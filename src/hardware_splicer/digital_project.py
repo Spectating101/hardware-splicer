@@ -15,12 +15,14 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 import time
 import uuid
 import zipfile
 from functools import lru_cache
 
 from .project_store import CorruptProject, ProjectNotFound, RevisionConflict, validate_project_id
+from . import digital_cases as cases
 
 CASE = Path(__file__).resolve().parents[2] / 'examples/drone_proving_ground/digital'
 DESIGN = CASE.parent / 'revision_b/reference'
@@ -89,6 +91,57 @@ def runtime():
     return _runtime(native_python())
 
 
+@lru_cache(maxsize=4)
+def _device_runtime(interpreter):
+    try:
+        result = subprocess.run([interpreter, '-B', '-c',
+                                 'import cadquery, trimesh, numpy, PIL, matplotlib'],
+                                capture_output=True, timeout=30, check=False)
+        available = result.returncode == 0
+    except (OSError, subprocess.TimeoutExpired):
+        available = False
+    return {'available': available, 'engine': 'CadQuery + registered engineering scripts',
+            'setup_hint': '' if available else 'Set HARDWARE_SPLICER_DIGITAL_PYTHON to a Python with CadQuery, trimesh, numpy, Pillow and matplotlib.'}
+
+
+def runtime_for_case(case_id=cases.DEFAULT_CASE):
+    cases.validate_case_id(case_id)
+    return runtime() if case_id == cases.DEFAULT_CASE else _device_runtime(native_python())
+
+
+def artifact_names(case_id=cases.DEFAULT_CASE, *, case=None):
+    return ARTIFACTS if case_id == cases.DEFAULT_CASE else (case or cases.registered(case_id)).artifacts
+
+
+def case_id_for(seal):
+    value = seal.get('case_id', cases.DEFAULT_CASE)
+    try:
+        return cases.validate_case_id(value)
+    except ValueError as exc:
+        raise CorruptProject('Digital run has an unknown registered case.') from exc
+
+
+def case_for_run(seal):
+    case_id = case_id_for(seal)
+    if case_id == cases.DEFAULT_CASE:
+        return None
+    if 'case_contract' in seal:
+        return cases.archived(seal['case_contract'], case_id)
+    # Compatibility for the first registered-case snapshots made before the
+    # adapter itself was archived. New publications always carry a definition.
+    if (case_id == 'fielddeck-7'
+            and set(seal.get('artifact_sha256', {})) == cases.FIELDDECK_V1.artifacts | {'STUDY.zip'}):
+        return cases.FIELDDECK_V1
+    return cases.registered(case_id)
+
+
+def resolve_requirements(seal, change_request='', requirements=None):
+    case_id = case_id_for(seal)
+    if case_id == cases.DEFAULT_CASE:
+        return requirement_tools().resolve(seal['summary']['requirements'], change_request, requirements)
+    return cases.registered(case_id).resolve(seal['summary']['requirements'], change_request, requirements)
+
+
 def run_dir(store, project_id, run_id):
     validate_project_id(project_id)
     if not isinstance(run_id, str) or not RUN_RE.fullmatch(run_id):
@@ -104,11 +157,11 @@ def run_dir(store, project_id, run_id):
     return path
 
 
-def checked_file(directory, name, hashes):
-    if name not in ARTIFACTS | {'STUDY.zip'} or name not in hashes:
+def checked_file(directory, name, hashes, *, case_id=cases.DEFAULT_CASE, case=None):
+    if name not in artifact_names(case_id, case=case) | {'STUDY.zip'} or name not in hashes:
         raise ProjectNotFound('Digital artifact not found.')
-    path = directory / name
-    if path.is_symlink() or not path.is_file() or digest(path) != hashes[name]:
+    path = cases.safe_file(directory, name)
+    if digest(path) != hashes[name]:
         raise CorruptProject('Digital artifact changed after verification: ' + name)
     return path
 
@@ -156,25 +209,37 @@ def summarize(receipt, model, report, config=None):
 
 
 def stage_run(store, project_id, source, *, change_request, parent_revision, job_id=None,
-              expected_requirements=None, attempt_id=None):
-    receipt, model, report = verified_package(source)
-    if expected_requirements is not None and model.get('requirements') != expected_requirements:
+              expected_requirements=None, attempt_id=None, case_id=cases.DEFAULT_CASE, registered_case=None):
+    if case_id == cases.DEFAULT_CASE:
+        receipt, model, report = verified_package(source)
+        summary = summarize(receipt, model, report, read_json(source / 'simulation-contract.json'))
+    else:
+        registered_case = registered_case or cases.registered(case_id)
+        if registered_case.case_id != case_id:
+            raise CorruptProject('The registered adapter belongs to a different case.')
+        summary = cases.verified_package(registered_case, source)
+    if expected_requirements is not None and summary.get('requirements') != expected_requirements:
         raise CorruptProject('Computed model does not match the requested requirements.')
+    artifacts = artifact_names(case_id, case=registered_case)
     run_id = uuid.uuid4().hex
     destination = run_dir(store, project_id, run_id)
     destination.mkdir(parents=True, exist_ok=False)
     try:
-        for name in ARTIFACTS:
+        for name in artifacts:
+            (destination / name).parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(source / name, destination / name)
         # Exact files only: bytecode, logs and other users' paths never enter a bundle.
         with zipfile.ZipFile(destination / 'STUDY.zip', 'w', compression=zipfile.ZIP_DEFLATED) as archive:
-            for name in sorted(ARTIFACTS):
+            for name in sorted(artifacts):
                 archive.write(destination / name, name)
         seal = {'schema': 'hardware_splicer.digital_run.v1', 'project_id': project_id, 'run_id': run_id,
                 'parent_revision': parent_revision, 'change_request': change_request, 'job_id': job_id,
                 'attempt_id': attempt_id,
-                'summary': summarize(receipt, model, report, read_json(source / 'simulation-contract.json')),
-                'artifact_sha256': {name: digest(destination / name) for name in sorted(ARTIFACTS | {'STUDY.zip'})}}
+                'summary': summary,
+                'artifact_sha256': {name: digest(destination / name) for name in sorted(artifacts | {'STUDY.zip'})}}
+        if case_id != cases.DEFAULT_CASE:
+            seal['case_id'] = case_id
+            seal['case_contract'] = registered_case.definition()
         write_json(destination / 'sealed-run.json', seal)
         return seal
     except BaseException:
@@ -188,10 +253,41 @@ def snapshot_for(project_id, seal, previous=None):
                      'mode': 'digital', 'currentStage': 'digital',
                      'digitalStudy': {'run_id': seal['run_id'], 'requirements': seal['summary']['requirements'],
                                       'parent_revision': seal['parent_revision'], 'change_request': seal['change_request']}})
+    if case_id_for(seal) != cases.DEFAULT_CASE:
+        snapshot['digitalStudy']['case_id'] = seal['case_id']
     return snapshot
 
 
-def create_project(store, *, name='HS-3G-B digital study'):
+def create_project(store, *, name='HS-3G-B digital study', case_id=cases.DEFAULT_CASE):
+    cases.validate_case_id(case_id)
+    if case_id != cases.DEFAULT_CASE:
+        case = cases.registered(case_id)
+        if not runtime_for_case(case_id)['available']:
+            raise RuntimeError(runtime_for_case(case_id)['setup_hint'])
+        # New cases execute their native stages before the first publication.
+        # Later revisions use the same stages through the existing job runner.
+        with tempfile.TemporaryDirectory(prefix='hs-registered-baseline-') as scratch:
+            package = Path(scratch) / 'study'
+            cases.prepare(case, package, case.defaults())
+            env = dict(os.environ)
+            env.pop('PYTHONOPTIMIZE', None)  # Native verifier assertions must execute.
+            env.update({key: '1' for key in ('OPENBLAS_NUM_THREADS', 'OMP_NUM_THREADS', 'MKL_NUM_THREADS', 'NUMEXPR_NUM_THREADS')})
+            for stage in case.stages:
+                completed = subprocess.run([native_python(), '-B', str(package / stage)],
+                                           capture_output=True, text=True, timeout=600, env=env)
+                if completed.returncode != 0:
+                    raise RuntimeError('Registered native stage failed (' + stage + '): ' +
+                                       (completed.stdout + completed.stderr)[-2000:])
+            cases.seal_package(case, package)
+            project_id = 'digital-' + uuid.uuid4().hex
+            seal = stage_run(store, project_id, package, change_request='Verified native baseline',
+                             parent_revision=None, case_id=case_id)
+            try:
+                return store.save(project_id, snapshot_for(project_id, seal, {'projectName': name}), expected_revision=0,
+                                  metadata={'source': 'digital_study', 'run_id': seal['run_id']})
+            except BaseException:
+                shutil.rmtree(run_dir(store, project_id, seal['run_id']))
+                raise
     _, model, _ = verified_package(CASE / 'reference', check_sources=True)
     if model.get('requirements') != requirement_tools().validate():
         raise CorruptProject('The registered reference must contain the default baseline requirements.')
@@ -218,6 +314,8 @@ def load_run(store, project_id, revision=None):
     if (not isinstance(seal, dict) or seal.get('schema') != 'hardware_splicer.digital_run.v1'
             or seal.get('project_id') != project_id or seal.get('run_id') != run_id):
         raise CorruptProject('Digital run belongs to a different project.')
+    if snapshot['digitalStudy'].get('case_id', cases.DEFAULT_CASE) != case_id_for(seal):
+        raise CorruptProject('Digital run belongs to a different registered case.')
     if (seal.get('attempt_id') is not None
             and envelope.get('metadata', {}).get('attempt_id') != seal['attempt_id']):
         raise CorruptProject('Digital run does not match its recorded execution attempt.')
@@ -232,6 +330,20 @@ def load_run(store, project_id, revision=None):
 def validated_run(store, project_id, revision=None):
     """Bind cached claims to their immutable model, contract and verified result."""
     envelope, directory, seal = load_run(store, project_id, revision)
+    case_id = case_id_for(seal)
+    if case_id != cases.DEFAULT_CASE:
+        try:
+            case = case_for_run(seal)
+            if set(seal['artifact_sha256']) != artifact_names(case_id, case=case) | {'STUDY.zip'}:
+                raise ValueError('Invalid registered artifact inventory')
+            for name in artifact_names(case_id, case=case):
+                checked_file(directory, name, seal['artifact_sha256'], case_id=case_id, case=case)
+            summary = cases.verified_package(case, directory)
+            if summary != seal['summary']:
+                raise ValueError('Stored summary differs from the verified result')
+        except (KeyError, TypeError, ValueError, AttributeError, OverflowError) as exc:
+            raise CorruptProject('Digital result claims do not match their verified artifacts.') from exc
+        return envelope, directory, seal
     try:
         hashes = seal['artifact_sha256']
         if set(hashes) != ARTIFACTS | {'STUDY.zip'}:
@@ -276,9 +388,12 @@ def duplicate_project(store, project_id, target_id):
     if (store.root / target_id).exists():
         raise RevisionConflict('Target project already exists.')
     envelope, source, old_seal = load_run(store, project_id)
-    for name in ARTIFACTS:
-        checked_file(source, name, old_seal['artifact_sha256'])
-    seal = stage_run(store, target_id, source, change_request='Copied digital study', parent_revision=None)
+    case_id = case_id_for(old_seal)
+    case = case_for_run(old_seal)
+    for name in artifact_names(case_id, case=case):
+        checked_file(source, name, old_seal['artifact_sha256'], case_id=case_id, case=case)
+    seal = stage_run(store, target_id, source, change_request='Copied digital study', parent_revision=None,
+                     case_id=case_id, registered_case=case)
     previous = dict(envelope['snapshot'])
     previous['projectName'] = previous.get('projectName', 'Digital study') + ' (copy)'
     try:
@@ -297,11 +412,15 @@ def _active(backend, job):
 
 def _command(backend, job, args, log):
     env = dict(os.environ)
+    env.pop('PYTHONOPTIMIZE', None)  # Applies to both device and legacy drone stages.
     env.update({key: '1' for key in ('OPENBLAS_NUM_THREADS', 'OMP_NUM_THREADS', 'MKL_NUM_THREADS', 'NUMEXPR_NUM_THREADS')})
     with log.open('wb') as handle:
         process = subprocess.Popen([native_python(), '-B', *map(str, args)], stdout=handle, stderr=subprocess.STDOUT, env=env)
+        deadline = time.monotonic() + 600
         try:
             while process.poll() is None:
+                if time.monotonic() > deadline:
+                    raise RuntimeError('The registered native stage exceeded its 600 second execution limit.')
                 if not _active(backend, job):
                     process.terminate()
                     try:
@@ -321,33 +440,37 @@ def execute_study(backend, job):
     store = backend.project_store
     payload = job.options['payload']
     project_id, base_revision = payload['project_id'], payload['base_revision']
-    parent, _, _ = load_run(store, project_id, base_revision)
+    parent, _, parent_seal = load_run(store, project_id, base_revision)
+    case_id = case_id_for(parent_seal)
+    if payload.get('case_id', cases.DEFAULT_CASE) != case_id:
+        raise CorruptProject('Digital job targets a different registered case.')
     if store.load(project_id)['revision'] != base_revision:
         raise RevisionConflict('The project changed before this run started. Reload and run from the latest revision.')
-    requirements = requirement_tools().validate(payload['requirements'])
+    requirements = (requirement_tools().validate(payload['requirements']) if case_id == cases.DEFAULT_CASE
+                    else cases.registered(case_id).validate(payload['requirements']))
     attempt = Path(job.output_dir) / (job.attempt_id or uuid.uuid4().hex)
     attempt.mkdir(parents=True, exist_ok=False)
     write_json(attempt / 'requirements.json', requirements)
     package = attempt / 'study'
-    design = CASE.parent / 'revision_b' / 'reference'
-    code = _command(backend, job, [CASE / 'build_digital.py', '--design', design, '--out', package,
-                                    '--requirements', attempt / 'requirements.json'], attempt / 'build.log')
-    if code is None:
-        return
-    if code not in (0, 2):
-        raise RuntimeError('Native digital generation failed: ' + (attempt / 'build.log').read_text(errors='replace')[-1000:])
-    code = _command(backend, job, [CASE / 'verify_digital.py', package, '--design', design, '--study'],
-                    attempt / 'verification.log')
-    if code is None:
-        return
-    if code != 0:
-        raise RuntimeError('Independent digital artifact verification failed: ' +
-                           (attempt / 'verification.log').read_text(errors='replace')[-1000:])
+    if case_id != cases.DEFAULT_CASE:
+        case = cases.registered(case_id)
+        cases.prepare(case, package, requirements)
+        for index, stage in enumerate(case.stages):
+            log = attempt / f'{index + 1}-{Path(stage).stem}.log'
+            code = _command(backend, job, [package / stage], log)
+            if code is None:
+                return
+            if code != 0:
+                raise RuntimeError('Registered native stage failed (' + stage + '): ' +
+                                   log.read_text(errors='replace')[-2000:])
+        cases.seal_package(case, package)
+    else:
+        _execute_drone_stages(backend, job, attempt, package)
     if not _active(backend, job):
         return
     seal = stage_run(store, project_id, package, change_request=payload['change_request'] or 'Updated study requirements',
                      parent_revision=base_revision, job_id=job.job_id, expected_requirements=requirements,
-                     attempt_id=job.attempt_id)
+                     attempt_id=job.attempt_id, case_id=case_id)
     published = False
     try:
         def publish():
@@ -363,3 +486,20 @@ def execute_study(backend, job):
     finally:
         if not published:
             shutil.rmtree(run_dir(store, project_id, seal['run_id']), ignore_errors=True)
+
+
+def _execute_drone_stages(backend, job, attempt, package):
+    design = CASE.parent / 'revision_b' / 'reference'
+    code = _command(backend, job, [CASE / 'build_digital.py', '--design', design, '--out', package,
+                                    '--requirements', attempt / 'requirements.json'], attempt / 'build.log')
+    if code is None:
+        return
+    if code not in (0, 2):
+        raise RuntimeError('Native digital generation failed: ' + (attempt / 'build.log').read_text(errors='replace')[-1000:])
+    code = _command(backend, job, [CASE / 'verify_digital.py', package, '--design', design, '--study'],
+                    attempt / 'verification.log')
+    if code is None:
+        return
+    if code != 0:
+        raise RuntimeError('Independent digital artifact verification failed: ' +
+                           (attempt / 'verification.log').read_text(errors='replace')[-1000:])

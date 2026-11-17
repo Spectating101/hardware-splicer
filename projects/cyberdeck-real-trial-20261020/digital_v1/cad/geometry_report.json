@@ -229,7 +229,7 @@
         20.0,
         3.0
       ],
-      "step_sha256": "311ae9e467e10ce5ab1b9de76b6722a0638ae618b958e6f63a6d9c71a21b1bbf",
+      "step_sha256": "cd26090c66996d5eeecb2c8f3790301d310b8ecae5df842740a46e2bdec3b737",
       "stl_sha256": "e6a32d28036e98e26cdb7d35b9294fe0360d34a4dec43745c07d465c42c23fe6"
     },
     {
@@ -252,7 +252,7 @@
         20.0,
         3.0
       ],
-      "step_sha256": "97bf379edce3cffb149cc6ee220d2895ea17782b1e4b34217f7a40635104a68d",
+      "step_sha256": "19455d4977adca93c8000f5e729e1875094bf352f3fde4adcb80b970e25d55d0",
       "stl_sha256": "e6a32d28036e98e26cdb7d35b9294fe0360d34a4dec43745c07d465c42c23fe6"
     },
     {
@@ -275,7 +275,7 @@
         20.0,
         3.0
       ],
-      "step_sha256": "fdf575aed5995f2e474c9f903faac3a7057f721b7e8ecad262ed8b8e9e86b660",
+      "step_sha256": "1cc0c118de033e906a2d597ef7459219228e1c8291285940e0a443f39b27ecff",
       "stl_sha256": "e6a32d28036e98e26cdb7d35b9294fe0360d34a4dec43745c07d465c42c23fe6"
     },
     {
@@ -298,7 +298,7 @@
         20.0,
         3.0
       ],
-      "step_sha256": "5fb6c67c88da16848044c5b574c18cf31c1d7d00364dd547aa1b1743ff7fe143",
+      "step_sha256": "93eb61f4e9affa3faec66fd23e2a8c30557fc7e4a725bada1b155e2566f0f7ac",
       "stl_sha256": "e6a32d28036e98e26cdb7d35b9294fe0360d34a4dec43745c07d465c42c23fe6"
     },
     {
@@ -321,7 +321,7 @@
         40.0,
         3.0
       ],
-      "step_sha256": "d09e098d7ea69b3a735c5fb6ce67ba85a2f3c6d830bf8288e5cf7b2c0e79a88a",
+      "step_sha256": "c70faa1da966ab1cdfc5b3aa58f0129712e6fe210f35962e6292a743e93bfbb6",
       "stl_sha256": "533161fdb334469ea9bc19c6dfccaf2a9b13f4a7ef87206c7332295575b387b3"
     },
     {
@@ -344,7 +344,7 @@
         40.0,
         3.0
       ],
-      "step_sha256": "3c0810eb8fae54cf65e20e54e1770b01887e2ede2b5e267fe5d99759f18cf8b4",
+      "step_sha256": "cce2f76057babd469f6ff56a980686f3abbb85f82903b7ea7c6e010cbaf5c869",
       "stl_sha256": "533161fdb334469ea9bc19c6dfccaf2a9b13f4a7ef87206c7332295575b387b3"
     },
     {
@@ -352,7 +352,7 @@
       "kind": "custom",
       "notes": "Print floor down; nut pockets and underside tool access included.",
       "solids": 1,
-      "volume_mm3": 140975.743,
+      "volume_mm3": 140909.632,
       "bounds_mm": [
         0.0,
         0.0,
@@ -367,8 +367,8 @@
         139.85,
         61.0
       ],
-      "step_sha256": "a930b321645196ef7609e85392de590af79c354db883e95149f62670a610eddf",
-      "stl_sha256": "3035af8fd4065ab078e35aa67ecb3f2a633b21607f43c83f5c1ad7a62766d047"
+      "step_sha256": "28b55d82e5def520b99bc7113f6f9be6397c805b91eb9964a47885ae65bb059b",
+      "stl_sha256": "b210b3dcc1d28feaa4b37b01e7bf3fea724feffea9b126c9d81449cf3da51be3"
     },
     {
       "name": "face_front_left",
@@ -390,7 +390,7 @@
         139.85,
         3.0
       ],
-      "step_sha256": "4cf8cad06fa1251dcfaf79e3a16b9489c8c6cdfbe266938d76600030ba2559ef",
+      "step_sha256": "94fd4671c1b45c63e953e94f1468bbd944f8d10aff5f24d5abea3cb5c74f55ab",
       "stl_sha256": "28f330e32f1408bbbb6a0c977242eacd23338a9d22c6744e05b27e246480aa65"
     },
     {
@@ -398,7 +398,7 @@
       "kind": "custom",
       "notes": "Print floor down; nut pockets and underside tool access included.",
       "solids": 1,
-      "volume_mm3": 136830.143,
+      "volume_mm3": 136764.032,
       "bounds_mm": [
         155.15,
         0.0,
@@ -413,8 +413,8 @@
         139.85,
         61.0
       ],
-      "step_sha256": "35fc997d7d7dbb1d6d2510a6f903261a5f8070e628c3ea9698558445fa87fabf",
-      "stl_sha256": "34c0829e1c3dd3c348716081d274640abe1ee27e64a77a95352ba98b40f1449d"
+      "step_sha256": "daadbb4bc83eba3771f853110965ffffc524c4a826f8b01666d500021a8aa928",
+      "stl_sha256": "c659884ad33cec5c8bcf61665af3fe9534d4497fea5dd55d3f2bb91d8693645f"
     },
     {
       "name": "face_front_right",
@@ -436,7 +436,7 @@
         139.85,
         3.0
       ],
-      "step_sha256": "0158f210b55d2c60064a00a26a746f3f60b54bc89d1fe8592bc51221ce05b306",
+      "step_sha256": "65084427113400870d53c48b2c79528df28289b62b3e5ad1e0feea7ba2b89624",
       "stl_sha256": "32e7954edae763a0cfc007837a865055945457ef6214b2276faadb75cadd46cc"
     },
     {
@@ -444,7 +444,7 @@
       "kind": "custom",
       "notes": "Print floor down; nut pockets and underside tool access included.",
       "solids": 1,
-      "volume_mm3": 133917.042,
+      "volume_mm3": 133784.82,
       "bounds_mm": [
         0.0,
         140.15,
@@ -459,8 +459,8 @@
         144.85,
         61.0
       ],
-      "step_sha256": "93f542e2e5bd9ca949b38944c414761a790c25c393db660b92501f3961a3d07d",
-      "stl_sha256": "00399e3fe17f15d7058e82ef5c679ff27e9aabc5365dc7312244dc73f1008298"
+      "step_sha256": "6bba313a6d93b6cb309ca2650279315e0219bdb457c6fb6664457cb54691bfe7",
+      "stl_sha256": "94690741e3226308bd413cc231cab1287da0dd8843813eb8b69748d686fced8a"
     },
     {
       "name": "face_rear_left",
@@ -482,7 +482,7 @@
         144.85,
         3.0
       ],
-      "step_sha256": "7510c3f9eb628b6e13fa278a6429a8e263a9db0c94f6f5f131e052b797926954",
+      "step_sha256": "54ab0c68c03ca239f7244edfabea8f8105a2a4d809eee1196c7dc39ae2cdad82",
       "stl_sha256": "60c51629b6a870a8638a0ba2992d11e68720962eb04f5e19c660d456ccef1123"
     },
     {
@@ -490,7 +490,7 @@
       "kind": "custom",
       "notes": "Print floor down; nut pockets and underside tool access included.",
       "solids": 1,
-      "volume_mm3": 134042.196,
+      "volume_mm3": 133909.974,
       "bounds_mm": [
         155.15,
         140.15,
@@ -505,8 +505,8 @@
         144.85,
         61.0
       ],
-      "step_sha256": "6e6cf2754736f5fceeeb1b5c7178a4203d0e9adae233b94359612d346ca34233",
-      "stl_sha256": "4b84c24422761602ec888e9c436723b4a928b5ff35e706625ec7966320f773c4"
+      "step_sha256": "f22443ceb0bc80b61bb034dc6bdd414275b99376ac18338117572550f55253d1",
+      "stl_sha256": "6dc6dac8764a7c1d5dc66589f67f40ff7b3468b25ed512180dc41598448ce045"
     },
     {
       "name": "face_rear_right",
@@ -528,13 +528,13 @@
         144.85,
         3.0
       ],
-      "step_sha256": "f5981cae3aee923c7464e129254b3c7aefeb4364fa39106fda147fd996b0a77e",
+      "step_sha256": "29e6cfb7b113996e976a938bd4844868ce9b94d117314491fde8ecdbd8912ad9",
       "stl_sha256": "806dd8e3701496edd1ff9b8068940fca972c253fe63bb4e4e97b9b3b2866aea6"
     },
     {
       "name": "fan_guard",
       "kind": "custom",
-      "notes": "M3 x 20 screws with nuts below fan; supplied soft mounts are optional alternatives.",
+      "notes": "M3 x 25 screws clamp guard, face, fan and 2 mm duct flange; nuts below flange.",
       "solids": 1,
       "volume_mm3": 2212.833,
       "bounds_mm": [
@@ -551,15 +551,15 @@
         44.0,
         2.0
       ],
-      "step_sha256": "e1dae3832065568d9048f6e47861937166623953013626e1f1afe96dd6f304cd",
+      "step_sha256": "00196c825551819a95af1b74d082a4dd8ab1871811b530c6d83dff52ac8e053c",
       "stl_sha256": "9142c924d5c462ee493e0f18e3205dd382dd65b7d4879d5d8a6b5871536dc55c"
     },
     {
       "name": "fan_duct",
       "kind": "custom",
-      "notes": "Slips around fan frame; attach to guard/fan assembly using tape, no PCB contact.",
+      "notes": "2 mm flange bolted below fan, 0.5 mm sleeve clearance; preassemble with rear-left face, no PCB contact.",
       "solids": 1,
-      "volume_mm3": 7140.0,
+      "volume_mm3": 8401.908,
       "bounds_mm": [
         10.0,
         208.5,
@@ -574,8 +574,8 @@
         44.0,
         28.0
       ],
-      "step_sha256": "874fa481cd2daf3ae5bdec30a8535d8ebbae22ec1ce870a2d398904d5e45cc9c",
-      "stl_sha256": "7399ecc150cf5c196511523c1db7afc568bc770bc4ff62440a86f9b71ea708f8"
+      "step_sha256": "f43a911db30bb16117aea68d1706aa5762131df741f6004d61fac3b2f42a33bd",
+      "stl_sha256": "b94ad7519be910e4f87043c2513b7a159206c49ffe98476cc2469135186a2856"
     },
     {
       "name": "foot_1",
@@ -597,7 +597,7 @@
         16.0,
         6.0
       ],
-      "step_sha256": "dd31745723afa0b17aedb02f294f1009350f8ba969168b8448224f00df7fbe34",
+      "step_sha256": "734dca82c415000ce02311d9bd684f7d0e390b2a91a0fad086e69d564c526e7e",
       "stl_sha256": "54bb09479b3519c30aabf9ab13b333f16d5fe84d2a5af64327d3acf531574eef"
     },
     {
@@ -620,7 +620,7 @@
         16.0,
         6.0
       ],
-      "step_sha256": "63446439ce50ca4a81b7b1ceade606284ee1aba445f360d39ece5193f131b008",
+      "step_sha256": "c0e241e32b095391ac850f5206309d7db2634f45990ac4b1d162edb459a2708e",
       "stl_sha256": "54bb09479b3519c30aabf9ab13b333f16d5fe84d2a5af64327d3acf531574eef"
     },
     {
@@ -643,7 +643,7 @@
         16.0,
         6.0
       ],
-      "step_sha256": "c125d842a137bf6e25ce293815bfb86534286a852d3de793bccdccbeca3871b8",
+      "step_sha256": "077d42a710a8e90313e8922d917212ef0707da964bbdaa82f4870187eea2ee03",
       "stl_sha256": "54bb09479b3519c30aabf9ab13b333f16d5fe84d2a5af64327d3acf531574eef"
     },
     {
@@ -666,7 +666,7 @@
         16.0,
         6.0
       ],
-      "step_sha256": "e29e08dd739aa59ae6b61abbe2d431b2b552b2c9de0c8d78f3dd4aebb40d5bb2",
+      "step_sha256": "e78eb5f5f19bbc0ee93de39212559bf6e06e1591b4b5a1155947a9a54c67b92a",
       "stl_sha256": "54bb09479b3519c30aabf9ab13b333f16d5fe84d2a5af64327d3acf531574eef"
     }
   ],
@@ -857,5 +857,23 @@
   ],
   "manufacturer_display_step_used": true,
   "physical_fit_verified": false,
-  "source_spec_sha256": "b3bc2a23ff82aaba3f6d13f35fb4bc275d7e81f2d02f834fa0e759ec52935993"
+  "source_spec_sha256": "0883100a6ae3accd11c70fd731cc98bf46646b878ab5ce37a086b386bb73e192",
+  "source_author_sha256": "000480690a347006001ba026098183597caf6275860a24c69dd06c8cc7e4119c",
+  "source_vendor_step_sha256": "8a977a4d6a6fdd1253b9f69274d41bc308eff57b3268ccdbf4214f5dacda1a57",
+  "face_nut_pockets": {
+    "insertion": "side_loaded_before_faces",
+    "pocket_bottom_z_mm": 56.6,
+    "pocket_top_z_mm": 59.2,
+    "roof_thickness_mm": 1.8
+  },
+  "fan_mount_stack_mm": {
+    "guard": 2,
+    "face": 3,
+    "fan": 10,
+    "duct_flange": 2,
+    "nut": 2.4,
+    "screw_under_head_length": 25,
+    "tip_beyond_nut": 5.6
+  },
+  "fastener_model_scope": "Nominal head, nut, shank and tool envelopes checked independently by verify_device.py; threads and flexible cables are not complete solid models."
 }

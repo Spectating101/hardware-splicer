@@ -1,0 +1,1137 @@
+{
+  "metadata": {
+    "source": "project_source_bundle_check",
+    "source_set_sha256": "sha256:d70a29c455e68f1d8b010c238b2af19e898d1ab0d60962738d25e4556b91c8e9"
+  },
+  "project_id": "hs-flex-cyberdeck",
+  "revision": 27,
+  "saved_at": "2026-11-17T15:37:02.473281+00:00",
+  "schema_version": "hardware_splicer.project_snapshot.v1",
+  "snapshot": {
+    "constraints": {
+      "frontend_deferred": true,
+      "no_parts_owned": true,
+      "no_user_budget_confirmed": true,
+      "scope": "digital CAD and first-order calculations only"
+    },
+    "designMethod": "Assistant-directed part research and CadQuery authoring; existing HS source ingestion, CAD reading and materials reconciliation used below.",
+    "engineeringSourceBundleRuns": [
+      {
+        "analysis_parameters_sha256": "sha256:21c10defc6dd1b124635d58854ff87cdf758ffeac7e35e8b6103486f1e250431",
+        "geometry": {
+          "FIELDDECK_7.step": {
+            "bounding_box_mm": {
+              "max": {
+                "x": 310.0,
+                "y": 285.7,
+                "z": 66.0
+              },
+              "min": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -6.0
+              },
+              "span": {
+                "x": 310.0,
+                "y": 285.7,
+                "z": 72.0
+              }
+            },
+            "cad_kernel": "CadQuery/OpenCascade",
+            "coordinate_axes_are_original_source_orientation": true,
+            "fabrication_authorized": false,
+            "manufacturer_design_maturity_unverified": true,
+            "mounting_interfaces_verified": false,
+            "physical_clearances_verified": false,
+            "solid_count": 38,
+            "source_sha256": "sha256:73b4e2508825fa7f3c4e6e247ade643e54b4dae9698084d4490dbd8efc418ba8",
+            "status": "imported_brep"
+          },
+          "touch_display2_7inch.step": {
+            "bounding_box_mm": {
+              "max": {
+                "x": 60.12,
+                "y": 97.595,
+                "z": 5.02
+              },
+              "min": {
+                "x": -60.12,
+                "y": -91.725,
+                "z": -9.94
+              },
+              "span": {
+                "x": 120.24,
+                "y": 189.32,
+                "z": 14.96
+              }
+            },
+            "cad_kernel": "CadQuery/OpenCascade",
+            "coordinate_axes_are_original_source_orientation": true,
+            "fabrication_authorized": false,
+            "manufacturer_design_maturity_unverified": true,
+            "mounting_interfaces_verified": false,
+            "physical_clearances_verified": false,
+            "solid_count": 5,
+            "source_sha256": "sha256:8a977a4d6a6fdd1253b9f69274d41bc308eff57b3268ccdbf4214f5dacda1a57",
+            "status": "imported_brep"
+          }
+        },
+        "input_sources": {
+          "FIELDDECK_7.step": {
+            "kind": "step_cad",
+            "sha256": "sha256:73b4e2508825fa7f3c4e6e247ade643e54b4dae9698084d4490dbd8efc418ba8"
+          },
+          "touch_display2_7inch.step": {
+            "kind": "step_cad",
+            "sha256": "sha256:8a977a4d6a6fdd1253b9f69274d41bc308eff57b3268ccdbf4214f5dacda1a57"
+          }
+        },
+        "manufacturing_approved": false,
+        "project_context": "not_applicable",
+        "release_authorized": false,
+        "repair_evidence": {},
+        "schema_version": "hardware_splicer.project_source_bundle.v1",
+        "semantic_limitations": [
+          "Extracted source facts do not prove physical fit or a finished design.",
+          "Unknown physical measurements, safety and procurement remain blocked."
+        ],
+        "software_checks": {},
+        "software_tool": "source_type_auto_dispatch",
+        "source_analysis_failures": [],
+        "source_set_sha256": "sha256:4d034e645ea923c3b768cf7a52d51ce90013f87a178e6ff5667f00f339ce8500",
+        "status": "analyzed_non_electrical_sources"
+      },
+      {
+        "analysis_parameters_sha256": "sha256:21c10defc6dd1b124635d58854ff87cdf758ffeac7e35e8b6103486f1e250431",
+        "geometry": {
+          "FIELDDECK_7.step": {
+            "bounding_box_mm": {
+              "max": {
+                "x": 310.0,
+                "y": 285.7,
+                "z": 66.0
+              },
+              "min": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -6.0
+              },
+              "span": {
+                "x": 310.0,
+                "y": 285.7,
+                "z": 72.0
+              }
+            },
+            "cad_kernel": "CadQuery/OpenCascade",
+            "coordinate_axes_are_original_source_orientation": true,
+            "fabrication_authorized": false,
+            "manufacturer_design_maturity_unverified": true,
+            "mounting_interfaces_verified": false,
+            "physical_clearances_verified": false,
+            "solid_count": 38,
+            "source_sha256": "sha256:73b4e2508825fa7f3c4e6e247ade643e54b4dae9698084d4490dbd8efc418ba8",
+            "status": "imported_brep"
+          },
+          "touch_display2_7inch.step": {
+            "bounding_box_mm": {
+              "max": {
+                "x": 60.12,
+                "y": 97.595,
+                "z": 5.02
+              },
+              "min": {
+                "x": -60.12,
+                "y": -91.725,
+                "z": -9.94
+              },
+              "span": {
+                "x": 120.24,
+                "y": 189.32,
+                "z": 14.96
+              }
+            },
+            "cad_kernel": "CadQuery/OpenCascade",
+            "coordinate_axes_are_original_source_orientation": true,
+            "fabrication_authorized": false,
+            "manufacturer_design_maturity_unverified": true,
+            "mounting_interfaces_verified": false,
+            "physical_clearances_verified": false,
+            "solid_count": 5,
+            "source_sha256": "sha256:8a977a4d6a6fdd1253b9f69274d41bc308eff57b3268ccdbf4214f5dacda1a57",
+            "status": "imported_brep"
+          }
+        },
+        "input_sources": {
+          "FIELDDECK_7.step": {
+            "kind": "step_cad",
+            "sha256": "sha256:73b4e2508825fa7f3c4e6e247ade643e54b4dae9698084d4490dbd8efc418ba8"
+          },
+          "touch_display2_7inch.step": {
+            "kind": "step_cad",
+            "sha256": "sha256:8a977a4d6a6fdd1253b9f69274d41bc308eff57b3268ccdbf4214f5dacda1a57"
+          }
+        },
+        "manufacturing_approved": false,
+        "project_context": "not_applicable",
+        "release_authorized": false,
+        "repair_evidence": {},
+        "schema_version": "hardware_splicer.project_source_bundle.v1",
+        "semantic_limitations": [
+          "Extracted source facts do not prove physical fit or a finished design.",
+          "Unknown physical measurements, safety and procurement remain blocked."
+        ],
+        "software_checks": {},
+        "software_tool": "source_type_auto_dispatch",
+        "source_analysis_failures": [],
+        "source_set_sha256": "sha256:2e30df9529c00d8381c9f0a21e2357c1aca9fa232fba3ecb79e9ad5f3b5e797a",
+        "status": "analyzed_non_electrical_sources"
+      },
+      {
+        "analysis_parameters_sha256": "sha256:21c10defc6dd1b124635d58854ff87cdf758ffeac7e35e8b6103486f1e250431",
+        "geometry": {
+          "FIELDDECK_7.step": {
+            "bounding_box_mm": {
+              "max": {
+                "x": 310.0,
+                "y": 285.7,
+                "z": 66.0
+              },
+              "min": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -6.0
+              },
+              "span": {
+                "x": 310.0,
+                "y": 285.7,
+                "z": 72.0
+              }
+            },
+            "cad_kernel": "CadQuery/OpenCascade",
+            "coordinate_axes_are_original_source_orientation": true,
+            "fabrication_authorized": false,
+            "manufacturer_design_maturity_unverified": true,
+            "mounting_interfaces_verified": false,
+            "physical_clearances_verified": false,
+            "solid_count": 38,
+            "source_sha256": "sha256:b8e568f9dbc4332aaaf1409e4cf3acdde2d7065c2298ff1b21ff76e74d7c3b8c",
+            "status": "imported_brep"
+          },
+          "touch_display2_7inch.step": {
+            "bounding_box_mm": {
+              "max": {
+                "x": 60.12,
+                "y": 97.595,
+                "z": 5.02
+              },
+              "min": {
+                "x": -60.12,
+                "y": -91.725,
+                "z": -9.94
+              },
+              "span": {
+                "x": 120.24,
+                "y": 189.32,
+                "z": 14.96
+              }
+            },
+            "cad_kernel": "CadQuery/OpenCascade",
+            "coordinate_axes_are_original_source_orientation": true,
+            "fabrication_authorized": false,
+            "manufacturer_design_maturity_unverified": true,
+            "mounting_interfaces_verified": false,
+            "physical_clearances_verified": false,
+            "solid_count": 5,
+            "source_sha256": "sha256:8a977a4d6a6fdd1253b9f69274d41bc308eff57b3268ccdbf4214f5dacda1a57",
+            "status": "imported_brep"
+          }
+        },
+        "input_sources": {
+          "FIELDDECK_7.step": {
+            "kind": "step_cad",
+            "sha256": "sha256:b8e568f9dbc4332aaaf1409e4cf3acdde2d7065c2298ff1b21ff76e74d7c3b8c"
+          },
+          "touch_display2_7inch.step": {
+            "kind": "step_cad",
+            "sha256": "sha256:8a977a4d6a6fdd1253b9f69274d41bc308eff57b3268ccdbf4214f5dacda1a57"
+          }
+        },
+        "manufacturing_approved": false,
+        "project_context": "not_applicable",
+        "release_authorized": false,
+        "repair_evidence": {},
+        "schema_version": "hardware_splicer.project_source_bundle.v1",
+        "semantic_limitations": [
+          "Extracted source facts do not prove physical fit or a finished design.",
+          "Unknown physical measurements, safety and procurement remain blocked."
+        ],
+        "software_checks": {},
+        "software_tool": "source_type_auto_dispatch",
+        "source_analysis_failures": [],
+        "source_set_sha256": "sha256:b56de294a75a488861e45426df55baa7e32acc6ebd3078f0d62843ce59267b76",
+        "status": "analyzed_non_electrical_sources"
+      },
+      {
+        "analysis_parameters_sha256": "sha256:21c10defc6dd1b124635d58854ff87cdf758ffeac7e35e8b6103486f1e250431",
+        "geometry": {
+          "FIELDDECK_7.step": {
+            "bounding_box_mm": {
+              "max": {
+                "x": 310.0,
+                "y": 285.7,
+                "z": 66.0
+              },
+              "min": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -6.0
+              },
+              "span": {
+                "x": 310.0,
+                "y": 285.7,
+                "z": 72.0
+              }
+            },
+            "cad_kernel": "CadQuery/OpenCascade",
+            "coordinate_axes_are_original_source_orientation": true,
+            "fabrication_authorized": false,
+            "manufacturer_design_maturity_unverified": true,
+            "mounting_interfaces_verified": false,
+            "physical_clearances_verified": false,
+            "solid_count": 38,
+            "source_sha256": "sha256:b8e568f9dbc4332aaaf1409e4cf3acdde2d7065c2298ff1b21ff76e74d7c3b8c",
+            "status": "imported_brep"
+          },
+          "touch_display2_7inch.step": {
+            "bounding_box_mm": {
+              "max": {
+                "x": 60.12,
+                "y": 97.595,
+                "z": 5.02
+              },
+              "min": {
+                "x": -60.12,
+                "y": -91.725,
+                "z": -9.94
+              },
+              "span": {
+                "x": 120.24,
+                "y": 189.32,
+                "z": 14.96
+              }
+            },
+            "cad_kernel": "CadQuery/OpenCascade",
+            "coordinate_axes_are_original_source_orientation": true,
+            "fabrication_authorized": false,
+            "manufacturer_design_maturity_unverified": true,
+            "mounting_interfaces_verified": false,
+            "physical_clearances_verified": false,
+            "solid_count": 5,
+            "source_sha256": "sha256:8a977a4d6a6fdd1253b9f69274d41bc308eff57b3268ccdbf4214f5dacda1a57",
+            "status": "imported_brep"
+          }
+        },
+        "input_sources": {
+          "FIELDDECK_7.step": {
+            "kind": "step_cad",
+            "sha256": "sha256:b8e568f9dbc4332aaaf1409e4cf3acdde2d7065c2298ff1b21ff76e74d7c3b8c"
+          },
+          "touch_display2_7inch.step": {
+            "kind": "step_cad",
+            "sha256": "sha256:8a977a4d6a6fdd1253b9f69274d41bc308eff57b3268ccdbf4214f5dacda1a57"
+          }
+        },
+        "manufacturing_approved": false,
+        "project_context": "not_applicable",
+        "release_authorized": false,
+        "repair_evidence": {},
+        "schema_version": "hardware_splicer.project_source_bundle.v1",
+        "semantic_limitations": [
+          "Extracted source facts do not prove physical fit or a finished design.",
+          "Unknown physical measurements, safety and procurement remain blocked."
+        ],
+        "software_checks": {},
+        "software_tool": "source_type_auto_dispatch",
+        "source_analysis_failures": [],
+        "source_set_sha256": "sha256:f441bb78782057898842314b6f7f5c9b95e6179cb7d9d33bf1cf8c1ef2ff35e9",
+        "status": "analyzed_non_electrical_sources"
+      },
+      {
+        "analysis_parameters_sha256": "sha256:21c10defc6dd1b124635d58854ff87cdf758ffeac7e35e8b6103486f1e250431",
+        "geometry": {
+          "FIELDDECK_7.step": {
+            "bounding_box_mm": {
+              "max": {
+                "x": 310.0,
+                "y": 285.7,
+                "z": 66.0
+              },
+              "min": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -6.0
+              },
+              "span": {
+                "x": 310.0,
+                "y": 285.7,
+                "z": 72.0
+              }
+            },
+            "cad_kernel": "CadQuery/OpenCascade",
+            "coordinate_axes_are_original_source_orientation": true,
+            "fabrication_authorized": false,
+            "manufacturer_design_maturity_unverified": true,
+            "mounting_interfaces_verified": false,
+            "physical_clearances_verified": false,
+            "solid_count": 38,
+            "source_sha256": "sha256:b8e568f9dbc4332aaaf1409e4cf3acdde2d7065c2298ff1b21ff76e74d7c3b8c",
+            "status": "imported_brep"
+          },
+          "touch_display2_7inch.step": {
+            "bounding_box_mm": {
+              "max": {
+                "x": 60.12,
+                "y": 97.595,
+                "z": 5.02
+              },
+              "min": {
+                "x": -60.12,
+                "y": -91.725,
+                "z": -9.94
+              },
+              "span": {
+                "x": 120.24,
+                "y": 189.32,
+                "z": 14.96
+              }
+            },
+            "cad_kernel": "CadQuery/OpenCascade",
+            "coordinate_axes_are_original_source_orientation": true,
+            "fabrication_authorized": false,
+            "manufacturer_design_maturity_unverified": true,
+            "mounting_interfaces_verified": false,
+            "physical_clearances_verified": false,
+            "solid_count": 5,
+            "source_sha256": "sha256:8a977a4d6a6fdd1253b9f69274d41bc308eff57b3268ccdbf4214f5dacda1a57",
+            "status": "imported_brep"
+          }
+        },
+        "input_sources": {
+          "FIELDDECK_7.step": {
+            "kind": "step_cad",
+            "sha256": "sha256:b8e568f9dbc4332aaaf1409e4cf3acdde2d7065c2298ff1b21ff76e74d7c3b8c"
+          },
+          "touch_display2_7inch.step": {
+            "kind": "step_cad",
+            "sha256": "sha256:8a977a4d6a6fdd1253b9f69274d41bc308eff57b3268ccdbf4214f5dacda1a57"
+          }
+        },
+        "manufacturing_approved": false,
+        "project_context": "not_applicable",
+        "release_authorized": false,
+        "repair_evidence": {},
+        "schema_version": "hardware_splicer.project_source_bundle.v1",
+        "semantic_limitations": [
+          "Extracted source facts do not prove physical fit or a finished design.",
+          "Unknown physical measurements, safety and procurement remain blocked."
+        ],
+        "software_checks": {},
+        "software_tool": "source_type_auto_dispatch",
+        "source_analysis_failures": [],
+        "source_set_sha256": "sha256:bb973dfdf3e8e3f827104d1e5dc21429f7563f2832107c6e32585b2f527e1b27",
+        "status": "analyzed_non_electrical_sources"
+      },
+      {
+        "analysis_parameters_sha256": "sha256:21c10defc6dd1b124635d58854ff87cdf758ffeac7e35e8b6103486f1e250431",
+        "geometry": {
+          "FIELDDECK_7.step": {
+            "bounding_box_mm": {
+              "max": {
+                "x": 310.0,
+                "y": 285.7,
+                "z": 66.0
+              },
+              "min": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -6.0
+              },
+              "span": {
+                "x": 310.0,
+                "y": 285.7,
+                "z": 72.0
+              }
+            },
+            "cad_kernel": "CadQuery/OpenCascade",
+            "coordinate_axes_are_original_source_orientation": true,
+            "fabrication_authorized": false,
+            "manufacturer_design_maturity_unverified": true,
+            "mounting_interfaces_verified": false,
+            "physical_clearances_verified": false,
+            "solid_count": 38,
+            "source_sha256": "sha256:a3a26a05db6e0086c38dbfd09bafacecc198751763ba40060569c46f82187827",
+            "status": "imported_brep"
+          },
+          "touch_display2_7inch.step": {
+            "bounding_box_mm": {
+              "max": {
+                "x": 60.12,
+                "y": 97.595,
+                "z": 5.02
+              },
+              "min": {
+                "x": -60.12,
+                "y": -91.725,
+                "z": -9.94
+              },
+              "span": {
+                "x": 120.24,
+                "y": 189.32,
+                "z": 14.96
+              }
+            },
+            "cad_kernel": "CadQuery/OpenCascade",
+            "coordinate_axes_are_original_source_orientation": true,
+            "fabrication_authorized": false,
+            "manufacturer_design_maturity_unverified": true,
+            "mounting_interfaces_verified": false,
+            "physical_clearances_verified": false,
+            "solid_count": 5,
+            "source_sha256": "sha256:8a977a4d6a6fdd1253b9f69274d41bc308eff57b3268ccdbf4214f5dacda1a57",
+            "status": "imported_brep"
+          }
+        },
+        "input_sources": {
+          "FIELDDECK_7.step": {
+            "kind": "step_cad",
+            "sha256": "sha256:a3a26a05db6e0086c38dbfd09bafacecc198751763ba40060569c46f82187827"
+          },
+          "touch_display2_7inch.step": {
+            "kind": "step_cad",
+            "sha256": "sha256:8a977a4d6a6fdd1253b9f69274d41bc308eff57b3268ccdbf4214f5dacda1a57"
+          }
+        },
+        "manufacturing_approved": false,
+        "project_context": "not_applicable",
+        "release_authorized": false,
+        "repair_evidence": {},
+        "schema_version": "hardware_splicer.project_source_bundle.v1",
+        "semantic_limitations": [
+          "Extracted source facts do not prove physical fit or a finished design.",
+          "Unknown physical measurements, safety and procurement remain blocked."
+        ],
+        "software_checks": {},
+        "software_tool": "source_type_auto_dispatch",
+        "source_analysis_failures": [],
+        "source_set_sha256": "sha256:d70a29c455e68f1d8b010c238b2af19e898d1ab0d60962738d25e4556b91c8e9",
+        "status": "analyzed_non_electrical_sources"
+      }
+    ],
+    "engineeringSourceUploads": [
+      {
+        "authority_ceiling": "declared",
+        "automatic_authorization": false,
+        "blob_ref": "sources/sha256/8a/8a977a4d6a6fdd1253b9f69274d41bc308eff57b3268ccdbf4214f5dacda1a57",
+        "bytes_retained": true,
+        "classification": {
+          "confidence": "bounded",
+          "kind": "step_cad",
+          "limitations": [
+            "The existing STEP path is bounded identity and coarse-envelope analysis, not full BREP or FEA."
+          ],
+          "media_type": "model/step",
+          "metadata": {
+            "declared_media_type": null,
+            "extension_media_type": "model/step",
+            "signature_media_type": null
+          },
+          "parser_disposition": "structured",
+          "parser_route": "step_geometry",
+          "source_type": "cad",
+          "structured_format": "step"
+        },
+        "content_hash": "sha256:8a977a4d6a6fdd1253b9f69274d41bc308eff57b3268ccdbf4214f5dacda1a57",
+        "duplicate_blob": false,
+        "metadata": {
+          "content_addressed_storage": true,
+          "fabrication_authorized": false,
+          "flash_authorized": false,
+          "motion_authorized": false,
+          "power_on_authorized": false,
+          "raw_bytes_in_response": false,
+          "release_authorized": false,
+          "server_computed_hash": true
+        },
+        "original_filename": "touch_display2_7inch.step",
+        "schema_version": "hardware_splicer.engineering_source_ingestion.v1",
+        "size_bytes": 1352219,
+        "source_id": "upload-8a977a4d6a6fdd1253b9"
+      },
+      {
+        "authority_ceiling": "declared",
+        "automatic_authorization": false,
+        "blob_ref": "sources/sha256/73/73b4e2508825fa7f3c4e6e247ade643e54b4dae9698084d4490dbd8efc418ba8",
+        "bytes_retained": true,
+        "classification": {
+          "confidence": "bounded",
+          "kind": "step_cad",
+          "limitations": [
+            "The existing STEP path is bounded identity and coarse-envelope analysis, not full BREP or FEA."
+          ],
+          "media_type": "model/step",
+          "metadata": {
+            "declared_media_type": null,
+            "extension_media_type": "model/step",
+            "signature_media_type": null
+          },
+          "parser_disposition": "structured",
+          "parser_route": "step_geometry",
+          "source_type": "cad",
+          "structured_format": "step"
+        },
+        "content_hash": "sha256:73b4e2508825fa7f3c4e6e247ade643e54b4dae9698084d4490dbd8efc418ba8",
+        "duplicate_blob": false,
+        "metadata": {
+          "content_addressed_storage": true,
+          "fabrication_authorized": false,
+          "flash_authorized": false,
+          "motion_authorized": false,
+          "power_on_authorized": false,
+          "raw_bytes_in_response": false,
+          "release_authorized": false,
+          "server_computed_hash": true
+        },
+        "original_filename": "FIELDDECK_7.step",
+        "schema_version": "hardware_splicer.engineering_source_ingestion.v1",
+        "size_bytes": 4520844,
+        "source_id": "upload-73b4e2508825fa7f3c4e"
+      },
+      {
+        "authority_ceiling": "declared",
+        "automatic_authorization": false,
+        "blob_ref": "sources/sha256/b3/b3bc2a23ff82aaba3f6d13f35fb4bc275d7e81f2d02f834fa0e759ec52935993",
+        "bytes_retained": true,
+        "classification": {
+          "confidence": "bounded",
+          "kind": "json_descriptor",
+          "limitations": [
+            "Valid JSON is not automatically trusted as a valid engineering-source schema."
+          ],
+          "media_type": "application/json",
+          "metadata": {
+            "declared_media_type": null,
+            "extension_media_type": "application/json",
+            "json_valid": true,
+            "signature_media_type": null
+          },
+          "parser_disposition": "structured",
+          "parser_route": "engineering_source_descriptor",
+          "source_type": "other",
+          "structured_format": "json"
+        },
+        "content_hash": "sha256:b3bc2a23ff82aaba3f6d13f35fb4bc275d7e81f2d02f834fa0e759ec52935993",
+        "duplicate_blob": false,
+        "metadata": {
+          "content_addressed_storage": true,
+          "fabrication_authorized": false,
+          "flash_authorized": false,
+          "motion_authorized": false,
+          "power_on_authorized": false,
+          "raw_bytes_in_response": false,
+          "release_authorized": false,
+          "server_computed_hash": true
+        },
+        "original_filename": "design.json",
+        "schema_version": "hardware_splicer.engineering_source_ingestion.v1",
+        "size_bytes": 3138,
+        "source_id": "upload-b3bc2a23ff82aaba3f6d"
+      },
+      {
+        "authority_ceiling": "declared",
+        "automatic_authorization": false,
+        "blob_ref": "sources/sha256/5b/5bb94831c468685f4e6319e872cbf16737c1f774f9e90e8b50b7c8f3197dc212",
+        "bytes_retained": true,
+        "classification": {
+          "confidence": "bounded",
+          "kind": "json_descriptor",
+          "limitations": [
+            "Valid JSON is not automatically trusted as a valid engineering-source schema."
+          ],
+          "media_type": "application/json",
+          "metadata": {
+            "declared_media_type": null,
+            "extension_media_type": "application/json",
+            "json_valid": true,
+            "signature_media_type": null
+          },
+          "parser_disposition": "structured",
+          "parser_route": "engineering_source_descriptor",
+          "source_type": "other",
+          "structured_format": "json"
+        },
+        "content_hash": "sha256:5bb94831c468685f4e6319e872cbf16737c1f774f9e90e8b50b7c8f3197dc212",
+        "duplicate_blob": false,
+        "metadata": {
+          "content_addressed_storage": true,
+          "fabrication_authorized": false,
+          "flash_authorized": false,
+          "motion_authorized": false,
+          "power_on_authorized": false,
+          "raw_bytes_in_response": false,
+          "release_authorized": false,
+          "server_computed_hash": true
+        },
+        "original_filename": "bom.json",
+        "schema_version": "hardware_splicer.engineering_source_ingestion.v1",
+        "size_bytes": 8012,
+        "source_id": "upload-5bb94831c468685f4e63"
+      },
+      {
+        "authority_ceiling": "declared",
+        "automatic_authorization": false,
+        "blob_ref": "sources/sha256/7b/7b413da8e54dada8bbf10140d8edd200caa9d720d59a14b3e9e17ad57fc0f94b",
+        "bytes_retained": true,
+        "classification": {
+          "confidence": "bounded",
+          "kind": "json_descriptor",
+          "limitations": [
+            "Valid JSON is not automatically trusted as a valid engineering-source schema."
+          ],
+          "media_type": "application/json",
+          "metadata": {
+            "declared_media_type": null,
+            "extension_media_type": "application/json",
+            "json_valid": true,
+            "signature_media_type": null
+          },
+          "parser_disposition": "structured",
+          "parser_route": "engineering_source_descriptor",
+          "source_type": "other",
+          "structured_format": "json"
+        },
+        "content_hash": "sha256:7b413da8e54dada8bbf10140d8edd200caa9d720d59a14b3e9e17ad57fc0f94b",
+        "duplicate_blob": false,
+        "metadata": {
+          "content_addressed_storage": true,
+          "fabrication_authorized": false,
+          "flash_authorized": false,
+          "motion_authorized": false,
+          "power_on_authorized": false,
+          "raw_bytes_in_response": false,
+          "release_authorized": false,
+          "server_computed_hash": true
+        },
+        "original_filename": "bom.json",
+        "schema_version": "hardware_splicer.engineering_source_ingestion.v1",
+        "size_bytes": 8322,
+        "source_id": "upload-7b413da8e54dada8bbf1"
+      },
+      {
+        "authority_ceiling": "declared",
+        "automatic_authorization": false,
+        "blob_ref": "sources/sha256/b8/b8e568f9dbc4332aaaf1409e4cf3acdde2d7065c2298ff1b21ff76e74d7c3b8c",
+        "bytes_retained": true,
+        "classification": {
+          "confidence": "bounded",
+          "kind": "step_cad",
+          "limitations": [
+            "The existing STEP path is bounded identity and coarse-envelope analysis, not full BREP or FEA."
+          ],
+          "media_type": "model/step",
+          "metadata": {
+            "declared_media_type": null,
+            "extension_media_type": "model/step",
+            "signature_media_type": null
+          },
+          "parser_disposition": "structured",
+          "parser_route": "step_geometry",
+          "source_type": "cad",
+          "structured_format": "step"
+        },
+        "content_hash": "sha256:b8e568f9dbc4332aaaf1409e4cf3acdde2d7065c2298ff1b21ff76e74d7c3b8c",
+        "duplicate_blob": false,
+        "metadata": {
+          "content_addressed_storage": true,
+          "fabrication_authorized": false,
+          "flash_authorized": false,
+          "motion_authorized": false,
+          "power_on_authorized": false,
+          "raw_bytes_in_response": false,
+          "release_authorized": false,
+          "server_computed_hash": true
+        },
+        "original_filename": "FIELDDECK_7.step",
+        "schema_version": "hardware_splicer.engineering_source_ingestion.v1",
+        "size_bytes": 4520952,
+        "source_id": "upload-b8e568f9dbc4332aaaf1"
+      },
+      {
+        "authority_ceiling": "declared",
+        "automatic_authorization": false,
+        "blob_ref": "sources/sha256/37/37bb48a9731690ab63a93268f2b3e2e41eedfadc212188a7dcca8f98e410eddf",
+        "bytes_retained": true,
+        "classification": {
+          "confidence": "bounded",
+          "kind": "json_descriptor",
+          "limitations": [
+            "Valid JSON is not automatically trusted as a valid engineering-source schema."
+          ],
+          "media_type": "application/json",
+          "metadata": {
+            "declared_media_type": null,
+            "extension_media_type": "application/json",
+            "json_valid": true,
+            "signature_media_type": null
+          },
+          "parser_disposition": "structured",
+          "parser_route": "engineering_source_descriptor",
+          "source_type": "other",
+          "structured_format": "json"
+        },
+        "content_hash": "sha256:37bb48a9731690ab63a93268f2b3e2e41eedfadc212188a7dcca8f98e410eddf",
+        "duplicate_blob": false,
+        "metadata": {
+          "content_addressed_storage": true,
+          "fabrication_authorized": false,
+          "flash_authorized": false,
+          "motion_authorized": false,
+          "power_on_authorized": false,
+          "raw_bytes_in_response": false,
+          "release_authorized": false,
+          "server_computed_hash": true
+        },
+        "original_filename": "bom.json",
+        "schema_version": "hardware_splicer.engineering_source_ingestion.v1",
+        "size_bytes": 8623,
+        "source_id": "upload-37bb48a9731690ab63a9"
+      },
+      {
+        "authority_ceiling": "declared",
+        "automatic_authorization": false,
+        "blob_ref": "sources/sha256/b9/b97f06fd064d942be06e0569d0b22f982eeb3fc68cf640155c4b12d2255ac955",
+        "bytes_retained": true,
+        "classification": {
+          "confidence": "bounded",
+          "kind": "json_descriptor",
+          "limitations": [
+            "Valid JSON is not automatically trusted as a valid engineering-source schema."
+          ],
+          "media_type": "application/json",
+          "metadata": {
+            "declared_media_type": null,
+            "extension_media_type": "application/json",
+            "json_valid": true,
+            "signature_media_type": null
+          },
+          "parser_disposition": "structured",
+          "parser_route": "engineering_source_descriptor",
+          "source_type": "other",
+          "structured_format": "json"
+        },
+        "content_hash": "sha256:b97f06fd064d942be06e0569d0b22f982eeb3fc68cf640155c4b12d2255ac955",
+        "duplicate_blob": false,
+        "metadata": {
+          "content_addressed_storage": true,
+          "fabrication_authorized": false,
+          "flash_authorized": false,
+          "motion_authorized": false,
+          "power_on_authorized": false,
+          "raw_bytes_in_response": false,
+          "release_authorized": false,
+          "server_computed_hash": true
+        },
+        "original_filename": "bom.json",
+        "schema_version": "hardware_splicer.engineering_source_ingestion.v1",
+        "size_bytes": 11683,
+        "source_id": "upload-b97f06fd064d942be06e"
+      },
+      {
+        "authority_ceiling": "declared",
+        "automatic_authorization": false,
+        "blob_ref": "sources/sha256/02/02bb915d3401e59ae3a702a35eb2a5a991a1c6ca03a73a7bd9b001903e6569a5",
+        "bytes_retained": true,
+        "classification": {
+          "confidence": "bounded",
+          "kind": "json_descriptor",
+          "limitations": [
+            "Valid JSON is not automatically trusted as a valid engineering-source schema."
+          ],
+          "media_type": "application/json",
+          "metadata": {
+            "declared_media_type": null,
+            "extension_media_type": "application/json",
+            "json_valid": true,
+            "signature_media_type": null
+          },
+          "parser_disposition": "structured",
+          "parser_route": "engineering_source_descriptor",
+          "source_type": "other",
+          "structured_format": "json"
+        },
+        "content_hash": "sha256:02bb915d3401e59ae3a702a35eb2a5a991a1c6ca03a73a7bd9b001903e6569a5",
+        "duplicate_blob": false,
+        "metadata": {
+          "content_addressed_storage": true,
+          "fabrication_authorized": false,
+          "flash_authorized": false,
+          "motion_authorized": false,
+          "power_on_authorized": false,
+          "raw_bytes_in_response": false,
+          "release_authorized": false,
+          "server_computed_hash": true
+        },
+        "original_filename": "bom.json",
+        "schema_version": "hardware_splicer.engineering_source_ingestion.v1",
+        "size_bytes": 10806,
+        "source_id": "upload-02bb915d3401e59ae3a7"
+      },
+      {
+        "authority_ceiling": "declared",
+        "automatic_authorization": false,
+        "blob_ref": "sources/sha256/a3/a3a26a05db6e0086c38dbfd09bafacecc198751763ba40060569c46f82187827",
+        "bytes_retained": true,
+        "classification": {
+          "confidence": "bounded",
+          "kind": "step_cad",
+          "limitations": [
+            "The existing STEP path is bounded identity and coarse-envelope analysis, not full BREP or FEA."
+          ],
+          "media_type": "model/step",
+          "metadata": {
+            "declared_media_type": null,
+            "extension_media_type": "model/step",
+            "signature_media_type": null
+          },
+          "parser_disposition": "structured",
+          "parser_route": "step_geometry",
+          "source_type": "cad",
+          "structured_format": "step"
+        },
+        "content_hash": "sha256:a3a26a05db6e0086c38dbfd09bafacecc198751763ba40060569c46f82187827",
+        "duplicate_blob": false,
+        "metadata": {
+          "content_addressed_storage": true,
+          "fabrication_authorized": false,
+          "flash_authorized": false,
+          "motion_authorized": false,
+          "power_on_authorized": false,
+          "raw_bytes_in_response": false,
+          "release_authorized": false,
+          "server_computed_hash": true
+        },
+        "original_filename": "FIELDDECK_7.step",
+        "schema_version": "hardware_splicer.engineering_source_ingestion.v1",
+        "size_bytes": 4586011,
+        "source_id": "upload-a3a26a05db6e0086c38d"
+      },
+      {
+        "authority_ceiling": "declared",
+        "automatic_authorization": false,
+        "blob_ref": "sources/sha256/08/0883100a6ae3accd11c70fd731cc98bf46646b878ab5ce37a086b386bb73e192",
+        "bytes_retained": true,
+        "classification": {
+          "confidence": "bounded",
+          "kind": "json_descriptor",
+          "limitations": [
+            "Valid JSON is not automatically trusted as a valid engineering-source schema."
+          ],
+          "media_type": "application/json",
+          "metadata": {
+            "declared_media_type": null,
+            "extension_media_type": "application/json",
+            "json_valid": true,
+            "signature_media_type": null
+          },
+          "parser_disposition": "structured",
+          "parser_route": "engineering_source_descriptor",
+          "source_type": "other",
+          "structured_format": "json"
+        },
+        "content_hash": "sha256:0883100a6ae3accd11c70fd731cc98bf46646b878ab5ce37a086b386bb73e192",
+        "duplicate_blob": false,
+        "metadata": {
+          "content_addressed_storage": true,
+          "fabrication_authorized": false,
+          "flash_authorized": false,
+          "motion_authorized": false,
+          "power_on_authorized": false,
+          "raw_bytes_in_response": false,
+          "release_authorized": false,
+          "server_computed_hash": true
+        },
+        "original_filename": "design.json",
+        "schema_version": "hardware_splicer.engineering_source_ingestion.v1",
+        "size_bytes": 5598,
+        "source_id": "upload-0883100a6ae3accd11c7"
+      },
+      {
+        "authority_ceiling": "declared",
+        "automatic_authorization": false,
+        "blob_ref": "sources/sha256/48/480a43aedbbb4bcd1b30ac6a7170a995c89b5bd92defe43fcb41c11ab4d47679",
+        "bytes_retained": true,
+        "classification": {
+          "confidence": "bounded",
+          "kind": "json_descriptor",
+          "limitations": [
+            "Valid JSON is not automatically trusted as a valid engineering-source schema."
+          ],
+          "media_type": "application/json",
+          "metadata": {
+            "declared_media_type": null,
+            "extension_media_type": "application/json",
+            "json_valid": true,
+            "signature_media_type": null
+          },
+          "parser_disposition": "structured",
+          "parser_route": "engineering_source_descriptor",
+          "source_type": "other",
+          "structured_format": "json"
+        },
+        "content_hash": "sha256:480a43aedbbb4bcd1b30ac6a7170a995c89b5bd92defe43fcb41c11ab4d47679",
+        "duplicate_blob": false,
+        "metadata": {
+          "content_addressed_storage": true,
+          "fabrication_authorized": false,
+          "flash_authorized": false,
+          "motion_authorized": false,
+          "power_on_authorized": false,
+          "raw_bytes_in_response": false,
+          "release_authorized": false,
+          "server_computed_hash": true
+        },
+        "original_filename": "bom.json",
+        "schema_version": "hardware_splicer.engineering_source_ingestion.v1",
+        "size_bytes": 10799,
+        "source_id": "upload-480a43aedbbb4bcd1b30"
+      }
+    ],
+    "engineeringSources": [
+      {
+        "authority_ceiling": "declared",
+        "content_hash": "sha256:8a977a4d6a6fdd1253b9f69274d41bc308eff57b3268ccdbf4214f5dacda1a57",
+        "metadata": {
+          "automatic_authorization": false,
+          "blob_ref": "sources/sha256/8a/8a977a4d6a6fdd1253b9f69274d41bc308eff57b3268ccdbf4214f5dacda1a57",
+          "bytes_retained": true,
+          "captured_at": null,
+          "design_author": "Raspberry Pi Ltd",
+          "ingestion_schema": "hardware_splicer.engineering_source_ingestion.v1",
+          "limitations": [
+            "The existing STEP path is bounded identity and coarse-envelope analysis, not full BREP or FEA."
+          ],
+          "media_type": "model/step",
+          "original_filename": "touch_display2_7inch.step",
+          "package_relative_path": "sources/touch_display2_7inch.step",
+          "parser_disposition": "structured",
+          "parser_route": "step_geometry",
+          "scope": "digital_reference_only",
+          "server_computed_hash": true,
+          "size_bytes": 1352219,
+          "source_kind": "step_cad",
+          "structured_format": "step"
+        },
+        "revision": "sha256:8a977a4d6a6fdd1253b9f69274d41bc308eff57b3268ccdbf4214f5dacda1a57",
+        "source_id": "upload-8a977a4d6a6fdd1253b9",
+        "source_type": "cad",
+        "uri": "hs-project://hs-flex-cyberdeck/sources/sha256/8a/8a977a4d6a6fdd1253b9f69274d41bc308eff57b3268ccdbf4214f5dacda1a57"
+      },
+      {
+        "authority_ceiling": "declared",
+        "content_hash": "sha256:a3a26a05db6e0086c38dbfd09bafacecc198751763ba40060569c46f82187827",
+        "metadata": {
+          "automatic_authorization": false,
+          "blob_ref": "sources/sha256/a3/a3a26a05db6e0086c38dbfd09bafacecc198751763ba40060569c46f82187827",
+          "bytes_retained": true,
+          "captured_at": null,
+          "design_author": "assistant directed",
+          "ingestion_schema": "hardware_splicer.engineering_source_ingestion.v1",
+          "limitations": [
+            "The existing STEP path is bounded identity and coarse-envelope analysis, not full BREP or FEA."
+          ],
+          "media_type": "model/step",
+          "original_filename": "FIELDDECK_7.step",
+          "package_relative_path": "cad/FIELDDECK_7.step",
+          "parser_disposition": "structured",
+          "parser_route": "step_geometry",
+          "scope": "digital_reference_only",
+          "server_computed_hash": true,
+          "size_bytes": 4586011,
+          "source_kind": "step_cad",
+          "structured_format": "step"
+        },
+        "revision": "sha256:a3a26a05db6e0086c38dbfd09bafacecc198751763ba40060569c46f82187827",
+        "source_id": "upload-a3a26a05db6e0086c38d",
+        "source_type": "cad",
+        "uri": "hs-project://hs-flex-cyberdeck/sources/sha256/a3/a3a26a05db6e0086c38dbfd09bafacecc198751763ba40060569c46f82187827"
+      },
+      {
+        "authority_ceiling": "declared",
+        "content_hash": "sha256:0883100a6ae3accd11c70fd731cc98bf46646b878ab5ce37a086b386bb73e192",
+        "metadata": {
+          "automatic_authorization": false,
+          "blob_ref": "sources/sha256/08/0883100a6ae3accd11c70fd731cc98bf46646b878ab5ce37a086b386bb73e192",
+          "bytes_retained": true,
+          "captured_at": null,
+          "design_author": "assistant directed",
+          "ingestion_schema": "hardware_splicer.engineering_source_ingestion.v1",
+          "limitations": [
+            "Valid JSON is not automatically trusted as a valid engineering-source schema."
+          ],
+          "media_type": "application/json",
+          "original_filename": "design.json",
+          "package_relative_path": "design.json",
+          "parser_disposition": "structured",
+          "parser_route": "engineering_source_descriptor",
+          "scope": "digital_reference_only",
+          "server_computed_hash": true,
+          "size_bytes": 5598,
+          "source_kind": "json_descriptor",
+          "structured_format": "json"
+        },
+        "revision": "sha256:0883100a6ae3accd11c70fd731cc98bf46646b878ab5ce37a086b386bb73e192",
+        "source_id": "upload-0883100a6ae3accd11c7",
+        "source_type": "other",
+        "uri": "hs-project://hs-flex-cyberdeck/sources/sha256/08/0883100a6ae3accd11c70fd731cc98bf46646b878ab5ce37a086b386bb73e192"
+      },
+      {
+        "authority_ceiling": "declared",
+        "content_hash": "sha256:480a43aedbbb4bcd1b30ac6a7170a995c89b5bd92defe43fcb41c11ab4d47679",
+        "metadata": {
+          "automatic_authorization": false,
+          "blob_ref": "sources/sha256/48/480a43aedbbb4bcd1b30ac6a7170a995c89b5bd92defe43fcb41c11ab4d47679",
+          "bytes_retained": true,
+          "captured_at": null,
+          "design_author": "assistant directed",
+          "ingestion_schema": "hardware_splicer.engineering_source_ingestion.v1",
+          "limitations": [
+            "Valid JSON is not automatically trusted as a valid engineering-source schema."
+          ],
+          "media_type": "application/json",
+          "original_filename": "bom.json",
+          "package_relative_path": "bom.json",
+          "parser_disposition": "structured",
+          "parser_route": "engineering_source_descriptor",
+          "scope": "digital_reference_only",
+          "server_computed_hash": true,
+          "size_bytes": 10799,
+          "source_kind": "json_descriptor",
+          "structured_format": "json"
+        },
+        "revision": "sha256:480a43aedbbb4bcd1b30ac6a7170a995c89b5bd92defe43fcb41c11ab4d47679",
+        "source_id": "upload-480a43aedbbb4bcd1b30",
+        "source_type": "other",
+        "uri": "hs-project://hs-flex-cyberdeck/sources/sha256/48/480a43aedbbb4bcd1b30ac6a7170a995c89b5bd92defe43fcb41c11ab4d47679"
+      }
+    ],
+    "goal": "Self-contained Linux field terminal: 7-inch touch display, wired keyboard, rear USB and Ethernet, offline documentation, SSH, commercial USB-C power bank and realizable enclosure.",
+    "mode": "digital_only",
+    "physicalBuildVerified": false,
+    "projectName": "Fielddeck 7 — continuation of the October cyberdeck objective",
+    "recovery": {
+      "old_revisions_recreated": false,
+      "old_store": "/tmp/hs-cross-domain-20261021/store/hs-flex-cyberdeck",
+      "old_store_available": false,
+      "original_trial": "../README.md"
+    }
+  }
+}

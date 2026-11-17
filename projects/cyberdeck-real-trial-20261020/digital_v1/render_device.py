@@ -53,9 +53,8 @@ def render(filename,exploded=False,inside=False):
         if inside and (node.startswith('face_') or node.startswith('keyboard_') or node in ('touch_display_2_manufacturer','fan_guard','fan_envelope','fan_duct')):
             continue
         if exploded:
-            if node.startswith('face_') or node=='fan_guard':offset[2]=110
+            if node.startswith('face_') or node in ('fan_guard','fan_envelope','fan_duct'):offset[2]=110
             elif node.startswith('keyboard_') or node=='touch_display_2_manufacturer':offset[2]=65
-            elif node in ('fan_envelope','fan_duct'):offset[2]=60
             elif node=='power_bank_nominal_envelope':offset[2]=24
         vertices=m.vertices+offset
         colors=m.visual.face_colors[:,:3]
@@ -89,7 +88,7 @@ def render(filename,exploded=False,inside=False):
     if inside:
         labels=[([42,77,30],'Removable 10,000 mAh bank',(78,830)),([32,231,25],'Pi 4 + rear USB / Ethernet',(78,210)),([225,175,52.5],'Display support posts',(1030,330)),([210,20,38],'Keyboard support / pads',(1030,940))]
     elif exploded:
-        labels=[([270,230,174],'Four removable face pieces',(1060,200)),([155,210,127],'7-inch Touch Display 2',(1000,450)),([155,78,127],'Wired USB keyboard',(70,680)),([155,130,3],'Four tray pieces + seam plates',(930,990))]
+        labels=[([270,230,174],'Faces; fan / duct preassembled',(1060,200)),([155,210,127],'7-inch Touch Display 2',(1000,450)),([155,78,127],'Wired USB keyboard',(70,680)),([155,130,3],'Four tray pieces + seam plates',(930,990))]
     else:
         labels=[([180,211,64],'7-inch landscape touch',(1030,290)),([220,70,64],'Wired keyboard',(1050,950)),([32,230.5,66],'USB-powered fan',(78,260))]
     for pt,label,pos in labels:

@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 from .digital_engine import DigitalStudyEngine
+from .digital_cases import DEFAULT_CASE
 
 
 def parser():
@@ -13,8 +14,10 @@ def parser():
     command.add_argument('--project-root', type=Path)
     command.add_argument('--jobs-db', type=Path)
     commands = command.add_subparsers(dest='command', required=True)
+    commands.add_parser('cases', help='List bounded registered cases and numeric requirements.')
     init = commands.add_parser('init', help='Create a project from the verified digital baseline.')
-    init.add_argument('--name', default='HS-3G-B digital study')
+    init.add_argument('--name')
+    init.add_argument('--case', dest='case_id', default=DEFAULT_CASE)
     for name in ('inspect','history','revise','work','job','cancel','retry','compare','audit','export'):
         item = commands.add_parser(name)
         item.add_argument('project_id')
@@ -26,6 +29,7 @@ def parser():
             item.add_argument('--payload-g', type=float)
             item.add_argument('--gust-scale', type=float)
             item.add_argument('--max-mass-g', type=float)
+            item.add_argument('--requirements', type=Path, help='JSON object of explicit case-specific numeric overrides.')
             item.add_argument('--request-id')
             item.add_argument('--enqueue', action='store_true', help='Persist the task for a separate headless worker.')
         if name in ('job','cancel','retry'):
@@ -46,8 +50,10 @@ def parser():
 
 def dispatch(engine, args):
     name = args.command
+    if name == 'cases':
+        return engine.cases()
     if name == 'init':
-        return engine.create(name=args.name)
+        return engine.create(name=args.name, case_id=args.case_id)
     project = args.project_id
     if name == 'inspect':
         return {'ok': True, 'study': engine.study(project, args.revision)}
@@ -56,6 +62,13 @@ def dispatch(engine, args):
     if name == 'revise':
         requirements = {key: value for key,value in (
             ('payload_mass_g',args.payload_g), ('gust_scale',args.gust_scale), ('max_mass_g',args.max_mass_g)) if value is not None}
+        if args.requirements:
+            supplied = json.loads(args.requirements.read_text())
+            if not isinstance(supplied, dict):
+                raise ValueError('The requirements file must contain a JSON object.')
+            if set(supplied) & set(requirements):
+                raise ValueError('Supply each requirement once, through flags or the JSON file.')
+            requirements.update(supplied)
         method = engine.enqueue_revision if args.enqueue else engine.run_revision
         return method(project, base_revision=args.base_revision, change_request=args.change,
                       requirements=requirements, request_id=args.request_id)

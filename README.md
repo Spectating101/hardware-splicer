@@ -35,7 +35,10 @@ fabrication approval.
 
 **Headless digital engine:** `hs-digital` and `hardware_splicer.sdk.digital_engine`
 create/resume studies, change requirements, execute native CAD/physics jobs,
-compare revisions, audit their evidence and export verified packages. Failed
+compare revisions, audit their evidence and export verified packages. Registered
+cases include the HS-3G-B drone, [Fielddeck 7 cyberdeck](projects/cyberdeck-real-trial-20261020/digital_v1/README.md)
+and [Ender-3 reference-donor pen plotter](projects/ender3-penplotter-digital/README.md).
+`hs-digital cases` lists their supported requirements. Failed
 requirements retain their artifacts. The current focus is the backend engine;
 frontend work is deferred. See the [engine guide](docs/ENGINE.md#headless-digital-engine).
 No HTTP server, browser, physical parts or model-service key is required.

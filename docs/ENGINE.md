@@ -130,7 +130,15 @@ Success payload includes `quality.drc_pass`, paths to `build_graph.json`, `main_
 
 ## Headless digital engineering
 
-The digital study engine runs directly from Python or the CLI. It uses the existing project store and job queue; it does not start an HTTP server, browser, or frontend. The current registered proving case is HS-3G-B, with representative CAD and native PyBullet dynamics. It is a bounded case inside the broader engineering engine, not an arbitrary hardware redesign interface.
+The digital study engine runs directly from Python or the CLI. It uses the existing project store and job queue; it does not start an HTTP server, browser, or frontend. Its server-owned registry contains three bounded device families:
+
+| Case ID | Device and native engineering work |
+| --- | --- |
+| `hs3g-b` (default) | Existing drone assembly, native PyBullet dynamics, payload/gust/mass studies |
+| `fielddeck-7` | Cyberdeck enclosure, checked mounts and fastener/tool envelopes, sourced display geometry, power/runtime/structural sensitivity studies |
+| `ender3-penplotter` | Published classic Ender-3 reference donor, parametric pen and hotend-parking mounts, emitted G-code and drawing-trajectory checks |
+
+Case selection is explicit. These cases do not identify arbitrary junk or automatically design every kind of hardware. The plotter's donor inventory is a documented virtual reference; the user's owned inventory remains empty. The two new cases execute fresh native scripts before publishing revision 1. Later revisions use the existing cancellable job queue and compare-and-swap publication.
 
 Install the repository and native dependencies with `python -m pip install -e '.[drone-sim]'`. In this workspace the base environment can also use the native interpreter selected by `HARDWARE_SPLICER_DIGITAL_PYTHON`, or the prepared project-cache native environment. No model-service key or physical parts are required.
 
@@ -147,6 +155,8 @@ with digital_engine(project_root="/tmp/hs-digital-projects", job_db="/tmp/hs-dig
     audit = engine.audit(project_id, 2, native=True)
     delivery = engine.export(project_id, "/tmp/hs-payload-study.zip", 2)
 ```
+
+Use `engine.cases()` to inspect supported numeric requirements. For a cyberdeck study, select `engine.create(case_id="fielddeck-7")`, then pass explicit overrides to `run_revision`, such as `requirements={"minimum_work_runtime_h": 3, "pi_work_current_a": 2.2}`. An intact computation can correctly report unmet engineering requirements. The fixed module layout is checked explicitly; unsupported dimensional edits are rejected instead of being hashed over unchanged solids.
 
 The equivalent CLI is `hs-digital`, or `python -m hardware_splicer.digital_engine_cli`. Pass `--project-root` and `--jobs-db` consistently across processes. `init` returns the project ID as JSON; use that ID for subsequent commands.
 
@@ -170,6 +180,16 @@ A successful computation can fail its engineering requirements. Such a run remai
 Job attempts have durable random identities, independent of wall-clock timestamps. Completion, failure and publication from an old attempt cannot update a retry, even when timestamps are identical. Existing job databases migrate additively without discarding their records.
 
 The canonical HTTP adapter uses this same engine. In addition to create/inspect/submit/artifact routes, it exposes `GET /v1/projects/{id}/digital/compare?before_revision=1&after_revision=2`, `GET /v1/projects/{id}/digital/revisions/{revision}/audit`, and `POST /v1/projects/{id}/digital/revisions/{revision}/verify`. The canonical MCP gateway discovers these through OpenAPI; no second MCP implementation owns their rules.
+
+### Selecting and reproducing another device case
+
+`hs-digital cases` lists each case's numeric keys and ranges. Select one with `init --case fielddeck-7` or `init --case ender3-penplotter`. To revise a new device case, write overrides to a JSON file, for example `{"minimum_work_runtime_h": 3, "pi_work_current_a": 2.2}`, then run `revise PROJECT_ID --base-revision 1 --requirements changes.json`. Free-text changes label these studies; their explicit numeric overrides define the computation. The drone's existing payload phrases and flags continue to work.
+
+Every new-case ZIP contains `STUDY_README.md`, selected requirements, frozen source inputs and licenses, generated CAD/simulation files, quantitative constraints and independent verification. The entry document gives the exact included script sequence. Captured source documentation may also describe a separate standalone delivery; use the study entry document when rerunning the backend ZIP.
+
+Historical studies retain their original input bytes. Native audit reruns the included verifier in scratch, including calculation or emitted-trajectory checks, without changing the saved revision. The case registry and nested-file allowlist reject unknown cases, arbitrary executable paths and symlink traversal. `GET /v1/digital/cases` exposes the same case descriptions through HTTP, and `POST /v1/digital/projects` accepts an optional `case_id`.
+
+The [dated device execution record](status/generated/device-engineering-20261117.json) retains actual cyberdeck and plotter revision results, native audits, source hashes and remaining physical unknowns. Its proof records distinguish model requirements from artifact integrity.
 
 ## Exact materials and InvenTree inventory
 

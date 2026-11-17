@@ -9,13 +9,15 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from . import digital_project as digital
+from .digital_cases import DEFAULT_CASE
 from .project_api import _project_error
 from .digital_engine import DigitalStudyEngine, DigitalRuntimeUnavailable
 
 
 class CreateDigitalProject(BaseModel):
     model_config = ConfigDict(extra='forbid')
-    name: str = Field(default='HS-3G-B digital study', min_length=1, max_length=100)
+    name: str | None = Field(default=None, min_length=1, max_length=100)
+    case_id: str = Field(default=DEFAULT_CASE, min_length=1, max_length=64)
 
 
 class DigitalRunRequest(BaseModel):
@@ -40,9 +42,16 @@ def create_digital_project_router(store, backend):
     @router.post('/v1/digital/projects', status_code=201)
     def create(request: CreateDigitalProject):
         try:
-            return engine.create(name=request.name.strip() or 'Digital study')
+            return engine.create(name=(request.name.strip() or 'Digital study') if request.name is not None else None,
+                                 case_id=request.case_id)
+        except DigitalRuntimeUnavailable as exc:
+            raise HTTPException(status_code=503, detail={'type': 'digital_runtime_unavailable', 'message': str(exc)}) from exc
         except Exception as exc:
             raise _project_error(exc) from exc
+
+    @router.get('/v1/digital/cases')
+    def registered_cases():
+        return engine.cases()
 
     @router.get('/v1/projects/{project_id}/digital')
     def get_study(project_id: str, revision: int | None = Query(default=None, ge=1)):
@@ -81,11 +90,12 @@ def create_digital_project_router(store, backend):
         except Exception as exc:
             raise _project_error(exc) from exc
 
-    @router.get('/v1/projects/{project_id}/digital/revisions/{revision}/artifacts/{name}')
+    @router.get('/v1/projects/{project_id}/digital/revisions/{revision}/artifacts/{name:path}')
     def artifact(project_id: str, revision: int, name: str):
         try:
             _, directory, seal = digital.load_run(store, project_id, revision)
-            path = digital.checked_file(directory, name, seal['artifact_sha256'])
+            path = digital.checked_file(directory, name, seal['artifact_sha256'], case_id=digital.case_id_for(seal),
+                                        case=digital.case_for_run(seal))
         except Exception as exc:
             raise _project_error(exc) from exc
         if name == 'VIEWER.html':
@@ -96,7 +106,7 @@ def create_digital_project_router(store, backend):
             })
         types = {'.zip': 'application/zip', '.glb': 'model/gltf-binary', '.step': 'model/step',
                  '.csv': 'text/csv', '.json': 'application/json', '.png': 'image/png', '.gif': 'image/gif'}
-        return FileResponse(path, media_type=types.get(path.suffix, 'text/plain'), filename=name,
+        return FileResponse(path, media_type=types.get(path.suffix, 'text/plain'), filename=path.name,
                             headers={'X-Content-Type-Options': 'nosniff'})
 
     return router

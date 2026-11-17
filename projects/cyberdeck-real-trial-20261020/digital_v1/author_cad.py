@@ -23,6 +23,26 @@ W, D, H = [SPEC["case_mm"][key] for key in ("width", "depth", "height")]
 T = SPEC["case_mm"]["floor"]
 
 
+def validate_fixed_geometry(spec):
+    """Reject geometry changes this authored layout cannot safely rearrange.
+
+    Study currents/targets may vary. Module relocation and size changes require
+    an authored revision, rather than hashing new JSON over unchanged solids.
+    """
+    expected={
+      'case_mm':{'width':310,'depth':285,'height':64,'floor':3,'wall':3,'lid':3,'split_x':155,'split_y':140,'seam_gap':.3},
+      'display':{'mpn':'SC1635','centre_xy':[155,210],'front_z':62,'aperture_mm':[184.32,115.24],'native_front_z':5.02,'native_centre_y':2.935},
+      'pi':{'mpn':'SC0193','ram_gb':2,'board_mm':[85,56,1.6],'rotation_deg':90,'origin_xy':[60,198],'pcb_bottom_z':7,
+            'holes_local_xy':[[3.5,3.5],[61.5,3.5],[3.5,52.5],[61.5,52.5]]},
+      'keyboard':{'mpn':'1736','dimensions_mm':[285,123,22],'centre_xy':[155,78],'top_z':62},
+      'power_bank':{'mpn':'A1259','dimensions_mm':[104,52.3,26],'world_min':[16,25,4],'world_rotation_deg':90},
+      'fan':{'mpn':'NF-A4x10 5V PWM','dimensions_mm':[40,40,10],'centre_xy':[32,230.5],'bottom_z':51,'mount_pitch_mm':32}}
+    for section,fields in expected.items():
+        for field,value in fields.items():
+            if spec.get(section,{}).get(field)!=value:
+                raise ValueError(f'Unsupported fixed-layout geometry change: {section}.{field}; author a new layout before regeneration')
+
+
 def box(x, y, z, a, b, c):
     return cq.Workplane("XY").box(a,b,c,centered=(False,False,False)).translate((x,y,z)).val()
 
@@ -80,6 +100,7 @@ def overlap_volume(a,b):
 
 
 def author():
+    validate_fixed_geometry(SPEC)
     OUT.mkdir(exist_ok=True)
     (OUT/"print").mkdir(exist_ok=True)
     parts=[]
@@ -151,8 +172,13 @@ def author():
     for x,y in pi_holes:
         tray=tray.fuse(cylinder(x,y,3,3.5,4)).cut(pinut(x,y))
     for x,y in top_holes:
-        boss=cylinder(x,y,3,5,58)
-        boss=boss.cut(cylinder(x,y,3,1.6,60)).cut(hexhole(x,y,58.4,5.8,3))
+        boss=cylinder(x,y,3,5,58).cut(cylinder(x,y,3,1.6,60))
+        # The nut must pull against a printed roof to retain the face. An
+        # open-top pocket would let the tightened face and nut lift together.
+        direction=1 if x<W/4 or W/2<x<3*W/4 else -1
+        pocket=hexhole(x,y,56.6,5.8,2.6)
+        entry=box(x if direction>0 else x-6,y-2.9,56.6,6,5.8,2.6)
+        boss=boss.cut(pocket.fuse(entry))  # 1.8 mm roof ends at Z61
         tray=tray.fuse(boss)
 
     # Columns end at z=38; 2 mm hook-and-loop pads support the z=40 underside.
@@ -222,9 +248,15 @@ def author():
         guard=guard.fuse(bar)
     for x,y in itertools.product((16,48),(214.5,246.5)):
         guard=guard.cut(cylinder(x,y,63,1.6,5))
-    add("fan_guard",guard.clean(),(204,112,44,255),"custom","M3 x 20 screws with nuts below fan; supplied soft mounts are optional alternatives.",True)
+    add("fan_guard",guard.clean(),(204,112,44,255),"custom","M3 x 25 screws clamp guard, face, fan and 2 mm duct flange; nuts below flange.",True)
     duct=box(10,208.5,25,44,44,28).cut(box(11.5,210,24,41,41,31))
-    add("fan_duct",duct,(75,91,104,255),"custom","Slips around fan frame; attach to guard/fan assembly using tape, no PCB contact.",True)
+    # A bolted flange carries the duct. The 2 mm sleeve overlap locates it;
+    # adhesive alone is not the load path. Assemble on the loose face first.
+    flange=box(10,208.5,49,44,44,2).cut(cylinder(32,230.5,48,18,4))
+    for x,y in itertools.product((16,48),(214.5,246.5)):
+        flange=flange.cut(cylinder(x,y,48,1.6,4))
+    duct=duct.fuse(flange).clean()
+    add("fan_duct",duct,(75,91,104,255),"custom","2 mm flange bolted below fan, 0.5 mm sleeve clearance; preassemble with rear-left face, no PCB contact.",True)
     for i,(x,y) in enumerate(((16,16),(294,16),(16,269),(294,269))):
         add("foot_"+str(i+1),cylinder(x,y,-6,8,6),(55,61,66,255),"custom","Adhesive transfer tape to floor; clears seam screw heads by 3 mm.",True)
 
@@ -280,7 +312,13 @@ def author():
             "display_case_mount_centres_mm":outer_holes,"pi_mount_centres_mm":pi_holes,
             "top_fastener_centres_mm":top_holes,"seam_fastener_centres_mm":join_holes,
             "manufacturer_display_step_used":True,"physical_fit_verified":False,
-            "source_spec_sha256":hashlib.sha256((ROOT/"design.json").read_bytes()).hexdigest()}
+            "source_spec_sha256":hashlib.sha256((ROOT/"design.json").read_bytes()).hexdigest(),
+            "source_author_sha256":hashlib.sha256((ROOT/"author_cad.py").read_bytes()).hexdigest(),
+            "source_vendor_step_sha256":hashlib.sha256((ROOT/"sources/touch_display2_7inch.step").read_bytes()).hexdigest(),
+            "face_nut_pockets":{"insertion":"side_loaded_before_faces","pocket_bottom_z_mm":56.6,"pocket_top_z_mm":59.2,"roof_thickness_mm":1.8},
+            "fan_mount_stack_mm":{"guard":2,"face":3,"fan":10,"duct_flange":2,"nut":2.4,
+                                  "screw_under_head_length":25,"tip_beyond_nut":5.6},
+            "fastener_model_scope":"Nominal head, nut, shank and tool envelopes checked independently by verify_device.py; threads and flexible cables are not complete solid models."}
     (OUT/"geometry_report.json").write_text(json.dumps(report,indent=2)+'\n')
     print(json.dumps({"parts":len(parts),"custom_parts":len(custom),"findings":conflicts}))
     return report

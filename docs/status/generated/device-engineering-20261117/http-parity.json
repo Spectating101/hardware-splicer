@@ -1,0 +1,27 @@
+{
+  "case_ids": [
+    "hs3g-b",
+    "fielddeck-7",
+    "ender3-penplotter"
+  ],
+  "projects": [
+    {
+      "project_id": "digital-4dd8e8afe5da4cfaae9488caad3f3666",
+      "revision": 3,
+      "state_http_status": 200,
+      "comparison_http_status": 200,
+      "artifact_http_status": 200,
+      "artifact_bytes": 67507,
+      "artifact_sha256": "48f9416751926ec2a36c4ec5a334defb149a8849eabd57f2b525a7b12ca9b811"
+    },
+    {
+      "project_id": "digital-7bf2dd3f7f2a43e6912f5aeb31983f36",
+      "revision": 2,
+      "state_http_status": 200,
+      "comparison_http_status": 200,
+      "artifact_http_status": 200,
+      "artifact_bytes": 134286,
+      "artifact_sha256": "3f88c432ff15caa8ae3302c13f226c9e29463c113381fd908d17228a227ef632"
+    }
+  ]
+}

@@ -10,6 +10,11 @@ ROOT=Path(__file__).resolve().parent
 def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def require(condition, message):
+    if not condition:
+        raise ValueError(message)
+
+
 def references():
     sources=[
       ('touch_display2_7inch.step.zip','https://pip-assets.raspberrypi.com/categories/1083-raspberry-pi-touch-display-2/documents/RP-009154-DD-3-raspberry-pi-touch-display-2-step-7inch.zip','Manufacturer 7-inch STEP download; MIT reference geometry, approximate fit guide.'),
@@ -60,20 +65,47 @@ def connection_drawing():
 
 def main():
     verification=json.loads((ROOT/'analysis/verification.json').read_text())
-    assert verification['status']=='digital_geometry_checks_passed'
-    assert verification['assembly_step_sha256']==sha(ROOT/'cad/FIELDDECK_7.step')
+    require(verification['status']=='digital_geometry_checks_passed', 'Current geometry verification must pass.')
+    require(verification['assembly_step_sha256']==sha(ROOT/'cad/FIELDDECK_7.step'), 'The verified assembly changed.')
+    require(verification['author_cad_sha256']==sha(ROOT/'author_cad.py'), 'The verified CAD author changed.')
+    verified=verification.get('verified_files_sha256')
+    if not isinstance(verified,dict) or not verified:
+        raise ValueError('A complete current exported-file verification is required.')
+    geometry=json.loads((ROOT/'cad/geometry_report.json').read_text())
+    expected_exports={'cad/FIELDDECK_7.step', 'cad/FIELDDECK_7.glb'}
+    expected_exports.update('cad/print/'+part['name']+'.'+extension
+                            for part in geometry['parts'] if part['printable']
+                            for extension in ('step','stl'))
+    actual_exports={str(path.relative_to(ROOT)) for path in (ROOT/'cad').rglob('*')
+                    if path.is_file() and path.suffix.lower() in ('.step','.stl','.glb')}
+    require(actual_exports==expected_exports, 'The CAD export inventory contains missing or unverified files.')
+    required_verified=expected_exports | {
+        'analysis/calculations.json', 'author_cad.py', 'bom.json', 'cad/geometry_report.json',
+        'design.json', 'engineering.py', 'sources/touch_display2_7inch.step',
+        'study_contract.py', 'verify_device.py'}
+    if (ROOT/'requirements.json').is_file():
+        required_verified.add('requirements.json')
+    require(set(verified)==required_verified, 'The exported-file verification inventory is incomplete.')
+    for name,digest in verified.items():
+        path=ROOT/name
+        if path.is_symlink() or not path.resolve().is_relative_to(ROOT.resolve()) or sha(path)!=digest:
+            raise ValueError('A verified artifact changed: '+name)
+    from study_contract import validate_calculation_record
+    validate_calculation_record(ROOT)
     check=json.loads((ROOT/'analysis/hs_source_check.json').read_text())['source_bundle_run']
-    assert check['input_sources']['FIELDDECK_7.step']['sha256']=='sha256:'+sha(ROOT/'cad/FIELDDECK_7.step')
+    require(check['input_sources']['FIELDDECK_7.step']['sha256']=='sha256:'+sha(ROOT/'cad/FIELDDECK_7.step'), 'The saved HS source assembly is stale.')
     snapshot=json.loads((ROOT/'HS_PROJECT_SNAPSHOT.json').read_text())
     for name in ('bom.json','design.json'):
         selected=[s for s in snapshot['snapshot']['engineeringSources'] if s.get('metadata',{}).get('original_filename')==name]
-        assert len(selected)==1 and selected[0]['content_hash']=='sha256:'+sha(ROOT/name)
+        require(len(selected)==1 and selected[0]['content_hash']=='sha256:'+sha(ROOT/name), 'The saved HS source is stale: '+name)
     references();connection_drawing()
     include=[]
     for p in ROOT.rglob('*'):
+        if p.is_symlink():
+            raise ValueError('Distribution paths cannot contain symbolic links: '+str(p.relative_to(ROOT)))
         if not p.is_file():continue
         relative=p.relative_to(ROOT)
-        if '__pycache__' in relative.parts or p.name.startswith('.') or p.name in ('MANIFEST.json','FIELDDECK_7_DIGITAL.zip','FIELDDECK_7_DIGITAL.zip.sha256'):continue
+        if '__pycache__' in relative.parts or p.name.startswith('.') or p.name in ('MANIFEST.json','LICENSE.txt','FIELDDECK_7_DIGITAL.zip','FIELDDECK_7_DIGITAL.zip.sha256'):continue
         if relative.parts[0]=='sources' and p.name not in ('touch_display2_7inch.step','touch_display2_LICENSE.txt','references.json','downloads.json'):continue
         include.append(p)
     manifest={'device':'Fielddeck 7','scope':'digital engineering prototype only','files':{str(p.relative_to(ROOT)):sha(p) for p in sorted(include)}}
@@ -82,10 +114,14 @@ def main():
     archive=ROOT/'FIELDDECK_7_DIGITAL.zip'
     with zipfile.ZipFile(archive,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=7) as z:
         for p in sorted(include):z.write(p,'Fielddeck_7/'+str(p.relative_to(ROOT)))
-        z.write(ROOT.parents[2]/'LICENSE','Fielddeck_7/LICENSE.txt')
+        license_path=ROOT.parents[2]/'LICENSE'
+        if not license_path.is_file():
+            license_path=ROOT/'LICENSE.txt'
+        z.write(license_path,'Fielddeck_7/LICENSE.txt')
     with zipfile.ZipFile(archive) as z:
-        assert z.testzip() is None
-        for relative,digest in manifest['files'].items():assert hashlib.sha256(z.read('Fielddeck_7/'+relative)).hexdigest()==digest
+        require(z.testzip() is None, 'The distribution ZIP has a corrupt entry.')
+        for relative,digest in manifest['files'].items():
+            require(hashlib.sha256(z.read('Fielddeck_7/'+relative)).hexdigest()==digest, 'The packaged artifact differs: '+relative)
     (ROOT/'FIELDDECK_7_DIGITAL.zip.sha256').write_text(sha(archive)+'  '+archive.name+'\n')
     print(json.dumps({'zip':str(archive.relative_to(ROOT)),'bytes':archive.stat().st_size,'verified_payload_files':len(manifest['files']),'sha256':sha(archive)}))
 

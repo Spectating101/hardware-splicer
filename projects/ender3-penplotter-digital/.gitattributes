@@ -1,0 +1,9 @@
+# Preserve exact vendor source bytes and review CAD through native readers.
+sources/*.step binary
+sources/*.STEP binary
+sources/Configuration.h -text -diff
+sources/LICENSE whitespace=cr-at-eol
+sources/README.md -text
+exports/*.step binary
+# csv.DictWriter intentionally emits RFC-style CRLF records.
+simulation/*.csv whitespace=cr-at-eol

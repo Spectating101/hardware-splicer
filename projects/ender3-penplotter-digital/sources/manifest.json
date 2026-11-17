@@ -1,0 +1,93 @@
+{
+  "repository": "https://github.com/Creality3DPrinting/Ender-3",
+  "commit": "88c7758cea9d0d00a54fdb238bedb3b33425f409",
+  "variant": "original Ender-3, manufacturer open-source 2018 mechanical design",
+  "retrieved_utc": "2026-11-17",
+  "license": "GPL-3.0",
+  "files": [
+    {
+      "path": "LICENSE",
+      "local": "sources/LICENSE",
+      "url": "https://raw.githubusercontent.com/Creality3DPrinting/Ender-3/88c7758cea9d0d00a54fdb238bedb3b33425f409/LICENSE",
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+      "bytes": 35147
+    },
+    {
+      "path": "README.md",
+      "local": "sources/README.md",
+      "url": "https://raw.githubusercontent.com/Creality3DPrinting/Ender-3/88c7758cea9d0d00a54fdb238bedb3b33425f409/README.md",
+      "sha256": "bfb8429f5fc71722be53a237543b5a4991e02d5817f8165b2cd61f2f94ee248d",
+      "bytes": 100
+    },
+    {
+      "path": "Ender-3 Mechanical/Ender-3 BOM.XLS",
+      "local": "sources/Ender-3 BOM.XLS",
+      "url": "https://raw.githubusercontent.com/Creality3DPrinting/Ender-3/88c7758cea9d0d00a54fdb238bedb3b33425f409/Ender-3%20Mechanical/Ender-3%20BOM.XLS",
+      "sha256": "b0af37db410d3afd79da325fd57c987caea10486f015adf9517561e4ff41ce3b",
+      "bytes": 47616
+    },
+    {
+      "path": "Ender-3 Mechanical/STP/E plate.step",
+      "local": "sources/E plate.step",
+      "url": "https://raw.githubusercontent.com/Creality3DPrinting/Ender-3/88c7758cea9d0d00a54fdb238bedb3b33425f409/Ender-3%20Mechanical/STP/E%20plate.step",
+      "sha256": "3f88c432ff15caa8ae3302c13f226c9e29463c113381fd908d17228a227ef632",
+      "bytes": 134286
+    },
+    {
+      "path": "Ender-3 Mechanical/PDF/E plate.pdf",
+      "local": "sources/E plate.pdf",
+      "url": "https://raw.githubusercontent.com/Creality3DPrinting/Ender-3/88c7758cea9d0d00a54fdb238bedb3b33425f409/Ender-3%20Mechanical/PDF/E%20plate.pdf",
+      "sha256": "ab6f5b9c4f5eb64ab9a9569d0b5e588682f40774aa4c7aee3bb8b899619ab698",
+      "bytes": 166931
+    },
+    {
+      "path": "Ender-3 Mechanical/STP/01 MAIN ASM Ender_3.STEP",
+      "local": "sources/01 MAIN ASM Ender_3.STEP",
+      "url": "https://raw.githubusercontent.com/Creality3DPrinting/Ender-3/88c7758cea9d0d00a54fdb238bedb3b33425f409/Ender-3%20Mechanical/STP/01%20MAIN%20ASM%20Ender_3.STEP",
+      "sha256": "6a1e54e484ccf3a157bb6f38b7f262a8b62bfdb21f19880538d6790c88ac5230",
+      "bytes": 44837842
+    },
+    {
+      "path": "Ender-3 Mechanical/Ender-3 Parts/E plate.SLDPRT",
+      "local": "sources/E plate.SLDPRT",
+      "url": "https://raw.githubusercontent.com/Creality3DPrinting/Ender-3/88c7758cea9d0d00a54fdb238bedb3b33425f409/Ender-3%20Mechanical/Ender-3%20Parts/E%20plate.SLDPRT",
+      "sha256": "ce296470cb53cbbb59af96f2fa79195efcd1545c73d7e591253158e6ce49feac",
+      "bytes": 80348
+    },
+    {
+      "path": "Ender-3 Firmware (Marlin)/Ender-3 (includes power failure resume- English)/Marlin/Configuration.h",
+      "local": "sources/Configuration.h",
+      "url": "https://raw.githubusercontent.com/Creality3DPrinting/Ender-3/88c7758cea9d0d00a54fdb238bedb3b33425f409/Ender-3%20Firmware%20%28Marlin%29/Ender-3%20%28includes%20power%20failure%20resume-%20English%29/Marlin/Configuration.h",
+      "sha256": "8e091f7a2ca407405f8e1537d84b1bc5b21d9b996bbc2e0e75950bbffae23dc6",
+      "bytes": 64196
+    },
+    {
+      "path": "Ender-3 Mechanical/STP/nozzle.step",
+      "local": "sources/nozzle.step",
+      "url": "https://raw.githubusercontent.com/Creality3DPrinting/Ender-3/88c7758cea9d0d00a54fdb238bedb3b33425f409/Ender-3%20Mechanical/STP/nozzle.step",
+      "sha256": "e23313c89901799e8b37d160b8050535ce2809711a2da6b93dfd6e7d4273b89f",
+      "bytes": 66278
+    },
+    {
+      "path": "Ender-3 Mechanical/STP/Radiator.step",
+      "local": "sources/Radiator.step",
+      "url": "https://raw.githubusercontent.com/Creality3DPrinting/Ender-3/88c7758cea9d0d00a54fdb238bedb3b33425f409/Ender-3%20Mechanical/STP/Radiator.step",
+      "sha256": "3875129bb3abfea38a595ca0cc62cf14d447f0ab2a73f35c02873a3d1dc1ca24",
+      "bytes": 263419
+    },
+    {
+      "path": "Ender-3 Mechanical/STP/2020 profile.step",
+      "local": "sources/2020 profile.step",
+      "url": "https://raw.githubusercontent.com/Creality3DPrinting/Ender-3/88c7758cea9d0d00a54fdb238bedb3b33425f409/Ender-3%20Mechanical/STP/2020%20profile.step",
+      "sha256": "42ee502ac74f7a2e125224b18904bd6048845b83f8f129729fe328a7ec51dacb",
+      "bytes": 560114
+    },
+    {
+      "path": "Ender-3 Mechanical/STP/M4 T-Slot Nut.step",
+      "local": "sources/M4 T-Slot Nut.step",
+      "url": "https://raw.githubusercontent.com/Creality3DPrinting/Ender-3/88c7758cea9d0d00a54fdb238bedb3b33425f409/Ender-3%20Mechanical/STP/M4%20T-Slot%20Nut.step",
+      "sha256": "69b889505eab4ff536c0c2a25d777a97856e65189828af53a58bc919817d5da2",
+      "bytes": 30403
+    }
+  ]
+}

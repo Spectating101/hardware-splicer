@@ -1,13 +1,13 @@
 {
   "ok": true,
   "registered": true,
-  "revision": 20,
+  "revision": 27,
   "project_id": "hs-flex-cyberdeck",
   "source_bundle_run": {
     "schema_version": "hardware_splicer.project_source_bundle.v1",
     "input_sources": {
       "FIELDDECK_7.step": {
-        "sha256": "sha256:b8e568f9dbc4332aaaf1409e4cf3acdde2d7065c2298ff1b21ff76e74d7c3b8c",
+        "sha256": "sha256:a3a26a05db6e0086c38dbfd09bafacecc198751763ba40060569c46f82187827",
         "kind": "step_cad"
       },
       "touch_display2_7inch.step": {
@@ -51,7 +51,7 @@
       "FIELDDECK_7.step": {
         "status": "imported_brep",
         "cad_kernel": "CadQuery/OpenCascade",
-        "source_sha256": "sha256:b8e568f9dbc4332aaaf1409e4cf3acdde2d7065c2298ff1b21ff76e74d7c3b8c",
+        "source_sha256": "sha256:a3a26a05db6e0086c38dbfd09bafacecc198751763ba40060569c46f82187827",
         "solid_count": 38,
         "bounding_box_mm": {
           "span": {
@@ -85,7 +85,7 @@
       "Extracted source facts do not prove physical fit or a finished design.",
       "Unknown physical measurements, safety and procurement remain blocked."
     ],
-    "source_set_sha256": "sha256:bb973dfdf3e8e3f827104d1e5dc21429f7563f2832107c6e32585b2f527e1b27",
+    "source_set_sha256": "sha256:d70a29c455e68f1d8b010c238b2af19e898d1ab0d60962738d25e4556b91c8e9",
     "analysis_parameters_sha256": "sha256:21c10defc6dd1b124635d58854ff87cdf758ffeac7e35e8b6103486f1e250431"
   },
   "physical_authority_unchanged": true

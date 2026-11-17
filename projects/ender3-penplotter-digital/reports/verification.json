@@ -1,0 +1,290 @@
+{
+  "case_id": "ender3-penplotter",
+  "artifact_integrity": true,
+  "requirements_met": true,
+  "physical_validation_performed": false,
+  "checks": [
+    {
+      "name": "frozen_manufacturer_source",
+      "passed": true,
+      "detail": "Original Ender-3, manufacturer repository, frozen commit"
+    },
+    {
+      "name": "source_hash_LICENSE",
+      "passed": true,
+      "detail": "sources/LICENSE"
+    },
+    {
+      "name": "source_hash_README.md",
+      "passed": true,
+      "detail": "sources/README.md"
+    },
+    {
+      "name": "source_hash_Ender-3 BOM.XLS",
+      "passed": true,
+      "detail": "sources/Ender-3 BOM.XLS"
+    },
+    {
+      "name": "source_hash_E plate.step",
+      "passed": true,
+      "detail": "sources/E plate.step"
+    },
+    {
+      "name": "source_hash_E plate.pdf",
+      "passed": true,
+      "detail": "sources/E plate.pdf"
+    },
+    {
+      "name": "source_hash_01 MAIN ASM Ender_3.STEP",
+      "passed": true,
+      "detail": "sources/01 MAIN ASM Ender_3.STEP"
+    },
+    {
+      "name": "source_hash_E plate.SLDPRT",
+      "passed": true,
+      "detail": "sources/E plate.SLDPRT"
+    },
+    {
+      "name": "source_hash_Configuration.h",
+      "passed": true,
+      "detail": "sources/Configuration.h"
+    },
+    {
+      "name": "source_hash_nozzle.step",
+      "passed": true,
+      "detail": "sources/nozzle.step"
+    },
+    {
+      "name": "source_hash_Radiator.step",
+      "passed": true,
+      "detail": "sources/Radiator.step"
+    },
+    {
+      "name": "source_hash_2020 profile.step",
+      "passed": true,
+      "detail": "sources/2020 profile.step"
+    },
+    {
+      "name": "source_hash_M4 T-Slot Nut.step",
+      "passed": true,
+      "detail": "sources/M4 T-Slot Nut.step"
+    },
+    {
+      "name": "source_license",
+      "passed": true,
+      "detail": "Full license accompanies new work and manufacturer sources"
+    },
+    {
+      "name": "stock_temperature_protection_evidence",
+      "passed": true,
+      "detail": "Both stock temperature sensors required at ambient above5C; protection unchanged; boot not tested"
+    },
+    {
+      "name": "manufacturer_interface_axes",
+      "passed": true,
+      "detail": "Independent STEP cylinder extraction verifies both M3 axes and 14mm pitch"
+    },
+    {
+      "name": "assembly_datum_match",
+      "passed": true,
+      "detail": "Small source STEP volumes agree with frozen full assembly instance metadata within .001mm3"
+    },
+    {
+      "name": "tool_offset_datum",
+      "passed": true,
+      "detail": "[7.105427357601002e-15, -19.200000000000003]"
+    },
+    {
+      "name": "pen_adapter_STEP_solid",
+      "passed": true,
+      "detail": "Reopened STEP: one valid solid"
+    },
+    {
+      "name": "pen_adapter_STL_closed",
+      "passed": true,
+      "detail": "Independently loaded mesh is watertight, consistently wound, positive volume"
+    },
+    {
+      "name": "pen_adapter_STEP_STL_volume",
+      "passed": true,
+      "detail": "Relative volume difference 0.00002327"
+    },
+    {
+      "name": "pen_adapter_requested_pen_bore",
+      "passed": true,
+      "detail": "Bore radius agrees with current pen diameter plus 1.2mm liner allowance"
+    },
+    {
+      "name": "pen_clamp_STEP_solid",
+      "passed": true,
+      "detail": "Reopened STEP: one valid solid"
+    },
+    {
+      "name": "pen_clamp_STL_closed",
+      "passed": true,
+      "detail": "Independently loaded mesh is watertight, consistently wound, positive volume"
+    },
+    {
+      "name": "pen_clamp_STEP_STL_volume",
+      "passed": true,
+      "detail": "Relative volume difference 0.00005720"
+    },
+    {
+      "name": "pen_clamp_requested_pen_bore",
+      "passed": true,
+      "detail": "Bore radius agrees with current pen diameter plus 1.2mm liner allowance"
+    },
+    {
+      "name": "hotend_parking_plate_STEP_solid",
+      "passed": true,
+      "detail": "Reopened STEP: one valid solid"
+    },
+    {
+      "name": "hotend_parking_plate_STL_closed",
+      "passed": true,
+      "detail": "Independently loaded mesh is watertight, consistently wound, positive volume"
+    },
+    {
+      "name": "hotend_parking_plate_STEP_STL_volume",
+      "passed": true,
+      "detail": "Relative volume difference 0.00000218"
+    },
+    {
+      "name": "donor_interference",
+      "passed": true,
+      "detail": "Detailed manufacturer carriage intersection 0.000000000mm3"
+    },
+    {
+      "name": "parking_radiator_interface",
+      "passed": true,
+      "detail": "Actual radiator CAD: 3.2mm through bores with 14mm pitch"
+    },
+    {
+      "name": "parking_tnut_profile_fit",
+      "passed": true,
+      "detail": "Actual vendor solids; 90deg nut orientation in slot"
+    },
+    {
+      "name": "full_layout_exports",
+      "passed": true,
+      "detail": "STEP/GLB reopened; detailed mount plus >=20 named bodies"
+    },
+    {
+      "name": "GLB_STEP_volume",
+      "passed": true,
+      "detail": "World-space GLB volume agrees with full STEP within 0.3%"
+    },
+    {
+      "name": "explicit_envelopes",
+      "passed": true,
+      "detail": "Reference geometry labels preserved in GLB"
+    },
+    {
+      "name": "export_hashes",
+      "passed": true,
+      "detail": "Build-time export hashes match delivered bytes"
+    },
+    {
+      "name": "image_exports/device_render.png",
+      "passed": true,
+      "detail": "PNG decoded independently"
+    },
+    {
+      "name": "image_simulation/plotted_drawing.png",
+      "passed": true,
+      "detail": "PNG decoded independently"
+    },
+    {
+      "name": "Gcode_strict_subset",
+      "passed": true,
+      "detail": "Metric absolute moves; zero heater commands; no extrusion, homing, machine I/O"
+    },
+    {
+      "name": "Gcode_CSV_roundtrip",
+      "passed": true,
+      "detail": "Independent G-code positions match every stored CSV segment"
+    },
+    {
+      "name": "SVG_Gcode_geometric_roundtrip",
+      "passed": true,
+      "detail": "Every vector pen-down segment agrees after offset and scaling"
+    },
+    {
+      "name": "requested_pen_up_lift",
+      "passed": true,
+      "detail": "All non-drawing XY motion holds current requested Z lift"
+    },
+    {
+      "name": "report_contract",
+      "passed": true,
+      "detail": "Requirements and digital-only donor identity agree"
+    },
+    {
+      "name": "constraint_consistency",
+      "passed": true,
+      "detail": "Unique constraints; requirements_met derives from every constraint"
+    },
+    {
+      "name": "all_acceptance_constraints_recomputed",
+      "passed": true,
+      "detail": "Every claimed engineering actual, limit and pass flag independently derived from reopened geometry and emitted commands"
+    },
+    {
+      "name": "simulation_constraints_recomputed",
+      "passed": true,
+      "detail": "Motion requirement satisfaction recomputed separately"
+    },
+    {
+      "name": "numeric_metric_coverage",
+      "passed": true,
+      "detail": "No unverified quantitative engineering summary fields"
+    },
+    {
+      "name": "simulation_metrics_recomputed",
+      "passed": true,
+      "detail": "Every simulation metric independently recomputed"
+    },
+    {
+      "name": "engineering_summary_recomputed",
+      "passed": true,
+      "detail": "Independent geometry and trajectory agree with numeric summary"
+    }
+  ],
+  "metrics": {
+    "pen_adapter_reopened_volume_mm3": 26756.596159163593,
+    "pen_clamp_reopened_volume_mm3": 8787.816474612535,
+    "hotend_parking_plate_reopened_volume_mm3": 29336.842062378215,
+    "adapter_volume_mm3": 26756.596159163593,
+    "cap_volume_mm3": 8787.816474612535,
+    "mount_interference_mm3": 0.0,
+    "draw_length_mm": 771.8085921943639,
+    "segment_count": 305,
+    "non_drawing_XY_without_lift": 0,
+    "mount_pitch_mm": 14.0,
+    "mount_boss_front_mm": 7.0,
+    "mount_bolt_engagement_mm": 4.0,
+    "printed_mass_g_at_1_27_g_cm3": 82.39919346411602,
+    "plate_to_adapter_airgap_mm": 4.5,
+    "pen_tip_to_clamp_mm": 30.0,
+    "beam_proxy_deflection_mm_at_2N": 0.05095031836970898,
+    "clamp_open_gap_mm": 0.3999999999999986,
+    "clamp_screw_tip_to_plate_mm": 2.3999999999999986,
+    "pen_lift_mm": 3.0,
+    "pen_diameter_mm": 10.0,
+    "drawing_width_mm": 100.0,
+    "drawing_height_mm": 80.0,
+    "parking_plate_volume_mm3": 29336.842062378215,
+    "parking_tnut_profile_interference_mm3": 0.0,
+    "parking_radiator_hole_pitch_mm": 14.0,
+    "travel_length_mm": 560.2469361579608,
+    "ideal_feed_time_s": 124.39320602733441,
+    "stroke_count": 12,
+    "pen_center_bed_margin_mm": 71.5,
+    "fixture_bed_clearance_mm": 29.0,
+    "controller_travel_margin_mm": 70.30000000000001,
+    "minimum_commanded_Z_mm": 0.0,
+    "maximum_commanded_Z_mm": 3.0
+  },
+  "excluded_large_provenance_files": [],
+  "verification_scope": "Independent local export reopening, source hashes, exact E-plate intersection, SVG/G-code/CSV roundtrip. No hardware or powered tests."
+}

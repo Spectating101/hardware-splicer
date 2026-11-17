@@ -1,9 +1,9 @@
 {
   "ok": true,
   "assessment": {
-    "assessment_id": "materials-de15325b5b307f97cba19c5adb7b0083",
+    "assessment_id": "materials-49216b16b3426ded6b574feb6e46ba8b",
     "inventory": {
-      "captured_at": "2026-11-17T14:43:05.478143Z",
+      "captured_at": "2026-11-17T15:37:02.666359Z",
       "lots": [],
       "response_sha256": {},
       "simulated": false,
@@ -15,7 +15,7 @@
     "project_id": "hs-flex-cyberdeck",
     "report": {
       "engineering_compatibility": "not_assessed_by_inventory_reconciliation",
-      "evaluated_at": "2026-11-17T14:43:05.492692+00:00",
+      "evaluated_at": "2026-11-17T15:37:02.722865+00:00",
       "inventory_current_at_evaluation": true,
       "lines": [
         {
@@ -283,18 +283,18 @@
           "action": "buy",
           "available_for_plan": "0",
           "catalog_part_id": null,
-          "description": "M3 x 20 socket cap, ISO 4762, stainless A2-70; fan",
+          "description": "M3 x 25 socket cap, ISO4762, stainless A2; fan and bolted duct flange",
           "excluded_lots": [],
           "identity_basis": "declared_specification",
           "issues": [],
           "manufacturer": "",
-          "material_id": "m3_20",
+          "material_id": "m3_25",
           "mpn": "",
           "planned_allocations": [],
           "quantity": "4",
           "shortage": "4",
-          "source_ref": "https://www.accu.co.uk/metric-cap-head-screws/2802-SSC-M3-20-A2",
-          "specification": "M3x20 ISO4762 A2-70",
+          "source_ref": "https://www.accu.co.uk/metric-cap-head-screws/2804-SSC-M3-25-A2",
+          "specification": "M3x25 ISO4762 A2",
           "supplier_references": [],
           "unit": "ea",
           "unresolved": []
@@ -304,7 +304,7 @@
           "action": "buy",
           "available_for_plan": "0",
           "catalog_part_id": null,
-          "description": "M3 hex nuts, ISO 4032, A2; nominal AF 5.5mm",
+          "description": "M3 hex nuts, DIN 934, A2; nominal AF 5.5mm",
           "excluded_lots": [],
           "identity_basis": "declared_specification",
           "issues": [],
@@ -315,7 +315,7 @@
           "quantity": "40",
           "shortage": "40",
           "source_ref": "https://www.accu.co.uk/hexagon-nuts/7888-HPN-M3-A2",
-          "specification": "M3 ISO4032 A2",
+          "specification": "M3 DIN934 A2",
           "supplier_references": [],
           "unit": "ea",
           "unresolved": []
@@ -346,7 +346,7 @@
           "action": "buy",
           "available_for_plan": "0",
           "catalog_part_id": null,
-          "description": "M2.5 hex nuts, ISO 4032, A2; nominal AF 5mm",
+          "description": "M2.5 hex nuts, DIN 934, A2; nominal AF 5mm",
           "excluded_lots": [],
           "identity_basis": "declared_specification",
           "issues": [],
@@ -357,7 +357,7 @@
           "quantity": "4",
           "shortage": "4",
           "source_ref": "https://www.accu.co.uk/hexagon-nuts/7886-HPN-M2-5-A2",
-          "specification": "M2.5 ISO4032 A2",
+          "specification": "M2.5 DIN934 A2",
           "supplier_references": [],
           "unit": "ea",
           "unresolved": []
@@ -392,7 +392,7 @@
           "action": "buy",
           "available_for_plan": "0",
           "catalog_part_id": null,
-          "description": "Two reusable hook-loop straps, 20 x 200mm minimum",
+          "description": "Two reusable hook-loop straps, 20 x 250mm minimum",
           "excluded_lots": [],
           "identity_basis": "declared_specification",
           "issues": [],
@@ -403,7 +403,7 @@
           "quantity": "2",
           "shortage": "2",
           "source_ref": "https://www.velcro.com/products/electronics-organization/one-wrap-ties/",
-          "specification": "Hook-loop strap 20x200mm minimum",
+          "specification": "Hook-loop strap 20x250mm minimum",
           "supplier_references": [],
           "unit": "ea",
           "unresolved": []
@@ -438,7 +438,7 @@
           "action": "buy",
           "available_for_plan": "0",
           "catalog_part_id": null,
-          "description": "Adhesive transfer tape for four printed feet and duct retention",
+          "description": "Adhesive transfer tape for four printed feet",
           "excluded_lots": [],
           "identity_basis": "exact_manufacturer_and_mpn",
           "issues": [],
@@ -675,26 +675,26 @@
       {
         "acquisition": "buy",
         "catalog_part_id": null,
-        "description": "M3 x 20 socket cap, ISO 4762, stainless A2-70; fan",
+        "description": "M3 x 25 socket cap, ISO4762, stainless A2; fan and bolted duct flange",
         "manufacturer": "",
-        "material_id": "m3_20",
+        "material_id": "m3_25",
         "mpn": "",
         "quantity": "4",
-        "source_ref": "https://www.accu.co.uk/metric-cap-head-screws/2802-SSC-M3-20-A2",
-        "specification": "M3x20 ISO4762 A2-70",
+        "source_ref": "https://www.accu.co.uk/metric-cap-head-screws/2804-SSC-M3-25-A2",
+        "specification": "M3x25 ISO4762 A2",
         "unit": "ea",
         "unresolved": []
       },
       {
         "acquisition": "buy",
         "catalog_part_id": null,
-        "description": "M3 hex nuts, ISO 4032, A2; nominal AF 5.5mm",
+        "description": "M3 hex nuts, DIN 934, A2; nominal AF 5.5mm",
         "manufacturer": "",
         "material_id": "m3_nut",
         "mpn": "",
         "quantity": "40",
         "source_ref": "https://www.accu.co.uk/hexagon-nuts/7888-HPN-M3-A2",
-        "specification": "M3 ISO4032 A2",
+        "specification": "M3 DIN934 A2",
         "unit": "ea",
         "unresolved": []
       },
@@ -714,13 +714,13 @@
       {
         "acquisition": "buy",
         "catalog_part_id": null,
-        "description": "M2.5 hex nuts, ISO 4032, A2; nominal AF 5mm",
+        "description": "M2.5 hex nuts, DIN 934, A2; nominal AF 5mm",
         "manufacturer": "",
         "material_id": "m25_nut",
         "mpn": "",
         "quantity": "4",
         "source_ref": "https://www.accu.co.uk/hexagon-nuts/7886-HPN-M2-5-A2",
-        "specification": "M2.5 ISO4032 A2",
+        "specification": "M2.5 DIN934 A2",
         "unit": "ea",
         "unresolved": []
       },
@@ -742,13 +742,13 @@
       {
         "acquisition": "buy",
         "catalog_part_id": null,
-        "description": "Two reusable hook-loop straps, 20 x 200mm minimum",
+        "description": "Two reusable hook-loop straps, 20 x 250mm minimum",
         "manufacturer": "",
         "material_id": "bank_straps",
         "mpn": "",
         "quantity": "2",
         "source_ref": "https://www.velcro.com/products/electronics-organization/one-wrap-ties/",
-        "specification": "Hook-loop strap 20x200mm minimum",
+        "specification": "Hook-loop strap 20x250mm minimum",
         "unit": "ea",
         "unresolved": []
       },
@@ -770,7 +770,7 @@
       {
         "acquisition": "buy",
         "catalog_part_id": null,
-        "description": "Adhesive transfer tape for four printed feet and duct retention",
+        "description": "Adhesive transfer tape for four printed feet",
         "manufacturer": "3M",
         "material_id": "tape",
         "mpn": "467MP",
@@ -808,8 +808,8 @@
       }
     ],
     "schema_version": "hardware_splicer.material_assessment.v1",
-    "source_revision": 20,
-    "source_snapshot_sha256": "b5b93b5654735d30e4cc338d77aed708d169ff95eec90b2d5a05852fbadf829d"
+    "source_revision": 27,
+    "source_snapshot_sha256": "a96bcd5046165e728dd8588ffb4a1dc3bc59fc3b6c8704e0b1ba0cf8b908181e"
   },
   "current_for_project": true,
   "inventory_current_now": true

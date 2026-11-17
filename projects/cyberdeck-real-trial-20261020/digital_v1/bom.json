@@ -159,21 +159,21 @@
       "availability": "Dimensional / product-family reference; stock and price not confirmed for this line"
     },
     {
-      "id": "m3_20",
-      "description": "M3 x 20 socket cap, ISO 4762, stainless A2-70; fan",
-      "specification": "M3x20 ISO4762 A2-70",
+      "id": "m3_25",
+      "description": "M3 x 25 socket cap, ISO4762, stainless A2; fan and bolted duct flange",
+      "specification": "M3x25 ISO4762 A2",
       "quantity": 4,
       "unit": "ea",
       "acquisition": "buy",
       "price_usd": 1.0,
       "price_basis": "line planning allowance",
-      "url": "https://www.accu.co.uk/metric-cap-head-screws/2802-SSC-M3-20-A2",
+      "url": "https://www.accu.co.uk/metric-cap-head-screws/2804-SSC-M3-25-A2",
       "availability": "Dimensional / product-family reference; stock and price not confirmed for this line"
     },
     {
       "id": "m3_nut",
-      "description": "M3 hex nuts, ISO 4032, A2; nominal AF 5.5mm",
-      "specification": "M3 ISO4032 A2",
+      "description": "M3 hex nuts, DIN 934, A2; nominal AF 5.5mm",
+      "specification": "M3 DIN934 A2",
       "quantity": 40,
       "unit": "ea",
       "acquisition": "buy",
@@ -196,8 +196,8 @@
     },
     {
       "id": "m25_nut",
-      "description": "M2.5 hex nuts, ISO 4032, A2; nominal AF 5mm",
-      "specification": "M2.5 ISO4032 A2",
+      "description": "M2.5 hex nuts, DIN 934, A2; nominal AF 5mm",
+      "specification": "M2.5 DIN934 A2",
       "quantity": 4,
       "unit": "ea",
       "acquisition": "buy",
@@ -221,8 +221,8 @@
     },
     {
       "id": "bank_straps",
-      "description": "Two reusable hook-loop straps, 20 x 200mm minimum",
-      "specification": "Hook-loop strap 20x200mm minimum",
+      "description": "Two reusable hook-loop straps, 20 x 250mm minimum",
+      "specification": "Hook-loop strap 20x250mm minimum",
       "quantity": 2,
       "unit": "ea",
       "acquisition": "buy",
@@ -244,7 +244,7 @@
     },
     {
       "id": "tape",
-      "description": "Adhesive transfer tape for four printed feet and duct retention",
+      "description": "Adhesive transfer tape for four printed feet",
       "manufacturer": "3M",
       "mpn": "467MP",
       "quantity": 1,

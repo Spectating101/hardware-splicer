@@ -1,0 +1,41 @@
+{
+  "source_step": "E plate.step",
+  "source_drawing": "E plate.pdf",
+  "part_code": "400101002",
+  "coordinate_system": "manufacturer STEP u=X,v=vertical,w=front normal",
+  "mount_centers_uv_mm": [
+    [
+      9.5,
+      7.55
+    ],
+    [
+      23.5,
+      7.55
+    ]
+  ],
+  "mount_pitch_mm": 14.0,
+  "mount_thread": "M3",
+  "plate_front_w_mm": 2.5,
+  "boss_front_w_mm": 7.0,
+  "mount_use": "Two original radiator/hotend bores; remove heating head in virtual conversion",
+  "evidence": "PDF front view says 2*M3, u=9.5 and23.5 relative center, v=32-24.45=7.55; STEP cylindrical bores radius1.5 and axes +w at exact same centers.",
+  "measurement_tolerance_mm": 0.001,
+  "pen_offset_from_nozzle_xy_mm": [
+    0.0,
+    -19.2
+  ],
+  "pen_tip_v_mm": -65.0,
+  "original_nozzle_tip_v_mm": -34.25,
+  "pen_tip_z_offset_mm": -30.75,
+  "original_nozzle_axis_uw_mm": [
+    16.5,
+    13.0
+  ],
+  "pen_axis_uw_mm": [
+    16.5,
+    32.2
+  ],
+  "assembly_e_plate_instance": "/01 MAIN ASM Ender_3/ASM X-Axis/ASM Printing Head/NAUO168",
+  "assembly_nozzle_instance": "/01 MAIN ASM Ender_3/ASM X-Axis/ASM Printing Head/ASM Heating Unit/NAUO201",
+  "assembly_derived_note": "E-plate volume matches standalone STEP to <1e-8 mm3. Nozzle NAUO201 identified by separately measured manufacturer nozzle STEP volume and axis (source frozen in manifest). Conventional plot Y=-manufacturer front normal; pen offset -19.2mm."
+}

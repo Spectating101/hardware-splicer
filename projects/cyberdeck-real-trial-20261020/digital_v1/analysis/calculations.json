@@ -1,66 +1,183 @@
 {
+  "schema_version": "hardware_splicer.fielddeck_calculations.v2",
+  "case_id": "fielddeck-7",
   "calculation_type": "first_order_scenarios_not_physical_simulation",
-  "battery_nominal_cell_energy_wh": 36,
+  "requirements": {
+    "minimum_work_runtime_h": 2.5,
+    "minimum_supply_margin_a": 0.3,
+    "maximum_case_width_mm": 320.0,
+    "maximum_case_depth_mm": 300.0,
+    "maximum_case_height_mm": 75.0,
+    "printer_bed_x_mm": 220.0,
+    "printer_bed_y_mm": 220.0,
+    "pi_work_current_a": 1.0,
+    "keyboard_current_a": 0.1
+  },
+  "requirements_met": true,
+  "constraints": [
+    {
+      "id": "work_runtime",
+      "label": "Conservative work-runtime scenario",
+      "actual": 2.781818,
+      "limit": 2.5,
+      "unit": "h",
+      "passed": true
+    },
+    {
+      "id": "supply_current_margin",
+      "label": "Smallest ordinary-operation single-port current margin",
+      "actual": 0.48,
+      "limit": 0.3,
+      "unit": "A",
+      "passed": true
+    },
+    {
+      "id": "sensitivity_supply_limit",
+      "label": "Largest modelled current including keyboard sensitivity",
+      "actual": 2.92,
+      "limit": 3.0,
+      "unit": "A",
+      "passed": true
+    },
+    {
+      "id": "usb_current_limit",
+      "label": "Largest modelled USB load",
+      "actual": 0.57,
+      "limit": 1.2,
+      "unit": "A",
+      "passed": true
+    },
+    {
+      "id": "case_width",
+      "label": "Nominal enclosure width",
+      "actual": 310.0,
+      "limit": 320.0,
+      "unit": "mm",
+      "passed": true
+    },
+    {
+      "id": "case_depth",
+      "label": "Nominal enclosure depth",
+      "actual": 285.0,
+      "limit": 300.0,
+      "unit": "mm",
+      "passed": true
+    },
+    {
+      "id": "case_height",
+      "label": "Nominal enclosure height",
+      "actual": 64.0,
+      "limit": 75.0,
+      "unit": "mm",
+      "passed": true
+    },
+    {
+      "id": "print_bed_x",
+      "label": "Largest printed-part x span",
+      "actual": 154.85,
+      "limit": 220.0,
+      "unit": "mm",
+      "passed": true
+    },
+    {
+      "id": "print_bed_y",
+      "label": "Largest printed-part y span",
+      "actual": 144.85,
+      "limit": 220.0,
+      "unit": "mm",
+      "passed": true
+    },
+    {
+      "id": "display_post_bending",
+      "label": "Ideal display-post bending stress",
+      "actual": 0.9949378429526526,
+      "limit": 10.0,
+      "unit": "MPa",
+      "passed": true
+    }
+  ],
+  "metrics": {
+    "work_runtime_lower_h": 2.781818,
+    "work_runtime_upper_h": 3.927273,
+    "stress_current_margin_a": 0.48,
+    "minimum_supply_current_margin_a": 0.48,
+    "planning_cost_usd": 336.73,
+    "solid_petg_mass_g": 841.025,
+    "case_width_mm": 310.0,
+    "case_depth_mm": 285.0,
+    "case_height_mm": 64.0
+  },
+  "effective_assumptions": {
+    "pi_work_current_a": 1.0,
+    "keyboard_current_a": 0.1,
+    "source": "Design defaults with explicit study-requirement overrides."
+  },
+  "battery_nominal_cell_energy_wh": 36.0,
   "usable_output_energy_wh": [
     22.95,
     32.4
   ],
-  "battery_basis": "10Ah x assumed 3.6V cell nominal; 75-90% conversion, 85-100% usable capacity. Not 10Ah at 5V.",
+  "battery_basis": "10Ah \u00d7 3.6V cell nominal; conversion [0.75, 0.9]; usable capacity [0.85, 1.0]. Not capacity at USB voltage.",
   "load_scenarios": [
     {
       "name": "light",
       "pi_current_a": 0.65,
       "display_w": 2.4,
       "keyboard_a": 0.1,
+      "usb_current_a": 0.17,
       "current_a": 1.3,
       "power_w": 6.5,
       "current_headroom_a": 1.7,
       "runtime_h": [
-        3.53,
-        4.98
+        3.530769,
+        4.984615
       ]
     },
     {
       "name": "work",
-      "pi_current_a": 1,
+      "pi_current_a": 1.0,
       "display_w": 2.4,
       "keyboard_a": 0.1,
+      "usb_current_a": 0.17,
       "current_a": 1.65,
       "power_w": 8.25,
       "current_headroom_a": 1.35,
       "runtime_h": [
-        2.78,
-        3.93
+        2.781818,
+        3.927273
       ]
     },
     {
       "name": "stress_allocation",
       "pi_current_a": 1.75,
-      "display_w": 3,
+      "display_w": 3.0,
       "keyboard_a": 0.1,
+      "usb_current_a": 0.17,
       "current_a": 2.52,
       "power_w": 12.6,
       "current_headroom_a": 0.48,
       "runtime_h": [
-        1.82,
-        2.57
+        1.821429,
+        2.571429
       ]
     },
     {
       "name": "high_power_keyboard_sensitivity",
       "pi_current_a": 1.75,
-      "display_w": 3,
+      "display_w": 3.0,
       "keyboard_a": 0.5,
+      "usb_current_a": 0.57,
       "current_a": 2.92,
       "power_w": 14.6,
       "current_headroom_a": 0.08,
       "runtime_h": [
-        1.57,
-        2.22
+        1.571918,
+        2.219178
       ]
     }
   ],
-  "bank_single_port_limit_a": 3,
+  "bank_single_port_limit_a": 3.0,
+  "supply_voltage_v": 5.0,
   "pi_usb_aggregate_limit_a": 1.2,
   "power_cable_loop_resistance_ohm": [
     0.0535,
@@ -68,29 +185,42 @@
     0.1535
   ],
   "stress_cable_drop_v": [
-    0.135,
-    0.261,
-    0.387
+    0.13482,
+    0.26082,
+    0.38682
   ],
   "stress_pi_voltage_if_bank_exactly_5v": [
-    4.865,
-    4.739,
-    4.613
+    4.86518,
+    4.73918,
+    4.61318
   ],
-  "voltage_caveat": "At the upper contact resistance, Pi input can approach/breach its undervoltage threshold. A 3A wattage margin does not establish voltage stability.",
-  "custom_solid_volume_cm3": 661.36,
-  "custom_100_percent_solid_petg_mass_g": 839.9,
-  "mass_note": "Actual sliced mass not computed; 30% infill does not imply 30% of this mass. Display mass budget 250-350g; other module/hardware mass assumptions recorded in README.",
+  "largest_ordinary_scenario": "stress_allocation",
+  "peak_cable_drop_v": [
+    0.13482,
+    0.26082,
+    0.38682
+  ],
+  "peak_pi_voltage_if_bank_nominal": [
+    4.86518,
+    4.73918,
+    4.61318
+  ],
+  "voltage_caveat": "Single-port current headroom does not establish input-voltage stability; bank regulation and actual contact resistance are unmeasured.",
+  "gpio_extension_copper_drop_v": 0.07668,
+  "custom_solid_volume_cm3": 662.224763,
+  "custom_100_percent_solid_petg_mass_g": 841.0254490100001,
+  "mass_note": "100% solid CAD mass bound; actual sliced mass, supports and printing time not computed.",
   "post_lateral_2g_check": {
     "panel_mass_assumption_kg": 0.35,
+    "lateral_acceleration_g": 2.0,
     "load_per_post_n": 1.7161637499999998,
     "length_mm": 49.54,
     "section_second_moment_mm4": 427.2566008882119,
-    "elastic_modulus_assumption_mpa": 1500,
-    "allowable_stress_assumption_mpa": 10,
+    "elastic_modulus_assumption_mpa": 1500.0,
+    "allowable_stress_assumption_mpa": 10.0,
     "bending_stress_mpa": 0.9949378429526526,
     "tip_deflection_mm": 0.10852391090903903,
-    "scope": "Ideal cantilever with equal load sharing; excludes base/root, layers, screws, seams, glass and impact. Not a drop rating."
+    "scope": "Ideal equal-share cantilevers; excludes roots, layer anisotropy, fasteners, joints and glass; no drop rating."
   },
   "cooling_sensitivity": {
     "heat_assumption_w": 12.6,
@@ -107,7 +237,7 @@
       21.130303538487333,
       10.565151769243666
     ],
-    "scope": "Energy balance, not CFD, CPU junction temperature or a fan/system operating point."
+    "scope": "Air-energy balance, not CFD, junction temperature or a predicted fan/system operating point."
   },
   "cost_usd": {
     "observed_retail_subtotal": 249.24,
@@ -119,8 +249,16 @@
     "bank ports/button and built-in cable not dimensioned",
     "keyboard underside/pad retention and cable bend not manufacturer CAD",
     "display lug thread/engagement nominal only",
-    "GPIO extension connector rating and retention unverified",
-    "flexible cable bends/routing not solid interference verified"
+    "GPIO extension contact current rating/retention unverified",
+    "flexible cable bends/routing not solid-interference verified"
   ],
-  "physical_validation_performed": false
+  "thermal_acceptance_established": false,
+  "physical_validation_performed": false,
+  "input_sha256": {
+    "design.json": "0883100a6ae3accd11c70fd731cc98bf46646b878ab5ce37a086b386bb73e192",
+    "bom.json": "480a43aedbbb4bcd1b30ac6a7170a995c89b5bd92defe43fcb41c11ab4d47679",
+    "cad/geometry_report.json": "0b2dd9a273bdf96e322351a033e0ecb3f107861fabf9bf4acb54686abc64f2dc",
+    "study_contract.py": "69d141f403e5399a63a6a0743545b741e5b79eae1deb0b4f0038f89a55504b9f",
+    "engineering.py": "1e8924b81567366ca692cebcec2061c38721c3829f230cabe864c96aa9983de5"
+  }
 }
