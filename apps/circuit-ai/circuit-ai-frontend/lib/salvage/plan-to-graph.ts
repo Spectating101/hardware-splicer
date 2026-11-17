@@ -817,7 +817,7 @@ const RECIPES: Record<string, Recipe> = {
       { from: { role: "mcu", pin: "D3" }, to: { role: "drv", pin: "IN2" } },
     ],
     notes: [
-      "Set motor buck to motor rated voltage. Motors on OUT1/OUT2.",
+      "Set motor buck to the motor rated voltage, which must be 7-12 V: the L298N 5V_EN jumper stays fitted so its onboard 5 V regulator runs and the 5V terminal is an unused output. Above a 12 V motor supply remove the jumper and feed the 5V terminal from an external 5 V logic supply. Motors on OUT1/OUT2.",
       "USB 5V feeds Arduino; 12V barrel feeds motor driver supply.",
     ],
   },
