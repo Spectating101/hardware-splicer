@@ -209,6 +209,11 @@ export const MODULE_FOOTPRINTS: Record<string, ModuleFootprintMeta> = {
     bodyMm: { w: 12, h: 4 },
     pads: row(["1", "2"], 0, 0, 10.16),
   },
+  "terminal-block-2p": {
+    kicadFootprint: "TerminalBlock:TerminalBlock_bornier-2_P5.08mm",
+    bodyMm: { w: 12, h: 10 },
+    pads: row(["1", "2"], 0, 0, 5.08),
+  },
   "terminal-block-4p": {
     kicadFootprint: "TerminalBlock:TerminalBlock_bornier-4_P5.08mm",
     bodyMm: { w: 22, h: 10 },

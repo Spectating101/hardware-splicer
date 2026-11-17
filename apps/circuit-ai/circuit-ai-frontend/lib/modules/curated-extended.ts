@@ -644,6 +644,22 @@ export const CURATED_EXTENDED: ModuleSpec[] = [
     ],
   },
   {
+    id: "terminal-block-2p",
+    label: "2-pin screw terminal block",
+    category: "interface",
+    summary: "5.08 mm field-wiring terminal on the carrier PCB; takes a two-wire off-board load or output.",
+    manufacturer: "Generic",
+    partNumber: "KF301-2P",
+    priceUsd: 0.5,
+    source: "curated",
+    // Explicit non-planner tag: keeps this passive part out of capability-based module picking.
+    capabilityTags: ["field_wiring"],
+    pins: [
+      { id: "1", label: "1", role: "other" },
+      { id: "2", label: "2", role: "other" },
+    ],
+  },
+  {
     id: "terminal-block-4p",
     label: "4-pin screw terminal block",
     category: "interface",
