@@ -98,14 +98,14 @@ def test_netlist_pcb_parity_notices_a_pad_that_leaves_its_net() -> None:
 
 def test_plotter_a4988_reset_is_tied_to_sleep_and_enable_to_ground() -> None:
     assert _has_wire("plotter_motion_stage", ("a4988-stepper", "RST"), ("a4988-stepper", "SLP"))
-    # Every Arduino Nano pin in the module data is already used (D2 STEP, D3 DIR, A0/A4 limit
-    # switches, A5 servo), so there is no free GPIO and EN is tied to GND, not driven.
+    # EN stays tied to GND (the stage is not driven through ENABLE). That decision used to rest on the
+    # registry listing only nine Nano pins, all taken; the registry now carries all 30 real pads, so
+    # free GPIOs exist, and the recipe is deliberately unchanged: ENABLE is not needed to move the stage.
     assert _has_wire("plotter_motion_stage", ("a4988-stepper", "EN"), ("arduino-nano", "GND"))
-    nano_signal_pins = {p["id"] for p in find_module("arduino-nano")["pins"] if p["role"] not in {"power_in", "power_out", "gnd"}}
     used = {w[1] for w in _wires("plotter_motion_stage") if w[0] == "arduino-nano"} | {
         w[3] for w in _wires("plotter_motion_stage") if w[2] == "arduino-nano"
     }
-    assert nano_signal_pins <= used
+    assert used <= {p["id"] for p in find_module("arduino-nano")["pins"]}
 
 
 def test_plotter_stepper_coils_land_on_a_real_four_pin_terminal() -> None:
@@ -185,9 +185,9 @@ def test_plotter_reports_its_real_kicad_drc_errors_and_is_not_build_ready(tmp_pa
 def test_indicator_light_has_a_microcontroller_that_drives_the_mosfet_from_a_pwm_pin() -> None:
     recipe = _recipe("indicator_or_task_light")
     assert "arduino-nano" in {m["moduleId"] for m in recipe["modules"]}
-    # Arduino Nano D3 is the pin the module data marks PWM-capable (role "pwm").
+    # The Nano's PWM-capable pins are D3, D5, D6, D9, D10 and D11; the recipe drives the MOSFET from D3.
     pwm_pins = {p["id"] for p in find_module("arduino-nano")["pins"] if p["role"] == "pwm"}
-    assert pwm_pins == {"D3"}
+    assert pwm_pins == {"D3", "D5", "D6", "D9", "D10", "D11"}
     assert _has_wire("indicator_or_task_light", ("arduino-nano", "D3"), ("mosfet-irlz44n", "SIG"))
     # The Nano is powered from the same buck output as the MOSFET rail and shares its ground.
     assert _has_wire("indicator_or_task_light", ("buck-mp1584", "OUT+"), ("arduino-nano", "VIN"))
