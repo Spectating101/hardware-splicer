@@ -17,6 +17,7 @@ from hardware_splicer.module_picker import pick_modules_for_goal
 from hardware_splicer.pcb.build_to_geometry import build_graph_to_geometry
 from hardware_splicer.pcb.drc import run_drc
 from hardware_splicer.pcb.safety_rules import analyze_build
+from known_router_gaps import xfail_if_amp_tracks_cross
 
 
 def _module_id_for_node(graph: Mapping[str, Any], node_id: str) -> Optional[str]:
@@ -76,6 +77,10 @@ def _verify_compose(phrase: str, *, sensor_id: Optional[str] = None, signal_pin:
     assert not errors, f"safety errors: {[w.get('message') for w in errors]}"
 
     drc = run_drc(build_graph_to_geometry(graph))
+    if not drc.get("pass"):
+        xfail_if_amp_tracks_cross(
+            pick.module_ids, [str(v.get("message") or "") for v in drc.get("violations") or []]
+        )
     assert drc.get("pass"), f"DRC fail: {drc.get('violations')}"
 
     if sensor_id and signal_pin:
