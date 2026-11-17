@@ -267,3 +267,9 @@ def test_sg90_lead_is_gnd_vcc_sig_with_vcc_in_the_middle() -> None:
 
 
 
+def test_dht22_bare_part_has_four_pins_with_the_nc_pad_between_data_and_ground() -> None:
+    row = _single_row("dht22")
+    assert [name for name, _x in row] == ["VCC", "DATA", "NC", "GND"]
+    assert {round(b[1] - a[1], 3) for a, b in zip(row, row[1:])} == {2.54}
+    assert {"VCC", "DATA", "NC", "GND"} <= spec_pin_ids("dht22")
+    assert fit("dht22")["status"] == "verified_against"

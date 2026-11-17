@@ -1083,6 +1083,12 @@
           "id": "GND",
           "label": "GND",
           "role": "gnd"
+        },
+        {
+          "id": "NC",
+          "label": "NC",
+          "role": "other",
+          "notes": "Not connected inside the sensor"
         }
       ],
       "capabilityTags": [

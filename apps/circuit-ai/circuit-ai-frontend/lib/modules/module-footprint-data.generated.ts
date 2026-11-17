@@ -190,11 +190,12 @@ export const MODULE_FOOTPRINT_DATA: Record<string, ModuleFootprintMeta> = {
   "dht22": {
     kicadFootprint: "Sensor:DHT22-4PIN",
     bodyMm: { w: 15, h: 12 },
-    fit: { status: "unverified_variant", reason: "Footprint geometry has not been checked against the real part." },
+    fit: { status: "verified_against", verifiedAgainst: "Aosong DHT22 / AM2302 datasheet: bare sensor with four pins at 2.54 mm in the order VCC, DATA, NC, GND. Layout taken from the maker's datasheet as documented; not machine-read in this run. A three-pin breakout board of the same sensor would not match." },
     pads: [
-      { pinId: "VCC", x: -2.54, y: 0 },
-      { pinId: "DATA", x: 0, y: 0 },
-      { pinId: "GND", x: 2.54, y: 0 },
+      { pinId: "VCC", x: -3.81, y: 0 },
+      { pinId: "DATA", x: -1.27, y: 0 },
+      { pinId: "NC", x: 1.27, y: 0 },
+      { pinId: "GND", x: 3.81, y: 0 },
     ],
   },
   "hc-sr04": {

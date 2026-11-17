@@ -343,6 +343,7 @@ export const MODULE_LIBRARY: ModuleSpec[] = [
       { id: "VCC", label: "VCC", role: "power_in", voltage: "3-5.5V" },
       { id: "DATA", label: "DATA", role: "digital_io", voltage: "logic level", notes: "Needs 4.7k-10k pull-up to VCC" },
       { id: "GND", label: "GND", role: "gnd" },
+      { id: "NC", label: "NC", role: "other", notes: "Not connected inside the sensor" },
     ],
   },
   {
