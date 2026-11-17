@@ -249,3 +249,48 @@ def test_module_block_fallback_pins_use_the_library_y_inversion() -> None:
     # sheet's downward Y that is y-2.54 for pin 1 and y+2.54 for pin 2 (label sits 5.08 further left).
     assert _label_at(text, "A") == (round(x - 7.62 - 5.08, 4), round(y - 2.54, 4))
     assert _label_at(text, "B") == (round(x - 7.62 - 5.08, 4), round(y + 2.54, 4))
+
+
+# ---- load termination classification ----------------------------------------------------------
+
+
+def test_every_off_board_no_connect_states_it_lands_on_the_breakouts_own_terminal() -> None:
+    from hardware_splicer.integrations.schematic_pin_policy import load_policy
+
+    policy = load_policy()
+    terminal_modules = set(policy["load_termination"]["breakout_terminal_modules"])
+    seen = 0
+    for build_id, modules in policy["build_pins"].items():
+        for module_id, pins in modules.items():
+            for pin_id, entry in pins.items():
+                if entry["disposition"] in {"off_board_terminal", "optional_cell"}:
+                    seen += 1
+                    assert entry.get("termination") == "breakout_terminal", (build_id, module_id, pin_id)
+                    assert module_id in terminal_modules, (build_id, module_id, pin_id)
+    assert seen > 0
+
+
+def test_pins_that_reach_the_carrier_through_a_connector_never_get_a_no_connect() -> None:
+    from hardware_splicer.integrations.schematic_pin_policy import load_policy
+
+    policy = load_policy()
+    carrier = policy["load_termination"]["carrier_connector_pins"]
+    for build_id, modules in policy["build_pins"].items():
+        for module_id, pins in modules.items():
+            overlap = set(pins) & set(carrier.get(module_id, {}).get("pins", []))
+            assert not overlap, (build_id, module_id, overlap)
+    # And the recipes really do wire each of those pins to its connector part.
+    import json
+    from pathlib import Path
+
+    data = Path(__file__).resolve().parents[1] / "src" / "hardware_splicer" / "data" / "catalog_recipes.json"
+    recipes = json.loads(data.read_text(encoding="utf-8"))["recipes"]
+    for module_id, info in carrier.items():
+        recipe = recipes[info["build"]]
+        roles = {m["role"]: m["moduleId"] for m in recipe["modules"]}
+        wired = {
+            (roles[w["from"]["role"]], w["from"]["pin"]) for w in recipe["wires"]
+        } | {(roles[w["to"]["role"]], w["to"]["pin"]) for w in recipe["wires"]}
+        for pin in info["pins"]:
+            assert (module_id, pin) in wired, (module_id, pin)
+        assert info["connector"] in roles.values()

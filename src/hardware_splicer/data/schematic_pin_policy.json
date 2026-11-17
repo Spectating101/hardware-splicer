@@ -46,39 +46,39 @@
   "build_pins": {
     "automatic_plant_watering": {
       "mosfet-irlz44n": {
-        "VOUT+": {"disposition": "off_board_terminal", "reason": "Recipe note: wire the mini pump to driver VOUT+/VOUT-; the pump is not a catalog module."},
-        "VOUT-": {"disposition": "off_board_terminal", "reason": "Recipe note: wire the mini pump to driver VOUT+/VOUT-; the pump is not a catalog module."}
+        "VOUT+": {"disposition": "off_board_terminal", "termination": "breakout_terminal", "reason": "Recipe note: wire the mini pump to driver VOUT+/VOUT-; the pump is not a catalog module."},
+        "VOUT-": {"disposition": "off_board_terminal", "termination": "breakout_terminal", "reason": "Recipe note: wire the mini pump to driver VOUT+/VOUT-; the pump is not a catalog module."}
       }
     },
     "automatic_plant_watering_usb": {
       "mosfet-irlz44n": {
-        "VOUT+": {"disposition": "off_board_terminal", "reason": "Recipe note: wire mini pump to driver VOUT+/VOUT-; the pump is not a catalog module."},
-        "VOUT-": {"disposition": "off_board_terminal", "reason": "Recipe note: wire mini pump to driver VOUT+/VOUT-; the pump is not a catalog module."}
+        "VOUT+": {"disposition": "off_board_terminal", "termination": "breakout_terminal", "reason": "Recipe note: wire mini pump to driver VOUT+/VOUT-; the pump is not a catalog module."},
+        "VOUT-": {"disposition": "off_board_terminal", "termination": "breakout_terminal", "reason": "Recipe note: wire mini pump to driver VOUT+/VOUT-; the pump is not a catalog module."}
       }
     },
     "bench_power_adapter": {
       "tp4056": {
-        "BAT+": {"disposition": "optional_cell", "reason": "Recipe note: optional Li-ion cell on TP4056 BAT+/BAT-."},
-        "BAT-": {"disposition": "optional_cell", "reason": "Recipe note: optional Li-ion cell on TP4056 BAT+/BAT-."}
+        "BAT+": {"disposition": "optional_cell", "termination": "breakout_terminal", "reason": "Recipe note: optional Li-ion cell on TP4056 BAT+/BAT-."},
+        "BAT-": {"disposition": "optional_cell", "termination": "breakout_terminal", "reason": "Recipe note: optional Li-ion cell on TP4056 BAT+/BAT-."}
       }
     },
     "indicator_or_task_light": {
       "mosfet-irlz44n": {
-        "VOUT+": {"disposition": "off_board_terminal", "reason": "Recipe note: LED load on VOUT+/VOUT-; the LED is not a catalog module."},
-        "VOUT-": {"disposition": "off_board_terminal", "reason": "Recipe note: LED load on VOUT+/VOUT-; the LED is not a catalog module."}
+        "VOUT+": {"disposition": "off_board_terminal", "termination": "breakout_terminal", "reason": "Recipe note: LED load on VOUT+/VOUT-; the LED is not a catalog module."},
+        "VOUT-": {"disposition": "off_board_terminal", "termination": "breakout_terminal", "reason": "Recipe note: LED load on VOUT+/VOUT-; the LED is not a catalog module."}
       }
     },
     "low_voltage_motor_test_jig": {
       "mosfet-irlz44n": {
-        "SIG": {"disposition": "off_board_terminal", "reason": "Recipe note: add a manual switch on SIG for benchtop on/off."},
-        "VOUT+": {"disposition": "off_board_terminal", "reason": "The motor under test is user supplied; the recipe has no motor module."},
-        "VOUT-": {"disposition": "off_board_terminal", "reason": "The motor under test is user supplied; the recipe has no motor module."}
+        "SIG": {"disposition": "off_board_terminal", "termination": "breakout_terminal", "reason": "Recipe note: add a manual switch on SIG for benchtop on/off."},
+        "VOUT+": {"disposition": "off_board_terminal", "termination": "breakout_terminal", "reason": "The motor under test is user supplied; the recipe has no motor module."},
+        "VOUT-": {"disposition": "off_board_terminal", "termination": "breakout_terminal", "reason": "The motor under test is user supplied; the recipe has no motor module."}
       }
     },
     "robot_drive_base": {
       "l298n": {
-        "OUT1": {"disposition": "off_board_terminal", "reason": "Recipe note: motors on OUT1/OUT2."},
-        "OUT2": {"disposition": "off_board_terminal", "reason": "Recipe note: motors on OUT1/OUT2."},
+        "OUT1": {"disposition": "off_board_terminal", "termination": "breakout_terminal", "reason": "Recipe note: motors on OUT1/OUT2."},
+        "OUT2": {"disposition": "off_board_terminal", "termination": "breakout_terminal", "reason": "Recipe note: motors on OUT1/OUT2."},
         "OUT3": {"disposition": "unused_channel", "reason": "Recipe drives channel A only (IN1/IN2, motors on OUT1/OUT2)."},
         "OUT4": {"disposition": "unused_channel", "reason": "Recipe drives channel A only (IN1/IN2, motors on OUT1/OUT2)."},
         "IN3": {"disposition": "unused_channel", "reason": "Recipe drives channel A only (IN1/IN2, motors on OUT1/OUT2)."},
@@ -87,10 +87,24 @@
     },
     "smart_relay_box": {
       "relay-1ch-5v": {
-        "COM": {"disposition": "off_board_terminal", "reason": "Relay contact terminals switch an off-board load (recipe note on inductive loads)."},
-        "NO": {"disposition": "off_board_terminal", "reason": "Relay contact terminals switch an off-board load (recipe note on inductive loads)."},
-        "NC": {"disposition": "off_board_terminal", "reason": "Relay contact terminals switch an off-board load (recipe note on inductive loads)."}
+        "COM": {"disposition": "off_board_terminal", "termination": "breakout_terminal", "reason": "Relay contact terminals switch an off-board load (recipe note on inductive loads)."},
+        "NO": {"disposition": "off_board_terminal", "termination": "breakout_terminal", "reason": "Relay contact terminals switch an off-board load (recipe note on inductive loads)."},
+        "NC": {"disposition": "off_board_terminal", "termination": "breakout_terminal", "reason": "Relay contact terminals switch an off-board load (recipe note on inductive loads)."}
       }
+    }
+  },
+  "load_termination": {
+    "rule": "Where an off-board load or cable attaches decides how the pin is drawn. breakout_terminal: the wires land on a terminal that belongs to the breakout module itself (screw terminal or solder pad on the module), so the carrier PCB has nothing to connect and a no-connect is correct (module_pins/build_pins entries with a termination field). carrier_connector: the pin reaches the carrier PCB through a pad with no terminal on the module, so the recipe wires it to a real connector part and the pin is never given a no-connect.",
+    "breakout_terminal_modules": {
+      "mosfet-irlz44n": "Low-side MOSFET driver breakout: VOUT+/VOUT- and the SIG control header are its own screw terminals/header. Standard hobby breakout; confirm against the exact board.",
+      "l298n": "L298N dual H-bridge breakout: OUT1-OUT4 are its own screw terminals.",
+      "relay-1ch-5v": "Relay breakout: COM/NO/NC are its own screw terminals.",
+      "tp4056": "TP4056 charger breakout: BAT+/BAT- are its own solder pads for the cell."
+    },
+    "carrier_connector_pins": {
+      "a4988-stepper": {"pins": ["1A", "1B", "2A", "2B"], "connector": "terminal-block-4p", "build": "plotter_motion_stage", "reason": "A StepStick has no motor terminal; the coil pins reach the carrier through its header, so the motor lands on a 4-pin terminal."},
+      "max98357a-i2s-amp": {"pins": ["SPK+", "SPK-"], "connector": "terminal-block-2p", "build": "small_audio_amp_box", "reason": "The footprint carries SPK+/SPK- as pads on the carrier and the data lists no onboard speaker terminal."},
+      "ldo-ams1117-3v3": {"pins": ["VOUT", "GND"], "connector": "terminal-block-2p-dc", "build": "bench_power_adapter", "reason": "The AMS1117 breakout is three pads on the carrier with no terminal, so the 3.3V output leaves through a terminal."}
     }
   },
   "external_supply": {
