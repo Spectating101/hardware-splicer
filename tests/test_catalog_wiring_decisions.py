@@ -81,11 +81,16 @@ def test_netlist_pcb_parity_notices_a_pad_that_leaves_its_net() -> None:
             "nets": [{"name": "GND", "pins": [{"component_ref": "U1", "pin": "GND"}, {"component_ref": "U2", "pin": "GND"}]}],
         }
     )
+    # Pads are numbered by position in the module pad table, so look the GND pad numbers up.
+    def gnd_pad(module_id: str) -> int:
+        pads = resolve_module_pads(module_id, find_module(module_id))
+        return next(i for i, p in enumerate(pads) if p["pinId"] == "GND") + 1
+
     good = (
         '\n  (footprint "Connector:USB-MICRO-POWER" (layer "F.Cu")\n'
-        '    (pad "2" thru_hole circle (at 0 0) (size 1 1) (net 1 "GND"))\n  )'
+        f'    (pad "{gnd_pad("usb-power-5v")}" thru_hole circle (at 0 0) (size 1 1) (net 1 "GND"))\n  )'
         '\n  (footprint "Module:ESP32-WROOM-32" (layer "F.Cu")\n'
-        '    (pad "2" thru_hole circle (at 0 0) (size 1 1) (net 1 "GND"))\n  )'
+        f'    (pad "{gnd_pad("esp32-devkit")}" thru_hole circle (at 0 0) (size 1 1) (net 1 "GND"))\n  )'
     )
     assert netlist_pcb_parity(netlist, good)["pass"] is True
     broken = good.replace('(net 1 "GND"))\n  )\n  (footprint', '(net 0 ""))\n  )\n  (footprint', 1)

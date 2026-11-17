@@ -143,3 +143,45 @@ def test_rpi_pico_declares_every_pad_as_a_pin_and_is_verified() -> None:
     assert {p["pinId"] for p in table("rpi-pico")} <= spec_pin_ids("rpi-pico")
     assert fit("rpi-pico")["status"] == "verified_against"
     assert "RaspberryPi_Pico_Common_THT" in fit("rpi-pico")["verified_against"]
+
+
+# ---- ESP32 DevKit (Espressif ESP32-DevKitC V4, 38 pins) -------------------------------------------
+
+# Header J2 then J3, top to bottom, as in the Espressif ESP32-DevKitC user guide pin tables. The
+# registry calls the board's 5V pad VIN; GND appears once on J2 and twice on J3.
+DEVKITC_V4_J2 = ["3V3", "EN", "GPIO36", "GPIO39", "GPIO34", "GPIO35", "GPIO32", "GPIO33", "GPIO25", "GPIO26",
+                 "GPIO27", "GPIO14", "GPIO12", "GND", "GPIO13", "GPIO9", "GPIO10", "GPIO11", "VIN"]
+DEVKITC_V4_J3 = ["GND_2", "GPIO23", "GPIO22", "GPIO1", "GPIO3", "GPIO21", "GND_3", "GPIO19", "GPIO18", "GPIO5",
+                 "GPIO17", "GPIO16", "GPIO4", "GPIO0", "GPIO2", "GPIO15", "GPIO8", "GPIO7", "GPIO6"]
+
+
+def test_esp32_devkit_is_the_38_pin_devkitc_v4_with_rows_25_4_mm_apart() -> None:
+    pads = table("esp32-devkit")
+    assert len(pads) == 38 and len({p["pinId"] for p in pads}) == 38
+    left = [p for p in pads if p["x"] < 0]
+    right = [p for p in pads if p["x"] > 0]
+    assert [p["pinId"] for p in left] == DEVKITC_V4_J2
+    assert [p["pinId"] for p in right] == DEVKITC_V4_J3
+    assert round(right[0]["x"] - left[0]["x"], 3) == 25.4
+    for column in (left, right):
+        assert len(column) == 19
+        assert {round(b["y"] - a["y"], 3) for a, b in zip(column, column[1:])} == {2.54}
+    # Pads sit on the board: the envelope holds the 25.4 mm row spacing plus the pad copper.
+    body = registry.resolve_module_body_mm("esp32-devkit")
+    assert body["w"] >= 25.4 + 1.8 and body["h"] >= 18 * 2.54 + 1.8
+
+
+def test_esp32_devkit_declares_every_pad_as_a_pin_and_keeps_the_recipe_pins() -> None:
+    pad_ids = {p["pinId"] for p in table("esp32-devkit")}
+    assert pad_ids <= spec_pin_ids("esp32-devkit")
+    assert {"VIN", "3V3", "GND", "GPIO2", "GPIO4", "GPIO5", "GPIO15", "GPIO16", "GPIO17", "GPIO18",
+            "GPIO21", "GPIO22", "GPIO23", "GPIO34"} <= pad_ids
+
+
+def test_esp32_devkit_names_its_variant_and_the_flash_pins_are_not_offered_as_gpio() -> None:
+    fit_record = fit("esp32-devkit")
+    assert fit_record["status"] == "verified_against"
+    assert "DevKitC V4" in fit_record["verified_against"] and "30-pin" in fit_record["verified_against"]
+    spec = registry.find_module("esp32-devkit")
+    flash = [p for p in spec["pins"] if p["id"] in {"GPIO6", "GPIO7", "GPIO8", "GPIO9", "GPIO10", "GPIO11"}]
+    assert len(flash) == 6 and all(p["role"] == "other" and "flash" in p["notes"] for p in flash)
