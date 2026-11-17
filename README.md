@@ -21,9 +21,9 @@ Hardware Splicer takes a board design through KiCad electrical and design-rule c
 | **Status** | Software and design-review layer complete for the SPI reference design. **No board has been fabricated or measured yet**, and nothing here claims physical correctness |
 
 ```bash
-git clone https://github.com/Spectating101/hardware-splicer.git && cd hardware-splicer
-bash scripts/install_splice_v1.sh && source .venv/bin/activate
-hs-doctor && make splice-ui-serve
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements-splice-v1.txt -e '.[digital]'
+.venv/bin/hs-digital cases
 ```
 
 **Engineering operator pilot:** `python3 scripts/hs_workshop_operator.py --list` exposes
@@ -227,15 +227,11 @@ The repository also retains earlier Splice/Circuit/mechanical lineage and intern
 ## Developer quick start
 
 ```bash
-git clone https://github.com/Spectating101/hardware-splicer.git
-cd hardware-splicer
-bash scripts/install_splice_v1.sh
-source .venv/bin/activate
-hs-doctor
-make splice-ui-serve
+.venv/bin/python -m pip install -e '.[dev]'
+make verify-headless-backend
 ```
 
-For internal/developer navigation, see [`docs/GITHUB_START_HERE.md`](docs/GITHUB_START_HERE.md) and the broader [`docs/`](docs/) tree.
+See the [headless backend verification scope](docs/PACKAGING_AND_DEPLOYMENT.md#headless-backend-verification) and [developer navigation](docs/GITHUB_START_HERE.md).
 
 ## Canonical generated artifacts
 

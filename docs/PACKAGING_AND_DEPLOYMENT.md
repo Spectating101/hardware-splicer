@@ -54,6 +54,26 @@ the declared model and requirements. Physical verification requires bench eviden
 The [backend release evidence](status/generated/headless-backend-release-20261118.json)
 records the fresh install, full test collection, native checks and state restore.
 
+### Headless backend verification
+
+Run `make verify-headless-backend` for the focused engine regression checks. It
+exercises study revisions, part substitution, material and wiring checks,
+source-pinned discovery, robot model import, Sortcell packaging and MCP parity
+with autorouting disabled. A native study replay verifies the CAD and simulation
+outputs for the selected device. The dated release evidence contains results
+from a full root suite and a local HTTP restart and recovery check.
+
+An integrated module is ready when its results can be consumed through the backend
+with their source and project revision. For example, a robot teardown should
+link a CAD part to its BOM entry and electrical evidence so clients can present
+or act on the same result.
+
+Freerouting is an optional PCB tool. The router field in the preserved SPI
+reference receipt records the board's routing provenance. The independent replay
+opens the supplied board with `pcbnew` and uses KiCad to check it. Teardown's
+browser replay checks its exported 3D artifact. The legacy Splice UI build has
+its own verification targets.
+
 ## External backend release
 
 The local release evidence supports a trusted operator. External engineering
