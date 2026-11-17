@@ -31,6 +31,7 @@ from .github_signal_pipeline import (
     registry_row as akcli_registry_row,
     sha256_file,
 )
+from .github_signal_proposals import IBOM, KIKIT, PROPOSED_ADAPTERS
 
 TASK_SCHEMA = "hardware_splicer.github_signal_task.v1"
 VERDICT_FILENAME = "HS_SIGNAL_TASK_RESULT.json"
@@ -43,6 +44,13 @@ KDIF_DOCKER_IMAGE = (
 )
 
 _SELECT_WORDS = {
+    "interactive_assembly_bom": re.compile(
+        r"\b(ibom|interactive\s+(?:html\s+)?(?:assembly\s+)?bom|"
+        r"interactive\s+assembly|placement\s+viewer)\b", re.I
+    ),
+    "panelise_or_fab": re.compile(
+        r"\b(paneli[sz](?:ation|e|ing)|fab(?:rication)?\s+(?:outputs?|exports?))\b", re.I
+    ),
     "review_schematic": re.compile(
         r"\b(review|inspect|check|lint|audit|diagnos\w*|validate)\b", re.I
     ),
@@ -52,6 +60,8 @@ _SELECT_WORDS = {
     ),
 }
 _TARGET_REPOS = {
+    "interactive_assembly_bom": IBOM,
+    "panelise_or_fab": KIKIT,
     "review_schematic": "tipoLi5890/akcli",
     "compare_board_revisions": "0x12net/kdif",
 }
@@ -69,8 +79,8 @@ def select_task(objective: str) -> dict[str, Any]:
     selected = [task for task, found in matched.items() if found]
     if len(selected) != 1:
         raise SignalEvaluationError(
-            "ambiguous/unsupported objective; specify either design review OR "
-            "two-revision comparison"
+            "ambiguous/unsupported objective; specify one of design review, "
+            "two-revision comparison, interactive assembly BOM, or panelisation/fab outputs"
         )
     return {
         "selected_task": selected[0],
@@ -302,6 +312,24 @@ def run_task(
     """
     plan = select_task(objective)
     candidates = normalize_feed(feed)
+    proposal = PROPOSED_ADAPTERS.get(plan["selected_repository"])
+    if proposal:
+        # A matching objective is enough to report the proposal, never enough
+        # to acquire source or execute it (even if feed metadata claims approval).
+        verdict = {
+            "schema_version": TASK_SCHEMA, "ok": False, "executed": False,
+            "objective": objective, "selection": plan,
+            "status": ("tool_blocked" if proposal["status"] == "proposed_blocked"
+                       else "tool_proposed_pending_approval"),
+            "proposal": proposal["repository"], "blockers": proposal["blockers"],
+            "approval_effect": "none", "physical_authority": False,
+            "tool_selection_authority": "rules_v1",
+        }
+        output_dir.mkdir(parents=True, exist_ok=True)
+        (output_dir / VERDICT_FILENAME).write_text(
+            json.dumps(verdict, indent=2, sort_keys=True) + "\n"
+        )
+        return verdict
     selected = [c for c in candidates if c["repository"] == plan["selected_repository"]]
     if len(selected) != 1 or selected[0]["discovered_only"]:
         raise SignalEvaluationError("selected specialist absent or revision unapproved")

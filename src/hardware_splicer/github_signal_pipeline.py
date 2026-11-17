@@ -70,6 +70,8 @@ def sha256_file(path: Path) -> str:
 
 def normalize_feed(feed: Mapping[str, Any]) -> list[dict[str, Any]]:
     """Read a normalized exported signal; it is NOT a live Github Signals API."""
+    from .github_signal_proposals import PROPOSED_ADAPTERS
+
     if feed.get("schema_version") != "hardware_splicer.github_signal_feed.v1":
         raise SignalEvaluationError("unknown signal feed schema")
     source = feed.get("source")
@@ -94,7 +96,8 @@ def normalize_feed(feed: Mapping[str, Any]) -> list[dict[str, Any]]:
         # the reviewed repository and its *exact* approved commit are required.
         # Any newer upstream revision stays discovery-only until reviewed.
         adapter = ADAPTERS.get(repo)
-        admitted = bool(adapter and revision == adapter["approved_commit_sha"])
+        admitted = bool(repo not in PROPOSED_ADAPTERS and adapter
+                        and revision == adapter["approved_commit_sha"])
         out.append({
             "repository": repo, "commit_sha": revision,
             "license_claim": str(record.get("license_spdx_id", "UNKNOWN")),
@@ -109,8 +112,12 @@ def normalize_feed(feed: Mapping[str, Any]) -> list[dict[str, Any]]:
 
 
 def acquire_pinned_repo(candidate: Mapping[str, Any], checkout: Path, *, fetch: bool) -> Path:
+    from .github_signal_proposals import PROPOSED_ADAPTERS
+
     repo = str(candidate["repository"])
     revision = str(candidate["commit_sha"])
+    if repo in PROPOSED_ADAPTERS:
+        raise SignalEvaluationError("proposed adapters require explicit trials; not approved")
     if repo not in ADAPTERS:
         raise SignalEvaluationError("no reviewed adapter for this repository")
     if revision != ADAPTERS[repo]["approved_commit_sha"]:
@@ -251,6 +258,8 @@ def evaluate_signals(
     distinguish diagnostic execution from an electrically correct or fabricated
     engineering design.
     """
+    from .github_signal_proposals import PROPOSED_ADAPTERS
+
     candidates = normalize_feed(feed)
     evaluations: list[dict[str, Any]] = []
     # This legacy acquisition endpoint is explicitly akcli-only. The new
@@ -263,7 +272,14 @@ def evaluate_signals(
     ]
     output_dir.mkdir(parents=True, exist_ok=True)
     for candidate in candidates:
-        if candidate["discovered_only"]:
+        proposal = PROPOSED_ADAPTERS.get(candidate["repository"])
+        if proposal:
+            evaluations.append({
+                **candidate, "state": proposal["status"], "executed": False,
+                "reason": "Proposals never execute through the normal pipeline",
+                "blockers": proposal["blockers"], "approval_effect": "none",
+            })
+        elif candidate["discovered_only"]:
             evaluations.append({
                 **candidate, "state": "discovered_only",
                 "executed": False, "reason": "No approved repo/adapter/revision pair",

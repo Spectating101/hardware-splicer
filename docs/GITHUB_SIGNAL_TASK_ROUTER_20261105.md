@@ -90,3 +90,70 @@ router select the approved akcli tool. Both calls are exercised by the tests.
 Reusing upstream programs is preferred: the HS contribution is source approval,
 tool selection, compatibility checks, execution isolation, provenance, artifact
 verification, project registry, and eventually multi-device orchestration.
+
+## Proposed adapters and explicit offline trials
+
+`github_signal_proposals.PROPOSED_ADAPTERS` is a review queue separate from
+`ADAPTERS`. The approved set remains akcli and kdif. A discovered repository,
+vetting evidence, or successful trial never approves a tool. Approving a
+proposal remains a **human code change to ADAPTERS**, with adapter/revision
+review and tests; the proposal must also leave the proposed-only guards.
+
+The rules_v1 objective table additionally reports these proposals:
+
+| Objective | Proposal | Router result |
+|---|---|---|
+| interactive assembly BOM / placement viewer for a KiCad board | openscopeproject/InteractiveHtmlBom | `tool_proposed_pending_approval` |
+| panelisation / fab outputs | yaqwsx/KiKit | `tool_blocked` with dependency blocker |
+
+Neither result executes or acquires source. The normal signal pipeline also
+refuses proposal execution, even at the proposed commit. Proposal evidence is
+never registered as an approved project-used capability.
+
+InteractiveHtmlBom is `proposed_pending_human_approval`: release v2.12.0,
+commit `5c192e794cd66fde04bab11810601b711bf8581b`, MIT licence claim.
+The operator-established offline trial used host KiCad 9 `/usr/bin/python3`
+with `pcbnew` and `wx`, no other dependencies and no installation. On
+`hardware/reference_designs/spi_flash_adapter_v1/spi_flash_adapter_v1.kicad_pcb`,
+it exited 0, wrote `/output/ibom.html` (about 229 KB), and left the checkout
+clean. Its `var pcbdata = JSON.parse(LZString.decompressFromBase64("..."))`
+data contained exactly the board's 40 references; `bom` had keys `both`,
+`skipped`, `fields`, `F`, `B`, with 10 rows in `both`. These are recorded
+operator observations, not measurements from the unit tests.
+
+An operator can explicitly trial an already available clean checkout:
+
+```sh
+python3 scripts/trial_github_signal_proposal.py \
+  --adapter openscopeproject/InteractiveHtmlBom \
+  --checkout /path/to/pinned/InteractiveHtmlBom \
+  --board hardware/reference_designs/spi_flash_adapter_v1/spi_flash_adapter_v1.kicad_pcb \
+  --out /path/to/empty/trial-output
+```
+
+This CLI checks the full HEAD, clean Git root (including ignored/untracked
+files), LICENSE claim, entrypoint, host Python modules and KiCad major version.
+It runs the exact registered argv template with `bwrap --unshare-all`, read-only
+source and board, and only the separate output directory writable. Missing
+bubblewrap or capabilities fail closed; there is no host/Docker fallback,
+fetch, or runtime dependency installation. The output directory must be empty.
+
+The independent checker parses board footprint references with HS's KiCad
+s-expression parser, decodes LZString in pure Python, and compares them to
+`pcbdata.footprints[].ref`, requiring `bom` to be present. It never executes
+page JavaScript. Missing and extra references are reported; a matching set
+proves this limited data check, not assembly correctness or HTML safety.
+`HS_SIGNAL_PROPOSAL_TRIAL.json` retains the argv, host capability report,
+input/output SHA-256, exit code, stderr tail, timing and output check, including
+failed executions. Every trial states `approval_effect: "none"`.
+
+KiKit is `proposed_blocked`: release v1.8.1, commit
+`d1957c535781371db5a2f507f8154d460095f9f1`. The MIT licence claim follows the
+existing HS tool catalogue and is not newly verified trial evidence. The
+operator established that host packages `shapely`, `markdown2`, `pybars`,
+`commentjson`, and `solidpython` are absent. Runtime installation is forbidden;
+a pinned, reviewed dependency environment is required before a trial can be
+designed and accepted. Its recorded candidate panelisation argv and expected
+output are untrialled; neither panelisation nor fabrication exports have
+execution evidence here. The explicit trial runner refuses this blocked
+proposal before any subprocess is invoked.
