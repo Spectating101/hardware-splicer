@@ -49,6 +49,7 @@ hs-backend-mcp = "hardware_splicer.cli_entry:main_backend_mcp"
 hs-capability-freeze = "hardware_splicer.cli_entry:main_capability_freeze"
 hs-derive = "hardware_splicer.cli_entry:main_derive"
 hs-digital = "hardware_splicer.digital_engine_cli:main"
+hs-materials = "hardware_splicer.materials_cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -40,6 +40,24 @@ def digital_engine(*, project_root: str | Path | None = None, job_db: str | Path
     return DigitalStudyEngine(project_root=project_root, job_db=job_db)
 
 
+def assess_materials(project_id: str, *, expected_revision: int, requirements, inventory, project_root=None):
+    """Match exact material requirements to declared or imported stock."""
+    from .project_materials import assess_project_materials
+    from .project_store import ProjectStore
+
+    return assess_project_materials(ProjectStore(project_root), project_id, expected_revision=expected_revision,
+                                    requirements=requirements, inventory=inventory)
+
+
+def import_inventree_materials(project_id: str, *, expected_revision: int, assembly_part_id: int, build_quantity: int = 1, project_root=None):
+    """Read a direct InvenTree BOM and its inventory into this project revision."""
+    from .project_materials import import_inventree_materials as import_materials
+    from .project_store import ProjectStore
+
+    return import_materials(ProjectStore(project_root), project_id, expected_revision=expected_revision,
+                            assembly_part_id=assembly_part_id, build_quantity=build_quantity)
+
+
 def apply_engine_defaults() -> None:
     """Safe defaults for agent-driven compiles (headless, no Java autoroute)."""
     load_env_local()

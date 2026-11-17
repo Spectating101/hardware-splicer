@@ -6,6 +6,17 @@ from typing import Any, Dict, List
 
 OSS_CATALOG: List[Dict[str, Any]] = [
     {
+        "id": "inventree",
+        "layer": "supply",
+        "name": "InvenTree materials integration",
+        "url": "https://github.com/inventree/InvenTree",
+        "license": "MIT",
+        "status": "wired",
+        "priority": "P1",
+        "hook": "hs-materials, SDK assess_materials/import_inventree_materials, /v1/projects/{id}/materials",
+        "claim": "Read-only direct BOM and inventory import; revision-bound material shortages and CSV; no stock reservation or ordering",
+    },
+    {
         "id": "capability-studio",
         "layer": "product-flow",
         "name": "Interchange Review Studio",

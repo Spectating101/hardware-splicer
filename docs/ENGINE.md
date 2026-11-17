@@ -170,3 +170,47 @@ A successful computation can fail its engineering requirements. Such a run remai
 Job attempts have durable random identities, independent of wall-clock timestamps. Completion, failure and publication from an old attempt cannot update a retry, even when timestamps are identical. Existing job databases migrate additively without discarding their records.
 
 The canonical HTTP adapter uses this same engine. In addition to create/inspect/submit/artifact routes, it exposes `GET /v1/projects/{id}/digital/compare?before_revision=1&after_revision=2`, `GET /v1/projects/{id}/digital/revisions/{revision}/audit`, and `POST /v1/projects/{id}/digital/revisions/{revision}/verify`. The canonical MCP gateway discovers these through OpenAPI; no second MCP implementation owns their rules.
+
+## Exact materials and InvenTree inventory
+
+The backend compares a design's material requirements with available inventory and produces a reusable/missing/make list. It accepts a declared inventory or imports a direct assembly BOM and inventory from [InvenTree](https://github.com/inventree/InvenTree). The integration reads the upstream REST API. Local assessments work independently of an inventory server.
+
+`hs-materials` operates on an existing saved project. Assessments are retained beside that project and bound to its exact revision and snapshot hash. They leave the design revision, simulation history and authority fields intact. Later design changes mark earlier assessments as historical. Opening a saved assessment validates its inputs, computed claims and source identity.
+
+```bash
+# Use the project ID returned by hs-digital init or the normal project API.
+# Omitting --inventory explicitly declares that you have no parts.
+hs-materials --project-root /tmp/hs-digital-projects assess PROJECT_ID \
+  --expected-revision 1 \
+  --requirements examples/materials/hs3g_b_requirements.json
+hs-materials --project-root /tmp/hs-digital-projects history PROJECT_ID
+hs-materials --project-root /tmp/hs-digital-projects csv PROJECT_ID ASSESSMENT_ID
+```
+
+The [drone requirements example](../examples/materials/hs3g_b_requirements.json) derives from the retained HS-3G-B BOM and native hardware calculation. It expands bundled hardware into individual fasteners and separates the frame parts to make. Purchase quantities include the source BOM's spare battery and prop packs. The unitemized wiring allowance, discontinued controller sourcing and unspecified laminate grade remain visible issues. Manufacturer/model identifiers and standard material specifications are declared source identities; this file supplies no new supplier quote or stock check.
+
+Each requirement has `material_id`, `description`, `quantity`, `unit` (default `ea`), and either `manufacturer` plus `mpn`, or an explicit `specification`. `source_ref` identifies its basis. `acquisition: "make"` identifies a custom item. `unresolved` preserves missing specifications. A declared inventory has `source: "declared"`, a timezone-aware `captured_at`, and `lots`; each lot supplies its exact identity/specification, quantity, allocated amount, unit and condition. Only `condition: "ok"` stock covers requirements. Matching uses an explicit InvenTree part binding, exact manufacturer/model, or exact material specification. Units and any additional specifications must agree.
+
+The Python SDK exposes the same service:
+
+```python
+from hardware_splicer.sdk import assess_materials
+
+assessment = assess_materials(
+    "PROJECT_ID", project_root="/tmp/hs-digital-projects", expected_revision=1,
+    requirements=required_materials, inventory=declared_inventory,
+)
+```
+
+For InvenTree, configure `HARDWARE_SPLICER_INVENTREE_URL` and `HARDWARE_SPLICER_INVENTREE_TOKEN` in the backend process. Use a user/token with view permissions. Remote connections require HTTPS; loopback HTTP supports local development. Credentials stay outside project records and CLI arguments.
+
+```bash
+hs-materials --project-root /tmp/hs-digital-projects import-inventree PROJECT_ID \
+  --expected-revision 1 --assembly-part-id 123 --build-quantity 1
+```
+
+The connector reads the assembly's direct BOM, component identities, stock lots and cached supplier references. It deducts server-reported allocations and excludes damaged, unchecked, expired, installed and unsupported custom-status stock. It consumes all pages within bounded requests and rejects incomplete or conflicting pagination. Duplicate BOM requirements share one planned stock balance. It never allocates or reserves remote stock.
+
+Supplier quantities remain cached inventory-server information; they do not count as owned parts or establish a live vendor quote. Nested assemblies and unsupported BOM quantity adjustments remain review issues. Captures older than 24 hours, more than five minutes in the future, or marked simulated do not cover owned-stock requirements. Saved results retain their original evaluation; reads also report current inventory age and whether the design revision has changed. Exact inventory identity does not establish electrical, mechanical or firmware compatibility.
+
+The canonical API provides `POST /v1/projects/{id}/materials/assess`, `POST /v1/projects/{id}/materials/import-inventree`, `GET /v1/projects/{id}/materials`, `GET /v1/projects/{id}/materials/{assessment_id}`, and a `/csv` download on that assessment. MCP discovers the same operations from OpenAPI. Assessments record whether the inputs came from a provided snapshot or an actual InvenTree HTTP read. Assessments and exports do not grant purchase, fabrication or physical authority.
