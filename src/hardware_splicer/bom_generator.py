@@ -58,6 +58,7 @@ _PART_HINTS: Dict[str, Dict[str, str]] = {
     "mosfet-irf520": {"mpn": "IRF520NPBF", "footprint": "MOSFET-IRF520-MODULE", "supplier_sku": "IRF520-MOD"},
     "l298n": {"mpn": "L298N", "footprint": "L298N-HBRIDGE-MODULE", "supplier_sku": "L298N-MOD"},
     "relay-1ch": {"mpn": "SRD-05VDC-SL-C", "footprint": "RELAY-1CH-5V", "supplier_sku": "RELAY-1CH-5V"},
+    "terminal-block-4p": {"mpn": "KF301-4P", "footprint": "TerminalBlock_bornier-4_P5.08mm", "supplier_sku": "KF301-4P"},
     "sg90": {"mpn": "SG90", "footprint": "SG90-SERVO", "supplier_sku": "SG90-MICRO"},
     "dht22": {"mpn": "DHT22", "footprint": "DHT22-SENSOR", "supplier_sku": "DHT22-AM2302"},
     "rpi-pico": {"mpn": "RP2040", "footprint": "Raspberry_Pi_Pico", "supplier_sku": "SC0915"},

@@ -364,7 +364,8 @@
         {"role": "lim_x", "moduleId": "limit-switch-3pin"},
         {"role": "lim_y", "moduleId": "limit-switch-3pin"},
         {"role": "svo_psu", "moduleId": "ldo-ams1117-5v"},
-        {"role": "svo", "moduleId": "sg90"}
+        {"role": "svo", "moduleId": "sg90"},
+        {"role": "motor", "moduleId": "terminal-block-4p"}
       ],
       "wires": [
         {"from": {"role": "pwr", "pin": "V+"}, "to": {"role": "mot_psu", "pin": "IN+"}},
@@ -388,10 +389,17 @@
         {"from": {"role": "pwr", "pin": "GND"}, "to": {"role": "svo_psu", "pin": "GND"}},
         {"from": {"role": "svo_psu", "pin": "VOUT"}, "to": {"role": "svo", "pin": "VCC"}},
         {"from": {"role": "svo_psu", "pin": "GND"}, "to": {"role": "svo", "pin": "GND"}},
-        {"from": {"role": "mcu", "pin": "A5"}, "to": {"role": "svo", "pin": "SIG"}}
+        {"from": {"role": "mcu", "pin": "A5"}, "to": {"role": "svo", "pin": "SIG"}},
+        {"from": {"role": "drv", "pin": "RST"}, "to": {"role": "drv", "pin": "SLP"}},
+        {"from": {"role": "drv", "pin": "EN"}, "to": {"role": "mcu", "pin": "GND"}},
+        {"from": {"role": "drv", "pin": "1A"}, "to": {"role": "motor", "pin": "COIL1_A"}},
+        {"from": {"role": "drv", "pin": "1B"}, "to": {"role": "motor", "pin": "COIL1_B"}},
+        {"from": {"role": "drv", "pin": "2A"}, "to": {"role": "motor", "pin": "COIL2_A"}},
+        {"from": {"role": "drv", "pin": "2B"}, "to": {"role": "motor", "pin": "COIL2_B"}}
       ],
       "notes": [
-        "A4988 stepper on motor buck; dual limit switches on A0/A4; tie EN to GND to enable driver.",
+        "A4988 stepper on motor buck; dual limit switches on A0/A4; RST is strapped to SLP and EN is tied to GND (driver always enabled, because every Nano pin is in use so firmware cannot disable the motor).",
+        "Stepper motor coils land on the 4-pin terminal: 1A/1B = coil 1, 2A/2B = coil 2.",
         "12V barrel feeds motor buck + servo LDO; USB 5V feeds Arduino."
       ]
     },

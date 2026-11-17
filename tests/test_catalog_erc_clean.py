@@ -21,11 +21,6 @@ pytestmark = pytest.mark.skipif(not shutil.which("kicad-cli"), reason="kicad-cli
 # remove the entry, not loosen the test.
 KNOWN_REMAINING_ERC_ERRORS = {
     "indicator_or_task_light": {("pin_not_connected", "Pin SIG")},
-    "plotter_motion_stage": {
-        ("pin_not_connected", "Pin EN"),
-        ("pin_not_connected", "Pin RST"),
-        ("pin_not_connected", "Pin SLP"),
-    },
     "room_display_station": {("pin_not_connected", "Pin LED")},
 }
 
