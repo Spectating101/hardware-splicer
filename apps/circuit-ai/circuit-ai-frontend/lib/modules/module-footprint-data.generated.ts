@@ -323,10 +323,10 @@ export const MODULE_FOOTPRINT_DATA: Record<string, ModuleFootprintMeta> = {
   "sg90": {
     kicadFootprint: "Actuator:SG90-SERVO",
     bodyMm: { w: 23, h: 12 },
-    fit: { status: "unverified_variant", reason: "Footprint geometry has not been checked against the real part." },
+    fit: { status: "verified_against", verifiedAgainst: "TowerPro SG90 micro servo datasheet: three-way 2.54 mm lead connector, brown GND, red VCC in the middle, orange signal. Layout taken from the maker's datasheet as documented; not machine-read in this run." },
     pads: [
-      { pinId: "VCC", x: -2.54, y: -8 },
-      { pinId: "GND", x: 0, y: -8 },
+      { pinId: "GND", x: -2.54, y: -8 },
+      { pinId: "VCC", x: 0, y: -8 },
       { pinId: "SIG", x: 2.54, y: -8 },
     ],
   },

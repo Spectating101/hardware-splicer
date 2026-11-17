@@ -259,3 +259,11 @@ def test_hc_sr04_is_a_four_pin_header_at_2_54_mm() -> None:
     assert [name for name, _x in row] == ["VCC", "TRIG", "ECHO", "GND"]
     assert {round(b[1] - a[1], 3) for a, b in zip(row, row[1:])} == {2.54}
     assert fit("hc-sr04")["status"] == "verified_against"
+def test_sg90_lead_is_gnd_vcc_sig_with_vcc_in_the_middle() -> None:
+    row = _single_row("sg90")
+    assert [name for name, _x in row] == ["GND", "VCC", "SIG"]
+    assert {round(b[1] - a[1], 3) for a, b in zip(row, row[1:])} == {2.54}
+    assert fit("sg90")["status"] == "verified_against"
+
+
+
