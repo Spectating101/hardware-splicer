@@ -3315,6 +3315,31 @@
       ]
     },
     {
+      "id": "terminal-block-2p",
+      "label": "2-pin screw terminal block",
+      "category": "interface",
+      "summary": "5.08 mm field-wiring terminal on the carrier PCB; takes a two-wire off-board load or output.",
+      "manufacturer": "Generic",
+      "partNumber": "KF301-2P",
+      "priceUsd": 0.5,
+      "source": "curated",
+      "capabilityTags": [
+        "field_wiring"
+      ],
+      "pins": [
+        {
+          "id": "1",
+          "label": "1",
+          "role": "other"
+        },
+        {
+          "id": "2",
+          "label": "2",
+          "role": "other"
+        }
+      ]
+    },
+    {
       "id": "terminal-block-4p",
       "label": "4-pin screw terminal block",
       "category": "interface",
@@ -10154,6 +10179,25 @@
         {
           "pinId": "2",
           "x": 5.08,
+          "y": 0
+        }
+      ]
+    },
+    "terminal-block-2p": {
+      "kicadFootprint": "TerminalBlock:TerminalBlock_bornier-2_P5.08mm",
+      "bodyMm": {
+        "w": 12,
+        "h": 10
+      },
+      "pads": [
+        {
+          "pinId": "1",
+          "x": -2.54,
+          "y": 0
+        },
+        {
+          "pinId": "2",
+          "x": 2.54,
           "y": 0
         }
       ]

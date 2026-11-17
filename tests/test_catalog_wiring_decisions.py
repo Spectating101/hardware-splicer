@@ -186,3 +186,24 @@ def test_room_display_compiles_with_the_backlight_resistor_on_the_board(tmp_path
     assert result.ok is True, result.error
     assert result.design_quality.get("kicad_drc_pass") is True
     assert netlist_pcb_parity(netlist, pcb)["pass"] is True
+
+
+# ---- small_audio_amp_box ------------------------------------------------------------------------
+
+
+def test_speaker_outputs_land_on_a_two_pin_terminal_on_the_carrier() -> None:
+    # The MAX98357A footprint carries SPK+ and SPK- as pads on the carrier PCB, so the speaker
+    # wires cannot land on the breakout itself; they get a real terminal.
+    pads = {p["pinId"] for p in resolve_module_pads("max98357a-i2s-amp", find_module("max98357a-i2s-amp"))}
+    assert {"SPK+", "SPK-"} <= pads
+    assert _has_wire("small_audio_amp_box", ("max98357a-i2s-amp", "SPK+"), ("terminal-block-2p", "1"))
+    assert _has_wire("small_audio_amp_box", ("max98357a-i2s-amp", "SPK-"), ("terminal-block-2p", "2"))
+    assert "SPK-" in " ".join(_recipe("small_audio_amp_box")["notes"])
+
+
+@pytest.mark.skipif(not shutil.which("node"), reason="node required")
+def test_audio_box_compiles_with_the_speaker_terminal_on_the_board(tmp_path: Path) -> None:
+    result, netlist, pcb = _compile("small_audio_amp_box", tmp_path)
+    assert result.ok is True, result.error
+    assert result.design_quality.get("kicad_drc_pass") is True
+    assert netlist_pcb_parity(netlist, pcb)["pass"] is True
