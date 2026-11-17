@@ -189,6 +189,11 @@ def plan_no_connects(
                 needs = {str(x) for x in entry.get("requires_connected") or []}
                 if needs and not needs <= connected_here:
                     continue
+                note_needed = str(entry.get("requires_recipe_note") or "")
+                if note_needed and (
+                    recipe_key is None or note_needed.lower() not in _recipe_notes(recipe_key).lower()
+                ):
+                    continue
                 plans.append(
                     NoConnectPlan(comp.ref, pin_id, str(entry.get("disposition") or "listed"), str(entry.get("reason") or ""))
                 )

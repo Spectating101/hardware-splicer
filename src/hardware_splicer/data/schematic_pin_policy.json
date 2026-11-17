@@ -23,9 +23,6 @@
       "3V3": {"disposition": "unused_supply_output", "reason": "On-board 3.3V regulator output; nothing in the build has to consume it."},
       "VSYS": {"disposition": "alternate_supply_input", "requires_connected": ["VBUS"], "reason": "VBUS feeds VSYS through the Pico's on-board diode, so VSYS may stay open while VBUS is supplied."}
     },
-    "l298n": {
-      "5V": {"disposition": "unused_supply_output", "reason": "On-board 5V logic regulator output; the recipe supplies logic power elsewhere."}
-    },
     "a4988-stepper": {
       "MS1": {"disposition": "optional_input", "reason": "A4988 MS1-MS3 have internal pull-downs, so open selects full-step mode (datasheet)."},
       "MS2": {"disposition": "optional_input", "reason": "A4988 MS1-MS3 have internal pull-downs, so open selects full-step mode (datasheet)."},
@@ -77,6 +74,7 @@
     },
     "robot_drive_base": {
       "l298n": {
+        "5V": {"disposition": "unused_supply_output", "requires_recipe_note": "5V_EN jumper", "reason": "The recipe keeps the 5V_EN jumper fitted and holds the motor supply to 7-12 V, so the onboard regulator makes 5 V and this terminal is an output the build does not use. Without the jumper (motor supply above 12 V) the terminal needs an external 5 V logic supply and must not be left open."},
         "OUT1": {"disposition": "off_board_terminal", "termination": "breakout_terminal", "reason": "Recipe note: motors on OUT1/OUT2."},
         "OUT2": {"disposition": "off_board_terminal", "termination": "breakout_terminal", "reason": "Recipe note: motors on OUT1/OUT2."},
         "OUT3": {"disposition": "unused_channel", "reason": "Recipe drives channel A only (IN1/IN2, motors on OUT1/OUT2)."},

@@ -330,3 +330,32 @@ def test_recipe_specific_no_connects_need_the_netlist_to_come_from_that_recipe()
     tampered = CircuitNetlist.from_dict(real.to_dict())
     tampered.nets.append(Net(name="EXTRA", pins=[PinRef(mosfet, "SIG"), PinRef(mosfet, "GND")]))
     assert f"{mosfet}.VOUT+" not in _nc(tampered, "automatic_plant_watering")
+
+
+def test_l298n_5v_is_left_for_erc_unless_the_recipe_states_jumper_and_motor_supply() -> None:
+    import json
+    from pathlib import Path
+
+    from hardware_splicer.integrations.schematic_pin_policy import load_policy
+    from hardware_splicer.netlist.lower import build_graph_to_netlist
+    from hardware_splicer.plan_to_graph import splice_plan_to_build_graph
+
+    # No build context: the 5V terminal is an unflagged open pin (it may need an external supply).
+    assert "U5.5V" not in _nc(_netlist([("U5", "l298n")], {}))
+    assert "U5.5V" not in _nc(_netlist([("U5", "l298n")], {}), "robot_drive_base")
+    # The module-level blanket entry is gone; only the robot recipe may state it.
+    assert "5V" not in (load_policy().get("module_pins") or {}).get("l298n", {})
+    graph, _id, _n, _w = splice_plan_to_build_graph({"target": {"recommended_build_id": "robot_drive_base"}})
+    real = build_graph_to_netlist(graph)
+    l298 = next(c.ref for c in real.components if c.module_id == "l298n")
+    assert f"{l298}.5V" in _nc(real, "robot_drive_base")
+    # The recipe really states the fitted jumper and a motor supply inside the 78M05 range.
+    data = Path(__file__).resolve().parents[1] / "src" / "hardware_splicer" / "data" / "catalog_recipes.json"
+    note = " ".join(json.loads(data.read_text(encoding="utf-8"))["recipes"]["robot_drive_base"]["notes"])
+    assert "5V_EN jumper" in note and "7-12 V" in note
+    # If the recipe stopped saying so, the no-connect would disappear with it.
+    policy = json.loads(json.dumps(load_policy()))
+    policy["build_pins"]["robot_drive_base"]["l298n"]["5V"]["requires_recipe_note"] = "jumper removed"
+    assert f"{l298}.5V" not in {
+        f"{p.ref}.{p.pin}" for p in plan_no_connects(real, build_id="robot_drive_base", policy=policy)
+    }
