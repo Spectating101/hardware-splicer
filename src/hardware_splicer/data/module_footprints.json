@@ -185,12 +185,12 @@
     "hc-sr04": {
       "kicadFootprint": "Sensor:HC-SR04",
       "bodyMm": {"w": 45, "h": 20},
-      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "fit": {"status": "verified_against", "verified_against": "HC-SR04 ultrasonic module datasheet (ElecFreaks / Cytron): four-pin 2.54 mm header in the order VCC, Trig, Echo, GND. Layout taken from the maker's datasheet as documented; not machine-read in this run."},
       "pads": [
-        {"pinId": "VCC", "x": -7.62, "y": 0},
-        {"pinId": "TRIG", "x": -2.54, "y": 0},
-        {"pinId": "ECHO", "x": 2.54, "y": 0},
-        {"pinId": "GND", "x": 7.62, "y": 0}
+        {"pinId": "VCC", "x": -3.81, "y": 0},
+        {"pinId": "TRIG", "x": -1.27, "y": 0},
+        {"pinId": "ECHO", "x": 1.27, "y": 0},
+        {"pinId": "GND", "x": 3.81, "y": 0}
       ]
     },
     "buck-mp1584": {

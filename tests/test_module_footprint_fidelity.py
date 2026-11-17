@@ -243,3 +243,19 @@ def test_level_shifter_is_unverified_because_row_spacing_varies_by_vendor() -> N
     record = fit("level-shifter-4ch")
     assert record["status"] == "unverified_variant"
     assert "differs by vendor" in record["reason"]
+
+
+# ---- HC-SR04, SG90, DHT22 (maker-documented layouts) ---------------------------------------------
+
+
+def _single_row(module_id: str) -> List[Tuple[str, float]]:
+    pads = table(module_id)
+    assert len({p["y"] for p in pads}) == 1, "one in-line header"
+    return [(p["pinId"], p["x"]) for p in sorted(pads, key=lambda p: p["x"])]
+
+
+def test_hc_sr04_is_a_four_pin_header_at_2_54_mm() -> None:
+    row = _single_row("hc-sr04")
+    assert [name for name, _x in row] == ["VCC", "TRIG", "ECHO", "GND"]
+    assert {round(b[1] - a[1], 3) for a, b in zip(row, row[1:])} == {2.54}
+    assert fit("hc-sr04")["status"] == "verified_against"
