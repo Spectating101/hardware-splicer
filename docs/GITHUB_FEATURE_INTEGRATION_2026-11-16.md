@@ -131,6 +131,20 @@ The complete root suite on `406d2142`, including the three preserved local files
 
 The [backend verification receipt](status/generated/headless-backend-completion-2026-11-17.json) records source and test hashes, exact skip reasons, attempt identities, comparison results, artifact audit and export. The [engine guide](ENGINE.md#headless-digital-engineering) documents Python and CLI usage. HS-3G-B remains a bounded registered digital proving case; this step does not establish arbitrary hardware redesign or physical validation. The original three local files remain byte-identical and uncommitted. Changes remain local; no GitHub push, PR or merge was performed.
 
+### Practical materials and inventory integration — November 17
+
+The first follow-up to the broader GitHub research adds a read-only InvenTree REST connector and a shared material-reconciliation service. Python, `hs-materials` and the canonical HTTP/MCP surface can assess declared materials or import a selected direct InvenTree assembly BOM, identities, stock and supplier references. An assessment is bound to the existing project revision and source snapshot; it does not advance the design revision or invalidate the digital drone's saved studies.
+
+An independent local upstream server at `inventree/InvenTree@8f8502d0d9e0cebb726430746e39327c51845a8a` (1.8.0 dev, API 581) was started from a clean pinned checkout and isolated dependency environment. The real canonical HS import route used a fixture user with 116 view permissions and no superuser access. Four required motors and three healthy motors produce a shortage of one; 100 damaged, 20 unchecked and 1,000 cached supplier units do not count as usable owned stock. Readback and CSV export pass, the design snapshot is unchanged, and no token is stored in the assessment. The temporary server was stopped.
+
+This execution caught a real upstream representation difference: standard statuses also populate `status_custom_key` with their numeric value. The adapter distinguishes these built-in values from custom states. It deducts reported allocations, checks condition/expiry/units and explicit identity conflicts, shares stock across repeated requirements, consumes complete pagination and retains unresolved BOM adjustments and nested assemblies. Old, future-dated or simulated captures cannot claim owned-stock coverage.
+
+The installed CLI also assessed the existing HS-3G-B digital baseline from `/tmp` with `PYTHONPATH` empty and no inventory declared. The [materials CSV](status/generated/hs3g-b-materials-2026-11-17.csv) has 18 lines: 15 purchase lines, two frame parts to make, and one wiring allowance requiring an exact identity/item list. Four lines retain unresolved issues. The source BOM's spare battery/prop packs are included; this is a materials-and-spares list. It provides no new live supplier quote or physical qualification.
+
+The complete root suite on implementation `443a8fb4` passes in one invocation: **4,360 passed, three skipped, zero failures**, in **1,484.15 seconds**. CAD, physics, KiCad, pinned vendor-library, public-source and headless routing profiles were enabled. All 43 new material/inventory regression cases passed; the only skips are the three existing opt-in live-vision tests. The [integration receipt](status/generated/inventree-materials-integration-2026-11-17.json) binds the source, full-suite log, native upstream execution, CSV, retained source inputs and preserved local work.
+
+The [engine guide](ENGINE.md#exact-materials-and-inventree-inventory) documents the interface and limits. The broader build-from-parts objective remains open: choosing the inventory BOM does not establish device-goal coverage, interface compatibility or complete current sourcing. No frontend changes, purchases, physical work or GitHub mutations were made in this integration.
+
 ## Useful starting commands
 
 From the repository root:
