@@ -93,6 +93,25 @@ def _dynamic_symbol_definition(
 
 _PWR_FLAG_LIB_ID = "power:PWR_FLAG"
 
+# Pin ends of the embedded generic symbols, as library-local (x, y) with +Y up.
+_GENERIC_PIN_LOCAL: Dict[str, Dict[str, tuple[float, float]]] = {
+    "Device:R": {"1": (0.0, 2.54), "2": (0.0, -2.54)},
+    "Device:C": {"1": (0.0, 2.54), "2": (0.0, -2.54)},
+    "Connector:Conn_01x01": {"1": (0.0, 0.0), "2": (0.0, 0.0)},
+}
+_HS_BLOCK_PIN_LOCAL: Dict[str, tuple[float, float]] = {"1": (_PIN_X_MM, 2.54), "2": (_PIN_X_MM, -2.54)}
+
+
+def _generic_pin_positions(lib_id: str, x: float, y: float) -> Dict[str, tuple[float, float]]:
+    """Sheet positions of pins 1 and 2 on an embedded generic symbol placed at (x, y).
+
+    Library Y points up while sheet Y points down, so the local Y is subtracted. Wire stubs must
+    start exactly on these points or KiCad leaves the pin unconnected.
+    """
+
+    local = _GENERIC_PIN_LOCAL.get(lib_id, _HS_BLOCK_PIN_LOCAL)
+    return {pin: (x + dx, y - dy) for pin, (dx, dy) in local.items()}
+
 
 def _pwr_flag_lib_symbol() -> List[str]:
     return [
@@ -207,7 +226,7 @@ def netlist_to_kicad_schematic(
             }
         else:
             sheet_lib = _fallback_lib if _fallback_lib in EMBEDDED_LIB_IDS else "HS:ModuleBlock"
-            pin_positions[comp.ref] = {"1": (x + _PIN_X_MM, y + 2.54), "2": (x + _PIN_X_MM, y - 2.54)}
+            pin_positions[comp.ref] = _generic_pin_positions(sheet_lib, x, y)
 
         lines.extend(
             [

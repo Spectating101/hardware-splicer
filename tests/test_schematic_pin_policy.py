@@ -207,3 +207,45 @@ def test_mcu_pins_keep_their_role_based_types() -> None:
     assert pin_electrical_type("esp32-devkit", _pin("esp32-devkit", "GPIO34")) == "input"
     assert pin_electrical_type("esp32-devkit", _pin("esp32-devkit", "GPIO4")) == "bidirectional"
 
+
+# ---- generic (non-catalog) symbol pin geometry ------------------------------------------------
+
+
+def _wire_ends(text: str) -> set[tuple[float, float]]:
+    return {
+        (float(x), float(y))
+        for x, y in re.findall(r"\(wire\s+\(pts \(xy ([\d.\-]+) ([\d.\-]+)\)", text)
+    }
+
+
+def test_resistor_wire_stubs_start_on_the_generic_symbols_real_pin_ends() -> None:
+    # Device:R has its pins at (0, +/-2.54) in library coordinates (+Y up). The component sits
+    # at the sheet origin below; sheet Y grows downward, so pin 1 is at y-2.54 and pin 2 at y+2.54.
+    netlist = _netlist(
+        [("R1", "resistor-4_7k")],
+        {"A": ["R1.1"], "B": ["R1.2"]},
+    )
+    text = netlist_to_kicad_schematic(netlist)
+    at = re.search(r'\(lib_id "Device:R"\)\s+\(at ([\d.\-]+) ([\d.\-]+) 0\)', text)
+    assert at, "resistor should use the embedded Device:R symbol"
+    x, y = float(at.group(1)), float(at.group(2))
+    assert (x, round(y - 2.54, 4)) in {(a, round(b, 4)) for a, b in _wire_ends(text)}
+    assert (x, round(y + 2.54, 4)) in {(a, round(b, 4)) for a, b in _wire_ends(text)}
+
+
+def _label_at(text: str, name: str) -> tuple[float, float]:
+    match = re.search(rf'\(label "{re.escape(name)}" \(at ([\d.\-]+) ([\d.\-]+) 180\)', text)
+    assert match, name
+    return round(float(match.group(1)), 4), round(float(match.group(2)), 4)
+
+
+def test_module_block_fallback_pins_use_the_library_y_inversion() -> None:
+    netlist = _netlist([("U9", "not-a-catalog-module")], {"A": ["U9.1"], "B": ["U9.2"]})
+    text = netlist_to_kicad_schematic(netlist)
+    at = re.search(r'\(lib_id "HS:ModuleBlock"\)\s+\(at ([\d.\-]+) ([\d.\-]+) 0\)', text)
+    assert at
+    x, y = float(at.group(1)), float(at.group(2))
+    # HS block symbols put pin 1 at library (-7.62, +2.54) and pin 2 at (-7.62, -2.54); with the
+    # sheet's downward Y that is y-2.54 for pin 1 and y+2.54 for pin 2 (label sits 5.08 further left).
+    assert _label_at(text, "A") == (round(x - 7.62 - 5.08, 4), round(y - 2.54, 4))
+    assert _label_at(text, "B") == (round(x - 7.62 - 5.08, 4), round(y + 2.54, 4))

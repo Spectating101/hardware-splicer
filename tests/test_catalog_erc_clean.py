@@ -80,3 +80,27 @@ def test_builds_with_a_real_remaining_erc_error_are_not_build_ready(build_id: st
     assert result.design_quality.get("kicad_erc_pass") is False
     assert result.design_quality.get("build_ready") is False
 
+
+def test_generic_resistors_in_a_netlist_are_connected_under_real_erc(tmp_path: Path) -> None:
+    from hardware_splicer.netlist.ir import CircuitNetlist, ComponentInstance, Net, PinRef
+
+    netlist = CircuitNetlist(
+        components=[
+            ComponentInstance(ref="J1", module_id="usb-power-5v"),
+            ComponentInstance(ref="U1", module_id="esp32-devkit"),
+            ComponentInstance(ref="U2", module_id="bme280"),
+            ComponentInstance(ref="R1", module_id="resistor-4_7k"),
+            ComponentInstance(ref="R2", module_id="resistor-4_7k"),
+        ],
+        nets=[
+            Net("GND", [PinRef("J1", "GND"), PinRef("U1", "GND"), PinRef("U2", "GND")]),
+            Net("+5V", [PinRef("J1", "V+"), PinRef("U1", "VIN")]),
+            Net("+3V3", [PinRef("U1", "3V3"), PinRef("U2", "VCC"), PinRef("R1", "2"), PinRef("R2", "2")]),
+            Net("SDA", [PinRef("U1", "GPIO21"), PinRef("U2", "SDA"), PinRef("R1", "1")]),
+            Net("SCL", [PinRef("U1", "GPIO22"), PinRef("U2", "SCL"), PinRef("R2", "1")]),
+        ],
+    )
+    sch = tmp_path / "pullups.kicad_sch"
+    write_schematic_for_netlist(netlist, sch)
+    report = run_kicad_cli_erc(sch, out_dir=tmp_path / "erc")
+    assert _errors(report) == set(), report["violations"]
