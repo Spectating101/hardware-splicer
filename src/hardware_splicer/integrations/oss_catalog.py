@@ -6,6 +6,17 @@ from typing import Any, Dict, List
 
 OSS_CATALOG: List[Dict[str, Any]] = [
     {
+        "id": "wireviz",
+        "layer": "artifacts",
+        "name": "WireViz harness export",
+        "url": "https://github.com/wireviz/WireViz",
+        "license": "GPL-3.0",
+        "status": "opt_in",
+        "priority": "P1",
+        "hook": "hs-wiring --render, SDK assess_wiring, /v1/projects/{id}/wiring",
+        "claim": "Material-bound conductor cut lists and optional offline SVG/BOM; declared electrical checks, no inferred donor pinout or construction approval",
+    },
+    {
         "id": "inventree",
         "layer": "supply",
         "name": "InvenTree materials integration",

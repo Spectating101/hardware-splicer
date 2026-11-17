@@ -214,3 +214,41 @@ The connector reads the assembly's direct BOM, component identities, stock lots 
 Supplier quantities remain cached inventory-server information; they do not count as owned parts or establish a live vendor quote. Nested assemblies and unsupported BOM quantity adjustments remain review issues. Captures older than 24 hours, more than five minutes in the future, or marked simulated do not cover owned-stock requirements. Saved results retain their original evaluation; reads also report current inventory age and whether the design revision has changed. Exact inventory identity does not establish electrical, mechanical or firmware compatibility.
 
 The canonical API provides `POST /v1/projects/{id}/materials/assess`, `POST /v1/projects/{id}/materials/import-inventree`, `GET /v1/projects/{id}/materials`, `GET /v1/projects/{id}/materials/{assessment_id}`, and a `/csv` download on that assessment. MCP discovers the same operations from OpenAPI. Assessments record whether the inputs came from a provided snapshot or an actual InvenTree HTTP read. Assessments and exports do not grant purchase, fabrication or physical authority.
+
+## Project wiring and harness review
+
+`hs-wiring` extends the same material assessment into an explicit pin-to-pin harness. The Python SDK, CLI, canonical API and OpenAPI-derived MCP operations use the same engine. Assessments live beside the project, bound to its revision, snapshot hash and material assessment. Creating a wiring assessment does not advance the design revision or alter a digital study.
+
+```bash
+hs-wiring --project-root /tmp/hs-projects assess PROJECT_ID \
+  --expected-revision 1 --materials MATERIAL_ASSESSMENT_ID \
+  --specification examples/wiring/hs3g_b_receiver.json
+hs-wiring --project-root /tmp/hs-projects csv PROJECT_ID WIRING_ASSESSMENT_ID
+hs-wiring --project-root /tmp/hs-projects export PROJECT_ID WIRING_ASSESSMENT_ID \
+  --output /tmp/new-wiring-review.zip
+```
+
+The [receiver example](../examples/wiring/README.md) requires an additional conductor requirement in metres; the old bundled wiring allowance cannot substitute for an itemized wire. See that example's preparation code. It is a partial draft on the existing drone, with provisional lengths and unresolved physical pinout/rating evidence.
+
+Each endpoint describes one component instance, its material ID, pin viewing orientation and explicit pin contracts. Pin roles are `power_out`, `power_in`, `ground`, `signal_out`, `signal_in` or `unknown`. Power `voltage.minimum/maximum` describes the operating range; `current_a` is output capacity or worst-case input demand. Signal `high` and `low` specify output level ranges or accepted input level ranges separately. `signal` identifies the intended signal family. Active pins name their endpoint's ground `reference_pin`. Pins marked `required: "yes"` must be connected. Unsupported bidirectional/open-drain behavior remains unresolved rather than becoming a single-driver signal claim.
+
+Each wire supplies its exact endpoints, material ID, declared `length_m`, optional color and wire contract. Endpoint requirements use `ea`; wire requirements use `m`. Quantities aggregate across all endpoint instances and wire cuts. The engine rejects implicit unit conversions and flags mismatched identities, additional material specifications or quantities exceeding the attached assessment. An endpoint represents a component interface, so a native WireViz BOM's connector row does not independently establish the connector housing/contact/termination parts needed to construct it.
+
+Checks operate on entire connected nets. They detect power-to-ground and incompatible role connections, multiple outputs, out-of-range supply voltage, aggregate load exceeding the selected output, incompatible digital high/low ranges and disconnected/different ground references. Supply and return conductor checks use declared net demand conservatively. AWG never supplies an inferred ampacity. Missing ratings, unknown pins, unbound contract sources and unassessed signal loading/timing stay explicit issues. Shared regulator budgets across separate output pins, transients, voltage drop, conductor routing/fit, terminations, protocol behavior and complete-device coverage remain outside this check.
+
+Optional `source` on an endpoint or wire has `source_id`, canonical `content_hash` and an RFC 6901 `pointer` (empty means the root) into a retained JSON engineering source. It must belong to `engineeringSources` on this same project revision. HS rereads the registered bytes, verifies their hash, parses the selected contract and compares it to the supplied contract. This binds the declaration to retained data; it does not authenticate a manufacturer, prove that a human extraction is correct, or raise uploaded source authority. Omitted bindings remain `unbound_declaration`. Missing/mismatched supplied bindings are rejected. Rereading an assessment repeats the source, materials, report and generated-instruction checks; historical records remain readable with `current_for_project: false` after later revisions.
+
+The default export requires no external renderer: JSON-formatted YAML for [WireViz](https://github.com/wireviz/WireViz), a conductor cut-list CSV and an assessment ZIP. Use `--render` to invoke a separately installed WireViz CLI and Graphviz locally and add a native SVG and TSV BOM. Set `HARDWARE_SPLICER_WIREVIZ_EXECUTABLE` to a dedicated executable, or place `wireviz` on `PATH`; `dot` must be on `PATH`. No third-party code is vendored and no renderer dependency is added to the core install. WireViz 0.4.1 was exercised; its GPL-3.0 CLI remains a separate optional tool. The existing [InvenTree WireViz plugin](https://github.com/inventree/inventree-wireviz) can consume `.wireviz` files, but HS performs no plugin upload or remote BOM mutation.
+
+Only generated connector/cable/connection data reaches the renderer. HS does not accept arbitrary WireViz YAML, images, include paths or command arguments. Text is escaped, execution and output sizes are bounded, active/external SVG content is rejected and spreadsheet exports keep formula-looking values as text. The native diagram visibly includes its digital review status. A failed explicit render publishes no assessment; callers can retry without rendering.
+
+```python
+from hardware_splicer.sdk import assess_wiring, export_wiring
+
+result = assess_wiring("PROJECT_ID", project_root="/tmp/hs-projects", expected_revision=1,
+    material_assessment_id="materials-...", specification=harness, render=False)
+package = export_wiring("PROJECT_ID", result["assessment"]["assessment_id"],
+                        project_root="/tmp/hs-projects")
+```
+
+The API provides `POST /v1/projects/{id}/wiring/assess`, `GET /v1/projects/{id}/wiring`, `GET /v1/projects/{id}/wiring/{assessment_id}`, and `/csv`, `/wireviz`, `/export` downloads on that assessment. MCP callers can request `response_mode: "base64"` for the binary ZIP. Results distinguish `blocked`, `unresolved` and `passes_declared_checks`. All retain `construction_ready: false`, `complete_device_compatibility_verified: false` and `physical_authority_granted: false`.

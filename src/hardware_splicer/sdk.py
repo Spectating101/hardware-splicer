@@ -58,6 +58,24 @@ def import_inventree_materials(project_id: str, *, expected_revision: int, assem
                             assembly_part_id=assembly_part_id, build_quantity=build_quantity)
 
 
+def assess_wiring(project_id: str, *, expected_revision: int, material_assessment_id: str,
+                  specification, render: bool = False, project_root=None):
+    """Check a declared harness against exact materials and optional retained sources."""
+    from .project_wiring import assess_project_wiring
+    from .project_store import ProjectStore
+
+    return assess_project_wiring(ProjectStore(project_root), project_id, expected_revision=expected_revision,
+        material_assessment_id=material_assessment_id, specification=specification, render=render)
+
+
+def export_wiring(project_id: str, assessment_id: str, *, project_root=None) -> bytes:
+    """Read and verify an immutable wiring assessment, then return its ZIP package."""
+    from .project_wiring import load_wiring_assessment, wiring_bundle
+    from .project_store import ProjectStore
+
+    return wiring_bundle(load_wiring_assessment(ProjectStore(project_root), project_id, assessment_id)["assessment"])
+
+
 def apply_engine_defaults() -> None:
     """Safe defaults for agent-driven compiles (headless, no Java autoroute)."""
     load_env_local()

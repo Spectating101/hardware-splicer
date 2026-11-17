@@ -1,0 +1,5 @@
+wire_id,material_id,from_endpoint,from_pin,to_endpoint,to_pin,length_m,color,gauge_awg,manufacturer,mpn,specification
+fc_tx_to_receiver_rx,receiver_conductors,flight_controller,TX1,receiver,RX,0.10,,,,,"Receiver harness conductor; exact wire, gauge, insulation and ampacity unresolved"
+receiver_tx_to_fc_rx,receiver_conductors,flight_controller,RX1,receiver,TX,0.10,,,,,"Receiver harness conductor; exact wire, gauge, insulation and ampacity unresolved"
+receiver_supply,receiver_conductors,flight_controller,5V,receiver,5V,0.10,,,,,"Receiver harness conductor; exact wire, gauge, insulation and ampacity unresolved"
+receiver_ground,receiver_conductors,flight_controller,GND,receiver,GND,0.10,,,,,"Receiver harness conductor; exact wire, gauge, insulation and ampacity unresolved"
