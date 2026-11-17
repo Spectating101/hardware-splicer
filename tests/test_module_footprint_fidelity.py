@@ -292,3 +292,50 @@ def test_max98357a_has_the_seven_pin_header_and_a_separate_speaker_pair() -> Non
 def test_max98357a_stays_unverified_because_the_speaker_terminal_is_assumed() -> None:
     record = fit("max98357a-i2s-amp")
     assert record["status"] == "unverified_variant" and "speaker terminal" in record["reason"]
+
+
+# ---- A4988 stepper carrier, resistor, terminal blocks -----------------------------------------------
+
+
+@needs_kicad_library
+def test_a4988_footprint_is_the_pololu_carrier_turned_through_180_degrees() -> None:
+    kicad = kicad_pads("Module.pretty/Pololu_Breakout-16_15.2x20.3mm.kicad_mod")
+    names = kicad_pin_names("Driver_Motor.kicad_sym", "Pololu_Breakout_A4988")
+    assert len(kicad) == len(names) == 16
+    # Registry ids for KiCad's names; pad 1 is the ground beside VDD, pad 7 the one beside VMOT.
+    alias = {"~{ENABLE}": "EN", "~{RESET}": "RST", "~{SLEEP}": "SLP"}
+    kicad_cx = (min(x for _n, x, _y in kicad) + max(x for _n, x, _y in kicad)) / 2
+    kicad_cy = (min(y for _n, _x, y in kicad) + max(y for _n, _x, y in kicad)) / 2
+    ours = {p["pinId"]: (p["x"], p["y"]) for p in table("a4988-stepper")}
+    assert len(ours) == 16
+    for number, x, y in kicad:
+        name = names[number]
+        pin = {1: "GND_LOGIC", 7: "GND_MOTOR"}.get(number) or alias.get(name, name)
+        # Rotating the board 180 degrees about its centre maps KiCad's pad onto ours.
+        expected = (round(-(x - kicad_cx), 3), round(-(y - kicad_cy), 3))
+        assert (round(ours[pin][0], 3), round(ours[pin][1], 3)) == expected, (number, name, pin)
+    assert fit("a4988-stepper")["status"] == "verified_against"
+
+
+@needs_kicad_library
+def test_resistor_and_terminal_block_pads_match_kicad() -> None:
+    for module_id, relative in (
+        ("resistor-10r", "Resistor_THT.pretty/R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal.kicad_mod"),
+        ("terminal-block-2p", "TerminalBlock.pretty/TerminalBlock_bornier-2_P5.08mm.kicad_mod"),
+        ("terminal-block-2p-dc", "TerminalBlock.pretty/TerminalBlock_bornier-2_P5.08mm.kicad_mod"),
+        ("terminal-block-4p", "TerminalBlock.pretty/TerminalBlock_bornier-4_P5.08mm.kicad_mod"),
+    ):
+        assert len(set(relative_to_kicad(module_id, relative))) == 1, module_id
+
+
+def test_terminal_blocks_are_not_verified_because_kicads_hole_is_larger_than_the_generators() -> None:
+    assert fit("resistor-10r")["status"] == "verified_against"
+    for module_id in ("terminal-block-2p", "terminal-block-2p-dc", "terminal-block-4p"):
+        record = fit(module_id)
+        assert record["status"] == "unverified_variant", module_id
+        assert "1.52" in record["reason"] and "1.0" in record["reason"]
+
+
+def test_dht11_uses_the_same_four_pin_layout_as_the_dht22() -> None:
+    assert [p["pinId"] for p in table("dht11")] == ["VCC", "DATA", "NC", "GND"]
+    assert fit("dht11")["status"] == "verified_against"

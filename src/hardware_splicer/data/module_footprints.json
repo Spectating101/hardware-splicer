@@ -369,7 +369,7 @@
     "a4988-stepper": {
       "kicadFootprint": "Driver:A4988-STEPSTICK",
       "bodyMm": {"w": 15.2, "h": 20.3},
-      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "fit": {"status": "verified_against", "verified_against": "KiCad 9.0 Module.pretty/Pololu_Breakout-16_15.2x20.3mm.kicad_mod with pin names from Driver_Motor.kicad_sym Pololu_Breakout_A4988: 2x8 header, 2.54 mm pitch, rows 12.7 mm apart, 15.2 x 20.3 mm; our pads are KiCad's turned through 180 degrees, which is the same part placed the other way round"},
       "pads": [
         {"pinId": "EN", "x": -6.35, "y": -8.89},
         {"pinId": "MS1", "x": -6.35, "y": -6.35},
@@ -392,7 +392,7 @@
     "resistor-10r": {
       "kicadFootprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
       "bodyMm": {"w": 12, "h": 4},
-      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "fit": {"status": "verified_against", "verified_against": "KiCad 9.0 Resistor_THT.pretty/R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal.kicad_mod: two leads 10.16 mm apart, 0.8 mm holes (the generator's 1.0 mm hole passes them)"},
       "pads": [
         {"pinId": "1", "x": -5.08, "y": 0},
         {"pinId": "2", "x": 5.08, "y": 0}
@@ -401,7 +401,7 @@
     "terminal-block-2p": {
       "kicadFootprint": "TerminalBlock:TerminalBlock_bornier-2_P5.08mm",
       "bodyMm": {"w": 12, "h": 10},
-      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "fit": {"status": "unverified_variant", "reason": "Pad count and the 5.08 mm pitch match KiCad TerminalBlock.pretty/TerminalBlock_bornier-2_P5.08mm.kicad_mod, but that footprint drills 1.52 mm holes and the generator drills 1.0 mm, which a screw terminal's pins may not pass through."},
       "pads": [
         {"pinId": "1", "x": -2.54, "y": 0},
         {"pinId": "2", "x": 2.54, "y": 0}
@@ -410,7 +410,7 @@
     "terminal-block-2p-dc": {
       "kicadFootprint": "TerminalBlock:TerminalBlock_bornier-2_P5.08mm",
       "bodyMm": {"w": 12, "h": 10},
-      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "fit": {"status": "unverified_variant", "reason": "Pad count and the 5.08 mm pitch match KiCad TerminalBlock.pretty/TerminalBlock_bornier-2_P5.08mm.kicad_mod, but that footprint drills 1.52 mm holes and the generator drills 1.0 mm, which a screw terminal's pins may not pass through."},
       "pads": [
         {"pinId": "V+", "x": -2.54, "y": 0},
         {"pinId": "GND", "x": 2.54, "y": 0}
@@ -419,7 +419,7 @@
     "terminal-block-4p": {
       "kicadFootprint": "TerminalBlock:TerminalBlock_bornier-4_P5.08mm",
       "bodyMm": {"w": 22, "h": 10},
-      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "fit": {"status": "unverified_variant", "reason": "Pad count and the 5.08 mm pitch match KiCad TerminalBlock.pretty/TerminalBlock_bornier-4_P5.08mm.kicad_mod, but that footprint drills 1.52 mm holes and the generator drills 1.0 mm, which a screw terminal's pins may not pass through."},
       "pads": [
         {"pinId": "COIL1_A", "x": -7.62, "y": 0},
         {"pinId": "COIL1_B", "x": -2.54, "y": 0},
@@ -489,7 +489,7 @@
     "dht11": {
       "kicadFootprint": "Sensor:DHT11-4PIN",
       "bodyMm": {"w": 15, "h": 12},
-      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "fit": {"status": "verified_against", "verified_against": "Aosong DHT11 datasheet: bare sensor with four pins at 2.54 mm in the order VCC, DATA, NC, GND. Layout taken from the maker's datasheet as documented; not machine-read in this run. A three-pin breakout board of the same sensor would not match."},
       "pads": [
         {"pinId": "VCC", "x": -3.81, "y": 0},
         {"pinId": "DATA", "x": -1.27, "y": 0},
