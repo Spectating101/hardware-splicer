@@ -119,6 +119,18 @@ An initial full attempt was interrupted after missing CLI subprocess dependencie
 
 The regenerated baseline now includes **22 files and 106 independent checks**, plus the ZIP and standalone requirements evaluator. The earlier digital-completion receipt above remains historical evidence for its pinned source commit; the [new completion record](status/generated/digital-project-completion-2026-11-17.json) records the current source, archive, tests, four-revision exercise, native follow-up and screenshots. The three original local work files remain byte-identical and uncommitted. All changes remain local; no GitHub push, PR or merge was performed.
 
+### Backend engine completion — November 17
+
+The user has deferred app and frontend work. Commit `406d2142` adds a shared `DigitalStudyEngine`, exposed through the Python SDK and installed `hs-digital` CLI. It creates projects, resolves bounded requirements, submits and executes saved revisions, compares results, audits evidence, and exports verified packages without starting an HTTP server or browser. The HTTP adapter delegates to these same backend rules. No frontend files were changed in this pass; the earlier frontend work remains separate from this verification.
+
+Job claims now have durable random attempt identities. Late completion, failure or publication from a superseded attempt cannot overwrite a retry, including when wall-clock timestamps are identical. Existing databases migrate additively. Separate producer and worker processes share the queue, project-scoped workers leave other tasks queued, and opening an engine for inspection does not recover or stop another worker.
+
+The native headless acceptance test creates three saved revisions: the **234.9 g** baseline, a passing **244.9 g** study with **10 g** of payload, and the same model rejected by a tightened **240 g** limit. The last computation succeeds as a job while returning failed engineering requirements and CLI exit code **2**. Backend comparison identifies both regressed mass checks. Native audit preserves the original receipt, failed designs remain auditable and exportable, and earlier revisions remain unchanged. The installed CLI and SDK were also exercised from `/tmp` with `PYTHONPATH` empty.
+
+The complete root suite on `406d2142`, including the three preserved local files, passes in one invocation: **4,317 passed, three skipped, zero failures**, in **1,351.92 seconds**. Native CAD, physics, KiCad, vendor-library, public-source and headless routing profiles were enabled. The only skips are the three opt-in live-vision tests; all **27** new backend regression cases passed. No frontend build or browser testing was needed for this backend change.
+
+The [backend verification receipt](status/generated/headless-backend-completion-2026-11-17.json) records source and test hashes, exact skip reasons, attempt identities, comparison results, artifact audit and export. The [engine guide](ENGINE.md#headless-digital-engineering) documents Python and CLI usage. HS-3G-B remains a bounded registered digital proving case; this step does not establish arbitrary hardware redesign or physical validation. The original three local files remain byte-identical and uncommitted. Changes remain local; no GitHub push, PR or merge was performed.
+
 ## Useful starting commands
 
 From the repository root:

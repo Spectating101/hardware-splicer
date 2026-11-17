@@ -1,0 +1,1905 @@
+{
+  "backend_regressions_in_full_suite": [
+    "tests.test_digital_engine::test_headless_state_exposes_hashed_artifacts_without_http_links",
+    "tests.test_digital_engine::test_cached_claims_cannot_override_the_verified_result[summary]",
+    "tests.test_digital_engine::test_cached_claims_cannot_override_the_verified_result[requirements]",
+    "tests.test_digital_engine::test_cached_claims_cannot_override_the_verified_result[lineage]",
+    "tests.test_digital_engine::test_cached_claims_cannot_override_the_verified_result[attempt]",
+    "tests.test_digital_engine::test_cached_claims_cannot_override_the_verified_result[seal_type]",
+    "tests.test_digital_engine::test_history_uses_the_archived_contract_when_current_defaults_change",
+    "tests.test_digital_engine::test_changed_telemetry_is_rejected_before_export",
+    "tests.test_digital_engine::test_zip_inventory_is_checked_even_if_its_outer_hash_is_resealed",
+    "tests.test_digital_engine::test_export_never_overwrites_existing_files_or_revisions",
+    "tests.test_digital_engine::test_unavailable_runtime_never_queues_or_publishes_a_revision",
+    "tests.test_digital_engine::test_native_audit_timeout_does_not_rewrite_published_evidence",
+    "tests.test_digital_engine::test_boolean_revision_is_rejected_by_both_python_and_http",
+    "tests.test_digital_engine::test_retry_cannot_reset_a_job_completed_after_preflight",
+    "tests.test_digital_engine::test_opening_a_second_engine_does_not_recover_or_stop_another_worker",
+    "tests.test_digital_engine::test_request_id_is_shared_between_direct_engine_and_http",
+    "tests.test_digital_engine::test_invalid_large_numeric_requirements_do_not_escape_validation",
+    "tests.test_digital_engine::test_retry_is_project_scoped_and_refuses_stale_base",
+    "tests.test_digital_engine::test_cli_reads_and_exports_without_an_api_process",
+    "tests.test_digital_engine::test_native_headless_pipeline_persists_compares_audits_and_exports_failed_design",
+    "tests.test_job_attempt_identity::test_existing_database_is_migrated_without_losing_jobs",
+    "tests.test_job_attempt_identity::test_attempt_identity_changes_even_when_clock_is_frozen",
+    "tests.test_job_attempt_identity::test_real_worker_late_callback_cannot_overwrite_retry[complete]",
+    "tests.test_job_attempt_identity::test_real_worker_late_callback_cannot_overwrite_retry[fail]",
+    "tests.test_job_attempt_identity::test_two_stores_submit_one_idempotent_job",
+    "tests.test_job_attempt_identity::test_scoped_worker_leaves_other_projects_and_task_types_queued",
+    "tests.test_job_attempt_identity::test_interrupted_headless_worker_finishes_its_own_attempt"
+  ],
+  "backend_step_complete": true,
+  "complete_root_suite": {
+    "errors": 0,
+    "failures": 0,
+    "passed": 4317,
+    "path": ".cache/hardware-splicer/digital-backend-20261117/full.xml",
+    "seconds": 1351.734,
+    "sha256": "8b2dd3d336a2c4f6127c2090be19563b54f19713ef1f1e96d1d131255cd0817b",
+    "skip_reasons": {
+      "tests.test_donor_board_vision_live_optional::test_live_donor_board_vision_smoke": "set HARDWARE_SPLICER_RUN_VISION_LIVE=1 to run live donor vision",
+      "tests.test_vision_gemini::test_gemini_live_smoke_optional": "set HARDWARE_SPLICER_GEMINI_LIVE_TEST=1 to run live Gemini smoke test",
+      "tests.test_vision_live_optional::test_live_vision_returns_structured_report": "set HARDWARE_SPLICER_RUN_VISION_LIVE=1 to run live vision"
+    },
+    "skipped": 3,
+    "tests": 4320
+  },
+  "date": "2026-11-17",
+  "development_native_focused_suite": {
+    "errors": 0,
+    "failures": 0,
+    "passed": 53,
+    "path": ".cache/hardware-splicer/digital-backend-20261117/focused.xml",
+    "seconds": 270.317,
+    "sha256": "f0799b8e1c23b43bc6a1815c726cb721ecf8cbac18d7a5521d185c275776e2c1",
+    "skip_reasons": {},
+    "skipped": 0,
+    "tests": 53
+  },
+  "execution": {
+    "blas_threads": 1,
+    "cpu_affinity": [
+      0,
+      3
+    ],
+    "display": "",
+    "github_mutations_performed": false,
+    "remote_cluster_status": "Three remote workers were SSH-unreachable; bounded local verification used instead.",
+    "remote_cluster_used": false,
+    "root_log_path": ".cache/hardware-splicer/digital-backend-20261117/full.log",
+    "root_log_sha256": "5f8cafe04506b36f283c82d71e09be315aa2440a6876aa86fe229f598408ad73",
+    "root_profile_runner": ".cache/hardware-splicer/extended-verification-20261116/run_native_profile.py",
+    "root_profile_runner_sha256": "1e5f41fe5028f814555d5c41c1b1b357c1fc49311cee361dd04851519935de94",
+    "root_pytest_args": [
+      "-q",
+      "--basetemp=.cache/hardware-splicer/digital-backend-20261117/full-tmp",
+      "--junitxml=.cache/hardware-splicer/digital-backend-20261117/full.xml"
+    ],
+    "root_python": "/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.cache/hardware-splicer/digital-native-venv/bin/python",
+    "root_suite_native_profiles": [
+      "CadQuery",
+      "PyBullet",
+      "KiCad pcbnew",
+      "pinned vendor libraries",
+      "live public sources",
+      "headless freerouting"
+    ],
+    "test_workers": 1,
+    "wayland_display": ""
+  },
+  "final_non_native_focused_suite": {
+    "errors": 0,
+    "failures": 0,
+    "passed": 57,
+    "path": ".cache/hardware-splicer/digital-backend-20261117/fast-final.xml",
+    "seconds": 64.012,
+    "sha256": "fd4cbf003cc7e3bc5f3635949b3031b6287c778d9e1aaab897f6f4eb995a20be",
+    "skip_reasons": {},
+    "skipped": 0,
+    "tests": 57
+  },
+  "frontend_changed": false,
+  "headless_acceptance": {
+    "artifact_audit": {
+      "artifact_integrity": true,
+      "checks": {
+        "ASSEMBLY.png": true,
+        "EXPLODED.png": true,
+        "FLIGHT.gif": true,
+        "HS-LICENSE.txt": true,
+        "HS3G_B_ASSEMBLY.glb": true,
+        "HS3G_B_ASSEMBLY.step": true,
+        "README.md": true,
+        "REQUIREMENTS.txt": true,
+        "RERUN.py": true,
+        "SIMULATION.json": true,
+        "STUDY.zip": true,
+        "TELEMETRY.png": true,
+        "THREE-LICENSE.txt": true,
+        "VIEWER.html": true,
+        "hs3g_sim.py": true,
+        "mass_plus_5g.csv": true,
+        "model.json": true,
+        "motor_failure.csv": true,
+        "nominal.csv": true,
+        "simulation-contract.json": true,
+        "study_requirements.py": true,
+        "thrust-table.json": true,
+        "verification.json": true,
+        "verified_claims_and_revision_identity": true,
+        "zip_contents_match_verified_files": true
+      },
+      "error": null,
+      "native_verification": {
+        "performed": false,
+        "requested": false
+      },
+      "ok": true,
+      "physical_authority_granted": false,
+      "project_id": "digital-870eb66dde0b42dcb7854ddc029fafbb",
+      "requirements_met": false,
+      "revision": 3,
+      "run_id": "8c4d4c7e5d7b4b73bed7fed357dbca9e",
+      "schema": "hardware_splicer.digital_audit.v1"
+    },
+    "comparison": {
+      "after_revision": 3,
+      "before_revision": 2,
+      "constraints": [
+        {
+          "after": {
+            "actual": 244.9,
+            "id": "nominal_mass",
+            "label": "Nominal mass",
+            "limit": 240.0,
+            "margin": -4.900000000000006,
+            "passed": false,
+            "unit": "g"
+          },
+          "before": {
+            "actual": 244.9,
+            "id": "nominal_mass",
+            "label": "Nominal mass",
+            "limit": 250.0,
+            "margin": 5.099999999999994,
+            "passed": true,
+            "unit": "g"
+          },
+          "id": "nominal_mass",
+          "transition": "regressed"
+        },
+        {
+          "after": {
+            "actual": 249.9,
+            "id": "mass_uncertainty",
+            "label": "Mass with 5 g uncertainty",
+            "limit": 240.0,
+            "margin": -9.900000000000006,
+            "passed": false,
+            "unit": "g"
+          },
+          "before": {
+            "actual": 249.9,
+            "id": "mass_uncertainty",
+            "label": "Mass with 5 g uncertainty",
+            "limit": 250.0,
+            "margin": 0.09999999999999432,
+            "passed": true,
+            "unit": "g"
+          },
+          "id": "mass_uncertainty",
+          "transition": "regressed"
+        },
+        {
+          "after": {
+            "actual": 0.003518300906597968,
+            "id": "inertia_approximation",
+            "label": "Relative omitted products of inertia",
+            "limit": 0.05,
+            "margin": 0.04648169909340204,
+            "passed": true,
+            "unit": ""
+          },
+          "before": {
+            "actual": 0.003518300906597968,
+            "id": "inertia_approximation",
+            "label": "Relative omitted products of inertia",
+            "limit": 0.05,
+            "margin": 0.04648169909340204,
+            "passed": true,
+            "unit": ""
+          },
+          "id": "inertia_approximation",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": null,
+            "id": "nominal_controlled_ground_contact",
+            "label": "nominal \u00b7 controlled ground contact",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          "before": {
+            "actual": null,
+            "id": "nominal_controlled_ground_contact",
+            "label": "nominal \u00b7 controlled ground contact",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          "id": "nominal_controlled_ground_contact",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": 0.03861389610204398,
+            "id": "nominal_gust_recovery_error_m",
+            "label": "nominal \u00b7 gust recovery error m",
+            "limit": 0.07,
+            "passed": true,
+            "unit": "m"
+          },
+          "before": {
+            "actual": 0.03861389610204398,
+            "id": "nominal_gust_recovery_error_m",
+            "label": "nominal \u00b7 gust recovery error m",
+            "limit": 0.07,
+            "passed": true,
+            "unit": "m"
+          },
+          "id": "nominal_gust_recovery_error_m",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": 0.011227909665295088,
+            "id": "nominal_hover_error_m",
+            "label": "nominal \u00b7 hover error m",
+            "limit": 0.06,
+            "passed": true,
+            "unit": "m"
+          },
+          "before": {
+            "actual": 0.011227909665295088,
+            "id": "nominal_hover_error_m",
+            "label": "nominal \u00b7 hover error m",
+            "limit": 0.06,
+            "passed": true,
+            "unit": "m"
+          },
+          "id": "nominal_hover_error_m",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": 0.11676113873633127,
+            "id": "nominal_landing_speed_m_s",
+            "label": "nominal \u00b7 landing speed m s",
+            "limit": 0.15,
+            "passed": true,
+            "unit": ""
+          },
+          "before": {
+            "actual": 0.11676113873633127,
+            "id": "nominal_landing_speed_m_s",
+            "label": "nominal \u00b7 landing speed m s",
+            "limit": 0.15,
+            "passed": true,
+            "unit": ""
+          },
+          "id": "nominal_landing_speed_m_s",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": 4.51675793228596,
+            "id": "nominal_max_tracking_tilt_deg",
+            "label": "nominal \u00b7 max tracking tilt deg",
+            "limit": 35.0,
+            "passed": true,
+            "unit": ""
+          },
+          "before": {
+            "actual": 4.51675793228596,
+            "id": "nominal_max_tracking_tilt_deg",
+            "label": "nominal \u00b7 max tracking tilt deg",
+            "limit": 35.0,
+            "passed": true,
+            "unit": ""
+          },
+          "id": "nominal_max_tracking_tilt_deg",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": 0.05568679139910498,
+            "id": "nominal_tracking_rms_m",
+            "label": "nominal \u00b7 tracking rms m",
+            "limit": 0.1,
+            "passed": true,
+            "unit": "m"
+          },
+          "before": {
+            "actual": 0.05568679139910498,
+            "id": "nominal_tracking_rms_m",
+            "label": "nominal \u00b7 tracking rms m",
+            "limit": 0.1,
+            "passed": true,
+            "unit": "m"
+          },
+          "id": "nominal_tracking_rms_m",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": null,
+            "id": "nominal_yaw_tracking",
+            "label": "nominal \u00b7 yaw tracking",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          "before": {
+            "actual": null,
+            "id": "nominal_yaw_tracking",
+            "label": "nominal \u00b7 yaw tracking",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          "id": "nominal_yaw_tracking",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": null,
+            "id": "mass_plus_5g_controlled_ground_contact",
+            "label": "mass plus 5g \u00b7 controlled ground contact",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          "before": {
+            "actual": null,
+            "id": "mass_plus_5g_controlled_ground_contact",
+            "label": "mass plus 5g \u00b7 controlled ground contact",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          "id": "mass_plus_5g_controlled_ground_contact",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": 0.03884022919704738,
+            "id": "mass_plus_5g_gust_recovery_error_m",
+            "label": "mass plus 5g \u00b7 gust recovery error m",
+            "limit": 0.07,
+            "passed": true,
+            "unit": "m"
+          },
+          "before": {
+            "actual": 0.03884022919704738,
+            "id": "mass_plus_5g_gust_recovery_error_m",
+            "label": "mass plus 5g \u00b7 gust recovery error m",
+            "limit": 0.07,
+            "passed": true,
+            "unit": "m"
+          },
+          "id": "mass_plus_5g_gust_recovery_error_m",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": 0.0070101721972777,
+            "id": "mass_plus_5g_hover_error_m",
+            "label": "mass plus 5g \u00b7 hover error m",
+            "limit": 0.06,
+            "passed": true,
+            "unit": "m"
+          },
+          "before": {
+            "actual": 0.0070101721972777,
+            "id": "mass_plus_5g_hover_error_m",
+            "label": "mass plus 5g \u00b7 hover error m",
+            "limit": 0.06,
+            "passed": true,
+            "unit": "m"
+          },
+          "id": "mass_plus_5g_hover_error_m",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": 0.11846323168558891,
+            "id": "mass_plus_5g_landing_speed_m_s",
+            "label": "mass plus 5g \u00b7 landing speed m s",
+            "limit": 0.15,
+            "passed": true,
+            "unit": ""
+          },
+          "before": {
+            "actual": 0.11846323168558891,
+            "id": "mass_plus_5g_landing_speed_m_s",
+            "label": "mass plus 5g \u00b7 landing speed m s",
+            "limit": 0.15,
+            "passed": true,
+            "unit": ""
+          },
+          "id": "mass_plus_5g_landing_speed_m_s",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": 4.49036694459354,
+            "id": "mass_plus_5g_max_tracking_tilt_deg",
+            "label": "mass plus 5g \u00b7 max tracking tilt deg",
+            "limit": 35.0,
+            "passed": true,
+            "unit": ""
+          },
+          "before": {
+            "actual": 4.49036694459354,
+            "id": "mass_plus_5g_max_tracking_tilt_deg",
+            "label": "mass plus 5g \u00b7 max tracking tilt deg",
+            "limit": 35.0,
+            "passed": true,
+            "unit": ""
+          },
+          "id": "mass_plus_5g_max_tracking_tilt_deg",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": 0.05600399473690476,
+            "id": "mass_plus_5g_tracking_rms_m",
+            "label": "mass plus 5g \u00b7 tracking rms m",
+            "limit": 0.1,
+            "passed": true,
+            "unit": "m"
+          },
+          "before": {
+            "actual": 0.05600399473690476,
+            "id": "mass_plus_5g_tracking_rms_m",
+            "label": "mass plus 5g \u00b7 tracking rms m",
+            "limit": 0.1,
+            "passed": true,
+            "unit": "m"
+          },
+          "id": "mass_plus_5g_tracking_rms_m",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": null,
+            "id": "mass_plus_5g_yaw_tracking",
+            "label": "mass plus 5g \u00b7 yaw tracking",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          "before": {
+            "actual": null,
+            "id": "mass_plus_5g_yaw_tracking",
+            "label": "mass plus 5g \u00b7 yaw tracking",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          "id": "mass_plus_5g_yaw_tracking",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": null,
+            "id": "motor_failure_failure_reached_ground",
+            "label": "motor failure \u00b7 failure reached ground",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          "before": {
+            "actual": null,
+            "id": "motor_failure_failure_reached_ground",
+            "label": "motor failure \u00b7 failure reached ground",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          "id": "motor_failure_failure_reached_ground",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": null,
+            "id": "motor_failure_injected_motor_stopped",
+            "label": "motor failure \u00b7 injected motor stopped",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          "before": {
+            "actual": null,
+            "id": "motor_failure_injected_motor_stopped",
+            "label": "motor failure \u00b7 injected motor stopped",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          "id": "motor_failure_injected_motor_stopped",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": null,
+            "id": "motor_failure_loss_of_control_observed",
+            "label": "motor failure \u00b7 loss of control observed",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          "before": {
+            "actual": null,
+            "id": "motor_failure_loss_of_control_observed",
+            "label": "motor failure \u00b7 loss of control observed",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          "id": "motor_failure_loss_of_control_observed",
+          "transition": "unchanged"
+        }
+      ],
+      "metrics": {
+        "centre_of_mass_mm": {
+          "after": [
+            0.6553695242724364,
+            -4.789969349420739e-08,
+            0.33867257643578386
+          ],
+          "before": [
+            0.6553695242724364,
+            -4.789969349420739e-08,
+            0.33867257643578386
+          ],
+          "delta": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "consumed_mah_est": {
+          "after": 21.632718805218307,
+          "before": 21.632718805218307,
+          "delta": 0.0
+        },
+        "gust_recovery_error_m": {
+          "after": 0.03861389610204398,
+          "before": 0.03861389610204398,
+          "delta": 0.0
+        },
+        "inertia_diagonal_kg_m2": {
+          "after": [
+            0.00024256804451733044,
+            0.00023463995487729572,
+            0.0003094348437591488
+          ],
+          "before": [
+            0.00024256804451733044,
+            0.00023463995487729572,
+            0.0003094348437591488
+          ],
+          "delta": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "mass_g": {
+          "after": 244.9,
+          "before": 244.9,
+          "delta": 0.0
+        },
+        "mass_margin_g": {
+          "after": -4.900000000000006,
+          "before": 5.099999999999994,
+          "delta": -10.0
+        },
+        "peak_current_a_est": {
+          "after": 3.2744347095357327,
+          "before": 3.2744347095357327,
+          "delta": 0.0
+        },
+        "tracking_rms_m": {
+          "after": 0.05568679139910498,
+          "before": 0.05568679139910498,
+          "delta": 0.0
+        }
+      },
+      "physical_authority_granted": false,
+      "physical_work_requested": false,
+      "project_id": "digital-870eb66dde0b42dcb7854ddc029fafbb",
+      "requirements_changes": {
+        "max_mass_g": {
+          "after": 240.0,
+          "before": 250.0,
+          "delta": -10.0
+        }
+      },
+      "requirements_met": {
+        "after": false,
+        "before": true
+      },
+      "same_engine_sources": true,
+      "schema": "hardware_splicer.digital_comparison.v1"
+    },
+    "earlier_revisions_unchanged": true,
+    "export": {
+      "ok": true,
+      "path": "/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.cache/hardware-splicer/digital-backend-20261117/HEADLESS_FAILED_REQUIREMENTS.zip",
+      "physical_authority_granted": false,
+      "project_id": "digital-870eb66dde0b42dcb7854ddc029fafbb",
+      "requirements_met": false,
+      "revision": 3,
+      "sha256": "e88e7514e4816ab1219885a9f3e380e7e473d4c7cb1c9e9098fb4409b08270a4"
+    },
+    "failed_revision_cli_exit_code": 2,
+    "failed_revision_job_status": "succeeded",
+    "failed_revision_mass_limit_g": 240.0,
+    "installed_cli_and_sdk_check_cwd": "/tmp",
+    "installed_cli_exercised_outside_repo_without_pythonpath": true,
+    "installed_cli_pythonpath": "",
+    "jobs": [
+      {
+        "attempt_id": "83def60c8a7f43fc9431527bbb6d66f4",
+        "job_id": "5e52970b578552b386549075af956b92",
+        "result": {
+          "artifact_integrity": true,
+          "project_id": "digital-870eb66dde0b42dcb7854ddc029fafbb",
+          "requirements_met": true,
+          "revision": 2,
+          "run_id": "7b6cbb7225fd4de3b935b68f3fecad90"
+        },
+        "status": "succeeded"
+      },
+      {
+        "attempt_id": "13e00749490a4481b5f96e698f148b0d",
+        "job_id": "24f2411a22415e5abb84c747288f27dc",
+        "result": {
+          "artifact_integrity": true,
+          "project_id": "digital-870eb66dde0b42dcb7854ddc029fafbb",
+          "requirements_met": false,
+          "revision": 3,
+          "run_id": "8c4d4c7e5d7b4b73bed7fed357dbca9e"
+        },
+        "status": "succeeded"
+      }
+    ],
+    "latest_study": {
+      "artifact_manifest": {
+        "ASSEMBLY.png": {
+          "bytes": 19683,
+          "sha256": "3f411060d0f0309df0addbace5bed0030d8b4896b020e47e39acd845fdc8d9c9"
+        },
+        "EXPLODED.png": {
+          "bytes": 24503,
+          "sha256": "31974fb77ca27de891808780d36b722925d09e4aaaffb5caf0d9d338521e43bc"
+        },
+        "FLIGHT.gif": {
+          "bytes": 676716,
+          "sha256": "c1785b8274e8bbced61122f146f1118093313319a23786faf236e6a839b754e0"
+        },
+        "HS-LICENSE.txt": {
+          "bytes": 1102,
+          "sha256": "e243ac85fd7b0580eba9147640bd18047c3f4f799def65081f95b3a929518be6"
+        },
+        "HS3G_B_ASSEMBLY.glb": {
+          "bytes": 572420,
+          "sha256": "598f5eb4909cc43eb962005444810f4bd651c8f9a241d4e73ad0b3caa533a595"
+        },
+        "HS3G_B_ASSEMBLY.step": {
+          "bytes": 1090655,
+          "sha256": "41b12715e3ff60f1720201a952e5cc350b75c52cf4a144675d735735646c73be"
+        },
+        "README.md": {
+          "bytes": 4187,
+          "sha256": "caf34bbb48f6f896842e9551db9d5495604623082a293b8737c16fcbb0d554cf"
+        },
+        "REQUIREMENTS.txt": {
+          "bytes": 39,
+          "sha256": "c0373f10071c890ac102a697596523988db5af5df536fa89726ee278df141c7c"
+        },
+        "RERUN.py": {
+          "bytes": 2401,
+          "sha256": "eeaa9c881783e66b6fa07a9bec4974b62a8c8ced7af67cf78a5b6ac4843fa554"
+        },
+        "SIMULATION.json": {
+          "bytes": 7665,
+          "sha256": "4e5232d24cc19f80dfe5c0f8810ff7ba6862e3aa5ee5fe30c91f08490a55ad6e"
+        },
+        "STUDY.zip": {
+          "bytes": 5872214,
+          "sha256": "e88e7514e4816ab1219885a9f3e380e7e473d4c7cb1c9e9098fb4409b08270a4"
+        },
+        "TELEMETRY.png": {
+          "bytes": 197799,
+          "sha256": "73db2d90785e0f2058b3f16127007a17419916a6dfe6a7315aeffb4a457619f8"
+        },
+        "THREE-LICENSE.txt": {
+          "bytes": 1081,
+          "sha256": "852e0e8699169bf9f6fdc6bda3e682d078dcbc738b5d33e74df594721bff271d"
+        },
+        "VIEWER.html": {
+          "bytes": 3406711,
+          "sha256": "23cfe88975368cc219bc4a22f8d938f5c431be6e3592fb3f87142984e1556d5e"
+        },
+        "hs3g_sim.py": {
+          "bytes": 19928,
+          "sha256": "8dc63892f8681daf5aa05f1db4d43e9842f2db276fa792f4f9ce883f61f1a874"
+        },
+        "mass_plus_5g.csv": {
+          "bytes": 3474820,
+          "sha256": "f3bb69354430fc1d1cf8651dd080ecfac528bd65c1b9a50175dad623a7fd9ea0"
+        },
+        "model.json": {
+          "bytes": 3430153,
+          "sha256": "70995a78addd8eeb71b25ff12f13a9d572bad692a16e12feda85196c625bc075"
+        },
+        "motor_failure.csv": {
+          "bytes": 1495971,
+          "sha256": "a31f5280bf38653b84fb499fef49da3d9472dab91d3dde8700ac2cbe1c0bb1c5"
+        },
+        "nominal.csv": {
+          "bytes": 3477063,
+          "sha256": "cd9fd6a33bb4877436b75ff1eba3f175cdb4324669bf80c09b05c4b947ad94e6"
+        },
+        "simulation-contract.json": {
+          "bytes": 2950,
+          "sha256": "ddc9b3892163f47c7856546c8fb5f05ce3b0e710f1538a7130b22218eee0c01c"
+        },
+        "study_requirements.py": {
+          "bytes": 3563,
+          "sha256": "a002f285c2d4f251b9eaf5e575d01958240a1535e3ed509e3882209304200da2"
+        },
+        "thrust-table.json": {
+          "bytes": 1923,
+          "sha256": "836ea2d1a08e9fa5f32b899de5a8f8f56e12065afe4a9292420aadd6acf4261d"
+        },
+        "verification.json": {
+          "bytes": 15227,
+          "sha256": "06554aea6742fa142ae83c2d8abd723aeec7331e5d40c8dcf78acc583839a7ee"
+        }
+      },
+      "attempt_id": "13e00749490a4481b5f96e698f148b0d",
+      "change_request": "Updated study requirements",
+      "job_id": "24f2411a22415e5abb84c747288f27dc",
+      "parent_revision": 2,
+      "revision": 3,
+      "run_id": "8c4d4c7e5d7b4b73bed7fed357dbca9e",
+      "saved_at": "2026-11-17T10:33:15.491388+00:00",
+      "summary": {
+        "artifact_integrity": true,
+        "centre_of_mass_mm": [
+          0.6553695242724364,
+          -4.789969349420739e-08,
+          0.33867257643578386
+        ],
+        "constraints": [
+          {
+            "actual": 244.9,
+            "id": "nominal_mass",
+            "label": "Nominal mass",
+            "limit": 240.0,
+            "margin": -4.900000000000006,
+            "passed": false,
+            "unit": "g"
+          },
+          {
+            "actual": 249.9,
+            "id": "mass_uncertainty",
+            "label": "Mass with 5 g uncertainty",
+            "limit": 240.0,
+            "margin": -9.900000000000006,
+            "passed": false,
+            "unit": "g"
+          },
+          {
+            "actual": 0.003518300906597968,
+            "id": "inertia_approximation",
+            "label": "Relative omitted products of inertia",
+            "limit": 0.05,
+            "margin": 0.04648169909340204,
+            "passed": true,
+            "unit": ""
+          },
+          {
+            "actual": null,
+            "id": "nominal_controlled_ground_contact",
+            "label": "nominal \u00b7 controlled ground contact",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          {
+            "actual": 0.03861389610204398,
+            "id": "nominal_gust_recovery_error_m",
+            "label": "nominal \u00b7 gust recovery error m",
+            "limit": 0.07,
+            "passed": true,
+            "unit": "m"
+          },
+          {
+            "actual": 0.011227909665295088,
+            "id": "nominal_hover_error_m",
+            "label": "nominal \u00b7 hover error m",
+            "limit": 0.06,
+            "passed": true,
+            "unit": "m"
+          },
+          {
+            "actual": 0.11676113873633127,
+            "id": "nominal_landing_speed_m_s",
+            "label": "nominal \u00b7 landing speed m s",
+            "limit": 0.15,
+            "passed": true,
+            "unit": ""
+          },
+          {
+            "actual": 4.51675793228596,
+            "id": "nominal_max_tracking_tilt_deg",
+            "label": "nominal \u00b7 max tracking tilt deg",
+            "limit": 35.0,
+            "passed": true,
+            "unit": ""
+          },
+          {
+            "actual": 0.05568679139910498,
+            "id": "nominal_tracking_rms_m",
+            "label": "nominal \u00b7 tracking rms m",
+            "limit": 0.1,
+            "passed": true,
+            "unit": "m"
+          },
+          {
+            "actual": null,
+            "id": "nominal_yaw_tracking",
+            "label": "nominal \u00b7 yaw tracking",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          {
+            "actual": null,
+            "id": "mass_plus_5g_controlled_ground_contact",
+            "label": "mass plus 5g \u00b7 controlled ground contact",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          {
+            "actual": 0.03884022919704738,
+            "id": "mass_plus_5g_gust_recovery_error_m",
+            "label": "mass plus 5g \u00b7 gust recovery error m",
+            "limit": 0.07,
+            "passed": true,
+            "unit": "m"
+          },
+          {
+            "actual": 0.0070101721972777,
+            "id": "mass_plus_5g_hover_error_m",
+            "label": "mass plus 5g \u00b7 hover error m",
+            "limit": 0.06,
+            "passed": true,
+            "unit": "m"
+          },
+          {
+            "actual": 0.11846323168558891,
+            "id": "mass_plus_5g_landing_speed_m_s",
+            "label": "mass plus 5g \u00b7 landing speed m s",
+            "limit": 0.15,
+            "passed": true,
+            "unit": ""
+          },
+          {
+            "actual": 4.49036694459354,
+            "id": "mass_plus_5g_max_tracking_tilt_deg",
+            "label": "mass plus 5g \u00b7 max tracking tilt deg",
+            "limit": 35.0,
+            "passed": true,
+            "unit": ""
+          },
+          {
+            "actual": 0.05600399473690476,
+            "id": "mass_plus_5g_tracking_rms_m",
+            "label": "mass plus 5g \u00b7 tracking rms m",
+            "limit": 0.1,
+            "passed": true,
+            "unit": "m"
+          },
+          {
+            "actual": null,
+            "id": "mass_plus_5g_yaw_tracking",
+            "label": "mass plus 5g \u00b7 yaw tracking",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          {
+            "actual": null,
+            "id": "motor_failure_failure_reached_ground",
+            "label": "motor failure \u00b7 failure reached ground",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          {
+            "actual": null,
+            "id": "motor_failure_injected_motor_stopped",
+            "label": "motor failure \u00b7 injected motor stopped",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          {
+            "actual": null,
+            "id": "motor_failure_loss_of_control_observed",
+            "label": "motor failure \u00b7 loss of control observed",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          }
+        ],
+        "engine": "PyBullet DIRECT, 240 Hz native rigid-body integration",
+        "inertia_diagonal_kg_m2": [
+          0.00024256804451733044,
+          0.00023463995487729572,
+          0.0003094348437591488
+        ],
+        "mass_g": 244.9,
+        "mass_margin_g": -4.900000000000006,
+        "metrics": {
+          "consumed_mah_est": 21.632718805218307,
+          "fault_detected": false,
+          "final_position_m": [
+            -0.012598318376996959,
+            0.00810393882585503,
+            0.034824077792082436
+          ],
+          "force_balance_rms_m_s2": 1.437752216467839e-15,
+          "gust_recovery_error_m": 0.03861389610204398,
+          "hover_error_m": 0.011227909665295088,
+          "landed_contact": true,
+          "landing_speed_m_s": 0.11676113873633127,
+          "max_rpm": 15893.576217638314,
+          "max_tracking_tilt_deg": 4.51675793228596,
+          "peak_current_a_est": 3.2744347095357327,
+          "position_velocity_rms_m_s": 4.391892054166246e-15,
+          "rows": 6720,
+          "seconds": 28.0,
+          "tracking_rms_m": 0.05568679139910498,
+          "yaw_error_at_hold_deg": 0.00024261186309118023
+        },
+        "note": "Ideal state feedback; low-throttle thrust/current extrapolation. Gust scale multiplies a declared [0.12, -0.08, 0] N force; it is not a wind-speed estimate.",
+        "parts": 33,
+        "physical_work_requested": false,
+        "requirements": {
+          "gust_scale": 1.0,
+          "max_mass_g": 240.0,
+          "payload_mass_g": 10.0
+        },
+        "requirements_met": false,
+        "scope_limits": [
+          "Parameterized representative, not a physically calibrated digital twin.",
+          "Native CAD frame; simplified component, propeller and collision geometry.",
+          "Motor thrust uses the retained maker table; behavior below its first row is quadratic extrapolation. These low-throttle missions operate below that first measured bench row.",
+          "Motor lag, yaw drag, linear drag and controller gains are declared assumptions.",
+          "Ideal full-state feedback; no sensor noise, GNSS/RF link, INAV SITL, flexible-frame, CFD or battery-chemistry simulation.",
+          "Controller is a simulation position PID with SO(3) attitude PD, not a deployable INAV flight profile.",
+          "No purchasing, machining, firmware flashing, physical motors or flight are part of the requested digital completion."
+        ],
+        "source_sha256": {
+          "build_digital.py": "bf456e0a8dd2f3673777f6b03c86e475b5683d3ea256ad5690b47ff611556bdf",
+          "hs3g_model.py": "d2794ccf6fa02698ae3d9c9f5a1c5064585ebc0cae4d562eeae9af03c1fd1b08",
+          "hs3g_sim.py": "8dc63892f8681daf5aa05f1db4d43e9842f2db276fa792f4f9ce883f61f1a874",
+          "rerun_simulation.py": "eeaa9c881783e66b6fa07a9bec4974b62a8c8ced7af67cf78a5b6ac4843fa554",
+          "simulation.json": "375a6850ab092febad3a95b6c62858c5f3dafbe227c719eb4fc3ff41cb56c340",
+          "study_requirements.py": "a002f285c2d4f251b9eaf5e575d01958240a1535e3ed509e3882209304200da2",
+          "vendor/HS-LICENSE.txt": "e243ac85fd7b0580eba9147640bd18047c3f4f799def65081f95b3a929518be6",
+          "vendor/THREE-LICENSE.txt": "852e0e8699169bf9f6fdc6bda3e682d078dcbc738b5d33e74df594721bff271d",
+          "vendor/provenance.json": "c214c89606f378e526678e3468e5a1cbf8d2da9f0d57261ccd0386380f3e6430",
+          "vendor/three.min.js": "170c6789f43217c96b3170f4b42fafe135de7f7cd48497a4218f9757ee1d49fa",
+          "verify_digital.py": "282175c118fb4573a53e17667292efef5fb2d23c788a93de43781ec800045173",
+          "viewer.html": "c8e410eccfe5717a38e53b045f77fae9b00d877613aaf84b018b8abe38d626b8"
+        }
+      }
+    },
+    "native_audit_preserved_original_receipt": true,
+    "no_http_server_browser_or_frontend_required": true,
+    "passing_payload_mass_g": 244.9,
+    "passing_study": {
+      "artifact_manifest": {
+        "ASSEMBLY.png": {
+          "bytes": 19683,
+          "sha256": "3f411060d0f0309df0addbace5bed0030d8b4896b020e47e39acd845fdc8d9c9"
+        },
+        "EXPLODED.png": {
+          "bytes": 24503,
+          "sha256": "31974fb77ca27de891808780d36b722925d09e4aaaffb5caf0d9d338521e43bc"
+        },
+        "FLIGHT.gif": {
+          "bytes": 676716,
+          "sha256": "c1785b8274e8bbced61122f146f1118093313319a23786faf236e6a839b754e0"
+        },
+        "HS-LICENSE.txt": {
+          "bytes": 1102,
+          "sha256": "e243ac85fd7b0580eba9147640bd18047c3f4f799def65081f95b3a929518be6"
+        },
+        "HS3G_B_ASSEMBLY.glb": {
+          "bytes": 572420,
+          "sha256": "598f5eb4909cc43eb962005444810f4bd651c8f9a241d4e73ad0b3caa533a595"
+        },
+        "HS3G_B_ASSEMBLY.step": {
+          "bytes": 1090655,
+          "sha256": "051bec13cebc27374ab6d33ad96eec6fd0dd9a901b6360025861d8acf02bfb08"
+        },
+        "README.md": {
+          "bytes": 4186,
+          "sha256": "43072431b279b883f86ad289b01f5158968b5ec83e9fcd908729c0b88db1d28e"
+        },
+        "REQUIREMENTS.txt": {
+          "bytes": 39,
+          "sha256": "c0373f10071c890ac102a697596523988db5af5df536fa89726ee278df141c7c"
+        },
+        "RERUN.py": {
+          "bytes": 2401,
+          "sha256": "eeaa9c881783e66b6fa07a9bec4974b62a8c8ced7af67cf78a5b6ac4843fa554"
+        },
+        "SIMULATION.json": {
+          "bytes": 7662,
+          "sha256": "c8e858ee5439f18925243c953afb2f729e8ebaaad971830e72f9bfdcd87f5743"
+        },
+        "STUDY.zip": {
+          "bytes": 5872188,
+          "sha256": "a35346f288cd2cfadf685fadcd2a9a7ef235ce8f905ba44f8c0c9862626d471c"
+        },
+        "TELEMETRY.png": {
+          "bytes": 197799,
+          "sha256": "73db2d90785e0f2058b3f16127007a17419916a6dfe6a7315aeffb4a457619f8"
+        },
+        "THREE-LICENSE.txt": {
+          "bytes": 1081,
+          "sha256": "852e0e8699169bf9f6fdc6bda3e682d078dcbc738b5d33e74df594721bff271d"
+        },
+        "VIEWER.html": {
+          "bytes": 3406711,
+          "sha256": "740c0e6ba4eaab69d9a83529919b8c5df390c813b67a35e7492b647543d8f21d"
+        },
+        "hs3g_sim.py": {
+          "bytes": 19928,
+          "sha256": "8dc63892f8681daf5aa05f1db4d43e9842f2db276fa792f4f9ce883f61f1a874"
+        },
+        "mass_plus_5g.csv": {
+          "bytes": 3474820,
+          "sha256": "f3bb69354430fc1d1cf8651dd080ecfac528bd65c1b9a50175dad623a7fd9ea0"
+        },
+        "model.json": {
+          "bytes": 3430153,
+          "sha256": "cd50d7183a3d1427a4acc10e16327a843832549b145661d6b00c5fc9179d08a9"
+        },
+        "motor_failure.csv": {
+          "bytes": 1495971,
+          "sha256": "a31f5280bf38653b84fb499fef49da3d9472dab91d3dde8700ac2cbe1c0bb1c5"
+        },
+        "nominal.csv": {
+          "bytes": 3477063,
+          "sha256": "cd9fd6a33bb4877436b75ff1eba3f175cdb4324669bf80c09b05c4b947ad94e6"
+        },
+        "simulation-contract.json": {
+          "bytes": 2950,
+          "sha256": "8e72bd70b0419fd7eb82199c767d372d9fc4bc77777e731f36f90859047141ab"
+        },
+        "study_requirements.py": {
+          "bytes": 3563,
+          "sha256": "a002f285c2d4f251b9eaf5e575d01958240a1535e3ed509e3882209304200da2"
+        },
+        "thrust-table.json": {
+          "bytes": 1923,
+          "sha256": "836ea2d1a08e9fa5f32b899de5a8f8f56e12065afe4a9292420aadd6acf4261d"
+        },
+        "verification.json": {
+          "bytes": 15101,
+          "sha256": "b47cef30c8655cda5ad639ebef744b734f13edd0e1bc66a20f6e4e0bd57f04b6"
+        }
+      },
+      "attempt_id": "83def60c8a7f43fc9431527bbb6d66f4",
+      "change_request": "Add 10 g of payload",
+      "job_id": "5e52970b578552b386549075af956b92",
+      "parent_revision": 1,
+      "revision": 2,
+      "run_id": "7b6cbb7225fd4de3b935b68f3fecad90",
+      "saved_at": "2026-11-17T10:32:14.316784+00:00",
+      "summary": {
+        "artifact_integrity": true,
+        "centre_of_mass_mm": [
+          0.6553695242724364,
+          -4.789969349420739e-08,
+          0.33867257643578386
+        ],
+        "constraints": [
+          {
+            "actual": 244.9,
+            "id": "nominal_mass",
+            "label": "Nominal mass",
+            "limit": 250.0,
+            "margin": 5.099999999999994,
+            "passed": true,
+            "unit": "g"
+          },
+          {
+            "actual": 249.9,
+            "id": "mass_uncertainty",
+            "label": "Mass with 5 g uncertainty",
+            "limit": 250.0,
+            "margin": 0.09999999999999432,
+            "passed": true,
+            "unit": "g"
+          },
+          {
+            "actual": 0.003518300906597968,
+            "id": "inertia_approximation",
+            "label": "Relative omitted products of inertia",
+            "limit": 0.05,
+            "margin": 0.04648169909340204,
+            "passed": true,
+            "unit": ""
+          },
+          {
+            "actual": null,
+            "id": "nominal_controlled_ground_contact",
+            "label": "nominal \u00b7 controlled ground contact",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          {
+            "actual": 0.03861389610204398,
+            "id": "nominal_gust_recovery_error_m",
+            "label": "nominal \u00b7 gust recovery error m",
+            "limit": 0.07,
+            "passed": true,
+            "unit": "m"
+          },
+          {
+            "actual": 0.011227909665295088,
+            "id": "nominal_hover_error_m",
+            "label": "nominal \u00b7 hover error m",
+            "limit": 0.06,
+            "passed": true,
+            "unit": "m"
+          },
+          {
+            "actual": 0.11676113873633127,
+            "id": "nominal_landing_speed_m_s",
+            "label": "nominal \u00b7 landing speed m s",
+            "limit": 0.15,
+            "passed": true,
+            "unit": ""
+          },
+          {
+            "actual": 4.51675793228596,
+            "id": "nominal_max_tracking_tilt_deg",
+            "label": "nominal \u00b7 max tracking tilt deg",
+            "limit": 35.0,
+            "passed": true,
+            "unit": ""
+          },
+          {
+            "actual": 0.05568679139910498,
+            "id": "nominal_tracking_rms_m",
+            "label": "nominal \u00b7 tracking rms m",
+            "limit": 0.1,
+            "passed": true,
+            "unit": "m"
+          },
+          {
+            "actual": null,
+            "id": "nominal_yaw_tracking",
+            "label": "nominal \u00b7 yaw tracking",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          {
+            "actual": null,
+            "id": "mass_plus_5g_controlled_ground_contact",
+            "label": "mass plus 5g \u00b7 controlled ground contact",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          {
+            "actual": 0.03884022919704738,
+            "id": "mass_plus_5g_gust_recovery_error_m",
+            "label": "mass plus 5g \u00b7 gust recovery error m",
+            "limit": 0.07,
+            "passed": true,
+            "unit": "m"
+          },
+          {
+            "actual": 0.0070101721972777,
+            "id": "mass_plus_5g_hover_error_m",
+            "label": "mass plus 5g \u00b7 hover error m",
+            "limit": 0.06,
+            "passed": true,
+            "unit": "m"
+          },
+          {
+            "actual": 0.11846323168558891,
+            "id": "mass_plus_5g_landing_speed_m_s",
+            "label": "mass plus 5g \u00b7 landing speed m s",
+            "limit": 0.15,
+            "passed": true,
+            "unit": ""
+          },
+          {
+            "actual": 4.49036694459354,
+            "id": "mass_plus_5g_max_tracking_tilt_deg",
+            "label": "mass plus 5g \u00b7 max tracking tilt deg",
+            "limit": 35.0,
+            "passed": true,
+            "unit": ""
+          },
+          {
+            "actual": 0.05600399473690476,
+            "id": "mass_plus_5g_tracking_rms_m",
+            "label": "mass plus 5g \u00b7 tracking rms m",
+            "limit": 0.1,
+            "passed": true,
+            "unit": "m"
+          },
+          {
+            "actual": null,
+            "id": "mass_plus_5g_yaw_tracking",
+            "label": "mass plus 5g \u00b7 yaw tracking",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          {
+            "actual": null,
+            "id": "motor_failure_failure_reached_ground",
+            "label": "motor failure \u00b7 failure reached ground",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          {
+            "actual": null,
+            "id": "motor_failure_injected_motor_stopped",
+            "label": "motor failure \u00b7 injected motor stopped",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          {
+            "actual": null,
+            "id": "motor_failure_loss_of_control_observed",
+            "label": "motor failure \u00b7 loss of control observed",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          }
+        ],
+        "engine": "PyBullet DIRECT, 240 Hz native rigid-body integration",
+        "inertia_diagonal_kg_m2": [
+          0.00024256804451733044,
+          0.00023463995487729572,
+          0.0003094348437591488
+        ],
+        "mass_g": 244.9,
+        "mass_margin_g": 5.099999999999994,
+        "metrics": {
+          "consumed_mah_est": 21.632718805218307,
+          "fault_detected": false,
+          "final_position_m": [
+            -0.012598318376996959,
+            0.00810393882585503,
+            0.034824077792082436
+          ],
+          "force_balance_rms_m_s2": 1.437752216467839e-15,
+          "gust_recovery_error_m": 0.03861389610204398,
+          "hover_error_m": 0.011227909665295088,
+          "landed_contact": true,
+          "landing_speed_m_s": 0.11676113873633127,
+          "max_rpm": 15893.576217638314,
+          "max_tracking_tilt_deg": 4.51675793228596,
+          "peak_current_a_est": 3.2744347095357327,
+          "position_velocity_rms_m_s": 4.391892054166246e-15,
+          "rows": 6720,
+          "seconds": 28.0,
+          "tracking_rms_m": 0.05568679139910498,
+          "yaw_error_at_hold_deg": 0.00024261186309118023
+        },
+        "note": "Ideal state feedback; low-throttle thrust/current extrapolation. Gust scale multiplies a declared [0.12, -0.08, 0] N force; it is not a wind-speed estimate.",
+        "parts": 33,
+        "physical_work_requested": false,
+        "requirements": {
+          "gust_scale": 1.0,
+          "max_mass_g": 250.0,
+          "payload_mass_g": 10.0
+        },
+        "requirements_met": true,
+        "scope_limits": [
+          "Parameterized representative, not a physically calibrated digital twin.",
+          "Native CAD frame; simplified component, propeller and collision geometry.",
+          "Motor thrust uses the retained maker table; behavior below its first row is quadratic extrapolation. These low-throttle missions operate below that first measured bench row.",
+          "Motor lag, yaw drag, linear drag and controller gains are declared assumptions.",
+          "Ideal full-state feedback; no sensor noise, GNSS/RF link, INAV SITL, flexible-frame, CFD or battery-chemistry simulation.",
+          "Controller is a simulation position PID with SO(3) attitude PD, not a deployable INAV flight profile.",
+          "No purchasing, machining, firmware flashing, physical motors or flight are part of the requested digital completion."
+        ],
+        "source_sha256": {
+          "build_digital.py": "bf456e0a8dd2f3673777f6b03c86e475b5683d3ea256ad5690b47ff611556bdf",
+          "hs3g_model.py": "d2794ccf6fa02698ae3d9c9f5a1c5064585ebc0cae4d562eeae9af03c1fd1b08",
+          "hs3g_sim.py": "8dc63892f8681daf5aa05f1db4d43e9842f2db276fa792f4f9ce883f61f1a874",
+          "rerun_simulation.py": "eeaa9c881783e66b6fa07a9bec4974b62a8c8ced7af67cf78a5b6ac4843fa554",
+          "simulation.json": "375a6850ab092febad3a95b6c62858c5f3dafbe227c719eb4fc3ff41cb56c340",
+          "study_requirements.py": "a002f285c2d4f251b9eaf5e575d01958240a1535e3ed509e3882209304200da2",
+          "vendor/HS-LICENSE.txt": "e243ac85fd7b0580eba9147640bd18047c3f4f799def65081f95b3a929518be6",
+          "vendor/THREE-LICENSE.txt": "852e0e8699169bf9f6fdc6bda3e682d078dcbc738b5d33e74df594721bff271d",
+          "vendor/provenance.json": "c214c89606f378e526678e3468e5a1cbf8d2da9f0d57261ccd0386380f3e6430",
+          "vendor/three.min.js": "170c6789f43217c96b3170f4b42fafe135de7f7cd48497a4218f9757ee1d49fa",
+          "verify_digital.py": "282175c118fb4573a53e17667292efef5fb2d23c788a93de43781ec800045173",
+          "viewer.html": "c8e410eccfe5717a38e53b045f77fae9b00d877613aaf84b018b8abe38d626b8"
+        }
+      }
+    },
+    "payload_comparison": {
+      "after_revision": 2,
+      "before_revision": 1,
+      "constraints": [
+        {
+          "after": {
+            "actual": 244.9,
+            "id": "nominal_mass",
+            "label": "Nominal mass",
+            "limit": 250.0,
+            "margin": 5.099999999999994,
+            "passed": true,
+            "unit": "g"
+          },
+          "before": {
+            "actual": 234.9,
+            "id": "nominal_mass",
+            "label": "Nominal mass",
+            "limit": 250.0,
+            "margin": 15.099999999999994,
+            "passed": true,
+            "unit": "g"
+          },
+          "id": "nominal_mass",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": 249.9,
+            "id": "mass_uncertainty",
+            "label": "Mass with 5 g uncertainty",
+            "limit": 250.0,
+            "margin": 0.09999999999999432,
+            "passed": true,
+            "unit": "g"
+          },
+          "before": {
+            "actual": 239.9,
+            "id": "mass_uncertainty",
+            "label": "Mass with 5 g uncertainty",
+            "limit": 250.0,
+            "margin": 10.099999999999994,
+            "passed": true,
+            "unit": "g"
+          },
+          "id": "mass_uncertainty",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": 0.003518300906597968,
+            "id": "inertia_approximation",
+            "label": "Relative omitted products of inertia",
+            "limit": 0.05,
+            "margin": 0.04648169909340204,
+            "passed": true,
+            "unit": ""
+          },
+          "before": {
+            "actual": 0.023146111731037616,
+            "id": "inertia_approximation",
+            "label": "Relative omitted products of inertia",
+            "limit": 0.05,
+            "margin": 0.026853888268962386,
+            "passed": true,
+            "unit": ""
+          },
+          "id": "inertia_approximation",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": null,
+            "id": "nominal_controlled_ground_contact",
+            "label": "nominal \u00b7 controlled ground contact",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          "before": {
+            "actual": null,
+            "id": "nominal_controlled_ground_contact",
+            "label": "nominal \u00b7 controlled ground contact",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          "id": "nominal_controlled_ground_contact",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": 0.03861389610204398,
+            "id": "nominal_gust_recovery_error_m",
+            "label": "nominal \u00b7 gust recovery error m",
+            "limit": 0.07,
+            "passed": true,
+            "unit": "m"
+          },
+          "before": {
+            "actual": 0.04001556424009155,
+            "id": "nominal_gust_recovery_error_m",
+            "label": "nominal \u00b7 gust recovery error m",
+            "limit": 0.07,
+            "passed": true,
+            "unit": "m"
+          },
+          "id": "nominal_gust_recovery_error_m",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": 0.011227909665295088,
+            "id": "nominal_hover_error_m",
+            "label": "nominal \u00b7 hover error m",
+            "limit": 0.06,
+            "passed": true,
+            "unit": "m"
+          },
+          "before": {
+            "actual": 0.011562468474567864,
+            "id": "nominal_hover_error_m",
+            "label": "nominal \u00b7 hover error m",
+            "limit": 0.06,
+            "passed": true,
+            "unit": "m"
+          },
+          "id": "nominal_hover_error_m",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": 0.11676113873633127,
+            "id": "nominal_landing_speed_m_s",
+            "label": "nominal \u00b7 landing speed m s",
+            "limit": 0.15,
+            "passed": true,
+            "unit": ""
+          },
+          "before": {
+            "actual": 0.11659125272444161,
+            "id": "nominal_landing_speed_m_s",
+            "label": "nominal \u00b7 landing speed m s",
+            "limit": 0.15,
+            "passed": true,
+            "unit": ""
+          },
+          "id": "nominal_landing_speed_m_s",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": 4.51675793228596,
+            "id": "nominal_max_tracking_tilt_deg",
+            "label": "nominal \u00b7 max tracking tilt deg",
+            "limit": 35.0,
+            "passed": true,
+            "unit": ""
+          },
+          "before": {
+            "actual": 4.53086516568853,
+            "id": "nominal_max_tracking_tilt_deg",
+            "label": "nominal \u00b7 max tracking tilt deg",
+            "limit": 35.0,
+            "passed": true,
+            "unit": ""
+          },
+          "id": "nominal_max_tracking_tilt_deg",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": 0.05568679139910498,
+            "id": "nominal_tracking_rms_m",
+            "label": "nominal \u00b7 tracking rms m",
+            "limit": 0.1,
+            "passed": true,
+            "unit": "m"
+          },
+          "before": {
+            "actual": 0.05675998083029617,
+            "id": "nominal_tracking_rms_m",
+            "label": "nominal \u00b7 tracking rms m",
+            "limit": 0.1,
+            "passed": true,
+            "unit": "m"
+          },
+          "id": "nominal_tracking_rms_m",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": null,
+            "id": "nominal_yaw_tracking",
+            "label": "nominal \u00b7 yaw tracking",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          "before": {
+            "actual": null,
+            "id": "nominal_yaw_tracking",
+            "label": "nominal \u00b7 yaw tracking",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          "id": "nominal_yaw_tracking",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": null,
+            "id": "mass_plus_5g_controlled_ground_contact",
+            "label": "mass plus 5g \u00b7 controlled ground contact",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          "before": {
+            "actual": null,
+            "id": "mass_plus_5g_controlled_ground_contact",
+            "label": "mass plus 5g \u00b7 controlled ground contact",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          "id": "mass_plus_5g_controlled_ground_contact",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": 0.03884022919704738,
+            "id": "mass_plus_5g_gust_recovery_error_m",
+            "label": "mass plus 5g \u00b7 gust recovery error m",
+            "limit": 0.07,
+            "passed": true,
+            "unit": "m"
+          },
+          "before": {
+            "actual": 0.04025798463744165,
+            "id": "mass_plus_5g_gust_recovery_error_m",
+            "label": "mass plus 5g \u00b7 gust recovery error m",
+            "limit": 0.07,
+            "passed": true,
+            "unit": "m"
+          },
+          "id": "mass_plus_5g_gust_recovery_error_m",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": 0.0070101721972777,
+            "id": "mass_plus_5g_hover_error_m",
+            "label": "mass plus 5g \u00b7 hover error m",
+            "limit": 0.06,
+            "passed": true,
+            "unit": "m"
+          },
+          "before": {
+            "actual": 0.007488030195550651,
+            "id": "mass_plus_5g_hover_error_m",
+            "label": "mass plus 5g \u00b7 hover error m",
+            "limit": 0.06,
+            "passed": true,
+            "unit": "m"
+          },
+          "id": "mass_plus_5g_hover_error_m",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": 0.11846323168558891,
+            "id": "mass_plus_5g_landing_speed_m_s",
+            "label": "mass plus 5g \u00b7 landing speed m s",
+            "limit": 0.15,
+            "passed": true,
+            "unit": ""
+          },
+          "before": {
+            "actual": 0.11831814868332485,
+            "id": "mass_plus_5g_landing_speed_m_s",
+            "label": "mass plus 5g \u00b7 landing speed m s",
+            "limit": 0.15,
+            "passed": true,
+            "unit": ""
+          },
+          "id": "mass_plus_5g_landing_speed_m_s",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": 4.49036694459354,
+            "id": "mass_plus_5g_max_tracking_tilt_deg",
+            "label": "mass plus 5g \u00b7 max tracking tilt deg",
+            "limit": 35.0,
+            "passed": true,
+            "unit": ""
+          },
+          "before": {
+            "actual": 4.502905281040545,
+            "id": "mass_plus_5g_max_tracking_tilt_deg",
+            "label": "mass plus 5g \u00b7 max tracking tilt deg",
+            "limit": 35.0,
+            "passed": true,
+            "unit": ""
+          },
+          "id": "mass_plus_5g_max_tracking_tilt_deg",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": 0.05600399473690476,
+            "id": "mass_plus_5g_tracking_rms_m",
+            "label": "mass plus 5g \u00b7 tracking rms m",
+            "limit": 0.1,
+            "passed": true,
+            "unit": "m"
+          },
+          "before": {
+            "actual": 0.0570975494391757,
+            "id": "mass_plus_5g_tracking_rms_m",
+            "label": "mass plus 5g \u00b7 tracking rms m",
+            "limit": 0.1,
+            "passed": true,
+            "unit": "m"
+          },
+          "id": "mass_plus_5g_tracking_rms_m",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": null,
+            "id": "mass_plus_5g_yaw_tracking",
+            "label": "mass plus 5g \u00b7 yaw tracking",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          "before": {
+            "actual": null,
+            "id": "mass_plus_5g_yaw_tracking",
+            "label": "mass plus 5g \u00b7 yaw tracking",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          "id": "mass_plus_5g_yaw_tracking",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": null,
+            "id": "motor_failure_failure_reached_ground",
+            "label": "motor failure \u00b7 failure reached ground",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          "before": {
+            "actual": null,
+            "id": "motor_failure_failure_reached_ground",
+            "label": "motor failure \u00b7 failure reached ground",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          "id": "motor_failure_failure_reached_ground",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": null,
+            "id": "motor_failure_injected_motor_stopped",
+            "label": "motor failure \u00b7 injected motor stopped",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          "before": {
+            "actual": null,
+            "id": "motor_failure_injected_motor_stopped",
+            "label": "motor failure \u00b7 injected motor stopped",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          "id": "motor_failure_injected_motor_stopped",
+          "transition": "unchanged"
+        },
+        {
+          "after": {
+            "actual": null,
+            "id": "motor_failure_loss_of_control_observed",
+            "label": "motor failure \u00b7 loss of control observed",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          "before": {
+            "actual": null,
+            "id": "motor_failure_loss_of_control_observed",
+            "label": "motor failure \u00b7 loss of control observed",
+            "limit": null,
+            "passed": true,
+            "unit": ""
+          },
+          "id": "motor_failure_loss_of_control_observed",
+          "transition": "unchanged"
+        }
+      ],
+      "metrics": {
+        "centre_of_mass_mm": {
+          "after": [
+            0.6553695242724364,
+            -4.789969349420739e-08,
+            0.33867257643578386
+          ],
+          "before": [
+            0.002128550422817352,
+            -4.993884604823921e-08,
+            -1.223325185316631
+          ],
+          "delta": [
+            0.6532409738496191,
+            2.0391525540318213e-09,
+            1.5619977617524148
+          ]
+        },
+        "consumed_mah_est": {
+          "after": 21.632718805218307,
+          "before": 20.439417161734806,
+          "delta": 1.193301643483501
+        },
+        "gust_recovery_error_m": {
+          "after": 0.03861389610204398,
+          "before": 0.04001556424009155,
+          "delta": -0.0014016681380475682
+        },
+        "inertia_diagonal_kg_m2": {
+          "after": [
+            0.00024256804451733044,
+            0.00023463995487729572,
+            0.0003094348437591488
+          ],
+          "before": [
+            0.00022835905838985182,
+            0.00021793282115856427,
+            0.0003066966961678959
+          ],
+          "delta": [
+            1.4208986127478622e-05,
+            1.6707133718731456e-05,
+            2.738147591252872e-06
+          ]
+        },
+        "mass_g": {
+          "after": 244.9,
+          "before": 234.9,
+          "delta": 10.0
+        },
+        "mass_margin_g": {
+          "after": 5.099999999999994,
+          "before": 15.099999999999994,
+          "delta": -10.0
+        },
+        "peak_current_a_est": {
+          "after": 3.2744347095357327,
+          "before": 3.0922431793603975,
+          "delta": 0.18219153017533518
+        },
+        "tracking_rms_m": {
+          "after": 0.05568679139910498,
+          "before": 0.05675998083029617,
+          "delta": -0.001073189431191189
+        }
+      },
+      "physical_authority_granted": false,
+      "physical_work_requested": false,
+      "project_id": "digital-870eb66dde0b42dcb7854ddc029fafbb",
+      "requirements_changes": {
+        "payload_mass_g": {
+          "after": 10.0,
+          "before": 0.0,
+          "delta": 10.0
+        }
+      },
+      "requirements_met": {
+        "after": true,
+        "before": true
+      },
+      "same_engine_sources": true,
+      "schema": "hardware_splicer.digital_comparison.v1"
+    },
+    "payload_g": 10.0,
+    "producer_and_worker_separate_processes": true,
+    "project_id": "digital-870eb66dde0b42dcb7854ddc029fafbb",
+    "sdk_imports_no_api_product_api_or_uvicorn": true
+  },
+  "job_guards": {
+    "additive_existing_database_migration": true,
+    "cross_store_idempotent_submission": true,
+    "late_completion_and_failure_cannot_overwrite_retry": true,
+    "project_scoped_worker_does_not_claim_other_tasks": true,
+    "publication_bound_to_attempt_and_revision": true,
+    "random_attempt_identity_independent_of_wall_clock": true,
+    "readonly_engine_does_not_recover_other_workers": true
+  },
+  "local_environment_repair": "The base editable package registration pointed to an obsolete temporary checkout. Reinstalled this checkout with --no-deps; the installed hs-digital command was then exercised from outside the repo with PYTHONPATH empty.",
+  "native_versions": {
+    "cadquery": "2.6.1",
+    "numpy": "2.5.5",
+    "pybullet": "3.2.7",
+    "pytest": "8.4.2",
+    "scipy": "1.18.1",
+    "trimesh": "4.12.2"
+  },
+  "objective": "Backend engine first: headless Python/CLI execution, shared requirement rules, canonical comparisons, evidence audit/export and safe job attempts.",
+  "original_local_work_preserved": true,
+  "original_local_work_sha256": {
+    "src/hardware_splicer/kicad_registered_source_check.py": "9591b4ff9baec9426beb8b8e2de15293839fc080a51590120edde782a7191fb3",
+    "src/hardware_splicer/stored_source_parser.py": "afabeaa10c97ced6acad8721cc2eee4a91179c13340cea074b09f201bdc97539",
+    "tests/test_kicad_registered_source_check.py": "c3f8fccf1b42a2ce9adc8cbdb00fedf96b8fc1333c86d0386478405ae0fe5b60"
+  },
+  "physical_work_requested": false,
+  "schema": "hardware_splicer.headless_backend_completion.v1",
+  "scope_limits": [
+    "HS-3G-B remains a bounded registered proving case; this does not claim arbitrary hardware redesign.",
+    "Ideal state feedback, assumed drag/motor lag and extrapolated low-throttle motor data remain unchanged.",
+    "Artifact integrity and engineering requirements are separate verdicts; no physical authority is granted."
+  ],
+  "source_head": "406d2142f1e5e3a13161905a3ccb3498dd366969",
+  "source_sha256": {
+    "README.md": "828d13f18526a93374601dbc2676a129e18095265567918d1bc56e114438f02b",
+    "docs/ENGINE.md": "3e7e4d5254c04abd50df09b3b9639187fe0c1594c03d9f7fa45118f51d05a72a",
+    "pyproject.toml": "c87c8ac45c4697002b49d08d17366f643a0c372b31e64b31af9fec6a3d6440dd",
+    "src/hardware_splicer/digital_engine.py": "6cadb2b8988c5bbb5706f94500802d563badc9cc1f494190e2e632e5451a8233",
+    "src/hardware_splicer/digital_engine_cli.py": "892d02444680805e4f7eb42c496f5f1029dca0b3327cbb8d0381f3fdcfe1de7e",
+    "src/hardware_splicer/digital_project.py": "c6b9f47a3c2fd8da6eaa83a67c25c10c8039a51f81a428480dc9d42f59c588ad",
+    "src/hardware_splicer/digital_project_api.py": "81137438f96f2491c726578dbba2a34bcf1a238b74d786b564ff2bdae0a296a9",
+    "src/hardware_splicer/jobs.py": "09f062b91683f5cbb46611b7f470b80e1b1246a1e2037d3add3c050984deb12e",
+    "src/hardware_splicer/sdk.py": "468c5c50e2d63749048985554756f3f1704ac2d40057b77197691bd47c6dbf4a",
+    "tests/test_digital_engine.py": "824914234f2eb4314ccb806ef2198345fea7cb7dabe151f82d547f082b5a7baa",
+    "tests/test_job_attempt_identity.py": "802fa8d4a398a617fa3a4fe27914058777ea0bcfc78289f8811d29883a20d58f"
+  }
+}
