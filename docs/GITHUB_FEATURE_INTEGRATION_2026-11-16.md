@@ -12,6 +12,7 @@ The active checkout uses local branch `integration/github-features-20261116`. Th
 | Compare construction strategies and preserve requested functionality | #337 consolidation, including #217, #230/#231, #235, #276, #278 and #291 | [Microdrone reference](SYSTEM_EXAMPLE_MICRODRONE_001.md), [drone lab](../examples/drone_lab/README.md), [build versus buy](../examples/arbitrage_lab/build_vs_buy/README.md) |
 | Generate and inspect the HS-3G drone design | #338: source inputs, CAD generator, mass/propulsion/cost calculations and package checks | [HS-3G package](../examples/drone_proving_ground/README.md) |
 | Advance the same drone through a native design iteration | Local follow-up: sourced lower-current powertrain, bounded CAD search, cut/post-drill handoff and independent artifact verification | [HS-3G-B workflow](../examples/drone_proving_ground/revision_b/README.md), operator case `hs3g_drone_revision_b` |
+| Complete the drone as a digital-only 3D representative and simulation | Local follow-up: native assembly, offline orbit/explode/replay viewer, parameterized PyBullet missions and standalone runtime | [Digital workshop](../examples/drone_proving_ground/digital/README.md), operator case `hs3g_drone_digital` |
 | Execute one bounded native engineering work order and recover interrupted KiCad stages | #315/#343 plus the source-custody repair | `scripts/hs_workshop_operator.py`, `scripts/hs_spi_checkpoint.py` |
 | Reconstruct a source-backed keyboard PCB after a virtual cut | #342: KiCad extraction, copper islands, cut search, repair loop, bridge/remount boards, firmware/source and matrix checks | [Keyboard reconstruction](../examples/arbitrage_lab/keyboard_splice/README.md), `scripts/hs_keyboard_splice_probe.py` |
 | Report build readiness against the actual goal, requested parts and KiCad results | Isolated #346 commits, without importing the unrelated repair/hinge stack | Existing intake, SDK and MCP entry points; both goal coverage and requested-part gates are retained |
@@ -90,6 +91,22 @@ The [delivery receipt](status/generated/hs3g-revision-b-2026-11-16.json) binds t
 
 Engineering acceptance is limited to the digital scope. The controller is discontinued at the maker, and the dealer stock lead has not been confirmed for delivery. Shop acceptance, separate drilling qualification, actual component measurements, complete configuration/calibration, current/temperature measurements and frame vibration evidence remain open. Purchase readiness, fabrication, power and flight permissions remain false; no hardware was built or flashed. These changes are committed locally and have not been pushed to GitHub.
 
+### Digital-only completion — November 17
+
+The user clarified that they have no parts and want simulation and a 3D representative only. That digital objective is now complete. Physical purchasing, fabrication, calibration and bench work are outside its completion criteria.
+
+Open the [offline 3D workshop](../examples/drone_proving_ground/digital/reference/VIEWER.html), inspect the [browser preview](status/generated/hs3g-digital-workshop-2026-11-17.png), or download the [self-contained ZIP](../examples/drone_proving_ground/digital/HS3G_B_DIGITAL.zip). The 32-part assembly retains the native HS-3G-B frame and represents its motors, props, battery, electronics, GPS and camera. STEP and GLB exports, an exploded view, native camera images, flight animation and telemetry plots are included. The viewer supports orbit, zoom, explosion, scenario selection, playback and scrubbing, with no server, network resource or API key required.
+
+This uses the same 137 mm, modeled 234.90 g HS-3G-B rather than substituting the legacy Crazyflie demonstration. PyBullet integrates per-rotor forces, yaw torque, gravity, declared drag, a gust and ground contact at 240 Hz. Three runs produce **68 simulated seconds and 16,320 physics records**: a normal takeoff/square/yaw/gust/landing mission, a +5 g payload sensitivity run, and a stopped-motor case with detected loss of control and descent. The latter is an expected failure response, not a claim of fault-tolerant flight. The ZIP includes `RERUN.py`, the solver and all model inputs; the unpacked package successfully reran all three scenarios with `PYTHONPATH` empty and no repository imports.
+
+The representative model uses ideal state feedback and declared motor-lag, drag and controller assumptions. These low-throttle missions operate below the first sourced bench-table row, so their thrust/current behavior is extrapolated. It does not execute INAV firmware or model frame flexibility, CFD, sensors/RF, battery chemistry or thermal performance. These are explicit model limits, rather than uncompleted physical tasks.
+
+The registered operator stages the source, regenerates and verifies revision B, builds the digital assembly, runs the physics, and starts a separate artifact verifier. All **95 digital checks** pass, including STEP/GLB reimport, mass/inertia reconciliation, full CSV reconstruction, force/acceleration and position/velocity consistency, viewer/log identity and a native zero-thrust gravity comparison. Visual review caught and corrected a camera target that let the recording header crop the aircraft; projected-envelope acceptance and a regression now keep the drone fully visible. The correction leaves all three physics logs byte-identical. The resulting operator status is `verified_digital_simulation_complete`, with `digital_objective_complete=true`, `physical_work_requested=false` and no open digital actions. The separate canonical physical release remains closed.
+
+All **61 focused native tests** pass. The complete native root suite on final code commit `7827cb9c7ea888a3bf6f11d2849e2e9cd704ad6b`, including the three preserved local work files, passes in one invocation: **4,260 passed, three skipped, zero failures**, in 1,588.59 seconds. The skips are the pre-existing live-vision provider gaps, outside this offline deliverable. Browser controls, desktop/mobile layout and direct-file WebGL opening were exercised; the final recording, exploded assembly and plots were visually inspected. The [completion receipt](status/generated/hs3g-digital-completion-2026-11-17.json) records source/artifact/archive/test hashes, the actual operator replay, scope and remaining provider limits. The original three local files remain byte-identical and uncommitted.
+
+GitHub main remained at `38dbad2b` when rechecked. The keyboard draft has newer unrelated work beyond the previously integrated head; it was not pulled into this digital-drone completion. These changes are committed locally; no remote push, PR or merge was performed.
+
 ## Useful starting commands
 
 From the repository root:
@@ -101,6 +118,8 @@ PYTHONPATH=src .venv/bin/python scripts/hs_keyboard_splice_probe.py --help
 ```
 
 Use the native KiCad interpreter for actual SPI execution. Use an environment with the `cad` extra for HS-3G regeneration. Model providers and remote dispatch still require their explicit configuration and approval paths.
+
+For the completed digital workshop, open its HTML directly or install `.[drone-sim]` and run the registered `hs3g_drone_digital` case as shown in its README. Its simulation and viewer do not require model providers or physical parts.
 
 ## Work deliberately left separate
 
