@@ -273,3 +273,22 @@ def test_dht22_bare_part_has_four_pins_with_the_nc_pad_between_data_and_ground()
     assert {round(b[1] - a[1], 3) for a, b in zip(row, row[1:])} == {2.54}
     assert {"VCC", "DATA", "NC", "GND"} <= spec_pin_ids("dht22")
     assert fit("dht22")["status"] == "verified_against"
+
+
+# ---- MAX98357A I2S amplifier breakout -----------------------------------------------------------
+
+
+def test_max98357a_has_the_seven_pin_header_and_a_separate_speaker_pair() -> None:
+    pads = table("max98357a-i2s-amp")
+    header = sorted((p for p in pads if p["pinId"] not in ("SPK+", "SPK-")), key=lambda p: p["x"])
+    assert [p["pinId"] for p in header] == ["LRC", "BCLK", "DIN", "GAIN", "SD", "GND", "VIN"]
+    assert len({p["y"] for p in header}) == 1
+    assert {round(b["x"] - a["x"], 3) for a, b in zip(header, header[1:])} == {2.54}
+    speaker = [p for p in pads if p["pinId"] in ("SPK+", "SPK-")]
+    assert len(speaker) == 2 and speaker[0]["y"] != header[0]["y"], "speaker terminal is not on the header row"
+    assert {p["pinId"] for p in pads} == spec_pin_ids("max98357a-i2s-amp")
+
+
+def test_max98357a_stays_unverified_because_the_speaker_terminal_is_assumed() -> None:
+    record = fit("max98357a-i2s-amp")
+    assert record["status"] == "unverified_variant" and "speaker terminal" in record["reason"]

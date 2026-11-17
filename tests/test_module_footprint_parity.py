@@ -66,8 +66,6 @@ def test_every_footprint_record_is_well_formed() -> None:
 # on-board connector, not a pad the carrier PCB can accept.
 PINS_WITHOUT_A_PAD = {
     "ch340-usb-ttl": {"USB"},
-    # Known gaps in the table as it was moved into the data file; each is removed when its module is corrected.
-    "max98357a-i2s-amp": {"GAIN"},
 }
 
 
