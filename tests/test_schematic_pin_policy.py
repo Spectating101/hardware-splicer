@@ -396,3 +396,14 @@ def test_two_stubs_whose_sanitised_names_match_stay_distinct() -> None:
     netlist = _netlist([("U1", "ch340-usb-ttl"), ("U1_", "ch340-usb-ttl")], {})
     names = [p.net for p in plan_power_flags(netlist) if p.stub]
     assert len(names) == 2 and len(set(names)) == 2
+
+
+def test_a_pin_the_registry_calls_internally_not_connected_gets_a_no_connect() -> None:
+    netlist = _netlist(
+        [("U1", "esp32-devkit"), ("U2", "dht11")],
+        {"+3V3": ["U1.3V3", "U2.VCC"], "DATA": ["U1.GPIO4", "U2.DATA"], "GND": ["U1.GND", "U2.GND"]},
+    )
+    plans = {f"{p.ref}.{p.pin}": p for p in plan_no_connects(netlist)}
+    assert "U2.NC" in plans and "not connected" in plans["U2.NC"].reason.lower()
+    # "Normally-closed" relay contacts are not an internal no-connect.
+    assert "U3.NC" not in _nc(_netlist([("U3", "relay-1ch-5v")], {}))

@@ -2,6 +2,7 @@
   "schema_version": "hardware_splicer.schematic_pin_policy.v1",
   "description": "Explicit, reviewable facts the KiCad schematic emitter may use to decide how a pin that the netlist does not connect is drawn, and which nets are fed from off-board. Every entry names the evidence it relies on. A pin the netlist connects is never given a no-connect, whatever this file says.",
   "optional_note_pattern": "\\boptional\\b",
+  "internal_nc_note_pattern": "\\bnot (internally )?connected\\b",
   "mcu_general_io": {
     "category": "mcu",
     "reason": "Unused general-purpose I/O on a microcontroller board is normally left open.",
