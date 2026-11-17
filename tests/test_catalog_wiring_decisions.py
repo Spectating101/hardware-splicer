@@ -274,3 +274,37 @@ def test_bench_adapter_compiles_with_the_output_terminal_on_the_board(tmp_path: 
     assert result.ok is True, result.error
     assert result.design_quality.get("kicad_drc_pass") is True
     assert netlist_pcb_parity(netlist, pcb)["pass"] is True
+
+
+# ---- L298N channel B on an overridden MCU ---------------------------------------------------------
+
+
+def _drive_base_channel_b(mcu_id: str) -> dict:
+    from hardware_splicer.plan_to_graph import splice_plan_to_build_graph
+
+    graph = splice_plan_to_build_graph(
+        {"target": {"recommended_build_id": "robot_drive_base"}, "module_overrides": {"mcu": mcu_id}}
+    )[0]
+    modules = {n["id"]: n["moduleId"] for n in graph["nodes"]}
+    return {
+        w["to"]["pinId"]: (modules[w["from"]["nodeId"]], w["from"]["pinId"])
+        for w in graph["wires"]
+        if w["to"]["pinId"] in ("IN3", "IN4")
+    }
+
+
+def test_a_nodemcu_override_still_wires_the_h_bridge_channel_b_to_d4_and_d5() -> None:
+    # The Nano never had spare D4/D5 in the registry, so only the Nano keeps channel B open; any other
+    # board that has those pins (the NodeMCU) is still wired, as it was before the Nano gained them.
+    assert _drive_base_channel_b("esp8266_nodemcu") == {
+        "IN3": ("esp8266_nodemcu", "D4"),
+        "IN4": ("esp8266_nodemcu", "D5"),
+    }
+
+
+def test_the_nano_keeps_the_h_bridge_channel_b_open_and_the_esp32_uses_gpio14_and_15() -> None:
+    assert _drive_base_channel_b("arduino-nano") == {}
+    assert _drive_base_channel_b("esp32-devkit") == {
+        "IN3": ("esp32-devkit", "GPIO14"),
+        "IN4": ("esp32-devkit", "GPIO15"),
+    }

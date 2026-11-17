@@ -164,9 +164,13 @@ def _remap_recipe_pins_for_modules(recipe: Recipe) -> Recipe:
             for w in wires
             if w.get("from", {}).get("role") == "mcu"
         }
-        candidates = [
-            p for p in ("GPIO14", "GPIO15", "GPIO4", "GPIO2") if p in mcu_pins and p not in used
-        ]
+        # The Nano's D4/D5 are deliberately not candidates: driving channel B from a Nano is a
+        # recipe decision, and the TypeScript adaptation never wires them. Other boards (the
+        # NodeMCU) keep D4/D5 as before.
+        names = ("GPIO14", "GPIO15", "GPIO4", "GPIO2", "D4", "D5")
+        if mcu_id == "arduino-nano":
+            names = ("GPIO14", "GPIO15", "GPIO4", "GPIO2")
+        candidates = [p for p in names if p in mcu_pins and p not in used]
         # Prefer aliased names already remapped.
         candidates = [aliases.get(p, p) for p in candidates]
         candidates = [p for p in candidates if p in mcu_pins and p not in used]
