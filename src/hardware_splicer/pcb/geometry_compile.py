@@ -13,6 +13,7 @@ from ..compile_casefile import write_compile_casefile
 from ..integrations.freerouting_bridge import run_freerouting_pipeline, summarize_freerouting_for_quality
 from .build_to_geometry import build_graph_to_geometry
 from .drc import run_drc
+from .fit_report import module_fit_report
 from .geometry_hygiene import clean_preview_geometry
 from .kicad_cli_drc import run_kicad_cli_drc, summarize_for_quality
 from .kicad_serializer import serialize_build_to_kicad_pcb
@@ -72,12 +73,16 @@ def compile_graph_to_artifacts(
         and drc.get("pass") is True
         and kicad_text.startswith("(kicad_pcb")
     )
+    fit_report = module_fit_report(str(n.get("moduleId") or "") for n in nodes)
+    # Fit is deliberately a fabrication-only gate: build_ready stays the ERC/DRC/connectivity
+    # verdict, but copper laid out for a footprint nobody checked cannot be ordered as final.
     fabrication_ready = (
         bool(nodes)
         and not electrical_errors
         and not electrical_warnings
         and drc.get("pass") is True
         and kicad_text.startswith("(kicad_pcb")
+        and not fit_report["unverified_fit_modules"]
     )
 
     build_graph_path = out / "build_graph.json"
@@ -132,6 +137,13 @@ def compile_graph_to_artifacts(
         "build_id": resolved_build_id,
         "build_ready": build_ready,
         "fabrication_ready": fabrication_ready,
+        "module_fit": fit_report["module_fit"],
+        "unverified_fit_modules": fit_report["unverified_fit_modules"],
+        **(
+            {"fabrication_blockers": [fit_report["fabrication_blocker"]]}
+            if fit_report["fabrication_blocker"]
+            else {}
+        ),
         "build_graph_compiled": bool(nodes),
         "electrical_safety_pass": not electrical_errors,
         "drc_pass": drc.get("pass") is True,

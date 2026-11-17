@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Mapping
 
+from .pcb.fit_report import fit_blocker
+
 
 SCHEMA_VERSION = "hardware_splicer.design_quality_gate.v1"
 GOAL_NOT_COVERED_BLOCKER = "goal_not_covered_by_selected_design"
@@ -134,6 +136,12 @@ def build_design_quality_gate(
             )
 
     fabrication_blockers = list(blockers)
+    fit_blocker_text = fit_blocker(
+        body.get("unverified_fit_modules") or [], len(body.get("module_fit") or body.get("unverified_fit_modules") or [])
+    )
+    if fit_blocker_text:
+        # Fabrication-only: strict_build_ready below is untouched by fit.
+        fabrication_blockers.append(fit_blocker_text)
     if not gerber_ready:
         fabrication_blockers.append("Gerber export is not ready.")
     if not bom_ready:
@@ -167,6 +175,8 @@ def build_design_quality_gate(
         "electrical_safety_pass": electrical_pass,
         "gerber_ready": gerber_ready,
         "blockers": blockers,
+        "fabrication_blockers": fabrication_blockers,
+        "unverified_fit_modules": list(body.get("unverified_fit_modules") or []),
         "summary": body,
     }
     if request_fidelity is not None:

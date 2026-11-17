@@ -216,6 +216,7 @@ def _write_fab_package(
                         f"build_ready: {quality.get('build_ready')}",
                         f"fabrication_ready: {quality.get('fabrication_ready')}",
                         f"gerber_ready: {quality.get('gerber_ready')}",
+                        f"unverified_fit_modules: {', '.join(quality.get('unverified_fit_modules') or []) or 'none'}",
                         "",
                         "Upload gerbers/ to your PCB house; verify BOM before ordering modules.",
                     ]

@@ -6,6 +6,7 @@ import zipfile
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Tuple
 
+from .pcb.fit_report import fit_blocker
 from .testing_mode import testing_mode_enabled
 
 
@@ -58,6 +59,10 @@ def inspect_fabrication_package(
     if prototype_breakout_only and not testing_mode_enabled():
         production_score = min(production_score, PROTOTYPE_BREAKOUT_SCORE_CAP)
     blockers = [row["label"] for row in checks if not row.get("passed")]
+    unverified_fit = list(design_quality.get("unverified_fit_modules") or [])
+    fit_text = fit_blocker(unverified_fit, len(design_quality.get("module_fit") or unverified_fit))
+    if fit_text:
+        blockers.append(fit_text)
     warnings = [row["label"] for row in checks if row.get("severity") == "warning"]
 
     return {
@@ -73,7 +78,9 @@ def inspect_fabrication_package(
         "bom": bom_stats.get("summary") or {},
         "gerbers": gerber_stats.get("summary") or {},
         "prototype_breakout_only": prototype_breakout_only,
+        "unverified_fit_modules": unverified_fit,
         "honest_fabrication_ready": passed == len(checks)
+        and not unverified_fit
         and (not prototype_breakout_only or testing_mode_enabled()),
         "summary": _inspection_summary(production_score, package_validity_score, blockers, warnings, pcb_stats.get("summary") or {}),
     }

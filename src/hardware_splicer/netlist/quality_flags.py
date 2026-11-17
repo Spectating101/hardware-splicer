@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any, Dict, Mapping
 
+from ..pcb.fit_report import fit_blocker
+
 
 def copper_tier(*, freerouting_ok: bool, track_count: int, segment_count: int) -> str:
     if freerouting_ok and track_count > 0:
@@ -66,6 +68,7 @@ def attach_launch_quality_flags(
         and quality["kicad_truth_pass"]
         and copper == "autorouted"
         and gerber_ready
+        and not quality.get("unverified_fit_modules")
     )
     return quality
 
@@ -102,4 +105,11 @@ def finalize_launch_quality(quality: Dict[str, Any]) -> Dict[str, Any]:
         quality["build_ready"] = False
         quality["fabrication_ready"] = False
         quality["kicad_blockers"] = kicad_blockers
+    # A footprint nobody checked against the real part withholds fabrication, never build_ready.
+    unverified = list(quality.get("unverified_fit_modules") or [])
+    blocker = fit_blocker(unverified, len(quality.get("module_fit") or unverified))
+    if blocker:
+        quality["fabrication_ready"] = False
+        existing = [b for b in quality.get("fabrication_blockers") or [] if b != blocker]
+        quality["fabrication_blockers"] = [*existing, blocker]
     return quality
