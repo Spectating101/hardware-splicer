@@ -1,0 +1,1014 @@
+{
+  "additional_pinned_sources": [
+    {
+      "git_blob_sha": "86ef822ff3f5fd99f8b3978ebb083c204c9f3691",
+      "path": "LICENSE",
+      "repository": "penk/MainboardTerminal",
+      "url": "https://github.com/penk/MainboardTerminal/blob/a1c03c3052c2eb174e31b68cff73847a5b4669cf/LICENSE"
+    },
+    {
+      "git_blob_sha": "7cdbe0b482f604a06a0988dad8877ae8d9257f7d",
+      "path": "LICENSE",
+      "repository": "ClemensElflein/OpenMower",
+      "url": "https://github.com/ClemensElflein/OpenMower/blob/0e11044fb316e179de029f9cdbf551bdfa171387/LICENSE"
+    },
+    {
+      "git_blob_sha": "caf960ed641548bcc008ad6d071bf4c8255709a8",
+      "path": "docs/BOM.md",
+      "repository": "brickbots/HandiPi",
+      "url": "https://github.com/brickbots/HandiPi/blob/9cb9c32a14060ed7b145196f1ef0f36c87e8b424/docs/BOM.md"
+    },
+    {
+      "git_blob_sha": "42679d6eb33e7d52d8141e5f5c862896dc612e61",
+      "path": "docs/build.md",
+      "repository": "brickbots/HandiPi",
+      "url": "https://github.com/brickbots/HandiPi/blob/9cb9c32a14060ed7b145196f1ef0f36c87e8b424/docs/build.md"
+    },
+    {
+      "git_blob_sha": "80f0d9edda86114ccb43007c03b2b828e173c3b8",
+      "path": "docs/TOOL_REFERENCE.md",
+      "repository": "nimbalyst/nimbalyst-electronics",
+      "url": "https://github.com/nimbalyst/nimbalyst-electronics/blob/d00fc14aacd05e8bdf493189fd4c080b2da33d32/docs/TOOL_REFERENCE.md"
+    },
+    {
+      "git_blob_sha": "cbde6262a045c81980e45a0428b066371e667599",
+      "path": "src/fab/quote.ts",
+      "repository": "nimbalyst/nimbalyst-electronics",
+      "url": "https://github.com/nimbalyst/nimbalyst-electronics/blob/d00fc14aacd05e8bdf493189fd4c080b2da33d32/src/fab/quote.ts"
+    },
+    {
+      "git_blob_sha": "3fe600805a904996ab3fb2c5236d2627967af14c",
+      "path": "docs/usage/information_provider_system.md",
+      "repository": "Part-DB/Part-DB-server",
+      "url": "https://github.com/Part-DB/Part-DB-server/blob/27fd8b3a9e3b67fe905c113fa85a453f0742325c/docs/usage/information_provider_system.md"
+    }
+  ],
+  "assessment": {
+    "best_fit": "Coordinate exact material identity, buy/reuse/make decisions, source-backed interfaces and complete device outputs using mature specialist engines.",
+    "current_gaps": [
+      "One connected goal-to-complete-device workflow across domains",
+      "Exact sourceable material coverage beyond catalog hints",
+      "Fresh regional supply, quantity, freight and substitution evidence",
+      "Measured-compatible donor identities and complete connector/mounting definitions",
+      "Current independently demonstrated sourced cyberdeck package"
+    ],
+    "current_strengths": [
+      "Project and source lineage",
+      "Native KiCad/CAD and bounded digital drone execution",
+      "Inventory-constrained planning and donor evidence checks",
+      "Saved design changes and repeatable artifact packages"
+    ],
+    "no_uniqueness_claim": "Nimbalyst also documents evidence/freshness and bounded verification; HS cannot claim that those features alone distinguish it.",
+    "priority_order": [
+      "Read-only inventory/BOM and procurement evidence bridge; review InvenTree first",
+      "Complete the existing cyberdeck sourcing, interface and enclosure objective using verified reference assets",
+      "Create source-bound connector and harness construction outputs; review WireViz and the existing InvenTree bridge first"
+    ],
+    "product_objective": "A practical engineering assistant that converts a device goal plus obtainable parts or donor inventory into a sourced, compatible, inspectable construction package."
+  },
+  "assessment_kind": "Source-level engineering fit review, not a comparative execution benchmark.",
+  "date": "2026-11-17",
+  "feed_path": "examples/github_signals/build_from_parts_candidates_20261117.json",
+  "feed_sha256": "bac1ebc5f9906449df55de37bd8d87978cac8b2d990ee6392477c73dab416ce3",
+  "feed_validation": {
+    "candidate_count": 20,
+    "existing_approved_scope_changed": false,
+    "existing_reviewed_adapter_count": 2,
+    "new_adapters_implemented": false,
+    "new_discovery_only_count": 18,
+    "third_party_execution_or_installation_performed": false,
+    "upstream_heads_equal_existing_approved_pins": true
+  },
+  "frontend_changed": false,
+  "local_comparison_source_sha256": {
+    "docs/HARDWARE_SPLICER_MISSION_FREEZE.md": "68a09889a154d29366456fcf296543d21efdcde929a4b0a0211b3e6ffe129be5",
+    "examples/arbitrage_lab/build_vs_buy/README.md": "66ee2c2f1ef2e78debb29b59ea0822c040c6ca85e4b2cd8082aa8c4c20025f9b",
+    "examples/drone_proving_ground/revision_b/reference/README.md": "be03091bd98600f61f45f0013d6b3fd352045800cb8f384b2e30e616db1eea80",
+    "projects/cyberdeck-real-trial-20261020/REAL_OPERATOR_PROGRESS_20261020.md": "ed4b0956d07a0d80ebf02b274a01b94a08ea5ccf26cdd046b5a22ea792b20ba7",
+    "src/hardware_splicer/digital_engine.py": "6cadb2b8988c5bbb5706f94500802d563badc9cc1f494190e2e632e5451a8233",
+    "src/hardware_splicer/github_signal_pipeline.py": "ede3e28c3eea9801db1b3d0246c90be3303186408645bc4f40fcd076d1f5b8f0",
+    "src/hardware_splicer/github_signal_task_router.py": "c0ee9e823d84a676171cdd16699c6c468683dd16b71c9b5706d669bbd9c06e76",
+    "src/hardware_splicer/integrations/oss_catalog.py": "528fe757317547270cf491d233c1f1013e972823f934c22f69b849bdd19186a6",
+    "src/hardware_splicer/material_modes.py": "9fbba9aed9e058d3e855a6efbbcae578fbadb014c7ef112114295d2e76b28bf7",
+    "src/hardware_splicer/salvage_bom_estimate.py": "3a532a370f9977ebfea2f810237c7604bf5ca57e0416e947ca70202ead70562f",
+    "src/hardware_splicer/salvage_intelligence.py": "20b415a57d06d617c74557d0d697e94b0eb87ac4c2f3572fe04a022e42e07106"
+  },
+  "local_comparison_sources": [
+    "docs/HARDWARE_SPLICER_MISSION_FREEZE.md",
+    "src/hardware_splicer/github_signal_pipeline.py",
+    "src/hardware_splicer/github_signal_task_router.py",
+    "src/hardware_splicer/integrations/oss_catalog.py",
+    "src/hardware_splicer/salvage_intelligence.py",
+    "src/hardware_splicer/salvage_bom_estimate.py",
+    "src/hardware_splicer/material_modes.py",
+    "examples/arbitrage_lab/build_vs_buy/README.md",
+    "projects/cyberdeck-real-trial-20261020/REAL_OPERATOR_PROGRESS_20261020.md",
+    "examples/drone_proving_ground/revision_b/reference/README.md",
+    "src/hardware_splicer/digital_engine.py"
+  ],
+  "open_pull_requests": [
+    {
+      "draft": true,
+      "head_sha": "70a1e8decd059b386b0e672ba395eff60e895d36",
+      "number": 342,
+      "title": "HS keyboard salvage: corrected f60 split geometry and native 42-wire junction",
+      "updated_at": "2026-11-16T13:43:56Z",
+      "url": "https://github.com/Spectating101/hardware-splicer/pull/342"
+    },
+    {
+      "draft": true,
+      "head_sha": "5a37c88046127f0636d8401b96059fafd17c1cb8",
+      "number": 347,
+      "title": "Hardware Splicer: fix the SPI adapter order package to the independent fab check",
+      "updated_at": "2026-11-15T10:34:24Z",
+      "url": "https://github.com/Spectating101/hardware-splicer/pull/347"
+    },
+    {
+      "draft": true,
+      "head_sha": "3c6b8f23ea3e829ca6e6949b477212d0c90d34ce",
+      "number": 340,
+      "title": "Hardware Splicer: order-ready fab package for the SPI flash adapter",
+      "updated_at": "2026-11-14T23:22:00Z",
+      "url": "https://github.com/Spectating101/hardware-splicer/pull/340"
+    },
+    {
+      "draft": true,
+      "head_sha": "c8eb5fe0644db682623131f4b2db76a4501b9b26",
+      "number": 346,
+      "title": "Block build readiness on failed KiCad checks and uncovered goals",
+      "updated_at": "2026-11-14T21:02:40Z",
+      "url": "https://github.com/Spectating101/hardware-splicer/pull/346"
+    },
+    {
+      "draft": true,
+      "head_sha": "d76cfc5b56ed805e0fab5e6d21dff7cd534710f2",
+      "number": 345,
+      "title": "Report hinge retention and cable saddle as the geometry supports",
+      "updated_at": "2026-11-14T20:50:56Z",
+      "url": "https://github.com/Spectating101/hardware-splicer/pull/345"
+    },
+    {
+      "draft": true,
+      "head_sha": "a0e8fc0e87aa5d32cd919dba5a25656c9059df81",
+      "number": 344,
+      "title": "Close audited bypasses in the repair diagnosis gates",
+      "updated_at": "2026-11-14T20:50:54Z",
+      "url": "https://github.com/Spectating101/hardware-splicer/pull/344"
+    },
+    {
+      "draft": true,
+      "head_sha": "bdf304789ea9fdb86ded35b43f8b3a34d3894335",
+      "number": 343,
+      "title": "feat(hs): source-bound checkpoints within native SPI engineering job",
+      "updated_at": "2026-11-14T19:12:44Z",
+      "url": "https://github.com/Spectating101/hardware-splicer/pull/343"
+    },
+    {
+      "draft": true,
+      "head_sha": "a0ee2ee997aa773efa769050d681f1d0d9245ac8",
+      "number": 338,
+      "title": "Hardware Splicer: drone proving ground, design package from real parts",
+      "updated_at": "2026-11-14T10:21:25Z",
+      "url": "https://github.com/Spectating101/hardware-splicer/pull/338"
+    }
+  ],
+  "original_local_work_preserved": true,
+  "original_local_work_sha256": {
+    "src/hardware_splicer/kicad_registered_source_check.py": "9591b4ff9baec9426beb8b8e2de15293839fc080a51590120edde782a7191fb3",
+    "src/hardware_splicer/stored_source_parser.py": "afabeaa10c97ced6acad8721cc2eee4a91179c13340cea074b09f201bdc97539",
+    "tests/test_kicad_registered_source_check.py": "c3f8fccf1b42a2ce9adc8cbdb00fedf96b8fc1333c86d0386478405ae0fe5b60"
+  },
+  "own_main": {
+    "date": "2026-11-05T07:58:59Z",
+    "sha": "38dbad2b759a9313b81a5b10bfde7f20d64f308c",
+    "url": "https://github.com/Spectating101/hardware-splicer/commit/38dbad2b759a9313b81a5b10bfde7f20d64f308c"
+  },
+  "own_upstream_review": {
+    "keyboard_head_in_local_current_ancestry": false,
+    "keyboard_limits": "Draft PR remains a conditional reference design; no arbitrary real-junk success or physical construction claim.",
+    "keyboard_new_commits_available_for_selective_review": [
+      "e30b7a50",
+      "70a1e8de"
+    ],
+    "keyboard_pr": 342,
+    "keyboard_relevance": "Source-bound compact junction, nominal switch plates and corrected cut/clearance geometry are relevant to reuse-based cyberdecks.",
+    "main_changed_since_previous_integration": false,
+    "remote_mutations_or_merges_performed": false
+  },
+  "physical_work_requested": false,
+  "records": [
+    {
+      "api_license_spdx_id": "MIT",
+      "archived": false,
+      "assets": [],
+      "default_branch": "main",
+      "finding": "Code-defined circuits, constraint solving, part selection, reusable modules and KiCad/manufacturing outputs.",
+      "fit": "Study reusable interface constraints and exact part selection; retain HS project/source ownership. No need to start a new PCB compiler.",
+      "head_committed_at": "2026-03-11T21:16:01Z",
+      "head_sha": "619eda7f777558a3e500dbad9cc2941712881495",
+      "limit": "Source-level assessment; supplier picks need region, stock, quantity and timestamp checks.",
+      "priority": "reference",
+      "pushed_at": "2026-10-14T21:01:52Z",
+      "readme": {
+        "git_blob_sha": "1b0137f3e47e60c5046b888a88e830dc17b0bbf4",
+        "path": "README.md",
+        "url": "https://github.com/atopile/atopile/blob/619eda7f777558a3e500dbad9cc2941712881495/README.md"
+      },
+      "repository": "atopile/atopile",
+      "role": "circuit_authoring",
+      "stars_at_fetch": 4072,
+      "url": "https://github.com/atopile/atopile"
+    },
+    {
+      "api_license_spdx_id": "MIT",
+      "archived": false,
+      "assets": [],
+      "default_branch": "main",
+      "finding": "TypeScript/React circuit authoring with Circuit JSON and fabrication exports.",
+      "fit": "Continue the existing Circuit JSON import/export path for specialist board design.",
+      "head_committed_at": "2026-11-17T11:02:22Z",
+      "head_sha": "35feca405fe7c7c17ff699950795a1fd75d65c4d",
+      "limit": "A board compiler/exporter does not establish a complete drone or cyberdeck assembly.",
+      "priority": "existing_interchange",
+      "pushed_at": "2026-11-17T11:07:09Z",
+      "readme": {
+        "git_blob_sha": "04d6d2212ada5b08a94b350a6e6ef6b7afcb3a20",
+        "path": "README.md",
+        "url": "https://github.com/tscircuit/tscircuit/blob/35feca405fe7c7c17ff699950795a1fd75d65c4d/README.md"
+      },
+      "repository": "tscircuit/tscircuit",
+      "role": "circuit_authoring",
+      "stars_at_fetch": 3026,
+      "url": "https://github.com/tscircuit/tscircuit"
+    },
+    {
+      "api_license_spdx_id": "MIT",
+      "archived": false,
+      "assets": [],
+      "default_branch": "main",
+      "finding": "Python circuit composition with KiCad import/export and documented AI sourcing/simulation workflows.",
+      "fit": "Compare bounded Python design-edit and reusable subcircuit strategies.",
+      "head_committed_at": "2026-03-08T07:12:46Z",
+      "head_sha": "3aaff18c056de7cbe8f5b0a3e1e6e7e7895f544e",
+      "limit": "README capability claims were reviewed; no end-to-end runtime or sourcing benchmark was run.",
+      "priority": "reference",
+      "pushed_at": "2026-03-08T07:12:46Z",
+      "readme": {
+        "git_blob_sha": "2dc4357d2e26d33210c5125e1f120d3531b4fa50",
+        "path": "README.md",
+        "url": "https://github.com/circuit-synth/circuit-synth/blob/3aaff18c056de7cbe8f5b0a3e1e6e7e7895f544e/README.md"
+      },
+      "repository": "circuit-synth/circuit-synth",
+      "role": "circuit_authoring",
+      "stars_at_fetch": 296,
+      "url": "https://github.com/circuit-synth/circuit-synth"
+    },
+    {
+      "api_license_spdx_id": "MIT",
+      "archived": false,
+      "assets": [],
+      "default_branch": "main",
+      "finding": "Agent-operated design, simulation, firmware testing and manufacture exports; source/evidence freshness and review tools overlap HS concerns.",
+      "fit": "Use the full device outcome, supply-backed parts and donor adaptation as the acceptance target. Artifact evidence alone is not a unique differentiator.",
+      "head_committed_at": "2026-10-07T20:32:42Z",
+      "head_sha": "d00fc14aacd05e8bdf493189fd4c080b2da33d32",
+      "limit": "src/fab/quote.ts implements heuristic offline pricing; README supplier searches do not establish stock or orderability.",
+      "priority": "compare",
+      "pushed_at": "2026-10-07T20:48:07Z",
+      "readme": {
+        "git_blob_sha": "dba4e13264efb79e1711639922adee1b4e5295fa",
+        "path": "README.md",
+        "url": "https://github.com/nimbalyst/nimbalyst-electronics/blob/d00fc14aacd05e8bdf493189fd4c080b2da33d32/README.md"
+      },
+      "repository": "nimbalyst/nimbalyst-electronics",
+      "role": "closest_workflow_comparison",
+      "stars_at_fetch": 7,
+      "url": "https://github.com/nimbalyst/nimbalyst-electronics"
+    },
+    {
+      "api_license_spdx_id": "MIT",
+      "archived": false,
+      "assets": [],
+      "default_branch": "main",
+      "finding": "Local circuit assembly, AI wiring/firmware and native host firmware simulation.",
+      "fit": "Compare the useful assemble-wire-run loop for supported components.",
+      "head_committed_at": "2026-05-18T21:16:13Z",
+      "head_sha": "008c5f815f506da863e06f4239361c87aa42c060",
+      "limit": "Documented host simulation is not proof of the target electronics; README lists macOS prerequisites and Windows/Linux untested. Default branch head is May 2026.",
+      "priority": "compare",
+      "pushed_at": "2026-05-18T21:16:39Z",
+      "readme": {
+        "git_blob_sha": "acfe2f112153a1045421cd7a064af181f390ecf0",
+        "path": "README.md",
+        "url": "https://github.com/mfranzon/circuitiny/blob/008c5f815f506da863e06f4239361c87aa42c060/README.md"
+      },
+      "repository": "mfranzon/circuitiny",
+      "role": "closest_maker_workflow_comparison",
+      "stars_at_fetch": 55,
+      "url": "https://github.com/mfranzon/circuitiny"
+    },
+    {
+      "api_license_spdx_id": "MIT",
+      "archived": false,
+      "assets": [],
+      "default_branch": "master",
+      "finding": "Stock tracking, manufacturer/supplier parts, build/BOM workflows and a REST API.",
+      "fit": "First review a read-only inventory/BOM bridge to identify available, missing and externally sourced project lines.",
+      "head_committed_at": "2026-11-17T11:03:48Z",
+      "head_sha": "8f8502d0d9e0cebb726430746e39327c51845a8a",
+      "limit": "Stock records and supplier identifiers are inputs; engineering compatibility and fresh supplier availability still need independent checks.",
+      "priority": "first_integration_review",
+      "pushed_at": "2026-11-17T11:03:48Z",
+      "readme": {
+        "git_blob_sha": "5295f4fb9c67cec437a3925487386b76ffca5a36",
+        "path": "README.md",
+        "url": "https://github.com/inventree/InvenTree/blob/8f8502d0d9e0cebb726430746e39327c51845a8a/README.md"
+      },
+      "repository": "inventree/InvenTree",
+      "role": "inventory_and_procurement",
+      "stars_at_fetch": 7873,
+      "url": "https://github.com/inventree/InvenTree"
+    },
+    {
+      "api_license_spdx_id": "AGPL-3.0",
+      "archived": false,
+      "assets": [],
+      "default_branch": "master",
+      "finding": "Electronics inventory, parametric data, BOM allocation, supplier information providers, API and documented MCP access.",
+      "fit": "Alternative inventory source; reuse its supplier data model rather than duplicate a parts database.",
+      "head_committed_at": "2026-11-16T10:48:48Z",
+      "head_sha": "27fd8b3a9e3b67fe905c113fa85a453f0742325c",
+      "limit": "AGPL metadata recorded; provider credentials/configuration are required. An MCP connection itself is not a complete engineering workflow.",
+      "priority": "alternative_connector",
+      "pushed_at": "2026-11-16T10:48:48Z",
+      "readme": {
+        "git_blob_sha": "34fec9029619aea8d2afd292e7765e146c476674",
+        "path": "README.md",
+        "url": "https://github.com/Part-DB/Part-DB-server/blob/27fd8b3a9e3b67fe905c113fa85a453f0742325c/README.md"
+      },
+      "repository": "Part-DB/Part-DB-server",
+      "role": "inventory_and_procurement",
+      "stars_at_fetch": 1855,
+      "url": "https://github.com/Part-DB/Part-DB-server"
+    },
+    {
+      "api_license_spdx_id": "MIT",
+      "archived": false,
+      "assets": [],
+      "default_branch": "master",
+      "finding": "BOM-to-cost spreadsheet with distributor prices, availability and quantity adjustments.",
+      "fit": "Review dated procurement enrichment for identified electronic components.",
+      "head_committed_at": "2026-07-08T14:45:36Z",
+      "head_sha": "b2d3d419802b5d35e0952475d15216645fc8dba2",
+      "limit": "Distributor APIs and prices require live validation. Legacy xesscorp/KiCost API URL now redirects to this repository; no source was installed.",
+      "priority": "second_integration_review",
+      "pushed_at": "2026-07-08T14:46:35Z",
+      "readme": {
+        "git_blob_sha": "b47f0b5867fd94f5272a3f73f7d3c93d68d2e769",
+        "path": "README.rst",
+        "url": "https://github.com/hildogjr/KiCost/blob/b2d3d419802b5d35e0952475d15216645fc8dba2/README.rst"
+      },
+      "repository": "hildogjr/KiCost",
+      "role": "bom_costing",
+      "stars_at_fetch": 628,
+      "url": "https://github.com/hildogjr/KiCost"
+    },
+    {
+      "api_license_spdx_id": "GPL-3.0",
+      "archived": false,
+      "assets": [],
+      "default_branch": "main",
+      "finding": "Supplier-data-to-InvenTree/KiCad part creation, with documented Digi-Key, Mouser, Element14 and LCSC integrations.",
+      "fit": "Useful source/identity mapping patterns for parts selected by HS.",
+      "head_committed_at": "2026-07-09T16:08:26Z",
+      "head_sha": "e64b141618efcd6f5b6ba9c46f7ada8232e9fed1",
+      "limit": "README has API-version and InvenTree parameter-unit compatibility conditions; do not silently change unit enforcement or assume current server compatibility.",
+      "priority": "review_with_inventory",
+      "pushed_at": "2026-07-09T16:15:21Z",
+      "readme": {
+        "git_blob_sha": "e605c1c46e1c6138082ff3fe9150266f986ecfc2",
+        "path": "README.md",
+        "url": "https://github.com/sparkmicro/Ki-nTree/blob/e64b141618efcd6f5b6ba9c46f7ada8232e9fed1/README.md"
+      },
+      "repository": "sparkmicro/Ki-nTree",
+      "role": "part_identity_bridge",
+      "stars_at_fetch": 251,
+      "url": "https://github.com/sparkmicro/Ki-nTree"
+    },
+    {
+      "api_license_spdx_id": "GPL-3.0",
+      "archived": false,
+      "assets": [],
+      "default_branch": "master",
+      "finding": "YAML connector/wire/harness descriptions produce diagrams and a harness BOM.",
+      "fit": "Turn identified HS wiring interfaces into inspectable connector/pin/wire construction artifacts.",
+      "head_committed_at": "2026-10-25T17:35:56Z",
+      "head_sha": "5f961acd4c1ddfa509b0eb02ef4bfed7a510b7c7",
+      "limit": "Upstream explicitly targets individual harnesses, not complete-system wiring design or electrical validation.",
+      "priority": "third_integration_review",
+      "pushed_at": "2026-10-25T18:13:42Z",
+      "readme": {
+        "git_blob_sha": "732f671456758a28435eccc601bbac9b7a07e76f",
+        "path": "docs/README.md",
+        "url": "https://github.com/wireviz/WireViz/blob/5f961acd4c1ddfa509b0eb02ef4bfed7a510b7c7/docs/README.md"
+      },
+      "repository": "wireviz/WireViz",
+      "role": "construction_handoff",
+      "stars_at_fetch": 5338,
+      "url": "https://github.com/wireviz/WireViz"
+    },
+    {
+      "api_license_spdx_id": "MIT",
+      "archived": false,
+      "assets": [
+        {
+          "bytes": 448,
+          "git_blob_sha": "47bb6367448b79d775427ae53cad2b78fd0f805d",
+          "path": "demo/harness.wireviz"
+        }
+      ],
+      "default_branch": "main",
+      "finding": "Existing server-side WireViz SVG generation, harness BOM extraction and build-report integration.",
+      "fit": "Review before implementing another inventory-to-harness connector.",
+      "head_committed_at": "2026-11-14T21:51:17Z",
+      "head_sha": "67ee4c3bb5dd4b76d22e1180787dff8c568babe7",
+      "limit": "Requires InvenTree, WireViz/Graphviz and plugin configuration; supplied YAML must already encode correct interfaces.",
+      "priority": "reuse_existing_bridge",
+      "pushed_at": "2026-11-14T21:51:46Z",
+      "readme": {
+        "git_blob_sha": "18cf2a69f894f0a3acc6212d4ef099afaa3fdbc9",
+        "path": "README.md",
+        "url": "https://github.com/inventree/inventree-wireviz/blob/67ee4c3bb5dd4b76d22e1180787dff8c568babe7/README.md"
+      },
+      "repository": "inventree/inventree-wireviz",
+      "role": "inventory_harness_bridge",
+      "stars_at_fetch": 19,
+      "url": "https://github.com/inventree/inventree-wireviz"
+    },
+    {
+      "api_license_spdx_id": "MIT",
+      "archived": false,
+      "assets": [
+        {
+          "bytes": 497014,
+          "git_blob_sha": "1a9c41fbbe9082168bf134c68a3f881dcabf07a8",
+          "path": "model/Mainboard-Terminal.step"
+        },
+        {
+          "bytes": 216584,
+          "git_blob_sha": "07b2922f8b317625b7630a36180129a324e8b553",
+          "path": "model/STL/back-cover-left.stl"
+        },
+        {
+          "bytes": 216584,
+          "git_blob_sha": "cb5dbbd90e1930b9ce6e874377c3faebd3e693dc",
+          "path": "model/STL/back-cover-right.stl"
+        },
+        {
+          "bytes": 265884,
+          "git_blob_sha": "12e34b1e0147ca93f0cf8750dbd62a13a85073fc",
+          "path": "model/STL/bezel-left.stl"
+        },
+        {
+          "bytes": 247184,
+          "git_blob_sha": "af5f2d3bb08e563a9a6aadfff70177f27ff270ac",
+          "path": "model/STL/bezel-right.stl"
+        },
+        {
+          "bytes": 131384,
+          "git_blob_sha": "3f8e686abe978450267ae19175bc137f2e6f2836",
+          "path": "model/STL/case-back-left.stl"
+        },
+        {
+          "bytes": 92784,
+          "git_blob_sha": "9fb7f28a14a4006c4aa9f4322c81e1612f8bfd9e",
+          "path": "model/STL/case-back-right.stl"
+        },
+        {
+          "bytes": 75084,
+          "git_blob_sha": "c1aee43f58c2fab980468a7495cd4b267fde5779",
+          "path": "model/STL/case-front-left.stl"
+        },
+        {
+          "bytes": 76384,
+          "git_blob_sha": "9eb70ba50128b06a12f544865369fb36dc4b23a2",
+          "path": "model/STL/case-front-right.stl"
+        },
+        {
+          "bytes": 134284,
+          "git_blob_sha": "7cecc21276d91a3f4b31a9979e7393349d6395e7",
+          "path": "model/STL/display-ring.stl"
+        },
+        {
+          "bytes": 101884,
+          "git_blob_sha": "ddff098cb7a07863ea56ba3c31272b10985f8f91",
+          "path": "model/STL/mid-frame-left.stl"
+        },
+        {
+          "bytes": 93384,
+          "git_blob_sha": "fb6b40ca5ecaa48c7b5218986c8c39b7fd2a0368",
+          "path": "model/STL/mid-frame-right.stl"
+        },
+        {
+          "bytes": 2284,
+          "git_blob_sha": "de0ed81c60caa522a33811ad9a7d9819b8392f1a",
+          "path": "model/STL/pcb-cover.stl"
+        }
+      ],
+      "default_branch": "master",
+      "finding": "Framework-mainboard cyberdeck with editable STEP assembly, printable STL parts and identified major electronics.",
+      "fit": "Study evidence-rich module reuse and enclosure adaptation for the existing cyberdeck objective.",
+      "head_committed_at": "2022-09-14T09:25:27Z",
+      "head_sha": "a1c03c3052c2eb174e31b68cff73847a5b4669cf",
+      "limit": "2022 source; exact current stock was not checked. Root LICENSE is MIT while README also mentions CC-BY-SA-4.0: resolve file-level scope before CAD redistribution.",
+      "priority": "reference_candidate",
+      "pushed_at": "2022-09-14T09:25:27Z",
+      "readme": {
+        "git_blob_sha": "2e2a23f883e4ffa71d2ce9d4e313ed2d129a072a",
+        "path": "README.md",
+        "url": "https://github.com/penk/MainboardTerminal/blob/a1c03c3052c2eb174e31b68cff73847a5b4669cf/README.md"
+      },
+      "repository": "penk/MainboardTerminal",
+      "role": "cyberdeck_reference",
+      "stars_at_fetch": 856,
+      "url": "https://github.com/penk/MainboardTerminal"
+    },
+    {
+      "api_license_spdx_id": "MIT",
+      "archived": false,
+      "assets": [
+        {
+          "bytes": 1237,
+          "git_blob_sha": "caf960ed641548bcc008ad6d071bf4c8255709a8",
+          "path": "docs/BOM.md"
+        },
+        {
+          "bytes": 8805,
+          "git_blob_sha": "42679d6eb33e7d52d8141e5f5c862896dc612e61",
+          "path": "docs/build.md"
+        },
+        {
+          "bytes": 694990,
+          "git_blob_sha": "07821f500f243233498895c5fb8a0abbeed00d64",
+          "path": "images/build/IMG_4371.jpeg"
+        },
+        {
+          "bytes": 658383,
+          "git_blob_sha": "ab0b843f1c48dcf628de1d1d39b98cb2c7972aaf",
+          "path": "images/build/IMG_4382.jpeg"
+        },
+        {
+          "bytes": 594641,
+          "git_blob_sha": "0f73ee4236df8431051aea269f4b2d619fb67002",
+          "path": "images/build/IMG_4383.jpeg"
+        },
+        {
+          "bytes": 659092,
+          "git_blob_sha": "dc543cc19541058276131dfbc66b04ff83f09dc1",
+          "path": "images/build/IMG_4384.jpeg"
+        },
+        {
+          "bytes": 997866,
+          "git_blob_sha": "af7a88e396b047c6b542a1e755b5051951f4c1f3",
+          "path": "images/build/IMG_4385.jpeg"
+        },
+        {
+          "bytes": 435733,
+          "git_blob_sha": "e50e4c5bd66d1b2b5c2a652e67bfa929cd788769",
+          "path": "images/build/IMG_8105.jpeg"
+        },
+        {
+          "bytes": 480911,
+          "git_blob_sha": "ce335d46807c8ec862e6bed8881178b1381678d4",
+          "path": "images/build/IMG_8107.jpeg"
+        },
+        {
+          "bytes": 475513,
+          "git_blob_sha": "ea9922ca03059eef1ef314b32b1ff10aa0daf3a8",
+          "path": "images/build/IMG_8117.jpeg"
+        },
+        {
+          "bytes": 412473,
+          "git_blob_sha": "4b314a85fdb49c3f2f43043c6d515695782aee19",
+          "path": "images/build/IMG_8118.jpeg"
+        },
+        {
+          "bytes": 352022,
+          "git_blob_sha": "280dcf5877b361201b746e8c9b347400f0ca2362",
+          "path": "images/build/IMG_8152.jpeg"
+        },
+        {
+          "bytes": 445668,
+          "git_blob_sha": "85b4f5a0424abd0d8a3ed19c5550dd42fe9a7f4d",
+          "path": "images/build/IMG_8155.jpeg"
+        },
+        {
+          "bytes": 360351,
+          "git_blob_sha": "8d1831977f1835ff29aec0a50aea75e95c57ea37",
+          "path": "images/build/IMG_8156.jpeg"
+        },
+        {
+          "bytes": 368047,
+          "git_blob_sha": "dfd4206e50884cbdc247974b25b4c6cb6ab2c3c9",
+          "path": "images/build/IMG_8161.jpeg"
+        },
+        {
+          "bytes": 460412,
+          "git_blob_sha": "213dee75278f0407dfaa9b6f75c0b06f1274f797",
+          "path": "images/build/IMG_8163.jpeg"
+        },
+        {
+          "bytes": 424165,
+          "git_blob_sha": "ff348b93c62d60f829c109598608a98f07962ea4",
+          "path": "images/build/IMG_8164.jpeg"
+        },
+        {
+          "bytes": 309719,
+          "git_blob_sha": "0ea5eb4ea4aa131deb611974f7d898fa5e670844",
+          "path": "images/build/IMG_8167.jpeg"
+        },
+        {
+          "bytes": 413900,
+          "git_blob_sha": "3396fe296300cb2ec1735187e68e58bf876c500e",
+          "path": "images/build/IMG_8168.jpeg"
+        },
+        {
+          "bytes": 500708,
+          "git_blob_sha": "4492ef6547afb032d8919e52005802dbcc4e32ba",
+          "path": "images/build/IMG_8169.jpeg"
+        },
+        {
+          "bytes": 454112,
+          "git_blob_sha": "dd33444d7604bf4f115bee05af57988e71b98f3c",
+          "path": "images/build/IMG_8178.jpeg"
+        },
+        {
+          "bytes": 639126,
+          "git_blob_sha": "775fb965467d2f02eff205555d5fd7f9a352aa84",
+          "path": "images/build/IMG_8181.jpeg"
+        },
+        {
+          "bytes": 1006757,
+          "git_blob_sha": "02be33414b0afb58d0e05cf22b09b4300cab892e",
+          "path": "kicad/handipi_kb/handipi_kb.kicad_pcb"
+        },
+        {
+          "bytes": 161109,
+          "git_blob_sha": "e31bcb02b2aa43d3714267e8b7d2e6889afe604e",
+          "path": "kicad/handipi_kb/handipi_kb.kicad_sch"
+        },
+        {
+          "bytes": 36539,
+          "git_blob_sha": "476ecb1c796f86c2c3812d7c717a06d95271ca0e",
+          "path": "kicad/handipi_kb/handipi_kb.sch"
+        }
+      ],
+      "default_branch": "main",
+      "finding": "Handheld Pi system with build tour, component BOM, keyboard fabrication files and enclosure assets.",
+      "fit": "Use as a source-backed device architecture and source-completeness comparison.",
+      "head_committed_at": "2023-10-08T21:14:56Z",
+      "head_sha": "9cb9c32a14060ed7b145196f1ef0f36c87e8b424",
+      "limit": "docs/BOM.md explicitly excludes some hardware/wiring; build.md is a tour. Older links and parts require refresh. It is not already an exact complete purchase list.",
+      "priority": "reference_candidate",
+      "pushed_at": "2023-10-08T21:14:59Z",
+      "readme": {
+        "git_blob_sha": "3987ea601d1cbd1360426f5d087177302bf5e567",
+        "path": "README.md",
+        "url": "https://github.com/brickbots/HandiPi/blob/9cb9c32a14060ed7b145196f1ef0f36c87e8b424/README.md"
+      },
+      "repository": "brickbots/HandiPi",
+      "role": "cyberdeck_reference",
+      "stars_at_fetch": 814,
+      "url": "https://github.com/brickbots/HandiPi"
+    },
+    {
+      "api_license_spdx_id": "CERN-OHL-P-2.0",
+      "archived": false,
+      "assets": [
+        {
+          "bytes": 119365,
+          "git_blob_sha": "83e68c2fd11f4365aad2e2f593bb5ff9ce9a45f7",
+          "path": "nvme-module/components/0518CDMCCDS-2R2MC/3D/0518CDMCCDS-2R2MC.stp"
+        },
+        {
+          "bytes": 5143014,
+          "git_blob_sha": "08a472c0262b7a8cba343016ea5a4cb67f79d7b0",
+          "path": "nvme-module/components/1-2199230-6/PCIE-SMD_1-2199230-6.step"
+        },
+        {
+          "bytes": 677616,
+          "git_blob_sha": "0bcf3f2b9d074092cf7d7d0d58d938e352b41f8a",
+          "path": "nvme-module/components/687316124422/6873XX124422_687316124422.step"
+        },
+        {
+          "bytes": 1611122,
+          "git_blob_sha": "661a3f1e4c9097b04f474bce0d0964639bb4b2cf",
+          "path": "nvme-module/components/ASEK-32.768KHZ-LRT/OSC-SMD_4P-L3.2-W2.5-BL-1.step"
+        },
+        {
+          "bytes": 204598,
+          "git_blob_sha": "f9c72a6669b8bcf5157ea2636362498a72f4a1f3",
+          "path": "nvme-module/components/BM02B-SURS-TF.STEP"
+        },
+        {
+          "bytes": 4627589,
+          "git_blob_sha": "013f365ee9d94b1ba7907354cacb04ac0adddb74",
+          "path": "nvme-module/components/C5280579/C5280579.3dshapes/FFC-SMD_16P-P0.50_FPC-0.5-16PLTH2.0.step"
+        },
+        {
+          "bytes": 1373072,
+          "git_blob_sha": "380d60a174f70e8650135453650948c3a53c74c0",
+          "path": "nvme-module/components/C5280579/C5280579.3dshapes/OSC-SMD_4P-L3.2-W2.5-BL_TG-5006CE.step"
+        },
+        {
+          "bytes": 4917446,
+          "git_blob_sha": "1d89ad805f5c94b1d7f8a1525fbf0929b25b48df",
+          "path": "nvme-module/components/C5280579/C5280579.3dshapes/PCI-SMD_APCI0079-P002A.step"
+        },
+        {
+          "bytes": 4627589,
+          "git_blob_sha": "013f365ee9d94b1ba7907354cacb04ac0adddb74",
+          "path": "nvme-module/components/C6081226/C6081226.3dshapes/FFC-SMD_16P-P0.50_FPC-0.5-16PLTH2.0.step"
+        },
+        {
+          "bytes": 4627589,
+          "git_blob_sha": "013f365ee9d94b1ba7907354cacb04ac0adddb74",
+          "path": "nvme-module/components/C841651/C841651.3dshapes/FFC-SMD_16P-P0.50_FPC-0.5-16PLTH2.0.step"
+        },
+        {
+          "bytes": 4917446,
+          "git_blob_sha": "1d89ad805f5c94b1d7f8a1525fbf0929b25b48df",
+          "path": "nvme-module/components/C841651/C841651.3dshapes/PCI-SMD_APCI0079-P002A.step"
+        },
+        {
+          "bytes": 3507951,
+          "git_blob_sha": "6834c90f9a51e56fe6a24fe84cf06a5927e181e2",
+          "path": "nvme-module/components/EasyEDA.3dshapes/FPC-SMD_16P-L13.6-W2.0-H4.4-P0.50.step"
+        },
+        {
+          "bytes": 4435329,
+          "git_blob_sha": "6d210dfb1cd194a9ce56b40cabd103b61a65fd54",
+          "path": "nvme-module/components/EasyEDA.3dshapes/FPC-SMD_16P-P0.50_AFC07-S16ECA-00.step"
+        },
+        {
+          "bytes": 5143014,
+          "git_blob_sha": "08a472c0262b7a8cba343016ea5a4cb67f79d7b0",
+          "path": "nvme-module/components/EasyEDA.3dshapes/PCIE-SMD_1-2199230-6.step"
+        },
+        {
+          "bytes": 2886921,
+          "git_blob_sha": "727ea56307b6fd0deef61dc71ce346117a1117e6",
+          "path": "nvme-module/components/EasyEDA.3dshapes/SOT-523-3P_L1.6-W0.8-H0.9-LS1.6-P0.50.step"
+        },
+        {
+          "bytes": 1972355,
+          "git_blob_sha": "7505357bdaec84be22082f8c58b748532dd0ef60",
+          "path": "nvme-module/components/F31W-1A7H1-11016--3DModel-STEP-56544.STEP"
+        },
+        {
+          "bytes": 2045194,
+          "git_blob_sha": "c0747513baea0758018e2b028f6b66fd1b960a0d",
+          "path": "nvme-module/components/Inductor/0518CDMCCDS-2R2MC/IND-SMD_L5.4-W5.2-H1.6_0518CDMCCDS.step"
+        },
+        {
+          "bytes": 4330333,
+          "git_blob_sha": "de8049c88476b34f3b618ff6e6a88cb7aa537a3f",
+          "path": "nvme-module/components/MDT320M03001.STEP"
+        },
+        {
+          "bytes": 4330333,
+          "git_blob_sha": "de8049c88476b34f3b618ff6e6a88cb7aa537a3f",
+          "path": "nvme-module/components/MDT320M03001/MDT320M03001.step"
+        },
+        {
+          "bytes": 115170,
+          "git_blob_sha": "3ae82edc035fb50746ee0d37c29abafadbec5d28",
+          "path": "nvme-module/components/SRP4020TA-2R2M/SRP4020TA-2R2M--3DModel-STEP-56544.STEP"
+        },
+        {
+          "bytes": 115170,
+          "git_blob_sha": "3ae82edc035fb50746ee0d37c29abafadbec5d28",
+          "path": "nvme-module/components/SRP4020TA-2R2M/SRP4020TA-2R2M.step"
+        },
+        {
+          "bytes": 12389,
+          "git_blob_sha": "62661bde9e1706caf90b8e6c6d7a5e37d0e5e9a0",
+          "path": "nvme-module/components/WA-SMSI_9774XXX151/WA-SMSI_9774XXX151.step"
+        },
+        {
+          "bytes": 6409226,
+          "git_blob_sha": "c1a541ce1fbf947d233861cb64aaa084ce2dbfcb",
+          "path": "nvme-module/components/stepfiles/1-2199230-6.step"
+        },
+        {
+          "bytes": 1192229,
+          "git_blob_sha": "d916a6e7df519c25932ca0ac85a9043b4a772e31",
+          "path": "nvme-module/components/stepfiles/3225 SMD Crystal Oscillator.STEP"
+        },
+        {
+          "bytes": 677616,
+          "git_blob_sha": "0bcf3f2b9d074092cf7d7d0d58d938e352b41f8a",
+          "path": "nvme-module/components/stepfiles/6873XX124422_687316124422.step"
+        },
+        {
+          "bytes": 103792,
+          "git_blob_sha": "41b568a187132484f28bfc87981af2b83a869912",
+          "path": "nvme-module/components/stepfiles/DFN-8-1EP_2x2mm_P0.5mm_EP0.6x1.2mm.step"
+        },
+        {
+          "bytes": 867020,
+          "git_blob_sha": "98c4e8c7a4489f831566696c9e304b7a54759a0a",
+          "path": "nvme-module/components/stepfiles/MTFDHBK1T0TDP-1AT12AIYY.stp"
+        },
+        {
+          "bytes": 315095,
+          "git_blob_sha": "f0215f55c0640c5e459c3a0d216d42d8fcb64986",
+          "path": "nvme-module/components/stepfiles/Oscillator_ECS-3225S.STEP"
+        },
+        {
+          "bytes": 532868,
+          "git_blob_sha": "37505ba8a1791262c48ac5f7a615d9572d5e774a",
+          "path": "nvme-module/components/stepfiles/SL0420-2R2M.step"
+        },
+        {
+          "bytes": 1369118,
+          "git_blob_sha": "c4f0824cfbb4aea06f2f7a2f19e1f18259ed3b3b",
+          "path": "nvme-module/components/stepfiles/SMTSOM330BTR.step"
+        },
+        {
+          "bytes": 208539,
+          "git_blob_sha": "6135067b79000073b1e09d7f6250aa21eba4a5df",
+          "path": "nvme-module/components/stepfiles/SOT-523.STEP"
+        },
+        {
+          "bytes": 7306378,
+          "git_blob_sha": "38101a336d57e70cb2513b5ed9462d5f611ec155",
+          "path": "nvme-module/components/stepfiles/nvme-module.step"
+        },
+        {
+          "bytes": 2292415,
+          "git_blob_sha": "989b7eeb4072c1c28c3cb3bc473fd7166d5d6b73",
+          "path": "nvme-module/nvme-module.kicad_pcb"
+        },
+        {
+          "bytes": 244727,
+          "git_blob_sha": "ae14d9f77bc705498ef3183823c344ab4e496466",
+          "path": "nvme-module/nvme-module.kicad_sch"
+        }
+      ],
+      "default_branch": "main",
+      "finding": "Portable-computer repository includes mechanical, PCB and schematic assets; README says files are released gradually.",
+      "fit": "Additional mechanical/board reference for an adapted cyberdeck.",
+      "head_committed_at": "2025-11-07T11:57:55Z",
+      "head_sha": "5ab5baea43de92423225f3aca7047a5689bbb5b8",
+      "limit": "Check completeness and each submodule/source license; do not infer a complete reproducible system from the asset list.",
+      "priority": "reference_candidate",
+      "pushed_at": "2025-11-07T11:58:17Z",
+      "readme": {
+        "git_blob_sha": "e292c33dc0e8c7aa36b5dda14889c22d8fc48bb5",
+        "path": "README.md",
+        "url": "https://github.com/soulscircuit/pilet/blob/5ab5baea43de92423225f3aca7047a5689bbb5b8/README.md"
+      },
+      "repository": "soulscircuit/pilet",
+      "role": "cyberdeck_reference",
+      "stars_at_fetch": 814,
+      "url": "https://github.com/soulscircuit/pilet"
+    },
+    {
+      "api_license_spdx_id": "CC-BY-4.0",
+      "archived": false,
+      "assets": [],
+      "default_branch": "main",
+      "finding": "Manufacturer CAD, mainboard connector identities/pinouts and standalone-mainboard reuse documentation.",
+      "fit": "A better-founded donor-module route than guessing an undocumented board's connectors.",
+      "head_committed_at": "2026-07-14T03:15:15Z",
+      "head_sha": "9680262347b80efe2314673bf1f26eb955165fca",
+      "limit": "Exact board generation and mating interfaces must match. Documentation is not donor condition or price evidence.",
+      "priority": "reference_candidate",
+      "pushed_at": "2026-07-14T03:15:17Z",
+      "readme": {
+        "git_blob_sha": "dba62cacf11c68907b27c8cf8013c057152b29cb",
+        "path": "README.md",
+        "url": "https://github.com/FrameworkComputer/Framework-Laptop-13/blob/9680262347b80efe2314673bf1f26eb955165fca/README.md"
+      },
+      "repository": "FrameworkComputer/Framework-Laptop-13",
+      "role": "documented_donor_modules",
+      "stars_at_fetch": 2014,
+      "url": "https://github.com/FrameworkComputer/Framework-Laptop-13"
+    },
+    {
+      "api_license_spdx_id": "NOASSERTION",
+      "archived": false,
+      "assets": [],
+      "default_branch": "main",
+      "finding": "A documented donor-appliance conversion with supported hardware, firmware and software across dedicated repositories.",
+      "fit": "Study the supported-donor approach and complete system integration.",
+      "head_committed_at": "2026-09-03T16:03:24Z",
+      "head_sha": "0e11044fb316e179de029f9cdbf551bdfa171387",
+      "limit": "Root LICENSE is CC-BY-NC-SA-4.0 despite API SPDX NOASSERTION; linked software/hardware repositories have separate scopes. Do not treat as a permissive drop-in dependency.",
+      "priority": "reference_only",
+      "pushed_at": "2026-09-03T16:09:15Z",
+      "readme": {
+        "git_blob_sha": "8a5528398c7b154ef6c63f52ea4ed3421c6f51b2",
+        "path": "README.md",
+        "url": "https://github.com/ClemensElflein/OpenMower/blob/0e11044fb316e179de029f9cdbf551bdfa171387/README.md"
+      },
+      "repository": "ClemensElflein/OpenMower",
+      "role": "salvage_system_reference",
+      "stars_at_fetch": 6757,
+      "url": "https://github.com/ClemensElflein/OpenMower"
+    },
+    {
+      "api_license_spdx_id": "BSD-3-Clause",
+      "archived": false,
+      "assets": [],
+      "default_branch": "main",
+      "finding": "Maintained flight stack with documented SITL, vehicle models and integration interfaces.",
+      "fit": "Candidate for a future actual-firmware simulation milestone where selected hardware and firmware are supported.",
+      "head_committed_at": "2026-11-17T09:46:03Z",
+      "head_sha": "a6814cc7b6953ca83145f166a89dcf234566078a",
+      "limit": "Not installed or run. The current HS drone uses an INAV review configuration; PX4 simulation would not validate that configuration or controller.",
+      "priority": "future_target_specific_review",
+      "pushed_at": "2026-11-17T09:46:05Z",
+      "readme": {
+        "git_blob_sha": "90836e320f587b62428aad8157100b703031ff1c",
+        "path": "README.md",
+        "url": "https://github.com/PX4/PX4-Autopilot/blob/a6814cc7b6953ca83145f166a89dcf234566078a/README.md"
+      },
+      "repository": "PX4/PX4-Autopilot",
+      "role": "flight_simulation_reference",
+      "stars_at_fetch": 13045,
+      "url": "https://github.com/PX4/PX4-Autopilot"
+    },
+    {
+      "api_license_spdx_id": "GPL-3.0",
+      "archived": false,
+      "assets": [],
+      "default_branch": "master",
+      "finding": "Maintained multi-vehicle autopilot with documented development ecosystem.",
+      "fit": "Alternative future software-in-loop integration after choosing a supported vehicle/controller and defining the test.",
+      "head_committed_at": "2026-11-17T04:46:45Z",
+      "head_sha": "a42f84ae76f91f478f618468dee6af29b4dfc45c",
+      "limit": "Not installed or run; no assumption of compatibility with the existing HS-3G-B firmware/controller.",
+      "priority": "future_target_specific_review",
+      "pushed_at": "2026-11-17T04:46:46Z",
+      "readme": {
+        "git_blob_sha": "294acae54448852138cbecc1bfca5ee5a688e472",
+        "path": "README.md",
+        "url": "https://github.com/ArduPilot/ardupilot/blob/a42f84ae76f91f478f618468dee6af29b4dfc45c/README.md"
+      },
+      "repository": "ArduPilot/ardupilot",
+      "role": "flight_simulation_reference",
+      "stars_at_fetch": 16387,
+      "url": "https://github.com/ArduPilot/ardupilot"
+    },
+    {
+      "api_license_spdx_id": "MIT",
+      "archived": false,
+      "assets": [],
+      "default_branch": "main",
+      "finding": "Current upstream pin matches HS's approved read-only adapter. README additionally documents authoring, simulation and JLC/LCSC search.",
+      "fit": "Use current reviewed schematic diagnostics; review source-search capability separately if it closes a concrete component-selection gap.",
+      "head_committed_at": "2026-08-25T10:03:33Z",
+      "head_sha": "2126c328402fa77f8f6bf2114f052595f86f14aa",
+      "limit": "Additional upstream commands are not admitted merely because the same commit is approved for schematic checking.",
+      "priority": "use_existing_approved_scope",
+      "pushed_at": "2026-08-25T10:31:11Z",
+      "readme": {
+        "git_blob_sha": "0a3c697463506b31557166d51c7529741e9135a8",
+        "path": "README.md",
+        "url": "https://github.com/tipoLi5890/akcli/blob/2126c328402fa77f8f6bf2114f052595f86f14aa/README.md"
+      },
+      "repository": "tipoLi5890/akcli",
+      "role": "existing_reviewed_specialist",
+      "stars_at_fetch": 12,
+      "url": "https://github.com/tipoLi5890/akcli"
+    },
+    {
+      "api_license_spdx_id": "MIT",
+      "archived": false,
+      "assets": [],
+      "default_branch": "main",
+      "finding": "Current upstream pin matches the HS-approved board-revision comparison adapter.",
+      "fit": "Keep as an existing specialist for PCB design-change inspection.",
+      "head_committed_at": "2026-07-26T15:18:20Z",
+      "head_sha": "1de14f9bbfe37ef291b929c52532419d1a14f0e6",
+      "limit": "Revision visualization alone does not produce a device design or establish engineering acceptance.",
+      "priority": "use_existing_approved_scope",
+      "pushed_at": "2026-07-26T15:19:32Z",
+      "readme": {
+        "git_blob_sha": "1fb0e9a99fd8722c39c2c1bf3fec34caea3cce76",
+        "path": "README.md",
+        "url": "https://github.com/0x12net/kdif/blob/1de14f9bbfe37ef291b929c52532419d1a14f0e6/README.md"
+      },
+      "repository": "0x12net/kdif",
+      "role": "existing_reviewed_specialist",
+      "stars_at_fetch": 2,
+      "url": "https://github.com/0x12net/kdif"
+    }
+  ],
+  "runtime_backend_code_changed": false,
+  "schema": "hardware_splicer.github_build_research.v1",
+  "source_head": "35458e1b6769d14b947b60afa6d65538ebde5fe9",
+  "source_method": "Direct GitHub API/search and web discovery; pinned README and selected file/tree inspection. No authenticated GitHub Signals subscription feed, third-party execution, benchmark, live supplier quote or physical work."
+}
