@@ -227,16 +227,23 @@
       "modules": [
         {"role": "pwr", "moduleId": "dc-barrel-12v"},
         {"role": "psu", "moduleId": "buck-mp1584"},
-        {"role": "drv", "moduleId": "mosfet-irlz44n"}
+        {"role": "drv", "moduleId": "mosfet-irlz44n"},
+        {"role": "mcu", "moduleId": "arduino-nano"}
       ],
       "wires": [
         {"from": {"role": "pwr", "pin": "V+"}, "to": {"role": "psu", "pin": "IN+"}},
         {"from": {"role": "pwr", "pin": "GND"}, "to": {"role": "psu", "pin": "IN-"}},
         {"from": {"role": "psu", "pin": "OUT+"}, "to": {"role": "drv", "pin": "VIN"}},
         {"from": {"role": "psu", "pin": "OUT-"}, "to": {"role": "drv", "pin": "VIN-"}},
-        {"from": {"role": "psu", "pin": "OUT-"}, "to": {"role": "drv", "pin": "GND"}}
+        {"from": {"role": "psu", "pin": "OUT-"}, "to": {"role": "drv", "pin": "GND"}},
+        {"from": {"role": "psu", "pin": "OUT+"}, "to": {"role": "mcu", "pin": "VIN"}},
+        {"from": {"role": "psu", "pin": "OUT-"}, "to": {"role": "mcu", "pin": "GND"}},
+        {"from": {"role": "mcu", "pin": "D3"}, "to": {"role": "drv", "pin": "SIG"}}
       ],
-      "notes": ["LED load on VOUT+/VOUT- with appropriate series resistor."]
+      "notes": [
+        "LED load on VOUT+/VOUT- with appropriate series resistor.",
+        "Arduino Nano D3 (PWM) drives the MOSFET SIG input to dim the light; set the buck output to 5-12 V for the Nano VIN pin."
+      ]
     },
     "low_voltage_motor_test_jig": {
       "modules": [
