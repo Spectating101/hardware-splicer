@@ -32,6 +32,21 @@ def _schematic_erc(build_id: str, tmp_path: Path) -> dict:
     return run_kicad_cli_erc(sch, out_dir=tmp_path / "erc")
 
 
+def assert_erc_executed_and_clean(report: dict) -> None:
+    """A real ERC run: kicad-cli executed, wrote a report, and found nothing at error level.
+
+    An empty error set alone is not evidence: a crashed, skipped or missing run reports
+    pass=False/errors=1 with no violations.
+    """
+
+    assert report.get("skipped") is False, report
+    assert not report.get("reason"), report
+    assert report.get("report_path"), report
+    assert report.get("pass") is True, report
+    assert report.get("errors") == 0, report
+    assert _errors(report) == set(), report["violations"]
+
+
 def _errors(report: dict) -> set[tuple[str, str]]:
     found: set[tuple[str, str]] = set()
     for violation in report["violations"]:
@@ -48,15 +63,19 @@ def _errors(report: dict) -> set[tuple[str, str]]:
 @pytest.mark.parametrize("build_id", CATALOG_BUILD_IDS)
 def test_catalog_schematic_real_erc_has_only_the_documented_errors(build_id: str, tmp_path: Path) -> None:
     report = _schematic_erc(build_id, tmp_path)
-    assert report["skipped"] is False
-    assert _errors(report) == KNOWN_REMAINING_ERC_ERRORS.get(build_id, set())
-    assert report["pass"] is (build_id not in KNOWN_REMAINING_ERC_ERRORS)
+    if build_id in KNOWN_REMAINING_ERC_ERRORS:
+        assert report.get("skipped") is False and report.get("report_path"), report
+        assert _errors(report) == KNOWN_REMAINING_ERC_ERRORS[build_id]
+        assert report["pass"] is False
+    else:
+        assert_erc_executed_and_clean(report)
 
 
 @pytest.mark.parametrize("build_id", ["robot_drive_base", "usb_fume_extractor", "bench_power_adapter"])
 def test_compiled_representative_builds_are_build_ready_under_real_erc(build_id: str, tmp_path: Path) -> None:
     result = compile_catalog_build(build_id, tmp_path, export_gerber=False)
     quality = result.design_quality
+    assert quality.get("kicad_erc_skipped") is False, quality.get("kicad_erc_reason")
     assert quality.get("kicad_erc_pass") is True, quality.get("kicad_erc_errors")
     assert quality.get("kicad_erc_errors") == 0
     assert quality.get("build_ready") is True
@@ -88,4 +107,20 @@ def test_generic_resistors_in_a_netlist_are_connected_under_real_erc(tmp_path: P
     sch = tmp_path / "pullups.kicad_sch"
     write_schematic_for_netlist(netlist, sch)
     report = run_kicad_cli_erc(sch, out_dir=tmp_path / "erc")
-    assert _errors(report) == set(), report["violations"]
+    assert_erc_executed_and_clean(report)
+
+
+@pytest.mark.parametrize(
+    "bad_run",
+    [
+        {"pass": False, "skipped": False, "reason": "kicad-cli erc failed", "errors": 1, "warnings": 0, "violations": []},
+        {"pass": None, "skipped": True, "reason": "kicad-cli not on PATH", "errors": 0, "warnings": 0, "violations": []},
+        {"pass": False, "skipped": True, "reason": "missing_schematic", "errors": 1, "warnings": 0, "violations": []},
+        {"pass": False, "skipped": False, "reason": "no erc report written", "errors": 1, "warnings": 0, "violations": []},
+    ],
+)
+def test_a_failed_skipped_or_missing_erc_run_is_not_accepted_as_clean(bad_run: dict) -> None:
+    # The old check, _errors(report) == set(), accepts every one of these.
+    assert _errors(bad_run) == set()
+    with pytest.raises(AssertionError):
+        assert_erc_executed_and_clean(bad_run)
