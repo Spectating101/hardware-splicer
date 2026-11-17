@@ -1,15 +1,15 @@
 """Use HS substitution checks on the sourced Fielddeck display interface."""
 from copy import deepcopy
 
-from hardware_splicer.part_substitution import evaluate_substitution
-
-
-def assess_interfaces(mount, evidence, baseline_geometry):
+def assess_interfaces(mount, evidence, baseline_geometry, *, evaluator=None):
     """Produce one documented compatible interface case and one blocked case.
 
     The reference scope is the panel bay and Pi 4 display interface. The full
     assembly power scenario and reimported native geometry are checked separately.
     """
+    if evaluator is None:
+        from hardware_splicer.part_substitution import evaluate_substitution
+        evaluator = evaluate_substitution
     lane_note = evidence["lane_note"]
     compatibility = evidence["interface_doc"]
     original = next(row for row in baseline_geometry["parts"] if row["kind"] == "manufacturer_step")
@@ -46,8 +46,8 @@ def assess_interfaces(mount, evidence, baseline_geometry):
              "enclosure": {"minimum_mm": workspace_minimum, "maximum_mm": workspace_maximum}}
     first = deepcopy(graph) | {"candidate": five}
     negative = deepcopy(graph) | {"candidate": ten}
-    positive_report = evaluate_substitution(first)
-    negative_report = evaluate_substitution(negative)
+    positive_report = evaluator(first)
+    negative_report = evaluator(negative)
     if not any(row["kind"] == "mount_adapter" for row in positive_report["required_adaptations"]):
         raise ValueError("Expected a changed mounting interface for SC1975.")
     if negative_report["status"] != "blocked" or not any(

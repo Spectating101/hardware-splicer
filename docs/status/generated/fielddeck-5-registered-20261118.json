@@ -1,0 +1,270 @@
+{
+  "schema_version": "hardware_splicer.fielddeck_5_registered_proof.v1",
+  "project_id": "digital-bd8d4f632f124864ba8431bbaa79feda",
+  "case_id": "fielddeck-5",
+  "scope": "Registered headless simulation using retained source geometry.",
+  "baseline_metrics": {
+    "high_keyboard_source_margin_a": 0.08,
+    "ordinary_source_margin_a": 0.48,
+    "work_runtime_lower_h": 3.166,
+    "work_runtime_upper_h": 4.469,
+    "work_system_power_w": 7.25
+  },
+  "higher_load_metrics": {
+    "high_keyboard_source_margin_a": 0.08,
+    "ordinary_source_margin_a": 0.48,
+    "work_runtime_lower_h": 2.55,
+    "work_runtime_upper_h": 3.6,
+    "work_system_power_w": 9.0
+  },
+  "comparison": {
+    "schema": "hardware_splicer.digital_comparison.v1",
+    "project_id": "digital-bd8d4f632f124864ba8431bbaa79feda",
+    "before_revision": 1,
+    "after_revision": 2,
+    "requirements_met": {
+      "before": true,
+      "after": false
+    },
+    "same_engine_sources": true,
+    "requirements_changes": {
+      "minimum_work_runtime_h": {
+        "before": 2.5,
+        "after": 3.0,
+        "delta": 0.5
+      },
+      "pi_work_current_a": {
+        "before": 1.0,
+        "after": 1.35,
+        "delta": 0.3500000000000001
+      }
+    },
+    "metrics": {
+      "high_keyboard_source_margin_a": {
+        "before": 0.08,
+        "after": 0.08,
+        "delta": 0.0
+      },
+      "ordinary_source_margin_a": {
+        "before": 0.48,
+        "after": 0.48,
+        "delta": 0.0
+      },
+      "work_runtime_lower_h": {
+        "before": 3.166,
+        "after": 2.55,
+        "delta": -0.6160000000000001
+      },
+      "work_runtime_upper_h": {
+        "before": 4.469,
+        "after": 3.6,
+        "delta": -0.8690000000000002
+      },
+      "work_system_power_w": {
+        "before": 7.25,
+        "after": 9.0,
+        "delta": 1.75
+      }
+    },
+    "constraints": [
+      {
+        "id": "work_runtime",
+        "before": {
+          "actual": 3.166,
+          "id": "work_runtime",
+          "limit": 2.5,
+          "passed": true,
+          "unit": "h"
+        },
+        "after": {
+          "actual": 2.55,
+          "id": "work_runtime",
+          "limit": 3.0,
+          "passed": false,
+          "unit": "h"
+        },
+        "transition": "regressed"
+      },
+      {
+        "id": "ordinary_source_margin",
+        "before": {
+          "actual": 0.48,
+          "id": "ordinary_source_margin",
+          "limit": 0.3,
+          "passed": true,
+          "unit": "A"
+        },
+        "after": {
+          "actual": 0.48,
+          "id": "ordinary_source_margin",
+          "limit": 0.3,
+          "passed": true,
+          "unit": "A"
+        },
+        "transition": "unchanged"
+      },
+      {
+        "id": "high_keyboard_supply_limit",
+        "before": {
+          "actual": 0.08,
+          "id": "high_keyboard_supply_limit",
+          "limit": 0,
+          "passed": true,
+          "unit": "A"
+        },
+        "after": {
+          "actual": 0.08,
+          "id": "high_keyboard_supply_limit",
+          "limit": 0,
+          "passed": true,
+          "unit": "A"
+        },
+        "transition": "unchanged"
+      }
+    ],
+    "physical_work_requested": false,
+    "physical_authority_granted": false
+  },
+  "native_audit": {
+    "requested": true,
+    "performed": true,
+    "passed": true,
+    "returncode": 0,
+    "engineering_acceptance": false
+  },
+  "archived_bytes_unchanged_by_audit": true,
+  "http_served_hash_matches_seal": true,
+  "job_reopened_in_separate_engine": true,
+  "source_inputs_unchanged_between_revisions": true,
+  "geometry_reimported_solids": 47,
+  "ribbon_reserve": {
+    "cable_model": "Adafruit 1648",
+    "datasheet_url": "https://www.adafruit.com/product/1648",
+    "published_dimensions_mm": [
+      300,
+      16
+    ],
+    "reserved_boxes_mm": {
+      "pi_approach": [
+        25.75,
+        191.8,
+        14.2,
+        42.25,
+        208.3,
+        35
+      ],
+      "cross_case_run": [
+        34,
+        191.8,
+        31,
+        112,
+        208.3,
+        35
+      ],
+      "panel_approach": [
+        112,
+        191.8,
+        31,
+        124.6,
+        218.3,
+        51.28
+      ],
+      "panel_entrance_reserve": [
+        112,
+        201.8,
+        49,
+        115.6,
+        218.3,
+        53.25
+      ]
+    },
+    "nominal_centreline_mm": [
+      [
+        34,
+        200.05,
+        14.2
+      ],
+      [
+        34,
+        200.05,
+        33
+      ],
+      [
+        112,
+        200.05,
+        33
+      ],
+      [
+        112,
+        210,
+        33
+      ],
+      [
+        114,
+        210,
+        33
+      ],
+      [
+        114,
+        210,
+        53.25
+      ],
+      [
+        115.6,
+        210,
+        53.25
+      ]
+    ],
+    "centreline_length_mm": 130.6,
+    "length_remaining_for_bends_and_slack_mm": 169.4,
+    "obstruction_free": true,
+    "plug_exits_and_bends_verified": false,
+    "minimum_bend_radius_mm": null,
+    "exact_installed_cable_route_verified": false
+  },
+  "nominal_mount_stack": {
+    "case_support_cap_mm": 3,
+    "step_spacer_mm": 4.52,
+    "step_stack_to_lug_mm": 7.52,
+    "drawing_stack_to_lug_mm": 3,
+    "min_max_thread_engagement_mm": null,
+    "selected_screw_length_mm": null
+  },
+  "bundles": [
+    {
+      "filename": "fielddeck-5-registered.zip",
+      "sha256": "727143b08ff95a103740b7b7e5406406f3b3ec2cb38cb73d3e8d762877a8aa94",
+      "bytes": 3051410,
+      "files": 73,
+      "revision": 1,
+      "requirements_met": true
+    },
+    {
+      "filename": "fielddeck-5-higher-load.zip",
+      "sha256": "302c0d25372e06d0c80e0c347f461d37a2c3dc08fb7ab61c4a6f9b30a33772c7",
+      "bytes": 3051418,
+      "files": 73,
+      "revision": 2,
+      "requirements_met": false
+    }
+  ],
+  "physical_validation_performed": false,
+  "baseline_commit": "9535eda8",
+  "targeted_regressions": {
+    "total_passed": 134,
+    "groups": {
+      "regressions": {
+        "passed": 86,
+        "junit_sha256": "467c90817aa80d460346edf8b455321d6e86f82b5ec532c42f94a1810144e249"
+      },
+      "engine_regression": {
+        "passed": 48,
+        "junit_sha256": "4b94b6f06381103440b0ebf1b010c1fc8983a479de6d04bb83528d9ccefdee6e"
+      }
+    },
+    "digital_engine_native_tests_deselected": [
+      "native_payload_job_rebuilds",
+      "native_headless_pipeline_persists"
+    ]
+  }
+}

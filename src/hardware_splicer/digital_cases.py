@@ -1,6 +1,6 @@
 """Server-owned digital cases; this registry is not an arbitrary CAD/code runner.
 
-The drone keeps its existing contract. The two device cases share the existing
+The drone keeps its existing contract. The device cases share the existing
 project/job lifecycle, but declare their own native stages, files and metrics.
 Only these repository-owned inputs are copied into an execution workspace.
 """
@@ -123,6 +123,31 @@ FIELDDECK_V1 = RegisteredCase(
 
 FIELDDECK = replace(FIELDDECK_V1, inputs=(*FIELDDECK_V1.inputs, 'BACKEND.md'))
 
+_FIELDDECK_REPO = 'projects/cyberdeck-real-trial-20261020'
+_SWAP = _FIELDDECK_REPO + '/display_swap'
+_BASE = _FIELDDECK_REPO + '/digital_v1'
+_CHANGED_FIELD_PARTS = ('face_rear_left', 'face_rear_right', 'tray_rear_left', 'tray_rear_right')
+FIELDDECK_5 = RegisteredCase(
+    'fielddeck-5', 'Fielddeck 5 display revision', ROOT,
+    (*(f'{_SWAP}/{name}' for name in ('build.py', 'assess.py', 'study_contract.py', 'study_build.py', 'study_verify.py',
+                                     'sources/evidence.json', 'sources/vendor5.zip')),
+     'src/hardware_splicer/part_substitution.py',
+     *(f'{_BASE}/{name}' for name in ('cad/FIELDDECK_7.step', 'cad/geometry_report.json', 'analysis/verification.json',
+                                      'design.json', 'bom.json', 'sources/touch_display2_LICENSE.txt')),
+     *(f'{_BASE}/cad/print/{name}.{ext}' for name in _FIELD_PARTS if name not in _CHANGED_FIELD_PARTS
+       for ext in ('step', 'stl'))),
+    (*(f'revision/{name}' for name in ('geometry.json', 'power.json', 'engineering.json', 'verification.json',
+                                      'BOM.json', 'BOM.csv', 'substitution.json', 'connections.json',
+                                      'source-evidence.json', 'display5-LICENSE.txt', 'cad/FIELDDECK_5.step',
+                                      'cad/FIELDDECK_5.glb')),
+     *(f'revision/cad/changed_parts/{name}.{ext}' for name in (*_CHANGED_FIELD_PARTS, 'display_spacer_1')
+       for ext in ('step', 'stl'))),
+    (f'{_SWAP}/study_build.py', f'{_SWAP}/study_verify.py'), f'{_SWAP}/study_verify.py',
+    'revision/engineering.json', 'revision/verification.json',
+    {'minimum_work_runtime_h': (2.5, .1, 24), 'minimum_supply_margin_a': (.3, 0, 2),
+     'pi_work_current_a': (1., .4, 2.5), 'keyboard_current_a': (.1, .02, .5)},
+)
+
 PLOTTER = RegisteredCase(
     'ender3-penplotter', 'Ender-3 reference-donor pen plotter',
     ROOT / 'projects/ender3-penplotter-digital',
@@ -143,7 +168,7 @@ PLOTTER = RegisteredCase(
     {'drawing_width_mm': (100, 60, 140), 'drawing_height_mm': (80, 40, 140),
      'pen_diameter_mm': (10, 8, 12), 'pen_lift_mm': (3, 2, 5)})
 
-CASES = {case.case_id: case for case in (FIELDDECK, PLOTTER)}
+CASES = {case.case_id: case for case in (FIELDDECK, FIELDDECK_5, PLOTTER)}
 
 
 def registered(case_id):
@@ -268,6 +293,8 @@ def write_readme(case, directory, requirements):
     stages = '\n'.join('python -B ' + stage for stage in case.stages)
     rows = '\n'.join(f'| `{name}` | {value:g} |' for name, value in requirements.items())
     docs = '\n'.join(f'- [{name}](<{name}>)' for name in case.inputs if name.endswith('.md'))
+    dependencies = ('CadQuery, trimesh, numpy, Pillow, matplotlib and Pydantic v2' if case.case_id == 'fielddeck-5'
+                    else 'CadQuery, trimesh, numpy, Pillow and matplotlib')
     text = f'''# {case.name}
 
 This is an executable digital study for the registered case `{case.case_id}`.
@@ -286,7 +313,7 @@ and revision identity and SHA256 of the enclosing ZIP.
 ## Reproduce the native study
 
 Extract this archive into a new working directory. Use a Python environment with
-CadQuery, trimesh, numpy, Pillow and matplotlib, and run these included scripts
+{dependencies}, and run these included scripts
 from the extracted directory:
 
 ```sh
@@ -343,6 +370,12 @@ def summarize(case, directory):
                   and verification.get('assembly_valid') is True
                   and verification.get('physical_fit_or_operation_proven') is False
                   and verification.get('assembly_step_sha256') == sha(directory / 'cad/FIELDDECK_7.step'))
+    elif case.case_id == 'fielddeck-5':
+        hashes = {name: sha(safe_file(directory, name)) for name in case.outputs if name != case.verification}
+        intact = (verification.get('artifact_integrity') is True
+                  and verification.get('case_id') == case.case_id
+                  and verification.get('engineering_acceptance') is report.get('requirements_met')
+                  and verification.get('artifact_sha256') == hashes)
     else:
         intact = verification.get('artifact_integrity') is True
     if not intact:

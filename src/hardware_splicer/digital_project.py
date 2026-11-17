@@ -92,21 +92,27 @@ def runtime():
 
 
 @lru_cache(maxsize=4)
-def _device_runtime(interpreter):
+def _device_runtime(interpreter, *, substitution=False):
+    imports = 'import cadquery, trimesh, numpy, PIL, matplotlib'
+    if substitution:
+        imports += '; from pydantic import model_validator'
     try:
-        result = subprocess.run([interpreter, '-B', '-c',
-                                 'import cadquery, trimesh, numpy, PIL, matplotlib'],
+        result = subprocess.run([interpreter, '-B', '-c', imports],
                                 capture_output=True, timeout=30, check=False)
         available = result.returncode == 0
     except (OSError, subprocess.TimeoutExpired):
         available = False
+    dependencies = 'CadQuery, trimesh, numpy, Pillow and matplotlib'
+    if substitution:
+        dependencies += ' and Pydantic v2'
     return {'available': available, 'engine': 'CadQuery + registered engineering scripts',
-            'setup_hint': '' if available else 'Set HARDWARE_SPLICER_DIGITAL_PYTHON to a Python with CadQuery, trimesh, numpy, Pillow and matplotlib.'}
+            'setup_hint': '' if available else f'Set HARDWARE_SPLICER_DIGITAL_PYTHON to a Python with {dependencies}.'}
 
 
 def runtime_for_case(case_id=cases.DEFAULT_CASE):
     cases.validate_case_id(case_id)
-    return runtime() if case_id == cases.DEFAULT_CASE else _device_runtime(native_python())
+    return runtime() if case_id == cases.DEFAULT_CASE else _device_runtime(
+        native_python(), substitution=case_id == 'fielddeck-5')
 
 
 def artifact_names(case_id=cases.DEFAULT_CASE, *, case=None):
@@ -139,7 +145,14 @@ def resolve_requirements(seal, change_request='', requirements=None):
     case_id = case_id_for(seal)
     if case_id == cases.DEFAULT_CASE:
         return requirement_tools().resolve(seal['summary']['requirements'], change_request, requirements)
-    return cases.registered(case_id).resolve(seal['summary']['requirements'], change_request, requirements)
+    return _revision_case(seal).resolve(seal['summary']['requirements'], change_request, requirements)
+
+
+def _revision_case(seal):
+    case_id = case_id_for(seal)
+    # Fielddeck 5 revisions change numeric goals against the parent's exact
+    # assembly and evaluator, even if today's checkout has another variant.
+    return case_for_run(seal) if case_id == 'fielddeck-5' else cases.registered(case_id)
 
 
 def run_dir(store, project_id, run_id):
@@ -440,21 +453,25 @@ def execute_study(backend, job):
     store = backend.project_store
     payload = job.options['payload']
     project_id, base_revision = payload['project_id'], payload['base_revision']
-    parent, _, parent_seal = load_run(store, project_id, base_revision)
+    parent, parent_directory, parent_seal = load_run(store, project_id, base_revision)
     case_id = case_id_for(parent_seal)
     if payload.get('case_id', cases.DEFAULT_CASE) != case_id:
         raise CorruptProject('Digital job targets a different registered case.')
     if store.load(project_id)['revision'] != base_revision:
         raise RevisionConflict('The project changed before this run started. Reload and run from the latest revision.')
-    requirements = (requirement_tools().validate(payload['requirements']) if case_id == cases.DEFAULT_CASE
-                    else cases.registered(case_id).validate(payload['requirements']))
+    case = None if case_id == cases.DEFAULT_CASE else _revision_case(parent_seal)
+    requirements = (requirement_tools().validate(payload['requirements']) if case is None
+                    else case.validate(payload['requirements']))
     attempt = Path(job.output_dir) / (job.attempt_id or uuid.uuid4().hex)
     attempt.mkdir(parents=True, exist_ok=False)
     write_json(attempt / 'requirements.json', requirements)
     package = attempt / 'study'
-    if case_id != cases.DEFAULT_CASE:
-        case = cases.registered(case_id)
-        cases.prepare(case, package, requirements)
+    if case is not None:
+        source = parent_directory if case_id == 'fielddeck-5' else None
+        if source is not None:
+            for name in case.inputs:
+                checked_file(source, name, parent_seal['artifact_sha256'], case_id=case_id, case=case)
+        cases.prepare(case, package, requirements, source=source)
         for index, stage in enumerate(case.stages):
             log = attempt / f'{index + 1}-{Path(stage).stem}.log'
             code = _command(backend, job, [package / stage], log)
@@ -470,7 +487,7 @@ def execute_study(backend, job):
         return
     seal = stage_run(store, project_id, package, change_request=payload['change_request'] or 'Updated study requirements',
                      parent_revision=base_revision, job_id=job.job_id, expected_requirements=requirements,
-                     attempt_id=job.attempt_id, case_id=case_id)
+                     attempt_id=job.attempt_id, case_id=case_id, registered_case=case)
     published = False
     try:
         def publish():

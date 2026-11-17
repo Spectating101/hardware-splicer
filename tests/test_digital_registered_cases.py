@@ -112,6 +112,38 @@ def test_registered_revision_changes_real_computation_and_retains_failed_target(
     assert engine.study('registered-copy')['summary'] == result['study']['summary']
 
 
+def test_fielddeck5_revision_uses_parent_evaluator_sources_and_bounds(registered_engine, monkeypatch):
+    """The archived Fielddeck 5 adapter remains the basis for numeric changes."""
+    engine, fixture = registered_engine
+    case = replace(fixture, case_id="fielddeck-5")
+    monkeypatch.setitem(cases.CASES, case.case_id, case)
+    (case.root / "build.py").write_text(BUILD.replace("'test-device'", "'fielddeck-5'"))
+    verification = '''
+from hashlib import sha256
+assert e['case_id']=='fielddeck-5'
+hashes={n:sha256((p/n).read_bytes()).hexdigest() for n in ('parts/body.step','reports/engineering.json')}
+(p/'reports/verification.json').write_text(json.dumps({
+    'case_id':'fielddeck-5', 'artifact_integrity':True, 'artifact_sha256':hashes,
+    'engineering_acceptance':e['requirements_met']}))
+'''
+    (case.root / "verify.py").write_text(VERIFY + verification)
+    project = engine.create(case_id=case.case_id)["project"]["project_id"]
+    parent = engine.study(project)
+
+    (case.root / "build.py").write_text("raise RuntimeError('changed current source')\n")
+    monkeypatch.setitem(cases.CASES, case.case_id, replace(case, requirements={"load_a": (1, .1, 1.5)}))
+    revised = engine.run_revision(project, base_revision=1, requirements={"load_a": 2},
+                                   change_request="Exercise the retained declared-load model")
+    assert revised["ok"], revised
+    assert revised["study"]["summary"]["requirements_met"] is False
+    assert revised["study"]["summary"]["metrics"] == {"power_w": 10}
+    assert engine.study(project, 1) == parent
+    comparison = engine.compare(project, before_revision=1, after_revision=2)
+    assert comparison["same_engine_sources"] is True
+    assert comparison["constraints"][0]["transition"] == "regressed"
+    assert engine.audit(project, native=True)["native_verification"]["passed"] is True
+
+
 @pytest.mark.parametrize('requirements', [
     {'load_a': True}, {'load_a': float('nan')}, {'load_a': 10**400},
     {'payload_mass_g': 3}, {'path': '/tmp/arbitrary.py'}, {'load_a': 4},

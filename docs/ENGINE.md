@@ -351,11 +351,24 @@ case study retains both source dimensions in the report.
 
 The backend compares the display interface using `evaluate_substitution`.
 Its 10-inch control case must report a protocol mismatch against the existing
-Pi 4 display port. The native study checks the bezel opening, screw paths and a
-clear middle section for the ribbon cable. Power scenarios keep the original
-stress allocation and use the published display consumption in the work scenario.
-Cable bends, connector contact ratings, appropriate screw engagement and physical
-fit remain open.
+Pi 4 display port. The native study checks the bezel opening, screw paths and
+reserved ribbon access from the Pi toward the display. Its centreline gives a
+length budget. The detailed connector exits, bends, contact ratings and screw
+engagement still need evidence. Power scenarios keep the original stress
+allocation and use the published display consumption in the work scenario.
+
+The headless engine lists this study as `fielddeck-5`. Start one with
+`hs-digital init --case fielddeck-5`. Use its project ID with `inspect`,
+`audit --native` and `export`. The sealed ZIP includes the exact prior
+Fielddeck assembly, display source and substitution evaluator along with the
+updated STEP/GLB, print parts, BOM and engineering results.
+
+Submit a revision with `revise PROJECT_ID --base-revision 1 --requirements FILE`.
+The four numeric fields are `minimum_work_runtime_h`,
+`minimum_supply_margin_a`, `pi_work_current_a` and `keyboard_current_a`.
+Changing them recomputes work power, runtime, and supply margin against the same
+retained source geometry. A completed study with an unmet target can still be
+inspected, compared and exported.
 
 From the repository root, run the study with the project's CadQuery and trimesh
 environment. Choose a fresh output directory.
@@ -369,8 +382,11 @@ python projects/cyberdeck-real-trial-20261020/display_swap/bundle.py \
 
 The ZIP contains the revised assembly STEP/GLB, changed and retained print
 parts, BOM, wiring notes, power comparison and source/geometry evidence.
-The [execution record](status/generated/fielddeck-display-swap-20261118.json)
-retains the source hashes, modeled results and checks from the native build.
+The [standalone execution record](status/generated/fielddeck-display-swap-20261118.json)
+retains the source hashes, modeled results and checks from the original display swap.
+The [registered study record](status/generated/fielddeck-5-registered-20261118.json)
+captures the baseline and higher-load comparison, the independent native audit and
+both archive hashes.
 
 ## Exact materials and InvenTree inventory
 

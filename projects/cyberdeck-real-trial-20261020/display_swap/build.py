@@ -175,11 +175,11 @@ def place_display(source, evidence):
     return native.rotate((0, 0, 0), (0, 0, 1), 90).translate((tx, ty, tz)), {
         "glass_mm": [round(y1 - y0, 3), round(x1 - x0, 3)],
         "pose_mm": [round(v, 4) for v in (tx, ty, tz)],
-        "mount_xy_mm": sorted(axes), "mount_pitch_mm": [round(v, 3) for v in pitch],
+        "mount_xy_mm": [list(point) for point in sorted(axes)], "mount_pitch_mm": [round(v, 3) for v in pitch],
         "step_bore_entrance_z_mm": model_seat, "drawing_support_seat_z_mm": round(drawing_seat, 3),
         "spacer_height_mm": round(model_seat - drawing_seat, 3),
         "step_full_reference_envelope_depth_mm": round(z1 - bounds(native)[2], 3),
-        "aperture_mm": APERTURE,
+        "aperture_mm": list(APERTURE),
     }
 
 
@@ -241,19 +241,43 @@ def verify_geometry(parts, mount):
         require(overlap(tray, seat) >= .99 * shape_volume(seat), "An upper support seat is missing.")
         require(overlap(tray, shank) < .01 and overlap(parts[f"display_spacer_{index}"], shank) < .01,
                 "A screw clearance bore misses the mount axis.")
-    # Only the middle run of a possible FFC path has sufficient source/model
-    # coverage. The two plug exits and bend radii remain separate fit items.
-    corridor = box(50, 191.8, 31, 62, 16.5, 4)
-    offenders = [name for name, shape in parts.items() if overlap(corridor, shape) > .01]
-    require(not offenders, f"Proposed ribbon middle run obstructed by {offenders}.")
+    cable = ribbon_access(parts)
     return {"nominal_changed_pair_checks": sum(a in new_parts or b in new_parts for a,b in itertools.combinations(parts, 2)),
             "intersection_limit_mm3": COMMON_LIMIT, "display_mount_paths_checked": 4,
-            "bezel_aperture_mm": APERTURE,
-            "ffc_middle_corridor": {"bounds_mm": [50, 191.8, 31, 112, 208.3, 35],
-                                    "obstruction_free": True, "plug_exits_and_bends_verified": False}}
+            "bezel_aperture_mm": list(APERTURE), "ffc_reserved_access": cable,
+            "nominal_mount_stack": {"case_support_cap_mm": 3,
+                "step_spacer_mm": mount["spacer_height_mm"],
+                "step_stack_to_lug_mm": round(3 + mount["spacer_height_mm"], 3),
+                "drawing_stack_to_lug_mm": 3, "min_max_thread_engagement_mm": None,
+                "selected_screw_length_mm": None}}
 
 
-def export_and_reimport(parts, revised, out):
+def ribbon_access(parts):
+    # Boxes reserve approach volume. The centreline estimates length only.
+    # The Pi side is still based on a nominal connector envelope.
+    reserves = {
+        "pi_approach": [25.75, 191.8, 14.2, 42.25, 208.3, 35],
+        "cross_case_run": [34, 191.8, 31, 112, 208.3, 35],
+        "panel_approach": [112, 191.8, 31, 124.6, 218.3, 51.28],
+        "panel_entrance_reserve": [112, 201.8, 49, 115.6, 218.3, 53.25],
+    }
+    for label, extents in reserves.items():
+        mins, maxs = extents[:3], extents[3:]
+        probe = box(*mins, *[end - start for start, end in zip(mins, maxs)])
+        offenders = [name for name, shape in parts.items() if overlap(probe, shape) > .01]
+        require(not offenders, f"Proposed ribbon {label} obstructed by {offenders}.")
+    centreline = [[34, 200.05, 14.2], [34, 200.05, 33], [112, 200.05, 33],
+                  [112, 210, 33], [114, 210, 33], [114, 210, 53.25], [115.6, 210, 53.25]]
+    length = sum(math.dist(start, end) for start, end in zip(centreline, centreline[1:]))
+    return {"cable_model": "Adafruit 1648", "datasheet_url": "https://www.adafruit.com/product/1648",
+            "published_dimensions_mm": [300, 16], "reserved_boxes_mm": reserves,
+            "nominal_centreline_mm": centreline, "centreline_length_mm": round(length, 3),
+            "length_remaining_for_bends_and_slack_mm": round(300 - length, 3),
+            "obstruction_free": True, "plug_exits_and_bends_verified": False,
+            "minimum_bend_radius_mm": None, "exact_installed_cable_route_verified": False}
+
+
+def export_geometry(parts, revised, out):
     cad = out / "cad"
     changed_dir = cad / "changed_parts"
     changed_dir.mkdir(parents=True)
@@ -270,6 +294,16 @@ def export_and_reimport(parts, revised, out):
     assembly_path = cad / "FIELDDECK_5.step"
     assembly.save(str(assembly_path))
     scene.export(str(cad / "FIELDDECK_5.glb"))
+    for name in sorted(CHANGED | {"display_spacer_1"}):
+        local = revised[name].translate(tuple(-v for v in bounds(revised[name])[:3]))
+        cq.exporters.export(local, str(changed_dir / (name + ".step")))
+        cq.exporters.export(local, str(changed_dir / (name + ".stl")), tolerance=.08, angularTolerance=.12)
+
+
+def reimport_geometry(parts, revised, out):
+    cad = out / "cad"
+    changed_dir = cad / "changed_parts"
+    assembly_path = cad / "FIELDDECK_5.step"
     reread = cq.importers.importStep(str(assembly_path)).val()
     require(reread.isValid(), "Exported assembly STEP is invalid.")
     remaining = list(reread.Solids())
@@ -297,8 +331,6 @@ def export_and_reimport(parts, revised, out):
         local = body.translate(tuple(-v for v in lower))
         step = changed_dir / (name + ".step")
         stl = step.with_suffix(".stl")
-        cq.exporters.export(local, str(step))
-        cq.exporters.export(local, str(stl), tolerance=.08, angularTolerance=.12)
         copy = cq.importers.importStep(str(step)).val()
         mesh = trimesh.load(stl, force="mesh", process=True)
         dimensions = [bounds(copy)[i + 3] - bounds(copy)[i] for i in range(3)]
@@ -314,16 +346,18 @@ def export_and_reimport(parts, revised, out):
             "assembly_step_sha256": sha(assembly_path), "assembly_glb_sha256": sha(cad / "FIELDDECK_5.glb")}
 
 
-def power_comparison(design, published):
+def power_comparison(design, published, *, requirements=None):
     a = design["engineering_assumptions"]
     voltage = a["supply_voltage_v"]
     bank = design["power_bank"]
     energy = bank["capacity_mah"] / 1000 * a["power_bank_cell_voltage_v"]
     usable = [energy * e * u for e, u in zip(a["conversion_efficiency_range"], a["usable_capacity_fraction_range"])]
-    keyboard = a["keyboard_current_a"]["normal_allocation"]
+    requirements = requirements or {}
+    keyboard = requirements.get("keyboard_current_a", a["keyboard_current_a"]["normal_allocation"])
+    work_current = requirements.get("pi_work_current_a", a["pi_current_a"]["work"])
     rows = []
     for scenario, pi, display1, display2, keys in (
-        ("work_published_panel_power", a["pi_current_a"]["work"], a["display_w"]["published"], published, keyboard),
+        ("work_published_panel_power", work_current, a["display_w"]["published"], published, keyboard),
         ("stress_design_allocation", a["pi_current_a"]["stress"], a["display_w"]["allocated"], a["display_w"]["allocated"], keyboard),
         ("high_keyboard_demand", a["pi_current_a"]["stress"], a["display_w"]["allocated"], a["display_w"]["allocated"],
          a["keyboard_current_a"]["usb2_high_power_sensitivity"]),
@@ -362,24 +396,31 @@ def write_bom(base, out):
         writer.writerows(items)
 
 
-def build(base, output):
-    base, output = Path(base).resolve(), Path(output).resolve()
+def prepare_assembly(base, *, evaluator=None):
     evidence = read(ROOT / "sources/evidence.json")
     parts, geometry = baseline_parts(base, evidence)
     display, mount, vendor_license = vendor_display(evidence)
-    assessment = assess_interfaces(mount, evidence, geometry)
+    assessment = assess_interfaces(mount, evidence, geometry, evaluator=evaluator)
     revised = revise_panels(parts, geometry, mount)
     del parts[DISPLAY]
     parts.update(revised)
     parts[NEW_DISPLAY] = display
     checks = verify_geometry(parts, mount)
+    return parts, revised, mount, checks, evidence, assessment, vendor_license
+
+
+def build(base, output, *, evaluator=None, requirements=None):
+    base, output = Path(base).resolve(), Path(output).resolve()
+    parts, revised, mount, checks, evidence, assessment, vendor_license = prepare_assembly(base, evaluator=evaluator)
     output.mkdir(parents=True, exist_ok=False)
-    exports = export_and_reimport(parts, revised, output)
-    power = power_comparison(read(base / "design.json"), evidence["product_brief"]["documented_power_w"])
+    export_geometry(parts, revised, output)
+    exports = reimport_geometry(parts, revised, output)
+    power = power_comparison(read(base / "design.json"), evidence["product_brief"]["documented_power_w"],
+                             requirements=requirements)
     write(output / "power.json", power)
     write(output / "substitution.json", assessment)
     write(output / "connections.json", {"display": assessment["connections"],
-                                         "rigid_cad_check": checks["ffc_middle_corridor"]})
+                                         "rigid_cad_check": checks["ffc_reserved_access"]})
     write_bom(base, output)
     write(output / "geometry.json", {"status": "nominal_geometry_checks_passed", "display_mount": mount,
                                     "checks": checks, "exports": exports, "physical_fit_verified": False})
