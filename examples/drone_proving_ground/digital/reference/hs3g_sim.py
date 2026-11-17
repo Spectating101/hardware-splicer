@@ -49,7 +49,79 @@ def setpoint(t, floor):
     return position, velocity, yaw, phase
 
 
-class World:
+class MotorTable:
+    def __init__(self, table, config):
+        rows = np.array(table['props']['GF3028-3'])
+        names = table['columns']
+        self.rpm_table = rows[:,names.index('rpm')]
+        self.thrust_table = rows[:,names.index('thrust_g')] * config['gravity_m_s2'] / 1000
+        self.current_table = rows[:,names.index('current_a')]
+        self.max_rpm = float(self.rpm_table[-1])
+
+    def force_at_rpm(self, rpm):
+        low = self.thrust_table[0] * (rpm/self.rpm_table[0])**2
+        return np.where(rpm < self.rpm_table[0], low, np.interp(rpm, self.rpm_table, self.thrust_table))
+
+    def rpm_at_force(self, force):
+        low = self.rpm_table[0] * np.sqrt(np.maximum(0, force)/self.thrust_table[0])
+        return np.clip(np.where(force < self.thrust_table[0], low, np.interp(force, self.thrust_table, self.rpm_table)), 0, self.max_rpm)
+
+    def current_at_rpm(self, rpm):
+        low = self.current_table[0] * (rpm/self.rpm_table[0])**3
+        return np.where(rpm < self.rpm_table[0], low, np.interp(rpm, self.rpm_table, self.current_table))
+
+
+class Battery:
+    """Assumed OCV/sag model; table current is the sole motor-current model."""
+    def __init__(self, config, motor):
+        self.parameters = config['battery']
+        self.motor = motor
+        self.soc = self.parameters['initial_soc']['value']
+        self.consumed_mah = 0.
+
+    def load(self, requested_rpm):
+        if self.soc <= 0:
+            return 0., 0., np.zeros_like(requested_rpm)
+        b = self.parameters
+        curve = np.array(b['ocv_curve_soc_cell_v']['value'])
+        ocv = float(np.interp(self.soc, curve[:,0], curve[:,1])) * b['cells']['value']
+        resistance = b['internal_resistance_ohm']['value']
+        power = b['avionics_power_w']['value']
+        bench = b['bench_voltage_v']['value']
+
+        def electrical(voltage):
+            rpms = np.clip(requested_rpm, 0, self.motor.max_rpm * voltage / bench)
+            motor_current = float(np.sum(self.motor.current_at_rpm(rpms)))
+            available = ocv - resistance * motor_current
+            # High-voltage root of V = OCV - R*(I_motor + P_avionics/V).
+            discriminant = available**2 - 4*resistance*power
+            terminal = (available + math.sqrt(discriminant))/2 if discriminant >= 0 and available > 0 else 0.
+            return terminal, rpms, motor_current
+
+        voltage, rpms, motor_current = electrical(ocv)
+        if np.any(rpms > self.motor.max_rpm * voltage / bench):
+            low, high = 0., ocv
+            for _ in range(48):
+                voltage = (low+high)/2
+                if electrical(voltage)[0] > voltage:
+                    low = voltage
+                else:
+                    high = voltage
+            voltage = (low+high)/2
+            _, rpms, motor_current = electrical(voltage)
+        if voltage <= 0:
+            return 0., 0., np.zeros_like(requested_rpm)
+        current = motor_current + power / voltage
+        return voltage, current, rpms
+
+    def advance(self, current, dt):
+        self.consumed_mah = min(self.parameters['capacity_mah']['value'] * self.parameters['initial_soc']['value'],
+                                self.consumed_mah + current * dt / 3.6)
+        self.soc = max(0., self.parameters['initial_soc']['value'] -
+                       self.consumed_mah / self.parameters['capacity_mah']['value'])
+
+
+class World(MotorTable):
     def __init__(self, model, table, config, scenario):
         import pybullet as p
         self.p = p
@@ -65,12 +137,8 @@ class World:
         a = config['assumptions']
         self.allocation = np.stack([np.ones(4), self.rotors[:,1], -self.rotors[:,0], self.spin*a['yaw_torque_per_thrust_m']])
         self.inverse_allocation = np.linalg.inv(self.allocation)
-        rows = np.array(table['props']['GF3028-3'])
-        names = table['columns']
-        self.rpm_table = rows[:,names.index('rpm')]
-        self.thrust_table = rows[:,names.index('thrust_g')] * config['gravity_m_s2'] / 1000
-        self.current_table = rows[:,names.index('current_a')]
-        self.max_rpm = float(self.rpm_table[-1])
+        super().__init__(table, config)
+        self.battery = Battery(config, self)
         self.integral = np.zeros(3)
         self.rpms, self.rpm_command = np.zeros(4), np.zeros(4)
         self.landed = self.fault_detected = False
@@ -91,18 +159,6 @@ class World:
                          linearDamping=0, angularDamping=0, lateralFriction=.7, restitution=0, physicsClientId=self.client)
         self.visual_bodies = []
         self.tick = 0
-
-    def force_at_rpm(self, rpm):
-        low = self.thrust_table[0] * (rpm/self.rpm_table[0])**2
-        return np.where(rpm < self.rpm_table[0], low, np.interp(rpm, self.rpm_table, self.thrust_table))
-
-    def rpm_at_force(self, force):
-        low = self.rpm_table[0] * np.sqrt(np.maximum(0, force)/self.thrust_table[0])
-        return np.clip(np.where(force < self.thrust_table[0], low, np.interp(force, self.thrust_table, self.rpm_table)), 0, self.max_rpm)
-
-    def current_at_rpm(self, rpm):
-        low = self.current_table[0] * (rpm/self.rpm_table[0])**3
-        return np.where(rpm < self.rpm_table[0], low, np.interp(rpm, self.rpm_table, self.current_table))
 
     def state(self):
         p = self.p
@@ -148,6 +204,8 @@ class World:
         self.rpms += (self.rpm_command-self.rpms)*(1-math.exp(-self.dt/a['motor_time_constant_s']))
         if fault and t >= fault['at_s']:
             self.rpms[fault['index']] = 0
+        voltage, current, self.rpms = self.battery.load(self.rpms)
+        self.battery.advance(current, self.dt)
         thrust = self.force_at_rpm(self.rpms)
         for rotor, force in zip(self.rotors, thrust):
             # Force point and direction are in the body's COM-centred local frame.
@@ -171,7 +229,9 @@ class World:
                **{f'quat_{axis}': float(value) for axis,value in zip('xyzw',quat)},
                **{f'{k}_rad': float(value) for k,value in zip(['roll','pitch','yaw'],rpy)},
                **{f'rpm_{i+1}': float(value) for i,value in enumerate(self.rpms)},
-               'current_a_est': float(sum(self.current_at_rpm(self.rpms)) + 4.0/16.8),
+               'current_a_est': current, 'terminal_voltage_v': voltage,
+               'battery_soc': self.battery.soc, 'consumed_mah_est': self.battery.consumed_mah,
+               'full_throttle_thrust_n_est': float(4*self.force_at_rpm(self.max_rpm*voltage/self.cfg['battery']['bench_voltage_v']['value'])),
                'tilt_deg': math.degrees(math.acos(float(np.clip(R[2,2],-1,1)))),
                'contact': int(contact), 'target_yaw_rad': yaw, 'fault_detected': int(self.fault_detected)}
         return row
@@ -262,6 +322,47 @@ def run(model, table, config, scenario, out: Path, *, render=False):
         world.close()
 
 
+def hover_estimate(mass, config):
+    table = config['motor_table']['value']
+    motor = MotorTable(table, config)
+    battery = Battery(config, motor)
+    b = config['battery']
+    weight = mass * config['gravity_m_s2']
+    rpm = float(motor.rpm_at_force(weight/4))
+    requested = np.full(4, rpm)
+    target_mah = b['capacity_mah']['value'] * b['usable_capacity_fraction']['value']
+    seconds = 0.
+    min_voltage = b['cells']['value'] * config['acceptance']['min_terminal_cell_v']['value']
+    initial_current = battery.load(requested)[1]
+    termination = '80_percent_depth_of_discharge'
+    while battery.consumed_mah < target_mah:
+        voltage, current, available = battery.load(requested)
+        if voltage < min_voltage or float(np.sum(motor.force_at_rpm(available))) < weight*(1-1e-9):
+            termination = 'voltage_or_available_thrust_limit'
+            break
+        dt = min(b['hover_step_s']['value'], (target_mah-battery.consumed_mah)*3.6/current)
+        battery.advance(current, dt)
+        seconds += dt
+        if target_mah-battery.consumed_mah < 1e-9:
+            break
+    result = {'model': 'thrust_table_current_at_required_rpm', 'initial_current_a': initial_current,
+              'endurance_min': seconds/60, 'termination': termination,
+              'capacity_mah': b['capacity_mah']['value'], 'mass_g': mass*1000,
+              'initial_soc': b['initial_soc']['value'], 'min_terminal_voltage_v': min_voltage,
+              'target_depth_of_discharge': b['usable_capacity_fraction']['value'],
+              'assumptions': b['hover_assumptions']}
+    alt = config['alternate_estimate']
+    result['alternate_estimate'] = {'source': alt['source'],
+                                    'current_a': alt['current_a']['value'],
+                                    'endurance_min': alt['endurance_min']['value'],
+                                    'capacity_mah': alt['capacity_mah']['value'],
+                                    'mass_g': alt['mass_g']['value'],
+                                    'difference_current_a': alt['current_a']['value']-initial_current,
+                                    'difference_endurance_min': alt['endurance_min']['value']-seconds/60,
+                                    'assumptions': alt['note']}
+    return result
+
+
 def assess(rows, model, config, scenario):
     """Recomputable acceptance from actual physics telemetry, not renderer state."""
     a = {key: np.array([row[key] for row in rows], dtype=float) for key in rows[0] if key != 'phase'}
@@ -275,9 +376,9 @@ def assess(rows, model, config, scenario):
     mass = model['mass_kg'] + scenario.get('extra_mass_g',0)/1000
     residual = np.diff(vel,axis=0)*config['physics_hz'] - force[1:]/mass
     continuous_air = airborne[1:] & airborne[:-1]
-    force_rms = float(np.sqrt(np.mean(residual[continuous_air]**2)))
+    force_rms = float(np.sqrt(np.mean(residual[continuous_air]**2))) if continuous_air.any() else None
     position_residual = np.diff(pos,axis=0)*config['physics_hz'] - vel[1:]
-    position_rms = float(np.sqrt(np.mean(position_residual[continuous_air]**2)))
+    position_rms = float(np.sqrt(np.mean(position_residual[continuous_air]**2))) if continuous_air.any() else None
     touchdown = np.flatnonzero((t>24)&(a['contact']>0))
     limit = config['acceptance']
     metrics = {'tracking_rms_m': float(np.sqrt(np.mean(error[(t>3)&(t<22)]**2))),
@@ -289,14 +390,45 @@ def assess(rows, model, config, scenario):
                'position_velocity_rms_m_s': position_rms,
                'max_rpm': float(max(a[f'rpm_{i}'].max() for i in range(1,5))),
                'peak_current_a_est': float(a['current_a_est'].max()),
-               'consumed_mah_est': float(np.trapezoid(a['current_a_est'],t)/3.6),
+               'consumed_mah_est': float(a['consumed_mah_est'][-1]) if 'consumed_mah_est' in a else float(np.trapezoid(a['current_a_est'],t)/3.6),
                'final_position_m': pos[-1].tolist(),
                'landed_contact': bool(a['contact'][-1]),
                'fault_detected': bool(a['fault_detected'].max()), 'rows': len(rows), 'seconds': float(t[-1])}
     checks = {'finite_state': bool(all(np.isfinite(x).all() for x in a.values())),
               'timebase': bool(np.allclose(np.diff(t),1/config['physics_hz'],atol=1e-9)),
-              'position_velocity_consistency': position_rms < 0.0001,
-              'native_force_balance': force_rms < limit['force_balance_rms_m_s2']}
+              'position_velocity_consistency': position_rms is not None and position_rms < 0.0001,
+              'native_force_balance': force_rms is not None and force_rms < limit['force_balance_rms_m_s2']}
+    not_gated = {}
+    if 'terminal_voltage_v' in a and 'battery' in config:
+        b = config['battery']
+        voltage_limit = b['cells']['value'] * limit['min_terminal_cell_v']['value']
+        metrics['min_terminal_voltage_v'] = float(a['terminal_voltage_v'].min())
+        metrics['energy_wh_est'] = float(np.sum(a['terminal_voltage_v']*a['current_a_est'])/config['physics_hz']/3600)
+        checks['terminal_voltage'] = metrics['min_terminal_voltage_v'] >= voltage_limit
+        motor = MotorTable(config['motor_table']['value'], config)
+        minimum_voltage = min(voltage_limit, metrics['min_terminal_voltage_v'])
+        metrics['full_throttle_evaluation_voltage_v'] = minimum_voltage
+        metrics['thrust_to_weight_at_min_voltage'] = float(4*motor.force_at_rpm(motor.max_rpm*minimum_voltage/b['bench_voltage_v']['value'])/(mass*config['gravity_m_s2']))
+        checks['minimum_thrust_to_weight'] = metrics['thrust_to_weight_at_min_voltage'] >= limit['min_thrust_to_weight']['value']
+        rated_c = b['c_continuous']['value']
+        if rated_c is None:
+            not_gated['continuous_current'] = 'no rated C in source data'
+        else:
+            metrics['rated_continuous_current_a'] = rated_c*b['capacity_mah']['value']/1000
+            checks['continuous_current'] = metrics['peak_current_a_est'] <= metrics['rated_continuous_current_a']
+        hover = hover_estimate(mass, config)
+        metrics['estimated_hover_endurance_min'] = hover['endurance_min']
+        requirements = config.get('requirements', {})
+        if 'min_hover_endurance_min' in requirements:
+            checks['hover_endurance'] = hover['endurance_min'] >= requirements['min_hover_endurance_min']
+        else:
+            not_gated['hover_endurance'] = 'no endurance requirement declared'
+        if 'min_thrust_to_weight' in requirements:
+            checks['required_thrust_to_weight'] = metrics['thrust_to_weight_at_min_voltage'] >= requirements['min_thrust_to_weight']
+    else:
+        hover = None
+        checks['battery_telemetry_available'] = False
+        not_gated['battery'] = 'not_evaluated: legacy contract or telemetry lacks battery model'
     if scenario['expected'] == 'controlled_landing':
         for key in ['tracking_rms_m','hover_error_m','gust_recovery_error_m','max_tracking_tilt_deg','landing_speed_m_s']:
             checks[key] = metrics[key] is not None and metrics[key] < limit[key]
@@ -309,7 +441,8 @@ def assess(rows, model, config, scenario):
         checks['injected_motor_stopped'] = bool(np.all(a[f'rpm_{fail["index"]+1}'][t>fail['at_s']+.1] == 0))
         checks['loss_of_control_observed'] = metrics['fault_detected'] and float(error[t>fail['at_s']].max()) > .3
         checks['failure_reached_ground'] = metrics['landed_contact']
-    return {'scenario': scenario, 'metrics': metrics, 'checks': checks, 'accepted': all(checks.values())}
+    return {'scenario': scenario, 'metrics': metrics, 'checks': checks, 'accepted': all(checks.values()),
+            'hover_estimate': hover, 'not_gated': not_gated}
 
 
 def freefall_oracle(model, table, config):

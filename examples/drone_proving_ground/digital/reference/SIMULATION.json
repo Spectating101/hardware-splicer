@@ -3,20 +3,28 @@
     {
       "actual": 234.9,
       "id": "nominal_mass",
+      "kind": "mass_budget",
       "label": "Nominal mass",
       "limit": 250.0,
       "margin": 15.099999999999994,
+      "margin_g": 15.099999999999994,
+      "mass_budget": true,
       "passed": true,
-      "unit": "g"
+      "unit": "g",
+      "verdict_basis": "mass_budget_only"
     },
     {
       "actual": 239.9,
       "id": "mass_uncertainty",
+      "kind": "mass_budget",
       "label": "Mass with 5 g uncertainty",
       "limit": 250.0,
       "margin": 10.099999999999994,
+      "margin_g": 10.099999999999994,
+      "mass_budget": true,
       "passed": true,
-      "unit": "g"
+      "unit": "g",
+      "verdict_basis": "mass_budget_only"
     },
     {
       "actual": 0.023146111731037616,
@@ -25,7 +33,8 @@
       "limit": 0.05,
       "margin": 0.026853888268962386,
       "passed": true,
-      "unit": ""
+      "unit": "",
+      "verdict_basis": "mass_budget_only"
     }
   ],
   "controller": "Simulation position PID / SO(3) attitude PD, 60 Hz",
@@ -41,6 +50,7 @@
     "steps": 60,
     "zero_motor_thrust": true
   },
+  "mass_budget": true,
   "physical_validation": false,
   "physical_work_requested": false,
   "requested_scope": "digital_only_3d_representation_and_simulation",
@@ -54,20 +64,47 @@
     {
       "accepted": true,
       "checks": {
+        "continuous_current": true,
         "controlled_ground_contact": true,
         "finite_state": true,
         "gust_recovery_error_m": true,
         "hover_error_m": true,
         "landing_speed_m_s": true,
         "max_tracking_tilt_deg": true,
+        "minimum_thrust_to_weight": true,
         "native_force_balance": true,
         "position_velocity_consistency": true,
+        "terminal_voltage": true,
         "timebase": true,
         "tracking_rms_m": true,
         "yaw_tracking": true
       },
+      "hover_estimate": {
+        "alternate_estimate": {
+          "assumptions": "Original design power-law estimate at its 850 mAh capacity and nominal voltage; it is not adjusted for payload or sag and is not used by the simulation.",
+          "capacity_mah": 850,
+          "current_a": 3.58,
+          "difference_current_a": 0.7016795321922848,
+          "difference_endurance_min": -2.685399628660356,
+          "endurance_min": 11.4,
+          "mass_g": 234.9,
+          "source": "../revision_b/reference/results.json#propulsion"
+        },
+        "assumptions": "Four healthy motors in steady hover without gusts or maneuvering; constant required rotor RPM and current from the bench table, not voltage-calibrated; integrate coulomb count and avionics load to 80% depth of discharge, stopping earlier at the voltage or available-thrust limit; no temperature, aging or Peukert correction.",
+        "capacity_mah": 850,
+        "endurance_min": 14.085399628660356,
+        "initial_current_a": 2.878320467807715,
+        "initial_soc": 1.0,
+        "mass_g": 234.9,
+        "min_terminal_voltage_v": 13.2,
+        "model": "thrust_table_current_at_required_rpm",
+        "target_depth_of_discharge": 0.8,
+        "termination": "80_percent_depth_of_discharge"
+      },
       "metrics": {
-        "consumed_mah_est": 20.439417161734806,
+        "consumed_mah_est": 20.469141757922415,
+        "energy_wh_est": 0.3382182322945872,
+        "estimated_hover_endurance_min": 14.085399628660356,
         "fault_detected": false,
         "final_position_m": [
           -0.01313422286933502,
@@ -75,18 +112,25 @@
           0.033262139493817414
         ],
         "force_balance_rms_m_s2": 1.4065561081657125e-15,
+        "full_throttle_evaluation_voltage_v": 13.2,
         "gust_recovery_error_m": 0.04001556424009155,
         "hover_error_m": 0.011562468474567864,
         "landed_contact": true,
         "landing_speed_m_s": 0.11659125272444161,
         "max_rpm": 15519.219907397937,
         "max_tracking_tilt_deg": 4.53086516568853,
-        "peak_current_a_est": 3.0922431793603975,
+        "min_terminal_voltage_v": 16.46801824640542,
+        "peak_current_a_est": 3.0958592607390703,
         "position_velocity_rms_m_s": 4.400928988770165e-15,
+        "rated_continuous_current_a": 59.5,
         "rows": 6720,
         "seconds": 28.0,
+        "thrust_to_weight_at_min_voltage": 2.998997044539398,
         "tracking_rms_m": 0.05675998083029617,
         "yaw_error_at_hold_deg": 0.00024351102552849953
+      },
+      "not_gated": {
+        "hover_endurance": "no endurance requirement declared"
       },
       "scenario": {
         "expected": "controlled_landing",
@@ -98,20 +142,47 @@
     {
       "accepted": true,
       "checks": {
+        "continuous_current": true,
         "controlled_ground_contact": true,
         "finite_state": true,
         "gust_recovery_error_m": true,
         "hover_error_m": true,
         "landing_speed_m_s": true,
         "max_tracking_tilt_deg": true,
+        "minimum_thrust_to_weight": true,
         "native_force_balance": true,
         "position_velocity_consistency": true,
+        "terminal_voltage": true,
         "timebase": true,
         "tracking_rms_m": true,
         "yaw_tracking": true
       },
+      "hover_estimate": {
+        "alternate_estimate": {
+          "assumptions": "Original design power-law estimate at its 850 mAh capacity and nominal voltage; it is not adjusted for payload or sag and is not used by the simulation.",
+          "capacity_mah": 850,
+          "current_a": 3.58,
+          "difference_current_a": 0.6169415451162026,
+          "difference_endurance_min": -2.284982262402883,
+          "endurance_min": 11.4,
+          "mass_g": 234.9,
+          "source": "../revision_b/reference/results.json#propulsion"
+        },
+        "assumptions": "Four healthy motors in steady hover without gusts or maneuvering; constant required rotor RPM and current from the bench table, not voltage-calibrated; integrate coulomb count and avionics load to 80% depth of discharge, stopping earlier at the voltage or available-thrust limit; no temperature, aging or Peukert correction.",
+        "capacity_mah": 850,
+        "endurance_min": 13.684982262402883,
+        "initial_current_a": 2.9630584548837975,
+        "initial_soc": 1.0,
+        "mass_g": 239.9,
+        "min_terminal_voltage_v": 13.2,
+        "model": "thrust_table_current_at_required_rpm",
+        "target_depth_of_discharge": 0.8,
+        "termination": "80_percent_depth_of_discharge"
+      },
       "metrics": {
-        "consumed_mah_est": 21.024891473903697,
+        "consumed_mah_est": 21.055475597834825,
+        "energy_wh_est": 0.34773576962639835,
+        "estimated_hover_endurance_min": 13.684982262402883,
         "fault_detected": false,
         "final_position_m": [
           -0.013195933198319371,
@@ -119,18 +190,25 @@
           0.03326213953377131
         ],
         "force_balance_rms_m_s2": 1.4098980856693355e-15,
+        "full_throttle_evaluation_voltage_v": 13.2,
         "gust_recovery_error_m": 0.04025798463744165,
         "hover_error_m": 0.007488030195550651,
         "landed_contact": true,
         "landing_speed_m_s": 0.11831814868332485,
         "max_rpm": 15689.18548117276,
         "max_tracking_tilt_deg": 4.502905281040545,
-        "peak_current_a_est": 3.192832409787435,
+        "min_terminal_voltage_v": 16.45827787641948,
+        "peak_current_a_est": 3.1965676361121034,
         "position_velocity_rms_m_s": 4.424622047732452e-15,
+        "rated_continuous_current_a": 59.5,
         "rows": 6720,
         "seconds": 28.0,
+        "thrust_to_weight_at_min_voltage": 2.936491895632783,
         "tracking_rms_m": 0.0570975494391757,
         "yaw_error_at_hold_deg": 0.0002580662330671778
+      },
+      "not_gated": {
+        "hover_endurance": "no endurance requirement declared"
       },
       "scenario": {
         "expected": "controlled_landing",
@@ -142,16 +220,43 @@
     {
       "accepted": true,
       "checks": {
+        "continuous_current": true,
         "failure_reached_ground": true,
         "finite_state": true,
         "injected_motor_stopped": true,
         "loss_of_control_observed": true,
+        "minimum_thrust_to_weight": true,
         "native_force_balance": true,
         "position_velocity_consistency": true,
+        "terminal_voltage": true,
         "timebase": true
       },
+      "hover_estimate": {
+        "alternate_estimate": {
+          "assumptions": "Original design power-law estimate at its 850 mAh capacity and nominal voltage; it is not adjusted for payload or sag and is not used by the simulation.",
+          "capacity_mah": 850,
+          "current_a": 3.58,
+          "difference_current_a": 0.7016795321922848,
+          "difference_endurance_min": -2.685399628660356,
+          "endurance_min": 11.4,
+          "mass_g": 234.9,
+          "source": "../revision_b/reference/results.json#propulsion"
+        },
+        "assumptions": "Four healthy motors in steady hover without gusts or maneuvering; constant required rotor RPM and current from the bench table, not voltage-calibrated; integrate coulomb count and avionics load to 80% depth of discharge, stopping earlier at the voltage or available-thrust limit; no temperature, aging or Peukert correction.",
+        "capacity_mah": 850,
+        "endurance_min": 14.085399628660356,
+        "initial_current_a": 2.878320467807715,
+        "initial_soc": 1.0,
+        "mass_g": 234.9,
+        "min_terminal_voltage_v": 13.2,
+        "model": "thrust_table_current_at_required_rpm",
+        "target_depth_of_discharge": 0.8,
+        "termination": "80_percent_depth_of_discharge"
+      },
       "metrics": {
-        "consumed_mah_est": 6.6894251804334575,
+        "consumed_mah_est": 6.698374860773753,
+        "energy_wh_est": 0.11093673201023037,
+        "estimated_hover_endurance_min": 14.085399628660356,
         "fault_detected": true,
         "final_position_m": [
           0.38250640122304486,
@@ -159,17 +264,24 @@
           0.03326443808955244
         ],
         "force_balance_rms_m_s2": 3.223993288582877e-15,
+        "full_throttle_evaluation_voltage_v": 13.2,
         "gust_recovery_error_m": null,
         "hover_error_m": 0.011562468474567864,
         "landed_contact": true,
         "landing_speed_m_s": null,
         "max_rpm": 14572.703530509534,
         "max_tracking_tilt_deg": 170.73049481232906,
-        "peak_current_a_est": 3.0922431793603975,
+        "min_terminal_voltage_v": 16.53906569290465,
+        "peak_current_a_est": 3.0958592607390703,
         "position_velocity_rms_m_s": 4.131687934414493e-15,
+        "rated_continuous_current_a": 59.5,
         "rows": 2880,
         "seconds": 12.0,
+        "thrust_to_weight_at_min_voltage": 2.998997044539398,
         "tracking_rms_m": 0.4469566929315131
+      },
+      "not_gated": {
+        "hover_endurance": "no endurance requirement declared"
       },
       "scenario": {
         "duration_s": 12,
@@ -189,23 +301,25 @@
     "Native CAD frame; simplified component, propeller and collision geometry.",
     "Motor thrust uses the retained maker table; behavior below its first row is quadratic extrapolation. These low-throttle missions operate below that first measured bench row.",
     "Motor lag, yaw drag, linear drag and controller gains are declared assumptions.",
+    "Battery sag and coulomb counting use an assumed OCV curve and internal resistance; current versus RPM is extrapolated below the bench table and is not voltage-calibrated.",
     "Ideal full-state feedback; no sensor noise, GNSS/RF link, INAV SITL, flexible-frame, CFD or battery-chemistry simulation.",
     "Controller is a simulation position PID with SO(3) attitude PD, not a deployable INAV flight profile.",
     "No purchasing, machining, firmware flashing, physical motors or flight are part of the requested digital completion."
   ],
   "simulation_acceptance": true,
   "source_sha256": {
-    "build_digital.py": "bf456e0a8dd2f3673777f6b03c86e475b5683d3ea256ad5690b47ff611556bdf",
+    "build_digital.py": "5d1322a7d16b35e74d6fcab76cec717fa33d79b530e8097dc4836539f68beb75",
     "hs3g_model.py": "d2794ccf6fa02698ae3d9c9f5a1c5064585ebc0cae4d562eeae9af03c1fd1b08",
-    "hs3g_sim.py": "8dc63892f8681daf5aa05f1db4d43e9842f2db276fa792f4f9ce883f61f1a874",
-    "rerun_simulation.py": "eeaa9c881783e66b6fa07a9bec4974b62a8c8ced7af67cf78a5b6ac4843fa554",
-    "simulation.json": "375a6850ab092febad3a95b6c62858c5f3dafbe227c719eb4fc3ff41cb56c340",
-    "study_requirements.py": "a002f285c2d4f251b9eaf5e575d01958240a1535e3ed509e3882209304200da2",
+    "hs3g_sim.py": "c4a01285273ff5f7e5b0c08e5b93dfda81ad975777446a3261f6d848c6252768",
+    "rerun_simulation.py": "23f599ef260ceffc1e5dd5552b4eda837e8e6615449781ffec764878f113706a",
+    "simulation.json": "02c663327828bdada3f21cbf4d6e8e562e15d37e8bf76dcd795cae9c88861939",
+    "study_requirements.py": "97dc8308d847a88c79dcd4dbf413188b82c1ee5473a4c3f5453d6fd0ed9f84a7",
     "vendor/HS-LICENSE.txt": "e243ac85fd7b0580eba9147640bd18047c3f4f799def65081f95b3a929518be6",
     "vendor/THREE-LICENSE.txt": "852e0e8699169bf9f6fdc6bda3e682d078dcbc738b5d33e74df594721bff271d",
     "vendor/provenance.json": "c214c89606f378e526678e3468e5a1cbf8d2da9f0d57261ccd0386380f3e6430",
     "vendor/three.min.js": "170c6789f43217c96b3170f4b42fafe135de7f7cd48497a4218f9757ee1d49fa",
-    "verify_digital.py": "282175c118fb4573a53e17667292efef5fb2d23c788a93de43781ec800045173",
+    "verify_digital.py": "572c3094a75ed7a21562b3382dce3eb6c58af9b79ef9a3f6c6495b0b7705b9e2",
     "viewer.html": "c8e410eccfe5717a38e53b045f77fae9b00d877613aaf84b018b8abe38d626b8"
-  }
+  },
+  "verdict_basis": "mass_budget_only"
 }

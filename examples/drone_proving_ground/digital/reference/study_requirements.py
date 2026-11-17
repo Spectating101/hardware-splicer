@@ -10,17 +10,19 @@ import re
 
 DEFAULTS = {'payload_mass_g': 0.0, 'gust_scale': 1.0, 'max_mass_g': 250.0}
 BOUNDS = {'payload_mass_g': (0, 50), 'gust_scale': (0, 3), 'max_mass_g': (150, 500)}
+OPTIONAL = {'min_hover_endurance_min': 'endurance', 'min_thrust_to_weight': 'minimum_thrust_to_weight'}
 
 
 def validate(value=None):
     value = {} if value is None else value
-    if not isinstance(value, dict) or set(value) - set(DEFAULTS):
-        raise ValueError('Requirements support payload_mass_g, gust_scale and max_mass_g only.')
+    if not isinstance(value, dict) or set(value) - (set(DEFAULTS) | set(OPTIONAL)):
+        raise ValueError('Requirements support payload_mass_g, gust_scale, max_mass_g, '
+                         'min_hover_endurance_min and min_thrust_to_weight only.')
     result = dict(DEFAULTS)
     for key, number in value.items():
         if isinstance(number, bool) or not isinstance(number, (int, float)):
             raise ValueError(f'{key} must be a number.')
-        low, high = BOUNDS[key]
+        low, high = BOUNDS.get(key, (0, math.inf))
         if not math.isfinite(number) or not low <= number <= high:
             raise ValueError(f'{key} must be between {low} and {high}.')
         result[key] = float(number)
@@ -61,17 +63,43 @@ def configure(config, requirements):
     return config
 
 
-def constraints(model, requirements):
+def verdict_basis(requirements):
+    return 'mass_budget_only' if not set(requirements).intersection(OPTIONAL) else 'mass_budget_and_declared_performance'
+
+
+def constraints(model, requirements, assessment=None):
     requirements = validate(requirements)
     mass = model['mass_kg'] * 1000
     limit = requirements['max_mass_g']
-    return [
+    result = [
         {'id': 'nominal_mass', 'label': 'Nominal mass', 'actual': mass, 'limit': limit,
-         'unit': 'g', 'margin': limit - mass, 'passed': mass <= limit},
+         'kind': 'mass_budget', 'unit': 'g', 'margin': limit - mass, 'margin_g': limit - mass, 'passed': mass <= limit},
         {'id': 'mass_uncertainty', 'label': 'Mass with 5 g uncertainty', 'actual': mass + 5,
-         'limit': limit, 'unit': 'g', 'margin': limit - mass - 5, 'passed': mass + 5 <= limit},
+         'kind': 'mass_budget', 'limit': limit, 'unit': 'g', 'margin': limit - mass - 5,
+         'margin_g': limit - mass - 5, 'passed': mass + 5 <= limit},
         {'id': 'inertia_approximation', 'label': 'Relative omitted products of inertia',
          'actual': model['inertia_off_diagonal_relative_max'], 'limit': .05, 'unit': '',
          'margin': .05 - model['inertia_off_diagonal_relative_max'],
          'passed': model['inertia_off_diagonal_relative_max'] < .05},
     ]
+    for check in result:
+        check['verdict_basis'] = verdict_basis(requirements)
+        if check.get('kind') == 'mass_budget':
+            check['mass_budget'] = check['passed']
+    assessments = assessment if isinstance(assessment, list) else [assessment] if assessment else []
+    metrics = {'min_hover_endurance_min': ('estimated_hover_endurance_min', 'min'),
+               'min_thrust_to_weight': ('thrust_to_weight_at_min_voltage', '')}
+    for key, kind in OPTIONAL.items():
+        if key not in requirements:
+            continue
+        metric, unit = metrics[key]
+        values = [a.get('metrics', {}).get(metric) for a in assessments]
+        evaluated = bool(values) and all(v is not None and math.isfinite(v) for v in values)
+        actual = min(values) if evaluated else None
+        result.append({'id': key, 'kind': kind, 'label': key, 'actual': actual,
+                       'limit': requirements[key], 'unit': unit,
+                       'margin': actual-requirements[key] if evaluated else None,
+                       'passed': actual >= requirements[key] if evaluated else None,
+                       'status': 'evaluated' if evaluated else 'not_evaluated',
+                       'verdict_basis': verdict_basis(requirements)})
+    return result
