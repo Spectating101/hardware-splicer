@@ -662,6 +662,21 @@ export const CURATED_EXTENDED: ModuleSpec[] = [
     ],
   },
   {
+    id: "resistor-10r",
+    label: "10 ohm resistor",
+    category: "other",
+    summary: "Axial 1/4 W series resistor; limits a display backlight fed straight from a 3.3 V rail.",
+    manufacturer: "Generic",
+    partNumber: "CFR-25JB-52-10R",
+    priceUsd: 0.1,
+    source: "curated",
+    capabilityTags: ["passive_component"],
+    pins: [
+      { id: "1", label: "1", role: "other" },
+      { id: "2", label: "2", role: "other" },
+    ],
+  },
+  {
     id: "esp32-cam-module",
     label: "ESP32-CAM (OV2640)",
     category: "mcu",
