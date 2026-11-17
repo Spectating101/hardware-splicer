@@ -1,0 +1,650 @@
+{
+  "schema_version": "hardware_splicer.module_footprints.v1",
+  "description": "Single source of truth for module footprint geometry (local mm from the module centre). Python loads this file; the TypeScript table is generated from it by scripts/export_module_footprints_ts.py. A module with no entry here falls back to a synthetic two-column placeholder in both languages and is reported as an unverified fit.",
+  "modules": {
+    "dc-barrel-12v": {
+      "kicadFootprint": "Connector:BarrelJack_CUI_PJ-002A",
+      "bodyMm": {"w": 10, "h": 10},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "V+", "x": -1.75, "y": 0},
+        {"pinId": "GND", "x": 1.75, "y": 0}
+      ]
+    },
+    "usb-power-5v": {
+      "kicadFootprint": "Connector:USB-MICRO-POWER",
+      "bodyMm": {"w": 8, "h": 7},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "V+", "x": -1.25, "y": -2},
+        {"pinId": "GND", "x": 1.25, "y": -2}
+      ]
+    },
+    "esp32-devkit": {
+      "kicadFootprint": "Module:ESP32-WROOM-32",
+      "bodyMm": {"w": 26, "h": 50},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VIN", "x": -6.35, "y": -7.62},
+        {"pinId": "GND", "x": -6.35, "y": -5.08},
+        {"pinId": "GPIO4", "x": -6.35, "y": -2.54},
+        {"pinId": "GPIO5", "x": -6.35, "y": 0},
+        {"pinId": "GPIO16", "x": -6.35, "y": 2.54},
+        {"pinId": "GPIO17", "x": -6.35, "y": 5.08},
+        {"pinId": "GPIO18", "x": -6.35, "y": 7.62},
+        {"pinId": "3V3", "x": 6.35, "y": -7.62},
+        {"pinId": "GPIO2", "x": 6.35, "y": -5.08},
+        {"pinId": "GPIO15", "x": 6.35, "y": -2.54},
+        {"pinId": "GPIO21", "x": 6.35, "y": 0},
+        {"pinId": "GPIO22", "x": 6.35, "y": 2.54},
+        {"pinId": "GPIO23", "x": 6.35, "y": 5.08},
+        {"pinId": "GPIO34", "x": 6.35, "y": 7.62}
+      ]
+    },
+    "arduino-nano": {
+      "kicadFootprint": "Module:Arduino_Nano",
+      "bodyMm": {"w": 18, "h": 45},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VIN", "x": -8.89, "y": -5.08},
+        {"pinId": "GND", "x": -8.89, "y": -2.54},
+        {"pinId": "D2", "x": -8.89, "y": 0},
+        {"pinId": "D3", "x": -8.89, "y": 2.54},
+        {"pinId": "A0", "x": -8.89, "y": 5.08},
+        {"pinId": "5V", "x": 8.89, "y": -5.08},
+        {"pinId": "3V3", "x": 8.89, "y": -2.54},
+        {"pinId": "A4", "x": 8.89, "y": 0},
+        {"pinId": "A5", "x": 8.89, "y": 2.54}
+      ]
+    },
+    "rpi-pico": {
+      "kicadFootprint": "Module:RPi_Pico",
+      "bodyMm": {"w": 21, "h": 51},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VSYS", "x": -12.7, "y": -5.08},
+        {"pinId": "GND", "x": -12.7, "y": -2.54},
+        {"pinId": "GP0", "x": -12.7, "y": 0},
+        {"pinId": "GP4", "x": -12.7, "y": 2.54},
+        {"pinId": "GP26", "x": -12.7, "y": 5.08},
+        {"pinId": "VBUS", "x": 12.7, "y": -5.08},
+        {"pinId": "3V3", "x": 12.7, "y": -2.54},
+        {"pinId": "GP1", "x": 12.7, "y": 0},
+        {"pinId": "GP5", "x": 12.7, "y": 2.54}
+      ]
+    },
+    "soil_moisture": {
+      "kicadFootprint": "Sensor:SOIL-MOISTURE-3PIN",
+      "bodyMm": {"w": 20, "h": 12},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -3.81, "y": 4},
+        {"pinId": "GND", "x": -1.27, "y": 4},
+        {"pinId": "A0", "x": 1.27, "y": 4},
+        {"pinId": "D0", "x": 3.81, "y": 4}
+      ]
+    },
+    "bme280": {
+      "kicadFootprint": "Sensor:BME280-BREAKOUT",
+      "bodyMm": {"w": 12, "h": 10},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -3.81, "y": 0},
+        {"pinId": "GND", "x": -1.27, "y": 0},
+        {"pinId": "SCL", "x": 1.27, "y": 0},
+        {"pinId": "SDA", "x": 3.81, "y": 0}
+      ]
+    },
+    "dht22": {
+      "kicadFootprint": "Sensor:DHT22-4PIN",
+      "bodyMm": {"w": 15, "h": 12},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -2.54, "y": 0},
+        {"pinId": "DATA", "x": 0, "y": 0},
+        {"pinId": "GND", "x": 2.54, "y": 0}
+      ]
+    },
+    "hc-sr04": {
+      "kicadFootprint": "Sensor:HC-SR04",
+      "bodyMm": {"w": 45, "h": 20},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -7.62, "y": 0},
+        {"pinId": "TRIG", "x": -2.54, "y": 0},
+        {"pinId": "ECHO", "x": 2.54, "y": 0},
+        {"pinId": "GND", "x": 7.62, "y": 0}
+      ]
+    },
+    "buck-mp1584": {
+      "kicadFootprint": "Power:BUCK-MP1584-MODULE",
+      "bodyMm": {"w": 17, "h": 11},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "IN+", "x": -6, "y": -3.5},
+        {"pinId": "IN-", "x": -6, "y": 3.5},
+        {"pinId": "OUT+", "x": 6, "y": -3.5},
+        {"pinId": "OUT-", "x": 6, "y": 3.5}
+      ]
+    },
+    "buck-lm2596": {
+      "kicadFootprint": "Power:BUCK-LM2596-MODULE",
+      "bodyMm": {"w": 43, "h": 21},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "IN+", "x": -14, "y": -6},
+        {"pinId": "IN-", "x": -14, "y": 6},
+        {"pinId": "OUT+", "x": 14, "y": -6},
+        {"pinId": "OUT-", "x": 14, "y": 6}
+      ]
+    },
+    "ldo-ams1117-3v3": {
+      "kicadFootprint": "Power:AMS1117-3V3-MODULE",
+      "bodyMm": {"w": 12, "h": 10},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VIN", "x": -2.54, "y": 0},
+        {"pinId": "GND", "x": 0, "y": 0},
+        {"pinId": "VOUT", "x": 2.54, "y": 0}
+      ]
+    },
+    "ldo-ams1117-5v": {
+      "kicadFootprint": "Power:AMS1117-5V-MODULE",
+      "bodyMm": {"w": 12, "h": 10},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VIN", "x": -2.54, "y": 0},
+        {"pinId": "GND", "x": 0, "y": 0},
+        {"pinId": "VOUT", "x": 2.54, "y": 0}
+      ]
+    },
+    "tp4056": {
+      "kicadFootprint": "Power:TP4056-CHARGER",
+      "bodyMm": {"w": 27, "h": 17},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "IN+", "x": -8.54, "y": -5},
+        {"pinId": "IN-", "x": -3.46, "y": -5},
+        {"pinId": "BAT+", "x": -8.54, "y": 5},
+        {"pinId": "BAT-", "x": -3.46, "y": 5},
+        {"pinId": "OUT+", "x": 3.46, "y": 0},
+        {"pinId": "OUT-", "x": 8.54, "y": 0}
+      ]
+    },
+    "mosfet-irlz44n": {
+      "kicadFootprint": "Driver:MOSFET-LOGIC-MODULE",
+      "bodyMm": {"w": 33, "h": 24},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VIN", "x": -11, "y": -7},
+        {"pinId": "VIN-", "x": -11, "y": 7},
+        {"pinId": "SIG", "x": -2, "y": 7},
+        {"pinId": "GND", "x": -2, "y": -7},
+        {"pinId": "VOUT+", "x": 11, "y": -7},
+        {"pinId": "VOUT-", "x": 11, "y": 7}
+      ]
+    },
+    "mosfet-irf520": {
+      "kicadFootprint": "Driver:MOSFET-IRF520-MODULE",
+      "bodyMm": {"w": 33, "h": 24},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VIN", "x": -11, "y": -7},
+        {"pinId": "VIN-", "x": -11, "y": 7},
+        {"pinId": "SIG", "x": -2, "y": 7},
+        {"pinId": "GND", "x": -2, "y": -7},
+        {"pinId": "VOUT+", "x": 11, "y": -7},
+        {"pinId": "VOUT-", "x": 11, "y": 7}
+      ]
+    },
+    "relay-1ch-5v": {
+      "kicadFootprint": "Driver:RELAY-1CH-5V",
+      "bodyMm": {"w": 50, "h": 26},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -10.54, "y": -6},
+        {"pinId": "GND", "x": -8, "y": -6},
+        {"pinId": "IN", "x": -5.46, "y": -6},
+        {"pinId": "COM", "x": 5.46, "y": 6},
+        {"pinId": "NO", "x": 8, "y": 6},
+        {"pinId": "NC", "x": 10.54, "y": 6}
+      ]
+    },
+    "l298n": {
+      "kicadFootprint": "Driver:L298N-HBRIDGE",
+      "bodyMm": {"w": 43, "h": 43},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -14, "y": -10},
+        {"pinId": "GND", "x": -14, "y": 10},
+        {"pinId": "5V", "x": -5, "y": -10},
+        {"pinId": "IN1", "x": -5, "y": -2},
+        {"pinId": "IN2", "x": -5, "y": 4},
+        {"pinId": "IN3", "x": -5, "y": 10},
+        {"pinId": "IN4", "x": -5, "y": 16},
+        {"pinId": "OUT1", "x": 14, "y": -12},
+        {"pinId": "OUT2", "x": 14, "y": -4},
+        {"pinId": "OUT3", "x": 14, "y": 4},
+        {"pinId": "OUT4", "x": 14, "y": 12}
+      ]
+    },
+    "sg90": {
+      "kicadFootprint": "Actuator:SG90-SERVO",
+      "bodyMm": {"w": 23, "h": 12},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -2.54, "y": -8},
+        {"pinId": "GND", "x": 0, "y": -8},
+        {"pinId": "SIG", "x": 2.54, "y": -8}
+      ]
+    },
+    "ssd1306-128x64": {
+      "kicadFootprint": "Display:SSD1306-OLED",
+      "bodyMm": {"w": 27, "h": 27},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -3.81, "y": 10},
+        {"pinId": "GND", "x": -1.27, "y": 10},
+        {"pinId": "SCL", "x": 1.27, "y": 10},
+        {"pinId": "SDA", "x": 3.81, "y": 10}
+      ]
+    },
+    "ch340-usb-ttl": {
+      "kicadFootprint": "Interface:USB-TTL-CH340",
+      "bodyMm": {"w": 17, "h": 32},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -3.81, "y": 0},
+        {"pinId": "GND", "x": -1.27, "y": 0},
+        {"pinId": "TX", "x": 1.27, "y": 0},
+        {"pinId": "RX", "x": 3.81, "y": 0}
+      ]
+    },
+    "mini-pump-5v": {
+      "kicadFootprint": "Actuator:PUMP-5V-MINI",
+      "bodyMm": {"w": 24, "h": 18},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -2.54, "y": 0},
+        {"pinId": "GND", "x": 2.54, "y": 0}
+      ]
+    },
+    "level-shifter-4ch": {
+      "kicadFootprint": "Interface:LEVEL-SHIFTER-4CH",
+      "bodyMm": {"w": 15, "h": 12},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "LV", "x": -7.62, "y": 0},
+        {"pinId": "HV", "x": -5.08, "y": 0},
+        {"pinId": "GND", "x": -2.54, "y": 0},
+        {"pinId": "LV1", "x": 0, "y": 0},
+        {"pinId": "HV1", "x": 2.54, "y": 0},
+        {"pinId": "LV2", "x": 5.08, "y": 0},
+        {"pinId": "HV2", "x": 7.62, "y": 0}
+      ]
+    },
+    "a4988-stepper": {
+      "kicadFootprint": "Driver:A4988-STEPSTICK",
+      "bodyMm": {"w": 15.2, "h": 20.3},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "EN", "x": -6.35, "y": -8.89},
+        {"pinId": "MS1", "x": -6.35, "y": -6.35},
+        {"pinId": "MS2", "x": -6.35, "y": -3.81},
+        {"pinId": "MS3", "x": -6.35, "y": -1.27},
+        {"pinId": "RST", "x": -6.35, "y": 1.27},
+        {"pinId": "SLP", "x": -6.35, "y": 3.81},
+        {"pinId": "STEP", "x": -6.35, "y": 6.35},
+        {"pinId": "DIR", "x": -6.35, "y": 8.89},
+        {"pinId": "VMOT", "x": 6.35, "y": -8.89},
+        {"pinId": "GND_MOTOR", "x": 6.35, "y": -6.35},
+        {"pinId": "2B", "x": 6.35, "y": -3.81},
+        {"pinId": "2A", "x": 6.35, "y": -1.27},
+        {"pinId": "1A", "x": 6.35, "y": 1.27},
+        {"pinId": "1B", "x": 6.35, "y": 3.81},
+        {"pinId": "VDD", "x": 6.35, "y": 6.35},
+        {"pinId": "GND_LOGIC", "x": 6.35, "y": 8.89}
+      ]
+    },
+    "resistor-10r": {
+      "kicadFootprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+      "bodyMm": {"w": 12, "h": 4},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "1", "x": -5.08, "y": 0},
+        {"pinId": "2", "x": 5.08, "y": 0}
+      ]
+    },
+    "terminal-block-2p": {
+      "kicadFootprint": "TerminalBlock:TerminalBlock_bornier-2_P5.08mm",
+      "bodyMm": {"w": 12, "h": 10},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "1", "x": -2.54, "y": 0},
+        {"pinId": "2", "x": 2.54, "y": 0}
+      ]
+    },
+    "terminal-block-2p-dc": {
+      "kicadFootprint": "TerminalBlock:TerminalBlock_bornier-2_P5.08mm",
+      "bodyMm": {"w": 12, "h": 10},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "V+", "x": -2.54, "y": 0},
+        {"pinId": "GND", "x": 2.54, "y": 0}
+      ]
+    },
+    "terminal-block-4p": {
+      "kicadFootprint": "TerminalBlock:TerminalBlock_bornier-4_P5.08mm",
+      "bodyMm": {"w": 22, "h": 10},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "COIL1_A", "x": -7.62, "y": 0},
+        {"pinId": "COIL1_B", "x": -2.54, "y": 0},
+        {"pinId": "COIL2_A", "x": 2.54, "y": 0},
+        {"pinId": "COIL2_B", "x": 7.62, "y": 0}
+      ]
+    },
+    "max98357a-i2s-amp": {
+      "kicadFootprint": "Driver:MAX98357A-I2S",
+      "bodyMm": {"w": 18, "h": 12},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VIN", "x": -8.89, "y": 0},
+        {"pinId": "GND", "x": -6.35, "y": 0},
+        {"pinId": "BCLK", "x": -3.81, "y": 0},
+        {"pinId": "LRC", "x": -1.27, "y": 0},
+        {"pinId": "DIN", "x": 1.27, "y": 0},
+        {"pinId": "SD", "x": 3.81, "y": 0},
+        {"pinId": "SPK+", "x": 6.35, "y": 0},
+        {"pinId": "SPK-", "x": 8.89, "y": 0}
+      ]
+    },
+    "limit-switch-3pin": {
+      "kicadFootprint": "Sensor:LIMIT-SWITCH-3PIN",
+      "bodyMm": {"w": 20, "h": 10},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -2.54, "y": 0},
+        {"pinId": "GND", "x": 0, "y": 0},
+        {"pinId": "SIG", "x": 2.54, "y": 0}
+      ]
+    },
+    "esp32-cam-module": {
+      "kicadFootprint": "Module:ESP32-CAM",
+      "bodyMm": {"w": 32, "h": 48},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "5V", "x": -7.62, "y": -3.81},
+        {"pinId": "GND", "x": -7.62, "y": -1.27},
+        {"pinId": "GPIO12", "x": -7.62, "y": 1.27},
+        {"pinId": "GPIO13", "x": -7.62, "y": 3.81},
+        {"pinId": "GPIO14", "x": 7.62, "y": -3.81},
+        {"pinId": "GPIO15", "x": 7.62, "y": -1.27},
+        {"pinId": "U0T", "x": 7.62, "y": 1.27},
+        {"pinId": "U0R", "x": 7.62, "y": 3.81}
+      ]
+    },
+    "ds18b20": {
+      "kicadFootprint": "Sensor:DS18B20",
+      "bodyMm": {"w": 12, "h": 10},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -2.54, "y": 0},
+        {"pinId": "DATA", "x": 0, "y": 0},
+        {"pinId": "GND", "x": 2.54, "y": 0}
+      ]
+    },
+    "dht11": {
+      "kicadFootprint": "Sensor:DHT11-4PIN",
+      "bodyMm": {"w": 15, "h": 12},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -3.81, "y": 0},
+        {"pinId": "DATA", "x": -1.27, "y": 0},
+        {"pinId": "NC", "x": 1.27, "y": 0},
+        {"pinId": "GND", "x": 3.81, "y": 0}
+      ]
+    },
+    "bh1750": {
+      "kicadFootprint": "Sensor:BH1750",
+      "bodyMm": {"w": 12, "h": 10},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -3.81, "y": 0},
+        {"pinId": "GND", "x": -1.27, "y": 0},
+        {"pinId": "SCL", "x": 1.27, "y": 0},
+        {"pinId": "SDA", "x": 3.81, "y": 0}
+      ]
+    },
+    "bmp280": {
+      "kicadFootprint": "Sensor:BMP280",
+      "bodyMm": {"w": 12, "h": 10},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -3.81, "y": 0},
+        {"pinId": "GND", "x": -1.27, "y": 0},
+        {"pinId": "SCL", "x": 1.27, "y": 0},
+        {"pinId": "SDA", "x": 3.81, "y": 0}
+      ]
+    },
+    "pir_motion_sensor": {
+      "kicadFootprint": "Sensor:PIR-MOTION",
+      "bodyMm": {"w": 24, "h": 20},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -2.54, "y": 0},
+        {"pinId": "OUT", "x": 0, "y": 0},
+        {"pinId": "GND", "x": 2.54, "y": 0}
+      ]
+    },
+    "mq-2_gas_sensor": {
+      "kicadFootprint": "Sensor:MQ-2",
+      "bodyMm": {"w": 20, "h": 16},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -3.81, "y": 0},
+        {"pinId": "GND", "x": -1.27, "y": 0},
+        {"pinId": "A0", "x": 1.27, "y": 0},
+        {"pinId": "D0", "x": 3.81, "y": 0}
+      ]
+    },
+    "flame_sensor": {
+      "kicadFootprint": "Sensor:FLAME",
+      "bodyMm": {"w": 16, "h": 12},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -3.81, "y": 0},
+        {"pinId": "GND", "x": -1.27, "y": 0},
+        {"pinId": "D0", "x": 1.27, "y": 0},
+        {"pinId": "A0", "x": 3.81, "y": 0}
+      ]
+    },
+    "lcd_16x2_i2c": {
+      "kicadFootprint": "Display:LCD1602-I2C",
+      "bodyMm": {"w": 80, "h": 24},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -3.81, "y": 0},
+        {"pinId": "GND", "x": -1.27, "y": 0},
+        {"pinId": "SDA", "x": 1.27, "y": 0},
+        {"pinId": "SCL", "x": 3.81, "y": 0}
+      ]
+    },
+    "st7735_tft": {
+      "kicadFootprint": "Display:ST7735-TFT",
+      "bodyMm": {"w": 34, "h": 34},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -9.779, "y": 0},
+        {"pinId": "GND", "x": -6.985, "y": 0},
+        {"pinId": "SCL", "x": -4.191, "y": 0},
+        {"pinId": "SDA", "x": -1.397, "y": 0},
+        {"pinId": "RES", "x": 1.397, "y": 0},
+        {"pinId": "DC", "x": 4.191, "y": 0},
+        {"pinId": "CS", "x": 6.985, "y": 0},
+        {"pinId": "BL", "x": 9.779, "y": 0}
+      ]
+    },
+    "neopixel_ring": {
+      "kicadFootprint": "Display:NEOPIXEL-RING",
+      "bodyMm": {"w": 44, "h": 44},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "5V", "x": -3.81, "y": 0},
+        {"pinId": "GND", "x": -1.27, "y": 0},
+        {"pinId": "IN", "x": 1.27, "y": 0},
+        {"pinId": "OUT", "x": 3.81, "y": 0}
+      ]
+    },
+    "cooling_fan_5v": {
+      "kicadFootprint": "Actuator:FAN-5V-40MM",
+      "bodyMm": {"w": 40, "h": 40},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -2.54, "y": 0},
+        {"pinId": "GND", "x": 2.54, "y": 0}
+      ]
+    },
+    "dc_motor_3v_6v": {
+      "kicadFootprint": "Actuator:DC-MOTOR-3V6V",
+      "bodyMm": {"w": 24, "h": 18},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -2.54, "y": 0},
+        {"pinId": "GND", "x": 2.54, "y": 0}
+      ]
+    },
+    "solenoid_valve_12v": {
+      "kicadFootprint": "Actuator:SOLENOID-12V",
+      "bodyMm": {"w": 28, "h": 20},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -3.81, "y": 0},
+        {"pinId": "GND", "x": 3.81, "y": 0}
+      ]
+    },
+    "active_buzzer": {
+      "kicadFootprint": "Actuator:BUZZER-ACTIVE-5V",
+      "bodyMm": {"w": 12, "h": 12},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -2.54, "y": 0},
+        {"pinId": "GND", "x": 2.54, "y": 0}
+      ]
+    },
+    "relay_module_1ch_5v": {
+      "kicadFootprint": "Driver:RELAY-1CH-5V-MOD",
+      "bodyMm": {"w": 50, "h": 26},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -10.54, "y": -6},
+        {"pinId": "GND", "x": -8, "y": -6},
+        {"pinId": "IN", "x": -5.46, "y": -6},
+        {"pinId": "COM", "x": 5.46, "y": 6},
+        {"pinId": "NO", "x": 8, "y": 6},
+        {"pinId": "NC", "x": 10.54, "y": 6}
+      ]
+    },
+    "esp8266_nodemcu": {
+      "kicadFootprint": "Module:ESP8266-NODEMCU",
+      "bodyMm": {"w": 24, "h": 48},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "3V3", "x": -6.35, "y": -5.08},
+        {"pinId": "GND", "x": -6.35, "y": -2.54},
+        {"pinId": "D1", "x": -6.35, "y": 0},
+        {"pinId": "D2", "x": -6.35, "y": 2.54},
+        {"pinId": "D3", "x": -6.35, "y": 5.08},
+        {"pinId": "D4", "x": 6.35, "y": -5.08},
+        {"pinId": "D5", "x": 6.35, "y": -2.54},
+        {"pinId": "D6", "x": 6.35, "y": 0},
+        {"pinId": "D7", "x": 6.35, "y": 2.54}
+      ]
+    },
+    "ds3231_rtc": {
+      "kicadFootprint": "Interface:DS3231-RTC",
+      "bodyMm": {"w": 20, "h": 14},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -6.985, "y": 0},
+        {"pinId": "GND", "x": -4.191, "y": 0},
+        {"pinId": "SDA", "x": -1.397, "y": 0},
+        {"pinId": "SCL", "x": 1.397, "y": 0},
+        {"pinId": "SQW", "x": 4.191, "y": 0},
+        {"pinId": "32K", "x": 6.985, "y": 0}
+      ]
+    },
+    "ds1307_rtc": {
+      "kicadFootprint": "Interface:DS1307-RTC",
+      "bodyMm": {"w": 18, "h": 12},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -5.08, "y": 0},
+        {"pinId": "GND", "x": -2.54, "y": 0},
+        {"pinId": "SDA", "x": 0, "y": 0},
+        {"pinId": "SCL", "x": 2.54, "y": 0},
+        {"pinId": "SQW", "x": 5.08, "y": 0}
+      ]
+    },
+    "ky040_encoder": {
+      "kicadFootprint": "Interface:KY040-ENCODER",
+      "bodyMm": {"w": 26, "h": 26},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -5.08, "y": 0},
+        {"pinId": "GND", "x": -2.54, "y": 0},
+        {"pinId": "CLK", "x": 0, "y": 0},
+        {"pinId": "DT", "x": 2.54, "y": 0},
+        {"pinId": "SW", "x": 5.08, "y": 0}
+      ]
+    },
+    "joystick_module": {
+      "kicadFootprint": "Interface:JOYSTICK-PS2",
+      "bodyMm": {"w": 34, "h": 34},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -5.08, "y": 0},
+        {"pinId": "GND", "x": -2.54, "y": 0},
+        {"pinId": "VRx", "x": 0, "y": 0},
+        {"pinId": "VRy", "x": 2.54, "y": 0},
+        {"pinId": "SW", "x": 5.08, "y": 0}
+      ]
+    },
+    "capacitive_touch": {
+      "kicadFootprint": "Interface:TTP223-TOUCH",
+      "bodyMm": {"w": 14, "h": 12},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -2.54, "y": 0},
+        {"pinId": "GND", "x": 0, "y": 0},
+        {"pinId": "SIG", "x": 2.54, "y": 0}
+      ]
+    },
+    "sd_card_module": {
+      "kicadFootprint": "Interface:SD-CARD-SPI",
+      "bodyMm": {"w": 24, "h": 28},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -6.985, "y": 0},
+        {"pinId": "GND", "x": -4.191, "y": 0},
+        {"pinId": "MISO", "x": -1.397, "y": 0},
+        {"pinId": "MOSI", "x": 1.397, "y": 0},
+        {"pinId": "SCK", "x": 4.191, "y": 0},
+        {"pinId": "CS", "x": 6.985, "y": 0}
+      ]
+    },
+    "mcp4725-dac": {
+      "kicadFootprint": "Interface:MCP4725-DAC",
+      "bodyMm": {"w": 12, "h": 10},
+      "fit": {"status": "unverified_variant", "reason": "Footprint geometry has not been checked against the real part."},
+      "pads": [
+        {"pinId": "VCC", "x": -6.35, "y": 0},
+        {"pinId": "GND", "x": -3.81, "y": 0},
+        {"pinId": "SCL", "x": -1.27, "y": 0},
+        {"pinId": "SDA", "x": 1.27, "y": 0},
+        {"pinId": "A0", "x": 3.81, "y": 0},
+        {"pinId": "VOUT", "x": 6.35, "y": 0}
+      ]
+    }
+  }
+}

@@ -56,20 +56,18 @@ def _compile(build_id: str, tmp_path: Path):
     return result, netlist, pcb
 
 
-# ---- engine data: Python pad tables must equal the TypeScript-exported ones --------------------
+# ---- engine data: the footprint table is one shared data file --------------------------------
 
 
-def test_exported_footprint_pads_match_the_python_pad_tables_for_modules_this_work_touches() -> None:
-    # esp32-devkit already differs between the TypeScript and Python tables (Python carries every
-    # declared pin, TypeScript does not); that drift predates this work, so it is not asserted here.
-    exported = json.loads((DATA / "engine_pcb_data.json").read_text(encoding="utf-8"))["module_footprints"]
-    touched = {"a4988-stepper", "terminal-block-2p", "terminal-block-2p-dc", "terminal-block-4p", "resistor-10r", "ili9341_tft"}
-    for module_id, meta in exported.items():
-        if module_id not in touched:
-            continue
+def test_footprint_geometry_comes_from_the_shared_data_file_for_modules_this_work_touches() -> None:
+    # Python and TypeScript read one file (tests/test_module_footprint_parity.py proves both
+    # resolve identical pads), so the modules this work touches are checked against that file.
+    shared = json.loads((DATA / "module_footprints.json").read_text(encoding="utf-8"))["modules"]
+    touched = {"a4988-stepper", "terminal-block-2p", "terminal-block-2p-dc", "terminal-block-4p", "resistor-10r"}
+    for module_id in touched:
         pads = resolve_module_pads(module_id, find_module(module_id))
         assert [(p["pinId"], round(p["x"], 4), round(p["y"], 4)) for p in pads] == [
-            (p["pinId"], round(p["x"], 4), round(p["y"], 4)) for p in meta["pads"]
+            (p["pinId"], round(p["x"], 4), round(p["y"], 4)) for p in shared[module_id]["pads"]
         ], module_id
 
 
@@ -116,8 +114,8 @@ def test_plotter_stepper_coils_land_on_a_real_four_pin_terminal() -> None:
     assert len(find_module("terminal-block-4p")["pins"]) == 4
 
 
-def test_new_connector_and_resistor_footprints_exist_in_the_exported_tables() -> None:
-    exported = json.loads((DATA / "engine_pcb_data.json").read_text(encoding="utf-8"))["module_footprints"]
+def test_new_connector_and_resistor_footprints_exist_in_the_shared_footprint_file() -> None:
+    exported = json.loads((DATA / "module_footprints.json").read_text(encoding="utf-8"))["modules"]
     assert "terminal-block-4p" in exported and "a4988-stepper" in exported
 
 
@@ -147,7 +145,7 @@ def test_a4988_footprint_is_the_real_two_by_eight_stepstick() -> None:
     # Pololu pin order: one row ENABLE..DIR, the other VMOT, GND, 2B, 2A, 1A, 1B, VDD, GND.
     assert [p["pinId"] for p in left] == ["EN", "MS1", "MS2", "MS3", "RST", "SLP", "STEP", "DIR"]
     assert [p["pinId"] for p in right] == ["VMOT", "GND_MOTOR", "2B", "2A", "1A", "1B", "VDD", "GND_LOGIC"]
-    body = json.loads((DATA / "engine_pcb_data.json").read_text(encoding="utf-8"))["module_footprints"][
+    body = json.loads((DATA / "module_footprints.json").read_text(encoding="utf-8"))["modules"][
         "a4988-stepper"
     ]["bodyMm"]
     assert (body["w"], body["h"]) == (15.2, 20.3)

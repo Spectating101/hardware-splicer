@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* eslint-disable @typescript-eslint/no-require-imports */
-/** Export module library + footprint metadata for the Python PCB engine. */
+/** Export the module library for the Python PCB engine. */
 const fs = require("fs");
 const path = require("path");
 const Module = require("module");
@@ -36,28 +36,15 @@ require.extensions[".ts"] = (mod, filename) => {
 };
 
 const { MODULE_LIBRARY } = require(path.join(FRONTEND, "lib/modules/module-library.ts"));
-const {
-  MODULE_FOOTPRINTS,
-  resolveModulePads,
-} = require(path.join(FRONTEND, "lib/modules/module-footprints.ts"));
 
-const footprints = {};
-for (const [id, meta] of Object.entries(MODULE_FOOTPRINTS)) {
-  const spec = MODULE_LIBRARY.find((m) => m.id === id);
-  footprints[id] = {
-    kicadFootprint: meta.kicadFootprint,
-    bodyMm: meta.bodyMm,
-    pads: meta.pads ?? resolveModulePads(id, spec) ?? [],
-  };
-}
-
+// Footprint geometry is deliberately not exported here: src/hardware_splicer/data/module_footprints.json
+// is its single source of truth, and the TypeScript table is generated from that file.
 const payload = {
   schema_version: "hardware_splicer.engine_pcb_data.v1",
   module_library: MODULE_LIBRARY,
-  module_footprints: footprints,
 };
 
 fs.mkdirSync(OUT_DIR, { recursive: true });
 const outPath = path.join(OUT_DIR, "engine_pcb_data.json");
 fs.writeFileSync(outPath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
-console.log(`Wrote ${outPath} (${MODULE_LIBRARY.length} modules, ${Object.keys(footprints).length} footprints)`);
+console.log(`Wrote ${outPath} (${MODULE_LIBRARY.length} modules)`);

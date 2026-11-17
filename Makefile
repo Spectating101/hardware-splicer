@@ -180,6 +180,11 @@ export-catalog-recipes:
 export-engine-pcb-data:
 	node scripts/export_engine_pcb_data.cjs
 
+# Module footprint geometry lives in src/hardware_splicer/data/module_footprints.json; this writes
+# the TypeScript table generated from it. tests/test_module_footprint_parity.py guards both.
+export-module-footprints-ts:
+	$(PYTHON) scripts/export_module_footprints_ts.py
+
 test-golden-intakes:
 	PYTHONPATH=src HARDWARE_SPLICER_SKIP_VISION_LIVE=1 HARDWARE_SPLICER_OFFLINE_SALVAGE=1 HARDWARE_SPLICER_OFFLINE_COMPOSE=1 HARDWARE_SPLICER_QWEN_SALVAGE=0 HARDWARE_SPLICER_SALVAGE_RESOLVE=heuristic HARDWARE_SPLICER_JLC_ENRICH=0 $(PYTHON) -m pytest tests/test_golden_intake_compile.py tests/test_golden_catalog_direct.py -q
 
