@@ -339,3 +339,14 @@ def test_terminal_blocks_are_not_verified_because_kicads_hole_is_larger_than_the
 def test_dht11_uses_the_same_four_pin_layout_as_the_dht22() -> None:
     assert [p["pinId"] for p in table("dht11")] == ["VCC", "DATA", "NC", "GND"]
     assert fit("dht11")["status"] == "verified_against"
+
+
+# ---- single-row breakouts: no 0.11 inch pitch ---------------------------------------------------
+
+
+def test_in_line_breakout_headers_use_the_standard_2_54_mm_pitch() -> None:
+    """2.794 mm (0.11 in) is not a header pitch; those rows were a scaling slip, not a variant."""
+    for module_id in ("st7735_tft", "ds3231_rtc", "sd_card_module"):
+        row = _single_row(module_id)
+        assert {round(b[1] - a[1], 3) for a, b in zip(row, row[1:])} == {2.54}, module_id
+        assert fit(module_id)["status"] == "unverified_variant", "row order and variant remain unchecked"
