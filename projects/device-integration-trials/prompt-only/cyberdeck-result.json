@@ -1,0 +1,31 @@
+{
+  "interpretation": {
+    "brief": "I want a five-inch FieldDeck cyberdeck for field notes. I need three hours of working battery time. Use 1.35 amps for the Raspberry Pi's work load. Estimate whether it can meet that target.",
+    "status": "build",
+    "case_id": "fielddeck-5",
+    "requirements": {
+      "minimum_work_runtime_h": 3.0,
+      "pi_work_current_a": 1.35
+    },
+    "explanation": "Build the Fielddeck 5 using its existing Raspberry Pi 4, modeled Anker A1259 battery, and existing five-inch display. The runtime study estimates battery life with the Pi work load set to 1.35 A and checks it against the three-hour target; the target may be unmet, which remains a valid simulation result.",
+    "drawing": null,
+    "provider": "copilot_cli",
+    "model": "auto"
+  },
+  "metrics": {
+    "high_keyboard_source_margin_a": 0.08,
+    "ordinary_source_margin_a": 0.48,
+    "work_runtime_lower_h": 2.55,
+    "work_runtime_upper_h": 3.6,
+    "work_system_power_w": 9.0
+  },
+  "requirements_met": false,
+  "native_verification": {
+    "requested": true,
+    "performed": true,
+    "passed": true,
+    "returncode": 0,
+    "engineering_acceptance": false
+  },
+  "sha256": "fe7a16ac4bbbf526bef52424cd807a475d1a5809fa8618ab4eae0a30f0ac1171"
+}

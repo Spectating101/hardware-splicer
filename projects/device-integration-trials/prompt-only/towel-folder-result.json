@@ -1,0 +1,14 @@
+{
+  "interpretation": {
+    "brief": "Design me a tabletop fabric folding machine that handles a hand towel. Start from just this description.",
+    "case_id": null,
+    "drawing": null,
+    "explanation": "The catalog contains electronics enclosures and a pen plotter, with no capability for fabric handling or towel folding. A fabric-folding machine is therefore outside the supplied device designs.",
+    "model": "auto",
+    "provider": "copilot_cli",
+    "requirements": {},
+    "status": "unsupported"
+  },
+  "ok": true,
+  "project": null
+}

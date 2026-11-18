@@ -81,6 +81,8 @@ def test_registered_case_runs_isolated_stages_and_serves_nested_artifacts(regist
     before = {p.name: p.read_bytes() for p in case.root.iterdir()}
     project = create(engine)
     study = engine.study(project)
+    state = client(engine).get(f'/v1/projects/{project}/digital').json()
+    assert state['requirement_bounds']['load_a'] == {'minimum': .1, 'maximum': 3}
     assert study['summary']['case_id'] == 'test-device'
     assert study['summary']['metrics'] == {'power_w': 5}
     assert study['summary']['requirements_met'] is True
@@ -90,6 +92,20 @@ def test_registered_case_runs_isolated_stages_and_serves_nested_artifacts(regist
     assert response.status_code == 200
     assert response.text == 'pipeline-fixture:5.0'
     assert response.headers['content-disposition'].endswith('filename="body.step"')
+
+def test_first_prompt_reports_a_missed_target(registered_engine, monkeypatch):
+    from hardware_splicer import digital_brief
+    from hardware_splicer.digital_engine_cli import exit_code
+
+    engine, _ = registered_engine
+    plan = {'status': 'build', 'case_id': 'test-device', 'drawing': None,
+            'requirements': {'load_a': 2}, 'brief': 'Run at two amps.'}
+    monkeypatch.setattr(digital_brief, 'interpret_brief', lambda *args, **kwargs: plan)
+    result = client(engine).post('/v1/digital/prompt', json={'brief': plan['brief']})
+    assert result.status_code == 200
+    assert result.json()['study']['summary']['metrics'] == {'power_w': 10}
+    assert result.json()['study']['summary']['requirements_met'] is False
+    assert exit_code(result.json()) == 2
 
 
 def test_registered_revision_changes_real_computation_and_retains_failed_target(registered_engine, tmp_path):
@@ -132,6 +148,7 @@ hashes={n:sha256((p/n).read_bytes()).hexdigest() for n in ('parts/body.step','re
 
     (case.root / "build.py").write_text("raise RuntimeError('changed current source')\n")
     monkeypatch.setitem(cases.CASES, case.case_id, replace(case, requirements={"load_a": (1, .1, 1.5)}))
+    assert engine.project_state(project)["requirement_bounds"]["load_a"]["maximum"] == 3
     revised = engine.run_revision(project, base_revision=1, requirements={"load_a": 2},
                                    change_request="Exercise the retained declared-load model")
     assert revised["ok"], revised

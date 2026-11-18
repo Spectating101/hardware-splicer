@@ -1,0 +1,42 @@
+{
+  "keys": [
+    "T",
+    "G",
+    "B",
+    "5",
+    "6"
+  ],
+  "wires": 10,
+  "endpoints_checked": 20,
+  "mismatches": [],
+  "swapped_header_control": [
+    {
+      "ref": "J1",
+      "pad": "2",
+      "expected": "KEY01_CONTACT1",
+      "viewer_net": "KEY01_CONTACT2"
+    },
+    {
+      "ref": "J1",
+      "pad": "1",
+      "expected": "KEY01_CONTACT2",
+      "viewer_net": "KEY01_CONTACT1"
+    }
+  ],
+  "inputs_sha256": {
+    "remount_keys.kicad_pcb": "c2425c79a591a6b521d524537cef9dc7a8ea5c1aee30bc23ef5f16a82ef7c2fd",
+    "RELOCATION_MAP.json": "469f66d166f742dd1bb167ae70482844d39e2855e5ba63712f27e1e273282858",
+    "remount_keys.kicad_pro": "a2fa680b32585ab0aaf1255fc9ff1203bc12a7ee20268ab5b960c50ef93385cd"
+  },
+  "view_sha256": "d24bc5eae8177ec46aea474c0e022431e40c2788907e8ebac9cf9ccebf7fa5af",
+  "kicad_drc": {
+    "$schema": "https://schemas.kicad.org/drc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-11-18T22:07:47+0800",
+    "kicad_version": "9.0.2",
+    "schematic_parity": [],
+    "source": "remount_keys.kicad_pcb",
+    "unconnected_items": [],
+    "violations": []
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "requirements": {
+    "drawing_height_mm": 100.0,
+    "drawing_width_mm": 140.0,
+    "pen_diameter_mm": 12.0,
+    "pen_lift_mm": 3.0
+  },
+  "original": {
+    "pen_down_mm": 1038.1324528115347,
+    "pen_up_mm": 760.2380349851761,
+    "ideal_feed_time_s": 161.02514703041234
+  },
+  "optimized": {
+    "pen_down_mm": 1038.1324528115347,
+    "pen_up_mm": 551.3643855466992,
+    "ideal_feed_time_s": 150.5814645584885
+  },
+  "identical_directed_drawing_segments": 268,
+  "strokes": 12,
+  "candidate_sha256": "0e618a4b236c2d1f4c10c7324e1f967f44243b875b277d42e19c127163728889",
+  "study_sha256": "3a665bf0041b61c130439812522ca1c22560237b7dca3cdb51098b5e8d785395"
+}

@@ -117,7 +117,9 @@ def main():
             elif cmd in ('M104','M140'):
                 if words.get('S')!=0:raise ValueError('Nonzero heater request')
             elif cmd not in ('M107','M400'):raise ValueError('Unsupported command '+cmd)
-        check('Gcode_strict_subset',len(rows)>100 and 'G28' not in code and not re.search(r'\bE-?\d',code),'Metric absolute moves; zero heater commands; no extrusion, homing, machine I/O')
+        drawing_file = ROOT/'sources/prompt-drawing.json'
+        enough_rows = bool(rows) if drawing_file.is_file() else len(rows)>100
+        check('Gcode_strict_subset',enough_rows and 'G28' not in code and not re.search(r'\bE-?\d',code),'Metric absolute moves; zero heater commands; no extrusion, homing, machine I/O')
         saved=list(csv.DictReader((ROOT/'simulation/trajectory.csv').open()))
         csvmatch=len(rows)==len(saved)
         for (line,start,end,draw),stored in zip(rows,saved):
@@ -132,6 +134,15 @@ def main():
             pts=[(117.5+(vals[i]-50)*req['drawing_width_mm']/100,
                   117.5+(40-vals[i+1])*req['drawing_height_mm']/80) for i in range(0,len(vals),2)]
             expected.extend(zip(pts[:-1],pts[1:]))
+        if drawing_file.is_file():
+            authored=[]
+            for stroke in json.loads(drawing_file.read_text()):
+                pts=[(117.5+(x-50)*req['drawing_width_mm']/100,
+                      117.5+(y-40)*req['drawing_height_mm']/80) for x,y in stroke]
+                authored.extend(zip(pts[:-1],pts[1:]))
+            check('prompt_artwork_roundtrip',bool(authored) and len(authored)==len(expected)
+                  and np.allclose(expected,authored,atol=.00011,rtol=0),
+                  'SVG segments trace the archived prompt artwork')
         ink=[([[p[0]+offset[0],p[1]+offset[1]] for p in (start,end)]) for _,start,end,draw in rows if draw]
         check('SVG_Gcode_geometric_roundtrip',len(ink)==len(expected) and np.allclose(ink,expected,atol=.00011),'Every vector pen-down segment agrees after offset and scaling')
         drawlength=sum(math.dist(a,b) for a,b in ink)

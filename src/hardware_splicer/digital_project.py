@@ -145,14 +145,16 @@ def resolve_requirements(seal, change_request='', requirements=None):
     case_id = case_id_for(seal)
     if case_id == cases.DEFAULT_CASE:
         return requirement_tools().resolve(seal['summary']['requirements'], change_request, requirements)
-    return _revision_case(seal).resolve(seal['summary']['requirements'], change_request, requirements)
+    return revision_case(seal).resolve(seal['summary']['requirements'], change_request, requirements)
 
 
-def _revision_case(seal):
+def revision_case(seal):
     case_id = case_id_for(seal)
     # Fielddeck 5 revisions change numeric goals against the parent's exact
     # assembly and evaluator, even if today's checkout has another variant.
-    return case_for_run(seal) if case_id == 'fielddeck-5' else cases.registered(case_id)
+    if case_id == 'fielddeck-5' or cases.DRAWING in seal['artifact_sha256']:
+        return case_for_run(seal)
+    return cases.registered(case_id)
 
 
 def run_dir(store, project_id, run_id):
@@ -271,7 +273,7 @@ def snapshot_for(project_id, seal, previous=None):
     return snapshot
 
 
-def create_project(store, *, name='HS-3G-B digital study', case_id=cases.DEFAULT_CASE):
+def create_project(store, *, name='HS-3G-B digital study', case_id=cases.DEFAULT_CASE, brief_plan=None):
     cases.validate_case_id(case_id)
     if case_id != cases.DEFAULT_CASE:
         case = cases.registered(case_id)
@@ -281,7 +283,15 @@ def create_project(store, *, name='HS-3G-B digital study', case_id=cases.DEFAULT
         # Later revisions use the same stages through the existing job runner.
         with tempfile.TemporaryDirectory(prefix='hs-registered-baseline-') as scratch:
             package = Path(scratch) / 'study'
-            cases.prepare(case, package, case.defaults())
+            requirements = case.defaults()
+            initial = {'projectName': name}
+            if brief_plan is not None:
+                requirements = case.resolve(requirements, overrides=brief_plan['requirements'])
+                initial['designBrief'] = brief_plan
+            drawing = brief_plan.get('drawing') if brief_plan else None
+            if drawing is not None:
+                case = cases.with_drawing(case)
+            cases.prepare(case, package, requirements, drawing=drawing)
             env = dict(os.environ)
             env.pop('PYTHONOPTIMIZE', None)  # Native verifier assertions must execute.
             env.update({key: '1' for key in ('OPENBLAS_NUM_THREADS', 'OMP_NUM_THREADS', 'MKL_NUM_THREADS', 'NUMEXPR_NUM_THREADS')})
@@ -293,10 +303,11 @@ def create_project(store, *, name='HS-3G-B digital study', case_id=cases.DEFAULT
                                        (completed.stdout + completed.stderr)[-2000:])
             cases.seal_package(case, package)
             project_id = 'digital-' + uuid.uuid4().hex
-            seal = stage_run(store, project_id, package, change_request='Verified native baseline',
-                             parent_revision=None, case_id=case_id)
+            seal = stage_run(store, project_id, package, change_request=(
+                'Digital build from design brief' if brief_plan is not None else 'Verified native baseline'),
+                             parent_revision=None, case_id=case_id, registered_case=case)
             try:
-                return store.save(project_id, snapshot_for(project_id, seal, {'projectName': name}), expected_revision=0,
+                return store.save(project_id, snapshot_for(project_id, seal, initial), expected_revision=0,
                                   metadata={'source': 'digital_study', 'run_id': seal['run_id']})
             except BaseException:
                 shutil.rmtree(run_dir(store, project_id, seal['run_id']))
@@ -459,7 +470,7 @@ def execute_study(backend, job):
         raise CorruptProject('Digital job targets a different registered case.')
     if store.load(project_id)['revision'] != base_revision:
         raise RevisionConflict('The project changed before this run started. Reload and run from the latest revision.')
-    case = None if case_id == cases.DEFAULT_CASE else _revision_case(parent_seal)
+    case = None if case_id == cases.DEFAULT_CASE else revision_case(parent_seal)
     requirements = (requirement_tools().validate(payload['requirements']) if case is None
                     else case.validate(payload['requirements']))
     attempt = Path(job.output_dir) / (job.attempt_id or uuid.uuid4().hex)
@@ -467,11 +478,14 @@ def execute_study(backend, job):
     write_json(attempt / 'requirements.json', requirements)
     package = attempt / 'study'
     if case is not None:
-        source = parent_directory if case_id == 'fielddeck-5' else None
+        source = parent_directory if case_id == 'fielddeck-5' or cases.DRAWING in case.inputs else None
         if source is not None:
             for name in case.inputs:
                 checked_file(source, name, parent_seal['artifact_sha256'], case_id=case_id, case=case)
-        cases.prepare(case, package, requirements, source=source)
+        drawing = (payload.get('design_brief') or {}).get('drawing')
+        if drawing is not None and cases.DRAWING not in case.inputs:
+            case = cases.with_drawing(case)
+        cases.prepare(case, package, requirements, source=source, drawing=drawing)
         for index, stage in enumerate(case.stages):
             log = attempt / f'{index + 1}-{Path(stage).stem}.log'
             code = _command(backend, job, [package / stage], log)
@@ -493,7 +507,10 @@ def execute_study(backend, job):
         def publish():
             # Deletion during a run must not resurrect the project.
             store.load(project_id)
-            envelope = store.save(project_id, snapshot_for(project_id, seal, parent['snapshot']),
+            snapshot = snapshot_for(project_id, seal, parent['snapshot'])
+            if 'design_brief' in payload:
+                snapshot['designBrief'] = payload['design_brief']
+            envelope = store.save(project_id, snapshot,
                                   expected_revision=base_revision,
                                   metadata={'source': 'digital_study', 'job_id': job.job_id, 'run_id': seal['run_id'],
                                             'attempt_id': job.attempt_id})

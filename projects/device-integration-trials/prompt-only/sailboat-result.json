@@ -1,0 +1,127 @@
+{
+  "interpretation": {
+    "brief": "Turn my classic Ender-3 into a pen plotter for an 11 mm felt-tip pen. Use a 13 by 9 cm drawing area and a 4 mm pen lift. Draw a small sailboat with a hull, mast, triangular sail and two waves underneath. I only have this description.",
+    "case_id": "ender3-penplotter",
+    "drawing": [
+      [
+        [
+          18.0,
+          28.0
+        ],
+        [
+          30.0,
+          24.0
+        ],
+        [
+          68.0,
+          24.0
+        ],
+        [
+          82.0,
+          28.0
+        ],
+        [
+          68.0,
+          34.0
+        ],
+        [
+          30.0,
+          34.0
+        ],
+        [
+          18.0,
+          28.0
+        ]
+      ],
+      [
+        [
+          50.0,
+          34.0
+        ],
+        [
+          50.0,
+          70.0
+        ]
+      ],
+      [
+        [
+          50.0,
+          68.0
+        ],
+        [
+          50.0,
+          38.0
+        ],
+        [
+          78.0,
+          38.0
+        ],
+        [
+          50.0,
+          68.0
+        ]
+      ],
+      [
+        [
+          12.0,
+          18.0
+        ],
+        [
+          24.0,
+          22.0
+        ],
+        [
+          36.0,
+          18.0
+        ],
+        [
+          48.0,
+          22.0
+        ]
+      ],
+      [
+        [
+          52.0,
+          18.0
+        ],
+        [
+          64.0,
+          22.0
+        ],
+        [
+          76.0,
+          18.0
+        ],
+        [
+          88.0,
+          22.0
+        ]
+      ]
+    ],
+    "explanation": "Build the classic Ender-3 pen plotter using the specified 11 mm felt-tip pen, 130 by 90 mm drawing area, and 4 mm pen lift. The drawing depicts a hull, mast, triangular sail, and two waves. Material assumption: the pen holder securely fits the felt-tip pen and the donor provides adequate travel for the requested area.",
+    "model": "auto",
+    "provider": "copilot_cli",
+    "requirements": {
+      "drawing_height_mm": 90.0,
+      "drawing_width_mm": 130.0,
+      "pen_diameter_mm": 11.0,
+      "pen_lift_mm": 4.0
+    },
+    "status": "build"
+  },
+  "requirements": {
+    "drawing_height_mm": 90.0,
+    "drawing_width_mm": 130.0,
+    "pen_diameter_mm": 11.0,
+    "pen_lift_mm": 4.0
+  },
+  "requirements_met": true,
+  "native_verification": {
+    "requested": true,
+    "performed": true,
+    "passed": true,
+    "returncode": 0,
+    "engineering_acceptance": true
+  },
+  "sha256": "123759d5e3ef40f868a0b618913244988d6637216750ffeac49ae0ba5556ec25"
+}

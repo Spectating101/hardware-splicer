@@ -1,10 +1,10 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import DigitalStudyPanel from "./DigitalStudyPanel.jsx";
-import { fetchDigitalJob, fetchDigitalStudy, submitDigitalRun } from "./digitalStudyApi.js";
+import { fetchDigitalJob, fetchDigitalStudy, submitDigitalBrief, submitDigitalRun } from "./digitalStudyApi.js";
 
 vi.mock("./digitalStudyApi.js", () => ({
-  fetchDigitalStudy: vi.fn(), fetchDigitalJob: vi.fn(), submitDigitalRun: vi.fn(), cancelDigitalJob: vi.fn(),
+  fetchDigitalStudy: vi.fn(), fetchDigitalJob: vi.fn(), submitDigitalRun: vi.fn(), submitDigitalBrief: vi.fn(), cancelDigitalJob: vi.fn(),
   digitalArtifactUrl: (path) => path,
 }));
 
@@ -69,4 +69,35 @@ describe("Saved digital requirement revisions", () => {
     expect(screen.getByTitle("Selected design 3D assembly revision 1")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Run and save new revision" })).toBeEnabled();
   });
+});
+
+it("uses the registered device's inputs, measurements and nested artifacts", async () => {
+  const saved = {
+    revision: 1, run_id: "plotter-baseline", change_request: "Baseline",
+    summary: {
+      case_id: "ender3-penplotter", requirements_met: true, scope_limits: [],
+      requirements: { drawing_width_mm: 100 }, metrics: { drawing_width_mm: 100 }, constraints: [],
+    },
+    artifacts: { "revision/BOM.csv": "/files/bom", "STUDY.zip": "/files/package" },
+  };
+  fetchDigitalStudy.mockResolvedValue({
+    ...data(saved), history: [saved], requirement_bounds: { drawing_width_mm: { minimum: 60, maximum: 140 } },
+  });
+  submitDigitalRun.mockResolvedValue({ job: { job_id: "saved", status: "succeeded" } });
+  render(<DigitalStudyPanel session={session} />);
+  const width = await screen.findByRole("spinbutton", { name: /Drawing width/ });
+  expect(width).toHaveAttribute("min", "60");
+  expect(width).toHaveAttribute("max", "140");
+  expect(screen.queryByLabelText("Payload change")).toBeNull();
+  expect(screen.getByRole("link", { name: "Bill of materials (CSV)" })).toHaveAttribute("href", "/files/bom");
+  submitDigitalBrief.mockResolvedValue({ interpretation: { explanation: "Specify the new pen diameter." } });
+  fireEvent.change(screen.getByLabelText("Describe your next change"), { target: { value: "Use a wider pen." } });
+  fireEvent.click(screen.getByRole("button", { name: "Apply described change" }));
+  expect(await screen.findByText("Specify the new pen diameter.")).toBeVisible();
+  expect(submitDigitalBrief).toHaveBeenCalledWith({ brief: "Use a wider pen.", project_id: session.projectId, base_revision: 1 });
+  fireEvent.change(width, { target: { value: "120" } });
+  fireEvent.click(screen.getByRole("button", { name: "Run and save new revision" }));
+  await waitFor(() => expect(submitDigitalRun).toHaveBeenCalledWith(session.projectId, expect.objectContaining({
+    requirements: { drawing_width_mm: 120 }, change_request: "", base_revision: 1,
+  })));
 });

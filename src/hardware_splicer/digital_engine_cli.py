@@ -17,6 +17,10 @@ def parser():
     command.add_argument('--jobs-db', type=Path)
     commands = command.add_subparsers(dest='command', required=True)
     commands.add_parser('cases', help='List bounded registered cases and numeric requirements.')
+    brief = commands.add_parser('prompt', help='Describe a device to build a registered digital study.')
+    brief.add_argument('brief', help='A plain-language device description.')
+    brief.add_argument('--project-id', help='Continue an existing study.')
+    brief.add_argument('--base-revision', type=int, help='Revision to edit (defaults to the current revision).')
     drive = commands.add_parser('so102-drive', help='Trace a follower servo from the BOM through its mount, wiring and joint.')
     drive.add_argument('joint', choices=('shoulder', 'elbow'))
     drive.add_argument('--angle-deg', type=float, help='Test a joint angle measured from the URDF zero pose.')
@@ -57,6 +61,8 @@ def parser():
 
 
 def dispatch(engine, args):
+    if args.command == 'prompt':
+        return engine.from_prompt(args.brief, project_id=args.project_id, base_revision=args.base_revision)
     name = args.command
     if name == 'cases':
         return engine.cases()
@@ -101,6 +107,8 @@ def dispatch(engine, args):
 def exit_code(result):
     if not result.get('ok', False):
         return 1
+    if 'interpretation' in result and result.get('study', {}).get('summary', {}).get('requirements_met') is False:
+        return 2
     jobs = result.get('jobs', [])
     if 'job' in result:
         jobs = [result['job']]

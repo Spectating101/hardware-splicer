@@ -267,14 +267,26 @@ def write(path, value):
     Path(path).write_text(json.dumps(value, indent=2, sort_keys=True, allow_nan=False) + '\n')
 
 
-def prepare(case, destination, requirements, *, source=None):
+DRAWING = 'sources/prompt-drawing.json'
+
+
+def with_drawing(case):
+    if case.case_id != 'ender3-penplotter':
+        raise ValueError('Prompt artwork requires a pen plotter.')
+    return replace(case, inputs=(*case.inputs, DRAWING))
+
+
+def prepare(case, destination, requirements, *, source=None, drawing=None):
     source = Path(source) if source is not None else case.root
     destination = Path(destination)
     destination.mkdir(parents=True, exist_ok=False)
     for name in case.inputs:
         target = destination / name
         target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(safe_file(source, name), target)
+        if name == DRAWING and drawing is not None:
+            write(target, drawing)
+        else:
+            shutil.copyfile(safe_file(source, name), target)
     # Scripts use their own path, never process cwd, and write only here.
     for name in case.outputs:
         (destination / name).parent.mkdir(parents=True, exist_ok=True)

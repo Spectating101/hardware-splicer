@@ -45,6 +45,23 @@ def call_copilot_cli_chat(prompt: str, *, model: str | None = None,
     if completed.returncode:
         return {'ok':False,'error':'copilot_cli_nonzero_exit','returncode':completed.returncode}
     content=completed.stdout.strip()
+    # Some CLI wrappers return a JSONL session on errors even with --silent
+    # and a successful shell exit. Keep diagnostics out of model content.
+    lines = content.splitlines()
+    if len(lines) > 1:
+        try:
+            events = [json.loads(line) for line in lines]
+        except ValueError:
+            events = []
+        if events and isinstance(events[0], dict) and events[0].get('type') == 'session.start':
+            for event in events:
+                if not isinstance(event, dict):
+                    continue
+                if event.get('type') == 'session.error':
+                    message = str(event.get('data', {}).get('message', '')).lower()
+                    code = 'copilot_cli_quota_exhausted' if 'quota' in message else 'copilot_cli_session_error'
+                    return {'ok': False, 'error': code}
+            return {'ok': False, 'error': 'copilot_cli_unexpected_session_output'}
     if content.startswith('```'):
         content='\n'.join(content.splitlines()[1:-1]).strip()
     if not content:

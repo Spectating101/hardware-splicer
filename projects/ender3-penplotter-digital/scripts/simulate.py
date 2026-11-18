@@ -22,6 +22,9 @@ def make_svg(path):
     paths.append([(76+9*math.cos(t),59+9*math.sin(t)) for t in np.linspace(0,2*math.pi,65)])
     for phase in [0,4,8]:
         paths.append([(x,4+phase+1.5*math.sin(x*.17)) for x in np.linspace(5,95,61)])
+    drawing = ROOT / 'sources' / 'prompt-drawing.json'
+    if drawing.is_file():
+        paths = json.loads(drawing.read_text())
     lines=['<svg xmlns="http://www.w3.org/2000/svg" width="100mm" height="80mm" viewBox="0 0 100 80">',
            '<g fill="none" stroke="#12638a" stroke-width="0.35">']
     for pts in paths:

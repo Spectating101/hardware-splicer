@@ -67,5 +67,36 @@
       "U$17",
       "U$18"
     ]
+  },
+  "feather-m4-express": {
+    "file": "feather_m4.brd",
+    "source": {
+      "repo": "adafruit/Adafruit-Feather-M4-Express-PCB",
+      "revision": "d98407a6071813bc35c39c6e88ca09c0c9ef6f18",
+      "path": "Adafruit Feather M4 Express.brd",
+      "sha256": "439104cb9a23a2df4e3204535889a891f12d246d3ba8bdcaf000b1193a6378a6"
+    },
+    "board_center_mm": [
+      25.4,
+      11.43
+    ],
+    "board_envelope_mm": [
+      50.8,
+      22.86
+    ],
+    "mount_refs": [
+      "U$31",
+      "U$32"
+    ],
+    "plain_mount_xy_mm": [
+      [
+        48.26,
+        20.32
+      ],
+      [
+        48.26,
+        2.54
+      ]
+    ]
   }
 }

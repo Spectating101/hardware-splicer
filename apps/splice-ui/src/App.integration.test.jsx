@@ -84,6 +84,18 @@ describe("App navigation integration", () => {
     expect(screen.getByText(/Project intake/i)).toBeInTheDocument();
   });
 
+  it("opens on Projects and keeps the reference viewers in the design library", async () => {
+    render(<App />);
+    expect(screen.getByRole("heading", { name: "Projects" })).toBeInTheDocument();
+    expect(screen.queryByTestId("nav-sortcell")).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: "Browse design library" }));
+    expect(screen.getByRole("heading", { name: "Start a digital design" })).toBeInTheDocument();
+    expect(screen.getByTestId("nav-complete-assembly")).toBeEnabled();
+    expect(screen.getByTestId("nav-sortcell")).toBeEnabled();
+    await userEvent.click(screen.getByRole("button", { name: "Projects", exact: true }));
+    expect(screen.getByRole("heading", { name: "Saved projects" })).toBeInTheDocument();
+  });
+
   it("Interface Lab is reachable only through Advanced", async () => {
     render(<App />);
     await waitFor(() => expect(screen.getByTestId("nav-advanced")).toBeInTheDocument());
