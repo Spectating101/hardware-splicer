@@ -421,7 +421,7 @@
   },
   "interposer_preview_summary": {
     "channels": 17,
-    "pcb_sha256": "9896a73e8a5c1691bc41c2a5414dafb2874bc309de1abf5ba1a7b688f9e92c1b",
+    "pcb_sha256": "28567fd00b15c12533b13cb8a6b6c41d5de747187d6bc7526d5662dcd49ed02f",
     "native_drc_errors": 0,
     "native_drc_warnings": 0,
     "native_unconnected_items": 0,
@@ -436,6 +436,13 @@
     "geometry_model_verified": true,
     "source_original_assembly_certified": false,
     "fabrication_release": "BLOCKED_RELOCATION_PREVIEW_ONLY"
+  },
+  "source_controller_pinout_summary": {
+    "original_physical_pads_mapped": 31,
+    "firmware_matrix_GPIOs_mapped": 19,
+    "pinout_proof_sha256": "cc639bd90c1babd769d223ef596fc33449d4d9272d26ab5e4604e3db757fd0cb",
+    "official_reference": "https://www.pjrc.com/teensy/card2a_rev5_web.pdf",
+    "physical_controller_tested": false
   },
   "full_matrix_summary": {
     "schematic_connected_nodes_verified": 267,
@@ -459,5 +466,26 @@
     "native_design_checks_passed": true,
     "fabrication_release": "BLOCKED_SOURCE_REFERENCE_JUNCTION_PREVIEW",
     "canonical_machine_authorized": false
+  },
+  "compact_junction_summary": {
+    "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+    "original_board_area_mm2": 7757.1,
+    "compact_board_area_mm2": 3948.0,
+    "area_reduction_percent": 49.1,
+    "source_nets": 20,
+    "donor_contacts": 39,
+    "remounted_key_wires": 10,
+    "native_drc_passed": true,
+    "fabrication_authorized": false
+  },
+  "source_legacy_zone_drc_summary": {
+    "source_original_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+    "converted_zone_refill_drc_errors": 0,
+    "converted_zone_refill_drc_warnings": 321,
+    "converted_zone_refill_drc_unconnected_items": 0,
+    "non_zone_source_copper_unchanged": true,
+    "original_byte_identical_source_native_drc_passed": false,
+    "fabrication_authorized": false,
+    "evidence_sha256": "6624bab4eda67a8d9a155af97a78397eab0796153d3caf845f6fbcb370c169fe"
   }
 }

@@ -32,7 +32,13 @@ def _geom_obstacles(board: dict):
             vias.append(Point(float(row["x"]),float(row["y"])).buffer(r+1.0,quad_segs=6))
     switches = []
     for row in board.get("switch_positions", []):
-        switches.append(Point(float(row["x"]),float(row["y"])).buffer(8.5,quad_segs=8))
+        # The physical MX plate aperture is 14×14 mm, whose diagonal corner
+        # extends farther than the old circular switch-center keepout.
+        # 1.5 mm enclosure/cut spacing expands the aperture to a 17×17
+        # axis-aligned forbidden square. An unknown key orientation remains
+        # an explicit mechanical verification blocker.
+        x=float(row["x"]); y=float(row["y"])
+        switches.append(box(x-8.5,y-8.5,x+8.5,y+8.5))
     # Preserve controller, USB plug and crystals as no-cut structural keepouts.
     # It is safer to reject an unknown donor than to guess a tiny package.
     critical = []

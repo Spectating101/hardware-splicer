@@ -1,0 +1,176 @@
+{
+  "schema": "hs.f60-teensy2-official-pinout-firmware-crosscheck.v1",
+  "original_source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+  "source_audit_sha256": "ca3090a90b450c5eed461c43fa25719d5d8e98fb4732d64696ea1e9812f9860c",
+  "full_matrix_proof_sha256": "687d0f81298531d4cd60221f11e88753e4980a26ecf3e80a8790eda45b3db457",
+  "upstream_source_footprint_sha256": "426868884418397d65c55bc7e6db2be776928dc83c7daffff28ffbbb552970d5",
+  "external_PJRC_C_pinout_reference": "https://www.pjrc.com/teensy/card2a_rev5_web.pdf",
+  "source_controller_ref": "U1",
+  "source_original_controller_pads_positionally_verified": 31,
+  "firmware_row_pin_assignments_verified": 5,
+  "firmware_column_pin_assignments_verified": 14,
+  "firmware_total_gpio_assignments_verified": 19,
+  "all_source_TMK_AVR_GPIO_to_KiCad_pins_match_PJRC": true,
+  "firmware_to_original_controller_physical_GPIO_mapping_proven_for_source_reference": true,
+  "connection_map": [
+    {
+      "matrix_kind": "row",
+      "matrix_index": 0,
+      "source_net": "/R0",
+      "TMK_AVR_GPIO": "D0",
+      "source_original_KiCad_pad": 7,
+      "physical_library_footprint_geometry_match": true
+    },
+    {
+      "matrix_kind": "row",
+      "matrix_index": 1,
+      "source_net": "/R1",
+      "TMK_AVR_GPIO": "B2",
+      "source_original_KiCad_pad": 4,
+      "physical_library_footprint_geometry_match": true
+    },
+    {
+      "matrix_kind": "row",
+      "matrix_index": 2,
+      "source_net": "/R2",
+      "TMK_AVR_GPIO": "B0",
+      "source_original_KiCad_pad": 2,
+      "physical_library_footprint_geometry_match": true
+    },
+    {
+      "matrix_kind": "row",
+      "matrix_index": 3,
+      "source_net": "/R3",
+      "TMK_AVR_GPIO": "B6",
+      "source_original_KiCad_pad": 22,
+      "physical_library_footprint_geometry_match": true
+    },
+    {
+      "matrix_kind": "row",
+      "matrix_index": 4,
+      "source_net": "/R4",
+      "TMK_AVR_GPIO": "F0",
+      "source_original_KiCad_pad": 28,
+      "physical_library_footprint_geometry_match": true
+    },
+    {
+      "matrix_kind": "column",
+      "matrix_index": 0,
+      "source_net": "/C0",
+      "TMK_AVR_GPIO": "F1",
+      "source_original_KiCad_pad": 27,
+      "physical_library_footprint_geometry_match": true
+    },
+    {
+      "matrix_kind": "column",
+      "matrix_index": 1,
+      "source_net": "/C1",
+      "TMK_AVR_GPIO": "F4",
+      "source_original_KiCad_pad": 26,
+      "physical_library_footprint_geometry_match": true
+    },
+    {
+      "matrix_kind": "column",
+      "matrix_index": 2,
+      "source_net": "/C2",
+      "TMK_AVR_GPIO": "F6",
+      "source_original_KiCad_pad": 24,
+      "physical_library_footprint_geometry_match": true
+    },
+    {
+      "matrix_kind": "column",
+      "matrix_index": 3,
+      "source_net": "/C3",
+      "TMK_AVR_GPIO": "F7",
+      "source_original_KiCad_pad": 23,
+      "physical_library_footprint_geometry_match": true
+    },
+    {
+      "matrix_kind": "column",
+      "matrix_index": 4,
+      "source_net": "/C4",
+      "TMK_AVR_GPIO": "B5",
+      "source_original_KiCad_pad": 21,
+      "physical_library_footprint_geometry_match": true
+    },
+    {
+      "matrix_kind": "column",
+      "matrix_index": 5,
+      "source_net": "/C5",
+      "TMK_AVR_GPIO": "B1",
+      "source_original_KiCad_pad": 3,
+      "physical_library_footprint_geometry_match": true
+    },
+    {
+      "matrix_kind": "column",
+      "matrix_index": 6,
+      "source_net": "/C6",
+      "TMK_AVR_GPIO": "B3",
+      "source_original_KiCad_pad": 5,
+      "physical_library_footprint_geometry_match": true
+    },
+    {
+      "matrix_kind": "column",
+      "matrix_index": 7,
+      "source_net": "/C7",
+      "TMK_AVR_GPIO": "B7",
+      "source_original_KiCad_pad": 6,
+      "physical_library_footprint_geometry_match": true
+    },
+    {
+      "matrix_kind": "column",
+      "matrix_index": 8,
+      "source_net": "/C8",
+      "TMK_AVR_GPIO": "D1",
+      "source_original_KiCad_pad": 8,
+      "physical_library_footprint_geometry_match": true
+    },
+    {
+      "matrix_kind": "column",
+      "matrix_index": 9,
+      "source_net": "/C9",
+      "TMK_AVR_GPIO": "C7",
+      "source_original_KiCad_pad": 12,
+      "physical_library_footprint_geometry_match": true
+    },
+    {
+      "matrix_kind": "column",
+      "matrix_index": 10,
+      "source_net": "/C10",
+      "TMK_AVR_GPIO": "D5",
+      "source_original_KiCad_pad": 13,
+      "physical_library_footprint_geometry_match": true
+    },
+    {
+      "matrix_kind": "column",
+      "matrix_index": 11,
+      "source_net": "/C11",
+      "TMK_AVR_GPIO": "D4",
+      "source_original_KiCad_pad": 17,
+      "physical_library_footprint_geometry_match": true
+    },
+    {
+      "matrix_kind": "column",
+      "matrix_index": 12,
+      "source_net": "/C12",
+      "TMK_AVR_GPIO": "D6",
+      "source_original_KiCad_pad": 18,
+      "physical_library_footprint_geometry_match": true
+    },
+    {
+      "matrix_kind": "column",
+      "matrix_index": 13,
+      "source_net": "/C13",
+      "TMK_AVR_GPIO": "D7",
+      "source_original_KiCad_pad": 19,
+      "physical_library_footprint_geometry_match": true
+    }
+  ],
+  "original_teensy_hardware_present": false,
+  "powered_gpio_scan_tested": false,
+  "firmware_compiled_flashed_or_USB_tested": false,
+  "source_physical_assembly_quality_verified": false,
+  "fabrication_authorized": false,
+  "release": "PASS_SOURCE_PINOUT_RECONCILIATION_ONLY",
+  "payload_sha256": "cc639bd90c1babd769d223ef596fc33449d4d9272d26ab5e4604e3db757fd0cb"
+}

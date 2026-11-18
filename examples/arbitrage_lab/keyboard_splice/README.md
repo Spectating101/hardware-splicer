@@ -293,3 +293,27 @@ The independent f.60 [upstream schematic netlist and original TMK firmware](arbi
 - The source-bound junction, original firmware audit, simulation evidence and unresolved physical interfaces now participate in the canonical HS MachineProject, which **still refuses BUILD_READY**.
 
 The original legacy f.60 PCB's full native DRC **still does not complete**. The new junction is a large (~195 mm) reference board and has no qualified mating connector, harness strain relief, case, source-board continuity proof or physical donor. All data are reference-only. The public-source arbitrary benchmark's strict original **0/8 passed** score is unchanged.
+
+
+## Stage VIII — legacy-zone DRC recovery, official Teensy 2.0 GPIO check, compact IDC junction
+
+The latest [f.60 Stage VIII engineering results](arbitrary_corpus/f60_remount_round5/README.md) now provide source-hash bound proof of:
+
+- Native KiCad 9 **copy** with regenerated legacy fills: **0 DRC errors, 0 unconnected items, 321 warnings**. Non-zone board geometry preserves **485 source pads, 489 tracks and 18 vias**; the original byte-identical board still has the legacy DRC timeout and no physical authorization.
+- Independently pinned original Teensy_20 footprint, [PJRC C-language pinout](https://www.pjrc.com/teensy/card2a_rev5_web.pdf), original TMK firmware and source PCB: **31 matching physical pad locations and all 19 firmware row/column GPIO assignments**.
+- Alternative compact native KiCad latching-IDC 2×25 junction: **20 original net groups, 49 active pin assignments**, **42 × 94 mm PCB**, **49.1% area saving** compared with the earlier 195 × 39.78 mm bus board, **zero native DRC violations**. It is **mutually exclusive** with the older two bridge/junction alternatives.
+
+Code: `scripts/hs_verify_legacy_zone_drc.py`, `src/hardware_splicer/keyboard_splice_teensy2.py`, `src/hardware_splicer/keyboard_splice_zone_drc.py`, `src/hardware_splicer/_pcbnew_helpers/keyboard_splice_legacy_refill.py` and `keyboard_splice_compact_junction.py`. All new source proofs are included in the HS canonical MachineProject and **do not** promote a simulated design to physical BUILD_READY.
+
+
+## Stage X — original Edge.Cuts and two-half switch-plate geometry (2026-11-16)
+
+The previous f.60 five-key route omitted a nominal 14×14 mm switch-plate aperture corner: **K35 (V)** was clipped. That route is rejected by the new mechanical acceptance check, rather than being treated as a successful build.
+
+The cut optimizer now evaluates conservatively **square 17×17 mm switch-aperture keepouts**, not only circular switch-center distances. A re-run of all 12 source-bound strategies finds an **improved four-key relocation option**: original PCB left/right **35/23** retained, with **I, J, N, 9** remounted. Native KiCad's exact 56-vertex original arc-tessellated Edge.Cuts boundary is split into two polygons; all **58 nominal 14 mm square switch openings** fit completely inside their modeled half, with minimum reported aperture wall clearance **1.7784 mm**. No original donor or print was handled.
+
+The newly selected cut also undergoes **three source-bound copper repair strategies**: 18 proposed graph connections, zero required source-copper gaps after model replay, and five terminal-free floating copper islands (including one isolated original trace/via branch), subject to explicit future physical insulation/ESD checks. The 62-key original firmware/source model still completes 91,230 ideal switch patterns. The revised 4-key daughterboard and 16-net-group full junction have **34 unique original donor pad tails and eight remount tails**; an alternative compact IDC50 uses **42 of 50 positions**, with the remaining eight expressly unassigned. Both compact and full junction remain native KiCad DRC clean.
+
+**Outputs:** [f60_mechanical_round10](arbitrary_corpus/f60_mechanical_round10/README.md), including editable left/right `.scad` switch-plate models, an `.svg` board-halves preview, native KiCad key daughterboard/bridge/junction projects, the 42-contact compact connector board and source-bound digital geometry release checks. **No OpenSCAD render/print or physical mechanical assembly has been verified; source-firmware and source-refilled KiCad 9 DRC evidence elsewhere in the PR are not physical proof.**
+
+The HS MachineProject now includes two modeled mechanical plate subsystems and unresolved plate-to-donor mounting, structural and stabilizer contracts. BUILD_READY remains denied.

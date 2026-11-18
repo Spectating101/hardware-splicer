@@ -1,0 +1,567 @@
+{
+  "schema": "hs.f60.reference-original-switch-geometry.v1",
+  "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+  "source_label": "f60.kicad_pcb",
+  "switch_positions": [
+    {
+      "ref": "K[D]0",
+      "value": "Backspace",
+      "footprint": "CHERRY_PCB_200H",
+      "x": 285.75,
+      "y": 28.575,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K[D]2",
+      "value": "Enter",
+      "footprint": "CHERRY_PCB_ISOR",
+      "x": 292.89375,
+      "y": 57.15,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K[C]3",
+      "value": "RShift",
+      "footprint": "CHERRY_PCB_275H",
+      "x": 278.60625,
+      "y": 85.725,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K46",
+      "value": "Space",
+      "footprint": "CHERRY_PCB_625H",
+      "x": 150.01875,
+      "y": 104.775,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K20",
+      "value": "CapsLock",
+      "footprint": "CHERRY_PCB_175H",
+      "x": 35.71875,
+      "y": 66.675,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K10",
+      "value": "Tab",
+      "footprint": "CHERRY_PCB_150H",
+      "x": 33.3375,
+      "y": 47.625,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K[0]0",
+      "value": "Esc",
+      "footprint": "CHERRY_PCB_100H",
+      "x": 28.575,
+      "y": 28.575,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K[0]1",
+      "value": "1",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 47.625,
+      "y": 28.575,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K[C]2",
+      "value": "#",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 271.4625,
+      "y": 66.675,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K[C]1",
+      "value": "]",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 266.7,
+      "y": 47.625,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K[C]0",
+      "value": "=",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 257.175,
+      "y": 28.575,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K[B]3",
+      "value": "/",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 242.8875,
+      "y": 85.725,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K[B]2",
+      "value": "'",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 252.4125,
+      "y": 66.675,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K[B]1",
+      "value": "[",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 247.65,
+      "y": 47.625,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K[B]0",
+      "value": "-",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 238.125,
+      "y": 28.575,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K[A]3",
+      "value": ".",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 223.8375,
+      "y": 85.725,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K[A]2",
+      "value": ";",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 233.3625,
+      "y": 66.675,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K[A]1",
+      "value": "P",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 228.6,
+      "y": 47.625,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K[A]0",
+      "value": "0",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 219.075,
+      "y": 28.575,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K[0]9",
+      "value": "9",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 200.025,
+      "y": 28.575,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K[0]8",
+      "value": "8",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 180.975,
+      "y": 28.575,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K[0]7",
+      "value": "7",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 161.925,
+      "y": 28.575,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K[0]6",
+      "value": "6",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 142.875,
+      "y": 28.575,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K[0]5",
+      "value": "5",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 123.825,
+      "y": 28.575,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K[0]4",
+      "value": "4",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 104.775,
+      "y": 28.575,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K[0]3",
+      "value": "3",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 85.725,
+      "y": 28.575,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K[0]2",
+      "value": "2",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 66.675,
+      "y": 28.575,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K39",
+      "value": ",",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 204.7875,
+      "y": 85.725,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K38",
+      "value": "M",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 185.7375,
+      "y": 85.725,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K37",
+      "value": "N",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 166.6875,
+      "y": 85.725,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K36",
+      "value": "B",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 147.6375,
+      "y": 85.725,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K35",
+      "value": "V",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 128.5875,
+      "y": 85.725,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K34",
+      "value": "C",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 109.5375,
+      "y": 85.725,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K33",
+      "value": "X",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 90.4875,
+      "y": 85.725,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K32",
+      "value": "Z",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 71.4375,
+      "y": 85.725,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K31",
+      "value": "\\",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 52.3875,
+      "y": 85.725,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K29",
+      "value": "L",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 214.3125,
+      "y": 66.675,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K28",
+      "value": "K",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 195.2625,
+      "y": 66.675,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K27",
+      "value": "J",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 176.2125,
+      "y": 66.675,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K26",
+      "value": "H",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 157.1625,
+      "y": 66.675,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K25",
+      "value": "G",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 138.1125,
+      "y": 66.675,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K24",
+      "value": "F",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 119.0625,
+      "y": 66.675,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K23",
+      "value": "D",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 100.0125,
+      "y": 66.675,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K22",
+      "value": "S",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 80.9625,
+      "y": 66.675,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K21",
+      "value": "A",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 61.9125,
+      "y": 66.675,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K19",
+      "value": "O",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 209.55,
+      "y": 47.625,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K18",
+      "value": "I",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 190.5,
+      "y": 47.625,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K17",
+      "value": "U",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 171.45,
+      "y": 47.625,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K16",
+      "value": "Y",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 152.4,
+      "y": 47.625,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K15",
+      "value": "T",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 133.35,
+      "y": 47.625,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K14",
+      "value": "R",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 114.3,
+      "y": 47.625,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K13",
+      "value": "E",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 95.25,
+      "y": 47.625,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K12",
+      "value": "W",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 76.2,
+      "y": 47.625,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K11",
+      "value": "Q",
+      "footprint": "footprints:CHERRY_PCB_100H",
+      "x": 57.15,
+      "y": 47.625,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K[D]4",
+      "value": "RCtrl",
+      "footprint": "footprints:CHERRY_PCB_125H",
+      "x": 292.89375,
+      "y": 104.775,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K[C]4",
+      "value": "Menu",
+      "footprint": "footprints:CHERRY_PCB_125H",
+      "x": 269.08125,
+      "y": 104.775,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K[B]4",
+      "value": "RSuper",
+      "footprint": "footprints:CHERRY_PCB_125H",
+      "x": 245.26875,
+      "y": 104.775,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K[A]4",
+      "value": "RAltGr",
+      "footprint": "footprints:CHERRY_PCB_125H",
+      "x": 221.45625,
+      "y": 104.775,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K42",
+      "value": "LAlt",
+      "footprint": "footprints:CHERRY_PCB_125H",
+      "x": 78.58125,
+      "y": 104.775,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K41",
+      "value": "LSuper",
+      "footprint": "footprints:CHERRY_PCB_125H",
+      "x": 54.76875,
+      "y": 104.775,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K40",
+      "value": "LCtrl",
+      "footprint": "footprints:CHERRY_PCB_125H",
+      "x": 30.95625,
+      "y": 104.775,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    },
+    {
+      "ref": "K30",
+      "value": "LShift",
+      "footprint": "footprints:CHERRY_PCB_125H",
+      "x": 30.95625,
+      "y": 85.725,
+      "detected_as_keyboard_switch": true,
+      "switch_detected_from": "known_keyboard_footprint"
+    }
+  ],
+  "source_physical_donor_measured": false,
+  "source_board_file_vendored": false
+}

@@ -1,0 +1,3746 @@
+{
+  "schema": "hs.keyboard-postcut-copper-islands.v1",
+  "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+  "cut_x_mm": 105.745,
+  "cut_path_sha256": "de147f5402c17c012a625621ea2fe6c774bc308084854459f7c28199a43ec043",
+  "cut_path_kind": "stepped_polyline",
+  "kerf_mm": 1.0,
+  "model_basis": "KiCad tracks/pads/vias and explicit filled copper zone polygons; unsupported pad shapes remain blocked",
+  "repair_mode": "adaptive_functional",
+  "trace_exposure_requires_mask_removal_and_strain_relief": true,
+  "conductive_zones_imported": 2,
+  "rule_areas_ignored_for_connectivity": 0,
+  "qualified_for_build": false,
+  "target_net_count": 13,
+  "model_pre_cut_island_count": 13,
+  "model_post_cut_island_count": 36,
+  "split_pre_cut_components": 13,
+  "candidate_graph_edges": 18,
+  "unanchored_split_components": 0,
+  "model_replay_remaining_split_components": 2,
+  "model_replay_remaining_required_components": 0,
+  "model_replay_achieved_required_restoration": true,
+  "planned_inert_track_remnants": 5,
+  "damaged_electrical_pad_count": 0,
+  "damaged_electrical_pads": [],
+  "preexisting_unconnected_terminal_net_count": 0,
+  "preexisting_unconnected_terminal_nets": {},
+  "model_replay_achieved_full_restoration": false,
+  "issues": [
+    "SOURCE_IMPORT_WARNINGS"
+  ],
+  "sections": [
+    {
+      "net": "/C10",
+      "precut_track_only_component": 188,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/C10::pre188::post207",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 11,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "U1",
+              "pad": "13",
+              "x": 137.795,
+              "y": 97.31375,
+              "net": "/C10",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "U1",
+              "pad": "13",
+              "x": 137.795,
+              "y": 97.3137,
+              "layer": "F.Cu",
+              "net": "/C10",
+              "source_geometry_id": "pad:69:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/C10::pre188::post215",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 24,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "K[A]0",
+              "pad": "2",
+              "x": 215.265,
+              "y": 26.035,
+              "net": "/C10",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K[A]1",
+              "pad": "2",
+              "x": 224.79,
+              "y": 45.085,
+              "net": "/C10",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K[A]4",
+              "pad": "2",
+              "x": 217.64625,
+              "y": 102.235,
+              "net": "/C10",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K[A]2",
+              "pad": "2",
+              "x": 229.5525,
+              "y": 64.135,
+              "net": "/C10",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "K[A]0",
+              "pad": "2",
+              "x": 215.265,
+              "y": 26.035,
+              "layer": "F.Cu",
+              "net": "/C10",
+              "source_geometry_id": "pad:144:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "K[A]1",
+              "pad": "2",
+              "x": 224.79,
+              "y": 45.085,
+              "layer": "F.Cu",
+              "net": "/C10",
+              "source_geometry_id": "pad:139:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "K[A]4",
+              "pad": "2",
+              "x": 217.6463,
+              "y": 102.235,
+              "layer": "F.Cu",
+              "net": "/C10",
+              "source_geometry_id": "pad:339:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "K[A]2",
+              "pad": "2",
+              "x": 229.5525,
+              "y": 64.135,
+              "layer": "F.Cu",
+              "net": "/C10",
+              "source_geometry_id": "pad:134:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "K[A]3",
+              "pad": "2",
+              "x": 220.0275,
+              "y": 83.185,
+              "layer": "F.Cu",
+              "net": "/C10",
+              "source_geometry_id": "pad:129:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "/C11",
+      "precut_track_only_component": 211,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/C11::pre211::post227",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 4,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "U1",
+              "pad": "17",
+              "x": 137.795,
+              "y": 107.47375,
+              "net": "/C11",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "U1",
+              "pad": "17",
+              "x": 137.795,
+              "y": 107.4737,
+              "layer": "F.Cu",
+              "net": "/C11",
+              "source_geometry_id": "pad:73:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/C11::pre211::post232",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 34,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "K[B]0",
+              "pad": "2",
+              "x": 234.315,
+              "y": 26.035,
+              "net": "/C11",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K[B]1",
+              "pad": "2",
+              "x": 243.84,
+              "y": 45.085,
+              "net": "/C11",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K[B]4",
+              "pad": "2",
+              "x": 241.45875,
+              "y": 102.235,
+              "net": "/C11",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K[B]2",
+              "pad": "2",
+              "x": 248.6025,
+              "y": 64.135,
+              "net": "/C11",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "K[B]0",
+              "pad": "2",
+              "x": 234.315,
+              "y": 26.035,
+              "layer": "F.Cu",
+              "net": "/C11",
+              "source_geometry_id": "pad:124:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "K[B]1",
+              "pad": "2",
+              "x": 243.84,
+              "y": 45.085,
+              "layer": "F.Cu",
+              "net": "/C11",
+              "source_geometry_id": "pad:119:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "K[B]4",
+              "pad": "2",
+              "x": 241.4588,
+              "y": 102.235,
+              "layer": "F.Cu",
+              "net": "/C11",
+              "source_geometry_id": "pad:334:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "K[B]2",
+              "pad": "2",
+              "x": 248.6025,
+              "y": 64.135,
+              "layer": "F.Cu",
+              "net": "/C11",
+              "source_geometry_id": "pad:114:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "K[B]3",
+              "pad": "2",
+              "x": 239.0775,
+              "y": 83.185,
+              "layer": "F.Cu",
+              "net": "/C11",
+              "source_geometry_id": "pad:109:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "/C12",
+      "precut_track_only_component": 241,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/C12::pre241::post248",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 7,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "U1",
+              "pad": "18",
+              "x": 137.795,
+              "y": 110.01375,
+              "net": "/C12",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "U1",
+              "pad": "18",
+              "x": 137.795,
+              "y": 110.0138,
+              "layer": "F.Cu",
+              "net": "/C12",
+              "source_geometry_id": "pad:74:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/C12::pre241::post263",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 30,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "K[C]0",
+              "pad": "2",
+              "x": 253.365,
+              "y": 26.035,
+              "net": "/C12",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K[C]1",
+              "pad": "2",
+              "x": 262.89,
+              "y": 45.085,
+              "net": "/C12",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K[C]4",
+              "pad": "2",
+              "x": 265.27125,
+              "y": 102.235,
+              "net": "/C12",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K[C]2",
+              "pad": "2",
+              "x": 267.6525,
+              "y": 64.135,
+              "net": "/C12",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "K[C]0",
+              "pad": "2",
+              "x": 253.365,
+              "y": 26.035,
+              "layer": "F.Cu",
+              "net": "/C12",
+              "source_geometry_id": "pad:104:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "K[C]1",
+              "pad": "2",
+              "x": 262.89,
+              "y": 45.085,
+              "layer": "F.Cu",
+              "net": "/C12",
+              "source_geometry_id": "pad:99:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "K[C]4",
+              "pad": "2",
+              "x": 265.2713,
+              "y": 102.235,
+              "layer": "F.Cu",
+              "net": "/C12",
+              "source_geometry_id": "pad:329:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "K[C]2",
+              "pad": "2",
+              "x": 267.6525,
+              "y": 64.135,
+              "layer": "F.Cu",
+              "net": "/C12",
+              "source_geometry_id": "pad:94:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "K[C]3",
+              "pad": "2",
+              "x": 274.7962,
+              "y": 83.185,
+              "layer": "F.Cu",
+              "net": "/C12",
+              "source_geometry_id": "pad:21:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "/C13",
+      "precut_track_only_component": 252,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/C13::pre252::post276",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 25,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "K[D]0",
+              "pad": "2",
+              "x": 281.94,
+              "y": 26.035,
+              "net": "/C13",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K[D]4",
+              "pad": "2",
+              "x": 289.08375,
+              "y": 102.235,
+              "net": "/C13",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K[D]2",
+              "pad": "2",
+              "x": 290.35375,
+              "y": 60.96,
+              "net": "/C13",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "K[D]0",
+              "pad": "2",
+              "x": 281.94,
+              "y": 26.035,
+              "layer": "F.Cu",
+              "net": "/C13",
+              "source_geometry_id": "pad:3:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "K[D]4",
+              "pad": "2",
+              "x": 289.0838,
+              "y": 102.235,
+              "layer": "F.Cu",
+              "net": "/C13",
+              "source_geometry_id": "pad:324:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "K[D]2",
+              "pad": "2",
+              "x": 290.3537,
+              "y": 60.96,
+              "layer": "F.Cu",
+              "net": "/C13",
+              "source_geometry_id": "pad:12:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/C13::pre252::post277",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 5,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "U1",
+              "pad": "19",
+              "x": 135.255,
+              "y": 110.01375,
+              "net": "/C13",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "U1",
+              "pad": "19",
+              "x": 135.255,
+              "y": 110.0138,
+              "layer": "F.Cu",
+              "net": "/C13",
+              "source_geometry_id": "pad:75:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "/C7",
+      "precut_track_only_component": 137,
+      "postcut_track_only_island_count": 6,
+      "required_island_count": 4,
+      "planned_inert_track_remnants": 2,
+      "candidate_graph_edges_needed": 3,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/C7::pre137::post146",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 5,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "U1",
+              "pad": "6",
+              "x": 122.555,
+              "y": 94.77375,
+              "net": "/C7",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "U1",
+              "pad": "6",
+              "x": 122.555,
+              "y": 94.7738,
+              "layer": "F.Cu",
+              "net": "/C7",
+              "source_geometry_id": "pad:62:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/C7::pre137::post148",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 9,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "K37",
+              "pad": "2",
+              "x": 162.8775,
+              "y": 83.185,
+              "net": "/C7",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "K37",
+              "pad": "2",
+              "x": 162.8775,
+              "y": 83.185,
+              "layer": "F.Cu",
+              "net": "/C7",
+              "source_geometry_id": "pad:199:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/C7::pre137::post152",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 5,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "K27",
+              "pad": "2",
+              "x": 172.4025,
+              "y": 64.135,
+              "net": "/C7",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "K27",
+              "pad": "2",
+              "x": 172.4025,
+              "y": 64.135,
+              "layer": "F.Cu",
+              "net": "/C7",
+              "source_geometry_id": "pad:244:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/C7::pre137::post155",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 1,
+          "intact_solder_pad_candidates": [],
+          "source_copper_contact_candidates": [],
+          "inert_track_remnant_plan": {
+            "decision": "PLAN_ISOLATE_TRACK_ONLY_REMNANT",
+            "total_modeled_copper_area_mm2": 0.3815,
+            "track_fragment_count": 1,
+            "via_fragment_count": 0,
+            "retained_electrical_terminal_count": 0,
+            "physical_discard_verified": false,
+            "physical_insulation_verified": false,
+            "inspection": "Confirm fragment is not a key/MCU/connector terminal; remove sharp free copper and insulate"
+          },
+          "restoration_required": false
+        },
+        {
+          "model_island_id": "/C7::pre137::post157",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 1,
+          "intact_solder_pad_candidates": [],
+          "source_copper_contact_candidates": [],
+          "inert_track_remnant_plan": {
+            "decision": "PLAN_ISOLATE_TRACK_ONLY_REMNANT",
+            "total_modeled_copper_area_mm2": 0.0,
+            "track_fragment_count": 1,
+            "via_fragment_count": 0,
+            "retained_electrical_terminal_count": 0,
+            "physical_discard_verified": false,
+            "physical_insulation_verified": false,
+            "inspection": "Confirm fragment is not a key/MCU/connector terminal; remove sharp free copper and insulate"
+          },
+          "restoration_required": false
+        },
+        {
+          "model_island_id": "/C7::pre137::post158",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 12,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "K17",
+              "pad": "2",
+              "x": 167.64,
+              "y": 45.085,
+              "net": "/C7",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K[0]7",
+              "pad": "2",
+              "x": 158.115,
+              "y": 26.035,
+              "net": "/C7",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "K17",
+              "pad": "2",
+              "x": 167.64,
+              "y": 45.085,
+              "layer": "F.Cu",
+              "net": "/C7",
+              "source_geometry_id": "pad:289:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "K[0]7",
+              "pad": "2",
+              "x": 158.115,
+              "y": 26.035,
+              "layer": "F.Cu",
+              "net": "/C7",
+              "source_geometry_id": "pad:159:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "/C8",
+      "precut_track_only_component": 153,
+      "postcut_track_only_island_count": 3,
+      "required_island_count": 3,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 2,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/C8::pre153::post168",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 16,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "K18",
+              "pad": "2",
+              "x": 186.69,
+              "y": 45.085,
+              "net": "/C8",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K28",
+              "pad": "2",
+              "x": 191.4525,
+              "y": 64.135,
+              "net": "/C8",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K38",
+              "pad": "2",
+              "x": 181.9275,
+              "y": 83.185,
+              "net": "/C8",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "K18",
+              "pad": "2",
+              "x": 186.69,
+              "y": 45.085,
+              "layer": "F.Cu",
+              "net": "/C8",
+              "source_geometry_id": "pad:284:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "K28",
+              "pad": "2",
+              "x": 191.4525,
+              "y": 64.135,
+              "layer": "F.Cu",
+              "net": "/C8",
+              "source_geometry_id": "pad:239:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "K38",
+              "pad": "2",
+              "x": 181.9275,
+              "y": 83.185,
+              "layer": "F.Cu",
+              "net": "/C8",
+              "source_geometry_id": "pad:194:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/C8::pre153::post170",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 12,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "U1",
+              "pad": "8",
+              "x": 127.635,
+              "y": 94.77375,
+              "net": "/C8",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "U1",
+              "pad": "8",
+              "x": 127.635,
+              "y": 94.7738,
+              "layer": "F.Cu",
+              "net": "/C8",
+              "source_geometry_id": "pad:64:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/C8::pre153::post182",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 5,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "K[0]8",
+              "pad": "2",
+              "x": 177.165,
+              "y": 26.035,
+              "net": "/C8",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "K[0]8",
+              "pad": "2",
+              "x": 177.165,
+              "y": 26.035,
+              "layer": "F.Cu",
+              "net": "/C8",
+              "source_geometry_id": "pad:154:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "/C9",
+      "precut_track_only_component": 170,
+      "postcut_track_only_island_count": 3,
+      "required_island_count": 3,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 2,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/C9::pre170::post187",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 19,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "K19",
+              "pad": "2",
+              "x": 205.74,
+              "y": 45.085,
+              "net": "/C9",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K29",
+              "pad": "2",
+              "x": 210.5025,
+              "y": 64.135,
+              "net": "/C9",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K39",
+              "pad": "2",
+              "x": 200.9775,
+              "y": 83.185,
+              "net": "/C9",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "K19",
+              "pad": "2",
+              "x": 205.74,
+              "y": 45.085,
+              "layer": "F.Cu",
+              "net": "/C9",
+              "source_geometry_id": "pad:279:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "K29",
+              "pad": "2",
+              "x": 210.5025,
+              "y": 64.135,
+              "layer": "F.Cu",
+              "net": "/C9",
+              "source_geometry_id": "pad:234:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "K39",
+              "pad": "2",
+              "x": 200.9775,
+              "y": 83.185,
+              "layer": "F.Cu",
+              "net": "/C9",
+              "source_geometry_id": "pad:189:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/C9::pre170::post188",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 8,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "U1",
+              "pad": "12",
+              "x": 137.795,
+              "y": 94.77375,
+              "net": "/C9",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "U1",
+              "pad": "12",
+              "x": 137.795,
+              "y": 94.7738,
+              "layer": "F.Cu",
+              "net": "/C9",
+              "source_geometry_id": "pad:68:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/C9::pre170::post193",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 4,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "K[0]9",
+              "pad": "2",
+              "x": 196.215,
+              "y": 26.035,
+              "net": "/C9",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "K[0]9",
+              "pad": "2",
+              "x": 196.215,
+              "y": 26.035,
+              "layer": "F.Cu",
+              "net": "/C9",
+              "source_geometry_id": "pad:149:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "/R0",
+      "precut_track_only_component": 114,
+      "postcut_track_only_island_count": 6,
+      "required_island_count": 3,
+      "planned_inert_track_remnants": 3,
+      "candidate_graph_edges_needed": 2,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/R0::pre114::post106",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 5,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "U1",
+              "pad": "7",
+              "x": 125.095,
+              "y": 94.77375,
+              "net": "/R0",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "U1",
+              "pad": "7",
+              "x": 125.095,
+              "y": 94.7738,
+              "layer": "F.Cu",
+              "net": "/R0",
+              "source_geometry_id": "pad:63:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/R0::pre114::post109",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 6,
+          "intact_solder_pad_candidates": [],
+          "source_copper_contact_candidates": [],
+          "inert_track_remnant_plan": {
+            "decision": "PLAN_QUARANTINE_FLOATING_TRACK_AND_VIA_ISLAND",
+            "total_modeled_copper_area_mm2": 15.964,
+            "track_fragment_count": 4,
+            "via_fragment_count": 2,
+            "retained_electrical_terminal_count": 0,
+            "physical_discard_verified": false,
+            "physical_insulation_verified": false,
+            "inspection": "Confirm the floating via and copper have no surviving key/controller terminal; inspect kerf-to-other-net clearance, soldermask and ESD, then mechanically insulate before considering build release"
+          },
+          "restoration_required": false
+        },
+        {
+          "model_island_id": "/R0::pre114::post110",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 1,
+          "intact_solder_pad_candidates": [],
+          "source_copper_contact_candidates": [],
+          "inert_track_remnant_plan": {
+            "decision": "PLAN_ISOLATE_TRACK_ONLY_REMNANT",
+            "total_modeled_copper_area_mm2": 1.3806,
+            "track_fragment_count": 1,
+            "via_fragment_count": 0,
+            "retained_electrical_terminal_count": 0,
+            "physical_discard_verified": false,
+            "physical_insulation_verified": false,
+            "inspection": "Confirm fragment is not a key/MCU/connector terminal; remove sharp free copper and insulate"
+          },
+          "restoration_required": false
+        },
+        {
+          "model_island_id": "/R0::pre114::post112",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 1,
+          "intact_solder_pad_candidates": [],
+          "source_copper_contact_candidates": [],
+          "inert_track_remnant_plan": {
+            "decision": "PLAN_ISOLATE_TRACK_ONLY_REMNANT",
+            "total_modeled_copper_area_mm2": 0.2303,
+            "track_fragment_count": 1,
+            "via_fragment_count": 0,
+            "retained_electrical_terminal_count": 0,
+            "physical_discard_verified": false,
+            "physical_insulation_verified": false,
+            "inspection": "Confirm fragment is not a key/MCU/connector terminal; remove sharp free copper and insulate"
+          },
+          "restoration_required": false
+        },
+        {
+          "model_island_id": "/R0::pre114::post123",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 23,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "D[0]9",
+              "pad": "1",
+              "x": 209.55,
+              "y": 33.655,
+              "net": "/R0",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D[A]0",
+              "pad": "1",
+              "x": 228.6,
+              "y": 33.655,
+              "net": "/R0",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D[B]0",
+              "pad": "1",
+              "x": 247.65,
+              "y": 33.655,
+              "net": "/R0",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D[D]0",
+              "pad": "1",
+              "x": 266.7,
+              "y": 33.655,
+              "net": "/R0",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "D[0]9",
+              "pad": "1",
+              "x": 209.55,
+              "y": 33.655,
+              "layer": "F.Cu",
+              "net": "/R0",
+              "source_geometry_id": "pad:399:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D[A]0",
+              "pad": "1",
+              "x": 228.6,
+              "y": 33.655,
+              "layer": "F.Cu",
+              "net": "/R0",
+              "source_geometry_id": "pad:397:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D[B]0",
+              "pad": "1",
+              "x": 247.65,
+              "y": 33.655,
+              "layer": "F.Cu",
+              "net": "/R0",
+              "source_geometry_id": "pad:387:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D[D]0",
+              "pad": "1",
+              "x": 266.7,
+              "y": 33.655,
+              "layer": "F.Cu",
+              "net": "/R0",
+              "source_geometry_id": "pad:367:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D[C]0",
+              "pad": "1",
+              "x": 262.255,
+              "y": 38.1,
+              "layer": "F.Cu",
+              "net": "/R0",
+              "source_geometry_id": "pad:377:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/R0::pre114::post135",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 38,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "D[0]8",
+              "pad": "1",
+              "x": 190.5,
+              "y": 33.655,
+              "net": "/R0",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D[0]7",
+              "pad": "1",
+              "x": 171.45,
+              "y": 33.655,
+              "net": "/R0",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D[0]6",
+              "pad": "1",
+              "x": 152.4,
+              "y": 33.655,
+              "net": "/R0",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D[0]5",
+              "pad": "1",
+              "x": 133.35,
+              "y": 33.655,
+              "net": "/R0",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "D[0]8",
+              "pad": "1",
+              "x": 190.5,
+              "y": 33.655,
+              "layer": "F.Cu",
+              "net": "/R0",
+              "source_geometry_id": "pad:401:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D[0]7",
+              "pad": "1",
+              "x": 171.45,
+              "y": 33.655,
+              "layer": "F.Cu",
+              "net": "/R0",
+              "source_geometry_id": "pad:403:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D[0]6",
+              "pad": "1",
+              "x": 152.4,
+              "y": 33.655,
+              "layer": "F.Cu",
+              "net": "/R0",
+              "source_geometry_id": "pad:405:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D[0]5",
+              "pad": "1",
+              "x": 133.35,
+              "y": 33.655,
+              "layer": "F.Cu",
+              "net": "/R0",
+              "source_geometry_id": "pad:407:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D[0]4",
+              "pad": "1",
+              "x": 114.3,
+              "y": 33.655,
+              "layer": "F.Cu",
+              "net": "/R0",
+              "source_geometry_id": "pad:409:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D[0]3",
+              "pad": "1",
+              "x": 95.25,
+              "y": 33.655,
+              "layer": "F.Cu",
+              "net": "/R0",
+              "source_geometry_id": "pad:411:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "/R1",
+      "precut_track_only_component": 86,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/R1::pre86::post90",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 15,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "D18",
+              "pad": "1",
+              "x": 200.025,
+              "y": 52.705,
+              "net": "/R1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D19",
+              "pad": "1",
+              "x": 219.075,
+              "y": 52.705,
+              "net": "/R1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D[A]1",
+              "pad": "1",
+              "x": 238.125,
+              "y": 52.705,
+              "net": "/R1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D[B]1",
+              "pad": "1",
+              "x": 257.175,
+              "y": 52.705,
+              "net": "/R1",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "D18",
+              "pad": "1",
+              "x": 200.025,
+              "y": 52.705,
+              "layer": "F.Cu",
+              "net": "/R1",
+              "source_geometry_id": "pad:467:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D19",
+              "pad": "1",
+              "x": 219.075,
+              "y": 52.705,
+              "layer": "F.Cu",
+              "net": "/R1",
+              "source_geometry_id": "pad:465:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D[A]1",
+              "pad": "1",
+              "x": 238.125,
+              "y": 52.705,
+              "layer": "F.Cu",
+              "net": "/R1",
+              "source_geometry_id": "pad:395:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D[B]1",
+              "pad": "1",
+              "x": 257.175,
+              "y": 52.705,
+              "layer": "F.Cu",
+              "net": "/R1",
+              "source_geometry_id": "pad:385:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D[C]1",
+              "pad": "1",
+              "x": 261.62,
+              "y": 57.15,
+              "layer": "F.Cu",
+              "net": "/R1",
+              "source_geometry_id": "pad:375:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/R1::pre86::post98",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 42,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "D17",
+              "pad": "1",
+              "x": 180.975,
+              "y": 52.705,
+              "net": "/R1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D16",
+              "pad": "1",
+              "x": 161.925,
+              "y": 52.705,
+              "net": "/R1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "U1",
+              "pad": "4",
+              "x": 117.475,
+              "y": 94.77375,
+              "net": "/R1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D15",
+              "pad": "1",
+              "x": 142.875,
+              "y": 52.705,
+              "net": "/R1",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "D17",
+              "pad": "1",
+              "x": 180.975,
+              "y": 52.705,
+              "layer": "F.Cu",
+              "net": "/R1",
+              "source_geometry_id": "pad:469:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D16",
+              "pad": "1",
+              "x": 161.925,
+              "y": 52.705,
+              "layer": "F.Cu",
+              "net": "/R1",
+              "source_geometry_id": "pad:471:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "U1",
+              "pad": "4",
+              "x": 117.475,
+              "y": 94.7738,
+              "layer": "F.Cu",
+              "net": "/R1",
+              "source_geometry_id": "pad:60:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D15",
+              "pad": "1",
+              "x": 142.875,
+              "y": 52.705,
+              "layer": "F.Cu",
+              "net": "/R1",
+              "source_geometry_id": "pad:473:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D14",
+              "pad": "1",
+              "x": 123.825,
+              "y": 52.705,
+              "layer": "F.Cu",
+              "net": "/R1",
+              "source_geometry_id": "pad:475:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D13",
+              "pad": "1",
+              "x": 104.775,
+              "y": 52.705,
+              "layer": "F.Cu",
+              "net": "/R1",
+              "source_geometry_id": "pad:477:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "/R2",
+      "precut_track_only_component": 52,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/R2::pre52::post55",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 37,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "D26",
+              "pad": "1",
+              "x": 166.6875,
+              "y": 71.755,
+              "net": "/R2",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D25",
+              "pad": "1",
+              "x": 152.7175,
+              "y": 76.2,
+              "net": "/R2",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D24",
+              "pad": "1",
+              "x": 128.5875,
+              "y": 71.755,
+              "net": "/R2",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "U1",
+              "pad": "2",
+              "x": 112.395,
+              "y": 94.77375,
+              "net": "/R2",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "D26",
+              "pad": "1",
+              "x": 166.6875,
+              "y": 71.755,
+              "layer": "F.Cu",
+              "net": "/R2",
+              "source_geometry_id": "pad:451:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D25",
+              "pad": "1",
+              "x": 152.7175,
+              "y": 76.2,
+              "layer": "F.Cu",
+              "net": "/R2",
+              "source_geometry_id": "pad:453:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D24",
+              "pad": "1",
+              "x": 128.5875,
+              "y": 71.755,
+              "layer": "F.Cu",
+              "net": "/R2",
+              "source_geometry_id": "pad:455:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "U1",
+              "pad": "2",
+              "x": 112.395,
+              "y": 94.7738,
+              "layer": "F.Cu",
+              "net": "/R2",
+              "source_geometry_id": "pad:58:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D23",
+              "pad": "1",
+              "x": 109.5375,
+              "y": 71.755,
+              "layer": "F.Cu",
+              "net": "/R2",
+              "source_geometry_id": "pad:457:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D22",
+              "pad": "1",
+              "x": 90.4875,
+              "y": 71.755,
+              "layer": "F.Cu",
+              "net": "/R2",
+              "source_geometry_id": "pad:459:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/R2::pre52::post58",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 26,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "D27",
+              "pad": "1",
+              "x": 185.7375,
+              "y": 71.755,
+              "net": "/R2",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D28",
+              "pad": "1",
+              "x": 204.7875,
+              "y": 71.755,
+              "net": "/R2",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D29",
+              "pad": "1",
+              "x": 223.8375,
+              "y": 71.755,
+              "net": "/R2",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D[A]2",
+              "pad": "1",
+              "x": 242.8875,
+              "y": 71.755,
+              "net": "/R2",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "D27",
+              "pad": "1",
+              "x": 185.7375,
+              "y": 71.755,
+              "layer": "F.Cu",
+              "net": "/R2",
+              "source_geometry_id": "pad:449:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D28",
+              "pad": "1",
+              "x": 204.7875,
+              "y": 71.755,
+              "layer": "F.Cu",
+              "net": "/R2",
+              "source_geometry_id": "pad:447:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D29",
+              "pad": "1",
+              "x": 223.8375,
+              "y": 71.755,
+              "layer": "F.Cu",
+              "net": "/R2",
+              "source_geometry_id": "pad:445:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D[A]2",
+              "pad": "1",
+              "x": 242.8875,
+              "y": 71.755,
+              "layer": "F.Cu",
+              "net": "/R2",
+              "source_geometry_id": "pad:393:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D[B]2",
+              "pad": "1",
+              "x": 261.9375,
+              "y": 71.755,
+              "layer": "F.Cu",
+              "net": "/R2",
+              "source_geometry_id": "pad:383:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D[C]2",
+              "pad": "1",
+              "x": 280.9875,
+              "y": 71.755,
+              "layer": "F.Cu",
+              "net": "/R2",
+              "source_geometry_id": "pad:373:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "/R3",
+      "precut_track_only_component": 25,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/R3::pre25::post27",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 34,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "D36",
+              "pad": "1",
+              "x": 157.1625,
+              "y": 88.42375,
+              "net": "/R3",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D35",
+              "pad": "1",
+              "x": 138.1125,
+              "y": 88.42375,
+              "net": "/R3",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D34",
+              "pad": "1",
+              "x": 119.0625,
+              "y": 88.42375,
+              "net": "/R3",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "U1",
+              "pad": "22",
+              "x": 127.635,
+              "y": 110.01375,
+              "net": "/R3",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "D36",
+              "pad": "1",
+              "x": 157.1625,
+              "y": 88.4237,
+              "layer": "F.Cu",
+              "net": "/R3",
+              "source_geometry_id": "pad:431:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D35",
+              "pad": "1",
+              "x": 138.1125,
+              "y": 88.4237,
+              "layer": "F.Cu",
+              "net": "/R3",
+              "source_geometry_id": "pad:433:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D34",
+              "pad": "1",
+              "x": 119.0625,
+              "y": 88.4237,
+              "layer": "F.Cu",
+              "net": "/R3",
+              "source_geometry_id": "pad:435:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "U1",
+              "pad": "22",
+              "x": 127.635,
+              "y": 110.0138,
+              "layer": "F.Cu",
+              "net": "/R3",
+              "source_geometry_id": "pad:78:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D33",
+              "pad": "1",
+              "x": 100.0125,
+              "y": 88.4237,
+              "layer": "F.Cu",
+              "net": "/R3",
+              "source_geometry_id": "pad:437:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D32",
+              "pad": "1",
+              "x": 80.9625,
+              "y": 88.4237,
+              "layer": "F.Cu",
+              "net": "/R3",
+              "source_geometry_id": "pad:439:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/R3::pre25::post32",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 20,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "D37",
+              "pad": "1",
+              "x": 176.2125,
+              "y": 88.42375,
+              "net": "/R3",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D38",
+              "pad": "1",
+              "x": 195.2625,
+              "y": 88.42375,
+              "net": "/R3",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D39",
+              "pad": "1",
+              "x": 214.3125,
+              "y": 88.42375,
+              "net": "/R3",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D[A]3",
+              "pad": "1",
+              "x": 233.3625,
+              "y": 88.42375,
+              "net": "/R3",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "D37",
+              "pad": "1",
+              "x": 176.2125,
+              "y": 88.4237,
+              "layer": "F.Cu",
+              "net": "/R3",
+              "source_geometry_id": "pad:429:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D38",
+              "pad": "1",
+              "x": 195.2625,
+              "y": 88.4237,
+              "layer": "F.Cu",
+              "net": "/R3",
+              "source_geometry_id": "pad:427:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D39",
+              "pad": "1",
+              "x": 214.3125,
+              "y": 88.4237,
+              "layer": "F.Cu",
+              "net": "/R3",
+              "source_geometry_id": "pad:425:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D[A]3",
+              "pad": "1",
+              "x": 233.3625,
+              "y": 88.4237,
+              "layer": "F.Cu",
+              "net": "/R3",
+              "source_geometry_id": "pad:391:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D[B]3",
+              "pad": "1",
+              "x": 252.4125,
+              "y": 88.4237,
+              "layer": "F.Cu",
+              "net": "/R3",
+              "source_geometry_id": "pad:381:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D[C]3",
+              "pad": "1",
+              "x": 259.5562,
+              "y": 88.4237,
+              "layer": "F.Cu",
+              "net": "/R3",
+              "source_geometry_id": "pad:371:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "/R4",
+      "precut_track_only_component": 15,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/R4::pre15::post4",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 23,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "D46",
+              "pad": "1",
+              "x": 159.54375,
+              "y": 109.855,
+              "net": "/R4",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "U1",
+              "pad": "28",
+              "x": 112.395,
+              "y": 110.01375,
+              "net": "/R4",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D42",
+              "pad": "1",
+              "x": 88.10625,
+              "y": 109.855,
+              "net": "/R4",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D41",
+              "pad": "1",
+              "x": 64.29375,
+              "y": 109.855,
+              "net": "/R4",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "D46",
+              "pad": "1",
+              "x": 159.5437,
+              "y": 109.855,
+              "layer": "F.Cu",
+              "net": "/R4",
+              "source_geometry_id": "pad:417:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "U1",
+              "pad": "28",
+              "x": 112.395,
+              "y": 110.0138,
+              "layer": "F.Cu",
+              "net": "/R4",
+              "source_geometry_id": "pad:84:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D42",
+              "pad": "1",
+              "x": 88.1063,
+              "y": 109.855,
+              "layer": "F.Cu",
+              "net": "/R4",
+              "source_geometry_id": "pad:419:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D41",
+              "pad": "1",
+              "x": 64.2938,
+              "y": 109.855,
+              "layer": "F.Cu",
+              "net": "/R4",
+              "source_geometry_id": "pad:421:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D40",
+              "pad": "1",
+              "x": 40.4813,
+              "y": 109.855,
+              "layer": "F.Cu",
+              "net": "/R4",
+              "source_geometry_id": "pad:423:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/R4::pre15::post17",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 19,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "D[A]4",
+              "pad": "1",
+              "x": 230.98125,
+              "y": 109.855,
+              "net": "/R4",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D[B]4",
+              "pad": "1",
+              "x": 254.79375,
+              "y": 109.855,
+              "net": "/R4",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D[C]4",
+              "pad": "1",
+              "x": 278.60625,
+              "y": 109.855,
+              "net": "/R4",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D[D]4",
+              "pad": "1",
+              "x": 283.36875,
+              "y": 109.855,
+              "net": "/R4",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "D[A]4",
+              "pad": "1",
+              "x": 230.9812,
+              "y": 109.855,
+              "layer": "F.Cu",
+              "net": "/R4",
+              "source_geometry_id": "pad:389:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D[B]4",
+              "pad": "1",
+              "x": 254.7937,
+              "y": 109.855,
+              "layer": "F.Cu",
+              "net": "/R4",
+              "source_geometry_id": "pad:379:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D[C]4",
+              "pad": "1",
+              "x": 278.6062,
+              "y": 109.855,
+              "layer": "F.Cu",
+              "net": "/R4",
+              "source_geometry_id": "pad:369:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "D[D]4",
+              "pad": "1",
+              "x": 283.3687,
+              "y": 109.855,
+              "layer": "F.Cu",
+              "net": "/R4",
+              "source_geometry_id": "pad:363:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "Net-(D[0]9-Pad2)",
+      "precut_track_only_component": 0,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "Net-(D[0]9-Pad2)::pre0::post0",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 3,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "D[0]9",
+              "pad": "2",
+              "x": 209.55,
+              "y": 23.495,
+              "net": "Net-(D[0]9-Pad2)",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "D[0]9",
+              "pad": "2",
+              "x": 209.55,
+              "y": 23.495,
+              "layer": "F.Cu",
+              "net": "Net-(D[0]9-Pad2)",
+              "source_geometry_id": "pad:400:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "Net-(D[0]9-Pad2)::pre0::post1",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 3,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "K[0]9",
+              "pad": "1",
+              "x": 202.565,
+              "y": 23.495,
+              "net": "Net-(D[0]9-Pad2)",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "K[0]9",
+              "pad": "1",
+              "x": 202.565,
+              "y": 23.495,
+              "layer": "F.Cu",
+              "net": "Net-(D[0]9-Pad2)",
+              "source_geometry_id": "pad:148:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    }
+  ],
+  "bridge_edges": [
+    {
+      "net": "/C10",
+      "from_island": "/C10::pre188::post207",
+      "to_island": "/C10::pre188::post215",
+      "from_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "U1",
+        "pad": "13",
+        "x": 137.795,
+        "y": 97.3137,
+        "layer": "F.Cu",
+        "net": "/C10",
+        "source_geometry_id": "pad:69:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "K[A]0",
+        "pad": "2",
+        "x": 215.265,
+        "y": 26.035,
+        "layer": "F.Cu",
+        "net": "/C10",
+        "source_geometry_id": "pad:144:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "from_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "U1",
+        "pad": "13",
+        "x": 137.795,
+        "y": 97.3137,
+        "layer": "F.Cu",
+        "net": "/C10",
+        "source_geometry_id": "pad:69:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "K[A]0",
+        "pad": "2",
+        "x": 215.265,
+        "y": 26.035,
+        "layer": "F.Cu",
+        "net": "/C10",
+        "source_geometry_id": "pad:144:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/C11",
+      "from_island": "/C11::pre211::post227",
+      "to_island": "/C11::pre211::post232",
+      "from_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "U1",
+        "pad": "17",
+        "x": 137.795,
+        "y": 107.4737,
+        "layer": "F.Cu",
+        "net": "/C11",
+        "source_geometry_id": "pad:73:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "K[B]0",
+        "pad": "2",
+        "x": 234.315,
+        "y": 26.035,
+        "layer": "F.Cu",
+        "net": "/C11",
+        "source_geometry_id": "pad:124:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "from_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "U1",
+        "pad": "17",
+        "x": 137.795,
+        "y": 107.4737,
+        "layer": "F.Cu",
+        "net": "/C11",
+        "source_geometry_id": "pad:73:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "K[B]0",
+        "pad": "2",
+        "x": 234.315,
+        "y": 26.035,
+        "layer": "F.Cu",
+        "net": "/C11",
+        "source_geometry_id": "pad:124:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/C12",
+      "from_island": "/C12::pre241::post248",
+      "to_island": "/C12::pre241::post263",
+      "from_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "U1",
+        "pad": "18",
+        "x": 137.795,
+        "y": 110.0138,
+        "layer": "F.Cu",
+        "net": "/C12",
+        "source_geometry_id": "pad:74:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "K[C]0",
+        "pad": "2",
+        "x": 253.365,
+        "y": 26.035,
+        "layer": "F.Cu",
+        "net": "/C12",
+        "source_geometry_id": "pad:104:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "from_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "U1",
+        "pad": "18",
+        "x": 137.795,
+        "y": 110.0138,
+        "layer": "F.Cu",
+        "net": "/C12",
+        "source_geometry_id": "pad:74:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "K[C]0",
+        "pad": "2",
+        "x": 253.365,
+        "y": 26.035,
+        "layer": "F.Cu",
+        "net": "/C12",
+        "source_geometry_id": "pad:104:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/C13",
+      "from_island": "/C13::pre252::post276",
+      "to_island": "/C13::pre252::post277",
+      "from_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "K[D]0",
+        "pad": "2",
+        "x": 281.94,
+        "y": 26.035,
+        "layer": "F.Cu",
+        "net": "/C13",
+        "source_geometry_id": "pad:3:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "U1",
+        "pad": "19",
+        "x": 135.255,
+        "y": 110.0138,
+        "layer": "F.Cu",
+        "net": "/C13",
+        "source_geometry_id": "pad:75:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "from_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "K[D]0",
+        "pad": "2",
+        "x": 281.94,
+        "y": 26.035,
+        "layer": "F.Cu",
+        "net": "/C13",
+        "source_geometry_id": "pad:3:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "U1",
+        "pad": "19",
+        "x": 135.255,
+        "y": 110.0138,
+        "layer": "F.Cu",
+        "net": "/C13",
+        "source_geometry_id": "pad:75:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/C7",
+      "from_island": "/C7::pre137::post146",
+      "to_island": "/C7::pre137::post148",
+      "from_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "U1",
+        "pad": "6",
+        "x": 122.555,
+        "y": 94.7738,
+        "layer": "F.Cu",
+        "net": "/C7",
+        "source_geometry_id": "pad:62:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "K37",
+        "pad": "2",
+        "x": 162.8775,
+        "y": 83.185,
+        "layer": "F.Cu",
+        "net": "/C7",
+        "source_geometry_id": "pad:199:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "from_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "U1",
+        "pad": "6",
+        "x": 122.555,
+        "y": 94.7738,
+        "layer": "F.Cu",
+        "net": "/C7",
+        "source_geometry_id": "pad:62:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "K37",
+        "pad": "2",
+        "x": 162.8775,
+        "y": 83.185,
+        "layer": "F.Cu",
+        "net": "/C7",
+        "source_geometry_id": "pad:199:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/C7",
+      "from_island": "/C7::pre137::post146",
+      "to_island": "/C7::pre137::post152",
+      "from_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "U1",
+        "pad": "6",
+        "x": 122.555,
+        "y": 94.7738,
+        "layer": "F.Cu",
+        "net": "/C7",
+        "source_geometry_id": "pad:62:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "K27",
+        "pad": "2",
+        "x": 172.4025,
+        "y": 64.135,
+        "layer": "F.Cu",
+        "net": "/C7",
+        "source_geometry_id": "pad:244:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "from_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "U1",
+        "pad": "6",
+        "x": 122.555,
+        "y": 94.7738,
+        "layer": "F.Cu",
+        "net": "/C7",
+        "source_geometry_id": "pad:62:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "K27",
+        "pad": "2",
+        "x": 172.4025,
+        "y": 64.135,
+        "layer": "F.Cu",
+        "net": "/C7",
+        "source_geometry_id": "pad:244:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/C7",
+      "from_island": "/C7::pre137::post146",
+      "to_island": "/C7::pre137::post158",
+      "from_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "U1",
+        "pad": "6",
+        "x": 122.555,
+        "y": 94.7738,
+        "layer": "F.Cu",
+        "net": "/C7",
+        "source_geometry_id": "pad:62:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "K17",
+        "pad": "2",
+        "x": 167.64,
+        "y": 45.085,
+        "layer": "F.Cu",
+        "net": "/C7",
+        "source_geometry_id": "pad:289:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "from_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "U1",
+        "pad": "6",
+        "x": 122.555,
+        "y": 94.7738,
+        "layer": "F.Cu",
+        "net": "/C7",
+        "source_geometry_id": "pad:62:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "K17",
+        "pad": "2",
+        "x": 167.64,
+        "y": 45.085,
+        "layer": "F.Cu",
+        "net": "/C7",
+        "source_geometry_id": "pad:289:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/C8",
+      "from_island": "/C8::pre153::post168",
+      "to_island": "/C8::pre153::post170",
+      "from_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "K18",
+        "pad": "2",
+        "x": 186.69,
+        "y": 45.085,
+        "layer": "F.Cu",
+        "net": "/C8",
+        "source_geometry_id": "pad:284:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "U1",
+        "pad": "8",
+        "x": 127.635,
+        "y": 94.7738,
+        "layer": "F.Cu",
+        "net": "/C8",
+        "source_geometry_id": "pad:64:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "from_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "K18",
+        "pad": "2",
+        "x": 186.69,
+        "y": 45.085,
+        "layer": "F.Cu",
+        "net": "/C8",
+        "source_geometry_id": "pad:284:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "U1",
+        "pad": "8",
+        "x": 127.635,
+        "y": 94.7738,
+        "layer": "F.Cu",
+        "net": "/C8",
+        "source_geometry_id": "pad:64:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/C8",
+      "from_island": "/C8::pre153::post168",
+      "to_island": "/C8::pre153::post182",
+      "from_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "K18",
+        "pad": "2",
+        "x": 186.69,
+        "y": 45.085,
+        "layer": "F.Cu",
+        "net": "/C8",
+        "source_geometry_id": "pad:284:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "K[0]8",
+        "pad": "2",
+        "x": 177.165,
+        "y": 26.035,
+        "layer": "F.Cu",
+        "net": "/C8",
+        "source_geometry_id": "pad:154:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "from_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "K18",
+        "pad": "2",
+        "x": 186.69,
+        "y": 45.085,
+        "layer": "F.Cu",
+        "net": "/C8",
+        "source_geometry_id": "pad:284:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "K[0]8",
+        "pad": "2",
+        "x": 177.165,
+        "y": 26.035,
+        "layer": "F.Cu",
+        "net": "/C8",
+        "source_geometry_id": "pad:154:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/C9",
+      "from_island": "/C9::pre170::post187",
+      "to_island": "/C9::pre170::post188",
+      "from_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "K19",
+        "pad": "2",
+        "x": 205.74,
+        "y": 45.085,
+        "layer": "F.Cu",
+        "net": "/C9",
+        "source_geometry_id": "pad:279:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "U1",
+        "pad": "12",
+        "x": 137.795,
+        "y": 94.7738,
+        "layer": "F.Cu",
+        "net": "/C9",
+        "source_geometry_id": "pad:68:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "from_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "K19",
+        "pad": "2",
+        "x": 205.74,
+        "y": 45.085,
+        "layer": "F.Cu",
+        "net": "/C9",
+        "source_geometry_id": "pad:279:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "U1",
+        "pad": "12",
+        "x": 137.795,
+        "y": 94.7738,
+        "layer": "F.Cu",
+        "net": "/C9",
+        "source_geometry_id": "pad:68:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/C9",
+      "from_island": "/C9::pre170::post187",
+      "to_island": "/C9::pre170::post193",
+      "from_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "K19",
+        "pad": "2",
+        "x": 205.74,
+        "y": 45.085,
+        "layer": "F.Cu",
+        "net": "/C9",
+        "source_geometry_id": "pad:279:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "K[0]9",
+        "pad": "2",
+        "x": 196.215,
+        "y": 26.035,
+        "layer": "F.Cu",
+        "net": "/C9",
+        "source_geometry_id": "pad:149:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "from_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "K19",
+        "pad": "2",
+        "x": 205.74,
+        "y": 45.085,
+        "layer": "F.Cu",
+        "net": "/C9",
+        "source_geometry_id": "pad:279:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "K[0]9",
+        "pad": "2",
+        "x": 196.215,
+        "y": 26.035,
+        "layer": "F.Cu",
+        "net": "/C9",
+        "source_geometry_id": "pad:149:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/R0",
+      "from_island": "/R0::pre114::post106",
+      "to_island": "/R0::pre114::post123",
+      "from_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "U1",
+        "pad": "7",
+        "x": 125.095,
+        "y": 94.7738,
+        "layer": "F.Cu",
+        "net": "/R0",
+        "source_geometry_id": "pad:63:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "D[0]9",
+        "pad": "1",
+        "x": 209.55,
+        "y": 33.655,
+        "layer": "F.Cu",
+        "net": "/R0",
+        "source_geometry_id": "pad:399:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "from_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "U1",
+        "pad": "7",
+        "x": 125.095,
+        "y": 94.7738,
+        "layer": "F.Cu",
+        "net": "/R0",
+        "source_geometry_id": "pad:63:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "D[0]9",
+        "pad": "1",
+        "x": 209.55,
+        "y": 33.655,
+        "layer": "F.Cu",
+        "net": "/R0",
+        "source_geometry_id": "pad:399:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/R0",
+      "from_island": "/R0::pre114::post106",
+      "to_island": "/R0::pre114::post135",
+      "from_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "U1",
+        "pad": "7",
+        "x": 125.095,
+        "y": 94.7738,
+        "layer": "F.Cu",
+        "net": "/R0",
+        "source_geometry_id": "pad:63:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "D[0]8",
+        "pad": "1",
+        "x": 190.5,
+        "y": 33.655,
+        "layer": "F.Cu",
+        "net": "/R0",
+        "source_geometry_id": "pad:401:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "from_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "U1",
+        "pad": "7",
+        "x": 125.095,
+        "y": 94.7738,
+        "layer": "F.Cu",
+        "net": "/R0",
+        "source_geometry_id": "pad:63:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "D[0]8",
+        "pad": "1",
+        "x": 190.5,
+        "y": 33.655,
+        "layer": "F.Cu",
+        "net": "/R0",
+        "source_geometry_id": "pad:401:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/R1",
+      "from_island": "/R1::pre86::post90",
+      "to_island": "/R1::pre86::post98",
+      "from_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "D18",
+        "pad": "1",
+        "x": 200.025,
+        "y": 52.705,
+        "layer": "F.Cu",
+        "net": "/R1",
+        "source_geometry_id": "pad:467:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "D17",
+        "pad": "1",
+        "x": 180.975,
+        "y": 52.705,
+        "layer": "F.Cu",
+        "net": "/R1",
+        "source_geometry_id": "pad:469:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "from_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "D18",
+        "pad": "1",
+        "x": 200.025,
+        "y": 52.705,
+        "layer": "F.Cu",
+        "net": "/R1",
+        "source_geometry_id": "pad:467:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "D17",
+        "pad": "1",
+        "x": 180.975,
+        "y": 52.705,
+        "layer": "F.Cu",
+        "net": "/R1",
+        "source_geometry_id": "pad:469:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/R2",
+      "from_island": "/R2::pre52::post55",
+      "to_island": "/R2::pre52::post58",
+      "from_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "D26",
+        "pad": "1",
+        "x": 166.6875,
+        "y": 71.755,
+        "layer": "F.Cu",
+        "net": "/R2",
+        "source_geometry_id": "pad:451:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "D27",
+        "pad": "1",
+        "x": 185.7375,
+        "y": 71.755,
+        "layer": "F.Cu",
+        "net": "/R2",
+        "source_geometry_id": "pad:449:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "from_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "D26",
+        "pad": "1",
+        "x": 166.6875,
+        "y": 71.755,
+        "layer": "F.Cu",
+        "net": "/R2",
+        "source_geometry_id": "pad:451:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "D27",
+        "pad": "1",
+        "x": 185.7375,
+        "y": 71.755,
+        "layer": "F.Cu",
+        "net": "/R2",
+        "source_geometry_id": "pad:449:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/R3",
+      "from_island": "/R3::pre25::post27",
+      "to_island": "/R3::pre25::post32",
+      "from_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "D36",
+        "pad": "1",
+        "x": 157.1625,
+        "y": 88.4237,
+        "layer": "F.Cu",
+        "net": "/R3",
+        "source_geometry_id": "pad:431:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "D37",
+        "pad": "1",
+        "x": 176.2125,
+        "y": 88.4237,
+        "layer": "F.Cu",
+        "net": "/R3",
+        "source_geometry_id": "pad:429:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "from_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "D36",
+        "pad": "1",
+        "x": 157.1625,
+        "y": 88.4237,
+        "layer": "F.Cu",
+        "net": "/R3",
+        "source_geometry_id": "pad:431:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "D37",
+        "pad": "1",
+        "x": 176.2125,
+        "y": 88.4237,
+        "layer": "F.Cu",
+        "net": "/R3",
+        "source_geometry_id": "pad:429:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/R4",
+      "from_island": "/R4::pre15::post4",
+      "to_island": "/R4::pre15::post17",
+      "from_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "D46",
+        "pad": "1",
+        "x": 159.5437,
+        "y": 109.855,
+        "layer": "F.Cu",
+        "net": "/R4",
+        "source_geometry_id": "pad:417:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "D[A]4",
+        "pad": "1",
+        "x": 230.9812,
+        "y": 109.855,
+        "layer": "F.Cu",
+        "net": "/R4",
+        "source_geometry_id": "pad:389:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "from_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "D46",
+        "pad": "1",
+        "x": 159.5437,
+        "y": 109.855,
+        "layer": "F.Cu",
+        "net": "/R4",
+        "source_geometry_id": "pad:417:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "D[A]4",
+        "pad": "1",
+        "x": 230.9812,
+        "y": 109.855,
+        "layer": "F.Cu",
+        "net": "/R4",
+        "source_geometry_id": "pad:389:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "Net-(D[0]9-Pad2)",
+      "from_island": "Net-(D[0]9-Pad2)::pre0::post0",
+      "to_island": "Net-(D[0]9-Pad2)::pre0::post1",
+      "from_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "D[0]9",
+        "pad": "2",
+        "x": 209.55,
+        "y": 23.495,
+        "layer": "F.Cu",
+        "net": "Net-(D[0]9-Pad2)",
+        "source_geometry_id": "pad:400:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_contact": {
+        "contact_type": "existing_pad",
+        "ref": "K[0]9",
+        "pad": "1",
+        "x": 202.565,
+        "y": 23.495,
+        "layer": "F.Cu",
+        "net": "Net-(D[0]9-Pad2)",
+        "source_geometry_id": "pad:148:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "from_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "D[0]9",
+        "pad": "2",
+        "x": 209.55,
+        "y": 23.495,
+        "layer": "F.Cu",
+        "net": "Net-(D[0]9-Pad2)",
+        "source_geometry_id": "pad:400:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "to_candidate_pad": {
+        "contact_type": "existing_pad",
+        "ref": "K[0]9",
+        "pad": "1",
+        "x": 202.565,
+        "y": 23.495,
+        "layer": "F.Cu",
+        "net": "Net-(D[0]9-Pad2)",
+        "source_geometry_id": "pad:148:F.Cu",
+        "exposure_length_mm": null,
+        "conductor_width_mm": null,
+        "physical_access_verified": false,
+        "inspection": "Confirm exact populated component and solderability"
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    }
+  ],
+  "release": "BLOCKED_REFERENCE_TOPOLOGY_ONLY",
+  "payload_sha256": "7aea0abecad58c97ed9290e3c8c1b2d10b0f86518a01114f36158475b090adf6"
+}

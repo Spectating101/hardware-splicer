@@ -35,7 +35,13 @@ def reference_inputs():
 
 def test_all_source_proofs_reach_only_hs_design_ready():
     records=reference_inputs()
-    result=extend_keyboard_splice_handoff(*records)
+    result=extend_keyboard_splice_handoff(
+        *records,
+        pinout_proof=load("PJRC_TEENSY2_PINOUT_PROOF.json"),
+        legacy_zone_drc_receipt=load("legacy_zone_drc_round9/LEGACY_ZONE_DRC_RECEIPT.json"),
+        compact_junction=load("compact_idc50_round8/COMPACT_JUNCTION_WIRING.json"),
+        compact_junction_verification=load("compact_idc50_round8/COMPACT_JUNCTION_VERIFICATION.json"),
+    )
     original=load("MACHINE_PROJECT_HANDOFF.json")
     assert result["physical_authority_granted"] is False
     assert result["release_assessment"]["requested_state"]=="build_ready"
@@ -53,7 +59,15 @@ def test_all_source_proofs_reach_only_hs_design_ready():
     assert data["physical_harness_cable_verified"] is False
     assert data["physical_donor_verified"] is False
     assert len(result["project"]["interfaces"])==4
-    assert len(result["project"]["evidence"])==4
+    assert len(result["project"]["evidence"])==7
+    assert data["compact_IDC_source_net_preview_available"] is True
+    assert data["compact_IDC_area_reduction_percent"]==49.1
+    assert data["compact_and_original_full_junction_mutually_exclusive"] is True
+    assert data["official_teensy2_source_pinout_19_signal_match"] is True
+    assert data["original_teensy_footprint_all_31_pads_source_matched"] is True
+    assert data["source_refilled_zone_copy_drc_no_errors"] is True
+    assert data["source_refilled_zone_copy_drc_warnings"]==321
+    assert data["source_original_byte_identical_full_drc_verified"] is False
     assert all(item["simulated"] for item in result["project"]["evidence"])
     assert result["canonical_summary"]==original["canonical_summary"]
     for item in result["project"]["interfaces"]:

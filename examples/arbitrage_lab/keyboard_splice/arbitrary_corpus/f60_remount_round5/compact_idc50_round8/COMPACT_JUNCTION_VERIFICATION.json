@@ -1,0 +1,13 @@
+{
+  "schema": "hs.native-compact-junction-drc.v1",
+  "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+  "full_source_junction_model_sha256": "687d0f81298531d4cd60221f11e88753e4980a26ecf3e80a8790eda45b3db457",
+  "pcb_sha256": "532a9dc2e4670dee325c625d6271b3cabe29bcfde37359d59c7500686bf0ad85",
+  "native_kicad_exit": 0,
+  "errors": 0,
+  "warnings": 0,
+  "unconnected_items": 0,
+  "native_drc_passed": true,
+  "physical_harness_verified": false,
+  "fabrication_release": "BLOCKED_NATIVE_KICAD_COMPACT_IDC_PREVIEW"
+}

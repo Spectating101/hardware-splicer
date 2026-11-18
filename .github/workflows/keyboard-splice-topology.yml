@@ -6,6 +6,7 @@ on:
       - "src/hardware_splicer/keyboard_splice*.py"
       - "src/hardware_splicer/_pcbnew_helpers/keyboard_splice*.py"
       - "scripts/hs_keyboard_splice_probe.py"
+      - "scripts/hs_verify_legacy_zone_drc.py"
       - "tests/test_keyboard_splice*.py"
       - "pyproject.toml"
       - ".github/workflows/keyboard-splice-topology.yml"
@@ -15,6 +16,7 @@ on:
       - "src/hardware_splicer/keyboard_splice*.py"
       - "src/hardware_splicer/_pcbnew_helpers/keyboard_splice*.py"
       - "scripts/hs_keyboard_splice_probe.py"
+      - "scripts/hs_verify_legacy_zone_drc.py"
       - "tests/test_keyboard_splice*.py"
       - "pyproject.toml"
       - ".github/workflows/keyboard-splice-topology.yml"
@@ -42,11 +44,16 @@ jobs:
             tests/test_keyboard_splice_islands.py \
             tests/test_keyboard_splice_path.py \
             tests/test_keyboard_splice_route_search.py \
+            tests/test_keyboard_splice_plate.py \
+            tests/test_keyboard_splice_via_quarantine.py \
+            tests/test_keyboard_splice_mechanical_handoff.py \
             tests/test_keyboard_splice_handoff.py \
             tests/test_keyboard_splice_repair_loop.py \
             tests/test_keyboard_splice_matrix.py \
             tests/test_keyboard_splice_source_audit.py \
             tests/test_keyboard_splice_full_matrix.py \
+            tests/test_keyboard_splice_teensy2.py \
+            tests/test_keyboard_splice_zone_drc.py \
             tests/test_keyboard_splice_handoff_extended.py \
             tests/test_keyboard_splice_arbitrary.py \
             tests/test_keyboard_splice_arbitrary_evidence.py \
@@ -85,4 +92,7 @@ jobs:
             tests/test_keyboard_splice_interposer.py \
             tests/test_keyboard_splice_key_relocation.py \
             tests/test_keyboard_splice_harness_bus.py \
+            tests/test_keyboard_splice_compact_junction.py \
+            tests/test_keyboard_splice_compact_dynamic.py \
+            tests/test_keyboard_splice_plate.py \
             tests/test_keyboard_splice_reference_1x6.py

@@ -106,8 +106,10 @@ def test_frozen_independent_firmware_source_matches_original_keyboard_identity()
     source_sha="e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6"
     assert pinned["original_pcb_source_sha256"]==source_sha
     assert proof["source_sha256"]==audit["original_pcb_sha256"]==source_sha
-    assert {r["name"]:r["sha256"] for r in pinned["files"]}==audit["source_hashes"]
-    assert len(pinned["files"])==5
+    hashes={r["name"]:r["sha256"] for r in pinned["files"]}
+    assert {name:hashes[name] for name in audit["source_hashes"]}==audit["source_hashes"]
+    assert len(pinned["files"])==6
+    assert hashes["Teensy_20.kicad_mod"]=="426868884418397d65c55bc7e6db2be776928dc83c7daffff28ffbbb552970d5"
     assert audit["matched_original_pcb_net_nodes"]==267
     assert audit["source_nets_in_original_pcb"]==81
     assert audit["schematic_node_count"]==279
