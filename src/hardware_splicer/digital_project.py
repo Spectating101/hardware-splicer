@@ -145,10 +145,10 @@ def resolve_requirements(seal, change_request='', requirements=None):
     case_id = case_id_for(seal)
     if case_id == cases.DEFAULT_CASE:
         return requirement_tools().resolve(seal['summary']['requirements'], change_request, requirements)
-    return _revision_case(seal).resolve(seal['summary']['requirements'], change_request, requirements)
+    return revision_case(seal).resolve(seal['summary']['requirements'], change_request, requirements)
 
 
-def _revision_case(seal):
+def revision_case(seal):
     case_id = case_id_for(seal)
     # Fielddeck 5 revisions change numeric goals against the parent's exact
     # assembly and evaluator, even if today's checkout has another variant.
@@ -459,7 +459,7 @@ def execute_study(backend, job):
         raise CorruptProject('Digital job targets a different registered case.')
     if store.load(project_id)['revision'] != base_revision:
         raise RevisionConflict('The project changed before this run started. Reload and run from the latest revision.')
-    case = None if case_id == cases.DEFAULT_CASE else _revision_case(parent_seal)
+    case = None if case_id == cases.DEFAULT_CASE else revision_case(parent_seal)
     requirements = (requirement_tools().validate(payload['requirements']) if case is None
                     else case.validate(payload['requirements']))
     attempt = Path(job.output_dir) / (job.attempt_id or uuid.uuid4().hex)

@@ -13,8 +13,10 @@ async function request(path, options = {}) {
   return body;
 }
 
-export const createDigitalProject = () => request("/v1/digital/projects", {
-  method: "POST", headers: { "Content-Type": "application/json" }, body: "{}",
+export const fetchDigitalCases = (signal) => request("/v1/digital/cases", { signal });
+
+export const createDigitalProject = (caseId) => request("/v1/digital/projects", {
+  method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ case_id: caseId }),
 });
 
 export const fetchDigitalStudy = (projectId, signal) =>

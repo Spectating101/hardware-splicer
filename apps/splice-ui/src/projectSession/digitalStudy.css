@@ -37,3 +37,45 @@
   .digital-viewer-card iframe { height: 580px; }
   .digital-table th, .digital-table td { padding: .55rem; min-width: 100px; }
 }
+.home-layout:has(.study-library) { grid-template-columns: minmax(0, 1fr); }
+.home-hero.study-library { min-width: 0; max-width: none; }
+.study-choice { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 1.5rem; align-items: center; }
+.study-preview { margin: 1rem 0; min-width: 0; background: white; border: 1px solid var(--line); border-radius: .65rem; overflow: hidden; }
+.study-preview img { display: block; width: 100%; height: clamp(180px, 18vw, 280px); object-fit: contain; }
+.study-preview figcaption { padding: .6rem .85rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .85rem; }
+@media (max-width: 980px) { .study-choice { grid-template-columns: minmax(0, 1fr); gap: 0; } }
+.study-library fieldset { border: 0; padding: 0; margin: 1.5rem 0; min-width: 0; }
+.study-library legend, .study-fields strong { font-weight: 650; margin-bottom: .5rem; }
+.study-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 195px), 1fr)); gap: .65rem; }
+.study-options label { display: flex; align-items: start; gap: .6rem; border: 1px solid var(--line); background: white; padding: .85rem; border-radius: .65rem; cursor: pointer; }
+.study-options label.selected { border-color: var(--accent); background: #eaf6ef; }
+.study-options input { width: auto; accent-color: var(--accent); }
+.study-options small { display: block; margin-top: .3rem; color: var(--muted); }
+.study-fields { font-size: .9rem; line-height: 1.55; }
+.digital-render { display: block; width: 100%; height: auto; border-radius: .6rem; }
+.study-files { max-height: 22rem; overflow: auto; overflow-wrap: anywhere; }
+.digital-table thead { color: var(--text); }
+@media (max-width: 640px) { .digital-field-pair { grid-template-columns: 1fr; } }
+
+.digital-input-diff { margin: 1rem 0; padding: .7rem 1rem; border-left: 3px solid var(--accent); background: var(--surface-2); }
+.digital-input-diff ul { padding-left: 1.2rem; margin: .35rem 0 0; }
+
+.display-comparison { border-top: 1px solid var(--line); margin-top: 1.5rem; padding-top: 1.25rem; min-width: 0; }
+.display-comparison header { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: .75rem; }
+.display-comparison header h2 { font-size: 1.2rem; margin: 0; }
+.display-comparison header p, .display-comparison caption { margin: .4rem 0; color: var(--muted); font-size: .85rem; }
+.display-comparison label { display: grid; gap: .25rem; font-size: .85rem; }
+.display-comparison select { font: inherit; min-height: 2.5rem; }
+.display-table-wrap { overflow-x: auto; }
+.display-comparison table { border-collapse: collapse; width: 100%; margin: .85rem 0; font-variant-numeric: tabular-nums; }
+.display-comparison caption { caption-side: bottom; text-align: left; }
+.display-comparison th, .display-comparison td { padding: .55rem; text-align: left; border-bottom: 1px solid var(--line); }
+.display-comparison thead { background: var(--surface-2); }
+.display-comparison th small { display: block; color: var(--muted); font-weight: 400; }
+.display-comparison summary { cursor: pointer; font-weight: 600; }
+.display-comparison details h3 { font-size: .95rem; margin: 1rem 0 .25rem; }
+.display-comparison details ul { margin: .25rem 0; }
+.display-comparison > a { display: inline-block; margin-top: .85rem; }
+.display-comparison th button { padding: .35rem .75rem; margin-bottom: .2rem; }
+.display-comparison th button[aria-pressed="true"] { background: var(--accent); color: white; }
+.study-start { margin-top: 1rem; }

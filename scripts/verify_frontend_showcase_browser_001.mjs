@@ -22,6 +22,7 @@ try {
     catch{await new Promise(r=>setTimeout(r,300));}
   }
   if(!loaded)throw Error('Vite frontend preview did not start');
+  await page.getByTestId('nav-library').click();
   await page.getByTestId('nav-product-explorer').click();
   await page.getByTestId('product-showcase').waitFor({state:'visible'});
   const iframe=page.locator('iframe[title="Hardware-Splicer native CAD interactive explorer"]');

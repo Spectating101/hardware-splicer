@@ -70,3 +70,29 @@ describe("Saved digital requirement revisions", () => {
     expect(screen.getByRole("button", { name: "Run and save new revision" })).toBeEnabled();
   });
 });
+
+it("uses the registered device's inputs, measurements and nested artifacts", async () => {
+  const saved = {
+    revision: 1, run_id: "plotter-baseline", change_request: "Baseline",
+    summary: {
+      case_id: "ender3-penplotter", requirements_met: true, scope_limits: [],
+      requirements: { drawing_width_mm: 100 }, metrics: { drawing_width_mm: 100 }, constraints: [],
+    },
+    artifacts: { "revision/BOM.csv": "/files/bom", "STUDY.zip": "/files/package" },
+  };
+  fetchDigitalStudy.mockResolvedValue({
+    ...data(saved), history: [saved], requirement_bounds: { drawing_width_mm: { minimum: 60, maximum: 140 } },
+  });
+  submitDigitalRun.mockResolvedValue({ job: { job_id: "saved", status: "succeeded" } });
+  render(<DigitalStudyPanel session={session} />);
+  const width = await screen.findByRole("spinbutton", { name: /Drawing width/ });
+  expect(width).toHaveAttribute("min", "60");
+  expect(width).toHaveAttribute("max", "140");
+  expect(screen.queryByLabelText("Payload change")).toBeNull();
+  expect(screen.getByRole("link", { name: "Bill of materials (CSV)" })).toHaveAttribute("href", "/files/bom");
+  fireEvent.change(width, { target: { value: "120" } });
+  fireEvent.click(screen.getByRole("button", { name: "Run and save new revision" }));
+  await waitFor(() => expect(submitDigitalRun).toHaveBeenCalledWith(session.projectId, expect.objectContaining({
+    requirements: { drawing_width_mm: 120 }, change_request: "", base_revision: 1,
+  })));
+});

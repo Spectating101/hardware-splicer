@@ -17,7 +17,7 @@ import ProductShowcase from "./components/ProductShowcase.jsx";
 import DetailedAssemblyReference from "./components/DetailedAssemblyReference.jsx";
 import SortingWorkcell from "./components/SortingWorkcell.jsx";
 import InterfaceLabPanel from "./components/InterfaceLabPanel.jsx";
-import PipelineVisual from "./components/PipelineVisual.jsx";
+import DigitalStudyLibrary from "./projectSession/DigitalStudyLibrary.jsx";
 import { StatusPill } from "./components/ProjectPanels.jsx";
 import { useSpliceJob } from "./hooks/useSpliceJob.js";
 import { ADVANCED_VIEWS, VIEWS, isAdvancedView } from "./nav.js";
@@ -78,117 +78,34 @@ function formatSavedAt(value) {
   return `Saved ${date.toLocaleString()}`;
 }
 
-function HomeHero({ onStart, onResume, canResume, onExample, onQuickDemo, onExplore, onDigital, creatingDigital, apiOk, version }) {
-  return (
-    <div className="home-layout">
-      <section className="home-hero card">
-        <p className="eyebrow">Hardware-Splicer · Splice Agent {version ? `v${version}` : ""}</p>
-        <h1>AI-assisted KiCad design — canvas to DRC truth to bench-ready package</h1>
-        <p className="lead">
-          <strong>Agents and humans</strong> share one spine: MCP/HTTP compose → KiCad DRC fix loop →{" "}
-          <code>PROJECT_PACKAGE</code> → bench gates. Salvage splice and donor vision when bring-up matters.
-        </p>
-        <div className="readiness-pitch">
-          <strong>Durable project first. Auditable machine lifecycle next.</strong>
-          <p className="muted small">
-            One project workspace: Intake → Design → Verify → Bench → Package. Projects autosave as
-            versioned server snapshots and reopen into the same editable source state.
-          </p>
-        </div>
-        <PipelineVisual />
-        <div className="hero-actions">
-          <button type="button" className="primary large" onClick={onDigital} disabled={!apiOk || creatingDigital}>
-            {creatingDigital ? "Opening digital project…" : "Start digital design"}
-          </button>
-          {canResume ? (
-            <>
-              <button type="button" className="primary large" onClick={onResume} disabled={!apiOk}>
-                Resume project
-              </button>
-              <button type="button" className="secondary large" onClick={onStart} disabled={!apiOk}>
-                Start new project
-              </button>
-            </>
-          ) : (
-            <button
-              type="button"
-              className="primary large"
-              onClick={onStart}
-              disabled={!apiOk}
-              data-testid="home-start-project"
-            >
-              Start a project
-            </button>
-          )}
-          <button type="button" className="secondary large" onClick={onExplore} data-testid="home-explore-cad">
-            Explore the 3D product
-          </button>
-          <button type="button" className="secondary large" onClick={onQuickDemo} disabled={!apiOk}>
-            Quick demo (1-click)
-          </button>
-          <button type="button" className="ghost large" onClick={onExample} disabled={!apiOk}>
-            Browse examples
-          </button>
-        </div>
-        {!apiOk && (
-          <div className="offline-box">
-            <strong>API offline</strong>
-            <p>
-              Run <code>hs-serve --port 8787</code> or{" "}
-              <code>HARDWARE_SPLICER_SERVE_UI=1 hs-serve</code> for single-port mode.
-            </p>
-          </div>
-        )}
-      </section>
-      <aside className="home-aside card">
-        <h3>What you get</h3>
-        <ul className="feature-list">
-          <li>
-            <span className="feature-icon">✦</span>
-            <div>
-              <strong>AI compose</strong>
-              <span>LLM-first module pick → KiCad design path</span>
-            </div>
-          </li>
-          <li>
-            <span className="feature-icon">◇</span>
-            <div>
-              <strong>Persistent source</strong>
-              <span>Versioned project snapshots, reopen, duplicate, and archive</span>
-            </div>
-          </li>
-          <li>
-            <span className="feature-icon">⚡</span>
-            <div>
-              <strong>KiCad carrier</strong>
-              <span>Honest DRC — not cosmetic copper fiction</span>
-            </div>
-          </li>
-          <li>
-            <span className="feature-icon">📋</span>
-            <div>
-              <strong>Project package</strong>
-              <span>BOM, wiring, build steps in one bundle</span>
-            </div>
-          </li>
-          <li>
-            <span className="feature-icon">◇</span>
-            <div>
-              <strong>Design verification</strong>
-              <span>KiCanvas preview, BOM, fab artifact coverage</span>
-            </div>
-          </li>
-          <li>
-            <span className="feature-icon">🛡</span>
-            <div>
-              <strong>Safety gates</strong>
-              <span>Bench measurements before power-on</span>
-            </div>
-          </li>
-        </ul>
-      </aside>
-    </div>
-  );
+function ProjectsHome({ projects, listError, loading, online, onStart, onLibrary, onOpen, onRetry }) {
+  const [query, setQuery] = useState("");
+  const matches = projects.filter((project) => formatProjectName(project.name).toLowerCase().includes(query.trim().toLowerCase()));
+  return <div className="projects-home">
+    <header className="projects-heading">
+      <div><h1>Projects</h1><p className="muted">Start with a build idea, adapt a reference design, or pick up where you left off.</p></div>
+      <div className="hero-actions">
+        <button type="button" className="secondary" onClick={onLibrary}>Browse design library</button>
+        <button type="button" className="primary" data-testid="home-start-project" disabled={!online} onClick={onStart}>New project</button>
+      </div>
+    </header>
+    <section className="card projects-collection" aria-label="Saved projects">
+      <div className="projects-heading"><h2>Saved projects</h2>
+        {projects.length > 0 && <label>Find a project
+          <input type="search" value={query} onChange={(event) => setQuery(event.target.value)} />
+        </label>}
+      </div>
+      {!online && <p role="status">{loading ? "Connecting to the engineering backend…" : "The engineering backend is offline."}</p>}
+      {listError && <p role="alert">{listError} <button type="button" onClick={onRetry}>Retry project list</button></p>}
+      {matches.length > 0 ? <div className="project-rows">
+        {matches.map((project) => <button type="button" key={project.project_id} onClick={() => onOpen(project.project_id)} disabled={!online}>
+          <span><strong>{formatProjectName(project.name)}</strong><small>{formatSavedAt(project.saved_at)}</small></span>
+          <span className="project-stage">{project.current_stage}</span><span>Rev {project.latest_revision}</span>
+        </button>)}
+      </div> : online && !listError && <p className="muted">{loading ? "Loading saved projects…" : projects.length
+        ? "No projects match this name." : "Your first saved project will appear here."}</p>}
+    </section>
+  </div>;
 }
 
 function AdvancedHub({ onExamples, onLab }) {
@@ -220,6 +137,7 @@ export default function App() {
   const [donorFixtures, setDonorFixtures] = useState([]);
   const [recentJobs, setRecentJobs] = useState([]);
   const [visionCapabilities, setVisionCapabilities] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [view, setView] = useState(VIEWS.home);
   const [selectedExampleId, setSelectedExampleId] = useState(null);
   const [loadError, setLoadError] = useState(null);
@@ -357,19 +275,18 @@ export default function App() {
     if (latest) openSavedProject(latest.project_id);
   };
 
-  const startDigitalProject = async () => {
+  const startDigitalProject = async (caseId) => {
     if (creatingDigital) return;
     setCreatingDigital(true);
     try {
-      const result = await createDigitalProject();
+      const result = await createDigitalProject(caseId);
       const envelope = result.project;
       dispatch({ type: ACTIONS.RESTORE_PROJECT_SNAPSHOT, snapshot: envelope.snapshot,
         projectId: envelope.project_id, revision: envelope.revision, savedAt: envelope.saved_at });
       setPreviewContext(null);
       setView(VIEWS.workspace);
       projectPersistence.refreshProjects();
-    } catch (error) { setToast(error.message); }
-    finally { setCreatingDigital(false); }
+    } finally { setCreatingDigital(false); }
   };
 
   const cancelIntake = () => {
@@ -505,63 +422,27 @@ export default function App() {
             HS
           </div>
           <div>
-            <strong>Splice Agent</strong>
+            <strong>Hardware Splicer</strong>
             <span>{health?.version ? `v${health.version}` : "Hardware-Splicer"}</span>
           </div>
+          <button type="button" className="mobile-nav-toggle" aria-controls="workbench-navigation"
+            aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>Menu</button>
         </div>
 
+        <div id="workbench-navigation" className={menuOpen ? "sidebar-body open" : "sidebar-body"}
+          onClick={(event) => { if (event.target.closest(".nav-button, .project-button")) setMenuOpen(false); }}>
         <nav className="sidebar-nav" aria-label="Main">
           <button
             type="button"
             className={`nav-button ${view === VIEWS.home ? "active" : ""}`}
             onClick={() => setView(VIEWS.home)}
           >
-            Home
+            Projects
           </button>
-          <button
-            type="button"
-            className={`nav-button ${inWorkspace ? "active" : ""}`}
-            data-testid="nav-project"
-            onClick={() => {
-              if (!session.projectId) {
-                const latest = projectPersistence.projects[0];
-                if (latest) {
-                  openSavedProject(latest.project_id);
-                  return;
-                }
-                startProject();
-                return;
-              }
-              setView(VIEWS.workspace);
-            }}
-            disabled={!health?.ok}
-          >
-            Project
-          </button>
-          <button
-            type="button"
-            className={`nav-button ${view === VIEWS.sortcell ? "active" : ""}`}
-            data-testid="nav-sortcell"
-            onClick={() => setView(VIEWS.sortcell)}
-          >
-            Sorting workcell
-          </button>
-          <button
-            type="button"
-            className={`nav-button ${view === VIEWS.reference ? "active" : ""}`}
-            data-testid="nav-complete-assembly"
-            onClick={() => setView(VIEWS.reference)}
-          >
-            Complete CAD assembly
-          </button>
-          <button
-            type="button"
-            className={`nav-button ${view === VIEWS.showcase ? "active" : ""}`}
-            data-testid="nav-product-explorer"
-            onClick={() => setView(VIEWS.showcase)}
-          >
-            Product explorer
-          </button>
+          {canResume && <button type="button" className={`nav-button ${inWorkspace ? "active" : ""}`}
+            data-testid="nav-project" onClick={resumeProject} disabled={!health?.ok}>Resume project</button>}
+          <button type="button" className={`nav-button ${[VIEWS.library, VIEWS.sortcell, VIEWS.reference, VIEWS.showcase].includes(view) ? "active" : ""}`}
+            data-testid="nav-library" onClick={() => setView(VIEWS.library)}>Design library</button>
           <button
             type="button"
             className={`nav-button ${advancedActive ? "active" : ""}`}
@@ -626,7 +507,7 @@ export default function App() {
           </div>
         )}
 
-        {projectPersistence.projects.length > 0 && (
+        {view !== VIEWS.home && projectPersistence.projects.length > 0 && (
           <div className="sidebar-section">
             <div className="sidebar-label">Saved projects</div>
             <div className="project-list">
@@ -674,24 +555,26 @@ export default function App() {
             </div>
           </div>
         )}
+        </div>
       </aside>
 
       <main className="main">
         <div className={`content ${inWorkspace || view === VIEWS.preview || view === VIEWS.showcase || view === VIEWS.reference ? "content-results" : ""}`}>
-          {view === VIEWS.home && (
-            <HomeHero
-              apiOk={health?.ok}
-              version={health?.version}
-              canResume={canResume}
-              onStart={startProject}
-              onResume={resumeProject}
-              onExample={() => setView(VIEWS.example)}
-              onQuickDemo={handleQuickDemo}
-              onExplore={() => setView(VIEWS.showcase)}
-              onDigital={startDigitalProject}
-              creatingDigital={creatingDigital}
-            />
-          )}
+          {view === VIEWS.home && <ProjectsHome projects={projectPersistence.projects} listError={projectPersistence.listError}
+            loading={(!health && !loadError) || projectPersistence.listLoading} online={health?.ok}
+            onStart={startProject} onOpen={openSavedProject} onRetry={projectPersistence.refreshProjects}
+            onLibrary={() => setView(VIEWS.library)} />}
+
+          {view === VIEWS.library && <div className="library-page">
+            <DigitalStudyLibrary onStart={startDigitalProject} online={health?.ok} busy={creatingDigital} />
+            <section className="card"><h2>Explore reference projects</h2><div className="hero-actions">
+              <button data-testid="nav-sortcell" onClick={() => setView(VIEWS.sortcell)}>Sorting workcell</button>
+              <button data-testid="nav-complete-assembly" onClick={() => setView(VIEWS.reference)}>Complete CAD assembly</button>
+              <button data-testid="nav-product-explorer" onClick={() => setView(VIEWS.showcase)}>Product explorer</button>
+              <button onClick={() => setView(VIEWS.example)}>Example projects</button>
+              <button onClick={handleQuickDemo} disabled={!health?.ok}>Quick demo</button>
+            </div></section>
+          </div>}
 
           {view === VIEWS.showcase && <ProductShowcase />}
           {view === VIEWS.reference && <DetailedAssemblyReference />}

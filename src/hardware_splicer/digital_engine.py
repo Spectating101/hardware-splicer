@@ -97,7 +97,13 @@ class DigitalStudyEngine:
 
     def project_state(self, project_id, revision=None):
         study = self.study(project_id, revision)
-        return {'ok': True, 'study': study, 'history': self.history(project_id),
+        case_id = study['summary'].get('case_id', cases.DEFAULT_CASE)
+        bounds = {}
+        if case_id != cases.DEFAULT_CASE:
+            _, _, seal = digital.load_run(self.projects, project_id, study['revision'])
+            case = digital.revision_case(seal)
+            bounds = {key: {'minimum': low, 'maximum': high} for key, (_, low, high) in case.requirements.items()}
+        return {'ok': True, 'study': study, 'history': self.history(project_id), 'requirement_bounds': bounds,
                 'runtime': digital.runtime_for_case(study['summary'].get('case_id', cases.DEFAULT_CASE)),
                 'jobs': [j.to_dict() for j in self.backend.store.list_digital_jobs(project_id)]}
 
