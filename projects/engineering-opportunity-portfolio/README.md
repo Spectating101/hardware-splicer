@@ -1,5 +1,7 @@
 # HS engineering opportunity portfolio — three distinct decision tracks
 
+For the November product map, open the [product index](product-index.md). It connects the market-screened offers, supplier listings, digital builds and the searchable list of 620 device configurations.
+
 **As of 2026-10-20.** This portfolio is a project-selection aid grounded in public examples, *not* evidence that any HS-generated design or repaired hardware is finished. Use the canonical [HS mission](../../docs/HARDWARE_SPLICER_MISSION_FREEZE.md). The objective is to build and repair actual devices, not a ranking engine.
 
 ## Track 1 — engineering integration proof

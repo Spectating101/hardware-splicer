@@ -20,6 +20,9 @@ from .engineering_source_ingestion import MAX_ENGINEERING_SOURCE_BYTES
 from .machine_project import AuthorityState
 from .project_store import default_project_root, validate_project_id
 from .robot_model_import import parse_robot_model, topology_from_robot_model
+from .kicad_registered_source_check import (
+    check_kicad_bytes, kicad_source_check_enabled, registered_kicad_kind,
+)
 
 
 STORED_SOURCE_PARSER_SCHEMA = "hardware_splicer.stored_source_parser.v1"
@@ -263,6 +266,33 @@ def execute_stored_source_parser(
         source,
         project_root=project_root,
     )
+
+    # Opt-in, real KiCad diagnostics for already registered, hash-verified files.
+    # Existing uploads were classified as inventory-only, so the verified byte
+    # signature plus original filename determines whether the tool may run.
+    if kicad_source_check_enabled():
+        filename = str(metadata.get("original_filename") or "")
+        if registered_kicad_kind(filename, content) is not None:
+            check = check_kicad_bytes(filename, content)
+            complete = check.get("status") in {"findings_present", "no_findings_reported"}
+            return StoredSourceParserResult(
+                parser_identity="hardware_splicer.stored_source_parser.kicad_cli.v1",
+                project_id=project_id,
+                source_id=source_id,
+                content_hash=content_hash,
+                parser_route="kicad_cli_rule_check",
+                status=StoredParserStatus.PARSED if complete else StoredParserStatus.SKIPPED,
+                authority_ceiling=authority,
+                parsed_output={"kicad_rule_check": check},
+                limitations=[
+                    "KiCad CLI diagnostics and netlist counts are not component validation, "
+                    "manufacturing approval, or physical test results."
+                ],
+                metadata={
+                    "blob_hash_reverified": True, "verified_size_bytes": len(content),
+                    "opt_in_kicad_cli": True, "physical_authority_unchanged": True,
+                },
+            )
 
     if parser_disposition != "structured" or not parser_route:
         return StoredSourceParserResult(

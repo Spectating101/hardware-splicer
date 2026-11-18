@@ -1,0 +1,39 @@
+{
+  "captured_at_utc": "2026-11-18T09:55:09.523639+00:00",
+  "source_branch": "integration/github-features-20261116",
+  "source_commit": "ede2f538fd1ca3a02645b130e1b92337bda9a91b",
+  "review_branch": "review/hs-optiplex-handoff-20261118",
+  "working_files": [
+    {
+      "path": "src/hardware_splicer/stored_source_parser.py",
+      "sha256": "afabeaa10c97ced6acad8721cc2eee4a91179c13340cea074b09f201bdc97539",
+      "bytes": 16137
+    },
+    {
+      "path": "src/hardware_splicer/kicad_registered_source_check.py",
+      "sha256": "9591b4ff9baec9426beb8b8e2de15293839fc080a51590120edde782a7191fb3",
+      "bytes": 5133
+    },
+    {
+      "path": "tests/test_kicad_registered_source_check.py",
+      "sha256": "c3f8fccf1b42a2ce9adc8cbdb00fedf96b8fc1333c86d0386478405ae0fe5b60",
+      "bytes": 1337
+    },
+    {
+      "path": "projects/engineering-opportunity-portfolio/README.md",
+      "sha256": "4f2496a5bef35bde18348de4f8971549b2090b3ae271562db638928eecd07b95",
+      "bytes": 9637
+    },
+    {
+      "path": "projects/engineering-opportunity-portfolio/product-index.md",
+      "sha256": "7376dac851022a6fbcac31e1383aa965bb34b0e4147847dcac318f87ea74a734",
+      "bytes": 14518
+    },
+    {
+      "path": "projects/engineering-opportunity-portfolio/device-configurations.csv",
+      "sha256": "50a8be73aab9e032fc9fb42c78baba3c17633dd1e873455e4a465fad10725f03",
+      "bytes": 180363
+    }
+  ],
+  "note": "Snapshot of authorized in-progress HS work for independent review. The source checkout and its index were not modified. Validation and keyboard integration are recorded separately."
+}
