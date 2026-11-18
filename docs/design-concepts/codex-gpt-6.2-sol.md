@@ -1,106 +1,111 @@
-# Hardware Splicer — a revision workbench
+# Hardware Splicer — Follow the evidence through a change
 
-## The project is a place you can rewind
+Open Projects to resume the last engineering question, or start with a goal, owned or salvaged stock, or a reference study. A missing part can start a project before geometry exists. Open a stuck BOM row directly from a shared link or a tool integration. Give the BOM the full width when sourcing. Each position connects a requirement, exact MPN, dated supplier offers, individual stock units and alternates. **Find the same MPN** preserves the design identity. **Assess an alternate** forks a draft. In a teardown, a photo crop can support a tentative donor identification while its connector and rating remain unknown. Record the physical unit in InvenTree with its own evidence. Offer suggestions on request, following ecoEDA’s intake study, the SO-ARM100 sourcing issues, and InvenTree’s part/stock distinction. [GitHub signals][signals] · [Hardware conventions][hardware]
 
-Open a project into the last thing you were inspecting. The canvas owns most of the screen. Above it, a breadcrumb names the project, saved revision and selected object. Below it, a revision strip marks saved changes, runs and decisions. Choose a revision to replay its exact state, or choose two to inspect what changed. Ctrl/Cmd+K opens a searchable navigator for parts, requirements, findings, files and runs. Enter opens an inspector at the selection. Both can dock when a long task calls for it. The default view keeps the object and one selected question in focus.
+## A bench that moves with the question
 
-Projects is home. Start from a goal, owned or salvaged units, or a reference study. Each creates the same kind of saved project. With no model yet, the canvas shows requirements and unresolved questions. The BOM is a first-class full-width view and the shared spine. A BOM line keeps its identity across revisions when the backend can map it. It links the design role, catalogue identity, specific owned stock or donor unit, and alternates. A suspected donor identification stays a sourced hypothesis. InvenTree contributes stock and catalogue records with their own provenance.
+Start with one working view. **Open beside** brings up a second instrument and keeps the selected item in both. Saved presets such as Motion, Fit + Wiring, and Diagnosis recall panels, camera and layers. A finding can offer the relevant preset in one click. Resize, maximize or return to the previous layout. Use a compact, collapsible outline for navigation and a source drawer for detail. Keep visible actions and keyboard hints, with exact lookup by MPN, refdes or finding ID. This adapts Rerun blueprints and Foxglove saved layouts, plus Linear’s peek. [Advanced patterns][advanced]
 
-## Follow the question across tools
+A shareable address carries the project, immutable revision or specific draft snapshot, selected object and optional finding, run and recorded time. Interactive HTML BOM’s bidirectional cross-probing and tscircuit’s pad-to-schematic jump extend across CAD bodies, KiCad symbols and footprints, harness endpoints, BOM positions and evidence. Highlight peers only through explicit mappings. An unlinked item opens its native file or report. CadQuery studies show their generated artifacts, PyBullet shows recorded poses, and plotter toolpaths step through recorded commands. Load specialist viewers on demand and keep links back to source-native artifacts, as Copper’s KiCad integration suggests. [Hardware conventions][hardware] · [Advanced patterns][advanced] · [GitHub signals][signals]
 
-From a part, requirement or finding, open the relevant representation in place and keep a breadcrumb back. CAD covers the CadQuery Fielddeck, pen-plotter conversion and inspection nest. Electrical objects open KiCad schematics, footprints, board layers or native ERC/DRC findings. A harness opens its wiring diagram and checks. A run opens PyBullet flight playback and battery traces, or a plotter toolpath and its report. A repair intake opens hypotheses, the evidence that would distinguish them, and the backend safety gates. Teardown observations link to the sourced identities they support and the BOM lines where those units are being considered.
+**Step through a run.** A Rerun-style cursor drives pose, telemetry and timestamped findings from one recorded stream. Click a trace spike to pause at that sample, highlight the mapped component and open the check’s source. The board stays at the run’s input revision and can cross-highlight that selection. Show missing channels and mapping coverage, as LeRobot does. Draw a clearance overlay from the check’s own geometry, following RoboSimStudio. Show each run’s engine version, inputs, output hashes and offline rerun package. [Advanced patterns][advanced]
 
-Every view shares an address with the revision, object and optional finding or run. Select a backed link to move between a BOM row, CAD body, board pad, graph cursor or evidence document. In sim replay, a single time cursor drives the pose and traces for that run. Unsupported links say “No mapped geometry” or the equivalent and still open the source artifact. Load viewers on demand. Preserve camera or layer state when returning, and synchronize compare cameras only where a shared frame is known. Use the original artifact and native report as the fallback for unsupported formats.
+**Step through project history.** A separate revision and activity strip steps between discrete snapshots. Expand tracks for the selected part or requirement. Clicking “check finished” opens the producing run at its input snapshot, with an optional jump into recorded run time. Stepping back restores the evidence available then. Foxglove-style lookback shows a prior observation with its revision and age. An input change marks dependent checks stale with a reason, adapting marimo’s lazy invalidation. Later receipts increment **New activity** while playback, historical inspection or approval stays pinned. Choose **Go live** to receive new events in place, or open an individual receipt. Onshape’s branch and merge markers distinguish saved revisions from parallel drafts. [Advanced patterns][advanced]
 
-Runs carry engine version, inputs, outputs and hashes. Open an offline-rerunnable package from its run or revision, with a manifest and instructions. Sealed evaluations open as benchmark runs with protocol, sealed prediction digest, results and abstentions after scoring. Their scope stays attached to the benchmark.
+Authority never upgrades implicitly. The inspector shows the backend label verbatim, claim scope, producer, source and receipt. **Unknown** occupies its own row with the missing input and an evidence action. Conflicting observations stay visible with their scopes. Show persistent backend blocker counts for the selected action, with separate states for an absent assessment and a scoped assessment reporting zero blockers. Blockers never become “ready.” Diagnosis lists competing hypotheses and the evidence that would distinguish them. The backend’s safety gate controls each proposed test and names the missing prerequisite. Use KiCad’s list-and-marker pattern and AllSpice’s sourced finding cards. [Hardware conventions][hardware] · [Advanced patterns][advanced]
 
-## Turn a substitution into a walkable diff
+### 1 · Inspect a saved run
 
-From a BOM line, choose an alternate and assess it against a fixed base. Open the candidate beside the base with **Differences only** on by default. Start at the changed line and traverse the reported dependencies for fit, mounting, connections, electrical load, stock and downstream artifacts. A changed bezel can jump to an overlay, then to the check that supports its dimensions. A cable route with missing evidence points to the source or input needed. Show checked, stale and unknown items individually, and mark gaps in dependency coverage. Use side-by-side artifacts where correspondence is missing.
-
-The revision header opens the backend’s blocker list for the selected action, such as fabrication or a repair step. Findings are listed, filterable and pinnable. A pin jumps to its exact revision and supported object or artifact anchor. The inspector shows the claim, backend authority verbatim, scope, source and run receipt. Conflicting checks stay visible with their scopes. When inputs change, show the older result under its original revision and surface the need for a new check. Saving a draft or approving a tool run changes the record of work. Authority changes require evidence and a new backend determination. If a scoped release exists, changing a released BOM line opens a change order with the affected scope, required checks and review history. The release remains addressable as its own revision.
-
-## Agent work is reviewable while it happens
-
-The revision strip shows project activity at the object it affects. Its inbox groups proposals, requests for input and failed runs by decision. Open an entry to see the agent or MCP caller, assigned question, base revision, proposed writes and run receipts. Select **Follow** for live updates on that task. Historical views and open approval cards stay pinned while newer events accumulate. Reconnect by fetching the current snapshot and replaying available events. Repository-side activity appears when an agent submits a project event or receipt.
-
-Steer with a bounded request on a finding or part, such as “check display cable clearance using the imported drawing.” Narrow the scope, request evidence, or stop a supported run. Agents can return parallel proposals from the same base. The review card previews the exact operation, affected objects, required permission and expected revision. The owner can approve that operation, reject it or return it with a request. A moved base requires reassessment against the new revision and fresh approval. Approving execution and accepting a proposed revision are separate recorded decisions.
-
-The GitHub tool factory brings discovered candidates into this same inbox. Show the source, commit, verified license, reviewed adapter, exact command, inputs and sandbox policy. Discovery and vetting can produce proposals. Execution requires a human-approved pin and adapter, runs without network access, and returns input and output hashes. Internal and MCP callers use the same backend gates. Friends get named identities once sign-in exists. Later, business teams can assign execution, change-order and release permissions to distinct roles.
-
-## Phone
-
-Open a shared link at the exact revision and finding. Use a single-column queue for blockers, decisions and work in progress. Tap a finding for the source or a cropped annotated preview. Read compare as a list of changes with before and after stacked. Owners can reply, assign a bounded follow-up, or approve a specific run after expanding its scope and provenance. If review depends on an artifact the phone cannot display legibly, save the review position for desktop. Load interactive 3D on demand.
-
-## Three screens
-
-Illustrative UI using the Fielddeck study. The states shown are example review states.
-
-### Work in a saved revision
+Illustrative states throughout.
 
 ```text
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ Projects / Fielddeck / 7-inch base                         [Find ⌘K] [Inbox]           │
-│ Assembly / Display module                                    [BOM] [Blockers]          │
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│  CAD                                          [Section] [Explode] [Open source]        │
-│                   __________________________                                           │
-│                  /      display assembly   /|                                          │
-│                 /_________________________/ |                                          │
-│                 |                       ● | /     ● Cable clearance                    │
-│                 |_________________________|/        Open finding ↗                     │
-│                                                                                        │
-│  Selected BOM line   DISPLAY                         [Alternates] [Inspect]            │
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│  Revisions    ● 7-inch base ───── ◇ candidate study                                    │
-│                ↑ Viewing          ↑ Open differences     [Follow agent work]           │
-└────────────────────────────────────────────────────────────────────────────────────────┘
+┌ Projects / Drone study / r7 · pinned ──────────────────────── [New activity 2] [BOM] ┐
+│ Battery / voltage dip                               [Fabrication blockers] [Source]  │
+├───────────────────────────────────────────┬──────────────────────────────────────────┤
+│ PYBULLET · saved pose                     │ BATTERY TRACE · sample at cursor         │
+│          o───┐ ┌───o                      │ ──────────╲_●_╱────────                  │
+│              ├─┤   ① Battery              │            ↑ ① voltage minimum           │
+│          o───┘ └───o                      │ ① Model input: pack resistance assumed   │
+│ [Open linked wiring]                      │ Measured resistance: ? unknown [Request] │
+├───────────────────────────────────────────┴──────────────────────────────────────────┤
+│ Run 38   [▶ Space] [←/→ Sample]  0 s ─────●───── 12 s    [Receipt] [Offline package] │
+│ Project  r6 ──● r7 (run inputs) ──○ r8      r7 · MCP wiring report arrived [Open]    │
+└──────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Assess a BOM alternate
+## Compare consequences, then decide
+
+Compare in place against a pinned base. Start differences-only, with a row for each reported downstream impact. Select the cable row to show the harness beside the enclosure section and trace the finding back to its input. Support Base/Target, split and blend with known registration. Otherwise show independent views. **Coverage** lists unrendered artifacts, unmapped objects and unchecked dependencies. Selecting a stale result shows what changed and offers a scoped rerun. A released line opens a change order with From/To items and affected scope, preserving the released revision and freezing the approved order. Use Onshape’s feature diff, deltaKi’s modes and coverage, and Duro’s affected-items convention. [Hardware conventions][hardware] · [Advanced patterns][advanced]
+
+### 2 · Assess an alternate
 
 ```text
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ Fielddeck / DISPLAY / Assess 5-inch alternate                     [Open BOM]           │
-│ Base  7-inch assembly       Target  5-inch candidate       [Differences only ✓]        │
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│  CAD overlay / bezel and mount                          [Fit view] [Sources]           │
-│               . . . . . . . . . . . .      · Base outline                              │
-│               .   ┌────────────┐    .      ─ Candidate outline                         │
-│               .   └────────────┘    .                                                  │
-│               . . . . . . . . . . . .                                                  │
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│  Follow a dependency                                                                   │
-│    DISPLAY ── Bezel and mount      Changed        [Jump to overlay]                    │
-│            ├─ Cable clearance     Unknown        [Open evidence request]               │
-│            └─ Power check         Needs rerun    [Open run inputs]                     │
-│                                            [Inspect assessment] [Review draft]         │
-└────────────────────────────────────────────────────────────────────────────────────────┘
+┌ FieldDeck / DISPLAY ─────────────────────────────────── Base r12 (7") → Draft A (5") ┐
+│ [Differences only ✓] [Base] [Target] [Split] [Blend]               [Coverage 2 gaps] │
+├───────────────────────────────────────┬──────────────────────────────────────────────┤
+│ CadQuery section · registered overlay │ Follow an impact                             │
+│   ┌────────────────────┐              │ Bezel         Changed files       [Inspect]  │
+│   │  ┌──────────┐      │              │ Runtime       Modelled delta      [Inputs]   │
+│   │  └──────────┘──①   │              │ › ① Cable     ? bend radius       [Request]  │
+│   └────────────────────┘              │ Pin/voltage   Unchecked          [Coverage]  │
+├───────────────────────────────────────┴──────────────────────────────────────────────┤
+│ r12 ──┬── Draft A  ·  Fit receipt arrived [Open]                                     │
+│       └── Draft B  ·  Donor identity unknown    [Compare candidates] [Review draft A]│
+└──────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Review an agent operation
+## Give agents a place in the work
+
+Assign a question from a finding with visible object scope, base, allowed inputs and outputs. Each agent or MCP caller works on an isolated draft. Task tracks show started, receipt, needs input, failure and completion. Click a receipt to open what it touched. Group routine progress and show the last receipt time when activity becomes unknown. Reconnect by fetching the current snapshot and catching up on recorded events. Steer with a narrower request or stop a supported run. Compare parallel candidates in one table with missing evidence first. This uses Linear’s typed activity, Devin’s receipt navigation, Zoo’s resumability and Cursor’s isolated tasks. [Advanced patterns][advanced] · [GitHub signals][signals]
+
+Agent Inbox and Circuitly’s file diffs inform a pinned review card. Authorize the exact operation with its arguments and permissions, then review the resulting diff as a separate decision. If the base advances, reopen the comparison and obtain fresh approval before applying. The same backend gates cover internal and MCP callers. The workshop queue gives GitHub discoveries the same review path with source, pinned commit, verified license, reviewed adapter, exact command and inputs. Execution requires human approval and a fail-closed no-network sandbox. Attach the hashed receipt. Link existing akcli inspection and kdif silkscreen diff from the affected artifact with their actual coverage. A sealed evaluation opens its protocol and sealed prediction digest, then outcomes and abstentions after scoring. Benchmark scope stays on the receipt. [Advanced patterns][advanced] · [GitHub signals][signals]
+
+### 3 · Review a scoped operation
 
 ```text
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ Fielddeck / Inbox / Display study                       [Back to assembly]             │
-│ Proposal from CAD agent via MCP                               [Open receipts]          │
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│  Save proposed 5-inch candidate                                                        │
-│  Base revision     7-inch assembly             Current revision matches base           │
-│  Preview           DISPLAY alternate and bezel artifacts         [Open diff]           │
-│  Requested write   Save a draft revision                                               │
-│  Open question     Cable clearance                             [Open finding]          │
-│  Evidence          CadQuery outputs and input manifest          [View hashes]          │
-│                                                                                        │
-│  [Request evidence]              [Reject]                 [Approve draft save]         │
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│  Project activity                                                                      │
-│  14:02  CAD agent submitted proposal          14:01  Digital fit run recorded          │
-└────────────────────────────────────────────────────────────────────────────────────────┘
+┌ FieldDeck / Draft A / Agent activity ──────────────────────── [Workshop] [All tasks] ┐
+│ 14:02  CAD via MCP · Fit report attached [Open]      14:05  Harness · Needs input    │
+├──────────────────────────────────────────────────────────────────────────────────────┤
+│ Request  Run wiring check on Draft A                  Expected base r12 · current r12│
+│ Reads    Draft A harness and candidate part record    [Inspect inputs and hashes]    │
+│ Writes   One diagnostic report on Draft A             [Inspect scope and coverage]   │
+│ Open     Candidate pinout source missing              [Request from owner]           │
+│ [Authorize this run]      [Return with narrower scope]      [Decline]                │
+└──────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-## Build first
+## Phone at the bench
 
-Ship one end-to-end Fielddeck display review. Reuse the existing study/comparison UI, substitution assessment, findings and project event stream. Build the shared address, saved-revision strip, alternate-to-diff path and one review card for proposing the candidate. A useful acceptance check is whether the owner can open the saved base, jump from the alternate to its evidence, find an unresolved dependency, and reopen the exact decision from a phone. Also exercise a stale proposal after a competing save.
+Open the same finding from a timestamped link, adapting Foxglove’s sharing and AllSpice’s anchored snippets. Stack before/after, show a source crop, and stage donor photos or readings with unit, method and provenance for review. Inspect the full scope before any approval. Offer **Resume on desktop** when the diff needs a larger view. [Advanced patterns][advanced]
 
-Stable cross-revision IDs and dependency coverage are the largest risks. Start with explicit mappings from the available manifests and let gaps show. Event noise can bury decisions. Group routine progress and keep pending decisions visible. Viewer load and embedded tool output are separate risks. Start with existing artifact previews and isolate external HTML. Add live agent controls and a second, dissimilar workflow with KiCad and wiring before generalizing the workbench.
+```text
+┌──────────────────────────────────────┐
+│ FieldDeck / Draft A / Cable ①        │
+│ Bend radius    ? unknown             │
+│ [Source crop] [Coverage]             │
+│ [Stage photo or reading]             │
+├──────────────────────────────────────┤
+│ Wiring check · approval requested    │
+│ [Inspect exact scope]                │
+│ [Resume on desktop]                  │
+└──────────────────────────────────────┘
+```
+
+## Patterns to leave out
+
+Obsidian’s global graph and growth animation obscure the short dependency path a decision needs. Figma-style participant cursors and viewport following add distraction and sync cost. Linear-style thought rows add noise to receipts. Foxglove-style semantic search earns a place only with an explained match and exact filters. Defer a general palette and layout editor until useful verbs and panels exist. Keep CADAM-style slider results explicitly assumed and require an explicit run for new evidence. Cursor-style parallel panes waste space when candidates lack the same evidence. Skip decorative transitions and simulated playback of static revisions. Zoo’s reduced animations and the distinction between a recorded sample and a saved snapshot both favor immediate, legible state changes. Altium BOM Portal’s aggregate health score can conceal a blocker, and AllSpice-style suppression can hide an unresolved gate. [Advanced patterns][advanced] · [Hardware conventions][hardware]
+
+## What I took from the others / what I disagree with
+
+I took presets and phone capture from Argon. I’d cap the default at two instruments to keep artifacts legible and reserve formal change orders for released scope so routine agent checks stay lightweight. I took Astra’s restorable trail and explicit unlinked endpoint. When fit and wiring depend on each other, I’d pin both views so the engineer can follow a finding without retracing the trail. [Argon](gemini-argon.md) · [Astra](codex-gpt-6.2-astra.md)
+
+## Ranked first build
+
+1. Reuse the FieldDeck study and substitution UI for linked compare, coverage, stale evidence and exact deep links. Include an intentionally unmapped path.
+2. Add receipt tracks, scoped MCP approval and phone triage. Exercise competing drafts, a stale approval and reconnect. Surface existing akcli/kdif receipts in the same review.
+3. Add recorded PyBullet playback with a trace-to-finding jump. Extend the linked bench to KiCad, wiring and a repair gate, then expose the sealed evaluation ledger.
+4. Compare the direct BOM entry and Projects entry on FieldDeck and an unavailable SO-ARM100 servo. Measure time to a justified decision, missed dependencies and unsupported claims. Missing evidence can be the correct result. [GitHub signals][signals]
+
+[advanced]: ../design-research/ADVANCED_INTERFACE_PATTERNS_20261118.md
+[hardware]: ../design-research/HARDWARE_TOOL_UI_CONVENTIONS_20261118.md
+[signals]: ../design-research/FRONTEND_GITHUB_SIGNALS_20261118.md
