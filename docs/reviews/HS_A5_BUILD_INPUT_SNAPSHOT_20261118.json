@@ -1,0 +1,383 @@
+{
+  "captured_at_utc": "2026-11-18T15:43:22.365655+00:00",
+  "active_source_commit": "ede2f538fd1ca3a02645b130e1b92337bda9a91b",
+  "base_review_commit": "8fa91d3bc55f6b892011adcaf3afb6f5bc3f4b75",
+  "working_files": [
+    {
+      "path": "apps/splice-ui/README.md",
+      "sha256": "0d140f0adf44f09e1f0fa75ac4efbbbf4d4ca4cc3726a93895fac8457a52594a",
+      "bytes": 4244
+    },
+    {
+      "path": "apps/splice-ui/src/App.integration.test.jsx",
+      "sha256": "d8a128a233fcf942706389fbe676bea770e55784b16ca737d0d1010911401ed7",
+      "bytes": 4325
+    },
+    {
+      "path": "apps/splice-ui/src/App.jsx",
+      "sha256": "dba56433cc93f507f19de0d3bf1bcc0dd4c5cec2928d85c7032cfc5aa75ca010",
+      "bytes": 29009
+    },
+    {
+      "path": "apps/splice-ui/src/nav.js",
+      "sha256": "47e68be6844805c86d263fe4b38e8a318daba139f0c7474c635e3def9a881ddb",
+      "bytes": 510
+    },
+    {
+      "path": "apps/splice-ui/src/projectSession/DigitalBriefForm.jsx",
+      "sha256": "f048adaf718dcae742438a8cac4fdce179fa4feca493377af29ac726bbb16c61",
+      "bytes": 1649
+    },
+    {
+      "path": "apps/splice-ui/src/projectSession/DigitalStudyLibrary.jsx",
+      "sha256": "31b3e748d36ff73b28248d5e9bc3ce55943f2792f20bc2cc1ad32f9a0b7a07da",
+      "bytes": 4503
+    },
+    {
+      "path": "apps/splice-ui/src/projectSession/DigitalStudyLibrary.test.jsx",
+      "sha256": "032c48a0f409736912e4afb6b538430b79f63b5938f0b77d33911f8cc517e906",
+      "bytes": 3100
+    },
+    {
+      "path": "apps/splice-ui/src/projectSession/DigitalStudyPanel.jsx",
+      "sha256": "1835f882583689a8b2e6b2c3c44afb3ee159ad0ad299c4773e7dd0234d1f2578",
+      "bytes": 18472
+    },
+    {
+      "path": "apps/splice-ui/src/projectSession/DigitalStudyPanel.test.jsx",
+      "sha256": "aae132410b71f9a9f75ffafc061de6410b4a4e62a579910990ee80df8c4453fc",
+      "bytes": 6406
+    },
+    {
+      "path": "apps/splice-ui/src/projectSession/FieldDeckDisplayComparison.jsx",
+      "sha256": "c96613e09f5ede5b107f6a1d0925038903e6bb8858d121f73592aa33ba45b426",
+      "bytes": 5842
+    },
+    {
+      "path": "apps/splice-ui/src/projectSession/FieldDeckDisplayComparison.test.jsx",
+      "sha256": "9525f7d03a34e4ba4d176350df35fb6617448d2484e0f3197a7b24e8ee7b39e5",
+      "bytes": 1437
+    },
+    {
+      "path": "apps/splice-ui/src/projectSession/digitalStudy.css",
+      "sha256": "036769d61b944dc78d271d3c3cfb50cb1d9b371c76115da783fffab7c3f5530e",
+      "bytes": 6469
+    },
+    {
+      "path": "apps/splice-ui/src/projectSession/digitalStudyApi.js",
+      "sha256": "d62ad9c956829b524513a4aa1c1740a08951aae9d5d5f4cf1787c9d1f8f4a3b4",
+      "bytes": 1709
+    },
+    {
+      "path": "apps/splice-ui/src/projectSession/digitalStudyLabels.js",
+      "sha256": "f27f6dd87a8c4833b04dae048da4c8e62b6e2b2a4b5606bd82f58e196b411615",
+      "bytes": 335
+    },
+    {
+      "path": "apps/splice-ui/src/projectSession/projectPersistence.js",
+      "sha256": "79f2eb4adb5717e162b59341bb6a3e904e6a3f83cec473f0fc6d8611fd17c8dc",
+      "bytes": 9782
+    },
+    {
+      "path": "apps/splice-ui/src/styles.css",
+      "sha256": "c850621b0abd37a6eee8eadeb1e1fa09bc16c923aff0c7887efda80252a596a4",
+      "bytes": 42469
+    },
+    {
+      "path": "docs/ENGINE.md",
+      "sha256": "4bdb60a1d73e7f19bce683642e788df46366bb41bba4226259a50085ec9a9d14",
+      "bytes": 38768
+    },
+    {
+      "path": "docs/FRONTEND_GITHUB_SIGNALS_20261118.md",
+      "sha256": "7ebe0b0476b673de49dac79aa71ad22639ae2f52fed08189336cdcbef5267391",
+      "bytes": 15716
+    },
+    {
+      "path": "docs/OPUS_FRONTEND_DESIGN_BRIEF.md",
+      "sha256": "d98a887ededc51f00cfb056d4b4f5486c627d4cd3c1a684a675c4c6388dd1310",
+      "bytes": 4845
+    },
+    {
+      "path": "docs/research/HS_ENGINEERING_VALUE_20261118.md",
+      "sha256": "4e4b96dcfbb3949b06578cb5f56f7a88e7936c665b34097498b44fe21cf7ab28",
+      "bytes": 6014
+    },
+    {
+      "path": "projects/cyberdeck-real-trial-20261020/display_swap/integration-trial/FieldDeck-5-integration.zip",
+      "sha256": "90194dd6384afdaae8ec9543a1ec75a309670b1f3592b3980a86ba54bd9697c9",
+      "bytes": 2894173
+    },
+    {
+      "path": "projects/cyberdeck-real-trial-20261020/display_swap/integration-trial/README.md",
+      "sha256": "0f1ede4a32836a8ff65b6f4935fb4281780081b46443044e824058a79290f7c0",
+      "bytes": 4472
+    },
+    {
+      "path": "projects/device-integration-trials/InteractiveHtmlBom-LICENSE",
+      "sha256": "e959bda26bfa9254a43968cb96298f94aa672d3a30726d42914a4cd3bc83dd86",
+      "bytes": 1062
+    },
+    {
+      "path": "projects/device-integration-trials/README.md",
+      "sha256": "d74993a527ec5ed60dcbe5834ed51ea948e1ab1d12c7edaf6df422a1358587ca",
+      "bytes": 3900
+    },
+    {
+      "path": "projects/device-integration-trials/check_feather.py",
+      "sha256": "ef939eb1db5d1c67fa97366e301c4b792bb2e503854a25badee3a0bf6307fb09",
+      "bytes": 1756
+    },
+    {
+      "path": "projects/device-integration-trials/check_keyboard.py",
+      "sha256": "65bb52d0742d3d99b5d9480d1f5637cb3a4069b5f87be8f9ac1324204fc2eab5",
+      "bytes": 2234
+    },
+    {
+      "path": "projects/device-integration-trials/check_plotter.py",
+      "sha256": "4f2331693a7cb335d97c7f7e94fdeb703ffa7fbe39f97f9ecea0df38795303ca",
+      "bytes": 3296
+    },
+    {
+      "path": "projects/device-integration-trials/ender3-route-trial.zip",
+      "sha256": "f1a1fdf274d08075bbb849d29826e75ccc9cf4606eb59d09a583d54b06f988f7",
+      "bytes": 1571737
+    },
+    {
+      "path": "projects/device-integration-trials/f60-keyboard-assembly.html",
+      "sha256": "d24bc5eae8177ec46aea474c0e022431e40c2788907e8ebac9cf9ccebf7fa5af",
+      "bytes": 185873
+    },
+    {
+      "path": "projects/device-integration-trials/feather-check.json",
+      "sha256": "12c7b3c546f566f705b0d0425e08af4615e8f5e445a3b54a07f418082069e53a",
+      "bytes": 881
+    },
+    {
+      "path": "projects/device-integration-trials/keyboard-check.json",
+      "sha256": "c3159f26dea0615d92076e4f027551e034777290ea47a0f6f6c55305f8a93c05",
+      "bytes": 1103
+    },
+    {
+      "path": "projects/device-integration-trials/plotter-route.json",
+      "sha256": "4748174dd319bc1e7ac77232dba909a62ed1462042c16404b6481dd6e4763567",
+      "bytes": 662
+    },
+    {
+      "path": "projects/device-integration-trials/plotter-route.png",
+      "sha256": "baff3cf0d8ff91ec94e82eff7c416d77375aca45533f66e87f86d14ee520d523",
+      "bytes": 169148
+    },
+    {
+      "path": "projects/device-integration-trials/plotter_route.py",
+      "sha256": "43a3ca69d09c7f8b0e8dd2065deac99f8531e03b402504edbcf1393d1d5c6545",
+      "bytes": 1907
+    },
+    {
+      "path": "projects/device-integration-trials/prompt-only/README.md",
+      "sha256": "6ff7a06be510632e160ab2bc174dab9afd9df6a63316b7dd421677cd012bb73c",
+      "bytes": 1680
+    },
+    {
+      "path": "projects/device-integration-trials/prompt-only/cyberdeck-result.json",
+      "sha256": "ac294bcdc5e41b64d983c1c8fa7c5b8d3b07456776eaa966da343beb8b43db05",
+      "bytes": 1250
+    },
+    {
+      "path": "projects/device-integration-trials/prompt-only/flag-result.json",
+      "sha256": "7e9323736f17c0512884586ad84a6f8ed90ae824976dfb94b889a6aa925689fc",
+      "bytes": 3279
+    },
+    {
+      "path": "projects/device-integration-trials/prompt-only/sailboat-flag-preview.png",
+      "sha256": "c50dd057ba7921235b9e4d70ad46a17c8d903d63d78c977f5b1e8d6680dba7e0",
+      "bytes": 94661
+    },
+    {
+      "path": "projects/device-integration-trials/prompt-only/sailboat-flag.zip",
+      "sha256": "7cb0ae70fa83c1d750aae2305e61d37e84180427d766327c360242c1b507c07d",
+      "bytes": 1382665
+    },
+    {
+      "path": "projects/device-integration-trials/prompt-only/sailboat-preview.png",
+      "sha256": "d4d639be227eb2c33341453205837b91e7b88b40bf301110d716c8b4ce6762a9",
+      "bytes": 90802
+    },
+    {
+      "path": "projects/device-integration-trials/prompt-only/sailboat-result.json",
+      "sha256": "aba8d622a1227bda661ae38cdc123c79aa8ede6e23b624232ab389bd37b09a65",
+      "bytes": 2479
+    },
+    {
+      "path": "projects/device-integration-trials/prompt-only/sailboat-study.zip",
+      "sha256": "123759d5e3ef40f868a0b618913244988d6637216750ffeac49ae0ba5556ec25",
+      "bytes": 1379413
+    },
+    {
+      "path": "projects/device-integration-trials/prompt-only/towel-folder-result.json",
+      "sha256": "f4e671210ba81fbc0af217e07d8298be01009d5052b96c4008fae42df9ac9196",
+      "bytes": 547
+    },
+    {
+      "path": "projects/ender3-penplotter-digital/scripts/simulate.py",
+      "sha256": "226376a6dca509daea5b2a1aeb7f6c250c9067eaa81a06c7b85bbe3736f9a439",
+      "bytes": 9076
+    },
+    {
+      "path": "projects/ender3-penplotter-digital/scripts/verify.py",
+      "sha256": "c323f466fbcec753c57a52e24e108c8bd20267144d1cf92d90b08ed17a040408",
+      "bytes": 19341
+    },
+    {
+      "path": "projects/engineering-opportunity-portfolio/README.md",
+      "sha256": "4f2496a5bef35bde18348de4f8971549b2090b3ae271562db638928eecd07b95",
+      "bytes": 9637
+    },
+    {
+      "path": "projects/engineering-opportunity-portfolio/device-configurations.csv",
+      "sha256": "50a8be73aab9e032fc9fb42c78baba3c17633dd1e873455e4a465fad10725f03",
+      "bytes": 180363
+    },
+    {
+      "path": "projects/engineering-opportunity-portfolio/expanded-market-comparison.md",
+      "sha256": "1435f59319de736078a470a4dc77d533e3f3a9f8870cf68ce6f4fb7be8eb2f5d",
+      "bytes": 23464
+    },
+    {
+      "path": "projects/engineering-opportunity-portfolio/offer-comparison.csv",
+      "sha256": "5685cc33828340a77d0fb934ac35a5f70b05234406c2ff5b7777d573e12a616e",
+      "bytes": 7948
+    },
+    {
+      "path": "projects/engineering-opportunity-portfolio/product-index.md",
+      "sha256": "032b2587d62e71020482ee7dfcd75a7873c83feefb1c96da0304e58f811052f5",
+      "bytes": 14711
+    },
+    {
+      "path": "projects/pcb-inspection-nest/README.md",
+      "sha256": "ad767c717c127e29d9c77834024b15b49dc80b2a303ea0267c48da2eb3786cbd",
+      "bytes": 5593
+    },
+    {
+      "path": "projects/pcb-inspection-nest/boards.json",
+      "sha256": "82866158412bad2cb86ea3bf7fe8a80c4563ada7b4fe9b32ec49cd6fdb497349",
+      "bytes": 2120
+    },
+    {
+      "path": "projects/pcb-inspection-nest/build.py",
+      "sha256": "086c9cbd01dfbab4f8cf6de35a8ba20adc66a9e4e1803080194f2ead719cf835",
+      "bytes": 7395
+    },
+    {
+      "path": "projects/pcb-inspection-nest/inspection-nest-v0.2.zip",
+      "sha256": "e449a9ca9c9d045e31330d154239e0bf79b655cf4e7e0e8d7ef87ca08e6c183d",
+      "bytes": 639005
+    },
+    {
+      "path": "projects/pcb-inspection-nest/notices/feather-m4-express/README.md",
+      "sha256": "d3b0239eed9ad96f1bb7c4f39f8099039141fec2610efe426d9a8970ee8694c5",
+      "bytes": 2013
+    },
+    {
+      "path": "projects/pcb-inspection-nest/notices/feather-m4-express/license.txt",
+      "sha256": "1f63e1f4676a433423b2c2ff1ccd9e80093f341f10b81f0ac0106342bc7bbe89",
+      "bytes": 22597
+    },
+    {
+      "path": "projects/pcb-inspection-nest/pack.py",
+      "sha256": "4fa7d0f1d3900e32686221dd2917071074c7278266a0ca22ab65a6d573b53cf6",
+      "bytes": 7968
+    },
+    {
+      "path": "projects/pcb-inspection-nest/preview.png",
+      "sha256": "6ed08a7bd7c50e40a11abdc467e093a7bf8803e78c52679bfc32b15015c25b61",
+      "bytes": 216200
+    },
+    {
+      "path": "scripts/preview_project_bench.py",
+      "sha256": "cc5654f910061d36ea50564f80af15236833014c6e5e9fdf6b34280df3238626",
+      "bytes": 4036
+    },
+    {
+      "path": "scripts/verify_frontend_showcase_browser_001.mjs",
+      "sha256": "f988c3c0d30d520d2230fad3be6708d4d1360e63ab385a00b2158ec54d493a85",
+      "bytes": 2634
+    },
+    {
+      "path": "scripts/verify_sort_workcell_frontend_001.mjs",
+      "sha256": "d86eb06df66dff45e1f96c3f4454b0e965dcce06c8405a525852dda21c989941",
+      "bytes": 2249
+    },
+    {
+      "path": "scripts/verify_upstream_openarm_browser_001.mjs",
+      "sha256": "b8fff17756b7ae285cde1668e4c8cfda2ec3253f5a5dc1abfb69a29ecf701ad1",
+      "bytes": 6408
+    },
+    {
+      "path": "src/hardware_splicer/digital_brief.py",
+      "sha256": "079fd92d47f8887bdff0a001548d20692e3b053d9c34a472ef936035e5486b1c",
+      "bytes": 5631
+    },
+    {
+      "path": "src/hardware_splicer/digital_cases.py",
+      "sha256": "dec81498379d321dbc8c9666c0b73177e1cabda9fd1a15bc614740b706c5c0f7",
+      "bytes": 24047
+    },
+    {
+      "path": "src/hardware_splicer/digital_engine.py",
+      "sha256": "d43cf0598d28a42b87980f037ce96ce50bafe7c6d8ab8963d9db0ad6b123f111",
+      "bytes": 22756
+    },
+    {
+      "path": "src/hardware_splicer/digital_engine_cli.py",
+      "sha256": "596239aeae920e2f67ed59a7bf4802e1f5dc99551aa01b93880eef0fbd936a2b",
+      "bytes": 7338
+    },
+    {
+      "path": "src/hardware_splicer/digital_project.py",
+      "sha256": "b5040511f6c14b43f7d45125b8e9f42a02d0d4375f6e70984744326b55ddaddd",
+      "bytes": 28873
+    },
+    {
+      "path": "src/hardware_splicer/digital_project_api.py",
+      "sha256": "5fb8ea999684e279cd4432c63c3fc25f4d3f4fc5f32af9a88b29150c55be3e9a",
+      "bytes": 6075
+    },
+    {
+      "path": "src/hardware_splicer/integrations/copilot_cli_text_client.py",
+      "sha256": "4d2889d8b9e03f01ed795d419f3539c958c2c4cf3e87479dae5eeb298cee9741",
+      "bytes": 3774
+    },
+    {
+      "path": "src/hardware_splicer/kicad_registered_source_check.py",
+      "sha256": "9591b4ff9baec9426beb8b8e2de15293839fc080a51590120edde782a7191fb3",
+      "bytes": 5133
+    },
+    {
+      "path": "src/hardware_splicer/stored_source_parser.py",
+      "sha256": "afabeaa10c97ced6acad8721cc2eee4a91179c13340cea074b09f201bdc97539",
+      "bytes": 16137
+    },
+    {
+      "path": "tests/test_copilot_cli_text_client.py",
+      "sha256": "7f3ccad76786daba023a21ae472740dc1217b58faaa04b8140b70e615cd7106c",
+      "bytes": 2966
+    },
+    {
+      "path": "tests/test_digital_brief.py",
+      "sha256": "db6b76363143449fc51fe3ec768498498add3269e2f5dd3a3bf71e4a1b691897",
+      "bytes": 3888
+    },
+    {
+      "path": "tests/test_digital_registered_cases.py",
+      "sha256": "ebdfdac90fc4322fe6e3ec5db62498e2f12fa62e601ad8a1efefe2aa684c0b36",
+      "bytes": 15989
+    },
+    {
+      "path": "tests/test_kicad_registered_source_check.py",
+      "sha256": "c3f8fccf1b42a2ce9adc8cbdb00fedf96b8fc1333c86d0386478405ae0fe5b60",
+      "bytes": 1337
+    }
+  ],
+  "scope": "Full repository review snapshot plus current nonignored working files, isolated for an actual HS build. Source checkout and index preserved; no environment or credential files copied."
+}

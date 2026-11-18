@@ -1,0 +1,45 @@
+{
+  "project": "A5 electronics inspection-card plotter",
+  "task": "Use Hardware Splicer's full project workflow to create, revise, verify and export a useful original-Ender-3 conversion and its inspection-card artwork.",
+  "donor": {
+    "reference": "Original Creality Ender-3",
+    "owned_inventory": 0,
+    "source_commit": "88c7758cea9d0d00a54fdb238bedb3b33425f409"
+  },
+  "baseline": {
+    "paper_width_mm": 180,
+    "paper_height_mm": 180,
+    "drawing_width_mm": 100,
+    "drawing_height_mm": 80,
+    "pen_diameter_mm": 10,
+    "pen_lift_mm": 3
+  },
+  "final": {
+    "paper_width_mm": 210,
+    "paper_height_mm": 148,
+    "drawing_width_mm": 190,
+    "drawing_height_mm": 128,
+    "pen_diameter_mm": 12,
+    "pen_lift_mm": 3
+  },
+  "acceptance": [
+    "Preserve a closed outer border, two blank header fields, four left checklist rows with one empty checkbox each, and a clear right board-sketch area.",
+    "Preserve the exact source artwork between baseline and A5 revision.",
+    "Produce reopened valid editable adapter/clamp/parking-plate STEP and watertight STL, plus a whole-device assembly and render.",
+    "Final STEP and GLB contain the requested 210 by 148 mm paper geometry.",
+    "Both clamp saddles have 6.6 mm nominal radius for the 12 mm pen with the existing 1.2 mm diametral allowance.",
+    "Retain the manufacturer's 14 mm M3 mounting pitch and source-bound tool offset.",
+    "The centered 190 by 128 mm viewport has at least 10 mm margins on all four A5 edges.",
+    "Strictly decoded emitted tool and controller motion stays within documented digital bounds; all ink stays within paper and viewport.",
+    "Pen-up travel uses the requested 3 mm lift and exported artwork matches the archived drawing.",
+    "Artifact integrity and engineering requirements both pass independently; physical motion is not performed."
+  ],
+  "deliverables": [
+    "Baseline and final HS study ZIPs",
+    "Final editable STEP and STL parts",
+    "SVG and simulated G-code",
+    "Native replay and device previews",
+    "Source/BOM/assembly/validation documents",
+    "Comparison, native audit and independent delivery checks"
+  ]
+}

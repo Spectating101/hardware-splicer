@@ -1,0 +1,7 @@
+{
+  "error": {
+    "message": "Design brief provider unavailable: agy_nonzero_exit",
+    "type": "BriefProviderError"
+  },
+  "ok": false
+}

@@ -1,0 +1,7 @@
+{
+  "error": {
+    "message": "The configured Copilot text provider has reached its quota. Try again when quota is available or configure another HS text provider.",
+    "type": "BriefProviderError"
+  },
+  "ok": false
+}

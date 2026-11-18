@@ -12,6 +12,7 @@ from . import digital_project as digital
 from .digital_cases import DEFAULT_CASE
 from .project_api import _project_error
 from .digital_engine import DigitalStudyEngine, DigitalRuntimeUnavailable
+from .digital_brief import BriefProviderError
 
 
 class CreateDigitalProject(BaseModel):
@@ -26,6 +27,13 @@ class DigitalRunRequest(BaseModel):
     change_request: str = Field(default='', max_length=200)
     requirements: dict[str, Any] = Field(default_factory=dict)
     request_id: UUID = Field(default_factory=uuid4)
+
+
+class DigitalBriefRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    brief: str = Field(min_length=1, max_length=4000)
+    project_id: str | None = Field(default=None, min_length=1, max_length=128)
+    base_revision: int | None = Field(default=None, ge=1, strict=True)
 
 
 def create_digital_project_router(store, backend):
@@ -52,6 +60,15 @@ def create_digital_project_router(store, backend):
     @router.get('/v1/digital/cases')
     def registered_cases():
         return engine.cases()
+
+    @router.post('/v1/digital/prompt')
+    def build_from_prompt(request: DigitalBriefRequest):
+        try:
+            return engine.from_prompt(**request.model_dump())
+        except (BriefProviderError, DigitalRuntimeUnavailable) as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
+        except Exception as exc:
+            raise _project_error(exc) from exc
 
     @router.get('/v1/projects/{project_id}/digital')
     def get_study(project_id: str, revision: int | None = Query(default=None, ge=1)):

@@ -15,6 +15,33 @@ import trimesh
 from common import ROOT, read_requirements, write_json, sha256
 
 
+def verified_paper_bounds(layout, glb, req):
+    """Read the sheet independently from both delivered world-space models."""
+    candidates=[]
+    for solid in layout.Solids():
+        b=solid.BoundingBox()
+        if abs(b.zmin)<1e-6 and abs(b.zmax-.1)<1e-6:
+            candidates.append(solid)
+    if len(candidates)!=1:
+        raise ValueError('A single 0.1 mm paper sheet must be present in the exported STEP')
+    paper=candidates[0];b=paper.BoundingBox()
+    bounds=np.array([[b.xmin,b.ymin,b.zmin],[b.xmax,b.ymax,b.zmax]])
+    pw,ph=req['paper_width_mm'],req['paper_height_mm']
+    expected=np.array([[(235-pw)/2,(235-ph)/2,0],[(235+pw)/2,(235+ph)/2,.1]])
+    if not np.allclose(bounds,expected,atol=.00001,rtol=0) or abs(paper.Volume()-pw*ph*.1)>.001:
+        raise ValueError('Delivered STEP paper dimensions, position or volume differ from the request')
+    meshes=[]
+    for node in glb.graph.nodes_geometry:
+        transform,name=glb.graph[node]
+        if name.startswith('paper_'):
+            m=glb.geometry[name].copy();m.apply_transform(transform);meshes.append(m)
+    if len(meshes)!=1 or not np.allclose(meshes[0].bounds,bounds,atol=.0001,rtol=0):
+        raise ValueError('Delivered GLB paper bounds disagree with independently reopened STEP')
+    if abs(float(meshes[0].volume)-paper.Volume())>max(.001,paper.Volume()*.0001):
+        raise ValueError('Delivered GLB paper volume disagrees with independently reopened STEP')
+    return bounds
+
+
 def main():
     req=read_requirements();checks=[];metrics={}
     def check(name,passed,detail):checks.append(dict(name=name,passed=bool(passed),detail=detail))
@@ -31,6 +58,10 @@ def main():
         check('source_license','GNU GENERAL PUBLIC LICENSE' in (ROOT/'sources/LICENSE').read_text() and 'Version 3' in (ROOT/'LICENSE').read_text(),'Full license accompanies new work and manufacturer sources')
         config=(ROOT/'sources/Configuration.h').read_text()
         check('stock_temperature_protection_evidence',all(re.search(r'^#define '+key+r'\s+'+val+r'\s*$',config,re.M) for key,val in [('TEMP_SENSOR_0','1'),('TEMP_SENSOR_BED','1'),('HEATER_0_MINTEMP','5'),('BED_MINTEMP','5')]) and '#define THERMAL_PROTECTION_HOTENDS' in config and '#define THERMAL_PROTECTION_BED' in config,'Both stock temperature sensors required at ambient above5C; protection unchanged; boot not tested')
+        check('manufacturer_travel_limits',all(re.search(r'^#define '+key+r'\s+'+value+r'\s*$',config,re.M)
+              for key,value in [('X_BED_SIZE','235'),('Y_BED_SIZE','235'),('X_MIN_POS','0'),('Y_MIN_POS','0'),
+                                ('X_MAX_POS','X_BED_SIZE'),('Y_MAX_POS','Y_BED_SIZE')]),
+              'Pinned manufacturer configuration defines a 235 mm bed and 0..235 mm XY travel')
         interface=json.loads((ROOT/'sources/interface.json').read_text())
         vendor=cq.importers.importStep(str(ROOT/'sources/E plate.step')).val()
         axes=[]
@@ -78,6 +109,8 @@ def main():
         layout=cq.importers.importStep(str(ROOT/'exports/plotter.step')).val()
         glb=trimesh.load(ROOT/'exports/plotter.glb',force='scene')
         check('full_layout_exports',layout.isValid() and len(layout.Solids())>=20 and len(glb.geometry)>=20,'STEP/GLB reopened; detailed mount plus >=20 named bodies')
+        paper_bounds=verified_paper_bounds(layout,glb,req)
+        check('requested_paper_geometry',True,'Reopened STEP and transformed GLB agree with requested centered sheet dimensions and solid volume')
         # Reopen exported GLB in world space, compare total volume to independent STEP read.
         worldmesh=glb.to_geometry();meshvol=float(worldmesh.volume)
         check('GLB_STEP_volume',abs(meshvol-layout.Volume())/layout.Volume()<.003,'World-space GLB volume agrees with full STEP within 0.3%')
@@ -117,7 +150,9 @@ def main():
             elif cmd in ('M104','M140'):
                 if words.get('S')!=0:raise ValueError('Nonzero heater request')
             elif cmd not in ('M107','M400'):raise ValueError('Unsupported command '+cmd)
-        check('Gcode_strict_subset',len(rows)>100 and 'G28' not in code and not re.search(r'\bE-?\d',code),'Metric absolute moves; zero heater commands; no extrusion, homing, machine I/O')
+        drawing_file = ROOT/'sources/prompt-drawing.json'
+        enough_rows = bool(rows) if drawing_file.is_file() else len(rows)>100
+        check('Gcode_strict_subset',enough_rows and 'G28' not in code and not re.search(r'\bE-?\d',code),'Metric absolute moves; zero heater commands; no extrusion, homing, machine I/O')
         saved=list(csv.DictReader((ROOT/'simulation/trajectory.csv').open()))
         csvmatch=len(rows)==len(saved)
         for (line,start,end,draw),stored in zip(rows,saved):
@@ -126,14 +161,36 @@ def main():
         csvmatch &= all(abs(float(s['feed_mm_min'])-f)<1e-8 and abs(float(s['duration_s'])-t)<1e-7 for s,(f,t) in zip(saved,durations))
         check('Gcode_CSV_roundtrip',csvmatch,'Independent G-code positions match every stored CSV segment')
         offset=interface['pen_offset_from_nozzle_xy_mm'];expected=[]
+        # Recompute the uniform source fit independently, without importing the author mapper.
+        canvas_scale=min(req['drawing_width_mm']/100,req['drawing_height_mm']/80)
         for node in ET.parse(ROOT/'simulation/example.svg').getroot().iter():
             if node.tag.split('}')[-1]!='polyline':continue
             vals=[float(x) for x in re.split(r'[\s,]+',node.attrib['points'].strip())]
-            pts=[(117.5+(vals[i]-50)*req['drawing_width_mm']/100,
-                  117.5+(40-vals[i+1])*req['drawing_height_mm']/80) for i in range(0,len(vals),2)]
+            if len(vals)<4 or len(vals)%2 or not all(math.isfinite(v) for v in vals):
+                raise ValueError('Malformed source drawing polyline')
+            if any(not 0<=x<=100 or not 0<=y<=80 for x,y in zip(vals[::2],vals[1::2])):
+                raise ValueError('Source drawing exceeds its declared logical viewport')
+            pts=[(117.5+(vals[i]-50)*canvas_scale,
+                  117.5+(40-vals[i+1])*canvas_scale) for i in range(0,len(vals),2)]
             expected.extend(zip(pts[:-1],pts[1:]))
+        if drawing_file.is_file():
+            authored=[]
+            for stroke in json.loads(drawing_file.read_text()):
+                pts=[(117.5+(x-50)*canvas_scale,
+                      117.5+(y-40)*canvas_scale) for x,y in stroke]
+                authored.extend(zip(pts[:-1],pts[1:]))
+            check('prompt_artwork_roundtrip',bool(authored) and len(authored)==len(expected)
+                  and np.allclose(expected,authored,atol=.00011,rtol=0),
+                  'SVG segments trace the archived prompt artwork')
         ink=[([[p[0]+offset[0],p[1]+offset[1]] for p in (start,end)]) for _,start,end,draw in rows if draw]
         check('SVG_Gcode_geometric_roundtrip',len(ink)==len(expected) and np.allclose(ink,expected,atol=.00011),'Every vector pen-down segment agrees after offset and scaling')
+        if not ink:raise ValueError('The exported drawing contains no ink segments')
+        ink_xy=np.array(ink).reshape(-1,2)
+        ink_paper_margin=float(min((ink_xy-paper_bounds[0,:2]).min(),(paper_bounds[1,:2]-ink_xy).min()))
+        half=np.array([req['drawing_width_mm'],req['drawing_height_mm']])/2
+        ink_viewport_margin=float(min((ink_xy-(117.5-half)).min(),((117.5+half)-ink_xy).min()))
+        check('emitted_ink_paper_margin',ink_paper_margin>=10-.00011,'Every decoded ink endpoint leaves 10 mm inside the delivered paper; 0.00011 mm serialization tolerance')
+        check('emitted_ink_viewport_containment',ink_viewport_margin>=-.00011,'Decoded ink stays inside the requested source viewport; affine segments are bounded by their endpoints')
         drawlength=sum(math.dist(a,b) for a,b in ink)
         badtravel=sum(math.dist(start[:2],end[:2])>1e-8 and not draw and min(start[2],end[2])<req['pen_lift_mm']-1e-6 for _,start,end,draw in rows)
         check('requested_pen_up_lift',badtravel==0,'All non-drawing XY motion holds current requested Z lift')
@@ -160,12 +217,23 @@ def main():
         if len(parking_matches)!=1:raise ValueError('Parking plate not uniquely found in exported layout')
         parking_frame_z=parking_matches[0].BoundingBox().zmax-shapes['hotend_parking_plate'].BoundingBox().ymax
         parked_z=parking_frame_z-30-(centers[0][1]-interface['original_nozzle_tip_v_mm'])
+        pw,ph=(paper_bounds[1]-paper_bounds[0])[:2]
+        paper_margin=float(min(paper_bounds[0,:2].min(),(235-paper_bounds[1,:2]).min()))
+        drawing_paper_x=float((pw-req['drawing_width_mm'])/2)
+        drawing_paper_y=float((ph-req['drawing_height_mm'])/2)
+        viewport_controller_margin=float(min(value for size,delta in zip(
+            (req['drawing_width_mm'],req['drawing_height_mm']),actual_offset)
+            for value in (117.5-size/2-delta,235-(117.5+size/2-delta))))
         expected_cons={
             'manufacturer_mount_pitch':(pitch,14,abs(pitch-14)<1e-6),
             'donor_interference':(interference,.001,interference<.001),
             'bolt_engagement':(engagement,3,engagement>=3),
             'beam_proxy':(delta,.3,delta<=.3),
-            'bed_limited_drawing_width':(req['drawing_width_mm'],140,req['drawing_width_mm']<=140),
+            'bed_limited_drawing_width':(req['drawing_width_mm'],190,req['drawing_width_mm']<=190),
+            'paper_on_bed':(paper_margin,0,paper_margin>=0),
+            'drawing_paper_margin_x':(drawing_paper_x,10,drawing_paper_x>=10),
+            'drawing_paper_margin_y':(drawing_paper_y,10,drawing_paper_y>=10),
+            'viewport_controller_travel':(viewport_controller_margin,0,viewport_controller_margin>=0),
             'bed_limited_drawing_height':(req['drawing_height_mm'],140,req['drawing_height_mm']<=140),
             'parking_tnut_profile_fit':(nut_overlap,.001,nut_overlap<.001),
             'parking_hotend_clearance':(parked_z-req['pen_lift_mm'],200,parked_z-req['pen_lift_mm']>200),
@@ -174,6 +242,8 @@ def main():
             'motion_controller_travel':(ctrlmargin,0,ctrlmargin>=0),
             'motion_pen_up_travel':(badtravel,0,badtravel==0),
             'motion_pen_lift_clearance':(req['pen_lift_mm']-1,1,req['pen_lift_mm']>=2),
+            'motion_ink_paper_margin':(ink_paper_margin,10,ink_paper_margin>=10-.00011),
+            'motion_ink_in_viewport':(ink_viewport_margin,0,ink_viewport_margin>=-.00011),
             'motion_Z_travel':(float(pts[:,2].max()),req['pen_lift_mm'],pts[:,2].min()>=0 and pts[:,2].max()<=req['pen_lift_mm']+1e-6)}
         matching=set(expected_cons)=={c['id'] for c in cons}
         for c in cons:
@@ -188,7 +258,12 @@ def main():
                 c=sim_cons.get(key[7:],{})
                 simmatching &= abs(c.get('actual',float('inf'))-a)<.001 and c.get('limit')==l and c.get('passed')==bool(p)
         check('simulation_constraints_recomputed',simmatching and sim['requirements_met']==all(p for k,(a,l,p) in expected_cons.items() if k.startswith('motion_')),'Motion requirement satisfaction recomputed separately')
-        actual.update({'mount_pitch_mm':pitch,'mount_boss_front_mm':7.,'mount_bolt_engagement_mm':engagement,
+        actual.update({'source_canvas_scale_mm_per_unit':canvas_scale,
+            'source_canvas_width_mm':100*canvas_scale,'source_canvas_height_mm':80*canvas_scale,
+            'paper_width_mm':float(pw),'paper_height_mm':float(ph),'paper_bed_margin_mm':paper_margin,
+            'drawing_paper_margin_x_mm':drawing_paper_x,'drawing_paper_margin_y_mm':drawing_paper_y,
+            'viewport_controller_margin_mm':viewport_controller_margin,
+            'ink_paper_margin_mm':ink_paper_margin,'ink_viewport_margin_mm':ink_viewport_margin,'mount_pitch_mm':pitch,'mount_boss_front_mm':7.,'mount_bolt_engagement_mm':engagement,
             'printed_mass_g_at_1_27_g_cm3':sum(s.Volume() for s in shapes.values())*.00127,
             'plate_to_adapter_airgap_mm':ab.zmin-2.5,'pen_tip_to_clamp_mm':ab.ymin-interface['pen_tip_v_mm'],
             'beam_proxy_deflection_mm_at_2N':delta,'clamp_open_gap_mm':cb.zmin-ab.zmax,

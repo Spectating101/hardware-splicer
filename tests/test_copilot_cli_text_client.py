@@ -30,6 +30,14 @@ def test_invalid_json_fails_closed(monkeypatch):
     assert got['error']=='copilot_cli_invalid_json'
 
 
+def test_streamed_quota_failure_is_reported_even_when_shell_exit_succeeds(monkeypatch):
+    events = [{'type': 'session.start'}, {'type': 'session.error', 'data': {'message': 'Monthly quota exceeded'}}]
+    monkeypatch.setattr(bridge.shutil, 'which', lambda _: '/fake')
+    monkeypatch.setattr(bridge.subprocess, 'run', lambda args, **kw: CompletedProcess(
+        args, 0, '\n'.join(map(json.dumps, events)), ''))
+    assert bridge.call_copilot_cli_chat('test', json_mode=True)['error'] == 'copilot_cli_quota_exhausted'
+
+
 def test_binary_allowlist_prevents_arbitrary_commands(monkeypatch):
     monkeypatch.setenv('HARDWARE_SPLICER_COPILOT_CLI_BINARY','evil-sudo')
     assert not bridge.copilot_cli_configured()

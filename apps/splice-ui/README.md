@@ -33,11 +33,25 @@ Open http://127.0.0.1:5178
 
 ## Consumer flow
 
-1. **Home** — value prop + “Start a project” / “Try an example”
+1. **Projects** opens the saved project list. Search by name, reopen a revision, or choose **New project** to enter a build goal. **Design library** holds the runnable studies, reference assemblies, and examples.
 2. **Wizard** — goal in plain English → clarifier questions → salvage vs new → parts list → donor fixture → power → review
 3. **Async build** — `POST /v1/jobs/splice-build` with progress polling (30–90s KiCad compile)
 4. **Results** — Overview · Parts list · Wiring · Build steps · Safety gates · Bench
 5. **Recent builds** — sidebar history + download zip
+
+## Product interface direction
+
+The next design target is a workspace for one build. Keep the project name and revision visible as the user moves between the assembly, parts list, connections, and checks. A selection should follow the user across these views. The current app implements the project list, library, intake, and individual engineering views. The shared selection and change-review workflow below is proposed.
+
+| User action | Pattern to adapt |
+|---|---|
+| Select a part in the assembly and find its exact parts-list row | Link geometry and table selection in both directions. [InteractiveHtmlBom](https://github.com/openscopeproject/InteractiveHtmlBom/wiki/Usage) |
+| Choose between a salvaged part and an orderable one | Show donor identity, quantity and condition alongside the manufacturer's part number and supplier offer. [InvenTree stock items](https://docs.inventree.org/en/stable/stock/) · [Flux project tables](https://docs.flux.ai/reference/project-tables) |
+| Connect a replacement inside the assembly | Keep attachment points visible while choosing a compatible connection. [Vention MachineBuilder](https://docs.vention.com/docs/inserting-and-connecting-parts) |
+| Ask the agent for a change | Pass the selected component and revision into the request so the user can point to what needs editing. [Zoo Design Studio](https://zoo.dev/docs/zoo-design-studio/features/ml-ai/zoodle/edit-parts) |
+| Decide whether to keep a variant | Show changes to the design and the corresponding simulation results. [Onshape Compare](https://cad.onshape.com/help/Content/Document/compare.htm) · [SimScale run comparison](https://www.simscale.com/docs/post-processing/new-integrated-post-processor/) |
+
+A practical acceptance check is to open a project, select a component, choose a candidate from a donor or supplier, inspect the affected geometry and connections, and see which checks have fresh results. Repeat on a second device category using the same controls. Each saved revision should reopen with its part identities, source records, and results intact.
 
 ## API surface (UI)
 

@@ -1,0 +1,291 @@
+{
+  "baseline_sha256": "93428326edd47048714a6ef9892391ac0a3e9757e63ed0b5272a64e918ab1387",
+  "checker_sha256": "9db6e8f5b7ce9042085854a7bce5f01747cfdee7ae22a48c330dc8260d0d3e6f",
+  "controls": [
+    {
+      "candidate_sha256": "4d506dce11d030eaabfbb298c48f15ba1206c5485254190644c8b9b2e45e8980",
+      "checker_exit_code": 1,
+      "description": "Authentic180x180 baseline layout replaces final layout while A5 requirements remain unchanged.",
+      "independent_metrics": {
+        "artwork_uniform_scale_mm_per_unit": 1.6,
+        "carriage_intersection_mm3": 0.0,
+        "checkbox_dimensions_mm": [
+          {
+            "height_mm": 8.0,
+            "source_stroke": 3,
+            "width_mm": 8.0
+          },
+          {
+            "height_mm": 8.0,
+            "source_stroke": 5,
+            "width_mm": 8.0
+          },
+          {
+            "height_mm": 8.0,
+            "source_stroke": 7,
+            "width_mm": 8.0
+          },
+          {
+            "height_mm": 8.0,
+            "source_stroke": 9,
+            "width_mm": 8.0
+          }
+        ],
+        "clamp_gap_mm": 0.3999999999999986,
+        "drawing_segments": 36,
+        "ideal_feed_seconds": 189.55529877780276,
+        "ink_bounds_mm": [
+          43.9,
+          59.89999999999999,
+          191.1,
+          175.10000000000002
+        ],
+        "ink_length_mm": 1408.0,
+        "linear_moves": 73,
+        "mount_pitch_mm": 14.0,
+        "paper_bounds_mm": [
+          12.5,
+          43.5,
+          222.5,
+          191.5
+        ],
+        "pen_up_xy_mm": 591.1059755560549,
+        "requested_pen_bore_radius_mm": 6.6,
+        "strokes": 12,
+        "working_viewport_mm": [
+          22.5,
+          53.5,
+          212.5,
+          181.5
+        ]
+      },
+      "name": "baseline_paper_in_a5_delivery",
+      "observed_failures": [
+        {
+          "detail": {
+            "expected_mm": [
+              210,
+              148,
+              0.1
+            ],
+            "matching_solids": 0
+          },
+          "name": "step_contains_actual_a5_paper",
+          "passed": false
+        },
+        {
+          "detail": {
+            "world_bounds_mm": [
+              [
+                [
+                  27.5,
+                  27.5,
+                  0.0
+                ],
+                [
+                  207.5,
+                  207.5,
+                  0.10000000149011612
+                ]
+              ]
+            ]
+          },
+          "name": "glb_contains_actual_a5_paper",
+          "passed": false
+        }
+      ],
+      "passed": true,
+      "recomputed_seals_and_archived_success_claims_pass": true,
+      "required_semantic_rejections": [
+        "glb_contains_actual_a5_paper",
+        "step_contains_actual_a5_paper"
+      ]
+    },
+    {
+      "candidate_sha256": "ba30b12a60ced16a78dbc1b22bd78fc1edc46e2d8d2e8155300b9b5b889642b2",
+      "checker_exit_code": 1,
+      "description": "First XY travel uses1mm lift; CSV and all byte seals are updated.",
+      "independent_metrics": {
+        "artwork_uniform_scale_mm_per_unit": 1.6,
+        "carriage_intersection_mm3": 0.0,
+        "checkbox_dimensions_mm": [
+          {
+            "height_mm": 8.0,
+            "source_stroke": 3,
+            "width_mm": 8.0
+          },
+          {
+            "height_mm": 8.0,
+            "source_stroke": 5,
+            "width_mm": 8.0
+          },
+          {
+            "height_mm": 8.0,
+            "source_stroke": 7,
+            "width_mm": 8.0
+          },
+          {
+            "height_mm": 8.0,
+            "source_stroke": 9,
+            "width_mm": 8.0
+          }
+        ],
+        "clamp_gap_mm": 0.3999999999999986,
+        "drawing_segments": 36,
+        "ideal_feed_seconds": 189.28863211113608,
+        "ink_bounds_mm": [
+          43.9,
+          59.89999999999999,
+          191.1,
+          175.10000000000002
+        ],
+        "ink_length_mm": 1408.0,
+        "linear_moves": 73,
+        "mount_pitch_mm": 14.0,
+        "paper_bounds_mm": [
+          12.5,
+          43.5,
+          222.5,
+          191.5
+        ],
+        "pen_up_xy_mm": 591.1059755560549,
+        "requested_pen_bore_radius_mm": 6.6,
+        "strokes": 12,
+        "working_viewport_mm": [
+          22.5,
+          53.5,
+          212.5,
+          181.5
+        ]
+      },
+      "name": "one_mm_travel_in_three_mm_job",
+      "observed_failures": [
+        {
+          "detail": "Every non-drawing XY move has 3 mm lift at both endpoints.",
+          "name": "all_xy_travel_pen_up",
+          "passed": false
+        }
+      ],
+      "passed": true,
+      "recomputed_seals_and_archived_success_claims_pass": true,
+      "required_semantic_rejections": [
+        "all_xy_travel_pen_up"
+      ]
+    },
+    {
+      "candidate_sha256": "f8d42048a5ec631742a43c0d7c962bbeebd278d7862e9d7ce0c6dbf0d8a88ec7",
+      "checker_exit_code": 1,
+      "description": "X scaling is stretched1.6\u21921.9 while Y remains1.6;9.5x8mm checkboxes still fit the viewport.",
+      "independent_metrics": {
+        "artwork_uniform_scale_mm_per_unit": 1.6,
+        "carriage_intersection_mm3": 0.0,
+        "checkbox_dimensions_mm": [
+          {
+            "height_mm": 8.0,
+            "source_stroke": 3,
+            "width_mm": 9.5
+          },
+          {
+            "height_mm": 8.0,
+            "source_stroke": 5,
+            "width_mm": 9.5
+          },
+          {
+            "height_mm": 8.0,
+            "source_stroke": 7,
+            "width_mm": 9.5
+          },
+          {
+            "height_mm": 8.0,
+            "source_stroke": 9,
+            "width_mm": 9.5
+          }
+        ],
+        "clamp_gap_mm": 0.3999999999999986,
+        "drawing_segments": 36,
+        "ideal_feed_seconds": 210.7184299540045,
+        "ink_bounds_mm": [
+          30.1,
+          59.89999999999999,
+          204.9,
+          175.10000000000002
+        ],
+        "ink_length_mm": 1578.4,
+        "linear_moves": 73,
+        "mount_pitch_mm": 14.0,
+        "paper_bounds_mm": [
+          12.5,
+          43.5,
+          222.5,
+          191.5
+        ],
+        "pen_up_xy_mm": 673.5685990800898,
+        "requested_pen_bore_radius_mm": 6.6,
+        "strokes": 12,
+        "working_viewport_mm": [
+          22.5,
+          53.5,
+          212.5,
+          181.5
+        ]
+      },
+      "name": "anisotropic_checkbox_distortion",
+      "observed_failures": [
+        {
+          "detail": {
+            "delivered_segments": 36,
+            "order_preserved": true,
+            "source_segments": 36,
+            "tolerance_mm": 0.0003
+          },
+          "name": "svg_to_gcode_directed_segments",
+          "passed": false
+        },
+        {
+          "detail": {
+            "expected_side_mm": 8.0,
+            "mapping": "Uniform centered fit preserves artwork proportions.",
+            "measured": [
+              {
+                "height_mm": 8.0,
+                "source_stroke": 3,
+                "width_mm": 9.5
+              },
+              {
+                "height_mm": 8.0,
+                "source_stroke": 5,
+                "width_mm": 9.5
+              },
+              {
+                "height_mm": 8.0,
+                "source_stroke": 7,
+                "width_mm": 9.5
+              },
+              {
+                "height_mm": 8.0,
+                "source_stroke": 9,
+                "width_mm": 9.5
+              }
+            ]
+          },
+          "name": "four_checkboxes_remain_square",
+          "passed": false
+        }
+      ],
+      "passed": true,
+      "recomputed_seals_and_archived_success_claims_pass": true,
+      "required_semantic_rejections": [
+        "four_checkboxes_remain_square",
+        "svg_to_gcode_directed_segments"
+      ]
+    }
+  ],
+  "generated_at": "2026-11-18T16:08:10.147407+00:00",
+  "harness_sha256": "b39ba6cc43e89fb428094b599a0fc038c45805764d0d63241daa7e5271e5b60c",
+  "originals_unchanged": true,
+  "passed": true,
+  "physical_validation_performed": false,
+  "schema": "hardware_splicer.a5_semantic_negative_controls.v1",
+  "scope": "Three temporary actual-delivery mutations; byte seals deliberately recomputed before independent semantic rejection.",
+  "study_sha256": "b55b12339b84e2732990091b7d27dfce455158085e521a244e41db63d8bf103f"
+}

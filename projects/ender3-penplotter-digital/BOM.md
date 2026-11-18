@@ -34,7 +34,7 @@ The extrusion motor/feeder, Bowden tube and spool holder are removed from the ac
 | Fan/shroud retention ties | 2.5mm-wide nylon ties, 150mm length, passed through four 4*12mm plate slots | 4 |
 | Grip liner | EPDM sheet0.5mm thick,20mm wide; cut length pi*pen_diameter+2mm (33.42mm default) | 1 strip |
 | Pen | Cylindrical grip of selected8..12mm diameter;100mm maximum tip-to-top envelope; default10mm | 1 |
-| Paper |180*180mm flat sheet, nominal0.1mm thickness | 1 |
+| Paper | Centered `paper_width_mm` × `paper_height_mm` from `requirements.json`, nominal 0.1 mm thickness; default 180 × 180 mm, A5 landscape 210 × 148 mm | 1 |
 | Masking tape | Thin paper tape, ≤1mm total raised obstruction height; keep outside plotted strokes | 4 short strips |
 
 No purchase links or supplier prices are supplied. The polymer modulus, density1.27g/cm3 and thin-tape bound are design assumptions. Material, layer strength, nut insertion fit, clamp holding and actual pen dimensions have not been tested. The heating unit must be supported by the parking plate rather than suspended from wires. A retained live heater is an electrical integration question that remains subject to a separate future hardware review; zero commands alone are not hardware isolation.

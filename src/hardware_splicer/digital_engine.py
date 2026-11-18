@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import os
 import hashlib
+import json
 from pathlib import Path
 import shutil
 import subprocess
@@ -67,7 +68,40 @@ class DigitalStudyEngine:
                            'scope': 'Registered drone model; no physical validation or flight authority.'},
                           *[case.describe() for case in cases.CASES.values()]]}
 
-    def create(self, *, name=None, case_id=digital.cases.DEFAULT_CASE):
+    def from_prompt(self, brief, *, project_id=None, base_revision=None):
+        from .digital_brief import interpret_brief
+
+        current = None
+        if project_id is not None:
+            envelope, directory, seal = digital.validated_run(self.projects, project_id, base_revision)
+            base_revision = envelope['revision']
+            case_id = digital.case_id_for(seal)
+            if case_id not in cases.CASES:
+                raise ValueError('This project has no registered text-brief adapter.')
+            current = {'case_id': case_id, 'requirements': seal['summary']['requirements']}
+            if previous := envelope['snapshot'].get('designBrief'):
+                current['previous_brief'] = previous['brief']
+            if cases.DRAWING in seal['artifact_sha256']:
+                current['drawing'] = json.loads((directory / cases.DRAWING).read_bytes())
+        elif base_revision is not None:
+            raise ValueError('A base revision requires a project ID.')
+        plan = interpret_brief(brief, current=current)
+        if plan['status'] != 'build':
+            return {'ok': True, 'interpretation': plan, 'project': None}
+        if current is not None:
+            if not plan['requirements'] and plan['drawing'] is None:
+                return {'ok': True, 'interpretation': plan, 'project_id': project_id,
+                        'revision': base_revision, 'unchanged': True}
+            result = self.run_revision(project_id, base_revision=base_revision,
+                                       change_request=plan['brief'][:200], requirements=plan['requirements'],
+                                       brief_plan=plan)
+            return {**result, 'interpretation': plan}
+        created = self.create(case_id=plan['case_id'], brief_plan=plan)
+        project = created['project']
+        study = self.study(project['project_id'], project['revision'])
+        return {**created, 'study': study, 'interpretation': plan}
+
+    def create(self, *, name=None, case_id=digital.cases.DEFAULT_CASE, brief_plan=None):
         cases.validate_case_id(case_id)
         if name is None:
             name = 'HS-3G-B digital study' if case_id == cases.DEFAULT_CASE else cases.registered(case_id).name
@@ -80,7 +114,8 @@ class DigitalStudyEngine:
             available = digital.runtime_for_case(case_id)
             if not available['available']:
                 raise DigitalRuntimeUnavailable(available['setup_hint'])
-        return {'ok': True, 'project': digital.create_project(self.projects, name=name.strip(), case_id=case_id)}
+        return {'ok': True, 'project': digital.create_project(self.projects, name=name.strip(), case_id=case_id,
+                                                              brief_plan=brief_plan)}
 
     def study(self, project_id, revision=None):
         envelope, directory, seal = digital.validated_run(self.projects, project_id, revision)
@@ -97,18 +132,26 @@ class DigitalStudyEngine:
 
     def project_state(self, project_id, revision=None):
         study = self.study(project_id, revision)
-        return {'ok': True, 'study': study, 'history': self.history(project_id),
+        case_id = study['summary'].get('case_id', cases.DEFAULT_CASE)
+        bounds = {}
+        if case_id != cases.DEFAULT_CASE:
+            _, _, seal = digital.load_run(self.projects, project_id, study['revision'])
+            case = digital.revision_case(seal)
+            bounds = {key: {'minimum': low, 'maximum': high} for key, (_, low, high) in case.requirements.items()}
+        return {'ok': True, 'study': study, 'history': self.history(project_id), 'requirement_bounds': bounds,
                 'runtime': digital.runtime_for_case(study['summary'].get('case_id', cases.DEFAULT_CASE)),
                 'jobs': [j.to_dict() for j in self.backend.store.list_digital_jobs(project_id)]}
 
-    def enqueue_revision(self, project_id, *, base_revision, change_request='', requirements=None, request_id=None):
+    def enqueue_revision(self, project_id, *, base_revision, change_request='', requirements=None,
+                         request_id=None, brief_plan=None):
         if isinstance(base_revision, bool) or not isinstance(base_revision, int) or base_revision < 1:
             raise ValueError('base_revision must be a positive integer.')
         if not isinstance(change_request, str) or len(change_request) > 200:
             raise ValueError('change_request must be a string of at most 200 characters.')
         envelope, _, seal = digital.validated_run(self.projects, project_id, base_revision)
         try:
-            resolved = digital.resolve_requirements(seal, change_request, requirements)
+            label = '' if brief_plan and brief_plan.get('drawing') is not None else change_request
+            resolved = digital.resolve_requirements(seal, label, requirements)
         except OverflowError as exc:
             raise ValueError('Requirement value exceeds the supported bounds.') from exc
         request_id = str(UUID(str(request_id))) if request_id is not None else str(uuid4())
@@ -117,6 +160,8 @@ class DigitalStudyEngine:
         case_id = digital.case_id_for(seal)
         if case_id != cases.DEFAULT_CASE:
             payload['case_id'] = case_id
+        if brief_plan is not None:
+            payload['design_brief'] = brief_plan
         job_id = uuid5(NAMESPACE_URL, f'hardware-splicer:digital:{project_id}:{request_id}').hex
         existing = self.backend.store.get_job(job_id)
         if existing:

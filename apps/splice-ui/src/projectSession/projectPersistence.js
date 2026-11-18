@@ -104,6 +104,7 @@ export async function deletePersistentProject(projectId) {
 
 export function useProjectPersistence({ session, dispatch, enabled = true, debounceMs = 700 }) {
   const [projects, setProjects] = useState([]);
+  const [firstListLoaded, setFirstListLoaded] = useState(false);
   const [listError, setListError] = useState(null);
   const [machineSeedError, setMachineSeedError] = useState(null);
   const timerRef = useRef(null);
@@ -127,6 +128,8 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
     } catch (error) {
       setListError(error.message);
       return [];
+    } finally {
+      setFirstListLoaded(true);
     }
   }, [enabled]);
 
@@ -299,6 +302,7 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
   );
 
   return {
+    listLoading: enabled && !firstListLoaded,
     projects,
     listError,
     machineSeedError,

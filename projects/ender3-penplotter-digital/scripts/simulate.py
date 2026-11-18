@@ -8,9 +8,6 @@ import math
 import re
 import xml.etree.ElementTree as ET
 import numpy as np
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
 from common import ROOT, read_requirements, write_json, constraint
 
 
@@ -22,6 +19,9 @@ def make_svg(path):
     paths.append([(76+9*math.cos(t),59+9*math.sin(t)) for t in np.linspace(0,2*math.pi,65)])
     for phase in [0,4,8]:
         paths.append([(x,4+phase+1.5*math.sin(x*.17)) for x in np.linspace(5,95,61)])
+    drawing = ROOT / 'sources' / 'prompt-drawing.json'
+    if drawing.is_file():
+        paths = json.loads(drawing.read_text())
     lines=['<svg xmlns="http://www.w3.org/2000/svg" width="100mm" height="80mm" viewBox="0 0 100 80">',
            '<g fill="none" stroke="#12638a" stroke-width="0.35">']
     for pts in paths:
@@ -29,14 +29,21 @@ def make_svg(path):
     path.write_text('\n'.join(lines+['</g>','</svg>'])+'\n')
 
 
+def source_to_bed(x,y,req):
+    # Uniform fit keeps squares, circles and the authored aspect ratio unchanged.
+    scale=min(req['drawing_width_mm']/100,req['drawing_height_mm']/80)
+    return (117.5+(x-50)*scale,117.5+(y-40)*scale)
+
+
 def parse_svg(path,req):
     paths=[]
     for node in ET.parse(path).getroot().iter():
         if node.tag.split('}')[-1]=='polyline':
             vals=[float(x) for x in re.split(r'[\s,]+',node.attrib['points'].strip())]
-            if len(vals)%2:raise ValueError('Malformed SVG polyline')
-            paths.append([(117.5+(vals[i]-50)*req['drawing_width_mm']/100,
-                           117.5+(40-vals[i+1])*req['drawing_height_mm']/80)
+            if len(vals)<4 or len(vals)%2:raise ValueError('Malformed SVG polyline')
+            if not all(math.isfinite(v) for v in vals) or any(not 0<=x<=100 or not 0<=y<=80 for x,y in zip(vals[::2],vals[1::2])):
+                raise ValueError('Source artwork lies outside the declared 100 x 80 logical viewport')
+            paths.append([source_to_bed(vals[i],80-vals[i+1],req)
                           for i in range(0,len(vals),2)])
     return paths
 
@@ -69,6 +76,10 @@ def replay(gcode,lift):
 
 
 def main():
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
     req=read_requirements();folder=ROOT/'simulation';folder.mkdir(exist_ok=True)
     svg=folder/'example.svg';make_svg(svg);paths=parse_svg(svg,req)
     offset=json.loads((ROOT/'sources/interface.json').read_text())['pen_offset_from_nozzle_xy_mm']
@@ -88,7 +99,10 @@ def main():
         writer=csv.DictWriter(stream,fieldnames=list(records[0]));writer.writeheader();writer.writerows(records)
     # Reconstruct ink FROM GCODE. Original SVG coordinates are not reused for the render.
     fig,ax=plt.subplots(figsize=(9,8));ax.add_patch(plt.Rectangle((0,0),235,235,facecolor='#dbe3e9',edgecolor='#5a6b75'))
-    ax.add_patch(plt.Rectangle((27.5,27.5),180,180,facecolor='#fffef6',edgecolor='#c4ba9e',linestyle='--'))
+    pw,ph=req['paper_width_mm'],req['paper_height_mm']
+    px0,py0=(235-pw)/2,(235-ph)/2
+    ax.add_patch(plt.Rectangle((px0,py0),pw,ph,facecolor='#fffef6',edgecolor='#c4ba9e',linestyle='--'))
+    ax.text(117.5,py0+2,f'{pw:g} × {ph:g} mm paper',ha='center',va='bottom',fontsize=8,color='#786d50')
     draw_length=0.;travel_length=0.;total_time=0.;xyz=[];bad_travel=0
     for row in records:
         xy=np.array([[row['x0'],row['y0']],[row['x1'],row['y1']]])+np.array(offset)
@@ -105,16 +119,27 @@ def main():
     eng=json.loads((ROOT/'reports/engineering.json').read_text())
     fixture_margin=eng['metrics']['pen_tip_to_clamp_mm']-1.
     ctrl=np.array([[r['x1'],r['y1']] for r in records]);ctrlmargin=float(min(ctrl.min(),235-ctrl.max()))
+    ink_xy=np.array([[r['x'+n]+offset[0],r['y'+n]+offset[1]] for r in records if r['drawing'] for n in ('0','1')])
+    if not len(ink_xy):raise ValueError('The requested artwork contains no ink segments')
+    ink_paper_margin=float(min((ink_xy-[px0,py0]).min(),(np.array([px0+pw,py0+ph])-ink_xy).min()))
+    half=np.array([req['drawing_width_mm'],req['drawing_height_mm']])/2
+    ink_viewport_margin=float(min((ink_xy-(117.5-half)).min(),((117.5+half)-ink_xy).min()))
     constraints=[constraint('pen_tip_on_bed',minbed,0,minbed>=0,'mm','Affine segment endpoints bound all linear XY positions'),
         constraint('fixture_vertical_clearance',fixture_margin,2,fixture_margin>=2,'mm','Measured fixture lower face30mm above tip minus assumed1mm tape; excludes frame/wires'),
         constraint('controller_travel',ctrlmargin,0,ctrlmargin>=0,'mm','Manufacturer Configuration.h 0..235mm XY, compensated tip offset'),
         constraint('pen_up_travel',bad_travel,0,bad_travel==0,'segments','Every XY travel move must stay at requested lift'),
         constraint('pen_lift_clearance',req['pen_lift_mm']-1.,1.,req['pen_lift_mm']>=2,'mm','Assumed tape height <=1mm; uncertainty is not physical validation'),
+        constraint('ink_paper_margin',ink_paper_margin,10,ink_paper_margin>=10-.00011,'mm','Every emitted ink endpoint leaves 10 mm paper margin; 0.00011 mm serialization tolerance'),
+        constraint('ink_in_viewport',ink_viewport_margin,0,ink_viewport_margin>=-.00011,'mm','Every emitted ink segment stays inside the requested source viewport; 0.00011 mm serialization tolerance'),
         constraint('Z_travel',float(pts[:,2].max()),req['pen_lift_mm'],pts[:,2].min()>=0 and pts[:,2].max()<=req['pen_lift_mm']+1e-6,'mm','Every commanded segment endpoint lies within paper Z0 and requested lift')]
+    canvas_scale=min(req['drawing_width_mm']/100,req['drawing_height_mm']/80)
     report=dict(case_id='ender3-penplotter',requirements=req,requirements_met=all(c['passed'] for c in constraints),
         physical_validation_performed=False,constraints=constraints,
-        metrics={'draw_length_mm':draw_length,'travel_length_mm':travel_length,'ideal_feed_time_s':total_time,
+        metrics={'source_canvas_scale_mm_per_unit':canvas_scale,
+                  'source_canvas_width_mm':100*canvas_scale,'source_canvas_height_mm':80*canvas_scale,
+                  'draw_length_mm':draw_length,'travel_length_mm':travel_length,'ideal_feed_time_s':total_time,
                  'segment_count':len(records),'stroke_count':len(paths),'pen_center_bed_margin_mm':minbed,
+                  'ink_paper_margin_mm':ink_paper_margin,'ink_viewport_margin_mm':ink_viewport_margin,
                  'fixture_bed_clearance_mm':fixture_margin,'controller_travel_margin_mm':ctrlmargin,
                  'pen_lift_mm':req['pen_lift_mm'],'non_drawing_XY_without_lift':bad_travel,
                  'minimum_commanded_Z_mm':float(pts[:,2].min()),'maximum_commanded_Z_mm':float(pts[:,2].max())},

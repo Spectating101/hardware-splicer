@@ -54,6 +54,14 @@ def read_board(profile, cache, fetch):
                 float(hole.get("drill")),
             )
         )
+    # Plain EAGLE holes have no reference designator. Only accept reviewed
+    # positions for mounting, since other drilled holes can serve different roles.
+    for x, y in profile.get("plain_mount_xy_mm", []):
+        matches = [h for h in board.findall("plain/hole")
+                   if (float(h.get("x")), float(h.get("y"))) == (x, y)]
+        if len(matches) != 1:
+            raise ValueError(f"Expected one plain mounting hole at {(x, y)}")
+        holes.append((x - cx, y - cy, float(matches[0].get("drill"))))
     if len(holes) != 4 or len(set((x, y) for x, y, _ in holes)) != 4:
         raise ValueError("Expected four distinct mounting holes")
     return holes

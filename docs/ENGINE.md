@@ -130,6 +130,21 @@ Success payload includes `quality.drc_pass`, paths to `build_graph.json`, `main_
 
 ## Headless digital engineering
 
+### Start with a description
+
+With an HS text provider configured and the native digital runtime available, open the Projects screen or design library, fill in **Describe what you want to build**, and choose **Build from description**. On a saved design, use **Describe your next change** to revise it. The same operations are available from the CLI.
+
+```sh
+hs-digital prompt "Turn my classic Ender-3 into a pen plotter for an 11 mm pen. Use a 13 by 9 cm drawing area, lift the pen 4 mm, and draw a small sailboat with two waves."
+hs-digital prompt --project-id PROJECT_ID "Keep the boat and waves, add a flag to the mast, and switch to a 9 mm pen."
+```
+
+Clients can also post `{"brief":"..."}` to `/v1/digital/prompt`. Include `project_id` to continue and optionally `base_revision` to specify the version being edited. The model interprets the request and the server validates the selected family, numeric bounds and optional vector strokes. The digital builder produces the case's CAD, parts information and simulation. Read `study.summary.requirements_met` and `study.summary.metrics` for the engineering result. The CLI returns exit code 2 when the simulation completes and misses a requirement.
+
+The text entry point currently covers the registered Ender-3 plotter and the two FieldDeck display sizes. The plotter can generate original line art as part of a brief. Each drawing is archived alongside the simulation, which independently compares its segments with the output. Later numeric revisions retain the drawing. Ambiguous or unsupported briefs return an explanation and create no study. The endpoint accepts text. Optional reference files continue to use the existing project source intake.
+
+See the [text-only design trials](../projects/device-integration-trials/prompt-only/README.md) for the original briefs, generated files and measured results.
+
 The digital study engine runs directly from Python or the CLI. It uses the existing project store and job queue; it does not start an HTTP server, browser, or frontend. Its server-owned registry contains three bounded device families:
 
 | Case ID | Device and native engineering work |

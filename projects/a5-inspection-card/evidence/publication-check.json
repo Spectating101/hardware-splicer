@@ -1,0 +1,16 @@
+{
+  "generated_at_utc": "2026-11-18T16:14:34.326309+00:00",
+  "base_commit": "8fa91d3bc55f6b892011adcaf3afb6f5bc3f4b75",
+  "candidate_files": 124,
+  "text_files_and_zip_members_scanned": 239,
+  "rules": [
+    "github_token",
+    "private_key",
+    "service_key",
+    "aws_access_key",
+    "credential_url"
+  ],
+  "findings": [],
+  "passed": true,
+  "scope": "Pattern check of newly published files and text members of delivery archives; no credential values recorded."
+}

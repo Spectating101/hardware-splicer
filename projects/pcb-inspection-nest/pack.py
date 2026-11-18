@@ -69,10 +69,10 @@ def preview(solids, path):
     from mpl_toolkits.mplot3d.art3d import Poly3DCollection
     import numpy as np
 
-    fig = plt.figure(figsize=(12, 4.2))
+    fig = plt.figure(figsize=(4 * len(solids), 4.2))
     for index, (name, parts) in enumerate(solids.items(), 1):
         ax = fig.add_subplot(
-            1, 3, index, projection="3d", proj_type="ortho", computed_zorder=False
+            1, len(solids), index, projection="3d", proj_type="ortho", computed_zorder=False
         )
         direction = np.array(
             [
@@ -102,6 +102,7 @@ def preview(solids, path):
             "pygamer": "PyGamer",
             "max9744": "MAX9744",
             "openlog": "OpenLog Artemis",
+            "feather-m4-express": "Feather M4 Express",
         }.get(name, name)
         ax.set(xlim=(-62, 62), ylim=(-42, 42), zlim=(0, 46), title=title)
         ax.set_box_aspect((124, 84, 46))
@@ -173,7 +174,7 @@ def package(cache, destination, fetch):
         ):
             shutil.copyfile(build.HERE / name, root / name)
         shutil.copytree(build.HERE / "notices", root / "notices")
-        archive = destination / "inspection-nest-v0.1.zip"
+        archive = destination / "inspection-nest-v0.2.zip"
         with ZipFile(archive, "w", compression=ZIP_DEFLATED) as z:
             for path in sorted(root.rglob("*")):
                 if path.is_file():

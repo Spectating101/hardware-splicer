@@ -1,0 +1,19 @@
+Original Remote Desktop Commander receipt, PID 2337698; not a test rerun.
+
+[Reading last 12 lines (total: 12 lines)]
+
+............................................                             [100%]
+=============================== warnings summary ===============================
+../../Downloads/llm_automation/project_portfolio/Hardware-Splicer/.venv/lib/python3.13/site-packages/fastapi/testclient.py:1
+  /home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.venv/lib/python3.13/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+tests/test_digital_registered_cases.py::test_case_selection_is_server_owned_and_change_labels_do_not_claim_language_understanding
+  /home/phyrexian/chatgpt-work/hs-a5-inspection-card-20261118/src/hardware_splicer/digital_project_api.py:58: DeprecationWarning: 'HTTP_422_UNPROCESSABLE_ENTITY' is deprecated. Use 'HTTP_422_UNPROCESSABLE_CONTENT' instead.
+    raise _project_error(exc) from exc
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+44 passed, 2 warnings in 8.40s
+✅ Process completed with exit code 0 (runtime: 9.96s)
+
+[executed on device: optiplex (a41adc50-b79b-4922-9842-7859ca3e8464)]
