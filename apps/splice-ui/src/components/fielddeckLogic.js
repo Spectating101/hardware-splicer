@@ -23,6 +23,20 @@ export const VALIDATION_LABEL = "No physical validation performed";
 export const DEFAULT_EXPLODE = 0.6;
 export const FIELDDECK_NARROW = "(width < 700px)";
 
+// Layers run bottom to top. Each gap is the clearance below that layer at the default setting.
+export function explodeGroupOffsets(layers, anchor, explode) {
+  const offsets = layers.map(() => 0);
+  if (!explode) return offsets;
+  for (let i = anchor + 1; i < layers.length; i++) {
+    offsets[i] = Math.max(0, layers[i - 1].maxZ + offsets[i - 1] + layers[i].gap - layers[i].minZ);
+  }
+  for (let i = anchor - 1; i >= 0; i--) {
+    offsets[i] = Math.min(0, layers[i + 1].minZ + offsets[i + 1] - layers[i + 1].gap - layers[i].maxZ);
+  }
+  const scale = explode / DEFAULT_EXPLODE;
+  return offsets.map((offset) => offset * scale);
+}
+
 export function toggleFielddeckSheet(current, sheet) {
   return current === sheet ? null : sheet;
 }
@@ -96,11 +110,36 @@ export function placeCallouts(viewport, panelRects, callouts) {
   const occupied = [...panelRects];
   const leaderObstacles = panelRects.map((rect) => padRect(rect, 4));
   const center = (viewport.left + viewport.right) / 2;
-  return callouts.map(({ width, height, anchor, leftAnchor = anchor, rightAnchor = anchor }) => {
+  return callouts.map(({ width, height, anchor, leftAnchor = anchor, rightAnchor = anchor, outline }) => {
     if (!anchor) return null;
     const maxX = viewport.right - width;
     const maxY = viewport.bottom - height;
     if (maxX < viewport.left || maxY < viewport.top) return null;
+
+    if (outline) {
+      const { left, right, top, bottom } = outline;
+      const x = (left + right) / 2;
+      const y = (top + bottom) / 2;
+      const obstacles = occupied.map((rect) => padRect(rect, 4));
+      for (const gap of [12, 28, 44]) {
+        for (const [rectLeft, rectTop, point] of [
+          [right + gap, clampTo(y - height / 2, viewport.top, maxY), { x: right, y }],
+          [left - width - gap, clampTo(y - height / 2, viewport.top, maxY), { x: left, y }],
+          [clampTo(x - width / 2, viewport.left, maxX), top - height - gap, { x, y: top }],
+          [clampTo(x - width / 2, viewport.left, maxX), bottom + gap, { x, y: bottom }],
+        ]) {
+          const rect = { left: rectLeft, top: rectTop, right: rectLeft + width, bottom: rectTop + height };
+          if (!containsPoint(viewport, point) || obstacles.some((obstacle) => containsPoint(obstacle, point))) continue;
+          if (rectLeft < viewport.left || rectLeft > maxX || rectTop < viewport.top || rectTop > maxY
+            || obstacles.some((obstacle) => overlaps(rect, obstacle))) continue;
+          const leader = leaderPath(point, rect, viewport, obstacles);
+          if (leader?.length !== 2) continue;
+          occupied.push(rect);
+          return { rect, leader };
+        }
+      }
+      return null;
+    }
 
     const preferredX = anchor.x < center ? viewport.left + 18 : maxX - 18;
     const preferredY = anchor.y - height / 2;

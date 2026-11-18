@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import FieldDeckScene, { EvidenceRows } from "./FieldDeckScene.jsx";
 import {
-  FIELDDECK_NARROW, classifyPart, evidenceCells, formatEvidenceSource, formatEvidenceValue,
+  DEFAULT_EXPLODE, FIELDDECK_NARROW, classifyPart, evidenceCells, explodeGroupOffsets, formatEvidenceSource, formatEvidenceValue,
   indexFielddeck, placeCallouts, rowForNode, rowsForMode, selectedPartKeys, toggleFielddeckSheet,
 } from "./fielddeckLogic.js";
 
@@ -84,6 +84,42 @@ describe("Fielddeck stage layout", () => {
   const card = (x, y, width = 228, height = 115) => ({ width, height, anchor: { x, y } });
   const overlaps = (a, b) =>
     a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+
+  const layers = [
+    { minZ: -6, maxZ: 0, gap: 0 },
+    { minZ: 3, maxZ: 6, gap: 8 },
+    { minZ: 0, maxZ: 80, gap: 8 },
+    { minZ: 61, maxZ: 66, gap: 44 },
+    { minZ: 47, maxZ: 52, gap: 19 },
+    { minZ: 46, maxZ: 62, gap: 29 },
+  ];
+
+  it("keeps the presentation layers in height order with clear gaps at the default explode", () => {
+    const offsets = explodeGroupOffsets(layers, 2, DEFAULT_EXPLODE);
+    expect(offsets[2]).toBe(0);
+    for (let i = 1; i < layers.length; i++) {
+      const bottom = layers[i].minZ + offsets[i];
+      const previousTop = layers[i - 1].maxZ + offsets[i - 1];
+      expect(bottom - previousTop).toBeGreaterThanOrEqual(layers[i].gap);
+    }
+    expect(explodeGroupOffsets(layers, 2, 1)).toEqual(offsets.map((offset) => offset * (1 / DEFAULT_EXPLODE)));
+  });
+
+  it("returns zero offsets for every group in the assembled view", () => {
+    expect(explodeGroupOffsets(layers, 2, 0)).toEqual([0, 0, 0, 0, 0, 0]);
+  });
+
+  it("places a drafting label beside the outline and falls back when its short leaders are blocked", () => {
+    const viewport = rect(0, 0, 700, 400);
+    const outline = rect(320, 150, 380, 250);
+    const label = { ...card(350, 200, 100, 30), outline };
+    const [placement] = placeCallouts(viewport, [rect(400, 0, 700, 400)], [label]);
+    expect(placement).toEqual({
+      rect: rect(208, 185, 308, 215),
+      leader: [{ x: 308, y: 200 }, { x: 320, y: 200 }],
+    });
+    expect(placeCallouts(rect(290, 130, 410, 270), [], [label])).toEqual([null]);
+  });
 
   it("flips and stacks cards around the inspector, tree, header and controls", () => {
     const viewport = rect(0, 0, 1426, 900);

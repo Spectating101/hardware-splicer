@@ -142,7 +142,9 @@
   grid-template: auto minmax(390px, 1fr) auto / minmax(0, 1fr);
   min-height: 100svh;
   overflow: hidden;
-  background: radial-gradient(120% 90% at 50% 38%, #1b222b 0%, #12161b 45%, #0b0d10 100%);
+  background:
+    radial-gradient(ellipse at 50% 46%, transparent 42%, #0005 100%),
+    radial-gradient(120% 90% at 50% 38%, #1b222b 0%, var(--bg-1) 45%, var(--bg-0) 100%);
 }
 
 .fd-stage canvas, .fd-leaders { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -188,11 +190,25 @@
 [data-kind="interface"] > .fd-swatch { width: 7px; height: 7px; transform: rotate(45deg); background: none; }
 
 .fd-annotations { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
-.fd-callout {
+.fd-label, .fd-callout {
   position: absolute;
   top: 0;
   left: 0;
   visibility: hidden;
+}
+.fd-label {
+  width: max-content;
+  max-width: min(210px, 24%);
+  font: 400 12px/1.35 var(--mono);
+  text-shadow: 0 1px 3px #000b;
+}
+.fd-label strong, .fd-label .fd-callout-evidence {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.fd-callout {
   pointer-events: auto;
   width: clamp(150px, 21%, 228px);
   z-index: 1;
@@ -235,10 +251,11 @@
 .fd-callout-more { color: var(--text-2); }
 .fd-folded-callouts { display: grid; gap: 6px; margin-bottom: 10px; }
 .fd-folded-callouts .fd-callout-inner { box-shadow: none; }
-.fd-leaders g { visibility: hidden; stroke: var(--text-3); stroke-width: 1; }
-.fd-leaders :is([data-kind="changed"], [data-kind="removed"], [data-kind="envelope"], [data-kind="added"]) { stroke: var(--kind); }
+.fd-leaders g { visibility: hidden; stroke: var(--kind, var(--text-3)); stroke-width: 1; }
 .fd-leaders path { fill: none; }
-.fd-leaders circle { fill: var(--bg-0); }
+.fd-dimension { stroke-dasharray: 3 3; }
+.fd-leaders circle { display: none; fill: var(--bg-0); }
+.fd-leaders [data-card="true"] circle { display: block; }
 
 @keyframes fd-callout-in {
   from { opacity: 0; }

@@ -5,7 +5,7 @@ import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment
 import { HorizontalBlurShader } from "three/examples/jsm/shaders/HorizontalBlurShader.js";
 import { VerticalBlurShader } from "three/examples/jsm/shaders/VerticalBlurShader.js";
 import { fielddeckSceneUrl } from "../api.js";
-import { classifyPart, DEFAULT_EXPLODE, FIELDDECK_NARROW, placeCallouts, rowForNode, TOUR } from "./fielddeckLogic.js";
+import { classifyPart, DEFAULT_EXPLODE, explodeGroupOffsets, FIELDDECK_NARROW, placeCallouts, rowForNode, TOUR } from "./fielddeckLogic.js";
 
 const COLORS = {
   custom: 0x35302a, vendor_step: 0x626b77, envelope: 0x8fa8c4,
@@ -14,7 +14,7 @@ const COLORS = {
 };
 const CONTACT_LAYER = 1;
 const UP = new THREE.Vector3(0, 0, 1);
-const VIEW = new THREE.Vector3(8.2, -9.6, 8).normalize();
+const VIEW = new THREE.Vector3(8.2, -9.6, 9.1).normalize();
 const clamp = (n) => Math.min(1, Math.max(0, n));
 const outCubic = (t) => 1 - (1 - t) ** 3;
 const inOutCubic = (t) => t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2;
@@ -177,7 +177,7 @@ function makeEntries(assets, index, scene, resources) {
       if (!entry) {
         const { basis, outline } = classifyPart(row.part);
         const group = new THREE.Group();
-        const vector = new THREE.Vector3().fromArray(row.part.explode_vector_mm);
+        const vector = new THREE.Vector3();
         const pattern = basis === "envelope" ? [4, 2.5] : outline ? [1.3, 2.8] : null;
         const displayTop = basis === "vendor_step" && row.part.part_id === "display" ? { value: 0 } : null;
         const solid = outline ? null : own(solidMaterial(basis, displayTop));
@@ -244,56 +244,60 @@ function boundsFor(entries, explode) {
   return bounds;
 }
 
-const stackOffsets = {
-  tray: [0, 0, 0], face: [0, 0, 31], seam: [0, 0, -7], foot: [0, 0, -9],
-  "display-spacer": [0, 0, 51], fan: [0, 0, 31], display: [0, 0, 62],
-  "keyboard-nominal-envelope": [0, 0, 20],
-  "power-bank-nominal-envelope": [-65, -55, 12], pi4: [-70, 62, 12],
-};
-
-function groupExplode(entries, modes) {
+function groupExplode(entries) {
+  const center = boundsFor(entries, 0).getCenter(new THREE.Vector3());
+  // Share layer clearances across revisions so removed geometry stays aligned in Compare.
+  const layers = [
+    ["foot", 0], ["seam", 8], ["enclosure", 8], ["face", 44], ["display-spacer", 19], ["display", 29],
+  ].map(([kind, gap]) => ({ kind, gap, bounds: new THREE.Box3(), groups: [] }));
+  const byKind = new Map(layers.map((layer) => [layer.kind, layer]));
   const groups = new Map();
   for (const entry of entries) {
     const { part, revision } = entry.row;
-    const layer = part.part_id.match(/^(tray|face|seam|foot|display-spacer|fan)-/)?.[1]
-      ?? part.group ?? part.part_id;
-    const key = `${revision}:${layer}`;
-    const members = groups.get(key) ?? [];
-    members.push(entry);
-    groups.set(key, members);
-    entry.explodeLayer = layer;
-  }
-  for (const members of groups.values()) {
-    const { explodeLayer } = members[0];
-    const authored = members.reduce((sum, entry) => sum.add(entry.vector), new THREE.Vector3())
-      .divideScalar(members.length);
-    // Keep the shared subassemblies aligned and lift the deck in stacked layers.
-    const offset = Object.hasOwn(stackOffsets, explodeLayer)
-      ? new THREE.Vector3().fromArray(stackOffsets[explodeLayer])
-      : authored.multiply(new THREE.Vector3(0.25, 0.25, 0.3));
-    const elevation = boundsFor(members, 0).getCenter(new THREE.Vector3()).z;
-    for (const entry of members) {
-      entry.vector.copy(offset);
-      entry.elevation = elevation;
+    const id = part.part_id;
+    const kind = id === "fan-guard" ? "face"
+      : id.match(/^(face|seam|foot|display-spacer)-/)?.[1] ?? id;
+    const layer = byKind.get(kind) ?? byKind.get("enclosure");
+    const name = id === "fan-duct" ? "fan-envelope" : part.group ?? id;
+    const key = `${revision}:${layer.kind}:${name}`;
+    if (!groups.has(key)) {
+      const group = { members: [], bounds: new THREE.Box3() };
+      groups.set(key, group);
+      layer.groups.push(group);
     }
+    const group = groups.get(key);
+    group.members.push(entry);
+    group.bounds.union(entry.bounds);
   }
 
-  // Use the same presentation scale for both revisions and their comparison.
-  let maximum = Infinity;
-  for (const mode of modes) {
-    const limit = boundsFor(mode, 0).getSize(new THREE.Vector3()).multiplyScalar(2.2);
-    let low = 0;
-    let high = Math.min(2, maximum);
-    const size = new THREE.Vector3();
-    for (let i = 0; i < 16; i++) {
-      const amount = (low + high) / 2;
-      boundsFor(mode, amount).getSize(size);
-      if (size.x <= limit.x && size.y <= limit.y && size.z <= limit.z) low = amount;
-      else high = amount;
+  // Trays and their contents share a height band. The contents lift within that band.
+  for (const layer of layers) {
+    for (const group of layer.groups) {
+      const relative = group.bounds.getCenter(new THREE.Vector3()).sub(center);
+      const tray = group.members[0].row.part.part_id.startsWith("tray-");
+      const inside = layer.kind === "enclosure" && !tray;
+      const outward = layer.kind === "foot" ? 0.19 : tray ? 0.16 : inside ? 0.1 : 0;
+      group.offset = relative.multiply(new THREE.Vector3(outward, outward, inside ? 0.19 : 0));
+      if (inside) group.offset.z += 18;
+      layer.bounds.union(group.bounds.clone().translate(group.offset));
     }
-    maximum = low;
   }
-  for (const entry of entries) entry.vector.multiplyScalar(maximum);
+  const present = layers.filter(({ groups }) => groups.length);
+  const anchor = Math.max(0, present.findIndex(({ kind }) => kind === "enclosure"));
+  const lift = explodeGroupOffsets(present.map(({ bounds, gap }) => ({
+    minZ: bounds.min.z, maxZ: bounds.max.z, gap,
+  })), anchor, DEFAULT_EXPLODE);
+  for (const [i, { groups }] of present.entries()) {
+    for (const group of groups) {
+      group.offset.z += lift[i];
+      group.offset.divideScalar(DEFAULT_EXPLODE);
+      for (const entry of group.members) {
+        entry.vector.copy(group.offset);
+        // Upper layers start first so lower layers don't close the gap during the lift.
+        entry.explodeDelay = i <= anchor ? 0 : 70 * Math.min(2, present.length - 1 - i);
+      }
+    }
+  }
 }
 
 function createContactShadow(scene, renderer, bounds, resources) {
@@ -342,14 +346,36 @@ function createContactShadow(scene, renderer, bounds, resources) {
   });
   const ground = new THREE.Mesh(groundGeometry, groundMaterial);
   ground.renderOrder = -1;
-  scene.add(ground);
-  [target, blurTarget, depth, quadGeometry, horizontal, vertical, groundGeometry, groundMaterial]
+  const poolMaterial = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, toneMapped: false,
+    uniforms: { tint: { value: new THREE.Color(0x9baebf) } },
+    vertexShader: `
+      varying vec2 floorUv;
+      void main() {
+        floorUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }`,
+    fragmentShader: `
+      uniform vec3 tint;
+      varying vec2 floorUv;
+      void main() {
+        float falloff = 1.0 - smoothstep(0.0, 1.0, length(floorUv * 2.0 - 1.0));
+        gl_FragColor = vec4(tint, 0.085 * falloff * falloff);
+        #include <colorspace_fragment>
+      }`,
+  });
+  const pool = new THREE.Mesh(quadGeometry, poolMaterial);
+  pool.scale.set(width * 0.74, height * 0.74, 1);
+  pool.renderOrder = -2;
+  scene.add(ground, pool);
+  [target, blurTarget, depth, quadGeometry, horizontal, vertical, groundGeometry, groundMaterial, poolMaterial]
     .forEach((resource) => resources.add(resource));
 
   return (floor) => {
-    ground.visible = Number.isFinite(floor);
+    pool.visible = ground.visible = Number.isFinite(floor);
     if (!ground.visible) return;
     ground.position.set(center.x, center.y, floor - 1);
+    pool.position.set(center.x, center.y, floor - 1.1);
     capture.position.copy(ground.position);
     capture.lookAt(center.x, center.y, floor + 1);
 
@@ -377,8 +403,8 @@ function modelWeights(mode) {
 }
 
 function layoutCallouts(host, camera, entries, meshes, width, height, ray, panels) {
-  const cards = [...host.querySelectorAll("[data-anchor]")];
-  if (!cards.length) return [];
+  const annotations = [...host.querySelectorAll("[data-anchor]")];
+  if (!annotations.length) return [];
   const origin = host.getBoundingClientRect();
   const viewport = {
     left: Math.max(0, -origin.left),
@@ -401,63 +427,111 @@ function layoutCallouts(host, camera, entries, meshes, width, height, ray, panel
     ray.setFromCamera(ndc.set(x * 2 / width - 1, 1 - y * 2 / height), camera);
     return ray.intersectObjects(objects, false)[0];
   };
+  const covered = (x, y, surface, hit) => {
+    const first = hitAt(x, y, meshes);
+    return first && !surface.includes(first.object) && (!hit || first.distance < hit.distance - 0.1);
+  };
 
-  const inputs = cards.map((card) => {
-    const entry = entries.get(card.dataset.anchor);
+  const inputs = annotations.map((annotation) => {
+    const entry = entries.get(annotation.dataset.anchor);
     if (!entry?.group.visible) return {};
     const bounds = entry.bounds.clone().translate(entry.group.position);
     const anchor = project(bounds.getCenter(new THREE.Vector3()));
     if (anchor.z < -1 || anchor.z > 1) return {};
-    const { width, height } = card.getBoundingClientRect();
-    if (!width || !height) return {};
-    const xs = [];
+    const corners = [];
     for (const x of [bounds.min.x, bounds.max.x]) {
       for (const y of [bounds.min.y, bounds.max.y]) {
         for (const z of [bounds.min.z, bounds.max.z]) {
-          xs.push(project(new THREE.Vector3(x, y, z)).x);
+          corners.push(project(new THREE.Vector3(x, y, z)));
         }
       }
     }
-
-    // Use the part's silhouette on the side facing the card when the center ray hits.
-    const surface = entry.style.surface;
-    const centerHit = hitAt(anchor.x, anchor.y, surface);
-    function silhouette(outer) {
-      if (!centerHit) return anchor;
-      let inside = anchor.x;
-      for (let i = 0; i < 8; i++) {
-        const x = (inside + outer) / 2;
-        if (hitAt(x, anchor.y, surface)) inside = x;
-        else outer = x;
-      }
-      return { x: inside, y: anchor.y };
-    }
-    return { width, height, anchor, leftAnchor: silhouette(Math.min(...xs)), rightAnchor: silhouette(Math.max(...xs)) };
+    const left = Math.min(...corners.map(({ x }) => x));
+    const right = Math.max(...corners.map(({ x }) => x));
+    const outline = corners.every(({ z }) => z >= -1 && z <= 1) ? {
+      left: left - 5, right: right + 5,
+      top: Math.min(...corners.map(({ y }) => y)) - 5,
+      bottom: Math.max(...corners.map(({ y }) => y)) + 5,
+    } : null;
+    return { entry, anchor, outline, left, right };
   });
 
-  const placements = placeCallouts(viewport, occupied, inputs);
+  const labels = placeCallouts(viewport, occupied, inputs.map(({ anchor, outline }, i) => {
+    if (!outline) return {};
+    const { width, height } = annotations[i].querySelector(".fd-label").getBoundingClientRect();
+    return width && height ? { anchor, outline, width, height } : {};
+  }));
+
+  const cards = placeCallouts(viewport, [...occupied, ...labels.filter(Boolean).map(({ rect }) => rect)],
+    inputs.map(({ anchor, entry, left, right }, i) => {
+      if (!anchor || labels[i]) return {};
+      const { width, height } = annotations[i].querySelector(".fd-callout").getBoundingClientRect();
+      if (!width || !height) return {};
+
+      // Use the part's silhouette on the side facing the fallback card when the center ray hits.
+      const surface = entry.style.surface;
+      const centerHit = hitAt(anchor.x, anchor.y, surface);
+      function silhouette(outer) {
+        if (!centerHit) return anchor;
+        let inside = anchor.x;
+        for (let i = 0; i < 8; i++) {
+          const x = (inside + outer) / 2;
+          if (hitAt(x, anchor.y, surface)) inside = x;
+          else outer = x;
+        }
+        return { x: inside, y: anchor.y };
+      }
+      return { width, height, anchor, leftAnchor: silhouette(left), rightAnchor: silhouette(right) };
+    }));
+
   const folded = [];
-  for (const [i, card] of cards.entries()) {
-    const line = host.querySelector(`[data-leader="${card.dataset.callout}"]`);
-    const placement = placements[i];
-    card.style.visibility = line.style.visibility = placement ? "visible" : "hidden";
+  for (const [i, annotation] of annotations.entries()) {
+    const line = host.querySelector(`[data-leader="${annotation.dataset.callout}"]`);
+    const label = annotation.querySelector(".fd-label");
+    const card = annotation.querySelector(".fd-callout");
+    const placement = labels[i] ?? cards[i];
+    label.style.visibility = labels[i] ? "visible" : "hidden";
+    card.style.visibility = cards[i] ? "visible" : "hidden";
+    const { outline, entry, anchor } = inputs[i];
+    line.style.visibility = outline || placement ? "visible" : "hidden";
+    line.dataset.card = Boolean(cards[i]);
+    const dimension = line.querySelector(".fd-dimension");
+    const ticks = line.querySelector(".fd-ticks");
+    if (outline) {
+      const { left, top, right, bottom } = outline;
+      const surface = entry.style.surface;
+      const hit = hitAt(anchor.x, anchor.y, surface);
+      const opacity = hit && covered(anchor.x, anchor.y, surface, hit) ? 0.4 : 1;
+      dimension.setAttribute("opacity", opacity);
+      ticks.setAttribute("opacity", opacity);
+      dimension.setAttribute("d", `M${left},${top}H${right}V${bottom}H${left}Z`);
+      ticks.setAttribute("d", [left, right].flatMap((x) => [top, bottom].map((y) =>
+        `M${x - 3},${y}h6 M${x},${y - 3}v6`,
+      )).join(" "));
+    } else {
+      dimension.removeAttribute("d");
+      ticks.removeAttribute("d");
+    }
+
+    const path = line.querySelector(".fd-leader");
     if (!placement) {
-      folded.push(card.dataset.calloutKey);
+      path.removeAttribute("d");
+      folded.push(annotation.dataset.calloutKey);
       continue;
     }
 
     const { rect, leader } = placement;
-    card.style.transform = `translate(${rect.left}px, ${rect.top}px)`;
-    line.querySelector("path").setAttribute("d", leader.map(({ x, y }, j) => `${j ? "L" : "M"}${x},${y}`).join(" "));
+    const text = labels[i] ? label : card;
+    text.style.transform = `translate(${rect.left}px, ${rect.top}px)`;
+    path.setAttribute("d", leader.map(({ x, y }, j) => `${j ? "L" : "M"}${x},${y}`).join(" "));
+    if (!cards[i]) continue;
     const { x, y } = leader.at(-1);
-    const surface = entries.get(card.dataset.anchor).style.surface;
-    const first = hitAt(x, y, meshes);
+    const surface = entry.style.surface;
     const hit = hitAt(x, y, surface);
-    const occluded = first && !surface.includes(first.object) && (!hit || first.distance < hit.distance - 0.1);
     const ring = line.querySelector("circle");
     ring.setAttribute("cx", x);
     ring.setAttribute("cy", y);
-    ring.setAttribute("opacity", occluded || !hit ? 0.4 : 1);
+    ring.setAttribute("opacity", !hit || covered(x, y, surface, hit) ? 0.4 : 1);
   }
   return folded;
 }
@@ -501,7 +575,7 @@ export function createFielddeckStage(host, assets, index, callbacks) {
     "5": all.filter(({ row }) => row.revision === "5"),
     compare: all.filter(({ row }) => row.revision === "5" || row.delta === "removed"),
   };
-  groupExplode(all, Object.values(modeEntries).filter((entries) => entries.length));
+  groupExplode(all);
   const extended = boundsFor(all, 1).union(boundsFor(all, 0));
   const renderContact = createContactShadow(scene, renderer, extended, resources);
   const assembled = boundsFor(all, 0);
@@ -683,9 +757,6 @@ export function createFielddeckStage(host, assets, index, callbacks) {
   for (const entry of all) {
     entry.style.surface.forEach((mesh) => { mesh.userData.fielddeckKey = entry.row.key; });
   }
-  const layers = all.map(({ elevation }) => elevation);
-  const bottom = Math.min(...layers);
-  const layerRange = Math.max(1, Math.max(...layers) - bottom);
   const nextPosition = new THREE.Vector3();
 
   function animate(now) {
@@ -698,9 +769,8 @@ export function createFielddeckStage(host, assets, index, callbacks) {
     let dirty = config !== lastConfig || resized || layoutDirty || heroElapsed !== null;
     const motion = heroElapsed === null ? explodeMotion : { from: 0, to: DEFAULT_EXPLODE, start: heroStart + 400 };
     const offsetFor = motion && motion.to > motion.from && !reduced
-      ? ({ elevation }) => {
-          const delay = 70 * Math.round(2 * (elevation - bottom) / layerRange);
-          const phase = outCubic(clamp((now - motion.start - delay) / (1100 - delay)));
+      ? ({ explodeDelay }) => {
+          const phase = outCubic(clamp((now - motion.start - explodeDelay) / (1100 - explodeDelay)));
           return THREE.MathUtils.lerp(motion.from, motion.to, phase);
         } : () => explode;
     if (!blend || mode !== blend.mode) {

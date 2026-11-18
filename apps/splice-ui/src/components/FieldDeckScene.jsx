@@ -27,13 +27,13 @@ function hasNumericValue({ value, state }) {
     || Array.isArray(value) && value.some((item) => typeof item === "number"));
 }
 
-function CalloutEvidence({ fact }) {
+function CalloutEvidence({ fact, compact }) {
   const [field, value, state, source] = evidenceCells(fact);
   return (
     <div className="fd-callout-evidence">
       <span data-numeric={hasNumericValue(fact)}>{state === "unknown" ? field : value}</span>
       {" · "}{state}
-      {source.href && <> · <EvidenceSource source={source} /></>}
+      {!compact && source.href && <> · <EvidenceSource source={source} /></>}
     </div>
   );
 }
@@ -153,6 +153,8 @@ function sceneCallouts(index, sidecars, view, linked) {
     const anchor = selectedPartKeys(index, row).find((key) => linked.has(key));
     if (!anchor) return;
     const basis = row.part && classifyPart(row.part, row.delta, view.mode);
+    const anchored = index.byKey.get(anchor);
+    const anchorState = classifyPart(anchored.part, anchored.delta, view.mode);
     const fact = row.part?.evidence.find(({ field, state }) => field === "landscape_glass_mm" && state !== "unknown")
       ?? row.part?.evidence.find(({ field }) => field === "geometry_reference")
       ?? row.part?.evidence.find(({ field, state }) => field === "print_dimensions_mm" && state !== "unknown")
@@ -164,6 +166,7 @@ function sceneCallouts(index, sidecars, view, linked) {
     }
     items.set(anchor, {
       key: row.key, anchor, kind: basis?.diff ?? basis?.basis ?? "interface",
+      annotationKind: anchorState.diff ?? anchorState.basis,
       tag: basis?.diff ? DIFF_LABELS[basis.diff] : row.part ? BASIS_LABELS[basis.basis] : "Interface",
       basisTag: basis?.diff && basis.basis,
       title: row.part?.label ?? row.link.label,
@@ -193,7 +196,8 @@ function sceneCallouts(index, sidecars, view, linked) {
   return [...items.values()].slice(0, 4);
 }
 
-function CalloutContent({ item, heading }) {
+function CalloutContent({ item, heading, expanded }) {
+  const reasons = expanded ? item.reasons : item.reasons.slice(0, 3);
   return (
     <div className="fd-callout-inner">
       <div className="fd-tags">
@@ -202,12 +206,12 @@ function CalloutContent({ item, heading }) {
       </div>
       {heading ? <h3>{item.title}</h3> : <strong title={item.title}>{item.title}</strong>}
       {item.fact && <CalloutEvidence fact={item.fact} />}
-      {item.reasons.length > 0 && (
+      {reasons.length > 0 && (
         <ul>
-          {item.reasons.slice(0, 3).map((reason, j) => <li key={j} title={reason}>{reason}</li>)}
+          {reasons.map((reason, j) => <li key={j} title={reason}>{reason}</li>)}
         </ul>
       )}
-      {item.reasons.length > 3 && (
+      {!expanded && item.reasons.length > 3 && (
         <span className="fd-callout-more" title={item.reasons.slice(3).join("\n")}>
           +{item.reasons.length - 3} more
         </span>
@@ -222,15 +226,22 @@ function Callouts({ items }) {
     <div className="fd-annotations" aria-label="Scene callouts">
       <svg className="fd-leaders" aria-hidden="true">
         {items.map((item, i) => (
-          <g key={item.key} data-kind={item.kind} data-leader={i}>
-            <path /><circle r="3.5" />
+          <g key={item.key} data-kind={item.annotationKind} data-leader={i}>
+            <path className="fd-dimension" /><path className="fd-ticks" />
+            <path className="fd-leader" /><circle r="3.5" />
           </g>
         ))}
       </svg>
       {items.map((item, i) => (
-        <div key={item.key} className="fd-callout" data-kind={item.kind} data-anchor={item.anchor}
-          data-callout={i} data-callout-key={item.key}>
-          <CalloutContent item={item} />
+        <div key={item.key} data-anchor={item.anchor} data-callout={i} data-callout-key={item.key}>
+          <div className="fd-label">
+            <strong>{item.title}</strong>
+            {item.reasons.length ? <span className="fd-callout-evidence">{item.reasons[0]}</span>
+              : item.fact && <CalloutEvidence fact={item.fact} compact />}
+          </div>
+          <div className="fd-callout" data-kind={item.kind}>
+            <CalloutContent item={item} />
+          </div>
         </div>
       ))}
     </div>
@@ -292,8 +303,9 @@ export default function FieldDeckScene() {
   const selection = index.byKey.get(view.selected);
   const callouts = useMemo(() => sceneCallouts(index, sidecars, view, linked), [index, sidecars, view, linked]);
   const foldedCallouts = narrow ? callouts : callouts.filter(({ key }) => foldedKeys.includes(key));
+  const inspectorBlockers = callouts.filter((item) => item.reasons.length && !foldedCallouts.includes(item));
   const inspectorKey = selection?.key ?? "";
-  const hasDetails = Boolean(selection || foldedCallouts.length);
+  const hasDetails = Boolean(selection || foldedCallouts.length || inspectorBlockers.length);
   const treeOpen = narrow ? sheet === "parts" : desktopTreeOpen;
   const inspectorOpen = narrow ? sheet === "details" : hasDetails && collapsedSelection !== inspectorKey;
   const selectedKeys = useMemo(() => selectedPartKeys(index, selection), [index, selection]);
@@ -504,11 +516,19 @@ export default function FieldDeckScene() {
             {inspectorOpen && foldedCallouts.length > 0 && (
               <div className="fd-folded-callouts" aria-label="Scene callouts">
                 {foldedCallouts.map((item) =>
-                  <CalloutContent key={item.key} item={item} heading={item.key === selection?.key} />)}
+                  <CalloutContent key={item.key} item={item} heading={item.key === selection?.key} expanded />)}
               </div>
             )}
             <PartCard row={selection} mode={view.mode} linked={linked} index={index}
               showHeading={!foldedCallouts.some(({ key }) => key === selection?.key)} />
+            {inspectorBlockers.map((item) => (
+              <div key={item.key}>
+                <h4>{item.key === selection?.key ? "Blockers" : `${item.title} blockers`}</h4>
+                <ul className="fd-checks">
+                  {item.reasons.map((reason, i) => <li key={i}>{reason}</li>)}
+                </ul>
+              </div>
+            ))}
           </div>
         </aside>
 
