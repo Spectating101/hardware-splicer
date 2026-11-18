@@ -2,8 +2,8 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import FieldDeckScene, { EvidenceRows } from "./FieldDeckScene.jsx";
 import {
-  classifyPart, evidenceCells, formatEvidenceSource, formatEvidenceValue, indexFielddeck,
-  rowForNode, rowsForMode, selectedPartKeys,
+  FIELDDECK_NARROW, classifyPart, evidenceCells, formatEvidenceSource, formatEvidenceValue,
+  indexFielddeck, placeCallouts, rowForNode, rowsForMode, selectedPartKeys, toggleFielddeckSheet,
 } from "./fielddeckLogic.js";
 
 const stageMock = vi.hoisted(() => ({ load: vi.fn(), create: vi.fn() }));
@@ -79,6 +79,66 @@ describe("Fielddeck state and mapping", () => {
   });
 });
 
+describe("Fielddeck stage layout", () => {
+  const rect = (left, top, right, bottom) => ({ left, top, right, bottom });
+  const card = (x, y, width = 228, height = 115) => ({ width, height, anchor: { x, y } });
+  const overlaps = (a, b) =>
+    a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+
+  it("flips and stacks cards around the inspector, tree, header and controls", () => {
+    const viewport = rect(0, 0, 1426, 900);
+    const panels = [
+      rect(0, 0, 1426, 58), rect(18, 58, 238, 502),
+      rect(1146, 58, 1408, 508), rect(0, 818, 1426, 900),
+    ];
+    const inputs = [card(1060, 140), card(1060, 140), card(240, 485), card(260, 510)];
+    const placements = placeCallouts(viewport, panels, inputs);
+    expect(placements.every(Boolean)).toBe(true);
+    expect(placements[0].rect.right).toBeLessThan(inputs[0].anchor.x);
+    expect(placements[1].rect.right).toBeLessThan(inputs[1].anchor.x);
+    expect(placements[1].rect.top).not.toBe(placements[0].rect.top);
+    placements.forEach(({ rect: placed, leader }, i) => {
+      expect(placed.left).toBeGreaterThanOrEqual(viewport.left);
+      expect(placed.top).toBeGreaterThanOrEqual(viewport.top);
+      expect(placed.right).toBeLessThanOrEqual(viewport.right);
+      expect(placed.bottom).toBeLessThanOrEqual(viewport.bottom);
+      expect(panels.some((panel) => overlaps(panel, placed))).toBe(false);
+      expect(placements.slice(0, i).some((other) => overlaps(other.rect, placed))).toBe(false);
+      expect(leader.at(-1)).toEqual(inputs[i].anchor);
+    });
+  });
+
+  it("routes the leader around a panel between the card and its anchor", () => {
+    const panel = rect(430, 75, 500, 300);
+    const panels = [rect(0, 0, 195, 400), rect(195, 0, 405, 95), rect(195, 160, 405, 400), panel];
+    const input = card(420, 110, 180, 160);
+    const [placement] = placeCallouts(rect(0, 0, 700, 400), panels, [input]);
+    expect(placement.rect.left).toBeGreaterThan(panel.right);
+    expect(placement.leader.at(-1)).toEqual(input.anchor);
+    expect(placement.leader.slice(1, -1).every(({ y }) => y < panel.top)).toBe(true);
+    expect(placement.leader.length).toBeGreaterThan(2);
+  });
+
+  it("uses the visible viewport and folds cards without a free slot or a visible anchor", () => {
+    const viewport = rect(50, 75, 350, 275);
+    const panels = [rect(50, 75, 210, 275)];
+    const inputs = [card(220, 160, 150, 50), card(80, 160, 80, 50), card(230, 60, 80, 50)];
+    expect(placeCallouts(viewport, panels, inputs)).toEqual([null, null, null]);
+    const [placement] = placeCallouts(viewport, panels, [card(220, 160, 140, 60)]);
+    expect(placement.rect.left).toBe(210);
+    expect(placement.rect.right).toBe(350);
+  });
+
+  it("switches directly between narrow-screen sheets and closes the active sheet", () => {
+    const parts = toggleFielddeckSheet(null, "parts");
+    const details = toggleFielddeckSheet(parts, "details");
+    expect(parts).toBe("parts");
+    expect(details).toBe("details");
+    expect(toggleFielddeckSheet(details, "parts")).toBe("parts");
+    expect(toggleFielddeckSheet(details, "details")).toBeNull();
+  });
+});
+
 describe("Fielddeck evidence formatting", () => {
   it("rounds measurements without padding decimals and gives dimensions and power their units", () => {
     expect(formatEvidenceValue({ field: "landscape_glass_mm", value: [143.4, 91.46000003] }))
@@ -113,10 +173,26 @@ describe("Fielddeck evidence formatting", () => {
 });
 
 describe("Fielddeck evidence UI", () => {
+  let narrow;
+  let callbacks;
+  const update = vi.fn();
   beforeEach(() => {
-    vi.stubGlobal("matchMedia", vi.fn(() => ({
-      matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn(),
+    narrow = false;
+    vi.stubGlobal("matchMedia", vi.fn((query) => ({
+      matches: query === FIELDDECK_NARROW ? narrow : query === "(prefers-reduced-motion: reduce)",
+      addEventListener: vi.fn(), removeEventListener: vi.fn(),
     })));
+    stageMock.load.mockResolvedValue(Object.fromEntries(
+      Object.entries(sides).map(([rev, sidecar]) => [rev, { sidecar, gltf: {} }]),
+    ));
+    stageMock.create.mockImplementation((_host, _assets, index, handlers) => {
+      callbacks = handlers;
+      handlers.onFrame();
+      return {
+        linked: new Set([...index.byKey.values()].filter(({ part }) => part).map(({ key }) => key)),
+        update, dispose: vi.fn(),
+      };
+    });
   });
   afterEach(() => vi.unstubAllGlobals());
 
@@ -134,19 +210,6 @@ describe("Fielddeck evidence UI", () => {
   });
 
   it("syncs picks and interface selection with the tree and shows no readiness claim", async () => {
-    stageMock.load.mockResolvedValue(Object.fromEntries(
-      Object.entries(sides).map(([rev, sidecar]) => [rev, { sidecar, gltf: {} }]),
-    ));
-    let callbacks;
-    const update = vi.fn();
-    stageMock.create.mockImplementation((_host, _assets, index, handlers) => {
-      callbacks = handlers;
-      handlers.onFrame();
-      return {
-        linked: new Set([...index.byKey.values()].filter(({ part }) => part).map(({ key }) => key)),
-        update, dispose: vi.fn(),
-      };
-    });
     render(<FieldDeckScene />);
     const tree = within(screen.getByRole("complementary", { name: "Part tree" }));
     const assembly = tree.getByRole("button", { name: "Assembly" });
@@ -161,12 +224,46 @@ describe("Fielddeck evidence UI", () => {
     fireEvent.click(tree.getByRole("button", { name: "DSI FFC" }));
     expect(inspector.getByText("pin_mapping_unknown")).toBeVisible();
     expect(inspector.getByText("signal_voltage_unknown")).toBeVisible();
-    expect(screen.getByRole("slider", { name: "Explode" })).toHaveValue("0.55");
+    expect(screen.getByRole("slider", { name: "Explode" })).toHaveValue("0.6");
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({
       selectedKeys: ["5:part:pi4-dsi", "5:part:display"],
     }));
     expect(screen.getByText("No physical validation performed")).toBeVisible();
     expect(screen.getByText("1 blocker")).toBeVisible();
     expect(screen.getByTestId("fielddeck-scene")).not.toHaveTextContent(/\bready\b/i);
+    act(() => callbacks.onCalloutLayout(["5:link:display-ribbon"]));
+    expect(within(inspector.getByLabelText("Scene callouts")).getByText("DSI FFC")).toBeVisible();
+  });
+
+  it("opens only one narrow sheet and keeps callouts inside Details", async () => {
+    narrow = true;
+    render(<FieldDeckScene />);
+    const parts = await screen.findByRole("button", { name: "Parts" });
+    const details = screen.getByRole("button", { name: "Details" });
+    expect(parts).toHaveAttribute("aria-expanded", "false");
+    expect(details).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("complementary", { name: "Part tree" })).toBeNull();
+    expect(screen.queryByRole("complementary", { name: "Selection details" })).toBeNull();
+
+    fireEvent.click(parts);
+    const tree = within(screen.getByRole("complementary", { name: "Part tree" }));
+    fireEvent.click(tree.getByRole("button", { name: "DSI FFC" }));
+    expect(parts).toHaveAttribute("aria-expanded", "true");
+    expect(screen.queryByLabelText("Scene callouts")).toBeNull();
+
+    fireEvent.click(details);
+    expect(parts).toHaveAttribute("aria-expanded", "false");
+    expect(details).toHaveAttribute("aria-expanded", "true");
+    expect(screen.queryByRole("complementary", { name: "Part tree" })).toBeNull();
+    const inspector = within(screen.getByRole("complementary", { name: "Selection details" }));
+    expect(within(inspector.getByLabelText("Scene callouts")).getByText("DSI FFC")).toBeVisible();
+    expect(inspector.getByText("pin_mapping_unknown")).toBeVisible();
+    expect(screen.getByTestId("fielddeck-scene").querySelector("[data-anchor]")).toBeNull();
+
+    fireEvent.click(parts);
+    expect(details).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("complementary", { name: "Selection details" })).toBeNull();
+    fireEvent.click(parts);
+    expect(screen.queryByRole("complementary", { name: "Part tree" })).toBeNull();
   });
 });

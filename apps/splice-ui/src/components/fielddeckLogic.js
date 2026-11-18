@@ -20,7 +20,128 @@ export const TOUR = [
 ];
 
 export const VALIDATION_LABEL = "No physical validation performed";
-export const DEFAULT_EXPLODE = 0.55;
+export const DEFAULT_EXPLODE = 0.6;
+export const FIELDDECK_NARROW = "(width < 700px)";
+
+export function toggleFielddeckSheet(current, sheet) {
+  return current === sheet ? null : sheet;
+}
+
+const clampTo = (value, min, max) => Math.max(min, Math.min(max, value));
+const containsPoint = (rect, { x, y }) =>
+  x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+const overlaps = (a, b) =>
+  a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+const padRect = (rect, gap) => ({
+  left: rect.left - gap, right: rect.right + gap, top: rect.top - gap, bottom: rect.bottom + gap,
+});
+
+// A segment can run along the outside edge of a padded obstacle.
+function crossesRect(from, to, rect) {
+  let enter = 0;
+  let exit = 1;
+  for (const [start, end, min, max] of [
+    [from.x, to.x, rect.left, rect.right], [from.y, to.y, rect.top, rect.bottom],
+  ]) {
+    if (start === end) {
+      if (start <= min || start >= max) return false;
+    } else {
+      const first = (min - start) / (end - start);
+      const last = (max - start) / (end - start);
+      enter = Math.max(enter, Math.min(first, last));
+      exit = Math.min(exit, Math.max(first, last));
+    }
+  }
+  return enter < exit;
+}
+
+function leaderPath(anchor, card, viewport, panels) {
+  const edge = {
+    x: clampTo(anchor.x, card.left, card.right),
+    y: clampTo(anchor.y, card.top, card.bottom),
+  };
+  const clear = (from, to) => !panels.some((panel) => crossesRect(from, to, panel));
+  if (clear(edge, anchor)) return [edge, anchor];
+
+  // Route around blocked straight lines using the visible corners of the panels.
+  const corners = panels.flatMap(({ left, right, top, bottom }) => [
+    { x: left, y: top }, { x: right, y: top }, { x: left, y: bottom }, { x: right, y: bottom },
+  ]).filter((point) => containsPoint(viewport, point));
+  const points = [edge, anchor, ...corners];
+  const distances = points.map(() => Infinity);
+  const previous = [];
+  const remaining = new Set(points.keys());
+  distances[0] = 0;
+  while (remaining.size) {
+    const next = [...remaining].reduce((a, b) => distances[a] <= distances[b] ? a : b);
+    if (!Number.isFinite(distances[next])) break;
+    if (next === 1) {
+      const path = [];
+      for (let i = 1; i !== undefined; i = previous[i]) path.unshift(points[i]);
+      return path;
+    }
+    remaining.delete(next);
+    for (const i of remaining) {
+      const distance = distances[next] + Math.hypot(points[next].x - points[i].x, points[next].y - points[i].y);
+      if (distance >= distances[i] || !clear(points[next], points[i]) || crossesRect(points[next], points[i], card)) continue;
+      distances[i] = distance;
+      previous[i] = next;
+    }
+  }
+  return null;
+}
+
+// Rectangles and anchors use stage coordinates. A null result folds that card into Details.
+export function placeCallouts(viewport, panelRects, callouts) {
+  const occupied = [...panelRects];
+  const leaderObstacles = panelRects.map((rect) => padRect(rect, 4));
+  const center = (viewport.left + viewport.right) / 2;
+  return callouts.map(({ width, height, anchor, leftAnchor = anchor, rightAnchor = anchor }) => {
+    if (!anchor) return null;
+    const maxX = viewport.right - width;
+    const maxY = viewport.bottom - height;
+    if (maxX < viewport.left || maxY < viewport.top) return null;
+
+    const preferredX = anchor.x < center ? viewport.left + 18 : maxX - 18;
+    const preferredY = anchor.y - height / 2;
+    for (const gap of [8, 0]) {
+      const obstacles = occupied.map((rect) => padRect(rect, gap));
+      const panels = gap ? leaderObstacles : panelRects;
+      const visible = (point) => containsPoint(viewport, point) && !panels.some((panel) => containsPoint(panel, point));
+      const centerPoint = visible(anchor) ? anchor : null;
+      const leftPoint = visible(leftAnchor) ? leftAnchor : centerPoint;
+      const rightPoint = visible(rightAnchor) ? rightAnchor : centerPoint;
+      if (!leftPoint && !rightPoint) continue;
+      const anchorGap = Math.max(gap, 1);
+      const xs = new Set([preferredX, viewport.left, maxX,
+        (leftPoint ?? anchor).x - width - anchorGap, (rightPoint ?? anchor).x + anchorGap,
+        ...obstacles.flatMap(({ left, right }) => [left - width, right]),
+      ].map((x) => clampTo(x, viewport.left, maxX)));
+      const ys = new Set([preferredY, viewport.top, maxY, anchor.y - height - anchorGap, anchor.y + anchorGap,
+        ...obstacles.flatMap(({ top, bottom }) => [top - height, bottom]),
+      ].map((y) => clampTo(y, viewport.top, maxY)));
+      const candidates = [];
+      for (const left of xs) {
+        for (const top of ys) {
+          const rect = { left, top, right: left + width, bottom: top + height };
+          const point = left + width / 2 < anchor.x ? leftPoint : rightPoint;
+          if (!point || containsPoint(rect, point) || obstacles.some((obstacle) => overlaps(rect, obstacle))) continue;
+          const score = Math.abs(top - preferredY) + 0.65 * Math.abs(left - preferredX)
+            + (left <= point.x && point.x <= rect.right ? 80 : 0);
+          candidates.push({ rect, point, score });
+        }
+      }
+      candidates.sort((a, b) => a.score - b.score);
+      for (const { rect, point } of candidates) {
+        const leader = leaderPath(point, rect, viewport, panels);
+        if (!leader) continue;
+        occupied.push(rect);
+        return { rect, leader };
+      }
+    }
+    return null;
+  });
+}
 
 export function classifyPart(part, delta, mode) {
   const basis = Object.hasOwn(BASIS_LABELS, part.geometry_basis) ? part.geometry_basis : "unknown";

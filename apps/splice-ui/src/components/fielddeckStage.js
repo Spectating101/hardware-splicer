@@ -5,7 +5,7 @@ import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment
 import { HorizontalBlurShader } from "three/examples/jsm/shaders/HorizontalBlurShader.js";
 import { VerticalBlurShader } from "three/examples/jsm/shaders/VerticalBlurShader.js";
 import { fielddeckSceneUrl } from "../api.js";
-import { classifyPart, DEFAULT_EXPLODE, rowForNode, TOUR } from "./fielddeckLogic.js";
+import { classifyPart, DEFAULT_EXPLODE, FIELDDECK_NARROW, placeCallouts, rowForNode, TOUR } from "./fielddeckLogic.js";
 
 const COLORS = {
   custom: 0x35302a, vendor_step: 0x626b77, envelope: 0x8fa8c4,
@@ -245,8 +245,10 @@ function boundsFor(entries, explode) {
 }
 
 const stackOffsets = {
-  tray: 0, face: 24, seam: -1, foot: -6, "display-spacer": 34,
-  fan: 24, display: 47, "keyboard-nominal-envelope": 15,
+  tray: [0, 0, 0], face: [0, 0, 31], seam: [0, 0, -7], foot: [0, 0, -9],
+  "display-spacer": [0, 0, 51], fan: [0, 0, 31], display: [0, 0, 62],
+  "keyboard-nominal-envelope": [0, 0, 20],
+  "power-bank-nominal-envelope": [-65, -55, 12], pi4: [-70, 62, 12],
 };
 
 function groupExplode(entries, modes) {
@@ -267,7 +269,7 @@ function groupExplode(entries, modes) {
       .divideScalar(members.length);
     // Keep the shared subassemblies aligned and lift the deck in stacked layers.
     const offset = Object.hasOwn(stackOffsets, explodeLayer)
-      ? new THREE.Vector3(0, 0, stackOffsets[explodeLayer])
+      ? new THREE.Vector3().fromArray(stackOffsets[explodeLayer])
       : authored.multiply(new THREE.Vector3(0.25, 0.25, 0.3));
     const elevation = boundsFor(members, 0).getCenter(new THREE.Vector3()).z;
     for (const entry of members) {
@@ -277,11 +279,11 @@ function groupExplode(entries, modes) {
   }
 
   // Use the same presentation scale for both revisions and their comparison.
-  let maximum = 1;
+  let maximum = Infinity;
   for (const mode of modes) {
-    const limit = boundsFor(mode, 0).getSize(new THREE.Vector3()).multiplyScalar(1.6);
+    const limit = boundsFor(mode, 0).getSize(new THREE.Vector3()).multiplyScalar(2.2);
     let low = 0;
-    let high = maximum;
+    let high = Math.min(2, maximum);
     const size = new THREE.Vector3();
     for (let i = 0; i < 16; i++) {
       const amount = (low + high) / 2;
@@ -374,21 +376,25 @@ function modelWeights(mode) {
   return { seven: mode === "7" ? 1 : 0, five: mode === "7" ? 0 : 1, compare: mode === "compare" ? 1 : 0 };
 }
 
-function layoutCallouts(host, camera, entries, meshes, width, height, ray) {
+function layoutCallouts(host, camera, entries, meshes, width, height, ray, panels) {
   const cards = [...host.querySelectorAll("[data-anchor]")];
-  if (!cards.length || window.matchMedia("(width < 700px)").matches) return;
+  if (!cards.length) return [];
+  const origin = host.getBoundingClientRect();
+  const viewport = {
+    left: Math.max(0, -origin.left),
+    top: Math.max(0, -origin.top),
+    right: Math.min(origin.width, document.documentElement.clientWidth - origin.left),
+    bottom: Math.min(origin.height, document.documentElement.clientHeight - origin.top),
+  };
+  const occupied = panels.map((panel) => panel.getBoundingClientRect())
+    .filter((rect) => rect.width && rect.height)
+    .map(({ left, right, top, bottom }) => ({
+      left: left - origin.left, right: right - origin.left,
+      top: top - origin.top, bottom: bottom - origin.top,
+    }));
   const ndc = new THREE.Vector2();
-  const screen = host.getBoundingClientRect();
-  const top = host.querySelector(".fd-header").getBoundingClientRect().bottom - screen.top;
-  const bottom = host.querySelector(".fd-bottom").getBoundingClientRect().top - screen.top - 14;
-  const gap = 10;
-  const columns = [".fd-tree", ".fd-inspector"].map((selector) => ({
-    top: Math.max(top, host.querySelector(selector).getBoundingClientRect().bottom - screen.top) + gap,
-    cards: [],
-    height: 0,
-  }));
   const project = (point) => {
-    const p = point.clone().project(camera);
+    const p = point.project(camera);
     return { x: (p.x + 1) * width / 2, y: (1 - p.y) * height / 2, z: p.z };
   };
   const hitAt = (x, y, objects) => {
@@ -396,90 +402,64 @@ function layoutCallouts(host, camera, entries, meshes, width, height, ray) {
     return ray.intersectObjects(objects, false)[0];
   };
 
-  for (const card of cards) {
-    const line = host.querySelector(`[data-leader="${card.dataset.callout}"]`);
+  const inputs = cards.map((card) => {
     const entry = entries.get(card.dataset.anchor);
-    card.style.visibility = line.style.visibility = "hidden";
-    if (!entry?.group.visible) continue;
+    if (!entry?.group.visible) return {};
     const bounds = entry.bounds.clone().translate(entry.group.position);
-    const point = project(bounds.getCenter(new THREE.Vector3()));
-    if (point.z < -1 || point.z > 1 || point.x < 0 || point.x > width || point.y < 0 || point.y > height) continue;
-    const side = Number(point.x >= width / 2);
-    const { width: w, height: h } = card.getBoundingClientRect();
-    const column = [columns[side], columns[1 - side]]
-      .find((lane) => lane.top + lane.height + h <= bottom);
-    if (!column) continue;
-    column.cards.push({ card, line, entry, bounds, point, w, h });
-    column.height += h + gap;
-    card.style.visibility = line.style.visibility = "visible";
-  }
-
-  for (const [side, column] of columns.entries()) {
-    column.cards.sort((a, b) => a.point.y - b.point.y);
-    let cursor = bottom;
-    for (const item of [...column.cards].reverse()) {
-      item.maxY = cursor - item.h;
-      cursor = item.maxY - gap;
-    }
-    cursor = column.top;
-    for (const { entry, bounds, point, card, line, w, h, maxY } of column.cards) {
-      const x = side ? width - w - 18 : 18;
-      const y = Math.max(cursor, Math.min(maxY, point.y - h / 2));
-      cursor = y + h + gap;
-      const edgeX = side ? x : x + w;
-      const edgeY = y + Math.min(h / 2, 34);
-      const direction = side ? 1 : -1;
-      card.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;
-
-      // Search inward from the projected bounds for the part's outside silhouette.
-      let outer = point.x;
-      for (const bx of [bounds.min.x, bounds.max.x]) {
-        for (const by of [bounds.min.y, bounds.max.y]) {
-          for (const bz of [bounds.min.z, bounds.max.z]) {
-            const corner = project(new THREE.Vector3(bx, by, bz));
-            if ((corner.x - outer) * direction > 0) outer = corner.x;
-          }
+    const anchor = project(bounds.getCenter(new THREE.Vector3()));
+    if (anchor.z < -1 || anchor.z > 1) return {};
+    const { width, height } = card.getBoundingClientRect();
+    if (!width || !height) return {};
+    const xs = [];
+    for (const x of [bounds.min.x, bounds.max.x]) {
+      for (const y of [bounds.min.y, bounds.max.y]) {
+        for (const z of [bounds.min.z, bounds.max.z]) {
+          xs.push(project(new THREE.Vector3(x, y, z)).x);
         }
       }
-      const surface = entry.style.surface;
-      let anchor = point;
-      let hit;
-      const stride = Math.max(2, Math.abs(outer - point.x) / 18);
-      for (let sx = outer; (sx - point.x) * direction >= -stride; sx -= direction * stride) {
-        hit = hitAt(sx, point.y, surface);
-        if (!hit) continue;
-        anchor = { x: sx + 3 * direction, y: point.y };
-        break;
-      }
-      const first = hitAt(anchor.x, anchor.y, meshes);
-      const occluded = Boolean(first && !surface.includes(first.object)
-        && (!hit || first.distance < hit.distance - 0.1));
-      const room = (edgeX - anchor.x) * direction;
-      const path = [];
-      if (room > 0) {
-        const knee = edgeX - direction * Math.min(36, room / 2);
-        const points = [[anchor.x, anchor.y], [knee, edgeY], [edgeX, edgeY]];
-        const blockers = meshes.includes(surface[0]) ? meshes : [...meshes, ...surface];
-        for (let i = 1; i < points.length; i++) {
-          const [sx, sy] = points[i - 1];
-          const [ex, ey] = points[i];
-          const steps = Math.ceil(Math.hypot(ex - sx, ey - sy) / 12);
-          for (let j = 0; j < steps; j++) {
-            const from = j / steps;
-            const to = (j + 1) / steps;
-            const middle = (from + to) / 2;
-            if (hitAt(THREE.MathUtils.lerp(sx, ex, middle), THREE.MathUtils.lerp(sy, ey, middle), blockers)) continue;
-            path.push(`M${THREE.MathUtils.lerp(sx, ex, from)},${THREE.MathUtils.lerp(sy, ey, from)}L${THREE.MathUtils.lerp(sx, ex, to)},${THREE.MathUtils.lerp(sy, ey, to)}`);
-          }
-        }
-      }
-      line.querySelector("path").setAttribute("d", path.join(" "));
-      const ring = line.querySelector("circle");
-      ring.setAttribute("cx", anchor.x);
-      ring.setAttribute("cy", anchor.y);
-      ring.setAttribute("opacity", room <= 0 ? 0 : occluded || !hit ? 0.4 : 1);
     }
+
+    // Use the part's silhouette on the side facing the card when the center ray hits.
+    const surface = entry.style.surface;
+    const centerHit = hitAt(anchor.x, anchor.y, surface);
+    function silhouette(outer) {
+      if (!centerHit) return anchor;
+      let inside = anchor.x;
+      for (let i = 0; i < 8; i++) {
+        const x = (inside + outer) / 2;
+        if (hitAt(x, anchor.y, surface)) inside = x;
+        else outer = x;
+      }
+      return { x: inside, y: anchor.y };
+    }
+    return { width, height, anchor, leftAnchor: silhouette(Math.min(...xs)), rightAnchor: silhouette(Math.max(...xs)) };
+  });
+
+  const placements = placeCallouts(viewport, occupied, inputs);
+  const folded = [];
+  for (const [i, card] of cards.entries()) {
+    const line = host.querySelector(`[data-leader="${card.dataset.callout}"]`);
+    const placement = placements[i];
+    card.style.visibility = line.style.visibility = placement ? "visible" : "hidden";
+    if (!placement) {
+      folded.push(card.dataset.calloutKey);
+      continue;
+    }
+
+    const { rect, leader } = placement;
+    card.style.transform = `translate(${rect.left}px, ${rect.top}px)`;
+    line.querySelector("path").setAttribute("d", leader.map(({ x, y }, j) => `${j ? "L" : "M"}${x},${y}`).join(" "));
+    const { x, y } = leader.at(-1);
+    const surface = entries.get(card.dataset.anchor).style.surface;
+    const first = hitAt(x, y, meshes);
+    const hit = hitAt(x, y, surface);
+    const occluded = first && !surface.includes(first.object) && (!hit || first.distance < hit.distance - 0.1);
+    const ring = line.querySelector("circle");
+    ring.setAttribute("cx", x);
+    ring.setAttribute("cy", y);
+    ring.setAttribute("opacity", occluded || !hit ? 0.4 : 1);
   }
+  return folded;
 }
 
 export function createFielddeckStage(host, assets, index, callbacks) {
@@ -580,18 +560,21 @@ export function createFielddeckStage(host, assets, index, callbacks) {
   let lastHero = null;
   let firstFrame = true;
   const ray = new THREE.Raycaster();
-  const header = host.querySelector(".fd-header");
-  const bottomChrome = host.querySelector(".fd-bottom");
-  const inspector = host.querySelector(".fd-inspector");
-  const mobileView = window.matchMedia("(width < 700px)");
+  const [header, bottomChrome, tree, inspector] = [".fd-header", ".fd-bottom", ".fd-tree", ".fd-inspector"]
+    .map((selector) => host.querySelector(selector));
+  const panels = [header, bottomChrome, tree, inspector];
+  const mobileView = window.matchMedia(FIELDDECK_NARROW);
+  const invalidateLayout = () => { layoutDirty = true; };
 
   function resize() {
     const nextWidth = Math.max(1, host.clientWidth);
     const nextHeight = Math.max(1, host.clientHeight);
     const origin = host.getBoundingClientRect().top;
-    const upper = Math.max(header.getBoundingClientRect().bottom,
-      mobileView.matches ? inspector.getBoundingClientRect().bottom : 0) - origin;
-    const lower = bottomChrome.getBoundingClientRect().top - origin;
+    const upper = header.getBoundingClientRect().bottom - origin;
+    const openSheets = mobileView.matches
+      ? [tree, inspector].map((panel) => panel.getBoundingClientRect()).filter((rect) => rect.height)
+      : [];
+    const lower = Math.min(bottomChrome.getBoundingClientRect().top, ...openSheets.map(({ top }) => top)) - origin;
     const nextFrameHeight = Math.max(1, lower - upper);
     const nextFrameCenter = (upper + lower) / 2;
     if (nextWidth !== width || nextHeight !== height) renderer.setSize(nextWidth, nextHeight, false);
@@ -606,8 +589,10 @@ export function createFielddeckStage(host, assets, index, callbacks) {
     layoutDirty = true;
   }
   const observer = new ResizeObserver(resize);
-  [host, header, bottomChrome, inspector].forEach((element) => observer.observe(element));
+  [host, ...panels].forEach((element) => observer.observe(element));
   mobileView.addEventListener("change", resize);
+  window.addEventListener("resize", invalidateLayout);
+  window.addEventListener("scroll", invalidateLayout, true);
   resize();
 
   function fit(bounds, angle, horizontal) {
@@ -822,8 +807,8 @@ export function createFielddeckStage(host, assets, index, callbacks) {
       renderer.render(scene, camera);
       pickable = pick;
       opaque = block;
-      if (layoutDirty || resized || config !== lastConfig || now - lastLayout > 60) {
-        layoutCallouts(host, camera, entries, opaque, width, height, ray);
+      if (!mobile && (layoutDirty || resized || config !== lastConfig || !dirty || now - lastLayout > 60)) {
+        callbacks.onCalloutLayout(layoutCallouts(host, camera, entries, opaque, width, height, ray, panels));
         lastLayout = now;
       }
     }
@@ -848,6 +833,8 @@ export function createFielddeckStage(host, assets, index, callbacks) {
       cancelAnimationFrame(frame);
       observer.disconnect();
       mobileView.removeEventListener("change", resize);
+      window.removeEventListener("resize", invalidateLayout);
+      window.removeEventListener("scroll", invalidateLayout, true);
       controls.dispose();
       environment.dispose();
       key.shadow.dispose();
