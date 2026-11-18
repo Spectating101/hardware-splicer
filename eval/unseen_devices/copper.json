@@ -1,0 +1,153 @@
+{
+  "boards": {
+    "amp.brd": [
+      {
+        "from": "X2/2",
+        "net": "LEFTIN",
+        "role": "left line input",
+        "to": "X1/3",
+        "track_path_verified": true
+      },
+      {
+        "from": "X2/3",
+        "net": "RIGHTIN",
+        "role": "right line input",
+        "to": "X1/1",
+        "track_path_verified": true
+      },
+      {
+        "from": "J3/1",
+        "net": "N$17",
+        "role": "left output A to filter",
+        "to": "FB5/2",
+        "track_path_verified": true
+      },
+      {
+        "from": "J3/2",
+        "net": "N$18",
+        "role": "left output B to filter",
+        "to": "FB4/2",
+        "track_path_verified": true
+      },
+      {
+        "from": "J2/1",
+        "net": "N$10",
+        "role": "right output A to filter",
+        "to": "FB2/2",
+        "track_path_verified": true
+      },
+      {
+        "from": "J2/2",
+        "net": "N$9",
+        "role": "right output B to filter",
+        "to": "FB3/2",
+        "track_path_verified": true
+      },
+      {
+        "from": "FB5/1",
+        "net": "N$16",
+        "role": "left A filter to amplifier",
+        "to": "U1/3",
+        "track_path_verified": true
+      },
+      {
+        "from": "FB4/1",
+        "net": "N$13",
+        "role": "left B filter to amplifier",
+        "source_net_has_polygon": true,
+        "to": "U1/41",
+        "track_path_verified": false
+      },
+      {
+        "from": "FB2/1",
+        "net": "N$6",
+        "role": "right A filter to amplifier",
+        "source_net_has_polygon": true,
+        "to": "U1/36",
+        "track_path_verified": false
+      },
+      {
+        "from": "FB3/1",
+        "net": "N$8",
+        "role": "right B filter to amplifier",
+        "to": "U1/31",
+        "track_path_verified": true
+      }
+    ],
+    "console.brd": [
+      {
+        "from": "X5/2",
+        "net": "D4_SDCS",
+        "role": "card chip select",
+        "to": "U$24/31",
+        "track_path_verified": true
+      },
+      {
+        "from": "X5/5",
+        "net": "SCK",
+        "role": "card clock",
+        "to": "U$24/36",
+        "track_path_verified": true
+      },
+      {
+        "from": "U1/6",
+        "net": "QSPI_SCK",
+        "role": "flash clock",
+        "to": "U$24/23",
+        "track_path_verified": true
+      },
+      {
+        "from": "IC1/9",
+        "net": "BUTTON_OUT",
+        "role": "button data",
+        "to": "U$24/59",
+        "track_path_verified": true
+      },
+      {
+        "from": "IC1/2",
+        "net": "BUTTON_CLK",
+        "role": "button clock",
+        "to": "U$24/60",
+        "track_path_verified": true
+      },
+      {
+        "from": "IC1/1",
+        "net": "BUTTON_LATCH",
+        "role": "button latch",
+        "to": "U$24/61",
+        "track_path_verified": true
+      }
+    ],
+    "logger.brd": [
+      {
+        "from": "U8/~D23",
+        "net": "MICROSD_~{CS}",
+        "role": "card chip select",
+        "to": "J6/CS/DAT3",
+        "track_path_verified": true
+      },
+      {
+        "from": "U8/~D44",
+        "net": "ICM_~{CS}",
+        "role": "IMU chip select to level shifter",
+        "to": "Q9/3",
+        "track_path_verified": true
+      },
+      {
+        "from": "U8/~D18",
+        "net": "QWIIC_PWR",
+        "role": "Qwiic power control",
+        "to": "U4/3",
+        "track_path_verified": true
+      },
+      {
+        "from": "U8/D15",
+        "net": "MICROSD_PWR",
+        "role": "card power control",
+        "to": "Q2/1",
+        "track_path_verified": true
+      }
+    ]
+  },
+  "kicad": "9.0.2"
+}

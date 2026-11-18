@@ -1,0 +1,39 @@
+{
+  "printer": {
+    "sources": [
+      "https://blog.prusa3d.com/original-prusa-mini-is-here-smart-and-compact-3d-printer_30887/"
+    ],
+    "evidence": "Prusa's comparison table gives the Original Prusa i3 MK3S a build volume of 25 × 21 × 21 cm. Compare each fixed-orientation box with these three dimensions.",
+    "answers": {"tray": "yes", "wide": "no", "tower": "no"}
+  },
+  "arm": {
+    "sources": [
+      "https://github.com/elephantrobotics/mycobot_docs/blob/468743879f4ccf9f1e727219c235310fec0d9296/mycobot_280_M5%282023%29en/1-ProductInformation/2.ProductParameter/2-ProductParameters.md"
+    ],
+    "evidence": "The M5 manual rates payload at 250 g. Section 3.2 lists J2 as ±140° and J6 as ±180°. The joint-limit reporting feature has a firmware and library version requirement.",
+    "answers": {"j2_135": "yes", "j2_145": "no", "j6_175": "yes", "payload": "no"}
+  },
+  "console": {
+    "sources": [
+      "https://github.com/adafruit/ArduinoCore-samd/blob/b73ae8c05d7b9463abd40b98b88653a4eefab306/variants/pygamer_m4/variant.h",
+      "https://github.com/adafruit/Adafruit_Arcada/blob/19f707488a21981819a10e83ae785bcddea82ad4/Boards/Adafruit_Arcada_PyGamer.h",
+      "https://learn.adafruit.com/adafruit-pygamer/pinouts"
+    ],
+    "evidence": "The board variant sets the SD card select to 4, SPI clock to 30 and QSPI clock to 35. Arcada assigns separate button latch, clock and data pins. The board guide identifies the button shift register.",
+    "answers": {"sd_d4": "yes", "shared_flash": "no", "i2c_buttons": "no"}
+  },
+  "logger": {
+    "sources": [
+      "https://github.com/sparkfun/OpenLog_Artemis/blob/f9c8e66b7da6f27a4bf9be55016c5b9231b9fb22/Firmware/OpenLog_Artemis/OpenLog_Artemis.ino#L196"
+    ],
+    "evidence": "SparkFun's v1.0 firmware uses card select 23, microSD power 15 and Qwiic power 18. Its older v0.4 branch uses card select 10. The production sketch instantiates the SPI ICM-20948 driver.",
+    "answers": {"spi_imu": "yes", "sd_d10": "no", "separate_power": "yes"}
+  },
+  "amplifier": {
+    "sources": [
+      "https://learn.adafruit.com/adafruit-20w-stereo-audio-amplifier-class-d-max9744/overview?view=all"
+    ],
+    "evidence": "Adafruit documents a stereo 3.5 mm line input and a bridge-tied output pair per speaker. The guide specifies 4–8 ohm speakers. The donor has no identifying information or measurement.",
+    "answers": {"line_input": "yes", "shared_return": "no", "donor_condition": "control"}
+  }
+}

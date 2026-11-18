@@ -69,6 +69,11 @@ HS got right, missed, and left open when assessing a previously unused split
 keyboard. It includes donor decisions sealed before scoring, a reproducible
 switch-to-controller map, and a PCB/schematic disagreement on both controllers.
 
+The [five-device challenge](eval/unseen_devices/README.md) tests whether a tray
+fits a printer, a robot joint can reach an angle, and parts of a handheld,
+sensor logger and stereo amplifier can be reused. It includes an editable tray
+model, the sealed decisions, the manufacturers' answers and board trace checks.
+
 Design principles and the full authority model: [`docs/DESIGN_PRINCIPLES.md`](docs/DESIGN_PRINCIPLES.md).
 
 ## Evaluators / competitions / research reviewers
