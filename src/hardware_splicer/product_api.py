@@ -42,6 +42,7 @@ from .source_project_editing_api import create_source_project_editing_router
 from .engineering_source_multipart_api import create_engineering_source_multipart_router
 from .engineering_source_role_api import create_engineering_source_role_router
 from .engineering_status_api import create_engineering_status_router
+from .fielddeck_scene_api import fielddeck_router
 from .machine_project_api import create_machine_project_router
 from .manufacturing_api import create_manufacturing_router
 from .mechanical_api import create_mechanical_router
@@ -121,6 +122,7 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_project_router(resolved_store))
     app.include_router(create_project_artifact_router(resolved_store))
     app.include_router(create_project_model3d_router(resolved_store))
+    app.include_router(fielddeck_router)
     app.include_router(create_project_assembly_router(resolved_store))
     app.include_router(create_device_router())
     app.include_router(create_donor_router())

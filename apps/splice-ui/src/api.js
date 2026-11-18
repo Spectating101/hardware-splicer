@@ -18,6 +18,10 @@ async function parseJson(res) {
   return body;
 }
 
+export function fielddeckSceneUrl(revision) {
+  return `${API_BASE}/v1/scenes/fielddeck/${revision}`;
+}
+
 export async function fetchHealth() {
   const res = await fetch(`${API_BASE}/health`);
   return parseJson(res);

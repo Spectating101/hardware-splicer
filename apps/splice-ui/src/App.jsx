@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import {
   benchStatus,
   benchSubmit,
@@ -32,6 +32,8 @@ import {
   sessionHasBuild,
   sessionIsResumable,
 } from "./projectSession/projectSession.js";
+
+const FieldDeckScene = lazy(() => import("./components/FieldDeckScene.jsx"));
 
 function Toast({ message, onDismiss }) {
   useEffect(() => {
@@ -488,7 +490,7 @@ export default function App() {
   const advancedActive = isAdvancedView(view);
 
   return (
-    <div className="app-shell" data-testid="app-shell">
+    <div className={`app-shell${view === VIEWS.fielddeck ? " fielddeck-shell" : ""}`} data-testid="app-shell">
       <BuildOverlay
         active={spliceJob.active}
         status={spliceJob.job?.status}
@@ -561,6 +563,14 @@ export default function App() {
             onClick={() => setView(VIEWS.showcase)}
           >
             Product explorer
+          </button>
+          <button
+            type="button"
+            className={`nav-button ${view === VIEWS.fielddeck ? "active" : ""}`}
+            data-testid="nav-fielddeck"
+            onClick={() => setView(VIEWS.fielddeck)}
+          >
+            3D scene (preview)
           </button>
           <button
             type="button"
@@ -696,6 +706,9 @@ export default function App() {
           {view === VIEWS.showcase && <ProductShowcase />}
           {view === VIEWS.reference && <DetailedAssemblyReference />}
           {view === VIEWS.sortcell && <SortingWorkcell />}
+          {view === VIEWS.fielddeck && (
+            <Suspense fallback={null}><FieldDeckScene /></Suspense>
+          )}
 
           {view === VIEWS.workspace && (
             <ProjectWorkspace
