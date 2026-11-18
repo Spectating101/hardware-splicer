@@ -161,6 +161,8 @@ def main():
         csvmatch &= all(abs(float(s['feed_mm_min'])-f)<1e-8 and abs(float(s['duration_s'])-t)<1e-7 for s,(f,t) in zip(saved,durations))
         check('Gcode_CSV_roundtrip',csvmatch,'Independent G-code positions match every stored CSV segment')
         offset=interface['pen_offset_from_nozzle_xy_mm'];expected=[]
+        # Recompute the uniform source fit independently, without importing the author mapper.
+        canvas_scale=min(req['drawing_width_mm']/100,req['drawing_height_mm']/80)
         for node in ET.parse(ROOT/'simulation/example.svg').getroot().iter():
             if node.tag.split('}')[-1]!='polyline':continue
             vals=[float(x) for x in re.split(r'[\s,]+',node.attrib['points'].strip())]
@@ -168,14 +170,14 @@ def main():
                 raise ValueError('Malformed source drawing polyline')
             if any(not 0<=x<=100 or not 0<=y<=80 for x,y in zip(vals[::2],vals[1::2])):
                 raise ValueError('Source drawing exceeds its declared logical viewport')
-            pts=[(117.5+(vals[i]-50)*req['drawing_width_mm']/100,
-                  117.5+(40-vals[i+1])*req['drawing_height_mm']/80) for i in range(0,len(vals),2)]
+            pts=[(117.5+(vals[i]-50)*canvas_scale,
+                  117.5+(40-vals[i+1])*canvas_scale) for i in range(0,len(vals),2)]
             expected.extend(zip(pts[:-1],pts[1:]))
         if drawing_file.is_file():
             authored=[]
             for stroke in json.loads(drawing_file.read_text()):
-                pts=[(117.5+(x-50)*req['drawing_width_mm']/100,
-                      117.5+(y-40)*req['drawing_height_mm']/80) for x,y in stroke]
+                pts=[(117.5+(x-50)*canvas_scale,
+                      117.5+(y-40)*canvas_scale) for x,y in stroke]
                 authored.extend(zip(pts[:-1],pts[1:]))
             check('prompt_artwork_roundtrip',bool(authored) and len(authored)==len(expected)
                   and np.allclose(expected,authored,atol=.00011,rtol=0),
@@ -256,7 +258,9 @@ def main():
                 c=sim_cons.get(key[7:],{})
                 simmatching &= abs(c.get('actual',float('inf'))-a)<.001 and c.get('limit')==l and c.get('passed')==bool(p)
         check('simulation_constraints_recomputed',simmatching and sim['requirements_met']==all(p for k,(a,l,p) in expected_cons.items() if k.startswith('motion_')),'Motion requirement satisfaction recomputed separately')
-        actual.update({'paper_width_mm':float(pw),'paper_height_mm':float(ph),'paper_bed_margin_mm':paper_margin,
+        actual.update({'source_canvas_scale_mm_per_unit':canvas_scale,
+            'source_canvas_width_mm':100*canvas_scale,'source_canvas_height_mm':80*canvas_scale,
+            'paper_width_mm':float(pw),'paper_height_mm':float(ph),'paper_bed_margin_mm':paper_margin,
             'drawing_paper_margin_x_mm':drawing_paper_x,'drawing_paper_margin_y_mm':drawing_paper_y,
             'viewport_controller_margin_mm':viewport_controller_margin,
             'ink_paper_margin_mm':ink_paper_margin,'ink_viewport_margin_mm':ink_viewport_margin,'mount_pitch_mm':pitch,'mount_boss_front_mm':7.,'mount_bolt_engagement_mm':engagement,

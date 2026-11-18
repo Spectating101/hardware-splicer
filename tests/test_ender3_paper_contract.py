@@ -73,3 +73,44 @@ def test_native_guard_checks_compensated_whole_viewport_not_only_ink():
 
 def test_registered_and_native_bounds_stay_in_agreement():
     assert {key: value[1:] for key, value in cases.PLOTTER.requirements.items()} == common.BOUNDS
+
+
+@pytest.fixture
+def plotter_simulator(monkeypatch):
+    import sys
+    monkeypatch.setitem(sys.modules, 'common', common)
+    spec = importlib.util.spec_from_file_location('ender3_uniform_fit_test', SCRIPTS / 'simulate.py')
+    simulator = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(simulator)
+    return simulator
+
+
+@pytest.mark.parametrize('width,height,expected_size', [(100, 80, 5.), (190, 128, 8.), (60, 140, 3.)])
+def test_svg_square_preserves_shape_when_viewport_aspect_changes(tmp_path, plotter_simulator, width, height, expected_size):
+    svg = tmp_path / 'square.svg'
+    svg.write_text('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 80">'
+                   '<polyline points="45,35 50,35 50,40 45,40 45,35"/></svg>')
+    points = plotter_simulator.parse_svg(svg, {'drawing_width_mm': width, 'drawing_height_mm': height})[0]
+    span_x = max(x for x, y in points) - min(x for x, y in points)
+    span_y = max(y for x, y in points) - min(y for x, y in points)
+    assert span_x == pytest.approx(expected_size)
+    assert span_y == pytest.approx(expected_size)
+    assert points[0] == points[-1]
+
+
+def test_a5_uniform_source_fit_is_centered_inside_larger_viewport(tmp_path, plotter_simulator):
+    svg = tmp_path / 'canvas.svg'
+    svg.write_text('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 80">'
+                   '<polyline points="0,0 100,0 100,80 0,80 0,0"/></svg>')
+    points = plotter_simulator.parse_svg(svg, A5)[0]
+    assert (min(x for x, y in points), max(x for x, y in points)) == pytest.approx((37.5, 197.5))
+    assert (min(y for x, y in points), max(y for x, y in points)) == pytest.approx((53.5, 181.5))
+    assert (37.5 + 197.5) / 2 == 117.5
+    assert (53.5 + 181.5) / 2 == 117.5
+
+
+def test_source_artwork_outside_declared_canvas_is_rejected(tmp_path, plotter_simulator):
+    svg = tmp_path / 'outside.svg'
+    svg.write_text('<svg><polyline points="0,0 101,0"/></svg>')
+    with pytest.raises(ValueError, match='logical viewport'):
+        plotter_simulator.parse_svg(svg, A5)

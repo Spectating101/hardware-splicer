@@ -8,9 +8,6 @@ import math
 import re
 import xml.etree.ElementTree as ET
 import numpy as np
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
 from common import ROOT, read_requirements, write_json, constraint
 
 
@@ -32,6 +29,12 @@ def make_svg(path):
     path.write_text('\n'.join(lines+['</g>','</svg>'])+'\n')
 
 
+def source_to_bed(x,y,req):
+    # Uniform fit keeps squares, circles and the authored aspect ratio unchanged.
+    scale=min(req['drawing_width_mm']/100,req['drawing_height_mm']/80)
+    return (117.5+(x-50)*scale,117.5+(y-40)*scale)
+
+
 def parse_svg(path,req):
     paths=[]
     for node in ET.parse(path).getroot().iter():
@@ -40,8 +43,7 @@ def parse_svg(path,req):
             if len(vals)<4 or len(vals)%2:raise ValueError('Malformed SVG polyline')
             if not all(math.isfinite(v) for v in vals) or any(not 0<=x<=100 or not 0<=y<=80 for x,y in zip(vals[::2],vals[1::2])):
                 raise ValueError('Source artwork lies outside the declared 100 x 80 logical viewport')
-            paths.append([(117.5+(vals[i]-50)*req['drawing_width_mm']/100,
-                           117.5+(40-vals[i+1])*req['drawing_height_mm']/80)
+            paths.append([source_to_bed(vals[i],80-vals[i+1],req)
                           for i in range(0,len(vals),2)])
     return paths
 
@@ -74,6 +76,10 @@ def replay(gcode,lift):
 
 
 def main():
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
     req=read_requirements();folder=ROOT/'simulation';folder.mkdir(exist_ok=True)
     svg=folder/'example.svg';make_svg(svg);paths=parse_svg(svg,req)
     offset=json.loads((ROOT/'sources/interface.json').read_text())['pen_offset_from_nozzle_xy_mm']
@@ -126,9 +132,12 @@ def main():
         constraint('ink_paper_margin',ink_paper_margin,10,ink_paper_margin>=10-.00011,'mm','Every emitted ink endpoint leaves 10 mm paper margin; 0.00011 mm serialization tolerance'),
         constraint('ink_in_viewport',ink_viewport_margin,0,ink_viewport_margin>=-.00011,'mm','Every emitted ink segment stays inside the requested source viewport; 0.00011 mm serialization tolerance'),
         constraint('Z_travel',float(pts[:,2].max()),req['pen_lift_mm'],pts[:,2].min()>=0 and pts[:,2].max()<=req['pen_lift_mm']+1e-6,'mm','Every commanded segment endpoint lies within paper Z0 and requested lift')]
+    canvas_scale=min(req['drawing_width_mm']/100,req['drawing_height_mm']/80)
     report=dict(case_id='ender3-penplotter',requirements=req,requirements_met=all(c['passed'] for c in constraints),
         physical_validation_performed=False,constraints=constraints,
-        metrics={'draw_length_mm':draw_length,'travel_length_mm':travel_length,'ideal_feed_time_s':total_time,
+        metrics={'source_canvas_scale_mm_per_unit':canvas_scale,
+                  'source_canvas_width_mm':100*canvas_scale,'source_canvas_height_mm':80*canvas_scale,
+                  'draw_length_mm':draw_length,'travel_length_mm':travel_length,'ideal_feed_time_s':total_time,
                  'segment_count':len(records),'stroke_count':len(paths),'pen_center_bed_margin_mm':minbed,
                   'ink_paper_margin_mm':ink_paper_margin,'ink_viewport_margin_mm':ink_viewport_margin,
                  'fixture_bed_clearance_mm':fixture_margin,'controller_travel_margin_mm':ctrlmargin,
