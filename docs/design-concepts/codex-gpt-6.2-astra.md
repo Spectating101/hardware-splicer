@@ -1,92 +1,104 @@
-# Hardware Splicer · Follow the change
+# Hardware Splicer · Follow the question
 
-Open a project and resume the engineering question you left on the bench. For the pen plotter it might be “Will the donor motor fit the X carriage?” The carriage drawing fills the screen at the mounting face. The donor’s hole spacing reads **unknown** beside the model dimension. Those values belong together even when there is evidence for only one. This is the everyday view. The project remembers the question, revision, selection and camera so a trip through a datasheet ends back at the same hole.
+“Can the servo in bin B4 replace the elbow servo I can’t buy?” Open that question from the arm’s BOM. Pin the elbow at its closest approach to the bracket. Follow the donor’s marking into a teardown photo, then its lead into a wiring drawing. The pinned elbow stays beside you. **Return to question** restores that pose with the evidence you’ve collected and the gaps you still have to explain. The saved unit of work is a question with a comparison you can hand to another engineer. This borrows Linear’s temporary peek, Rerun’s shareable views and the actual C044/C046 sourcing problem in SO-ARM100. [Advanced patterns, P10/P24][A] · [GitHub signals, SO-ARM100][S]
 
-## Moving through a project
+A question can start with a goal, an owned unit or a study. In Projects, resume a question by its last unresolved finding. From inventory, start directly on the stock unit. Its photo, proposed catalogue identity, supplier offer and BOM requirement each retain their own address. An offer for the same MPN adds a sourcing option. Trying a different MPN opens a branch. Ask for candidates when you want them. In ecoEDA’s study, builders started from both ideas and available parts, and five participants wanted control over suggestions. [GitHub signals, ecoEDA and InvenTree][S] · [Hardware conventions, Altium alternate rows][H]
 
-Projects is home. Start with a goal and requirements, a tray of owned units, or a registered reference study. Each creates a project with a saved starting revision. A project without geometry opens on its requirements or parts. Press **/** for the assembly navigator or search by BOM line, requirement, finding or refdes. Selecting one gives it the working surface. A short trail above it records the relationships traversed. A temporary inspector opens the source for any step. Back retraces the trail.
+### 1 · Catch a moment in a study
 
-The BOM gives each design position a stable address. M1 links to a particular salvaged unit, its proposed catalogue identity and any catalogue alternates. Keep those records distinct. From a teardown photo, follow a marking to the cited identity source, then to the InvenTree material record and the positions using it. A repair question can open on competing diagnoses instead. A safety gate interrupts the proposed diagnostic step in place and exposes its reason and missing evidence. All workshop actions concern digital records and runs.
-
-### 1 · The working bench
-
-Illustrative plotter session. New agent results arrive along the revision strip without moving the camera.
+Illustrative session throughout. Drag across the elbow trace. Each recorded sample moves the PyBullet pose and selects the corresponding check sample. Pinning a sample keeps its run, input revision, object, camera and timestamp together. Use the check’s own geometry for its overlay. If a channel has no sample, show the gap. A static KiCad footprint can follow a mapped part selection while staying at its input revision. Rerun’s linked frame views, RoboSimStudio’s verdict overlays and Interactive HTML BOM’s two-way selection supply the mechanics. [Advanced patterns, P1/P6/P8][A] · [Hardware conventions, Interactive HTML BOM][H]
 
 ```text
-┌─ Projects / Ender 3 plotter / r4 ───────────────────────────── [Find part or claim /] ┐
-│ Will the donor motor fit the X carriage?                            [Change question] │
-│ M1 · X motor  ›  mounting pattern  ›  carriage drawing                         [Back] │
-├──────────────────────────────────────────────────────────────────────────────────────┤
-│          o ┄┄┄┄┄┄┄┄ o           CadQuery · carriage · front                          │
-│          ┆    ◯     ┆           ① Hole centres in this model                         │
-│          o ┄┄┄┄┄┄┄┄ o           Donor hole centres     ? unknown                     │
-│                                 [Open source drawing]    [Compare alternate]         │
-├──────────────────────────────────────────────────────────────────────────────────────┤
-│ Findings   ① Mounting pattern [Locate]       Rated current    ? unknown · unlinked   │
-│ r3 ─── r4 viewing ──┬── donor drawing search · Codex · last receipt 10:42            │
-│                     └── catalogue alternate · Claude · proposal available            │
+┌─ Arm study / r4 / Can B4 replace the elbow servo? ───────────────────────────────────┐
+│ Pinned baseline · run 27                     [Previous sample] [Next sample] [Play]  │
+├──────────────────────────────────────────┬───────────────────────────────────────────┤
+│ PyBullet · elbow at closest approach     │ Modelled clearance / bracket              │
+│             wrist o                      │            ╲      ╱                       │
+│                  /                       │             ╲__●_╱                        │
+│          elbow ●/   ┃ bracket            │                │ 2.8 s                    │
+│               /     ┃                    │ Pin ① · run 27 · bracket / elbow          │
+├──────────────────────────────────────────┴───────────────────────────────────────────┤
+│ Run time      0 s ───────────●──────────────── 6 s        [Inputs] [Offline package] │
+│ Project log   10:41 run 27 saved   10:43 MCP found donor photo [Peek beside pin ①]   │
 └──────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-## Inspecting a consequence
+The two clocks answer different questions. Seek in run time to inspect the motion. Step through dated project events to inspect what the engineer knew. Select the 10:43 receipt to open the photo alongside pin ①. Step back to 10:41 and the photo drops out of that historical view. Later receipts accumulate behind **New activity** while either view is pinned. For an older observation show its source revision and age. A run receipt opens its engine version, inputs, output digest and offline rerun package. This extends Foxglove’s timestamped events and lookback, Devin’s jump-to-action log and marimo’s reproducible files. [Advanced patterns, P2–P4/P11/P26][A]
 
-Choose an alternate on M1 to fork a draft. Unroll the recorded dependency paths touched by that edit. Follow the driver-limit path to see the previous motor evidence, the proposed value with its source, and the check that consumes it. An unlinked record ends the path with a request for the missing mapping. Show gaps in dependency coverage alongside known impacts.
+### 2 · Pull the change through the assembly
 
-Compare two saved revisions or preview a labelled draft against its base. Start with differences only. Expand a row to recover unchanged context. Old results stay bound to their inputs. For a released BOM line, route the diff through a change order recording affected positions, reviewer and disposition while preserving the released revision.
-
-### 2 · Alternate under review
+Choose **Try B4** at pin ①. The baseline stays pinned while a draft follows one consequence at a time. Choose “lead order” and the other view becomes the harness endpoint. Select its KiCad refdes to cross-probe schematic, footprint or ERC/DRC marker through recorded mappings. An unmapped endpoint offers the native file and a request for the missing link. For mechanical fit, compare CadQuery sections with a wipe when registered, or independent labelled views otherwise. Coverage lists omitted objects and unchecked interfaces even with unchanged rows collapsed. [Hardware conventions, KiCad and Onshape][H] · [Advanced patterns, tscircuit and deltaKi, P6/P19/P20][A]
 
 ```text
-┌─ Ender 3 plotter / M1 ─────────────────────────── Base r4 ⇢ Target draft A ──────────┐
-│ Differences only [on]                        [Scrub registered views]     [All rows] │
-├──────────────────────────────────────────────────────────────────────────────────────┤
-│ BOM line        r4                          Draft A                                  │
-│ M1              donor unit D17              catalogue candidate C2                   │
-│ Rated current   ? unknown                   candidate datasheet §3          [Source] │
-├──────────────────────────────────────────────────────────────────────────────────────┤
-│ M1 ─┬─ mount pattern ── carriage fit         CAD result from r4            [Inspect] │
-│     ├─ winding current ─ driver limit        target check outstanding      [Inspect] │
-│     └─ lead order ───── harness J2           ? candidate pinout            [Request] │
-│ Selected path   J2 / lead order / wiring check             Board location unlinked   │
-│ [Keep r4]     [Request wiring evidence]     [Review draft changes]                   │
+┌─ Arm / elbow / Pin ① ─────────────────────────────── r4 vs draft B4.1 · changes only ┐
+│ Missing evidence first          [Mount pattern] [Lead order ×] [Show unchanged]      │
+├──────────────────────────────────────────┬───────────────────────────────────────────┤
+│ Keep beside me · baseline                │ Follow lead order · draft B4.1            │
+│ Run 27     elbow ●   ┃ bracket           │ Donor D17 ── cable ── ? ┄┄ J2 / pin 1     │
+│ Sample     2.8 s     ①                   │ J2 → schematic [Locate]                   │
+│ Inputs     r4 motor + bracket            │ D17 lead → J2 pin     ? mapping missing   │
+├──────────────────────────────────────────┴───────────────────────────────────────────┤
+│ Fit result   stale for draft · motor envelope changed       [Inspect r4 inputs]      │
+│ Coverage     donor sweep unchecked · connector photo only   [Open teardown crop]     │
+│ r4 ─┬─ B4.1 donor D17    [Ask agent for pinout source]       [Return to question]    │
+│     └─ C.1  catalogue    torque at required voltage unknown [Compare missing data]   │
 └──────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-Each finding has an address. Open it from a sortable list or a numbered pin to see the same claim, backend authority label verbatim, input revision, producing engine and source excerpt. Jump to the artifact and its digest, then back to the pin. Fabrication assessment opens on the backend blocker list. Distinguish an absent assessment from one reporting zero blockers. Accepting an edit records a design decision. Only the backend can revise claim authority on the strength of evidence.
+Changing the envelope invalidates dependent fit results. Keep the baseline result inspectable and offer an explicit rerun against the draft. Every claim carries its backend authority verbatim. A plausible match, successful run or accepted edit can never implicitly upgrade authority. **Unknown** gets a row, the missing datum and an evidence action. Show the backend blockers for the proposed action, distinguish an absent assessment from zero scoped blockers, and keep every outstanding blocker visible through review. Blockers never read “ready.” In repair diagnosis, pin competing hypotheses beside the observation that distinguishes them. A gated test opens its missing safety prerequisite. [Advanced patterns, marimo and AllSpice, P21/P25][A] · [GitHub signals, PartCAD verdicts][S]
 
-## One surface, several instruments
-
-The artifact determines the controls. Inspect a CadQuery section through the Fielddeck enclosure, plotter mount or PCB inspection nest. On a KiCad board, select a footprint to reach its BOM line, wiring checks and DRC findings. Open ERC findings in schematic coordinates. In a PyBullet drone run, scrub the trajectory and battery trace together by recorded simulation time. Link selections only through supplied object IDs, coordinates or timestamps. Unlocated findings stay in the list. Lock comparison cameras only with known registration. Otherwise show labelled independent views. Download the offline-rerunnable package from the revision’s run beside its inputs and manifest.
-
-## Directing the agents
-
-Give each agent a question, base revision, allowed inputs and deliverable. Human actions and external MCP calls share the project history. Each receipt updates the strip with actor, operation, time and artifact. Open it to narrow the next step or stop pending work. If reporting stops, retain the last receipt and mark current activity unknown. Authorizing a scoped run and accepting its proposed diff are separate decisions. If another task advances the base, require a fresh comparison before applying the proposal.
-
-### 3 · Authorizing the next operation
+### 3 · Open the agent’s receipt inside the question
 
 ```text
-┌─ Ender 3 plotter / Agent work / Draft A ─────────────────────────────────────────────┐
-│ Claude    r4 → draft A   Proposed M1 catalogue change                 [Inspect diff] │
-│ Codex     r4             Drawing search · last receipt 10:42           [See receipt] │
-├──────────────────────────────────────────────────────────────────────────────────────┤
-│ Decision requested     Run wiring check on draft A                                   │
-│ Inputs                 Draft A harness + candidate part record         [View hashes] │
-│ Allowed output         One diagnostic report attached to draft A                     │
-│ Open question          Candidate pinout source missing                               │
-│ Expected coverage      Report documented connections and unresolved leads            │
-├──────────────────────────────────────────────────────────────────────────────────────┤
-│ [Authorize this run]      [Return with narrower scope]      [Decline]                │
+┌─ Arm / B4.1 / D17 lead order ──────────────────────────────── Pin ① retained [Back] ─┐
+│ 10:43  MCP attached teardown crop     10:47  MCP requests schematic inspection       │
+├──────────────────────────────────────────┬───────────────────────────────────────────┤
+│ Evidence at request                      │ Authorize one operation                   │
+│ D17 label     [Open source crop]         │ Adapter   akcli  [Reviewed commit]        │
+│ J2 pin 1      [Open KiCad sheet]         │ Read      B4.1 schematic [Hashes]         │
+│ Donor pinout  ? source requested         │ Write     one inspection report on B4.1   │
+│                                          │ Sandbox   no network [Inspect arguments]  │
+├──────────────────────────────────────────┴───────────────────────────────────────────┤
+│ Scope ends at board-side labels. Donor lead order still needs independent evidence.  │
+│ [Authorize inspection]   [Edit scope]   [Decline]             [View last receipt]    │
 └──────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-Tool discovery also starts with a question, such as comparing PCB revisions. The proposal shows the normalized GitHub discovery record, licence, exact commit and reviewed adapter. An unfamiliar commit waits for human adapter review. For an approved tool such as kdif, show the requested inputs before execution, then attach the no-network sandbox receipt, output hashes and native diff. For sealed evaluations, show the protocol, engine version, aggregate outcomes and abstentions while keeping held-out answers sealed during work. The result belongs to the evaluated capability. Project findings retain their own evidence requirements.
+Bind MCP work to the selected endpoint and draft snapshot. A typed receipt replaces “inspecting” with the report, failure or request for input. Silence shows last contact and unknown activity. Resume after navigation. Click a reported pin to open its source and the exact schematic on which the agent worked. Review any resulting design diff separately. A changed base requires fresh comparison and approval. Use a From/To change order for released items. [Advanced patterns, Linear, Devin and Agent Inbox, P11–P13][A] · [GitHub signals, Zoo Resume][S] · [Hardware conventions, Fusion Manage][H]
 
-## Phone use
+Follow the tool name upstream into the GitHub tool factory to inspect discovery, licence, pinned commit and human adapter review. A new commit waits for review before execution. Follow the sandbox receipt downstream to hashed outputs. HS’s existing akcli inspection and kdif silkscreen diff give this path real artifacts with bounded coverage. For “how reliable is this adapter?”, open a sealed evaluation at its protocol and tool version. Keep held-out answers sealed during work. After scoring, show aggregate outcomes and abstentions scoped to the evaluated capability. [GitHub signals, executed HS record][S] · [Advanced patterns, PartCAD verification and deltaKi coverage, P16/P20][A]
 
-Open a deep link to M1 with revision and question intact. The source crop and one finding fill the screen. Swipe between findings or use labelled Previous and Next buttons. Tap a pin for its evidence sheet. Agent requests queue beneath the current question. Expand the exact diff or run scope before approval. Resume the same view on desktop when a footprint overlay needs more room.
+### At the parts bin
 
-## First cut
+Open the same question on a phone, capture the missing source against the individual unit, and stage it for review. The desktop receives a receipt beside the pinned sample. Only a reviewed evidence record can change the answer. This combines AllSpice’s anchored snippets with InvenTree’s stock-unit distinction and Foxglove’s timestamp sharing. [Hardware conventions][H] · [Advanced patterns, P24][A]
 
-Build the plotter journey on Projects, saved revisions, DigitalStudyPanel and existing evidence records. Ship the BOM finder, restorable trail, source jump and differences-only revision comparison first. Test whether the owner can open a motor’s source and return to the original mount in two actions. Sparse mappings are the main risk. Test an unlinked finding as deliberately as a linked one. Show the original artifact when a viewer lacks anchors.
+```text
+┌─ Arm / B4.1 / donor D17 ─────────┐
+│ Which lead reaches J2 pin 1?     │
+│ ? Donor pinout source missing    │
+│ [Teardown crop]  [Capture label] │
+│ Source note  [                  ]│
+│ [Stage photo for review]         │
+├──────────────────────────────────┤
+│ Return to pin ① · r4 / 2.8 s     │
+└──────────────────────────────────┘
+```
 
-Then add draft impact paths and agent receipts. Expand one dependency path at a time, with a count of remaining paths, to keep dense assemblies legible. Exercise two proposals against the same base before enabling acceptance. Add collaborator identities and permissions when friends get sign-in. Revision-bound decisions can carry change orders and formal business review later.
+### Patterns I would leave out
+
+Obsidian’s global graph and growth animation bury the single missing edge. Figma-style cursors and follow mode would pull the engineer off the pinned sample. Linear thought streams would bury the receipt. Foxglove-style semantic matches need a visible matched field and exact lookup. Defer a general palette and layout editor until engineers have repeated verbs and views worth saving. Keep assumption sliders out of measured traces. Collapse parallel agent panels into a missing-evidence comparison when both lack the same source. Skip smooth transitions between discrete revisions because intermediate states never existed. Altium’s aggregate health score could conceal the very blocker the question depends on. [Advanced patterns, gimmick list §3][A] · [Hardware conventions, Altium BOM Portal][H]
+
+## What I took from the others / what I disagree with
+
+Argon’s phone capture makes a teardown photo part of the same investigation. Its permanent BOM spine costs too much of a small drawing when the engineer already has the part in hand. Sol’s separate history and playback controls preserve the meaning of a sample. I’d also let the engineer carry that sample into a different branch as an explicitly labelled baseline, so returning from a wiring detour restores the precise mechanical question. [Argon](gemini-argon.md) · [Sol](codex-gpt-6.2-sol.md)
+
+### Ranked first build
+
+1. Ship **pin, follow, return** on the existing FieldDeck display swap. From the changed enclosure follow the cable to an unresolved pin/voltage check and back. Test restoration and stale-input coverage.
+2. Attach the existing akcli/kdif receipts to their own schematic and board review. Exercise an unlinked finding, a phone capture and a proposal whose base advances mid-review.
+3. Bind one recorded PyBullet trace and pose to a shareable sample. Replay the project log across a late MCP receipt and confirm that the historical evidence set is reproducible.
+4. Try the unavailable SO-ARM100 servo from a direct BOM link and from Projects. Measure engineer-minutes, missed dependencies and unsupported approvals against the existing workflow. Count a justified request for evidence as a completed decision. [GitHub signals, acceptance cases][S]
+
+[A]: ../design-research/ADVANCED_INTERFACE_PATTERNS_20261118.md
+[H]: ../design-research/HARDWARE_TOOL_UI_CONVENTIONS_20261118.md
+[S]: ../design-research/FRONTEND_GITHUB_SIGNALS_20261118.md
