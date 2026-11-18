@@ -58,6 +58,12 @@ assembly. HS reports electrical and mechanical conflicts, required adapters and
 missing donor specifications, then exports the revised BOM, connection plan and
 optional nominal STEP/STL. See the [substitution workflow](docs/ENGINE.md#part-substitution-across-a-declared-assembly).
 
+**Robot donor example.** Can the passive servo from a SO-ARM102 leader drive the
+follower shoulder? Run `hs-digital so102-drive shoulder --passive-leader`.
+The result identifies the required motor, shared printed mount, bus wiring and
+simulation joint, and explains which requirement the donor fails. Supply your
+own servo profile or check a target joint angle using the [worked example](docs/ENGINE.md#so-arm102-follower-drive).
+
 Design principles and the full authority model: [`docs/DESIGN_PRINCIPLES.md`](docs/DESIGN_PRINCIPLES.md).
 
 ## Evaluators / competitions / research reviewers

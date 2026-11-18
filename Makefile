@@ -31,7 +31,7 @@ verify-headless-backend:
 		tests/test_product_make_targets.py tests/test_digital_engine.py tests/test_digital_registered_cases.py \
 		tests/test_project_part_substitutions.py tests/test_project_materials.py tests/test_project_wiring.py \
 		tests/test_github_signal_pipeline.py tests/test_robot_model_import.py \
-		tests/test_sort_workcell_source.py tests/test_mcp_backend_gateway.py
+		tests/test_sort_workcell_source.py tests/test_so102_drives.py tests/test_mcp_backend_gateway.py
 
 explore:
 	PYTHONPATH=src HARDWARE_SPLICER_SKIP_VISION_LIVE=1 $(PYTHON) scripts/exploration_test.py

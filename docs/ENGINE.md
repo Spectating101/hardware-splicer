@@ -470,3 +470,62 @@ package = export_wiring("PROJECT_ID", result["assessment"]["assessment_id"],
 ```
 
 The API provides `POST /v1/projects/{id}/wiring/assess`, `GET /v1/projects/{id}/wiring`, `GET /v1/projects/{id}/wiring/{assessment_id}`, and `/csv`, `/wireviz`, `/export` downloads on that assessment. MCP callers can request `response_mode: "base64"` for the binary ZIP. Results distinguish `blocked`, `unresolved` and `passes_declared_checks`. All retain `construction_ready: false`, `complete_device_compatibility_verified: false` and `physical_authority_granted: false`.
+
+### SO-ARM102 follower drive
+
+Use this offline reference to choose a motor for the shoulder or elbow of the
+Robonine SO-ARM102 follower. HS joins the purchase variant, bus ID, cable run,
+shared printed arm and simulated joint at one upstream revision. The report
+includes source links and the two purchase listings recorded by the project.
+Stock and pricing require a current supplier check.
+
+```bash
+hs-digital so102-drive shoulder --passive-leader --angle-deg 120 > shoulder.json
+hs-digital so102-drive elbow --angle-deg 120 > elbow.json
+jq '.report | {drive, mount, travel_check, swap: .substitution.status}' shoulder.json
+```
+
+Both positions use the Feetech ST-3250-C002 on the 12 V follower bus. The passive
+leader option omits the motor and gearbox and fails the powered-drive requirement.
+The two lower-arm prints and sixteen M2×6 screws belong to the shared assembly
+step. Counting that hardware once per servo would double the order. The STEP
+envelope measures 113 × 34 × 20 mm for one print. A target of +120° from the
+CAD zero pose exceeds the shoulder limit and fits inside the elbow limit.
+Load, motion through obstacles and fit of a replacement servo remain open.
+
+To try a different servo, pass a JSON PartProfile with the donor facts you have.
+Use port IDs `power` and `bus` for the two logical interfaces on the servo cable.
+An example profile below describes a hypothetical salvaged servo whose documented
+input range ends at 8.4 V.
+
+```json
+{
+  "part_id": "salvaged-servo",
+  "name": "Spare serial servo",
+  "functions": ["powered_joint_drive"],
+  "ports": [
+    {"port_id": "power", "kind": "power", "direction": "input", "voltage_range_v": [6, 8.4]},
+    {"port_id": "bus", "kind": "signal", "direction": "bidirectional", "protocol": "Feetech TTL serial bus"}
+  ]
+}
+```
+
+```bash
+hs-digital so102-drive elbow --candidate donor.json | jq '.report.substitution | {status, failed: [.checks[] | select(.status == "fail")]}'
+```
+
+The follower supply exceeds that donor’s declared range. A blank rating leaves
+the electrical question open. A successful command means the assessment ran.
+Read `substitution.status` for the donor decision and
+`travel_check.within_joint_limits` for the position decision.
+
+The installed package contains a small reference derived from Robonine’s
+[SO-ARM102 source and license notices](https://github.com/roboninecom/SO-ARM102/tree/43252799d077e7f9971d7c695fd59f31413aa9b6).
+From an HS checkout with the digital extra installed, rebuild it using the
+upstream checkout at that revision. The recipe checks all six source digests
+before opening the STEP solid and parsing the URDF.
+
+```bash
+python -m scripts.prepare_so102_drives /path/to/SO-ARM102 rebuilt.json
+cmp rebuilt.json src/hardware_splicer/data/so102_follower_drives.json
+```

@@ -7,6 +7,8 @@ from pathlib import Path
 
 from .digital_engine import DigitalStudyEngine
 from .digital_cases import DEFAULT_CASE
+from .part_substitution import PartProfile
+from .so102_drives import follower_drive
 
 
 def parser():
@@ -15,6 +17,12 @@ def parser():
     command.add_argument('--jobs-db', type=Path)
     commands = command.add_subparsers(dest='command', required=True)
     commands.add_parser('cases', help='List bounded registered cases and numeric requirements.')
+    drive = commands.add_parser('so102-drive', help='Trace a follower servo from the BOM through its mount, wiring and joint.')
+    drive.add_argument('joint', choices=('shoulder', 'elbow'))
+    drive.add_argument('--angle-deg', type=float, help='Test a joint angle measured from the URDF zero pose.')
+    donors = drive.add_mutually_exclusive_group()
+    donors.add_argument('--candidate', type=Path, help='JSON PartProfile describing a proposed replacement.')
+    donors.add_argument('--passive-leader', action='store_true', help='Screen the documented passive leader donor.')
     init = commands.add_parser('init', help='Create a project from the verified digital baseline.')
     init.add_argument('--name')
     init.add_argument('--case', dest='case_id', default=DEFAULT_CASE)
@@ -104,8 +112,14 @@ def exit_code(result):
 def run(argv=None):
     args = parser().parse_args(argv)
     try:
-        with DigitalStudyEngine(project_root=args.project_root, job_db=args.jobs_db) as engine:
-            result = dispatch(engine, args)
+        if args.command == 'so102-drive':
+            candidate = PartProfile.model_validate_json(args.candidate.read_bytes()) if args.candidate else None
+            report = follower_drive(args.joint, candidate=candidate, passive_leader=args.passive_leader,
+                                    angle_deg=args.angle_deg)
+            result = {'ok': True, 'report': report}
+        else:
+            with DigitalStudyEngine(project_root=args.project_root, job_db=args.jobs_db) as engine:
+                result = dispatch(engine, args)
         code = exit_code(result)
     except KeyboardInterrupt:
         result = {'ok': False, 'error': {'type': 'WorkerInterrupted', 'message': 'Headless execution interrupted.'}}
