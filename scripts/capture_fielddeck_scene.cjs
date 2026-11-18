@@ -73,6 +73,7 @@ async function main() {
     await scene.getByRole("button", { name: "5-inch", exact: true }).click();
     await page.waitForTimeout(500);
     await scene.getByRole("button", { name: "Compare", exact: true }).click();
+    await scene.getByRole("button", { name: "Assembly", exact: true }).click();
     await scene.locator('[data-row="5:part:tray-rear-left"]').click();
     await inspector.getByText("geometry changed", { exact: true }).waitFor();
     await capture("compare", 950);

@@ -2,7 +2,8 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import FieldDeckScene, { EvidenceRows } from "./FieldDeckScene.jsx";
 import {
-  classifyPart, indexFielddeck, rowForNode, rowsForMode, selectedPartKeys,
+  classifyPart, evidenceCells, formatEvidenceSource, formatEvidenceValue, indexFielddeck,
+  rowForNode, rowsForMode, selectedPartKeys,
 } from "./fielddeckLogic.js";
 
 const stageMock = vi.hoisted(() => ({ load: vi.fn(), create: vi.fn() }));
@@ -78,6 +79,39 @@ describe("Fielddeck state and mapping", () => {
   });
 });
 
+describe("Fielddeck evidence formatting", () => {
+  it("rounds measurements without padding decimals and gives dimensions and power their units", () => {
+    expect(formatEvidenceValue({ field: "landscape_glass_mm", value: [143.4, 91.46000003] }))
+      .toBe("143.4 × 91.46 mm");
+    expect(formatEvidenceValue({ field: "documented_power_w", value: 1.40000001 })).toBe("1.4 W");
+    expect(formatEvidenceValue({ field: "nominal_volume_mm3", value: 7565.626 })).toBe("7565.63 mm³");
+  });
+
+  it("pairs bounds by axis and leaves the source values intact", () => {
+    const value = [83.30000305175781, 164.27000427246094, 46.099998474121094, 226.7, 255.73, 62];
+    expect(formatEvidenceValue({ field: "mesh_bounds_mm", value, state: "computed" }))
+      .toBe("X 83.3→226.7 · Y 164.27→255.73 · Z 46.1→62 mm");
+    expect(value[0]).toBe(83.30000305175781);
+  });
+
+  it("uses short source labels with complete destinations", () => {
+    const url = "https://www.example.com/data/display.pdf?revision=2";
+    expect(formatEvidenceSource(url)).toEqual({ label: "example.com", href: url });
+    expect(formatEvidenceSource("docs/MODEL3D.md")).toEqual({
+      label: "MODEL3D.md", href: "https://github.com/Spectating101/hardware-splicer/blob/main/docs/MODEL3D.md",
+    });
+    expect(formatEvidenceSource("digital_v1/design.json").href)
+      .toMatch(/\/projects\/cyberdeck-real-trial-20261020\/digital_v1\/design\.json$/);
+  });
+
+  it("preserves unknown and the evidence state labels", () => {
+    expect(evidenceCells({ field: "power_w", value: 4, state: "unknown", source: null }))
+      .toEqual(["power_w", "unknown", "unknown", { label: "unknown" }]);
+    expect(evidenceCells({ field: "power_w", value: 3, state: "assumed", source: null }))
+      .toEqual(["power_w", "3 W", "assumed", { label: "unknown" }]);
+  });
+});
+
 describe("Fielddeck evidence UI", () => {
   beforeEach(() => {
     vi.stubGlobal("matchMedia", vi.fn(() => ({
@@ -94,9 +128,9 @@ describe("Fielddeck evidence UI", () => {
     const unknown = screen.getByText("pin_mapping").parentElement;
     expect(unknown.querySelector(".fd-evidence-value")).toHaveTextContent(/^unknown$/);
     expect(unknown.querySelector(".fd-evidence-source")).toHaveTextContent(/^unknown$/);
-    expect(screen.getByText("1.4")).toBeVisible();
+    expect(screen.getByText("1.4 W")).toBeVisible();
     expect(screen.getByText("datasheet")).toBeVisible();
-    expect(screen.getByText("brief.pdf")).toBeVisible();
+    expect(screen.getByRole("link", { name: "brief.pdf" })).toBeVisible();
   });
 
   it("syncs picks and interface selection with the tree and shows no readiness claim", async () => {
@@ -115,6 +149,10 @@ describe("Fielddeck evidence UI", () => {
     });
     render(<FieldDeckScene />);
     const tree = within(screen.getByRole("complementary", { name: "Part tree" }));
+    const assembly = tree.getByRole("button", { name: "Assembly" });
+    expect(assembly).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("complementary", { name: "Selection details" })).toBeNull();
+    fireEvent.click(assembly);
     const tray = await tree.findByRole("button", { name: "Rear tray" });
     const inspector = within(screen.getByRole("complementary", { name: "Selection details" }));
     act(() => callbacks.onPick("5:part:tray"));
@@ -123,6 +161,7 @@ describe("Fielddeck evidence UI", () => {
     fireEvent.click(tree.getByRole("button", { name: "DSI FFC" }));
     expect(inspector.getByText("pin_mapping_unknown")).toBeVisible();
     expect(inspector.getByText("signal_voltage_unknown")).toBeVisible();
+    expect(screen.getByRole("slider", { name: "Explode" })).toHaveValue("0.55");
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({
       selectedKeys: ["5:part:pi4-dsi", "5:part:display"],
     }));

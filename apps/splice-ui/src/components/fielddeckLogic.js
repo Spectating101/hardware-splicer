@@ -14,12 +14,13 @@ export const DIFF_LABELS = {
 };
 
 export const TOUR = [
-  { label: "Display stack", partId: "display", target: [155, 208, 50], angle: 18 },
+  { label: "Display stack", partId: "display", angle: 18 },
   { label: "Cable (DSI)", interfaceId: "display-ribbon", angle: -5 },
   { label: "Changed parts", diff: "changed", angle: 24 },
 ];
 
 export const VALIDATION_LABEL = "No physical validation performed";
+export const DEFAULT_EXPLODE = 0.55;
 
 export function classifyPart(part, delta, mode) {
   const basis = Object.hasOwn(BASIS_LABELS, part.geometry_basis) ? part.geometry_basis : "unknown";
@@ -84,11 +85,46 @@ export function selectedPartKeys(index, row) {
     .filter(Boolean);
 }
 
-function evidenceText(value) {
-  if (value == null) return "unknown";
-  return typeof value === "object" ? JSON.stringify(value) : String(value);
+const precision = new Intl.NumberFormat("en", { useGrouping: false, maximumFractionDigits: 2 });
+const units = { mm: "mm", mm3: "mm³", w: "W" };
+const repo = "https://github.com/Spectating101/hardware-splicer/blob/main/";
+const fielddeckProject = "projects/cyberdeck-real-trial-20261020/";
+
+function formatNumber(value) {
+  const result = precision.format(value);
+  return result === "-0" ? "0" : result;
+}
+
+export function formatEvidenceValue({ field, value, state }) {
+  if (state === "unknown" || value == null) return "unknown";
+  const unit = units[field.match(/_(mm3|mm|w)$/)?.[1]];
+  const suffix = unit ? ` ${unit}` : "";
+  if (typeof value === "number") return formatNumber(value) + suffix;
+  if (Array.isArray(value) && value.every((item) => typeof item === "number")) {
+    if (field.endsWith("_bounds_mm") && value.length === 6) {
+      return ["X", "Y", "Z"].map((axis, i) =>
+        `${axis} ${formatNumber(value[i])}→${formatNumber(value[i + 3])}`,
+      ).join(" · ") + suffix;
+    }
+    return value.map(formatNumber).join(" × ") + suffix;
+  }
+  return typeof value === "object"
+    ? JSON.stringify(value, (_key, item) => typeof item === "number" ? Number(formatNumber(item)) : item)
+    : String(value);
+}
+
+export function formatEvidenceSource(source) {
+  if (!source || source === "unknown") return { label: "unknown" };
+  if (/^https?:\/\//i.test(source) && URL.canParse(source)) {
+    const { hostname } = new URL(source);
+    return { label: hostname.replace(/^www\./, ""), href: source };
+  }
+  const path = source.replace(/^\.\//, "");
+  const label = path.split("/").at(-1);
+  const prefix = /^(digital_v1|display_swap)\//.test(path) ? fielddeckProject : "";
+  return { label, href: repo + prefix + path };
 }
 
 export function evidenceCells(row) {
-  return [row.field, row.state === "unknown" ? "unknown" : evidenceText(row.value), row.state, evidenceText(row.source)];
+  return [row.field, formatEvidenceValue(row), row.state, formatEvidenceSource(row.source)];
 }

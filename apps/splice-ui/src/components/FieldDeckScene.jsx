@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
-  BASIS_LABELS, DIFF_LABELS, TOUR, VALIDATION_LABEL, classifyPart, evidenceCells,
-  indexFielddeck, rowsForMode, selectedPartKeys,
+  BASIS_LABELS, DEFAULT_EXPLODE, DIFF_LABELS, TOUR, VALIDATION_LABEL, classifyPart, evidenceCells,
+  formatEvidenceSource, indexFielddeck, rowsForMode, selectedPartKeys,
 } from "./fielddeckLogic.js";
 import { createFielddeckStage, disposeFielddeck, loadFielddeck } from "./fielddeckStage.js";
 import "./fielddeckScene.css";
@@ -12,10 +12,30 @@ const INITIAL = {
 };
 const LEGEND = [
   ["custom", "CAD part"], ["vendor_step", "Vendor model"], ["envelope", "Envelope"],
-  ["changed", "Geometry changed"], ["removed", "Removed"], ["added", "Added"],
+  ["changed", "Geometry changed"], ["removed", "Removed"], ["added", "Added"], ["unchanged", "Unchanged"],
 ];
 const MODES = [["7", "7-inch"], ["5", "5-inch"], ["compare", "Compare"]];
 let introSeen = false;
+
+function EvidenceSource({ source: { href, label } }) {
+  return href ? <a href={href} title={href} target="_blank" rel="noreferrer">{label}</a> : label;
+}
+
+function hasNumericValue({ value, state }) {
+  return state !== "unknown" && (typeof value === "number"
+    || Array.isArray(value) && value.some((item) => typeof item === "number"));
+}
+
+function CalloutEvidence({ fact }) {
+  const [field, value, state, source] = evidenceCells(fact);
+  return (
+    <div className="fd-callout-evidence">
+      <span data-numeric={hasNumericValue(fact)}>{state === "unknown" ? field : value}</span>
+      {" · "}{state}
+      {source.href && <> · <EvidenceSource source={source} /></>}
+    </div>
+  );
+}
 
 export function EvidenceRows({ evidence }) {
   return (
@@ -25,9 +45,9 @@ export function EvidenceRows({ evidence }) {
         return (
           <div key={`${field}:${i}`} className="fd-evidence-row">
             <dt>{field}</dt>
-            <dd className="fd-evidence-value">{value}</dd>
+            <dd className="fd-evidence-value" data-numeric={hasNumericValue(row)}>{value}</dd>
             <dd className="fd-evidence-state" data-unknown={state === "unknown"}>{state}</dd>
-            <dd className="fd-evidence-source">{source}</dd>
+            <dd className="fd-evidence-source"><EvidenceSource source={source} /></dd>
           </div>
         );
       })}
@@ -43,10 +63,10 @@ function PartCard({ row, mode, linked, index }) {
     return (
       <>
         <h3>{label}</h3>
-        <p className="fd-mono">{labelFor(from_part_id)} → {labelFor(to_part_id)}</p>
+        <p className="fd-note">{labelFor(from_part_id)} → {labelFor(to_part_id)}</p>
         <dl className="fd-meta">
           <dt>BOM line</dt><dd>{bom_line ?? "unknown"}</dd>
-          {source && <><dt>Source</dt><dd>{source}</dd></>}
+          {source && <><dt>Source</dt><dd><EvidenceSource source={formatEvidenceSource(source)} /></dd></>}
         </dl>
         <h4>Open checks</h4>
         {open_checks.length ? (
@@ -130,10 +150,10 @@ function sceneCallouts(index, sidecars, view, linked) {
     const anchor = selectedPartKeys(index, row).find((key) => linked.has(key));
     if (!anchor) return;
     const basis = row.part && classifyPart(row.part, row.delta, view.mode);
-    const fact = row.part?.evidence.find(({ field }) => field === "geometry_reference")
+    const fact = row.part?.evidence.find(({ field, state }) => field === "landscape_glass_mm" && state !== "unknown")
+      ?? row.part?.evidence.find(({ field }) => field === "geometry_reference")
+      ?? row.part?.evidence.find(({ field, state }) => field === "print_dimensions_mm" && state !== "unknown")
       ?? row.part?.evidence.find(({ field }) => field === "physical_fit");
-    const evidence = fact && (fact.state === "unknown"
-      ? `${fact.field} · unknown` : `${evidenceCells(fact)[1]} · ${fact.state}`);
     const current = items.get(anchor);
     if (current) {
       current.reasons.push(...reasons);
@@ -142,8 +162,9 @@ function sceneCallouts(index, sidecars, view, linked) {
     items.set(anchor, {
       key: row.key, anchor, kind: basis?.diff ?? basis?.basis ?? "interface",
       tag: basis?.diff ? DIFF_LABELS[basis.diff] : row.part ? BASIS_LABELS[basis.basis] : "Interface",
+      basisTag: basis?.diff && basis.basis,
       title: row.part?.label ?? row.link.label,
-      evidence,
+      fact,
       reasons: [...reasons],
     });
   }
@@ -170,8 +191,9 @@ function sceneCallouts(index, sidecars, view, linked) {
 }
 
 function Callouts({ items }) {
+  if (!items.length) return null;
   return (
-    <>
+    <div className="fd-annotations" aria-label="Scene callouts">
       <svg className="fd-leaders" aria-hidden="true">
         {items.map((item, i) => (
           <g key={item.key} data-kind={item.kind} data-leader={i}>
@@ -182,16 +204,26 @@ function Callouts({ items }) {
       {items.map((item, i) => (
         <div key={item.key} className="fd-callout" data-kind={item.kind} data-anchor={item.anchor} data-callout={i}>
           <div className="fd-callout-inner">
-            <span className="fd-tag" data-kind={item.kind}>{item.tag}</span>
-            <strong>{item.title}</strong>
-            {item.evidence && <span className="fd-callout-evidence">{item.evidence}</span>}
+            <div className="fd-tags">
+              <span className="fd-tag" data-kind={item.kind}>{item.tag}</span>
+              {item.basisTag && <span className="fd-tag" data-kind={item.basisTag}>{BASIS_LABELS[item.basisTag]}</span>}
+            </div>
+            <strong title={item.title}>{item.title}</strong>
+            {item.fact && <CalloutEvidence fact={item.fact} />}
             {item.reasons.length > 0 && (
-              <ul>{item.reasons.map((reason, j) => <li key={j}>{reason}</li>)}</ul>
+              <ul>
+                {item.reasons.slice(0, 3).map((reason, j) => <li key={j} title={reason}>{reason}</li>)}
+              </ul>
+            )}
+            {item.reasons.length > 3 && (
+              <span className="fd-callout-more" title={item.reasons.slice(3).join("\n")}>
+                +{item.reasons.length - 3} more
+              </span>
             )}
           </div>
         </div>
       ))}
-    </>
+    </div>
   );
 }
 
@@ -204,6 +236,8 @@ export default function FieldDeckScene() {
   const [rendered, setRendered] = useState(false);
   const [stageError, setStageError] = useState("");
   const [view, setView] = useState(INITIAL);
+  const [treeOpen, setTreeOpen] = useState(false);
+  const [collapsedSelection, setCollapsedSelection] = useState(null);
   const [explodeMotion, setExplodeMotion] = useState(null);
   const [reduced, setReduced] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 
@@ -236,6 +270,7 @@ export default function FieldDeckScene() {
   const index = useMemo(() => indexFielddeck(sidecars), [sidecars]);
   const rows = useMemo(() => rowsForMode(index, view.mode), [index, view.mode]);
   const selection = index.byKey.get(view.selected);
+  const inspectorOpen = Boolean(selection) && collapsedSelection !== view.selected;
   const selectedKeys = useMemo(() => selectedPartKeys(index, selection), [index, selection]);
   const comparisonAvailable = sidecars["5"]?.revision_diff?.status === "available";
   const comparisonRenderable = comparisonAvailable
@@ -243,13 +278,14 @@ export default function FieldDeckScene() {
 
   function finishIntro() {
     setView((old) => ({
-      ...old, mode: "compare", explode: 1, hero: null, blockers: true, showRemoved: true,
+      ...old, mode: "compare", explode: DEFAULT_EXPLODE, hero: null, blockers: true, showRemoved: true,
       selected: index.byPart.get("5:display")?.key ?? null,
     }));
   }
 
   function select(key) {
-    setView((old) => ({ ...old, selected: key, hero: null, touring: false, blockers: true }));
+    setCollapsedSelection(null);
+    setView((old) => ({ ...old, selected: key, cue: null, hero: null, touring: false, blockers: true }));
   }
   current.current = { view, reduced, finishIntro, select };
 
@@ -287,7 +323,7 @@ export default function FieldDeckScene() {
       current.current.finishIntro();
     } else {
       const mode = hasRevision("5") || !hasRevision("7") && sidecars["5"] ? "5" : "7";
-      setView({ ...INITIAL, mode, selected: index.byPart.get(`${mode}:display`)?.key ?? null });
+      setView({ ...INITIAL, mode, explode: DEFAULT_EXPLODE, selected: index.byPart.get(`${mode}:display`)?.key ?? null });
     }
     return () => {
       stage.current = null;
@@ -297,10 +333,10 @@ export default function FieldDeckScene() {
 
   useLayoutEffect(() => {
     stage.current?.update({
-      mode: view.mode, explode: view.explode, heroStart: view.hero,
+      mode: view.mode, explode: view.explode, explodeMotion, heroStart: view.hero,
       selectedKeys, cameraCue: view.cue, reduced,
     });
-  }, [assets, view, selectedKeys, reduced]);
+  }, [assets, view, selectedKeys, reduced, explodeMotion, treeOpen, inspectorOpen]);
 
   useEffect(() => {
     if (view.hero == null) return undefined;
@@ -322,12 +358,13 @@ export default function FieldDeckScene() {
   }, [view.hero, index, reduced]);
 
   function changeMode(mode) {
+    setCollapsedSelection(null);
     setView((old) => {
       const active = index.byKey.get(old.selected);
       const rev = mode === "7" ? "7" : "5";
       const key = active?.part ? index.byPart.get(`${rev}:${active.part.part_id}`)?.key
         : active?.link ? `${rev}:link:${active.link.interface_id}` : null;
-      return { ...old, mode, selected: index.byKey.has(key) ? key : null, touring: false, blockers: true };
+      return { ...old, mode, selected: index.byKey.has(key) ? key : null, cue: null, touring: false, blockers: true };
     });
   }
 
@@ -335,6 +372,7 @@ export default function FieldDeckScene() {
     const stop = TOUR[stopIndex];
     if (!stop) return;
     setExplodeMotion(null);
+    setCollapsedSelection(null);
     setView((old) => {
       const mode = stop.diff && comparisonAvailable && (comparisonRenderable || !rendered) ? "compare" : old.mode;
       const rev = mode === "7" ? "7" : "5";
@@ -373,7 +411,7 @@ export default function FieldDeckScene() {
       const progress = reduced ? 1 : Math.min(1, (now - start) / (to ? 1100 : 800));
       const amount = to ? 1 - (1 - progress) ** 3
         : progress < 0.5 ? 4 * progress ** 3 : 1 - (-2 * progress + 2) ** 3 / 2;
-      setView((old) => ({ ...old, explode: from + (to - from) * amount }));
+      setView((old) => ({ ...old, explode: from + (to - from) * amount, cue: null }));
       if (progress < 1) frame = requestAnimationFrame(step);
       else setExplodeMotion(null);
     }
@@ -413,64 +451,63 @@ export default function FieldDeckScene() {
   return (
     <section className="fd-scene" aria-labelledby="fd-title" data-testid="fielddeck-scene"
       data-scene-status={playing ? "hero" : modelVisible ? "settled" : loading ? "loading" : "unavailable"}>
-      <header className="fd-header">
-        <div>
-          <h1 id="fd-title">Fielddeck display swap</h1>
-          <p>7-inch → 5-inch</p>
-        </div>
-        <div className="fd-validation">
-          <span>{VALIDATION_LABEL}</span>
-          <strong>{blockerCount == null ? "Blocker count unknown" : `${blockerCount} ${blockerCount === 1 ? "blocker" : "blockers"}`}</strong>
-        </div>
-      </header>
+      <div className="fd-stage" ref={host} tabIndex={0} aria-label="Fielddeck stage">
+        <header className="fd-header">
+          <div>
+            <h1 id="fd-title">Fielddeck display swap</h1>
+            <p>7-inch → 5-inch</p>
+          </div>
+          <div className="fd-validation">
+            <span>{VALIDATION_LABEL}</span>
+            <strong>{blockerCount == null ? "Blocker count unknown" : `${blockerCount} ${blockerCount === 1 ? "blocker" : "blockers"}`}</strong>
+          </div>
+        </header>
 
-      <div className="fd-layout">
-        <aside className="fd-tree fd-panel" aria-label="Part tree">
-          <h2>Assembly</h2>
-          <PartTree rows={rows} view={view} selectedKeys={selectedKeys} linked={linked} onSelect={select} />
+        <aside className="fd-tree fd-panel" aria-label="Part tree" data-open={treeOpen}>
+          <h2><button type="button" aria-expanded={treeOpen} aria-controls="fd-tree-content"
+            onClick={() => setTreeOpen(!treeOpen)}>Assembly</button></h2>
+          <div className="fd-panel-content" id="fd-tree-content" hidden={!treeOpen}>
+            {treeOpen && <PartTree rows={rows} view={view} selectedKeys={selectedKeys} linked={linked} onSelect={select} />}
+          </div>
         </aside>
-        <div className="fd-center">
-          <div className="fd-stage" ref={host} tabIndex={0} aria-label="Fielddeck stage">
-            <Callouts items={callouts} />
-            {!modelVisible && <div className="fd-stage-message" role="status">
-              {loading ? "Loading Fielddeck models…" : errors.join(" ") || "Fielddeck model unavailable."}
-            </div>}
-            {modelVisible && errors.length > 0 && <p className="fd-stage-warning" role="status">{errors.join(" ")}</p>}
-            {playing && <button className="fd-skip" type="button" onClick={finishIntro}>Skip intro</button>}
+        <aside className="fd-inspector fd-panel" aria-label="Selection details" data-open={inspectorOpen} hidden={!selection}>
+          <h2><button type="button" aria-expanded={inspectorOpen} aria-controls="fd-inspector-content"
+            onClick={() => setCollapsedSelection(inspectorOpen ? view.selected : null)}>Inspector</button></h2>
+          <div className="fd-inspector-scroll" id="fd-inspector-content" hidden={!inspectorOpen}>
+            <PartCard row={selection} mode={view.mode} linked={linked} index={index} />
           </div>
-          <div className="fd-legend" aria-label="Material legend">
-            {LEGEND.map(([kind, label]) => (
-              <span key={kind} data-kind={kind}><i className="fd-swatch" aria-hidden="true" />{label}</span>
-            ))}
-            {[...index.byKey.values()].some((row) => row.part?.geometry_basis === "unknown" && linked.has(row.key))
-              && <span data-kind="unknown"><i className="fd-swatch" aria-hidden="true" />Unknown geometry</span>}
-          </div>
+        </aside>
+
+        {!modelVisible && <div className="fd-stage-message" role="status">
+          {loading ? "Loading Fielddeck models…" : errors.join(" ") || "Fielddeck model unavailable."}
+        </div>}
+        {modelVisible && errors.length > 0 && <p className="fd-stage-warning" role="status">{errors.join(" ")}</p>}
+        {playing && <button className="fd-skip" type="button" onClick={finishIntro}>Skip intro</button>}
+
+        <div className="fd-bottom">
+          <Callouts items={callouts} />
           {!playing && assets && (
             <div className="fd-controls">
-              <div className="fd-control-row">
-                <div className="fd-modes" role="group" aria-label="Revision">
-                  {MODES.filter(canChoose).map(([mode, label]) => (
-                    <button key={mode} type="button" aria-pressed={view.mode === mode} onClick={() => changeMode(mode)}>
-                      {label}
-                    </button>
-                  ))}
-                </div>
-                {modelVisible && <div className="fd-explode">
-                  <label htmlFor="fd-explode">Explode</label>
-                  <input id="fd-explode" type="range" min="0" max="1" step="0.01" value={view.explode}
-                    onChange={(event) => {
-                      setExplodeMotion(null);
-                      setView((old) => ({ ...old, explode: Number(event.target.value), touring: false }));
-                    }} />
-                  <output htmlFor="fd-explode">{Math.round(view.explode * 100)}%</output>
-                  <button type="button" onClick={() => {
-                    setView((old) => ({ ...old, touring: false }));
-                    setExplodeMotion({ from: view.explode, to: view.explode > 0 ? 0 : 1, start: performance.now() });
-                  }}>{view.explode > 0 ? "Collapse" : "Explode view"}</button>
-                </div>}
+              <div className="fd-modes" role="group" aria-label="Revision">
+                {MODES.filter(canChoose).map(([mode, label]) => (
+                  <button key={mode} type="button" aria-pressed={view.mode === mode} onClick={() => changeMode(mode)}>
+                    {label}
+                  </button>
+                ))}
               </div>
-              {modelVisible && rows.some(({ part }) => part?.explode_derived) &&
-                <p className="fd-note">Presentation offset, not assembly order</p>}
+              {modelVisible && <div className="fd-explode">
+                <label htmlFor="fd-explode">Explode</label>
+                <input id="fd-explode" type="range" min="0" max="1" step="0.01" value={view.explode}
+                  onChange={(event) => {
+                    setExplodeMotion(null);
+                    setView((old) => ({ ...old, explode: Number(event.target.value), cue: null, touring: false, blockers: true }));
+                  }} />
+                <output htmlFor="fd-explode">{Math.round(view.explode * 100)}%</output>
+                <button type="button" onClick={() => {
+                  setView((old) => ({ ...old, touring: false, blockers: true }));
+                  setExplodeMotion({ from: view.explode, to: view.explode > 0 ? 0 : 1, start: performance.now() });
+                }}>{view.explode > 0 ? "Collapse" : "Explode view"}</button>
+              </div>}
               <div className="fd-tour" role="group" aria-label="Tour">
                 <button type="button" disabled={!view.stop} onClick={() => goTo(view.stop - 1)}
                   aria-label="Previous stop">←</button>
@@ -483,14 +520,21 @@ export default function FieldDeckScene() {
               </div>
             </div>
           )}
-          <footer className="fd-footer">CAD preview · dimensions in mm</footer>
-        </div>
-        <aside className="fd-inspector fd-panel" aria-label="Selection details">
-          <h2>Inspector</h2>
-          <div className="fd-inspector-scroll">
-            <PartCard row={selection} mode={view.mode} linked={linked} index={index} />
+          <div className="fd-caption">
+            <div className="fd-legend" aria-label="Material legend">
+              {LEGEND.map(([kind, label]) => (
+                <span key={kind} data-kind={kind}><i className="fd-swatch" aria-hidden="true" />{label}</span>
+              ))}
+              {[...index.byKey.values()].some((row) => row.part?.geometry_basis === "unknown" && linked.has(row.key))
+                && <span data-kind="unknown"><i className="fd-swatch" aria-hidden="true" />Unknown geometry</span>}
+            </div>
+            <footer className="fd-footer">
+              {modelVisible && rows.some(({ part }) => part?.explode_derived) &&
+                <span>Presentation offset, not assembly order</span>}
+              <span>CAD preview · dimensions in mm</span>
+            </footer>
           </div>
-        </aside>
+        </div>
       </div>
     </section>
   );
