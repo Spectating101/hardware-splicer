@@ -1,0 +1,915 @@
+{
+  "ok": true,
+  "history": [
+    {
+      "revision": 2,
+      "saved_at": "2026-11-18T16:06:42.011859+00:00",
+      "attempt_id": "4be7214c884343629205a4fb1ef304db",
+      "run_id": "302d591fc9fc4f6a898ffa22fcccf1fa",
+      "parent_revision": 1,
+      "change_request": "Preserve authored inspection artwork; adapt to a 12 mm pen and 190 x 128 mm viewport on A5 paper.",
+      "job_id": "522ae2b0f01c5929b63fe05c228b8f6d",
+      "summary": {
+        "artifact_integrity": true,
+        "case_id": "ender3-penplotter",
+        "constraints": [
+          {
+            "actual": 14.0,
+            "basis": "PDF + STEP measured cylinder axes",
+            "id": "manufacturer_mount_pitch",
+            "limit": 14.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 0.0,
+            "basis": "Exact OpenCascade intersection with unmodified manufacturer E plate",
+            "id": "donor_interference",
+            "limit": 0.001,
+            "passed": true,
+            "unit": "mm3"
+          },
+          {
+            "actual": 4.0,
+            "basis": "New M3x10: 10 mm minus 6 mm printed web",
+            "id": "bolt_engagement",
+            "limit": 3.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 0.05095031836970898,
+            "basis": "2N, E=1400MPa assumed printed polymer, 40x6 web, L42.55; excludes layer/creep/clamp failure",
+            "id": "beam_proxy",
+            "limit": 0.3,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 190.0,
+            "basis": "Registered horizontal scope; full viewport separately checked against paper and source controller travel",
+            "id": "bed_limited_drawing_width",
+            "limit": 190.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 128.0,
+            "basis": "Retained vertical scope; physical calibration not performed",
+            "id": "bed_limited_drawing_height",
+            "limit": 140.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 12.5,
+            "basis": "Centered sheet inside the manufacturer 235 mm bed",
+            "id": "paper_on_bed",
+            "limit": 0.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 10.0,
+            "basis": "Full viewport leaves at least 10 mm paper margin at both horizontal edges",
+            "id": "drawing_paper_margin_x",
+            "limit": 10.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 10.0,
+            "basis": "Full viewport leaves at least 10 mm paper margin at both vertical edges",
+            "id": "drawing_paper_margin_y",
+            "limit": 10.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 22.5,
+            "basis": "Full source viewport after measured pen/nozzle offset stays in 0..235 mm controller travel",
+            "id": "viewport_controller_travel",
+            "limit": 0.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 0.0,
+            "basis": "Actual manufacturer M4 T nut rotated90deg, translated w=-3.5 inside actual2020 profile; no thread/torque validation",
+            "id": "parking_tnut_profile_fit",
+            "limit": 0.001,
+            "passed": true,
+            "unit": "mm3"
+          },
+          {
+            "actual": 270.2,
+            "basis": "Parked nozzle273.2mm above paper minus maximum pen lift; representative layout only",
+            "id": "parking_hotend_clearance",
+            "limit": 200.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 43.9,
+            "basis": "Affine segment endpoints bound all linear XY positions",
+            "id": "motion_pen_tip_on_bed",
+            "limit": 0.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 29.0,
+            "basis": "Measured fixture lower face30mm above tip minus assumed1mm tape; excludes frame/wires",
+            "id": "motion_fixture_vertical_clearance",
+            "limit": 2.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 40.69999999999999,
+            "basis": "Manufacturer Configuration.h 0..235mm XY, compensated tip offset",
+            "id": "motion_controller_travel",
+            "limit": 0.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 0.0,
+            "basis": "Every XY travel move must stay at requested lift",
+            "id": "motion_pen_up_travel",
+            "limit": 0.0,
+            "passed": true,
+            "unit": "segments"
+          },
+          {
+            "actual": 2.0,
+            "basis": "Assumed tape height <=1mm; uncertainty is not physical validation",
+            "id": "motion_pen_lift_clearance",
+            "limit": 1.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 16.399999999999977,
+            "basis": "Every emitted ink endpoint leaves 10 mm paper margin; 0.00011 mm serialization tolerance",
+            "id": "motion_ink_paper_margin",
+            "limit": 10.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 6.399999999999977,
+            "basis": "Every emitted ink segment stays inside the requested source viewport; 0.00011 mm serialization tolerance",
+            "id": "motion_ink_in_viewport",
+            "limit": 0.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 3.0,
+            "basis": "Every commanded segment endpoint lies within paper Z0 and requested lift",
+            "id": "motion_Z_travel",
+            "limit": 3.0,
+            "passed": true,
+            "unit": "mm"
+          }
+        ],
+        "engine": "Registered native CAD and engineering case",
+        "metrics": {
+          "adapter_volume_mm3": 26373.321855425656,
+          "beam_proxy_deflection_mm_at_2N": 0.05095031836970898,
+          "cap_volume_mm3": 8404.542170874423,
+          "clamp_open_gap_mm": 0.4,
+          "clamp_screw_tip_to_plate_mm": 2.4,
+          "controller_travel_margin_mm": 40.69999999999999,
+          "draw_length_mm": 1408.0,
+          "drawing_height_mm": 128.0,
+          "drawing_paper_margin_x_mm": 10.0,
+          "drawing_paper_margin_y_mm": 10.0,
+          "drawing_width_mm": 190.0,
+          "fixture_bed_clearance_mm": 29.0,
+          "ideal_feed_time_s": 189.55529877780276,
+          "ink_paper_margin_mm": 16.399999999999977,
+          "ink_viewport_margin_mm": 6.399999999999977,
+          "maximum_commanded_Z_mm": 3.0,
+          "minimum_commanded_Z_mm": 0.0,
+          "mount_bolt_engagement_mm": 4.0,
+          "mount_boss_front_mm": 7.0,
+          "mount_interference_mm3": 0.0,
+          "mount_pitch_mm": 14.0,
+          "non_drawing_XY_without_lift": 0,
+          "paper_bed_margin_mm": 12.5,
+          "paper_height_mm": 148.0,
+          "paper_width_mm": 210.0,
+          "parking_plate_volume_mm3": 29336.842062378215,
+          "parking_radiator_hole_pitch_mm": 14.0,
+          "parking_tnut_profile_interference_mm3": 0.0,
+          "pen_center_bed_margin_mm": 43.9,
+          "pen_diameter_mm": 12.0,
+          "pen_lift_mm": 3.0,
+          "pen_tip_to_clamp_mm": 30.0,
+          "plate_to_adapter_airgap_mm": 4.5,
+          "printed_mass_g_at_1_27_g_cm3": 81.42567673262144,
+          "segment_count": 73,
+          "source_canvas_height_mm": 128.0,
+          "source_canvas_scale_mm_per_unit": 1.6,
+          "source_canvas_width_mm": 160.0,
+          "stroke_count": 12,
+          "travel_length_mm": 591.1059755560548,
+          "viewport_controller_margin_mm": 22.5
+        },
+        "physical_authority_granted": false,
+        "physical_work_requested": false,
+        "requirements": {
+          "drawing_height_mm": 128.0,
+          "drawing_width_mm": 190.0,
+          "paper_height_mm": 148.0,
+          "paper_width_mm": 210.0,
+          "pen_diameter_mm": 12.0,
+          "pen_lift_mm": 3.0
+        },
+        "requirements_met": true,
+        "scope_limits": [
+          "Digital geometry and declared calculation/simulation models only.",
+          "No purchased/owned hardware, physical fit, operation or fabrication is established."
+        ],
+        "source_sha256": {
+          "ASSEMBLY.md": "f3ead7bbb0cd0f04e51df0817234dde53c6edd2f8200ebadb653c7cb4ee477e2",
+          "BOM.md": "f1237417f62f1687c44891468efc3212de74852dedf4a59d28ad8c93ad9316e2",
+          "LICENSE": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+          "NOTICE.md": "28ac90ee0c6c8a17380acdb015cf0f5ad22d1b4a307772d2ce33d63c6ffea9e7",
+          "README.md": "7cf831851350c3cc961c6f3106b08aa38859e9c89dc81c85ea82abd47b7d420b",
+          "VALIDATION.md": "39b857d1283a722d1a6b54d0d62e01ec911ce621d666ed3c27f642e08da63d88",
+          "scripts/build.py": "661260d41b6c43783333f534fee157cff9ea60b0e57d8aeb826dcf9803996ec5",
+          "scripts/common.py": "513b47bdae0ae3f4312ae0df056aac2b0bfe6c6f343308e4ad0c77c7b3467681",
+          "scripts/simulate.py": "e70b3d28fd998cdd73d7159dc36a3f8e15bf82fbef79a2653a35b7083e0df43c",
+          "scripts/verify.py": "53aa0478cd0a8f47254dd5102870e91798a4b9d9b9c80e978d5aa1545552b3fe",
+          "sources/2020 profile.step": "42ee502ac74f7a2e125224b18904bd6048845b83f8f129729fe328a7ec51dacb",
+          "sources/Configuration.h": "8e091f7a2ca407405f8e1537d84b1bc5b21d9b996bbc2e0e75950bbffae23dc6",
+          "sources/E plate.SLDPRT": "ce296470cb53cbbb59af96f2fa79195efcd1545c73d7e591253158e6ce49feac",
+          "sources/E plate.pdf": "ab6f5b9c4f5eb64ab9a9569d0b5e588682f40774aa4c7aee3bb8b899619ab698",
+          "sources/E plate.step": "3f88c432ff15caa8ae3302c13f226c9e29463c113381fd908d17228a227ef632",
+          "sources/Ender-3 BOM.XLS": "b0af37db410d3afd79da325fd57c987caea10486f015adf9517561e4ff41ce3b",
+          "sources/LICENSE": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+          "sources/M4 T-Slot Nut.step": "69b889505eab4ff536c0c2a25d777a97856e65189828af53a58bc919817d5da2",
+          "sources/README.md": "bfb8429f5fc71722be53a237543b5a4991e02d5817f8165b2cd61f2f94ee248d",
+          "sources/Radiator.step": "3875129bb3abfea38a595ca0cc62cf14d447f0ab2a73f35c02873a3d1dc1ca24",
+          "sources/assembly_parts.json": "347f036f9bf6dbf564864da4765a286bcb239f53e2e2aed685468f9a26754641",
+          "sources/interface.json": "5a8f70a32c0293306fd12a3bd1abf9d53572a340e115b7f1ed8fc4118dcf4289",
+          "sources/manifest.json": "5071b59ce6ac2c38456b0d20b2b2a7a5d9b017ec0e4804ce11babad6f3bed5c6",
+          "sources/nozzle.step": "e23313c89901799e8b37d160b8050535ce2809711a2da6b93dfd6e7d4273b89f",
+          "sources/prompt-drawing.json": "fb9c9021188bb3a3619178a7789b68881b650baf4a4ba4f47edf62a47c468f6e"
+        }
+      },
+      "artifact_manifest": {
+        "ASSEMBLY.md": {
+          "sha256": "f3ead7bbb0cd0f04e51df0817234dde53c6edd2f8200ebadb653c7cb4ee477e2",
+          "bytes": 8386
+        },
+        "BOM.md": {
+          "sha256": "f1237417f62f1687c44891468efc3212de74852dedf4a59d28ad8c93ad9316e2",
+          "bytes": 4010
+        },
+        "LICENSE": {
+          "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+          "bytes": 35147
+        },
+        "LICENSE_HS.txt": {
+          "sha256": "e243ac85fd7b0580eba9147640bd18047c3f4f799def65081f95b3a929518be6",
+          "bytes": 1102
+        },
+        "NOTICE.md": {
+          "sha256": "28ac90ee0c6c8a17380acdb015cf0f5ad22d1b4a307772d2ce33d63c6ffea9e7",
+          "bytes": 1984
+        },
+        "README.md": {
+          "sha256": "7cf831851350c3cc961c6f3106b08aa38859e9c89dc81c85ea82abd47b7d420b",
+          "bytes": 6458
+        },
+        "STUDY.zip": {
+          "sha256": "b55b12339b84e2732990091b7d27dfce455158085e521a244e41db63d8bf103f",
+          "bytes": 1395598
+        },
+        "STUDY_README.md": {
+          "sha256": "8693cd93fd09ffb4e32e7f5b6e2ece45904743a8fabfbe317ca7bb8eefb354de",
+          "bytes": 2411
+        },
+        "VALIDATION.md": {
+          "sha256": "39b857d1283a722d1a6b54d0d62e01ec911ce621d666ed3c27f642e08da63d88",
+          "bytes": 6714
+        },
+        "exports/device_render.png": {
+          "sha256": "e6c9659357db7b8348e47afe9ca9e9c440302dbcca971f743c8333b5f6c050c2",
+          "bytes": 481886
+        },
+        "exports/hotend_parking_plate.step": {
+          "sha256": "a5fc1468d65b9e63424ba7aaf2fe9e1f568758f2a18fb6dd6b8995d85104c93b",
+          "bytes": 135660
+        },
+        "exports/hotend_parking_plate.stl": {
+          "sha256": "98e6228836ab62512ce49eb5fb015677a0a0b671dd606c636a8d55965b457dd9",
+          "bytes": 108684
+        },
+        "exports/pen_adapter.step": {
+          "sha256": "e738d04a1ff5b9261a58618bddf35a197291ae65ffad0b0741e0f7d51a6895a4",
+          "bytes": 89046
+        },
+        "exports/pen_adapter.stl": {
+          "sha256": "c71763a42b88ee471e1f358a5d93d3b3631ae7e33e0f7ee389298146e2b49212",
+          "bytes": 117884
+        },
+        "exports/pen_clamp.step": {
+          "sha256": "500f77deb2e7b47915d4aa93c5d1b79f0541f9f00c9591de4d8d524389819ffd",
+          "bytes": 30581
+        },
+        "exports/pen_clamp.stl": {
+          "sha256": "8aed7f7b3c07bde76b97ab43f0dd7949067336e0dfaa4b02bd3042bd2640ee5b",
+          "bytes": 64284
+        },
+        "exports/plotter.glb": {
+          "sha256": "65ac81ec10f9995e0b9d29ed7bd2997cc6cd52aa0e5593e9f6f695c6bd992696",
+          "bytes": 268608
+        },
+        "exports/plotter.step": {
+          "sha256": "e93a69c605982e320bdd9b896803d5b97f80b34490f775a0f543dd922e32d416",
+          "bytes": 805852
+        },
+        "reports/engineering.json": {
+          "sha256": "dd19039ab429175acf4663ba6ade909f1c24e3ba4f7c64cbfba21ccd860a0c18",
+          "bytes": 7041
+        },
+        "reports/export_manifest.json": {
+          "sha256": "94cec6b9964ae527b48e3f2aec9a05988a78da4bd79149f46602f7afc9c4a27d",
+          "bytes": 888
+        },
+        "reports/simulation.json": {
+          "sha256": "4df30b78820dbdd7816ad1f7e4826b47fc19fb4426f82f461a6657936e25f452",
+          "bytes": 3080
+        },
+        "reports/verification.json": {
+          "sha256": "1ef714cd4262b8eaf30e2b345cb45666a74a5ef9527964b7300e1f64756fd09e",
+          "bytes": 10102
+        },
+        "requirements.json": {
+          "sha256": "741f98d14fe0347d09612f8bb22ff440908c8682cabcdb3d195dbda4655b2668",
+          "bytes": 166
+        },
+        "scripts/build.py": {
+          "sha256": "661260d41b6c43783333f534fee157cff9ea60b0e57d8aeb826dcf9803996ec5",
+          "bytes": 13498
+        },
+        "scripts/common.py": {
+          "sha256": "513b47bdae0ae3f4312ae0df056aac2b0bfe6c6f343308e4ad0c77c7b3467681",
+          "bytes": 2858
+        },
+        "scripts/simulate.py": {
+          "sha256": "e70b3d28fd998cdd73d7159dc36a3f8e15bf82fbef79a2653a35b7083e0df43c",
+          "bytes": 10880
+        },
+        "scripts/verify.py": {
+          "sha256": "53aa0478cd0a8f47254dd5102870e91798a4b9d9b9c80e978d5aa1545552b3fe",
+          "bytes": 24142
+        },
+        "simulation/example.gcode": {
+          "sha256": "e36f3693b90903a6dea58f4c42aae0e1b45929b8df38842432d03447fd2061af",
+          "bytes": 2032
+        },
+        "simulation/example.svg": {
+          "sha256": "6a4404913df7e1cac810259638c5dc13bf786ee0a1e503c96f79ac6cdf1db6c4",
+          "bytes": 1151
+        },
+        "simulation/plotted_drawing.png": {
+          "sha256": "394bf0eec99c07e2a4467b3b0ed4aabee6fff119890fb5f06c1b08d176ed90bc",
+          "bytes": 97480
+        },
+        "simulation/trajectory.csv": {
+          "sha256": "ee89271df7057e6a32cc13ab5912706bc96edf9bbe29c8d349093a4e82d69e7b",
+          "bytes": 3885
+        },
+        "sources/2020 profile.step": {
+          "sha256": "42ee502ac74f7a2e125224b18904bd6048845b83f8f129729fe328a7ec51dacb",
+          "bytes": 560114
+        },
+        "sources/Configuration.h": {
+          "sha256": "8e091f7a2ca407405f8e1537d84b1bc5b21d9b996bbc2e0e75950bbffae23dc6",
+          "bytes": 64196
+        },
+        "sources/E plate.SLDPRT": {
+          "sha256": "ce296470cb53cbbb59af96f2fa79195efcd1545c73d7e591253158e6ce49feac",
+          "bytes": 80348
+        },
+        "sources/E plate.pdf": {
+          "sha256": "ab6f5b9c4f5eb64ab9a9569d0b5e588682f40774aa4c7aee3bb8b899619ab698",
+          "bytes": 166931
+        },
+        "sources/E plate.step": {
+          "sha256": "3f88c432ff15caa8ae3302c13f226c9e29463c113381fd908d17228a227ef632",
+          "bytes": 134286
+        },
+        "sources/Ender-3 BOM.XLS": {
+          "sha256": "b0af37db410d3afd79da325fd57c987caea10486f015adf9517561e4ff41ce3b",
+          "bytes": 47616
+        },
+        "sources/LICENSE": {
+          "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+          "bytes": 35147
+        },
+        "sources/M4 T-Slot Nut.step": {
+          "sha256": "69b889505eab4ff536c0c2a25d777a97856e65189828af53a58bc919817d5da2",
+          "bytes": 30403
+        },
+        "sources/README.md": {
+          "sha256": "bfb8429f5fc71722be53a237543b5a4991e02d5817f8165b2cd61f2f94ee248d",
+          "bytes": 100
+        },
+        "sources/Radiator.step": {
+          "sha256": "3875129bb3abfea38a595ca0cc62cf14d447f0ab2a73f35c02873a3d1dc1ca24",
+          "bytes": 263419
+        },
+        "sources/assembly_parts.json": {
+          "sha256": "347f036f9bf6dbf564864da4765a286bcb239f53e2e2aed685468f9a26754641",
+          "bytes": 155208
+        },
+        "sources/interface.json": {
+          "sha256": "5a8f70a32c0293306fd12a3bd1abf9d53572a340e115b7f1ed8fc4118dcf4289",
+          "bytes": 1400
+        },
+        "sources/manifest.json": {
+          "sha256": "5071b59ce6ac2c38456b0d20b2b2a7a5d9b017ec0e4804ce11babad6f3bed5c6",
+          "bytes": 4819
+        },
+        "sources/nozzle.step": {
+          "sha256": "e23313c89901799e8b37d160b8050535ce2809711a2da6b93dfd6e7d4273b89f",
+          "bytes": 66278
+        },
+        "sources/prompt-drawing.json": {
+          "sha256": "fb9c9021188bb3a3619178a7789b68881b650baf4a4ba4f47edf62a47c468f6e",
+          "bytes": 1806
+        },
+        "study-contract.json": {
+          "sha256": "c26cf8543a6ee52ee11cd2582eab32b959c53346bd4b32bc6e3f7d4dc917af2d",
+          "bytes": 4944
+        },
+        "study-verification.json": {
+          "sha256": "36e0a678125f316a74bdac593bb754fa4321296d845592a0ccf1fca46b90f1db",
+          "bytes": 14288
+        }
+      }
+    },
+    {
+      "revision": 1,
+      "saved_at": "2026-11-18T16:06:32.315037+00:00",
+      "attempt_id": null,
+      "run_id": "86fef36f87db45199d4ac9f1199f1078",
+      "parent_revision": null,
+      "change_request": "Digital build from design brief",
+      "job_id": null,
+      "summary": {
+        "artifact_integrity": true,
+        "case_id": "ender3-penplotter",
+        "constraints": [
+          {
+            "actual": 14.0,
+            "basis": "PDF + STEP measured cylinder axes",
+            "id": "manufacturer_mount_pitch",
+            "limit": 14.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 0.0,
+            "basis": "Exact OpenCascade intersection with unmodified manufacturer E plate",
+            "id": "donor_interference",
+            "limit": 0.001,
+            "passed": true,
+            "unit": "mm3"
+          },
+          {
+            "actual": 4.0,
+            "basis": "New M3x10: 10 mm minus 6 mm printed web",
+            "id": "bolt_engagement",
+            "limit": 3.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 0.05095031836970898,
+            "basis": "2N, E=1400MPa assumed printed polymer, 40x6 web, L42.55; excludes layer/creep/clamp failure",
+            "id": "beam_proxy",
+            "limit": 0.3,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 100.0,
+            "basis": "Registered horizontal scope; full viewport separately checked against paper and source controller travel",
+            "id": "bed_limited_drawing_width",
+            "limit": 190.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 80.0,
+            "basis": "Retained vertical scope; physical calibration not performed",
+            "id": "bed_limited_drawing_height",
+            "limit": 140.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 27.5,
+            "basis": "Centered sheet inside the manufacturer 235 mm bed",
+            "id": "paper_on_bed",
+            "limit": 0.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 40.0,
+            "basis": "Full viewport leaves at least 10 mm paper margin at both horizontal edges",
+            "id": "drawing_paper_margin_x",
+            "limit": 10.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 50.0,
+            "basis": "Full viewport leaves at least 10 mm paper margin at both vertical edges",
+            "id": "drawing_paper_margin_y",
+            "limit": 10.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 58.30000000000001,
+            "basis": "Full source viewport after measured pen/nozzle offset stays in 0..235 mm controller travel",
+            "id": "viewport_controller_travel",
+            "limit": 0.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 0.0,
+            "basis": "Actual manufacturer M4 T nut rotated90deg, translated w=-3.5 inside actual2020 profile; no thread/torque validation",
+            "id": "parking_tnut_profile_fit",
+            "limit": 0.001,
+            "passed": true,
+            "unit": "mm3"
+          },
+          {
+            "actual": 270.2,
+            "basis": "Parked nozzle273.2mm above paper minus maximum pen lift; representative layout only",
+            "id": "parking_hotend_clearance",
+            "limit": 200.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 71.5,
+            "basis": "Affine segment endpoints bound all linear XY positions",
+            "id": "motion_pen_tip_on_bed",
+            "limit": 0.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 29.0,
+            "basis": "Measured fixture lower face30mm above tip minus assumed1mm tape; excludes frame/wires",
+            "id": "motion_fixture_vertical_clearance",
+            "limit": 2.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 62.30000000000001,
+            "basis": "Manufacturer Configuration.h 0..235mm XY, compensated tip offset",
+            "id": "motion_controller_travel",
+            "limit": 0.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 0.0,
+            "basis": "Every XY travel move must stay at requested lift",
+            "id": "motion_pen_up_travel",
+            "limit": 0.0,
+            "passed": true,
+            "unit": "segments"
+          },
+          {
+            "actual": 2.0,
+            "basis": "Assumed tape height <=1mm; uncertainty is not physical validation",
+            "id": "motion_pen_lift_clearance",
+            "limit": 1.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 44.0,
+            "basis": "Every emitted ink endpoint leaves 10 mm paper margin; 0.00011 mm serialization tolerance",
+            "id": "motion_ink_paper_margin",
+            "limit": 10.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 4.0,
+            "basis": "Every emitted ink segment stays inside the requested source viewport; 0.00011 mm serialization tolerance",
+            "id": "motion_ink_in_viewport",
+            "limit": 0.0,
+            "passed": true,
+            "unit": "mm"
+          },
+          {
+            "actual": 3.0,
+            "basis": "Every commanded segment endpoint lies within paper Z0 and requested lift",
+            "id": "motion_Z_travel",
+            "limit": 3.0,
+            "passed": true,
+            "unit": "mm"
+          }
+        ],
+        "engine": "Registered native CAD and engineering case",
+        "metrics": {
+          "adapter_volume_mm3": 26756.596159163615,
+          "beam_proxy_deflection_mm_at_2N": 0.05095031836970898,
+          "cap_volume_mm3": 8787.816474612377,
+          "clamp_open_gap_mm": 0.4,
+          "clamp_screw_tip_to_plate_mm": 2.4,
+          "controller_travel_margin_mm": 62.30000000000001,
+          "draw_length_mm": 880.0,
+          "drawing_height_mm": 80.0,
+          "drawing_paper_margin_x_mm": 40.0,
+          "drawing_paper_margin_y_mm": 50.0,
+          "drawing_width_mm": 100.0,
+          "fixture_bed_clearance_mm": 29.0,
+          "ideal_feed_time_s": 125.52642881373568,
+          "ink_paper_margin_mm": 44.0,
+          "ink_viewport_margin_mm": 4.0,
+          "maximum_commanded_Z_mm": 3.0,
+          "minimum_commanded_Z_mm": 0.0,
+          "mount_bolt_engagement_mm": 4.0,
+          "mount_boss_front_mm": 7.0,
+          "mount_interference_mm3": 0.0,
+          "mount_pitch_mm": 14.0,
+          "non_drawing_XY_without_lift": 0,
+          "paper_bed_margin_mm": 27.5,
+          "paper_height_mm": 180.0,
+          "paper_width_mm": 180.0,
+          "parking_plate_volume_mm3": 29336.842062378215,
+          "parking_radiator_hole_pitch_mm": 14.0,
+          "parking_tnut_profile_interference_mm3": 0.0,
+          "pen_center_bed_margin_mm": 71.5,
+          "pen_diameter_mm": 10.0,
+          "pen_lift_mm": 3.0,
+          "pen_tip_to_clamp_mm": 30.0,
+          "plate_to_adapter_airgap_mm": 4.5,
+          "printed_mass_g_at_1_27_g_cm3": 82.39919346411585,
+          "segment_count": 73,
+          "source_canvas_height_mm": 80.0,
+          "source_canvas_scale_mm_per_unit": 1.0,
+          "source_canvas_width_mm": 100.0,
+          "stroke_count": 12,
+          "travel_length_mm": 366.5285762747151,
+          "viewport_controller_margin_mm": 58.30000000000001
+        },
+        "physical_authority_granted": false,
+        "physical_work_requested": false,
+        "requirements": {
+          "drawing_height_mm": 80.0,
+          "drawing_width_mm": 100.0,
+          "paper_height_mm": 180.0,
+          "paper_width_mm": 180.0,
+          "pen_diameter_mm": 10.0,
+          "pen_lift_mm": 3.0
+        },
+        "requirements_met": true,
+        "scope_limits": [
+          "Digital geometry and declared calculation/simulation models only.",
+          "No purchased/owned hardware, physical fit, operation or fabrication is established."
+        ],
+        "source_sha256": {
+          "ASSEMBLY.md": "f3ead7bbb0cd0f04e51df0817234dde53c6edd2f8200ebadb653c7cb4ee477e2",
+          "BOM.md": "f1237417f62f1687c44891468efc3212de74852dedf4a59d28ad8c93ad9316e2",
+          "LICENSE": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+          "NOTICE.md": "28ac90ee0c6c8a17380acdb015cf0f5ad22d1b4a307772d2ce33d63c6ffea9e7",
+          "README.md": "7cf831851350c3cc961c6f3106b08aa38859e9c89dc81c85ea82abd47b7d420b",
+          "VALIDATION.md": "39b857d1283a722d1a6b54d0d62e01ec911ce621d666ed3c27f642e08da63d88",
+          "scripts/build.py": "661260d41b6c43783333f534fee157cff9ea60b0e57d8aeb826dcf9803996ec5",
+          "scripts/common.py": "513b47bdae0ae3f4312ae0df056aac2b0bfe6c6f343308e4ad0c77c7b3467681",
+          "scripts/simulate.py": "e70b3d28fd998cdd73d7159dc36a3f8e15bf82fbef79a2653a35b7083e0df43c",
+          "scripts/verify.py": "53aa0478cd0a8f47254dd5102870e91798a4b9d9b9c80e978d5aa1545552b3fe",
+          "sources/2020 profile.step": "42ee502ac74f7a2e125224b18904bd6048845b83f8f129729fe328a7ec51dacb",
+          "sources/Configuration.h": "8e091f7a2ca407405f8e1537d84b1bc5b21d9b996bbc2e0e75950bbffae23dc6",
+          "sources/E plate.SLDPRT": "ce296470cb53cbbb59af96f2fa79195efcd1545c73d7e591253158e6ce49feac",
+          "sources/E plate.pdf": "ab6f5b9c4f5eb64ab9a9569d0b5e588682f40774aa4c7aee3bb8b899619ab698",
+          "sources/E plate.step": "3f88c432ff15caa8ae3302c13f226c9e29463c113381fd908d17228a227ef632",
+          "sources/Ender-3 BOM.XLS": "b0af37db410d3afd79da325fd57c987caea10486f015adf9517561e4ff41ce3b",
+          "sources/LICENSE": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+          "sources/M4 T-Slot Nut.step": "69b889505eab4ff536c0c2a25d777a97856e65189828af53a58bc919817d5da2",
+          "sources/README.md": "bfb8429f5fc71722be53a237543b5a4991e02d5817f8165b2cd61f2f94ee248d",
+          "sources/Radiator.step": "3875129bb3abfea38a595ca0cc62cf14d447f0ab2a73f35c02873a3d1dc1ca24",
+          "sources/assembly_parts.json": "347f036f9bf6dbf564864da4765a286bcb239f53e2e2aed685468f9a26754641",
+          "sources/interface.json": "5a8f70a32c0293306fd12a3bd1abf9d53572a340e115b7f1ed8fc4118dcf4289",
+          "sources/manifest.json": "5071b59ce6ac2c38456b0d20b2b2a7a5d9b017ec0e4804ce11babad6f3bed5c6",
+          "sources/nozzle.step": "e23313c89901799e8b37d160b8050535ce2809711a2da6b93dfd6e7d4273b89f",
+          "sources/prompt-drawing.json": "fb9c9021188bb3a3619178a7789b68881b650baf4a4ba4f47edf62a47c468f6e"
+        }
+      },
+      "artifact_manifest": {
+        "ASSEMBLY.md": {
+          "sha256": "f3ead7bbb0cd0f04e51df0817234dde53c6edd2f8200ebadb653c7cb4ee477e2",
+          "bytes": 8386
+        },
+        "BOM.md": {
+          "sha256": "f1237417f62f1687c44891468efc3212de74852dedf4a59d28ad8c93ad9316e2",
+          "bytes": 4010
+        },
+        "LICENSE": {
+          "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+          "bytes": 35147
+        },
+        "LICENSE_HS.txt": {
+          "sha256": "e243ac85fd7b0580eba9147640bd18047c3f4f799def65081f95b3a929518be6",
+          "bytes": 1102
+        },
+        "NOTICE.md": {
+          "sha256": "28ac90ee0c6c8a17380acdb015cf0f5ad22d1b4a307772d2ce33d63c6ffea9e7",
+          "bytes": 1984
+        },
+        "README.md": {
+          "sha256": "7cf831851350c3cc961c6f3106b08aa38859e9c89dc81c85ea82abd47b7d420b",
+          "bytes": 6458
+        },
+        "STUDY.zip": {
+          "sha256": "93428326edd47048714a6ef9892391ac0a3e9757e63ed0b5272a64e918ab1387",
+          "bytes": 1385308
+        },
+        "STUDY_README.md": {
+          "sha256": "501f81b66c9ef23831d9b55b65b245d3083bec4941ff965265a07517e00e72bb",
+          "bytes": 2410
+        },
+        "VALIDATION.md": {
+          "sha256": "39b857d1283a722d1a6b54d0d62e01ec911ce621d666ed3c27f642e08da63d88",
+          "bytes": 6714
+        },
+        "exports/device_render.png": {
+          "sha256": "b894c58e738de0693e7d3efc8a69d22a24eedf24ed3622b3bc3f9252f2e8a58b",
+          "bytes": 480766
+        },
+        "exports/hotend_parking_plate.step": {
+          "sha256": "9caf2a53d2a5b828916d502be79150c1fd9aa51dfe5d1ec8eb507b230c482960",
+          "bytes": 135660
+        },
+        "exports/hotend_parking_plate.stl": {
+          "sha256": "98e6228836ab62512ce49eb5fb015677a0a0b671dd606c636a8d55965b457dd9",
+          "bytes": 108684
+        },
+        "exports/pen_adapter.step": {
+          "sha256": "21ab5249d32c4847d22ef14d5df5910952744e6694175ebf0188c70609d83e2f",
+          "bytes": 89049
+        },
+        "exports/pen_adapter.stl": {
+          "sha256": "137b267a462c087abc4e141bc0d76ea19f165eb8a48402a3b28123ee0c1f2cc8",
+          "bytes": 117884
+        },
+        "exports/pen_clamp.step": {
+          "sha256": "e35ee48a4e5b38473d150e2834c79ff50be08b72924445975ae0641e138689c6",
+          "bytes": 30583
+        },
+        "exports/pen_clamp.stl": {
+          "sha256": "d7be450acbbb687e6e251cf8e7b7d6ff226950895e96b833dfb857dcf0cf1f45",
+          "bytes": 64284
+        },
+        "exports/plotter.glb": {
+          "sha256": "38fa947b0c118e392391d81cc5b5bb426e291a2a9fccd0352adcb62cf50a9a84",
+          "bytes": 268616
+        },
+        "exports/plotter.step": {
+          "sha256": "86381a155419c467b6f97c59a862cc2e3e38a7a2681dfedf58843ea8ecf23fce",
+          "bytes": 805860
+        },
+        "reports/engineering.json": {
+          "sha256": "5c9d1779b6d2d1e6b81a273362841ecdf5c35802b2137c00bd7ef390000d72a4",
+          "bytes": 7006
+        },
+        "reports/export_manifest.json": {
+          "sha256": "db2765443d8be5111cfcf942f22590f366f98b0f282e172734613ded7133d5bb",
+          "bytes": 888
+        },
+        "reports/simulation.json": {
+          "sha256": "f03e4cf41f2324f55fe437e2e1a35d0124014428590e077e65ac8ad46e08776a",
+          "bytes": 3021
+        },
+        "reports/verification.json": {
+          "sha256": "e2e5a33b60ded8196e5bed958d8215c27cd6c84b959dca7d61f175f1628ec549",
+          "bytes": 10070
+        },
+        "requirements.json": {
+          "sha256": "fa67ba3cddfe2d84393251b60deb1d49bad8f91b0c9d82b49d0ad963a756074d",
+          "bytes": 165
+        },
+        "scripts/build.py": {
+          "sha256": "661260d41b6c43783333f534fee157cff9ea60b0e57d8aeb826dcf9803996ec5",
+          "bytes": 13498
+        },
+        "scripts/common.py": {
+          "sha256": "513b47bdae0ae3f4312ae0df056aac2b0bfe6c6f343308e4ad0c77c7b3467681",
+          "bytes": 2858
+        },
+        "scripts/simulate.py": {
+          "sha256": "e70b3d28fd998cdd73d7159dc36a3f8e15bf82fbef79a2653a35b7083e0df43c",
+          "bytes": 10880
+        },
+        "scripts/verify.py": {
+          "sha256": "53aa0478cd0a8f47254dd5102870e91798a4b9d9b9c80e978d5aa1545552b3fe",
+          "bytes": 24142
+        },
+        "simulation/example.gcode": {
+          "sha256": "920f99d6701ef27cccb9e7b71e6924c5f3382a25d98162f5d7d13e5f3dc4f010",
+          "bytes": 2041
+        },
+        "simulation/example.svg": {
+          "sha256": "6a4404913df7e1cac810259638c5dc13bf786ee0a1e503c96f79ac6cdf1db6c4",
+          "bytes": 1151
+        },
+        "simulation/plotted_drawing.png": {
+          "sha256": "bae55c103dd9192772135286040eb4d96d33985e298e54841f01d5fb09fd4d7d",
+          "bytes": 88974
+        },
+        "simulation/trajectory.csv": {
+          "sha256": "3ed319e2b0ad1fbeb1782d557ffc59786dc9619f46f77d57d3bcbc003410510a",
+          "bytes": 3730
+        },
+        "sources/2020 profile.step": {
+          "sha256": "42ee502ac74f7a2e125224b18904bd6048845b83f8f129729fe328a7ec51dacb",
+          "bytes": 560114
+        },
+        "sources/Configuration.h": {
+          "sha256": "8e091f7a2ca407405f8e1537d84b1bc5b21d9b996bbc2e0e75950bbffae23dc6",
+          "bytes": 64196
+        },
+        "sources/E plate.SLDPRT": {
+          "sha256": "ce296470cb53cbbb59af96f2fa79195efcd1545c73d7e591253158e6ce49feac",
+          "bytes": 80348
+        },
+        "sources/E plate.pdf": {
+          "sha256": "ab6f5b9c4f5eb64ab9a9569d0b5e588682f40774aa4c7aee3bb8b899619ab698",
+          "bytes": 166931
+        },
+        "sources/E plate.step": {
+          "sha256": "3f88c432ff15caa8ae3302c13f226c9e29463c113381fd908d17228a227ef632",
+          "bytes": 134286
+        },
+        "sources/Ender-3 BOM.XLS": {
+          "sha256": "b0af37db410d3afd79da325fd57c987caea10486f015adf9517561e4ff41ce3b",
+          "bytes": 47616
+        },
+        "sources/LICENSE": {
+          "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+          "bytes": 35147
+        },
+        "sources/M4 T-Slot Nut.step": {
+          "sha256": "69b889505eab4ff536c0c2a25d777a97856e65189828af53a58bc919817d5da2",
+          "bytes": 30403
+        },
+        "sources/README.md": {
+          "sha256": "bfb8429f5fc71722be53a237543b5a4991e02d5817f8165b2cd61f2f94ee248d",
+          "bytes": 100
+        },
+        "sources/Radiator.step": {
+          "sha256": "3875129bb3abfea38a595ca0cc62cf14d447f0ab2a73f35c02873a3d1dc1ca24",
+          "bytes": 263419
+        },
+        "sources/assembly_parts.json": {
+          "sha256": "347f036f9bf6dbf564864da4765a286bcb239f53e2e2aed685468f9a26754641",
+          "bytes": 155208
+        },
+        "sources/interface.json": {
+          "sha256": "5a8f70a32c0293306fd12a3bd1abf9d53572a340e115b7f1ed8fc4118dcf4289",
+          "bytes": 1400
+        },
+        "sources/manifest.json": {
+          "sha256": "5071b59ce6ac2c38456b0d20b2b2a7a5d9b017ec0e4804ce11babad6f3bed5c6",
+          "bytes": 4819
+        },
+        "sources/nozzle.step": {
+          "sha256": "e23313c89901799e8b37d160b8050535ce2809711a2da6b93dfd6e7d4273b89f",
+          "bytes": 66278
+        },
+        "sources/prompt-drawing.json": {
+          "sha256": "fb9c9021188bb3a3619178a7789b68881b650baf4a4ba4f47edf62a47c468f6e",
+          "bytes": 1806
+        },
+        "study-contract.json": {
+          "sha256": "5f5d83218c85649534b4fba6068589e731a4cb772a745416206e7fb4615f9ef6",
+          "bytes": 4943
+        },
+        "study-verification.json": {
+          "sha256": "762acc2841ef81f216d8c92a3e49de778d0631c920c661f4a231845b180d6f8f",
+          "bytes": 14253
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "reviewed_at_utc": "2026-11-18T16:13:22.973999+00:00",
+  "reviewer": "ChatGPT assistant visual inspection",
+  "accepted": true,
+  "files": [
+    "previews/device-render.png",
+    "previews/independent-preview.png"
+  ],
+  "observations": [
+    "Actual motion preview shows one closed outer border, two blank header fields, four square checkboxes with separate writing lines, and a right-hand sketch rectangle.",
+    "All strokes have visible whitespace and remain inside the displayed A5 margin.",
+    "CAD render shows the source frame reference assembly, centered landscape paper and detailed pen mount; this is a digital geometry rendering."
+  ],
+  "scope": "Visual inspection complements numerical geometry and independent G-code checks; no physical result was inspected."
+}

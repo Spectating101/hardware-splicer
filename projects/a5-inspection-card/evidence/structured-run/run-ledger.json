@@ -1,0 +1,91 @@
+{
+  "started_at_utc": "2026-11-18T16:06:16.711670+00:00",
+  "creation_method": "structured_registered_api",
+  "repository_commit": "588b3b3e1c728bede4a5d7b7d0b5ae38c2e6e3a6",
+  "artwork_provenance": "Assistant-authored vector strokes supplied directly to HS; no provider call or mock.",
+  "live_model_invocation": false,
+  "physical_operation_performed": false,
+  "baseline_requirements": {
+    "drawing_width_mm": 100.0,
+    "drawing_height_mm": 80.0,
+    "pen_diameter_mm": 10.0,
+    "pen_lift_mm": 3.0,
+    "paper_width_mm": 180.0,
+    "paper_height_mm": 180.0
+  },
+  "final_requirements": {
+    "drawing_width_mm": 190.0,
+    "drawing_height_mm": 128.0,
+    "pen_diameter_mm": 12.0,
+    "pen_lift_mm": 3.0,
+    "paper_width_mm": 210.0,
+    "paper_height_mm": 148.0
+  },
+  "note": "The legacy artifact name sources/prompt-drawing.json does not imply LLM provenance. The registered engine fits artwork uniformly and centers it in the viewport. The source canvas is 160 x 128 mm in the final 190 x 128 mm viewport; logical square checkboxes are 5 x 5 mm at baseline and 8 x 8 mm in the final build.",
+  "steps": [
+    {
+      "step": "00-cases",
+      "operation": "cases",
+      "ok": true,
+      "elapsed_seconds": 0.003,
+      "finished_at_utc": "2026-11-18T16:06:16.776163+00:00"
+    },
+    {
+      "step": "01-structured-baseline",
+      "operation": "create",
+      "ok": true,
+      "elapsed_seconds": 15.563,
+      "finished_at_utc": "2026-11-18T16:06:32.339066+00:00"
+    },
+    {
+      "step": "02-export-baseline",
+      "operation": "export",
+      "ok": true,
+      "elapsed_seconds": 0.131,
+      "finished_at_utc": "2026-11-18T16:06:32.505503+00:00"
+    },
+    {
+      "step": "03-structured-a5-revision",
+      "operation": "run_revision",
+      "ok": true,
+      "elapsed_seconds": 9.63,
+      "finished_at_utc": "2026-11-18T16:06:42.136009+00:00"
+    },
+    {
+      "step": "04-history",
+      "operation": "history",
+      "ok": true,
+      "elapsed_seconds": 0.076,
+      "finished_at_utc": "2026-11-18T16:06:42.212688+00:00"
+    },
+    {
+      "step": "05-compare",
+      "operation": "compare",
+      "ok": true,
+      "elapsed_seconds": 0.069,
+      "finished_at_utc": "2026-11-18T16:06:42.281734+00:00"
+    },
+    {
+      "step": "06-native-audit",
+      "operation": "audit(native=True)",
+      "ok": true,
+      "elapsed_seconds": 3.506,
+      "finished_at_utc": "2026-11-18T16:06:45.787438+00:00"
+    },
+    {
+      "step": "07-export-a5",
+      "operation": "export",
+      "ok": true,
+      "elapsed_seconds": 0.199,
+      "finished_at_utc": "2026-11-18T16:06:45.986519+00:00"
+    }
+  ],
+  "project_id": "digital-03a366b83b1c42ca900a5799ced2704c",
+  "baseline_revision": 1,
+  "final_revision": 2,
+  "artwork_sha256": "fb9c9021188bb3a3619178a7789b68881b650baf4a4ba4f47edf62a47c468f6e",
+  "artwork_preserved_between_revisions": true,
+  "finished_at_utc": "2026-11-18T16:06:45.986757+00:00",
+  "outcome": "exported_for_independent_delivery_check",
+  "final_package_sha256": "b55b12339b84e2732990091b7d27dfce455158085e521a244e41db63d8bf103f"
+}

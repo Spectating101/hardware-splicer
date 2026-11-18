@@ -1,0 +1,151 @@
+{
+  "ok": true,
+  "default_case_id": "hs3g-b",
+  "cases": [
+    {
+      "case_id": "hs3g-b",
+      "name": "HS-3G-B digital study",
+      "source_inputs_available": true,
+      "requirements": {
+        "payload_mass_g": {
+          "default": 0.0,
+          "minimum": 0,
+          "maximum": 50
+        },
+        "gust_scale": {
+          "default": 1.0,
+          "minimum": 0,
+          "maximum": 3
+        },
+        "max_mass_g": {
+          "default": 250.0,
+          "minimum": 150,
+          "maximum": 500
+        }
+      },
+      "scope": "Registered drone model; no physical validation or flight authority."
+    },
+    {
+      "case_id": "fielddeck-7",
+      "name": "Fielddeck 7 digital engineering",
+      "source_inputs_available": true,
+      "missing_inputs": [],
+      "requirements": {
+        "minimum_work_runtime_h": {
+          "default": 2.5,
+          "minimum": 0.1,
+          "maximum": 24
+        },
+        "minimum_supply_margin_a": {
+          "default": 0.3,
+          "minimum": 0,
+          "maximum": 2
+        },
+        "maximum_case_width_mm": {
+          "default": 320.0,
+          "minimum": 100,
+          "maximum": 1000
+        },
+        "maximum_case_depth_mm": {
+          "default": 300.0,
+          "minimum": 100,
+          "maximum": 1000
+        },
+        "maximum_case_height_mm": {
+          "default": 75.0,
+          "minimum": 20,
+          "maximum": 500
+        },
+        "printer_bed_x_mm": {
+          "default": 220.0,
+          "minimum": 100,
+          "maximum": 1000
+        },
+        "printer_bed_y_mm": {
+          "default": 220.0,
+          "minimum": 100,
+          "maximum": 1000
+        },
+        "pi_work_current_a": {
+          "default": 1.0,
+          "minimum": 0.4,
+          "maximum": 2.5
+        },
+        "keyboard_current_a": {
+          "default": 0.1,
+          "minimum": 0.02,
+          "maximum": 0.5
+        }
+      },
+      "scope": "Registered digital engineering case; no physical validation or authority."
+    },
+    {
+      "case_id": "fielddeck-5",
+      "name": "Fielddeck 5 display revision",
+      "source_inputs_available": true,
+      "missing_inputs": [],
+      "requirements": {
+        "minimum_work_runtime_h": {
+          "default": 2.5,
+          "minimum": 0.1,
+          "maximum": 24
+        },
+        "minimum_supply_margin_a": {
+          "default": 0.3,
+          "minimum": 0,
+          "maximum": 2
+        },
+        "pi_work_current_a": {
+          "default": 1.0,
+          "minimum": 0.4,
+          "maximum": 2.5
+        },
+        "keyboard_current_a": {
+          "default": 0.1,
+          "minimum": 0.02,
+          "maximum": 0.5
+        }
+      },
+      "scope": "Registered digital engineering case; no physical validation or authority."
+    },
+    {
+      "case_id": "ender3-penplotter",
+      "name": "Ender-3 reference-donor pen plotter",
+      "source_inputs_available": true,
+      "missing_inputs": [],
+      "requirements": {
+        "drawing_width_mm": {
+          "default": 100.0,
+          "minimum": 60,
+          "maximum": 190
+        },
+        "drawing_height_mm": {
+          "default": 80.0,
+          "minimum": 40,
+          "maximum": 140
+        },
+        "pen_diameter_mm": {
+          "default": 10.0,
+          "minimum": 8,
+          "maximum": 12
+        },
+        "pen_lift_mm": {
+          "default": 3.0,
+          "minimum": 2,
+          "maximum": 5
+        },
+        "paper_width_mm": {
+          "default": 180.0,
+          "minimum": 100,
+          "maximum": 220
+        },
+        "paper_height_mm": {
+          "default": 180.0,
+          "minimum": 100,
+          "maximum": 220
+        }
+      },
+      "scope": "Registered digital engineering case; no physical validation or authority."
+    }
+  ]
+}

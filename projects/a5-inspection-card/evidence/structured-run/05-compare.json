@@ -1,0 +1,652 @@
+{
+  "ok": true,
+  "comparison": {
+    "schema": "hardware_splicer.digital_comparison.v1",
+    "project_id": "digital-03a366b83b1c42ca900a5799ced2704c",
+    "before_revision": 1,
+    "after_revision": 2,
+    "requirements_met": {
+      "before": true,
+      "after": true
+    },
+    "same_engine_sources": true,
+    "requirements_changes": {
+      "drawing_height_mm": {
+        "before": 80.0,
+        "after": 128.0,
+        "delta": 48.0
+      },
+      "drawing_width_mm": {
+        "before": 100.0,
+        "after": 190.0,
+        "delta": 90.0
+      },
+      "paper_height_mm": {
+        "before": 180.0,
+        "after": 148.0,
+        "delta": -32.0
+      },
+      "paper_width_mm": {
+        "before": 180.0,
+        "after": 210.0,
+        "delta": 30.0
+      },
+      "pen_diameter_mm": {
+        "before": 10.0,
+        "after": 12.0,
+        "delta": 2.0
+      }
+    },
+    "metrics": {
+      "adapter_volume_mm3": {
+        "before": 26756.596159163615,
+        "after": 26373.321855425656,
+        "delta": -383.2743037379587
+      },
+      "beam_proxy_deflection_mm_at_2N": {
+        "before": 0.05095031836970898,
+        "after": 0.05095031836970898,
+        "delta": 0.0
+      },
+      "cap_volume_mm3": {
+        "before": 8787.816474612377,
+        "after": 8404.542170874423,
+        "delta": -383.27430373795323
+      },
+      "clamp_open_gap_mm": {
+        "before": 0.4,
+        "after": 0.4,
+        "delta": 0.0
+      },
+      "clamp_screw_tip_to_plate_mm": {
+        "before": 2.4,
+        "after": 2.4,
+        "delta": 0.0
+      },
+      "controller_travel_margin_mm": {
+        "before": 62.30000000000001,
+        "after": 40.69999999999999,
+        "delta": -21.600000000000023
+      },
+      "draw_length_mm": {
+        "before": 880.0,
+        "after": 1408.0,
+        "delta": 528.0
+      },
+      "drawing_height_mm": {
+        "before": 80.0,
+        "after": 128.0,
+        "delta": 48.0
+      },
+      "drawing_paper_margin_x_mm": {
+        "before": 40.0,
+        "after": 10.0,
+        "delta": -30.0
+      },
+      "drawing_paper_margin_y_mm": {
+        "before": 50.0,
+        "after": 10.0,
+        "delta": -40.0
+      },
+      "drawing_width_mm": {
+        "before": 100.0,
+        "after": 190.0,
+        "delta": 90.0
+      },
+      "fixture_bed_clearance_mm": {
+        "before": 29.0,
+        "after": 29.0,
+        "delta": 0.0
+      },
+      "ideal_feed_time_s": {
+        "before": 125.52642881373568,
+        "after": 189.55529877780276,
+        "delta": 64.02886996406708
+      },
+      "ink_paper_margin_mm": {
+        "before": 44.0,
+        "after": 16.399999999999977,
+        "delta": -27.600000000000023
+      },
+      "ink_viewport_margin_mm": {
+        "before": 4.0,
+        "after": 6.399999999999977,
+        "delta": 2.3999999999999773
+      },
+      "maximum_commanded_Z_mm": {
+        "before": 3.0,
+        "after": 3.0,
+        "delta": 0.0
+      },
+      "minimum_commanded_Z_mm": {
+        "before": 0.0,
+        "after": 0.0,
+        "delta": 0.0
+      },
+      "mount_bolt_engagement_mm": {
+        "before": 4.0,
+        "after": 4.0,
+        "delta": 0.0
+      },
+      "mount_boss_front_mm": {
+        "before": 7.0,
+        "after": 7.0,
+        "delta": 0.0
+      },
+      "mount_interference_mm3": {
+        "before": 0.0,
+        "after": 0.0,
+        "delta": 0.0
+      },
+      "mount_pitch_mm": {
+        "before": 14.0,
+        "after": 14.0,
+        "delta": 0.0
+      },
+      "non_drawing_XY_without_lift": {
+        "before": 0,
+        "after": 0,
+        "delta": 0
+      },
+      "paper_bed_margin_mm": {
+        "before": 27.5,
+        "after": 12.5,
+        "delta": -15.0
+      },
+      "paper_height_mm": {
+        "before": 180.0,
+        "after": 148.0,
+        "delta": -32.0
+      },
+      "paper_width_mm": {
+        "before": 180.0,
+        "after": 210.0,
+        "delta": 30.0
+      },
+      "parking_plate_volume_mm3": {
+        "before": 29336.842062378215,
+        "after": 29336.842062378215,
+        "delta": 0.0
+      },
+      "parking_radiator_hole_pitch_mm": {
+        "before": 14.0,
+        "after": 14.0,
+        "delta": 0.0
+      },
+      "parking_tnut_profile_interference_mm3": {
+        "before": 0.0,
+        "after": 0.0,
+        "delta": 0.0
+      },
+      "pen_center_bed_margin_mm": {
+        "before": 71.5,
+        "after": 43.9,
+        "delta": -27.6
+      },
+      "pen_diameter_mm": {
+        "before": 10.0,
+        "after": 12.0,
+        "delta": 2.0
+      },
+      "pen_lift_mm": {
+        "before": 3.0,
+        "after": 3.0,
+        "delta": 0.0
+      },
+      "pen_tip_to_clamp_mm": {
+        "before": 30.0,
+        "after": 30.0,
+        "delta": 0.0
+      },
+      "plate_to_adapter_airgap_mm": {
+        "before": 4.5,
+        "after": 4.5,
+        "delta": 0.0
+      },
+      "printed_mass_g_at_1_27_g_cm3": {
+        "before": 82.39919346411585,
+        "after": 81.42567673262144,
+        "delta": -0.9735167314944135
+      },
+      "segment_count": {
+        "before": 73,
+        "after": 73,
+        "delta": 0
+      },
+      "source_canvas_height_mm": {
+        "before": 80.0,
+        "after": 128.0,
+        "delta": 48.0
+      },
+      "source_canvas_scale_mm_per_unit": {
+        "before": 1.0,
+        "after": 1.6,
+        "delta": 0.6000000000000001
+      },
+      "source_canvas_width_mm": {
+        "before": 100.0,
+        "after": 160.0,
+        "delta": 60.0
+      },
+      "stroke_count": {
+        "before": 12,
+        "after": 12,
+        "delta": 0
+      },
+      "travel_length_mm": {
+        "before": 366.5285762747151,
+        "after": 591.1059755560548,
+        "delta": 224.5773992813397
+      },
+      "viewport_controller_margin_mm": {
+        "before": 58.30000000000001,
+        "after": 22.5,
+        "delta": -35.80000000000001
+      }
+    },
+    "constraints": [
+      {
+        "id": "manufacturer_mount_pitch",
+        "before": {
+          "actual": 14.0,
+          "basis": "PDF + STEP measured cylinder axes",
+          "id": "manufacturer_mount_pitch",
+          "limit": 14.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "after": {
+          "actual": 14.0,
+          "basis": "PDF + STEP measured cylinder axes",
+          "id": "manufacturer_mount_pitch",
+          "limit": 14.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "transition": "unchanged"
+      },
+      {
+        "id": "donor_interference",
+        "before": {
+          "actual": 0.0,
+          "basis": "Exact OpenCascade intersection with unmodified manufacturer E plate",
+          "id": "donor_interference",
+          "limit": 0.001,
+          "passed": true,
+          "unit": "mm3"
+        },
+        "after": {
+          "actual": 0.0,
+          "basis": "Exact OpenCascade intersection with unmodified manufacturer E plate",
+          "id": "donor_interference",
+          "limit": 0.001,
+          "passed": true,
+          "unit": "mm3"
+        },
+        "transition": "unchanged"
+      },
+      {
+        "id": "bolt_engagement",
+        "before": {
+          "actual": 4.0,
+          "basis": "New M3x10: 10 mm minus 6 mm printed web",
+          "id": "bolt_engagement",
+          "limit": 3.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "after": {
+          "actual": 4.0,
+          "basis": "New M3x10: 10 mm minus 6 mm printed web",
+          "id": "bolt_engagement",
+          "limit": 3.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "transition": "unchanged"
+      },
+      {
+        "id": "beam_proxy",
+        "before": {
+          "actual": 0.05095031836970898,
+          "basis": "2N, E=1400MPa assumed printed polymer, 40x6 web, L42.55; excludes layer/creep/clamp failure",
+          "id": "beam_proxy",
+          "limit": 0.3,
+          "passed": true,
+          "unit": "mm"
+        },
+        "after": {
+          "actual": 0.05095031836970898,
+          "basis": "2N, E=1400MPa assumed printed polymer, 40x6 web, L42.55; excludes layer/creep/clamp failure",
+          "id": "beam_proxy",
+          "limit": 0.3,
+          "passed": true,
+          "unit": "mm"
+        },
+        "transition": "unchanged"
+      },
+      {
+        "id": "bed_limited_drawing_width",
+        "before": {
+          "actual": 100.0,
+          "basis": "Registered horizontal scope; full viewport separately checked against paper and source controller travel",
+          "id": "bed_limited_drawing_width",
+          "limit": 190.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "after": {
+          "actual": 190.0,
+          "basis": "Registered horizontal scope; full viewport separately checked against paper and source controller travel",
+          "id": "bed_limited_drawing_width",
+          "limit": 190.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "transition": "unchanged"
+      },
+      {
+        "id": "bed_limited_drawing_height",
+        "before": {
+          "actual": 80.0,
+          "basis": "Retained vertical scope; physical calibration not performed",
+          "id": "bed_limited_drawing_height",
+          "limit": 140.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "after": {
+          "actual": 128.0,
+          "basis": "Retained vertical scope; physical calibration not performed",
+          "id": "bed_limited_drawing_height",
+          "limit": 140.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "transition": "unchanged"
+      },
+      {
+        "id": "paper_on_bed",
+        "before": {
+          "actual": 27.5,
+          "basis": "Centered sheet inside the manufacturer 235 mm bed",
+          "id": "paper_on_bed",
+          "limit": 0.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "after": {
+          "actual": 12.5,
+          "basis": "Centered sheet inside the manufacturer 235 mm bed",
+          "id": "paper_on_bed",
+          "limit": 0.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "transition": "unchanged"
+      },
+      {
+        "id": "drawing_paper_margin_x",
+        "before": {
+          "actual": 40.0,
+          "basis": "Full viewport leaves at least 10 mm paper margin at both horizontal edges",
+          "id": "drawing_paper_margin_x",
+          "limit": 10.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "after": {
+          "actual": 10.0,
+          "basis": "Full viewport leaves at least 10 mm paper margin at both horizontal edges",
+          "id": "drawing_paper_margin_x",
+          "limit": 10.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "transition": "unchanged"
+      },
+      {
+        "id": "drawing_paper_margin_y",
+        "before": {
+          "actual": 50.0,
+          "basis": "Full viewport leaves at least 10 mm paper margin at both vertical edges",
+          "id": "drawing_paper_margin_y",
+          "limit": 10.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "after": {
+          "actual": 10.0,
+          "basis": "Full viewport leaves at least 10 mm paper margin at both vertical edges",
+          "id": "drawing_paper_margin_y",
+          "limit": 10.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "transition": "unchanged"
+      },
+      {
+        "id": "viewport_controller_travel",
+        "before": {
+          "actual": 58.30000000000001,
+          "basis": "Full source viewport after measured pen/nozzle offset stays in 0..235 mm controller travel",
+          "id": "viewport_controller_travel",
+          "limit": 0.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "after": {
+          "actual": 22.5,
+          "basis": "Full source viewport after measured pen/nozzle offset stays in 0..235 mm controller travel",
+          "id": "viewport_controller_travel",
+          "limit": 0.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "transition": "unchanged"
+      },
+      {
+        "id": "parking_tnut_profile_fit",
+        "before": {
+          "actual": 0.0,
+          "basis": "Actual manufacturer M4 T nut rotated90deg, translated w=-3.5 inside actual2020 profile; no thread/torque validation",
+          "id": "parking_tnut_profile_fit",
+          "limit": 0.001,
+          "passed": true,
+          "unit": "mm3"
+        },
+        "after": {
+          "actual": 0.0,
+          "basis": "Actual manufacturer M4 T nut rotated90deg, translated w=-3.5 inside actual2020 profile; no thread/torque validation",
+          "id": "parking_tnut_profile_fit",
+          "limit": 0.001,
+          "passed": true,
+          "unit": "mm3"
+        },
+        "transition": "unchanged"
+      },
+      {
+        "id": "parking_hotend_clearance",
+        "before": {
+          "actual": 270.2,
+          "basis": "Parked nozzle273.2mm above paper minus maximum pen lift; representative layout only",
+          "id": "parking_hotend_clearance",
+          "limit": 200.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "after": {
+          "actual": 270.2,
+          "basis": "Parked nozzle273.2mm above paper minus maximum pen lift; representative layout only",
+          "id": "parking_hotend_clearance",
+          "limit": 200.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "transition": "unchanged"
+      },
+      {
+        "id": "motion_pen_tip_on_bed",
+        "before": {
+          "actual": 71.5,
+          "basis": "Affine segment endpoints bound all linear XY positions",
+          "id": "motion_pen_tip_on_bed",
+          "limit": 0.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "after": {
+          "actual": 43.9,
+          "basis": "Affine segment endpoints bound all linear XY positions",
+          "id": "motion_pen_tip_on_bed",
+          "limit": 0.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "transition": "unchanged"
+      },
+      {
+        "id": "motion_fixture_vertical_clearance",
+        "before": {
+          "actual": 29.0,
+          "basis": "Measured fixture lower face30mm above tip minus assumed1mm tape; excludes frame/wires",
+          "id": "motion_fixture_vertical_clearance",
+          "limit": 2.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "after": {
+          "actual": 29.0,
+          "basis": "Measured fixture lower face30mm above tip minus assumed1mm tape; excludes frame/wires",
+          "id": "motion_fixture_vertical_clearance",
+          "limit": 2.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "transition": "unchanged"
+      },
+      {
+        "id": "motion_controller_travel",
+        "before": {
+          "actual": 62.30000000000001,
+          "basis": "Manufacturer Configuration.h 0..235mm XY, compensated tip offset",
+          "id": "motion_controller_travel",
+          "limit": 0.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "after": {
+          "actual": 40.69999999999999,
+          "basis": "Manufacturer Configuration.h 0..235mm XY, compensated tip offset",
+          "id": "motion_controller_travel",
+          "limit": 0.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "transition": "unchanged"
+      },
+      {
+        "id": "motion_pen_up_travel",
+        "before": {
+          "actual": 0.0,
+          "basis": "Every XY travel move must stay at requested lift",
+          "id": "motion_pen_up_travel",
+          "limit": 0.0,
+          "passed": true,
+          "unit": "segments"
+        },
+        "after": {
+          "actual": 0.0,
+          "basis": "Every XY travel move must stay at requested lift",
+          "id": "motion_pen_up_travel",
+          "limit": 0.0,
+          "passed": true,
+          "unit": "segments"
+        },
+        "transition": "unchanged"
+      },
+      {
+        "id": "motion_pen_lift_clearance",
+        "before": {
+          "actual": 2.0,
+          "basis": "Assumed tape height <=1mm; uncertainty is not physical validation",
+          "id": "motion_pen_lift_clearance",
+          "limit": 1.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "after": {
+          "actual": 2.0,
+          "basis": "Assumed tape height <=1mm; uncertainty is not physical validation",
+          "id": "motion_pen_lift_clearance",
+          "limit": 1.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "transition": "unchanged"
+      },
+      {
+        "id": "motion_ink_paper_margin",
+        "before": {
+          "actual": 44.0,
+          "basis": "Every emitted ink endpoint leaves 10 mm paper margin; 0.00011 mm serialization tolerance",
+          "id": "motion_ink_paper_margin",
+          "limit": 10.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "after": {
+          "actual": 16.399999999999977,
+          "basis": "Every emitted ink endpoint leaves 10 mm paper margin; 0.00011 mm serialization tolerance",
+          "id": "motion_ink_paper_margin",
+          "limit": 10.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "transition": "unchanged"
+      },
+      {
+        "id": "motion_ink_in_viewport",
+        "before": {
+          "actual": 4.0,
+          "basis": "Every emitted ink segment stays inside the requested source viewport; 0.00011 mm serialization tolerance",
+          "id": "motion_ink_in_viewport",
+          "limit": 0.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "after": {
+          "actual": 6.399999999999977,
+          "basis": "Every emitted ink segment stays inside the requested source viewport; 0.00011 mm serialization tolerance",
+          "id": "motion_ink_in_viewport",
+          "limit": 0.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "transition": "unchanged"
+      },
+      {
+        "id": "motion_Z_travel",
+        "before": {
+          "actual": 3.0,
+          "basis": "Every commanded segment endpoint lies within paper Z0 and requested lift",
+          "id": "motion_Z_travel",
+          "limit": 3.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "after": {
+          "actual": 3.0,
+          "basis": "Every commanded segment endpoint lies within paper Z0 and requested lift",
+          "id": "motion_Z_travel",
+          "limit": 3.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        "transition": "unchanged"
+      }
+    ],
+    "physical_work_requested": false,
+    "physical_authority_granted": false
+  }
+}

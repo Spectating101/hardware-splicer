@@ -1,0 +1,269 @@
+{
+  "ok": true,
+  "project": {
+    "schema_version": "hardware_splicer.project_snapshot.v1",
+    "project_id": "digital-03a366b83b1c42ca900a5799ced2704c",
+    "revision": 1,
+    "saved_at": "2026-11-18T16:06:32.315037+00:00",
+    "snapshot": {
+      "projectName": "Electronics inspection card",
+      "designBrief": {
+        "status": "build",
+        "case_id": "ender3-penplotter",
+        "requirements": {
+          "drawing_width_mm": 100.0,
+          "drawing_height_mm": 80.0,
+          "pen_diameter_mm": 10.0,
+          "pen_lift_mm": 3.0,
+          "paper_width_mm": 180.0,
+          "paper_height_mm": 180.0
+        },
+        "explanation": "Explicit author-supplied requirements and vector strokes; no prompt interpretation.",
+        "drawing": [
+          [
+            [
+              4.0,
+              4.0
+            ],
+            [
+              96.0,
+              4.0
+            ],
+            [
+              96.0,
+              76.0
+            ],
+            [
+              4.0,
+              76.0
+            ],
+            [
+              4.0,
+              4.0
+            ]
+          ],
+          [
+            [
+              8.0,
+              63.0
+            ],
+            [
+              48.0,
+              63.0
+            ],
+            [
+              48.0,
+              72.0
+            ],
+            [
+              8.0,
+              72.0
+            ],
+            [
+              8.0,
+              63.0
+            ]
+          ],
+          [
+            [
+              52.0,
+              63.0
+            ],
+            [
+              92.0,
+              63.0
+            ],
+            [
+              92.0,
+              72.0
+            ],
+            [
+              52.0,
+              72.0
+            ],
+            [
+              52.0,
+              63.0
+            ]
+          ],
+          [
+            [
+              8.0,
+              49.0
+            ],
+            [
+              13.0,
+              49.0
+            ],
+            [
+              13.0,
+              54.0
+            ],
+            [
+              8.0,
+              54.0
+            ],
+            [
+              8.0,
+              49.0
+            ]
+          ],
+          [
+            [
+              18.0,
+              51.5
+            ],
+            [
+              44.0,
+              51.5
+            ]
+          ],
+          [
+            [
+              8.0,
+              38.0
+            ],
+            [
+              13.0,
+              38.0
+            ],
+            [
+              13.0,
+              43.0
+            ],
+            [
+              8.0,
+              43.0
+            ],
+            [
+              8.0,
+              38.0
+            ]
+          ],
+          [
+            [
+              18.0,
+              40.5
+            ],
+            [
+              44.0,
+              40.5
+            ]
+          ],
+          [
+            [
+              8.0,
+              27.0
+            ],
+            [
+              13.0,
+              27.0
+            ],
+            [
+              13.0,
+              32.0
+            ],
+            [
+              8.0,
+              32.0
+            ],
+            [
+              8.0,
+              27.0
+            ]
+          ],
+          [
+            [
+              18.0,
+              29.5
+            ],
+            [
+              44.0,
+              29.5
+            ]
+          ],
+          [
+            [
+              8.0,
+              16.0
+            ],
+            [
+              13.0,
+              16.0
+            ],
+            [
+              13.0,
+              21.0
+            ],
+            [
+              8.0,
+              21.0
+            ],
+            [
+              8.0,
+              16.0
+            ]
+          ],
+          [
+            [
+              18.0,
+              18.5
+            ],
+            [
+              44.0,
+              18.5
+            ]
+          ],
+          [
+            [
+              52.0,
+              10.0
+            ],
+            [
+              92.0,
+              10.0
+            ],
+            [
+              92.0,
+              56.0
+            ],
+            [
+              52.0,
+              56.0
+            ],
+            [
+              52.0,
+              10.0
+            ]
+          ]
+        ],
+        "brief": "Electronics inspection card: closed outer border, two blank header fields, four left-side checkboxes and writing lines, and a clear board-sketch box at right.",
+        "provider": null,
+        "model": null,
+        "input_origin": "assistant_authored_structured_input",
+        "live_model_invocation": false
+      },
+      "projectId": "digital-03a366b83b1c42ca900a5799ced2704c",
+      "mode": "digital",
+      "currentStage": "digital",
+      "digitalStudy": {
+        "run_id": "86fef36f87db45199d4ac9f1199f1078",
+        "requirements": {
+          "drawing_width_mm": 100.0,
+          "drawing_height_mm": 80.0,
+          "pen_diameter_mm": 10.0,
+          "pen_lift_mm": 3.0,
+          "paper_width_mm": 180.0,
+          "paper_height_mm": 180.0
+        },
+        "parent_revision": null,
+        "change_request": "Digital build from design brief",
+        "case_id": "ender3-penplotter"
+      }
+    },
+    "metadata": {
+      "source": "digital_study",
+      "run_id": "86fef36f87db45199d4ac9f1199f1078"
+    }
+  }
+}

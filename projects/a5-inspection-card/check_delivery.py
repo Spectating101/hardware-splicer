@@ -32,6 +32,9 @@ EXPECTED = {
 }
 CENTER, BED, LIFT = 117.5, 235.0, 3.0
 OFFSET = (0.0, -19.2)
+ART_SCALE = min(EXPECTED["drawing_width_mm"]/100., EXPECTED["drawing_height_mm"]/80.)
+CHECKBOX_BOUNDS = {3: (8., 49., 13., 54.), 5: (8., 38., 13., 43.),
+                   7: (8., 27., 13., 32.), 9: (8., 16., 13., 21.)}
 PAPER = (12.5, 43.5, 222.5, 191.5)
 VIEWPORT = (22.5, 53.5, 212.5, 181.5)
 XY_TOL, CAD_TOL = 0.0003, 0.00001
@@ -218,7 +221,7 @@ def source_segments(data, audit):
                  all(isinstance(p, list) and len(p) == 2 and all(finite(v) for v in p)
                      and 0 <= p[0] <= 100 and 0 <= p[1] <= 80 for p in s) for s in drawing)
     audit.require("archived_artwork_format", valid, "Nonempty strokes on the archived 100x80 logical canvas.")
-    authored = [[(CENTER+(x-50)*1.9, CENTER+(y-40)*1.6) for x, y in stroke] for stroke in drawing]
+    authored = [[(CENTER+(x-50)*ART_SCALE, CENTER+(y-40)*ART_SCALE) for x, y in stroke] for stroke in drawing]
     svg = ET.fromstring(data["simulation/example.svg"])
     audit.require("svg_logical_canvas", svg.attrib.get("viewBox", "").split() == ["0", "0", "100", "80"],
                   "The vector canvas is explicit, with physical scaling checked separately.")
@@ -232,12 +235,23 @@ def source_segments(data, audit):
             if len(values) < 4 or len(values) % 2 or any(not re.fullmatch(NUMBER, v) for v in values):
                 raise ValueError("Invalid SVG polyline coordinates")
             points = [float(v) for v in values]
-            paths.append([(CENTER+(points[i]-50)*1.9, CENTER+(40-points[i+1])*1.6)
+            paths.append([(CENTER+(points[i]-50)*ART_SCALE, CENTER+(40-points[i+1])*ART_SCALE)
                           for i in range(0, len(points), 2)])
     audit.check("prompt_to_svg_stroke_identity", len(paths) == len(authored) and
                 all(same_points(a, b) for a, b in zip(paths, authored)),
                 "Every directed point and stroke matches archived prompt artwork after independent scaling.")
-    return [(a, b) for path in paths for a, b in zip(path, path[1:])], len(paths)
+    boxes, cursor = [], 0
+    for index, stroke in enumerate(drawing):
+        if index in CHECKBOX_BOUNDS:
+            x0, y0, x1, y1 = CHECKBOX_BOUNDS[index]
+            expected_corners = {(x0, y0), (x1, y0), (x1, y1), (x0, y1)}
+            audit.check("source_checkbox_"+str(index), len(stroke) == 5 and stroke[0] == stroke[-1]
+                        and set(map(tuple, stroke[:-1])) == expected_corners,
+                        "Actual author-supplied checkbox is a closed 5x5 logical square.")
+            boxes.append((index, cursor, cursor+len(stroke)-1))
+        cursor += len(stroke)-1
+    audit.check("four_archived_checkboxes", len(boxes) == 4, "Actual authored checkbox stroke indices3,5,7,9.")
+    return [(a, b) for path in paths for a, b in zip(path, path[1:])], len(paths), boxes
 
 
 def check_motion(data, audit):
@@ -258,11 +272,28 @@ def check_motion(data, audit):
     ink = [((m["start"][0]+OFFSET[0], m["start"][1]+OFFSET[1]),
             (m["end"][0]+OFFSET[0], m["end"][1]+OFFSET[1])) for m in moves if m["drawing"]]
     audit.require("nonempty_ink", bool(ink), "The job draws actual line segments.")
-    expected, strokes = source_segments(data, audit)
+    expected, strokes, boxes = source_segments(data, audit)
     audit.check("svg_to_gcode_directed_segments", len(ink) == len(expected) and
                 all(same_points(a, b) for a, b in zip(ink, expected)),
                 {"delivered_segments": len(ink), "source_segments": len(expected),
                  "tolerance_mm": XY_TOL, "order_preserved": True})
+    dimensions = []
+    square = len(boxes) == 4
+    for index, first, stop in boxes:
+        segments = ink[first:stop]
+        if len(segments) != 4:
+            square = False
+            continue
+        points = [p for segment in segments for p in segment]
+        width = max(p[0] for p in points)-min(p[0] for p in points)
+        height = max(p[1] for p in points)-min(p[1] for p in points)
+        square &= close(width, 8.) and close(height, 8.)
+        square &= same_points([segments[-1][-1]], [segments[0][0]])
+        dimensions.append({"source_stroke": index, "width_mm": width, "height_mm": height})
+    audit.check("four_checkboxes_remain_square", square,
+                {"expected_side_mm": 5.*ART_SCALE, "measured": dimensions,
+                 "mapping": "Uniform centered fit preserves artwork proportions."})
+
     ink_points = [p for segment in ink for p in segment]
     audit.check("ink_inside_requested_viewport", all(inside(p, VIEWPORT) for p in ink_points), VIEWPORT)
     audit.check("ink_has_10mm_a5_margin", all(inside(p, (PAPER[0]+10, PAPER[1]+10,
@@ -279,6 +310,7 @@ def check_motion(data, audit):
     audit.check("independent_csv_replay", csv_match, "Every position, line, drawing flag, feed and duration agrees.")
     audit.metrics.update({
         "linear_moves": len(moves), "drawing_segments": len(ink), "strokes": strokes,
+        "artwork_uniform_scale_mm_per_unit": ART_SCALE, "checkbox_dimensions_mm": dimensions,
         "ink_bounds_mm": [min(p[0] for p in ink_points), min(p[1] for p in ink_points),
                           max(p[0] for p in ink_points), max(p[1] for p in ink_points)],
         "ink_length_mm": sum(math.dist(a, b) for a, b in ink),
