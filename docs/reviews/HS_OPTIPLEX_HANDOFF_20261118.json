@@ -26,14 +26,27 @@
     },
     {
       "path": "projects/engineering-opportunity-portfolio/product-index.md",
-      "sha256": "7376dac851022a6fbcac31e1383aa965bb34b0e4147847dcac318f87ea74a734",
-      "bytes": 14518
+      "sha256": "032b2587d62e71020482ee7dfcd75a7873c83feefb1c96da0304e58f811052f5",
+      "bytes": 14711
     },
     {
       "path": "projects/engineering-opportunity-portfolio/device-configurations.csv",
       "sha256": "50a8be73aab9e032fc9fb42c78baba3c17633dd1e873455e4a465fad10725f03",
       "bytes": 180363
+    },
+    {
+      "path": "projects/engineering-opportunity-portfolio/offer-comparison.csv",
+      "sha256": "5685cc33828340a77d0fb934ac35a5f70b05234406c2ff5b7777d573e12a616e",
+      "bytes": 7948
+    },
+    {
+      "path": "projects/engineering-opportunity-portfolio/expanded-market-comparison.md",
+      "sha256": "0c78fae784bb0c65b994a854d09fc6c09c2a26369daaade1c3b5bf7bf86462b9",
+      "bytes": 14041
     }
   ],
-  "note": "Snapshot of authorized in-progress HS work for independent review. The source checkout and its index were not modified. Validation and keyboard integration are recorded separately."
+  "note": "Snapshot of authorized in-progress HS work for independent review. The source checkout and its index were not modified. Validation and keyboard integration are recorded separately.",
+  "supplemental_capture_at_utc": "2026-11-18T10:00:36.389486+00:00",
+  "combined_code_commit": "36a084e00f4a117e150cbec078e926fa66415e93",
+  "keyboard_commit": "70a1e8decd059b386b0e672ba395eff60e895d36"
 }

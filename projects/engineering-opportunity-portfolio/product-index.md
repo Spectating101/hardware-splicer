@@ -2,6 +2,8 @@
 
 **18 November 2026.** Start with the offer table to see what a buyer would get. Use the supplier table to see which parts HS could buy, which equipment the buyer already needs, and which listings establish a competing price. The digital projects and the 620-row device list below cover the wider design portfolio. Taiwan and US figures each assume domestic fulfillment.
 
+For ranked margins, buyer counts and entry costs across 27 offers, open the [expanded market comparison](expanded-market-comparison.md) or the [sortable unit economics](offer-comparison.csv).
+
 ## Products HS could offer
 
 | Product and intended buyer | What HS supplies and what the buyer brings | Design evidence and next question | Delivered price → contribution per unit |
