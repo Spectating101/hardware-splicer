@@ -1,0 +1,2122 @@
+{
+  "schema_version": "hardware_splicer.parts_sidecar.v1",
+  "revision": "5",
+  "units": "mm",
+  "glb_native_units": "mm",
+  "glb_scale_to_mm": 1,
+  "glb_source": "display_swap/cad/FIELDDECK_5.glb",
+  "glb_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7",
+  "parts": [
+    {
+      "node_name": "world",
+      "node_index": 0,
+      "part_id": "world",
+      "label": "World",
+      "geometry_basis": "unknown",
+      "bom_line": null,
+      "no_bom_line": true,
+      "group": "world",
+      "explode_vector_mm": [
+        0,
+        0,
+        0
+      ],
+      "explode_derived": true,
+      "geometry_sha256": null,
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        }
+      ]
+    },
+    {
+      "node_name": "keyboard_nominal_envelope",
+      "node_index": 1,
+      "part_id": "keyboard-nominal-envelope",
+      "label": "Mini Chiclet USB wired keyboard, black, 285 x 123 x 22 mm",
+      "geometry_basis": "envelope",
+      "bom_line": "keyboard",
+      "no_bom_line": false,
+      "group": "keyboard-nominal-envelope",
+      "explode_vector_mm": [
+        0.0,
+        -64.850006,
+        21.0
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "de42cd9b34dd9cd93921a3df56334f28e397b7bd0afcecf514b5d7062d50e20a",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            12.5,
+            16.5,
+            40.0,
+            297.5,
+            139.5,
+            62.0
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        },
+        {
+          "field": "dimensions_mm",
+          "value": [
+            285,
+            123,
+            22
+          ],
+          "state": "datasheet",
+          "source": "https://www.adafruit.com/product/1736",
+          "source_sha256": "ab93dbf44dcd070bb9bd6514efa31c6a82a88a0373bf9bafeca6422d4d814444"
+        }
+      ]
+    },
+    {
+      "node_name": "power_bank_nominal_envelope",
+      "node_index": 2,
+      "part_id": "power-bank-nominal-envelope",
+      "label": "Nano 10000mAh 30W bank, Black Stone; single USB-C output limited to 5V 3A in this design",
+      "geometry_basis": "envelope",
+      "bom_line": "bank",
+      "no_bom_line": false,
+      "group": "power-bank-nominal-envelope",
+      "explode_vector_mm": [
+        -112.849998,
+        -65.850006,
+        -13.0
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "7bd1390bf8662a8d4f952adb3ee91f04e7364c12c5dd55181cf6c7010c4c1ba4",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            16.0,
+            25.0,
+            4.0,
+            68.30000305175781,
+            129.0,
+            30.0
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        },
+        {
+          "field": "dimensions_mm",
+          "value": [
+            104,
+            52.3,
+            26
+          ],
+          "state": "datasheet",
+          "source": "https://www.anker.com/products/a1259-built-in-cable-power-bank-10000mah",
+          "source_sha256": "74e33c92717e282923ec4e9ad0977a5ee716e6768a8ae54eb841c3972c585e15"
+        }
+      ]
+    },
+    {
+      "node_name": "pi4_board_envelope",
+      "node_index": 3,
+      "part_id": "pi4-board-envelope",
+      "label": "Raspberry Pi 4 Model B, 2GB",
+      "geometry_basis": "envelope",
+      "bom_line": "computer",
+      "no_bom_line": false,
+      "group": "pi4",
+      "explode_vector_mm": [
+        -122.0,
+        99.0,
+        -15.2
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "fa90d070398deb53ee4420f0a0776653d30271fb86c073f30f687646a18c5ff8",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            4.0,
+            198.0,
+            7.0,
+            60.0,
+            283.0,
+            8.600000381469727
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        },
+        {
+          "field": "board_mm",
+          "value": [
+            85,
+            56,
+            1.6
+          ],
+          "state": "datasheet",
+          "source": "https://pip-assets.raspberrypi.com/categories/545-raspberry-pi-4-model-b/documents/RP-008343-DS-1-raspberry-pi-4-mechanical-drawing.pdf",
+          "source_sha256": "a5c88057563016631ebca26666fd672614fc9aaa1c59128a541612c7798e9809"
+        }
+      ]
+    },
+    {
+      "node_name": "pi4_usb_a_lower",
+      "node_index": 4,
+      "part_id": "pi4-usb-a-lower",
+      "label": "Pi4 Usb A Lower",
+      "geometry_basis": "envelope",
+      "bom_line": "computer",
+      "no_bom_line": false,
+      "group": "pi4",
+      "explode_vector_mm": [
+        -122.0,
+        99.0,
+        -15.2
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "a1c42e74e9195063a1301994efccadcf5697f1c48e25a0abe62da992865fed55",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            45.29999923706055,
+            267.0,
+            8.600000381469727,
+            60.29999923706055,
+            285.70001220703125,
+            24.600000381469727
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        }
+      ]
+    },
+    {
+      "node_name": "pi4_usb_a_upper",
+      "node_index": 5,
+      "part_id": "pi4-usb-a-upper",
+      "label": "Pi4 Usb A Upper",
+      "geometry_basis": "envelope",
+      "bom_line": "computer",
+      "no_bom_line": false,
+      "group": "pi4",
+      "explode_vector_mm": [
+        -122.0,
+        99.0,
+        -15.2
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "869adea045d6755702a79c8c54357031c06ce0e76a29f10e1f7dc9afc2485149",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            27.299999237060547,
+            267.0,
+            8.600000381469727,
+            42.29999923706055,
+            285.70001220703125,
+            24.600000381469727
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        }
+      ]
+    },
+    {
+      "node_name": "pi4_ethernet",
+      "node_index": 6,
+      "part_id": "pi4-ethernet",
+      "label": "Pi4 Ethernet",
+      "geometry_basis": "envelope",
+      "bom_line": "computer",
+      "no_bom_line": false,
+      "group": "pi4",
+      "explode_vector_mm": [
+        -122.0,
+        99.0,
+        -15.2
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "798952a0c171f47e7c34c99813228f0679d7ed7338056f3edf79e08126b111e3",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            6.0,
+            263.0,
+            8.600000381469727,
+            22.0,
+            285.70001220703125,
+            22.100000381469727
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        }
+      ]
+    },
+    {
+      "node_name": "pi4_gpio",
+      "node_index": 7,
+      "part_id": "pi4-gpio",
+      "label": "Pi4 Gpio",
+      "geometry_basis": "envelope",
+      "bom_line": "computer",
+      "no_bom_line": false,
+      "group": "pi4",
+      "explode_vector_mm": [
+        -122.0,
+        99.0,
+        -15.2
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "f1768a626de811d8d55bf98d8ec079b68784500e949ae07b3dbbcc2fb1c7f280",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            4.5,
+            205.0,
+            8.600000381469727,
+            9.5,
+            256.0,
+            17.100000381469727
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        }
+      ]
+    },
+    {
+      "node_name": "pi4_usb_c",
+      "node_index": 8,
+      "part_id": "pi4-usb-c",
+      "label": "Pi4 Usb C",
+      "geometry_basis": "envelope",
+      "bom_line": "computer",
+      "no_bom_line": false,
+      "group": "pi4",
+      "explode_vector_mm": [
+        -122.0,
+        99.0,
+        -15.2
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "570fd71134bb646dac809973333e62955e9bfa1121fce50ce87c6e678d3692fb",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            54.0,
+            205.5,
+            8.600000381469727,
+            62.0,
+            214.5,
+            11.600000381469727
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        }
+      ]
+    },
+    {
+      "node_name": "pi4_dsi",
+      "node_index": 9,
+      "part_id": "pi4-dsi",
+      "label": "Pi4 Dsi",
+      "geometry_basis": "envelope",
+      "bom_line": "computer",
+      "no_bom_line": false,
+      "group": "pi4",
+      "explode_vector_mm": [
+        -122.0,
+        99.0,
+        -15.2
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "a5aeb4521721e0a7313071e87ae0ab2084bf0dca3f1dafb40d74d02015f8e247",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            26.0,
+            198.3000030517578,
+            8.600000381469727,
+            42.0,
+            202.3000030517578,
+            14.100000381469727
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        }
+      ]
+    },
+    {
+      "node_name": "pi4_microsd",
+      "node_index": 10,
+      "part_id": "pi4-microsd",
+      "label": "Pi4 Microsd",
+      "geometry_basis": "envelope",
+      "bom_line": "computer",
+      "no_bom_line": false,
+      "group": "pi4",
+      "explode_vector_mm": [
+        -122.0,
+        99.0,
+        -15.2
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "448884a12d51f18ee6d91979f2aa251ccd3511fe04d09007147b14667b98e4cd",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            24.0,
+            198.0,
+            5.0,
+            40.0,
+            212.0,
+            7.0
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        }
+      ]
+    },
+    {
+      "node_name": "pi4_soc_envelope",
+      "node_index": 11,
+      "part_id": "pi4-soc-envelope",
+      "label": "Pi4 Soc Envelope",
+      "geometry_basis": "envelope",
+      "bom_line": "computer",
+      "no_bom_line": false,
+      "group": "pi4",
+      "explode_vector_mm": [
+        -122.0,
+        99.0,
+        -15.2
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "d7293c523b5c5f2d291a1ebe22cab6e1499125e1f2c46e7ff03c6968ca662e26",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            23.0,
+            221.0,
+            8.600000381469727,
+            42.0,
+            240.0,
+            11.0
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        }
+      ]
+    },
+    {
+      "node_name": "fan_envelope",
+      "node_index": 12,
+      "part_id": "fan-envelope",
+      "label": "40 x 40 x 10 mm 5V PWM fan, including NA-AC7 USB adapter",
+      "geometry_basis": "envelope",
+      "bom_line": "fan",
+      "no_bom_line": false,
+      "group": "fan-envelope",
+      "explode_vector_mm": [
+        -123.0,
+        87.649994,
+        26.0
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "fef64a1f74e003a79e4416bd40df6935978ab33ee0b154ece0f19016ed5ef34f",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            12.0,
+            210.5,
+            51.0,
+            52.0,
+            250.5,
+            61.0
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        },
+        {
+          "field": "dimensions_mm",
+          "value": [
+            40,
+            40,
+            10
+          ],
+          "state": "datasheet",
+          "source": "https://cdn.noctua.at/media/noctua_nf_a4x10_5v_pwm_infosheet_en_web.pdf?download=true",
+          "source_sha256": "19ee9f0505418a44c2536c595433d76af4be147ccbc6787b9a2e70c651fee588"
+        }
+      ]
+    },
+    {
+      "node_name": "seam_plate_1",
+      "node_index": 13,
+      "part_id": "seam-plate-1",
+      "label": "Seam Plate 1",
+      "geometry_basis": "custom",
+      "bom_line": "printed_parts",
+      "no_bom_line": false,
+      "group": "seam-plate-1",
+      "explode_vector_mm": [
+        0.0,
+        -107.850006,
+        -25.5
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "6cc44608a47e91fb8db7d2f496978148094bc8d45505a11b680093c4793700da",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            135.0,
+            25.0,
+            3.0,
+            175.0,
+            45.0,
+            6.0
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        }
+      ]
+    },
+    {
+      "node_name": "seam_plate_2",
+      "node_index": 14,
+      "part_id": "seam-plate-2",
+      "label": "Seam Plate 2",
+      "geometry_basis": "custom",
+      "bom_line": "printed_parts",
+      "no_bom_line": false,
+      "group": "seam-plate-2",
+      "explode_vector_mm": [
+        0.0,
+        -32.850006,
+        -25.5
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "aee232f9be6ef9566dc0c97ce390fa92b70747f8ca5618b423b9dfd1a737a20e",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            135.0,
+            100.0,
+            3.0,
+            175.0,
+            120.0,
+            6.0
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        }
+      ]
+    },
+    {
+      "node_name": "seam_plate_3",
+      "node_index": 15,
+      "part_id": "seam-plate-3",
+      "label": "Seam Plate 3",
+      "geometry_basis": "custom",
+      "bom_line": "printed_parts",
+      "no_bom_line": false,
+      "group": "seam-plate-3",
+      "explode_vector_mm": [
+        0.0,
+        42.149994,
+        -25.5
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "64ca39b8662aba56ea13881fd2a2d5a62d599410bd5765be4b3bef40a5919cd6",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            135.0,
+            175.0,
+            3.0,
+            175.0,
+            195.0,
+            6.0
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        }
+      ]
+    },
+    {
+      "node_name": "seam_plate_4",
+      "node_index": 16,
+      "part_id": "seam-plate-4",
+      "label": "Seam Plate 4",
+      "geometry_basis": "custom",
+      "bom_line": "printed_parts",
+      "no_bom_line": false,
+      "group": "seam-plate-4",
+      "explode_vector_mm": [
+        0.0,
+        117.149994,
+        -25.5
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "e4c824634cb775857afd583e152532be253dc6a63770b718b32dc49e3bb222c8",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            135.0,
+            250.0,
+            3.0,
+            175.0,
+            270.0,
+            6.0
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        }
+      ]
+    },
+    {
+      "node_name": "seam_plate_5",
+      "node_index": 17,
+      "part_id": "seam-plate-5",
+      "label": "Seam Plate 5",
+      "geometry_basis": "custom",
+      "bom_line": "printed_parts",
+      "no_bom_line": false,
+      "group": "seam-plate-5",
+      "explode_vector_mm": [
+        -65.0,
+        -2.850006,
+        -25.5
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "178bce8d6a43e10ac6c79b1090ca7aa4ac38fa6f1f612f74db988aa4b0242656",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            80.0,
+            120.0,
+            3.0,
+            100.0,
+            160.0,
+            6.0
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        }
+      ]
+    },
+    {
+      "node_name": "seam_plate_6",
+      "node_index": 18,
+      "part_id": "seam-plate-6",
+      "label": "Seam Plate 6",
+      "geometry_basis": "custom",
+      "bom_line": "printed_parts",
+      "no_bom_line": false,
+      "group": "seam-plate-6",
+      "explode_vector_mm": [
+        90.0,
+        -2.850006,
+        -25.5
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "570fe8fe1a4c422eb3b15bd657856a495c465bd98b4538eceabd6e413e511278",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            235.0,
+            120.0,
+            3.0,
+            255.0,
+            160.0,
+            6.0
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        }
+      ]
+    },
+    {
+      "node_name": "tray_front_left",
+      "node_index": 19,
+      "part_id": "tray-front-left",
+      "label": "Tray Front Left",
+      "geometry_basis": "custom",
+      "bom_line": "printed_parts",
+      "no_bom_line": false,
+      "group": "tray-front-left",
+      "explode_vector_mm": [
+        -77.574997,
+        -72.925003,
+        0.5
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "b9bb94e75879f1959254cc65fe64782258138c113b9e819cc4698e8177c4118d",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            0.0,
+            0.0,
+            0.0,
+            154.85000610351562,
+            139.85000610351562,
+            61.0
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        }
+      ]
+    },
+    {
+      "node_name": "face_front_left",
+      "node_index": 20,
+      "part_id": "face-front-left",
+      "label": "Face Front Left",
+      "geometry_basis": "custom",
+      "bom_line": "printed_parts",
+      "no_bom_line": false,
+      "group": "face-front-left",
+      "explode_vector_mm": [
+        -77.574997,
+        -72.925003,
+        32.5
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "572b2e17e0c89534b54b699642f2a915f7b32a2db36f368810d5716b88f9e10d",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            0.0,
+            0.0,
+            61.0,
+            154.85000610351562,
+            139.85000610351562,
+            64.0
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        }
+      ]
+    },
+    {
+      "node_name": "tray_front_right",
+      "node_index": 21,
+      "part_id": "tray-front-right",
+      "label": "Tray Front Right",
+      "geometry_basis": "custom",
+      "bom_line": "printed_parts",
+      "no_bom_line": false,
+      "group": "tray-front-right",
+      "explode_vector_mm": [
+        77.574997,
+        -72.925003,
+        0.5
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "69f46f2f37def50cce4f217808ce948537f30fb6f7c2f01abdfe8548c90cea2a",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            155.14999389648438,
+            0.0,
+            0.0,
+            310.0,
+            139.85000610351562,
+            61.0
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        }
+      ]
+    },
+    {
+      "node_name": "face_front_right",
+      "node_index": 22,
+      "part_id": "face-front-right",
+      "label": "Face Front Right",
+      "geometry_basis": "custom",
+      "bom_line": "printed_parts",
+      "no_bom_line": false,
+      "group": "face-front-right",
+      "explode_vector_mm": [
+        77.574997,
+        -72.925003,
+        32.5
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "8484d1efa2392f90b53af27043de3c589dfc11def0a8bced9bf29582b5805e27",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            155.14999389648438,
+            0.0,
+            61.0,
+            310.0,
+            139.85000610351562,
+            64.0
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        }
+      ]
+    },
+    {
+      "node_name": "tray_rear_left",
+      "node_index": 23,
+      "part_id": "tray-rear-left",
+      "label": "Tray Rear Left",
+      "geometry_basis": "custom",
+      "bom_line": "tray_rear_left",
+      "no_bom_line": false,
+      "group": "tray-rear-left",
+      "explode_vector_mm": [
+        -77.574997,
+        69.724991,
+        0.5
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "77cc57656f75eac779fff355e1307b5224e8616fcb1d691e6c478409abdd987c",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            0.0,
+            140.14999389648438,
+            0.0,
+            154.85000610351562,
+            285.0,
+            61.0
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        },
+        {
+          "field": "print_dimensions_mm",
+          "value": [
+            154.85,
+            144.85,
+            61.0
+          ],
+          "state": "computed",
+          "source": "docs/status/generated/fielddeck-display-swap-20261118.json",
+          "source_sha256": "c38a859dde53f5c3c9a97e59a868be77fdef7b85518c22cded5ba404bca0f13b"
+        }
+      ]
+    },
+    {
+      "node_name": "face_rear_left",
+      "node_index": 24,
+      "part_id": "face-rear-left",
+      "label": "Face Rear Left",
+      "geometry_basis": "custom",
+      "bom_line": "face_rear_left",
+      "no_bom_line": false,
+      "group": "face-rear-left",
+      "explode_vector_mm": [
+        -77.574997,
+        69.724991,
+        32.5
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "9b44d0d7a62e6231fde28815aa12ba570cd00cb81b1c83a2b95c9e7a4e27155d",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            0.0,
+            140.14999389648438,
+            61.0,
+            154.85000610351562,
+            285.0,
+            64.0
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        },
+        {
+          "field": "print_dimensions_mm",
+          "value": [
+            154.85,
+            144.85,
+            3.0
+          ],
+          "state": "computed",
+          "source": "docs/status/generated/fielddeck-display-swap-20261118.json",
+          "source_sha256": "c38a859dde53f5c3c9a97e59a868be77fdef7b85518c22cded5ba404bca0f13b"
+        }
+      ]
+    },
+    {
+      "node_name": "tray_rear_right",
+      "node_index": 25,
+      "part_id": "tray-rear-right",
+      "label": "Tray Rear Right",
+      "geometry_basis": "custom",
+      "bom_line": "tray_rear_right",
+      "no_bom_line": false,
+      "group": "tray-rear-right",
+      "explode_vector_mm": [
+        77.574997,
+        69.724991,
+        0.5
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "32cc9d48a41785d0b0542958745514d5bd7a0a35a8512d1602fec20925ec6dfa",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            155.14999389648438,
+            140.14999389648438,
+            0.0,
+            310.0,
+            285.0,
+            61.0
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        },
+        {
+          "field": "print_dimensions_mm",
+          "value": [
+            154.85,
+            144.85,
+            61.0
+          ],
+          "state": "computed",
+          "source": "docs/status/generated/fielddeck-display-swap-20261118.json",
+          "source_sha256": "c38a859dde53f5c3c9a97e59a868be77fdef7b85518c22cded5ba404bca0f13b"
+        }
+      ]
+    },
+    {
+      "node_name": "face_rear_right",
+      "node_index": 26,
+      "part_id": "face-rear-right",
+      "label": "Face Rear Right",
+      "geometry_basis": "custom",
+      "bom_line": "face_rear_right",
+      "no_bom_line": false,
+      "group": "face-rear-right",
+      "explode_vector_mm": [
+        77.574997,
+        69.724991,
+        32.5
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "863bfd55ef2ee0d36cb0a38969f00356ac7662ece7dcbca5c004bc922a113a54",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            155.14999389648438,
+            140.14999389648438,
+            61.0,
+            310.0,
+            285.0,
+            64.0
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        },
+        {
+          "field": "print_dimensions_mm",
+          "value": [
+            154.85,
+            144.85,
+            3.0
+          ],
+          "state": "computed",
+          "source": "docs/status/generated/fielddeck-display-swap-20261118.json",
+          "source_sha256": "c38a859dde53f5c3c9a97e59a868be77fdef7b85518c22cded5ba404bca0f13b"
+        }
+      ]
+    },
+    {
+      "node_name": "fan_guard",
+      "node_index": 27,
+      "part_id": "fan-guard",
+      "label": "Fan Guard",
+      "geometry_basis": "custom",
+      "bom_line": "printed_parts",
+      "no_bom_line": false,
+      "group": "fan-guard",
+      "explode_vector_mm": [
+        -123.0,
+        87.649994,
+        35.0
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "5502d1d2998ee8905d49b383d4b131b9ec7744b34da25adf4cabb8b5bbd3e6eb",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            10.0,
+            208.5,
+            64.0,
+            54.0,
+            252.5,
+            66.0
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        }
+      ]
+    },
+    {
+      "node_name": "fan_duct",
+      "node_index": 28,
+      "part_id": "fan-duct",
+      "label": "Fan Duct",
+      "geometry_basis": "custom",
+      "bom_line": "printed_parts",
+      "no_bom_line": false,
+      "group": "fan-duct",
+      "explode_vector_mm": [
+        -123.0,
+        87.649994,
+        9.0
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "a48b0e010d16ee58eca13f07b313702a00e2c842b875ed15dfe20a3af5e8f90c",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            10.0,
+            208.5,
+            25.0,
+            54.0,
+            252.5,
+            53.0
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        }
+      ]
+    },
+    {
+      "node_name": "foot_1",
+      "node_index": 29,
+      "part_id": "foot-1",
+      "label": "Foot 1",
+      "geometry_basis": "custom",
+      "bom_line": "printed_parts",
+      "no_bom_line": false,
+      "group": "foot-1",
+      "explode_vector_mm": [
+        -138.995028,
+        -126.850007,
+        -33.0
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "ff75c07cec96c08ae25047b61247897f10e8c55dc0162b820ff10d66e31abd71",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            8.009944915771484,
+            8.002486228942871,
+            -6.0,
+            24.0,
+            23.997512817382812,
+            0.0
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        }
+      ]
+    },
+    {
+      "node_name": "foot_2",
+      "node_index": 30,
+      "part_id": "foot-2",
+      "label": "Foot 2",
+      "geometry_basis": "custom",
+      "bom_line": "printed_parts",
+      "no_bom_line": false,
+      "group": "foot-2",
+      "explode_vector_mm": [
+        139.004974,
+        -126.850007,
+        -33.0
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "80d03955e9ee805911183f9c28e668d59396908e279847556c540f84f5765c60",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            286.00994873046875,
+            8.002486228942871,
+            -6.0,
+            302.0,
+            23.997512817382812,
+            0.0
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        }
+      ]
+    },
+    {
+      "node_name": "foot_3",
+      "node_index": 31,
+      "part_id": "foot-3",
+      "label": "Foot 3",
+      "geometry_basis": "custom",
+      "bom_line": "printed_parts",
+      "no_bom_line": false,
+      "group": "foot-3",
+      "explode_vector_mm": [
+        -138.995028,
+        126.149994,
+        -33.0
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "407b98d711e75dd9bd16c446dd2c3a37fcaaa6da67656814e4b36ad361ee7138",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            8.009944915771484,
+            261.0024719238281,
+            -6.0,
+            24.0,
+            276.9975280761719,
+            0.0
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        }
+      ]
+    },
+    {
+      "node_name": "foot_4",
+      "node_index": 32,
+      "part_id": "foot-4",
+      "label": "Foot 4",
+      "geometry_basis": "custom",
+      "bom_line": "printed_parts",
+      "no_bom_line": false,
+      "group": "foot-4",
+      "explode_vector_mm": [
+        139.004974,
+        126.149994,
+        -33.0
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "2f2c7a5e56e2a2f96a2516f4308800bccfae3d93525b2b4a9e9dbb8e03634287",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            286.00994873046875,
+            261.0024719238281,
+            -6.0,
+            302.0,
+            276.9975280761719,
+            0.0
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        }
+      ]
+    },
+    {
+      "node_name": "display_spacer_1",
+      "node_index": 33,
+      "part_id": "display-spacer-1",
+      "label": "Display Spacer 1",
+      "geometry_basis": "unknown",
+      "bom_line": "display_spacer_1",
+      "no_bom_line": false,
+      "group": "display-spacer-1",
+      "explode_vector_mm": [
+        -51.847824,
+        41.649994,
+        19.34
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "5f594f5b0c9c33268cf7b67d6de42b0721ee826ef4c1f35cf192532c3ec9c291",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            99.65435028076172,
+            181.00108337402344,
+            47.08000183105469,
+            106.6500015258789,
+            187.99891662597656,
+            51.599998474121094
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        },
+        {
+          "field": "print_dimensions_mm",
+          "value": [
+            7.0,
+            7.0,
+            4.52
+          ],
+          "state": "computed",
+          "source": "docs/status/generated/fielddeck-display-swap-20261118.json",
+          "source_sha256": "c38a859dde53f5c3c9a97e59a868be77fdef7b85518c22cded5ba404bca0f13b"
+        }
+      ]
+    },
+    {
+      "node_name": "display_spacer_2",
+      "node_index": 34,
+      "part_id": "display-spacer-2",
+      "label": "Display Spacer 2",
+      "geometry_basis": "unknown",
+      "bom_line": "display_spacer_1",
+      "no_bom_line": false,
+      "group": "display-spacer-2",
+      "explode_vector_mm": [
+        -51.847824,
+        92.649994,
+        19.34
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "8274e1eb0ec238f2f8964cd85abba7387c9f9506a53e3b3c6f1f9f3d1b9ce9c4",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            99.65435028076172,
+            232.00108337402344,
+            47.08000183105469,
+            106.6500015258789,
+            238.99891662597656,
+            51.599998474121094
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        },
+        {
+          "field": "print_dimensions_mm",
+          "value": [
+            7.0,
+            7.0,
+            4.52
+          ],
+          "state": "computed",
+          "source": "docs/status/generated/fielddeck-display-swap-20261118.json",
+          "source_sha256": "c38a859dde53f5c3c9a97e59a868be77fdef7b85518c22cded5ba404bca0f13b"
+        }
+      ]
+    },
+    {
+      "node_name": "display_spacer_3",
+      "node_index": 35,
+      "part_id": "display-spacer-3",
+      "label": "Display Spacer 3",
+      "geometry_basis": "unknown",
+      "bom_line": "display_spacer_1",
+      "no_bom_line": false,
+      "group": "display-spacer-3",
+      "explode_vector_mm": [
+        51.85218,
+        41.649994,
+        19.34
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "7dd086ac87f6e61b262bba4222814c73f10ea8ded6ce5edde96e70a0f9a36dbf",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            203.35435485839844,
+            181.00108337402344,
+            47.08000183105469,
+            210.35000610351562,
+            187.99891662597656,
+            51.599998474121094
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        },
+        {
+          "field": "print_dimensions_mm",
+          "value": [
+            7.0,
+            7.0,
+            4.52
+          ],
+          "state": "computed",
+          "source": "docs/status/generated/fielddeck-display-swap-20261118.json",
+          "source_sha256": "c38a859dde53f5c3c9a97e59a868be77fdef7b85518c22cded5ba404bca0f13b"
+        }
+      ]
+    },
+    {
+      "node_name": "display_spacer_4",
+      "node_index": 36,
+      "part_id": "display-spacer-4",
+      "label": "Display Spacer 4",
+      "geometry_basis": "unknown",
+      "bom_line": "display_spacer_1",
+      "no_bom_line": false,
+      "group": "display-spacer-4",
+      "explode_vector_mm": [
+        51.85218,
+        92.649994,
+        19.34
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "51e8dc96a2a0132367c65108495fe3e1798b671018e438ccf920cbfdd96f5330",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            203.35435485839844,
+            232.00108337402344,
+            47.08000183105469,
+            210.35000610351562,
+            238.99891662597656,
+            51.599998474121094
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        },
+        {
+          "field": "print_dimensions_mm",
+          "value": [
+            7.0,
+            7.0,
+            4.52
+          ],
+          "state": "computed",
+          "source": "docs/status/generated/fielddeck-display-swap-20261118.json",
+          "source_sha256": "c38a859dde53f5c3c9a97e59a868be77fdef7b85518c22cded5ba404bca0f13b"
+        }
+      ]
+    },
+    {
+      "node_name": "touch_display_2_5inch_sc1975",
+      "node_index": 37,
+      "part_id": "display",
+      "label": "Raspberry Pi Touch Display 2, 5-inch (SC1975)",
+      "geometry_basis": "vendor_step",
+      "bom_line": "display",
+      "no_bom_line": false,
+      "group": "display",
+      "explode_vector_mm": [
+        0.0,
+        67.149994,
+        24.049999
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "76d46e2e7f7c940a331da36331930501057781a04dd82895d58df6c3554057b2",
+      "evidence": [
+        {
+          "field": "physical_fit",
+          "value": null,
+          "state": "unknown",
+          "source": null,
+          "source_sha256": null
+        },
+        {
+          "field": "mesh_bounds_mm",
+          "value": [
+            83.30000305175781,
+            164.27000427246094,
+            46.099998474121094,
+            226.6999969482422,
+            255.72999572753906,
+            62.0
+          ],
+          "state": "computed",
+          "source": "display_swap/cad/FIELDDECK_5.glb",
+          "source_sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+        },
+        {
+          "field": "documented_power_w",
+          "value": 1.4,
+          "state": "datasheet",
+          "source": "https://pip-assets.raspberrypi.com/categories/1083-raspberry-pi-touch-display-2/documents/RP-010430-MM-3-touch-display-2-5-inch-product-brief.pdf",
+          "source_sha256": "dcc7fc10f28297e6c33f7bc24ba314dc456f22676392dcce6dbe255a4e973b75"
+        },
+        {
+          "field": "landscape_glass_mm",
+          "value": [
+            143.4,
+            91.46
+          ],
+          "state": "datasheet",
+          "source": "https://pip-assets.raspberrypi.com/categories/1083-raspberry-pi-touch-display-2/documents/RP-010430-MM-3-touch-display-2-5-inch-product-brief.pdf",
+          "source_sha256": "dcc7fc10f28297e6c33f7bc24ba314dc456f22676392dcce6dbe255a4e973b75"
+        },
+        {
+          "field": "landscape_viewing_area_mm",
+          "value": [
+            111.4,
+            63.1
+          ],
+          "state": "datasheet",
+          "source": "https://pip-assets.raspberrypi.com/categories/1083-raspberry-pi-touch-display-2/documents/RP-010430-MM-3-touch-display-2-5-inch-product-brief.pdf",
+          "source_sha256": "dcc7fc10f28297e6c33f7bc24ba314dc456f22676392dcce6dbe255a4e973b75"
+        },
+        {
+          "field": "landscape_mount_pitch_mm",
+          "value": [
+            103.7,
+            51
+          ],
+          "state": "datasheet",
+          "source": "https://pip-assets.raspberrypi.com/categories/1083-raspberry-pi-touch-display-2/documents/RP-010430-MM-3-touch-display-2-5-inch-product-brief.pdf",
+          "source_sha256": "dcc7fc10f28297e6c33f7bc24ba314dc456f22676392dcce6dbe255a4e973b75"
+        },
+        {
+          "field": "nominal_lug_depth_mm",
+          "value": 14.92,
+          "state": "datasheet",
+          "source": "https://pip-assets.raspberrypi.com/categories/1083-raspberry-pi-touch-display-2/documents/RP-010430-MM-3-touch-display-2-5-inch-product-brief.pdf",
+          "source_sha256": "dcc7fc10f28297e6c33f7bc24ba314dc456f22676392dcce6dbe255a4e973b75"
+        },
+        {
+          "field": "geometry_reference",
+          "value": "vendor_step",
+          "state": "datasheet",
+          "source": "https://pip-assets.raspberrypi.com/categories/1083-raspberry-pi-touch-display-2/documents/RP-009152-DD-3-raspberry-pi-touch-display-2-step-5inch.zip",
+          "source_sha256": "6552f6b12b1ec7f4b829a64ce2422fe827004ee8a149a3bc1d0f669629a449b4"
+        },
+        {
+          "field": "allocated_power_w",
+          "value": 3.0,
+          "state": "assumed",
+          "source": "digital_v1/design.json",
+          "source_sha256": "0883100a6ae3accd11c70fd731cc98bf46646b878ab5ce37a086b386bb73e192"
+        }
+      ]
+    }
+  ],
+  "interfaces": [
+    {
+      "interface_id": "display-ribbon",
+      "label": "DSI FFC",
+      "from_part_id": "pi4-dsi",
+      "to_part_id": "display",
+      "endpoints_present": true,
+      "bom_line": "dsi",
+      "open_checks": [
+        "pin_mapping_unknown",
+        "signal_voltage_unknown",
+        "Installed cable exit, bend and strain relief remain to be checked."
+      ],
+      "source": "https://www.raspberrypi.com/documentation/accessories/touch-display-2.html"
+    },
+    {
+      "interface_id": "display-power",
+      "label": "Display GPIO power",
+      "from_part_id": "pi4-gpio",
+      "to_part_id": "display",
+      "endpoints_present": true,
+      "bom_line": "gpio_extensions",
+      "open_checks": [
+        "Confirm extension contact rating and delivered voltage; exact port limits are not published in the retained brief.",
+        "Contact current rating and vibration retention not published; 0.6A display allocation is a design requirement, not a vendor rating. Insulate and retain the two joins; confirm voltage drop physically."
+      ],
+      "source": "https://www.raspberrypi.com/documentation/accessories/touch-display-2.html"
+    },
+    {
+      "interface_id": "pi-power",
+      "label": "Pi USB-C power",
+      "from_part_id": "power-bank-nominal-envelope",
+      "to_part_id": "pi4-usb-c",
+      "endpoints_present": true,
+      "bom_line": "power_cable",
+      "open_checks": [
+        "Confirm low resistance and correct USB-C current advertisement with the selected bank and Pi revision. Cable bend and bank plug position remain unmeasured."
+      ]
+    },
+    {
+      "interface_id": "keyboard-usb",
+      "label": "Keyboard USB",
+      "from_part_id": "keyboard-nominal-envelope",
+      "to_part_id": "pi4-board-envelope",
+      "endpoints_present": true,
+      "bom_line": null,
+      "open_checks": []
+    },
+    {
+      "interface_id": "fan-usb",
+      "label": "Fan USB",
+      "from_part_id": "fan-envelope",
+      "to_part_id": "pi4-board-envelope",
+      "endpoints_present": true,
+      "bom_line": null,
+      "open_checks": []
+    }
+  ],
+  "blockers": [
+    {
+      "reason": "bank ports/button and built-in cable not dimensioned",
+      "part_id": "power-bank-nominal-envelope",
+      "source": "digital_v1/analysis/calculations.json"
+    },
+    {
+      "reason": "keyboard underside/pad retention and cable bend not manufacturer CAD",
+      "part_id": "keyboard-nominal-envelope",
+      "source": "digital_v1/analysis/calculations.json"
+    },
+    {
+      "reason": "display lug thread/engagement nominal only",
+      "part_id": "display",
+      "source": "digital_v1/analysis/calculations.json"
+    },
+    {
+      "reason": "GPIO extension contact current rating/retention unverified",
+      "interface_id": "display-power",
+      "source": "digital_v1/analysis/calculations.json"
+    },
+    {
+      "reason": "flexible cable bends/routing not solid-interference verified",
+      "interface_id": "display-ribbon",
+      "source": "digital_v1/analysis/calculations.json"
+    },
+    {
+      "reason": "pin_mapping_unknown",
+      "interface_id": "display-ribbon",
+      "source": "docs/status/generated/fielddeck-display-swap-20261118.json"
+    },
+    {
+      "reason": "signal_voltage_unknown",
+      "interface_id": "display-ribbon",
+      "source": "docs/status/generated/fielddeck-display-swap-20261118.json"
+    },
+    {
+      "reason": "Installed cable exit, bend and strain relief remain to be checked.",
+      "interface_id": "display-ribbon",
+      "source": "docs/status/generated/fielddeck-display-swap-20261118.json"
+    },
+    {
+      "reason": "Confirm extension contact rating and delivered voltage; exact port limits are not published in the retained brief.",
+      "interface_id": "display-power",
+      "source": "docs/status/generated/fielddeck-display-swap-20261118.json"
+    },
+    {
+      "reason": "Contact current rating and vibration retention not published; 0.6A display allocation is a design requirement, not a vendor rating. Insulate and retain the two joins; confirm voltage drop physically.",
+      "interface_id": "display-power",
+      "source": "digital_v1/bom.json"
+    },
+    {
+      "reason": "Confirm low resistance and correct USB-C current advertisement with the selected bank and Pi revision. Cable bend and bank plug position remain unmeasured.",
+      "interface_id": "pi-power",
+      "source": "digital_v1/bom.json"
+    }
+  ],
+  "alternates": [
+    {
+      "part_id": "display",
+      "part": "10-inch Touch Display 2",
+      "status": "blocked",
+      "failed_checks": [
+        "enclosure_fit",
+        "connector_mismatch",
+        "protocol_mismatch"
+      ],
+      "source": "docs/status/generated/fielddeck-display-swap-20261118.json"
+    }
+  ],
+  "revision_diff": {
+    "from_revision": "7",
+    "to_revision": "5",
+    "status": "available",
+    "nodes": [
+      {
+        "node_name": "world",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": null,
+        "to_geometry_sha256": null
+      },
+      {
+        "node_name": "touch_display_2_manufacturer",
+        "occurrence": 1,
+        "status": "removed",
+        "from_geometry_sha256": "2d44e3d46b37c2595fb2d79fb7015c62931f9d95f3587e4cac245fda6981777d",
+        "to_geometry_sha256": null
+      },
+      {
+        "node_name": "keyboard_nominal_envelope",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": "de42cd9b34dd9cd93921a3df56334f28e397b7bd0afcecf514b5d7062d50e20a",
+        "to_geometry_sha256": "de42cd9b34dd9cd93921a3df56334f28e397b7bd0afcecf514b5d7062d50e20a"
+      },
+      {
+        "node_name": "power_bank_nominal_envelope",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": "e00901e7a27f6c6e6421981ad4fe5c998440095f830510d35b2a8cc93069e54e",
+        "to_geometry_sha256": "7bd1390bf8662a8d4f952adb3ee91f04e7364c12c5dd55181cf6c7010c4c1ba4"
+      },
+      {
+        "node_name": "pi4_board_envelope",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": "0d73b3138663e68698e8eadacd76fbe465f67381d0e1aa3cc69e4f1bb0384b7c",
+        "to_geometry_sha256": "fa90d070398deb53ee4420f0a0776653d30271fb86c073f30f687646a18c5ff8"
+      },
+      {
+        "node_name": "pi4_usb_a_lower",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": "307f216a8e5b1aee705e824a542ebb8bef15b969d016fdb4a7f4c14535b762d9",
+        "to_geometry_sha256": "a1c42e74e9195063a1301994efccadcf5697f1c48e25a0abe62da992865fed55"
+      },
+      {
+        "node_name": "pi4_usb_a_upper",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": "c0f07818f33207a5a1e4a4730d0bc8dbd9bf6e73641d3069866725a9978e13b5",
+        "to_geometry_sha256": "869adea045d6755702a79c8c54357031c06ce0e76a29f10e1f7dc9afc2485149"
+      },
+      {
+        "node_name": "pi4_ethernet",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": "cb8d52635099836cf68d2819c0e6ef44dfdb95d09176d24406cf6cd44a77c746",
+        "to_geometry_sha256": "798952a0c171f47e7c34c99813228f0679d7ed7338056f3edf79e08126b111e3"
+      },
+      {
+        "node_name": "pi4_gpio",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": "f1768a626de811d8d55bf98d8ec079b68784500e949ae07b3dbbcc2fb1c7f280",
+        "to_geometry_sha256": "f1768a626de811d8d55bf98d8ec079b68784500e949ae07b3dbbcc2fb1c7f280"
+      },
+      {
+        "node_name": "pi4_usb_c",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": "570fd71134bb646dac809973333e62955e9bfa1121fce50ce87c6e678d3692fb",
+        "to_geometry_sha256": "570fd71134bb646dac809973333e62955e9bfa1121fce50ce87c6e678d3692fb"
+      },
+      {
+        "node_name": "pi4_dsi",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": "a5aeb4521721e0a7313071e87ae0ab2084bf0dca3f1dafb40d74d02015f8e247",
+        "to_geometry_sha256": "a5aeb4521721e0a7313071e87ae0ab2084bf0dca3f1dafb40d74d02015f8e247"
+      },
+      {
+        "node_name": "pi4_microsd",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": "448884a12d51f18ee6d91979f2aa251ccd3511fe04d09007147b14667b98e4cd",
+        "to_geometry_sha256": "448884a12d51f18ee6d91979f2aa251ccd3511fe04d09007147b14667b98e4cd"
+      },
+      {
+        "node_name": "pi4_soc_envelope",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": "d7293c523b5c5f2d291a1ebe22cab6e1499125e1f2c46e7ff03c6968ca662e26",
+        "to_geometry_sha256": "d7293c523b5c5f2d291a1ebe22cab6e1499125e1f2c46e7ff03c6968ca662e26"
+      },
+      {
+        "node_name": "fan_envelope",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": "d7a1183905a72097b1264475a9011515c2e3b3bc7b7465594cac900ca55f4235",
+        "to_geometry_sha256": "fef64a1f74e003a79e4416bd40df6935978ab33ee0b154ece0f19016ed5ef34f"
+      },
+      {
+        "node_name": "seam_plate_1",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": "5575073d77cf4cbcb0c9872080df4c317455e8f6f87dea5a268e0152968173f1",
+        "to_geometry_sha256": "6cc44608a47e91fb8db7d2f496978148094bc8d45505a11b680093c4793700da"
+      },
+      {
+        "node_name": "seam_plate_2",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": "fc5ccf8b1e30c4b62c6f092686cfd7af99052b332ac2ed236990927cccae570a",
+        "to_geometry_sha256": "aee232f9be6ef9566dc0c97ce390fa92b70747f8ca5618b423b9dfd1a737a20e"
+      },
+      {
+        "node_name": "seam_plate_3",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": "e1c779db4f00d0cfe48e458001b2543acd39de308610353ed84d374b1f0ade19",
+        "to_geometry_sha256": "64ca39b8662aba56ea13881fd2a2d5a62d599410bd5765be4b3bef40a5919cd6"
+      },
+      {
+        "node_name": "seam_plate_4",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": "d2086d0e1907b6dc149ccf5da5b2b95b3cca1b8ee42dbc2a605bed3560abf3b0",
+        "to_geometry_sha256": "e4c824634cb775857afd583e152532be253dc6a63770b718b32dc49e3bb222c8"
+      },
+      {
+        "node_name": "seam_plate_5",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": "b761b4097b496e81ee3f4d4ad44f2e9137a4d8112ff3efe51c1380b519591d72",
+        "to_geometry_sha256": "178bce8d6a43e10ac6c79b1090ca7aa4ac38fa6f1f612f74db988aa4b0242656"
+      },
+      {
+        "node_name": "seam_plate_6",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": "e5047f0084f42fe901a2cde1121ec98d79f43c2851c5ffa3d8075f4a28753603",
+        "to_geometry_sha256": "570fe8fe1a4c422eb3b15bd657856a495c465bd98b4538eceabd6e413e511278"
+      },
+      {
+        "node_name": "tray_front_left",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": "760ced82722abaa88189a3479901a54424b0436c2d04f479e3f082d59f48f181",
+        "to_geometry_sha256": "b9bb94e75879f1959254cc65fe64782258138c113b9e819cc4698e8177c4118d"
+      },
+      {
+        "node_name": "face_front_left",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": "d32e54727e7fcf1fa9414cdf1d51895bc91b2595db86c5216899f28a47771eb8",
+        "to_geometry_sha256": "572b2e17e0c89534b54b699642f2a915f7b32a2db36f368810d5716b88f9e10d"
+      },
+      {
+        "node_name": "tray_front_right",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": "4450a667145975dd60ba08324a2413f49f2589fc0fa1dd34b1cf7fbc74712ecc",
+        "to_geometry_sha256": "69f46f2f37def50cce4f217808ce948537f30fb6f7c2f01abdfe8548c90cea2a"
+      },
+      {
+        "node_name": "face_front_right",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": "144c8f0ec65bd0c9867f1d157b62dd3eec8e05671914367e535005d23850e585",
+        "to_geometry_sha256": "8484d1efa2392f90b53af27043de3c589dfc11def0a8bced9bf29582b5805e27"
+      },
+      {
+        "node_name": "tray_rear_left",
+        "occurrence": 1,
+        "status": "changed",
+        "from_geometry_sha256": "b16e0f472855d6e0425fbd294158611fbdc5430db1ed49123d34bcb9083ca0ef",
+        "to_geometry_sha256": "77cc57656f75eac779fff355e1307b5224e8616fcb1d691e6c478409abdd987c"
+      },
+      {
+        "node_name": "face_rear_left",
+        "occurrence": 1,
+        "status": "changed",
+        "from_geometry_sha256": "05ccdd93dfc7eee4c1c96d53d4a2418b70d96a3c2ebf83108cd6b6d550885873",
+        "to_geometry_sha256": "9b44d0d7a62e6231fde28815aa12ba570cd00cb81b1c83a2b95c9e7a4e27155d"
+      },
+      {
+        "node_name": "tray_rear_right",
+        "occurrence": 1,
+        "status": "changed",
+        "from_geometry_sha256": "78c5944788185460af8c7d6b28ec2c436834913f4dde297a93339a1cfd957a12",
+        "to_geometry_sha256": "32cc9d48a41785d0b0542958745514d5bd7a0a35a8512d1602fec20925ec6dfa"
+      },
+      {
+        "node_name": "face_rear_right",
+        "occurrence": 1,
+        "status": "changed",
+        "from_geometry_sha256": "962eb25fd569756454edaaa9bcaa813c2d18c67c310148f617e7be24743bea11",
+        "to_geometry_sha256": "863bfd55ef2ee0d36cb0a38969f00356ac7662ece7dcbca5c004bc922a113a54"
+      },
+      {
+        "node_name": "fan_guard",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": "d0cef871db624b1e1a5f90f12c7a39a2eb58f3447c5be2e2c40bb9e9175e7ae3",
+        "to_geometry_sha256": "5502d1d2998ee8905d49b383d4b131b9ec7744b34da25adf4cabb8b5bbd3e6eb"
+      },
+      {
+        "node_name": "fan_duct",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": "ed000979bc7de974ffe472a3a571a62104b68d52260989b717e40aea5803bc5e",
+        "to_geometry_sha256": "a48b0e010d16ee58eca13f07b313702a00e2c842b875ed15dfe20a3af5e8f90c"
+      },
+      {
+        "node_name": "foot_1",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": "91b64022c1a0015a266a55fca439dbbbaa0b8cb22d7cafaaeb99af5b273d1d65",
+        "to_geometry_sha256": "ff75c07cec96c08ae25047b61247897f10e8c55dc0162b820ff10d66e31abd71"
+      },
+      {
+        "node_name": "foot_2",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": "c1873b1cf20812efbb26d841eba5c71902b9c2618ec37d1a6ed72c65cb8d6f10",
+        "to_geometry_sha256": "80d03955e9ee805911183f9c28e668d59396908e279847556c540f84f5765c60"
+      },
+      {
+        "node_name": "foot_3",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": "9e9dc104c7ad5cd72332faeccc17619f7aedc1de8dacea541f36393a0f504d28",
+        "to_geometry_sha256": "407b98d711e75dd9bd16c446dd2c3a37fcaaa6da67656814e4b36ad361ee7138"
+      },
+      {
+        "node_name": "foot_4",
+        "occurrence": 1,
+        "status": "unchanged",
+        "from_geometry_sha256": "b9fd2872a3bccaa7b4eba597f3c0e9ba18d23f12f7b87b66fb40efb95268bc82",
+        "to_geometry_sha256": "2f2c7a5e56e2a2f96a2516f4308800bccfae3d93525b2b4a9e9dbb8e03634287"
+      },
+      {
+        "node_name": "display_spacer_1",
+        "occurrence": 1,
+        "status": "added",
+        "from_geometry_sha256": null,
+        "to_geometry_sha256": "5f594f5b0c9c33268cf7b67d6de42b0721ee826ef4c1f35cf192532c3ec9c291"
+      },
+      {
+        "node_name": "display_spacer_2",
+        "occurrence": 1,
+        "status": "added",
+        "from_geometry_sha256": null,
+        "to_geometry_sha256": "8274e1eb0ec238f2f8964cd85abba7387c9f9506a53e3b3c6f1f9f3d1b9ce9c4"
+      },
+      {
+        "node_name": "display_spacer_3",
+        "occurrence": 1,
+        "status": "added",
+        "from_geometry_sha256": null,
+        "to_geometry_sha256": "7dd086ac87f6e61b262bba4222814c73f10ea8ded6ce5edde96e70a0f9a36dbf"
+      },
+      {
+        "node_name": "display_spacer_4",
+        "occurrence": 1,
+        "status": "added",
+        "from_geometry_sha256": null,
+        "to_geometry_sha256": "51e8dc96a2a0132367c65108495fe3e1798b671018e438ccf920cbfdd96f5330"
+      },
+      {
+        "node_name": "touch_display_2_5inch_sc1975",
+        "occurrence": 1,
+        "status": "added",
+        "from_geometry_sha256": null,
+        "to_geometry_sha256": "76d46e2e7f7c940a331da36331930501057781a04dd82895d58df6c3554057b2"
+      }
+    ],
+    "counts": {
+      "unchanged": 29,
+      "changed": 4,
+      "added": 5,
+      "removed": 1
+    }
+  },
+  "missing_inputs": []
+}
