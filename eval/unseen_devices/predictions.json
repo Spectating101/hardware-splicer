@@ -1,0 +1,176 @@
+{
+  "amplifier": {
+    "cases": {
+      "donor_condition": {
+        "claim": "An unmarked salvaged speaker is within the allowed impedance range",
+        "prediction": "unresolved"
+      },
+      "line_input": {
+        "claim": "An analog stereo input can be fed through the 3.5 mm jack",
+        "prediction": "yes"
+      },
+      "shared_return": {
+        "claim": "A three-wire stereo speaker harness preserves the two output circuits",
+        "prediction": "no"
+      }
+    },
+    "input_jack": {
+      "1": "AGND",
+      "2": "LEFTIN",
+      "3": "RIGHTIN"
+    },
+    "speaker_terminal_nets": [
+      "N$10",
+      "N$9",
+      "N$17",
+      "N$18"
+    ]
+  },
+  "arm": {
+    "cases": {
+      "j2_135": {
+        "claim": "J2 target +135 degrees is within the nominal axis range",
+        "prediction": "yes"
+      },
+      "j2_145": {
+        "claim": "J2 target +145 degrees is within the nominal axis range",
+        "prediction": "no"
+      },
+      "j6_175": {
+        "claim": "J6 target +175 degrees is within the nominal axis range",
+        "prediction": "yes"
+      },
+      "payload": {
+        "claim": "A 300 g tool is within the nominal rated payload",
+        "prediction": "unresolved"
+      }
+    },
+    "ordered_joints": [
+      "joint2_to_joint1",
+      "joint3_to_joint2",
+      "joint4_to_joint3",
+      "joint5_to_joint4",
+      "joint6_to_joint5",
+      "joint6output_to_joint6"
+    ],
+    "urdf_limits_deg": [
+      [
+        -167.997,
+        167.997
+      ],
+      [
+        -139.997,
+        139.997
+      ],
+      [
+        -149.995,
+        149.995
+      ],
+      [
+        -149.995,
+        149.995
+      ],
+      [
+        -154.997,
+        159.998
+      ],
+      [
+        -179.909,
+        180.0
+      ]
+    ]
+  },
+  "console": {
+    "button_control": [
+      "BUTTON_OUT",
+      "BUTTON_CLK",
+      "BUTTON_LATCH"
+    ],
+    "card_cs": "D4_SDCS",
+    "card_nets": [
+      "MOSI",
+      "MISO",
+      "SCK"
+    ],
+    "cases": {
+      "i2c_buttons": {
+        "claim": "Use an I2C GPIO-expander driver for the four digital buttons",
+        "prediction": "no"
+      },
+      "sd_d4": {
+        "claim": "Use D4 as the stock microSD chip select",
+        "prediction": "yes"
+      },
+      "shared_flash": {
+        "claim": "The built-in flash shares the microSD clock net",
+        "prediction": "no"
+      }
+    },
+    "flash_nets": [
+      "QSPI_DATA[0]",
+      "QSPI_DATA[1]",
+      "QSPI_DATA[2]",
+      "QSPI_DATA[3]",
+      "QSPI_SCK"
+    ]
+  },
+  "logger": {
+    "cases": {
+      "sd_d10": {
+        "claim": "Use Artemis D10 as the onboard microSD chip select",
+        "prediction": "no"
+      },
+      "separate_power": {
+        "claim": "Firmware has separate control lines for Qwiic and microSD power",
+        "prediction": "yes"
+      },
+      "spi_imu": {
+        "claim": "The stock motion sensor communicates over SPI",
+        "prediction": "yes"
+      }
+    },
+    "imu_signals": [
+      "ICM-20948-LV_!CS!",
+      "ICM-20948-LV_SCK",
+      "ICM-20948-LV_SDI",
+      "ICM-20948-LV_SDO"
+    ],
+    "mcu_pads": {
+      "ICM_!CS!": "~D44",
+      "MICROSD_!CS!": "~D23",
+      "MICROSD_PWR": "D15",
+      "QWIIC_PWR": "~D18"
+    }
+  },
+  "printer": {
+    "cases": {
+      "tower": {
+        "claim": "[100, 100, 211] mm fits the nominal build volume in the specified orientation",
+        "prediction": "no"
+      },
+      "tray": {
+        "claim": "[245, 205, 20] mm fits the nominal build volume in the specified orientation",
+        "prediction": "yes"
+      },
+      "wide": {
+        "claim": "[252, 100, 20] mm fits the nominal build volume in the specified orientation",
+        "prediction": "no"
+      }
+    },
+    "firmware_max_pos_mm": {
+      "X": 255.0,
+      "Y": 212.5,
+      "Z": 210.0
+    },
+    "preset_chain": [
+      "Original Prusa i3 MK3S & MK3S+",
+      "Original Prusa i3 MK3",
+      "*common*"
+    ],
+    "print_volume_mm": [
+      250.0,
+      210.0,
+      210.0
+    ]
+  }
+}
