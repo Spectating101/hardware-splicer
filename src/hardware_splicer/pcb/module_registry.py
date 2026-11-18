@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import math
+from copy import deepcopy
 from pathlib import Path
 from typing import Optional
 
@@ -64,22 +65,46 @@ _MODULE_ALIASES: dict[str, str] = {
 }
 
 
-def _load_library() -> dict[str, dict]:
-    global _MODULE_LIBRARY
-    if _MODULE_LIBRARY is not None:
-        return _MODULE_LIBRARY
-    with open(_DATA_PATH, "r", encoding="utf-8") as fh:
-        data = json.load(fh)
-    lib = {m["id"]: m for m in data.get("module_library", [])}
+def _build_library(modules: list[dict], footprints: dict[str, dict]) -> dict[str, dict]:
+    """Build independent specs without mutating source modules or depending on table order."""
+    lib = {m["id"]: deepcopy(m) for m in modules}
     for alias, target in _MODULE_ALIASES.items():
         if alias in lib or target not in lib:
             continue
-        spec = dict(lib[target])
+        spec = deepcopy(lib[target])
         spec["id"] = alias
         if alias == "mini-pump-5v":
             spec["label"] = "5V mini water pump"
         lib[alias] = spec
-    _MODULE_LIBRARY = lib
+    variants = {
+        module_id: {**deepcopy(lib[meta["pinsFrom"]]), "id": module_id, "label": meta["label"]}
+        for module_id, meta in footprints.items()
+        if module_id not in lib and meta.get("pinsFrom") in lib
+    }
+
+    def with_reserved_pins(module_id: str, spec: dict) -> dict:
+        meta = footprints.get(module_id, {})
+        reserved = {
+            **(footprints.get(meta.get("pinsFrom"), {}).get("reservedPins") or {}),
+            **(meta.get("reservedPins") or {}),
+        }
+        return {
+            **spec,
+            "pins": [
+                {**pin, **({"reserved": reserved[pin["id"]]} if pin["id"] in reserved else {})}
+                for pin in spec.get("pins") or []
+            ],
+        }
+
+    return {mid: with_reserved_pins(mid, spec) for mid, spec in {**lib, **variants}.items()}
+
+
+def _load_library() -> dict[str, dict]:
+    global _MODULE_LIBRARY
+    if _MODULE_LIBRARY is None:
+        with open(_DATA_PATH, "r", encoding="utf-8") as fh:
+            data = json.load(fh)
+        _MODULE_LIBRARY = _build_library(data.get("module_library", []), _MODULE_FOOTPRINTS)
     return _MODULE_LIBRARY
 
 
@@ -89,7 +114,7 @@ def _load_library() -> dict[str, dict]:
 
 def find_module(module_id: str) -> Optional[dict]:
     """Return ModuleSpec dict for module_id, or None."""
-    return _load_library().get(module_id)
+    return deepcopy(_load_library().get(module_id))
 
 
 def find_modules_by_capabilities(requires_any: list[list[str]]) -> list[dict]:
@@ -98,7 +123,7 @@ def find_modules_by_capabilities(requires_any: list[list[str]]) -> list[dict]:
     for module in _load_library().values():
         tags = set(module.get("capabilityTags") or [])
         if all(any(cap in tags for cap in alt) for alt in requires_any):
-            out.append(module)
+            out.append(deepcopy(module))
     return out
 
 
@@ -114,7 +139,7 @@ def resolve_module_footprint(module_id: str) -> str:
     """Return KiCad footprint string."""
     meta = _MODULE_FOOTPRINTS.get(module_id)
     if meta:
-        return meta["kicadFootprint"]
+        return meta.get("kicadFootprint", f"Circuit.AI:{module_id}")
     return f"Circuit.AI:{module_id}"
 
 
@@ -182,5 +207,5 @@ def list_canvas_modules() -> list[dict]:
     for module_id in sorted(_MODULE_FOOTPRINTS.keys()):
         spec = lib.get(module_id)
         if spec:
-            rows.append(spec)
+            rows.append(deepcopy(spec))
     return rows

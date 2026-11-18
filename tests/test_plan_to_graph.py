@@ -109,3 +109,86 @@ def test_usb_plant_watering_topology_variant(build_id: str) -> None:
     assert "usb-power-5v" in module_ids
     assert "dc-barrel-12v" not in module_ids
     assert "buck-mp1584" not in module_ids
+
+
+def _assert_no_reserved_wires(graph: dict) -> None:
+    from hardware_splicer.pcb.module_registry import find_module
+
+    specs = {n["id"]: find_module(n["moduleId"]) for n in graph["nodes"]}
+    for wire in graph["wires"]:
+        for end in (wire["from"], wire["to"]):
+            spec = specs[end["nodeId"]]
+            assert spec
+            pin = next((p for p in spec["pins"] if p["id"] == end["pinId"]), None)
+            assert pin and not pin.get("reserved"), (spec["id"], end["pinId"])
+
+
+@pytest.mark.parametrize("build_id", ["inspection_motion_fixture", "sensor_logger"])
+def test_esp32_cam_inventory_builds_do_not_use_psram_gpio(build_id: str) -> None:
+    plan = {
+        "target": {"recommended_build_id": build_id},
+        "power_topology": "usb_5v",
+        "module_overrides": {"mcu": "esp32-cam-module", "sns": "dht22"},
+        "resolved_modules": [
+            {"role": "mcu", "module_id": "esp32-cam-module"},
+            {"role": "usb", "module_id": "usb-power-5v"},
+            {"role": "svo", "module_id": "sg90"},
+            {"role": "svo2", "module_id": "sg90"},
+            {"role": "sns", "module_id": "dht22"},
+        ],
+    }
+    graph, _, _, _ = splice_plan_to_build_graph(plan)
+    _assert_no_reserved_wires(graph)
+    nodes = {n["id"]: n["moduleId"] for n in graph["nodes"]}
+    control_pins = {"DATA"} if build_id == "sensor_logger" else {"SIG"}
+    controls = [w for w in graph["wires"] if w["to"]["pinId"] in control_pins]
+    assert controls
+    for wire in controls:
+        assert nodes[wire["from"]["nodeId"]] == "esp32-cam-module"
+        assert wire["from"]["pinId"] != "GPIO16"
+
+
+@pytest.mark.parametrize("mcu_id", ["esp32-cam-module", "esp32-devkit", "arduino-nano"])
+def test_typescript_auto_wire_never_uses_reserved_pins(mcu_id: str) -> None:
+    runtime = _typescript_runtime_path()
+    if not runtime:
+        pytest.skip("Node/TypeScript runtime unavailable")
+    plan = {
+        "target": {"recommended_build_id": "sensor_logger"},
+        "compose_from_inventory": True,
+        "resolved_modules": [{"module_id": mid} for mid in [
+            mcu_id, "usb-power-5v", "sg90", "dht22", "hc-sr04", "l298n", "a4988-stepper",
+        ]],
+    }
+    graph = _ts_splice_plan_to_graph(plan, typescript_runtime=runtime)
+    assert graph["wires"]
+    _assert_no_reserved_wires(graph)
+
+
+@pytest.mark.parametrize("compiler", ["compile_geometry.cjs", "compile_build_graph.cjs"])
+def test_node_and_python_withhold_fabrication_for_unverified_usb_fit(tmp_path: Path, compiler: str) -> None:
+    from hardware_splicer.pcb.geometry_compile import compile_graph_to_artifacts
+
+    runtime = _typescript_runtime_path()
+    if not runtime:
+        pytest.skip("Node/TypeScript runtime unavailable")
+    graph = {
+        "nodes": [{"id": "pwr", "moduleId": "usb-power-5v"}, {"id": "sns", "moduleId": "hc-sr04"}],
+        "wires": [
+            {"id": "w1", "from": {"nodeId": "pwr", "pinId": "V+"}, "to": {"nodeId": "sns", "pinId": "VCC"}},
+            {"id": "w2", "from": {"nodeId": "pwr", "pinId": "GND"}, "to": {"nodeId": "sns", "pinId": "GND"}},
+        ],
+    }
+    py_quality = compile_graph_to_artifacts("custom", tmp_path / "python", graph)["quality"]
+    graph_path = tmp_path / "graph.json"
+    graph_path.write_text(json.dumps(graph), encoding="utf-8")
+    proc = subprocess.run(
+        ["node", str(ROOT / "scripts" / compiler), "--build-id", "custom", "--out", str(tmp_path / "node"),
+         "--build-graph", str(graph_path), "--json"],
+        cwd=ROOT, capture_output=True, text=True, timeout=180,
+    )
+    assert proc.returncode == 0, proc.stderr or proc.stdout
+    node_quality = json.loads(proc.stdout)["quality"]
+    assert py_quality["build_ready"] and node_quality["build_ready"]
+    assert node_quality["fabrication_ready"] == py_quality["fabrication_ready"] == False
+    assert node_quality["unverified_fit_modules"] == py_quality["unverified_fit_modules"] == ["usb-power-5v"]

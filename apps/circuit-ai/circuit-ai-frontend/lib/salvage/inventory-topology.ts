@@ -1,5 +1,6 @@
 // Adapts catalog recipes to salvage inventory: power topology + owned modules.
 
+import { findModule } from "@/lib/modules/module-library";
 import type { SalvagePlanInput } from "./plan-to-graph";
 
 type Wire = { from: { role: string; pin: string }; to: { role: string; pin: string } };
@@ -229,12 +230,14 @@ function usbPanTiltTopology(recipe: Recipe, plan: SalvagePlanInput): Recipe | nu
   const mcuId = moduleIdFor(modules, "mcu") || invMcu || "esp32-devkit";
   const powerPin = mcuId.includes("pico") ? "VBUS" : "VIN";
   // Prefer documented ESP32 GPIOs present on DevKit modules (avoid GP0 boot-strap).
-  const sigPins =
+  const availablePins = new Set(findModule(mcuId)?.pins.filter((p) => !p.reserved).map((p) => p.id));
+  const sigPins = (
     mcuId.includes("esp32") || mcuId.includes("cam")
-      ? ["GPIO18", "GPIO16"]
+      ? ["GPIO18", "GPIO16", "GPIO12", "GPIO13", "GPIO14", "GPIO15"]
       : mcuId.includes("pico")
         ? ["GP0", "GP1"]
-        : ["D2", "D3"];
+        : ["D2", "D3"]).filter((p) => availablePins.has(p));
+  if (sigPins.length < (hasRole(modules, "svo2") ? 2 : 1)) return null;
   const wires: Wire[] = [
     { from: { role: "usb", pin: "V+" }, to: { role: "mcu", pin: powerPin } },
     { from: { role: "usb", pin: "GND" }, to: { role: "mcu", pin: "GND" } },

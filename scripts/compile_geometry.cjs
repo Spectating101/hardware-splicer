@@ -41,6 +41,8 @@ const { buildGraphToGeometry } = require(path.join(FRONTEND, "lib/pcb/build-to-g
 const { runDrc } = require(path.join(FRONTEND, "lib/pcb/drc.ts"));
 const { serializeBuildToKicadPcb } = require(path.join(FRONTEND, "lib/kicad-serializer.ts"));
 
+const { resolveModuleFit } = require(path.join(FRONTEND, "lib/modules/module-footprints.ts"));
+
 function loadSupportedBuildIds() {
   if (!fs.existsSync(CATALOG_DATA)) return [];
   try {
@@ -88,10 +90,18 @@ function compileGraph(buildId, outDir, graph, notes, warnings, effectiveBuildId)
   }
 
   const drcErrors = (drc.violations || []).filter((v) => v.severity === "error").length;
+  const moduleFit = [...new Set(graph.nodes.map((n) => String(n.moduleId ?? "")))].map((moduleId) => {
+    const fit = resolveModuleFit(moduleId);
+    return fit.status === "verified_against"
+      ? { module_id: moduleId, status: fit.status, verified_against: fit.verifiedAgainst }
+      : { module_id: moduleId, status: fit.status, reason: fit.reason };
+  });
+  const unverifiedFitModules = moduleFit.filter((r) => r.status !== "verified_against").map((r) => r.module_id).sort();
   const fabricationReady =
     graph.nodes.length > 0 &&
     electricalErrors.length === 0 &&
     electricalWarnings.length === 0 &&
+    unverifiedFitModules.length === 0 &&
     drc.pass === true &&
     Boolean(kicadText && kicadText.includes("(kicad_pcb"));
 
@@ -129,6 +139,8 @@ function compileGraph(buildId, outDir, graph, notes, warnings, effectiveBuildId)
     build_id: resolvedBuildId,
     build_ready: buildReady,
     fabrication_ready: fabricationReady,
+    module_fit: moduleFit,
+    unverified_fit_modules: unverifiedFitModules,
     build_graph_compiled: graph.nodes.length > 0,
     electrical_safety_pass: electricalErrors.length === 0,
     drc_pass: drc.pass === true,

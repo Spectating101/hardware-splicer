@@ -41,9 +41,12 @@ export type ModuleFit =
   | { status: "unverified_variant"; reason: string };
 
 export type ModuleFootprintMeta = {
-  kicadFootprint: string;
-  bodyMm: { w: number; h: number };
-  pads: ModulePadDef[];
+  kicadFootprint?: string;
+  bodyMm?: { w: number; h: number };
+  pads?: ModulePadDef[];
+  pinsFrom?: string;
+  label?: string;
+  reservedPins?: Record<string, string>;
   fit: ModuleFit;
 };
 
@@ -66,9 +69,19 @@ def render(payload: Dict[str, Any]) -> str:
     lines = [HEADER + "{"]
     for module_id, meta in payload["modules"].items():
         lines.append(f"  {json.dumps(module_id)}: {{")
-        lines.append(f"    kicadFootprint: {json.dumps(meta['kicadFootprint'])},")
-        lines.append(f"    bodyMm: {{ w: {_num(meta['bodyMm']['w'])}, h: {_num(meta['bodyMm']['h'])} }},")
+        if meta.get("pinsFrom"):
+            lines.append(f"    pinsFrom: {json.dumps(meta['pinsFrom'])},")
+            lines.append(f"    label: {json.dumps(meta['label'])},")
+        if meta.get("reservedPins"):
+            lines.append(f"    reservedPins: {json.dumps(meta['reservedPins'])},")
+        if "kicadFootprint" in meta:
+            lines.append(f"    kicadFootprint: {json.dumps(meta['kicadFootprint'])},")
+        if "bodyMm" in meta:
+            lines.append(f"    bodyMm: {{ w: {_num(meta['bodyMm']['w'])}, h: {_num(meta['bodyMm']['h'])} }},")
         lines.append(f"    fit: {_fit_ts(meta['fit'])},")
+        if "pads" not in meta:
+            lines.append("  },")
+            continue
         lines.append("    pads: [")
         for pad in meta["pads"]:
             lines.append(

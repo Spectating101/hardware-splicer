@@ -49,3 +49,26 @@ def test_resolve_part_name(name: str, part_type: str, expected: str | None) -> N
         assert module_id is None or isinstance(module_id, str)
     else:
         assert module_id == expected, f"{name} -> {module_id}"
+
+
+@pytest.mark.parametrize("name,expected", [
+    ("ESP32 DOIT DEVKIT V1 30-pin board", "esp32-doit-30pin"),
+    ("ESP32 30-pin", "esp32-doit-30pin"),
+    ("DOIT ESP32", "esp32-doit-30pin"),
+    ("DHT22 3-pin breakout module", "dht22-breakout-3pin"),
+    ("DHT22 breakout", "dht22-breakout-3pin"),
+    ("3-pin DHT22", "dht22-breakout-3pin"),
+    ("ESP32 DevKit", "esp32-devkit"),
+    ("DHT22", "dht22"),
+])
+def test_variant_names_do_not_inherit_verified_geometry(name: str, expected: str) -> None:
+    from hardware_splicer.pcb.module_registry import find_module, resolve_module_fit, resolve_module_pads
+
+    resolved = resolve_parts_to_modules([{"name": name}])
+    assert resolved[0]["module_id"] == expected
+    spec = find_module(expected)
+    assert spec and resolve_module_pads(expected, spec)
+    status = "unverified_variant" if expected in {"esp32-doit-30pin", "dht22-breakout-3pin"} else "verified_against"
+    assert resolve_module_fit(expected)["status"] == status
+    if status == "unverified_variant":
+        assert resolve_module_pads(expected) is None

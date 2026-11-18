@@ -422,7 +422,7 @@ def _pick_modules_regex(text: str) -> ModulePick:
         labels.append(mod.get("label") if mod else "Level shifter")
 
     return ModulePick(
-        module_ids=list(module_ids),
+        module_ids=sorted(module_ids),
         labels=list(dict.fromkeys(labels)),
         hints=hints,
     )

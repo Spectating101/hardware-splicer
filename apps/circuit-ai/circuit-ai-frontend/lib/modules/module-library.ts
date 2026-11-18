@@ -3,6 +3,8 @@
 // safety rules engine can validate connections client-side without an LLM
 // round-trip.
 
+import { MODULE_FOOTPRINT_DATA } from "./module-footprint-data.generated";
+
 export type PinRole =
   | "power_in"
   | "power_out"
@@ -34,6 +36,8 @@ export interface ModulePin {
   currentMaxMa?: number;
   /** Free-form note (pull-ups, strap pins, ADC attenuation, etc.). */
   notes?: string;
+  /** Reason this pin must not be allocated. */
+  reserved?: string;
 }
 
 export interface ModuleSpec {
@@ -80,7 +84,7 @@ export interface ModuleSpec {
 
 // A tight v1 library — the 20 modules that cover ~80% of beginner projects.
 // Expand from telemetry once the build flow ships.
-export const MODULE_LIBRARY: ModuleSpec[] = [
+const CURATED_MODULES: ModuleSpec[] = [
   {
     id: "esp32-devkit",
     label: "ESP32 DevKit",
@@ -553,15 +557,10 @@ import { INGESTED_PINOUTS } from "./ingested-pinouts";
 import { CURATED_EXTENDED } from "./curated-extended";
 import { INGESTED_KB } from "./ingested-kb";
 import { INGESTED_DATASHEETS } from "./ingested-datasheets";
-const _seenIds = new Set(MODULE_LIBRARY.map((m) => m.id));
-for (const src of [CURATED_EXTENDED, INGESTED_KB, INGESTED_DATASHEETS, INGESTED_MODULES, INGESTED_PINOUTS]) {
-  for (const m of src) {
-    if (!_seenIds.has(m.id)) {
-      MODULE_LIBRARY.push(m);
-      _seenIds.add(m.id);
-    }
-  }
-}
+const BASE_MODULES = [
+  ...CURATED_MODULES, ...CURATED_EXTENDED, ...INGESTED_KB, ...INGESTED_DATASHEETS,
+  ...INGESTED_MODULES, ...INGESTED_PINOUTS,
+].filter((m, i, all) => all.findIndex((candidate) => candidate.id === m.id) === i);
 
 // Derive salvage-planner capability tags from each module's category + role
 // composition + label hints. Lets the upcycling pipeline match a salvage plan's
@@ -646,12 +645,22 @@ function deriveCapabilityTags(m: ModuleSpec): string[] {
   return [...tags];
 }
 
-for (const m of MODULE_LIBRARY) {
-  // Don't overwrite explicit tags if a future curated entry sets them.
-  if (!m.capabilityTags || m.capabilityTags.length === 0) {
-    m.capabilityTags = deriveCapabilityTags(m);
-  }
-}
+const VARIANT_MODULES = Object.entries(MODULE_FOOTPRINT_DATA).flatMap(([id, meta]) => {
+  if (BASE_MODULES.some((m) => m.id === id)) return [];
+  const base = BASE_MODULES.find((m) => m.id === meta.pinsFrom);
+  return base ? [{ ...base, id, label: meta.label ?? id }] : [];
+});
+
+export const MODULE_LIBRARY: ModuleSpec[] = [...BASE_MODULES, ...VARIANT_MODULES].map((mod) => {
+  const meta = MODULE_FOOTPRINT_DATA[mod.id];
+  const reserved = { ...MODULE_FOOTPRINT_DATA[meta?.pinsFrom ?? ""]?.reservedPins, ...meta?.reservedPins };
+  return {
+    ...mod,
+    pins: mod.pins.map((p) => ({ ...p, ...(reserved[p.id] ? { reserved: reserved[p.id] } : {}) })),
+    // Don't overwrite explicit tags if a future curated entry sets them.
+    capabilityTags: mod.capabilityTags?.length ? [...mod.capabilityTags] : deriveCapabilityTags(mod),
+  };
+});
 
 /**
  * Find library modules whose `capabilityTags` satisfy a salvage-planner

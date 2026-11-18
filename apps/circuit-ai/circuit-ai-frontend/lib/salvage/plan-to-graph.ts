@@ -64,7 +64,7 @@ function pickModulesForRequirements(reqAny: string[][]): ModuleSpec[] {
 }
 
 function pinByRole(mod: ModuleSpec, role: ModulePin["role"]): string | undefined {
-  return mod.pins.find((p) => p.role === role)?.id;
+  return mod.pins.find((p) => !p.reserved && p.role === role)?.id;
 }
 
 function mcuPowerInPin(mod: ModuleSpec): string | undefined {
@@ -81,7 +81,7 @@ function powerOutPin(mod: ModuleSpec): string | undefined {
 }
 
 function firstPin(mod: ModuleSpec, pred: (p: ModulePin) => boolean): string | undefined {
-  return mod.pins.find(pred)?.id;
+  return mod.pins.find((p) => !p.reserved && pred(p))?.id;
 }
 
 function allocGpio(mcu: ModuleSpec, used: Set<string>): string | undefined {
@@ -91,13 +91,13 @@ function allocGpio(mcu: ModuleSpec, used: Set<string>): string | undefined {
     "D2", "D3", "A0", "A1", "A2", "A3", "A4", "A5",
   ];
   for (const id of order) {
-    if (mcu.pins.some((p) => p.id === id) && !used.has(id)) {
+    if (mcu.pins.some((p) => !p.reserved && p.id === id) && !used.has(id)) {
       used.add(id);
       return id;
     }
   }
   const fallback = mcu.pins.find(
-    (p) => (p.role === "digital_io" || p.role === "pwm" || p.role === "analog_in") && !used.has(p.id),
+    (p) => !p.reserved && (p.role === "digital_io" || p.role === "pwm" || p.role === "analog_in") && !used.has(p.id),
   );
   if (fallback) used.add(fallback.id);
   return fallback?.id;
@@ -105,6 +105,7 @@ function allocGpio(mcu: ModuleSpec, used: Set<string>): string | undefined {
 
 /** Heuristic auto-wiring for capability-matched or inventory-composed module sets. */
 function autoWirePickedModules(modules: ModuleSpec[]): Recipe {
+  modules = modules.map((m) => ({ ...m, pins: m.pins.filter((p) => !p.reserved) }));
   const roles = modules.map((m, i) => ({ role: `m${i + 1}`, moduleId: m.id }));
   const roleOf = new Map(modules.map((m, i) => [m.id, `m${i + 1}`]));
   const wires: Wire[] = [];
@@ -271,7 +272,7 @@ function autoWirePickedModules(modules: ModuleSpec[]): Recipe {
         if (echo) wire(mcu.id, echo, dev.id, "ECHO");
       }
     }
-    if (mcu && dev.id === "dht22") {
+    if (mcu && ["dht22", "dht22-breakout-3pin"].includes(dev.id)) {
       const data = allocGpio(mcu, usedGpio);
       if (data) wire(mcu.id, data, dev.id, "DATA");
     }
@@ -286,7 +287,7 @@ function autoWirePickedModules(modules: ModuleSpec[]): Recipe {
     if (mcu && /ili9341|st7735/.test(dev.id)) {
       const pickMcuPin = (preferred: string[], devPinId: string) => {
         for (const p of preferred) {
-          if (mcu!.pins.some((pin) => pin.id === p) && !usedGpio.has(p)) {
+          if (mcu!.pins.some((pin) => !pin.reserved && pin.id === p) && !usedGpio.has(p)) {
             usedGpio.add(p);
             wire(mcu!.id, p, dev.id, devPinId);
             return;
@@ -338,7 +339,7 @@ function autoWirePickedModules(modules: ModuleSpec[]): Recipe {
         if (mcuAnalog) wire(mcu.id, mcuAnalog, dev.id, analog.id);
       } else {
         const digital = dev.pins.find(
-          (p) => (p.role === "digital_io" || p.role === "digital_in" || p.role === "digital_out")
+          (p) => !p.reserved && (p.role === "digital_io" || p.role === "digital_in" || p.role === "digital_out")
             && p.id !== "VCC"
             && !wiredPins.has(p.id),
         );

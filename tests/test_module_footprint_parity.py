@@ -42,13 +42,26 @@ def test_data_file_is_the_only_source_of_python_footprints() -> None:
     assert payload["schema_version"] == "hardware_splicer.module_footprints.v1"
     assert set(registry._MODULE_FOOTPRINTS) == set(payload["modules"])
     for module_id, meta in payload["modules"].items():
-        assert _pads(registry.resolve_module_pads(module_id)) == _pads(meta["pads"]), module_id
-        assert registry.resolve_module_footprint(module_id) == meta["kicadFootprint"]
-        assert registry.resolve_module_body_mm(module_id) == meta["bodyMm"]
+        assert _pads(registry.resolve_module_pads(module_id)) == _pads(meta.get("pads")), module_id
+        assert registry.resolve_module_footprint(module_id) == meta.get("kicadFootprint", f"Circuit.AI:{module_id}")
+        assert registry.resolve_module_body_mm(module_id) == meta.get("bodyMm")
 
 
 def test_every_footprint_record_is_well_formed() -> None:
     for module_id, meta in _payload()["modules"].items():
+        if meta.get("pinsFrom"):
+            assert meta["fit"]["status"] == "unverified_variant", module_id
+            assert not any(key in meta for key in ("pads", "bodyMm")), module_id
+            base = registry.find_module(meta["pinsFrom"])
+            assert base, module_id
+            count = len(base["pins"])
+            assert meta["kicadFootprint"] == (
+                f"Connector_PinHeader_2.54mm:PinHeader_2x{count // 2:02d}_P2.54mm_Vertical"
+            ), module_id
+            spec = registry.find_module(module_id)
+            pads = registry.resolve_module_pads(module_id, spec)
+            assert len(pads) == count and len({p["pinId"] for p in pads}) == count, module_id
+            continue
         assert meta["kicadFootprint"], module_id
         assert meta["bodyMm"]["w"] > 0 and meta["bodyMm"]["h"] > 0, module_id
         pad_ids = [p["pinId"] for p in meta["pads"]]
@@ -74,7 +87,7 @@ def test_every_declared_pin_has_a_pad() -> None:
     library = registry._load_library()
     for module_id, meta in _payload()["modules"].items():
         spec = library.get(module_id)
-        if spec is None:
+        if spec is None or meta.get("pinsFrom"):
             continue
         spec_pins = {p["id"] for p in spec["pins"]}
         pad_ids = {p["pinId"] for p in meta["pads"]}
@@ -94,7 +107,7 @@ def test_generated_typescript_table_is_current() -> None:
     )
 
 
-def _typescript_resolution() -> Dict[str, Any]:
+def _typescript_node() -> str:
     node = shutil.which("node")
     if node is None:
         pytest.skip("node is not installed")
@@ -103,6 +116,11 @@ def _typescript_resolution() -> Dict[str, Any]:
             subprocess.run([node, "-e", "require('typescript')"], cwd=ROOT, check=True, capture_output=True)
         except subprocess.CalledProcessError:
             pytest.skip("the typescript package is not installed (run npm ci in the frontend)")
+    return node
+
+
+def _typescript_resolution() -> Dict[str, Any]:
+    node = _typescript_node()
     proc = subprocess.run(
         [node, str(ROOT / "scripts" / "dump_ts_module_pads.cjs")],
         cwd=ROOT,
@@ -112,6 +130,55 @@ def _typescript_resolution() -> Dict[str, Any]:
         timeout=180,
     )
     return json.loads(proc.stdout)
+
+
+def test_typescript_registry_reload_does_not_mutate_sources_or_allocations() -> None:
+    node = _typescript_node()
+    script = """
+const assert = require('node:assert/strict');
+const path = require('node:path');
+require('./scripts/compile_geometry.cjs'); // Installs the existing TypeScript loader.
+const modules = path.resolve('apps/circuit-ai/circuit-ai-frontend/lib/modules');
+const libraryPath = path.join(modules, 'module-library.ts');
+const data = require(path.join(modules, 'module-footprint-data.generated.ts'));
+const planPath = path.join(modules, '../salvage/plan-to-graph.ts');
+const first = require(libraryPath).MODULE_LIBRARY;
+const snapshot = JSON.stringify(first);
+const ids = ['esp32-devkit', 'max98357a-i2s-amp', 'usb-power-5v'];
+const allocate = () => require(planPath).composeBuildGraphFromModuleIds(ids);
+const expected = allocate();
+function freeze(value) {
+  if (value && typeof value === 'object' && !Object.isFrozen(value)) {
+    Object.values(value).forEach(freeze);
+    Object.freeze(value);
+  }
+}
+for (const source of ['curated-extended', 'ingested-kb', 'ingested-datasheets', 'ingested', 'ingested-pinouts']) {
+  freeze(require(path.join(modules, source + '.ts')));
+}
+freeze(first);
+for (let i = 0; i < 2; i++) {
+  data.MODULE_FOOTPRINT_DATA = Object.fromEntries(Object.entries(data.MODULE_FOOTPRINT_DATA).reverse());
+  delete require.cache[libraryPath];
+  delete require.cache[require.resolve(planPath)];
+  const next = require(libraryPath).MODULE_LIBRARY;
+  assert.equal(new Set(next.map((m) => m.id)).size, next.length);
+  assert.deepEqual(Object.fromEntries(next.map((m) => [m.id, m])), Object.fromEntries(first.map((m) => [m.id, m])));
+  assert.deepEqual(allocate(), expected);
+  assert.equal(JSON.stringify(first), snapshot);
+  for (const [id, meta] of Object.entries(data.MODULE_FOOTPRINT_DATA)) {
+    if (!meta.pinsFrom) continue;
+    const variant = next.find((m) => m.id === id);
+    const base = next.find((m) => m.id === meta.pinsFrom);
+    assert.notEqual(variant.pins, base.pins);
+    assert.notEqual(variant.pins[0], base.pins[0]);
+  }
+}
+"""
+    proc = subprocess.run(
+        [node, "-e", script], cwd=ROOT, capture_output=True, text=True, timeout=180,
+    )
+    assert proc.returncode == 0, proc.stderr or proc.stdout
 
 
 def test_python_and_typescript_resolve_identical_pads_for_every_module() -> None:
@@ -140,3 +207,43 @@ def test_python_and_typescript_resolve_identical_pads_for_every_module() -> None
         if _fit(registry.resolve_module_fit(module_id)) != _fit(ts[module_id]["fit"]):
             differing.append(f"{module_id}: fit record differs")
     assert not differing, "Python and TypeScript disagree:\n" + "\n".join(differing)
+
+
+@pytest.mark.parametrize("module_id,expected", [
+    ("esp32-cam-module", {"GPIO16"}),
+    ("esp32-devkit", {f"GPIO{i}" for i in range(6, 12)}),
+    ("arduino-nano", {"D0", "D1"}),
+])
+def test_reserved_pins_carry_shared_reasons_and_remain_in_geometry(module_id: str, expected: set[str]) -> None:
+    spec = registry.find_module(module_id)
+    assert spec
+    reserved = {p["id"]: p["reserved"] for p in spec["pins"] if p.get("reserved")}
+    assert set(reserved) == expected
+    assert reserved == _payload()["modules"][module_id]["reservedPins"]
+    assert expected <= {p["pinId"] for p in registry.resolve_module_pads(module_id, spec)}
+
+
+def test_no_python_pin_allocator_returns_a_reserved_pin() -> None:
+    from hardware_splicer.auto_wire import _alloc_gpio, _alloc_pin_by_role, _first_pin, _pin_by_role
+    from hardware_splicer.inventory_topology import _module_pin_ids
+
+    for module_id, spec in registry._load_library().items():
+        reserved = {p["id"] for p in spec["pins"] if p.get("reserved")}
+        assert not reserved.intersection(_module_pin_ids(module_id))
+        used: set[str] = set()
+        while (pin_id := _alloc_gpio(spec, used)) is not None:
+            assert pin_id not in reserved
+        for role in {p["role"] for p in spec["pins"]}:
+            assert _pin_by_role(spec, role) not in reserved
+            used = set()
+            while (pin_id := _alloc_pin_by_role(spec, used, role)) is not None:
+                assert pin_id not in reserved
+        assert _first_pin(spec, lambda p: p["id"] in reserved) is None
+
+    # Check both the preferred list and generic fallback even if pin roles change later.
+    only_reserved = {"pins": [
+        {"id": "GPIO12", "role": "digital_io", "reserved": "test preferred"},
+        {"id": "GPIO99", "role": "digital_io", "reserved": "test fallback"},
+    ]}
+    assert _alloc_gpio(only_reserved, set()) is None
+    assert _alloc_pin_by_role(only_reserved, set(), "digital_io") is None

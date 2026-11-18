@@ -10,9 +10,12 @@ export type ModuleFit =
   | { status: "unverified_variant"; reason: string };
 
 export type ModuleFootprintMeta = {
-  kicadFootprint: string;
-  bodyMm: { w: number; h: number };
-  pads: ModulePadDef[];
+  kicadFootprint?: string;
+  bodyMm?: { w: number; h: number };
+  pads?: ModulePadDef[];
+  pinsFrom?: string;
+  label?: string;
+  reservedPins?: Record<string, string>;
   fit: ModuleFit;
 };
 
@@ -36,7 +39,14 @@ export const MODULE_FOOTPRINT_DATA: Record<string, ModuleFootprintMeta> = {
       { pinId: "GND", x: 1.25, y: -2 },
     ],
   },
+  "esp32-doit-30pin": {
+    pinsFrom: "esp32-devkit",
+    label: "ESP32 DOIT DEVKIT V1 30-pin board",
+    kicadFootprint: "Connector_PinHeader_2.54mm:PinHeader_2x19_P2.54mm_Vertical",
+    fit: { status: "unverified_variant", reason: "30-pin DOIT variant: header geometry is unverified; declared pins are reused only for a synthetic placeholder." },
+  },
   "esp32-devkit": {
+    reservedPins: {"GPIO6": "Reserved for on-board SPI flash", "GPIO7": "Reserved for on-board SPI flash", "GPIO8": "Reserved for on-board SPI flash", "GPIO9": "Reserved for on-board SPI flash", "GPIO10": "Reserved for on-board SPI flash", "GPIO11": "Reserved for on-board SPI flash"},
     kicadFootprint: "Module:ESP32-WROOM-32",
     bodyMm: { w: 27.94, h: 54.4 },
     fit: { status: "verified_against", verifiedAgainst: "Espressif ESP32-DevKitC V4 38-pin board: J2 and J3 pin tables of the Espressif ESP32-DevKitC user guide (docs.espressif.com, esp-dev-kits) give the order of all 38 pins; 2.54 mm pitch with the two rows 25.4 mm (1.0 in) apart is the DevKitC V4 header standard (Espressif's dimension drawing is a PDF/DXF and was not machine-read, so the row spacing rests on that standard). The registry pin VIN is the DevKitC 5V pad. This is the DevKitC V4 variant, not the 30-pin DOIT clone, whose row spacing differs between sources." },
@@ -82,6 +92,7 @@ export const MODULE_FOOTPRINT_DATA: Record<string, ModuleFootprintMeta> = {
     ],
   },
   "arduino-nano": {
+    reservedPins: {"D0": "Reserved for USB serial RX", "D1": "Reserved for USB serial TX"},
     kicadFootprint: "Module:Arduino_Nano",
     bodyMm: { w: 18.28, h: 46.22 },
     fit: { status: "verified_against", verifiedAgainst: "KiCad 9.0 Module.pretty/Arduino_Nano.kicad_mod (30 pads, 2.54 mm pitch, rows 15.24 mm apart, pad numbers 1-30 in table order); pin names from MCU_Module.kicad_sym Arduino_Nano_v3.x" },
@@ -186,6 +197,12 @@ export const MODULE_FOOTPRINT_DATA: Record<string, ModuleFootprintMeta> = {
       { pinId: "SCL", x: 1.27, y: 0 },
       { pinId: "SDA", x: 3.81, y: 0 },
     ],
+  },
+  "dht22-breakout-3pin": {
+    pinsFrom: "dht22",
+    label: "DHT22 3-pin breakout module",
+    kicadFootprint: "Connector_PinHeader_2.54mm:PinHeader_2x02_P2.54mm_Vertical",
+    fit: { status: "unverified_variant", reason: "3-pin breakout variant: header geometry is unverified; declared sensor pins are reused only for a synthetic placeholder." },
   },
   "dht22": {
     kicadFootprint: "Sensor:DHT22-4PIN",
@@ -469,6 +486,7 @@ export const MODULE_FOOTPRINT_DATA: Record<string, ModuleFootprintMeta> = {
     ],
   },
   "esp32-cam-module": {
+    reservedPins: {"GPIO16": "Reserved for PSRAM on AI-Thinker boards"},
     kicadFootprint: "Module:ESP32-CAM",
     bodyMm: { w: 27, h: 40.5 },
     fit: { status: "unverified_variant", reason: "All 16 header pads, 2.54 mm pitch and the AI-Thinker pin order are present, but the maker publishes no dimension for the distance between the two header rows. 22.86 mm (0.9 in) is an assumed value, so the module may not seat." },

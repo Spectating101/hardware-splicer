@@ -15,21 +15,21 @@ ComposeResult = Dict[str, Any]
 
 def _pin_by_role(mod: ModuleSpec, role: str) -> Optional[str]:
     for pin in mod.get("pins") or []:
-        if pin.get("role") == role:
+        if not pin.get("reserved") and pin.get("role") == role:
             return str(pin.get("id"))
     return None
 
 
 def _mcu_power_in_pin(mod: ModuleSpec) -> Optional[str]:
     for pin_id in ("VIN", "VBUS", "5V"):
-        if any(p.get("id") == pin_id for p in mod.get("pins") or []):
+        if any(not p.get("reserved") and p.get("id") == pin_id for p in mod.get("pins") or []):
             return pin_id
     return _pin_by_role(mod, "power_in")
 
 
 def _power_out_pin(mod: ModuleSpec) -> Optional[str]:
     for pin in mod.get("pins") or []:
-        if pin.get("id") == "V+":
+        if not pin.get("reserved") and pin.get("id") == "V+":
             return "V+"
     out = _pin_by_role(mod, "power_out")
     if out:
@@ -39,7 +39,7 @@ def _power_out_pin(mod: ModuleSpec) -> Optional[str]:
 
 def _first_pin(mod: ModuleSpec, pred: Callable[[Mapping[str, Any]], bool]) -> Optional[str]:
     for pin in mod.get("pins") or []:
-        if pred(pin):
+        if not pin.get("reserved") and pred(pin):
             return str(pin.get("id"))
     return None
 
@@ -85,7 +85,7 @@ def _alloc_gpio(mcu: ModuleSpec, used: Set[str]) -> Optional[str]:
         "GP4", "GP5", "GP0", "GP1", "GP26",
         "D2", "D3", "A0", "A1", "A2", "A3", "A4", "A5",
     ]
-    pins = mcu.get("pins") or []
+    pins = [p for p in mcu.get("pins") or [] if not p.get("reserved")]
     for pin_id in order:
         if any(p.get("id") == pin_id for p in pins) and pin_id not in used:
             used.add(pin_id)
@@ -103,13 +103,14 @@ def _alloc_gpio(mcu: ModuleSpec, used: Set[str]) -> Optional[str]:
 def _alloc_pin_by_role(mcu: ModuleSpec, used: Set[str], role: str) -> Optional[str]:
     for pin in mcu.get("pins") or []:
         pin_id = str(pin.get("id") or "")
-        if pin.get("role") == role and pin_id and pin_id not in used:
+        if not pin.get("reserved") and pin.get("role") == role and pin_id and pin_id not in used:
             used.add(pin_id)
             return pin_id
     return None
 
 
 def auto_wire_picked_modules(modules: List[ModuleSpec]) -> Recipe:
+    modules = [{**m, "pins": [p for p in m.get("pins") or [] if not p.get("reserved")]} for m in modules]
     roles = [{"role": f"m{i + 1}", "moduleId": m["id"]} for i, m in enumerate(modules)]
     role_of = {m["id"]: f"m{i + 1}" for i, m in enumerate(modules)}
     wires: List[Dict[str, Any]] = []
@@ -203,7 +204,7 @@ def auto_wire_picked_modules(modules: List[ModuleSpec]) -> Recipe:
         rail_pos = None
         rail_gnd = None
 
-    mcu_pins = mcu.get("pins") or [] if mcu else []
+    mcu_pins = [p for p in mcu.get("pins") or [] if not p.get("reserved")] if mcu else []
     mcu_sda = next((p.get("id") for p in mcu_pins if p.get("role") == "i2c_sda"), None)
     mcu_scl = next((p.get("id") for p in mcu_pins if p.get("role") == "i2c_scl"), None)
     mcu_vout = next((p.get("id") for p in mcu_pins if p.get("id") == "3V3"), None) or next(
@@ -423,7 +424,7 @@ def auto_wire_picked_modules(modules: List[ModuleSpec]) -> Recipe:
                     wire(mcu["id"], trig, dev["id"], "TRIG")
                 if echo:
                     wire(mcu["id"], echo, dev["id"], "ECHO")
-        if mcu and dev_id == "dht22":
+        if mcu and dev_id in {"dht22", "dht22-breakout-3pin"}:
             data = _alloc_gpio(mcu, used_gpio)
             if data:
                 wire(mcu["id"], data, dev["id"], "DATA")

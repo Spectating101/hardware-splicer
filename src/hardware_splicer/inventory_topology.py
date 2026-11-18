@@ -67,7 +67,8 @@ def _module_pin_ids(module_id: str) -> Set[str]:
     ids = {str(pin.get("id") or "") for pin in spec.get("pins") or [] if pin.get("id")}
     pads = resolve_module_pads(module_id, spec) or []
     ids.update(str(pad.get("pinId") or "") for pad in pads if pad.get("pinId"))
-    return {pin_id for pin_id in ids if pin_id}
+    reserved = {p["id"] for p in spec.get("pins") or [] if p.get("reserved")}
+    return {pin_id for pin_id in ids if pin_id} - reserved
 
 
 def _module_supports_i2c(module_id: str) -> bool:
@@ -659,7 +660,7 @@ def adapt_recipe_to_inventory(recipe: Recipe, plan: Mapping[str, Any]) -> Tuple[
 def _rewrite_i2c_sensor_to_dht(recipe: Recipe, overrides: Mapping[str, str]) -> Recipe:
     """sensor_logger recipe is BME280/I2C — retarget wires when inventory is DHT22."""
     sns_id = str(overrides.get("sns") or "").strip()
-    if sns_id not in {"dht22", "dht11"}:
+    if sns_id not in {"dht22", "dht11", "dht22-breakout-3pin"}:
         return recipe
     mcu_id = _module_id_for(list(recipe.get("modules") or []), "mcu") or ""
     data_pin = "GPIO4"
