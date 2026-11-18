@@ -1,0 +1,62 @@
+{
+  "scope": "Prepared design family, digital acceptance only",
+  "requests": {
+    "baseline": {
+      "drawing_height_mm": 80.0,
+      "drawing_width_mm": 100.0,
+      "pen_diameter_mm": 10.0,
+      "pen_lift_mm": 3.0
+    },
+    "revision": {
+      "drawing_height_mm": 80.0,
+      "drawing_width_mm": 125.0,
+      "pen_diameter_mm": 12.0,
+      "pen_lift_mm": 3.0
+    }
+  },
+  "elapsed_cli_seconds": {
+    "baseline": 21.333,
+    "revision": 11.839,
+    "comparison": 0.496,
+    "native_audit": 5.731,
+    "delivery": 0.664
+  },
+  "measured_saddle_diameters_mm": {
+    "pen_adapter": {
+      "baseline": 11.2,
+      "revision": 13.2
+    },
+    "pen_clamp": {
+      "baseline": 11.2,
+      "revision": 13.2
+    }
+  },
+  "ink_bounds_xy_mm": [
+    [
+      60.0,
+      173.75
+    ],
+    [
+      80.00099999999999,
+      145.5
+    ]
+  ],
+  "metrics": {
+    "mount_pitch_mm": 14.0,
+    "mount_interference_mm3": 0.0,
+    "non_drawing_XY_without_lift": 0,
+    "maximum_commanded_Z_mm": 3.0,
+    "stroke_count": 12
+  },
+  "audit": {
+    "engineering_acceptance": true,
+    "passed": true,
+    "performed": true,
+    "requested": true,
+    "returncode": 0
+  },
+  "zip_sha256": "1a3a9081d505aecb609e03db8d426b9583fb84f9add1348401c7371b35c3f12e",
+  "human_minutes": null,
+  "model_and_compute_cost": null,
+  "customer_acceptance": null
+}
