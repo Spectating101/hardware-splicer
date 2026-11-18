@@ -1,0 +1,7 @@
+{
+  "error": {
+    "message": "Design brief provider unavailable: qwen_http_error",
+    "type": "BriefProviderError"
+  },
+  "ok": false
+}

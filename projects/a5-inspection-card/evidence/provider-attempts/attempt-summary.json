@@ -1,0 +1,38 @@
+{
+  "live_provider_attempts": [
+    {
+      "directory": "01-copilot",
+      "provider": "copilot_cli",
+      "model": "auto",
+      "ok": false,
+      "error": {
+        "message": "The configured Copilot text provider has reached its quota. Try again when quota is available or configure another HS text provider.",
+        "type": "BriefProviderError"
+      },
+      "project_created": false
+    },
+    {
+      "directory": "02-qwen",
+      "provider": "qwen",
+      "model": "qwen3.5-flash",
+      "ok": false,
+      "error": {
+        "message": "Design brief provider unavailable: qwen_http_error",
+        "type": "BriefProviderError"
+      },
+      "project_created": false
+    },
+    {
+      "directory": "03-agy",
+      "provider": "agy",
+      "model": "gemini-2.5-flash",
+      "ok": false,
+      "error": {
+        "message": "Design brief provider unavailable: agy_nonzero_exit",
+        "type": "BriefProviderError"
+      },
+      "project_created": false
+    }
+  ],
+  "note": "Each failed before project creation. The delivered structured-input run does not claim successful prose interpretation."
+}
