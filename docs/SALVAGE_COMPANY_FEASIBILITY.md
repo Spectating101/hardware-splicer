@@ -1,6 +1,22 @@
 # Can Hardware Splicer run the engineering side of a reuse company?
 
-**Yes, there is a credible business to test.** A refurbisher receives mixed devices and has limited technician time. HS could help decide which units to resell intact, repair, harvest for a particular order, combine into a repeatable product, or hand to a recycler. A partner with a recurring waste stream and records of what actually happened can test that proposition digitally before anyone buys inventory. Commercial feasibility is still open.
+**The business depends on making engineering iterations cheap enough for small orders.** A customer needs a machine to do a job. HS should make it affordable to design that machine with purchasable parts, revise it when requirements change and qualify donor substitutions when they make economic sense. A refurbisher's historical lots can help test the sourcing side. The cost of reaching an accepted design remains unmeasured.
+
+## What an order can afford to spend on design
+
+The selected starting model is to **build and publish our own product families**.
+HS chooses the brief and owns the reusable design and acceptance checks. The
+[PCB inspection nest](../projects/pcb-inspection-nest/README.md) is the first
+digital release candidate in this experiment. The customer-service and
+partner-lot scenarios below are earlier business hypotheses. For a self-published
+design, count original family development, incremental variants and ongoing
+support against actual demand as it becomes known.
+
+Track the cost of the first accepted design and the additional cost of each accepted revision. Include paid or founder time spent specifying, sourcing engineering evidence, preparing inputs, operating tools, reviewing and correcting the result. Add model and compute costs across all attempts, including abandoned approaches. Record elapsed time separately. Keep shared HS development visible as a platform investment, and charge work unique to a customer's design to that job.
+
+For a digital benchmark, give an HS-assisted engineer and a comparison engineer the same starting brief, source files and acceptance criteria. Record the effort to produce the first design. Then reveal one previously unseen change, such as a wider board for the inspection fixture. Each route must show that the camera still resolves the required detail across the larger field of view. Record what evidence carried over, what had to be checked again and how much reviewer time it took to accept the change. Include correction costs if a later review reopens it. A failed or unresolved design retains its spend in the results.
+
+The affordable design budget is the expected order contribution after recurring costs, less the amount the company needs to retain for overhead and profit. In the six-sale illustration below, only $20 remains before design, overhead and taxes. Spending $20 on engineering alone consumes the entire surplus. For a donor substitution, compare its incremental engineering cost with the total savings on the units that donor can actually cover.
 
 ## What happened with a pile and a listing
 
@@ -62,7 +78,7 @@ Before operating physically, choose the receiving and selling jurisdictions and 
 
 ## A digital pilot with an explicit decision at the end
 
-1. **Establish truthful inventory first.** Import the same offer twice, issue a price update, expire it, then simulate a receipt of one unit. Expected counts are zero owned before receipt and one after it. Record disassembly and verify the intact donor cannot also be sold. Two competing plans must be unable to reserve the same last unit. Replay out-of-order events and restart midway.
+1. **Price the engineering work and verify the inventory inputs.** Run the first-design and changed-requirement benchmark above. For the sourcing side, import the same offer twice, issue a price update, expire it, then simulate a receipt of one unit. Expected counts are zero owned before receipt and one after it. Record disassembly and verify the intact donor cannot also be sold. Two competing plans must be unable to reserve the same last unit. Replay out-of-order events and restart midway.
 2. **Replay historical lots.** Obtain a partner's permitted manifest and actual outcomes for several lots across at least two donor families. As a proposed starting sample, use 30 donor units. Hold back a whole later lot. Feed HS only information available on the decision date. Compare its route, unresolved cases, minutes per unit and net recovery with the shop's recorded baseline. A synthetic run tests software behaviour. Observed outcomes test the business assumption.
 3. **Replay one buyer job.** Use one defined fixture or tested module family, a quantity and an acceptance condition. Model two donor revisions, a failed unit and a vanished offer. Deliver the allocated BOM, missing inputs, design files, evidence, ETA assumptions, draft listing and low/base/high economics. A single low-cost reference donor cannot establish repeatable supply.
 4. **Decide whether a partner pilot merits investment.** Require zero phantom or double-allocated stock in the replay, every customer-facing technical claim traceable to evidence, and results that preserve uncertainty. Look for a recurring class where observed net recovery per technician hour beats intact resale or the shop's current route after failed units and unsold stock. Check whether a real operator would pay for that improvement. If only triage saves money, sell the analysis service. If buyers also want repeat units, pursue the kit. Physical yield, acceptance, warranty and actual willingness to pay remain open until a partner supplies that evidence.

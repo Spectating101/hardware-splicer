@@ -74,6 +74,11 @@ fits a printer, a robot joint can reach an angle, and parts of a handheld,
 sensor logger and stereo amplifier can be reused. It includes an editable tray
 model, the sealed decisions, the manufacturers' answers and board trace checks.
 
+The [HS PCB inspection nest](projects/pcb-inspection-nest/README.md) is an
+HS-authored digital hardware release candidate. One common dock accepts
+three board-specific carriers. Its package includes editable CAD, print meshes,
+source, and nominal fit checks.
+
 Design principles and the full authority model: [`docs/DESIGN_PRINCIPLES.md`](docs/DESIGN_PRINCIPLES.md).
 
 ## Evaluators / competitions / research reviewers

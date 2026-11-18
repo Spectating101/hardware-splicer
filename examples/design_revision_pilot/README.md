@@ -1,5 +1,10 @@
 # First customer pilot for Hardware Splicer
 
+This was an internal rehearsal of a possible design service. The selected
+company direction is to develop and publish HS-owned products. The first
+[inspection nest release candidate](../../projects/pcb-inspection-nest/README.md)
+exercises that workflow. The offer and outreach draft below are historical.
+
 Start with a small digital design service. A workshop already owns a machine and needs one change it can describe and check. The founder finds that job, agrees a price and decides whether the customer accepted it. HS prepares and revises the design, runs the supported checks, and packages the evidence. Each completed order provides data on demand, engineering effort and which families are worth supporting. The same workflow can later serve devices the company sells itself.
 
 ## Sample a buyer can inspect
