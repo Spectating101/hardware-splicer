@@ -27,7 +27,9 @@ rtk proxy env OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 taskset -c 0,3 .cache/har
 rtk proxy env OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 taskset -c 0,3 .cache/hardware-splicer/digital-native-venv/bin/python projects/ender3-penplotter-digital/scripts/verify.py
 ```
 
-`requirements.json` controls drawing width (60..140mm), drawing height (40..140mm), cylindrical pen grip diameter (8..12mm) and pen lift (2..5mm). Default values are 100mm, 80mm, 10mm and 3mm. Altering pen diameter changes both saddle solids. Drawing dimensions and lift alter emitted G-code and replay. Out-of-range or nonfinite inputs are rejected.
+`requirements.json` controls drawing width (60..190 mm), drawing height (40..140 mm), cylindrical pen grip diameter (8..12 mm), pen lift (2..5 mm), and centered paper width/height (100..220 mm each). Defaults remain a 100 × 80 mm viewport, 10 mm pen, 3 mm lift and 180 × 180 mm paper. Historical four-setting files default to that same square sheet. The full viewport must leave at least 10 mm of paper on every side. A 190 × 128 mm viewport therefore fits a 210 × 148 mm A5 landscape sheet exactly at those margins. Paper dimensions change the delivered STEP/GLB sheet and replay image. Altering pen diameter changes both saddle solids. Out-of-range, nonfinite and incompatible paper/viewport inputs are rejected before CAD generation.
+
+Only the horizontal viewport scope expanded. The manufacturer bed and controller bounds remain 235 × 235 mm, with measured pen/nozzle offset `(0, -19.2)` mm. The A5 viewport requires controller X 22.5..212.5 mm and Y 72.7..200.7 mm. The independent verifier checks the complete viewport against those source limits, reopens the actual exported paper geometry, and reconstructs ink containment from emitted G-code. These nominal clearances do not establish physical homing or machine-wide collision freedom.
 
 Width and height define the SVG viewport mapped onto the central paper area. The artwork has intentional internal margins, so its ink bounds are smaller than the viewport. The feed-based duration is an ideal estimate excluding acceleration and settling.
 

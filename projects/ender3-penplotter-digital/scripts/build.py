@@ -105,8 +105,12 @@ def main():
     envelope("REFERENCE_ENVELOPE_enclosed_PSU",(311,361,77,192,-60,155),silver)
     envelope("REFERENCE_ENVELOPE_controller_enclosure",(-35,100,-50,70,-65,-27),dark)
     envelope("REFERENCE_ENVELOPE_LCD",(215,295,-55,10,-40,-15),[34,81,109,255])
-    # Paper with masking tape occupies a conservative explicit maximum 180x180 work square.
-    envelope("paper_180mm_square",(27.5,207.5,27.5,207.5,0,.1),[250,249,242,255])
+    # Centered, explicitly sized sheet; the entire drawing viewport reserves 10 mm for tape.
+    pw,ph=req["paper_width_mm"],req["paper_height_mm"]
+    px0,px1=(235-pw)/2,(235+pw)/2
+    py0,py1=(235-ph)/2,(235+ph)/2
+    paper_name="paper_180mm_square" if pw==ph==180 else f"paper_{pw:g}x{ph:g}mm"
+    envelope(paper_name,(px0,px1,py0,py1,0,.1),[250,249,242,255])
     for name,s,col in local_parts:pieces.append((name,installed(s),col))
     def parked(s):return s.rotate((0,0,0),(1,0,0),90).translate((-12.,163.55,345.))
     pieces.append(("hotend_parking_plate",parked(parking),[159,90,187,255]))
@@ -127,7 +131,15 @@ def main():
     tnut=(cq.importers.importStep(str(ROOT/"sources/M4 T-Slot Nut.step")).val()
           .rotate((0,0,0),(0,0,1),90).translate((50,0,-3.5)))
     tnut_overlap=profile.intersect(tnut).Volume()
-    metrics={"mount_pitch_mm":14.,"mount_boss_front_mm":7.,"mount_bolt_engagement_mm":4.,
+    paper_margin=min(px0,235-px1,py0,235-py1)
+    drawing_paper_x=(pw-req["drawing_width_mm"])/2
+    drawing_paper_y=(ph-req["drawing_height_mm"])/2
+    viewport_controller_margin=min(value for size,offset in zip(
+        (req["drawing_width_mm"],req["drawing_height_mm"]),interface["pen_offset_from_nozzle_xy_mm"])
+        for value in (117.5-size/2-offset,235-(117.5+size/2-offset)))
+    metrics={"paper_width_mm":pw,"paper_height_mm":ph,"paper_bed_margin_mm":paper_margin,
+             "drawing_paper_margin_x_mm":drawing_paper_x,"drawing_paper_margin_y_mm":drawing_paper_y,
+             "viewport_controller_margin_mm":viewport_controller_margin,"mount_pitch_mm":14.,"mount_boss_front_mm":7.,"mount_bolt_engagement_mm":4.,
              "mount_interference_mm3":overlap,"adapter_volume_mm3":adapter.Volume(),
              "cap_volume_mm3":cap.Volume(),"printed_mass_g_at_1_27_g_cm3":(adapter.Volume()+cap.Volume()+parking.Volume())*.00127,
              "plate_to_adapter_airgap_mm":4.5,"pen_tip_to_clamp_mm":30.,
@@ -140,8 +152,12 @@ def main():
         constraint("donor_interference",overlap,.001,overlap<.001,"mm3","Exact OpenCascade intersection with unmodified manufacturer E plate"),
         constraint("bolt_engagement",4,3,4>=3,"mm","New M3x10: 10 mm minus 6 mm printed web"),
         constraint("beam_proxy",delta,.3,delta<=.3,"mm","2N, E=1400MPa assumed printed polymer, 40x6 web, L42.55; excludes layer/creep/clamp failure"),
-        constraint("bed_limited_drawing_width",req["drawing_width_mm"],140,req["drawing_width_mm"]<=140,"mm","Centered drawing inside 180 mm paper; physical calibration not performed"),
-        constraint("bed_limited_drawing_height",req["drawing_height_mm"],140,req["drawing_height_mm"]<=140,"mm","Centered drawing inside 180 mm paper"),
+        constraint("bed_limited_drawing_width",req["drawing_width_mm"],190,req["drawing_width_mm"]<=190,"mm","Registered horizontal scope; full viewport separately checked against paper and source controller travel"),
+        constraint("bed_limited_drawing_height",req["drawing_height_mm"],140,req["drawing_height_mm"]<=140,"mm","Retained vertical scope; physical calibration not performed"),
+        constraint("paper_on_bed",paper_margin,0,paper_margin>=0,"mm","Centered sheet inside the manufacturer 235 mm bed"),
+        constraint("drawing_paper_margin_x",drawing_paper_x,10,drawing_paper_x>=10,"mm","Full viewport leaves at least 10 mm paper margin at both horizontal edges"),
+        constraint("drawing_paper_margin_y",drawing_paper_y,10,drawing_paper_y>=10,"mm","Full viewport leaves at least 10 mm paper margin at both vertical edges"),
+        constraint("viewport_controller_travel",viewport_controller_margin,0,viewport_controller_margin>=0,"mm","Full source viewport after measured pen/nozzle offset stays in 0..235 mm controller travel"),
         constraint("parking_tnut_profile_fit",tnut_overlap,.001,tnut_overlap<.001,"mm3","Actual manufacturer M4 T nut rotated90deg, translated w=-3.5 inside actual2020 profile; no thread/torque validation"),
         constraint("parking_hotend_clearance",273.2-req["pen_lift_mm"],200.,273.2-req["pen_lift_mm"]>200,"mm","Parked nozzle273.2mm above paper minus maximum pen lift; representative layout only")]
     report=dict(case_id="ender3-penplotter",requirements=req,metrics=metrics,constraints=constraints,
@@ -162,7 +178,7 @@ def main():
             m=mesh(s,col);poly=Poly3DCollection(m.vertices[m.faces],alpha=col[3]/255,linewidths=.05)
             poly.set_facecolor(np.array(col)/255);poly.set_edgecolor((.1,.13,.18,.1));ax.add_collection3d(poly)
         if i==1:
-            ax.set(xlim=(-70,375),ylim=(-80,340),zlim=(-110,365),title="Virtual Ender-3 plotter\nDetailed mount; labeled reference envelopes")
+            ax.set(xlim=(-70,375),ylim=(-80,340),zlim=(-110,365),title=f"Virtual Ender-3 plotter · {pw:g} × {ph:g} mm paper\nDetailed mount; labeled reference envelopes")
             ax.set_box_aspect((445,420,475));ax.view_init(elev=23,azim=-62)
         else:
             ax.set(xlim=(-35,40),ylim=(-49,23),zlim=(-70,45),title="Manufacturer carriage + adjustable pen clamp\n14 mm M3 interface; Z axis lifts entire pen")

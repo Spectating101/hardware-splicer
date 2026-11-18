@@ -57,6 +57,12 @@ class RegisteredCase:
             if not valid:
                 raise ValueError(f'{name} must be a finite number between {minimum:g} and {maximum:g}.')
             result[name] = float(value)
+        if self.case_id == 'ender3-penplotter':
+            for axis in ('width', 'height'):
+                # Archived four-setting adapters keep their original square paper.
+                paper = result.get(f'paper_{axis}_mm', 180.)
+                if result[f'drawing_{axis}_mm'] + 20 > paper:
+                    raise ValueError('The drawing viewport needs at least 10 mm of paper on each side.')
         return result
 
     def resolve(self, current, change_request='', overrides=None):
@@ -165,8 +171,9 @@ PLOTTER = RegisteredCase(
      'reports/verification.json', 'reports/export_manifest.json'),
     ('scripts/build.py', 'scripts/simulate.py', 'scripts/verify.py'),
     'scripts/verify.py', 'reports/engineering.json', 'reports/verification.json',
-    {'drawing_width_mm': (100, 60, 140), 'drawing_height_mm': (80, 40, 140),
-     'pen_diameter_mm': (10, 8, 12), 'pen_lift_mm': (3, 2, 5)})
+    {'drawing_width_mm': (100, 60, 190), 'drawing_height_mm': (80, 40, 140),
+     'pen_diameter_mm': (10, 8, 12), 'pen_lift_mm': (3, 2, 5),
+     'paper_width_mm': (180, 100, 220), 'paper_height_mm': (180, 100, 220)})
 
 CASES = {case.case_id: case for case in (FIELDDECK, FIELDDECK_5, PLOTTER)}
 
