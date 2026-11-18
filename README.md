@@ -64,6 +64,11 @@ The result identifies the required motor, shared printed mount, bus wiring and
 simulation joint, and explains which requirement the donor fails. Supply your
 own servo profile or check a target joint angle using the [worked example](docs/ENGINE.md#so-arm102-follower-drive).
 
+The [unseen Sweep keyboard challenge](eval/unseen_sweep/README.md) records what
+HS got right, missed, and left open when assessing a previously unused split
+keyboard. It includes donor decisions sealed before scoring, a reproducible
+switch-to-controller map, and a PCB/schematic disagreement on both controllers.
+
 Design principles and the full authority model: [`docs/DESIGN_PRINCIPLES.md`](docs/DESIGN_PRINCIPLES.md).
 
 ## Evaluators / competitions / research reviewers

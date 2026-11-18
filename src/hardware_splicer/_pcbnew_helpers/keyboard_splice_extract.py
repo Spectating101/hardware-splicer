@@ -39,8 +39,8 @@ def main() -> int:
     # Original PCB vendors use K*, S*, SW*, or MX* key refs. Footprint
     # identities are stronger evidence than a source-specific reference.
     keyboard_footprint = re.compile(
-        r"(?i)(?:cherry|kailh|mxonly|mx1a|mx[_-]?alps|"
-        r"sw[_-]?choc|choc[_-]?switch|mx[_-]?[0-9]u)"
+        r"(?i)(?:cherry[_ -]?mx|mxonly|mx1a|mx[_-]?alps|"
+        r"sw[_-]?choc|choc[_ -]?(?:switch|v[12]|mini)|pg135[03]|mx[_-]?[0-9]u)"
     )
     for f in board.GetFootprints():
         x,y=u(f.GetPosition().x),u(f.GetPosition().y)
@@ -49,7 +49,11 @@ def main() -> int:
         ref=f.GetReference()
         identity=f.GetFPIDAsString()
         value=f.GetValue()
-        is_key=bool(keyboard_footprint.search(identity))
+        # A library nickname can apply to every item from a vendor, including
+        # jacks, power switches and logos. Classify the footprint item itself.
+        item_name=identity.rsplit(":", 1)[-1]
+        known_switch=bool(keyboard_footprint.search(item_name))
+        is_key=known_switch
         if not is_key and re.fullmatch(r"(?i)MX[0-9]+",ref):
             is_key=bool("mx" in value.lower() or "mx" in identity.lower())
         if not is_key and ref.upper().startswith(("SW","S")):
@@ -67,7 +71,7 @@ def main() -> int:
         if is_key:
             rec["detected_as_keyboard_switch"]=True
             rec["switch_detected_from"]=(
-                "known_keyboard_footprint" if keyboard_footprint.search(identity)
+                "known_keyboard_footprint" if known_switch
                 else "candidate_switch_footprint_or_ref"
             )
             switches.append(rec)

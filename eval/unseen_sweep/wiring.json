@@ -1,0 +1,40 @@
+{
+  "controller_label_differences": [
+    {
+      "controller": "U1",
+      "pad": "9",
+      "pcb": "Switch15",
+      "schematic": "Switch1"
+    },
+    {
+      "controller": "U1",
+      "pad": "10",
+      "pcb": "Switch1",
+      "schematic": "Switch15"
+    },
+    {
+      "controller": "U2",
+      "pad": "9",
+      "pcb": "Switch15_r",
+      "schematic": "Switch1_r"
+    },
+    {
+      "controller": "U2",
+      "pad": "10",
+      "pcb": "Switch1_r",
+      "schematic": "Switch15_r"
+    }
+  ],
+  "drc_violations_by_severity": {
+    "error": 14,
+    "warning": 105
+  },
+  "kicad_version": "9.0.2",
+  "missing_signal_paths": [],
+  "signal_paths_checked": 34,
+  "unconnected_items_by_net": {
+    "gnd": 1,
+    "raw": 1,
+    "vcc": 1
+  }
+}

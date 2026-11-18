@@ -26,6 +26,31 @@ def _available():
 
 
 @pytest.mark.skipif(not _available(), reason="native KiCad pcbnew unavailable")
+def test_classifies_switch_items_independently_of_vendor_library(tmp_path):
+    board = tmp_path / "mixed.kicad_pcb"
+    subprocess.run([NATIVE, "-c", """
+import sys, pcbnew as p
+b = p.LoadBoard(sys.argv[1])
+items = [
+    ("SW2_r1", "custom", "choc-v1-with-millmax"),
+    ("K1", "parts", "SW_Cherry_MX_1.00u_PCB"),
+    ("J1", "Kailh", "TRRS-PJ-320A"),
+    ("G***", "Kailh", "ferris_broom"),
+    ("POWER SW", "Kailh", "SPDT_C128955"),
+    ("RSW1", "kbd", "SW_SPST_B3U-1000P"),
+]
+keys = [f for f in b.GetFootprints() if f.GetReference().startswith("SW")]
+for f, (ref, lib, name) in zip(keys, items, strict=True):
+    f.SetReference(ref)
+    f.SetValue("SW_Push")
+    f.SetFPID(p.LIB_ID(lib, name))
+p.SaveBoard(sys.argv[2], b)
+""", str(REFERENCE), str(board)], check=True, timeout=30)
+    raw = subprocess.check_output([NATIVE, str(EXTRACT), "--pcb", str(board)], timeout=30)
+    assert sorted(f["ref"] for f in json.loads(raw)["switch_positions"]) == ["K1", "SW2_r1"]
+
+
+@pytest.mark.skipif(not _available(), reason="native KiCad pcbnew unavailable")
 def test_cut_extraction_rejects_real_arc_whose_copper_leaves_endpoint_chord(tmp_path):
     derived = tmp_path / "curved-copper.kicad_pcb"
     created = subprocess.run([

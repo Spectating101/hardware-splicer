@@ -1,0 +1,56 @@
+{
+  "baseline_extractor": {
+    "missed_keys": 34,
+    "reported": 5,
+    "true_key_refs": 0
+  },
+  "cases": {
+    "Alps / Matias": {
+      "expected": "reject",
+      "oracle_column": "MX & Alps",
+      "predicted": "reject",
+      "result": "correct_reject"
+    },
+    "Cherry MX": {
+      "expected": "reject",
+      "oracle_column": "MX & Alps",
+      "predicted": "reject",
+      "result": "correct_reject"
+    },
+    "Choc Mini": {
+      "expected": "reject",
+      "oracle_column": "Choc Mini",
+      "predicted": "reject",
+      "result": "correct_reject"
+    },
+    "Choc V1": {
+      "expected": "accept",
+      "oracle_column": "Choc V1",
+      "predicted": "accept",
+      "result": "correct_accept"
+    },
+    "Choc V2": {
+      "expected": "reject",
+      "oracle_column": "Choc V2",
+      "predicted": "unresolved",
+      "result": "abstained_on_known"
+    }
+  },
+  "counts": {
+    "abstained_on_known": 1,
+    "correct_accept": 1,
+    "correct_reject": 3,
+    "false_accept": 0,
+    "false_reject": 0
+  },
+  "missing_information_control": "unresolved",
+  "oracle_sha256": "e84da2800817f7b439e68306311c8b9fd4c3095565fe0e3d4f5c78b331cba1f7",
+  "oracle_url": "https://github.com/davidphilipbarr/Sweep/blob/8ba72a256d627567660ecc0b6f51bb18fa8badb5/README.md",
+  "prediction_commit": "6b56c2f4",
+  "predictions_sha256": "05ec4afe055ace97f6bad7ef9d9ea100599519de2bdd29b4f51a4ad798f53d42",
+  "published_columns": 4,
+  "published_key_quantity": 34,
+  "published_quantity_matches": true,
+  "reconstructed_quantity": 34,
+  "source_outcome": "Maintainer-declared PCB support for the Sweep2.x family"
+}
