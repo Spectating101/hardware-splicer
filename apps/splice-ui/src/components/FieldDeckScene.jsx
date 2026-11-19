@@ -301,6 +301,7 @@ function Annotations({ labels, selection, endpoints, pins, faceView, base, targe
             aria-label={`Open question ${number}`} title={questionText(reason)} onClick={() => onSelect(key, number)}><span>{number}</span></button>
         </div>
       ))}
+      {!faceView && <span className="fd-grid-label" data-grid-label="">Grid 10 mm</span>}
       {endpoints.length > 0 && (
         <div className="fd-route-position" data-route-label="">
           <span className="fd-label">Routing unknown</span>

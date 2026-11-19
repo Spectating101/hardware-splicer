@@ -593,7 +593,7 @@ function createContactShadow(scene, bounds, resources) {
     target.texture.repeat.x = -1;
     target.texture.offset.x = 1;
     const material = new THREE.MeshBasicMaterial({
-      map: target.texture, transparent: true, depthWrite: false, opacity: i ? 0.6 : 0.7, toneMapped: false,
+      map: target.texture, transparent: true, depthWrite: false, opacity: i ? 0.5 : 0.7, toneMapped: false,
     });
     resources.add(target);
     resources.add(material);
@@ -622,18 +622,26 @@ function createContactShadow(scene, bounds, resources) {
   const pool = new THREE.Mesh(quadGeometry, poolMaterial);
   pool.scale.set(width * 0.74, height * 0.74, 1);
   pool.renderOrder = -2;
-  scene.add(...ground, pool);
-  [target, blurTarget, depth, quadGeometry, horizontal, vertical, groundGeometry, poolMaterial]
+  // The key light's own shadow on the floor, inside the light pool, so the assembly sits down.
+  const keyFloorMaterial = new THREE.ShadowMaterial({ opacity: 0.3, depthWrite: false });
+  const keyFloor = new THREE.Mesh(quadGeometry, keyFloorMaterial);
+  keyFloor.scale.copy(pool.scale);
+  keyFloor.receiveShadow = true;
+  keyFloor.renderOrder = -1;
+  scene.add(...ground, pool, keyFloor);
+  [target, blurTarget, depth, quadGeometry, horizontal, vertical, groundGeometry, poolMaterial, keyFloorMaterial]
     .forEach((resource) => resources.add(resource));
 
   return (renderer, floor) => {
-    pool.visible = Number.isFinite(floor);
+    pool.visible = keyFloor.visible = Number.isFinite(floor);
+    // Bake and composite at the lowest assembly z so the feet touch their contact shadow.
     ground.forEach((mesh) => {
       mesh.visible = pool.visible;
-      mesh.position.set(center.x, center.y, floor - 1);
+      mesh.position.set(center.x, center.y, floor - 0.05);
     });
     if (!pool.visible) return;
-    pool.position.set(center.x, center.y, floor - 1.1);
+    pool.position.set(center.x, center.y, floor - 0.2);
+    keyFloor.position.set(center.x, center.y, floor - 0.03);
     capture.position.copy(ground[0].position);
     capture.lookAt(center.x, center.y, floor + 1);
 
@@ -931,7 +939,7 @@ function createFrameSampler(renderer) {
   };
 }
 
-function layoutAnnotations(host, camera, entries, width, height, canvasTop, panels, placeLabels, displayOpacity, showDimensions, { base, target, focusPart }) {
+function layoutAnnotations(host, camera, entries, width, height, canvasTop, panels, placeLabels, displayOpacity, showDimensions, { base, target, focusPart }, gridPoint) {
   const origin = host.getBoundingClientRect();
   const viewport = {
     left: Math.max(8, 8 - origin.left),
@@ -1099,6 +1107,15 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
     const d = bracketPath(pointsFor(path.dataset.bracket), { arm: 10, offset: 8 });
     if (d) path.setAttribute("d", d);
     else path.removeAttribute("d");
+  }
+
+  const gridLabel = host.querySelector("[data-grid-label]");
+  if (gridLabel) {
+    const point = gridPoint && project(gridPoint);
+    const rect = point && { left: point.x - gridLabel.offsetWidth / 2, right: point.x + gridLabel.offsetWidth / 2,
+      top: point.y - gridLabel.offsetHeight / 2, bottom: point.y + gridLabel.offsetHeight / 2 };
+    position(gridLabel, rect && !occupied.some((panel) => rect.left < panel.right && rect.right > panel.left
+      && rect.top < panel.bottom && rect.bottom > panel.top) ? point : null);
   }
 
   const labels = [...host.querySelectorAll("[data-anchor]")];
@@ -1656,6 +1673,12 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
     entry.style.surface.forEach((mesh) => { mesh.userData.fielddeckKey = entry.row.key; });
   }
   const nextPosition = new THREE.Vector3();
+  // "Grid 10 mm" sits at the front-right edge where the grid starts to fade, in the current view.
+  function gridLabelPoint() {
+    const toCamera = camera.position.clone().sub(center).setZ(0).normalize();
+    const right = new THREE.Vector3(-toCamera.y, toCamera.x, 0);
+    return toCamera.add(right).normalize().multiplyScalar(footprint * 0.92).add(center).setZ(grid.position.z);
+  }
 
   function animate(now) {
     frame = null;
@@ -1854,7 +1877,7 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
 
     // A step that lands after the final animation frame still needs to draw its exact endpoint.
     if (dirty || wasAnimating) {
-      grid.position.z = Number.isFinite(floor) ? floor - 0.9 : assembled.min.z - 0.9;
+      grid.position.z = Number.isFinite(floor) ? floor - 0.1 : assembled.min.z - 0.1;
       contactPending ||= shadowDirty;
       if (shadowDirty) key.shadow.needsUpdate = true;
       renderFrame(floor, contactPending && (settling || firstFrame),
@@ -1862,7 +1885,8 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
       pickable = pick;
       opaque = block;
       const placeLabels = layoutDirty || resized || config !== lastConfig || !dirty || now - lastLayout > 60;
-      layoutAnnotations(host, camera, entries, width, height, canvasTop, panels, placeLabels, displayOpacity, !cameraMove, sceneConfig);
+      layoutAnnotations(host, camera, entries, width, height, canvasTop, panels, placeLabels, displayOpacity, !cameraMove,
+        sceneConfig, grid.visible ? gridLabelPoint() : null);
       if (placeLabels) lastLayout = now;
     }
     canvas.dataset.fielddeckCanvas = "rendered";
