@@ -91,7 +91,12 @@ async function main() {
     await capture("display-selected", 2500);
 
     await scene.getByRole("button", { name: "Face view", exact: true }).click();
-    await capture("face-view", 900);
+    await capture("face-view", 1200);
+    // The same drawing in 5-inch mode: the 7-inch footprint, its dimensions and its question leave.
+    await scene.getByRole("button", { name: "5-inch", exact: true }).click();
+    await capture("face-view-5inch", 900);
+    await scene.getByRole("button", { name: "Compare", exact: true }).click();
+    await page.waitForTimeout(300);
     await scene.getByRole("button", { name: "Back to 3D", exact: true }).click();
     await page.waitForTimeout(600);
 
