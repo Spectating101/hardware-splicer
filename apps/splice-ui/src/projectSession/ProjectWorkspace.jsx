@@ -6,9 +6,7 @@ import MachineArchitecturePanel from "../components/MachineArchitecturePanel.jsx
 import MachineAuthoringPanel from "../components/MachineAuthoringPanel.jsx";
 import MachineEvidencePanel from "../components/MachineEvidencePanel.jsx";
 import ProjectWizard from "../components/ProjectWizard.jsx";
-import ProjectStatusHeader from "../components/ProjectStatusHeader.jsx";
-import ProjectReadinessPanel from "../components/ProjectReadinessPanel.jsx";
-import ProjectReviewPanel from "../components/ProjectReviewPanel.jsx";
+import ProjectBench from "./ProjectBench.jsx";
 import TabNav from "../components/TabNav.jsx";
 import {
   BomPanel,
@@ -20,7 +18,6 @@ import {
 import MechatronicsPanel from "../components/MechatronicsPanel.jsx";
 import {
   STAGES,
-  sessionHasPackage,
 } from "./projectSession.js";
 import {
   buildStageTabs,
@@ -35,7 +32,16 @@ import { derivePackageHandoff } from "./packageHandoff.js";
  * Project workspace shell — stages wrap existing panels while the durable
  * project session carries the canonical machine object across disciplines.
  */
-export default function ProjectWorkspace({
+export default function ProjectWorkspace(props) {
+  if (props.session.mode === "digital") {
+    return <DigitalStudyPanel key={props.session.projectId} session={props.session} onProjectReload={props.onProjectReload}
+      onToast={props.onToast} onReference={props.onReference} />;
+  }
+  return <ProjectBench key={props.session.projectId} session={props.session} onToast={props.onToast} onReference={props.onReference}
+    tools={<ProjectTools {...props} />} />;
+}
+
+function ProjectTools({
   session,
   onSetStage,
   apiOk,
@@ -55,16 +61,10 @@ export default function ProjectWorkspace({
   onBenchSubmit,
   onBenchCaptureSubmit,
   onToast,
-  activeJobId,
-  onProjectReload,
 }) {
-  if (session.mode === "digital") {
-    return <DigitalStudyPanel key={session.projectId} session={session} onProjectReload={onProjectReload} />;
-  }
   const pkg = session.projectPackage;
   const buildDir = session.buildDir || pkg?.build_dir || null;
   const stage = session.currentStage || STAGES.intake;
-  const hasPkg = sessionHasPackage(session);
   const stageTabs = buildStageTabs(session);
   const next = nextStageAction(session);
   const truth = deriveProjectTruth(session);
@@ -86,22 +86,12 @@ export default function ProjectWorkspace({
 
   return (
     <div className="project-workspace" data-testid="project-workspace">
-      <ProjectStatusHeader
-        session={session}
-        activeJobId={activeJobId}
-        onShare={(link) => {
-          const url = link?.url || handoff.url;
-          if (!url) return;
-          navigator.clipboard?.writeText(url);
-          onToast?.("Share link copied — download package for reviewers");
-        }}
-      />
-
-      <ProjectReviewPanel
-        projectId={session.projectId}
-        currentRevision={session.snapshotRevision}
-        onToast={onToast}
-      />
+      {handoff.available && handoff.url && <div className="hero-actions">
+        <button type="button" className="ghost" onClick={() => {
+          navigator.clipboard?.writeText(handoff.url); onToast?.("Share link copied");
+        }}>Share package</button>
+        <a className="secondary button-link" href={handoff.url} download data-testid="download-bundle">Download package</a>
+      </div>}
 
       <TabNav tabs={stageTabs} activeId={stage} onChange={handleStageChange} badges={badges} />
 
@@ -136,10 +126,6 @@ export default function ProjectWorkspace({
             </button>
           )}
         </div>
-      )}
-
-      {hasPkg && stage !== STAGES.design && stage !== STAGES.intake && (
-        <ProjectReadinessPanel session={session} onGoStage={handleStageChange} />
       )}
 
       <div className="workspace-stage">

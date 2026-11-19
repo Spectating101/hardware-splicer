@@ -30,3 +30,15 @@ export const submitDigitalRun = (projectId, payload) =>
 export const fetchDigitalJob = (jobId, signal) => request(`/v1/jobs/${encodeURIComponent(jobId)}`, { signal });
 export const cancelDigitalJob = (jobId) => request(`/v1/jobs/${encodeURIComponent(jobId)}/cancel`, { method: "POST" });
 export const digitalArtifactUrl = (path) => path ? `${API_BASE}${path}` : undefined;
+
+export const fetchProjectAssurance = (projectId, revision, signal) =>
+  request(`/v1/projects/${encodeURIComponent(projectId)}/engineering/assurance?revision=${revision}`, { signal });
+export const fetchProjectMaterials = (projectId, signal) =>
+  request(`/v1/projects/${encodeURIComponent(projectId)}/materials`, { signal });
+export const fetchMaterialAssessment = (projectId, assessmentId, signal) =>
+  request(`/v1/projects/${encodeURIComponent(projectId)}/materials/${encodeURIComponent(assessmentId)}`, { signal });
+export const fetchPartSubstitution = (projectId, assessmentId, signal) =>
+  request(`/v1/projects/${encodeURIComponent(projectId)}/parts/substitutions/${encodeURIComponent(assessmentId)}`, { signal });
+export const assessMachineRelease = (project, signal) => request("/v1/machine-projects/assess-release", {
+  method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ project }), signal,
+});

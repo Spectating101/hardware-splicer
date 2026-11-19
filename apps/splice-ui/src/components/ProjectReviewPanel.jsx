@@ -24,7 +24,7 @@ function collectFlags(review) {
   return [...proposalFlags, ...direct, ...objectFlags];
 }
 
-export default function ProjectReviewPanel({ projectId, currentRevision, onToast }) {
+export default function ProjectReviewPanel({ projectId, currentRevision, onToast, disclosure = false }) {
   const [reviews, setReviews] = useState([]);
   const [revisions, setRevisions] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
@@ -123,16 +123,15 @@ export default function ProjectReviewPanel({ projectId, currentRevision, onToast
     }
   };
 
-  if (!projectId || !currentRevision) return null;
+  if (!projectId || !currentRevision || (disclosure && !reviews.length)) return null;
 
   const decisionOpen = ["pending", "accepting"].includes(selected?.status);
   const acceptanceInProgress = selected?.status === "accepting";
 
-  return (
-    <section className="card project-review" data-testid="project-review-panel">
+  const content = (
+    <section className={disclosure ? "project-review" : "card project-review"} data-testid="project-review-panel">
       <div className="project-review__header">
         <div>
-          <p className="eyebrow">Revision control</p>
           <h2>Engineering review queue</h2>
           <p className="small muted">
             Candidates remain outside project history until accepted. Acceptance controls persistence only;
@@ -289,4 +288,5 @@ export default function ProjectReviewPanel({ projectId, currentRevision, onToast
       </div>
     </section>
   );
+  return disclosure ? <details className="agent-proposals"><summary>Agent proposals ({reviews.length})</summary>{content}</details> : content;
 }
