@@ -150,13 +150,13 @@ function edgeMaterial(color, pattern, linewidth) {
 // loops. It draws before the violet strokes and wins the shared stencil where an added cap meets
 // a changed part, so the two colours never merge into one ring.
 function addedOutlineMaterial() {
-  const material = diffMaterial(DIFF_COLORS.added);
+  const material = diffMaterial(DIFF_COLORS.added, 1.25);
   material.polygonOffsetFactor = material.polygonOffsetUnits = -2;
   return material;
 }
 
-function diffMaterial(color) {
-  const material = edgeMaterial(color, null, 1.5);
+function diffMaterial(color, width = 1.5) {
+  const material = edgeMaterial(color, null, width);
   Object.assign(material, {
     stencilWrite: true, stencilRef: 1, stencilFunc: THREE.NotEqualStencilFunc,
     stencilZPass: THREE.ReplaceStencilOp, stencilFail: THREE.KeepStencilOp, stencilZFail: THREE.KeepStencilOp,
@@ -411,12 +411,16 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
         const group = new THREE.Group();
         const strokes = new THREE.Group();
         const vector = new THREE.Vector3();
-        const solid = outline ? null : own(solidMaterial(spec));
-        const baseColor = new THREE.Color(spec.color ?? spec.edgeColor);
+        // An added part of unknown shape still has a body: a plain neutral solid that claims no
+        // shape source. Its teal is the outline alone.
+        const addedBody = outline && basis === "unknown" && row.delta === "added";
+        const solid = outline && !addedBody ? null
+          : own(solidMaterial(addedBody ? { ...spec, color: UNKNOWN_BODY, roughness: 0.85 } : spec));
+        const baseColor = new THREE.Color(addedBody ? UNKNOWN_BODY : spec.color ?? spec.edgeColor);
         if (basis === "envelope" && row.part.geometry_basis === "donor_cad") {
           baseColor.lerp(new THREE.Color(materialSpec("donor_cad").color), 0.4);
         }
-        const mutedColor = new THREE.Color(materialSpec(basis, row.delta, true).color ?? spec.edgeColor);
+        const mutedColor = new THREE.Color(addedBody ? UNKNOWN_BODY : materialSpec(basis, row.delta, true).color ?? spec.edgeColor);
         // Rubber feet read as the dimmed vendor grey in every mode, never as near-white plastic.
         if (row.part.part_id.startsWith("foot-")) {
           baseColor.setHex(DIMMED_VENDOR);
@@ -474,9 +478,13 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
       const stride = Math.max(1, Math.ceil(vertices.count / 2500));
       for (let i = 0; i < vertices.count; i += stride) entry.samples.push(vertices.getX(i), vertices.getY(i), vertices.getZ(i));
       const { style, group, strokes } = entry;
-      const mesh = new THREE.Mesh(geometry, style.solid ?? style.fill ?? style.edge.base);
+      // An unknown shape has no surface material: its mesh stays for picking and draws nothing,
+      // so an added spacer reads by its teal outline, not as a filled teal blob.
+      const mesh = new THREE.Mesh(geometry, style.solid ?? style.fill ?? (pickOnlyMaterial ??= own(new THREE.MeshBasicMaterial({
+        colorWrite: false, depthWrite: false, transparent: true,
+      }))));
       style.surface.push(mesh);
-      if (entry.outline) strokes.add(mesh);
+      if (entry.outline && !style.solid) strokes.add(mesh);
       else group.add(mesh);
 
       const positions = edgePositions(geometry, entry.spec.threshold);
@@ -491,10 +499,18 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
           style.edge.base = own(edgeMaterial(style.baseColor, null, 1));
           entry.outlineOpacity = 0.55;
         }
+        if (entry.basis === "unknown" && entry.row.delta === "added") {
+          // End caps and other creases of an added unknown part stay in ink at 25%.
+          capInk ??= own(Object.assign(edgeMaterial(CREASE_INK, null, 1), { opacity: 0.25 }));
+          const caps = featureLine(positions, capInk, own);
+          style.lines.push(caps);
+          strokes.add(caps);
+        }
         for (const points of chains) {
           const chain = own(new LineGeometry());
           chain.setPositions(points.flat());
           const line = new Line2(chain, style.edge.base);
+          line.renderOrder = 1;
           if (line.material.dashed) line.computeLineDistances();
           style.lines.push(line);
           strokes.add(line);
