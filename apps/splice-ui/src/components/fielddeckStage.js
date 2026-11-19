@@ -17,7 +17,7 @@ import {
 import { N8AOPostPass } from "n8ao";
 import { fielddeckSceneUrl } from "../api.js";
 import {
-  bracketPath, chooseTier, DIMMED_VENDOR, pairMovedFeatures, closedEdgeLoops, cullIsolatedChains, totalChainLength, classifyPart, convexHull, cullCoincidentChains, DEFAULT_EXPLODE, diffAccentChains,
+  bracketPath, chooseTier, CREASE_INK, DIMMED_VENDOR, pairMovedFeatures, closedEdgeLoops, cullIsolatedChains, totalChainLength, classifyPart, convexHull, cullCoincidentChains, DEFAULT_EXPLODE, diffAccentChains,
   DIFF_COLORS, explodeGroupOffsets, FIELDDECK_NARROW, footprintDeltaPair, ghostDeltaKey,
   ghostOutlineLoops, materialSpec, repelPins, meshMeasures, nearestPoint, placeBesideEndpoint, placeCallouts,
   projectedFitScale, QUALITY_SAMPLE_COUNT, rowForNode, weldEdgeChains,
@@ -165,6 +165,10 @@ function diffMaterial(color) {
 }
 
 const STAGE_BACKGROUND = new THREE.Color(0x0e1116);
+// Compare focus: a part above the selection that overlaps it goes to a neutral veil.
+const FADED_VEIL = new THREE.Color(0x8e8b85);
+const FADED_OPACITY = 0.14;
+const UNKNOWN_BODY = 0xa3a29d;
 
 function stylePart(entry, compare, weight, ghost, accent, emphasis, focus = null) {
   const { outline, row } = entry;
@@ -177,10 +181,11 @@ function stylePart(entry, compare, weight, ghost, accent, emphasis, focus = null
     // Compare focus: parts that recede shift 40% toward the stage background.
     if (focus?.recede) solid.color.lerp(STAGE_BACKGROUND, focus.recede);
     // A settled solid is fully opaque; only a revision cross-fade, or a part above the selection
-    // that overlaps it on screen (22%, no depth write), is ever blended.
+    // that overlaps it on screen (a neutral 14% veil, no depth write), is ever blended.
     const faded = Boolean(focus?.fade);
+    if (faded) solid.color.copy(FADED_VEIL);
     const transparent = weight < 0.999 || faded;
-    solid.opacity = faded ? weight * focus.fade : transparent ? weight : 1;
+    solid.opacity = faded ? weight * FADED_OPACITY : transparent ? weight : 1;
     if (solid.transparent !== transparent) {
       solid.transparent = transparent;
       solid.needsUpdate = true;
@@ -194,10 +199,16 @@ function stylePart(entry, compare, weight, ghost, accent, emphasis, focus = null
     * (outline && row.delta === "added" ? emphasis : 1);
   if (edge.diff) edge.diff.opacity = weight * accent * emphasis * (entry.accentScale ?? 1);
   if (focus) {
-    // Everything but the selection keeps its edges at 20% (faded overlaps scale with the solid).
-    const scale = focus.fade ?? 1;
-    edge.base.opacity = Math.min(edge.base.opacity, 0.2 * weight) * scale;
-    if (edge.diff) edge.diff.opacity = Math.min(edge.diff.opacity, 0.2 * weight) * scale;
+    // Everything but the selection keeps its edges at 20%.
+    edge.base.opacity = Math.min(edge.base.opacity, 0.2 * weight);
+    if (edge.diff) edge.diff.opacity = Math.min(edge.diff.opacity, 0.2 * weight);
+  }
+  // A faded occluder draws no creases: only its outer silhouette in ink at 25%, behind a
+  // front-face depth pre-pass so its own hidden loops and internal edges stay hidden.
+  const veiled = Boolean(focus?.fade) && !ghost;
+  if (entry.veil) {
+    entry.veil.prepass.visible = entry.veil.silhouette.visible = veiled;
+    entry.veil.material.opacity = 0.25 * weight;
   }
 
   for (const mesh of surface) {
@@ -208,8 +219,8 @@ function stylePart(entry, compare, weight, ghost, accent, emphasis, focus = null
     if (mesh.castShadow) mesh.layers.enable(CONTACT_LAYER);
     else mesh.layers.disable(CONTACT_LAYER);
   }
-  lines.forEach((line) => { line.visible = !ghost; });
-  accents.forEach((line) => { line.visible = !ghost && accent > 0; });
+  lines.forEach((line) => { line.visible = !ghost && !veiled; });
+  accents.forEach((line) => { line.visible = !ghost && !veiled && accent > 0; });
 }
 
 function edgePositions(geometry, threshold) {
@@ -369,6 +380,9 @@ function makeGhost(chains, own, { xray = false } = {}) {
 
 function makeEntries(assets, index, scene, technical, resources, { base, target, focusPart }) {
   const entries = new Map();
+  let veilPrepassMaterial = null;
+  let pickOnlyMaterial = null;
+  let capInk = null;
   const own = (resource) => {
     resources.add(resource);
     return resource;
@@ -505,6 +519,27 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
           line.renderOrder = 2;
           style.accents.push(line);
           strokes.add(line);
+        }
+      }
+      if (style.solid) {
+        if (!entry.veil) {
+          const prepass = new THREE.Group();
+          const silhouette = new THREE.Group();
+          // Pre-pass and silhouette draw last in the overlay, so other parts' lines are unaffected.
+          prepass.visible = silhouette.visible = false;
+          entry.veil = { prepass, silhouette, material: own(edgeMaterial(CREASE_INK, null, 1)) };
+          strokes.add(prepass, silhouette);
+        }
+        const depthOnly = new THREE.Mesh(geometry, veilPrepassMaterial ??= own(new THREE.MeshBasicMaterial({
+          colorWrite: false, depthWrite: true, transparent: true, side: THREE.FrontSide,
+        })));
+        depthOnly.renderOrder = 10;
+        entry.veil.prepass.add(depthOnly);
+        const loops = ghostOutlineLoops(positions, { maxChains: 2 });
+        if (loops.length) {
+          const outline = featureLine(chainSegments(loops), entry.veil.material, own);
+          outline.renderOrder = 11;
+          entry.veil.silhouette.add(outline);
         }
       }
       if (entry.ghostEdges) {
