@@ -106,6 +106,9 @@ async function main() {
     await capture("cable-selected", 3000);
     await page.setViewportSize({ width: 390, height: 844 });
     await capture("mobile");
+    // Face view on a phone, from the stage pill.
+    await scene.locator(".fd-face-pill").click();
+    await capture("face-view-phone", 1200);
     if (errors.length) throw new Error(errors.join("\n"));
   } finally {
     await browser.close();
