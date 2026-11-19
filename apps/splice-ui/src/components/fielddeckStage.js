@@ -2266,7 +2266,8 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
         } : () => explode;
     if (!blend || mode !== blend.mode) {
       const next = {
-        base: Number(mode === base), target: Number(mode !== base), compare: Number(mode === "compare"),
+        // A single-revision scene has base === target: its one revision is the target and stays drawn.
+        base: Number(mode === base), target: Number(mode === target || mode === "compare"), compare: Number(mode === "compare"),
       };
       blend = { mode, start: now, from: blend?.current ?? next, to: next, current: next };
     }
