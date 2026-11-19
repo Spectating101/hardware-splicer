@@ -79,3 +79,7 @@ PYTHONPATH=src python -m pytest -q tests/test_dc_measurement_station.py
 ```
 
 Its session is always `capture_kind=TEST_FIXTURE`, `source_kind=register_fixture`. No hardware or instrument observation is claimed. Tests cover signed decoding and exact register vectors, calibration quantization, undersized shunts, insufficient current range, identity/configuration changes, missing conversion-ready, diagnostic flags, short reads, negative/out-of-envelope signals and clock-step failure. They do not validate a physical INA228, Linux adapter timing, the shunts, temperature rise or instrument calibration.
+
+## Deciding which measurement station is appropriate
+
+See [engineering-experiment feasibility](DC_EXPERIMENT_FEASIBILITY.md) for the typed cross-project work order, the distinct input/output boundary check, and the unbuilt/unsafe gate. This adds planning information only; it does not change the acquisition or authorization status of the DC station.
