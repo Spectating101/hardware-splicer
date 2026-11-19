@@ -130,6 +130,10 @@ Success payload includes `quality.drc_pass`, paths to `build_graph.json`, `main_
 
 ## Headless digital engineering
 
+Saved studies can feed Policy Lab's declared design targets and return revision-bound
+numeric proposals. See [the Policy Lab layer](POLICY_LAB_LAYER.md) for export,
+assessment replay, feedback validation and the finite Fielddeck experiment.
+
 The digital study engine runs directly from Python or the CLI. It uses the existing project store and job queue; it does not start an HTTP server, browser, or frontend. Its server-owned registry contains three bounded device families:
 
 | Case ID | Device and native engineering work |
