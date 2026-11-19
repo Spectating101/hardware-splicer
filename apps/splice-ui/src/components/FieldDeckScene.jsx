@@ -160,6 +160,15 @@ function Inspector({ row, index, questions, open, compare, meshStats, footprint,
               ))}
             </ul>
           </>}
+          {other && <details className="fd-other-revision" data-inspector-item>
+            <summary>Other revision ({other.revision}-inch) · {other.questions.length}</summary>
+            <ul className="fd-checks">
+              {other.questions.map(({ reason, number }) => (
+                <li key={number}><span className="fd-question-scope"><QuestionNumber number={number} /></span>
+                  <span>{questionText(reason)}</span></li>
+              ))}
+            </ul>
+          </details>}
           {link ? <>
             <h3>Endpoint components</h3>
             <Endpoints row={row} index={index} />
@@ -177,7 +186,7 @@ function Inspector({ row, index, questions, open, compare, meshStats, footprint,
   );
 }
 
-function PartTree({ rows, view, questions, counts, blockersOnly, endpoints, linked, onSelect }) {
+function PartTree({ rows, view, questions, counts, blockersOnly, endpoints, linked, onSelect, total = questions.length, viewName = "" }) {
   const [unchangedOpen, setUnchangedOpen] = useState(false);
   const tree = useRef(null);
   const [more, setMore] = useState(0);
@@ -242,7 +251,10 @@ function PartTree({ rows, view, questions, counts, blockersOnly, endpoints, link
           {rows.filter(({ key }) => endpointFor(key)).map((row) => rowButton(row, row.delta ?? "unchanged"))}
         </ul></div>}
         {groups.filter(({ kind }) => !blockersOnly || kind === "blocker").map(({ kind, label, items }) => {
-          const count = kind === "blocker" ? questions.length : counts?.[kind] ?? items.length;
+          // Blockers count the project total; a filtered view names its own count beside it.
+          const count = kind === "blocker"
+            ? total === questions.length ? total : `${total} open · ${questions.length} in ${viewName}`
+            : counts?.[kind] ?? items.length;
           const collapsed = kind === "unchanged" && !unchangedOpen;
           const shown = collapsed ? items.filter(({ key }) => key === view.selected || endpointFor(key)) : items;
           const heading = <>{label} <span className="fd-count">{kind === "unchanged" ? `(${count})` : count}</span></>;
@@ -438,6 +450,13 @@ export default function FieldDeckScene({ onExit }) {
         : `${[...question.keys][0].split(":")[0]}-inch revision`,
     }]);
   }, [allQuestions, index, selection, view.mode, base, target]);
+  const inViewCount = questions.length;
+  // Outside Compare, a selected part's questions from the other revision sit in their own group.
+  const otherRevision = view.mode === "compare" ? null : view.mode === base ? target : base;
+  const ownQuestions = otherRevision
+    ? selectionQuestions.filter((question) => [...question.keys].some((key) => key.startsWith(`${view.mode}:`)))
+    : selectionQuestions;
+  const otherQuestions = otherRevision ? selectionQuestions.filter((question) => !ownQuestions.includes(question)) : [];
   const treeOpen = narrow ? sheet === "parts" || sheet === "blockers" : desktopTreeOpen;
   const inspectorOpen = !narrow || sheet === "details";
   const selectedKeys = useMemo(() => selectedPartKeys(index, selection), [index, selection]);
@@ -726,10 +745,13 @@ export default function FieldDeckScene({ onExit }) {
           </div>
           <button className="fd-validation" type="button" aria-pressed={filtered} aria-controls="fd-tree"
             onClick={toggleBlockers}>
+            {/* The count is project state: always the total, with the filtered view named beside it. */}
             {narrow ? <>
               <span>Physical fit unknown</span>
-              <span><span className="fd-count">{questions.length}</span> questions</span>
-            </> : <>Physical fit unknown · <span className="fd-count">{questions.length}</span> open questions</>}
+              <span><span className="fd-count">{allQuestions.length}</span> {inViewCount === allQuestions.length
+                ? "questions" : `open · ${inViewCount} in view`}</span>
+            </> : <>Physical fit unknown · <span className="fd-count">{allQuestions.length}</span> {inViewCount === allQuestions.length
+              ? "open questions" : `open · ${inViewCount} in ${view.mode}-inch view`}</>}
           </button>
         </header>
 
@@ -738,10 +760,12 @@ export default function FieldDeckScene({ onExit }) {
             onClick={() => { setDesktopTreeOpen(!treeOpen); setBlockersOnly(false); }}>Assembly</button></h2>}
           <div className="fd-panel-content" id="fd-tree-content" hidden={!treeOpen}>
             <PartTree rows={rows} view={view} endpoints={treeEndpoints} linked={linked} onSelect={select}
-              questions={questions} blockersOnly={filtered} counts={view.mode === "compare" ? sidecars[target]?.revision_diff?.counts : null} />
+              questions={questions} blockersOnly={filtered} counts={view.mode === "compare" ? sidecars[target]?.revision_diff?.counts : null}
+              total={allQuestions.length} viewName={`${view.mode}-inch view`} />
           </div>
         </aside>
-        <Inspector row={selection} index={index} questions={selectionQuestions} open={inspectorOpen} compare={sceneCompare}
+        <Inspector row={selection} index={index} questions={ownQuestions} open={inspectorOpen} compare={sceneCompare}
+          other={otherQuestions.length ? { revision: otherRevision, questions: otherQuestions } : null}
           meshStats={meshStats} footprint={view.mode === "compare" && selection?.part?.part_id === focusPart && faceFit?.footprint
             ? { base, value: faceFit.footprint } : null} />
 
@@ -821,7 +845,7 @@ export default function FieldDeckScene({ onExit }) {
             <strong>{nameOf(selection) ?? "Select a part or interface"}</strong>
             {selection && <span className="fd-status">{statusOf(selection)}</span>}
             {selection?.link && <Endpoints row={selection} index={index} />}
-            {(selection?.link ? selectionQuestions : selectionQuestions.slice(0, 1)).map(({ number, reason, scope }) => (
+            {(selection?.link ? selectionQuestions : ownQuestions.slice(0, 1)).map(({ number, reason, scope }) => (
               <span key={number} data-peek-question="">
                 <QuestionNumber number={number} /> {questionText(reason)}
                 {!selection?.link && scope !== nameOf(selection) && <small className="fd-revision-tag">{scope}</small>}

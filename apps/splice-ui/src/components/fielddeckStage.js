@@ -1447,6 +1447,15 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
         return point;
       }
     }
+    // A question on the removed revision sits on its ghost outline, never on the newer glass.
+    const ghost = !footprint && !anchor && entry?.removed?.object.visible ? entry : !footprint && !anchor
+      ? entries.get(node.dataset.pinAnchor) : null;
+    if (ghost?.removed?.object.visible) {
+      const { bounds } = ghost;
+      const point = project(new THREE.Vector3(THREE.MathUtils.lerp(bounds.min.x, bounds.max.x, 0.12), bounds.max.y, bounds.max.z)
+        .add(ghost.removed.object.position));
+      return mark(node, point, true);
+    }
     return mark(node, anchor ?? centerFor(node.dataset.pinAnchor), Boolean(footprint));
   };
   host.querySelectorAll("[data-pin-anchor]:not([data-endpoint-pin]):not([data-interface-question])")

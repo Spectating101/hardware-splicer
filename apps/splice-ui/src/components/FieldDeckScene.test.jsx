@@ -815,7 +815,7 @@ describe("Fielddeck evidence UI", () => {
     }));
   });
 
-  it("numbers each question once across revisions and counts only questions in the visible mode", async () => {
+  it("numbers each question once across revisions and keeps the project total and names the count in the visible mode", async () => {
     render(<FieldDeckScene />);
     fireEvent.click(await screen.findByRole("button", { name: "DSI FFC" }));
     const inspector = within(screen.getByRole("complementary", { name: "Selection details" }));
@@ -827,11 +827,11 @@ describe("Fielddeck evidence UI", () => {
     expect(mapping()).toHaveTextContent(/^2 · DSI FFC\s*Pin mapping unknown$/);
     expect(inspector.queryByText("Signal voltage unknown")).toBeNull();
     expect(inspector.getByText("A").parentElement).toHaveTextContent("pi4-dsi");
-    expect(screen.getByRole("button", { name: "Physical fit unknown · 3 open questions" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Physical fit unknown · 5 open · 3 in 7-inch view" })).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "5-inch" }));
     expect(mapping()).toHaveTextContent(/^2 · DSI FFC\s*Pin mapping unknown$/);
     expect(inspector.queryByText("Connector retention unknown")).toBeNull();
-    expect(screen.getByRole("button", { name: "Physical fit unknown · 3 open questions" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Physical fit unknown · 5 open · 3 in 5-inch view" })).toBeVisible();
   });
 
   it("toggles Face view and requests ghost geometry only for changed parts in Compare", async () => {
@@ -869,6 +869,17 @@ describe("Fielddeck evidence UI", () => {
     fireEvent.click(screen.getByRole("button", { name: /Unchanged \(1\)/ }));
     fireEvent.click(screen.getByRole("button", { name: "Pi DSI port" }));
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ ghostDeltaKey: null }));
+  });
+
+  it("files the other revision's display question under a collapsed group outside Compare", async () => {
+    render(<FieldDeckScene />);
+    fireEvent.click(await screen.findByRole("button", { name: "5-inch" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "5-inch display" })[0]);
+    const inspector = within(screen.getByRole("complementary", { name: "Selection details" }));
+    const group = inspector.getByText("Other revision (7-inch) · 1").closest("details");
+    expect(group).not.toHaveAttribute("open");
+    expect(within(group).getByText("Check pilot hole engagement")).toBeInTheDocument();
+    expect(inspector.getByText("Display lug thread/engagement nominal only").closest("details")).toBeNull();
   });
 
   it("uses the same blocker number on the pin, tree and inspector and keeps the qualifier intact", async () => {
