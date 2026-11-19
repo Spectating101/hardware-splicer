@@ -1,30 +1,17 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
-  BASIS_LABELS, DEFAULT_EXPLODE, DIFF_LABELS, FIELDDECK_COMPARE, FIELDDECK_NARROW,
+  BASIS_LABELS, DEFAULT_EXPLODE, DIFF_LABELS, FIELDDECK_NARROW,
   changeSummary, classifyPart, oldRevisionCaption, evidenceCells, formatEvidenceSource, indexFielddeck, rowsForMode, selectedPartKeys,
   countClippedItems, evidenceLabel, ghostDeltaKey, openQuestions, shortPartName, toggleFielddeckSheet,
   coverDetail, coverHeadline, formatEvidenceValue,
 } from "./fielddeckLogic.js";
 import { createFielddeckStage, disposeFielddeck, loadFielddeck } from "./fielddeckStage.js";
-import { fetchSceneManifest } from "../api.js";
+import { sceneRevisions } from "./sceneRevisions.js";
 import "./fielddeckScene.css";
 
 const INITIAL = {
-  mode: "5", explode: DEFAULT_EXPLODE, selected: null, stop: 0, cue: null,
+  mode: null, explode: DEFAULT_EXPLODE, selected: null, stop: 0, cue: null,
   hero: null, question: null, faceView: false, blockers: true, touring: false,
-};
-const LEGEND = [["Shape source", BASIS_LABELS], ["Change", DIFF_LABELS]];
-const MODES = [["7", "7-inch"], ["5", "5-inch"], ["compare", "Compare"]];
-const FALLBACK_MANIFEST = {
-  title: "Fielddeck display swap",
-  subtitle: "7-inch → 5-inch",
-  compare: FIELDDECK_COMPARE,
-  focus: { part_id: "display", label: "Display" },
-  tour: [
-    { label: "Display stack", select: "display", explode: 1 },
-    { label: "Cable (DSI)", select: "display-ribbon", explode: 0.45 },
-    { label: "Changed parts", select: null, revision: "compare", explode: 1, diff: "changed" },
-  ],
 };
 const EVIDENCE_STATES = new Set(["datasheet", "assumed", "computed", "unknown"]);
 let introSeen = false;
@@ -49,7 +36,7 @@ export function EvidenceRows({ evidence, change, footprint }) {
         </>}
       </div>}
       {footprint && <div className="fd-evidence-row" data-inspector-item>
-        <dt>CAD footprint vs {footprint.base}-inch</dt>
+        <dt>CAD footprint vs {footprint.label ?? footprint.base}</dt>
         <dd className="fd-evidence-state">computed</dd>
         <dd className="fd-evidence-value" data-numeric="true">{footprint.value}</dd>
         <dd className="fd-evidence-source">Both revisions&apos; display GLB bounds</dd>
@@ -112,6 +99,7 @@ function QuestionNumber({ number }) {
 }
 
 function Inspector({ row, index, questions, open, compare, meshStats, footprint, other = null }) {
+  const comparing = Boolean(compare);
   const scroll = useRef(null);
   const [more, setMore] = useState(0);
   useLayoutEffect(() => {
@@ -147,7 +135,8 @@ function Inspector({ row, index, questions, open, compare, meshStats, footprint,
           <h2>{part?.label ?? link.label}</h2>
           <p className="fd-status">{statusOf(row)}</p>
           {part && <p className="fd-status" data-inspector-item>
-            {BASIS_LABELS[classifyPart(part).basis]} · {DIFF_LABELS[row.delta]?.toLowerCase() ?? "change unknown"}
+            {BASIS_LABELS[classifyPart(part).basis]}
+            {comparing && <> · {DIFF_LABELS[row.delta]?.toLowerCase() ?? "change unknown"}</>}
           </p>}
           {questions.length > 0 && <>
             <h3>Open questions</h3>
@@ -161,7 +150,7 @@ function Inspector({ row, index, questions, open, compare, meshStats, footprint,
             </ul>
           </>}
           {other && <details className="fd-other-revision" data-inspector-item>
-            <summary>Other revision ({other.revision}-inch) · {other.questions.length}</summary>
+            <summary>Other revision ({other.label}) · {other.questions.length}</summary>
             <ul className="fd-checks">
               {other.questions.map(({ reason, number }) => (
                 <li key={number}><span className="fd-question-scope"><QuestionNumber number={number} /></span>
@@ -186,14 +175,19 @@ function Inspector({ row, index, questions, open, compare, meshStats, footprint,
   );
 }
 
-function PartTree({ rows, view, questions, counts, blockersOnly, endpoints, linked, onSelect, total = questions.length, viewName = "" }) {
+function PartTree({ rows, view, questions, counts, blockersOnly, endpoints, linked, onSelect, total = questions.length, viewName = "", bySource = false }) {
   const [unchangedOpen, setUnchangedOpen] = useState(false);
   const tree = useRef(null);
   const [more, setMore] = useState(0);
   const endpointFor = (key) => endpoints.find(([, endpointKey]) => endpointKey === key)?.[0];
-  const groups = Object.entries(DIFF_LABELS).map(([kind, label]) => ({
-    kind, label, items: rows.filter(({ part, delta }) => part && (delta ?? "unchanged") === kind),
-  }));
+  // A single revision has nothing to diff against, so its parts group by shape source instead.
+  const groups = bySource
+    ? Object.entries(BASIS_LABELS).map(([kind, label]) => ({
+      kind, label, items: rows.filter(({ part }) => part && classifyPart(part).basis === kind),
+    })).filter(({ items }) => items.length)
+    : Object.entries(DIFF_LABELS).map(([kind, label]) => ({
+      kind, label, items: rows.filter(({ part, delta }) => part && (delta ?? "unchanged") === kind),
+    }));
   groups.push(
     { kind: "interface", label: "Interfaces", items: rows.filter(({ link }) => link) },
     { kind: "blocker", label: "Blockers", items: questions },
@@ -278,8 +272,8 @@ function PartTree({ rows, view, questions, counts, blockersOnly, endpoints, link
 
 // Face view caption. A faceplate covering the glass edge is a bezel lip; an XY projection cannot
 // establish interference, so physical fit stays unknown and every line names its source.
-function FaceStrip({ fit, mode, base, target, glbSources, viewingArea }) {
-  const sources = [target, ...(mode === "compare" ? [base] : [])].map((rev) => glbSources[rev] ?? `${rev}-inch GLB`);
+function FaceStrip({ fit, mode, base, target, glbSources, viewingArea, labelOf = (rev) => rev }) {
+  const sources = [target, ...(mode === "compare" ? [base] : [])].map((rev) => glbSources[rev] ?? `${labelOf(rev)} GLB`);
   return (
     <div className="fd-footprint" data-footprint="">
       <div className="fd-fit-primary">Physical fit · Unknown (stack-up and lug alignment unverified)</div>
@@ -300,7 +294,7 @@ function FaceStrip({ fit, mode, base, target, glbSources, viewingArea }) {
   );
 }
 
-function Annotations({ labels, selection, endpoints, pins, faceView, base, target, onSelect, glbSources = {}, faceFit, mode, viewingArea }) {
+function Annotations({ labels, selection, endpoints, pins, faceView, base, target, onSelect, glbSources = {}, faceFit, mode, viewingArea, labelOf }) {
   return (
     <div className="fd-annotations" aria-label="Scene callouts">
       <svg className="fd-leaders" aria-hidden="true">
@@ -318,7 +312,7 @@ function Annotations({ labels, selection, endpoints, pins, faceView, base, targe
           <path className="fd-bracket" data-bracket={selection.key} />
         </>}
       </svg>
-      {faceView && <FaceStrip fit={faceFit} mode={mode} base={base} target={target} glbSources={glbSources} viewingArea={viewingArea} />}
+      {faceView && <FaceStrip fit={faceFit} mode={mode} base={base} target={target} glbSources={glbSources} viewingArea={viewingArea} labelOf={labelOf} />}
       {labels.map((row) => <span className="fd-label" key={row.key} data-anchor={row.key}
         data-endpoint-label={row.endpoint}>{row.caption ?? nameOf(row)}
         {row.detail && <small className="fd-label-detail">{row.detail}</small>}</span>)}
@@ -347,15 +341,22 @@ function Annotations({ labels, selection, endpoints, pins, faceView, base, targe
   );
 }
 
-export default function FieldDeckScene({ onExit }) {
+// The scene draws whichever project's manifest it is given: two revisions get Compare and the
+// change legend, a single revision groups parts by shape source, and nothing here names a project.
+export default function FieldDeckScene({ projectId, manifest, onExit, embedded = false }) {
   const host = useRef(null);
   const stage = useRef(null);
   const current = useRef(null);
   const [assets, setAssets] = useState(null);
-  const [manifest, setManifest] = useState(FALLBACK_MANIFEST);
-  const { compare, focus, tour } = manifest;
-  const { base, target } = compare ?? FIELDDECK_COMPARE;
-  const comparisonEnabled = Boolean(compare);
+  const { compare = null, focus = null, tour = [] } = manifest;
+  const revisions = useMemo(() => sceneRevisions(manifest), [manifest]);
+  const revisionIds = useMemo(() => revisions.map(([id]) => id), [revisions]);
+  const revisionKey = revisionIds.join("\u0000");
+  const labelOf = (rev) => revisions.find(([id]) => id === rev)?.[1] ?? rev;
+  const comparisonEnabled = Boolean(compare) && revisionIds.length > 1;
+  const { base, target } = comparisonEnabled ? compare
+    : { base: revisionIds[0], target: revisionIds.at(-1) };
+  const modes = comparisonEnabled ? [...revisions, ["compare", "Compare"]] : revisions;
   const focusPart = focus?.part_id;
   const [linked, setLinked] = useState(new Set());
   const [meshStats, setMeshStats] = useState(null);
@@ -364,7 +365,7 @@ export default function FieldDeckScene({ onExit }) {
   const [faceFit, setFaceFit] = useState(null);
   const [rendered, setRendered] = useState(false);
   const [stageError, setStageError] = useState("");
-  const [view, setView] = useState(INITIAL);
+  const [view, setView] = useState(() => ({ ...INITIAL, mode: target }));
   const [desktopTreeOpen, setDesktopTreeOpen] = useState(true);
   const [blockersOnly, setBlockersOnly] = useState(false);
   const [narrow, setNarrow] = useState(() => window.matchMedia(FIELDDECK_NARROW).matches);
@@ -392,18 +393,9 @@ export default function FieldDeckScene({ onExit }) {
 
   useEffect(() => {
     const controller = new AbortController();
-    fetchSceneManifest("cyberdeck-real-trial-20261020", controller.signal).then((result) => {
-      if (!controller.signal.aborted && result?.schema === "hardware_splicer.scene_manifest.v1") {
-        setManifest(result);
-      }
-    }).catch(() => {});
-    return () => controller.abort();
-  }, []);
-
-  useEffect(() => {
-    const controller = new AbortController();
     let loaded;
-    loadFielddeck(controller.signal).then((result) => {
+    setAssets(null);
+    loadFielddeck(projectId, revisionKey.split("\u0000"), controller.signal, manifest.title).then((result) => {
       if (controller.signal.aborted) disposeFielddeck(result);
       else {
         loaded = result;
@@ -414,11 +406,12 @@ export default function FieldDeckScene({ onExit }) {
       controller.abort();
       if (loaded) disposeFielddeck(loaded);
     };
-  }, []);
+  }, [projectId, revisionKey, manifest.title]);
 
-  const sidecars = useMemo(() => ({
-    "7": assets?.["7"].sidecar, "5": assets?.["5"].sidecar,
-  }), [assets]);
+  const sidecars = useMemo(() => Object.fromEntries(revisionKey.split("\u0000")
+    .map((rev) => [rev, assets?.[rev]?.sidecar])), [assets, revisionKey]);
+  const questionOrder = useMemo(() => comparisonEnabled ? [target, base] : revisionKey.split("\u0000"),
+    [comparisonEnabled, target, base, revisionKey]);
   const glbSources = useMemo(() => Object.fromEntries(Object.entries(sidecars)
     .filter(([, sidecar]) => sidecar?.glb_source).map(([rev, sidecar]) => [rev, sidecar.glb_source.split("/").at(-1)])),
   [sidecars]);
@@ -428,7 +421,7 @@ export default function FieldDeckScene({ onExit }) {
   const rows = useMemo(() => rowsForMode(index, view.mode, sceneCompare), [index, view.mode, sceneCompare]);
   const selection = index.byKey.get(view.selected);
   const revision = view.mode === "compare" ? target : view.mode;
-  const allQuestions = useMemo(() => openQuestions(sidecars, index), [sidecars, index]);
+  const allQuestions = useMemo(() => openQuestions(sidecars, index, questionOrder), [sidecars, index, questionOrder]);
   const displayedKeys = useMemo(() => new Set(rows.map(({ key }) => key)), [rows]);
   const questions = useMemo(() => allQuestions.flatMap(({ keys, ...question }) => {
     const matching = [...keys].filter((key) => view.mode === "compare" || key.startsWith(`${revision}:`));
@@ -447,12 +440,12 @@ export default function FieldDeckScene({ onExit }) {
     return allQuestions.flatMap((question) => !keys.some((key) => question.keys.has(key)) ? [] : [{
       ...question,
       scope: question.keys.has(selection.key) ? nameOf(selection)
-        : `${[...question.keys][0].split(":")[0]}-inch revision`,
+        : `${labelOf([...question.keys][0].split(":")[0])} revision`,
     }]);
   }, [allQuestions, index, selection, view.mode, base, target]);
   const inViewCount = questions.length;
   // Outside Compare, a selected part's questions from the other revision sit in their own group.
-  const otherRevision = view.mode === "compare" ? null : view.mode === base ? target : base;
+  const otherRevision = !comparisonEnabled || view.mode === "compare" ? null : view.mode === base ? target : base;
   const ownQuestions = otherRevision
     ? selectionQuestions.filter((question) => [...question.keys].some((key) => key.startsWith(`${view.mode}:`)))
     : selectionQuestions;
@@ -495,7 +488,7 @@ export default function FieldDeckScene({ onExit }) {
       if (narrow && selection?.link) continue;
       // The older revision is named on the pin's tooltip and in the Inspector, never as a chip that
       // would sit on the newer part.
-      const revisionTag = view.mode === "compare" && key.startsWith(`${base}:`) ? `${base}-inch revision` : undefined;
+      const revisionTag = view.mode === "compare" && key.startsWith(`${base}:`) ? `${labelOf(base)} revision` : undefined;
       if (linked.has(key) && displayedKeys.has(key)) pins.push({ ...question, anchor: key, dimmed: Boolean(selection?.link), revisionTag });
     }
   }
@@ -740,9 +733,10 @@ export default function FieldDeckScene({ onExit }) {
   };
 
   return (
-    <section className="fd-scene fielddeck-route" aria-labelledby="fd-title" data-testid="fielddeck-scene"
+    <section className={`fd-scene fielddeck-route${embedded ? " is-embedded" : ""}`} aria-labelledby="fd-title"
+      data-testid="fielddeck-scene" data-scene-project={projectId} data-scene-revisions={revisions.length}
       data-scene-status={playing ? "hero" : modelVisible ? "settled" : loading ? "loading" : "unavailable"}>
-      <div className="fd-stage" data-has-selection={Boolean(selection)} ref={host} tabIndex={0} aria-label="Fielddeck stage">
+      <div className="fd-stage" data-has-selection={Boolean(selection)} ref={host} tabIndex={0} aria-label={`${manifest.title} stage`}>
         <header className="fd-header">
           <div>
             {onExit && <button className="fd-exit" type="button" aria-label="Back to home" onClick={onExit}>←</button>}
@@ -757,7 +751,7 @@ export default function FieldDeckScene({ onExit }) {
               <span><span className="fd-count">{allQuestions.length}</span> {inViewCount === allQuestions.length
                 ? "questions" : `open · ${inViewCount} in view`}</span>
             </> : <>Physical fit unknown · <span className="fd-count">{allQuestions.length}</span> {inViewCount === allQuestions.length
-              ? "open questions" : `open · ${inViewCount} in ${view.mode}-inch view`}</>}
+              ? "open questions" : `open · ${inViewCount} in ${labelOf(view.mode)} view`}</>}
           </button>
         </header>
 
@@ -767,28 +761,28 @@ export default function FieldDeckScene({ onExit }) {
           <div className="fd-panel-content" id="fd-tree-content" hidden={!treeOpen}>
             <PartTree rows={rows} view={view} endpoints={treeEndpoints} linked={linked} onSelect={select}
               questions={questions} blockersOnly={filtered} counts={view.mode === "compare" ? sidecars[target]?.revision_diff?.counts : null}
-              total={allQuestions.length} viewName={`${view.mode}-inch view`} />
+              total={allQuestions.length} viewName={`${labelOf(view.mode)} view`} bySource={!comparisonEnabled} />
           </div>
         </aside>
         <Inspector row={selection} index={index} questions={ownQuestions} open={inspectorOpen} compare={sceneCompare}
-          other={otherQuestions.length ? { revision: otherRevision, questions: otherQuestions } : null}
+          other={otherQuestions.length ? { revision: otherRevision, label: labelOf(otherRevision), questions: otherQuestions } : null}
           meshStats={meshStats} footprint={view.mode === "compare" && selection?.part?.part_id === focusPart && faceFit?.footprint
-            ? { base, value: faceFit.footprint } : null} />
+            ? { base, label: labelOf(base), value: faceFit.footprint } : null} />
 
         {!modelVisible && <div className="fd-stage-message" role="status">
-          {loading ? "Loading Fielddeck models…" : errors.join(" ") || "Fielddeck model unavailable."}
+          {loading ? `Loading ${manifest.title} models…` : errors.join(" ") || `${manifest.title} model unavailable.`}
         </div>}
         {modelVisible && errors.length > 0 && <p className="fd-stage-warning" role="status">{errors.join(" ")}</p>}
         {playing && <button className="fd-skip" type="button" onClick={finishIntro}>Skip intro</button>}
 
         <Annotations labels={labels} selection={view.faceView ? null : selection} endpoints={endpoints}
           pins={pins} faceView={view.faceView} base={base} target={target} onSelect={select}
-          glbSources={glbSources} faceFit={faceFit} mode={view.mode} viewingArea={viewingArea} />
+          glbSources={glbSources} faceFit={faceFit} mode={view.mode} viewingArea={viewingArea} labelOf={labelOf} />
         <div className="fd-bottom">
           {assets && (
             <div className="fd-controls" data-intro={playing}>
               <div className="fd-modes" role="group" aria-label="Revision">
-                {MODES.filter(canChoose).map(([mode, label]) => (
+                {modes.filter(canChoose).map(([mode, label]) => (
                   <button key={mode} type="button"
                     aria-pressed={view.mode === mode} onClick={() => changeMode(mode)}>
                     {label}
@@ -834,7 +828,7 @@ export default function FieldDeckScene({ onExit }) {
           {view.faceView ? "Back to 3D" : "Face view"}
         </button>}
         <div className="fd-legend" id="fd-legend" aria-label="Material legend" hidden={narrow && !keyOpen}>
-          {LEGEND.map(([label, kinds]) => (
+          {[["Shape source", BASIS_LABELS], ...(comparisonEnabled ? [["Change", DIFF_LABELS]] : [])].map(([label, kinds]) => (
             <div key={label} role="group" aria-label={label}>
               <strong>{label}</strong>
               {Object.entries(kinds)

@@ -15,7 +15,7 @@ import {
   SMAAEffect, SMAAPreset, ToneMappingEffect, ToneMappingMode,
 } from "postprocessing";
 import { N8AOPostPass } from "n8ao";
-import { fielddeckSceneUrl } from "../api.js";
+import { sceneRevisionUrl } from "../api.js";
 import {
   bracketPath, chooseTier, CREASE_INK, DIMMED_VENDOR, pairMovedFeatures, closedEdgeLoops, cullIsolatedChains, totalChainLength, classifyPart, convexHull, cullCoincidentChains, DEFAULT_EXPLODE, diffAccentChains,
   DIFF_COLORS, explodeGroupOffsets, FIELDDECK_NARROW, footprintDeltaPair, ghostDeltaKey,
@@ -61,19 +61,20 @@ async function request(url, type, signal) {
   return response[type]();
 }
 
-export async function loadFielddeck(signal) {
+// Loads every drawable revision a project's scene manifest lists, through the generic scene routes.
+export async function loadFielddeck(projectId, revisionIds, signal, title = projectId) {
   const loader = new GLTFLoader();
-  const revisions = await Promise.all(["7", "5"].map(async (revision) => {
-    const url = fielddeckSceneUrl(revision);
+  const revisions = await Promise.all(revisionIds.map(async (revision) => {
+    const url = sceneRevisionUrl(projectId, revision);
     const [sidecar, model] = await Promise.allSettled([
-      request(url, "json", signal),
+      request(`${url}/parts`, "json", signal),
       request(`${url}/model`, "arrayBuffer", signal).then((bytes) => loader.parseAsync(bytes, url)),
     ]);
     return [revision, {
       sidecar: sidecar.value,
       gltf: model.value,
-      error: sidecar.status === "rejected" ? `Fielddeck ${revision} parts unavailable (${sidecar.reason.message}).`
-        : model.status === "rejected" ? `Fielddeck ${revision} model unavailable (${model.reason.message}).` : null,
+      error: sidecar.status === "rejected" ? `${title} ${revision} parts unavailable (${sidecar.reason.message}).`
+        : model.status === "rejected" ? `${title} ${revision} model unavailable (${model.reason.message}).` : null,
     }];
   }));
   return Object.fromEntries(revisions);
@@ -1684,14 +1685,14 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
     .map(([revision, { sidecar }]) => [revision, sidecar?.glb_source?.split("/").at(-1)]));
   if (!all.length) {
     resources.forEach((resource) => resource.dispose());
-    throw new Error("No GLB mesh names match the Fielddeck sidecars.");
+    throw new Error("No GLB mesh names match the scene sidecars.");
   }
 
   function createRenderer(antialias) {
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias });
     renderer.autoClear = false;
     renderer.shadowMap.type = THREE.PCFShadowMap;
-    renderer.domElement.setAttribute("aria-label", "Interactive Fielddeck assembly");
+    renderer.domElement.setAttribute("aria-label", "Interactive assembly");
     return renderer;
   }
   function createEnvironment(renderer) {

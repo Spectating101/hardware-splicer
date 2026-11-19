@@ -810,14 +810,14 @@ export function selectedPartKeys(index, row) {
     .filter(Boolean);
 }
 
-export function openQuestions(scenes, index) {
+export function openQuestions(scenes, index, order = Object.keys(scenes)) {
   const questions = new Map();
   function add(kind, id, key, reason) {
     const identity = JSON.stringify([kind, id, reason]);
     if (!questions.has(identity)) questions.set(identity, { reason, number: questions.size + 1, keys: new Set() });
     questions.get(identity).keys.add(key);
   }
-  for (const revision of ["5", "7"]) {
+  for (const revision of order) {
     const scene = scenes[revision];
     if (!scene) continue;
     for (const { part_id, node_name, interface_id, reason } of scene.blockers) {

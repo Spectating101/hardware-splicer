@@ -14,6 +14,26 @@ import {
 } from "./fielddeckLogic.js";
 
 const stageMock = vi.hoisted(() => ({ load: vi.fn(), create: vi.fn() }));
+const FIELDDECK = {
+  projectId: "cyberdeck-real-trial-20261020",
+  manifest: {
+    schema: "hardware_splicer.scene_manifest.v1",
+    project_id: "cyberdeck-real-trial-20261020",
+    title: "Fielddeck display swap",
+    subtitle: "7-inch → 5-inch",
+    revisions: [
+      { id: "7", label: "7-inch", glb: "7.glb", parts: "7.json" },
+      { id: "5", label: "5-inch", glb: "5.glb", parts: "5.json" },
+    ],
+    compare: { base: "7", target: "5" },
+    focus: { part_id: "display", label: "Display" },
+    tour: [
+      { label: "Display stack", select: "display", explode: 1 },
+      { label: "Cable (DSI)", select: "display-ribbon", explode: 0.45 },
+      { label: "Changed parts", select: null, revision: "compare", explode: 1, diff: "changed" },
+    ],
+  },
+};
 vi.mock("three", () => ({}));
 vi.mock("./fielddeckStage.js", () => ({
   loadFielddeck: stageMock.load,
@@ -692,15 +712,11 @@ describe("Fielddeck evidence UI", () => {
   afterEach(() => vi.unstubAllGlobals());
 
   it("uses the scene manifest for the heading, tour and view availability", async () => {
-    fetch.mockResolvedValue({
-      ok: true,
-      json: async () => ({
-        schema: "hardware_splicer.scene_manifest.v1",
-        title: "Project scene title", subtitle: "Project scene subtitle", compare: null,
-        tour: [{ label: "Inspect the tray", select: "tray", revision: "7", explode: 0.25 }],
-      }),
-    });
-    render(<FieldDeckScene />);
+    render(<FieldDeckScene projectId="cyberdeck-real-trial-20261020" manifest={{
+      ...FIELDDECK.manifest,
+      title: "Project scene title", subtitle: "Project scene subtitle", compare: null,
+      tour: [{ label: "Inspect the tray", select: "tray", revision: "7", explode: 0.25 }],
+    }} />);
     expect(await screen.findByRole("heading", { name: "Project scene title" })).toBeVisible();
     expect(screen.getByText("Project scene subtitle")).toBeVisible();
     expect(screen.queryByRole("button", { name: "Compare" })).toBeNull();
@@ -710,6 +726,37 @@ describe("Fielddeck evidence UI", () => {
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({
       mode: "7", explode: 0.25, selectedKey: "7:part:tray",
     }));
+  });
+
+  it("loads the given project's revisions and draws a single revision without any diff", async () => {
+    const plotter = {
+      parts: [
+        part("adapter", "PenAdapter", "custom", { label: "Pen adapter" }),
+        part("bed", "REFERENCE_ENVELOPE_bed", "envelope", { label: "Bed envelope" }),
+      ],
+      blockers: [], interfaces: [],
+    };
+    stageMock.load.mockResolvedValue({ v1: { sidecar: plotter, gltf: {} } });
+    render(<FieldDeckScene projectId="ender3-penplotter-digital" manifest={{
+      schema: "hardware_splicer.scene_manifest.v1", project_id: "ender3-penplotter-digital",
+      title: "Virtual Ender-3 pen plotter", subtitle: "Digital engineering study",
+      revisions: [{ id: "v1", label: "v1", glb: "plotter.glb", parts: "parts.json" }],
+      compare: null, focus: null, tour: [],
+    }} />);
+    expect(stageMock.load).toHaveBeenCalledWith("ender3-penplotter-digital", ["v1"], expect.anything(), "Virtual Ender-3 pen plotter");
+    const tree = within(screen.getByRole("complementary", { name: "Part tree" }));
+    expect(await tree.findByRole("button", { name: "Pen adapter" })).toBeVisible();
+    expect(tree.getAllByRole("region").map((group) => group.getAttribute("aria-label"))).toEqual([
+      "Custom CAD", "Envelope", "Interfaces", "Blockers",
+    ]);
+    expect(tree.queryByRole("region", { name: "Added" })).toBeNull();
+    expect(tree.queryByRole("region", { name: "Unchanged" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Compare" })).toBeNull();
+    expect(screen.queryByRole("group", { name: "Change" })).toBeNull();
+    expect(screen.getByRole("group", { name: "Shape source" })).toBeVisible();
+    fireEvent.click(tree.getByRole("button", { name: "Pen adapter" }));
+    const inspector = within(screen.getByRole("complementary", { name: "Selection details" }));
+    expect(inspector.queryByText(/change unknown|unchanged/i)).toBeNull();
   });
 
   it("renders unknown values and preserves known fields and sources", () => {
@@ -737,7 +784,7 @@ describe("Fielddeck evidence UI", () => {
       })],
     };
     stageMock.load.mockResolvedValue({ "7": { sidecar: sides["7"], gltf: {} }, "5": { sidecar: target, gltf: {} } });
-    render(<FieldDeckScene />);
+    render(<FieldDeckScene {...FIELDDECK} />);
     const legend = within(screen.getByRole("group", { name: "Shape source" }));
     expect(await legend.findByText("Donor CAD (unverified)")).toBeVisible();
     expect(legend.getByText("Measured")).toBeVisible();
@@ -747,7 +794,7 @@ describe("Fielddeck evidence UI", () => {
   });
 
   it("groups revision changes and syncs picks with the tree and inspector", async () => {
-    render(<FieldDeckScene />);
+    render(<FieldDeckScene {...FIELDDECK} />);
     const panel = screen.getByRole("complementary", { name: "Part tree" });
     const tree = within(panel);
     expect(tree.getByRole("button", { name: "Assembly" })).toHaveAttribute("aria-expanded", "true");
@@ -782,7 +829,7 @@ describe("Fielddeck evidence UI", () => {
   });
 
   it("shows the presentation offset only while exploded and keeps the slider name", async () => {
-    render(<FieldDeckScene />);
+    render(<FieldDeckScene {...FIELDDECK} />);
     const slider = await screen.findByRole("slider", { name: "Explode" });
     expect(screen.getByText("Presentation offset · 60%")).toBeVisible();
     fireEvent.change(slider, { target: { value: "0" } });
@@ -794,7 +841,7 @@ describe("Fielddeck evidence UI", () => {
   });
 
   it("marks cable endpoints A and B in the tree and connects their callouts to the markers", async () => {
-    render(<FieldDeckScene />);
+    render(<FieldDeckScene {...FIELDDECK} />);
     fireEvent.click(await screen.findByRole("button", { name: "DSI FFC" }));
     const inspector = within(screen.getByRole("complementary", { name: "Selection details" }));
     expect(inspector.getByRole("heading", { name: "Endpoint components" })).toBeVisible();
@@ -826,7 +873,7 @@ describe("Fielddeck evidence UI", () => {
   });
 
   it("numbers each question once across revisions and keeps the project total and names the count in the visible mode", async () => {
-    render(<FieldDeckScene />);
+    render(<FieldDeckScene {...FIELDDECK} />);
     fireEvent.click(await screen.findByRole("button", { name: "DSI FFC" }));
     const inspector = within(screen.getByRole("complementary", { name: "Selection details" }));
     const mapping = () => inspector.getByText("Pin mapping unknown").parentElement;
@@ -845,7 +892,7 @@ describe("Fielddeck evidence UI", () => {
   });
 
   it("toggles Face view and requests ghost geometry only for changed parts in Compare", async () => {
-    render(<FieldDeckScene />);
+    render(<FieldDeckScene {...FIELDDECK} />);
     fireEvent.click(await screen.findByRole("button", { name: "Face view" }));
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ faceView: true, ghostDeltaKey: null }));
     // A covered glass edge is a bezel lip; the strip keeps physical fit primary and unknown.
@@ -882,7 +929,7 @@ describe("Fielddeck evidence UI", () => {
   });
 
   it("files the other revision's display question under a collapsed group outside Compare", async () => {
-    render(<FieldDeckScene />);
+    render(<FieldDeckScene {...FIELDDECK} />);
     fireEvent.click(await screen.findByRole("button", { name: "5-inch" }));
     fireEvent.click(screen.getAllByRole("button", { name: "5-inch display" })[0]);
     const inspector = within(screen.getByRole("complementary", { name: "Selection details" }));
@@ -893,7 +940,7 @@ describe("Fielddeck evidence UI", () => {
   });
 
   it("uses the same blocker number on the pin, tree and inspector and keeps the qualifier intact", async () => {
-    render(<FieldDeckScene />);
+    render(<FieldDeckScene {...FIELDDECK} />);
     const filter = await screen.findByRole("button", { name: "Physical fit unknown · 5 open questions" });
     const scene = screen.getByTestId("fielddeck-scene");
     const pin = scene.querySelector('[data-question-number="1"]');
@@ -932,7 +979,7 @@ describe("Fielddeck evidence UI", () => {
 
   it("switches between narrow sheets and keeps the current selection in the peek", async () => {
     narrow = true;
-    render(<FieldDeckScene />);
+    render(<FieldDeckScene {...FIELDDECK} />);
     const more = await screen.findByRole("button", { name: "More" });
     expect(more).toHaveAttribute("aria-expanded", "false");
     expect(screen.queryByRole("slider", { name: "Explode" })).toBeNull();

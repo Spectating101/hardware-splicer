@@ -18,8 +18,18 @@ async function parseJson(res) {
   return body;
 }
 
-export function fielddeckSceneUrl(revision) {
-  return `${API_BASE}/v1/scenes/fielddeck/${revision}`;
+export function sceneRevisionUrl(projectId, revision) {
+  return `${API_BASE}/v1/scenes/${encodeURIComponent(projectId)}/${encodeURIComponent(revision)}`;
+}
+
+export async function fetchScenes(signal) {
+  const res = await fetch(`${API_BASE}/v1/scenes`, { signal });
+  return parseJson(res);
+}
+
+export async function fetchSceneRecords(projectId, signal) {
+  const res = await fetch(`${API_BASE}/v1/scenes/${encodeURIComponent(projectId)}/records`, { signal });
+  return parseJson(res);
 }
 
 export async function fetchSceneManifest(projectId, signal) {

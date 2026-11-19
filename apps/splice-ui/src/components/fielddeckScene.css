@@ -485,3 +485,7 @@
   .fd-fit-secondary { display: none; }
   .fd-face-drawing text { font-size: 9px; }
 }
+
+/* Inside a project bench the scene is one pane, not the whole viewport. */
+.fd-scene.is-embedded { flex: none; width: 100%; }
+.fd-scene.is-embedded .fd-stage { height: min(720px, 78svh); }
