@@ -52,6 +52,8 @@ export function createEmptySession(overrides = {}) {
     goal: o.goal || "",
     mode: o.mode || "greenfield",
     digitalStudy: o.digitalStudy || null,
+    ...(o.partAssembly ? { partAssembly: o.partAssembly } : {}),
+    ...(o.partSubstitution ? { partSubstitution: o.partSubstitution } : {}),
     intake: o.intake || null,
     constraints: o.constraints || null,
     graph: o.graph || emptyGraph(),

@@ -111,3 +111,19 @@ describe("persistent project session state", () => {
     expect(sessionIsPersistable(state)).toBe(true);
   });
 });
+
+
+it("restores owned units independently of catalogue identity and retains backend substitution references", () => {
+  const snapshot = {
+    projectId: "motors", projectName: "Plotter",
+    intake: { owned_units: [{ unit_id: "motor-1", name: "Salvaged stepper", source: "salvaged", known_facts: "Current unknown" }] },
+    partAssembly: { parts: [{ part_id: "catalogue-motor", catalog_part_id: 17 }] },
+    partSubstitution: { assessment_id: "substitution-1", source_revision: 3 },
+  };
+  const restored = projectSessionReducer(createEmptySession(), {
+    type: ACTIONS.RESTORE_PROJECT_SNAPSHOT, revision: 4, snapshot,
+  });
+  expect(projectSnapshot(restored)).toMatchObject(snapshot);
+  expect(restored.intake.owned_units[0]).not.toHaveProperty("catalog_part_id");
+  expect(restored.intake.owned_units[0]).not.toHaveProperty("authority");
+});
