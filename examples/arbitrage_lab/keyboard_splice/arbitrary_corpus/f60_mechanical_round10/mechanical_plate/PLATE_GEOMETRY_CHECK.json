@@ -1,0 +1,38 @@
+{
+  "schema": "hs.keyboard-half-plate-source-outline-preview.v1",
+  "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+  "cut_path_sha256": "de147f5402c17c012a625621ea2fe6c774bc308084854459f7c28199a43ec043",
+  "native_edge_cuts_source": "f60.kicad_pcb",
+  "original_board_outline_vertices": 56,
+  "original_source_board_area_mm2": 27212.8088,
+  "postcut_halves_area_mm2": [
+    15070.9928,
+    11990.1439
+  ],
+  "modeled_cut_removed_board_area_mm2": 151.6722,
+  "retained_switch_positions_left_right": [
+    35,
+    23
+  ],
+  "source_switches_relocated": [
+    "K18",
+    "K27",
+    "K37",
+    "K[0]9"
+  ],
+  "accounted_original_switch_count": 62,
+  "switch_aperture_mm": 14.0,
+  "minimum_modeled_aperture_to_source_outline_or_cut_mm": 1.7784,
+  "switch_cutout_to_cut_web_pass": true,
+  "original_switch_population_physically_confirmed": false,
+  "original_source_stabilizer_geometry_verified": false,
+  "actual_case_mounting_design_verified": false,
+  "source_np_through_holes_used_as_case_mounts": false,
+  "native_scad_render_or_print_verified": false,
+  "fabrication_release": "BLOCKED_MECHANICAL_REFERENCE_ONLY",
+  "output_files": [
+    "left.scad",
+    "right.scad",
+    "board_half_switch_plate.svg"
+  ]
+}

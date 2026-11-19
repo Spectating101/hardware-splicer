@@ -25,7 +25,7 @@ def test_plant_watering_functional_delivery_above_70(tmp_path: Path) -> None:
 
 
 @pytest.mark.skipif(not shutil.which("node"), reason="node not available")
-def test_enrich_spec_adds_compiler_evidence(tmp_path: Path) -> None:
+def test_enrich_spec_adds_compiler_evidence(tmp_path: Path, assume_clean_kicad_erc: None) -> None:
     result = compile_catalog_build("automatic_plant_watering", tmp_path, export_gerber=False)
     spec = HardwareCompileSpec.from_dict(
         {

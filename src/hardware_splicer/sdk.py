@@ -30,6 +30,117 @@ from .compose_dispatch import compose_dispatch
 SCHEMA_VERSION = "hardware_splicer.sdk.v1"
 
 
+def digital_engine(*, project_root: str | Path | None = None, job_db: str | Path | None = None):
+    """Open the persistent simulation engine directly, without an HTTP/UI process.
+
+    Use as a context manager. Opening it does not restart or recover other workers.
+    """
+    from .digital_engine import DigitalStudyEngine
+
+    return DigitalStudyEngine(project_root=project_root, job_db=job_db)
+
+
+def promote_source_bundle(project_id: str, *, expected_revision: int, source_ids=None,
+                          primary_source_id=None, project_root=None):
+    """Make registered native source bytes editable without recompiling their geometry."""
+    from .source_project_editing import promote_kicad_source_bundle
+    from .project_store import ProjectStore
+
+    return promote_kicad_source_bundle(ProjectStore(project_root), project_id,
+        expected_revision=expected_revision, source_ids=source_ids, primary_source_id=primary_source_id)
+
+
+def propose_native_edit(project_id: str, *, kind: str, ops, base_revision: int,
+                        author: str = 'sdk', note: str = '', project_root=None):
+    """Propose an edit of a retained native design; the review remains pending."""
+    from .project_candidates import propose_candidate
+    from .project_store import ProjectStore
+
+    return propose_candidate(ProjectStore(project_root), project_id, kind=kind, ops=ops,
+        base_revision=base_revision, author=author, note=note)
+
+
+def export_native_edit(project_id: str, candidate_id: str, *, project_root=None) -> bytes:
+    """Export an edit plus preserved native project/rule bytes as one checked ZIP."""
+    from .source_project_editing import native_candidate_bundle
+    from .project_store import ProjectStore
+
+    return native_candidate_bundle(ProjectStore(project_root), project_id, candidate_id)
+
+
+def check_native_design(project_id: str, *, expected_revision: int, kind: str = 'pcb', project_root=None):
+    """Run native DRC/ERC on the exact retained design and its project/rule bytes."""
+    from .source_project_editing import check_retained_native_design
+    from .project_store import ProjectStore
+
+    return check_retained_native_design(ProjectStore(project_root), project_id,
+                                        expected_revision=expected_revision, kind=kind)
+
+
+def assess_materials(project_id: str, *, expected_revision: int, requirements, inventory, project_root=None):
+    """Match exact material requirements to declared or imported stock."""
+    from .project_materials import assess_project_materials
+    from .project_store import ProjectStore
+
+    return assess_project_materials(ProjectStore(project_root), project_id, expected_revision=expected_revision,
+                                    requirements=requirements, inventory=inventory)
+
+
+def assess_part_substitution(project_id: str, *, expected_revision: int, specification,
+                             generate_geometry: bool = False, project_root=None):
+    """Compare a replacement in its complete declared assembly; optionally export nominal CAD."""
+    from .project_part_substitutions import assess_project_substitution
+    from .project_store import ProjectStore
+
+    return assess_project_substitution(ProjectStore(project_root), project_id,
+        expected_revision=expected_revision, specification=specification, generate_geometry=generate_geometry)
+
+
+def propose_part_substitution(project_id: str, assessment_id: str, *, expected_revision: int,
+                              author: str = 'sdk', note: str = '', project_root=None):
+    """Open a pending review of the assessed declared assembly; no design is auto-accepted."""
+    from .project_part_substitutions import propose_project_substitution
+    from .project_store import ProjectStore
+
+    return propose_project_substitution(ProjectStore(project_root), project_id, assessment_id,
+        expected_revision=expected_revision, author=author, note=note)
+
+
+def export_part_substitution(project_id: str, assessment_id: str, *, project_root=None) -> bytes:
+    """Download the verified report, revised BOM/connections and generated nominal CAD."""
+    from .project_part_substitutions import export_substitution_bundle
+    from .project_store import ProjectStore
+
+    return export_substitution_bundle(ProjectStore(project_root), project_id, assessment_id)
+
+
+def import_inventree_materials(project_id: str, *, expected_revision: int, assembly_part_id: int, build_quantity: int = 1, project_root=None):
+    """Read a direct InvenTree BOM and its inventory into this project revision."""
+    from .project_materials import import_inventree_materials as import_materials
+    from .project_store import ProjectStore
+
+    return import_materials(ProjectStore(project_root), project_id, expected_revision=expected_revision,
+                            assembly_part_id=assembly_part_id, build_quantity=build_quantity)
+
+
+def assess_wiring(project_id: str, *, expected_revision: int, material_assessment_id: str,
+                  specification, render: bool = False, project_root=None):
+    """Check a declared harness against exact materials and optional retained sources."""
+    from .project_wiring import assess_project_wiring
+    from .project_store import ProjectStore
+
+    return assess_project_wiring(ProjectStore(project_root), project_id, expected_revision=expected_revision,
+        material_assessment_id=material_assessment_id, specification=specification, render=render)
+
+
+def export_wiring(project_id: str, assessment_id: str, *, project_root=None) -> bytes:
+    """Read and verify an immutable wiring assessment, then return its ZIP package."""
+    from .project_wiring import load_wiring_assessment, wiring_bundle
+    from .project_store import ProjectStore
+
+    return wiring_bundle(load_wiring_assessment(ProjectStore(project_root), project_id, assessment_id)["assessment"])
+
+
 def apply_engine_defaults() -> None:
     """Safe defaults for agent-driven compiles (headless, no Java autoroute)."""
     load_env_local()
@@ -217,7 +328,7 @@ def compose_design(
     export_gerber: bool = False,
     fab_profile: bool = False,
     arbitrary: bool = False,
-    allow_llm_first: bool = True,
+    allow_llm_first: bool = False,
     drc_fixup: Mapping[str, float] | None = None,
 ) -> Dict[str, Any]:
     """Compose NL phrase, module list, or canvas graph → KiCad artifacts."""
@@ -264,7 +375,7 @@ def compose_design_agent_loop(
     salvage_mode: bool = False,
     out_dir: str | Path | None = None,
     export_gerber: bool = False,
-    allow_llm_first: bool = True,
+    allow_llm_first: bool = False,
     drc_fixup: Mapping[str, float] | None = None,
     max_manual_retries: int = 2,
     finalize_package: bool = False,
@@ -309,8 +420,13 @@ def jarvis_build(
     out_dir: str | Path | None = None,
     export_gerber: bool = False,
     allow_qwen: bool = True,
+    allow_llm_first: bool = False,
 ) -> Dict[str, Any]:
-    """LLM-aware electrical build: goal (+ optional parts) → compile → trust → JARVIS narrative."""
+    """LLM-aware electrical build: goal (+ optional parts) → compile → trust → JARVIS narrative.
+
+    A model-written netlist is only compiled on the open path when ``allow_llm_first`` is
+    set explicitly; otherwise the deterministic scratch pipeline runs.
+    """
     from .jarvis_build import jarvis_build as _jarvis_build
 
     return _jarvis_build(
@@ -321,6 +437,7 @@ def jarvis_build(
         out_dir=out_dir,
         export_gerber=export_gerber,
         allow_qwen=allow_qwen,
+        allow_llm_first=allow_llm_first,
     )
 
 
@@ -446,7 +563,7 @@ def compose_agent_bench_loop(
     salvage_mode: bool = False,
     out_dir: str | Path | None = None,
     export_gerber: bool = False,
-    allow_llm_first: bool = True,
+    allow_llm_first: bool = False,
     drc_fixup: Mapping[str, float] | None = None,
     max_manual_retries: int = 2,
     goal: str | None = None,

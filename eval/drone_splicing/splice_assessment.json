@@ -1,0 +1,97 @@
+{
+  "schema_version": "hardware_splicer.drone_splicing.v1",
+  "original_design": "Holybro X500 V2 + Pixhawk 6C PX4 reference quadcopter",
+  "candidates": [
+    {
+      "candidate_id": "s500-frame-from-droneskeleton",
+      "replaces": "frame",
+      "origin_repo": "https://github.com/colgecen/DroneSkeleton",
+      "classification": "redesign_required_not_drop_in",
+      "confirmed_matches": [],
+      "hard_failures": [
+        "frame_family: incompatible declared value"
+      ],
+      "unverified_gaps": [
+        "all_up_mass_limit_g: interface unresolved",
+        "motor_mount_hole_spacing_mm: interface unresolved",
+        "pixhawk_mount_hole_spacing_mm: interface unresolved",
+        "prop_clearance_mm: interface unresolved"
+      ],
+      "adapter_or_redesign": [
+        "Produce dimensioned mounting plate or mechanical adapter from measured hole spacing",
+        "Re-run structural and propeller-clearance checks"
+      ],
+      "authority": "proposed_not_physically_validated"
+    },
+    {
+      "candidate_id": "stm32-custom-flight-controller",
+      "replaces": "fc",
+      "origin_repo": "https://github.com/IoT-App-Development-Company/DroneControllerUsing-STM32",
+      "classification": "redesign_required_not_drop_in",
+      "confirmed_matches": [],
+      "hard_failures": [
+        "controller_family: incompatible declared value"
+      ],
+      "unverified_gaps": [
+        "firmware_target: interface unresolved",
+        "gps_port_pinout: interface unresolved",
+        "mount_hole_pattern: interface unresolved",
+        "power_input_voltage_range_v: interface unresolved",
+        "pwm_motor_outputs: interface unresolved"
+      ],
+      "adapter_or_redesign": [
+        "Different flight-controller firmware and full configuration migration required",
+        "Resolve PCB ERC/DRC before considering fabrication"
+      ],
+      "authority": "proposed_not_physically_validated"
+    },
+    {
+      "candidate_id": "salvaged-unknown-esc",
+      "replaces": "esc",
+      "origin_repo": "user-supplied donor assembly, unverified",
+      "classification": "adaptation_or_verification_required",
+      "confirmed_matches": [
+        "channels"
+      ],
+      "hard_failures": [],
+      "unverified_gaps": [
+        "battery_cell_support: interface unresolved",
+        "channels: missing traceable source",
+        "continuous_current_a: interface unresolved",
+        "ground_reference: interface unresolved",
+        "motor_connector: interface unresolved",
+        "peak_current_a: interface unresolved",
+        "signal_protocol: interface unresolved"
+      ],
+      "adapter_or_redesign": [
+        "Determine exact model and manufacturer ratings",
+        "Check four-unit count, command signal, phase connectors and thermal/current margins before fitting"
+      ],
+      "authority": "proposed_not_physically_validated"
+    },
+    {
+      "candidate_id": "known-document-only-propeller",
+      "replaces": "props",
+      "origin_repo": "hypothetical spare item with no physical provenance",
+      "classification": "adaptation_or_verification_required",
+      "confirmed_matches": [
+        "diameter_class"
+      ],
+      "hard_failures": [],
+      "unverified_gaps": [
+        "handedness: interface unresolved",
+        "motor_propeller_thrust_data: interface unresolved",
+        "rpm_rating: interface unresolved",
+        "shaft_mount: interface unresolved"
+      ],
+      "adapter_or_redesign": [
+        "Verify actual blade manufacturer, mounting hardware, balance and motor thrust curve"
+      ],
+      "authority": "proposed_not_physically_validated"
+    }
+  ],
+  "approved_for_installation": [],
+  "physical_testing_performed": false,
+  "assembly_authorized": false,
+  "flight_authorized": false
+}

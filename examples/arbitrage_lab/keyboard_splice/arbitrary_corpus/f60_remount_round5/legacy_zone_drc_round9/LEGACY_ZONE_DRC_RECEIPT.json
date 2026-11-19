@@ -1,0 +1,63 @@
+{
+  "schema": "hs.legacy-kicad-zone-refilled-source-copy-check.v1",
+  "source_original_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+  "native_conversion": {
+    "schema": "hs.native-legacy-kicad-zone-refill.v1",
+    "original_source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+    "converted_copy_sha256": "ddd8c2f6915a078947dbb287ca5c1f35d3b0489aec4bcf5fb4d6571848932fd8",
+    "native_kicad_version": "9.0.2",
+    "copper_layer_count": 2,
+    "original_zone_count": 2,
+    "original_filled_zone_count": 2,
+    "regenerated_filled_zone_count": 2,
+    "original_zone_source_net_names": [
+      "",
+      ""
+    ],
+    "original_file_modified": false,
+    "original_upstream_source_format_updated_in_copy": true,
+    "source_copper_pads_tracks_vias_equivalence_not_yet_verified": true,
+    "fabrication_approved": false,
+    "physical_board_tested": false
+  },
+  "source_geometry_preservation": {
+    "original_source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+    "converted_copy_sha256": "ddd8c2f6915a078947dbb287ca5c1f35d3b0489aec4bcf5fb4d6571848932fd8",
+    "non_zone_source_geometry_equivalent": true,
+    "pad_contacts_preserved": 485,
+    "copper_tracks_preserved": 489,
+    "vias_preserved": 18,
+    "component_locations_preserved": 129,
+    "detected_key_locations_preserved": 62,
+    "original_conductive_zone_fills_identical": false,
+    "physical_clearances_after_cut_verified": false,
+    "fabrication_authorized": false
+  },
+  "native_copy_full_severity_drc": {
+    "kicad_version": "9.0.2",
+    "total_violations": 321,
+    "errors": 0,
+    "warnings": 321,
+    "unconnected_items": 0,
+    "warning_and_error_types": {
+      "lib_footprint_issues": 121,
+      "silk_over_copper": 200
+    },
+    "drc_completed_with_no_errors_or_opens": true,
+    "drc_has_unresolved_warnings": true,
+    "original_byte_identical_source_drc_completed": false,
+    "physical_product_validated": false
+  },
+  "original_netchain_not_changed": true,
+  "legacy_filled_zone_regeneration_required": true,
+  "original_unconnected_zone_names": 2,
+  "modified_source_file_checked_not_original_bytes": true,
+  "upstream_original_copy_available_in_output": false,
+  "native_drc_all_warnings_resolved": false,
+  "original_firmware_powered": false,
+  "physical_keyboard_tested": false,
+  "fabrication_approved": false,
+  "conclusion": "REFILLED_COPY_ZERO_DRC_ERRORS_BUT_WARNINGS_REMAIN",
+  "native_refilled_copy_drc_sha256": "aa95695ba19e9cea880a8ace60c8417469c1fc212b5b74f749f471ef5e0c9104",
+  "payload_sha256": "6624bab4eda67a8d9a155af97a78397eab0796153d3caf845f6fbcb370c169fe"
+}

@@ -10,6 +10,16 @@ import {
 
 
 describe("persistent project session state", () => {
+  it("keeps the saved digital run and requirements when reopening a revision", () => {
+    const digitalStudy = { run_id: "verified-run", requirements: { payload_mass_g: 10 } };
+    const restored = projectSessionReducer(createEmptySession(), {
+      type: ACTIONS.RESTORE_PROJECT_SNAPSHOT, revision: 2,
+      snapshot: { projectId: "digital-drone", projectName: "Drone", mode: "digital", currentStage: "digital", digitalStudy },
+    });
+    expect(restored.digitalStudy).toEqual(digitalStudy);
+    expect(restored.snapshotRevision).toBe(2);
+    expect(projectSnapshot(restored).digitalStudy).toEqual(digitalStudy);
+  });
   it("restores a server snapshot without promoting or dirtying it", () => {
     const restored = projectSessionReducer(createEmptySession(), {
       type: ACTIONS.RESTORE_PROJECT_SNAPSHOT,

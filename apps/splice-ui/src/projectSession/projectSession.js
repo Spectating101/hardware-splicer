@@ -51,6 +51,7 @@ export function createEmptySession(overrides = {}) {
     projectName: o.projectName || "",
     goal: o.goal || "",
     mode: o.mode || "greenfield",
+    digitalStudy: o.digitalStudy || null,
     intake: o.intake || null,
     constraints: o.constraints || null,
     graph: o.graph || emptyGraph(),

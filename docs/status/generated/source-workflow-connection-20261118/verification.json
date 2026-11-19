@@ -1,0 +1,140 @@
+{
+  "schema_version": "hardware_splicer.source_connection_test_evidence.v1",
+  "date": "2026-11-18",
+  "scope": "All collected Python tests, split into four base batches, with native complement and affected-path rechecks.",
+  "collected": 4513,
+  "resolved_outcomes": {
+    "passed": 4509,
+    "skipped": 4
+  },
+  "missing": [],
+  "unresolved_failures": [],
+  "remaining_skips": [
+    {
+      "nodeid": "tests/test_vision_gemini.py::test_gemini_live_smoke_optional",
+      "status": "skipped",
+      "report": "source-connect-batch-1.xml",
+      "reason": "set HARDWARE_SPLICER_GEMINI_LIVE_TEST=1 to run live Gemini smoke test"
+    },
+    {
+      "nodeid": "tests/test_donor_board_vision_live_optional.py::test_live_donor_board_vision_smoke",
+      "status": "skipped",
+      "report": "source-connect-batch-3.xml",
+      "reason": "set HARDWARE_SPLICER_RUN_VISION_LIVE=1 to run live donor vision"
+    },
+    {
+      "nodeid": "tests/test_vision_live_optional.py::test_live_vision_returns_structured_report",
+      "status": "skipped",
+      "report": "source-connect-batch-3.xml",
+      "reason": "set HARDWARE_SPLICER_RUN_VISION_LIVE=1 to run live vision"
+    },
+    {
+      "nodeid": "tests/test_lookup_integration.py::test_live_ifixit_still_answers_in_the_shape_we_read",
+      "status": "skipped",
+      "report": "source-connect-batch-4.xml",
+      "reason": "set HS_LIVE_NET=1 to call iFixit for real"
+    }
+  ],
+  "supplemental_uncollected_results": [],
+  "reports_in_override_order": [
+    {
+      "report": "source-connect-batch-1.xml",
+      "sha256": "00c4bc82ec4a29549d71b399e3a6c917fdb0ea4766f1a4894ca2515dff49e546",
+      "outcomes": {
+        "passed": 1103,
+        "skipped": 22
+      }
+    },
+    {
+      "report": "source-connect-batch-2.xml",
+      "sha256": "2f47512e7bc80e502ea6575bd296fea67ab1d9efa7a544c81b2ac078d1778622",
+      "outcomes": {
+        "passed": 1124,
+        "skipped": 1
+      }
+    },
+    {
+      "report": "source-connect-batch-3.xml",
+      "sha256": "afc79938ed83def96e433b2611e7722b48602cd30e79ce46326d1841f9efa60f",
+      "outcomes": {
+        "passed": 1114,
+        "skipped": 11
+      }
+    },
+    {
+      "report": "source-connect-batch-4.xml",
+      "sha256": "108fd132bbcdfbda259edc3fde9382fae77d4ce3cedf32aa3a29701ee949e8ad",
+      "outcomes": {
+        "passed": 1110,
+        "failed": 2,
+        "skipped": 12
+      }
+    },
+    {
+      "report": "source-connect-import-recheck.xml",
+      "sha256": "a8acb1ae72d26eb93cdae103f93fa1bd0fe5c5fd07e888f9580542c59940965f",
+      "outcomes": {
+        "passed": 47
+      }
+    },
+    {
+      "report": "source-connect-native-regressions.xml",
+      "sha256": "afff9ce107891b3d353b02b69f4f6e93c522cf03a790624a4a35b489b130af05",
+      "outcomes": {
+        "passed": 72
+      }
+    },
+    {
+      "report": "source-connect-final-ai.xml",
+      "sha256": "a7c7654b4fa7623d32b118630de8874524d43d95e90aca779cf5e17b7494d61f",
+      "outcomes": {
+        "passed": 37
+      }
+    },
+    {
+      "report": "source-connect-native-check.xml",
+      "sha256": "5021e83d711f96381079637e864f68ca13c0c945441c7a305de71075c5f6bddf",
+      "outcomes": {
+        "passed": 14
+      }
+    },
+    {
+      "report": "source-connect-rule-inspection.xml",
+      "sha256": "8db6c634012b6c8a15f68124914ff5645c0cb2dcf1b245179bdb949e0f5a730a",
+      "outcomes": {
+        "passed": 9
+      }
+    }
+  ],
+  "initial_failure_resolution": {
+    "initial_failures": 2,
+    "cause": "KiCad S-expression netlist importer converted nested ref/pin/name fields into Python-list strings.",
+    "repair": "Read named scalar child fields, preserve legacy positional input, reject incomplete identities.",
+    "recheck": "47 parser and compile consumer cases passed, including both initial failures and six new identity cases."
+  },
+  "collection_sha256": "0ce689c94438c079bae70ef75323849c4243cda81e461c459350a4f317d7f512",
+  "outcome_manifest_sha256": "eaeb9117548f6ce171f4f03af834886d5ae5862f44650c5cdbcc31dbecdaab9d",
+  "native_complement": {
+    "passed": 72,
+    "engines": [
+      "KiCad CLI 9.0.2",
+      "CadQuery",
+      "PyBullet",
+      "WireViz",
+      "FreeRouting 2.1.0 headless",
+      "vendor firmware host replay"
+    ],
+    "execution": "Two bounded CPU groups, one process per group; remote cluster workers were unreachable."
+  },
+  "workspace_scope": "Includes pre-existing registered-source checker work, preserved byte-for-byte and excluded from this change.",
+  "committed_parser_independence": {
+    "passed": 46,
+    "method": "Loaded the baseline committed stored_source_parser module in memory before pytest; left the independent workspace changes untouched.",
+    "scope": [
+      "tests/test_source_project_editing.py",
+      "tests/test_ai_project_edit_integration.py",
+      "tests/test_engineering_project_source_bundle.py"
+    ],
+    "report_sha256": "a90f7c30662ef03b5e63219ced13a6dc29bfb795c7a07ea17b2728e4a496a714"
+  }
+}

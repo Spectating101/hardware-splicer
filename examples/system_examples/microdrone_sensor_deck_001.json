@@ -1,0 +1,106 @@
+{
+  "schema_version": "hardware_splicer.microdrone_design.v1",
+  "id": "crazyflie21plus_environment_deck_001",
+  "baseline": {
+    "manufacturer": "Bitcraze",
+    "model": "Crazyflie 2.1+",
+    "vendor_url": "https://www.bitcraze.io/products/crazyflie-2-1-plus/",
+    "firmware_url": "https://github.com/bitcraze/crazyflie-firmware",
+    "reference_guidance_scenario": "crazyflie_custom_sensor_deck",
+    "flight_controller_mcu": "STM32F405",
+    "radio_power_mcu": "nRF51822",
+    "motor_count": 4,
+    "stock_takeoff_mass_g": 29,
+    "vendor_max_recommended_payload_g": 15,
+    "vendor_expansion_vcc_v": 3,
+    "vendor_expansion_vcc_max_ma": 100,
+    "vendor_reference_flight_time_min": 7,
+    "vendor_geometry": {
+      "width_mm": 92,
+      "depth_mm": 92,
+      "height_mm": 29
+    },
+    "truth_basis": "Bitcraze product specification; not a measured device"
+  },
+  "requirements": {
+    "mission": "Supervised indoor environmental sensing with a modular expansion deck",
+    "max_added_deck_mass_g": 3,
+    "max_deck_peak_current_ma": 80,
+    "preserve_emergency_disarm": true,
+    "require_propeller_guards": true,
+    "require_simulator_validation": true,
+    "require_source_bound_firmware": true
+  },
+  "candidate": {
+    "proposed_deck_mass_g": {
+      "value": 2.4,
+      "basis": "illustrative_engineering_estimate",
+      "measured": false
+    },
+    "proposed_deck_peak_current_ma": {
+      "value": 54,
+      "basis": "illustrative_engineering_estimate",
+      "measured": false
+    },
+    "deck_vcc_v": {
+      "value": 3,
+      "basis": "connector_supply_nominal",
+      "measured": false
+    },
+    "components": [
+      {
+        "identity": "BME688",
+        "quantity": 1,
+        "role": "environmental sensor",
+        "exact_board_or_die_and_electrical_characteristics_verified": false
+      },
+      {
+        "identity": "DS28E05",
+        "quantity": 1,
+        "role": "deck 1-wire identity",
+        "exact_board_or_die_and_electrical_characteristics_verified": false
+      },
+      {
+        "identity": "deck connector",
+        "quantity": 2,
+        "role": "mechanical/electrical expansion attachment",
+        "exact_board_or_die_and_electrical_characteristics_verified": false
+      },
+      {
+        "identity": "decoupling capacitor",
+        "quantity": 2,
+        "role": "local bypass",
+        "exact_board_or_die_and_electrical_characteristics_verified": false
+      }
+    ],
+    "electrical": {
+      "power_rail": "VCC_3V0",
+      "sensor_data_bus": "I2C",
+      "deck_identity_bus": "1-Wire",
+      "connector_pin_mapping_verified": false,
+      "parts_voltage_compatibility_verified": false,
+      "power_measurements_available": false,
+      "native_schematic_and_board_files_available": false
+    },
+    "mechanical": {
+      "mount_geometry_measured": false,
+      "installed_propeller_guards_verified": false,
+      "propeller_deck_clearance_measured": false,
+      "center_of_mass_measured": false
+    },
+    "firmware": {
+      "stack": "Bitcraze crazyflie-firmware",
+      "flight_controller_source_revision": null,
+      "radio_firmware_source_revision": null,
+      "deck_driver_build_passed": false,
+      "watchdog_and_disarm_regression_passed": false
+    },
+    "simulation": {
+      "suggested_backend": "Bitcraze crazyflie-simulation or MuJoCo Crazyflie model",
+      "official_source": "https://www.bitcraze.io/development/external-projects/",
+      "simulator_version": null,
+      "validated_model_parameters": false,
+      "dynamic_model_executed": false
+    }
+  }
+}

@@ -2,10 +2,49 @@
 
 from __future__ import annotations
 
+import importlib.util
 from collections.abc import Callable
 from datetime import datetime, timezone, tzinfo
 
 import pytest
+
+# Optional ``cad`` extra. Tests marked ``requires_cadquery`` / ``requires_trimesh``
+# are skipped, with a reason, when the package cannot be found.
+_OPTIONAL_CAD_MODULES = {
+    "requires_cadquery": "cadquery",
+    "requires_trimesh": "trimesh",
+}
+
+
+def _module_available(name: str) -> bool:
+    try:
+        return importlib.util.find_spec(name) is not None
+    except (ImportError, ValueError):
+        return False
+
+
+def pytest_configure(config: pytest.Config) -> None:
+    for marker, module in _OPTIONAL_CAD_MODULES.items():
+        config.addinivalue_line(
+            "markers",
+            f"{marker}: skipped when the optional '{module}' package (cad extra) is not installed",
+        )
+
+
+def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:
+    missing = {
+        marker: module
+        for marker, module in _OPTIONAL_CAD_MODULES.items()
+        if not _module_available(module)
+    }
+    for item in items:
+        for marker, module in missing.items():
+            if item.get_closest_marker(marker) is not None:
+                item.add_marker(
+                    pytest.mark.skip(
+                        reason=f"requires optional '{module}' package (install the cad extra)"
+                    )
+                )
 
 
 @pytest.fixture(autouse=True)
@@ -58,3 +97,18 @@ def authorization_clock(monkeypatch: pytest.MonkeyPatch) -> Callable[[datetime],
     # After the fixture's evidence capture/review, before its September expiry.
     set_time(datetime(2026, 8, 4, 3, tzinfo=timezone.utc))
     return set_time
+
+
+@pytest.fixture
+def assume_clean_kicad_erc(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Isolate a test from the real KiCad ERC outcome on the emitted schematic.
+
+    KiCad ERC failures now veto build_ready (see test_kicad_erc_trust_gate.py), and the
+    generated catalog schematics currently report real ERC errors. Tests that exercise
+    downstream behaviour of a *ready* build use this fixture to state that assumption
+    explicitly instead of depending on the installed kicad-cli.
+    """
+    monkeypatch.setattr(
+        "hardware_splicer.netlist.compile.run_kicad_cli_erc",
+        lambda *a, **k: {"pass": True, "skipped": False, "errors": 0, "warnings": 0, "violations": [], "report_path": None},
+    )

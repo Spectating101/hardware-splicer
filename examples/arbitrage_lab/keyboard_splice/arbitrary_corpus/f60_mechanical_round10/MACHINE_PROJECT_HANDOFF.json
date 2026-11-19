@@ -1,0 +1,773 @@
+{
+  "project": {
+    "schema_version": "hardware_splicer.machine_project.v1",
+    "project_id": "keyboard-pcb-reuse-virtual-cut",
+    "name": "keyboard-pcb-reuse-virtual-cut",
+    "purpose": "Reuse a documented, legally owned rigid-PCB keyboard as a physically verified split keyboard",
+    "lifecycle_state": "architecture",
+    "requested_release_state": "concept",
+    "requirements": [
+      {
+        "requirement_id": "req-primary-purpose",
+        "statement": "Reuse a documented, legally owned rigid-PCB keyboard as a physically verified split keyboard",
+        "kind": "functional",
+        "priority": "should",
+        "source": "user",
+        "parent_requirement_id": null,
+        "allocated_to": [
+          "system"
+        ],
+        "verification_method_ids": [],
+        "authority": "declared",
+        "metadata": {
+          "source_field": "goal"
+        }
+      },
+      {
+        "requirement_id": "req-prove-physical-postcut-electrical-safety",
+        "statement": "Verify physical PCB identity, copper continuity, USB/ESD and every intended key before energizing",
+        "kind": "safety",
+        "priority": "should",
+        "source": "user",
+        "parent_requirement_id": null,
+        "allocated_to": [
+          "system"
+        ],
+        "verification_method_ids": [
+          "verification-postcut-bench"
+        ],
+        "authority": "declared",
+        "metadata": {}
+      }
+    ],
+    "functions": [
+      {
+        "function_id": "function-primary",
+        "name": "Deliver primary machine purpose",
+        "description": "Reuse a documented, legally owned rigid-PCB keyboard as a physically verified split keyboard",
+        "parent_function_id": null,
+        "allocated_subsystem_ids": [
+          "electrical-system",
+          "firmware-control"
+        ],
+        "requirement_ids": [
+          "req-primary-purpose"
+        ],
+        "authority": "proposed",
+        "metadata": {}
+      }
+    ],
+    "subsystems": [
+      {
+        "subsystem_id": "system",
+        "name": "Machine system",
+        "domain": "system",
+        "purpose": "Reuse a documented, legally owned rigid-PCB keyboard as a physically verified split keyboard",
+        "parent_subsystem_id": null,
+        "requirement_ids": [
+          "req-primary-purpose"
+        ],
+        "function_ids": [
+          "function-primary"
+        ],
+        "component_ids": [],
+        "interface_ids": [],
+        "artifact_refs": [],
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "subsystem_id": "electrical-system",
+        "name": "Electrical System",
+        "domain": "electrical",
+        "purpose": "Seeded from declared structured intake fields.",
+        "parent_subsystem_id": "system",
+        "requirement_ids": [],
+        "function_ids": [],
+        "component_ids": [
+          "reference-PCB"
+        ],
+        "interface_ids": [],
+        "artifact_refs": [],
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "subsystem_id": "firmware-control",
+        "name": "Firmware and control",
+        "domain": "firmware",
+        "purpose": "Control behavior and embedded software.",
+        "parent_subsystem_id": "system",
+        "requirement_ids": [],
+        "function_ids": [],
+        "component_ids": [],
+        "interface_ids": [],
+        "artifact_refs": [],
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "subsystem_id": "donor-left-pcb",
+        "name": "Remaining donor PCB left half",
+        "domain": "electrical",
+        "purpose": "",
+        "parent_subsystem_id": "system",
+        "requirement_ids": [],
+        "function_ids": [],
+        "component_ids": [],
+        "interface_ids": [],
+        "artifact_refs": [],
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "subsystem_id": "donor-right-pcb",
+        "name": "Remaining donor PCB right half",
+        "domain": "electrical",
+        "purpose": "",
+        "parent_subsystem_id": "system",
+        "requirement_ids": [],
+        "function_ids": [],
+        "component_ids": [],
+        "interface_ids": [],
+        "artifact_refs": [],
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "subsystem_id": "remounted-key-pcb",
+        "name": "4 detached source-key circuits represented by a new KiCad daughterboard",
+        "domain": "electrical",
+        "purpose": "",
+        "parent_subsystem_id": "system",
+        "requirement_ids": [],
+        "function_ids": [],
+        "component_ids": [],
+        "interface_ids": [],
+        "artifact_refs": [],
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "subsystem_id": "source-bound-junction-bus",
+        "name": "Source-net-pinned junction connector PCB, conditional only",
+        "domain": "electrical",
+        "purpose": "",
+        "parent_subsystem_id": "system",
+        "requirement_ids": [],
+        "function_ids": [],
+        "component_ids": [],
+        "interface_ids": [],
+        "artifact_refs": [],
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "subsystem_id": "switch-plate-left",
+        "name": "Source-bound modeled MX key switch plate for left half",
+        "domain": "mechanical",
+        "purpose": "",
+        "parent_subsystem_id": "system",
+        "requirement_ids": [],
+        "function_ids": [],
+        "component_ids": [],
+        "interface_ids": [],
+        "artifact_refs": [],
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "subsystem_id": "switch-plate-right",
+        "name": "Source-bound modeled MX key switch plate for right half",
+        "domain": "mechanical",
+        "purpose": "",
+        "parent_subsystem_id": "system",
+        "requirement_ids": [],
+        "function_ids": [],
+        "component_ids": [],
+        "interface_ids": [],
+        "artifact_refs": [],
+        "authority": "proposed",
+        "metadata": {}
+      }
+    ],
+    "components": [
+      {
+        "component_id": "reference-PCB",
+        "name": "reference PCB",
+        "domain": "electrical",
+        "subsystem_id": "electrical-system",
+        "role": "electrical",
+        "source": "unknown",
+        "part": null,
+        "requirement_ids": [],
+        "function_ids": [],
+        "artifact_refs": [],
+        "authority": "declared",
+        "metadata": {
+          "intake_part": {
+            "name": "reference PCB",
+            "source": "external",
+            "role": "electrical",
+            "domain": "electrical"
+          },
+          "domain_projection_source": "declared_domain",
+          "discipline_allocation_unresolved": false
+        }
+      }
+    ],
+    "interfaces": [
+      {
+        "interface_id": "interface-cut-restoration-harness",
+        "name": "Original copper topology restored across physical split",
+        "kind": "electrical_interposer",
+        "endpoints": [
+          {
+            "object_id": "donor-left-pcb",
+            "port": "unknown_actual_testpads",
+            "role": ""
+          },
+          {
+            "object_id": "donor-right-pcb",
+            "port": "unknown_actual_testpads",
+            "role": ""
+          }
+        ],
+        "contracts": [
+          {
+            "contract_type": "postcut_original_net_continuity",
+            "values": {
+              "model_candidate_graph_edges": 18
+            },
+            "unresolved_fields": [
+              "original_board_revision",
+              "exact_copper_islands",
+              "solderable_pads",
+              "harness_pinout",
+              "return_current_path",
+              "cable_strain_relief"
+            ],
+            "authority": "proposed"
+          }
+        ],
+        "requirement_ids": [],
+        "verification_method_ids": [],
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "interface_id": "interface-junction-donor-left-pcb",
+        "name": "Unverified physical cable between full source-net junction and donor-left-pcb",
+        "kind": "electrical_wiring",
+        "endpoints": [
+          {
+            "object_id": "source-bound-junction-bus",
+            "port": "source_net_header_clusters",
+            "role": ""
+          },
+          {
+            "object_id": "donor-left-pcb",
+            "port": "unverified_original_mating_pads",
+            "role": ""
+          }
+        ],
+        "contracts": [
+          {
+            "contract_type": "original_source_net_reference",
+            "values": {
+              "junction_net_clusters": 16,
+              "source_pins": 34,
+              "remount_pins": 8
+            },
+            "unresolved_fields": [
+              "physical_donor_identity",
+              "cable_mpn",
+              "connector_mating",
+              "assembly_tolerance",
+              "strain_relief",
+              "firmware_validation"
+            ],
+            "authority": "proposed"
+          }
+        ],
+        "requirement_ids": [],
+        "verification_method_ids": [],
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "interface_id": "interface-junction-donor-right-pcb",
+        "name": "Unverified physical cable between full source-net junction and donor-right-pcb",
+        "kind": "electrical_wiring",
+        "endpoints": [
+          {
+            "object_id": "source-bound-junction-bus",
+            "port": "source_net_header_clusters",
+            "role": ""
+          },
+          {
+            "object_id": "donor-right-pcb",
+            "port": "unverified_original_mating_pads",
+            "role": ""
+          }
+        ],
+        "contracts": [
+          {
+            "contract_type": "original_source_net_reference",
+            "values": {
+              "junction_net_clusters": 16,
+              "source_pins": 34,
+              "remount_pins": 8
+            },
+            "unresolved_fields": [
+              "physical_donor_identity",
+              "cable_mpn",
+              "connector_mating",
+              "assembly_tolerance",
+              "strain_relief",
+              "firmware_validation"
+            ],
+            "authority": "proposed"
+          }
+        ],
+        "requirement_ids": [],
+        "verification_method_ids": [],
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "interface_id": "interface-junction-remounted-key-pcb",
+        "name": "Unverified physical cable between full source-net junction and remounted-key-pcb",
+        "kind": "electrical_wiring",
+        "endpoints": [
+          {
+            "object_id": "source-bound-junction-bus",
+            "port": "source_net_header_clusters",
+            "role": ""
+          },
+          {
+            "object_id": "remounted-key-pcb",
+            "port": "unverified_original_mating_pads",
+            "role": ""
+          }
+        ],
+        "contracts": [
+          {
+            "contract_type": "original_source_net_reference",
+            "values": {
+              "junction_net_clusters": 16,
+              "source_pins": 34,
+              "remount_pins": 8
+            },
+            "unresolved_fields": [
+              "physical_donor_identity",
+              "cable_mpn",
+              "connector_mating",
+              "assembly_tolerance",
+              "strain_relief",
+              "firmware_validation"
+            ],
+            "authority": "proposed"
+          }
+        ],
+        "requirement_ids": [],
+        "verification_method_ids": [],
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "interface_id": "interface-switch-plate-left",
+        "name": "Physical plate registration to retained donor PCB left half",
+        "kind": "mechanical_plate_to_donor_board",
+        "endpoints": [
+          {
+            "object_id": "switch-plate-left",
+            "port": "proposed_cutout_support_faces",
+            "role": ""
+          },
+          {
+            "object_id": "donor-left-pcb",
+            "port": "unknown_actual_component_population",
+            "role": ""
+          }
+        ],
+        "contracts": [
+          {
+            "contract_type": "original_source_switch_aperture_14mm",
+            "values": {
+              "nominal_cutout_side_mm": 14.0,
+              "minimum_modeled_plate_web_mm": 1.7784,
+              "retained_keys_per_half": [
+                35,
+                23
+              ]
+            },
+            "unresolved_fields": [
+              "printed_or_machined_plate_physical_tolerances",
+              "actual_switch_footprint_populated_layout",
+              "plate_to_PCB_mounting_without_new_donor_holes",
+              "stabilizer_and_keycap_clearance",
+              "case_screws_or_clips",
+              "material_and_structural_strength"
+            ],
+            "authority": "proposed"
+          }
+        ],
+        "requirement_ids": [],
+        "verification_method_ids": [],
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "interface_id": "interface-switch-plate-right",
+        "name": "Physical plate registration to retained donor PCB right half",
+        "kind": "mechanical_plate_to_donor_board",
+        "endpoints": [
+          {
+            "object_id": "switch-plate-right",
+            "port": "proposed_cutout_support_faces",
+            "role": ""
+          },
+          {
+            "object_id": "donor-right-pcb",
+            "port": "unknown_actual_component_population",
+            "role": ""
+          }
+        ],
+        "contracts": [
+          {
+            "contract_type": "original_source_switch_aperture_14mm",
+            "values": {
+              "nominal_cutout_side_mm": 14.0,
+              "minimum_modeled_plate_web_mm": 1.7784,
+              "retained_keys_per_half": [
+                35,
+                23
+              ]
+            },
+            "unresolved_fields": [
+              "printed_or_machined_plate_physical_tolerances",
+              "actual_switch_footprint_populated_layout",
+              "plate_to_PCB_mounting_without_new_donor_holes",
+              "stabilizer_and_keycap_clearance",
+              "case_screws_or_clips",
+              "material_and_structural_strength"
+            ],
+            "authority": "proposed"
+          }
+        ],
+        "requirement_ids": [],
+        "verification_method_ids": [],
+        "authority": "proposed",
+        "metadata": {}
+      }
+    ],
+    "constraints": [
+      {
+        "constraint_id": "constraint-cut_type",
+        "name": "Cut Type",
+        "domain": "system",
+        "statement": "cut type shall be physical_subtractive_work.",
+        "severity": "required",
+        "applies_to": [
+          "system"
+        ],
+        "source_requirement_ids": [],
+        "verification_method_ids": [],
+        "authority": "declared",
+        "metadata": {
+          "raw_value": "physical_subtractive_work"
+        }
+      },
+      {
+        "constraint_id": "constraint-retained_controller",
+        "name": "Retained Controller",
+        "domain": "system",
+        "statement": "retained controller shall be enabled.",
+        "severity": "required",
+        "applies_to": [
+          "system"
+        ],
+        "source_requirement_ids": [],
+        "verification_method_ids": [],
+        "authority": "declared",
+        "metadata": {
+          "raw_value": true
+        }
+      }
+    ],
+    "verifications": [
+      {
+        "verification_id": "verification-postcut-bench",
+        "name": "Donor PCB registration, safe mechanical cut, solder inspection, and powered key scan",
+        "method_type": "test",
+        "status": "blocked",
+        "requirement_ids": [
+          "req-prove-physical-postcut-electrical-safety"
+        ],
+        "target_ids": [
+          "system"
+        ],
+        "evidence_ids": [],
+        "procedure": "Requires an actual matched donor, solderable connectors and independent physical measurements",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      },
+      {
+        "verification_id": "verification-physical-switch-plates",
+        "name": "Assembled plate clearance, mounting, stabilizers and cut-edge strain test",
+        "method_type": "inspection",
+        "status": "blocked",
+        "requirement_ids": [],
+        "target_ids": [
+          "switch-plate-left",
+          "switch-plate-right"
+        ],
+        "evidence_ids": [],
+        "procedure": "Requires an actual legally acquired donor, source revision, fabricated plate and measured fit",
+        "acceptance_criteria": {},
+        "authority": "proposed",
+        "metadata": {}
+      }
+    ],
+    "evidence": [
+      {
+        "evidence_id": "evidence-source-bound-virtual-cut",
+        "kind": "reference_copper_geometry_model",
+        "basis": "KiCad reference board and conservative modeled material removal",
+        "ref": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+        "supports": [
+          "system"
+        ],
+        "authority": "declared",
+        "simulated": true,
+        "metadata": {
+          "topology_sha256": "7aea0abecad58c97ed9290e3c8c1b2d10b0f86518a01114f36158475b090adf6"
+        }
+      },
+      {
+        "evidence_id": "f60-source-independent-schematic-firmware-audit",
+        "kind": "public_schematic_vs_pcb_netlist_equality",
+        "basis": "Independent SHA-pinned public schematic netlist and TMK firmware",
+        "ref": "ca3090a90b450c5eed461c43fa25719d5d8e98fb4732d64696ea1e9812f9860c",
+        "supports": [
+          "system"
+        ],
+        "authority": "declared",
+        "simulated": true,
+        "metadata": {}
+      },
+      {
+        "evidence_id": "f60-62-key-ideal-matrix-press-test",
+        "kind": "source_bound_ideal_keyboard_scan_model",
+        "basis": "Original source-derived 62-key/62-diode controller matrix, no USB hardware",
+        "ref": "779413641cdabb75d46be52ea1e0c6b7778229ad239778ccb1a96bd0325badb7",
+        "supports": [
+          "system"
+        ],
+        "authority": "declared",
+        "simulated": true,
+        "metadata": {}
+      },
+      {
+        "evidence_id": "f60-kicad-source-junction-native-drc",
+        "kind": "native_kicad_electrical_routing_check",
+        "basis": "Twenty independent source-net junction buses; physical wiring not tested",
+        "ref": "6b7765daf6e515ce5bd7375f74652761aaaa74070aff08ace52809a43968d49e",
+        "supports": [
+          "system"
+        ],
+        "authority": "declared",
+        "simulated": true,
+        "metadata": {}
+      },
+      {
+        "evidence_id": "f60-compact-50pin-IDC-header-native-drc",
+        "kind": "native_kicad_alternative_compact_wiring_board",
+        "basis": "Original source-net grouped junction, 42 pins and 16 buses, native KiCad IDC footprint",
+        "ref": "ffccfb6eb480c0485293c5b67dbc1145fff6b88b2099957e65f454707ede43dd",
+        "supports": [
+          "system"
+        ],
+        "authority": "declared",
+        "simulated": true,
+        "metadata": {}
+      },
+      {
+        "evidence_id": "f60-original-edgecut-matched-keyplate-preview",
+        "kind": "native_kicad_edge_cuts_to_openscad_plate_analysis",
+        "basis": "Source board polygon and exact virtual kerf; no real physical case",
+        "ref": "de147f5402c17c012a625621ea2fe6c774bc308084854459f7c28199a43ec043",
+        "supports": [
+          "switch-plate-left",
+          "switch-plate-right"
+        ],
+        "authority": "declared",
+        "simulated": true,
+        "metadata": {}
+      }
+    ],
+    "artifacts": [],
+    "discipline_payloads": {
+      "project_intake": {
+        "project_name": "keyboard-pcb-reuse-virtual-cut",
+        "goal": "Reuse a documented, legally owned rigid-PCB keyboard as a physically verified split keyboard",
+        "available_parts": [
+          {
+            "name": "reference PCB",
+            "source": "external",
+            "role": "electrical",
+            "domain": "electrical"
+          }
+        ],
+        "constraints": {
+          "retained_controller": true,
+          "cut_type": "physical_subtractive_work"
+        }
+      },
+      "keyboard_splice": {
+        "reference_source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+        "model_sha256": "7aea0abecad58c97ed9290e3c8c1b2d10b0f86518a01114f36158475b090adf6",
+        "cut_x_mm": 105.745,
+        "stepped_path_sha256": "de147f5402c17c012a625621ea2fe6c774bc308084854459f7c28199a43ec043",
+        "model_required_copper_connected": true,
+        "model_unresolved_required_groups": 0,
+        "inert_copper_fragments_to_isolate": 5,
+        "source_preexisting_terminal_net_gaps": 0,
+        "physical_donor_verified": false,
+        "fabrication_authorized": false,
+        "source_connected_schematic_pad_nodes": 267,
+        "firmware_source_matrix_positions": 62,
+        "simulated_ideal_press_patterns": 91230,
+        "independent_schematic_audit_sha256": "ca3090a90b450c5eed461c43fa25719d5d8e98fb4732d64696ea1e9812f9860c",
+        "full_62_key_matrix_sha256": "779413641cdabb75d46be52ea1e0c6b7778229ad239778ccb1a96bd0325badb7",
+        "native_junction_design_sha256": "6b7765daf6e515ce5bd7375f74652761aaaa74070aff08ace52809a43968d49e",
+        "junction_source_net_groups": 16,
+        "junction_donor_original_pad_wires": 34,
+        "junction_daughterboard_port_wires": 8,
+        "native_source_pcb_full_drc_complete": false,
+        "official_teensy2_source_pinout_19_signal_match": false,
+        "original_teensy_footprint_all_31_pads_source_matched": false,
+        "source_refilled_zone_copy_drc_no_errors": false,
+        "source_refilled_zone_copy_drc_warnings": null,
+        "source_original_byte_identical_full_drc_verified": false,
+        "compact_IDC_source_net_preview_available": true,
+        "compact_IDC_area_reduction_percent": 33.32,
+        "compact_and_original_full_junction_mutually_exclusive": true,
+        "physical_harness_cable_verified": false,
+        "original_teensy_firmware_compiled_flashed_or_verified": false,
+        "native_original_outline_source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+        "mechanical_cut_path_sha256": "de147f5402c17c012a625621ea2fe6c774bc308084854459f7c28199a43ec043",
+        "mechanical_plate_key_distribution": [
+          35,
+          23
+        ],
+        "mechanical_plate_model_minimum_clearance_mm": 1.7784,
+        "source_switch_occupied_locations_physically_verified": false,
+        "OpenSCAD_plate_rendered_or_physically_produced": false,
+        "actual_case_assembly_or_screws_verified": false
+      }
+    },
+    "metadata": {
+      "seed": "machine_project_from_intake.v2",
+      "interfaces_inferred": false,
+      "verification_inferred": false,
+      "authority_preserved_without_upgrade": true,
+      "part_domain_projection": "structured_declared_fields_or_offline_legacy",
+      "unresolved_component_allocation_ids": []
+    }
+  },
+  "release_assessment": {
+    "requested_state": "build_ready",
+    "achieved_state": "design_ready",
+    "blockers": [
+      {
+        "code": "unresolved_interface",
+        "message": "interface 'interface-cut-restoration-harness' has unresolved fields: cable_strain_relief, exact_copper_islands, harness_pinout, original_board_revision, return_current_path, solderable_pads",
+        "object_id": "interface-cut-restoration-harness",
+        "severity": "error"
+      },
+      {
+        "code": "unresolved_interface",
+        "message": "interface 'interface-junction-donor-left-pcb' has unresolved fields: assembly_tolerance, cable_mpn, connector_mating, firmware_validation, physical_donor_identity, strain_relief",
+        "object_id": "interface-junction-donor-left-pcb",
+        "severity": "error"
+      },
+      {
+        "code": "unresolved_interface",
+        "message": "interface 'interface-junction-donor-right-pcb' has unresolved fields: assembly_tolerance, cable_mpn, connector_mating, firmware_validation, physical_donor_identity, strain_relief",
+        "object_id": "interface-junction-donor-right-pcb",
+        "severity": "error"
+      },
+      {
+        "code": "unresolved_interface",
+        "message": "interface 'interface-junction-remounted-key-pcb' has unresolved fields: assembly_tolerance, cable_mpn, connector_mating, firmware_validation, physical_donor_identity, strain_relief",
+        "object_id": "interface-junction-remounted-key-pcb",
+        "severity": "error"
+      },
+      {
+        "code": "unresolved_interface",
+        "message": "interface 'interface-switch-plate-left' has unresolved fields: actual_switch_footprint_populated_layout, case_screws_or_clips, material_and_structural_strength, plate_to_PCB_mounting_without_new_donor_holes, printed_or_machined_plate_physical_tolerances, stabilizer_and_keycap_clearance",
+        "object_id": "interface-switch-plate-left",
+        "severity": "error"
+      },
+      {
+        "code": "unresolved_interface",
+        "message": "interface 'interface-switch-plate-right' has unresolved fields: actual_switch_footprint_populated_layout, case_screws_or_clips, material_and_structural_strength, plate_to_PCB_mounting_without_new_donor_holes, printed_or_machined_plate_physical_tolerances, stabilizer_and_keycap_clearance",
+        "object_id": "interface-switch-plate-right",
+        "severity": "error"
+      },
+      {
+        "code": "safety_not_closed",
+        "message": "safety requirement 'req-prove-physical-postcut-electrical-safety' is not closed by passing verification",
+        "object_id": "req-prove-physical-postcut-electrical-safety",
+        "severity": "error"
+      },
+      {
+        "code": "verification_not_passed",
+        "message": "verification 'verification-postcut-bench' is blocked",
+        "object_id": "verification-postcut-bench",
+        "severity": "error"
+      },
+      {
+        "code": "verification_not_passed",
+        "message": "verification 'verification-physical-switch-plates' is blocked",
+        "object_id": "verification-physical-switch-plates",
+        "severity": "error"
+      },
+      {
+        "code": "release_state_not_reached",
+        "message": "requested build_ready, but evidence supports only design_ready",
+        "object_id": "keyboard-pcb-reuse-virtual-cut",
+        "severity": "error"
+      }
+    ],
+    "warnings": [
+      {
+        "code": "unverified_requirement",
+        "message": "requirement 'req-primary-purpose' has no verification method",
+        "object_id": "req-primary-purpose",
+        "severity": "warning"
+      }
+    ]
+  },
+  "physical_authority_granted": false,
+  "canonical_summary": {
+    "requested": "build_ready",
+    "achieved": "design_ready",
+    "allowed": false,
+    "blocker_codes": [
+      "unresolved_interface",
+      "unresolved_interface",
+      "unresolved_interface",
+      "unresolved_interface",
+      "unresolved_interface",
+      "unresolved_interface",
+      "safety_not_closed",
+      "verification_not_passed",
+      "verification_not_passed",
+      "release_state_not_reached"
+    ]
+  }
+}

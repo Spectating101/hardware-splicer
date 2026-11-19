@@ -1,0 +1,658 @@
+{
+  "schema": "hs.arbitrary-keyboard-public-reference-benchmark.v1",
+  "manifest_sha256": "84ba51fdaa55eae251395164a32bfa32d33d8af0539be21712859bbf35aa0545",
+  "case_count": 8,
+  "selected_case_ids": [
+    "st40",
+    "kinesis_fkeys",
+    "shortcut_keyboard",
+    "plink_kicad",
+    "f60",
+    "nhw68",
+    "practice2by2",
+    "vyom60"
+  ],
+  "cases": [
+    {
+      "schema": "hs.arbitrary-keyboard-real-reference.v1",
+      "case_id": "st40",
+      "repository": "coarse/st40",
+      "reference_path": "st40.kicad_pcb",
+      "source_url": "https://raw.githubusercontent.com/coarse/st40/master/st40.kicad_pcb",
+      "expected_source_sha256": "cf1427e4dc9ba7c6fcd6038defa56626babeb27c3a4b239e22903cb20586ea04",
+      "physical_donor_present": false,
+      "engine_uses_hand_written_wiring_map": false,
+      "actual_sha256": "cf1427e4dc9ba7c6fcd6038defa56626babeb27c3a4b239e22903cb20586ea04",
+      "intake": {
+        "schema": "hs.arbitrary-keyboard-intake.v1",
+        "reference_source_sha256": "cf1427e4dc9ba7c6fcd6038defa56626babeb27c3a4b239e22903cb20586ea04",
+        "reference_source_filename": "st40.kicad_pcb",
+        "source_kind": "EXTERNAL_KICAD_REFERENCE_NOT_PHYSICAL_JUNK",
+        "copper_layers": 2,
+        "footprints": 110,
+        "key_switch_candidates": 49,
+        "switch_detection_methods": {
+          "known_keyboard_footprint": 49
+        },
+        "routed_track_count": 737,
+        "plated_via_count": 23,
+        "routed_conductive_zone_count": 0,
+        "unfilled_conductive_zone_names": [],
+        "source_warnings": [],
+        "eligible_for_bounded_virtual_reconstruction": true,
+        "blocker_codes": [],
+        "claimed_physical_donor_present": false,
+        "physical_authority_granted": false
+      },
+      "native_source_drc": {
+        "exit": 0,
+        "violations": 180,
+        "unconnected_items": 0,
+        "kicad_version": "9.0.2",
+        "report_present": true
+      },
+      "engine_execution": {
+        "exit": 0,
+        "timeout": false,
+        "error_tail": null
+      },
+      "status": "REPAIR_INCOMPLETE",
+      "verdict": {
+        "schema": "hs.arbitrary-keyboard-benchmark-verdict.v1",
+        "status": "REPAIR_INCOMPLETE",
+        "gates": {
+          "required_reconnection_complete_in_model": false,
+          "source_terminals_connected_in_model": false,
+          "modeled_cut_clear_of_components": true,
+          "original_native_drc_clean": false,
+          "bridge_native_drc_clean": false,
+          "source_geometry_reliable_without_legacy_repairs": false
+        },
+        "strict_reference_digital_pass": false,
+        "source_sha256": "cf1427e4dc9ba7c6fcd6038defa56626babeb27c3a4b239e22903cb20586ea04",
+        "actual_discarded_keyboard_tested": false,
+        "arbitrary_unphotographed_junk_supported": false,
+        "real_keyboard_function_verified": false,
+        "physical_release": "BLOCKED_NOT_TESTED",
+        "build_ready": false
+      },
+      "cut": {
+        "left_switch_candidates": 33,
+        "right_switch_candidates": 16,
+        "collisions": {
+          "pads": 0,
+          "vias": 0,
+          "switches": 0,
+          "critical": 0
+        },
+        "affected_nets": 8
+      },
+      "reconstruction": {
+        "mode": "adaptive_functional",
+        "bridge_channels": 0,
+        "remaining_required_groups": 8,
+        "preexisting_terminal_net_gaps": 8,
+        "inert_remnants_to_isolate": 0,
+        "model_issues": [
+          "OVAL_PAD_APPROXIMATION"
+        ]
+      },
+      "iterations": [
+        {
+          "mode": "pad_only",
+          "remaining": 8
+        },
+        {
+          "mode": "adaptive",
+          "remaining": 8
+        },
+        {
+          "mode": "adaptive_functional",
+          "remaining": 8
+        }
+      ]
+    },
+    {
+      "schema": "hs.arbitrary-keyboard-real-reference.v1",
+      "case_id": "kinesis_fkeys",
+      "repository": "dodotronix/kinesis_board",
+      "reference_path": "kinesis_fkeys/kinesis_fkeys.kicad_pcb",
+      "source_url": "https://raw.githubusercontent.com/dodotronix/kinesis_board/main/kinesis_fkeys/kinesis_fkeys.kicad_pcb",
+      "expected_source_sha256": "0493adb4a3203bec918b3f4c8e83d412ea58cde7d3512a54a2c0ba4b782f94da",
+      "physical_donor_present": false,
+      "engine_uses_hand_written_wiring_map": false,
+      "actual_sha256": "0493adb4a3203bec918b3f4c8e83d412ea58cde7d3512a54a2c0ba4b782f94da",
+      "intake": {
+        "schema": "hs.arbitrary-keyboard-intake.v1",
+        "reference_source_sha256": "0493adb4a3203bec918b3f4c8e83d412ea58cde7d3512a54a2c0ba4b782f94da",
+        "reference_source_filename": "kinesis_fkeys.kicad_pcb",
+        "source_kind": "EXTERNAL_KICAD_REFERENCE_NOT_PHYSICAL_JUNK",
+        "copper_layers": 2,
+        "footprints": 40,
+        "key_switch_candidates": 18,
+        "switch_detection_methods": {
+          "candidate_switch_footprint_or_ref": 18
+        },
+        "routed_track_count": 0,
+        "plated_via_count": 6,
+        "routed_conductive_zone_count": 39,
+        "unfilled_conductive_zone_names": [
+          "GND_L",
+          "GND_R"
+        ],
+        "source_warnings": [
+          "unfilled_zone:11:GND_L",
+          "unfilled_zone:12:GND_R",
+          "SWITCH_IDENTITY_NEEDS_PHYSICAL_CONFIRMATION"
+        ],
+        "eligible_for_bounded_virtual_reconstruction": false,
+        "blocker_codes": [
+          "SOURCE_CONDUCTIVE_ZONES_NOT_FILLED"
+        ],
+        "claimed_physical_donor_present": false,
+        "physical_authority_granted": false
+      },
+      "status": "SOURCE_TRIAGE_REJECTED",
+      "verdict": {
+        "schema": "hs.arbitrary-keyboard-benchmark-verdict.v1",
+        "status": "SOURCE_REJECTED_BEFORE_MODEL",
+        "gates": {},
+        "strict_reference_digital_pass": false,
+        "source_sha256": "0493adb4a3203bec918b3f4c8e83d412ea58cde7d3512a54a2c0ba4b782f94da",
+        "actual_discarded_keyboard_tested": false,
+        "arbitrary_unphotographed_junk_supported": false,
+        "real_keyboard_function_verified": false,
+        "physical_release": "BLOCKED_NOT_TESTED",
+        "build_ready": false
+      }
+    },
+    {
+      "schema": "hs.arbitrary-keyboard-real-reference.v1",
+      "case_id": "shortcut_keyboard",
+      "repository": "bhoppe-dev/Shortcut_Keyboard",
+      "reference_path": "01_Shortcut_Keyboard_PCB/shortcut_keyboard.kicad_pcb",
+      "source_url": "https://raw.githubusercontent.com/bhoppe-dev/Shortcut_Keyboard/main/01_Shortcut_Keyboard_PCB/shortcut_keyboard.kicad_pcb",
+      "expected_source_sha256": "1234e0dead1c058cb5230fec302a0e44dcdb63f1e104b79a760c7dff0e899718",
+      "physical_donor_present": false,
+      "engine_uses_hand_written_wiring_map": false,
+      "actual_sha256": "1234e0dead1c058cb5230fec302a0e44dcdb63f1e104b79a760c7dff0e899718",
+      "intake": {
+        "schema": "hs.arbitrary-keyboard-intake.v1",
+        "reference_source_sha256": "1234e0dead1c058cb5230fec302a0e44dcdb63f1e104b79a760c7dff0e899718",
+        "reference_source_filename": "shortcut_keyboard.kicad_pcb",
+        "source_kind": "EXTERNAL_KICAD_REFERENCE_NOT_PHYSICAL_JUNK",
+        "copper_layers": 4,
+        "footprints": 74,
+        "key_switch_candidates": 8,
+        "switch_detection_methods": {
+          "known_keyboard_footprint": 8
+        },
+        "routed_track_count": 371,
+        "plated_via_count": 103,
+        "routed_conductive_zone_count": 11,
+        "unfilled_conductive_zone_names": [],
+        "source_warnings": [],
+        "eligible_for_bounded_virtual_reconstruction": false,
+        "blocker_codes": [
+          "UNSUPPORTED_LAYER_STACK"
+        ],
+        "claimed_physical_donor_present": false,
+        "physical_authority_granted": false
+      },
+      "status": "SOURCE_TRIAGE_REJECTED",
+      "verdict": {
+        "schema": "hs.arbitrary-keyboard-benchmark-verdict.v1",
+        "status": "SOURCE_REJECTED_BEFORE_MODEL",
+        "gates": {},
+        "strict_reference_digital_pass": false,
+        "source_sha256": "1234e0dead1c058cb5230fec302a0e44dcdb63f1e104b79a760c7dff0e899718",
+        "actual_discarded_keyboard_tested": false,
+        "arbitrary_unphotographed_junk_supported": false,
+        "real_keyboard_function_verified": false,
+        "physical_release": "BLOCKED_NOT_TESTED",
+        "build_ready": false
+      }
+    },
+    {
+      "schema": "hs.arbitrary-keyboard-real-reference.v1",
+      "case_id": "plink_kicad",
+      "repository": "Logan-Fouts/Plink",
+      "reference_path": "hardware/plink_kicad/plink_kicad.kicad_pcb",
+      "source_url": "https://raw.githubusercontent.com/Logan-Fouts/Plink/master/hardware/plink_kicad/plink_kicad.kicad_pcb",
+      "expected_source_sha256": "3f342a51a596b808f348295f2cc35cf35bea36ec51d907eb31a7e6fbb81127c9",
+      "physical_donor_present": false,
+      "engine_uses_hand_written_wiring_map": false,
+      "actual_sha256": "3f342a51a596b808f348295f2cc35cf35bea36ec51d907eb31a7e6fbb81127c9",
+      "status": "UNSUPPORTED_KICAD_SOURCE_FORMAT_OR_NATIVE_IMPORT",
+      "native_parser_exit": 1,
+      "native_parser_timeout": false,
+      "parser_error": "Failed to open PCB with this KiCad version\n"
+    },
+    {
+      "schema": "hs.arbitrary-keyboard-real-reference.v1",
+      "case_id": "f60",
+      "repository": "robertcalvert/f.60",
+      "reference_path": "hardware/keyboard.kicad_pcb",
+      "source_url": "https://raw.githubusercontent.com/robertcalvert/f.60/master/hardware/keyboard.kicad_pcb",
+      "expected_source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+      "physical_donor_present": false,
+      "engine_uses_hand_written_wiring_map": false,
+      "actual_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+      "intake": {
+        "schema": "hs.arbitrary-keyboard-intake.v1",
+        "reference_source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+        "reference_source_filename": "f60.kicad_pcb",
+        "source_kind": "EXTERNAL_KICAD_REFERENCE_NOT_PHYSICAL_JUNK",
+        "copper_layers": 2,
+        "footprints": 129,
+        "key_switch_candidates": 62,
+        "switch_detection_methods": {
+          "known_keyboard_footprint": 62
+        },
+        "routed_track_count": 489,
+        "plated_via_count": 18,
+        "routed_conductive_zone_count": 0,
+        "unfilled_conductive_zone_names": [],
+        "source_warnings": [
+          "legacy_format_conversion_requires_independent_board_review"
+        ],
+        "eligible_for_bounded_virtual_reconstruction": true,
+        "blocker_codes": [],
+        "claimed_physical_donor_present": false,
+        "physical_authority_granted": false
+      },
+      "native_source_drc": {
+        "exit": 124,
+        "violations": null,
+        "unconnected_items": null,
+        "kicad_version": null,
+        "report_present": false,
+        "error": "PROCESS_TIMEOUT"
+      },
+      "engine_execution": {
+        "exit": 0,
+        "timeout": false,
+        "error_tail": null
+      },
+      "status": "RECONNECTED_BUT_CUT_COLLIDES",
+      "verdict": {
+        "schema": "hs.arbitrary-keyboard-benchmark-verdict.v1",
+        "status": "RECONNECTED_BUT_CUT_COLLIDES",
+        "gates": {
+          "required_reconnection_complete_in_model": true,
+          "source_terminals_connected_in_model": true,
+          "modeled_cut_clear_of_components": false,
+          "original_native_drc_clean": false,
+          "bridge_native_drc_clean": true,
+          "source_geometry_reliable_without_legacy_repairs": false
+        },
+        "strict_reference_digital_pass": false,
+        "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+        "actual_discarded_keyboard_tested": false,
+        "arbitrary_unphotographed_junk_supported": false,
+        "real_keyboard_function_verified": false,
+        "physical_release": "BLOCKED_NOT_TESTED",
+        "build_ready": false
+      },
+      "cut": {
+        "left_switch_candidates": 25,
+        "right_switch_candidates": 37,
+        "collisions": {
+          "pads": 1,
+          "vias": 0,
+          "switches": 5,
+          "critical": 0
+        },
+        "affected_nets": 15
+      },
+      "reconstruction": {
+        "mode": "pad_only",
+        "bridge_channels": 17,
+        "remaining_required_groups": 0,
+        "preexisting_terminal_net_gaps": 0,
+        "inert_remnants_to_isolate": 0,
+        "model_issues": [
+          "SOURCE_IMPORT_WARNINGS"
+        ]
+      },
+      "iterations": [
+        {
+          "mode": "pad_only",
+          "remaining": 0
+        }
+      ],
+      "interposer": {
+        "native_drc_pass": true,
+        "channel_count": 17,
+        "fabrication_release": "BLOCKED_PREVIEW_ONLY"
+      }
+    },
+    {
+      "schema": "hs.arbitrary-keyboard-real-reference.v1",
+      "case_id": "nhw68",
+      "repository": "dingyifei/NHW68",
+      "reference_path": "hardware/PCB/PCB.kicad_pcb",
+      "source_url": "https://raw.githubusercontent.com/dingyifei/NHW68/master/hardware/PCB/PCB.kicad_pcb",
+      "expected_source_sha256": "9cc1dacb5ebf294c86c8a929dc58a58a2add61dfa7c7371364a42b2459738308",
+      "physical_donor_present": false,
+      "engine_uses_hand_written_wiring_map": false,
+      "actual_sha256": "9cc1dacb5ebf294c86c8a929dc58a58a2add61dfa7c7371364a42b2459738308",
+      "intake": {
+        "schema": "hs.arbitrary-keyboard-intake.v1",
+        "reference_source_sha256": "9cc1dacb5ebf294c86c8a929dc58a58a2add61dfa7c7371364a42b2459738308",
+        "reference_source_filename": "nhw68.kicad_pcb",
+        "source_kind": "EXTERNAL_KICAD_REFERENCE_NOT_PHYSICAL_JUNK",
+        "copper_layers": 2,
+        "footprints": 262,
+        "key_switch_candidates": 68,
+        "switch_detection_methods": {
+          "known_keyboard_footprint": 68
+        },
+        "routed_track_count": 1109,
+        "plated_via_count": 184,
+        "routed_conductive_zone_count": 2,
+        "unfilled_conductive_zone_names": [],
+        "source_warnings": [],
+        "eligible_for_bounded_virtual_reconstruction": true,
+        "blocker_codes": [],
+        "claimed_physical_donor_present": false,
+        "physical_authority_granted": false
+      },
+      "native_source_drc": {
+        "exit": 124,
+        "violations": null,
+        "unconnected_items": null,
+        "kicad_version": null,
+        "report_present": false,
+        "error": "PROCESS_TIMEOUT"
+      },
+      "engine_execution": {
+        "exit": 0,
+        "timeout": false,
+        "error_tail": null
+      },
+      "status": "REPAIR_INCOMPLETE",
+      "verdict": {
+        "schema": "hs.arbitrary-keyboard-benchmark-verdict.v1",
+        "status": "REPAIR_INCOMPLETE",
+        "gates": {
+          "required_reconnection_complete_in_model": false,
+          "source_terminals_connected_in_model": false,
+          "modeled_cut_clear_of_components": false,
+          "original_native_drc_clean": false,
+          "bridge_native_drc_clean": true,
+          "source_geometry_reliable_without_legacy_repairs": false
+        },
+        "strict_reference_digital_pass": false,
+        "source_sha256": "9cc1dacb5ebf294c86c8a929dc58a58a2add61dfa7c7371364a42b2459738308",
+        "actual_discarded_keyboard_tested": false,
+        "arbitrary_unphotographed_junk_supported": false,
+        "real_keyboard_function_verified": false,
+        "physical_release": "BLOCKED_NOT_TESTED",
+        "build_ready": false
+      },
+      "cut": {
+        "left_switch_candidates": 40,
+        "right_switch_candidates": 28,
+        "collisions": {
+          "pads": 4,
+          "vias": 1,
+          "switches": 4,
+          "critical": 0
+        },
+        "affected_nets": 12
+      },
+      "reconstruction": {
+        "mode": "adaptive_functional",
+        "bridge_channels": 13,
+        "remaining_required_groups": 1,
+        "preexisting_terminal_net_gaps": 1,
+        "inert_remnants_to_isolate": 1,
+        "model_issues": [
+          "OVAL_PAD_APPROXIMATION",
+          "ZONE_BOUNDARY_RECONSTRUCTED_WITH_GEOMETRY_REPAIR"
+        ]
+      },
+      "iterations": [
+        {
+          "mode": "pad_only",
+          "remaining": 2
+        },
+        {
+          "mode": "adaptive",
+          "remaining": 2
+        },
+        {
+          "mode": "adaptive_functional",
+          "remaining": 1
+        }
+      ],
+      "interposer": {
+        "native_drc_pass": true,
+        "channel_count": 13,
+        "fabrication_release": "BLOCKED_PREVIEW_ONLY"
+      }
+    },
+    {
+      "schema": "hs.arbitrary-keyboard-real-reference.v1",
+      "case_id": "practice2by2",
+      "repository": "Vyom88/Mechanical-Keyboard-PCBs",
+      "reference_path": "Practice 2by3/2by2.kicad_pcb",
+      "source_url": "https://raw.githubusercontent.com/Vyom88/Mechanical-Keyboard-PCBs/main/Practice%202by3/2by2.kicad_pcb",
+      "expected_source_sha256": "47f827a002c7de3be1a14aef81cbad1846ea1524730579beff1ddb7fb3f95525",
+      "physical_donor_present": false,
+      "engine_uses_hand_written_wiring_map": false,
+      "actual_sha256": "47f827a002c7de3be1a14aef81cbad1846ea1524730579beff1ddb7fb3f95525",
+      "intake": {
+        "schema": "hs.arbitrary-keyboard-intake.v1",
+        "reference_source_sha256": "47f827a002c7de3be1a14aef81cbad1846ea1524730579beff1ddb7fb3f95525",
+        "reference_source_filename": "practice2by2.kicad_pcb",
+        "source_kind": "EXTERNAL_KICAD_REFERENCE_NOT_PHYSICAL_JUNK",
+        "copper_layers": 2,
+        "footprints": 24,
+        "key_switch_candidates": 4,
+        "switch_detection_methods": {
+          "known_keyboard_footprint": 4
+        },
+        "routed_track_count": 191,
+        "plated_via_count": 15,
+        "routed_conductive_zone_count": 1,
+        "unfilled_conductive_zone_names": [],
+        "source_warnings": [],
+        "eligible_for_bounded_virtual_reconstruction": true,
+        "blocker_codes": [],
+        "claimed_physical_donor_present": false,
+        "physical_authority_granted": false
+      },
+      "native_source_drc": {
+        "exit": 0,
+        "violations": 26,
+        "unconnected_items": 0,
+        "kicad_version": "9.0.2",
+        "report_present": true
+      },
+      "engine_execution": {
+        "exit": 0,
+        "timeout": false,
+        "error_tail": null
+      },
+      "status": "REPAIR_INCOMPLETE",
+      "verdict": {
+        "schema": "hs.arbitrary-keyboard-benchmark-verdict.v1",
+        "status": "REPAIR_INCOMPLETE",
+        "gates": {
+          "required_reconnection_complete_in_model": false,
+          "source_terminals_connected_in_model": false,
+          "modeled_cut_clear_of_components": false,
+          "original_native_drc_clean": false,
+          "bridge_native_drc_clean": true,
+          "source_geometry_reliable_without_legacy_repairs": false
+        },
+        "strict_reference_digital_pass": false,
+        "source_sha256": "47f827a002c7de3be1a14aef81cbad1846ea1524730579beff1ddb7fb3f95525",
+        "actual_discarded_keyboard_tested": false,
+        "arbitrary_unphotographed_junk_supported": false,
+        "real_keyboard_function_verified": false,
+        "physical_release": "BLOCKED_NOT_TESTED",
+        "build_ready": false
+      },
+      "cut": {
+        "left_switch_candidates": 0,
+        "right_switch_candidates": 4,
+        "collisions": {
+          "pads": 0,
+          "vias": 1,
+          "switches": 1,
+          "critical": 0
+        },
+        "affected_nets": 4
+      },
+      "reconstruction": {
+        "mode": "adaptive_functional",
+        "bridge_channels": 2,
+        "remaining_required_groups": 1,
+        "preexisting_terminal_net_gaps": 4,
+        "inert_remnants_to_isolate": 1,
+        "model_issues": [
+          "OVAL_PAD_APPROXIMATION",
+          "ZONE_BOUNDARY_RECONSTRUCTED_WITH_GEOMETRY_REPAIR"
+        ]
+      },
+      "iterations": [
+        {
+          "mode": "pad_only",
+          "remaining": 4
+        },
+        {
+          "mode": "adaptive",
+          "remaining": 2
+        },
+        {
+          "mode": "adaptive_functional",
+          "remaining": 1
+        }
+      ],
+      "interposer": {
+        "native_drc_pass": true,
+        "channel_count": 2,
+        "fabrication_release": "BLOCKED_PREVIEW_ONLY"
+      }
+    },
+    {
+      "schema": "hs.arbitrary-keyboard-real-reference.v1",
+      "case_id": "vyom60",
+      "repository": "Vyom88/Mechanical-Keyboard-PCBs",
+      "reference_path": "60% Pcb/60_Pcb.kicad_pcb",
+      "source_url": "https://raw.githubusercontent.com/Vyom88/Mechanical-Keyboard-PCBs/main/60%25%20Pcb/60_Pcb.kicad_pcb",
+      "expected_source_sha256": "6d15e812f2542a920f57fde86ce9441781eb2ecd3ac2b99c81fee19b8e4c5c15",
+      "physical_donor_present": false,
+      "engine_uses_hand_written_wiring_map": false,
+      "actual_sha256": "6d15e812f2542a920f57fde86ce9441781eb2ecd3ac2b99c81fee19b8e4c5c15",
+      "intake": {
+        "schema": "hs.arbitrary-keyboard-intake.v1",
+        "reference_source_sha256": "6d15e812f2542a920f57fde86ce9441781eb2ecd3ac2b99c81fee19b8e4c5c15",
+        "reference_source_filename": "vyom60.kicad_pcb",
+        "source_kind": "EXTERNAL_KICAD_REFERENCE_NOT_PHYSICAL_JUNK",
+        "copper_layers": 2,
+        "footprints": 286,
+        "key_switch_candidates": 91,
+        "switch_detection_methods": {
+          "known_keyboard_footprint": 91
+        },
+        "routed_track_count": 2838,
+        "plated_via_count": 359,
+        "routed_conductive_zone_count": 2,
+        "unfilled_conductive_zone_names": [],
+        "source_warnings": [],
+        "eligible_for_bounded_virtual_reconstruction": true,
+        "blocker_codes": [],
+        "claimed_physical_donor_present": false,
+        "physical_authority_granted": false
+      },
+      "native_source_drc": {
+        "exit": 0,
+        "violations": 880,
+        "unconnected_items": 0,
+        "kicad_version": "9.0.2",
+        "report_present": true
+      },
+      "engine_execution": {
+        "exit": 0,
+        "timeout": false,
+        "error_tail": null
+      },
+      "status": "REPAIR_INCOMPLETE",
+      "verdict": {
+        "schema": "hs.arbitrary-keyboard-benchmark-verdict.v1",
+        "status": "REPAIR_INCOMPLETE",
+        "gates": {
+          "required_reconnection_complete_in_model": false,
+          "source_terminals_connected_in_model": false,
+          "modeled_cut_clear_of_components": false,
+          "original_native_drc_clean": false,
+          "bridge_native_drc_clean": true,
+          "source_geometry_reliable_without_legacy_repairs": false
+        },
+        "strict_reference_digital_pass": false,
+        "source_sha256": "6d15e812f2542a920f57fde86ce9441781eb2ecd3ac2b99c81fee19b8e4c5c15",
+        "actual_discarded_keyboard_tested": false,
+        "arbitrary_unphotographed_junk_supported": false,
+        "real_keyboard_function_verified": false,
+        "physical_release": "BLOCKED_NOT_TESTED",
+        "build_ready": false
+      },
+      "cut": {
+        "left_switch_candidates": 39,
+        "right_switch_candidates": 52,
+        "collisions": {
+          "pads": 5,
+          "vias": 2,
+          "switches": 6,
+          "critical": 0
+        },
+        "affected_nets": 20
+      },
+      "reconstruction": {
+        "mode": "adaptive_functional",
+        "bridge_channels": 11,
+        "remaining_required_groups": 13,
+        "preexisting_terminal_net_gaps": 20,
+        "inert_remnants_to_isolate": 4,
+        "model_issues": [
+          "OVAL_PAD_APPROXIMATION",
+          "ZONE_BOUNDARY_RECONSTRUCTED_WITH_GEOMETRY_REPAIR"
+        ]
+      },
+      "iterations": [
+        {
+          "mode": "pad_only",
+          "remaining": 16
+        },
+        {
+          "mode": "adaptive",
+          "remaining": 15
+        },
+        {
+          "mode": "adaptive_functional",
+          "remaining": 13
+        }
+      ],
+      "interposer": {
+        "native_drc_pass": true,
+        "channel_count": 11,
+        "fabrication_release": "BLOCKED_PREVIEW_ONLY"
+      }
+    }
+  ],
+  "status_counts": {
+    "RECONNECTED_BUT_CUT_COLLIDES": 1,
+    "REPAIR_INCOMPLETE": 4,
+    "SOURCE_TRIAGE_REJECTED": 2,
+    "UNSUPPORTED_KICAD_SOURCE_FORMAT_OR_NATIVE_IMPORT": 1
+  },
+  "strict_reference_digital_passes": 0,
+  "modeled_copper_reconnections": 1,
+  "actual_physical_discarded_boards": 0,
+  "fabrication_or_sale_authorized": false,
+  "sample_is_random": false
+}

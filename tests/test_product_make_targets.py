@@ -31,3 +31,13 @@ def test_unrelated_make_targets_remain_available() -> None:
     output = make_dry_run("doctor")
 
     assert "scripts/hardware_splicer.py doctor" in output
+
+
+def test_headless_backend_checks_use_engine_tests_with_autorouting_disabled() -> None:
+    output = make_dry_run("verify-headless-backend")
+
+    assert "HARDWARE_SPLICER_AUTOROUTE=0" in output
+    assert "tests/test_digital_engine.py" in output
+    assert "tests/test_mcp_backend_gateway.py" in output
+    assert "splice-ui" not in output
+    assert "npm" not in output

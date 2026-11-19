@@ -22,6 +22,7 @@ import { StatusPill } from "./components/ProjectPanels.jsx";
 import { useSpliceJob } from "./hooks/useSpliceJob.js";
 import { ADVANCED_VIEWS, VIEWS, isAdvancedView } from "./nav.js";
 import ProjectWorkspace from "./projectSession/ProjectWorkspace.jsx";
+import { createDigitalProject } from "./projectSession/digitalStudyApi.js";
 import { useProjectPersistence } from "./projectSession/projectPersistence.js";
 import {
   ACTIONS,
@@ -77,7 +78,7 @@ function formatSavedAt(value) {
   return `Saved ${date.toLocaleString()}`;
 }
 
-function HomeHero({ onStart, onResume, canResume, onExample, onQuickDemo, onExplore, apiOk, version }) {
+function HomeHero({ onStart, onResume, canResume, onExample, onQuickDemo, onExplore, onDigital, creatingDigital, apiOk, version }) {
   return (
     <div className="home-layout">
       <section className="home-hero card">
@@ -96,6 +97,9 @@ function HomeHero({ onStart, onResume, canResume, onExample, onQuickDemo, onExpl
         </div>
         <PipelineVisual />
         <div className="hero-actions">
+          <button type="button" className="primary large" onClick={onDigital} disabled={!apiOk || creatingDigital}>
+            {creatingDigital ? "Opening digital project…" : "Start digital design"}
+          </button>
           {canResume ? (
             <>
               <button type="button" className="primary large" onClick={onResume} disabled={!apiOk}>
@@ -222,6 +226,7 @@ export default function App() {
   const [toast, setToast] = useState("");
   const [previewContext, setPreviewContext] = useState(null);
   const [session, dispatch] = useReducer(projectSessionReducer, undefined, () => createEmptySession());
+  const [creatingDigital, setCreatingDigital] = useState(false);
 
   const spliceJob = useSpliceJob();
   const projectPersistence = useProjectPersistence({
@@ -350,6 +355,21 @@ export default function App() {
     }
     const latest = projectPersistence.projects[0];
     if (latest) openSavedProject(latest.project_id);
+  };
+
+  const startDigitalProject = async () => {
+    if (creatingDigital) return;
+    setCreatingDigital(true);
+    try {
+      const result = await createDigitalProject();
+      const envelope = result.project;
+      dispatch({ type: ACTIONS.RESTORE_PROJECT_SNAPSHOT, snapshot: envelope.snapshot,
+        projectId: envelope.project_id, revision: envelope.revision, savedAt: envelope.saved_at });
+      setPreviewContext(null);
+      setView(VIEWS.workspace);
+      projectPersistence.refreshProjects();
+    } catch (error) { setToast(error.message); }
+    finally { setCreatingDigital(false); }
   };
 
   const cancelIntake = () => {
@@ -642,7 +662,8 @@ export default function App() {
                   key={job.job_id}
                   type="button"
                   className={`project-button ${session.activeJobId === job.job_id ? "active" : ""} ${jobStatusClass(job.status)}`}
-                  onClick={() => job.status === "succeeded" && loadJobResult(job.job_id)}
+                  onClick={() => job.status === "succeeded" && (job.options?.job_type === "digital_study"
+                    ? openSavedProject(job.options.payload.project_id) : loadJobResult(job.job_id))}
                   disabled={job.status !== "succeeded"}
                   title={job.status}
                 >
@@ -667,6 +688,8 @@ export default function App() {
               onExample={() => setView(VIEWS.example)}
               onQuickDemo={handleQuickDemo}
               onExplore={() => setView(VIEWS.showcase)}
+              onDigital={startDigitalProject}
+              creatingDigital={creatingDigital}
             />
           )}
 
@@ -707,6 +730,7 @@ export default function App() {
               onBenchCaptureSubmit={handleBenchCaptureSubmit}
               onToast={setToast}
               activeJobId={session.activeJobId}
+              onProjectReload={openSavedProject}
             />
           )}
 

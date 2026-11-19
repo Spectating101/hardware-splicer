@@ -1,0 +1,276 @@
+{
+  "compatible-repinned-3v3": {
+    "status": "passes_declared_checks",
+    "issues": [],
+    "source_checks": [
+      {
+        "authority": "declared_contract_only",
+        "content_hash": "sha256:d19bfa4d9ef172d62abec4cc73c348f90fe3b7a9b6dbb5b20c6b22a3b0c50209",
+        "pointer": "/source",
+        "source_id": "upload-d19bfa4d9ef172d62abe",
+        "status": "registered_contract_bytes_match",
+        "target": "reused-donor-supply"
+      },
+      {
+        "authority": "declared_contract_only",
+        "content_hash": "sha256:d19bfa4d9ef172d62abec4cc73c348f90fe3b7a9b6dbb5b20c6b22a3b0c50209",
+        "pointer": "/target",
+        "source_id": "upload-d19bfa4d9ef172d62abe",
+        "status": "registered_contract_bytes_match",
+        "target": "replacement-sensor"
+      },
+      {
+        "authority": "declared_contract_only",
+        "content_hash": "sha256:d19bfa4d9ef172d62abec4cc73c348f90fe3b7a9b6dbb5b20c6b22a3b0c50209",
+        "pointer": "/lead",
+        "source_id": "upload-d19bfa4d9ef172d62abe",
+        "status": "registered_contract_bytes_match",
+        "target": "repinned-positive"
+      },
+      {
+        "authority": "declared_contract_only",
+        "content_hash": "sha256:d19bfa4d9ef172d62abec4cc73c348f90fe3b7a9b6dbb5b20c6b22a3b0c50209",
+        "pointer": "/lead",
+        "source_id": "upload-d19bfa4d9ef172d62abe",
+        "status": "registered_contract_bytes_match",
+        "target": "repinned-return"
+      }
+    ],
+    "nets": [
+      {
+        "declared_current_a": "0.23",
+        "net_id": "net-1",
+        "pins": [
+          "replacement-sensor.RETURN",
+          "reused-donor-supply.RET"
+        ],
+        "roles": [
+          "ground"
+        ],
+        "status": "passes_declared_checks",
+        "wire_ids": [
+          "repinned-return"
+        ]
+      },
+      {
+        "declared_current_a": "0.23",
+        "net_id": "net-2",
+        "pins": [
+          "replacement-sensor.VIN",
+          "reused-donor-supply.P"
+        ],
+        "roles": [
+          "power_in",
+          "power_out"
+        ],
+        "status": "passes_declared_checks",
+        "wire_ids": [
+          "repinned-positive"
+        ]
+      }
+    ],
+    "materials": {
+      "buy_lines": 3,
+      "fully_covered_lines": 0,
+      "make_lines": 0,
+      "required_lines": 3,
+      "shortage_lines": 3,
+      "unresolved_lines": 0
+    },
+    "construction_ready": false,
+    "cut_list_csv": "wire_id,material_id,from_endpoint,from_pin,to_endpoint,to_pin,length_m,color,gauge_awg,manufacturer,mpn,specification\nrepinned-positive,lead,reused-donor-supply,P,replacement-sensor,VIN,0.37,RD,24,SyntheticAudit,DECLARED-WIRE,\nrepinned-return,lead,reused-donor-supply,RET,replacement-sensor,RETURN,0.42,BK,24,SyntheticAudit,DECLARED-WIRE,\n"
+  },
+  "changed-without-updated-source": {
+    "correctly_rejected": true,
+    "error": "declared wiring contract differs from the retained source pointer"
+  },
+  "incompatible-12v": {
+    "status": "blocked",
+    "issues": [
+      {
+        "code": "supply_voltage_outside_load_range",
+        "pin": "replacement-sensor.VIN",
+        "severity": "blocked",
+        "target": "net-2"
+      }
+    ],
+    "source_checks": [
+      {
+        "authority": "declared_contract_only",
+        "content_hash": "sha256:6438e9f4e28991a0fea06ffdfcdae9c1ef2e02968b2bde539bd8b1ddf9932d26",
+        "pointer": "/source",
+        "source_id": "upload-6438e9f4e28991a0fea0",
+        "status": "registered_contract_bytes_match",
+        "target": "reused-donor-supply"
+      },
+      {
+        "authority": "declared_contract_only",
+        "content_hash": "sha256:6438e9f4e28991a0fea06ffdfcdae9c1ef2e02968b2bde539bd8b1ddf9932d26",
+        "pointer": "/target",
+        "source_id": "upload-6438e9f4e28991a0fea0",
+        "status": "registered_contract_bytes_match",
+        "target": "replacement-sensor"
+      },
+      {
+        "authority": "declared_contract_only",
+        "content_hash": "sha256:6438e9f4e28991a0fea06ffdfcdae9c1ef2e02968b2bde539bd8b1ddf9932d26",
+        "pointer": "/lead",
+        "source_id": "upload-6438e9f4e28991a0fea0",
+        "status": "registered_contract_bytes_match",
+        "target": "repinned-positive"
+      },
+      {
+        "authority": "declared_contract_only",
+        "content_hash": "sha256:6438e9f4e28991a0fea06ffdfcdae9c1ef2e02968b2bde539bd8b1ddf9932d26",
+        "pointer": "/lead",
+        "source_id": "upload-6438e9f4e28991a0fea0",
+        "status": "registered_contract_bytes_match",
+        "target": "repinned-return"
+      }
+    ],
+    "nets": [
+      {
+        "declared_current_a": "0.23",
+        "net_id": "net-1",
+        "pins": [
+          "replacement-sensor.RETURN",
+          "reused-donor-supply.RET"
+        ],
+        "roles": [
+          "ground"
+        ],
+        "status": "passes_declared_checks",
+        "wire_ids": [
+          "repinned-return"
+        ]
+      },
+      {
+        "declared_current_a": "0.23",
+        "net_id": "net-2",
+        "pins": [
+          "replacement-sensor.VIN",
+          "reused-donor-supply.P"
+        ],
+        "roles": [
+          "power_in",
+          "power_out"
+        ],
+        "status": "blocked",
+        "wire_ids": [
+          "repinned-positive"
+        ]
+      }
+    ],
+    "materials": {
+      "buy_lines": 3,
+      "fully_covered_lines": 0,
+      "make_lines": 0,
+      "required_lines": 3,
+      "shortage_lines": 3,
+      "unresolved_lines": 0
+    },
+    "construction_ready": false,
+    "cut_list_csv": "wire_id,material_id,from_endpoint,from_pin,to_endpoint,to_pin,length_m,color,gauge_awg,manufacturer,mpn,specification\nrepinned-positive,lead,reused-donor-supply,P,replacement-sensor,VIN,0.37,RD,24,SyntheticAudit,DECLARED-WIRE,\nrepinned-return,lead,reused-donor-supply,RET,replacement-sensor,RETURN,0.42,BK,24,SyntheticAudit,DECLARED-WIRE,\n"
+  },
+  "incompatible-current": {
+    "status": "blocked",
+    "issues": [
+      {
+        "code": "wire_current_exceeded",
+        "demand_a": "2.1",
+        "severity": "blocked",
+        "target": "repinned-return"
+      },
+      {
+        "capacity_a": "1.2",
+        "code": "supply_current_exceeded",
+        "demand_a": "2.1",
+        "severity": "blocked",
+        "target": "net-2"
+      },
+      {
+        "code": "wire_current_exceeded",
+        "demand_a": "2.1",
+        "severity": "blocked",
+        "target": "repinned-positive"
+      }
+    ],
+    "source_checks": [
+      {
+        "authority": "declared_contract_only",
+        "content_hash": "sha256:0b924299f4ff589b6e11127363d270dc070dfb45ed685ffa6eebadc9b69a55bc",
+        "pointer": "/source",
+        "source_id": "upload-0b924299f4ff589b6e11",
+        "status": "registered_contract_bytes_match",
+        "target": "reused-donor-supply"
+      },
+      {
+        "authority": "declared_contract_only",
+        "content_hash": "sha256:0b924299f4ff589b6e11127363d270dc070dfb45ed685ffa6eebadc9b69a55bc",
+        "pointer": "/target",
+        "source_id": "upload-0b924299f4ff589b6e11",
+        "status": "registered_contract_bytes_match",
+        "target": "replacement-sensor"
+      },
+      {
+        "authority": "declared_contract_only",
+        "content_hash": "sha256:0b924299f4ff589b6e11127363d270dc070dfb45ed685ffa6eebadc9b69a55bc",
+        "pointer": "/lead",
+        "source_id": "upload-0b924299f4ff589b6e11",
+        "status": "registered_contract_bytes_match",
+        "target": "repinned-positive"
+      },
+      {
+        "authority": "declared_contract_only",
+        "content_hash": "sha256:0b924299f4ff589b6e11127363d270dc070dfb45ed685ffa6eebadc9b69a55bc",
+        "pointer": "/lead",
+        "source_id": "upload-0b924299f4ff589b6e11",
+        "status": "registered_contract_bytes_match",
+        "target": "repinned-return"
+      }
+    ],
+    "nets": [
+      {
+        "declared_current_a": "2.1",
+        "net_id": "net-1",
+        "pins": [
+          "replacement-sensor.RETURN",
+          "reused-donor-supply.RET"
+        ],
+        "roles": [
+          "ground"
+        ],
+        "status": "blocked",
+        "wire_ids": [
+          "repinned-return"
+        ]
+      },
+      {
+        "declared_current_a": "2.1",
+        "net_id": "net-2",
+        "pins": [
+          "replacement-sensor.VIN",
+          "reused-donor-supply.P"
+        ],
+        "roles": [
+          "power_in",
+          "power_out"
+        ],
+        "status": "blocked",
+        "wire_ids": [
+          "repinned-positive"
+        ]
+      }
+    ],
+    "materials": {
+      "buy_lines": 3,
+      "fully_covered_lines": 0,
+      "make_lines": 0,
+      "required_lines": 3,
+      "shortage_lines": 3,
+      "unresolved_lines": 0
+    },
+    "construction_ready": false,
+    "cut_list_csv": "wire_id,material_id,from_endpoint,from_pin,to_endpoint,to_pin,length_m,color,gauge_awg,manufacturer,mpn,specification\nrepinned-positive,lead,reused-donor-supply,P,replacement-sensor,VIN,0.37,RD,24,SyntheticAudit,DECLARED-WIRE,\nrepinned-return,lead,reused-donor-supply,RET,replacement-sensor,RETURN,0.42,BK,24,SyntheticAudit,DECLARED-WIRE,\n"
+  }
+}

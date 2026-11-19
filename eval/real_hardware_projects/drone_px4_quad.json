@@ -1,0 +1,82 @@
+{
+  "id": "drone_px4_quad",
+  "kind": "new_build",
+  "device": "450 mm class quadcopter on Pixhawk 6C / PX4",
+  "task": "Develop a practical, non-flight-authorizing quadcopter assembly concept from a documented flight controller; enumerate required complete subsystem interfaces and missing sizing calculations.",
+  "intake": {
+    "project_name": "PX4 reference quadcopter new assembly",
+    "goal": "Develop a buildable quadcopter design using documented Pixhawk 6C flight controller and PX4; identify frame motors propellers ESC power distribution battery radio GPS firmware and setup; check interface/power compatibility and missing thrust/weight/current measurements before any operation.",
+    "mode": "greenfield",
+    "available_parts": [
+      {
+        "name": "Pixhawk 6C flight controller",
+        "type": "microcontroller",
+        "quantity": 1
+      },
+      {
+        "name": "quad frame no chosen dimensions",
+        "type": "mechanical_structure",
+        "quantity": 1
+      },
+      {
+        "name": "unselected brushless motors",
+        "type": "brushless_motor",
+        "quantity": 4
+      },
+      {
+        "name": "unselected ESCs",
+        "type": "motor_driver",
+        "quantity": 4
+      },
+      {
+        "name": "unselected flight battery",
+        "type": "power_source",
+        "quantity": 1
+      }
+    ],
+    "constraints": {
+      "battery_voltage_v": "unknown",
+      "motor_stall_current_a": "unknown",
+      "payload_mass_kg": "unknown",
+      "maximum_takeoff_mass_kg": "unknown",
+      "motor_kv": "unknown",
+      "propeller_size": "unknown",
+      "power_module_model": "unknown",
+      "flight_authorized": false
+    }
+  },
+  "sources": [
+    {
+      "source_id": "px4_pixhawk6c",
+      "source_type": "manual",
+      "uri": "https://github.com/PX4/PX4-Autopilot/blob/main/docs/en/flight_controller/pixhawk6c.md",
+      "revision": "accessed-2026-10-20-not-archived",
+      "claims": [
+        "Pixhawk 6C POWER1 and POWER2 require regulated supply through suitable power module",
+        "Pixhawk 6C supports PWM servo outputs and PX4 multicopter configurations"
+      ]
+    },
+    {
+      "source_id": "px4_wiring",
+      "source_type": "manual",
+      "uri": "https://docs.px4.io/v1.17/en/assembly/quick_start_pixhawk6c",
+      "revision": "v1.17",
+      "claims": [
+        "Pixhawk 6C supports power module, GPS/compass and ESC interface wiring"
+      ]
+    }
+  ],
+  "deliverables": [
+    "exact controller power-rail design and isolation",
+    "four motor ESC battery sizing table",
+    "thrust to weight calculations and expected current",
+    "assembly wiring and BOM",
+    "PX4 configuration and bench-only validation protocol"
+  ],
+  "acceptance": [
+    "Do not wire battery directly to flight-controller regulated POWER port",
+    "No assumed thrust or runtime without motor prop battery data",
+    "No flight authorization"
+  ],
+  "approved_catalog_build_ids": []
+}
