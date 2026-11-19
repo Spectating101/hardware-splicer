@@ -108,6 +108,7 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
   const [listError, setListError] = useState(null);
   const [machineSeedError, setMachineSeedError] = useState(null);
   const timerRef = useRef(null);
+  const scheduledProjectRef = useRef(null);
   const pendingSerializedRef = useRef(null);
   const savedSerializedRef = useRef(null);
   const machineSeedRef = useRef(null);
@@ -170,7 +171,18 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
     };
   }, [dispatch, enabled, session?.intake, session?.machineProject, session?.projectId]);
 
+  useEffect(() => () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+  }, []);
+
   useEffect(() => {
+    // A pending save belongs to one project. Leaving that project (cancel, reset, switch)
+    // discards it; ordinary re-renders of the same project must not.
+    if (timerRef.current && scheduledProjectRef.current !== (session?.projectId || null)) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+      pendingSerializedRef.current = null;
+    }
     if (!enabled || session?.mode === "digital" || !sessionIsPersistable(session)) return undefined;
 
     const snapshot = projectSnapshot(session);
@@ -194,8 +206,10 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
     }
 
     pendingSerializedRef.current = serialized;
+    scheduledProjectRef.current = session.projectId;
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(async () => {
+      timerRef.current = null;
       const projectId = session.projectId;
       const expectedRevision = Number(session.snapshotRevision || 0);
       dispatch({ type: ACTIONS.SET_PERSISTENCE, status: PERSISTENCE_STATUS.saving });
@@ -233,10 +247,7 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
         }
       }
     }, debounceMs);
-
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
+    return undefined;
   }, [debounceMs, dispatch, enabled, refreshProjects, session]);
 
   const openProject = useCallback(
