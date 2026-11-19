@@ -1123,10 +1123,10 @@ function scanCrossings(loop, axis, at) {
 
 const SIDES = [["left", 0, -1], ["right", 0, 1], ["bottom", 1, -1], ["top", 1, 1]];
 
-// Signed in-plane gap per side between the display's projected outline and the aperture loop,
+// Signed in-plane distance per side between the display's projected outline and the aperture loop,
 // measured along that side's normal and minimised over scanlines across the span both share.
-// Positive clears; negative means the faceplate overlaps the outline on that side.
-export function projectedSideGaps(outline, aperture, centre, { samples = 96 } = {}) {
+// Positive clears; negative means the faceplate covers the outline on that side.
+export function projectedSideDistances(outline, aperture, centre, { samples = 96 } = {}) {
   const result = {};
   for (const [side, axis, sign] of SIDES) {
     if (!aperture?.length) {
@@ -1160,29 +1160,61 @@ export function projectedSideGaps(outline, aperture, centre, { samples = 96 } = 
   return result;
 }
 
-export function minimumSideGap(gaps) {
-  const sides = Object.entries(gaps);
-  const unknown = sides.find(([, gap]) => gap.value == null);
-  if (!sides.length || unknown) return { value: null, side: null, reason: unknown?.[1].reason ?? "no sides" };
-  const [side, { value }] = sides.reduce((a, b) => (b[1].value < a[1].value ? b : a));
+export function tightestSide(sides) {
+  const entries = Object.entries(sides);
+  const unknown = entries.find(([, side]) => side.value == null);
+  if (!entries.length || unknown) return { value: null, side: null, reason: unknown?.[1].reason ?? "no sides" };
+  const [side, { value }] = entries.reduce((a, b) => (b[1].value < a[1].value ? b : a));
   return { value, side, reason: null };
 }
 
 const SIDE_LETTER = { left: "L", right: "R", top: "T", bottom: "B" };
+const SIDE_ORDER = ["left", "right", "top", "bottom"];
+const amount = (value) => Math.abs(value).toFixed(2);
 
-export function formatGapValue(value) {
-  return value < 0 ? `overlap ${mm2(value)} mm` : `${mm2(value)} mm`;
-}
-
-export function gapLabel(side, gap) {
+// A signed in-plane distance per side. Negative means the faceplate covers the glass edge on that
+// side: a bezel lip, which an XY projection cannot call interference. Positive leaves the edge
+// clear of the faceplate.
+export function sideCoverLabel(side, entry) {
   const letter = SIDE_LETTER[side];
-  if (gap?.value == null) return `Projected CAD gap · ${letter} ? · ${gap?.reason ?? "not derivable"}`;
-  return `Projected CAD gap · ${letter} ${formatGapValue(gap.value)} · computed`;
+  if (entry?.value == null) return `${letter} ? · ${entry?.reason ?? "not derivable"}`;
+  return entry.value < 0 ? `lip ${amount(entry.value)}` : `clear ${amount(entry.value)}`;
 }
 
-export function minimumGapLabel(minimum) {
-  if (minimum?.value == null) return "Min projected XY gap · ? · not derivable";
-  return `Min projected XY gap · ${formatGapValue(minimum.value)} · computed`;
+export function coverHeadline(sides) {
+  const entries = SIDE_ORDER.map((side) => [side, sides?.[side]]);
+  if (entries.some(([, entry]) => entry?.value == null)) return "Faceplate cover of glass edge · ? · not derivable";
+  const clear = entries.filter(([, entry]) => entry.value >= 0);
+  const pick = (list, key) => {
+    const best = Math.min(...list.map(([, entry]) => key(entry.value)));
+    const letters = list.filter(([, entry]) => key(entry.value).toFixed(2) === best.toFixed(2)).map(([side]) => SIDE_LETTER[side]);
+    return { best, letters: letters.join("/") };
+  };
+  if (!clear.length) {
+    const { best, letters } = pick(entries, (value) => -value);
+    return `Faceplate covers glass edge · min lip ${best.toFixed(2)} mm (${letters}) · computed`;
+  }
+  const { best, letters } = pick(clear, (value) => value);
+  return `Glass edge clear of faceplate on ${clear.map(([side]) => SIDE_LETTER[side]).join("/")} · min clear ${best.toFixed(2)} mm (${letters}) · computed`;
+}
+
+export function coverDetail(sides, source = "projected CAD, section Face Rear L+R") {
+  const entries = SIDE_ORDER.map((side) => [side, sides?.[side]]);
+  const allLips = entries.every(([, entry]) => entry?.value != null && entry.value < 0);
+  const items = entries.map(([side, entry]) => {
+    const letter = SIDE_LETTER[side];
+    if (entry?.value == null) return `${letter} ?`;
+    if (allLips) return `${letter} ${amount(entry.value)}`;
+    return `${letter} ${entry.value < 0 ? "lip" : "clear"} ${amount(entry.value)}`;
+  });
+  return `${allLips ? "Lip " : ""}${items.join(" · ")} mm · ${source}`;
+}
+
+export function apertureSizeLabel(bounds, seam) {
+  if (!bounds) return "Aperture size · not derivable";
+  const size = `${(bounds.right - bounds.left).toFixed(2)} × ${(bounds.top - bounds.bottom).toFixed(2)} mm`;
+  const seamText = seam ? `, ${seam.gap.toFixed(2)} mm seam at x ${formatNumber(Math.round(seam.at[0] * 10) / 10)}` : "";
+  return `Aperture ${size} across both halves${seamText} · computed`;
 }
 
 export function footprintDeltaPair(older, newer) {
@@ -1266,12 +1298,12 @@ function orientLoops(loops) {
 
 export function orientedSectionEdges(segments, weld = APERTURE_WELD_MM) {
   const edges = [];
-  for (const loop of orientLoops(weldSectionLoops(segments, weld).loops)) {
+  for (const [loopIndex, loop] of orientLoops(weldSectionLoops(segments, weld).loops).entries()) {
     for (let i = 0; i < loop.length; i++) {
       const a = loop[i];
       const b = loop[(i + 1) % loop.length];
       const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
-      if (length > 0) edges.push({ a, b, normal: [(b[1] - a[1]) / length, -(b[0] - a[0]) / length] });
+      if (length > 0) edges.push({ a, b, loop: loopIndex, normal: [(b[1] - a[1]) / length, -(b[0] - a[0]) / length] });
     }
   }
   return edges;
@@ -1363,52 +1395,66 @@ export function gapToEdges(outline, edges, side, centre, { samples = 96, used = 
   return best;
 }
 
-// halves: [{ label, side: "left" | "right", segments }]. Left and right gaps use their own half;
-// top and bottom take the minimum over both halves and name the half that gives it.
-export function perHalfGaps(outline, halves, centre, { weld = APERTURE_WELD_MM } = {}) {
-  const edges = halves.map((half) => ({ ...half, edges: orientedSectionEdges(half.segments, weld) }));
+// halves: [{ label, side: "left" | "right", segments }]. Left and right use their own half; top
+// and bottom take the tighter of both halves and name the half that gives it. `aperture` is the
+// bounds of the inner edges themselves, measured, never derived from the display outline.
+export function perHalfCover(outline, halves, centre, { weld = APERTURE_WELD_MM } = {}) {
+  // Each half bounds the aperture with the section loop that comes nearest the display centre;
+  // screw holes and other loops of the same half are not aperture edges.
+  const edges = halves.map((half) => {
+    const all = orientedSectionEdges(half.segments, weld);
+    let nearest = null;
+    let best = Infinity;
+    for (const edge of all) {
+      const distance = pointSegmentDistance(centre, edge.a, edge.b);
+      if (distance < best) {
+        best = distance;
+        nearest = edge.loop;
+      }
+    }
+    return { ...half, edges: all.filter((edge) => edge.loop === nearest) };
+  });
   const seam = edges.length === 2 ? seamBetween(edges[0].edges, edges[1].edges, centre) : null;
   const reach = seam ? seam.gap + weld : 0;
   const otherOf = (half) => edges.find((other) => other !== half)?.edges ?? [];
   const inner = [];
-  const gaps = {};
-  for (const side of ["left", "right", "top", "bottom"]) {
+  const sides = {};
+  const extremes = {};
+  for (const side of SIDE_ORDER) {
+    const { axis, toward } = SIDE_SPEC[side];
     const candidates = side === "left" || side === "right" ? edges.filter((half) => half.side === side) : edges;
     const results = candidates.map((half) => {
       const own = innerEdgesForSide(half.edges, side, centre, otherOf(half), reach);
       // Only the edges that bound the aperture at some scanline are drawn, not hole rims behind them.
       const used = new Set();
       const value = own.length && outline?.length ? gapToEdges(outline, own, side, centre, { used }) : null;
-      inner.push(...[...used].map(({ a, b }) => [a, b]));
+      for (const { a, b } of used) {
+        inner.push([a, b]);
+        for (const point of [a, b]) {
+          const reach = point[axis] * toward;
+          if (extremes[side] === undefined || reach > extremes[side] * toward) extremes[side] = point[axis];
+        }
+      }
       return { label: half.label, value };
     }).filter(({ value }) => value !== null);
     if (!results.length) {
       const names = candidates.map(({ label }) => label).join(" or ") || "either half";
-      gaps[side] = { value: null, part: null, reason: `no inner edge of ${names} faces the display` };
+      sides[side] = { value: null, part: null, reason: `no inner edge of ${names} faces the display` };
       continue;
     }
     const value = Math.min(...results.map((result) => result.value));
     const givers = results.filter((result) => result.value.toFixed(2) === value.toFixed(2));
-    gaps[side] = {
+    sides[side] = {
       value, reason: null,
       part: side === "left" || side === "right" ? null : givers.length > 1 ? "both halves" : givers[0].label,
     };
   }
-  return { gaps, seam, inner };
+  const aperture = SIDE_ORDER.every((side) => extremes[side] !== undefined)
+    ? { left: extremes.left, right: extremes.right, bottom: extremes.bottom, top: extremes.top } : null;
+  return { sides, seam, inner, aperture };
 }
 
 export function seamLabel(seam) {
   return seam ? `Faceplate halves ${seam.gap.toFixed(2)} mm apart at x ${formatNumber(Math.round(seam.at[0] * 10) / 10)} · computed` : null;
 }
 
-export function halfGapLabel(side, gap) {
-  const letter = SIDE_LETTER[side];
-  if (gap?.value == null) return `Projected CAD gap · ${letter} ? · ${gap?.reason ?? "not derivable"}`;
-  return `Projected CAD gap · ${letter} ${formatGapValue(gap.value)}${gap.part ? ` (${gap.part})` : ""} · computed`;
-}
-
-export function perHalfMinimumLabel(gaps) {
-  const minimum = minimumSideGap(gaps);
-  if (minimum.value == null) return "Min projected XY gap · ? · not derivable";
-  return `Min projected XY gap · ${formatGapValue(minimum.value)} · computed (per half)`;
-}

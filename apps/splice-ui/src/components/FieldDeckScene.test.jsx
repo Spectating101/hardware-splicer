@@ -8,9 +8,9 @@ import {
   indexFielddeck, materialSpec, meshDeltaLabel, meshMeasures, nearestPoint, placeBesideEndpoint, placeCallouts,
   placeRoutingLabel, projectedFitScale, rowForNode, rowsForMode, selectedPartKeys, simplifyEdgeChain,
   toggleFielddeckSheet, weldEdgeChains,
-  apertureFromSection, footprintDeltaPair, gapLabel, linearDimension, minimumGapLabel, minimumSideGap,
-  pointInPolygon, polygonArea, projectedSideGaps, sectionSegments, vertexCentroid, weldSectionLoops,
-  halfGapLabel, perHalfGaps, perHalfMinimumLabel, seamLabel,
+  apertureFromSection, footprintDeltaPair, linearDimension, tightestSide,
+  pointInPolygon, polygonArea, projectedSideDistances, sectionSegments, vertexCentroid, weldSectionLoops,
+  apertureSizeLabel, coverDetail, coverHeadline, perHalfCover, seamLabel, sideCoverLabel,
 } from "./fielddeckLogic.js";
 
 const stageMock = vi.hoisted(() => ({ load: vi.fn(), create: vi.fn() }));
@@ -511,31 +511,29 @@ describe("Fielddeck Face view fit layer", () => {
     expect(apertureFromSection([{ label: "Face", segments: [] }], [0, 0]).reason).toBe("section plane misses the faceplate");
   });
 
-  it("measures signed projected gaps per side and calls a negative gap an overlap", () => {
+  it("measures signed projected distances per side against one closed aperture loop", () => {
     const aperture = apertureFromSection(faceplate(0), [30, 20]).loop;
-    const gaps = projectedSideGaps(rect(12, 11, 48, 29.5), aperture, [30, 20]);
-    expect(gaps.left.value).toBeCloseTo(2, 6);
-    expect(gaps.right.value).toBeCloseTo(2, 6);
-    expect(gaps.bottom.value).toBeCloseTo(1, 6);
-    expect(gaps.top.value).toBeCloseTo(0.5, 6);
-    expect(minimumSideGap(gaps)).toEqual({ value: expect.closeTo(0.5, 6), side: "top", reason: null });
-    expect(gapLabel("left", gaps.left)).toBe("Projected CAD gap · L 2.00 mm · computed");
-    const covered = projectedSideGaps(rect(8, 11, 48, 29.5), aperture, [30, 20]);
-    expect(gapLabel("left", covered.left)).toBe("Projected CAD gap · L overlap −2.00 mm · computed");
-    expect(minimumGapLabel(minimumSideGap(covered))).toBe("Min projected XY gap · overlap −2.00 mm · computed");
+    const sides = projectedSideDistances(rect(12, 11, 48, 29.5), aperture, [30, 20]);
+    expect(sides.left.value).toBeCloseTo(2, 6);
+    expect(sides.right.value).toBeCloseTo(2, 6);
+    expect(sides.bottom.value).toBeCloseTo(1, 6);
+    expect(sides.top.value).toBeCloseTo(0.5, 6);
+    expect(tightestSide(sides)).toEqual({ value: expect.closeTo(0.5, 6), side: "top", reason: null });
+    expect(sideCoverLabel("left", sides.left)).toBe("clear 2.00");
+    const covered = projectedSideDistances(rect(8, 11, 48, 29.5), aperture, [30, 20]);
+    expect(sideCoverLabel("left", covered.left)).toBe("lip 2.00");
   });
 
   it("marks every side unknown, with its reason, when the aperture is not derivable", () => {
-    const gaps = projectedSideGaps(rect(12, 11, 48, 29.5), null, [30, 20]);
-    expect(Object.values(gaps).every(({ value }) => value === null)).toBe(true);
-    expect(gapLabel("top", gaps.top)).toBe("Projected CAD gap · T ? · aperture not derivable");
-    expect(minimumSideGap(gaps).value).toBeNull();
-    expect(minimumGapLabel(minimumSideGap(gaps))).toBe("Min projected XY gap · ? · not derivable");
+    const sides = projectedSideDistances(rect(12, 11, 48, 29.5), null, [30, 20]);
+    expect(Object.values(sides).every(({ value }) => value === null)).toBe(true);
+    expect(sideCoverLabel("top", sides.top)).toBe("T ? · aperture not derivable");
+    expect(tightestSide(sides).value).toBeNull();
+    expect(coverHeadline(sides)).toBe("Faceplate cover of glass edge · ? · not derivable");
   });
 
-
   // Two halves with a 0.3 mm seam at x 30–30.3; the right half's window edge at the top sits 1 mm
-  // lower, so the top gap comes from Face Rear Right.
+  // lower, so the top comes from Face Rear Right.
   function halves(seam = 0.3, rightTop = 29) {
     const prism = (rects, dx = 0) => rects.flatMap(([[x0, y0], [x1, y1]]) => box([x0 + dx, y0, 0], [x1 + dx, y1, 3]));
     const left = prism([[[0, 0], [10, 10]], [[0, 10], [10, 30]], [[0, 30], [10, 40]], [[10, 0], [30, 10]], [[10, 30], [30, 40]]]);
@@ -550,29 +548,35 @@ describe("Fielddeck Face view fit layer", () => {
   it("measures each side against its own half when a 0.3 mm seam keeps the loop open", () => {
     const centre = [30.15, 20];
     expect(apertureFromSection(halves(), centre).loop).toBeNull();
-    const { gaps, seam, inner } = perHalfGaps(rect(12, 11, 48, 28.5), halves(), centre);
-    expect(gaps.left).toEqual({ value: expect.closeTo(2, 6), part: null, reason: null });
-    expect(gaps.right.value).toBeCloseTo(2.3, 6);
-    expect(gaps.top).toEqual({ value: expect.closeTo(0.5, 6), part: "Face Rear Right", reason: null });
-    expect(gaps.bottom).toEqual({ value: expect.closeTo(1, 6), part: "both halves", reason: null });
-    expect(halfGapLabel("top", gaps.top)).toBe("Projected CAD gap · T 0.50 mm (Face Rear Right) · computed");
-    expect(halfGapLabel("left", gaps.left)).toBe("Projected CAD gap · L 2.00 mm · computed");
-    expect(perHalfMinimumLabel(gaps)).toBe("Min projected XY gap · 0.50 mm · computed (per half)");
+    const { sides, seam, inner, aperture } = perHalfCover(rect(12, 11, 48, 28.5), halves(), centre);
+    expect(sides.left).toEqual({ value: expect.closeTo(2, 6), part: null, reason: null });
+    expect(sides.right.value).toBeCloseTo(2.3, 6);
+    expect(sides.top).toEqual({ value: expect.closeTo(0.5, 6), part: "Face Rear Right", reason: null });
+    expect(sides.bottom).toEqual({ value: expect.closeTo(1, 6), part: "both halves", reason: null });
+    expect(coverHeadline(sides)).toBe("Glass edge clear of faceplate on L/R/T/B · min clear 0.50 mm (T) · computed");
     expect(seam.gap).toBeCloseTo(0.3, 6);
     expect(seamLabel({ ...seam, at: [155.01, 250] })).toBe("Faceplate halves 0.30 mm apart at x 155 · computed");
+    // The aperture is the bounds of the inner edges, seam included: 10 to 50.3 by 10 to 30.
+    expect(aperture).toEqual({ left: 10, right: expect.closeTo(50.3, 6), bottom: 10, top: 30 });
+    expect(apertureSizeLabel(aperture, { ...seam, at: [30.14, 10] }))
+      .toBe("Aperture 40.30 × 20.00 mm across both halves, 0.30 mm seam at x 30.1 · computed");
     // Seam edges never count as aperture edges.
     expect(inner.every(([a, b]) => !(Math.abs(a[0] - 30) < 0.01 && Math.abs(b[0] - 30) < 0.01))).toBe(true);
-    expect(inner.length).toBeGreaterThan(0);
   });
 
-  it("calls a covered side an overlap in ink and names a side without an inner edge", () => {
+  it("calls a covered glass edge a lip, never interference, and names a side without an inner edge", () => {
     const centre = [30.15, 20];
-    const { gaps } = perHalfGaps(rect(5, 11, 48, 28.5), halves(), centre);
-    expect(halfGapLabel("left", gaps.left)).toBe("Projected CAD gap · L overlap −5.00 mm · computed");
-    const lonely = perHalfGaps(rect(12, 11, 48, 28.5), halves().slice(0, 1), centre);
-    expect(lonely.gaps.right).toEqual({ value: null, part: null, reason: "no inner edge of either half faces the display" });
-    expect(halfGapLabel("right", lonely.gaps.right)).toBe("Projected CAD gap · R ? · no inner edge of either half faces the display");
-    expect(perHalfMinimumLabel(lonely.gaps)).toBe("Min projected XY gap · ? · not derivable");
+    const { sides } = perHalfCover(rect(5, 5, 55, 35), halves(0.3, 30), centre);
+    expect(sideCoverLabel("left", sides.left)).toBe("lip 5.00");
+    expect(coverHeadline(sides)).toBe("Faceplate covers glass edge · min lip 4.70 mm (R) · computed");
+    expect(coverDetail(sides)).toBe("Lip L 5.00 · R 4.70 · T 5.00 · B 5.00 mm · projected CAD, section Face Rear L+R");
+    for (const text of [coverHeadline(sides), coverDetail(sides), sideCoverLabel("left", sides.left)]) {
+      expect(text).not.toMatch(/gap|overlap|−/i);
+    }
+    const lonely = perHalfCover(rect(12, 11, 48, 28.5), halves().slice(0, 1), centre);
+    expect(lonely.sides.right).toEqual({ value: null, part: null, reason: "no inner edge of either half faces the display" });
+    expect(sideCoverLabel("right", lonely.sides.right)).toBe("R ? · no inner edge of either half faces the display");
+    expect(lonely.aperture).toBeNull();
   });
 
   it("averages mesh vertices for spacer centroids and states the footprint delta as a pair", () => {
@@ -658,11 +662,12 @@ describe("Fielddeck evidence UI", () => {
         meshStats: new Map([["7:part:tray", { volume: 12000, area: 3000 }], ["5:part:tray", { volume: 11450, area: 2990 }]]),
         ghostLengths: new Map([["7:part:tray", 42]]),
         faceFit: {
-          gaps: { left: { value: -14.7, part: null, reason: null }, right: { value: -14.7, part: null, reason: null },
-            top: { value: -12.98, part: "both halves", reason: null },
-            bottom: { value: null, part: null, reason: "no inner edge of either half faces the display" } },
-          minimum: { value: null, side: null, reason: "no inner edge of either half faces the display" }, spacers: 4, level: 62.5,
-          seam: "Faceplate halves 0.30 mm apart at x 155 · computed", footprint: "−45.92 × −28.78 mm",
+          sides: { left: { value: -14.7, part: null, reason: null }, right: { value: -14.7, part: null, reason: null },
+            top: { value: -12.98, part: "both halves", reason: null }, bottom: { value: -12.98, part: "both halves", reason: null } },
+          minimum: { value: -14.7, side: "left", reason: null }, spacers: 4, level: 62.5,
+          seam: "Faceplate halves 0.30 mm apart at x 155 · computed",
+          aperture: "Aperture 114.00 × 65.50 mm across both halves, 0.30 mm seam at x 155 · computed",
+          footprint: "−45.92 × −28.78 mm",
         },
         update, dispose: vi.fn(),
       };
@@ -827,17 +832,18 @@ describe("Fielddeck evidence UI", () => {
     render(<FieldDeckScene />);
     fireEvent.click(await screen.findByRole("button", { name: "Face view" }));
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ faceView: true, ghostDeltaKey: null }));
-    expect(screen.getByText("5-inch minus 7-inch · CAD footprint, computed")).toBeInTheDocument();
-    // The strip keeps physical fit primary and never turns a missing aperture into a number.
+    // A covered glass edge is a bezel lip; the strip keeps physical fit primary and unknown.
     const strip = within(document.querySelector("[data-footprint]"));
-    expect(strip.getByText("Physical fit · Unknown")).toHaveClass("fd-fit-primary");
-    expect(strip.getByText("Min projected XY gap · ? · not derivable")).toBeInTheDocument();
-    expect(strip.getByText("Projected CAD gap · L overlap −14.70 mm · computed")).toBeInTheDocument();
-    expect(strip.getByText("Projected CAD gap · T overlap −12.98 mm (both halves) · computed")).toBeInTheDocument();
-    expect(strip.getByText("Projected CAD gap · B ? · no inner edge of either half faces the display")).toBeInTheDocument();
-    expect(strip.getByText("Faceplate halves 0.30 mm apart at x 155 · computed")).toBeInTheDocument();
-    expect(screen.getByText("−45.92 × −28.78 mm")).toBeInTheDocument();
-    expect(screen.getByText(/Spacer mesh centroid · computed \(hole axis unverified\)/)).toBeInTheDocument();
+    expect(strip.getByText("Physical fit · Unknown (stack-up and lug alignment unverified)")).toHaveClass("fd-fit-primary");
+    expect(strip.getByText("Faceplate covers glass edge · min lip 12.98 mm (T/B) · computed")).toBeInTheDocument();
+    expect(strip.getByText("Lip L 14.70 · R 14.70 · T 12.98 · B 12.98 mm · projected CAD, section Face Rear L+R")).toBeInTheDocument();
+    expect(strip.getByText("Aperture 114.00 × 65.50 mm across both halves, 0.30 mm seam at x 155 · computed")).toBeInTheDocument();
+    expect(strip.getByText("Active area exposure · unknown")).toBeInTheDocument();
+    expect(strip.getByText("Rear pocket clearance · not derivable from the XY projection")).toBeInTheDocument();
+    expect(document.querySelector("[data-footprint]").textContent).not.toMatch(/gap|overlap|interference/i);
+    // The CAD footprint delta lives in the Compare inspector for the display, not in Face view.
+    expect(strip.queryByText("−45.92 × −28.78 mm")).toBeNull();
+    expect(within(screen.getByRole("complementary", { name: "Selection details" })).getByText("−45.92 × −28.78 mm")).toBeInTheDocument();
     const scene = screen.getByTestId("fielddeck-scene");
     expect(scene.querySelector('[data-question-number="1"]').parentElement).toHaveAttribute("data-pin-anchor", "5:part:display");
     expect(scene.querySelector('[title="Check pilot hole engagement"]').parentElement).toHaveAttribute("data-pin-anchor", "7:part:display");

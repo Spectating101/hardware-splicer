@@ -436,17 +436,19 @@
 .fd-face-drawing .fd-dim-extension { stroke-width: 0.75; }
 .fd-face-drawing .fd-dim-line { stroke-width: 1; }
 .fd-face-drawing .fd-dim-arrow { fill: var(--kind, var(--text)); stroke: none; }
-.fd-face-drawing .fd-dim[data-kind="removed"] { opacity: 0.7; }
+/* Compare Face view: the 7-inch layer and its dimensions sit at 35%. */
+.fd-face-drawing .fd-dim[data-kind="removed"] { opacity: 0.35; }
+.fd-face-drawing .fd-seam-chain { stroke: var(--text); stroke-opacity: 0.6; stroke-width: 0.75; stroke-dasharray: 12 3 2 3; fill: none; }
 .fd-face-drawing text {
   fill: var(--kind, var(--text)); stroke: none; font: 11px var(--mono); font-variant-numeric: tabular-nums;
 }
 .fd-face-drawing .fd-aperture { stroke: #d9cfbe; stroke-width: 1.5; fill: none; }
 .fd-face-drawing .fd-spacer-marks { stroke: var(--text); stroke-width: 1; fill: none; }
-.fd-face-drawing .fd-gap { stroke: var(--text); fill: none; }
-.fd-face-drawing .fd-gap .fd-dim-arrow { fill: var(--text); }
-.fd-face-drawing .fd-gap-unknown { stroke: var(--text-2); stroke-width: 1; stroke-dasharray: 1 3; }
-.fd-face-drawing .fd-gap-text { fill: var(--text-2); font-size: 10px; }
-.fd-face-drawing .fd-gap[data-known="true"] .fd-gap-text { fill: var(--text); }
+.fd-face-drawing .fd-cover { stroke: var(--text); fill: none; }
+.fd-face-drawing .fd-cover .fd-dim-arrow { fill: var(--text); }
+.fd-face-drawing .fd-cover-unknown { stroke: var(--text-2); stroke-width: 1; stroke-dasharray: 1 3; }
+.fd-face-drawing .fd-cover-text { fill: var(--text-2); font-size: 10px; }
+.fd-face-drawing .fd-cover[data-known="true"] .fd-cover-text { fill: var(--text); }
 
 .fd-stage .fd-footprint {
   display: grid; justify-items: center; gap: 2px; padding: 4px 8px;
@@ -455,17 +457,11 @@
 .fd-fit-primary { font: 600 14px/1.3 "IBM Plex Sans", system-ui, sans-serif; }
 .fd-fit-gap { font: 500 20px/1.3 var(--mono); }
 .fd-fit-reason { color: var(--text-2); font-size: 11px; }
-.fd-fit-sides { display: grid; grid-template-columns: repeat(2, max-content); gap: 0 16px; font: 11px/1.4 var(--mono); color: var(--text-2); }
-.fd-fit-sides [data-known="true"] { color: var(--text); }
-.fd-fit-sides span:nth-child(5) { grid-column: 1 / -1; justify-self: center; }
-.fd-fit-delta { display: flex; gap: 8px; align-items: baseline; color: var(--text-2); font-size: 11px; }
-.fd-fit-delta [data-footprint-delta] { color: var(--text); font: 500 14px/1.3 var(--mono); }
-.fd-fit-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 14px; color: var(--text-2); font-size: 10px; }
-.fd-fit-legend span { display: inline-flex; align-items: center; gap: 4px; }
-.fd-fit-legend svg { width: 12px; height: 12px; stroke: var(--text); stroke-width: 1; fill: none; }
-.fd-fit-legend svg[viewBox="0 0 16 12"] { width: 16px; }
-.fd-fit-legend .fd-legend-dashed { stroke: #9097a0; stroke-dasharray: 4 3; }
-.fd-fit-legend a { color: inherit; pointer-events: auto; }
+.fd-fit-line { font: 11px/1.4 var(--mono); color: var(--text); }
+.fd-fit-secondary { color: var(--text-2); }
+.fd-fit-unknown { color: var(--text-2); }
+.fd-fit-source { font: 10px/1.4 var(--mono); }
+.fd-footprint a { color: inherit; pointer-events: auto; }
 .fd-leaders .fd-pin-ticks { stroke: var(--question); stroke-width: 1; fill: none; }
 /* Face view sits on the dark stage, so its pins take a raised fill to read as filled discs, as in 3D. */
 .fd-stage:has(.fd-footprint) .fd-pin span { background: #262b33; }
@@ -479,8 +475,9 @@
 .fd-ghost-links .fd-ghost-delta { fill: #f17e70; stroke: #0e1116; stroke-width: 3px; stroke-linejoin: round; font: 11px var(--mono); paint-order: stroke; }
 .fd-fit-compact { display: none; font: 10px/1.4 var(--mono); }
 @media (width < 640px) {
-  .fd-fit-compact { display: block; }
-  .fd-fit-sides, .fd-fit-delta, .fd-fit-legend { display: none; }
-  .fd-fit-gap { font-size: 14px; }
-  .fd-fit-primary { font-size: 13px; }
+  .fd-fit-gap { font-size: 13px; }
+  .fd-fit-primary { font-size: 12px; }
+  .fd-fit-line, .fd-fit-source { font-size: 9px; }
+  .fd-fit-secondary { display: none; }
+  .fd-face-drawing text { font-size: 9px; }
 }

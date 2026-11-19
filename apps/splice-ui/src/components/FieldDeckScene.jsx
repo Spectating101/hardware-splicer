@@ -3,7 +3,7 @@ import {
   BASIS_LABELS, DEFAULT_EXPLODE, DIFF_LABELS, FIELDDECK_COMPARE, FIELDDECK_NARROW,
   changeSummary, classifyPart, oldRevisionCaption, evidenceCells, formatEvidenceSource, indexFielddeck, rowsForMode, selectedPartKeys,
   countClippedItems, evidenceLabel, ghostDeltaKey, openQuestions, shortPartName, toggleFielddeckSheet,
-  formatEvidenceValue, formatGapValue, halfGapLabel, perHalfMinimumLabel,
+  coverDetail, coverHeadline, formatEvidenceValue,
 } from "./fielddeckLogic.js";
 import { createFielddeckStage, disposeFielddeck, loadFielddeck } from "./fielddeckStage.js";
 import { fetchSceneManifest } from "../api.js";
@@ -38,7 +38,7 @@ function hasNumericValue({ value, state }) {
     || Array.isArray(value) && value.some((item) => typeof item === "number"));
 }
 
-export function EvidenceRows({ evidence, change }) {
+export function EvidenceRows({ evidence, change, footprint }) {
   return (
     <dl className="fd-evidence" aria-label="Evidence">
       {change && <div className="fd-evidence-row fd-change-summary" data-inspector-item>
@@ -47,6 +47,12 @@ export function EvidenceRows({ evidence, change }) {
           <dd className="fd-evidence-state">computed</dd>
           <dd className="fd-evidence-value" data-numeric="true">{change.bounds}</dd>
         </>}
+      </div>}
+      {footprint && <div className="fd-evidence-row" data-inspector-item>
+        <dt>CAD footprint vs {footprint.base}-inch</dt>
+        <dd className="fd-evidence-state">computed</dd>
+        <dd className="fd-evidence-value" data-numeric="true">{footprint.value}</dd>
+        <dd className="fd-evidence-source">Both revisions&apos; display GLB bounds</dd>
       </div>}
       {change?.mesh && <div className="fd-evidence-row" data-inspector-item>
         <dt>Mesh volume and area</dt>
@@ -105,7 +111,7 @@ function QuestionNumber({ number }) {
   return <span className="fd-question-numbers">{number}</span>;
 }
 
-function Inspector({ row, index, questions, open, compare, meshStats }) {
+function Inspector({ row, index, questions, open, compare, meshStats, footprint, other = null }) {
   const scroll = useRef(null);
   const [more, setMore] = useState(0);
   useLayoutEffect(() => {
@@ -161,7 +167,7 @@ function Inspector({ row, index, questions, open, compare, meshStats }) {
             {link.source && <div data-inspector-item><EvidenceSource source={formatEvidenceSource(link.source)} /></div>}
           </> : <>
             <h3>Evidence</h3>
-            <EvidenceRows change={changeSummary(index, row, compare, meshStats)}
+            <EvidenceRows change={changeSummary(index, row, compare, meshStats)} footprint={footprint}
               evidence={part.evidence.filter(({ field }) => field !== "physical_fit")} />
           </>}
         </>}
@@ -258,46 +264,31 @@ function PartTree({ rows, view, questions, counts, blockersOnly, endpoints, link
   );
 }
 
-// One line for phones: each side's signed value, with overlap spelled out.
-function compactGaps(gaps) {
-  const sides = ["left", "right", "top", "bottom"].map((side) => {
-    const { value } = gaps[side];
-    return `${side[0].toUpperCase()} ${value == null ? "?" : formatGapValue(value)}`;
-  });
-  return `Projected CAD gap · ${sides.join(" · ")} · computed`;
-}
-
-// Face view strip: physical fit stays the primary line, the minimum projected gap is the one large
-// number, and every mark in the drawing has its source here or on the dimension itself.
-function FaceStrip({ fit, mode, base, target, glbSources, pitch }) {
+// Face view caption. A faceplate covering the glass edge is a bezel lip; an XY projection cannot
+// establish interference, so physical fit stays unknown and every line names its source.
+function FaceStrip({ fit, mode, base, target, glbSources, viewingArea }) {
   const sources = [target, ...(mode === "compare" ? [base] : [])].map((rev) => glbSources[rev] ?? `${rev}-inch GLB`);
   return (
     <div className="fd-footprint" data-footprint="">
-      <div className="fd-fit-primary">Physical fit · Unknown</div>
-      <div className="fd-fit-gap" data-fit-gap="">{fit ? perHalfMinimumLabel(fit.gaps) : "Min projected XY gap · ? · not derivable"}</div>
-      {fit ? <div className="fd-fit-sides">
-        {["left", "right", "top", "bottom"].map((side) => <span key={side} data-known={fit.gaps[side].value != null}>
-          {halfGapLabel(side, fit.gaps[side])}</span>)}
-        {fit.seam && <span data-known="true">{fit.seam}</span>}
-      </div> : <div className="fd-fit-reason">Fit layer unavailable</div>}
-      {fit && <div className="fd-fit-compact">{compactGaps(fit.gaps)}</div>}
-      {mode === "compare" && fit?.footprint && <div className="fd-fit-delta">
-        <span data-footprint-delta="">{fit.footprint}</span>
-        <span>{target}-inch minus {base}-inch · CAD footprint, computed</span>
+      <div className="fd-fit-primary">Physical fit · Unknown (stack-up and lug alignment unverified)</div>
+      <div className="fd-fit-gap" data-fit-headline="">{fit ? coverHeadline(fit.sides) : "Faceplate cover of glass edge · ? · not derivable"}</div>
+      {fit && <div className="fd-fit-line" data-fit-detail="">{coverDetail(fit.sides)}</div>}
+      {fit && <div className="fd-fit-line">{fit.aperture}</div>}
+      {viewingArea && <div className="fd-fit-line fd-fit-secondary">
+        Viewing area {viewingArea.value} · datasheet{" "}
+        {viewingArea.source.href ? <a href={viewingArea.source.href}>{viewingArea.source.label}</a> : viewingArea.source.label}
+        {" "}· position relative to glass not given
       </div>}
-      <div className="fd-fit-legend" data-footprint-source="">
-        {fit?.spacers > 0 && <span><svg aria-hidden="true" viewBox="0 0 12 12"><path d="M0,6h12M6,0v12" /></svg>
-          Spacer mesh centroid · computed (hole axis unverified)</span>}
-        {pitch && <span><svg aria-hidden="true" viewBox="0 0 16 12"><path className="fd-legend-dashed" d="M0,6h16" /></svg>
-          Mount pitch · {pitch.value} · datasheet{" "}
-          {pitch.source.href ? <a href={pitch.source.href}>{pitch.source.label}</a> : pitch.source.label}</span>}
-        <span>Contours computed from {sources.join(" and ")}</span>
+      <div className="fd-fit-line fd-fit-unknown">Active area exposure · unknown</div>
+      <div className="fd-fit-line fd-fit-unknown">Rear pocket clearance · not derivable from the XY projection</div>
+      <div className="fd-fit-source fd-fit-secondary" data-footprint-source="">
+        Contours, section and spacer centroids computed from {sources.join(" and ")} · spacer hole axes unverified
       </div>
     </div>
   );
 }
 
-function Annotations({ labels, selection, endpoints, pins, faceView, base, target, onSelect, glbSources = {}, faceFit, mode, pitch }) {
+function Annotations({ labels, selection, endpoints, pins, faceView, base, target, onSelect, glbSources = {}, faceFit, mode, viewingArea }) {
   return (
     <div className="fd-annotations" aria-label="Scene callouts">
       <svg className="fd-leaders" aria-hidden="true">
@@ -314,7 +305,7 @@ function Annotations({ labels, selection, endpoints, pins, faceView, base, targe
           <path className="fd-bracket" data-bracket={selection.key} />
         </>}
       </svg>
-      {faceView && <FaceStrip fit={faceFit} mode={mode} base={base} target={target} glbSources={glbSources} pitch={pitch} />}
+      {faceView && <FaceStrip fit={faceFit} mode={mode} base={base} target={target} glbSources={glbSources} viewingArea={viewingArea} />}
       {labels.map((row) => <span className="fd-label" key={row.key} data-anchor={row.key}
         data-endpoint-label={row.endpoint}>{row.caption ?? nameOf(row)}
         {row.detail && <small className="fd-label-detail">{row.detail}</small>}</span>)}
@@ -490,10 +481,10 @@ export default function FieldDeckScene({ onExit }) {
   const comparisonAvailable = comparisonEnabled && sidecars[target]?.revision_diff?.status === "available";
   const comparisonRenderable = comparisonAvailable
     && [base, target].every((rev) => [...linked].some((key) => key.startsWith(`${rev}:`)));
-  const pitchEvidence = index.byPart.get(`${target}:${focusPart}`)?.part?.evidence
-    ?.find(({ field }) => field === "landscape_mount_pitch_mm");
-  const mountPitch = pitchEvidence?.value != null ? {
-    value: formatEvidenceValue({ ...pitchEvidence, state: "datasheet" }), source: formatEvidenceSource(pitchEvidence.source),
+  const areaEvidence = index.byPart.get(`${target}:${focusPart}`)?.part?.evidence
+    ?.find(({ field }) => field === "landscape_viewing_area_mm");
+  const viewingArea = areaEvidence?.value != null ? {
+    value: formatEvidenceValue({ ...areaEvidence, state: "datasheet" }), source: formatEvidenceSource(areaEvidence.source),
   } : null;
   const faceAvailable = comparisonRenderable && focusPart
     && [base, target].every((rev) => linked.has(index.byPart.get(`${rev}:${focusPart}`)?.key));
@@ -749,7 +740,8 @@ export default function FieldDeckScene({ onExit }) {
           </div>
         </aside>
         <Inspector row={selection} index={index} questions={selectionQuestions} open={inspectorOpen} compare={sceneCompare}
-          meshStats={meshStats} />
+          meshStats={meshStats} footprint={view.mode === "compare" && selection?.part?.part_id === focusPart && faceFit?.footprint
+            ? { base, value: faceFit.footprint } : null} />
 
         {!modelVisible && <div className="fd-stage-message" role="status">
           {loading ? "Loading Fielddeck models…" : errors.join(" ") || "Fielddeck model unavailable."}
@@ -759,7 +751,7 @@ export default function FieldDeckScene({ onExit }) {
 
         <Annotations labels={labels} selection={view.faceView ? null : selection} endpoints={endpoints}
           pins={pins} faceView={view.faceView} base={base} target={target} onSelect={select}
-          glbSources={glbSources} faceFit={faceFit} mode={view.mode} pitch={mountPitch} />
+          glbSources={glbSources} faceFit={faceFit} mode={view.mode} viewingArea={viewingArea} />
         <div className="fd-bottom">
           {assets && (
             <div className="fd-controls" data-intro={playing}>
