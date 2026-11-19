@@ -1841,6 +1841,9 @@ def create_app() -> FastAPI:
         job = job_backend.store.get_job(job_id)
         return {"ok": True, "job": job.to_dict(include_result=False) if job else None}
 
+    from .project_scene_api import project_scene_router
+
+    app.include_router(project_scene_router)
     _maybe_mount_splice_ui(app)
     return app
 

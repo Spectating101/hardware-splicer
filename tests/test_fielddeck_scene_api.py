@@ -5,13 +5,25 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from hardware_splicer import fielddeck_scene_api
+from hardware_splicer import fielddeck_scene_api, project_scene_api
 
 
 @pytest.fixture
 def client(tmp_path, monkeypatch):
-    root = tmp_path / "fielddeck"
-    monkeypatch.setattr(fielddeck_scene_api, "_FIELDDECK_ROOT", root)
+    project = "projects/cyberdeck-real-trial-20261020"
+    root = tmp_path / project
+    root.mkdir(parents=True)
+    (root / "scene.json").write_text(json.dumps({
+        "schema": "hardware_splicer.scene_manifest.v1",
+        "project_id": root.name,
+        "revisions": [
+            {"id": "7", "parts": f"{project}/digital_v1/cad/parts.json",
+             "glb": f"{project}/digital_v1/cad/FIELDDECK_7.glb"},
+            {"id": "5", "parts": f"{project}/display_swap/parts.json",
+             "glb": f"{project}/display_swap/cad/FIELDDECK_5.glb"},
+        ],
+    }))
+    monkeypatch.setattr(project_scene_api, "_REPO_ROOT", tmp_path)
     app = FastAPI()
     app.include_router(fielddeck_scene_api.fielddeck_router)
     with TestClient(app) as client:
