@@ -6,6 +6,12 @@ connectivity itself: every net of the circuit netlist with two or more pins must
 PCB as a net holding exactly the matching footprint pads, and the PCB must not join pads the
 netlist keeps apart. Footprints are matched by their KiCad footprint id and pads by the pad's
 position in the module pad table, which is how the PCB serializer numbers them.
+
+A module with no catalog body size is drawn as a logical-preview package
+(``HardwareSplicerPreview:<node>``, synthetic pads in catalog pin order) and is blocked from
+fabrication elsewhere. Its footprint id names the node, not the part, so such footprints are
+matched as one preview class and their pads by catalog pin order; pad-to-net membership is
+still checked pad by pad.
 """
 
 from __future__ import annotations
@@ -15,7 +21,9 @@ from collections import Counter
 from typing import Any, Dict, List, Mapping, Tuple
 
 from ..netlist.ir import CircuitNetlist
-from .module_registry import find_module, resolve_module_footprint, resolve_module_pads
+from .module_registry import find_module, resolve_module_body_mm, resolve_module_footprint, resolve_module_pads
+
+_PREVIEW = "HardwareSplicerPreview"
 
 _FOOTPRINT_RE = re.compile(r'\(footprint "([^"]+)"')
 _PAD_RE = re.compile(r'\(pad "([^"]+)"[^\n]*?\(net (\d+) "([^"]*)"\)\)')
@@ -32,9 +40,14 @@ def _netlist_signatures(netlist: CircuitNetlist) -> Counter:
             comp = comps.get(pin.component_ref)
             module_id = str(comp.module_id or "") if comp else ""
             spec = find_module(module_id) if module_id else None
-            pads = resolve_module_pads(module_id, spec) if module_id else None
-            footprint = resolve_module_footprint(module_id) if module_id else ""
-            index = next((i for i, p in enumerate(pads or []) if p["pinId"] == pin.pin), None)
+            if spec is not None and resolve_module_body_mm(module_id) is None:
+                footprint = _PREVIEW
+                order = [str(p.get("id")) for p in spec.get("pins") or []]
+                index = order.index(pin.pin) if pin.pin in order else None
+            else:
+                pads = resolve_module_pads(module_id, spec) if module_id else None
+                footprint = resolve_module_footprint(module_id) if module_id else ""
+                index = next((i for i, p in enumerate(pads or []) if p["pinId"] == pin.pin), None)
             members.append((footprint, str(index + 1) if index is not None else f"missing:{pin.pin}"))
         if len(members) >= 2:
             signatures[tuple(sorted(members))] += 1
@@ -49,6 +62,8 @@ def _pcb_signatures(pcb_text: str) -> Counter:
         if not match:
             continue
         footprint = match.group(1)
+        if footprint.startswith(_PREVIEW + ":"):
+            footprint = _PREVIEW
         for number, net_id, _name in _PAD_RE.findall(part):
             if net_id == "0":
                 continue
