@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="218mm" height="180mm" viewBox="0 0 218 180">
+  <title>Large-ball desktop USB pointer housing coupon</title>
+  <style>text{font:4px sans-serif;fill:#18323a} .part,.dim,.test{fill:none;stroke:#22424a;stroke-width:.4}.part{fill:#dfebeb;fill-opacity:.4}.dim{stroke:#13746a}.test{stroke:#a54b25;stroke-dasharray:2 1}</style>
+  <rect id="cover" class="part" x="21" y="16" width="150" height="115" />
+  <circle id="ball" class="part" cx="96.0" cy="60" r="27.5" />
+  <circle id="cleaning-access" class="dim" cx="96.0" cy="60" r="32.5" />
+  <circle id="button-0" class="part" cx="70.0" cy="107" r="11.0" />
+  <rect id="foot-0" class="test" x="28" y="123" width="5" height="5" />
+  <circle id="button-1" class="part" cx="122.0" cy="107" r="11.0" />
+  <rect id="foot-1" class="test" x="159" y="123" width="5" height="5" />
+  <rect id="usb-relief" class="dim" x="89.0" y="10" width="14" height="6" />
+  <text x="21" y="146">Ball Ø55; lift-off ring Ø65; button centers 52 apart</text>
+  <text x="21" y="156">Assumed cleanable donor ball, two large buttons and wired USB controller.</text>
+  <text x="21" y="166">Check button position and ball force with the intended operator.</text>
+</svg>

@@ -1,0 +1,642 @@
+{
+  "P008": {
+    "baseline": {
+      "Minimum insertion clearance": {
+        "value": 0.95,
+        "target": "min",
+        "limit": 0.2,
+        "unit": "mm",
+        "pass": true
+      },
+      "Worst lateral reload span": {
+        "value": 1.55,
+        "target": "max",
+        "limit": 1.0,
+        "unit": "mm",
+        "pass": false
+      },
+      "Vertical frame margin": {
+        "value": 0.125,
+        "target": "min",
+        "limit": 0.25,
+        "unit": "mm",
+        "pass": false
+      },
+      "Horizontal frame margin": {
+        "value": 0.35,
+        "target": "min",
+        "limit": 0.25,
+        "unit": "mm",
+        "pass": true
+      },
+      "Perforation exclusion margin": {
+        "value": -0.025,
+        "target": "min",
+        "limit": 0.25,
+        "unit": "mm",
+        "pass": false
+      }
+    },
+    "revised": {
+      "Minimum insertion clearance": {
+        "value": 0.3,
+        "target": "min",
+        "limit": 0.2,
+        "unit": "mm",
+        "pass": true
+      },
+      "Worst lateral reload span": {
+        "value": 0.9,
+        "target": "max",
+        "limit": 1.0,
+        "unit": "mm",
+        "pass": true
+      },
+      "Vertical frame margin": {
+        "value": 0.45,
+        "target": "min",
+        "limit": 0.25,
+        "unit": "mm",
+        "pass": true
+      },
+      "Horizontal frame margin": {
+        "value": 0.35,
+        "target": "min",
+        "limit": 0.25,
+        "unit": "mm",
+        "pass": true
+      },
+      "Perforation exclusion margin": {
+        "value": 0.3,
+        "target": "min",
+        "limit": 0.25,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P017": {
+    "baseline": {
+      "Worst nominal index error": {
+        "value": 0.68359,
+        "target": "max",
+        "limit": 0.1,
+        "unit": "deg",
+        "pass": false
+      },
+      "Home closure error": {
+        "value": 0.70312,
+        "target": "max",
+        "limit": 0.1,
+        "unit": "deg",
+        "pass": false
+      },
+      "Settling time budget surplus": {
+        "value": -170,
+        "target": "min",
+        "limit": 0,
+        "unit": "ms",
+        "pass": false
+      }
+    },
+    "revised": {
+      "Worst nominal index error": {
+        "value": 0.07812,
+        "target": "max",
+        "limit": 0.1,
+        "unit": "deg",
+        "pass": true
+      },
+      "Home closure error": {
+        "value": 0.0,
+        "target": "max",
+        "limit": 0.1,
+        "unit": "deg",
+        "pass": true
+      },
+      "Settling time budget surplus": {
+        "value": 20,
+        "target": "min",
+        "limit": 0,
+        "unit": "ms",
+        "pass": true
+      }
+    }
+  },
+  "P018": {
+    "baseline": {
+      "Worst projected stability margin": {
+        "value": 0.39618,
+        "target": "min",
+        "limit": 10,
+        "unit": "mm",
+        "pass": false
+      },
+      "Offset drive pin spacing": {
+        "value": 18.0,
+        "target": "min",
+        "limit": 15,
+        "unit": "mm",
+        "pass": true
+      },
+      "Offset drive pin diametral relief": {
+        "value": 0.5,
+        "target": "min",
+        "limit": 0.35,
+        "unit": "mm",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Worst projected stability margin": {
+        "value": 13.45741,
+        "target": "min",
+        "limit": 10,
+        "unit": "mm",
+        "pass": true
+      },
+      "Offset drive pin spacing": {
+        "value": 18.0,
+        "target": "min",
+        "limit": 15,
+        "unit": "mm",
+        "pass": true
+      },
+      "Offset drive pin diametral relief": {
+        "value": 0.5,
+        "target": "min",
+        "limit": 0.35,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P019": {
+    "baseline": {
+      "Clearance between stowed side packs": {
+        "value": -102.0,
+        "target": "min",
+        "limit": 4,
+        "unit": "mm",
+        "pass": false
+      },
+      "Useable open side depth": {
+        "value": 184.0,
+        "target": "min",
+        "limit": 182.0,
+        "unit": "mm",
+        "pass": true
+      },
+      "Hinge offset surplus over packed stock": {
+        "value": 2.0,
+        "target": "min",
+        "limit": 0.8,
+        "unit": "mm",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Clearance between stowed side packs": {
+        "value": 86.0,
+        "target": "min",
+        "limit": 4,
+        "unit": "mm",
+        "pass": true
+      },
+      "Useable open side depth": {
+        "value": 184.0,
+        "target": "min",
+        "limit": 182.0,
+        "unit": "mm",
+        "pass": true
+      },
+      "Hinge offset surplus over packed stock": {
+        "value": 1.0,
+        "target": "min",
+        "limit": 0.8,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P020": {
+    "baseline": {
+      "Modeled maximum sag": {
+        "value": 28.8455,
+        "target": "max",
+        "limit": 1.0,
+        "unit": "mm",
+        "pass": false
+      },
+      "Modeled extreme fiber stress": {
+        "value": 8.37225,
+        "target": "max",
+        "limit": 5.0,
+        "unit": "N/mm²",
+        "pass": false
+      },
+      "Support span": {
+        "value": 610.0,
+        "target": "min",
+        "limit": 600,
+        "unit": "mm",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Modeled maximum sag": {
+        "value": 0.26083,
+        "target": "max",
+        "limit": 1.0,
+        "unit": "mm",
+        "pass": true
+      },
+      "Modeled extreme fiber stress": {
+        "value": 0.36338,
+        "target": "max",
+        "limit": 5.0,
+        "unit": "N/mm²",
+        "pass": true
+      },
+      "Support span": {
+        "value": 610.0,
+        "target": "min",
+        "limit": 600,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P195": {
+    "baseline": {
+      "Full-image horizontal sight margin": {
+        "value": 4.26353,
+        "target": "min",
+        "limit": 0.4,
+        "unit": "mm",
+        "pass": true
+      },
+      "Full-image vertical sight margin": {
+        "value": 2.6676,
+        "target": "min",
+        "limit": 0.4,
+        "unit": "mm",
+        "pass": true
+      },
+      "Overhead shadow beyond far screen edge": {
+        "value": -25.10668,
+        "target": "min",
+        "limit": 2,
+        "unit": "mm",
+        "pass": false
+      }
+    },
+    "revised": {
+      "Full-image horizontal sight margin": {
+        "value": 0.43751,
+        "target": "min",
+        "limit": 0.4,
+        "unit": "mm",
+        "pass": true
+      },
+      "Full-image vertical sight margin": {
+        "value": 0.45748,
+        "target": "min",
+        "limit": 0.4,
+        "unit": "mm",
+        "pass": true
+      },
+      "Overhead shadow beyond far screen edge": {
+        "value": 6.07024,
+        "target": "min",
+        "limit": 2,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P196": {
+    "baseline": {
+      "Large-lens lower adjustment reserve": {
+        "value": -6.69697,
+        "target": "min",
+        "limit": 1.0,
+        "unit": "mm",
+        "pass": false
+      },
+      "Small-lens upper adjustment reserve": {
+        "value": 3.71219,
+        "target": "min",
+        "limit": 1.0,
+        "unit": "mm",
+        "pass": true
+      },
+      "Nominal rod hole diametral relief": {
+        "value": 0.6,
+        "target": "min",
+        "limit": 0.5,
+        "unit": "mm",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Large-lens lower adjustment reserve": {
+        "value": 2.30303,
+        "target": "min",
+        "limit": 1.0,
+        "unit": "mm",
+        "pass": true
+      },
+      "Small-lens upper adjustment reserve": {
+        "value": 2.71219,
+        "target": "min",
+        "limit": 1.0,
+        "unit": "mm",
+        "pass": true
+      },
+      "Nominal rod hole diametral relief": {
+        "value": 0.6,
+        "target": "min",
+        "limit": 0.5,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P199": {
+    "baseline": {
+      "Rear plane smallest ray clearance": {
+        "value": 7.7,
+        "target": "min",
+        "limit": 1.5,
+        "unit": "mm",
+        "pass": true
+      },
+      "Filter plane smallest ray clearance": {
+        "value": 14.7,
+        "target": "min",
+        "limit": 1.5,
+        "unit": "mm",
+        "pass": true
+      },
+      "Front plane smallest ray clearance": {
+        "value": -1.8,
+        "target": "min",
+        "limit": 1.5,
+        "unit": "mm",
+        "pass": false
+      },
+      "Filter support land": {
+        "value": 9.255,
+        "target": "min",
+        "limit": 4.0,
+        "unit": "mm",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Rear plane smallest ray clearance": {
+        "value": 7.7,
+        "target": "min",
+        "limit": 1.5,
+        "unit": "mm",
+        "pass": true
+      },
+      "Filter plane smallest ray clearance": {
+        "value": 14.7,
+        "target": "min",
+        "limit": 1.5,
+        "unit": "mm",
+        "pass": true
+      },
+      "Front plane smallest ray clearance": {
+        "value": 3.2,
+        "target": "min",
+        "limit": 1.5,
+        "unit": "mm",
+        "pass": true
+      },
+      "Filter support land": {
+        "value": 9.255,
+        "target": "min",
+        "limit": 4.0,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P200": {
+    "baseline": {
+      "Geometric hard cutoff half-angle": {
+        "value": 45.74642,
+        "target": "max",
+        "limit": 28,
+        "unit": "deg",
+        "pass": false
+      },
+      "On-axis open area over clear head": {
+        "value": 64.41511,
+        "target": "min",
+        "limit": 62,
+        "unit": "%",
+        "pass": true
+      },
+      "Outer cell edge margin": {
+        "value": 1.75,
+        "target": "min",
+        "limit": 1.0,
+        "unit": "mm",
+        "pass": true
+      },
+      "Minimum web between neighboring cells": {
+        "value": 0.99999,
+        "target": "min",
+        "limit": 0.85,
+        "unit": "mm",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Geometric hard cutoff half-angle": {
+        "value": 27.16691,
+        "target": "max",
+        "limit": 28,
+        "unit": "deg",
+        "pass": true
+      },
+      "On-axis open area over clear head": {
+        "value": 64.41511,
+        "target": "min",
+        "limit": 62,
+        "unit": "%",
+        "pass": true
+      },
+      "Outer cell edge margin": {
+        "value": 1.75,
+        "target": "min",
+        "limit": 1.0,
+        "unit": "mm",
+        "pass": true
+      },
+      "Minimum web between neighboring cells": {
+        "value": 0.99999,
+        "target": "min",
+        "limit": 0.85,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P203": {
+    "baseline": {
+      "Smallest bilingual label size": {
+        "value": 2.5,
+        "target": "min",
+        "limit": 3.5,
+        "unit": "mm",
+        "pass": false
+      },
+      "Smallest writing line height": {
+        "value": 17.0,
+        "target": "min",
+        "limit": 15,
+        "unit": "mm",
+        "pass": true
+      },
+      "Nominal hinge side clearance": {
+        "value": 0.0,
+        "target": "min",
+        "limit": 0.8,
+        "unit": "mm",
+        "pass": false
+      },
+      "Fixed jaw hole ligament": {
+        "value": 5.3,
+        "target": "min",
+        "limit": 4.0,
+        "unit": "mm",
+        "pass": true
+      },
+      "Nominal tip opening at travel limit": {
+        "value": 99.93655,
+        "target": "min",
+        "limit": 90,
+        "unit": "mm",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Smallest bilingual label size": {
+        "value": 4.0,
+        "target": "min",
+        "limit": 3.5,
+        "unit": "mm",
+        "pass": true
+      },
+      "Smallest writing line height": {
+        "value": 17.0,
+        "target": "min",
+        "limit": 15,
+        "unit": "mm",
+        "pass": true
+      },
+      "Nominal hinge side clearance": {
+        "value": 1.2,
+        "target": "min",
+        "limit": 0.8,
+        "unit": "mm",
+        "pass": true
+      },
+      "Fixed jaw hole ligament": {
+        "value": 5.3,
+        "target": "min",
+        "limit": 4.0,
+        "unit": "mm",
+        "pass": true
+      },
+      "Nominal tip opening at travel limit": {
+        "value": 99.93655,
+        "target": "min",
+        "limit": 90,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P205": {
+    "baseline": {
+      "Cue ray vertical glass edge clearance": {
+        "value": -27.5302,
+        "target": "min",
+        "limit": 2,
+        "unit": "mm",
+        "pass": false
+      },
+      "Cue ray lateral glass edge clearance": {
+        "value": -4.74643,
+        "target": "min",
+        "limit": 2,
+        "unit": "mm",
+        "pass": false
+      },
+      "Camera ray vertical glass edge clearance": {
+        "value": 0.37874,
+        "target": "min",
+        "limit": 2,
+        "unit": "mm",
+        "pass": false
+      },
+      "Camera ray lateral glass edge clearance": {
+        "value": 38.02918,
+        "target": "min",
+        "limit": 2,
+        "unit": "mm",
+        "pass": true
+      },
+      "Minimum total phone-pocket relief": {
+        "value": 2.0,
+        "target": "min",
+        "limit": 2,
+        "unit": "mm",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Cue ray vertical glass edge clearance": {
+        "value": 3.4698,
+        "target": "min",
+        "limit": 2,
+        "unit": "mm",
+        "pass": true
+      },
+      "Cue ray lateral glass edge clearance": {
+        "value": 5.25357,
+        "target": "min",
+        "limit": 2,
+        "unit": "mm",
+        "pass": true
+      },
+      "Camera ray vertical glass edge clearance": {
+        "value": 31.37874,
+        "target": "min",
+        "limit": 2,
+        "unit": "mm",
+        "pass": true
+      },
+      "Camera ray lateral glass edge clearance": {
+        "value": 48.02918,
+        "target": "min",
+        "limit": 2,
+        "unit": "mm",
+        "pass": true
+      },
+      "Minimum total phone-pocket relief": {
+        "value": 2.0,
+        "target": "min",
+        "limit": 2,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  }
+}

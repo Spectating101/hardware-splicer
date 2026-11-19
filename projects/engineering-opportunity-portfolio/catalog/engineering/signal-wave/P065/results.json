@@ -1,0 +1,5 @@
+{
+  "phase_channel_cases": 800,
+  "slow_misses": 416,
+  "input_pulse_ns": 240
+}

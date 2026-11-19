@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="294mm" height="222mm" viewBox="0 0 294 222">
+  <title>P232 trial shop drawing, millimetres</title>
+  <style>text{font:4px sans-serif;fill:#162930} .heading{font:bold 5px sans-serif}.part,.bore,.guide,.limit{fill:none;stroke:#223842;stroke-width:.38}.bore{stroke:#00645c}.guide{stroke:#964314;stroke-dasharray:2 1}.limit{stroke:#a1384e;stroke-dasharray:1 1}.part{fill:#e6eef0;fill-opacity:.28}</style>
+  <g data-view="plan" transform="translate(12 5)">
+    <text x="0" y="4" class="heading">Cradle plan and interchangeable drill guide</text>
+    <g transform="translate(0 10)">
+      <rect id="base" class="part" x="0" y="0" width="210" height="90" />
+      <rect id="guide" class="part" x="8" y="36" width="194" height="18" />
+      <rect id="bridge-0" class="part" x="4" y="9" width="10" height="72" />
+      <circle id="bridge-mount-0-0" class="bore" cx="9" cy="16" r="2.2" />
+      <circle id="bridge-mount-0-1" class="bore" cx="9" cy="74" r="2.2" />
+      <rect id="bridge-1" class="part" x="196" y="9" width="10" height="72" />
+      <circle id="bridge-mount-1-0" class="bore" cx="201" cy="16" r="2.2" />
+      <circle id="bridge-mount-1-1" class="bore" cx="201" cy="74" r="2.2" />
+      <circle id="awl-0" class="bore" cx="30" cy="45" r="1.25" />
+      <circle id="awl-1" class="bore" cx="67.5" cy="45" r="1.25" />
+      <circle id="awl-2" class="bore" cx="105" cy="45" r="1.25" />
+      <circle id="awl-3" class="bore" cx="142.5" cy="45" r="1.25" />
+      <circle id="awl-4" class="bore" cx="180" cy="45" r="1.25" />
+      <line id="gap-left" class="guide" x1="0" y1="43" x2="210" y2="43" />
+      <line id="gap-right" class="guide" x1="0" y1="47" x2="210" y2="47" />
+    </g>
+    <text x="0" y="109">Base 210 × 90; awl holes Ø2.5 at x = [30, 67.5, 105, 142.5, 180]</text>
+  </g>
+  <g data-view="section" transform="translate(12 134)">
+    <text x="0" y="4" class="heading">End section with two rails and open awl exit</text>
+    <g transform="translate(0 10)">
+      <polygon id="rail-left" class="part" points="43,40 11,8 11,19 43,51" />
+      <polygon id="rail-right" class="part" points="47,40 79,8 79,19 47,51" />
+      <rect id="guide-edge" class="part" x="36" y="0" width="18" height="6" />
+      <line id="awl-axis" class="guide" x1="45" y1="0" x2="45" y2="55" />
+    </g>
+    <text x="0" y="67">Two 45° rails; apex slit 4; guide thickness 6</text>
+  </g>
+</svg>

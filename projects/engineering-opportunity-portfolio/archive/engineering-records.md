@@ -1,0 +1,16 @@
+# Digital build and sourcing records
+
+The workbook records each product's level of engineering evidence. The repository paths below are relative to the Hardware Splicer checkout. The downloadable archive includes a small set of independent reference records under `supporting-records/`. These are historical snapshots with their original repository-relative links. The workbook, all CSVs and the financial index can be opened offline.
+
+| IDs | Evidence already available in the project | Practical question still open |
+|---|---|---|
+| P001, P004–P006 | `projects/pcb-inspection-nest/README.md` and `boards.json`. Revision-specific docks, carrier geometry and printed-part file packages. | Populated board and USB microscope alignment under repeated physical loading. |
+| P002 | `projects/ender3-penplotter-digital/README.md`. Named Ender-3 conversion, editable mount geometry, pen substitution and drawing replay. | Compatibility of a customer's printer revision, pen force and willingness to pay for supplied files. |
+| P028, P045 | `projects/engineering-opportunity-portfolio/machine-value-trials/digital-checks.json`. Five switch tester meshes inspected. For the winder, a schematic netlist and board findings plus a candidate bare-board carrier. | Actual reliability, printed clearance, assembly time and winding quality. [Switch tester](https://incoherency.co.uk/blog/stories/keyswitch-tester.html) · [Winder reference](https://github.com/AnotherBuildCorner/Pickup_Winder) |
+| P030 | `examples/robot_reference_e2e/reference_rich_indoor_inspection_rover.json`. An integration brief for an indoor inspection rover. | Proof that the chosen clearance and lighting deliver a view worth paying for. |
+| P031–P032 | Published shallow-water camera builds and an established OEM accessory. No depth-rated HS prototype. | Delivered components, depth and leak performance, propulsion losses, field recovery and host access. [Open underwater vehicle](https://github.com/bgreig/TinkerSub) |
+| P033 | `projects/bench-probe-fixture/geometry.json`. HS generated carrier and guide for an 18-pad specimen. A digital change of one pad by 2 mm changed only its guide bore. | First-unit contact force and orientation keying. One design change on an existing carrier gives a concrete way to measure HS-specific engineering savings. |
+| P038 | `projects/cabinet-logger-digital/`. USB logger, firmware, electronic parts breakdown, layout and representative CSV. | Accuracy, host availability, availability of a comparable returned enclosure and maintenance. |
+| P043 | `projects/engineering-opportunity-portfolio/four-wire-seed-examples.zip`. Two pinouts and digital open, bridge and permutation cases. | Actual mating connector, intermittent faults, assembly yield and throughput. |
+| P047, P049 | `projects/arm-solder-cell/`. Digital arm motion, pallet and cold solder-head trace with build-versus-buy inputs. | Gripper retention, collision, payload and physical handoff; commercial finger sets need a specific buyer and part. |
+| Remaining offers | New planning estimates or adaptations in the product evidence register. The 620 concept configurations retain hypothetical donor descriptions. | Physical builds, supplier baskets and accepted orders would establish actual costs and selling prices. |

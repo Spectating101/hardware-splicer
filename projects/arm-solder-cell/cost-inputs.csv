@@ -1,0 +1,23 @@
+group,item,currency,quantity,unit_price,basis,source_or_assumption
+station,Genmitsu 3018-PRO complete XYZ donor kit USA variant,USD,1,159.00,vendor,https://www.sainsmart.com/products/sainsmart-genmitsu-cnc-router-3018-pro-diy-kit
+station,Pinecil V2 with tip,USD,1,25.99,vendor,https://pine64.com/product/pinecil-smart-mini-portable-soldering-iron/
+station,PinePower 65 W PD supply,USD,1,24.99,vendor,https://pine64.com/product-category/makerspace/
+station,Pinecil silicone USB-C cable 1.5 m,USD,1,3.99,vendor,https://pine64.com/product-category/makerspace/
+station,NEMA-17 feeder motor 324,USD,1,14.00,vendor,https://www.adafruit.com/product/324
+station,A4988 feeder driver 6109,USD,1,6.95,vendor,https://www.adafruit.com/product/6109
+station,VEVOR 80 W extractor US variant,USD,1,248.99,vendor,https://www.vevor.com/fume-extractors-c_13369/vevor-filter-fume-extractor-pure-air-fume-extractor-80w-with-3-stage-filters-p_010512669506
+station,Wire roll drive guides spool and auxiliary supply,USD,1,45,base_allowance,Unquoted fabrication and hardware
+station,Pallet connector insert sprung tool mount and fasteners,USD,1,55,base_allowance,Unquoted materials and prints
+station,Guard local stop sensors and heater cutoff,USD,1,85,base_allowance,Unquoted hardware
+station,Local controller camera lighting and wiring,USD,1,50,base_allowance,Assumes existing HS host
+station,Test boards tips solder cleaning and scrap,USD,1,40,base_allowance,Initial commissioning only
+station,First station design build and verification hours,USD,24,24,labor_scenario,Studio planning rate and hours
+arm_increment,PartaBot assembled 12 V follower,USD,1,299,comparison_sold_out,https://partabot.com/products/so-arm101-follower-only
+arm_increment,Cell integration and acceptance hours,USD,6,24,labor_scenario,Increment over hand-loaded station
+tw_arm,12 V C018 or C047 servo with harness,TWD,6,672,vendor_tax_included,https://robotkingdom.com.tw/product/feetech-st-3215-c018-c047-servo/
+tw_arm,Seeed 105990190 USB bus board,TWD,1,235,vendor_displayed,https://www.icshop.com.tw/products/368030800929
+tw_arm,Mean Well GST60A12-P1J 12 V 5 A supply,TWD,1,538,vendor_displayed,https://www.100y.com.tw/product/127947
+tw_arm,Plastic printing and failed prints,TWD,1,400,base_allowance,Outsource or charge material machine use and rejects
+tw_arm,Clamps mains USB and DC leads fasteners and box,TWD,1,450,base_allowance,Unquoted allowance
+tw_arm_buy,Assembled calibrated 12 V follower with printed parts supply and box,TWD,1,7088,vendor_tax_included,https://robotkingdom.com.tw/product/so-arm101-followe-assembly/
+id_arm_motors,ST-3215-C018 on indent,IDR,6,459000,vendor,https://digiwarestore.com/id/servo/serial-bus-servo-12v-30kgcm-360-degree-with-magnetic-encoder-15-c018-713620.html

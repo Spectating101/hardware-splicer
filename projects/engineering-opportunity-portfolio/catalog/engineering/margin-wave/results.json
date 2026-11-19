@@ -1,0 +1,256 @@
+{
+  "P082": {
+    "trial": {
+      "peak modeled unloaded-fixture deadweight sag mm": {
+        "measured": 0.022832,
+        "pass": true
+      },
+      "midpoint classical beam formula error mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "displacement at support points mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "load and probe mirror residual mm": {
+        "measured": 0.0,
+        "pass": true
+      }
+    },
+    "rejected": {
+      "peak modeled unloaded-fixture deadweight sag mm": {
+        "measured": 0.154117,
+        "pass": false
+      },
+      "midpoint classical beam formula error mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "displacement at support points mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "load and probe mirror residual mm": {
+        "measured": 0.0,
+        "pass": true
+      }
+    },
+    "required_rejection": "peak modeled unloaded-fixture deadweight sag mm",
+    "pass": true
+  },
+  "P220": {
+    "trial": {
+      "maximum cursor jump on stationary sensor noise px": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "candidate hit count across four quadrant scripts": {
+        "measured": 40,
+        "pass": true
+      },
+      "short drag displacement while button held px": {
+        "measured": 8.370484,
+        "pass": true
+      },
+      "ball lift-off radial opening margin mm": {
+        "measured": 5.0,
+        "pass": true
+      },
+      "button edge separation mm": {
+        "measured": 30.0,
+        "pass": true
+      }
+    },
+    "rejected": {
+      "maximum cursor jump on stationary sensor noise px": {
+        "measured": 2.489277,
+        "pass": false
+      },
+      "candidate hit count across four quadrant scripts": {
+        "measured": 40,
+        "pass": true
+      },
+      "short drag displacement while button held px": {
+        "measured": 8.370484,
+        "pass": true
+      },
+      "ball lift-off radial opening margin mm": {
+        "measured": 5.0,
+        "pass": true
+      },
+      "button edge separation mm": {
+        "measured": 30.0,
+        "pass": true
+      }
+    },
+    "required_rejection": "maximum cursor jump on stationary sensor noise px",
+    "pass": true
+  },
+  "P237": {
+    "trial": {
+      "opposite bevel angular mismatch deg": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "horizontal shoulder tip mismatch mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "spine exposed above opposed faces mm": {
+        "measured": 9.0,
+        "pass": true
+      },
+      "matched working lengths mm": {
+        "measured": [
+          290.0,
+          290.0
+        ],
+        "pass": true
+      }
+    },
+    "rejected": {
+      "opposite bevel angular mismatch deg": {
+        "measured": 5.000001,
+        "pass": false
+      },
+      "horizontal shoulder tip mismatch mm": {
+        "measured": 0.652219,
+        "pass": false
+      },
+      "spine exposed above opposed faces mm": {
+        "measured": 9.0,
+        "pass": true
+      },
+      "matched working lengths mm": {
+        "measured": [
+          290.0,
+          290.0
+        ],
+        "pass": true
+      }
+    },
+    "required_rejection": "opposite bevel angular mismatch deg",
+    "pass": true
+  },
+  "P243": {
+    "trial": {
+      "maximum groove offset error over projected curves mm": {
+        "measured": 0.348913,
+        "pass": true
+      },
+      "straight-edge guide nominal error mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "circular arc and section consistency mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "minimum space between projected rollers mm": {
+        "measured": 4.0,
+        "pass": true
+      }
+    },
+    "rejected": {
+      "maximum groove offset error over projected curves mm": {
+        "measured": 1.14315,
+        "pass": false
+      },
+      "straight-edge guide nominal error mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "circular arc and section consistency mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "minimum space between projected rollers mm": {
+        "measured": 12.0,
+        "pass": true
+      }
+    },
+    "required_rejection": "maximum groove offset error over projected curves mm",
+    "pass": true
+  },
+  "P266": {
+    "trial": {
+      "closest spout margin in five orientations mm": {
+        "measured": 3.0,
+        "pass": true
+      },
+      "remaining support annulus width mm": {
+        "measured": 5.5,
+        "pass": true
+      },
+      "clearance below spout mm": {
+        "measured": 8.0,
+        "pass": true
+      },
+      "bench load projection inside support polygon mm": {
+        "measured": 34.0,
+        "pass": true
+      }
+    },
+    "rejected": {
+      "closest spout margin in five orientations mm": {
+        "measured": -2.5,
+        "pass": false
+      },
+      "remaining support annulus width mm": {
+        "measured": 11.0,
+        "pass": false
+      },
+      "clearance below spout mm": {
+        "measured": 8.0,
+        "pass": true
+      },
+      "bench load projection inside support polygon mm": {
+        "measured": 34.0,
+        "pass": true
+      }
+    },
+    "required_rejection": "closest spout margin in five orientations mm",
+    "pass": true
+  },
+  "P270": {
+    "trial": {
+      "liner direction change at peel edge deg": {
+        "measured": 145.01837,
+        "pass": true
+      },
+      "minimum axial space at lane dividers mm": {
+        "measured": 0.5,
+        "pass": true
+      },
+      "shaft to assumed core radial allowance mm": {
+        "measured": 5.5,
+        "pass": true
+      },
+      "active peel edge overhang across all lanes mm": {
+        "measured": 4.0,
+        "pass": true
+      }
+    },
+    "rejected": {
+      "liner direction change at peel edge deg": {
+        "measured": 57.490647,
+        "pass": false
+      },
+      "minimum axial space at lane dividers mm": {
+        "measured": 0.5,
+        "pass": true
+      },
+      "shaft to assumed core radial allowance mm": {
+        "measured": 5.5,
+        "pass": true
+      },
+      "active peel edge overhang across all lanes mm": {
+        "measured": 4.0,
+        "pass": true
+      }
+    },
+    "required_rejection": "liner direction change at peel edge deg",
+    "pass": true
+  }
+}

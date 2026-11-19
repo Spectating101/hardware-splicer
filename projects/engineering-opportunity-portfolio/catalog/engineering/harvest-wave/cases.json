@@ -1,0 +1,59 @@
+{
+  "P115": {
+    "pilot": "Taiwan teaching nursery, eight inert soil-mix block surrogates and an assumed ejector force envelope",
+    "rows": 2, "cols": 4, "pitch_mm": 48,
+    "width_at_top_mm": 38, "depth_mm": 40, "draft_deg": 2,
+    "shoe_side_mm": 37, "width_tol_mm": 0.15, "shoe_tol_mm": 0.12, "guide_runout_mm": 0.15,
+    "model_breakaway_kpa": 2.5, "proposed_lever_ratio": 4.5, "control_lever_ratio": 2,
+    "lever_efficiency": 0.75, "handle_force_budget_n": 60, "min_runout_clearance_mm": 0.15,
+    "ejector_stroke_mm": 45, "handle_travel_budget_mm": 230
+  },
+  "P123": {
+    "pilot": "Taiwan greenhouse eight 30–40 m driplines with a common gravity drain",
+    "lateral_lengths_m": [30, 35, 33, 37, 40, 32, 38, 36],
+    "lateral_id_mm": 13.6, "lateral_k": 8,
+    "segment_lengths_m": [0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.4, 0.65],
+    "progressive_id_mm": [13.6, 16, 18, 22, 25, 25, 25, 32],
+    "control_id_mm": [13.6, 13.6, 13.6, 13.6, 13.6, 13.6, 13.6, 13.6],
+    "segment_k": 0.9, "darcy_factor": 0.035,
+    "strict_supply_head_m": 1.65, "source_droop_m_per_lpm_squared": 0.0012,
+    "velocity_gate_m_s": 0.3048
+  },
+  "P136": {
+    "pilot": "School water demonstration, rigid inert beads and removable screened cup",
+    "mouth_mm": 200, "cup_mm": 45, "body_length_mm": 420,
+    "candidate_mesh_um": 200, "control_mesh_um": 300, "aperture_tol_um": 20, "thread_um": 120,
+    "bead_min_um": 255, "bead_max_um": 355, "beads": 100, "seam_bypass_every": 30,
+    "retention_gate_pct": 90, "min_clean_open_to_mouth_ratio": 1.5
+  },
+  "P141": {
+    "pilot": "Taiwan hatchery training desk, masked camera snapshots of inert coupons over a shallow chute",
+    "frame_px": [96, 48], "batches": 10, "items_per_batch": 50, "visible_pairs_per_batch": 5,
+    "coupon_axes_px": [7, 3], "single_area_envelope_px": [49, 95],
+    "offset_pair_px": 10, "coincident_pair_trials": 12, "noise_speck_area_px": 2
+  },
+  "P147": {
+    "pilot": "Dry low-voltage bench, supplemental blower pressure indication on dummy pressure-switch contact",
+    "sample_s": 1, "debounce_s": 6, "trial_count": 10, "max_alarm_delay_s": 30,
+    "min_horn_runtime_min": 15, "battery_mAh": 600, "control_mAh": 70,
+    "capacity_fraction": 0.65, "horn_mA": 200, "logic_mA": 35
+  },
+  "P153": {
+    "pilot": "Indonesian teaching grader, 3 kg dry green coffee simulants and human inspection card",
+    "marked_defects": 30, "width_mm": 120, "side_margin_mm": 8,
+    "longitudinal_pitch_mm": 18, "transverse_pitch_mm": 18, "occupation_fraction": 0.78,
+    "average_bean_mass_g": 0.18, "batch_g": 3000, "inspection_length_mm": 180,
+    "target_speed_mm_s": 70, "control_speed_mm_s": 120,
+    "min_dwell_s": 2.2, "max_batch_minutes": 25,
+    "max_bean_height_mm": 12, "chute_opening_mm": 16, "vertical_allowance_mm": 1
+  },
+  "P156": {
+    "pilot": "Taiwan packhouse training, pear-sized 8 mm plunger and inert foam coupons",
+    "probe_mm": 8, "target_depth_mm": 8, "stop_tolerance_mm": 0.12,
+    "guide_angle_deg": 2, "reference_load_n": [15, 50, 100], "full_load_n": 100,
+    "frame_n_per_mm": 550, "control_frame_n_per_mm": 140,
+    "force_code_per_n": 19.8, "force_zero_code": 29,
+    "force_noise_codes": 3, "max_depth_error_mm": 0.5, "max_force_error_n": 0.7,
+    "foam_stiffness_n_mm": 4.5, "foam_repeats": 10
+  }
+}

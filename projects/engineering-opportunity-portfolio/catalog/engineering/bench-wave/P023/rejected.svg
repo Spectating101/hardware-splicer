@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520mm" height="640mm" viewBox="0 0 520 640">
+  <title>Drawer slide alignment pair</title>
+  <style>text{font:4px sans-serif;fill:#103341} .part,.tool,.test{stroke:#2a4148;stroke-width:.35;fill:none}.part{fill:#dce9e9;fill-opacity:.45}.tool{stroke:#006557}.test{stroke:#aa4c22;stroke-dasharray:2 1}</style>
+  <line id="datum-0" class="tool" x1="25" y1="55" x2="475" y2="55" />
+  <polygon id="slide-0" class="part" points="25.00000,55.00000 475.00000,55.00000 475.00000,68.00000 25.00000,68.00000" />
+  <rect id="shoe-0-0" class="test" x="37" y="45.0" width="50" height="25" />
+  <circle id="clamp-0-0" class="test" cx="62" cy="29.0" r="12" />
+  <rect id="shoe-0-1" class="test" x="413" y="45.0" width="50" height="25" />
+  <circle id="clamp-0-1" class="test" cx="438" cy="29.0" r="12" />
+  <line id="datum-1" class="tool" x1="25" y1="465" x2="475" y2="466.2" />
+  <polygon id="slide-1" class="part" points="25.00000,465.00000 475.00000,466.20000 475.00000,479.20000 25.00000,478.00000" />
+  <rect id="shoe-1-0" class="test" x="37" y="455.09867" width="50" height="25" />
+  <circle id="clamp-1-0" class="test" cx="62" cy="439.09867" r="12" />
+  <rect id="shoe-1-1" class="test" x="413" y="456.10133" width="50" height="25" />
+  <circle id="clamp-1-1" class="test" cx="438" cy="440.10133" r="12" />
+  <rect id="rail-section" class="part" x="40" y="530" width="13" height="45" />
+  <rect id="ledge-section" class="tool" x="37" y="575" width="24" height="10" />
+  <text x="25" y="18">Reference span 410; rail length 450. Gauge each end before driving screws.</text>
+  <text x="25" y="510">Mirrored locating shoes mount under the slide. Clamps act on adjacent faces.</text>
+  <text x="80" y="550">Assumed section 13 × 45; ledge 10 thick</text>
+</svg>

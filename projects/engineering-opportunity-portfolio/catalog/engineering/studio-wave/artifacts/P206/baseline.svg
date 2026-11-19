@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="520mm" height="295mm" viewBox="0 0 520 295">
+  <title>P206 baseline · full-size proof coupon</title>
+  <rect id="scale" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="10" y="6" width="20" height="10" />
+  <circle id="pivot" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="155" cy="180" r="3" />
+  <line id="arm-level" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x1="155" y1="180" x2="455" y2="180" />
+  <circle id="arm-anchor" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" cx="219" cy="180" r="2.1" />
+  <circle id="fixed-anchor" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" cx="67" cy="115" r="2.1" />
+  <rect id="spring-length-gauge" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="30" y="254" width="55" height="7" />
+  <rect id="brace-coupon" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="24" y="27" width="90" height="42" />
+  <circle id="brace-hole-0" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="36" cy="47" r="3.1" />
+  <circle id="brace-hole-1" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="99" cy="47" r="3.1" />
+</svg>

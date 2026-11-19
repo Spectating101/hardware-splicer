@@ -1,0 +1,23 @@
+{
+  "pilot": "Indonesian teaching grader, 3 kg dry green coffee simulants and human inspection card",
+  "metrics": {
+    "model_speed_window_mm_s": [
+      51.28,
+      81.82
+    ],
+    "candidate": {
+      "lanes": 5,
+      "modeled_batch_minutes": 18.32,
+      "min_mark_exposure_s": 2.571,
+      "exposure_budget_misses": 0,
+      "modeled_chute_height_clearance_mm": 3
+    },
+    "fast-control": {
+      "lanes": 5,
+      "modeled_batch_minutes": 10.68,
+      "min_mark_exposure_s": 1.5,
+      "exposure_budget_misses": 30,
+      "modeled_chute_height_clearance_mm": 3
+    }
+  }
+}

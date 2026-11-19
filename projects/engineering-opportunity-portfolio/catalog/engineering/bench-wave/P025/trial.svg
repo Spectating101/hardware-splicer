@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="190mm" height="190mm" viewBox="0 0 190 190">
+  <title>Repair fastener tray and transport lid</title>
+  <style>text{font:4px sans-serif;fill:#103341} .part,.tool,.test{stroke:#2a4148;stroke-width:.35;fill:none}.part{fill:#dce9e9;fill-opacity:.45}.tool{stroke:#006557}.test{stroke:#aa4c22;stroke-dasharray:2 1}</style>
+  <rect id="tray" class="part" x="10" y="10" width="130" height="100" />
+  <circle id="pocket-A1" class="tool" cx="30" cy="32" r="8.92965" />
+  <rect id="fastener-A1" class="test" x="26" y="29.5" width="7" height="5" />
+  <text x="25" y="49">A1 × 8</text>
+  <circle id="pocket-A2" class="tool" cx="70" cy="32" r="9.0" />
+  <rect id="fastener-A2" class="test" x="66" y="29.5" width="10" height="5" />
+  <text x="65" y="49">A2 × 4</text>
+  <circle id="pocket-B1" class="tool" cx="110" cy="32" r="9.71589" />
+  <rect id="fastener-B1" class="test" x="106" y="29.0" width="9" height="6" />
+  <text x="105" y="49">B1 × 6</text>
+  <circle id="pocket-B2" class="tool" cx="30" cy="80" r="8.5" />
+  <rect id="fastener-B2" class="test" x="26" y="77.0" width="12" height="6" />
+  <text x="25" y="97">B2 × 2</text>
+  <circle id="pocket-C1" class="tool" cx="70" cy="80" r="8.5" />
+  <rect id="fastener-C1" class="test" x="66" y="75.5" width="1.4" height="9" />
+  <text x="65" y="97">C1 × 2</text>
+  <circle id="pocket-C2" class="tool" cx="110" cy="80" r="8.5" />
+  <rect id="fastener-C2" class="test" x="106" y="76.0" width="2" height="8" />
+  <text x="105" y="97">C2 × 3</text>
+  <rect id="floor" class="part" x="10" y="165" width="130" height="3" />
+  <rect id="wall-0" class="part" x="10" y="150" width="3" height="15" />
+  <rect id="wall-1" class="part" x="52" y="150" width="3" height="15" />
+  <rect id="wall-2" class="part" x="94" y="150" width="3" height="15" />
+  <rect id="wall-3" class="part" x="137" y="150" width="3" height="15" />
+  <rect id="lid" class="tool" x="7" y="146.4" width="136" height="3" />
+  <text x="10" y="130">Floor 3; walls 15 high; closed lid gap over wall 0.6</text>
+</svg>

@@ -1,0 +1,5 @@
+{
+  "max_delay_ms": 3.5,
+  "slow_control_max_ms": 17.5,
+  "open_contacts_output": "off"
+}

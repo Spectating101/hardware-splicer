@@ -1,0 +1,17 @@
+{
+  "accepted_checks": 48,
+  "drawing_area_mm": [
+    100,
+    80
+  ],
+  "mount_pitch_mm": 14.0,
+  "adverse_control": "Extra out-of-envelope move in temporary command stream",
+  "rejecting_checks": [
+    "Gcode_CSV_roundtrip",
+    "requested_pen_up_lift",
+    "all_acceptance_constraints_recomputed",
+    "simulation_constraints_recomputed",
+    "simulation_metrics_recomputed",
+    "engineering_summary_recomputed"
+  ]
+}

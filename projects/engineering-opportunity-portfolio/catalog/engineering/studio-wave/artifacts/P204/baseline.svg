@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="700mm" height="680mm" viewBox="0 0 700 680">
+  <title>P204 baseline · full-size proof coupon</title>
+  <rect id="scale" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="10" y="6" width="20" height="10" />
+  <rect id="fabric-blank" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="23" y="29" width="620" height="510" />
+  <rect id="keyable-field" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="43" y="49" width="580" height="470" />
+  <rect id="strap-anchor-0-left" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="35" y="78" width="14" height="26" />
+  <rect id="strap-anchor-0-right" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="617" y="78" width="14" height="26" />
+  <rect id="strap-anchor-1-left" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="35" y="462" width="14" height="26" />
+  <rect id="strap-anchor-1-right" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="617" y="462" width="14" height="26" />
+  <rect id="strap-cut" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="51" y="569" width="470" height="24" />
+  <line id="installed-chair-route-low" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x1="51" y1="614" x2="573" y2="614" />
+  <line id="installed-chair-route-high" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x1="51" y1="640" x2="622" y2="640" />
+</svg>

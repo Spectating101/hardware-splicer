@@ -1,0 +1,546 @@
+{
+  "P003": {
+    "trial": {
+      "print calibration span error mm": {
+        "pass": true,
+        "measured": 0.0
+      },
+      "maximum screw pitch error mm": {
+        "pass": true,
+        "measured": 0.0
+      },
+      "handle pair center offset mm": {
+        "pass": true,
+        "measured": 0.0
+      },
+      "edge setback maximum error mm": {
+        "pass": true,
+        "measured": 0.0
+      }
+    },
+    "rejected": {
+      "print calibration span error mm": {
+        "pass": false,
+        "measured": 3.0
+      },
+      "maximum screw pitch error mm": {
+        "pass": false,
+        "measured": 4.8
+      },
+      "handle pair center offset mm": {
+        "pass": true,
+        "measured": 0.0
+      },
+      "edge setback maximum error mm": {
+        "pass": false,
+        "measured": 1.8
+      }
+    },
+    "required_rejection": "print calibration span error mm",
+    "pass": true
+  },
+  "P004": {
+    "trial": {
+      "source outline agreement mm": {
+        "pass": true,
+        "measured": 0.0
+      },
+      "radial pocket allowance mm": {
+        "pass": true,
+        "measured": 0.35
+      },
+      "SD pull travel mm": {
+        "pass": true,
+        "measured": 12.0
+      },
+      "board margin inside camera view mm": {
+        "pass": true,
+        "measured": 7.5
+      },
+      "carrier corner hole edge land mm": {
+        "pass": true,
+        "measured": 1.35
+      }
+    },
+    "rejected": {
+      "source outline agreement mm": {
+        "pass": true,
+        "measured": 0.0
+      },
+      "radial pocket allowance mm": {
+        "pass": true,
+        "measured": 0.35
+      },
+      "SD pull travel mm": {
+        "pass": false,
+        "measured": 4.0
+      },
+      "board margin inside camera view mm": {
+        "pass": true,
+        "measured": 7.5
+      },
+      "carrier corner hole edge land mm": {
+        "pass": true,
+        "measured": 1.35
+      }
+    },
+    "required_rejection": "SD pull travel mm",
+    "pass": true
+  },
+  "P023": {
+    "trial": {
+      "end-to-end parallelism error mm": {
+        "pass": true,
+        "measured": 0.0
+      },
+      "mean distance between slide faces mm": {
+        "pass": true,
+        "measured": 410.0
+      },
+      "clamp pad clearance from locating shoe mm": {
+        "pass": true,
+        "measured": 4.0
+      },
+      "ledge support across rail footprint": {
+        "pass": true,
+        "measured": 13.0
+      }
+    },
+    "rejected": {
+      "end-to-end parallelism error mm": {
+        "pass": false,
+        "measured": 1.2
+      },
+      "mean distance between slide faces mm": {
+        "pass": false,
+        "measured": 410.6
+      },
+      "clamp pad clearance from locating shoe mm": {
+        "pass": true,
+        "measured": 4.0
+      },
+      "ledge support across rail footprint": {
+        "pass": true,
+        "measured": 13.0
+      }
+    },
+    "required_rejection": "end-to-end parallelism error mm",
+    "pass": true
+  },
+  "P025": {
+    "trial": {
+      "lid bypass gap below thin washer thickness mm": {
+        "pass": true,
+        "measured": 0.6
+      },
+      "fastener diagonal clearance inside retrieval pocket mm": {
+        "pass": true,
+        "measured": 3.583592
+      },
+      "minimum pocket separation mm": {
+        "pass": true,
+        "measured": 21.28411
+      },
+      "wall and tray floor engagement mm": {
+        "pass": true,
+        "measured": 3.0
+      }
+    },
+    "rejected": {
+      "lid bypass gap below thin washer thickness mm": {
+        "pass": false,
+        "measured": 2.0
+      },
+      "fastener diagonal clearance inside retrieval pocket mm": {
+        "pass": true,
+        "measured": 3.583592
+      },
+      "minimum pocket separation mm": {
+        "pass": true,
+        "measured": 21.28411
+      },
+      "wall and tray floor engagement mm": {
+        "pass": true,
+        "measured": 3.0
+      }
+    },
+    "required_rejection": "lid bypass gap below thin washer thickness mm",
+    "pass": true
+  },
+  "P026": {
+    "trial": {
+      "nominal width error mm": {
+        "pass": true,
+        "measured": 0.0
+      },
+      "tent angle deg": {
+        "pass": true,
+        "measured": 13.734501
+      },
+      "minimum supported typing load margin mm": {
+        "pass": true,
+        "measured": 32.5
+      },
+      "assumed plug projection allowance mm": {
+        "pass": true,
+        "measured": 18.0
+      },
+      "friction margin for clean surface coupon": {
+        "pass": true,
+        "measured": 0.205588
+      }
+    },
+    "rejected": {
+      "nominal width error mm": {
+        "pass": true,
+        "measured": 0.0
+      },
+      "tent angle deg": {
+        "pass": true,
+        "measured": 13.734501
+      },
+      "minimum supported typing load margin mm": {
+        "pass": false,
+        "measured": -11.5
+      },
+      "assumed plug projection allowance mm": {
+        "pass": true,
+        "measured": 18.0
+      },
+      "friction margin for clean surface coupon": {
+        "pass": true,
+        "measured": 0.205588
+      }
+    },
+    "required_rejection": "minimum supported typing load margin mm",
+    "pass": true
+  },
+  "P030": {
+    "trial": {
+      "worst overhead clearance on threshold mm": {
+        "pass": true,
+        "measured": 6.8
+      },
+      "skid clearance above threshold mm": {
+        "pass": true,
+        "measured": 5.0
+      },
+      "target within camera cone margin mm": {
+        "pass": true,
+        "measured": 48.6001
+      },
+      "recovery slot width mm": {
+        "pass": true,
+        "measured": 9.0
+      },
+      "track between axle centrelines mm": {
+        "pass": true,
+        "measured": 145.0
+      }
+    },
+    "rejected": {
+      "worst overhead clearance on threshold mm": {
+        "pass": false,
+        "measured": -2.2
+      },
+      "skid clearance above threshold mm": {
+        "pass": true,
+        "measured": 5.0
+      },
+      "target within camera cone margin mm": {
+        "pass": true,
+        "measured": 48.6001
+      },
+      "recovery slot width mm": {
+        "pass": true,
+        "measured": 9.0
+      },
+      "track between axle centrelines mm": {
+        "pass": true,
+        "measured": 145.0
+      }
+    },
+    "required_rejection": "worst overhead clearance on threshold mm",
+    "pass": true
+  },
+  "P039": {
+    "trial": {
+      "ambiguous readings in full-factorial trial": {
+        "pass": true,
+        "measured": 0
+      },
+      "count set differences from independent interval inversion": {
+        "pass": true,
+        "measured": 0
+      },
+      "neighboring counts falsely accepted as twenty": {
+        "pass": true,
+        "measured": 0
+      },
+      "candidate set excludes true count": {
+        "pass": true,
+        "measured": 0
+      },
+      "tare subtraction disagreement g": {
+        "pass": true,
+        "measured": 0.0
+      },
+      "gross scale headroom g": {
+        "pass": true,
+        "measured": 94.376
+      }
+    },
+    "rejected": {
+      "ambiguous readings in full-factorial trial": {
+        "pass": false,
+        "measured": 10
+      },
+      "count set differences from independent interval inversion": {
+        "pass": true,
+        "measured": 0
+      },
+      "neighboring counts falsely accepted as twenty": {
+        "pass": true,
+        "measured": 0
+      },
+      "candidate set excludes true count": {
+        "pass": true,
+        "measured": 0
+      },
+      "tare subtraction disagreement g": {
+        "pass": true,
+        "measured": 0.0
+      },
+      "gross scale headroom g": {
+        "pass": true,
+        "measured": 94.176
+      }
+    },
+    "required_rejection": "ambiguous readings in full-factorial trial",
+    "pass": true
+  },
+  "P040": {
+    "trial": {
+      "maximum simulated fill ml": {
+        "pass": true,
+        "measured": 3098
+      },
+      "pump steps with dry reservoir": {
+        "pass": true,
+        "measured": 0
+      },
+      "pump steps on asserted upper stop or latch": {
+        "pass": true,
+        "measured": 0
+      },
+      "pumping steps after restart with retained fault": {
+        "pass": true,
+        "measured": 0
+      },
+      "mass-balance residual ml": {
+        "pass": true,
+        "measured": 0
+      }
+    },
+    "rejected": {
+      "maximum simulated fill ml": {
+        "pass": false,
+        "measured": 3264
+      },
+      "pump steps with dry reservoir": {
+        "pass": true,
+        "measured": 0
+      },
+      "pump steps on asserted upper stop or latch": {
+        "pass": true,
+        "measured": 0
+      },
+      "pumping steps after restart with retained fault": {
+        "pass": false,
+        "measured": 11
+      },
+      "mass-balance residual ml": {
+        "pass": true,
+        "measured": 0
+      }
+    },
+    "required_rejection": "maximum simulated fill ml",
+    "pass": true
+  },
+  "P045": {
+    "trial": {
+      "minimum adjacent turn pitch mm": {
+        "pass": true,
+        "measured": 0.08
+      },
+      "maximum adjacent turn pitch mm": {
+        "pass": true,
+        "measured": 0.09
+      },
+      "guide edge margin mm": {
+        "pass": true,
+        "measured": 0.5
+      },
+      "encoder turn count": {
+        "pass": true,
+        "measured": 6000
+      },
+      "reversal dwell-free count": {
+        "pass": true,
+        "measured": 53
+      }
+    },
+    "rejected": {
+      "minimum adjacent turn pitch mm": {
+        "pass": false,
+        "measured": 0.06
+      },
+      "maximum adjacent turn pitch mm": {
+        "pass": true,
+        "measured": 0.06
+      },
+      "guide edge margin mm": {
+        "pass": true,
+        "measured": 0.5
+      },
+      "encoder turn count": {
+        "pass": true,
+        "measured": 6000
+      },
+      "reversal dwell-free count": {
+        "pass": false,
+        "measured": 39
+      }
+    },
+    "required_rejection": "minimum adjacent turn pitch mm",
+    "pass": true
+  },
+  "P046": {
+    "trial": {
+      "minimum reflected spot distance outside tray with positioning error mm": {
+        "pass": true,
+        "measured": 16.666667
+      },
+      "horizontal camera field margin per side mm": {
+        "pass": true,
+        "measured": 93.24097
+      },
+      "vertical camera field margin per side mm": {
+        "pass": true,
+        "measured": 69.66403
+      },
+      "height repeatability datum mm": {
+        "pass": true,
+        "measured": 280.0
+      }
+    },
+    "rejected": {
+      "minimum reflected spot distance outside tray with positioning error mm": {
+        "pass": false,
+        "measured": -13.333333
+      },
+      "horizontal camera field margin per side mm": {
+        "pass": true,
+        "measured": 93.24097
+      },
+      "vertical camera field margin per side mm": {
+        "pass": true,
+        "measured": 69.66403
+      },
+      "height repeatability datum mm": {
+        "pass": true,
+        "measured": 280.0
+      }
+    },
+    "required_rejection": "minimum reflected spot distance outside tray with positioning error mm",
+    "pass": true
+  },
+  "P228": {
+    "trial": {
+      "nominal phone-load droop mm": {
+        "pass": true,
+        "measured": 5.535213
+      },
+      "pivot slip torque divided by modeled phone-only demand": {
+        "pass": true,
+        "measured": 1.686039
+      },
+      "table thickness range mm": {
+        "pass": true,
+        "measured": 54.0
+      },
+      "jaw engagement length mm": {
+        "pass": true,
+        "measured": 52.0
+      }
+    },
+    "rejected": {
+      "nominal phone-load droop mm": {
+        "pass": false,
+        "measured": 16.594956
+      },
+      "pivot slip torque divided by modeled phone-only demand": {
+        "pass": true,
+        "measured": 1.686039
+      },
+      "table thickness range mm": {
+        "pass": true,
+        "measured": 54.0
+      },
+      "jaw engagement length mm": {
+        "pass": true,
+        "measured": 52.0
+      }
+    },
+    "required_rejection": "nominal phone-load droop mm",
+    "pass": true
+  },
+  "P229": {
+    "trial": {
+      "minimum clear tactile gap between path and landmark mm": {
+        "pass": true,
+        "measured": 16.8
+      },
+      "unique shape signatures matching separate key": {
+        "pass": true,
+        "measured": 5
+      },
+      "ridge height mm": {
+        "pass": true,
+        "measured": 0.9
+      },
+      "landmark to base edge margin mm": {
+        "pass": true,
+        "measured": 23.0
+      },
+      "training source route coordinate maximum error mm": {
+        "pass": true,
+        "measured": 0.0
+      }
+    },
+    "rejected": {
+      "minimum clear tactile gap between path and landmark mm": {
+        "pass": false,
+        "measured": 13.0
+      },
+      "unique shape signatures matching separate key": {
+        "pass": true,
+        "measured": 5
+      },
+      "ridge height mm": {
+        "pass": true,
+        "measured": 0.9
+      },
+      "landmark to base edge margin mm": {
+        "pass": true,
+        "measured": 23.0
+      },
+      "training source route coordinate maximum error mm": {
+        "pass": true,
+        "measured": 0.0
+      }
+    },
+    "required_rejection": "minimum clear tactile gap between path and landmark mm",
+    "pass": true
+  }
+}

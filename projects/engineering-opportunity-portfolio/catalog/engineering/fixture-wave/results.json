@@ -1,0 +1,266 @@
+{
+  "P022": {
+    "trial": {
+      "reposition splice error mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "intra-segment pitch error mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "reference edge setback error mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "indexing pin radial allowance mm": {
+        "measured": 0.03,
+        "pass": true
+      }
+    },
+    "rejected": {
+      "reposition splice error mm": {
+        "measured": 1.05,
+        "pass": false
+      },
+      "intra-segment pitch error mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "reference edge setback error mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "indexing pin radial allowance mm": {
+        "measured": 0.03,
+        "pass": true
+      }
+    },
+    "required_rejection": "reposition splice error mm",
+    "pass": true
+  },
+  "P024": {
+    "trial": {
+      "underside part clearance above vise bed mm": {
+        "measured": 1.4,
+        "pass": true
+      },
+      "jaw width settings mm": {
+        "measured": [
+          22.0,
+          45.0,
+          70.0
+        ],
+        "pass": true
+      },
+      "board thickness clearance in jaw slots mm": {
+        "measured": 0.35,
+        "pass": true
+      },
+      "minimum spring travel reserve mm": {
+        "measured": 3.18,
+        "pass": true
+      }
+    },
+    "rejected": {
+      "underside part clearance above vise bed mm": {
+        "measured": -3.6,
+        "pass": false
+      },
+      "jaw width settings mm": {
+        "measured": [
+          22.0,
+          45.0,
+          70.0
+        ],
+        "pass": true
+      },
+      "board thickness clearance in jaw slots mm": {
+        "measured": 0.35,
+        "pass": true
+      },
+      "minimum spring travel reserve mm": {
+        "measured": 3.18,
+        "pass": true
+      }
+    },
+    "required_rejection": "underside part clearance above vise bed mm",
+    "pass": true
+  },
+  "P033": {
+    "trial": {
+      "mapped instrument leads with simulated connection": {
+        "measured": 18,
+        "pass": true
+      },
+      "distinct connected nets with shared grounds": {
+        "measured": 16,
+        "pass": true
+      },
+      "source coordinate disagreement mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "probe tip radial margin mm": {
+        "measured": 0.1,
+        "pass": true
+      },
+      "spring stroke reserve mm": {
+        "measured": 0.18,
+        "pass": true
+      },
+      "reversed key clearance beyond receiving window mm": {
+        "measured": 86.8,
+        "pass": true
+      }
+    },
+    "rejected": {
+      "mapped instrument leads with simulated connection": {
+        "measured": 17,
+        "pass": false
+      },
+      "distinct connected nets with shared grounds": {
+        "measured": 15,
+        "pass": false
+      },
+      "source coordinate disagreement mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "probe tip radial margin mm": {
+        "measured": 0.1,
+        "pass": true
+      },
+      "spring stroke reserve mm": {
+        "measured": 0.18,
+        "pass": true
+      },
+      "reversed key clearance beyond receiving window mm": {
+        "measured": 86.8,
+        "pass": true
+      }
+    },
+    "required_rejection": "mapped instrument leads with simulated connection",
+    "pass": true
+  },
+  "P034": {
+    "trial": {
+      "nozzle-to-clamp repeat clearance mm": {
+        "measured": 5.0,
+        "pass": true
+      },
+      "in-plane stage coupon hole disagreement mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "fiducial triangle area mm2": {
+        "measured": 1017.0,
+        "pass": true
+      },
+      "safe travel height above clamps mm": {
+        "measured": 6.0,
+        "pass": true
+      }
+    },
+    "rejected": {
+      "nozzle-to-clamp repeat clearance mm": {
+        "measured": -3.0,
+        "pass": false
+      },
+      "in-plane stage coupon hole disagreement mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "fiducial triangle area mm2": {
+        "measured": 1017.0,
+        "pass": true
+      },
+      "safe travel height above clamps mm": {
+        "measured": 6.0,
+        "pass": true
+      }
+    },
+    "required_rejection": "nozzle-to-clamp repeat clearance mm",
+    "pass": true
+  },
+  "P048": {
+    "trial": {
+      "maximum aperture-to-land displacement mm": {
+        "measured": 0.063216,
+        "pass": true
+      },
+      "remaining copper margin around worst aperture mm": {
+        "measured": 0.036784,
+        "pass": true
+      },
+      "minimum initial lift clearance at 5 degrees mm": {
+        "measured": 1.574796,
+        "pass": true
+      },
+      "open angle deg": {
+        "measured": 50.0,
+        "pass": true
+      }
+    },
+    "rejected": {
+      "maximum aperture-to-land displacement mm": {
+        "measured": 0.281742,
+        "pass": false
+      },
+      "remaining copper margin around worst aperture mm": {
+        "measured": -0.181742,
+        "pass": false
+      },
+      "minimum initial lift clearance at 5 degrees mm": {
+        "measured": 1.574796,
+        "pass": true
+      },
+      "open angle deg": {
+        "measured": 50.0,
+        "pass": true
+      }
+    },
+    "required_rejection": "maximum aperture-to-land displacement mm",
+    "pass": true
+  },
+  "P216": {
+    "trial": {
+      "worst geometry-only tool tip drift mm": {
+        "measured": 0.355313,
+        "pass": true
+      },
+      "prevent reverse dowel seating mm": {
+        "measured": 7.211103,
+        "pass": true
+      },
+      "latch hook depth engagement mm": {
+        "measured": 3.2,
+        "pass": true
+      },
+      "release travel reserve mm": {
+        "measured": 3.8,
+        "pass": true
+      }
+    },
+    "rejected": {
+      "worst geometry-only tool tip drift mm": {
+        "measured": 1.120312,
+        "pass": false
+      },
+      "prevent reverse dowel seating mm": {
+        "measured": 7.211103,
+        "pass": true
+      },
+      "latch hook depth engagement mm": {
+        "measured": 3.2,
+        "pass": true
+      },
+      "release travel reserve mm": {
+        "measured": 3.8,
+        "pass": true
+      }
+    },
+    "required_rejection": "worst geometry-only tool tip drift mm",
+    "pass": true
+  }
+}

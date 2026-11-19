@@ -1,0 +1,22 @@
+{
+  "openlog": {
+    "seated_intersection_mm3": 0.0,
+    "reversed_intersection_mm3": 71.333,
+    "support_mm2": 32.223
+  },
+  "max9744": {
+    "seated_intersection_mm3": 0.0,
+    "reversed_intersection_mm3": 71.333,
+    "support_mm2": 46.841
+  },
+  "pygamer": {
+    "seated_intersection_mm3": 0.0,
+    "reversed_intersection_mm3": 71.333,
+    "support_mm2": 38.202
+  },
+  "feather-m4-express": {
+    "seated_intersection_mm3": 0.0,
+    "reversed_intersection_mm3": 71.333,
+    "support_mm2": 46.524
+  }
+}

@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="220mm" height="260mm" viewBox="0 0 220 260">
+  <title>P037 baseline · full-size proof coupon</title>
+  <rect id="scale" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="10" y="6" width="20" height="10" />
+  <rect id="stage-plate" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="28" y="49" width="118" height="90" />
+  <rect id="view-window" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="59" y="73" width="56" height="42" />
+  <rect id="specimen" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="77" y="86.5" width="20" height="15" />
+  <line id="axis-x" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x1="72" y1="94" x2="102" y2="94" />
+  <line id="axis-y" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x1="86.47664" y1="84.013705" x2="87.52336" y2="103.986295" />
+  <rect id="traveler-plate" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="50" y="175" width="76" height="52" />
+  <circle id="traveler-mount-58-182" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="58" cy="182" r="2.2" />
+  <circle id="traveler-mount-118-182" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="118" cy="182" r="2.2" />
+  <circle id="traveler-mount-58-220" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="58" cy="220" r="2.2" />
+  <circle id="traveler-mount-118-220" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="118" cy="220" r="2.2" />
+</svg>

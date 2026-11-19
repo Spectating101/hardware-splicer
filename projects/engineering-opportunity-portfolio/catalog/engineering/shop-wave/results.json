@@ -1,0 +1,512 @@
+{
+  "P232": {
+    "candidate": {
+      "awl exit radial clearance mm": {
+        "measured": 0.75,
+        "pass": true
+      },
+      "station pitch maximum error mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "section axis and 45 degree rails": {
+        "measured": 0.0,
+        "pass": true
+      }
+    },
+    "rejected": {
+      "awl exit radial clearance mm": {
+        "measured": -2.25,
+        "pass": false
+      },
+      "station pitch maximum error mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "section axis and 45 degree rails": {
+        "measured": 0.0,
+        "pass": true
+      }
+    },
+    "required_rejection": "awl exit radial clearance mm",
+    "pass": true
+  },
+  "P233": {
+    "candidate": {
+      "hand knob sweep clear of flat platen mm": {
+        "measured": 5.0,
+        "pass": true
+      },
+      "minimum engaged thread over opening range mm": {
+        "measured": 17.0,
+        "pass": true
+      },
+      "book coupon flush to both cauls": {
+        "measured": 0.0,
+        "pass": true
+      }
+    },
+    "rejected": {
+      "hand knob sweep clear of flat platen mm": {
+        "measured": -8.0,
+        "pass": false
+      },
+      "minimum engaged thread over opening range mm": {
+        "measured": 17.0,
+        "pass": true
+      },
+      "book coupon flush to both cauls": {
+        "measured": 0.0,
+        "pass": true
+      }
+    },
+    "required_rejection": "hand knob sweep clear of flat platen mm",
+    "pass": true
+  },
+  "P234": {
+    "candidate": {
+      "key clearance inside continuous slot mm": {
+        "measured": 1.0,
+        "pass": true
+      },
+      "washer coverage per side mm": {
+        "measured": 4.5,
+        "pass": true
+      },
+      "book lateral insertion clearance mm": {
+        "measured": 10.0,
+        "pass": true
+      },
+      "cord misalignment mm": {
+        "measured": 0.0,
+        "pass": true
+      }
+    },
+    "rejected": {
+      "key clearance inside continuous slot mm": {
+        "measured": 0.0,
+        "pass": false
+      },
+      "washer coverage per side mm": {
+        "measured": 5.5,
+        "pass": true
+      },
+      "book lateral insertion clearance mm": {
+        "measured": 10.0,
+        "pass": true
+      },
+      "cord misalignment mm": {
+        "measured": 0.0,
+        "pass": true
+      }
+    },
+    "required_rejection": "key clearance inside continuous slot mm",
+    "pass": true
+  },
+  "P235": {
+    "candidate": {
+      "tool clearance above both jaw tops mm": {
+        "measured": 6.0,
+        "pass": true
+      },
+      "axial jaw coverage over spine": {
+        "measured": 245.0,
+        "pass": true
+      },
+      "rod edge clearance to block ends mm": {
+        "measured": 9.1,
+        "pass": true
+      },
+      "facing jaw contact height mm": {
+        "measured": 34.0,
+        "pass": true
+      }
+    },
+    "rejected": {
+      "tool clearance above both jaw tops mm": {
+        "measured": -4.0,
+        "pass": false
+      },
+      "axial jaw coverage over spine": {
+        "measured": 245.0,
+        "pass": true
+      },
+      "rod edge clearance to block ends mm": {
+        "measured": 9.1,
+        "pass": true
+      },
+      "facing jaw contact height mm": {
+        "measured": 44.0,
+        "pass": true
+      }
+    },
+    "required_rejection": "tool clearance above both jaw tops mm",
+    "pass": true
+  },
+  "P236": {
+    "candidate": {
+      "rocker sweep above base mm": {
+        "measured": 40.27773,
+        "pass": true
+      },
+      "end plate stops contact without early collision": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "exported rotation endpoint maximum error mm": {
+        "measured": 1e-05,
+        "pass": true
+      },
+      "leaf length above clamp jaws mm": {
+        "measured": 30.0,
+        "pass": true
+      }
+    },
+    "rejected": {
+      "rocker sweep above base mm": {
+        "measured": 4.27773,
+        "pass": false
+      },
+      "end plate stops contact without early collision": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "exported rotation endpoint maximum error mm": {
+        "measured": 1e-05,
+        "pass": true
+      },
+      "leaf length above clamp jaws mm": {
+        "measured": 30.0,
+        "pass": true
+      }
+    },
+    "required_rejection": "rocker sweep above base mm",
+    "pass": true
+  },
+  "P240": {
+    "candidate": {
+      "offset and strip registration error mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "minimum slot margin over all offsets mm": {
+        "measured": 0.5,
+        "pass": true
+      },
+      "two-point fence restraint span mm": {
+        "measured": 108.0,
+        "pass": true
+      },
+      "strip remaining under punch mm": {
+        "measured": 10.0,
+        "pass": true
+      },
+      "shoe insertion allowance mm": {
+        "measured": 1.0,
+        "pass": true
+      }
+    },
+    "rejected": {
+      "offset and strip registration error mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "minimum slot margin over all offsets mm": {
+        "measured": 0.5,
+        "pass": true
+      },
+      "two-point fence restraint span mm": {
+        "measured": 0.0,
+        "pass": false
+      },
+      "strip remaining under punch mm": {
+        "measured": 10.0,
+        "pass": true
+      },
+      "shoe insertion allowance mm": {
+        "measured": 1.0,
+        "pass": true
+      }
+    },
+    "required_rejection": "two-point fence restraint span mm",
+    "pass": true
+  },
+  "P241": {
+    "candidate": {
+      "minimum bath immersion mm": {
+        "measured": 2.0,
+        "pass": true
+      },
+      "roller off floor mm": {
+        "measured": 6.0,
+        "pass": true
+      },
+      "cleaning lift clears tray wall mm": {
+        "measured": 2.0,
+        "pass": true
+      },
+      "axle removal slot clearance mm": {
+        "measured": 1.0,
+        "pass": true
+      }
+    },
+    "rejected": {
+      "minimum bath immersion mm": {
+        "measured": -1.0,
+        "pass": false
+      },
+      "roller off floor mm": {
+        "measured": 9.0,
+        "pass": true
+      },
+      "cleaning lift clears tray wall mm": {
+        "measured": 5.0,
+        "pass": true
+      },
+      "axle removal slot clearance mm": {
+        "measured": 1.0,
+        "pass": true
+      }
+    },
+    "required_rejection": "minimum bath immersion mm",
+    "pass": true
+  },
+  "P246": {
+    "candidate": {
+      "all blank points cross the abrasive span mm": {
+        "measured": 42.0,
+        "pass": true
+      },
+      "carrier side clearance mm": {
+        "measured": 1.0,
+        "pass": true
+      },
+      "carrier end margin mm": {
+        "measured": 16.0,
+        "pass": true
+      },
+      "assembled set thickness error mm": {
+        "measured": 0.0,
+        "pass": true
+      }
+    },
+    "rejected": {
+      "all blank points cross the abrasive span mm": {
+        "measured": 27.0,
+        "pass": false
+      },
+      "carrier side clearance mm": {
+        "measured": 1.0,
+        "pass": true
+      },
+      "carrier end margin mm": {
+        "measured": 20.0,
+        "pass": true
+      },
+      "assembled set thickness error mm": {
+        "measured": 0.0,
+        "pass": true
+      }
+    },
+    "required_rejection": "all blank points cross the abrasive span mm",
+    "pass": true
+  },
+  "P251": {
+    "candidate": {
+      "quarter circle and tangent endpoint error mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "bearing to cutting radius transfer error mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "minimum indexing fence overlap on narrow panel mm": {
+        "measured": 19.0,
+        "pass": true
+      },
+      "clamp pad edge clearance mm": {
+        "measured": 6.0,
+        "pass": true
+      }
+    },
+    "rejected": {
+      "quarter circle and tangent endpoint error mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "bearing to cutting radius transfer error mm": {
+        "measured": 1.75,
+        "pass": false
+      },
+      "minimum indexing fence overlap on narrow panel mm": {
+        "measured": 19.0,
+        "pass": true
+      },
+      "clamp pad edge clearance mm": {
+        "measured": 6.0,
+        "pass": true
+      }
+    },
+    "required_rejection": "bearing to cutting radius transfer error mm",
+    "pass": true
+  },
+  "P261": {
+    "candidate": {
+      "maximum angular interval error deg": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "tick placement radial error mm": {
+        "measured": 1e-05,
+        "pass": true
+      },
+      "centering insert radial play mm": {
+        "measured": 0.15,
+        "pass": true
+      },
+      "center key alignment error mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "minimum edge land mm": {
+        "measured": 5.0,
+        "pass": true
+      }
+    },
+    "rejected": {
+      "maximum angular interval error deg": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "tick placement radial error mm": {
+        "measured": 1e-05,
+        "pass": true
+      },
+      "centering insert radial play mm": {
+        "measured": 0.8,
+        "pass": false
+      },
+      "center key alignment error mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "minimum edge land mm": {
+        "measured": 5.0,
+        "pass": true
+      }
+    },
+    "required_rejection": "centering insert radial play mm",
+    "pass": true
+  },
+  "P263": {
+    "candidate": {
+      "coupler hole to pin mismatch mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "equal crank throws and 90 degree phasing": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "least available tangential component over 360 degrees": {
+        "measured": 0.70711,
+        "pass": true
+      },
+      "link projected edge clearance mm": {
+        "measured": 32.0,
+        "pass": true
+      },
+      "separation between link planes mm": {
+        "measured": 6.0,
+        "pass": true
+      },
+      "clear gap between projected clip circles mm": {
+        "measured": 30.0,
+        "pass": true
+      }
+    },
+    "rejected": {
+      "coupler hole to pin mismatch mm": {
+        "measured": 3.0,
+        "pass": false
+      },
+      "equal crank throws and 90 degree phasing": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "least available tangential component over 360 degrees": {
+        "measured": 0.70711,
+        "pass": true
+      },
+      "link projected edge clearance mm": {
+        "measured": 32.0,
+        "pass": true
+      },
+      "separation between link planes mm": {
+        "measured": 6.0,
+        "pass": true
+      },
+      "clear gap between projected clip circles mm": {
+        "measured": 30.0,
+        "pass": true
+      }
+    },
+    "required_rejection": "coupler hole to pin mismatch mm",
+    "pass": true
+  },
+  "P264": {
+    "candidate": {
+      "peg hole edge-to-edge spacing mm": {
+        "measured": 74.0,
+        "pass": true
+      },
+      "bolt edge land inside both overlapping rails mm": {
+        "measured": 26.0,
+        "pass": true
+      },
+      "inactive sockets clearance from vertical runs mm": {
+        "measured": 74.0,
+        "pass": true
+      },
+      "yarn line to active peg tangency error mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "nominal finished loop lengths mm": {
+        "measured": [
+          1850.265,
+          1490.265
+        ],
+        "pass": true
+      }
+    },
+    "rejected": {
+      "peg hole edge-to-edge spacing mm": {
+        "measured": -13.0,
+        "pass": false
+      },
+      "bolt edge land inside both overlapping rails mm": {
+        "measured": 26.0,
+        "pass": true
+      },
+      "inactive sockets clearance from vertical runs mm": {
+        "measured": -3.0,
+        "pass": false
+      },
+      "yarn line to active peg tangency error mm": {
+        "measured": 0.0,
+        "pass": true
+      },
+      "nominal finished loop lengths mm": {
+        "measured": [
+          1850.265,
+          1664.265
+        ],
+        "pass": false
+      }
+    },
+    "required_rejection": "peg hole edge-to-edge spacing mm",
+    "pass": true
+  }
+}

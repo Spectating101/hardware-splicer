@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="425mm" height="322mm" viewBox="0 0 425 322" data-phone-mass-kg="0.24" data-joint-stiffness="27" data-slip-torque="1.0">
+  <title>Two-link tabletop arm geometry and clamp</title>
+  <style>text{font:4px sans-serif;fill:#103341} .part,.tool,.test{stroke:#2a4148;stroke-width:.35;fill:none}.part{fill:#dce9e9;fill-opacity:.45}.tool{stroke:#006557}.test{stroke:#aa4c22;stroke-dasharray:2 1}</style>
+  <rect id="desk" class="part" x="30" y="205" width="355" height="33" />
+  <rect id="jaw-top" class="part" x="29" y="195" width="52" height="10" />
+  <rect id="jaw-bottom" class="part" x="29" y="259" width="52" height="10" />
+  <rect id="jaw-back" class="part" x="20" y="195" width="10" height="74" />
+  <line id="jaw-screw" class="tool" x1="61" y1="259" x2="61" y2="220" />
+  <line id="link-a-0" class="tool" x1="57" y1="175" x2="181.03943" y2="220.14666" />
+  <line id="link-b-0" class="tool" x1="181.03943" y1="220.14666" x2="301.03943" y2="220.14666" />
+  <rect id="load-0" class="test" x="301.03943" y="212.14666" width="10" height="16" />
+  <line id="link-a-1" class="tool" x1="57" y1="175" x2="189.0" y2="175.0" />
+  <line id="link-b-1" class="tool" x1="189.0" y1="175.0" x2="309.0" y2="175.0" />
+  <rect id="load-1" class="test" x="309.0" y="167.0" width="10" height="16" />
+  <line id="link-a-2" class="tool" x1="57" y1="175" x2="141.84796" y2="73.88213" />
+  <line id="link-b-2" class="tool" x1="141.84796" y1="73.88213" x2="261.84796" y2="73.88213" />
+  <rect id="load-2" class="test" x="261.84796" y="65.88213" width="10" height="16" />
+  <text x="20" y="18">Pivot spans 132 + 120; modeled phone mass 0.24 kg</text>
+  <text x="20" y="298">Throat 52; max open 54; joint stiffness input 27 Nm/rad</text>
+</svg>

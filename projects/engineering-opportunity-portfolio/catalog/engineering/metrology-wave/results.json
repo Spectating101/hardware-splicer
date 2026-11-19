@@ -1,0 +1,482 @@
+{
+  "P076": {
+    "baseline": {
+      "Worst three-axis reconstruction error with face tolerance": {
+        "value": 1.528,
+        "relation": "≤",
+        "target": 0.04,
+        "unit": "mm",
+        "pass": false
+      },
+      "Smallest modeled conductor wall at stock faces": {
+        "value": 3.15,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Worst three-axis reconstruction error with face tolerance": {
+        "value": 0.029,
+        "relation": "≤",
+        "target": 0.04,
+        "unit": "mm",
+        "pass": true
+      },
+      "Smallest modeled conductor wall at stock faces": {
+        "value": 3.15,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P077": {
+    "baseline": {
+      "Worst modeled travel reserve after trigger and stop": {
+        "value": -0.16,
+        "relation": "≥",
+        "target": 0.35,
+        "unit": "mm",
+        "pass": false
+      },
+      "Earliest trigger compression": {
+        "value": 0.33,
+        "relation": "≥",
+        "target": 0.25,
+        "unit": "mm",
+        "pass": true
+      },
+      "Full bounded trigger spread": {
+        "value": 0.06,
+        "relation": "≤",
+        "target": 0.07,
+        "unit": "mm",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Worst modeled travel reserve after trigger and stop": {
+        "value": 0.54,
+        "relation": "≥",
+        "target": 0.35,
+        "unit": "mm",
+        "pass": true
+      },
+      "Earliest trigger compression": {
+        "value": 0.33,
+        "relation": "≥",
+        "target": 0.25,
+        "unit": "mm",
+        "pass": true
+      },
+      "Full bounded trigger spread": {
+        "value": 0.06,
+        "relation": "≤",
+        "target": 0.07,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P078": {
+    "baseline": {
+      "Worst spindle tilt inference error": {
+        "value": 0.02702,
+        "relation": "≤",
+        "target": 0.006,
+        "unit": "deg",
+        "pass": false
+      },
+      "Repeated estimate spread": {
+        "value": 0.0026,
+        "relation": "≤",
+        "target": 0.003,
+        "unit": "deg",
+        "pass": true
+      },
+      "Indicator pad separation": {
+        "value": 176.0,
+        "relation": "≥",
+        "target": 165,
+        "unit": "mm",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Worst spindle tilt inference error": {
+        "value": 0.00163,
+        "relation": "≤",
+        "target": 0.006,
+        "unit": "deg",
+        "pass": true
+      },
+      "Repeated estimate spread": {
+        "value": 0.00195,
+        "relation": "≤",
+        "target": 0.003,
+        "unit": "deg",
+        "pass": true
+      },
+      "Indicator pad separation": {
+        "value": 176.0,
+        "relation": "≥",
+        "target": 165,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P086": {
+    "baseline": {
+      "Worst modeled slot-width error": {
+        "value": 3.36,
+        "relation": "≤",
+        "target": 0.12,
+        "unit": "mm",
+        "pass": false
+      },
+      "Smallest two-stop displacement": {
+        "value": 6.4,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Lock slot reserve above longest displacement": {
+        "value": 84.91,
+        "relation": "≥",
+        "target": 5,
+        "unit": "mm",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Worst modeled slot-width error": {
+        "value": 0.1,
+        "relation": "≤",
+        "target": 0.12,
+        "unit": "mm",
+        "pass": true
+      },
+      "Smallest two-stop displacement": {
+        "value": 4.95,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Lock slot reserve above longest displacement": {
+        "value": 88.19,
+        "relation": "≥",
+        "target": 5,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P099": {
+    "baseline": {
+      "Worst insert center displacement at overhang": {
+        "value": 0.44786,
+        "relation": "≤",
+        "target": 0.19,
+        "unit": "mm",
+        "pass": false
+      },
+      "Guide-clearance tilt bound": {
+        "value": 0.61386,
+        "relation": "≤",
+        "target": 0.3,
+        "unit": "deg",
+        "pass": false
+      },
+      "Worst depth stop error": {
+        "value": 0.3,
+        "relation": "≤",
+        "target": 0.12,
+        "unit": "mm",
+        "pass": false
+      }
+    },
+    "revised": {
+      "Worst insert center displacement at overhang": {
+        "value": 0.17268,
+        "relation": "≤",
+        "target": 0.19,
+        "unit": "mm",
+        "pass": true
+      },
+      "Guide-clearance tilt bound": {
+        "value": 0.20962,
+        "relation": "≤",
+        "target": 0.3,
+        "unit": "deg",
+        "pass": true
+      },
+      "Worst depth stop error": {
+        "value": 0.09,
+        "relation": "≤",
+        "target": 0.12,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P105": {
+    "baseline": {
+      "Known imbalance torque ratio over deadband": {
+        "value": 0.60277,
+        "relation": "≥",
+        "target": 1.65,
+        "unit": "ratio",
+        "pass": false
+      },
+      "Equivalent worst-case detected-mass threshold": {
+        "value": 1.32721,
+        "relation": "≤",
+        "target": 0.5,
+        "unit": "g",
+        "pass": false
+      },
+      "Stand foot depth": {
+        "value": 31.0,
+        "relation": "≥",
+        "target": 28,
+        "unit": "mm",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Known imbalance torque ratio over deadband": {
+        "value": 1.81907,
+        "relation": "≥",
+        "target": 1.65,
+        "unit": "ratio",
+        "pass": true
+      },
+      "Equivalent worst-case detected-mass threshold": {
+        "value": 0.43979,
+        "relation": "≤",
+        "target": 0.5,
+        "unit": "g",
+        "pass": true
+      },
+      "Stand foot depth": {
+        "value": 31.0,
+        "relation": "≥",
+        "target": 28,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P106": {
+    "baseline": {
+      "Minimum radial adjustment reserve": {
+        "value": -22.0,
+        "relation": "≥",
+        "target": 5,
+        "unit": "mm",
+        "pass": false
+      },
+      "Maximum modeled pad and hub-tip differential budget": {
+        "value": 0.95,
+        "relation": "≤",
+        "target": 0.2,
+        "unit": "mm",
+        "pass": false
+      },
+      "Minimum difference from known dish shim after flip": {
+        "value": 0.95,
+        "relation": "≥",
+        "target": 1.5,
+        "unit": "mm",
+        "pass": false
+      }
+    },
+    "revised": {
+      "Minimum radial adjustment reserve": {
+        "value": 6.0,
+        "relation": "≥",
+        "target": 5,
+        "unit": "mm",
+        "pass": true
+      },
+      "Maximum modeled pad and hub-tip differential budget": {
+        "value": 0.18,
+        "relation": "≤",
+        "target": 0.2,
+        "unit": "mm",
+        "pass": true
+      },
+      "Minimum difference from known dish shim after flip": {
+        "value": 1.72,
+        "relation": "≥",
+        "target": 1.5,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P107": {
+    "baseline": {
+      "Worst single-reading spindle-clearance projection": {
+        "value": 3.0,
+        "relation": "≤",
+        "target": 0.6,
+        "unit": "mm",
+        "pass": false
+      },
+      "Maximum vector recovery error incl. clearance": {
+        "value": 4.26814,
+        "relation": "≤",
+        "target": 0.9,
+        "unit": "mm",
+        "pass": false
+      },
+      "Conservative lower bound on detected tilt-equivalent displacement": {
+        "value": -1.14334,
+        "relation": "≥",
+        "target": 1.8,
+        "unit": "mm",
+        "pass": false
+      }
+    },
+    "revised": {
+      "Worst single-reading spindle-clearance projection": {
+        "value": 0.5625,
+        "relation": "≤",
+        "target": 0.6,
+        "unit": "mm",
+        "pass": true
+      },
+      "Maximum vector recovery error incl. clearance": {
+        "value": 0.82099,
+        "relation": "≤",
+        "target": 0.9,
+        "unit": "mm",
+        "pass": true
+      },
+      "Conservative lower bound on detected tilt-equivalent displacement": {
+        "value": 2.3038,
+        "relation": "≥",
+        "target": 1.8,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P110": {
+    "baseline": {
+      "Worst modeled layout drift over panel length": {
+        "value": 2.22352,
+        "relation": "≤",
+        "target": 1.2,
+        "unit": "mm",
+        "pass": false
+      },
+      "Nominal index angle error": {
+        "value": 0.0,
+        "relation": "≤",
+        "target": 0.05,
+        "unit": "deg",
+        "pass": true
+      },
+      "Minimum modeled rail key clearance": {
+        "value": 0.18,
+        "relation": "≥",
+        "target": 0.1,
+        "unit": "mm",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Worst modeled layout drift over panel length": {
+        "value": 1.05882,
+        "relation": "≤",
+        "target": 1.2,
+        "unit": "mm",
+        "pass": true
+      },
+      "Nominal index angle error": {
+        "value": 0.0,
+        "relation": "≤",
+        "target": 0.05,
+        "unit": "deg",
+        "pass": true
+      },
+      "Minimum modeled rail key clearance": {
+        "value": 0.18,
+        "relation": "≥",
+        "target": 0.1,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P245": {
+    "baseline": {
+      "Worst crown-to-notch edge clearance incl. registration": {
+        "value": -13.3925,
+        "relation": "≥",
+        "target": 0.75,
+        "unit": "mm",
+        "pass": false
+      },
+      "Smallest remaining fretboard contact land": {
+        "value": 4.54537,
+        "relation": "≥",
+        "target": 4,
+        "unit": "mm",
+        "pass": true
+      },
+      "Minimum depth over fret crown": {
+        "value": 3.8,
+        "relation": "≥",
+        "target": 3.5,
+        "unit": "mm",
+        "pass": true
+      },
+      "Maximum fret center position deviation": {
+        "value": 14.2875,
+        "relation": "≤",
+        "target": 0.09,
+        "unit": "mm",
+        "pass": false
+      }
+    },
+    "revised": {
+      "Worst crown-to-notch edge clearance incl. registration": {
+        "value": 0.895,
+        "relation": "≥",
+        "target": 0.75,
+        "unit": "mm",
+        "pass": true
+      },
+      "Smallest remaining fretboard contact land": {
+        "value": 4.82856,
+        "relation": "≥",
+        "target": 4,
+        "unit": "mm",
+        "pass": true
+      },
+      "Minimum depth over fret crown": {
+        "value": 3.8,
+        "relation": "≥",
+        "target": 3.5,
+        "unit": "mm",
+        "pass": true
+      },
+      "Maximum fret center position deviation": {
+        "value": 0.0,
+        "relation": "≤",
+        "target": 0.09,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  }
+}

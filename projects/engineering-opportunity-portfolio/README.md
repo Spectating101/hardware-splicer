@@ -1,5 +1,9 @@
 # HS engineering opportunity portfolio — three distinct decision tracks
 
+Browse the [270-offer manufacturing catalog](catalog/index.html), read the [build-versus-buy findings](catalog/README.md), or [download the offline edition](HS-manufacturing-catalog.zip). The catalog covers 62 families and preserves the earlier concept library as a separate index. The [digital engineering reader](catalog/engineering/trials.html) covers 153 offers, including all 53 with positive modeled 25-sale returns.
+
+For the November product map, open the [product index](product-index.md). It connects the market-screened offers, supplier listings, digital builds and the searchable list of 620 device configurations.
+
 **As of 2026-10-20.** This portfolio is a project-selection aid grounded in public examples, *not* evidence that any HS-generated design or repaired hardware is finished. Use the canonical [HS mission](../../docs/HARDWARE_SPLICER_MISSION_FREEZE.md). The objective is to build and repair actual devices, not a ranking engine.
 
 ## Track 1 — engineering integration proof

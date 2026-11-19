@@ -1,0 +1,8 @@
+{
+  "clean_corners": 24,
+  "warped_corners": 24,
+  "pitch_mm": 24.0,
+  "max_warp_residual_px": 0.243,
+  "scaled_97pct_pitch_mm": 23.296,
+  "expected_corners": 24
+}

@@ -1,0 +1,100 @@
+{
+ "P036":{
+  "finding":"A 240 µm pre-roll and 6 µm capture schedule cover 0.60 mm with 57.81% worst modeled focal overlap.",
+  "method":"Replay the emitted 101-position sequence after a same-direction pre-roll. Use thin-lens macro depth of field with unity pupil magnification, f/5.6, 3× magnification and 4 µm image-plane circle of confusion. The modeled screw clearance is 220 µm. Clearance not taken up by the jog absorbs early commanded motion. Charge ±1.2 µm independent settled position error to neighboring exposures. The revised schedule has 20 µm of backlash pre-roll reserve and 3.6 µm minimum advance.",
+  "source":"WeMacro specifies 100 mm of commercial rail travel, a configurable 1 µm minimum step in one direction and 220 µm recommended software backlash. The 220 µm value is used as a conservative comparator input. The proposed stage's error and optical settings are modeled. [WeMacro Pro 100 specifications](https://www.wemacro.com/?p=337)",
+  "physical":"Measure actual reversal clearance, settling and step repeatability under mounted load with a displacement gauge. Run a 101-exposure stack at the selected lens setting and check overlap, focus breathing, vibration, trigger timing and travel stops.",
+  "use":"The SVG is a full-size 100 mm travel installation coupon and mounting datum plate. The companion schedule gives one absolute jog command followed by monotonically increasing exposure positions in micrometers. Schedule settle time on the hardware after measurement."
+ },
+ "P037":{
+  "finding":"Squaring the second slide to 0.12° nominal skew reduces the modeled cross-axis drift from 0.55 to 0.099 mm.",
+  "method":"Place a 20 × 15 mm specimen in the center of a 56 × 42 mm viewing aperture. Model 14 mm X and 9 mm Y commanded motion at each sign. Compare the projection of the exported Y direction onto the X direction plus 0.08 mm stage error. The revised plate retains at least 3.90 mm viewing clearance at the far corner.",
+  "source":"The specimen, motion and slide joint dimensions use a synthetic stage envelope.",
+  "physical":"Measure actual carriage squareness, lash, screw pitch and repeatability with a dial indicator. Inspect specimen retention, clamp and lens clearance through all four travel corners.",
+  "use":"Cut the aperture carrier and traveler plate. Use the engraved crossing-axis datum to align slides before tightening the mount."
+ },
+ "P193":{
+  "finding":"A 25.2° steering setting gives a 309.73 mm modeled turning radius and 15.90 mm support reserve.",
+  "method":"Use a three-wheel kinematic model with fixed rear axle and single steered front wheel. Derive the track radius to the midpoint of the rear axle from its 146 mm wheelbase and engraved steering angle. Subtract a 10 mm projected payload shift from the minimum camera mount to support-triangle edge distance.",
+  "source":"The wheeled deck, payload margin and steering target are synthetic. The chart describes low-speed rolling without scrub.",
+  "physical":"Measure real wheel contact and loaded center of mass. Check curves, wheel scrub, floor transitions, steering play and frame vibration with a noncritical payload.",
+  "use":"Cut the deck pattern and steering arm coupon, then fit hub hardware to the chosen wheels. The blue centerline and engraved steering vector establish the angle datum."
+ },
+ "P194":{
+  "finding":"Increasing the nominal cable-path radius to 23 mm leaves 20.4 mm on the largest cable's inside surface and retains 0.20–0.60 mm modeled pad interference.",
+  "method":"A two-jaw fixture captures circular 4.8–5.2 mm cables using soft pads 1.25 mm thick. Check the worst inside-surface bend radius from the path center radius and half the largest cable diameter. For the closed clamp, charge pad thickness on both sides against jaw opening and compare the resulting interference across that cable family.",
+  "source":"SmallRig's instructions show the role of a model-specific camera cable clamp. The 28 mm hole pitch, cable family, minimum bend requirement and pad fit are synthetic. [SmallRig cable clamp example](https://www.smallrig.com/smallrig-hdmi-cable-clamp-for-select-camera-cage-3637.html)",
+  "physical":"Measure the actual cage threads, cable diameter, manufacturer bend requirement and connectors. Use a pull gauge to verify that force reaches the cage and the padding leaves the cable and ports undamaged.",
+  "use":"Cut the mount plate, split jaws and replaceable rectangles of padding to fit the verified connectors. Use the opening and pad thickness coupons during setup."
+ },
+ "P197":{
+  "finding":"Trimming the bottom plate keeps all three modeled access zones open, with 4.5 mm clearance at the closest door sweep.",
+  "method":"Read a synthetic 132 × 83 mm body, connector corridor, hot shoe and closed-to-open door footprint. Evaluate their orthogonal separation from all three cage rails and deduct a 1.5 mm combined host and manufacturing position allowance. Check hole-edge ligament on the shortened rail. The imported shape is an intentionally conservative rectangular sweep.",
+  "source":"The trial defines a synthetic camera body and three access corridors. The manufacturing dimensions need a specific camera, cage load and material before release.",
+  "physical":"Measure the actual camera and three-dimensional motions, including the articulated display. Verify anti-twist features, connector insertion travel, fastener depth, door access and bracket retention before putting a camera in service.",
+  "use":"The three red section blanks give profile and mounting datums. The blue keepouts guide a real fit gauge for the chosen camera body."
+ },
+ "P198":{
+  "finding":"Reducing carriage offset to 0.13 mm lowers modeled lens reversal play from 0.910° to 0.345° and retains 1.483 contact ratio.",
+  "method":"Generate a 96-tooth lens ring and 20-tooth pinion as external involute approximations with 0.8 mm module, 20° pressure angle and a ±0.05 mm center-distance allowance. Read tip radii, tooth counts and pitch center distance from the exported drawing. Calculate transverse contact ratio at the far allowance with a first-order backlash model. A 90° lens throw needs 432° of manual wheel rotation.",
+  "source":"ARRI offers commercial lens and follow-focus gearing of module 0.8. The pressure angle, tooth counts, fabrication errors and lens diameter are trial inputs. [ARRI follow focus gear catalog](https://shop.arri.com/Products/PCA-Mechanical-Accessories/Follow-Focus/Gears/)",
+  "physical":"Measure chosen lens diameters and any gear installed, check print or cutter tolerance, run contact-blue and mesh-backlash checks at the tight and loose ends, and test focusing torque and marked repeatability without binding.",
+  "use":"SVG provides separate editable tooth profiles and a marking disc. Blue pitch circles show the nominal assembled positions. Root transitions use polygon relief approximations. Choose tooling and hub retention against measured material and gear geometry."
+ },
+ "P201":{
+  "finding":"A 0.448 kg centered ballast increases the model's restoring-to-disturbance moment ratio from 1.26 to 2.92.",
+  "method":"Use a 276 × 351 mm active flat panel with center of pressure 285 mm up. Apply a 3 m/s uniform cross-draft at synthetic density 1.225 kg/m³ and drag coefficient 1.18. Compare its overturn moment with gravitational restoring moment at an 80 mm foot lever arm. Compute a nominal steel ballast mass from the drawn square and 12 mm stock.",
+  "source":"Panel dimensions, air exposure, drag coefficient, ballast stock and contact layout use synthetic tabletop inputs.",
+  "physical":"Measure stand socket size and footprint, verify that ballast cannot shift, and check stable tipping and slip behavior against an actual tabletop draft before using it next to equipment.",
+  "use":"Cut fabric and backing battens and test the illustrated ballast size in a secured socket or molded tray. Blue indicates the usable reflective field and load setup."
+ },
+ "P202":{
+  "finding":"A 24 mm effective brake contact radius supplies 1.79–5.25 N modeled paper tension and no more than 4.8 N estimated crank force.",
+  "method":"Use a friction brake with 12.5 N normal force and coefficient 0.35 ±20% relative. Compare the torque from the drawn contact radius against paper tension at 24 and 47 mm roll radii. Compare worst brake torque plus 0.09 N·m extra winding load against a 45 mm crank lever. The 13.7 mm initial contact radius under-tensions a full roll.",
+  "source":"Manfrotto's Expan provides a single-roll commercial precedent. The tabletop apparatus, friction model, hand-force target, load and roll sizes are synthetic. [Manfrotto single-roll background drive](https://www.manfrotto.com/global-en/lighting/metal-chain-expan-set-with-red-chain-22lb-10kg-capacity-046mc/)",
+  "physical":"Measure chosen paper width, roll radius, bracket and table clamp range. Confirm breakaway and running friction with a spring scale, hand force, roll retention and wear after repeated cycles.",
+  "use":"Cut the brake disk and hand crank coupon. Mark the effective contact path and use the two blue roll envelope circles as gauges. The holder and desk clamp need measured installation geometry."
+ },
+ "P204":{
+  "finding":"Extending adjustable strap cut length to 500 mm keeps fitted strain between 4.4% and 14.2% across both chair routes.",
+  "method":"Fit a tabletop green panel to synthetic 522–571 mm strap routes. Compute strain at both bounds from the independent cut pattern and route references. The shorter prior strap strains 21.49% on the wide chair coupon. The model preserves 272,600 mm² of green active field.",
+  "source":"Fabric, clip routes, pre-strain window and panel coverage are trial inputs.",
+  "physical":"Fit the straps to the agreed chair, confirm the chair remains stable and move through fold cycles. Compare wrinkles and key quality under actual side lighting and check elastic creep.",
+  "use":"Cut the fabric with the indicated 20 mm border, mark side anchors and use the original strap pattern to gauge effective installed length between sewn ends."
+ },
+ "P206":{
+  "finding":"Raising the spring anchor above the pivot reduces modeled residual torque from 1.20 to 0.394 N·m through the working range.",
+  "method":"Run a single equivalent 300 mm arm carrying a 0.65 kg point load, with a spring anchored 64 mm along the beam. Sweep −10° to +55°. Read the anchor positions and rest length from the drawing and calculate effective linear spring force and pivot moment. The model uses a 325 N/m spring and omits inertia, friction, cable drag and arm self-weight.",
+  "source":"Pivot layout, mass, spring rate and travel model are synthetic. The exported coupon studies an equivalent pivot geometry.",
+  "physical":"Measure real center of mass and spring stroke, then proof and cycle the clamp, lock and pivot using an expendable load. Check release and cable clearance through the full arm articulation.",
+  "use":"The one-to-one side view establishes prototype spring anchor and length. The separate brace coupon is a drilling reference. Select and measure the real spring before load testing."
+ },
+ "P207":{
+  "finding":"A 52 mm aperture radius and an 11 mm mesh gap preserve 12.28 mm of modeled source-cone clearance and 64 mm to the diaphragm.",
+  "method":"Use two concentric membranes, a 12° source-envelope half angle and ±14 mm mouth offset. Compare the outer envelope at the farther membrane against both equal opening sizes. Read the full scale spacing and confirm the second membrane remains far enough from a diaphragm 185 mm from the source.",
+  "source":"The stand, mouth envelope, geometry and mesh are synthetic. The criterion describes physical coverage and stand-off, independent of acoustic attenuation.",
+  "physical":"Compare recorded plosive peaks and in-band speech attenuation against recordings without a screen at identical gain. Check flex-neck range and clamp strength on the actual stand.",
+  "use":"Cut two circular retainers and cut multiple spacer strips of the specified thickness. The section shows nominal stages from mouth datum to microphone."
+ },
+ "P208":{
+  "finding":"The softer cord setting reduces modeled 30 Hz motion transmission from 0.232 to 0.061 and retains 20.66 mm of static travel reserve.",
+  "method":"Mount a synthetic 0.35 kg microphone in a ring with 36 mm radial cord span. Evaluate two axial cords in tension together and two transverse cords with 1 N pre-tension each. Read gauge length and pull displacement from the drawing. Use the chosen cord's trial force at 5 mm pull to estimate linear stiffness. Calculate base excitation transmissibility at 30 Hz with damping ratio 0.15 and verify static sag plus a 6 mm excursion.",
+  "source":"The original cord force 4.75 N and the revised 0.78 N per 5 mm pull are synthetic selection targets. Actual stiffness, damping, excursions and body contact depend on the mic and elastic.",
+  "physical":"Check cord force-displacement with a spring scale, center the mic with cable attached, and measure impulse and sinusoidal transmission through the working orientation before making performance claims.",
+  "use":"Cut the external ring and opening. Use blue to locate four cords and the mic barrel. Check candidate elastic with the gauge before mounting the microphone."
+ },
+ "P209":{
+  "finding":"Increasing each wing to 163 mm raises the geometric rear coverage half-angle from 84.56° to 99.33°.",
+  "method":"Measure the position of the microphone, rear absorber and wing endpoints in an open plan trace. Determine the rear and side coverage angle where the first straight path from the source strikes the screen in the horizontal plane. The absorber height is 260 mm. This model accepts the upsized outline based on path coverage.",
+  "source":"Dimensions, fold angle, source placement and absorber size are synthetic. Blocked sight lines alone cannot predict measured acoustic treatment.",
+  "physical":"Compare impulse records with and without the screen, inspect off-axis coloration and desk reflection, then verify hinge friction and stowed fit.",
+  "use":"Cut the back and two wing blanks for the indicated coverage. The blue spread around the microphone is a fixture setting reference."
+ },
+ "P210":{
+  "finding":"Matched wedges with a 24 mm height differential across 170 mm produce 8.04° tilt and at least 8 mm seating inset.",
+  "method":"Extract both side profiles and the 150 × 108 mm speaker footprints. Calculate the slope of each part and reserve against a synthetic minimum static friction coefficient of 0.33. Angle agreement is based on generated pattern geometry.",
+  "source":"Speaker dimensions, wedge geometry and friction value model a hypothetical tabletop pair.",
+  "physical":"Measure the actual speaker feet, load and center of mass. Verify foam compression, height matching, stability on the desk and transfer vibration at working volume.",
+  "use":"Use the two full-size side and plan views for trimming a matched pair. Check tilt against the 20 mm reference scale after the speakers compress the physical stock."
+ }
+}

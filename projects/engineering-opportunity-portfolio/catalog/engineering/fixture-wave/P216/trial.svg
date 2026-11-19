@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="226mm" height="176mm" viewBox="0 0 226 176">
+  <title>Manual coupler and two register plates</title>
+  <style>text{font:4px sans-serif; fill:#21363c} .part,.cut,.limit{fill:none;stroke:#293c44;stroke-width:.35}.part{fill:#ddeaea;fill-opacity:.4}.cut{stroke:#006454}.limit{stroke:#ab492b;stroke-dasharray:2 1}</style>
+  <rect id="plate-0" class="part" x="16" y="18" width="66" height="46" />
+  <circle id="pin-0-0" class="cut" cx="35" cy="38" r="2.0" />
+  <circle id="seat-0-0" class="limit" cx="35" cy="38" r="2.06" />
+  <circle id="pin-0-1" class="cut" cx="67" cy="38" r="2.0" />
+  <circle id="seat-0-1" class="limit" cx="67" cy="38" r="2.075" />
+  <rect id="latch-slot-0" class="cut" x="28" y="50" width="10" height="5" />
+  <rect id="latch-hook-0" class="part" x="27" y="50" width="4" height="3.2" />
+  <rect id="reversed-tab-0" class="limit" x="60" y="50" width="4" height="3.2" />
+  <text x="88" y="30">Wrist-side plate</text>
+  <rect id="plate-1" class="part" x="16" y="79" width="66" height="46" />
+  <circle id="pin-1-0" class="cut" cx="35" cy="99" r="2.0" />
+  <circle id="seat-1-0" class="limit" cx="35" cy="99" r="2.06" />
+  <circle id="pin-1-1" class="cut" cx="67" cy="99" r="2.0" />
+  <circle id="seat-1-1" class="limit" cx="67" cy="99" r="2.075" />
+  <rect id="latch-slot-1" class="cut" x="28" y="111" width="10" height="5" />
+  <rect id="latch-hook-1" class="part" x="27" y="111" width="4" height="3.2" />
+  <rect id="reversed-tab-1" class="limit" x="60" y="111" width="4" height="3.2" />
+  <text x="88" y="91">Tool-side plate and second identical blank</text>
+  <line id="tip-offset" class="limit" x1="108" y1="78" x2="178" y2="78" />
+  <line id="release-motion" class="limit" x1="112" y1="116" x2="112" y2="109" />
+  <text x="16" y="143">Seat plain tool plate on round and relieved locators, then push latch home.</text>
+  <text x="16" y="154">Blank interface for measured wrist adapter. Section refers to registered face, not horn.</text>
+  <text x="16" y="165">Test unloaded over a catching mat before adding the 100 g dummy tool.</text>
+</svg>

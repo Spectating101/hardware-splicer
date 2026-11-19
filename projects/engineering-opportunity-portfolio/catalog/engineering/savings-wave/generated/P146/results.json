@@ -1,0 +1,15 @@
+{
+  "pilot": "Four empty bench vessels, low-flow air only with branch-isolation trial",
+  "metrics": {
+    "regulated": {
+      "branch_readings": 48,
+      "max_instrument_error_pct": 4.25,
+      "max_outlet_shift_when_closing_pct": 4.97
+    },
+    "droop-control": {
+      "branch_readings": 48,
+      "max_instrument_error_pct": 5.4,
+      "max_outlet_shift_when_closing_pct": 23.98
+    }
+  }
+}

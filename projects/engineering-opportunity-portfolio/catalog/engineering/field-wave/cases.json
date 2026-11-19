@@ -1,0 +1,82 @@
+{
+  "P111": {
+    "pilot": "Tainan nursery, one straight 12 by 6 brassica plug tray",
+    "rows": 6, "cols": 12, "pitch_x_mm": 27, "pitch_y_mm": 27,
+    "min_seed_width_mm": 0.95, "max_seed_mass_mg": 15,
+    "max_hand_load_g": 2, "vacuum_pa": 5000, "diameter_tol_mm": 0.05,
+    "max_alignment_mm": 2, "xy_tol_mm": 0.25,
+    "hole_mm": 0.65, "control_hole_mm": 0.40
+  },
+  "P112": {
+    "pilot": "Chiayi vegetable nursery, 24-site leek tray coupon",
+    "rows": 4, "cols": 6, "pitch_mm": 38,
+    "target_depth_mm": 10, "tip_stack_error_mm": 0.5, "tray_stack_error_mm": 0.6,
+    "support_span_mm": 220, "brace_width_mm": 20, "modulus_mpa": 69000,
+    "press_force_n": 50, "brace_mm": 8, "control_brace_mm": 3
+  },
+  "P119": {
+    "pilot": "Changhua seeder repair bench, one optical gate on an opaque surrogate chute",
+    "sample_ms": 1, "drops": 100, "spacing_ms": 30,
+    "beam_low": 120, "beam_high": 240, "min_blocked_samples": 2, "min_clear_samples": 2,
+    "paired_gap_ms": 1
+  },
+  "P122": {
+    "pilot": "Yunlin drip-filter wash station, two matched gauges over a zero-flow common bench tee",
+    "full_scale_bar": 2.5, "class_pct": 0.4, "control_class_pct": 1.6,
+    "display_step_bar": 0.01, "tap_height_delta_mm": 50, "limit_bar": 0.05,
+    "common_pressures_bar": [0.25, 0.5, 1.0, 1.5, 2.0]
+  },
+  "P126": {
+    "pilot": "Pingtung irrigation trial, one IRROMETER WATERMARK 200SS and colocated temperature probe",
+    "adc_max_code": 4095, "series_ohm": 10000, "series_tol_pct": 0.1,
+    "resistors_ohm": [2000, 4000, 7000, 10000, 15000],
+    "temperatures_c": [20, 24, 32], "fallback_c": 24,
+    "max_error_pct": 1, "max_default_bias_kpa": 2
+  },
+  "P128": {
+    "pilot": "Chiayi orchard, one synthetic leaf-surface data stream",
+    "cadence_s": 30, "wet_on": 700, "wet_off": 500, "confirm": 3,
+    "control_confirm": 1, "max_gap_s": 45, "cycles": 10,
+    "cycle_period_s": 720, "wet_duration_s": 300
+  },
+  "P132": {
+    "pilot": "Taichung extension practice plot, 40 mm ID by 75 mm long removable core sleeve",
+    "sleeve_id_mm": 40, "sleeve_length_mm": 75, "shoe_mm": 39.0, "size_tol_mm": 0.20,
+    "ejector_span_mm": 220, "effective_length_factor": 2, "modulus_mpa": 193000,
+    "ejection_force_n": 120, "rod_mm": 8, "control_rod_mm": 4, "rod_tol_mm": 0.10,
+    "buckling_factor": 2
+  },
+  "P134": {
+    "pilot": "Stationary Taiwan pond platform, 20 cm freshwater Secchi disk and 5 m line",
+    "diameter_mm": 200, "mark_pitch_mm": 100, "length_mm": 5000,
+    "label_tol_mm": 2, "residual_strain": 0.002, "control_residual_strain": 0.010,
+    "hub_d_mm": 58, "flange_d_mm": 86, "spool_width_mm": 22, "line_d_mm": 2,
+    "allowable_error_mm": 20
+  },
+  "P135": {
+    "pilot": "Taiwan farm-pond training tank, horizontal one-litre bottle and messenger",
+    "bore_mm": 85, "effective_length_mm": 176.2, "effective_exchange_ml_s": 110,
+    "volume_deviation_pct": 5, "exchange_deviation_pct": 20,
+    "carryover_ml": 15, "retrieval_leak_ml": 15, "linger_s": 45, "control_linger_s": 10,
+    "bad_fraction_limit": 0.10
+  },
+  "P139": {
+    "pilot": "Yilan nursery measuring board, wet ruler insert for 0 to 400 mm surrogates",
+    "span_mm": 400, "strip_height_mm": 34, "origin_mm": 12,
+    "printer_scale_x": 0.995, "residual_scale_pct": 0.10, "stop_tol_mm": 0.20,
+    "reference_limit_mm": 1
+  },
+  "P150": {
+    "pilot": "Sumatra small-lot grading bench, two round-hole screens and catch pan",
+    "screens_mm": [6.35, 5.56], "pitch_mm": 9, "rows": 15, "cols": 15,
+    "edge_mm": 8, "kerf_mm": 0.18, "hole_tol_mm": 0.10, "min_ligament_mm": 2.5,
+    "gauge_mix": [[6.65, 75], [5.95, 100], [5.38, 75]]
+  },
+  "P151": {
+    "pilot": "Java dry sample desk, 1 kg coloured-bead surrogate and two receiver trays",
+    "slots": 12, "slot_clear_mm": 24, "separator_mm": 1, "slope_deg": 60,
+    "particle_max_mm": 8, "friction_slope_ratio": 0.7,
+    "beads": 2000, "bead_g": 0.5, "trials": 10, "max_half_error_pct": 5,
+    "control_feed_fraction": 0.08
+  }
+}

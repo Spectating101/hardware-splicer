@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hardware Splicer · Manufacturing catalog</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f3ec;color:#202f30;font:16px/1.48 "Segoe UI",Arial,sans-serif}main{max-width:1320px;margin:auto;padding:30px clamp(14px,4vw,55px) 65px}header{border-top:6px solid #276761;padding:22px 0 16px}h1,h2{font-family:Georgia,serif;font-weight:500;line-height:1.12}h1{font-size:clamp(32px,5vw,58px);margin:.14em 0}.muted,small{color:#475b59}.section{background:#fff;border:1px solid #ccd6ce;padding:15px 18px;margin:15px 0}label{font-size:.87rem;color:#304843;font-weight:600;display:grid;gap:4px}input,select,button{font:inherit;color:inherit;border:1px solid #9eada5;border-radius:4px;background:white;padding:7px 8px;min-width:0}button,summary,select{cursor:pointer}a,summary{color:#155d57}a:focus,summary:focus,button:focus-visible{outline:3px solid #ae6c25}.filters,.controls{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:end}.filters label:first-child{flex:1 1 210px}.filters select{max-width:270px}.controls input{width:110px}.caption{font-size:.87rem;margin:9px 0 0}.count{font-weight:600}.scroll{overflow:auto;border:1px solid #cad2c9;background:#fff}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}th,td{text-align:right;white-space:nowrap;padding:10px 12px;border-bottom:1px solid #dbe3db}th{color:white;background:#214c47;font-size:.82rem;position:sticky;top:0}td:first-child,th:first-child{text-align:left;white-space:normal;min-width:235px}td button{padding:0;border:0;background:transparent;text-align:left;color:#155d57;font-weight:650}td small{display:block}tr:nth-child(even){background:#f7faf5}.loss{color:#a03830}.gain{color:#166156}.detail td{white-space:normal;text-align:left}.detail dl{max-width:1100px;display:grid;grid-template-columns:minmax(100px,175px) 1fr;gap:5px 14px;margin:10px 0}.detail dd{margin:0}.detail dt{font-weight:600}nav{display:flex;flex-wrap:wrap;gap:8px 20px}section summary{font-weight:600}footer{margin-top:22px}.range{font-size:.89rem}#rows tr:focus-within{outline:1px solid #81a297}h2{font-size:24px;margin:.2em 0 .6em}@media(max-width:650px){.detail dl{grid-template-columns:1fr}.detail dd{margin-bottom:6px}main{padding-top:12px}}
+</style></head><body><main>
+<header><div class="muted">Hardware Splicer · Research archive · 19 November 2026</div><h1>Manufacturing catalog</h1><p>Explore what the shop would deliver, how much engineering it needs, and how many sales would pay for it. Select a product to read its parts budget, ready-made alternatives and the test that would qualify it.</p>
+<nav><a href="engineering/trials.html">Engineering trials</a><a href="README.md">Research findings</a><a href="HS-manufacturing-catalog.xlsx">Editable workbook</a><a href="products.csv">Cost inputs</a><a href="returns.csv">Default returns</a><a href="all-purchase-listings.csv">Buying comparisons</a><a href="regional-listings.csv">Regional evidence</a></nav></header>
+<section class="section"><h2>Batch assumptions</h2><div class="controls">
+<label>Units built<input id="made" type="number" value="25" min="1" max="100000"></label><label>Units sold<input id="sold" type="number" value="25" min="0" max="100000"></label>
+<label>Shop rate, NT$/h<input id="wage" type="number" value="600" min="0" max="10000"></label>
+<label>Price cut, %<input id="cut" type="number" value="0" min="0" max="100"></label>
+<label>Extra cost/sale, NT$<input id="extra" type="number" value="0" min="0" max="100000"></label>
+<label>Price basis<select id="cap"><option value="target">HS target</option><option value="matched">Cap at same-job seller ask</option></select></label>
+<button id="base">Base case</button><button id="down">Downside</button></div>
+<p class="caption" id="status" aria-live="polite"></p></section>
+<section class="section"><div class="filters"><label>Search<input id="search" type="search" placeholder="Product, buyer, material or ID"></label><label>Family<select id="family"><option value="">All families</option></select></label><label>Evidence<select id="evidence"><option value="">All evidence</option></select></label><label>Show<select id="filter"><option value="">All products</option><option value="trial">Published engineering trial</option><option value="positive">Positive batch result</option><option value="priced">Priced buying comparison</option><option value="same">Same-job purchase</option><option value="Taiwan">Taiwan asking price</option><option value="Indonesia">Indonesia asking price</option></select></label>
+<label>Order by<select id="sort"><option value="id">Catalog ID</option><option value="roi">Highest batch ROI</option><option value="result">Highest batch profit</option><option value="first">Lowest first-build cost</option><option value="payback">Fewest sales to recover launch</option></select></label></div></section>
+<p class="count" id="count" aria-live="polite"></p><div class="scroll"><table><thead><tr><th scope="col">Product and family</th><th scope="col">Sale price, NT$</th><th scope="col">Left per sale, NT$</th><th scope="col">Launch, NT$</th><th scope="col">Batch result, NT$</th><th scope="col">Batch ROI</th><th scope="col">Break-even sales</th></tr></thead><tbody id="rows"></tbody></table></div>
+<footer class="muted">Each row represents a separate launch. Comparable selling prices, ratings and counters have different evidentiary weight. Physical performance, repeat orders, and realized returns require independent confirmation. Currency display uses NT$32.947 per US$1.</footer>
+</main><script type="application/json" id="catalog"><!--CATALOG_DATA--></script>
+<script>
+"use strict";
+const data=JSON.parse(document.getElementById('catalog').textContent), el=id=>document.getElementById(id);
+const listingsById=new Map();for(const q of data.listings){if(!listingsById.has(q.id))listingsById.set(q.id,[]);listingsById.get(q.id).push(q);}
+const fmt=new Intl.NumberFormat('en-US',{maximumFractionDigits:0}), money=n=>'NT$'+fmt.format(n)+' / US$'+fmt.format(n/32.947);
+const make=(tag,value)=>{const node=document.createElement(tag);if(value!=null)node.textContent=value;return node;};
+for(const [field,id] of [['group','family'],['evidence_class','evidence']]){
+  for(const value of [...new Set(data.products.map(p=>p[field]))].sort()){const option=make('option',value);option.value=value;el(id).append(option);}
+}
+function setting(id,max){const input=el(id),n=input.valueAsNumber;return Number.isFinite(n)?Math.min(max,Math.max(0,n)):0;}
+const rates={TWD:1,USD:32.947,IDR:32.947/18252};
+function calc(p,s){
+ const quote=data.quotes[p.id],limit=s.cap==='matched'&&quote?.comparison==='Same job'&&quote.currency in rates?quote.ask_native*rates[quote.currency]:Infinity;
+ const price=Math.min(p.price,limit)*(1-s.cut/100),build=+p.parts+(+p.loss)+p.minutes*s.wage/60,launch=p.hrs*s.wage+(+p.proto);
+ const perSale=price*p.fee+(+p.flat)+(+p.ship)+s.extra,margin=price-build-perSale;
+ const cost=launch+(p.market==='Download'?s.sold:s.made)*build+s.sold*perSale,result=s.sold*price-cost;
+ return {price,build,launch,margin,result,roi:cost?100*result/cost:null,first:build+launch,payback:margin>0?Math.ceil(launch/margin):null};
+}
+function details(p,m,q){
+ const wrap=make('tr');wrap.className='detail';const cell=make('td');cell.colSpan=7;wrap.append(cell);const dl=make('dl');cell.append(dl);
+ const line=(k,v)=>{if(v==null||v==='')return;dl.append(make('dt',k));const dd=make('dd');if(typeof v==='string')dd.textContent=v;else dd.append(v);dl.append(dd);};
+ const link=(url,label)=>{try{const u=new URL(url);if(['https:','http:'].includes(u.protocol)){const a=make('a',label);a.href=u.href;a.target='_blank';a.rel='noopener noreferrer';return a;}}catch{}return null;};
+ line('Customer',p.buyer);line('What is supplied',p.scope);line('Parts budget',money(+p.parts)+(p.parts_budget?' · '+p.parts_budget:''));line('Build labor',p.minutes+' active minutes per unit · '+p.hrs+' one-time engineering hours');
+ line('Repeat build',money(m.build));line('First internal unit',p.market==='Download'?'Digital file offer; compare as a sales model.':money(m.first)+' including launch and one finished build');
+ line('Demand evidence',p.signal);line('Commercial alternative',p.comparator);
+ if(q){line('Purchase comparison',q.country+' · '+q.currency+' '+fmt.format(q.ask_native)+' · '+q.comparison+'. '+q.caveat);const rates={TWD:1,USD:32.947,IDR:32.947/18252};if(q.comparison==='Same job'&&q.currency in rates){const buy=q.ask_native*rates[q.currency];line('Cost of buying minus first build',money(buy-m.first)+' · before freight, duty and differences in specifications');}
+ line('Seller page',link(q.url,q.item));}
+ const others=(listingsById.get(p.id)||[]).filter(x=>!q||x.url!==q.url||x.ask_native!==q.ask_native);
+ if(others.length){const list=make('ul');for(const other of others){const li=make('li');li.append(link(other.url,other.item)||make('span',other.item),document.createTextNode(' · '+other.currency+' '+fmt.format(other.ask_native)+' · '+other.comparison+'. '+other.caveat));list.append(li);}line('Additional offers',list);}
+ line('Engineering record',p.engineering);
+ if(p.engineering_path && /^P[0-9]{3}$/.test(p.id)){const study=make('a','Open the designs, results and replay instructions');study.href='engineering/trials.html#'+p.id;line('Digital trial',study);}
+ line('Acceptance test',p.test);if(p.engineering_physical_check!==p.test)line('Physical follow-up',p.engineering_physical_check);line('Research reference',link(p.source,'Open source page'));line('Component or design record',link(p.supply,'Open supporting page'));line('Cost basis',p.basis);return wrap;
+}
+let expanded='';
+function render(){
+ const made=Math.max(1,Math.floor(setting('made',100000))),requested=Math.floor(setting('sold',100000)),sold=Math.min(requested,made);
+ const s={made,sold,wage:setting('wage',10000),cut:setting('cut',100),extra:setting('extra',100000),cap:el('cap').value};
+ el('status').textContent=fmt.format(made)+' built, '+fmt.format(sold)+' sold. Physical stock incurs production cost for every unit made. Digital fulfillment accrues on each sale.'+(requested>made?' Units sold are capped at units built.':'');
+ const term=el('search').value.trim().toLowerCase(),family=el('family').value,evidence=el('evidence').value,filter=el('filter').value,order=el('sort').value;
+ const list=[];
+ for(const p of data.products){const q=data.quotes[p.id],m=calc(p,s);
+ if(family&&p.group!==family||evidence&&p.evidence_class!==evidence||term&&![p.id,p.name,p.group,p.buyer,p.scope,p.parts_budget].join(' ').toLowerCase().includes(term))continue;
+ if(filter==='trial'&&!p.engineering_path||filter==='positive'&&m.result<=0||filter==='priced'&&!q||filter==='same'&&q?.comparison!=='Same job')continue;
+ if(['Taiwan','Indonesia'].includes(filter)&&!(listingsById.get(p.id)||[]).some(x=>x.country===filter))continue;
+ list.push({p,q,m});}
+ if(order!=='id')list.sort((a,b)=>order==='first'||order==='payback'?(a.m[order]??Infinity)-(b.m[order]??Infinity):(b.m[order]??-Infinity)-(a.m[order]??-Infinity));
+ const frag=document.createDocumentFragment();
+ for(const {p,m,q} of list){const tr=make('tr'),name=make('td'),button=make('button',p.name);button.setAttribute('aria-expanded',expanded===p.id?'true':'false');
+ button.onclick=()=>{expanded=expanded===p.id?'':p.id;render();document.getElementById('show-'+p.id)?.focus({preventScroll:true});};button.id='show-'+p.id;name.append(button,make('small',p.id+' · '+p.group));tr.append(name);
+ for(const [i,v] of [m.price,m.margin,m.launch,m.result,m.roi,m.payback].entries()){const td=make('td',v==null?'—':i===4?v.toFixed(1)+'%':fmt.format(v));if(i===3||i===4)td.className=v<0?'loss':'gain';tr.append(td);}
+ frag.append(tr);if(expanded===p.id)frag.append(details(p,m,q));}
+ el('rows').replaceChildren(frag);el('count').textContent=list.length+' of '+data.products.length+' products · '+list.filter(x=>x.m.result>0).length+' with a positive result in this scenario';
+}
+for(const id of ['search','family','evidence','filter','sort','made','sold','wage','cut','extra','cap'])el(id).addEventListener('input',render);
+function preset(down){for(const [k,v] of Object.entries({made:25,sold:down?17:25,wage:600,cut:down?20:0,extra:0,cap:'target'}))el(k).value=v;render();}
+el('base').onclick=()=>preset(false);el('down').onclick=()=>preset(true);render();
+</script></body></html>

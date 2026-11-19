@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="192mm" height="96mm" viewBox="0 0 192 96">
+  <title>Eight cell upper and exit faces</title>
+  <rect x="5.0" y="5.0" width="38" height="38" fill="none" stroke="#15283b" stroke-width="0.15" data-side="upper" />
+  <rect x="3.60317" y="3.60317" width="40.79366155933982" height="40.79366155933982" fill="none" stroke="#356493" stroke-width="0.15" data-side="exit" />
+  <rect x="53.0" y="5.0" width="38" height="38" fill="none" stroke="#15283b" stroke-width="0.15" data-side="upper" />
+  <rect x="51.60317" y="3.60317" width="40.79366155933982" height="40.79366155933982" fill="none" stroke="#356493" stroke-width="0.15" data-side="exit" />
+  <rect x="101.0" y="5.0" width="38" height="38" fill="none" stroke="#15283b" stroke-width="0.15" data-side="upper" />
+  <rect x="99.60317" y="3.60317" width="40.79366155933982" height="40.79366155933982" fill="none" stroke="#356493" stroke-width="0.15" data-side="exit" />
+  <rect x="149.0" y="5.0" width="38" height="38" fill="none" stroke="#15283b" stroke-width="0.15" data-side="upper" />
+  <rect x="147.60317" y="3.60317" width="40.79366155933982" height="40.79366155933982" fill="none" stroke="#356493" stroke-width="0.15" data-side="exit" />
+  <rect x="5.0" y="53.0" width="38" height="38" fill="none" stroke="#15283b" stroke-width="0.15" data-side="upper" />
+  <rect x="3.60317" y="51.60317" width="40.79366155933982" height="40.79366155933982" fill="none" stroke="#356493" stroke-width="0.15" data-side="exit" />
+  <rect x="53.0" y="53.0" width="38" height="38" fill="none" stroke="#15283b" stroke-width="0.15" data-side="upper" />
+  <rect x="51.60317" y="51.60317" width="40.79366155933982" height="40.79366155933982" fill="none" stroke="#356493" stroke-width="0.15" data-side="exit" />
+  <rect x="101.0" y="53.0" width="38" height="38" fill="none" stroke="#15283b" stroke-width="0.15" data-side="upper" />
+  <rect x="99.60317" y="51.60317" width="40.79366155933982" height="40.79366155933982" fill="none" stroke="#356493" stroke-width="0.15" data-side="exit" />
+  <rect x="149.0" y="53.0" width="38" height="38" fill="none" stroke="#15283b" stroke-width="0.15" data-side="upper" />
+  <rect x="147.60317" y="51.60317" width="40.79366155933982" height="40.79366155933982" fill="none" stroke="#356493" stroke-width="0.15" data-side="exit" />
+</svg>

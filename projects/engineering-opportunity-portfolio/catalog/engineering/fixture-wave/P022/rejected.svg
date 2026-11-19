@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="342mm" height="183mm" viewBox="0 0 342 183">
+  <title>Indexing shelf pin jig</title>
+  <style>text{font:4px sans-serif; fill:#21363c} .part,.cut,.limit{fill:none;stroke:#293c44;stroke-width:.35}.part{fill:#ddeaea;fill-opacity:.4}.cut{stroke:#006454}.limit{stroke:#ab492b;stroke-dasharray:2 1}</style>
+  <rect id="work-0" class="part" x="20" y="42" width="310" height="52" />
+  <rect id="jig-0" class="part" x="23.0" y="52" width="146" height="42" />
+  <rect id="fence-0" class="cut" x="23.0" y="37" width="146" height="5" />
+  <circle id="bush-0-0" class="cut" cx="32.0" cy="79" r="4.0" />
+  <circle id="hole-0-0" class="limit" cx="32.0" cy="79" r="2.5" />
+  <circle id="bush-0-1" class="cut" cx="64.0" cy="79" r="4.0" />
+  <circle id="hole-0-1" class="limit" cx="64.0" cy="79" r="2.5" />
+  <circle id="bush-0-2" class="cut" cx="96.0" cy="79" r="4.0" />
+  <circle id="hole-0-2" class="limit" cx="96.0" cy="79" r="2.5" />
+  <circle id="bush-0-3" class="cut" cx="128.0" cy="79" r="4.0" />
+  <circle id="hole-0-3" class="limit" cx="128.0" cy="79" r="2.5" />
+  <circle id="bush-0-4" class="cut" cx="160.0" cy="79" r="4.0" />
+  <circle id="hole-0-4" class="limit" cx="160.0" cy="79" r="2.5" />
+  <text x="20" y="33">Placement 1   pitch 32; hole line 37 from reference edge</text>
+  <rect id="work-1" class="part" x="20" y="106" width="310" height="52" />
+  <rect id="jig-1" class="part" x="152.05" y="116" width="146" height="42" />
+  <rect id="fence-1" class="cut" x="152.05" y="101" width="146" height="5" />
+  <circle id="bush-1-0" class="cut" cx="161.05" cy="143" r="4.0" />
+  <circle id="hole-1-0" class="limit" cx="161.05" cy="143" r="2.5" />
+  <circle id="bush-1-1" class="cut" cx="193.05" cy="143" r="4.0" />
+  <circle id="hole-1-1" class="limit" cx="193.05" cy="143" r="2.5" />
+  <circle id="bush-1-2" class="cut" cx="225.05" cy="143" r="4.0" />
+  <circle id="hole-1-2" class="limit" cx="225.05" cy="143" r="2.5" />
+  <circle id="bush-1-3" class="cut" cx="257.05" cy="143" r="4.0" />
+  <circle id="hole-1-3" class="limit" cx="257.05" cy="143" r="2.5" />
+  <circle id="bush-1-4" class="cut" cx="289.05" cy="143" r="4.0" />
+  <circle id="hole-1-4" class="limit" cx="289.05" cy="143" r="2.5" />
+  <circle id="index-pin" class="cut" cx="161.05" cy="143" r="2.47" />
+  <text x="20" y="97">Placement 2   pitch 32; hole line 37 from reference edge</text>
+  <text x="20" y="173">Seat fence. Start next segment with the index pin in the last drilled hole.</text>
+</svg>

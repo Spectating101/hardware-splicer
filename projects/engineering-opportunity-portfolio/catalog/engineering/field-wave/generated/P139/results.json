@@ -1,0 +1,15 @@
+{
+  "pilot": "Yilan nursery measuring board, wet ruler insert for 0 to 400 mm surrogates",
+  "metrics": {
+    "compensated": {
+      "ticks": 401,
+      "reference_checks": 10,
+      "maximum_error_mm": 0.6
+    },
+    "native-control": {
+      "ticks": 401,
+      "reference_checks": 10,
+      "maximum_error_mm": 2.598
+    }
+  }
+}

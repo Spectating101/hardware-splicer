@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="410mm" height="344mm" viewBox="0 0 410 344">
+  <title>Split keyboard support pair</title>
+  <style>text{font:4px sans-serif;fill:#103341} .part,.tool,.test{stroke:#2a4148;stroke-width:.35;fill:none}.part{fill:#dce9e9;fill-opacity:.45}.tool{stroke:#006557}.test{stroke:#aa4c22;stroke-dasharray:2 1}</style>
+  <line id="keyboard-0" class="tool" x1="16" y1="96.0" x2="186" y2="54.45" />
+  <polygon id="wedge-0" class="part" points="23.50000,105.00000 178.50000,105.00000 178.50000,56.28309 23.50000,94.16691" />
+  <rect id="stop-0" class="tool" x="13" y="91.0" width="6" height="5" />
+  <line id="load-0" class="test" x1="56" y1="101" x2="146" y2="101" />
+  <line id="cable-0" class="test" x1="186" y1="54.45" x2="186" y2="72.45" />
+  <line id="keyboard-1" class="tool" x1="376" y1="96.0" x2="206" y2="54.45" />
+  <polygon id="wedge-1" class="part" points="368.50000,105.00000 213.50000,105.00000 213.50000,56.28309 368.50000,94.16691" />
+  <rect id="stop-1" class="tool" x="373" y="91.0" width="6" height="5" />
+  <line id="load-1" class="test" x1="246" y1="101" x2="336" y2="101" />
+  <line id="cable-1" class="test" x1="206" y1="54.45" x2="206" y2="72.45" />
+  <rect id="plan-body" class="test" x="16" y="136" width="170" height="170" />
+  <text x="16" y="127">Wingless top envelope at 1:1.</text>
+  <text x="16" y="320">Keyboard support: 155 base, 41.55 rise over 170</text>
+  <text x="16" y="331">Use non-slip strips. Confirm real underside, cable plugs and stop contact before printing.</text>
+</svg>

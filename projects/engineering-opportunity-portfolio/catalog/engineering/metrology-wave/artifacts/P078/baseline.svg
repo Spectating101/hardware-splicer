@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="300mm" height="230mm" viewBox="0 0 300 230">
+  <title>P078 baseline · full-size proof coupon</title>
+  <rect id="scale" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="10" y="6" width="20" height="10" />
+  <rect id="beam-blank" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="40" y="78.5" width="220" height="33" />
+  <circle id="center-shank" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="150" cy="95" r="6" />
+  <circle id="indicator-0" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="62" cy="95" r="4" />
+  <rect id="indicator-foot-0" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="49" y="144" width="26" height="22" />
+  <circle id="foot-bore-0" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="62" cy="155" r="4" />
+  <circle id="indicator-1" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="238" cy="95" r="4" />
+  <rect id="indicator-foot-1" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="225" y="144" width="26" height="22" />
+  <circle id="foot-bore-1" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="238" cy="155" r="4" />
+</svg>

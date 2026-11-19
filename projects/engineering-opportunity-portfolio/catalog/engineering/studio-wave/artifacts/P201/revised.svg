@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="650mm" height="550mm" viewBox="0 0 650 550">
+  <title>P201 revised · full-size proof coupon</title>
+  <rect id="scale" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="10" y="6" width="20" height="10" />
+  <rect id="cloth-blank" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="34" y="27" width="300" height="375" />
+  <rect id="usable-sail" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="46" y="39" width="276" height="351" />
+  <line id="support-height" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x1="370" y1="403" x2="370" y2="118" />
+  <rect id="batten-0" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="47" y="87" width="274" height="9" />
+  <rect id="batten-1" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="47" y="322" width="274" height="9" />
+  <line id="table-center" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x1="389" y1="479" x2="389" y2="502" />
+  <line id="tip-axis" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x1="469" y1="479" x2="469" y2="502" />
+  <rect id="ballast-gauge" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="386" y="428" width="69" height="69" />
+</svg>

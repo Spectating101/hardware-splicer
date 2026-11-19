@@ -1,0 +1,260 @@
+{
+  "scope": "Offline digital engineering replay",
+  "offers_verified": 153,
+  "physical_tests": 0,
+  "groups": {
+    "P028": {
+      "ids": [
+        "P028"
+      ],
+      "study_sha256": "4267f36885454e53ecadf3136e363f3f537b10bcc699e92173bc3fbcc136e042"
+    },
+    "P010": {
+      "ids": [
+        "P010"
+      ],
+      "study_sha256": "11ff0420a5c4393f08feb835563ab05106ac4551b51d908049bc0a066d4e386d"
+    },
+    "P217": {
+      "ids": [
+        "P217"
+      ],
+      "study_sha256": "61b6ce787879a81bf74cbf12243061136b87b905601505726e035c4d684286f6"
+    },
+    "P047": {
+      "ids": [
+        "P047"
+      ],
+      "study_sha256": "0fcd1209e1cfc70dd461f6387a235c4fec03a3f897b149c518a107c743b2045b"
+    },
+    "bench-wave": {
+      "ids": [
+        "P003",
+        "P004",
+        "P023",
+        "P025",
+        "P026",
+        "P030",
+        "P039",
+        "P040",
+        "P045",
+        "P046",
+        "P228",
+        "P229"
+      ],
+      "study_sha256": "0e78e6fbd0989df8429f8ffc11816f4ee903180c873bba01c1e5e5abd23eb861"
+    },
+    "field-wave": {
+      "ids": [
+        "P111",
+        "P112",
+        "P119",
+        "P122",
+        "P126",
+        "P128",
+        "P132",
+        "P134",
+        "P135",
+        "P139",
+        "P150",
+        "P151"
+      ],
+      "study_sha256": "07743ed031d5688561108377cc81cd5e3bbe091ef3c8eb1f410e2b20bcb7d6d6"
+    },
+    "fixture-wave": {
+      "ids": [
+        "P022",
+        "P024",
+        "P033",
+        "P034",
+        "P048",
+        "P216"
+      ],
+      "study_sha256": "1e9eb2e26b5a60b2826cf8f6eed5a0828e07c1cc3b925b3439db79539bd11d36"
+    },
+    "harvest-wave": {
+      "ids": [
+        "P115",
+        "P123",
+        "P136",
+        "P141",
+        "P147",
+        "P153",
+        "P156"
+      ],
+      "study_sha256": "90eed5fb3871c48beea4580242dda2d8bea92ffbfa62566ea459da03d0817aba"
+    },
+    "imaging-wave": {
+      "ids": [
+        "P008",
+        "P017",
+        "P018",
+        "P019",
+        "P020",
+        "P195",
+        "P196",
+        "P199",
+        "P200",
+        "P203",
+        "P205"
+      ],
+      "study_sha256": "024dae67b5b6aed1894ed639d78872474f437ee93976e6ef5b8adeddf5f3f9f8"
+    },
+    "margin-wave": {
+      "ids": [
+        "P082",
+        "P220",
+        "P237",
+        "P243",
+        "P266",
+        "P270"
+      ],
+      "study_sha256": "935e0a8dfd63fb167dcaa5d8c160dbf123925132f0e4f673e9946a11c8a10c63"
+    },
+    "marine-wave": {
+      "ids": [
+        "P032",
+        "P172",
+        "P173",
+        "P174",
+        "P175",
+        "P176",
+        "P177",
+        "P178",
+        "P179",
+        "P180"
+      ],
+      "study_sha256": "c029546eacdca1c732b89524e81f3e891517496cd95b0e8096b42c36a0360361"
+    },
+    "metrology-wave": {
+      "ids": [
+        "P076",
+        "P077",
+        "P078",
+        "P086",
+        "P099",
+        "P105",
+        "P106",
+        "P107",
+        "P110",
+        "P245"
+      ],
+      "study_sha256": "f7da6773218806eba32b6ecfed26f1c690a471f05f191dda5e9294ee09b2d6f4"
+    },
+    "platform-wave": {
+      "ids": [
+        "P031",
+        "P049"
+      ],
+      "study_sha256": "8917bf87b0890a9672dd8addfc2dcfa1d11a6bea7422d3a317551a8d43806c3f"
+    },
+    "reuse-wave": {
+      "ids": [
+        "P001",
+        "P002"
+      ],
+      "study_sha256": "da9c60e40d25dda4d7bc09eb0d840e67466d7db1eb99e0a267c64f0ffeb54333"
+    },
+    "robot-wave": {
+      "ids": [
+        "P181",
+        "P182",
+        "P183",
+        "P184",
+        "P185",
+        "P186",
+        "P187",
+        "P188",
+        "P189",
+        "P190",
+        "P191",
+        "P192"
+      ],
+      "study_sha256": "47145649bc9d25128b63b005e338ae662a50cdc63996fd29fbf46ca4a5bb7706"
+    },
+    "savings-wave": {
+      "ids": [
+        "P116",
+        "P117",
+        "P129",
+        "P130",
+        "P138",
+        "P140",
+        "P146"
+      ],
+      "study_sha256": "33f96c0de18d4e84886665ecfbea187f89537b3c75590ee737b2ab1e60afd51a"
+    },
+    "scanner-wave": {
+      "ids": [
+        "P009",
+        "P011",
+        "P012",
+        "P013",
+        "P014",
+        "P015",
+        "P016"
+      ],
+      "study_sha256": "3ec48a6022e5073c12650f57c8bcea2442aea7b607e48e2557d399d4d5ac2422"
+    },
+    "shop-wave": {
+      "ids": [
+        "P232",
+        "P233",
+        "P234",
+        "P235",
+        "P236",
+        "P240",
+        "P241",
+        "P246",
+        "P251",
+        "P261",
+        "P263",
+        "P264"
+      ],
+      "study_sha256": "5828ac112eae68893dea5566e5a61b6834d59d76bf6301f9c9155bb2a34dfeb2"
+    },
+    "signal-wave": {
+      "ids": [
+        "P038",
+        "P043",
+        "P065",
+        "P066",
+        "P067",
+        "P070",
+        "P071",
+        "P073",
+        "P074",
+        "P075",
+        "P211",
+        "P212",
+        "P213",
+        "P214",
+        "P215",
+        "P218",
+        "P219",
+        "P222",
+        "P223"
+      ],
+      "study_sha256": "5a74f66b7fb8f48b5b8ede48053d540983a2e0598c2293a9a75c72b853a541a8"
+    },
+    "studio-wave": {
+      "ids": [
+        "P036",
+        "P037",
+        "P193",
+        "P194",
+        "P197",
+        "P198",
+        "P201",
+        "P202",
+        "P204",
+        "P206",
+        "P207",
+        "P208",
+        "P209",
+        "P210"
+      ],
+      "study_sha256": "0dcb42e6d131ccc1453700288820a70d521aaa0efae710278f6073fd09e3d32f"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "pilot": "Dry low-voltage bench, supplemental blower pressure indication on dummy pressure-switch contact",
+  "metrics": {
+    "candidate": {
+      "trials": 10,
+      "max_model_delay_s": 5.0,
+      "min_model_horn_minutes": 99.5,
+      "transient_false_alarm_trials": 0
+    },
+    "small-battery-control": {
+      "trials": 10,
+      "max_model_delay_s": 5.0,
+      "min_model_horn_minutes": 11.53,
+      "transient_false_alarm_trials": 0
+    },
+    "unfiltered-control": {
+      "trials": 10,
+      "max_model_delay_s": 0.0,
+      "min_model_horn_minutes": 99.52,
+      "transient_false_alarm_trials": 10
+    }
+  }
+}

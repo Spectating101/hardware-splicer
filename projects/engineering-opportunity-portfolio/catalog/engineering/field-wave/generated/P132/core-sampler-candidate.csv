@@ -1,0 +1,6 @@
+feature,nominal_mm,tol_mm
+sleeve_inner_diameter,40,0.2
+sleeve_length,75,0.2
+ejector_shoe_diameter,39.0,0.2
+ejector_unsupported_span,220,0
+ejector_rod_diameter,8,0.1

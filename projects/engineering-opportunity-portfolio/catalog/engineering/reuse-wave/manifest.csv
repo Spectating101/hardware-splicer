@@ -1,0 +1,4 @@
+id,title,engineering,physical_check,report
+P001,PCB inspection dock files,Four STEP assemblies and carrier meshes reopened. Fully seated carriers had zero overlap and the 180-degree yaw control interfered in all four cases.,Print one dock and two revision-matched carriers. Check keyed seating and populated-board component clearance and time a changeover.,P001/README.md
+P002,Ender-3 plotter conversion files,48 export and trajectory checks passed for the original printer. An inserted out-of-range command broke agreement with the saved trajectory.,Verify donor carriage revision and pen clearance. Check line registration and lift on scrap paper with a cold mechanism.,P002/README.md
+

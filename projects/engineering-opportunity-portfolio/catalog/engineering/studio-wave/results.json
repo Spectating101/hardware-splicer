@@ -1,0 +1,758 @@
+{
+  "P036": {
+    "baseline": {
+      "Backlash pre-roll reserve": {
+        "value": -220,
+        "relation": "≥",
+        "target": 15,
+        "unit": "µm",
+        "pass": false
+      },
+      "Worst modeled focal-slice overlap": {
+        "value": 37.72321,
+        "relation": "≥",
+        "target": 55,
+        "unit": "%",
+        "pass": false
+      },
+      "Guaranteed advance between exposures": {
+        "value": 0,
+        "relation": "≥",
+        "target": 2,
+        "unit": "µm",
+        "pass": false
+      },
+      "Commanded stack depth": {
+        "value": 1000,
+        "relation": "≥",
+        "target": 600,
+        "unit": "µm",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Backlash pre-roll reserve": {
+        "value": 20,
+        "relation": "≥",
+        "target": 15,
+        "unit": "µm",
+        "pass": true
+      },
+      "Worst modeled focal-slice overlap": {
+        "value": 57.8125,
+        "relation": "≥",
+        "target": 55,
+        "unit": "%",
+        "pass": true
+      },
+      "Guaranteed advance between exposures": {
+        "value": 3.6,
+        "relation": "≥",
+        "target": 2,
+        "unit": "µm",
+        "pass": true
+      },
+      "Commanded stack depth": {
+        "value": 600,
+        "relation": "≥",
+        "target": 600,
+        "unit": "µm",
+        "pass": true
+      }
+    }
+  },
+  "P037": {
+    "baseline": {
+      "Worst orthogonal cross-axis drift": {
+        "value": 0.55102,
+        "relation": "≤",
+        "target": 0.15,
+        "unit": "mm",
+        "pass": false
+      },
+      "View-window margin for positioned specimen": {
+        "value": 3.44898,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Axis reserve past requested X travel": {
+        "value": 1.0,
+        "relation": "≥",
+        "target": 0.5,
+        "unit": "mm",
+        "pass": true
+      },
+      "Axis reserve past requested Y travel": {
+        "value": 1.0,
+        "relation": "≥",
+        "target": 0.5,
+        "unit": "mm",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Worst orthogonal cross-axis drift": {
+        "value": 0.09885,
+        "relation": "≤",
+        "target": 0.15,
+        "unit": "mm",
+        "pass": true
+      },
+      "View-window margin for positioned specimen": {
+        "value": 3.90115,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Axis reserve past requested X travel": {
+        "value": 1.0,
+        "relation": "≥",
+        "target": 0.5,
+        "unit": "mm",
+        "pass": true
+      },
+      "Axis reserve past requested Y travel": {
+        "value": 1.0,
+        "relation": "≥",
+        "target": 0.5,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P193": {
+    "baseline": {
+      "Rear axle midpoint orbit radius error": {
+        "value": 57.12059,
+        "relation": "≤",
+        "target": 10,
+        "unit": "mm",
+        "pass": false
+      },
+      "Worst projected support-polygon margin": {
+        "value": 15.89504,
+        "relation": "≥",
+        "target": 12,
+        "unit": "mm",
+        "pass": true
+      },
+      "Modeled steering angle": {
+        "value": 30.0,
+        "relation": "≤",
+        "target": 35,
+        "unit": "deg",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Rear axle midpoint orbit radius error": {
+        "value": 0.26578,
+        "relation": "≤",
+        "target": 10,
+        "unit": "mm",
+        "pass": true
+      },
+      "Worst projected support-polygon margin": {
+        "value": 15.89504,
+        "relation": "≥",
+        "target": 12,
+        "unit": "mm",
+        "pass": true
+      },
+      "Modeled steering angle": {
+        "value": 25.2,
+        "relation": "≤",
+        "target": 35,
+        "unit": "deg",
+        "pass": true
+      }
+    }
+  },
+  "P194": {
+    "baseline": {
+      "Worst inside-surface bend radius": {
+        "value": 12.4,
+        "relation": "≥",
+        "target": 20,
+        "unit": "mm",
+        "pass": false
+      },
+      "Minimum pad interference on smallest cable": {
+        "value": 0.3,
+        "relation": "≥",
+        "target": 0.15,
+        "unit": "mm",
+        "pass": true
+      },
+      "Maximum pad interference on largest cable": {
+        "value": 0.7,
+        "relation": "≤",
+        "target": 0.9,
+        "unit": "mm",
+        "pass": true
+      },
+      "Nominal fastener separation": {
+        "value": 28.0,
+        "relation": "≥",
+        "target": 25,
+        "unit": "mm",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Worst inside-surface bend radius": {
+        "value": 20.4,
+        "relation": "≥",
+        "target": 20,
+        "unit": "mm",
+        "pass": true
+      },
+      "Minimum pad interference on smallest cable": {
+        "value": 0.2,
+        "relation": "≥",
+        "target": 0.15,
+        "unit": "mm",
+        "pass": true
+      },
+      "Maximum pad interference on largest cable": {
+        "value": 0.6,
+        "relation": "≤",
+        "target": 0.9,
+        "unit": "mm",
+        "pass": true
+      },
+      "Nominal fastener separation": {
+        "value": 28.0,
+        "relation": "≥",
+        "target": 25,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P197": {
+    "baseline": {
+      "door-sweep": {
+        "value": -9.5,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": false
+      },
+      "connector-corridor": {
+        "value": 18.5,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "top-shoe-corridor": {
+        "value": 5.5,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Base-hole edge distance": {
+        "value": 3.75,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      }
+    },
+    "revised": {
+      "door-sweep": {
+        "value": 4.5,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "connector-corridor": {
+        "value": 18.5,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "top-shoe-corridor": {
+        "value": 5.5,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Base-hole edge distance": {
+        "value": 3.75,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P198": {
+    "baseline": {
+      "Worst modeled lens-ring reversal play": {
+        "value": 0.90951,
+        "relation": "≤",
+        "target": 0.45,
+        "unit": "deg",
+        "pass": false
+      },
+      "Transverse contact ratio at far limit": {
+        "value": 0.87961,
+        "relation": "≥",
+        "target": 1.45,
+        "unit": "teeth",
+        "pass": false
+      },
+      "Root-to-bore lens-ring land": {
+        "value": 2.4,
+        "relation": "≥",
+        "target": 2,
+        "unit": "mm",
+        "pass": true
+      },
+      "Manual wheel sweep for 90 degree lens throw": {
+        "value": 432.0,
+        "relation": "≤",
+        "target": 460,
+        "unit": "deg",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Worst modeled lens-ring reversal play": {
+        "value": 0.34471,
+        "relation": "≤",
+        "target": 0.45,
+        "unit": "deg",
+        "pass": true
+      },
+      "Transverse contact ratio at far limit": {
+        "value": 1.4827,
+        "relation": "≥",
+        "target": 1.45,
+        "unit": "teeth",
+        "pass": true
+      },
+      "Root-to-bore lens-ring land": {
+        "value": 2.4,
+        "relation": "≥",
+        "target": 2,
+        "unit": "mm",
+        "pass": true
+      },
+      "Manual wheel sweep for 90 degree lens throw": {
+        "value": 432.0,
+        "relation": "≤",
+        "target": 460,
+        "unit": "deg",
+        "pass": true
+      }
+    }
+  },
+  "P201": {
+    "baseline": {
+      "Restoring to disturbance moment ratio": {
+        "value": 1.26102,
+        "relation": "≥",
+        "target": 1.8,
+        "unit": "ratio",
+        "pass": false
+      },
+      "Minimum visible reflector area": {
+        "value": 96876.0,
+        "relation": "≥",
+        "target": 95000,
+        "unit": "mm²",
+        "pass": true
+      },
+      "Maximum centered base ballast mass": {
+        "value": 0.06867,
+        "relation": "≤",
+        "target": 0.5,
+        "unit": "kg",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Restoring to disturbance moment ratio": {
+        "value": 2.92019,
+        "relation": "≥",
+        "target": 1.8,
+        "unit": "ratio",
+        "pass": true
+      },
+      "Minimum visible reflector area": {
+        "value": 96876.0,
+        "relation": "≥",
+        "target": 95000,
+        "unit": "mm²",
+        "pass": true
+      },
+      "Maximum centered base ballast mass": {
+        "value": 0.44849,
+        "relation": "≤",
+        "target": 0.5,
+        "unit": "kg",
+        "pass": true
+      }
+    }
+  },
+  "P202": {
+    "baseline": {
+      "Minimum paper tension at full roll": {
+        "value": 1.02021,
+        "relation": "≥",
+        "target": 1.5,
+        "unit": "N",
+        "pass": false
+      },
+      "Maximum paper tension near core": {
+        "value": 2.99687,
+        "relation": "≤",
+        "target": 6,
+        "unit": "N",
+        "pass": true
+      },
+      "Worst estimated hand force": {
+        "value": 3.59833,
+        "relation": "≤",
+        "target": 8,
+        "unit": "N",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Minimum paper tension at full roll": {
+        "value": 1.78723,
+        "relation": "≥",
+        "target": 1.5,
+        "unit": "N",
+        "pass": true
+      },
+      "Maximum paper tension near core": {
+        "value": 5.25,
+        "relation": "≤",
+        "target": 6,
+        "unit": "N",
+        "pass": true
+      },
+      "Worst estimated hand force": {
+        "value": 4.8,
+        "relation": "≤",
+        "target": 8,
+        "unit": "N",
+        "pass": true
+      }
+    }
+  },
+  "P204": {
+    "baseline": {
+      "Minimum fitted strap strain": {
+        "value": 11.06383,
+        "relation": "≥",
+        "target": 3,
+        "unit": "%",
+        "pass": true
+      },
+      "Maximum fitted strap strain": {
+        "value": 21.48936,
+        "relation": "≤",
+        "target": 16,
+        "unit": "%",
+        "pass": false
+      },
+      "Flat green field": {
+        "value": 272600.0,
+        "relation": "≥",
+        "target": 260000,
+        "unit": "mm²",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Minimum fitted strap strain": {
+        "value": 4.4,
+        "relation": "≥",
+        "target": 3,
+        "unit": "%",
+        "pass": true
+      },
+      "Maximum fitted strap strain": {
+        "value": 14.2,
+        "relation": "≤",
+        "target": 16,
+        "unit": "%",
+        "pass": true
+      },
+      "Flat green field": {
+        "value": 272600.0,
+        "relation": "≥",
+        "target": 260000,
+        "unit": "mm²",
+        "pass": true
+      }
+    }
+  },
+  "P206": {
+    "baseline": {
+      "Peak uncompensated pivot moment": {
+        "value": 1.19926,
+        "relation": "≤",
+        "target": 0.45,
+        "unit": "N·m",
+        "pass": false
+      },
+      "Minimum spring preload travel": {
+        "value": 70.34121,
+        "relation": "≥",
+        "target": 20,
+        "unit": "mm",
+        "pass": true
+      },
+      "Peak spring extension": {
+        "value": 114.12311,
+        "relation": "≤",
+        "target": 125,
+        "unit": "mm",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Peak uncompensated pivot moment": {
+        "value": 0.39406,
+        "relation": "≤",
+        "target": 0.45,
+        "unit": "N·m",
+        "pass": true
+      },
+      "Minimum spring preload travel": {
+        "value": 39.95681,
+        "relation": "≥",
+        "target": 20,
+        "unit": "mm",
+        "pass": true
+      },
+      "Peak spring extension": {
+        "value": 108.7308,
+        "relation": "≤",
+        "target": 125,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P207": {
+    "baseline": {
+      "Mesh edge clearance around source cone": {
+        "value": -4.23145,
+        "relation": "≥",
+        "target": 7,
+        "unit": "mm",
+        "pass": false
+      },
+      "Minimum separation between meshes": {
+        "value": 4.0,
+        "relation": "≥",
+        "target": 8,
+        "unit": "mm",
+        "pass": false
+      },
+      "Maximum separation between meshes": {
+        "value": 4.0,
+        "relation": "≤",
+        "target": 15,
+        "unit": "mm",
+        "pass": true
+      },
+      "Rear mesh to diaphragm stand-off": {
+        "value": 71.0,
+        "relation": "≥",
+        "target": 45,
+        "unit": "mm",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Mesh edge clearance around source cone": {
+        "value": 12.28066,
+        "relation": "≥",
+        "target": 7,
+        "unit": "mm",
+        "pass": true
+      },
+      "Minimum separation between meshes": {
+        "value": 11.0,
+        "relation": "≥",
+        "target": 8,
+        "unit": "mm",
+        "pass": true
+      },
+      "Maximum separation between meshes": {
+        "value": 11.0,
+        "relation": "≤",
+        "target": 15,
+        "unit": "mm",
+        "pass": true
+      },
+      "Rear mesh to diaphragm stand-off": {
+        "value": 64.0,
+        "relation": "≥",
+        "target": 45,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P208": {
+    "baseline": {
+      "Modeled 30 Hz base motion transmissibility": {
+        "value": 0.23168,
+        "relation": "≤",
+        "target": 0.17,
+        "unit": "ratio",
+        "pass": false
+      },
+      "Static cord travel reserve after 6 mm excursion": {
+        "value": 28.24483,
+        "relation": "≥",
+        "target": 15,
+        "unit": "mm",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Modeled 30 Hz base motion transmissibility": {
+        "value": 0.06117,
+        "relation": "≤",
+        "target": 0.17,
+        "unit": "ratio",
+        "pass": true
+      },
+      "Static cord travel reserve after 6 mm excursion": {
+        "value": 20.66175,
+        "relation": "≥",
+        "target": 15,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P209": {
+    "baseline": {
+      "Screened half angle measured from rear": {
+        "value": 84.56326,
+        "relation": "≥",
+        "target": 95,
+        "unit": "deg",
+        "pass": false
+      },
+      "Minimum panel height": {
+        "value": 260.0,
+        "relation": "≥",
+        "target": 250,
+        "unit": "mm",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Screened half angle measured from rear": {
+        "value": 99.33149,
+        "relation": "≥",
+        "target": 95,
+        "unit": "deg",
+        "pass": true
+      },
+      "Minimum panel height": {
+        "value": 260.0,
+        "relation": "≥",
+        "target": 250,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P210": {
+    "baseline": {
+      "Smallest wedge tilt": {
+        "value": 4.03771,
+        "relation": "≥",
+        "target": 7.5,
+        "unit": "deg",
+        "pass": false
+      },
+      "Largest wedge tilt": {
+        "value": 4.03771,
+        "relation": "≤",
+        "target": 8.5,
+        "unit": "deg",
+        "pass": true
+      },
+      "Pair angle agreement": {
+        "value": 0.0,
+        "relation": "≤",
+        "target": 0.1,
+        "unit": "deg",
+        "pass": true
+      },
+      "Speaker footprint inset": {
+        "value": 8.0,
+        "relation": "≥",
+        "target": 7.5,
+        "unit": "mm",
+        "pass": true
+      },
+      "Modeled static friction reserve": {
+        "value": 0.25941,
+        "relation": "≥",
+        "target": 0.15,
+        "unit": "coefficient",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Smallest wedge tilt": {
+        "value": 8.03571,
+        "relation": "≥",
+        "target": 7.5,
+        "unit": "deg",
+        "pass": true
+      },
+      "Largest wedge tilt": {
+        "value": 8.03571,
+        "relation": "≤",
+        "target": 8.5,
+        "unit": "deg",
+        "pass": true
+      },
+      "Pair angle agreement": {
+        "value": 0.0,
+        "relation": "≤",
+        "target": 0.1,
+        "unit": "deg",
+        "pass": true
+      },
+      "Speaker footprint inset": {
+        "value": 8.0,
+        "relation": "≥",
+        "target": 7.5,
+        "unit": "mm",
+        "pass": true
+      },
+      "Modeled static friction reserve": {
+        "value": 0.18882,
+        "relation": "≥",
+        "target": 0.15,
+        "unit": "coefficient",
+        "pass": true
+      }
+    }
+  }
+}

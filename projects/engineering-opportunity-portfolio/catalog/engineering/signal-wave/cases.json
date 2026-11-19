@@ -1,0 +1,320 @@
+{
+  "P038": {
+    "name": "USB dry-cabinet environmental logger",
+    "inputs": {
+      "poll_s": 10,
+      "valid_range_pct": [
+        0,
+        100
+      ],
+      "max_age_s": 25
+    },
+    "connection": "RH, temperature and sample age → validated record → host CSV",
+    "trial": "Distinguish new samples, carried-forward readings, startup without data and expired readings.",
+    "physical": "Compare against a reference humidity instrument and log a real USB disconnect and reconnect."
+  },
+  "P043": {
+    "name": "Custom four-wire harness checker",
+    "inputs": {
+      "pins": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "mapping": [
+        2,
+        1,
+        4,
+        3
+      ]
+    },
+    "connection": "One enabled source pin → unpowered harness → four observed return pins",
+    "trial": "Test an exact four-wire cross-harness against every single open, output swap and pairwise bridge.",
+    "physical": "Confirm the exact mating connectors and continuity on an unpowered known-good cable, then test fault plugs."
+  },
+  "P065": {
+    "name": "Buffered digital timing capture pod",
+    "inputs": {
+      "sample_ns": 100,
+      "old_sample_ns": 500,
+      "pulse_ns": 240,
+      "channels": 8
+    },
+    "connection": "Eight square-wave inputs → buffer → common sample clock → edge records",
+    "trial": "Determine which capture interval can see the shortest specified pulse at every sampled phase.",
+    "physical": "Measure input thresholds, shortest detectable pulse width, interchannel skew and crosstalk on the populated pod."
+  },
+  "P067": {
+    "name": "Stepper winding identification and jog station",
+    "inputs": {
+      "winding_ohms": 16,
+      "lead_ohms": 0.4,
+      "unequal_limit_ohms": 1,
+      "pairs": [
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          3
+        ]
+      ]
+    },
+    "connection": "Four disconnected motor leads → resistance matrix → bipolar winding pairing",
+    "trial": "Recover both coil pairs under all lead permutations and reject an open coil and an intercoil bridge.",
+    "physical": "Measure a named four-lead motor and check current-limited slow jog. Five- and six-lead motors need a separate classification."
+  },
+  "P070": {
+    "name": "Bench resistance substitution box",
+    "inputs": {
+      "decades": [
+        1,
+        10,
+        100
+      ],
+      "contact_ohm": 0.12,
+      "part_tolerance": 0.01,
+      "lead_ohm": 0.3,
+      "abs_limit_ohm": 0.3,
+      "rel_limit": 0.015
+    },
+    "connection": "Three decade switches → series resistors → test terminals",
+    "trial": "Compute the tolerance envelope for all 1,000 settings and identify when the two-wire contacts dominate.",
+    "physical": "Measure every switch position at the terminals on a calibrated meter. Repeat low-ohm settings after operating the switches."
+  },
+  "P071": {
+    "name": "Four-wire Kelvin clamp fixture",
+    "inputs": {
+      "shunt_mohm": 10,
+      "force_mA": 100,
+      "contact_mohm": [
+        8,
+        12,
+        5,
+        9,
+        16,
+        7,
+        11,
+        4,
+        14,
+        10
+      ],
+      "sense_bias_uA": 1,
+      "meter_offset_uV": 3,
+      "limit_pct": 1
+    },
+    "connection": "Two force leads supply a reference shunt → two independent sense leads measure its voltage",
+    "trial": "Replay ten assumed remounts, comparing separate sense contacts with a sense lead mistakenly sharing the force contact.",
+    "physical": "Remount a reference shunt ten times, reverse the test current to assess offsets and check the separate contact positions."
+  },
+  "P074": {
+    "name": "USB hands-free test trigger pedal",
+    "inputs": {
+      "debounce_ms": 6,
+      "bounce_ms": [
+        0,
+        1,
+        3,
+        4,
+        5
+      ],
+      "press_ms": 45
+    },
+    "connection": "One mechanical pedal → debounced edge → keyboard trigger",
+    "trial": "Inject switch bounce and reconnect while held, requiring a release before a new trigger.",
+    "physical": "Record one event per stroke on the host and unplug and reconnect the USB cable with the pedal depressed."
+  },
+  "P075": {
+    "name": "Eight-port selectable I2C sensor breakout",
+    "inputs": {
+      "ports": 8,
+      "address": 68
+    },
+    "connection": "Controller → single selected multiplexer channel → identical-address sensor",
+    "trial": "Prevent selecting multiple same-address channels and show how combined data can resemble a valid zero.",
+    "physical": "Read two marked same-address sensors on every connector and measure bus signal edges with the intended cable length."
+  },
+  "P213": {
+    "name": "Wired director tally lamp",
+    "inputs": {
+      "poll_ms": 2,
+      "opto_delay_ms": 1.5,
+      "response_ms": 10,
+      "slow_poll_ms": 16
+    },
+    "connection": "Two isolated contact inputs → program priority → red / green tally",
+    "trial": "Check all contact combinations, transition latency and loss of both closures.",
+    "physical": "Verify dark state on unplug and time 100 mixer-contact transitions including simultaneous program and preview."
+  },
+  "P214": {
+    "name": "Four-pad USB MIDI trigger box",
+    "inputs": {
+      "threshold": 45,
+      "adjacent_ratio": 0.16,
+      "old_threshold": 15,
+      "peak_ranges": [
+        [
+          51,
+          70
+        ],
+        [
+          100,
+          126
+        ]
+      ],
+      "samples": 30
+    },
+    "connection": "Four strike envelopes → per-pad threshold → MIDI note and velocity",
+    "trial": "Replay light and hard strikes with coupled adjacent signals and compare false notes across two thresholds.",
+    "physical": "Measure missed and doubled notes and velocity response from 30 light and hard strikes on each actual pad."
+  },
+  "P215": {
+    "name": "Three-pedal stream shortcut controller",
+    "inputs": {
+      "channels": 3,
+      "rounds": 500
+    },
+    "connection": "Three independent pedal states → HID report → host held-key set",
+    "trial": "Exercise simultaneous holds and releases plus 500 strokes per pedal. Compare the reports with a one-key encoder.",
+    "physical": "Run a hold and release log on each supported host. Measure debounce and verify shortcut behavior inside the intended app."
+  },
+  "P219": {
+    "name": "Two-switch wired USB interface",
+    "inputs": {
+      "keys": [
+        4,
+        44
+      ],
+      "rounds": 200
+    },
+    "connection": "Two dry-contact sockets → configurable key usages → HID held-key set",
+    "trial": "Replay independent, simultaneous and reconfigured holds, including unplug recovery when a key is still down.",
+    "physical": "Repeat on the two named hosts with the user's actual switches. Verify socket fit, accessibility and release handling."
+  },
+  "P222": {
+    "name": "Two-message tactile playback pad",
+    "inputs": {
+      "slots": 2,
+      "max_bytes": 128,
+      "power_cycles": 20
+    },
+    "connection": "Record buffer → two-slot nonvolatile journal → two playback selectors",
+    "trial": "Interrupt a replacement message at each write-operation boundary and verify recovery of the prior committed audio payload.",
+    "physical": "Record and recover distinct audio after 20 real power cycles and verify tactile identification with the intended user."
+  },
+  "P223": {
+    "name": "Dry-contact switch latch and timer",
+    "inputs": {
+      "preset_ms": [
+        250,
+        1000,
+        3000
+      ],
+      "tick_ms": 7,
+      "rounds": 100
+    },
+    "connection": "Switch edge → toggle or timed state → low-voltage dry-contact output",
+    "trial": "Replay both modes on a discrete clock including a press during an active interval and simulated power loss.",
+    "physical": "Compare each preset with a reference timer for 100 cycles, verify relay release and confirm default open after power loss."
+  },
+  "P066": {
+    "name": "Servo characterization dial and load arm",
+    "inputs": {
+      "arm_mm": 65,
+      "weight_g": 100,
+      "angles_deg": [
+        0,
+        15,
+        30,
+        45
+      ],
+      "angle_error_deg": 0.5,
+      "radius_error_mm": 0.4,
+      "weight_error_g": 0.5,
+      "max_error_pct": 3
+    },
+    "connection": "Hanging mass and graduated arm → angle-corrected moment estimate",
+    "trial": "Compute the load moment over a servo angle sweep and quantify the error from assuming a horizontal arm.",
+    "physical": "Measure lever length and angle under load, weigh the fixture and test power, holding current and safe servo limits independently."
+  },
+  "P073": {
+    "name": "USB-UART service adapter with keyed leads",
+    "inputs": {
+      "baud_rates": [
+        9600,
+        57600,
+        115200
+      ],
+      "clock_skew": 0.02,
+      "old_skew": 0.08,
+      "bytes": [
+        0,
+        85,
+        170,
+        127,
+        128,
+        255
+      ]
+    },
+    "connection": "Synthetic 8N1 transmitter → sampled loopback waveform → decoded bytes",
+    "trial": "Check alternating and boundary bit patterns across three declared rates and injected clock skew.",
+    "physical": "Loop back on the populated board and measure actual logic voltage in each keyed position. Test supported hosts."
+  },
+  "P211": {
+    "name": "Passive stereo monitor level box",
+    "inputs": {
+      "topology_ohm": 10000,
+      "source_ohm": 100,
+      "load_ohm": 20000,
+      "taps": [
+        0.03,
+        0.1,
+        0.25,
+        0.5,
+        0.75,
+        1
+      ],
+      "tracking_rel": 0.012,
+      "old_tracking_rel": 0.075,
+      "limit_db": 0.5
+    },
+    "connection": "Stereo line-level source → two tapped resistive dividers → finite input load",
+    "trial": "Bound stereo balance at six settings with finite source and load impedances.",
+    "physical": "Sweep both channels under a named load and measure tracking, residual hum, noise and mute isolation."
+  },
+  "P212": {
+    "name": "Headphone rehearsal splitter amplifier",
+    "inputs": {
+      "request_vrms": 0.45,
+      "load_ohm": [
+        32,
+        80,
+        250
+      ],
+      "source_r_ohm": 1,
+      "peak_current_ma": 52,
+      "old_peak_current_ma": 26,
+      "voltage_headroom_vpk": 1.5
+    },
+    "connection": "Two independently loaded outputs per stereo side → shared per-side current budget",
+    "trial": "Sweep simultaneous dummy loads and reject a source with insufficient per-side peak current.",
+    "physical": "Test both real outputs into declared dummy loads. Measure output limit, distortion, noise and heating; hearing comfort is outside the model."
+  },
+  "P218": {
+    "name": "Large single access button",
+    "inputs": {
+      "hinge_offset_mm": 24,
+      "old_offset_mm": 9,
+      "face_diameter_mm": 70,
+      "switch_lever_mm": 36,
+      "switch_force_n": 0.38,
+      "bias_nmm": 3,
+      "force_limit_n": 0.85
+    },
+    "connection": "Wide pivoted face → mechanical moment arm → dry-contact switch",
+    "trial": "Compare center and four edge activation forces for two hinge positions at a fixed switch lever distance.",
+    "physical": "Measure activation force and travel at center and edges, inspect return, and test 500 actuations with the actual mounting and intended user."
+  }
+}

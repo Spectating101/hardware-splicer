@@ -1,0 +1,10 @@
+{
+  "pilot": "Taiwan hatchery training desk, masked camera snapshots of inert coupons over a shallow chute",
+  "metrics": {
+    "batches": 10,
+    "accepted_singles_per_batch": 40,
+    "visible_overlaps_held_per_batch": 5,
+    "naive_undercount_per_batch": 5,
+    "fully_coincident_alias_trials": 12
+  }
+}

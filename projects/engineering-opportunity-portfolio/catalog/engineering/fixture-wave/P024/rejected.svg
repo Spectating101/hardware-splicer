@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="262mm" height="243mm" viewBox="0 0 262 243">
+  <title>Spring preloaded PCB vise</title>
+  <style>text{font:4px sans-serif; fill:#21363c} .part,.cut,.limit{fill:none;stroke:#293c44;stroke-width:.35}.part{fill:#ddeaea;fill-opacity:.4}.cut{stroke:#006454}.limit{stroke:#ab492b;stroke-dasharray:2 1}</style>
+  <rect id="bed-0" class="part" x="18" y="18" width="119" height="8" />
+  <rect id="pcb-0" class="cut" x="30" y="15" width="22" height="1.6" />
+  <rect id="keepout-0" class="limit" x="36" y="16.6" width="10" height="5" />
+  <rect id="fixed-0" class="part" x="24" y="14.7" width="6" height="1.95" />
+  <rect id="moving-0" class="part" x="52" y="14.7" width="6" height="1.95" />
+  <line id="spring-0" class="limit" x1="155" y1="23" x2="157.5" y2="23" />
+  <line id="spring-limit-0" class="limit" x1="155" y1="31" x2="165" y2="31" />
+  <text x="150" y="15">Board 22 wide; spring deflection 2.50</text>
+  <rect id="bed-1" class="part" x="18" y="85" width="119" height="8" />
+  <rect id="pcb-1" class="cut" x="30" y="82" width="45" height="1.6" />
+  <rect id="keepout-1" class="limit" x="36" y="83.6" width="33" height="5" />
+  <rect id="fixed-1" class="part" x="24" y="81.7" width="6" height="1.95" />
+  <rect id="moving-1" class="part" x="75" y="81.7" width="6" height="1.95" />
+  <line id="spring-1" class="limit" x1="155" y1="90" x2="159.57" y2="90" />
+  <line id="spring-limit-1" class="limit" x1="155" y1="98" x2="165" y2="98" />
+  <text x="150" y="82">Board 45 wide; spring deflection 4.57</text>
+  <rect id="bed-2" class="part" x="18" y="152" width="119" height="8" />
+  <rect id="pcb-2" class="cut" x="30" y="149" width="70" height="1.6" />
+  <rect id="keepout-2" class="limit" x="36" y="150.6" width="58" height="5" />
+  <rect id="fixed-2" class="part" x="24" y="148.7" width="6" height="1.95" />
+  <rect id="moving-2" class="part" x="100" y="148.7" width="6" height="1.95" />
+  <line id="spring-2" class="limit" x1="155" y1="157" x2="161.82" y2="157" />
+  <line id="spring-limit-2" class="limit" x1="155" y1="165" x2="165" y2="165" />
+  <text x="150" y="149">Board 70 wide; spring deflection 6.82</text>
+  <text x="18" y="222">Jaw slot 1.95 for 1.6 board; assumed component height ≤5</text>
+  <text x="18" y="231">Replaceable edge jaws attach to rail blocks under the section datum.</text>
+</svg>

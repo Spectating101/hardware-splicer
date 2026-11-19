@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="268.6mm" height="190.1mm" viewBox="0 0 268.6 190.1">
+  <rect id="base" x="0" y="0" width="268.600000" height="190.100000" rx="3" fill="#c9ced0" />
+  <rect id="tablet" x="9" y="8" width="250.600000" height="174.100000" rx="8" fill="#384849" />
+  <rect id="display" x="30.390909" y="17.118182" width="207.818182" height="155.863636" rx="0" fill="#e1e6e7" />
+  <rect id="ui-r1c1" x="40.974242" y="32.512121" width="42.333333" height="32.712121" rx="0" fill="#86bbaa" />
+  <rect id="ui-r1c2" x="89.080303" y="32.512121" width="42.333333" height="32.712121" rx="0" fill="#86bbaa" />
+  <rect id="ui-r1c3" x="137.186364" y="32.512121" width="42.333333" height="32.712121" rx="0" fill="#86bbaa" />
+  <rect id="ui-r1c4" x="185.292424" y="32.512121" width="42.333333" height="32.712121" rx="0" fill="#86bbaa" />
+  <rect id="ui-r2c1" x="40.974242" y="78.693939" width="42.333333" height="32.712121" rx="0" fill="#86bbaa" />
+  <rect id="ui-r2c2" x="94.468182" y="78.693939" width="36.945455" height="32.712121" rx="0" fill="#86bbaa" />
+  <rect id="ui-r2c3" x="137.186364" y="78.693939" width="42.333333" height="32.712121" rx="0" fill="#86bbaa" />
+  <rect id="ui-r2c4" x="185.292424" y="78.693939" width="42.333333" height="32.712121" rx="0" fill="#86bbaa" />
+  <rect id="ui-r3c1" x="40.974242" y="124.875758" width="42.333333" height="32.712121" rx="0" fill="#86bbaa" />
+  <rect id="ui-r3c2" x="89.080303" y="124.875758" width="42.333333" height="32.712121" rx="0" fill="#86bbaa" />
+  <rect id="ui-r3c3" x="137.186364" y="124.875758" width="42.333333" height="32.712121" rx="0" fill="#86bbaa" />
+  <rect id="ui-r3c4" x="185.292424" y="124.875758" width="42.333333" height="32.712121" rx="0" fill="#86bbaa" />
+  <g fill="none" stroke="#ac3c20" stroke-width=".45">
+    <rect id="outline" x="0" y="0" width="268.600000" height="190.100000" rx="3" />
+    <circle id="mount-1" cx="4.400000" cy="4.500000" r="1.750000" />
+    <circle id="mount-2" cx="264.200000" cy="4.500000" r="1.750000" />
+    <circle id="mount-3" cx="4.400000" cy="185.600000" r="1.750000" />
+    <circle id="mount-4" cx="264.200000" cy="176.100000" r="1.750000" />
+    <rect id="access-top" x="27.390909" y="14.118182" width="213.818182" height="10.500000" rx="2" />
+    <rect id="access-bottom" x="27.390909" y="165.481818" width="213.818182" height="10.500000" rx="2" />
+    <rect id="access-left" x="6.500000" y="77.050000" width="31.390909" height="36" rx="2" />
+    <rect id="access-right" x="230.709091" y="77.050000" width="31.390909" height="36" rx="2" />
+    <rect id="window-r1c1" x="44.174242" y="35.712121" width="35.933333" height="26.312121" rx="2" />
+    <rect id="window-r1c2" x="92.280303" y="35.712121" width="35.933333" height="26.312121" rx="2" />
+    <rect id="window-r1c3" x="140.386364" y="35.712121" width="35.933333" height="26.312121" rx="2" />
+    <rect id="window-r1c4" x="188.492424" y="35.712121" width="35.933333" height="26.312121" rx="2" />
+    <rect id="window-r2c1" x="44.174242" y="81.893939" width="35.933333" height="26.312121" rx="2" />
+    <rect id="window-r2c2" x="97.668182" y="81.893939" width="30.545455" height="26.312121" rx="2" />
+    <rect id="window-r2c3" x="140.386364" y="81.893939" width="35.933333" height="26.312121" rx="2" />
+    <rect id="window-r2c4" x="188.492424" y="81.893939" width="35.933333" height="26.312121" rx="2" />
+    <rect id="window-r3c1" x="44.174242" y="128.075758" width="35.933333" height="26.312121" rx="2" />
+    <rect id="window-r3c2" x="92.280303" y="128.075758" width="35.933333" height="26.312121" rx="2" />
+    <rect id="window-r3c3" x="140.386364" y="128.075758" width="35.933333" height="26.312121" rx="2" />
+    <rect id="window-r3c4" x="188.492424" y="128.075758" width="35.933333" height="26.312121" rx="2" />
+  </g>
+  <text x="62.140909" y="48.868182" text-anchor="middle" font-size="3.500000" font-family="sans-serif" fill="#15282a">r1c1</text>
+  <text x="110.246970" y="48.868182" text-anchor="middle" font-size="3.500000" font-family="sans-serif" fill="#15282a">r1c2</text>
+  <text x="158.353030" y="48.868182" text-anchor="middle" font-size="3.500000" font-family="sans-serif" fill="#15282a">r1c3</text>
+  <text x="206.459091" y="48.868182" text-anchor="middle" font-size="3.500000" font-family="sans-serif" fill="#15282a">r1c4</text>
+  <text x="62.140909" y="95.050000" text-anchor="middle" font-size="3.500000" font-family="sans-serif" fill="#15282a">r2c1</text>
+  <text x="112.940909" y="95.050000" text-anchor="middle" font-size="3.500000" font-family="sans-serif" fill="#15282a">r2c2</text>
+  <text x="158.353030" y="95.050000" text-anchor="middle" font-size="3.500000" font-family="sans-serif" fill="#15282a">r2c3</text>
+  <text x="206.459091" y="95.050000" text-anchor="middle" font-size="3.500000" font-family="sans-serif" fill="#15282a">r2c4</text>
+  <text x="62.140909" y="141.231818" text-anchor="middle" font-size="3.500000" font-family="sans-serif" fill="#15282a">r3c1</text>
+  <text x="110.246970" y="141.231818" text-anchor="middle" font-size="3.500000" font-family="sans-serif" fill="#15282a">r3c2</text>
+  <text x="158.353030" y="141.231818" text-anchor="middle" font-size="3.500000" font-family="sans-serif" fill="#15282a">r3c3</text>
+  <text x="206.459091" y="141.231818" text-anchor="middle" font-size="3.500000" font-family="sans-serif" fill="#15282a">r3c4</text>
+</svg>

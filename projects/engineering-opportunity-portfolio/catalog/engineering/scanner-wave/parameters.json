@@ -1,0 +1,9 @@
+{
+ "P009":{"body_mm":[165.1,111.76],"light_mm":[149.225,95.25],"coupon_frame_mm":[35.8,23.8],"wall_height_mm":2,"ray_deg":10,"misregistration_mm":0.5,"baseline":{"aperture":[80,56]},"revised":{"aperture":[40,28]}},
+ "P011":{"media_diameter_mm":65,"frame_mm":[10.6,8.2],"frame_radius_mm":24,"frames":15,"center_tolerance_mm":0.25,"baseline":{"key_half_slack":0.85},"revised":{"key_half_slack":0.22}},
+ "P012":{"film_width_mm":46,"nominal_frame_mm":40,"minimum_edge_radius_mm":130,"locator_error_mm":0.30,"baseline":{"clip_x":[-31,31]},"revised":{"clip_x":[-31,-10.33,10.33,31]}},
+ "P013":{"media_w_mm":35,"frame_mm":[28,28],"hole_size_mm":[2.8,1.8],"location_error_mm":0.15,"baseline":{"engage_both":true},"revised":{"engage_both":false}},
+ "P014":{"media_w_mm":61,"frame_mm":[56,56],"placement_error_mm":0.13,"focus_band_mm":[0.90,1.50],"baseline":{"shim_options":[0.60]},"revised":{"shim_options":[0.95,1.20,1.45]}},
+ "P015":{"film_w_mm":16,"frame_mm":[17.0,12.8],"film_pitch_mm":19,"placement_error_mm":0.20,"baseline":{"pitch":18.15},"revised":{"pitch":19}},
+ "P016":{"media_w_mm":8,"frame_mm":[3.30,4.60],"frame_pitch_mm":3.81,"placement_mm":0.07,"max_skew_deg":1,"baseline":{"aperture_y":0},"revised":{"aperture_y":0.96}}
+}

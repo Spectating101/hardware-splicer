@@ -1,0 +1,23 @@
+{
+  "pilot": "Chiayi orchard, one synthetic leaf-surface data stream",
+  "metrics": {
+    "confirmed": {
+      "reference_edges": 20,
+      "emitted_edges": 20,
+      "worst_edge_timestamp_error_s": 25,
+      "worst_observed_confirmation_latency_s": 85,
+      "complete_wet_windows": 10,
+      "max_wet_duration_error_s": 0,
+      "gap_logged_and_recovered": true
+    },
+    "one-sample-control": {
+      "reference_edges": 20,
+      "emitted_edges": 60,
+      "worst_edge_timestamp_error_s": null,
+      "worst_observed_confirmation_latency_s": null,
+      "complete_wet_windows": 30,
+      "max_wet_duration_error_s": 270,
+      "gap_logged_and_recovered": true
+    }
+  }
+}

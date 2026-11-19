@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="440mm" height="320mm" viewBox="0 0 440 320">
+  <title>P210 revised · full-size proof coupon</title>
+  <rect id="scale" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="10" y="6" width="20" height="10" />
+  <polygon id="side-0" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" points="24,145 194,145 194,104 24,128" />
+  <rect id="plan-0" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="24" y="168" width="170" height="124" />
+  <rect id="speaker-base-0" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="34" y="176" width="150" height="108" />
+  <polygon id="side-1" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" points="224,145 394,145 394,104 224,128" />
+  <rect id="plan-1" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="224" y="168" width="170" height="124" />
+  <rect id="speaker-base-1" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="234" y="176" width="150" height="108" />
+</svg>

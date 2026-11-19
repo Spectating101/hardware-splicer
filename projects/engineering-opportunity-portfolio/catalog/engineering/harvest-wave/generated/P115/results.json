@@ -1,0 +1,17 @@
+{
+  "pilot": "Taiwan teaching nursery, eight inert soil-mix block surrogates and an assumed ejector force envelope",
+  "metrics": {
+    "candidate": {
+      "cells": 8,
+      "model_handle_force_n": 37.52,
+      "worst_shoe_side_clearance_mm": 0.215,
+      "model_handle_travel_mm": 202.5
+    },
+    "short-lever-control": {
+      "cells": 8,
+      "model_handle_force_n": 84.42,
+      "worst_shoe_side_clearance_mm": 0.215,
+      "model_handle_travel_mm": 90.0
+    }
+  }
+}

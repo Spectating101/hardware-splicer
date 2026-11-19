@@ -1,0 +1,16 @@
+{
+ "P036":{"optical":{"magnification":3,"f_number":5.6,"coc_mm":0.004},"stage_error_um":1.2,"backlash_um":220,"start_um":10000,"exposures":101,"baseline":{"step_um":10,"preroll_um":0},"revised":{"step_um":6,"preroll_um":240}},
+ "P037":{"xy_command_mm":[14,9],"stage_error_mm":0.08,"baseline":{"y_skew_deg":3},"revised":{"y_skew_deg":0.12}},
+ "P193":{"wheelbase_mm":146,"target_orbit_r_mm":310,"load_shift_mm":10,"baseline":{"steer_deg":30},"revised":{"steer_deg":25.2}},
+ "P194":{"min_inside_bend_mm":20,"cable_d_mm":[4.8,5.2],"pad_mm":1.25,"baseline":{"bend_radius_mm":15,"jaw_open_mm":7.0},"revised":{"bend_radius_mm":23,"jaw_open_mm":7.1}},
+ "P197":{"nominal_position_error_mm":1.5,"baseline":{"plate_w_mm":64},"revised":{"plate_w_mm":49}},
+ "P198":{"module_mm":0.8,"pressure_deg":20,"bare_lens_mm":70,"teeth_ring":96,"teeth_pinion":20,"nominal_lash_mm":0.10,"mount_error_mm":0.05,"lens_throw_deg":90,"baseline":{"carriage_offset_mm":0.65},"revised":{"carriage_offset_mm":0.13}},
+ "P201":{"base_radius_mm":80,"base_mass_kg":0.22,"cp_mm":285,"air_density_kgm3":1.225,"drag_coefficient":1.18,"air_speed_ms":3,"ballast_thickness_mm":12,"ballast_density_gmm3":0.00785,"baseline":{"ballast_edge_mm":27},"revised":{"ballast_edge_mm":69}},
+ "P202":{"roll_radii_mm":[24,47],"crank_arm_mm":45,"brake_normal_n":12.5,"friction_nominal":0.35,"friction_rel_error":0.20,"wind_extra_nm":0.09,"baseline":{"contact_mm":13.7},"revised":{"contact_mm":24}},
+ "P204":{"chair_routes_mm":[522,571],"baseline":{"strap_mm":470},"revised":{"strap_mm":500}},
+ "P206":{"outreach":300,"arm_anchor":64,"fixed_anchor":[0,140],"load_kg":0.65,"spring_rest_mm":55,"spring_rate_nm":325,"ratio":1,"angle_range_deg":[-10,55],"baseline":{"fixed_anchor":[-88,65]},"revised":{"fixed_anchor":[0,140]}},
+ "P207":{"mesh_distance":110,"mic_distance":185,"mouth_offset_mm":14,"signal_cone_deg":12,"baseline":{"screen_radius":34,"mesh_gap":4},"revised":{"screen_radius":52,"mesh_gap":11}},
+ "P208":{"outer_r_mm":60,"barrel_r_mm":24,"pull_mm":5,"mic_mass_kg":0.35,"damping_ratio":0.15,"trial_freq_hz":30,"baseline":{"pull_n_at_gauge":4.75},"revised":{"pull_n_at_gauge":0.78}},
+ "P209":{"baseline":{"wing_length":90},"revised":{"wing_length":163}},
+ "P210":{"baseline":{"depth":170,"heel":29,"toe":17},"revised":{"depth":170,"heel":41,"toe":17},"speaker_center_height_mm":86,"friction_minimum":0.33}
+}

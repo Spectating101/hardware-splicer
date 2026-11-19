@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="220mm" height="285mm" viewBox="0 0 220 285">
+  <title>P013 baseline · full-size proof coupon</title>
+  <rect id="scale" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="10" y="6" width="20" height="10" />
+  <rect id="host-window-coupon" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="20" y="24" width="112" height="198" />
+  <rect id="preserve-calibration-zone" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="20" y="24" width="112" height="24" />
+  <rect id="carrier" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="26" y="56" width="98" height="90" />
+  <rect id="media-ref" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="38" y="81.5" width="74" height="35" />
+  <rect id="image-target" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="61" y="85" width="28" height="28" />
+  <rect id="scan-opening" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="60.35" y="84.35" width="29.3" height="29.3" />
+  <rect id="perforation" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="69.6" y="82.35" width="2.8" height="1.8" />
+  <circle id="orientation-key-0" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" cx="71" cy="83.25" r="0.55" />
+  <circle id="orientation-key-1" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" cx="71" cy="114.75" r="0.55" />
+  <rect id="key-stock" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="147" y="67" width="24" height="12" />
+  <circle id="key-press-hole" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="159" cy="73" r="0.55" />
+</svg>

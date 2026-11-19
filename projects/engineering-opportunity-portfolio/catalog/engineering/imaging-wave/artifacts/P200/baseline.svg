@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="120mm" height="135mm" viewBox="0 0 120 135">
+  <title>P200 baseline | full-size study patterns</title>
+  <rect id="scale" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x="8" y="8" width="20" height="10" />
+  <text id="scale-label" data-operation="engrave" fill="#333333" stroke="none" stroke-width="0.17" x="9" y="14" font-size="2.6" font-family="sans-serif">20 × 10 mm</text>
+  <rect id="cell-blank" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" x="13" y="30" width="96" height="52" />
+  <rect id="head-reference" data-operation="reference" fill="none" stroke="#2475a9" stroke-width="0.17" x="17" y="34" width="88" height="44" />
+  <polygon id="cell-0-0" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="22.75,45.030345 26.75,42.720944 26.75,38.102142 22.75,35.792741 18.75,38.102142 18.75,42.720944" />
+  <polygon id="cell-0-1" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="31.75,45.030345 35.75,42.720944 35.75,38.102142 31.75,35.792741 27.75,38.102142 27.75,42.720944" />
+  <polygon id="cell-0-2" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="40.75,45.030345 44.75,42.720944 44.75,38.102142 40.75,35.792741 36.75,38.102142 36.75,42.720944" />
+  <polygon id="cell-0-3" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="49.75,45.030345 53.75,42.720944 53.75,38.102142 49.75,35.792741 45.75,38.102142 45.75,42.720944" />
+  <polygon id="cell-0-4" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="58.75,45.030345 62.75,42.720944 62.75,38.102142 58.75,35.792741 54.75,38.102142 54.75,42.720944" />
+  <polygon id="cell-0-5" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="67.75,45.030345 71.75,42.720944 71.75,38.102142 67.75,35.792741 63.75,38.102142 63.75,42.720944" />
+  <polygon id="cell-0-6" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="76.75,45.030345 80.75,42.720944 80.75,38.102142 76.75,35.792741 72.75,38.102142 72.75,42.720944" />
+  <polygon id="cell-0-7" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="85.75,45.030345 89.75,42.720944 89.75,38.102142 85.75,35.792741 81.75,38.102142 81.75,42.720944" />
+  <polygon id="cell-0-8" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="94.75,45.030345 98.75,42.720944 98.75,38.102142 94.75,35.792741 90.75,38.102142 90.75,42.720944" />
+  <polygon id="cell-1-0" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="27.25,52.824574 31.25,50.515172 31.25,45.89637 27.25,43.586969 23.25,45.89637 23.25,50.515172" />
+  <polygon id="cell-1-1" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="36.25,52.824574 40.25,50.515172 40.25,45.89637 36.25,43.586969 32.25,45.89637 32.25,50.515172" />
+  <polygon id="cell-1-2" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="45.25,52.824574 49.25,50.515172 49.25,45.89637 45.25,43.586969 41.25,45.89637 41.25,50.515172" />
+  <polygon id="cell-1-3" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="54.25,52.824574 58.25,50.515172 58.25,45.89637 54.25,43.586969 50.25,45.89637 50.25,50.515172" />
+  <polygon id="cell-1-4" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="63.25,52.824574 67.25,50.515172 67.25,45.89637 63.25,43.586969 59.25,45.89637 59.25,50.515172" />
+  <polygon id="cell-1-5" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="72.25,52.824574 76.25,50.515172 76.25,45.89637 72.25,43.586969 68.25,45.89637 68.25,50.515172" />
+  <polygon id="cell-1-6" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="81.25,52.824574 85.25,50.515172 85.25,45.89637 81.25,43.586969 77.25,45.89637 77.25,50.515172" />
+  <polygon id="cell-1-7" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="90.25,52.824574 94.25,50.515172 94.25,45.89637 90.25,43.586969 86.25,45.89637 86.25,50.515172" />
+  <polygon id="cell-1-8" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="99.25,52.824574 103.25,50.515172 103.25,45.89637 99.25,43.586969 95.25,45.89637 95.25,50.515172" />
+  <polygon id="cell-2-0" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="22.75,60.618802 26.75,58.309401 26.75,53.690599 22.75,51.381198 18.75,53.690599 18.75,58.309401" />
+  <polygon id="cell-2-1" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="31.75,60.618802 35.75,58.309401 35.75,53.690599 31.75,51.381198 27.75,53.690599 27.75,58.309401" />
+  <polygon id="cell-2-2" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="40.75,60.618802 44.75,58.309401 44.75,53.690599 40.75,51.381198 36.75,53.690599 36.75,58.309401" />
+  <polygon id="cell-2-3" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="49.75,60.618802 53.75,58.309401 53.75,53.690599 49.75,51.381198 45.75,53.690599 45.75,58.309401" />
+  <polygon id="cell-2-4" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="58.75,60.618802 62.75,58.309401 62.75,53.690599 58.75,51.381198 54.75,53.690599 54.75,58.309401" />
+  <polygon id="cell-2-5" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="67.75,60.618802 71.75,58.309401 71.75,53.690599 67.75,51.381198 63.75,53.690599 63.75,58.309401" />
+  <polygon id="cell-2-6" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="76.75,60.618802 80.75,58.309401 80.75,53.690599 76.75,51.381198 72.75,53.690599 72.75,58.309401" />
+  <polygon id="cell-2-7" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="85.75,60.618802 89.75,58.309401 89.75,53.690599 85.75,51.381198 81.75,53.690599 81.75,58.309401" />
+  <polygon id="cell-2-8" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="94.75,60.618802 98.75,58.309401 98.75,53.690599 94.75,51.381198 90.75,53.690599 90.75,58.309401" />
+  <polygon id="cell-3-0" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="27.25,68.413031 31.25,66.10363 31.25,61.484828 27.25,59.175426 23.25,61.484828 23.25,66.10363" />
+  <polygon id="cell-3-1" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="36.25,68.413031 40.25,66.10363 40.25,61.484828 36.25,59.175426 32.25,61.484828 32.25,66.10363" />
+  <polygon id="cell-3-2" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="45.25,68.413031 49.25,66.10363 49.25,61.484828 45.25,59.175426 41.25,61.484828 41.25,66.10363" />
+  <polygon id="cell-3-3" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="54.25,68.413031 58.25,66.10363 58.25,61.484828 54.25,59.175426 50.25,61.484828 50.25,66.10363" />
+  <polygon id="cell-3-4" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="63.25,68.413031 67.25,66.10363 67.25,61.484828 63.25,59.175426 59.25,61.484828 59.25,66.10363" />
+  <polygon id="cell-3-5" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="72.25,68.413031 76.25,66.10363 76.25,61.484828 72.25,59.175426 68.25,61.484828 68.25,66.10363" />
+  <polygon id="cell-3-6" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="81.25,68.413031 85.25,66.10363 85.25,61.484828 81.25,59.175426 77.25,61.484828 77.25,66.10363" />
+  <polygon id="cell-3-7" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="90.25,68.413031 94.25,66.10363 94.25,61.484828 90.25,59.175426 86.25,61.484828 86.25,66.10363" />
+  <polygon id="cell-3-8" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="99.25,68.413031 103.25,66.10363 103.25,61.484828 99.25,59.175426 95.25,61.484828 95.25,66.10363" />
+  <polygon id="cell-4-0" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="22.75,76.207259 26.75,73.897858 26.75,69.279056 22.75,66.969655 18.75,69.279056 18.75,73.897858" />
+  <polygon id="cell-4-1" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="31.75,76.207259 35.75,73.897858 35.75,69.279056 31.75,66.969655 27.75,69.279056 27.75,73.897858" />
+  <polygon id="cell-4-2" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="40.75,76.207259 44.75,73.897858 44.75,69.279056 40.75,66.969655 36.75,69.279056 36.75,73.897858" />
+  <polygon id="cell-4-3" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="49.75,76.207259 53.75,73.897858 53.75,69.279056 49.75,66.969655 45.75,69.279056 45.75,73.897858" />
+  <polygon id="cell-4-4" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="58.75,76.207259 62.75,73.897858 62.75,69.279056 58.75,66.969655 54.75,69.279056 54.75,73.897858" />
+  <polygon id="cell-4-5" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="67.75,76.207259 71.75,73.897858 71.75,69.279056 67.75,66.969655 63.75,69.279056 63.75,73.897858" />
+  <polygon id="cell-4-6" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="76.75,76.207259 80.75,73.897858 80.75,69.279056 76.75,66.969655 72.75,69.279056 72.75,73.897858" />
+  <polygon id="cell-4-7" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="85.75,76.207259 89.75,73.897858 89.75,69.279056 85.75,66.969655 81.75,69.279056 81.75,73.897858" />
+  <polygon id="cell-4-8" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="94.75,76.207259 98.75,73.897858 98.75,69.279056 94.75,66.969655 90.75,69.279056 90.75,73.897858" />
+  <rect id="depth-gauge" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" x="13" y="94" width="20" height="9" />
+  <text id="layers" data-operation="engrave" fill="#333333" stroke="none" stroke-width="0.17" x="46" y="102" font-size="3" font-family="sans-serif">3 plates × 3 mm</text>
+</svg>

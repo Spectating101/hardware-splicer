@@ -1,0 +1,15 @@
+{
+  "pilot": "Java dry sample desk, 1 kg coloured-bead surrogate and two receiver trays",
+  "metrics": {
+    "uniform": {
+      "splits": 10,
+      "max_half_mass_error_pct": 4.2,
+      "max_color_gap_percentage_points": 3.55
+    },
+    "one-chute-control": {
+      "splits": 10,
+      "max_half_mass_error_pct": 11.4,
+      "max_color_gap_percentage_points": 3.73
+    }
+  }
+}

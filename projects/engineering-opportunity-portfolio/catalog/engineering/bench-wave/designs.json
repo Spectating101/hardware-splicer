@@ -1,0 +1,265 @@
+{
+ "P003": {
+  "pitch": [
+   96,
+   128,
+   160
+  ],
+  "width": 220,
+  "height": 105,
+  "center": 110,
+  "setbacks": [
+   22,
+   38,
+   60
+  ],
+  "calibration": 100,
+  "scale": 1,
+  "bad": {
+   "scale": 0.97
+  }
+ },
+ "P004": {
+  "board_w": 15.24,
+  "board_d": 19.05,
+  "margin": 0.35,
+  "carrier_w": 45,
+  "carrier_d": 49,
+  "origin": [
+   19,
+   13
+  ],
+  "camera": [
+   25,
+   23
+  ],
+  "fov": [
+   36,
+   35
+  ],
+  "card_exit": 12,
+  "bad": {
+   "card_exit": 4
+  }
+ },
+ "P023": {
+  "length": 450,
+  "space": 410,
+  "rail_thick": 13,
+  "base_h": 10,
+  "rail_height": 45,
+  "clamp_r": 12,
+  "skew": 0,
+  "bad": {
+   "skew": 1.2
+  }
+ },
+ "P025": {
+  "fasteners": [
+   [
+    "A1",
+    5,
+    7,
+    8
+   ],
+   [
+    "A2",
+    5,
+    10,
+    4
+   ],
+   [
+    "B1",
+    6,
+    9,
+    6
+   ],
+   [
+    "B2",
+    6,
+    12,
+    2
+   ],
+   [
+    "C1",
+    9,
+    1.4,
+    2
+   ],
+   [
+    "C2",
+    8,
+    2,
+    3
+   ]
+  ],
+  "floor": 3,
+  "wall_h": 15,
+  "lid_gap": 0.6,
+  "bad": {
+   "lid_gap": 2
+  }
+ },
+ "P026": {
+  "keyboard_width": 170,
+  "keyboard_depth": 170,
+  "footprint": 155,
+  "rise": 41.55,
+  "bottom_height": 9,
+  "stop_height": 5,
+  "friction": 0.45,
+  "cable_clear": 18,
+  "bad": {
+   "footprint": 67
+  }
+ },
+ "P030": {
+  "wheelbase": 150,
+  "wheel_d": 60,
+  "track": 145,
+  "wheel_w": 20,
+  "top": 61,
+  "skid": 11,
+  "length": 210,
+  "roof": 75,
+  "threshold": 6,
+  "recovery_w": 9,
+  "camera_h": 43,
+  "camera_fov": 63,
+  "target_distance": 125,
+  "bad": {
+   "top": 70
+  }
+ },
+ "P039": {
+  "sample_g": 0.812,
+  "unit_tol_g": 0.01,
+  "reading_err_g": 0.04,
+  "nominal": 20,
+  "pan_g": 37.5,
+  "capacity_g": 150,
+  "guard": 0.02,
+  "bad": {
+   "reading_err_g": 0.24
+  }
+ },
+ "P040": {
+  "bottom_ml": 2920,
+  "upper_ml": 3100,
+  "start_ml": 2850,
+  "pump_ml_step": 18,
+  "max_ticks": 9,
+  "latch": true,
+  "boiloff_ml_step": 10,
+  "bad": {
+   "max_ticks": 23
+  }
+ },
+ "P045": {
+  "span": 10,
+  "edge": 0.5,
+  "step": 0.01,
+  "wire_d": 0.075,
+  "turns": 6000,
+  "turns_per_layer": 112,
+  "reverse_error": 0,
+  "bad": {
+   "turns_per_layer": 150
+  }
+ },
+ "P228": {
+  "links": [
+   132,
+   120
+  ],
+  "angles": [
+   -20,
+   50
+  ],
+  "mass": 0.24,
+  "jaw_depth": 52,
+  "table_thicknesses": [
+   18,
+   33,
+   45
+  ],
+  "screw_opening": 54,
+  "joint_stiffness": 27,
+  "slip_torque": 1.0,
+  "bad": {
+   "joint_stiffness": 9
+  }
+ },
+ "P229": {
+  "width": 215,
+  "height": 150,
+  "path_width": 2.4,
+  "ridge_height": 0.9,
+  "marks": [
+   [
+    "Entry",
+    "circle",
+    29,
+    58
+   ],
+   [
+    "Craft room",
+    "square",
+    82,
+    37
+   ],
+   [
+    "Reading room",
+    "triangle",
+    143,
+    34
+   ],
+   [
+    "Courtyard",
+    "diamond",
+    150,
+    118
+   ],
+   [
+    "Quiet room",
+    "cross",
+    56,
+    116
+   ]
+  ],
+  "mark_radius": 6,
+  "route": [
+   [
+    25,
+    82
+   ],
+   [
+    185,
+    82
+   ],
+   [
+    185,
+    42
+   ],
+   [
+    204,
+    42
+   ]
+  ],
+  "bad": {
+   "path_width": 10
+  }
+ },
+ "P046": {
+  "tray_w": 150,
+  "tray_d": 110,
+  "camera_h": 280,
+  "horizontal_fov": 62,
+  "vertical_fov": 48,
+  "lamp_h": 140,
+  "lamp_offset": 145,
+  "bad": {
+   "lamp_offset": 100
+  }
+ }
+}

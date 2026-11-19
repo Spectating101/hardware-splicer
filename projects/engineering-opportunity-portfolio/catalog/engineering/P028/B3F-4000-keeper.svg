@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="30mm" height="24mm" viewBox="0 0 30 24">
+  <g stroke-width="0.05" fill="none" stroke="black">
+    <rect id="outline" x="0" y="0" width="30" height="24" />
+    <circle id="mount-1" cx="4" cy="12" r="1.6" />
+    <circle id="mount-2" cx="26" cy="12" r="1.6" />
+    <circle id="datum" cx="5" cy="5" r="1.025" />
+    <rect id="datum-slot" x="23.65" y="3.975" width="2.7" height="2.05" rx="1.025" ry="1.025" />
+    <circle id="button" cx="15" cy="12" r="4.25" />
+  </g>
+</svg>

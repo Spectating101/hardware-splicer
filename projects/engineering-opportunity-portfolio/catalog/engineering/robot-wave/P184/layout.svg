@@ -1,0 +1,2 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="60mm" height="60mm" viewBox="0 0 60 60"><title>Teaching robot odometry pod</title><circle id="rolling-wheel" cx="30" cy="30" r="24.0" fill="white" stroke="#223041" stroke-width="0.22" /><circle id="illustrative-axle" cx="30" cy="30" r="2" fill="white" stroke="#223041" stroke-width="0.22" /><rect id="rotation-index" x="29.75" y="6" width="0.5" height="8" fill="#eceff1" stroke="#223041" stroke-width="0.22" /></svg>

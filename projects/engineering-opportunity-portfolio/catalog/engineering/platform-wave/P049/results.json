@@ -1,0 +1,12 @@
+{
+  "revised": {
+    "max_position_error_mm": 0.0,
+    "max_orientation_error_deg": 0.0002,
+    "shoulder_home_bias_max_position_error_mm": 4.7932
+  },
+  "far": {
+    "max_position_error_mm": 25.0659,
+    "max_orientation_error_deg": 38.2362,
+    "shoulder_home_bias_max_position_error_mm": 26.7837
+  }
+}

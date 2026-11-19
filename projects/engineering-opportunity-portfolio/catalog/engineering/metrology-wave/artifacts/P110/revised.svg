@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="330mm" height="280mm" viewBox="0 0 330 280">
+  <title>P110 revised · full-size proof coupon</title>
+  <rect id="scale" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="10" y="6" width="20" height="10" />
+  <rect id="fence-blank" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="30" y="192" width="215" height="24" />
+  <circle id="pivot" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="157" cy="158" r="3.1" />
+  <circle id="index--45" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="96.895924" cy="97.895924" r="2.2" />
+  <circle id="index-0" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="157" cy="73" r="2.2" />
+  <circle id="index-45" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="217.104076" cy="97.895924" r="2.2" />
+  <line id="square-reference" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x1="157" y1="158" x2="157" y2="65" />
+  <rect id="rail-pad-0" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="33" y="240" width="10" height="10" />
+  <rect id="rail-pad-1" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="203" y="240" width="10" height="10" />
+  <rect id="guide-profile-reference" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="25" y="232" width="224" height="25" />
+  <rect id="rail-key-width-gauge" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="263" y="39" width="16" height="7" />
+  <rect id="host-groove-envelope" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="287" y="39" width="16" height="7.18" />
+</svg>

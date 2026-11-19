@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="284mm" height="383mm" viewBox="0 0 284 383">
+  <title>P246 trial shop drawing, millimetres</title>
+  <style>text{font:4px sans-serif;fill:#162930} .heading{font:bold 5px sans-serif}.part,.bore,.guide,.limit{fill:none;stroke:#223842;stroke-width:.38}.bore{stroke:#00645c}.guide{stroke:#964314;stroke-dasharray:2 1}.limit{stroke:#a1384e;stroke-dasharray:1 1}.part{fill:#e6eef0;fill-opacity:.28}</style>
+  <g data-view="set-0" transform="translate(12 5)">
+    <text x="0" y="4" class="heading">Carrier plan at 2.5 mm finished thickness</text>
+    <g transform="translate(0 10)">
+      <rect id="track-0" class="part" x="0" y="0" width="140" height="44" />
+      <rect id="abrasive-0" class="part" x="34" y="45" width="70" height="4" />
+      <rect id="start-stop-0" class="part" x="15" y="4" width="5" height="20" />
+      <rect id="end-stop-0" class="part" x="119" y="4" width="5" height="20" />
+      <rect id="shoe-0-0" class="guide" x="20" y="1" width="52" height="42" />
+      <rect id="blank-0-0" class="limit" x="30" y="42.5" width="32" height="2.5" />
+      <rect id="shoe-0-1" class="guide" x="67" y="1" width="52" height="42" />
+      <rect id="blank-0-1" class="limit" x="77" y="42.5" width="32" height="2.5" />
+      <rect id="sanding-fence-0" class="part" x="0" y="49" width="140" height="13" />
+      <rect id="stock-section-0" class="part" x="172" y="8" width="7" height="12" />
+      <rect id="finish-section-0" class="limit" x="172" y="8" width="2.5" height="12" />
+      <rect id="hold-down-0" class="part" x="167" y="5" width="17" height="3" />
+    </g>
+    <text x="0" y="69">Track 140 × 44; shoe 52 × 42; blank length 32</text>
+    <text x="0" y="75">Carrier backing shim sets 2.5; abrasive span x=34–104</text>
+    <text x="156" y="29">Initial blank 7 × 12</text>
+  </g>
+  <g data-view="set-1" transform="translate(12 131)">
+    <text x="0" y="4" class="heading">Carrier plan at 4 mm finished thickness</text>
+    <g transform="translate(0 10)">
+      <rect id="track-1" class="part" x="0" y="0" width="140" height="44" />
+      <rect id="abrasive-1" class="part" x="34" y="45" width="70" height="4" />
+      <rect id="start-stop-1" class="part" x="15" y="4" width="5" height="20" />
+      <rect id="end-stop-1" class="part" x="119" y="4" width="5" height="20" />
+      <rect id="shoe-1-0" class="guide" x="20" y="1" width="52" height="42" />
+      <rect id="blank-1-0" class="limit" x="30" y="41" width="32" height="4" />
+      <rect id="shoe-1-1" class="guide" x="67" y="1" width="52" height="42" />
+      <rect id="blank-1-1" class="limit" x="77" y="41" width="32" height="4" />
+      <rect id="sanding-fence-1" class="part" x="0" y="49" width="140" height="13" />
+      <rect id="stock-section-1" class="part" x="172" y="8" width="7" height="12" />
+      <rect id="finish-section-1" class="limit" x="172" y="8" width="4" height="12" />
+      <rect id="hold-down-1" class="part" x="167" y="5" width="17" height="3" />
+    </g>
+    <text x="0" y="69">Track 140 × 44; shoe 52 × 42; blank length 32</text>
+    <text x="0" y="75">Carrier backing shim sets 4; abrasive span x=34–104</text>
+    <text x="156" y="29">Initial blank 7 × 12</text>
+  </g>
+  <g data-view="set-2" transform="translate(12 257)">
+    <text x="0" y="4" class="heading">Carrier plan at 5.5 mm finished thickness</text>
+    <g transform="translate(0 10)">
+      <rect id="track-2" class="part" x="0" y="0" width="140" height="44" />
+      <rect id="abrasive-2" class="part" x="34" y="45" width="70" height="4" />
+      <rect id="start-stop-2" class="part" x="15" y="4" width="5" height="20" />
+      <rect id="end-stop-2" class="part" x="119" y="4" width="5" height="20" />
+      <rect id="shoe-2-0" class="guide" x="20" y="1" width="52" height="42" />
+      <rect id="blank-2-0" class="limit" x="30" y="39.5" width="32" height="5.5" />
+      <rect id="shoe-2-1" class="guide" x="67" y="1" width="52" height="42" />
+      <rect id="blank-2-1" class="limit" x="77" y="39.5" width="32" height="5.5" />
+      <rect id="sanding-fence-2" class="part" x="0" y="49" width="140" height="13" />
+      <rect id="stock-section-2" class="part" x="172" y="8" width="7" height="12" />
+      <rect id="finish-section-2" class="limit" x="172" y="8" width="5.5" height="12" />
+      <rect id="hold-down-2" class="part" x="167" y="5" width="17" height="3" />
+    </g>
+    <text x="0" y="69">Track 140 × 44; shoe 52 × 42; blank length 32</text>
+    <text x="0" y="75">Carrier backing shim sets 5.5; abrasive span x=34–104</text>
+    <text x="156" y="29">Initial blank 7 × 12</text>
+  </g>
+</svg>

@@ -1,0 +1,55 @@
+{
+  "P116": {
+    "pilot": "Taiwan spinach grower, nominal 2 inch Paperpot chain on a prepared row",
+    "pot_width_mm": 30.48, "pot_overfill_mm": 2, "pitch_mm": 50.8, "plugs": 50,
+    "yaw_range_deg": [-12, 0, 12], "lateral_runout_mm": 1, "sheet_tol_mm": 0.5,
+    "wanted_clearance_mm": 1, "throat_mm": 44, "control_throat_mm": 34,
+    "target_depth_mm": 25, "longitudinal_offset_mm": 200, "local_slope_pct": 2,
+    "static_depth_error_mm": 2, "max_depth_error_mm": 10
+  },
+  "P117": {
+    "pilot": "400 mm narrow raised-bed broadfork, removable straight handles",
+    "tines": 6, "tine_centers_mm": 60, "bar_length_mm": 400,
+    "candidate_tube": [34, 3], "control_tube": [30, 1.5],
+    "od_tol_mm": 0.2, "wall_tol_mm": 0.15, "lever_mm": 650,
+    "side_force_n": 220, "model_stress_gate_mpa": 90,
+    "catalog_first_unit_ntd": 9830, "catalog_buy_start_ntd": 9948.35,
+    "catalog_additional_case_ntd": 150
+  },
+  "P129": {
+    "pilot": "Level three-channel canopy relative light bar, two neutral-density surrogates",
+    "gain": [0.9, 1.01, 1.13], "offset_adc": [13, 29, 47],
+    "calibration_light": 500, "uniform_levels": [150, 400, 1000],
+    "screen_transmission": [1.0, 0.66, 0.31],
+    "voltage_noise_codes": 2, "uniform_error_limit_pct": 5
+  },
+  "P130": {
+    "pilot": "Reed contact rainfall logger, two-rate freshwater bench volumes",
+    "collector_d_mm": 200, "mm_per_tip": 0.254, "end_depth_mm": 20,
+    "equivalent_rate_mm_per_hour": [30, 120], "start_utc": "2026-11-19T02:00:00+00:00",
+    "bounce_after_ms": [0, 1, 3], "candidate_lockout_ms": 20,
+    "control_lockout_ms": 10000, "overcount_control_ms": 0, "max_error_pct": 5
+  },
+  "P138": {
+    "pilot": "Straight reference flume, synthetic dry-start pulse replay for a spot-velocity wand",
+    "reference_m_s": [0.22, 0.45, 0.8], "below_threshold_m_s": [0.04, 0.1, 0.15],
+    "stall_threshold_m_s": 0.16, "slip_intercept_m_s": 0.14,
+    "gain_hz_per_m_s": 25, "gain_tolerance_pct": 2, "gate_time_s": 20,
+    "max_error_m_s": 0.03, "max_repeatability_range_m_s": 0.03
+  },
+  "P140": {
+    "pilot": "Two inert size-coupon trials for a submerged lift-basket grading concept",
+    "gap_mm": [8.3, 10.3], "profile_base_mm": [7.2, 9.2],
+    "profile_pitch_mm": 2, "profile_length_mm": 15,
+    "profile_count": 100, "gap_tol_mm": 0.20, "width_jitter_mm": 0.18,
+    "candidate_yaw_deg": 8, "control_yaw_deg": 25, "min_correct_pct": 95
+  },
+  "P146": {
+    "pilot": "Four empty bench vessels, low-flow air only with branch-isolation trial",
+    "test_source_kpa": [2.3, 3.0, 3.7], "branch_coeff_lpm_per_kpa": [0.7, 0.64, 0.71, 0.67],
+    "immersed_opening_kpa": [0.8, 0.72, 0.78, 0.75],
+    "source_resistance_kpa_per_lpm": 0.08, "control_resistance_kpa_per_lpm": 0.90,
+    "instrument_scale_error_pct": [-3, 4, 2, -4], "readout_step_lpm": 0.01,
+    "max_error_pct": 10, "max_outlet_change_pct": 10
+  }
+}

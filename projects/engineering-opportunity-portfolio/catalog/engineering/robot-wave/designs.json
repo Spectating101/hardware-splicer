@@ -1,0 +1,14 @@
+{
+  "P181": {"name":"Robot teaching conveyor","length":300,"belt_width":45,"roller_radius":10,"speeds":[40,80,120],"brake_mm_s2":400,"delay_s":0.08,"sensor_x":240,"old_sensor_x":268,"edge_buffer":18,"article_mass_g":80},
+  "P182": {"name":"Compliant puck singulator","chute_width":32,"min_diameter":24,"max_diameter":27,"min_thick":6.8,"max_thick":8.1,"compression":0.10,"gate":9.2,"old_gate":13.5,"gap_error":0.35,"frame_width":64},
+  "P183": {"name":"Chute colour sorting head","speed":100,"read_x":25,"gate_x":55,"old_gate_x":37,"gate_time":0.135,"sensing_time":0.035,"classes":{"red":[160,42,34],"green":[43,157,57],"blue":[41,68,171]},"ref_dark":[6,7,6],"ambient_levels":[15,55],"uncertainty":8},
+  "P184": {"name":"Teaching robot odometry pod","wheel_diameter":48,"assumed_rolling_mm_per_turn":149.3,"encoder_counts":240,"travel_mm":2000,"floors":{"smooth":0.002,"mat":0.006,"jointed":0.012},"error_limit_pct":2.0},
+  "P185": {"name":"Short-stroke gate pusher","guide_travel":45,"limit_x":37,"old_limit_x":42,"speed":45,"latency_s":0.04,"decel_mm_s2":320,"switch_uncertainty":0.45,"home_switch_x":3,"hard_stop_margin":1},
+  "P186": {"name":"Line-track teaching cart","pitch":6,"sensors":7,"line_width":12,"signal_floor":0.09,"light_factors":[0.45,1.0,1.3],"offsets":[-11,-8,-5,-2,0,2,5,8,11],"track_width":280,"track_height":170},
+  "P187": {"name":"Machine vision calibration board","cols":7,"rows":5,"square_mm":24,"marker_mm":18,"px_per_mm":8,"border_mm":12,"pitch_error_limit_mm":0.15},
+  "P188": {"name":"Camera calibration target tripod cradle","board_width":192,"board_min_thick":3,"board_max_thick":6,"jaw_max_gap":6.8,"old_gap":5.8,"gap_error":0.35,"board_mass":0.28,"cg_from_pivot":72,"pivot_radius":16,"friction":0.25,"clamp_N":95,"factor":1.7},
+  "P189": {"name":"Pan-tilt inspection camera head","pcb_width":25,"pcb_height":24,"depth":11.5,"tilt_limit_deg":60,"old_pivot_height":15,"pivot_height":21,"frame_clearance":2,"harness_loop":3,"angle_error_deg":1.2},
+  "P190": {"name":"Robot contact bumper strip","length":100,"switch_span":80,"contact_force_N":2,"spring_N_per_mm":1.2,"trigger_mm":0.65,"old_trigger_mm":1.05,"switch_tolerance_mm":0.12,"overtravel_stop_mm":2.0},
+  "P191": {"name":"Bolt-on robot bumper corner set","rail_mm":20,"leg_length":52,"plate_thickness":4,"hole_diameter":5.5,"hole_pitch_from_corner":[19,38],"washer_diameter":10,"pad_start":45,"old_pad_start":41,"pad_position_error":0.8},
+  "P192": {"name":"Vacuum picking head for a teaching arm","cup_mm":16,"old_cup_mm":12,"vacuum_kpa":20,"seal_efficiency":0.55,"coupon_mass_g":50,"acceleration":2,"safety_factor":3,"pressure_sample_s":0.02,"vent_tau_s":0.08,"fixture_throat":20}
+}

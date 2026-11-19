@@ -1,0 +1,17 @@
+{
+  "pilot": "Tainan nursery, one straight 12 by 6 brassica plug tray",
+  "metrics": {
+    "candidate": {
+      "holes": 72,
+      "ideal_sealed_force_ratio": 4.81,
+      "seed_width_margin_mm": 0.25,
+      "residual_location_budget_mm": 1.646
+    },
+    "control": {
+      "holes": 72,
+      "ideal_sealed_force_ratio": 1.64,
+      "seed_width_margin_mm": 0.5,
+      "residual_location_budget_mm": 1.646
+    }
+  }
+}

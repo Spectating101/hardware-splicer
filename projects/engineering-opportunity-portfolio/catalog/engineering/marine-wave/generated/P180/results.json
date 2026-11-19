@@ -1,0 +1,25 @@
+{
+  "pilot": "Tank wall with assumed 22\u201348 mm rims and Standard Fathom tether",
+  "metrics": {
+    "candidate": {
+      "angles": 9,
+      "clamp_fit_mm": [
+        21,
+        53
+      ],
+      "min_bend_diameter_mm": 82.5,
+      "min_angle_reserve_deg": 3.0,
+      "min_groove_clearance_mm": 2.2
+    },
+    "control": {
+      "angles": 9,
+      "clamp_fit_mm": [
+        21,
+        53
+      ],
+      "min_bend_diameter_mm": 42.5,
+      "min_angle_reserve_deg": 3.0,
+      "min_groove_clearance_mm": 2.2
+    }
+  }
+}

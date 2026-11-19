@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="280mm" height="360mm" viewBox="0 0 280 360">
+  <title>P018 baseline | full-size study patterns</title>
+  <rect id="scale" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x="8" y="8" width="20" height="10" />
+  <text id="scale-label" data-operation="engrave" fill="#333333" stroke="none" stroke-width="0.17" x="9" y="14" font-size="2.6" font-family="sans-serif">20 × 10 mm</text>
+  <circle id="deck" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" cx="140" cy="155" r="130" />
+  <circle id="safe-cog-zone" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" cx="140" cy="155" r="100" />
+  <circle id="host-foot-0" data-operation="reference" fill="none" stroke="#2475a9" stroke-width="0.17" cx="62" cy="77" r="3" />
+  <circle id="host-foot-1" data-operation="reference" fill="none" stroke="#2475a9" stroke-width="0.17" cx="218" cy="77" r="3" />
+  <circle id="host-foot-2" data-operation="reference" fill="none" stroke="#2475a9" stroke-width="0.17" cx="218" cy="233" r="3" />
+  <circle id="host-foot-3" data-operation="reference" fill="none" stroke="#2475a9" stroke-width="0.17" cx="62" cy="233" r="3" />
+  <circle id="deck-pilot" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" cx="140" cy="155" r="4.25" />
+  <circle id="deck-key" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" cx="158" cy="155" r="2.75" />
+  <circle id="hub-pilot" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" cx="140" cy="320" r="4.25" />
+  <circle id="hub-key" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" cx="158" cy="320" r="2.75" />
+  <rect id="hub-blank" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" x="108" y="301" width="64" height="38" />
+</svg>

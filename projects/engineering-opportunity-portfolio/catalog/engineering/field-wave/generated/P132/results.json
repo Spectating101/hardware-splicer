@@ -1,0 +1,15 @@
+{
+  "pilot": "Taichung extension practice plot, 40 mm ID by 75 mm long removable core sleeve",
+  "metrics": {
+    "candidate": {
+      "min_diametral_ejector_clearance_mm": 0.6,
+      "euler_critical_force_n": 1881.2,
+      "euler_load_ratio": 15.68
+    },
+    "control": {
+      "min_diametral_ejector_clearance_mm": 0.6,
+      "euler_critical_force_n": 111.7,
+      "euler_load_ratio": 0.93
+    }
+  }
+}

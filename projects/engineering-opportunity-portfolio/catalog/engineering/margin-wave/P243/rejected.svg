@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="291mm" height="220mm" viewBox="0 0 291 220">
+  <title>Spline-guided leather groove offset coupon</title>
+  <style>text{font:4px sans-serif;fill:#18323a} .part,.dim,.test{fill:none;stroke:#22424a;stroke-width:.4}.part{fill:#dfebeb;fill-opacity:.4}.dim{stroke:#13746a}.test{stroke:#a54b25;stroke-dasharray:2 1}</style>
+  <circle id="roller-0-0-0" class="part" cx="35.0" cy="70.0" r="3.0" />
+  <circle id="roller-0-0-1" class="part" cx="53.0" cy="70.0" r="3.0" />
+  <path id="curve-edge-0-0" class="test" d="M 35.0 67 A 36 36 0 0 1 53.0 67" />
+  <line id="chord-0-0" class="dim" x1="35.0" y1="67" x2="53.0" y2="67" />
+  <line id="curve-datum-0-0" class="test" x1="44" y1="67" x2="44" y2="65.85685" />
+  <circle id="tool-0-0" class="dim" cx="44" cy="64" r="0.55" />
+  <circle id="witness-0-0" class="test" cx="44" cy="62.85685" r="0.55" />
+  <text x="18" y="53">R36   outside guide</text>
+  <circle id="roller-0-1-0" class="part" cx="35.0" cy="174.0" r="3.0" />
+  <circle id="roller-0-1-1" class="part" cx="53.0" cy="174.0" r="3.0" />
+  <path id="curve-edge-0-1" class="test" d="M 35.0 171 A 36 36 0 0 1 53.0 171" />
+  <line id="chord-0-1" class="dim" x1="35.0" y1="171" x2="53.0" y2="171" />
+  <line id="curve-datum-0-1" class="test" x1="44" y1="171" x2="44" y2="169.85685" />
+  <circle id="tool-0-1" class="dim" cx="44" cy="174" r="0.55" />
+  <circle id="witness-0-1" class="test" cx="44" cy="172.85685" r="0.55" />
+  <text x="18" y="157">R36   inside guide</text>
+  <circle id="roller-1-0-0" class="part" cx="181.0" cy="70.0" r="3.0" />
+  <circle id="roller-1-0-1" class="part" cx="199.0" cy="70.0" r="3.0" />
+  <path id="curve-edge-1-0" class="test" d="M 181.0 67 A 80 80 0 0 1 199.0 67" />
+  <line id="chord-1-0" class="dim" x1="181.0" y1="67" x2="199.0" y2="67" />
+  <line id="curve-datum-1-0" class="test" x1="190" y1="67" x2="190" y2="66.492138" />
+  <circle id="tool-1-0" class="dim" cx="190" cy="64" r="0.55" />
+  <circle id="witness-1-0" class="test" cx="190" cy="63.492138" r="0.55" />
+  <text x="164" y="53">R80   outside guide</text>
+  <circle id="roller-1-1-0" class="part" cx="181.0" cy="174.0" r="3.0" />
+  <circle id="roller-1-1-1" class="part" cx="199.0" cy="174.0" r="3.0" />
+  <path id="curve-edge-1-1" class="test" d="M 181.0 171 A 80 80 0 0 1 199.0 171" />
+  <line id="chord-1-1" class="dim" x1="181.0" y1="171" x2="199.0" y2="171" />
+  <line id="curve-datum-1-1" class="test" x1="190" y1="171" x2="190" y2="170.492138" />
+  <circle id="tool-1-1" class="dim" cx="190" cy="174" r="0.55" />
+  <circle id="witness-1-1" class="test" cx="190" cy="173.492138" r="0.55" />
+  <text x="164" y="157">R80   inside guide</text>
+  <text x="18" y="192">Guide wheel pitch 18; nominal grooving offset 3; verify with blunt witness tip.</text>
+  <text x="18" y="203">Use two rollers on the reference edge and lock the offset at the center of their chord.</text>
+</svg>

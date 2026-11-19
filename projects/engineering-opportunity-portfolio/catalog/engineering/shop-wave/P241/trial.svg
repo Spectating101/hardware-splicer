@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="284mm" height="444mm" viewBox="0 0 284 444">
+  <title>P241 trial shop drawing, millimetres</title>
+  <style>text{font:4px sans-serif;fill:#162930} .heading{font:bold 5px sans-serif}.part,.bore,.guide,.limit{fill:none;stroke:#223842;stroke-width:.38}.bore{stroke:#00645c}.guide{stroke:#964314;stroke-dasharray:2 1}.limit{stroke:#a1384e;stroke-dasharray:1 1}.part{fill:#e6eef0;fill-opacity:.28}</style>
+  <g data-view="wet-0" transform="translate(12 5)">
+    <text x="0" y="4" class="heading">Roller section at 2 mm edge slot</text>
+    <g transform="translate(0 10)">
+      <polygon id="tray-0" class="part" points="0,35 3,35 3,65 81,65 81,35 84,35 84,68 0,68" />
+      <line id="dye-0" class="guide" x1="3" y1="57" x2="81" y2="57" />
+      <circle id="roller-0" class="part" cx="42" cy="41" r="18" />
+      <circle id="axle-0" class="bore" cx="42" cy="41" r="4" />
+      <circle id="lifted-0" class="limit" cx="42" cy="15" r="18" />
+    </g>
+    <text x="0" y="85">Roller Ø36; bath fill 8; cleaning lift 26</text>
+  </g>
+  <g data-view="wet-1" transform="translate(12 111)">
+    <text x="0" y="4" class="heading">Roller section at 3.5 mm edge slot</text>
+    <g transform="translate(0 10)">
+      <polygon id="tray-1" class="part" points="0,35 3,35 3,65 81,65 81,35 84,35 84,68 0,68" />
+      <line id="dye-1" class="guide" x1="3" y1="57" x2="81" y2="57" />
+      <circle id="roller-1" class="part" cx="42" cy="41" r="18" />
+      <circle id="axle-1" class="bore" cx="42" cy="41" r="4" />
+      <circle id="lifted-1" class="limit" cx="42" cy="15" r="18" />
+    </g>
+    <text x="0" y="85">Roller Ø36; bath fill 8; cleaning lift 26</text>
+  </g>
+  <g data-view="wet-2" transform="translate(12 217)">
+    <text x="0" y="4" class="heading">Roller section at 5 mm edge slot</text>
+    <g transform="translate(0 10)">
+      <polygon id="tray-2" class="part" points="0,35 3,35 3,65 81,65 81,35 84,35 84,68 0,68" />
+      <line id="dye-2" class="guide" x1="3" y1="57" x2="81" y2="57" />
+      <circle id="roller-2" class="part" cx="42" cy="41" r="18" />
+      <circle id="axle-2" class="bore" cx="42" cy="41" r="4" />
+      <circle id="lifted-2" class="limit" cx="42" cy="15" r="18" />
+    </g>
+    <text x="0" y="85">Roller Ø36; bath fill 8; cleaning lift 26</text>
+  </g>
+  <g data-view="axle" transform="translate(12 323)">
+    <text x="0" y="4" class="heading">Face width, open bearing slots and top gap guide</text>
+    <g transform="translate(0 10)">
+      <rect id="face" class="part" x="30" y="25" width="24" height="36" />
+      <rect id="shaft" class="part" x="15" y="39" width="54" height="8" />
+      <line id="slot-edge-0-left" class="guide" x1="17.5" y1="12" x2="17.5" y2="43" />
+      <line id="slot-edge-0-right" class="guide" x1="26.5" y1="12" x2="26.5" y2="43" />
+      <line id="slot-edge-1-left" class="guide" x1="57.5" y1="12" x2="57.5" y2="43" />
+      <line id="slot-edge-1-right" class="guide" x1="66.5" y1="12" x2="66.5" y2="43" />
+      <rect id="edge-gap-0" class="guide" x="30" y="77" width="2" height="12" />
+      <rect id="edge-gap-1" class="guide" x="60" y="77" width="3.5" height="12" />
+      <rect id="edge-gap-2" class="guide" x="90" y="77" width="5" height="12" />
+    </g>
+    <text x="0" y="99">Roller face 24; open slots 9; replaceable guide gaps [2, 3.5, 5]</text>
+  </g>
+</svg>

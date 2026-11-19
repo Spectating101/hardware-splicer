@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="314mm" height="1090mm" viewBox="0 0 314 1090">
+  <title>P236 trial shop drawing, millimetres</title>
+  <style>text{font:4px sans-serif;fill:#162930} .heading{font:bold 5px sans-serif}.part,.bore,.guide,.limit{fill:none;stroke:#223842;stroke-width:.38}.bore{stroke:#00645c}.guide{stroke:#964314;stroke-dasharray:2 1}.limit{stroke:#a1384e;stroke-dasharray:1 1}.part{fill:#e6eef0;fill-opacity:.28}</style>
+  <g data-view="tilt-0" transform="translate(12 5)">
+    <text x="0" y="4" class="heading">End assembly at -16°</text>
+    <g transform="translate(0 10)">
+      <rect id="base-0" class="part" x="0" y="260" width="290" height="16" />
+      <circle id="pivot-0" class="bore" cx="145" cy="176" r="4" />
+      <circle id="stop-0" class="bore" cx="188.63901" cy="222.72227" r="3" />
+      <polygon id="rocker-0" class="part" points="84.82275,189.95343 188.63901,219.72227 191.94666,208.18713 88.1304,178.41829" />
+      <polygon id="carrier-0" class="part" points="116.96825,186.68741 163.10881,199.91801 168.07028,182.6153 121.92972,169.3847" />
+      <polygon id="stack-0" class="part" points="127.69729,171.03853 162.30271,180.96147 203.09704,38.69474 168.49162,28.7718" />
+      <polygon id="near-jaw-0" class="part" points="118.08467,168.28215 127.69729,171.03853 160.2225,57.60965 150.60988,54.85327" />
+      <polygon id="far-jaw-0" class="part" points="162.30271,180.96147 171.91533,183.71785 204.44054,70.28897 194.82792,67.53259" />
+    </g>
+    <text x="0" y="293">Pivot axis 84 above deck; stack 36 × 148; free leaves 30</text>
+  </g>
+  <g data-view="tilt-1" transform="translate(12 319)">
+    <text x="0" y="4" class="heading">End assembly at +0°</text>
+    <g transform="translate(0 10)">
+      <rect id="base-1" class="part" x="0" y="260" width="290" height="16" />
+      <circle id="pivot-1" class="bore" cx="145" cy="176" r="4" />
+      <polygon id="rocker-1" class="part" points="91,206 199,206 199,194 91,194" />
+      <polygon id="carrier-1" class="part" points="121,194 169,194 169,176 121,176" />
+      <polygon id="stack-1" class="part" points="127,176 163,176 163,28 127,28" />
+      <polygon id="near-jaw-1" class="part" points="117,176 127,176 127,58 117,58" />
+      <polygon id="far-jaw-1" class="part" points="163,176 173,176 173,58 163,58" />
+    </g>
+    <text x="0" y="293">Pivot axis 84 above deck; stack 36 × 148; free leaves 30</text>
+  </g>
+  <g data-view="tilt-2" transform="translate(12 633)">
+    <text x="0" y="4" class="heading">End assembly at +16°</text>
+    <g transform="translate(0 10)">
+      <rect id="base-2" class="part" x="0" y="260" width="290" height="16" />
+      <circle id="pivot-2" class="bore" cx="145" cy="176" r="4" />
+      <circle id="stop-2" class="bore" cx="101.36099" cy="222.72227" r="3" />
+      <polygon id="rocker-2" class="part" points="101.36099,219.72227 205.17725,189.95343 201.8696,178.41829 98.05334,208.18713" />
+      <polygon id="carrier-2" class="part" points="126.89119,199.91801 173.03175,186.68741 168.07028,169.3847 121.92972,182.6153" />
+      <polygon id="stack-2" class="part" points="127.69729,180.96147 162.30271,171.03853 121.50838,28.7718 86.90296,38.69474" />
+      <polygon id="near-jaw-2" class="part" points="118.08467,183.71785 127.69729,180.96147 95.17208,67.53259 85.55946,70.28897" />
+      <polygon id="far-jaw-2" class="part" points="162.30271,171.03853 171.91533,168.28215 139.39012,54.85327 129.7775,57.60965" />
+    </g>
+    <text x="0" y="293">Pivot axis 84 above deck; stack 36 × 148; free leaves 30</text>
+  </g>
+  <g data-view="end-plate" transform="translate(12 947)">
+    <text x="0" y="4" class="heading">End plate blank and drill coordinates</text>
+    <g transform="translate(0 10)">
+      <rect id="end-cheek" class="part" x="79" y="0" width="132" height="98" />
+      <circle id="pivot-bore" class="bore" cx="145" cy="8" r="4.2" />
+      <circle id="drill-stop-0" class="bore" cx="188.63901" cy="54.72227" r="3" />
+      <circle id="drill-stop-1" class="bore" cx="101.36099" cy="54.72227" r="3" />
+    </g>
+    <text x="0" y="123">Plate thickness 12; pivot Ø8.4; stop pins Ø6</text>
+  </g>
+</svg>

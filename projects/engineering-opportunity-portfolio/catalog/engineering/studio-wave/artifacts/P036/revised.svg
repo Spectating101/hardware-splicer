@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="235mm" height="285mm" viewBox="0 0 235 285">
+  <title>P036 revised · full-size proof coupon</title>
+  <rect id="scale" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="10" y="6" width="20" height="10" />
+  <rect id="mount-blank" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="20" y="46" width="98" height="164" />
+  <line id="axis" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x1="69" y1="55" x2="69" y2="199" />
+  <line id="travel-low" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x1="55" y1="74" x2="83" y2="74" />
+  <line id="travel-high" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x1="55" y1="174" x2="83" y2="174" />
+  <circle id="slot-mount-0" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="38" cy="58" r="3.3" />
+  <circle id="slot-mount-1" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="100" cy="58" r="3.3" />
+  <circle id="slot-mount-2" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="38" cy="198" r="3.3" />
+  <circle id="slot-mount-3" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="100" cy="198" r="3.3" />
+</svg>

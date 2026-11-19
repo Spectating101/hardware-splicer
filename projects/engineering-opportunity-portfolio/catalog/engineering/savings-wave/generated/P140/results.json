@@ -1,0 +1,25 @@
+{
+  "pilot": "Two inert size-coupon trials for a submerged lift-basket grading concept",
+  "metrics": {
+    "guided": {
+      "8.3": {
+        "inert_profiles": 100,
+        "correct_pct": 100.0
+      },
+      "10.3": {
+        "inert_profiles": 100,
+        "correct_pct": 100.0
+      }
+    },
+    "unguided-control": {
+      "8.3": {
+        "inert_profiles": 100,
+        "correct_pct": 83.0
+      },
+      "10.3": {
+        "inert_profiles": 100,
+        "correct_pct": 83.0
+      }
+    }
+  }
+}

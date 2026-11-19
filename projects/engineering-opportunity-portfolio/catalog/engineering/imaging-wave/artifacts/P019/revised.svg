@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="294mm" height="1076mm" viewBox="0 0 294 1076">
+  <title>P019 revised | full-size study patterns</title>
+  <rect id="scale" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x="8" y="8" width="20" height="10" />
+  <text id="scale-label" data-operation="engrave" fill="#333333" stroke="none" stroke-width="0.17" x="9" y="14" font-size="2.6" font-family="sans-serif">20 × 10 mm</text>
+  <rect id="floor" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" x="12" y="24" width="270" height="190" />
+  <rect id="back" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" x="12" y="224" width="270" height="190" />
+  <rect id="side-0-inner" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" x="12" y="424" width="90" height="190" />
+  <rect id="side-0-outer" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" x="106" y="424" width="90" height="190" />
+  <line id="hinge-offset-0" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="19" y1="427" x2="19" y2="611" />
+  <rect id="side-1-inner" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" x="12" y="624" width="90" height="190" />
+  <rect id="side-1-outer" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" x="106" y="624" width="90" height="190" />
+  <line id="hinge-offset-1" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="19" y1="627" x2="19" y2="811" />
+  <rect id="top-diffuser" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" x="12" y="824" width="270" height="190" />
+</svg>

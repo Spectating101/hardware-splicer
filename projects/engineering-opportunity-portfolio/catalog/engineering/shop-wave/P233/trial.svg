@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="334mm" height="600mm" viewBox="0 0 334 600">
+  <title>P233 trial shop drawing, millimetres</title>
+  <style>text{font:4px sans-serif;fill:#162930} .heading{font:bold 5px sans-serif}.part,.bore,.guide,.limit{fill:none;stroke:#223842;stroke-width:.38}.bore{stroke:#00645c}.guide{stroke:#964314;stroke-dasharray:2 1}.limit{stroke:#a1384e;stroke-dasharray:1 1}.part{fill:#e6eef0;fill-opacity:.28}</style>
+  <g data-view="plan" transform="translate(12 5)">
+    <text x="0" y="4" class="heading">Plan of platen, screws and rotating handles</text>
+    <g transform="translate(0 10)">
+      <rect id="frame" class="part" x="0" y="0" width="310" height="180" />
+      <rect id="working-platen" class="part" x="40" y="10" width="230" height="160" />
+      <circle id="rod-bore-0" class="bore" cx="20" cy="90" r="5.3" />
+      <circle id="handle-envelope-0" class="limit" cx="20" cy="90" r="15" />
+      <circle id="rod-bore-1" class="bore" cx="290" cy="90" r="5.3" />
+      <circle id="handle-envelope-1" class="limit" cx="290" cy="90" r="15" />
+    </g>
+    <text x="0" y="198">Frame 310 × 180; flat caul face 230 × 160; handles Ø30</text>
+  </g>
+  <g data-view="gap-0" transform="translate(12 223)">
+    <text x="0" y="4" class="heading">Screw section at 10 mm opening</text>
+    <g transform="translate(0 10)">
+      <rect id="sleeve-0-0" class="part" x="10" y="52" width="20" height="20" />
+      <rect id="thread-0-0" class="guide" x="15" y="10" width="10" height="96" />
+      <rect id="sleeve-0-1" class="part" x="280" y="52" width="20" height="20" />
+      <rect id="thread-0-1" class="guide" x="285" y="10" width="10" height="96" />
+      <rect id="upper-0" class="part" x="40" y="72" width="230" height="24" />
+      <rect id="book-0" class="guide" x="45" y="96" width="220" height="10" />
+      <rect id="lower-0" class="part" x="40" y="106" width="230" height="24" />
+    </g>
+    <text x="0" y="146">Cauls 24 thick; threaded collar 20; usable thread 96</text>
+  </g>
+  <g data-view="gap-1" transform="translate(12 389)">
+    <text x="0" y="4" class="heading">Screw section at 55 mm opening</text>
+    <g transform="translate(0 10)">
+      <rect id="sleeve-1-0" class="part" x="10" y="52" width="20" height="20" />
+      <rect id="thread-1-0" class="guide" x="15" y="55" width="10" height="96" />
+      <rect id="sleeve-1-1" class="part" x="280" y="52" width="20" height="20" />
+      <rect id="thread-1-1" class="guide" x="285" y="55" width="10" height="96" />
+      <rect id="upper-1" class="part" x="40" y="72" width="230" height="24" />
+      <rect id="book-1" class="guide" x="45" y="96" width="220" height="55" />
+      <rect id="lower-1" class="part" x="40" y="151" width="230" height="24" />
+    </g>
+    <text x="0" y="191">Cauls 24 thick; threaded collar 20; usable thread 96</text>
+  </g>
+</svg>

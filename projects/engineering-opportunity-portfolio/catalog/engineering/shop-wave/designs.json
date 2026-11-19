@@ -1,0 +1,14 @@
+{
+  "P232": {"length": 210, "depth": 90, "fold_x": [30, 67.5, 105, 142.5, 180], "guide_y": 45, "hole_d": 2.5, "apex_gap": 4, "v_drop": 32, "guide_t": 6, "rejected": {"guide_y": 48}},
+  "P233": {"width": 310, "depth": 180, "platen_width": 230, "platen_depth": 160, "platen_t": 24, "screw_inset": 20, "rod_d": 10, "knob_radius": 15, "sleeve_t": 20, "screw_thread": 96, "clamp_gaps": [10, 55], "rejected": {"screw_inset": 33}},
+  "P234": {"width": 320, "depth": 160, "height": 285, "side": 25, "slot_start": 55, "slot_end": 265, "slot_width": 7, "key_d": 5, "washer_d": 16, "cord_sets": [[72, 120, 168, 216, 248], [95, 160, 225]], "book_width": 230, "rejected": {"slot_width": 5}},
+  "P235": {"jaw_len": 310, "jaw_t": 24, "jaw_depth": 75, "rod_inset": 18, "rod_d": 10, "book_len": 245, "block_t": 36, "spine_exposure": 16, "tool_reach": 10, "rejected": {"spine_exposure": 6}},
+  "P236": {"base_width": 290, "pivot_z": 84, "pivot_x": 145, "stack_width": 36, "stack_height": 148, "jaw_t": 10, "jaw_overlap": 118, "rocker_bottom": 30, "rocker_half_width": 54, "tilt": 16, "end_plate_t": 12, "pivot_d": 8, "stop_pin_d": 6, "rejected": {"pivot_z": 48}},
+  "P240": {"deck_width": 150, "deck_depth": 130, "press_base_width": 120, "press_base_depth": 100, "edge_rail": 18, "base_lip": 5, "shoe_throat": 6, "punch_x": 75, "punch_y": 52, "sight_width": 20, "offsets": [4, 8, 12], "fence_mount_x": [21, 129], "strip_width": 24, "rejected": {"fence_mount_x": [21, 21]}},
+  "P241": {"tray_width": 84, "tray_depth": 30, "roller_d": 36, "roller_face_width": 24, "axle_d": 8, "dye_height": 8, "axle_z": 24, "slot_width": 9, "guide_gaps": [2, 3.5, 5], "lift": 26, "rejected": {"axle_z": 27}},
+  "P246": {"track_len": 140, "track_width": 44, "shoe_width": 42, "shoe_len": 52, "blank_len": 32, "blank_height": 12, "blank_initial_t": 7, "settings": [2.5, 4, 5.5], "stroke_start": 20, "stroke_end": 67, "abrasive_start": 34, "abrasive_end": 104, "rejected": {"stroke_end": 51}},
+  "P251": {"body": 125, "radii": [12, 25, 40], "fence_t": 10, "minimum_panel": 62, "pad_r": 7, "pad_locations": [20, 49], "bearing_d": 12.5, "cutter_d": 12.5, "rejected": {"bearing_d": 16}},
+  "P261": {"disc_r": 95, "ring_radii": [52, 69, 86], "divisions": [6, 8, 12], "boss_d": 20, "receptacle_d": 20.3, "key_r": 4, "key_x": 31, "rejected": {"receptacle_d": 21.6}},
+  "P263": {"axles": [[55, 48], [103, 48]], "axle_d": 8, "crank_r": 12, "clip_r": 9, "link_len": 48, "link_width": 8, "joint_d": 4, "link_layers": [8, 18], "link_t": 4, "plate_width": 158, "plate_height": 96, "rejected": {"link_len": 51}},
+  "P264": {"width": 660, "height": 480, "rail_w": 80, "side_w": 60, "peg_d": 16, "peg_rows": [40, 440], "peg_x": [80, 170, 490, 580], "joint_x": [30, 630], "bolt_d": 8, "rejected": {"peg_x": [80, 83, 490, 580]}}
+}

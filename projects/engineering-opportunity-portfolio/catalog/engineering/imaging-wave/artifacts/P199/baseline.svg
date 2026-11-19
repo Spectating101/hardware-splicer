@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="210mm" height="410mm" viewBox="0 0 210 410">
+  <title>P199 baseline | full-size study patterns</title>
+  <rect id="scale" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x="8" y="8" width="20" height="10" />
+  <text id="scale-label" data-operation="engrave" fill="#333333" stroke="none" stroke-width="0.17" x="9" y="14" font-size="2.6" font-family="sans-serif">20 × 10 mm</text>
+  <rect id="rear-blank" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" x="47" y="21" width="116" height="88" />
+  <rect id="rear-aperture" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" x="76" y="42" width="58" height="46" />
+  <rect id="filter-blank" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" x="22.5" y="118" width="165" height="112" />
+  <rect id="filter-aperture" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" x="42.5" y="133" width="125" height="82" />
+  <rect id="filter-envelope" data-operation="reference" fill="none" stroke="#2475a9" stroke-width="0.17" x="33.245" y="123.2" width="143.51" height="101.6" />
+  <rect id="front-blank" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" x="26.5" y="240.5" width="157" height="103" />
+  <rect id="front-aperture" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" x="56" y="261" width="98" height="62" />
+  <line id="plane-0" data-operation="reference" fill="none" stroke="#2475a9" stroke-width="0.17" x1="40" y1="360" x2="40" y2="379" />
+  <line id="plane-1" data-operation="reference" fill="none" stroke="#2475a9" stroke-width="0.17" x1="62" y1="360" x2="62" y2="379" />
+  <line id="plane-2" data-operation="reference" fill="none" stroke="#2475a9" stroke-width="0.17" x1="75" y1="360" x2="75" y2="379" />
+  <line id="pupil-datum" data-operation="reference" fill="none" stroke="#2475a9" stroke-width="0.17" x1="25" y1="360" x2="25" y2="379" />
+  <rect id="top-flag" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" x="90" y="361" width="102" height="38" />
+  <line id="flag-hinge" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="90" y1="366" x2="192" y2="366" />
+</svg>

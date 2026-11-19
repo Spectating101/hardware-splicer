@@ -1,0 +1,7 @@
+{
+  "single_clearance_mm": 0.75,
+  "side_by_side_rejection_margin_mm": 11.200000000000003,
+  "double_rejection_margin_mm": 2.690000000000001,
+  "old_double_margin_mm": -1.6099999999999999,
+  "lateral_clearance_mm": 5
+}
