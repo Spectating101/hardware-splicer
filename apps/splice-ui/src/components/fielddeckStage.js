@@ -8,10 +8,10 @@ import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment
 import { HorizontalBlurShader } from "three/examples/jsm/shaders/HorizontalBlurShader.js";
 import { VerticalBlurShader } from "three/examples/jsm/shaders/VerticalBlurShader.js";
 import { fielddeckSceneUrl } from "../api.js";
-import { classifyPart, DEFAULT_EXPLODE, explodeGroupOffsets, FIELDDECK_NARROW, placeCallouts, rowForNode, TOUR } from "./fielddeckLogic.js";
+import { classifyPart, DEFAULT_EXPLODE, explodeGroupOffsets, FIELDDECK_NARROW, placeCallouts, formatEvidenceValue, rowForNode, TOUR } from "./fielddeckLogic.js";
 
 const COLORS = {
-  custom: 0xd8ccb6, vendor_step: 0x94a6b2, envelope: 0x94a6b2,
+  custom: 0xd8ccb6, vendor_step: 0x8e979e, envelope: 0xa5aeb5,
   unknown: 0x9097a0, proxy: 0xa6a098, changed: 0xe0a040, added: 0x2dd4bf,
   removed: 0xf17e70,
 };
@@ -21,6 +21,20 @@ const VIEW = new THREE.Vector3(8.2, -9.6, 9.1).normalize();
 const clamp = (n) => Math.min(1, Math.max(0, n));
 const outCubic = (t) => 1 - (1 - t) ** 3;
 const inOutCubic = (t) => t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2;
+const FACE_UP = new THREE.Vector3(0, 1, 0);
+const introEase = (x) => {
+  if (x === 0 || x === 1) return x;
+  // Evaluate the timing curve by solving its X coordinate before evaluating Y.
+  let lo = 0;
+  let hi = 1;
+  for (let i = 0; i < 16; i++) {
+    const t = (lo + hi) / 2;
+    const curveX = 3 * (1 - t) ** 2 * t * 0.22 + 3 * (1 - t) * t ** 2 * 0.36 + t ** 3;
+    if (curveX < x) lo = t;
+    else hi = t;
+  }
+  return 1 - (1 - (lo + hi) / 2) ** 3;
+};
 const damped = (t) => (1 - (1 + 7 * t) * Math.exp(-7 * t)) / (1 - 8 * Math.exp(-7));
 
 async function request(url, type, signal) {
@@ -67,7 +81,7 @@ export function disposeFielddeck(assets) {
 
 function solidMaterial(basis) {
   return new THREE.MeshStandardMaterial({
-    color: COLORS[basis], metalness: 0, roughness: basis === "vendor_step" ? 0.78 : 0.84,
+    color: COLORS[basis], metalness: 0, roughness: basis === "vendor_step" ? 0.82 : 0.84,
     polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1,
   });
 }
@@ -99,7 +113,7 @@ function stylePart(entry, compare, weight, ghost, accent) {
   const dimming = row.delta === "unchanged" ? compare : 0;
   const dim = 1 - dimming * 0.6;
   fill.color.setHex(ghost ? COLORS.removed : COLORS[basis]);
-  fill.opacity = weight * dim * (ghost ? 0.035 : basis === "envelope" ? 0.06 : 0);
+  fill.opacity = weight * (basis === "envelope" && !ghost ? 0.06 : 0);
   if (solid) {
     solid.color.copy(baseColor).lerp(mutedColor, dimming);
     solid.opacity = weight;
@@ -111,20 +125,21 @@ function stylePart(entry, compare, weight, ghost, accent) {
     solid.depthWrite = weight > 0.55;
   }
 
-  const variant = ghost ? edge.ghost : edge.diff && accent > 0 ? edge.diff : edge.base;
+  const variant = ghost ? edge.ghost : basis !== "envelope" && edge.diff && accent > 0 ? edge.diff : edge.base;
   if (variant === edge.diff) variant.color.setHex(COLORS[basis]).lerp(entry.accentColor, accent);
   const baseAlpha = outline ? 0.82 : basis === "custom" ? 0.32 : 0.48;
-  variant.opacity = weight * dim * (ghost ? 1 : THREE.MathUtils.lerp(baseAlpha, 1, accent));
+  variant.opacity = weight * (basis === "envelope" || ghost ? 1 : dim * THREE.MathUtils.lerp(baseAlpha, 1, accent));
 
   for (const mesh of surface) {
     mesh.material = translucent ? fill : solid;
-    mesh.visible = basis !== "unknown" || ghost;
+    mesh.visible = basis !== "unknown" && !ghost;
     mesh.castShadow = !translucent && weight >= 0.49;
     mesh.receiveShadow = !translucent;
     if (mesh.castShadow) mesh.layers.enable(CONTACT_LAYER);
     else mesh.layers.disable(CONTACT_LAYER);
   }
   lines.forEach((line) => { line.material = variant; });
+  return variant;
 }
 
 function makeEntries(assets, index, scene, resources) {
@@ -155,17 +170,16 @@ function makeEntries(assets, index, scene, resources) {
         const { basis, outline } = classifyPart(row.part);
         const group = new THREE.Group();
         const vector = new THREE.Vector3();
-        const pattern = basis === "envelope" ? [4, 2.5] : basis === "unknown" ? [0.9, 2.8] : null;
+        const pattern = basis === "envelope" ? [4, 3] : basis === "unknown" ? [0.9, 2.8] : null;
         const solid = outline ? null : own(solidMaterial(basis));
         const baseColor = new THREE.Color(COLORS[basis]);
         const gray = baseColor.r * 0.2126 + baseColor.g * 0.7152 + baseColor.b * 0.0722;
         const mutedColor = baseColor.clone().lerp(new THREE.Color().setRGB(gray, gray, gray), 0.65).multiplyScalar(0.4);
         const fill = own(new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false }));
         const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
-        if (basis === "envelope") applyHatch(fill, 8, pixelRatio);
         if (basis === "proxy") applyHatch(solid, 8, pixelRatio);
         entry = {
-          row, basis, outline, group, vector, bounds: new THREE.Box3(), hover: 0,
+          row, basis, outline, group, vector, bounds: new THREE.Box3(),
           accentColor: new THREE.Color(COLORS[row.delta]),
           style: {
             solid, baseColor, mutedColor, fill,
@@ -191,14 +205,33 @@ function makeEntries(assets, index, scene, resources) {
       style.surface.push(mesh);
       group.add(mesh);
 
-      const edges = new THREE.EdgesGeometry(geometry, 28);
-      const segments = own(new LineSegmentsGeometry());
-      segments.setPositions(edges.getAttribute("position").array);
-      edges.dispose();
-      const line = new LineSegments2(segments, style.edge.base);
-      if (style.edge.base.dashed || style.edge.ghost) line.computeLineDistances();
+      function featureEdges(threshold, material) {
+        const edges = new THREE.EdgesGeometry(geometry, threshold);
+        const segments = own(new LineSegmentsGeometry());
+        segments.setPositions(edges.getAttribute("position").array);
+        edges.dispose();
+        const line = new LineSegments2(segments, material);
+        line.computeLineDistances();
+        return line;
+      }
+
+      const line = featureEdges(row.delta === "removed" ? 40 : 28, style.edge.base);
       style.lines.push(line);
       group.add(line);
+
+      const display = row.part.part_id === "display";
+      if (display || revision === "7" && (row.delta === "changed"
+        || index.byPart.get(`5:${row.part.part_id}`)?.delta === "changed")) {
+        if (!entry.overlay) {
+          const material = own(edgeMaterial(display && revision === "5" ? COLORS.added : COLORS.removed,
+            display && revision === "5" ? null : [5, 3], 1.5));
+          const object = new THREE.Group();
+          object.visible = false;
+          entry.overlay = { object, material };
+          scene.add(object);
+        }
+        entry.overlay.object.add(featureEdges(40, entry.overlay.material));
+      }
     });
   }
   return entries;
@@ -373,7 +406,7 @@ function modelWeights(mode) {
   return { seven: mode === "7" ? 1 : 0, five: mode === "7" ? 0 : 1, compare: mode === "compare" ? 1 : 0 };
 }
 
-function layoutAnnotations(host, camera, entries, width, height, canvasTop, panels, placeLabels) {
+function layoutAnnotations(host, camera, entries, width, height, canvasTop, panels, placeLabels, displayOpacity, showDimensions) {
   const origin = host.getBoundingClientRect();
   const viewport = {
     left: Math.max(8, 8 - origin.left),
@@ -418,10 +451,63 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
     };
   }
 
+  const occupied = panels.filter((panel) => panel.getClientRects().length).map(rectFor);
   const pinRects = [];
+  const markers = [];
+  const pinLeaders = [];
   for (const node of host.querySelectorAll("[data-pin-anchor]")) {
-    position(node, centerFor(node.dataset.pinAnchor));
-    if (placeLabels && node.style.visibility === "visible") pinRects.push(rectFor(node));
+    const anchor = centerFor(node.dataset.pinAnchor);
+    const clear = (point) => point.x >= viewport.left + 12 && point.x <= viewport.right - 12
+      && point.y >= viewport.top + 12 && point.y <= viewport.bottom - 12
+      && !occupied.some((rect) => point.x > rect.left - 12 && point.x < rect.right + 12
+        && point.y > rect.top - 12 && point.y < rect.bottom + 12)
+      && markers.every((other) => Math.hypot(point.x - other.x, point.y - other.y) >= 24);
+    let point = anchor;
+    if (anchor && !clear(anchor)) {
+      const angles = [0, 1, -1, 2, -2, 3, -3, 4].map((step) => step * Math.PI / 4);
+      point = angles.map((angle) => ({ x: anchor.x + 36 * Math.cos(angle), y: anchor.y + 36 * Math.sin(angle) }))
+        .find(clear);
+      if (point) {
+        const dx = (point.x - anchor.x) / 3;
+        const dy = (point.y - anchor.y) / 3;
+        pinLeaders.push(`M${anchor.x + dx},${anchor.y + dy}l${dx},${dy}`);
+      }
+    }
+    position(node, point);
+    if (node.style.visibility === "visible") {
+      markers.push(point);
+      if (placeLabels) pinRects.push(rectFor(node));
+    }
+  }
+  host.querySelector("[data-pin-leaders]").setAttribute("d", pinLeaders.join(" "));
+
+  for (const group of host.querySelectorAll("[data-dimensions]")) {
+    const bounds = entries.get(`${group.dataset.dimensions}:part:display`)?.bounds;
+    const older = group.dataset.dimensions === "7";
+    const path = group.querySelector("path");
+    const texts = group.querySelectorAll("text");
+    group.style.visibility = "hidden";
+    if (!showDimensions || !bounds || bounds.isEmpty()) continue;
+    const { min, max } = bounds;
+    const z = max.z;
+    const corners = [project(new THREE.Vector3(min.x, older ? max.y : min.y, z)),
+      project(new THREE.Vector3(max.x, older ? max.y : min.y, z)),
+      project(new THREE.Vector3(older ? min.x : max.x, max.y, z)),
+      project(new THREE.Vector3(older ? min.x : max.x, min.y, z))];
+    if (corners.some((point) => !point)) continue;
+    const [a, b, c, d] = corners;
+    const y = (older ? Math.min(a.y, b.y) : Math.max(a.y, b.y)) + (older ? -16 : 16);
+    const x = (older ? Math.min(c.x, d.x) : Math.max(c.x, d.x)) + (older ? -16 : 16);
+    path.setAttribute("d", `M${a.x},${a.y}V${y + (older ? -4 : 4)} M${b.x},${b.y}V${y + (older ? -4 : 4)}
+      M${a.x},${y}H${b.x} M${c.x},${c.y}H${x + (older ? -4 : 4)} M${d.x},${d.y}H${x + (older ? -4 : 4)}
+      M${x},${c.y}V${d.y}`);
+    const dimension = (value) => `${formatEvidenceValue({ field: "dimension_mm", value })} · computed`;
+    texts[0].textContent = dimension(max.x - min.x);
+    texts[0].setAttribute("x", (a.x + b.x) / 2);
+    texts[0].setAttribute("y", y + (older ? -5 : 13));
+    texts[1].textContent = dimension(max.y - min.y);
+    texts[1].setAttribute("transform", `translate(${x + (older ? -5 : 13)},${(c.y + d.y) / 2}) rotate(-90)`);
+    group.style.visibility = "visible";
   }
   for (const path of host.querySelectorAll("[data-bracket]")) {
     const outline = outlineFor(boundsForKey(path.dataset.bracket), 6);
@@ -446,18 +532,26 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
     if (placeLabels && node.style.visibility === "visible") pinRects.push(rectFor(node));
   }
 
-  if (!placeLabels) return;
   const labels = [...host.querySelectorAll("[data-anchor]")];
   if (!labels.length) return;
-  const occupied = panels.filter((panel) => panel.getClientRects().length).map(rectFor);
-  const outlines = [...entries.values()].filter(({ group }) => group.visible)
-    .map(({ row }) => outlineFor(boundsForKey(row.key))).filter(Boolean);
-  const placements = placeCallouts(viewport, occupied, labels.map((node) => {
+  const outlines = placeLabels ? [...entries.keys()].map((key) => outlineFor(boundsForKey(key))).filter(Boolean) : [];
+  const model = {
+    left: Math.min(...outlines.map(({ left }) => left)),
+    right: Math.max(...outlines.map(({ right }) => right)),
+  };
+  const placements = placeLabels && placeCallouts(viewport, occupied, labels.map((node) => {
     const anchor = centerFor(node.dataset.anchor);
-    return { anchor, width: node.offsetWidth, height: node.offsetHeight, elbow: true };
-  }), [...outlines, ...pinRects]);
+    const outline = outlineFor(boundsForKey(node.dataset.anchor));
+    return {
+      anchor, model, width: node.offsetWidth, height: node.offsetHeight, elbow: true,
+      leftAnchor: outline && { ...anchor, x: outline.left },
+      rightAnchor: outline && { ...anchor, x: outline.right },
+    };
+  }), pinRects);
   for (const [i, node] of labels.entries()) {
     const line = host.querySelector(`[data-leader="${i}"]`);
+    node.style.opacity = line.style.opacity = displayOpacity;
+    if (!placements) continue;
     const placement = placements[i];
     node.style.visibility = line.style.visibility = placement ? "visible" : "hidden";
     if (!placement) continue;
@@ -513,6 +607,15 @@ export function createFielddeckStage(host, assets, index, callbacks) {
   const extended = boundsFor(all, 1).union(boundsFor(all, 0));
   const renderContact = createContactShadow(scene, renderer, extended, resources);
   const assembled = boundsFor(all, 0);
+  const grid = new THREE.GridHelper(600, 30, 0x59636e, 0x59636e);
+  grid.rotation.x = Math.PI / 2;
+  grid.position.copy(assembled.getCenter(new THREE.Vector3()));
+  grid.material.transparent = true;
+  grid.material.depthWrite = false;
+  grid.material.opacity = 0.2;
+  scene.add(grid);
+  resources.add(grid.geometry);
+  resources.add(grid.material);
   const center = assembled.getCenter(new THREE.Vector3());
   const radius = extended.getSize(new THREE.Vector3()).length() / 2;
   const key = new THREE.DirectionalLight(0xfff1e0, 2.6);
@@ -527,7 +630,7 @@ export function createFielddeckStage(host, assets, index, callbacks) {
     left: -radius, right: radius, top: radius, bottom: -radius, near: 1, far: 4 * radius,
   });
   key.shadow.camera.updateProjectionMatrix();
-  const rim = new THREE.DirectionalLight(0x9fc0ff, 1.4);
+  const rim = new THREE.DirectionalLight(0xffffff, 1.4);
   rim.position.set(5, 6, 3).normalize().multiplyScalar(radius * 2).add(center);
   rim.target.position.copy(center);
   scene.add(key, key.target, rim, rim.target);
@@ -540,7 +643,8 @@ export function createFielddeckStage(host, assets, index, callbacks) {
   controls.target.copy(center);
   controls.enableDamping = true;
   controls.dampingFactor = 0.15;
-  controls.minDistance = radius * 0.2;
+  const minimumDistance = radius * 0.2;
+  controls.minDistance = minimumDistance;
   controls.maxDistance = radius * 13;
   controls.update();
 
@@ -548,6 +652,7 @@ export function createFielddeckStage(host, assets, index, callbacks) {
   let lastConfig;
   let width = 1;
   let height = 1;
+  let baseFov = 26;
   let frameHeight = 1;
   let frameWidth = 1;
   let frameCenterX = 0;
@@ -568,6 +673,7 @@ export function createFielddeckStage(host, assets, index, callbacks) {
   let blend;
   let cameraMove;
   let latestCue;
+  let priorCamera;
   let lastHero = null;
   let firstFrame = true;
   const ray = new THREE.Raycaster();
@@ -586,7 +692,10 @@ export function createFielddeckStage(host, assets, index, callbacks) {
     const { left: originX, top: originY } = host.getBoundingClientRect();
     const upper = (phone ? bottomChrome : header).getBoundingClientRect().bottom - originY;
     const nextCanvasTop = canvas.offsetTop;
-    const lower = phone ? nextHeight + nextCanvasTop : bottomChrome.getBoundingClientRect().top - originY;
+    const lower = phone
+      ? Math.min(nextHeight + nextCanvasTop, ...[tree, inspector, legend].filter((panel) => panel.getClientRects().length)
+        .map((panel) => panel.getBoundingClientRect().top - originY))
+      : bottomChrome.getBoundingClientRect().top - originY;
     const left = phone ? 0 : Math.max(0, tree.getBoundingClientRect().right - originX);
     const right = phone ? nextWidth : Math.min(nextWidth, inspector.getBoundingClientRect().left - originX);
     const nextFrameHeight = Math.max(1, lower - upper);
@@ -606,7 +715,7 @@ export function createFielddeckStage(host, assets, index, callbacks) {
     frameCenter = nextFrameCenter;
     frameCenterX = nextFrameCenterX;
     const aspect = width / height;
-    camera.fov = mobile ? THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(13)) / aspect)) : 26;
+    baseFov = mobile ? THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(13)) / aspect)) : 26;
     camera.setViewOffset(width, height, width / 2 - frameCenterX, height / 2 - frameCenter, width, height);
     controls.enablePan = !mobile;
     controls.enableZoom = !mobile;
@@ -619,15 +728,19 @@ export function createFielddeckStage(host, assets, index, callbacks) {
   window.addEventListener("scroll", invalidateLayout, true);
   resize();
 
-  function fit(bounds, angle, horizontal) {
-    const target = bounds.getCenter(new THREE.Vector3());
-    const direction = VIEW.clone().applyAxisAngle(UP, THREE.MathUtils.degToRad(angle));
-    const right = UP.clone().cross(direction).normalize();
+  function fit(bounds, angle, horizontal, options = {}) {
+    const { target = bounds.getCenter(new THREE.Vector3()), margin, face = false,
+      direction = face ? UP.clone() : VIEW.clone().applyAxisAngle(UP, THREE.MathUtils.degToRad(angle)),
+    } = options;
+    const right = (face ? FACE_UP : UP).clone().cross(direction).normalize();
     const up = direction.clone().cross(right);
-    const tangent = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-    const horizontalFit = tangent * camera.aspect * (mobile ? horizontal : frameWidth / width * 0.92);
-    const verticalFit = tangent * Math.min(1, frameHeight / height) * 0.9;
-    if (mobile) {
+    const tangent = Math.tan(THREE.MathUtils.degToRad((face ? 12 : baseFov) / 2));
+    const usable = (size) => size > 2 * margin ? size - 2 * margin : size / 3;
+    const horizontalFit = tangent * camera.aspect * (margin === undefined
+      ? mobile ? horizontal : frameWidth / width * horizontal : usable(frameWidth) / width);
+    const verticalFit = tangent * (margin === undefined
+      ? Math.min(1, frameHeight / height) * 0.9 : usable(frameHeight) / height);
+    if (mobile && margin === undefined) {
       const sphere = bounds.getBoundingSphere(new THREE.Sphere());
       const distance = sphere.radius / Math.sin(Math.atan(Math.min(horizontalFit, verticalFit)));
       controls.maxDistance = Math.max(radius * 13, distance);
@@ -635,7 +748,7 @@ export function createFielddeckStage(host, assets, index, callbacks) {
       camera.updateProjectionMatrix();
       return { target: sphere.center, position: direction.multiplyScalar(distance).add(sphere.center) };
     }
-    let distance = controls.minDistance;
+    let distance = minimumDistance;
     for (const x of [bounds.min.x, bounds.max.x]) {
       for (const y of [bounds.min.y, bounds.max.y]) {
         for (const z of [bounds.min.z, bounds.max.z]) {
@@ -647,22 +760,39 @@ export function createFielddeckStage(host, assets, index, callbacks) {
         }
       }
     }
-    return { target, position: direction.multiplyScalar(distance).add(target) };
+    controls.maxDistance = Math.max(radius * 13, distance);
+    camera.far = controls.maxDistance + radius * 2;
+    camera.updateProjectionMatrix();
+    return { target, position: direction.clone().multiplyScalar(distance).add(target) };
   }
 
-  function assemblyPose(mode, explode, turn = mode === "compare" ? 1 : 0) {
+  const displays = all.filter(({ row }) => row.part.part_id === "display");
+  const displayBounds = boundsFor(displays, 0);
+
+  function facePose(target) {
+    return { ...fit(displayBounds, 0, 1, { target, face: true, margin: 48 }), fov: 12, up: FACE_UP };
+  }
+
+  function cablePose(direction) {
+    const endpoints = config.selectedKeys.map((key) => entries.get(key)).filter(Boolean);
+    if (config.selectedKeys.length < 2 || !endpoints.length) return null;
+    return fit(boundsFor(endpoints, config.explode), TOUR[1].angle, 1, { margin: 48, direction });
+  }
+
+  function assemblyPose(mode, explode) {
     const framed = !mobile && modeEntries[mode].length ? modeEntries[mode] : all;
-    return fit(boundsFor(framed, explode), TOUR[0].angle * turn, mobile ? 0.93 : 0.76);
+    return fit(boundsFor(framed, explode), mode === "compare" ? TOUR[0].angle : 0, mobile ? 0.93 : 0.76);
   }
 
   function tourPose(stopIndex) {
+    if (stopIndex === 1) return cablePose() ?? assemblyPose(config.mode, config.explode);
     if (mobile) return assemblyPose(config.mode, config.explode);
     const stop = TOUR[stopIndex];
     const framed = modeEntries[config.mode].length ? modeEntries[config.mode] : all;
     const targetItems = framed.filter(({ row }) => config.selectedKeys.includes(row.key)
       || stop.diff && row.delta === stop.diff);
     const bounds = boundsFor(targetItems.length ? targetItems : framed, config.explode);
-    bounds.expandByScalar(stopIndex === 1 ? 26 : 36);
+    bounds.expandByScalar(36);
     return fit(bounds, stop.angle, mobile ? 0.89 : 0.72);
   }
 
@@ -670,9 +800,25 @@ export function createFielddeckStage(host, assets, index, callbacks) {
     cameraMove = { pose, start: now, duration, ease, from: camera.position.clone(), target: controls.target.clone() };
   }
 
-  function setCamera({ position, target }, amount = 1, from = camera.position, fromTarget = controls.target) {
-    camera.position.lerpVectors(from, position, amount);
+  function setCamera({ position, target, fov = baseFov, up = UP }, amount = 1,
+    from = camera.position, fromTarget = controls.target, faceTransition) {
     controls.target.lerpVectors(fromTarget, target, amount);
+    if (faceTransition) {
+      const fromOffset = from.clone().sub(fromTarget);
+      const toOffset = position.clone().sub(target);
+      const direction = fromOffset.clone().normalize();
+      const turn = new THREE.Quaternion().setFromUnitVectors(direction, toOffset.clone().normalize());
+      direction.applyQuaternion(new THREE.Quaternion().slerp(turn, amount));
+      camera.position.copy(direction.multiplyScalar(THREE.MathUtils.lerp(fromOffset.length(), toOffset.length(), amount))
+        .add(controls.target));
+      camera.up.lerpVectors(faceTransition.up, up, amount).normalize();
+      fov = THREE.MathUtils.lerp(faceTransition.fov, fov, amount);
+    } else {
+      camera.position.lerpVectors(from, position, amount);
+      camera.up.copy(up);
+    }
+    camera.fov = fov;
+    camera.updateProjectionMatrix();
     camera.lookAt(controls.target);
   }
 
@@ -686,8 +832,7 @@ export function createFielddeckStage(host, assets, index, callbacks) {
   }
   function down(event) {
     if (event.isPrimary && event.button === 0) pressed = [event.clientX, event.clientY];
-    if (config?.heroStart != null) callbacks.onInterrupt();
-    cameraMove = null;
+    if (!cameraMove?.faceTransition) cameraMove = null;
   }
   function up(event) {
     if (!pressed || !event.isPrimary) return;
@@ -712,7 +857,7 @@ export function createFielddeckStage(host, assets, index, callbacks) {
   canvas.addEventListener("pointermove", move);
   canvas.addEventListener("pointerleave", leave);
   canvas.addEventListener("pointercancel", leave);
-  canvas.addEventListener("wheel", () => { cameraMove = null; }, { passive: true });
+  canvas.addEventListener("wheel", () => { if (!cameraMove?.faceTransition) cameraMove = null; }, { passive: true });
   for (const entry of all) {
     entry.style.surface.forEach((mesh) => { mesh.userData.fielddeckKey = entry.row.key; });
   }
@@ -723,11 +868,14 @@ export function createFielddeckStage(host, assets, index, callbacks) {
     if (!config) return;
     const tick = Math.min(50, now - previousTime);
     previousTime = now;
-    const { mode, heroStart, reduced, explode, explodeMotion, cameraCue } = config;
-    const heroElapsed = heroStart == null ? null : now - heroStart;
+    const { mode, heroStart, reduced, explode, explodeMotion, cameraCue, faceView, ghostDeltaKey } = config;
+    const heroElapsed = heroStart == null ? null : Math.max(0, now - heroStart);
+    const displayOpacity = heroElapsed === null ? 1 : clamp((heroElapsed - 850) / 250);
     let dirty = config !== lastConfig || resized || layoutDirty || heroElapsed !== null;
-    const motion = heroElapsed === null ? explodeMotion : { from: 0, to: DEFAULT_EXPLODE, start: heroStart + 400 };
-    const offsetFor = motion && motion.to > motion.from && !reduced
+    const motion = explodeMotion;
+    const offsetFor = heroElapsed !== null
+      ? () => DEFAULT_EXPLODE * introEase(clamp((heroElapsed - 250) / 600))
+      : motion && motion.to > motion.from && !reduced
       ? ({ explodeDelay }) => {
           const phase = outCubic(clamp((now - motion.start - explodeDelay) / (1100 - explodeDelay)));
           return THREE.MathUtils.lerp(motion.from, motion.to, phase);
@@ -746,40 +894,71 @@ export function createFielddeckStage(host, assets, index, callbacks) {
     const accentProgress = clamp((now - blend.start - (reduced ? 0 : 700)) / (reduced ? 100 : 180));
     dirty ||= progress < 1 || (mode === "compare" && accentProgress < 1);
 
+    const cable = config.selectedKeys.length >= 2;
     if (heroElapsed !== null) {
-      const turn = damped(clamp((heroElapsed - 4200) / 800));
-      setCamera(assemblyPose(mode, offsetFor, turn));
-    } else if (mobile && (firstFrame || resized || lastHero !== null || mode !== lastConfig.mode
-      || explode !== lastConfig.explode || explodeMotion || lastConfig.explodeMotion)) {
-      cameraMove = null;
-      setCamera(assemblyPose(mode, offsetFor));
-    } else if (cameraCue && cameraCue !== latestCue) {
-      latestCue = cameraCue;
-      moveCamera(tourPose(cameraCue.stopIndex), now, 1600, damped);
-    } else if (firstFrame || lastHero !== null) {
-      setCamera(assemblyPose(mode, offsetFor));
-    } else if (mode !== lastConfig.mode) {
-      moveCamera(assemblyPose(mode, offsetFor), now, 450, inOutCubic);
-    } else if (resized) {
-      const pose = cameraCue ? tourPose(cameraCue.stopIndex) : assemblyPose(mode, offsetFor);
-      const remaining = cameraMove && cameraMove.duration - (now - cameraMove.start);
-      moveCamera(pose, now, Math.max(240, remaining || 0), outCubic);
-    } else if (explodeMotion) {
-      const pose = assemblyPose(mode, offsetFor);
-      if (cameraMove) cameraMove.pose = pose;
-      else setCamera(pose, reduced ? 1 : 1 - Math.exp(-tick / 85));
-      dirty = true;
-    } else if (explode !== lastConfig.explode || lastConfig.explodeMotion) {
-      moveCamera(assemblyPose(mode, explode), now, 220, outCubic);
+      setCamera(assemblyPose(mode, DEFAULT_EXPLODE));
+    } else if (faceView !== Boolean(lastConfig?.faceView)) {
+      if (faceView && !priorCamera) priorCamera = { position: camera.position.clone(), target: controls.target.clone() };
+      moveCamera(faceView ? facePose(controls.target.clone()) : priorCamera, now, 240, inOutCubic);
+      cameraMove.faceTransition = { up: camera.up.clone(), fov: camera.fov };
+    } else if (faceView) {
+      if (resized) {
+        const pose = facePose(controls.target.clone());
+        if (cameraMove) cameraMove.pose = pose;
+        else setCamera(pose);
+      }
+    } else if (!cameraMove?.faceTransition) {
+      if (cable && (firstFrame || resized || mode !== lastConfig.mode || explode !== lastConfig.explode
+        || cameraCue !== latestCue || config.selectedKeys.join() !== lastConfig.selectedKeys.join())) {
+        latestCue = cameraCue;
+        cameraMove = null;
+        setCamera(cablePose() ?? assemblyPose(mode, offsetFor));
+      } else if (mobile && (firstFrame || resized || lastHero !== null || mode !== lastConfig.mode
+        || explode !== lastConfig.explode || explodeMotion || lastConfig.explodeMotion)) {
+        cameraMove = null;
+        setCamera(assemblyPose(mode, offsetFor));
+      } else if (cameraCue && cameraCue !== latestCue) {
+        latestCue = cameraCue;
+        moveCamera(tourPose(cameraCue.stopIndex), now, 1600, damped);
+      } else if (firstFrame || lastHero !== null) {
+        setCamera(assemblyPose(mode, offsetFor));
+      } else if (mode !== lastConfig.mode) {
+        moveCamera(assemblyPose(mode, offsetFor), now, 450, inOutCubic);
+      } else if (resized) {
+        const pose = cameraCue ? tourPose(cameraCue.stopIndex) : assemblyPose(mode, offsetFor);
+        const remaining = cameraMove && cameraMove.duration - (now - cameraMove.start);
+        moveCamera(pose, now, Math.max(240, remaining || 0), outCubic);
+      } else if (explodeMotion && !cable) {
+        const pose = assemblyPose(mode, offsetFor);
+        if (cameraMove) cameraMove.pose = pose;
+        else setCamera(pose, reduced ? 1 : 1 - Math.exp(-tick / 85));
+        dirty = true;
+      } else if (!cable && (explode !== lastConfig.explode || lastConfig.explodeMotion)) {
+        moveCamera(assemblyPose(mode, explode), now, 220, outCubic);
+      }
     }
+    controls.enabled = !faceView && !cameraMove?.faceTransition && heroElapsed === null;
     if (cameraMove) {
+      const { pose, ease, from, target, faceTransition } = cameraMove;
       const progress = reduced ? 1 : clamp((now - cameraMove.start) / cameraMove.duration);
-      setCamera(cameraMove.pose, cameraMove.ease(progress), cameraMove.from, cameraMove.target);
+      setCamera(pose, ease(progress), from, target, faceTransition);
       dirty = true;
-      if (progress === 1) cameraMove = null;
+      if (progress === 1) {
+        if (faceTransition && !faceView) priorCamera = null;
+        cameraMove = null;
+      }
     }
     controls.enableDamping = !reduced;
-    dirty = controls.update() || dirty;
+    controls.enablePan = !mobile && !cable;
+    controls.minDistance = minimumDistance;
+    if (controls.enabled) {
+      dirty = controls.update() || dirty;
+      if (cable && dirty) {
+        const offset = camera.position.clone().sub(controls.target);
+        const pose = cablePose(offset.clone().normalize());
+        if (pose && offset.lengthSq() < pose.position.distanceToSquared(pose.target)) setCamera(pose);
+      }
+    }
 
     if (!dirty && !wasAnimating && !pointerMoved) return;
     if (pointer && !pressed && (dirty || pointerMoved)) {
@@ -789,6 +968,15 @@ export function createFielddeckStage(host, assets, index, callbacks) {
     pointerMoved = false;
     canvas.style.cursor = hovered ? "pointer" : "grab";
 
+    camera.updateMatrixWorld();
+    function scaleDashes(material, entry, position) {
+      if (!material.dashed) return;
+      const center = entry.bounds.getCenter(new THREE.Vector3()).add(position).applyMatrix4(camera.matrixWorldInverse);
+      material.dashScale = height / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * Math.max(1, -center.z));
+    }
+    grid.visible = !faceView;
+    grid.material.opacity = 0.2 * (heroElapsed === null ? 1 : clamp(heroElapsed / 250));
+
     const pick = [];
     const block = [];
     let floor = Infinity;
@@ -796,10 +984,24 @@ export function createFielddeckStage(host, assets, index, callbacks) {
     for (const entry of all) {
       const { row, group, vector } = entry;
       const removed = row.revision === "7" && row.delta === "removed";
-      const ghost = removed && (mode === "compare" || blend.current.compare > 0 || heroElapsed >= 1600);
+      const ghost = removed && (mode === "compare" || blend.current.compare > 0);
       const weight = row.revision === "5" ? blend.current.five
-        : ghost ? Math.max(blend.current.seven, blend.current.compare) : blend.current.seven;
-      const visible = weight > 0.001;
+        : ghost ? Math.max(blend.current.seven, blend.current.compare) * displayOpacity : blend.current.seven;
+      if (entry.overlay) {
+        const { object, material } = entry.overlay;
+        object.visible = faceView ? row.part.part_id === "display" : row.key === ghostDeltaKey;
+        object.position.set(0, 0, 0);
+        if (object.visible && !faceView) {
+          // Apply the selected layer's presentation offset to both CAD transforms.
+          const selected = entries.get(config.selectedKeys[0]);
+          if (selected) object.position.copy(selected.vector).multiplyScalar(offsetFor(selected));
+        }
+        if (object.visible) {
+          material.depthTest = faceView;
+          scaleDashes(material, entry, object.position);
+        }
+      }
+      const visible = !faceView && weight > 0.001;
       const wasCasting = group.visible && entry.style.surface[0].castShadow;
       dirty ||= visible !== group.visible;
       group.visible = visible;
@@ -807,17 +1009,12 @@ export function createFielddeckStage(host, assets, index, callbacks) {
         contactDirty ||= wasCasting;
         continue;
       }
-      const hover = Number(hovered === row.key);
-      dirty ||= hover !== entry.hover;
-      const distance = reduced ? 1 : tick / 120;
-      entry.hover += Math.sign(hover - entry.hover) * Math.min(distance, Math.abs(hover - entry.hover));
-      const length = vector.length();
-      const offset = offsetFor(entry) + (length && !reduced ? 2 * outCubic(entry.hover) / length : 0);
-      nextPosition.copy(vector).multiplyScalar(offset);
+      nextPosition.copy(vector).multiplyScalar(offsetFor(entry));
       const moved = !group.position.equals(nextPosition);
       group.position.copy(nextPosition);
       const accent = (reduced ? accentProgress : outCubic(accentProgress)) * blend.current.compare;
-      stylePart(entry, blend.current.compare, weight, ghost, entry.style.edge.diff ? accent : 0);
+      const material = stylePart(entry, blend.current.compare, weight, ghost, entry.style.edge.diff ? accent : 0);
+      scaleDashes(material, entry, group.position);
       const casts = entry.style.surface[0].castShadow;
       contactDirty ||= casts !== wasCasting || casts && moved;
       if (casts) floor = Math.min(floor, entry.bounds.min.z + group.position.z);
@@ -829,6 +1026,7 @@ export function createFielddeckStage(host, assets, index, callbacks) {
 
     // A step that lands after the final animation frame still needs to draw its exact endpoint.
     if (dirty || wasAnimating) {
+      grid.position.z = Number.isFinite(floor) ? floor - 0.9 : assembled.min.z - 0.9;
       if (contactDirty) {
         renderContact(floor);
         key.shadow.needsUpdate = true;
@@ -837,7 +1035,7 @@ export function createFielddeckStage(host, assets, index, callbacks) {
       pickable = pick;
       opaque = block;
       const placeLabels = layoutDirty || resized || config !== lastConfig || !dirty || now - lastLayout > 60;
-      layoutAnnotations(host, camera, entries, width, height, canvasTop, panels, placeLabels);
+      layoutAnnotations(host, camera, entries, width, height, canvasTop, panels, placeLabels, displayOpacity, !cameraMove);
       if (placeLabels) lastLayout = now;
     }
     if (firstFrame) {

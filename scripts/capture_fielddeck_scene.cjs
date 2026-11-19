@@ -81,6 +81,11 @@ async function main() {
     await inspector.getByText(/^Vendor model ·/).waitFor();
     await capture("display-selected");
 
+    await scene.getByRole("button", { name: "Face view", exact: true }).click();
+    await capture("face-view", 900);
+    await scene.getByRole("button", { name: "Back to 3D", exact: true }).click();
+    await page.waitForTimeout(600);
+
     await scene.locator('[data-row="5:link:display-ribbon"]:visible').first().click();
     await inspector.getByText("Routing unknown", { exact: true }).waitFor();
     await scene.getByRole("button", { name: "Next stop", exact: true }).click();

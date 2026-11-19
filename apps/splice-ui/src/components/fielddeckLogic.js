@@ -123,11 +123,37 @@ export function placeCallouts(viewport, panelRects, callouts, clearSpace = []) {
   const occupied = [...panelRects, ...clearSpace];
   const leaderObstacles = panelRects.map((rect) => padRect(rect, 4));
   const center = (viewport.left + viewport.right) / 2;
-  return callouts.map(({ width, height, anchor, leftAnchor = anchor, rightAnchor = anchor, outline, elbow }) => {
+  return callouts.map(({ width, height, anchor, leftAnchor = anchor, rightAnchor = anchor, outline, elbow, model }) => {
     if (!anchor) return null;
     const maxX = viewport.right - width;
     const maxY = viewport.bottom - height;
     if (maxX < viewport.left || maxY < viewport.top) return null;
+
+    if (model) {
+      const leftSide = anchor.x < (model.left + model.right) / 2;
+      const obstacles = occupied.map((rect) => padRect(rect, 8));
+      const point = leftSide ? leftAnchor : rightAnchor;
+      if (!containsPoint(viewport, point)) return null;
+      const idealY = anchor.y - height / 2;
+      const ys = [clampTo(idealY, viewport.top, maxY),
+        ...obstacles.flatMap(({ top, bottom }) => [top - height, bottom]),
+      ].sort((a, b) => Math.abs(a - idealY) - Math.abs(b - idealY));
+      for (const gap of [40, 64, 88, 112, 140]) {
+        const left = leftSide ? model.left - gap - width : model.right + gap;
+        if (left < viewport.left || left > maxX) continue;
+        for (const top of ys) {
+          const rect = { left, top, right: left + width, bottom: top + height };
+          if (top < viewport.top || top > maxY || obstacles.some((obstacle) => overlaps(rect, obstacle))) continue;
+          const leader = leaderPath(point, rect, viewport, leaderObstacles, true);
+          const length = leader?.slice(1).reduce((sum, p, i) =>
+            sum + Math.hypot(p.x - leader[i].x, p.y - leader[i].y), 0);
+          if (!leader || length > 160) continue;
+          occupied.push(rect);
+          return { rect, leader };
+        }
+      }
+      return null;
+    }
 
     if (outline) {
       const { left, right, top, bottom } = outline;
@@ -258,17 +284,38 @@ export function selectedPartKeys(index, row) {
     .filter(Boolean);
 }
 
-export function openQuestions(scene, revision) {
-  if (!scene) return [];
-  const questions = scene.blockers.map(({ part_id, interface_id, reason }) => ({
-    key: part_id ? `${revision}:part:${part_id}` : `${revision}:link:${interface_id}`, reason,
-  }));
-  for (const link of scene.interfaces) {
-    for (const reason of link.open_checks) {
-      questions.push({ key: `${revision}:link:${link.interface_id}`, reason });
+export function openQuestions(scenes, index) {
+  const questions = new Map();
+  function add(kind, id, key, reason) {
+    const identity = JSON.stringify([kind, id, reason]);
+    if (!questions.has(identity)) questions.set(identity, { reason, number: questions.size + 1, keys: new Set() });
+    questions.get(identity).keys.add(key);
+  }
+  for (const revision of ["5", "7"]) {
+    const scene = scenes[revision];
+    if (!scene) continue;
+    for (const { part_id, node_name, interface_id, reason } of scene.blockers) {
+      if (interface_id) add("link", interface_id, `${revision}:link:${interface_id}`, reason);
+      else {
+        const part = index.byPart.get(`${revision}:${part_id}`)
+          ?? index.byNode.get(revision)?.get(node_name)?.[0];
+        const id = part_id ?? part?.part.part_id ?? node_name;
+        add("part", id, part?.key ?? `${revision}:part:${id}`, reason);
+      }
+    }
+    for (const { interface_id, open_checks } of scene.interfaces) {
+      for (const reason of open_checks) add("link", interface_id, `${revision}:link:${interface_id}`, reason);
     }
   }
-  return questions.map((question, i) => ({ ...question, number: i + 1 }));
+  return [...questions.values()];
+}
+
+export function ghostDeltaKey(index, mode, row) {
+  if (mode !== "compare" || !row?.part || row.delta !== "changed") return null;
+  const revision = row.revision === "5" ? "7" : "5";
+  const { part_id, node_name } = row.part;
+  return (index.byPart.get(`${revision}:${part_id}`)
+    ?? index.byNode.get(revision)?.get(node_name)?.[0])?.key ?? null;
 }
 
 const SHORT_NAMES = {
@@ -313,6 +360,7 @@ export function formatEvidenceValue({ field, value, state }) {
     }
     return value.map(formatNumber).join(" × ") + suffix;
   }
+  if (typeof value === "string" && Object.hasOwn(BASIS_LABELS, value)) return BASIS_LABELS[value];
   return typeof value === "object"
     ? JSON.stringify(value, (_key, item) => typeof item === "number" ? Number(formatNumber(item)) : item)
     : String(value);

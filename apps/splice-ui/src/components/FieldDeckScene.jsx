@@ -2,14 +2,14 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   BASIS_LABELS, DEFAULT_EXPLODE, DIFF_LABELS, FIELDDECK_NARROW, TOUR,
   classifyPart, evidenceCells, formatEvidenceSource, indexFielddeck, rowsForMode, selectedPartKeys,
-  evidenceLabel, openQuestions, shortPartName, toggleFielddeckSheet,
+  evidenceLabel, ghostDeltaKey, openQuestions, shortPartName, toggleFielddeckSheet,
 } from "./fielddeckLogic.js";
 import { createFielddeckStage, disposeFielddeck, loadFielddeck } from "./fielddeckStage.js";
 import "./fielddeckScene.css";
 
 const INITIAL = {
   mode: "5", explode: DEFAULT_EXPLODE, selected: null, stop: 0, cue: null,
-  hero: null, blockers: true, showRemoved: true, touring: false,
+  hero: null, faceView: false, blockers: true, touring: false,
 };
 const LEGEND = [["Shape source", BASIS_LABELS], ["Change", DIFF_LABELS]];
 const MODES = [["7", "7-inch"], ["5", "5-inch"], ["compare", "Compare"]];
@@ -36,7 +36,7 @@ export function EvidenceRows({ evidence }) {
         return (
           <div key={`${field}:${i}`} className="fd-evidence-row" data-inspector-item title={field}>
             <dt>{label}</dt>
-            {unknown ? <dd> · Unknown</dd> : <>
+            {unknown ? <dd className="fd-evidence-state">Unknown</dd> : <>
               <dd className="fd-evidence-value" data-numeric={hasNumericValue(row)}>{value}</dd>
               <dd className="fd-evidence-state">{state}</dd>
               <dd className="fd-evidence-source"><EvidenceSource source={source} /></dd>
@@ -66,18 +66,8 @@ function questionText(reason) {
   return reason.charAt(0).toUpperCase() + reason.slice(1);
 }
 
-function groupQuestions(questions) {
-  const groups = new Map();
-  for (const { key, reason, number } of questions) {
-    const id = JSON.stringify([key, reason]);
-    if (!groups.has(id)) groups.set(id, { key, reason, numbers: [] });
-    groups.get(id).numbers.push(number);
-  }
-  return [...groups.values()];
-}
-
-function QuestionNumbers({ numbers }) {
-  return <span className="fd-question-numbers">{numbers.join(", ")}</span>;
+function QuestionNumber({ number }) {
+  return <span className="fd-question-numbers">{number}</span>;
 }
 
 function Inspector({ row, index, questions, open }) {
@@ -113,14 +103,14 @@ function Inspector({ row, index, questions, open }) {
     <aside className="fd-inspector fd-panel" id="fd-inspector" aria-label="Selection details" hidden={!open}>
       <div className="fd-inspector-scroll" id="fd-inspector-content" ref={scroll} tabIndex={0}>
         {!row ? <p className="fd-empty">Select a part or interface to inspect its evidence.</p> : <>
-          <h2 data-numeric={/\d/.test(part?.label ?? link.label)}>{part?.label ?? link.label}</h2>
+          <h2>{part?.label ?? link.label}</h2>
           <p className="fd-status">{statusOf(row)}</p>
           {questions.length > 0 && <>
             <h3>Open questions</h3>
             <ul className="fd-checks">
-              {groupQuestions(questions).map(({ reason, numbers }) => (
-                <li data-inspector-item key={numbers[0]}>
-                  <QuestionNumbers numbers={numbers} />{" "}<span>{questionText(reason)}</span>
+              {questions.map(({ reason, number }) => (
+                <li data-inspector-item key={number}>
+                  <QuestionNumber number={number} />{" "}<span>{questionText(reason)}</span>
                 </li>
               ))}
             </ul>
@@ -130,7 +120,7 @@ function Inspector({ row, index, questions, open }) {
             <dl className="fd-endpoints">
               {[["A", link.from_part_id], ["B", link.to_part_id]].map(([letter, id]) => (
                 <div key={letter} data-inspector-item>
-                  <dt>{letter}</dt><dd>{nameOf(index.byPart.get(`${revision}:${id}`)) ?? id ?? "Unknown endpoint"}</dd>
+                  <dt>{letter}</dt><dd>{index.byPart.get(`${revision}:${id}`)?.part.label ?? id ?? "Unknown endpoint"}</dd>
                 </div>
               ))}
             </dl>
@@ -155,7 +145,7 @@ function PartTree({ rows, view, questions, counts, blockersOnly, selectedKeys, l
   }));
   groups.splice(3, 0,
     { kind: "interface", label: "Interfaces", items: rows.filter(({ link }) => link) },
-    { kind: "blocker", label: "Blockers", items: groupQuestions(questions) },
+    { kind: "blocker", label: "Blockers", items: questions },
   );
 
   useLayoutEffect(() => {
@@ -181,12 +171,12 @@ function PartTree({ rows, view, questions, counts, blockersOnly, selectedKeys, l
             ) : heading}</h3>
             <ul id={kind === "unchanged" ? "fd-unchanged" : undefined} hidden={kind === "unchanged" && !unchangedOpen}>
               {items.map((row) => (
-                <li key={row.numbers?.[0] ?? row.key}>
+                <li key={row.number ?? row.key}>
                   <button type="button" aria-pressed={row.key === view.selected}
                     data-endpoint={selectedKeys.includes(row.key) && row.key !== view.selected}
                     data-row={row.key} data-kind={kind} onClick={() => onSelect(row.key)}>
-                    {row.numbers ? <QuestionNumbers numbers={row.numbers} /> : <span className="fd-swatch" aria-hidden="true" />}
-                    <span className="fd-tree-label" data-numeric={/\d/.test(nameOf(row) ?? "")}>
+                    {row.number ? <QuestionNumber number={row.number} /> : <span className="fd-swatch" aria-hidden="true" />}
+                    <span className="fd-tree-label">
                       {row.reason ? questionText(row.reason) : nameOf(row)}
                     </span>
                     {row.part && !linked.has(row.key) && <small>Not linked</small>}
@@ -201,25 +191,27 @@ function PartTree({ rows, view, questions, counts, blockersOnly, selectedKeys, l
   );
 }
 
-function Annotations({ labels, selection, endpoints, pins, onSelect }) {
+function Annotations({ labels, selection, endpoints, pins, faceView, onSelect }) {
   return (
     <div className="fd-annotations" aria-label="Scene callouts">
       <svg className="fd-leaders" aria-hidden="true">
         {labels.map(({ key, delta }, i) => (
           <g key={key} data-kind={delta} data-leader={i}><path /><circle r="1.5" /></g>
         ))}
+        <path className="fd-pin-leaders" data-pin-leaders="" />
+        {faceView && ["7", "5"].map((revision) => (
+          <g className="fd-dimensions" data-dimensions={revision} key={revision}
+            data-kind={revision === "7" ? "removed" : "added"}>
+            <path /><text /><text />
+          </g>
+        ))}
         {selection?.part && <path className="fd-bracket" data-bracket={selection.key} />}
       </svg>
       {labels.map((row) => <span className="fd-label" key={row.key} data-anchor={row.key}>{nameOf(row)}</span>)}
-      {pins.map(({ key, questions }) => (
-        <div className="fd-pin-position" key={key} data-pin-anchor={key}
-          data-with-endpoint={endpoints.some(([, endpoint]) => endpoint === key)}>
-          <div className="fd-pin-group">
-            {questions.map(({ number, reason }) => (
-              <button className="fd-pin" key={number} type="button" data-question-number={number}
-                aria-label={`Open question ${number}`} title={questionText(reason)} onClick={() => onSelect(key)}><span>{number}</span></button>
-            ))}
-          </div>
+      {pins.map(({ key, reason, number }) => (
+        <div className="fd-pin-position" key={number} data-pin-anchor={key}>
+          <button className="fd-pin" type="button" data-question-number={number}
+            aria-label={`Open question ${number}`} title={questionText(reason)} onClick={() => onSelect(key)}><span>{number}</span></button>
         </div>
       ))}
       {endpoints.map(([letter, key]) => key && (
@@ -248,6 +240,7 @@ export default function FieldDeckScene({ onExit }) {
   const [desktopTreeOpen, setDesktopTreeOpen] = useState(true);
   const [blockersOnly, setBlockersOnly] = useState(false);
   const [narrow, setNarrow] = useState(() => window.matchMedia(FIELDDECK_NARROW).matches);
+  const [keyOpen, setKeyOpen] = useState(false);
   const [sheet, setSheet] = useState(null);
   const [explodeMotion, setExplodeMotion] = useState(null);
   const [reduced, setReduced] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
@@ -289,21 +282,30 @@ export default function FieldDeckScene({ onExit }) {
   const rows = useMemo(() => rowsForMode(index, view.mode), [index, view.mode]);
   const selection = index.byKey.get(view.selected);
   const revision = view.mode === "7" ? "7" : "5";
-  const questionsByRevision = useMemo(() => ({
-    "7": openQuestions(sidecars["7"], "7"), "5": openQuestions(sidecars["5"], "5"),
-  }), [sidecars]);
-  const questions = questionsByRevision[revision];
-  const selectionQuestions = useMemo(() => questionsByRevision[selection?.revision ?? revision]
-    .filter(({ key }) => key === selection?.key), [questionsByRevision, selection, revision]);
+  const allQuestions = useMemo(() => openQuestions(sidecars, index), [sidecars, index]);
+  const displayedKeys = useMemo(() => new Set(rows.map(({ key }) => key)), [rows]);
+  const questions = useMemo(() => allQuestions.flatMap(({ keys, ...question }) => {
+    const matching = [...keys].filter((key) => view.mode === "compare" || key.startsWith(`${revision}:`));
+    if (!matching.length) return [];
+    // An older revision's check can still be inspected from its visible counterpart.
+    const visible = matching.filter((key) => displayedKeys.has(key));
+    const fallback = view.mode === "compare" ? matching[0].replace(/^7:/, "5:") : matching[0];
+    const key = visible[0] ?? (displayedKeys.has(fallback) ? fallback : matching[0]);
+    return [{ ...question, key, keys: visible }];
+  }), [allQuestions, displayedKeys, revision, view.mode]);
+  const selectionQuestions = useMemo(() => questions.filter(
+    ({ key, keys }) => key === view.selected || keys.includes(view.selected),
+  ), [questions, view.selected]);
   const treeOpen = narrow ? sheet === "parts" || sheet === "blockers" : desktopTreeOpen;
   const inspectorOpen = !narrow || sheet === "details";
   const selectedKeys = useMemo(() => selectedPartKeys(index, selection), [index, selection]);
-  const labels = rows.filter((row) => row.part && linked.has(row.key) && (row.key === selection?.key
-    || row.part.part_id === "display" && (row.delta !== "removed" || view.mode !== "compare" || view.showRemoved)));
-  const pins = view.blockers ? rows.filter(({ key, part, revision: rowRevision }) =>
-    part && rowRevision === revision && linked.has(key) && questions.some((question) => question.key === key))
-    .map(({ key }) => ({ key, questions: questions.filter((question) => question.key === key) })) : [];
-  const endpoints = selection?.link ? [["A", selection.link.from_part_id], ["B", selection.link.to_part_id]]
+  const labels = view.faceView ? [] : rows.filter((row) => row.part && linked.has(row.key) && (row.key === selection?.key
+    || row.part.part_id === "display"));
+  const pins = view.blockers && !view.faceView ? questions.flatMap((question) => {
+    const key = question.key;
+    return linked.has(key) && index.byKey.get(key)?.part && displayedKeys.has(key) ? [question] : [];
+  }) : [];
+  const endpoints = selection?.link && !view.faceView ? [["A", selection.link.from_part_id], ["B", selection.link.to_part_id]]
     .map(([letter, id]) => [letter, index.byPart.get(`${selection.revision}:${id}`)?.key]) : [];
   const comparisonAvailable = sidecars["5"]?.revision_diff?.status === "available";
   const comparisonRenderable = comparisonAvailable
@@ -311,7 +313,7 @@ export default function FieldDeckScene({ onExit }) {
 
   function finishIntro() {
     setView((old) => ({
-      ...old, mode: "compare", explode: DEFAULT_EXPLODE, hero: null, blockers: true, showRemoved: true,
+      ...old, mode: "compare", explode: DEFAULT_EXPLODE, hero: null, blockers: true,
       selected: index.byPart.get("5:display")?.key ?? null,
     }));
   }
@@ -324,16 +326,11 @@ export default function FieldDeckScene({ onExit }) {
   useLayoutEffect(() => {
     if (!assets) return undefined;
     const available = Object.keys(assets).filter((rev) => assets[rev].gltf && assets[rev].sidecar);
-    let playIntro = false;
     let runtime;
     if (available.length) {
       try {
         runtime = createFielddeckStage(host.current, assets, index, {
-          onFrame: () => {
-            setRendered(true);
-            if (playIntro) setView((old) => ({ ...old, hero: performance.now() }));
-          },
-          onInterrupt: () => current.current.finishIntro(),
+          onFrame: () => setRendered(true),
           onPick: (key) => {
             if (current.current.view.hero === null && key) current.current.select(key);
           },
@@ -348,8 +345,7 @@ export default function FieldDeckScene({ onExit }) {
     const canPlay = comparisonAvailable && hasRevision("7") && hasRevision("5");
     if (canPlay && !introSeen && !current.current.reduced) {
       introSeen = true;
-      playIntro = true;
-      setView({ ...INITIAL, mode: "7", explode: 0, blockers: false, showRemoved: false });
+      setView({ ...INITIAL, mode: "compare", hero: performance.now(), blockers: false });
     } else if (canPlay) {
       introSeen = true;
       current.current.finishIntro();
@@ -366,9 +362,10 @@ export default function FieldDeckScene({ onExit }) {
   useLayoutEffect(() => {
     stage.current?.update({
       mode: view.mode, explode: view.explode, explodeMotion, heroStart: view.hero,
-      selectedKeys, cameraCue: view.cue, reduced,
+      selectedKeys, cameraCue: view.cue, reduced, faceView: view.faceView,
+      ghostDeltaKey: ghostDeltaKey(index, view.mode, selection),
     });
-  }, [assets, view, selectedKeys, reduced, explodeMotion, treeOpen, inspectorOpen, narrow, blockersOnly, sheet]);
+  }, [assets, view, selectedKeys, reduced, explodeMotion, treeOpen, inspectorOpen, narrow, blockersOnly, sheet, keyOpen, index, selection]);
 
   useEffect(() => {
     if (view.hero == null) return undefined;
@@ -376,18 +373,16 @@ export default function FieldDeckScene({ onExit }) {
       current.current.finishIntro();
       return undefined;
     }
-    const timeline = [
-      [1800, (old) => ({ ...old, mode: "compare" })],
-      [2400, (old) => ({ ...old, blockers: true, selected: index.byPart.get("5:display")?.key })],
-      [3200, (old) => ({ ...old, showRemoved: true })],
-      [5000, () => current.current.finishIntro()],
-    ];
-    const timers = timeline.map(([at, apply], i) => window.setTimeout(
-      () => i === timeline.length - 1 ? apply() : setView((old) => old.hero == null ? old : apply(old)),
-      Math.max(0, at - (performance.now() - view.hero)),
-    ));
-    return () => timers.forEach((timer) => window.clearTimeout(timer));
-  }, [view.hero, index, reduced]);
+    const finish = () => current.current.finishIntro();
+    const timer = window.setTimeout(finish, Math.max(0, 1100 - (performance.now() - view.hero)));
+    window.addEventListener("pointerdown", finish, true);
+    window.addEventListener("wheel", finish, { capture: true, passive: true });
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("pointerdown", finish, true);
+      window.removeEventListener("wheel", finish, true);
+    };
+  }, [view.hero, reduced]);
 
   function changeMode(mode) {
     setView((old) => {
@@ -411,8 +406,8 @@ export default function FieldDeckScene({ onExit }) {
           : rowsForMode(index, mode).find((row) => row.part && row.delta === stop.diff);
       return {
         ...old, mode, explode: stop.interfaceId ? 0.45 : 1, hero: null,
-        stop: stopIndex, selected: selected?.key ?? null, touring,
-        cue: { stopIndex }, blockers: true, showRemoved: true,
+        stop: stopIndex, faceView: false, selected: selected?.key ?? null, touring,
+        cue: { stopIndex }, blockers: true,
       };
     });
   }
@@ -454,7 +449,8 @@ export default function FieldDeckScene({ onExit }) {
   };
 
   function onKeyDown(event) {
-    if (event.key === "Escape" && playing) current.current.finishIntro();
+    if (playing) current.current.finishIntro();
+    if (event.key === "Escape") setKeyOpen(false);
     if (playing || !assets || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey
       || event.target.matches?.("input, textarea, select, [contenteditable=true]")) return;
     if (["ArrowLeft", "ArrowRight", "j", "k"].includes(event.key)) {
@@ -491,7 +487,7 @@ export default function FieldDeckScene({ onExit }) {
           </div>
           <button className="fd-validation" type="button" aria-pressed={filtered} aria-controls="fd-tree"
             onClick={toggleBlockers}>
-            Physical fit unknown · <span className="fd-count">{questions.length}</span> open questions
+            {narrow ? "Fit unknown" : "Physical fit unknown"} · <span className="fd-count">{questions.length}</span> {narrow ? "questions" : "open questions"}
           </button>
         </header>
 
@@ -511,19 +507,20 @@ export default function FieldDeckScene({ onExit }) {
         {modelVisible && errors.length > 0 && <p className="fd-stage-warning" role="status">{errors.join(" ")}</p>}
         {playing && <button className="fd-skip" type="button" onClick={finishIntro}>Skip intro</button>}
 
-        <Annotations labels={labels} selection={selection} endpoints={endpoints} pins={pins} onSelect={select} />
+        <Annotations labels={labels} selection={view.faceView ? null : selection} endpoints={endpoints}
+          pins={pins} faceView={view.faceView} onSelect={select} />
         <div className="fd-bottom">
-          {!playing && assets && (
-            <div className="fd-controls">
+          {assets && (
+            <div className="fd-controls" data-intro={playing}>
               <div className="fd-modes" role="group" aria-label="Revision">
                 {MODES.filter(canChoose).map(([mode, label]) => (
-                  <button key={mode} type="button" data-numeric={mode !== "compare"}
+                  <button key={mode} type="button"
                     aria-pressed={view.mode === mode} onClick={() => changeMode(mode)}>
                     {label}
                   </button>
                 ))}
               </div>
-              {modelVisible && <div className="fd-explode">
+              {(modelVisible || playing) && <div className="fd-explode">
                 <label htmlFor="fd-explode">Explode</label>
                 <input id="fd-explode" type="range" min="0" max="1" step="0.01" value={view.explode}
                   onChange={(event) => {
@@ -536,6 +533,11 @@ export default function FieldDeckScene({ onExit }) {
                   setExplodeMotion({ from: view.explode, to: view.explode > 0 ? 0 : 1, start: performance.now() });
                 }}>{view.explode > 0 ? "Collapse" : "Explode view"}</button>}
               </div>}
+              {comparisonRenderable && <button type="button" onClick={() => {
+                setView((old) => ({ ...old, faceView: !old.faceView, touring: false }));
+              }}>{view.faceView ? "Back to 3D" : "Face view"}</button>}
+              {narrow && <button type="button" aria-expanded={keyOpen} aria-controls="fd-legend"
+                onClick={() => setKeyOpen(!keyOpen)}>Key</button>}
               {!narrow && <div className="fd-tour" role="group" aria-label="Tour">
                 <button type="button" disabled={!view.stop} onClick={() => goTo(view.stop - 1)}
                   aria-label="Previous stop">←</button>
@@ -549,7 +551,7 @@ export default function FieldDeckScene({ onExit }) {
             </div>
           )}
         </div>
-        <div className="fd-legend" aria-label="Material legend">
+        <div className="fd-legend" id="fd-legend" aria-label="Material legend" hidden={narrow && !keyOpen}>
           {LEGEND.map(([label, kinds]) => (
             <div key={label} role="group" aria-label={label}>
               <strong>{label}</strong>
@@ -561,9 +563,9 @@ export default function FieldDeckScene({ onExit }) {
         </div>
         <div className="fd-sheet" hidden={!narrow}>
           <div className="fd-peek">
-            <strong data-numeric={/\d/.test(nameOf(selection) ?? "")}>{nameOf(selection) ?? "Select a part or interface"}</strong>
+            <strong>{nameOf(selection) ?? "Select a part or interface"}</strong>
             {selection && <span className="fd-status">{statusOf(selection)}</span>}
-            <span className="fd-question-numbers">{selectionQuestions.length} open questions</span>
+            <span><span className="fd-question-numbers">{selectionQuestions.length}</span> open questions</span>
           </div>
           <div className="fd-sheets" role="group" aria-label="Scene panels">
             {[["details", "Inspector"], ["parts", "Parts"], ["blockers", "Blockers"]].map(([id, label]) => (

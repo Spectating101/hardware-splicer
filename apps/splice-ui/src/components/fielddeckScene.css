@@ -39,7 +39,7 @@
 .fd-scene button:disabled { opacity: 0.45; cursor: default; }
 .fd-scene :focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
 .fd-scene a { color: var(--text); text-underline-offset: 2px; }
-.fd-scene :is([data-numeric="true"], .fd-count, .fd-revision, .fd-question-numbers, output, .fd-evidence-state) {
+.fd-scene :is([data-numeric="true"], .fd-count, .fd-revision, .fd-question-numbers, output, .fd-dimensions text) {
   font-family: var(--mono);
 }
 
@@ -179,6 +179,7 @@
 .fd-evidence-value { flex: 1 1 70%; }
 .fd-evidence-row:has(.fd-evidence-value) dt, .fd-evidence-source { flex-basis: 100%; }
 .fd-evidence-state, .fd-evidence-source { color: var(--text-2); }
+.fd-evidence .fd-evidence-state { margin-inline-start: auto; }
 .fd-endpoints > div { display: flex; gap: 8px; padding-block: 4px; }
 
 .fd-annotations { z-index: 1; pointer-events: none; }
@@ -189,15 +190,14 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 4px;
   background: rgba(11, 14, 20, 0.82);
-  font-family: var(--mono);
 }
 .fd-leaders g { visibility: hidden; stroke: var(--kind, var(--text-2)); stroke-width: 1; }
 .fd-leaders path { fill: none; }
 .fd-leaders circle { stroke: none; fill: var(--kind, var(--text-2)); }
+.fd-leaders .fd-pin-leaders { stroke: var(--text-2); }
+.fd-dimensions text { fill: var(--kind); stroke: none; text-anchor: middle; font-size: 11px; }
 .fd-leaders .fd-bracket { stroke: var(--focus); stroke-width: 1.5; }
 .fd-pin-position, .fd-route-position { translate: -50% -50%; }
-.fd-pin-position[data-with-endpoint="true"] { translate: 16px -50%; }
-.fd-pin-group { display: flex; }
 .fd-scene button.fd-pin {
   display: grid;
   place-items: center;
@@ -216,13 +216,15 @@
   border-radius: 50%;
   background: var(--bg-0);
   color: var(--question);
-  font: 600 12px var(--mono);
+  font-weight: 600;
 }
+.fd-pin span { font-family: var(--mono); }
 .fd-endpoint { border: 3px double var(--focus); color: var(--focus); }
 .fd-route-position .fd-label { position: static; visibility: inherit; display: block; }
 
 .fd-scene [data-kind="custom"] { --kind: #d8ccb6; }
-.fd-scene [data-kind="vendor_step"], .fd-scene [data-kind="envelope"] { --kind: #94a6b2; }
+.fd-scene [data-kind="vendor_step"] { --kind: #8e979e; }
+.fd-scene [data-kind="envelope"] { --kind: #a5aeb5; }
 .fd-scene [data-kind="proxy"] { --kind: #a6a098; }
 .fd-scene [data-kind="added"] { --kind: #2dd4bf; }
 .fd-scene [data-kind="changed"] { --kind: #e0a040; }
@@ -251,6 +253,7 @@
 }
 .fd-controls, .fd-modes, .fd-explode, .fd-tour, .fd-sheets { display: flex; align-items: center; gap: 4px; }
 .fd-controls { width: max-content; max-width: 100%; justify-content: center; flex-wrap: wrap; padding: 4px; }
+.fd-controls[data-intro="true"] { visibility: hidden; }
 .fd-controls button { white-space: nowrap; }
 .fd-explode input { width: clamp(60px, 8vw, 112px); accent-color: var(--focus); }
 .fd-explode output { min-width: 4ch; text-align: end; }
@@ -271,13 +274,14 @@
 .fd-legend strong { color: var(--text); font-weight: 600; }
 
 @media (width < 600px) {
-  .fd-stage { --stage-height: 58%; --peek: 72px; --tabs: 44px; --safe: env(safe-area-inset-bottom, 0px); }
-  .fd-stage canvas { height: var(--stage-height); }
-  .fd-header { height: 44px; padding: 0 4px; }
-  .fd-header > div { display: grid; grid-template-columns: auto 1fr; column-gap: 4px; row-gap: 0; }
-  .fd-header h1, .fd-header .fd-revision { grid-column: 2; font-size: 11px; }
-  .fd-header .fd-exit { grid-row: 1 / 3; }
-  .fd-header .fd-validation { font-size: 11px; }
+  .fd-stage { --peek: 72px; --safe: env(safe-area-inset-bottom, 0px); }
+  .fd-stage canvas { top: 44px; height: calc(100% - 44px - var(--peek) - var(--safe)); }
+  .fd-header { height: 44px; padding: 0 4px; gap: 4px; }
+  .fd-header > div { min-width: 0; gap: 4px; }
+  .fd-header h1 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .fd-header h1, .fd-header .fd-revision, .fd-header .fd-validation { font-size: 11px; }
+  .fd-header .fd-exit, .fd-header .fd-validation { flex: none; }
+  .fd-header .fd-validation { white-space: nowrap; padding-inline: 4px; }
   .fd-header .fd-validation[aria-pressed="false"] { border-color: transparent; }
   .fd-scene button, .fd-inspector a { min-height: 44px; min-width: 44px; }
   .fd-inspector a { display: inline-flex; align-items: center; }
@@ -286,30 +290,38 @@
     min-height: 44px;
     translate: 0;
   }
-  .fd-controls { width: 100%; gap: 8px; flex-wrap: nowrap; padding: 0 4px; }
+  .fd-controls { width: 100%; gap: 4px; padding: 0 4px; }
   .fd-modes button { padding-inline: 4px; }
   .fd-explode { gap: 2px; }
   .fd-explode input { width: clamp(44px, 16vw, 96px); min-height: 44px; margin: 0; }
   .fd-explode output { display: none; }
-  .fd-legend { inset: var(--stage-height) 4px auto; max-width: none; padding: 4px; font-size: 11px; }
+  .fd-legend {
+    inset: auto 4px calc(var(--peek) + var(--safe) + 8px) auto;
+    z-index: 4;
+    width: min(260px, calc(100% - 8px));
+    font-size: 11px;
+  }
   .fd-panel {
-    inset: auto 0 calc(var(--peek) + var(--tabs) + var(--safe));
+    inset: auto 0 calc(var(--peek) + var(--safe));
     width: 100%;
-    max-height: calc(100% - var(--stage-height) - var(--peek) - var(--tabs) - var(--safe));
+    max-height: 40%;
   }
   .fd-tree-group li button { align-items: center; }
   .fd-sheet {
     position: absolute;
     z-index: 3;
     inset: auto 0 0;
+    display: flex;
+    align-items: center;
+    height: calc(var(--peek) + var(--safe));
     padding-bottom: var(--safe);
     border-inline: 0;
     border-bottom: 0;
   }
-  .fd-peek { height: var(--peek); display: grid; align-content: center; padding: 4px 12px; }
-  .fd-peek strong { font-size: 14px; }
-  .fd-sheets { min-height: var(--tabs); padding: 0 4px; }
-  .fd-sheets button { flex: 1; }
-  .fd-stage-message { bottom: auto; height: var(--stage-height); padding-top: 88px; }
-  .fd-stage-warning, .fd-stage .fd-skip { bottom: auto; top: calc(var(--stage-height) - 48px); }
+  .fd-peek { flex: 1; display: grid; align-content: center; padding: 4px; line-height: 1.15; }
+  .fd-peek strong { font-size: 12px; }
+  .fd-sheets { padding: 0 4px; }
+  .fd-sheets button { padding-inline: 4px; }
+  .fd-stage-message { top: 88px; bottom: calc(var(--peek) + var(--safe)); }
+  .fd-stage-warning, .fd-stage .fd-skip { bottom: calc(var(--peek) + var(--safe) + 8px); }
 }

@@ -22,9 +22,15 @@ function part(part_id, node_name, geometry_basis, extra = {}) {
 }
 const sides = {
   "7": {
-    parts: [part("display", "PANEL_7", "vendor_step", { label: "7-inch panel" })],
+    parts: [
+      part("display", "PANEL_7", "vendor_step", { label: "7-inch panel" }),
+      part("tray", "Tray", "custom", { label: "Rear tray" }),
+    ],
     blockers: [],
-    interfaces: [],
+    interfaces: [{
+      interface_id: "display-ribbon", label: "DSI FFC", from_part_id: "pi4-dsi", to_part_id: "display",
+      open_checks: ["pin_mapping_unknown", "connector_retention_unknown"],
+    }],
   },
   "5": {
     parts: [
@@ -123,6 +129,22 @@ describe("Fielddeck stage layout", () => {
       leader: [{ x: 308, y: 200 }, { x: 320, y: 200 }],
     });
     expect(placeCallouts(rect(290, 130, 410, 270), [], [label])).toEqual([null]);
+  });
+
+  it("keeps model labels on the anchor side with short leaders and vertical clearance", () => {
+    const viewport = rect(0, 0, 800, 400);
+    const model = rect(300, 80, 480, 330);
+    const label = { ...card(440, 180, 100, 24), rightAnchor: { x: 470, y: 180 }, model };
+    const panel = rect(650, 0, 800, 400);
+    const [first, second] = placeCallouts(viewport, [panel], [label, label]);
+    expect(first.rect.left - model.right).toBe(40);
+    expect(Math.abs(first.rect.top - second.rect.top)).toBeGreaterThanOrEqual(32);
+    for (const { leader } of [first, second]) {
+      expect(leader).toHaveLength(3);
+      expect(leader.at(-1)).toEqual(label.rightAnchor);
+      expect(leader.slice(1).reduce((sum, p, i) =>
+        sum + Math.hypot(p.x - leader[i].x, p.y - leader[i].y), 0)).toBeLessThanOrEqual(160);
+    }
   });
 
   it("flips and stacks cards around the inspector, tree, header and controls", () => {
@@ -240,10 +262,12 @@ describe("Fielddeck evidence UI", () => {
     render(<EvidenceRows evidence={[
       { field: "pin_mapping", value: false, state: "unknown", source: null },
       { field: "documented_power_w", value: 1.4, state: "datasheet", source: "brief.pdf" },
+      { field: "geometry_reference", value: "vendor_step", state: "computed" },
     ]} />);
     const unknown = screen.getByText("Pin mapping").parentElement;
     expect(unknown).toHaveAttribute("title", "pin_mapping");
-    expect(unknown).toHaveTextContent(/^Pin mapping · Unknown$/);
+    expect(within(unknown).getByText("Unknown")).toHaveClass("fd-evidence-state");
+    expect(screen.getByText("Vendor model")).toBeVisible();
     expect(screen.getByText("1.4 W")).toBeVisible();
     expect(screen.getByText("datasheet")).toBeVisible();
     expect(screen.getByRole("link", { name: "brief.pdf" })).toBeVisible();
@@ -280,9 +304,7 @@ describe("Fielddeck evidence UI", () => {
     const inspector = within(screen.getByRole("complementary", { name: "Selection details" }));
     expect(inspector.getByText("Routing unknown")).toBeVisible();
     expect(inspector.getByText("A").parentElement).toHaveTextContent("Pi DSI port");
-    expect(inspector.getByText("B").parentElement).toHaveTextContent("5-inch display");
-    expect(inspector.getAllByText("Pin mapping unknown")).toHaveLength(1);
-    expect(inspector.getByText("Pin mapping unknown").parentElement).toHaveTextContent("2, 3");
+    expect(inspector.getByText("B").parentElement).toHaveTextContent("Touch Display 2, 5-inch · nominal only");
     expect(inspector.getByText("Signal voltage unknown")).toBeVisible();
     const annotations = screen.getByLabelText("Scene callouts");
     expect(within(annotations).getByLabelText("Endpoint A").parentElement)
@@ -292,10 +314,45 @@ describe("Fielddeck evidence UI", () => {
     const label = annotations.querySelector("[data-route-label]");
     expect(label).toHaveTextContent("Routing unknown");
     expect(label.querySelector("path")).toBeNull();
-    expect(annotations.querySelector("svg > path")).toBeNull();
+    expect(annotations.querySelector("svg > path:not([data-pin-leaders])")).toBeNull();
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({
       selectedKeys: ["5:part:pi4-dsi", "5:part:display"],
     }));
+  });
+
+  it("numbers each question once across revisions and counts only questions in the visible mode", async () => {
+    render(<FieldDeckScene />);
+    fireEvent.click(await screen.findByRole("button", { name: "DSI FFC" }));
+    const inspector = within(screen.getByRole("complementary", { name: "Selection details" }));
+    const mapping = () => inspector.getByText("Pin mapping unknown").parentElement;
+    expect(mapping()).toHaveTextContent(/^2 Pin mapping unknown$/);
+    expect(inspector.getByText("Connector retention unknown")).toBeVisible();
+    expect(screen.getByRole("button", { name: "Physical fit unknown · 4 open questions" })).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "7-inch" }));
+    expect(mapping()).toHaveTextContent(/^2 Pin mapping unknown$/);
+    expect(inspector.queryByText("Signal voltage unknown")).toBeNull();
+    expect(inspector.getByText("A").parentElement).toHaveTextContent("pi4-dsi");
+    expect(screen.getByRole("button", { name: "Physical fit unknown · 2 open questions" })).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "5-inch" }));
+    expect(mapping()).toHaveTextContent(/^2 Pin mapping unknown$/);
+    expect(inspector.queryByText("Connector retention unknown")).toBeNull();
+    expect(screen.getByRole("button", { name: "Physical fit unknown · 3 open questions" })).toBeVisible();
+  });
+
+  it("toggles Face view and requests ghost geometry only for changed parts in Compare", async () => {
+    render(<FieldDeckScene />);
+    fireEvent.click(await screen.findByRole("button", { name: "Face view" }));
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ faceView: true, ghostDeltaKey: null }));
+    fireEvent.click(screen.getByRole("button", { name: "Back to 3D" }));
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ faceView: false }));
+    fireEvent.click(screen.getByRole("button", { name: "Rear tray" }));
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ ghostDeltaKey: "7:part:tray" }));
+    fireEvent.click(screen.getByRole("button", { name: "5-inch" }));
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ ghostDeltaKey: null }));
+    fireEvent.click(screen.getByRole("button", { name: "Compare" }));
+    fireEvent.click(screen.getByRole("button", { name: /Unchanged 1/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Pi DSI port" }));
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ ghostDeltaKey: null }));
   });
 
   it("uses the same blocker number on the pin, tree and inspector and keeps the qualifier intact", async () => {
@@ -328,6 +385,12 @@ describe("Fielddeck evidence UI", () => {
     narrow = true;
     render(<FieldDeckScene />);
     await screen.findByRole("slider", { name: "Explode" });
+    const key = screen.getByRole("button", { name: "Key" });
+    expect(key).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(key);
+    expect(screen.getByRole("group", { name: "Shape source" })).toBeVisible();
+    fireEvent.click(key);
+    expect(screen.getByRole("button", { name: "Fit unknown · 4 questions" })).toBeVisible();
     const panels = within(screen.getByRole("group", { name: "Scene panels" }));
     const parts = panels.getByRole("button", { name: "Parts" });
     const details = panels.getByRole("button", { name: "Inspector" });
