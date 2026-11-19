@@ -318,14 +318,6 @@ function displayContours(entry) {
   const [perimeter] = large.filter((loop) => loop.width * loop.height >= largest.width * largest.height * 0.998)
     .sort((a, b) => Number(b.closed) - Number(a.closed) || b.center.z - a.center.z);
   const { center, width, height } = perimeter;
-  const viewingArea = entry.row.part.evidence.find(({ field }) => field === "landscape_viewing_area_mm")?.value;
-  const windowScore = (loop) => viewingArea
-    ? Math.abs(loop.width - viewingArea[0]) + Math.abs(loop.height - viewingArea[1])
-    : -loop.center.z;
-  const [window] = large.filter((loop) => loop.width > width * 0.45 && loop.width < width * 0.95
-    && loop.height > height * 0.45 && loop.height < height * 0.95
-    && Math.abs(loop.center.x - center.x) < width * 0.1 && Math.abs(loop.center.y - center.y) < height * 0.1)
-    .sort((a, b) => Number(b.closed) - Number(a.closed) || windowScore(a) - windowScore(b));
   const pitch = entry.row.part.evidence.find(({ field }) => field === "landscape_mount_pitch_mm")?.value;
   const mounts = [1, -1].flatMap((x) => [1, -1].map((y) => {
     const targetX = center.x + x * (pitch?.[0] ?? width) / 2;
@@ -336,7 +328,10 @@ function displayContours(entry) {
   }));
   return {
     perimeter: perimeter.positions,
-    interior: [window, ...mounts].flatMap((loop) => loop?.positions ?? []),
+    // Mount holes only. The loop the size heuristic used to pick as a "window" is a rear module
+    // outline from the vendor STEP (z 58.4, 119.49 × 65.20 mm, offset 5.6 mm right, with FPC strips),
+    // not the active area, and it doubled the aperture's right edge.
+    interior: mounts.flatMap((loop) => loop?.positions ?? []),
     lug: mounts[0]?.center,
   };
 }
