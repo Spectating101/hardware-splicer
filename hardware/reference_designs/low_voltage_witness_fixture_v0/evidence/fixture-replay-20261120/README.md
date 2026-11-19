@@ -10,7 +10,7 @@ python3 verify_and_replay.py --pl-root /absolute/path/to/policy-lab --out /new/o
 
 with HS revision `feature/low-voltage-witness-fixture-20261120`, Policy Lab revision `feature/measurement-investigation-20261120`.
 
-- `verification.json` — evidence SHA-256: `57c40d7582ce420b70d019d0f9113d5ec6df4d233dd715778ced685cc7b14a00`.
+- `verification.json` — evidence SHA-256: `e9e2b853575b0d3aaba487be9136da7b5b783f9c04fb902d3918e3f8ffa8fd93`.
 - `spice-result.txt` — 5.0 V source, assumed 50 mΩ fuse/contact, 15 mΩ Adafruit shunt, 10 mΩ reference shunt, 10 Ω load. 2.462918 W at J2.
 - `primary/` — 183 simulated raw INA228 register capture samples processed by actual HS decoding/capture code; the device ID and clock are intentionally synthetic.
 - `reference-fixture.csv` — separately constructed analytical reference shunt path; **not** a DMM export.

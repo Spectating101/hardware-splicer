@@ -23,7 +23,7 @@
   "reference_shunt_ohm_nominal": 0.01,
   "schema": "hardware_splicer.5v_witness_design_replay.v1",
   "source_sha256": {
-    "generate_pcb.py": "b9452eac203ab405a9a5ba098d0456d08b1e8c09e06884faf4f16b24974d3532",
+    "generate_pcb.py": "7550e6904098bfeaac0eccc132b06e9d996d3fd08f2552e28b8a8f022bd526a4",
     "generate_schematic.py": "5b0f3c6c2a24daf732a6da325617250d080f93f13100dafd96bbb5cefdd73c35",
     "low_voltage_witness_fixture_v0.kicad_pcb": "06b461e05b6772e202c079b52c4fa4f2353d793180f9eecec1dd8f3bc215dccf",
     "low_voltage_witness_fixture_v0.kicad_pro": "ba09dac7863fb6079f6f6cc77b5c36113ed161a1849c9b3590550bc1959eb433",
