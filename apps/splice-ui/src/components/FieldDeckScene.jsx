@@ -299,6 +299,7 @@ function Annotations({ labels, selection, endpoints, pins, faceView, base, targe
         <path className="fd-pin-ticks" data-pin-ticks="" />
         <path className="fd-ghost-marks" data-ghost-marks="" />
         <g className="fd-ghost-links" data-ghost-links="" />
+        <path className="fd-pairing-leader" data-pairing-leader="" />
         {faceView && <g className="fd-face-drawing" data-face-drawing="" />}
         {selection?.part && <>
           <path className="fd-bracket-halo" data-bracket={selection.key} />
@@ -323,6 +324,7 @@ function Annotations({ labels, selection, endpoints, pins, faceView, base, targe
             onClick={() => onSelect(key, number)}><span>{number}</span></button>
         </div>
       ))}
+      {!faceView && <span className="fd-label fd-pairing-chip" data-pairing-chip="" />}
       {!faceView && <span className="fd-grid-label" data-grid-label="">Grid 10 mm</span>}
       {endpoints.length > 0 && (
         <div className="fd-route-position" data-route-label="">

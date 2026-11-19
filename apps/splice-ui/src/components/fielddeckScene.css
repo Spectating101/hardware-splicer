@@ -472,8 +472,9 @@
 .fd-leaders .fd-ghost-links, .fd-leaders .fd-ghost-links g { visibility: visible; }
 .fd-ghost-links .fd-ghost-leader { stroke: #f17e70; stroke-width: 1; fill: none; }
 .fd-ghost-links .fd-ghost-arrow { fill: #f17e70; stroke: none; }
-.fd-ghost-links .fd-ghost-delta { fill: #f17e70; stroke: #0e1116; stroke-width: 3px; stroke-linejoin: round; font: 11px var(--mono); paint-order: stroke; }
-.fd-fit-compact { display: none; font: 10px/1.4 var(--mono); }
+/* Old-to-new pairing chip: neutral label chip, Mono 11 px, no stroke, with a neutral leader. */
+.fd-pairing-chip { font: 11px/1.4 var(--mono); color: #e6e8eb; }
+.fd-leaders .fd-pairing-leader { stroke: #9097a0; stroke-width: 1; fill: none; }
 @media (width < 640px) {
   .fd-fit-gap { font-size: 13px; }
   .fd-fit-primary { font-size: 12px; }

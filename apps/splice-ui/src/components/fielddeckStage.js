@@ -21,7 +21,7 @@ import {
   DIFF_COLORS, explodeGroupOffsets, FIELDDECK_NARROW, footprintDeltaPair, ghostDeltaKey,
   ghostOutlineLoops, materialSpec, repelPins, meshMeasures, nearestPoint, placeBesideEndpoint, placeCallouts,
   projectedFitScale, QUALITY_SAMPLE_COUNT, rowForNode, weldEdgeChains,
-  apertureSizeLabel, FACE_APERTURE_PARTS, formatEvidenceValue, linearDimension, perHalfCover,
+  apertureSizeLabel, FACE_APERTURE_PARTS, standoffPairingLabel, formatEvidenceValue, linearDimension, perHalfCover,
   projectedSideDistances, sectionSegments, seamLabel, sideCoverLabel, tightestSide, vertexCentroid,
 } from "./fielddeckLogic.js";
 
@@ -1537,17 +1537,20 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
     position(gridLabel, gridPoint ? { x: (rect.left + rect.right) / 2, y: (rect.top + rect.bottom) / 2 } : null);
   }
 
-  // Old-revision small features: a moved one gets a 1 px leader from its old centre to its new
-  // centre with a 5 px arrowhead and its computed centre distance; an unpaired one keeps a 6 px
-  // centre cross.
+  // Old-revision small features: a paired one gets a 1 px leader from its old centre to the
+  // nearest new centre of the same size, with a 5 px arrowhead; an unpaired one keeps a 6 px centre
+  // cross. Pairing is nearest-centre, so nothing here says a feature moved.
   const marks = [];
   const links = host.querySelector("[data-ghost-links]");
   links?.replaceChildren();
+  const distances = [];
+  const ends = [];
   for (const entry of entries.values()) {
     const overlay = entry.overlay;
     if (!overlay?.object.visible) continue;
     const at = (center) => project(new THREE.Vector3(...center).add(overlay.object.position));
     const paired = new Set((overlay.pairs ?? []).map(([older]) => older));
+
     for (const feature of overlay.features) {
       const point = !paired.has(feature) && at(feature.center);
       if (point) marks.push(`M${point.x - 3},${point.y}h6M${point.x},${point.y - 3}v6`);
@@ -1568,8 +1571,28 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
         svgNode(group, "path", { class: "fd-ghost-leader", d: `M${from.x},${from.y}L${bx},${by}` });
         svgNode(group, "path", { class: "fd-ghost-arrow", d: `M${to.x},${to.y}L${bx - uy * half},${by + ux * half}L${bx + uy * half},${by - ux * half}Z` });
       }
-      svgNode(group, "text", { class: "fd-ghost-delta", x: (from.x + to.x) / 2 + 6, y: (from.y + to.y) / 2 - 6 },
-        `Δ ${distance.toFixed(2)} mm · computed`);
+      distances.push(distance);
+      ends.push(to);
+    }
+  }
+  // One neutral chip for all pairs, beside the cluster with a neutral leader to it.
+  const chip = host.querySelector("[data-pairing-chip]");
+  const chipLeader = host.querySelector("[data-pairing-leader]");
+  const chipText = standoffPairingLabel(distances);
+  if (chip) {
+    chip.textContent = chipText ?? "";
+    const anchor = ends.length && { x: ends.reduce((sum, p) => sum + p.x, 0) / ends.length, y: Math.min(...ends.map((p) => p.y)) };
+    const spot = chipText && anchor && placeBesideEndpoint(viewport, [...occupied, ...pinRects], anchor, chip.offsetWidth, chip.offsetHeight, 28);
+    if (spot) {
+      chip.style.visibility = "visible";
+      chip.style.transform = `translate(${spot.x - chip.offsetWidth / 2}px, ${spot.y - chip.offsetHeight / 2}px)`;
+      const rect = { left: spot.x - chip.offsetWidth / 2, right: spot.x + chip.offsetWidth / 2, top: spot.y - chip.offsetHeight / 2, bottom: spot.y + chip.offsetHeight / 2 };
+      occupied.push(rect);
+      const edge = { x: Math.min(rect.right, Math.max(rect.left, anchor.x)), y: Math.min(rect.bottom, Math.max(rect.top, anchor.y)) };
+      chipLeader?.setAttribute("d", `M${edge.x},${edge.y}L${anchor.x},${anchor.y}`);
+    } else {
+      chip.style.visibility = "hidden";
+      chipLeader?.removeAttribute("d");
     }
   }
   host.querySelector("[data-ghost-marks]")?.setAttribute("d", marks.join(""));

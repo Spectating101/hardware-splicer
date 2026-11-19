@@ -10,7 +10,7 @@ import {
   toggleFielddeckSheet, weldEdgeChains,
   apertureFromSection, footprintDeltaPair, linearDimension, tightestSide,
   pointInPolygon, polygonArea, projectedSideDistances, sectionSegments, vertexCentroid, weldSectionLoops,
-  apertureSizeLabel, coverDetail, coverHeadline, perHalfCover, seamLabel, sideCoverLabel,
+  apertureSizeLabel, coverDetail, coverHeadline, perHalfCover, seamLabel, sideCoverLabel, standoffPairingLabel,
 } from "./fielddeckLogic.js";
 
 const stageMock = vi.hoisted(() => ({ load: vi.fn(), create: vi.fn() }));
@@ -577,6 +577,12 @@ describe("Fielddeck Face view fit layer", () => {
     expect(lonely.sides.right).toEqual({ value: null, part: null, reason: "no inner edge of either half faces the display" });
     expect(sideCoverLabel("right", lonely.sides.right)).toBe("R ? · no inner edge of either half faces the display");
     expect(lonely.aperture).toBeNull();
+  });
+
+  it("merges standoff pairs into one pairing label with the real distance range", () => {
+    expect(standoffPairingLabel([21.364, 21.371])).toBe("2 standoffs · nearest-centre pairing · Δ 21.36–21.37 mm · computed");
+    expect(standoffPairingLabel([5])).toBe("1 standoff · nearest-centre pairing · Δ 5.00 mm · computed");
+    expect(standoffPairingLabel([])).toBeNull();
   });
 
   it("averages mesh vertices for spacer centroids and states the footprint delta as a pair", () => {

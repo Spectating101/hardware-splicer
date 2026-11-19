@@ -1458,3 +1458,15 @@ export function seamLabel(seam) {
   return seam ? `Faceplate halves ${seam.gap.toFixed(2)} mm apart at x ${formatNumber(Math.round(seam.at[0] * 10) / 10)} · computed` : null;
 }
 
+
+// One neutral chip for every old-to-new small-feature pair in Compare. Pairing is by nearest centre
+// of the same size, so it says pairing, never that a feature moved.
+export function standoffPairingLabel(distances) {
+  if (!distances.length) return null;
+  const values = distances.map((value) => value.toFixed(2));
+  const low = Math.min(...distances).toFixed(2);
+  const high = Math.max(...distances).toFixed(2);
+  const range = low === high ? low : `${low}–${high}`;
+  const count = `${distances.length} standoff${distances.length === 1 ? "" : "s"}`;
+  return values.length ? `${count} · nearest-centre pairing · Δ ${range} mm · computed` : null;
+}
