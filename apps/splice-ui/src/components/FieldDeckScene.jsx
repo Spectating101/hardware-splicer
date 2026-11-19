@@ -617,6 +617,10 @@ export default function FieldDeckScene({ onExit }) {
     if (event.key === "Escape") {
       setKeyOpen(false);
       setMoreOpen(false);
+      // Escape returns to the unselected overview once the intro has finished.
+      if (!playing && !keyOpen && !moreOpen && !view.faceView) {
+        setView((old) => ({ ...old, selected: null, question: null, cue: null, touring: false }));
+      }
     }
     if (playing || !assets || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey
       || event.target.matches?.("input, textarea, select, [contenteditable=true]")) return;

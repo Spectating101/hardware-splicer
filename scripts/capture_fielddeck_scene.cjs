@@ -70,6 +70,10 @@ async function main() {
     }
 
     await capture("hero-end");
+    // The default unselected overview: Escape clears the intro's display selection.
+    await page.keyboard.press("Escape");
+    await inspector.getByText("Select a part or interface to inspect its evidence.").waitFor();
+    await capture("overview", 900);
     await scene.getByRole("button", { name: "5-inch", exact: true }).click();
     await page.waitForTimeout(500);
     await scene.getByRole("button", { name: "Compare", exact: true }).click();
@@ -77,9 +81,14 @@ async function main() {
     await inspector.getByText(/ · changed$/).waitFor();
     await capture("compare", 950);
 
+    // Frame the display from the Display stack tour stop so it differs from the hero shot.
     await scene.locator('[data-row="5:part:display"]:visible').first().click();
     await inspector.getByText(/^Vendor model · /).waitFor();
-    await capture("display-selected");
+    await scene.getByRole("button", { name: "Next stop", exact: true }).click();
+    await page.waitForTimeout(300);
+    await scene.getByRole("button", { name: "Previous stop", exact: true }).click();
+    await inspector.getByText(/^Vendor model · /).waitFor();
+    await capture("display-selected", 2500);
 
     await scene.getByRole("button", { name: "Face view", exact: true }).click();
     await capture("face-view", 900);
