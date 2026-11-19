@@ -209,7 +209,7 @@
 .fd-endpoints > div { display: flex; gap: 8px; padding-block: 4px; }
 
 .fd-annotations { z-index: 1; pointer-events: none; }
-.fd-label, .fd-pin-position, .fd-route-position, .fd-dimension-label, .fd-footprint { position: absolute; top: 0; left: 0; visibility: hidden; }
+.fd-label, .fd-pin-position, .fd-route-position, .fd-footprint { position: absolute; top: 0; left: 0; visibility: hidden; }
 .fd-label {
   width: max-content;
   padding: 4px 8px;
@@ -222,7 +222,7 @@
 .fd-leaders circle { stroke: none; fill: var(--kind, var(--text-2)); }
 .fd-leaders .fd-pin-leaders { stroke: var(--text-2); }
 
-.fd-dimension-label, .fd-footprint {
+.fd-footprint {
   translate: -50% -50%;
   padding: 2px 6px;
   background: #0e1116;
@@ -231,7 +231,6 @@
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
-.fd-dimension-label[data-axis="height"] { writing-mode: vertical-rl; }
 .fd-footprint { translate: -50% 0; text-align: center; }
 .fd-leaders .fd-bracket-halo { stroke: #0e1116; stroke-width: 3.5; }
 .fd-pin-position[data-dimmed="true"] { opacity: 0.35; }
@@ -429,7 +428,40 @@
   .fd-leaders .fd-bracket { stroke-width: 1; }
   .fd-leaders .fd-bracket-halo { stroke-width: 3; }
 }
-.fd-footprint-source { color: #9097a0; font-size: 10px; }
+/* Face view drafting, ISO 128 / 129-1: 0.75 px extension lines, 1 px unbroken dimension lines,
+   filled arrows, 11 px Plex Mono text. Revision colour marks which display a dimension belongs to. */
+.fd-leaders .fd-face-drawing, .fd-leaders .fd-face-drawing g { visibility: visible; }
+.fd-face-drawing .fd-dim { stroke: var(--kind, var(--text)); fill: none; }
+.fd-face-drawing .fd-dim-extension { stroke-width: 0.75; }
+.fd-face-drawing .fd-dim-line { stroke-width: 1; }
+.fd-face-drawing .fd-dim-arrow { fill: var(--kind, var(--text)); stroke: none; }
+.fd-face-drawing .fd-dim[data-kind="removed"] { opacity: 0.7; }
+.fd-face-drawing text {
+  fill: var(--kind, var(--text)); stroke: none; font: 11px var(--mono); font-variant-numeric: tabular-nums;
+}
+.fd-face-drawing .fd-aperture { stroke: #d9cfbe; stroke-width: 1.5; fill: none; }
+.fd-face-drawing .fd-spacer-marks { stroke: var(--text); stroke-width: 1; fill: none; }
+.fd-face-drawing .fd-gap { stroke: var(--text); fill: none; }
+.fd-face-drawing .fd-gap .fd-dim-arrow { fill: var(--text); }
+.fd-face-drawing .fd-gap-unknown { stroke: var(--text-2); stroke-width: 1; stroke-dasharray: 1 3; }
+.fd-face-drawing .fd-gap-text { fill: var(--text-2); font-size: 10px; }
+.fd-face-drawing .fd-gap[data-known="true"] .fd-gap-text { fill: var(--text); }
+
+.fd-stage .fd-footprint {
+  display: grid; justify-items: center; gap: 2px; padding: 4px 8px;
+  background: rgb(14 17 22 / 0.88); color: var(--text); white-space: normal; width: max-content; max-width: min(860px, calc(100vw - 32px));
+}
+.fd-fit-primary { font: 600 14px/1.3 "IBM Plex Sans", system-ui, sans-serif; }
+.fd-fit-gap { font: 500 20px/1.3 var(--mono); }
+.fd-fit-reason { color: var(--text-2); font-size: 11px; }
+.fd-fit-delta { display: flex; gap: 8px; align-items: baseline; color: var(--text-2); font-size: 11px; }
+.fd-fit-delta [data-footprint-delta] { color: var(--text); font: 500 14px/1.3 var(--mono); }
+.fd-fit-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 14px; color: var(--text-2); font-size: 10px; }
+.fd-fit-legend span { display: inline-flex; align-items: center; gap: 4px; }
+.fd-fit-legend svg { width: 12px; height: 12px; stroke: var(--text); stroke-width: 1; fill: none; }
+.fd-fit-legend svg[viewBox="0 0 16 12"] { width: 16px; }
+.fd-fit-legend .fd-legend-dashed { stroke: #9097a0; stroke-dasharray: 4 3; }
+.fd-fit-legend a { color: inherit; pointer-events: auto; }
 .fd-leaders .fd-pin-ticks { stroke: var(--question); stroke-width: 1; fill: none; }
 /* Face view sits on the dark stage, so its pins take a raised fill to read as filled discs, as in 3D. */
 .fd-stage:has(.fd-footprint) .fd-pin span { background: #262b33; }

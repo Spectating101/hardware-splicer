@@ -612,6 +612,12 @@ describe("Fielddeck evidence UI", () => {
         linked: new Set([...index.byKey.values()].filter(({ part }) => part).map(({ key }) => key)),
         meshStats: new Map([["7:part:tray", { volume: 12000, area: 3000 }], ["5:part:tray", { volume: 11450, area: 2990 }]]),
         ghostLengths: new Map([["7:part:tray", 42]]),
+        faceFit: {
+          apertureReason: "section loop not closed after 0.05 mm weld · 0.30 mm seam between Face Rear Left and Face Rear Right",
+          gaps: Object.fromEntries(["left", "right", "top", "bottom"].map((side) => [side, { value: null, reason: "aperture not derivable" }])),
+          minimum: { value: null, side: null, reason: "aperture not derivable" }, spacers: 4, level: 62.5,
+          footprint: "−45.92 × −28.78 mm",
+        },
         update, dispose: vi.fn(),
       };
     });
@@ -776,9 +782,21 @@ describe("Fielddeck evidence UI", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Face view" }));
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ faceView: true, ghostDeltaKey: null }));
     expect(screen.getByText("5-inch minus 7-inch · CAD footprint, computed")).toBeInTheDocument();
+    // The strip keeps physical fit primary and never turns a missing aperture into a number.
+    const strip = within(document.querySelector("[data-footprint]"));
+    expect(strip.getByText("Physical fit · Unknown")).toHaveClass("fd-fit-primary");
+    expect(strip.getByText("Min projected XY gap · ? · not derivable")).toBeInTheDocument();
+    expect(screen.getByText(/^Aperture not derivable · section loop not closed after 0.05 mm weld/)).toBeInTheDocument();
+    expect(screen.getByText("−45.92 × −28.78 mm")).toBeInTheDocument();
+    expect(screen.getByText(/Spacer mesh centroid · computed \(hole axis unverified\)/)).toBeInTheDocument();
     const scene = screen.getByTestId("fielddeck-scene");
     expect(scene.querySelector('[data-question-number="1"]').parentElement).toHaveAttribute("data-pin-anchor", "5:part:display");
     expect(scene.querySelector('[title="Check pilot hole engagement"]').parentElement).toHaveAttribute("data-pin-anchor", "7:part:display");
+    // In 5-inch mode the 7-inch footprint and its question leave the drawing.
+    fireEvent.click(screen.getByRole("button", { name: "5-inch" }));
+    expect(scene.querySelector('[title="Check pilot hole engagement"]')).toBeNull();
+    expect(screen.queryByText("5-inch minus 7-inch · CAD footprint, computed")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Compare" }));
     fireEvent.click(screen.getByRole("button", { name: "Back to 3D" }));
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ faceView: false }));
     fireEvent.click(screen.getByRole("button", { name: "Rear tray" }));

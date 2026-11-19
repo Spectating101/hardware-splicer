@@ -3,6 +3,7 @@ import {
   BASIS_LABELS, DEFAULT_EXPLODE, DIFF_LABELS, FIELDDECK_COMPARE, FIELDDECK_NARROW,
   changeSummary, classifyPart, oldRevisionCaption, evidenceCells, formatEvidenceSource, indexFielddeck, rowsForMode, selectedPartKeys,
   countClippedItems, evidenceLabel, ghostDeltaKey, openQuestions, shortPartName, toggleFielddeckSheet,
+  formatEvidenceValue, minimumGapLabel,
 } from "./fielddeckLogic.js";
 import { createFielddeckStage, disposeFielddeck, loadFielddeck } from "./fielddeckStage.js";
 import { fetchSceneManifest } from "../api.js";
@@ -257,7 +258,33 @@ function PartTree({ rows, view, questions, counts, blockersOnly, endpoints, link
   );
 }
 
-function Annotations({ labels, selection, endpoints, pins, faceView, base, target, onSelect, glbSources = {} }) {
+// Face view strip: physical fit stays the primary line, the minimum projected gap is the one large
+// number, and every mark in the drawing has its source here or on the dimension itself.
+function FaceStrip({ fit, mode, base, target, glbSources, pitch }) {
+  const sources = [target, ...(mode === "compare" ? [base] : [])].map((rev) => glbSources[rev] ?? `${rev}-inch GLB`);
+  return (
+    <div className="fd-footprint" data-footprint="">
+      <div className="fd-fit-primary">Physical fit · Unknown</div>
+      <div className="fd-fit-gap" data-fit-gap="">{minimumGapLabel(fit?.minimum)}</div>
+      {fit?.apertureReason && <div className="fd-fit-reason">Aperture not derivable · {fit.apertureReason}</div>}
+      {!fit && <div className="fd-fit-reason">Aperture not derivable · fit layer unavailable</div>}
+      {mode === "compare" && fit?.footprint && <div className="fd-fit-delta">
+        <span data-footprint-delta="">{fit.footprint}</span>
+        <span>{target}-inch minus {base}-inch · CAD footprint, computed</span>
+      </div>}
+      <div className="fd-fit-legend" data-footprint-source="">
+        {fit?.spacers > 0 && <span><svg aria-hidden="true" viewBox="0 0 12 12"><path d="M0,6h12M6,0v12" /></svg>
+          Spacer mesh centroid · computed (hole axis unverified)</span>}
+        {pitch && <span><svg aria-hidden="true" viewBox="0 0 16 12"><path className="fd-legend-dashed" d="M0,6h16" /></svg>
+          Mount pitch · {pitch.value} · datasheet{" "}
+          {pitch.source.href ? <a href={pitch.source.href}>{pitch.source.label}</a> : pitch.source.label}</span>}
+        <span>Contours computed from {sources.join(" and ")}</span>
+      </div>
+    </div>
+  );
+}
+
+function Annotations({ labels, selection, endpoints, pins, faceView, base, target, onSelect, glbSources = {}, faceFit, mode, pitch }) {
   return (
     <div className="fd-annotations" aria-label="Scene callouts">
       <svg className="fd-leaders" aria-hidden="true">
@@ -268,31 +295,13 @@ function Annotations({ labels, selection, endpoints, pins, faceView, base, targe
         <path className="fd-pin-ticks" data-pin-ticks="" />
         <path className="fd-ghost-marks" data-ghost-marks="" />
         <path className="fd-ghost-pairs" data-ghost-pairs="" />
-        {faceView && [base, target].map((revision) => (
-          <g className="fd-dimensions" data-dimensions={revision} key={revision}
-            data-kind={revision === base ? "removed" : "added"}>
-            <path />
-          </g>
-        ))}
+        {faceView && <g className="fd-face-drawing" data-face-drawing="" />}
         {selection?.part && <>
           <path className="fd-bracket-halo" data-bracket={selection.key} />
           <path className="fd-bracket" data-bracket={selection.key} />
         </>}
       </svg>
-      {faceView && <>
-        {[base, target].flatMap((revision) => ["width", "height"].map((axis) => (
-          <span className="fd-dimension-label" key={revision + axis} data-dimension-label={revision + axis}
-            data-kind={revision === base ? "removed" : "added"} data-axis={axis} />
-        )))}
-        <div className="fd-footprint" data-footprint="">
-          <div>{target}-inch minus {base}-inch · CAD footprint, computed</div>
-          <div data-footprint-delta="" />
-          {/* Every Face view mark names its source; the inner rectangle and circles are CAD contours. */}
-          <div className="fd-footprint-source" data-footprint-source="">
-            Window and mount-hole contours · computed from {[target, base].map((rev) => glbSources[rev] ?? `${rev}-inch GLB`).join(" and ")}
-          </div>
-        </div>
-      </>}
+      {faceView && <FaceStrip fit={faceFit} mode={mode} base={base} target={target} glbSources={glbSources} pitch={pitch} />}
       {labels.map((row) => <span className="fd-label" key={row.key} data-anchor={row.key}
         data-endpoint-label={row.endpoint}>{row.caption ?? nameOf(row)}
         {row.detail && <small className="fd-label-detail">{row.detail}</small>}</span>)}
@@ -333,6 +342,7 @@ export default function FieldDeckScene({ onExit }) {
   const [linked, setLinked] = useState(new Set());
   const [meshStats, setMeshStats] = useState(null);
   const [ghostLengths, setGhostLengths] = useState(null);
+  const [faceFit, setFaceFit] = useState(null);
   const [rendered, setRendered] = useState(false);
   const [stageError, setStageError] = useState("");
   const [view, setView] = useState(INITIAL);
@@ -441,8 +451,11 @@ export default function FieldDeckScene({ onExit }) {
   });
   const pins = [];
   if (view.blockers && view.faceView) {
+    // Face view pins anchor to a display outline that is drawn in this mode only.
+    const drawn = (key) => view.mode === "compare" || key.startsWith(`${view.mode}:`);
     for (const question of allQuestions) {
-      const anchors = [...question.keys].filter((key) => index.byKey.get(key)?.part?.part_id === focusPart && linked.has(key));
+      const anchors = [...question.keys].filter((key) => index.byKey.get(key)?.part?.part_id === focusPart
+        && linked.has(key) && drawn(key));
       if (anchors.length) pins.push({ ...question, key: index.byPart.get(`${revision}:${focusPart}`)?.key ?? anchors[0], anchor: anchors[0] });
     }
   } else if (view.blockers) {
@@ -460,6 +473,11 @@ export default function FieldDeckScene({ onExit }) {
   const comparisonAvailable = comparisonEnabled && sidecars[target]?.revision_diff?.status === "available";
   const comparisonRenderable = comparisonAvailable
     && [base, target].every((rev) => [...linked].some((key) => key.startsWith(`${rev}:`)));
+  const pitchEvidence = index.byPart.get(`${target}:${focusPart}`)?.part?.evidence
+    ?.find(({ field }) => field === "landscape_mount_pitch_mm");
+  const mountPitch = pitchEvidence?.value != null ? {
+    value: formatEvidenceValue({ ...pitchEvidence, state: "datasheet" }), source: formatEvidenceSource(pitchEvidence.source),
+  } : null;
   const faceAvailable = comparisonRenderable && focusPart
     && [base, target].every((rev) => linked.has(index.byPart.get(`${rev}:${focusPart}`)?.key));
 
@@ -525,6 +543,7 @@ export default function FieldDeckScene({ onExit }) {
         setLinked(runtime.linked);
         setMeshStats(runtime.meshStats ?? null);
         setGhostLengths(runtime.ghostLengths ?? null);
+        setFaceFit(runtime.faceFit ?? null);
       } catch (error) {
         setStageError(`3D stage unavailable (${error.message}).`);
       }
@@ -675,8 +694,12 @@ export default function FieldDeckScene({ onExit }) {
   }
 
   const offsetLabel = view.explode > 0 ? `Presentation offset · ${Math.round(view.explode * 100)}%` : null;
+  // Face view draws at explode 0; Back to 3D returns the presentation offset that was live before.
   const toggleFace = () => {
-    setView((old) => ({ ...old, faceView: !old.faceView, touring: false }));
+    setExplodeMotion(null);
+    setView((old) => (old.faceView
+      ? { ...old, faceView: false, touring: false, explode: old.faceExplode ?? old.explode, faceExplode: undefined }
+      : { ...old, faceView: true, touring: false, faceExplode: old.explode }));
     setMoreOpen(false);
   };
 
@@ -718,7 +741,7 @@ export default function FieldDeckScene({ onExit }) {
 
         <Annotations labels={labels} selection={view.faceView ? null : selection} endpoints={endpoints}
           pins={pins} faceView={view.faceView} base={base} target={target} onSelect={select}
-          glbSources={glbSources} />
+          glbSources={glbSources} faceFit={faceFit} mode={view.mode} pitch={mountPitch} />
         <div className="fd-bottom">
           {assets && (
             <div className="fd-controls" data-intro={playing}>

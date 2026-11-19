@@ -18,9 +18,11 @@ import { N8AOPostPass } from "n8ao";
 import { fielddeckSceneUrl } from "../api.js";
 import {
   bracketPath, chooseTier, DIMMED_VENDOR, pairMovedFeatures, closedEdgeLoops, cullIsolatedChains, totalChainLength, classifyPart, convexHull, cullCoincidentChains, DEFAULT_EXPLODE, diffAccentChains,
-  DIFF_COLORS, dimensionLabel, explodeGroupOffsets, FIELDDECK_NARROW, footprintDelta, ghostDeltaKey,
+  DIFF_COLORS, explodeGroupOffsets, FIELDDECK_NARROW, footprintDeltaPair, ghostDeltaKey,
   ghostOutlineLoops, materialSpec, repelPins, meshMeasures, nearestPoint, placeBesideEndpoint, placeCallouts,
   projectedFitScale, QUALITY_SAMPLE_COUNT, rowForNode, weldEdgeChains,
+  apertureFromSection, FACE_APERTURE_PARTS, formatEvidenceValue, gapLabel, linearDimension, minimumSideGap,
+  projectedSideGaps, sectionSegments, vertexCentroid,
 } from "./fielddeckLogic.js";
 
 const TOUR_ANGLES = [18, -5, 24];
@@ -37,6 +39,7 @@ const clamp = (n) => Math.min(1, Math.max(0, n));
 const outCubic = (t) => 1 - (1 - t) ** 3;
 const inOutCubic = (t) => t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2;
 const FACE_UP = new THREE.Vector3(0, 1, 0);
+const FACE_FOV = 4;
 const introEase = (x) => {
   if (x === 0 || x === 1) return x;
   // Evaluate the timing curve by solving its X coordinate before evaluating Y.
@@ -590,6 +593,50 @@ function boundsFor(entries, explode) {
   return bounds;
 }
 
+function triangleSoup(entry) {
+  const soup = [];
+  for (const mesh of entry.style.surface) {
+    const position = mesh.geometry.getAttribute("position");
+    const index = mesh.geometry.index;
+    const count = index ? index.count : position.count;
+    for (let i = 0; i < count; i++) {
+      const vertex = index ? index.getX(i) : i;
+      soup.push(position.getX(vertex), position.getY(vertex), position.getZ(vertex));
+    }
+  }
+  return soup;
+}
+
+// Face view fit layer, in assembled coordinates (explode 0). The display face is the XY plane, so
+// the faceplate is sectioned at its mid-thickness in Z and everything is projected onto XY.
+function computeFaceFit(entries, { target, focusPart }) {
+  const display = entries.get(`${target}:part:${focusPart}`);
+  if (!display) return null;
+  const centre = [(display.bounds.min.x + display.bounds.max.x) / 2, (display.bounds.min.y + display.bounds.max.y) / 2];
+  const soup = triangleSoup(display);
+  const points = [];
+  for (let i = 0; i < soup.length; i += 3) points.push({ x: soup[i], y: soup[i + 1] });
+  const outline = convexHull(points).map(({ x, y }) => [x, y]);
+  const faces = FACE_APERTURE_PARTS.map((id) => entries.get(`${target}:part:${id}`));
+  let level = null;
+  let aperture;
+  if (faces.some((entry) => !entry)) {
+    aperture = { loop: null, reason: "Face Rear Left or Right mesh missing" };
+  } else {
+    const bounds = boundsFor(faces, 0);
+    level = (bounds.min.z + bounds.max.z) / 2;
+    aperture = apertureFromSection(faces.map((entry) => ({
+      label: entry.row.part.label, segments: sectionSegments(triangleSoup(entry), level),
+    })), centre);
+  }
+  const gaps = projectedSideGaps(outline, aperture.loop, centre);
+  const spacers = [...entries.values()]
+    .filter(({ row }) => row.revision === target && row.part.part_id.startsWith("display-spacer-"))
+    .map((entry) => ({ key: entry.row.key, point: vertexCentroid(triangleSoup(entry)) }))
+    .filter(({ point }) => point);
+  return { level, centre, outline, aperture, gaps, minimum: minimumSideGap(gaps), spacers, top: display.bounds.max.z };
+}
+
 function groupExplode(entries) {
   const center = boundsFor(entries, 0).getCenter(new THREE.Vector3());
   // Share layer clearances across revisions so removed geometry stays aligned in Compare.
@@ -1054,7 +1101,130 @@ function createFrameSampler(renderer) {
   };
 }
 
-function layoutAnnotations(host, camera, entries, width, height, canvasTop, panels, placeLabels, displayOpacity, showDimensions, { base, target, focusPart }, gridPoint) {
+const SVG_NS = "http://www.w3.org/2000/svg";
+function svgNode(parent, tag, attributes, text) {
+  const node = document.createElementNS(SVG_NS, tag);
+  for (const [name, value] of Object.entries(attributes)) node.setAttribute(name, value);
+  if (text != null) node.textContent = text;
+  parent.append(node);
+  return node;
+}
+
+// Face view drafting (ISO 128 / 129-1) in the SVG overlay, projected through the same camera as
+// the 3D contours so every mark sits on its feature. Returns the drawing's lower edge for the strip.
+function drawFace(host, project, entries, face, visible, { base, target, focusPart }) {
+  const layer = host.querySelector("[data-face-drawing]");
+  if (!layer) return null;
+  layer.replaceChildren();
+  if (!visible || !face) return null;
+  const { mode, fit, compact, sources } = face;
+  const older = mode !== target ? entries.get(`${base}:part:${focusPart}`)?.bounds : null;
+  const newer = mode !== base ? entries.get(`${target}:part:${focusPart}`)?.bounds : null;
+  const outlineOf = (bounds) => {
+    if (!bounds) return null;
+    const a = project(new THREE.Vector3(bounds.min.x, bounds.max.y, bounds.max.z));
+    const b = project(new THREE.Vector3(bounds.max.x, bounds.min.y, bounds.max.z));
+    return a && b ? { left: a.x, top: a.y, right: b.x, bottom: b.y } : null;
+  };
+  const o = outlineOf(older);
+  const n = outlineOf(newer);
+  if (!o && !n) return null;
+  const extent = [o, n].filter(Boolean).reduce((a, b) => ({
+    left: Math.min(a.left, b.left), right: Math.max(a.right, b.right),
+    top: Math.min(a.top, b.top), bottom: Math.max(a.bottom, b.bottom),
+  }));
+  const label = (feature, value, revision) => ({
+    short: `${feature} · ${formatEvidenceValue({ field: "dimension_mm", value })} · computed`,
+    source: compact ? "" : ` from ${sources?.[revision] ?? `${revision}-inch GLB`}`,
+  });
+  const dimensions = [];
+  if (o) {
+    dimensions.push({ kind: "removed", from: [o.left, o.top], to: [o.right, o.top], normal: [0, -1], offset: 28,
+      text: label("7-inch display outline", older.max.x - older.min.x, base) });
+    dimensions.push({ kind: "removed", from: [o.left, o.bottom], to: [o.left, o.top], normal: [-1, 0], offset: 28,
+      text: label("7-inch display outline", older.max.y - older.min.y, base) });
+  }
+  let lowest = extent.bottom;
+  if (n) {
+    // 5-inch dimensions take the sides the 7-inch ones leave free. They sit in the band between the
+    // two outlines when it is wide enough to stay 24 px clear of the 7-inch outline, else outside it.
+    const place = (band) => (!o ? 28 : band >= 52 ? 22 : band + 40);
+    const below = place(o ? o.bottom - n.bottom : 0);
+    const beside = place(o ? o.right - n.right : 0);
+    dimensions.push({ kind: "added", from: [n.left, n.bottom], to: [n.right, n.bottom], normal: [0, 1], offset: below,
+      text: label("5-inch glass", newer.max.x - newer.min.x, target) });
+    dimensions.push({ kind: "added", from: [n.right, n.bottom], to: [n.right, n.top], normal: [1, 0], offset: beside,
+      text: label("5-inch glass", newer.max.y - newer.min.y, target) });
+    lowest = Math.max(lowest, n.bottom + below + 4);
+  }
+  for (const { kind, from, to, normal, offset, text } of dimensions) {
+    const dimension = linearDimension(from, to, normal, offset);
+    const group = svgNode(layer, "g", { class: "fd-dim", "data-kind": kind });
+    svgNode(group, "path", { class: "fd-dim-extension", d: dimension.extensions });
+    svgNode(group, "path", { class: "fd-dim-line", d: dimension.line });
+    svgNode(group, "path", { class: "fd-dim-arrow", d: dimension.arrows });
+    const node = svgNode(group, "text", {
+      class: "fd-dim-text", "text-anchor": "middle",
+      transform: `translate(${dimension.text.x},${dimension.text.y}) rotate(${dimension.text.rotate})`,
+    }, text.short + text.source);
+    // Text stays within its dimension line; the GLB name moves to the strip's source line if not.
+    if (text.source && node.getComputedTextLength?.() > dimension.length - 16) node.textContent = text.short;
+  }
+  if (n && fit) {
+    const at = ([x, y], z) => project(new THREE.Vector3(x, y, z));
+    // Aperture: the faceplate's mid-thickness section, only when a closed loop was derived.
+    if (fit.aperture.loop) {
+      const points = fit.aperture.loop.map((point) => at(point, fit.level));
+      if (points.every(Boolean)) {
+        svgNode(layer, "path", { class: "fd-aperture", d: points.map(({ x, y }, i) => `${i ? "L" : "M"}${x},${y}`).join("") + "Z" });
+      }
+    }
+    // Spacer mesh centroids: a 12 px cross each.
+    const crosses = fit.spacers.map(({ point }) => project(new THREE.Vector3(...point))).filter(Boolean)
+      .map(({ x, y }) => `M${x - 6},${y}h12M${x},${y - 6}v12`).join("");
+    if (crosses) svgNode(layer, "path", { class: "fd-spacer-marks", d: crosses });
+    // Projected gaps per side: a signed dimension when derived, otherwise a dotted "?" stub.
+    const [cx, cy] = fit.centre;
+    const middle = { left: [n.left, (n.top + n.bottom) / 2], right: [n.right, (n.top + n.bottom) / 2],
+      top: [(n.left + n.right) / 2, n.top], bottom: [(n.left + n.right) / 2, n.bottom] };
+    const inward = { left: [1, 0], right: [-1, 0], top: [0, 1], bottom: [0, -1] };
+    for (const side of ["left", "right", "top", "bottom"]) {
+      const gap = fit.gaps[side];
+      const [x, y] = middle[side];
+      const [ix, iy] = inward[side];
+      const text = compact ? `Gap ${side[0].toUpperCase()} ${gap.value == null ? "?" : gapLabel(side, gap).split(" · ")[1].slice(2)}`
+        : gapLabel(side, gap);
+      const vertical = side === "left" || side === "right";
+      const group = svgNode(layer, "g", { class: "fd-gap", "data-side": side, "data-known": String(gap.value != null) });
+      if (gap.value == null) {
+        svgNode(group, "path", { class: "fd-gap-unknown", d: `M${x - ix * 6},${y - iy * 6}L${x + ix * 14},${y + iy * 14}` });
+      } else {
+        // The aperture edge on this side, on the line through the display centre: the outline's
+        // extreme minus the signed gap (left, bottom) or plus it (right, top).
+        const axis = vertical ? 0 : 1;
+        const extreme = side === "left" || side === "bottom"
+          ? Math.min(...fit.outline.map((point) => point[axis])) - gap.value
+          : Math.max(...fit.outline.map((point) => point[axis])) + gap.value;
+        const edge = at(vertical ? [extreme, cy] : [cx, extreme], fit.level);
+        if (edge) {
+          const dimension = linearDimension([x, y], vertical ? [edge.x, y] : [x, edge.y], vertical ? [0, -1] : [1, 0], 0, { gap: 0, overrun: 0 });
+          svgNode(group, "path", { class: "fd-dim-line", d: dimension.line });
+          svgNode(group, "path", { class: "fd-dim-arrow", d: dimension.arrows });
+        }
+      }
+      const tx = x + ix * 18;
+      const ty = y + iy * 18;
+      svgNode(group, "text", {
+        class: "fd-gap-text", "text-anchor": "middle", "dominant-baseline": "central",
+        transform: `translate(${tx},${ty}) rotate(${vertical ? -90 : 0})`,
+      }, text);
+    }
+  }
+  return { left: extent.left, right: extent.right, y: lowest };
+}
+
+function layoutAnnotations(host, camera, entries, width, height, canvasTop, panels, placeLabels, displayOpacity, showDimensions, sceneConfig, gridPoint, face) {
+  const { base } = sceneConfig;
   const origin = host.getBoundingClientRect();
   const viewport = {
     left: Math.max(8, 8 - origin.left),
@@ -1151,10 +1321,28 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
     endpointPositions.set(node.dataset.endpointPin, mark(node, centerFor(node.dataset.pinAnchor)));
   }
   const footprint = host.querySelector("[data-footprint]");
+  const faceTicks = [];
   const markPin = (node, anchor) => {
-    const display = footprint && entries.get(node.dataset.pinAnchor)?.displayOverlay;
-    const lug = display?.lug && project(display.lug.clone().add(display.object.position));
-    return mark(node, anchor ?? lug ?? centerFor(node.dataset.pinAnchor), Boolean(footprint));
+    const entry = footprint && entries.get(node.dataset.pinAnchor);
+    if (entry?.displayOverlay && !anchor) {
+      // Face view: a 7-inch question sits on the 7-inch outline; a 5-inch question sits beside the
+      // display lug it is about, with a 1 px tick back to that lug.
+      const { bounds } = entry;
+      if (entry.row.revision === base) {
+        const point = project(new THREE.Vector3(THREE.MathUtils.lerp(bounds.min.x, bounds.max.x, 0.12), bounds.max.y, bounds.max.z));
+        return mark(node, point, true);
+      }
+      const lug = entry.displayOverlay.lug && project(entry.displayOverlay.lug.clone());
+      if (lug) {
+        const point = mark(node, { x: lug.x - 30, y: lug.y + 22 }, true);
+        if (point) {
+          const length = Math.hypot(lug.x - point.x, lug.y - point.y);
+          faceTicks.push(`M${point.x + (lug.x - point.x) * 12 / length},${point.y + (lug.y - point.y) * 12 / length}L${lug.x},${lug.y}`);
+        }
+        return point;
+      }
+    }
+    return mark(node, anchor ?? centerFor(node.dataset.pinAnchor), Boolean(footprint));
   };
   host.querySelectorAll("[data-pin-anchor]:not([data-endpoint-pin]):not([data-interface-question])")
     .forEach((node) => markPin(node));
@@ -1196,45 +1384,18 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
       }
     });
   }
-  host.querySelector("[data-pin-ticks]")?.setAttribute("d", ticks.join(" "));
+  host.querySelector("[data-pin-ticks]")?.setAttribute("d", [...faceTicks, ...ticks].join(" "));
   host.querySelector("[data-pin-leaders]").setAttribute("d", pinLeaders.join(" "));
 
   if (footprint) {
-    const older = entries.get(`${base}:part:${focusPart}`)?.bounds;
-    const newer = entries.get(`${target}:part:${focusPart}`)?.bounds;
-    const outlines = showDimensions && older && newer && [outlineFor(older), outlineFor(newer)];
-    const visible = outlines && outlines.every(Boolean);
-    const outer = visible && {
-      left: Math.min(...outlines.map(({ left }) => left)), right: Math.max(...outlines.map(({ right }) => right)),
-      top: Math.min(...outlines.map(({ top }) => top)), bottom: Math.max(...outlines.map(({ bottom }) => bottom)),
-    };
-    for (const [i, revision] of [base, target].entries()) {
-      const group = host.querySelector(`[data-dimensions="${revision}"]`);
-      const widthLabel = host.querySelector(`[data-dimension-label="${revision}width"]`);
-      const heightLabel = host.querySelector(`[data-dimension-label="${revision}height"]`);
-      group.style.visibility = widthLabel.style.visibility = heightLabel.style.visibility = visible ? "visible" : "hidden";
-      if (!visible) continue;
-      const { left, right, top, bottom } = outlines[i];
-      const sign = i === 0 ? -1 : 1;
-      const y = (i === 0 ? outer.top : outer.bottom) + sign * 16;
-      const x = (i === 0 ? outer.left : outer.right) + sign * 16;
-      const edgeY = i === 0 ? top : bottom;
-      const edgeX = i === 0 ? left : right;
-      group.querySelector("path").setAttribute("d",
-        `M${left},${edgeY}V${y}H${right}V${edgeY} M${edgeX},${top}H${x}V${bottom}H${edgeX}`);
-      const bounds = i === 0 ? older : newer;
-      widthLabel.textContent = dimensionLabel(revision, bounds, "x");
-      heightLabel.textContent = dimensionLabel(revision, bounds, "y");
-      widthLabel.style.transform = `translate(${(left + right) / 2}px, ${y + sign * (widthLabel.offsetHeight / 2 + 3)}px)`;
-      heightLabel.style.transform = `translate(${x + sign * (heightLabel.offsetWidth / 2 + 3)}px, ${(top + bottom) / 2}px)`;
-    }
-    if (visible) {
-      footprint.querySelector("[data-footprint-delta]").textContent = footprintDelta(older, newer);
-      const x = (outer.left + outer.right) / 2;
+    const bottom = drawFace(host, project, entries, face, showDimensions, sceneConfig);
+    if (bottom !== null) {
+      const { left, right } = bottom;
+      const x = (left + right) / 2;
       const halfWidth = footprint.offsetWidth / 2;
       const clearance = Math.min(viewport.bottom, ...occupied.filter((rect) =>
-        rect.top >= outer.bottom && rect.left < x + halfWidth && rect.right > x - halfWidth).map((rect) => rect.top));
-      position(footprint, { x, y: Math.min(outer.bottom + 42, clearance - footprint.offsetHeight - 16) });
+        rect.top >= bottom.y && rect.left < x + halfWidth && rect.right > x - halfWidth).map((rect) => rect.top));
+      position(footprint, { x, y: Math.max(bottom.y + 16, Math.min(bottom.y + 24, clearance - footprint.offsetHeight - 12)) });
     } else {
       position(footprint, null);
     }
@@ -1380,6 +1541,9 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
   const technical = new THREE.Scene();
   const entries = makeEntries(assets, index, scene, technical, resources, sceneConfig);
   const all = [...entries.values()];
+  const faceFit = all.length ? computeFaceFit(entries, sceneConfig) : null;
+  const glbSources = Object.fromEntries(Object.entries(assets)
+    .map(([revision, { sidecar }]) => [revision, sidecar?.glb_source?.split("/").at(-1)]));
   if (!all.length) {
     resources.forEach((resource) => resource.dispose());
     throw new Error("No GLB mesh names match the Fielddeck sidecars.");
@@ -1634,7 +1798,9 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
 
   function projectedPose(parts, direction, explode, { face = false, ghost } = {}) {
     const upAxis = face ? FACE_UP : UP;
-    const fov = face ? 12 : baseFov;
+    // Face view narrows to 4°, close to orthographic, so planes a few millimetres apart in depth
+    // project to the same scale as the overlay drawn over them.
+    const fov = face ? FACE_FOV : baseFov;
     const right = upAxis.clone().cross(direction).normalize();
     const up = direction.clone().cross(right);
     const target = (face ? displayBounds : boundsFor(parts, explode)).getCenter(new THREE.Vector3());
@@ -1656,15 +1822,16 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
     }
 
     // Reserve more room below the face drawing for the delta and the phone controls.
-    const topInset = Math.min(frameHeight / 4, face ? 46 : 32);
-    const bottomInset = Math.min(frameHeight * (face ? 0.4 : 0.25), face ? (mobile ? 145 : 84) : 32);
+    // Face view keeps room for the dimensions on every side and the fit strip below.
+    const topInset = Math.min(frameHeight / 4, face ? (mobile ? 64 : 76) : 32);
+    const bottomInset = Math.min(frameHeight * (face ? 0.45 : 0.25), face ? (mobile ? 190 : 200) : 32);
     const rect = {
       left: -frameWidth / 2, right: frameWidth / 2,
       top: -frameHeight / 2 + topInset, bottom: frameHeight / 2 - bottomInset,
     };
     const centerY = (rect.top + rect.bottom) / 2;
     // Phones frame the assembly at about 70% of the stage width.
-    const margin = { x: Math.min(frameWidth / 3, face ? 50 : mobile ? frameWidth * 0.15 : 32), y: 0 };
+    const margin = { x: Math.min(frameWidth / 3, face ? (mobile ? 40 : 76) : mobile ? frameWidth * 0.15 : 32), y: 0 };
     const focalPixels = height / (2 * Math.tan(THREE.MathUtils.degToRad(fov / 2)));
     let shiftX = 0;
     let shiftY = 0;
@@ -1975,16 +2142,16 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
     if (heroElapsed !== null) {
       setCamera(assemblyPose(mode, offsetFor));
     } else if (faceView !== Boolean(lastConfig?.faceView)) {
-      if (faceView && !priorCamera) priorCamera = { position: camera.position.clone(), target: controls.target.clone() };
-      const pose = faceView ? facePose()
-        : newCue || selectionChanged || mode !== lastConfig.mode ? assemblyPose(mode, offsetFor) : priorCamera;
+      // Back to 3D restores the exact camera that was live when Face view opened: position,
+      // target, up and field of view. Only a new tour cue or selection asks for a fresh pose.
+      if (faceView && !priorCamera) {
+        priorCamera = { position: camera.position.clone(), target: controls.target.clone(), up: camera.up.clone(), fov: camera.fov };
+      }
+      const pose = faceView ? facePose() : newCue || selectionChanged ? assemblyPose(mode, offsetFor) : priorCamera;
       if (!faceView) latestCue = cameraCue;
-      moveCamera(pose, now, 240, inOutCubic);
+      moveCamera(pose, now, 650, inOutCubic);
       cameraMove.faceTransition = { up: camera.up.clone(), fov: camera.fov };
     } else if (faceView) {
-      if (resized || selectionChanged || mode !== lastConfig.mode || explode !== lastConfig.explode) {
-        priorCamera = assemblyPose(mode, offsetFor);
-      }
       if (resized) {
         const pose = facePose();
         if (cameraMove) cameraMove.pose = pose;
@@ -2103,12 +2270,16 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
         }
       }
       if (entry.displayOverlay) {
+        // Face view: the 5-inch mode shows only its own display; Compare keeps the 7-inch outline
+        // at 35%, dashed, as the reference footprint.
         const { object, rim, details } = entry.displayOverlay;
-        object.visible = faceView;
+        const faded = mode === "compare" && row.revision === base;
+        object.visible = faceView && (mode === "compare" || row.revision === mode);
         if (object.visible) {
           object.position.set(0, 0, 0);
-          rim.opacity = 1;
-          details.opacity = 0.2;
+          // Lines composite in linear light, where 0.2 reads as about 35% on screen.
+          rim.opacity = faded ? 0.2 : 1;
+          details.opacity = faded ? 0.12 : 0.2;
         }
       }
       const visible = !faceView && weight > 0.001;
@@ -2160,7 +2331,8 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
       opaque = block;
       const placeLabels = layoutDirty || resized || config !== lastConfig || !dirty || now - lastLayout > 60;
       layoutAnnotations(host, camera, entries, width, height, canvasTop, panels, placeLabels, displayOpacity, !cameraMove,
-        sceneConfig, grid.visible ? gridLabelPoint() : null);
+        sceneConfig, grid.visible ? gridLabelPoint() : null,
+        faceView ? { mode, fit: faceFit, compact: mobile, sources: glbSources } : null);
       if (placeLabels) lastLayout = now;
     }
     canvas.dataset.fielddeckCanvas = "rendered";
@@ -2179,6 +2351,12 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
     linked: new Set(entries.keys()),
     meshStats: new Map(all.map(({ row, meshStats }) => [row.key, meshStats])),
     ghostLengths: new Map(all.filter(({ overlay }) => overlay).map(({ row, overlay }) => [row.key, overlay.length])),
+    faceFit: faceFit && {
+      apertureReason: faceFit.aperture.reason, gaps: faceFit.gaps, minimum: faceFit.minimum,
+      spacers: faceFit.spacers.length, level: faceFit.level,
+      footprint: entries.has(`${base}:part:${focusPart}`)
+        ? footprintDeltaPair(entries.get(`${base}:part:${focusPart}`).bounds, entries.get(`${target}:part:${focusPart}`).bounds) : null,
+    },
     update: (next) => { config = next; resize(); },
     dispose() {
       if (frame !== null) cancelAnimationFrame(frame);
