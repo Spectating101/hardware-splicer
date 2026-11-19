@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -272,6 +273,23 @@ def test_whole_file_hash_mismatch_blocks_finalize(tmp_path: Path) -> None:
 
     assert finalized.status_code == 409
     assert "expected_content_hash" in finalized.json()["detail"]["message"]
+    assert store.load("robot-r1")["revision"] == 1
+
+
+def test_duplicate_chunk_record_cannot_override_original_digest(tmp_path: Path) -> None:
+    store, client = _client(tmp_path)
+    content = b"fixture"
+    session_id = _create_session(client, content)["session_id"]
+    url = f"/v1/projects/robot-r1/source-upload-sessions/{session_id}"
+    assert client.put(f"{url}/chunks/0", content=content).status_code == 200
+    manifest = store.root / "robot-r1" / "source_upload_sessions" / session_id / "session.json"
+    session = json.loads(manifest.read_text())
+    received = session["received_chunks"]
+    received.insert(0, {**received[0], "content_hash": "sha256:" + "0" * 64})
+    manifest.write_text(json.dumps(session))
+    result = client.post(f"{url}/finalize", json={"expected_revision": 1})
+    assert result.status_code == 409
+    assert "no longer matches its manifest" in result.json()["detail"]["message"]
     assert store.load("robot-r1")["revision"] == 1
 
 

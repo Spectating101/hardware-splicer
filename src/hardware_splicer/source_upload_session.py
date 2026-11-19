@@ -436,7 +436,8 @@ def assemble_source_upload_session(
             f"upload session is incomplete; missing chunks: {missing}"
         )
     content = BytesIO()
-    records = {row.chunk_index: row for row in session.received_chunks}
+    # A second entry for an index must not override its first recorded digest.
+    records = {row.chunk_index: row for row in reversed(session.received_chunks)}
     for index in range(session.chunk_count):
         target = _chunk_path(
             project_root,
