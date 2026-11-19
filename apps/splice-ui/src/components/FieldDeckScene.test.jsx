@@ -744,7 +744,8 @@ describe("Fielddeck evidence UI", () => {
       .toHaveTextContent(/DSI FFC.*Physical fit · Unknown.*A.*Pi DSI port.*B.*Touch Display 2.*Pin mapping unknown/);
     const annotations = screen.getByLabelText("Scene callouts");
     expect(annotations.querySelector("[data-anchor], [data-interface-question]")).toBeNull();
-    expect(annotations.querySelector('[data-question-number="1"]').parentElement).toHaveAttribute("data-dimmed", "true");
+    // Below 640 px an interface selection hides the pins that are not part of it.
+    expect(annotations.querySelector('[data-question-number="1"]')).toBeNull();
     expect(screen.getByTestId("fielddeck-scene").querySelector(".fd-peek")).toHaveTextContent("Signal voltage unknown");
 
     fireEvent.click(details);

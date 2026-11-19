@@ -439,6 +439,8 @@ export default function FieldDeckScene({ onExit }) {
     }
     for (const question of questions) {
       const { key } = question;
+      // On a phone, an interface selection hides the pins that are not part of it.
+      if (narrow && selection?.link) continue;
       if (linked.has(key) && displayedKeys.has(key)) pins.push({ ...question, anchor: key, dimmed: Boolean(selection?.link) });
     }
   }

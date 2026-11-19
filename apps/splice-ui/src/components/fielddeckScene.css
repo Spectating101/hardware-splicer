@@ -425,3 +425,7 @@
   .fd-tree-scroll { scroll-snap-type: y mandatory; }
   .fd-tree-scroll li, .fd-tree-scroll h3 { scroll-snap-align: start; }
 }
+@media (width < 640px) {
+  .fd-leaders .fd-bracket { stroke-width: 1; }
+  .fd-leaders .fd-bracket-halo { stroke-width: 3; }
+}

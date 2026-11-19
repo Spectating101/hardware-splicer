@@ -1035,8 +1035,16 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
   for (const node of host.querySelectorAll("[data-endpoint-pin]")) {
     endpointPositions.set(node.dataset.endpointPin, mark(node, centerFor(node.dataset.pinAnchor)));
   }
-  // Routing is unknown, so nothing is drawn between A and B: the pill sits beside endpoint B and
-  // the interface's questions gather around the pill.
+  const footprint = host.querySelector("[data-footprint]");
+  const markPin = (node, anchor) => {
+    const display = footprint && entries.get(node.dataset.pinAnchor)?.displayOverlay;
+    const lug = display?.lug && project(display.lug.clone().add(display.object.position));
+    mark(node, anchor ?? lug ?? centerFor(node.dataset.pinAnchor), Boolean(footprint));
+  };
+  host.querySelectorAll("[data-pin-anchor]:not([data-endpoint-pin]):not([data-interface-question])")
+    .forEach((node) => markPin(node));
+  // Routing is unknown, so nothing is drawn between A and B: the pill sits beside endpoint B, clear
+  // of every placed pin, and the interface's questions gather around the pill.
   const endpoint = endpointPositions.get("B") ?? endpointPositions.get("A");
   let routePoint = null;
   if (routeLabel) {
@@ -1049,12 +1057,7 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
       pinRects.push(rect);
     }
   }
-  const footprint = host.querySelector("[data-footprint]");
-  for (const node of host.querySelectorAll("[data-pin-anchor]:not([data-endpoint-pin]), [data-interface-question]")) {
-    const display = footprint && entries.get(node.dataset.pinAnchor)?.displayOverlay;
-    const lug = display?.lug && project(display.lug.clone().add(display.object.position));
-    mark(node, node.dataset.interfaceQuestion ? routePoint ?? endpoint : lug ?? centerFor(node.dataset.pinAnchor), Boolean(footprint));
-  }
+  host.querySelectorAll("[data-interface-question]").forEach((node) => markPin(node, routePoint ?? endpoint));
   host.querySelector("[data-pin-leaders]").setAttribute("d", pinLeaders.join(" "));
 
   if (footprint) {
@@ -1129,7 +1132,8 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
   const callouts = placeLabels && labels.map((node) => {
     const endpoint = node.dataset.endpointLabel;
     const anchor = endpoint ? endpointPositions.get(endpoint) : centerFor(node.dataset.anchor);
-    const hull = !endpoint && anchor ? convexHull(pointsFor(node.dataset.anchor)) : [];
+    // Endpoint labels end on the part's near silhouette too, never across the part to its marker.
+    const hull = anchor ? convexHull(pointsFor(node.dataset.anchor)) : [];
     hulls.set(node, hull);
     // Leaders land on the part's own silhouette: the extreme projected vertex on each side.
     const extreme = (sign) => hull.reduce((best, point) => !best || sign * (point.x - best.x) > 0 ? point : best, null);
@@ -1295,14 +1299,20 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
     resources.forEach((resource) => resource.dispose());
     throw error;
   }
+  // CSS widths × DPR; phones draw every technical line at 1 px.
+  let narrowLines = false;
+  function updateLineWidths() {
+    const dpr = renderer.getPixelRatio();
+    technical.traverse((object) => {
+      const { material } = object;
+      if (material?.isLineMaterial) material.linewidth = (narrowLines ? 1 : material.userData.cssWidth) * dpr;
+    });
+  }
   function applyTier() {
     const { dpr, shadowSize } = TIERS[tier];
     renderer.setPixelRatio(dpr);
     for (const entry of all) entry.hatchDpr.value = dpr;
-    technical.traverse((object) => {
-      const { material } = object;
-      if (material?.isLineMaterial) material.linewidth = material.userData.cssWidth * dpr;
-    });
+    updateLineWidths();
     grid.material.uniforms.dpr.value = dpr;
     renderer.toneMapping = composer ? THREE.NoToneMapping : THREE.NeutralToneMapping;
     renderer.toneMappingExposure = composer ? 1 : EXPOSURE;
@@ -1403,6 +1413,8 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
     camera.setViewOffset(width, height, width / 2 - frameCenterX, height / 2 - frameCenter, width, height);
     controls.enablePan = !mobile;
     controls.enableZoom = !mobile;
+    narrowLines = mobile;
+    updateLineWidths();
     invalidateLayout();
   }
   const observer = new ResizeObserver(resize);
@@ -1447,7 +1459,7 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
       top: -frameHeight / 2 + topInset, bottom: frameHeight / 2 - bottomInset,
     };
     const centerY = (rect.top + rect.bottom) / 2;
-    const margin = { x: Math.min(frameWidth / 3, face ? 50 : mobile ? 16 : 32), y: 0 };
+    const margin = { x: Math.min(frameWidth / 3, face ? 50 : mobile ? 24 : 32), y: 0 };
     const focalPixels = height / (2 * Math.tan(THREE.MathUtils.degToRad(fov / 2)));
     let shiftX = 0;
     let shiftY = 0;
