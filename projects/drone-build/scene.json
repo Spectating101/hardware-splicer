@@ -15,6 +15,7 @@
   "focus": null,
   "tour": [],
   "geometry_status": "unavailable",
+  "geometry_label": "Frame",
   "geometry_note": "downloaded_and_hash_identified_not_geometrically_validated\nImport source STEP into a working CAD kernel, extract mounting geometries and establish accurate dimensions and tolerances; compare actual donor CAD. Do not claim mechanical fit until done.",
   "sources": [
     {
