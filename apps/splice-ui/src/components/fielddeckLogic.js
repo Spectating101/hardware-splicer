@@ -23,9 +23,12 @@ export const QUALITY_SAMPLE_COUNT = 60;
 export const DIFF_COLORS = { changed: 0xa78bfa, added: 0x2dd4bf, removed: 0xf17e70 };
 export const CREASE_INK = 0x1a1d22;
 
-const VENDOR = { color: 0x9c9ea0, roughness: 0.86, threshold: 42 };
+// Dimmed (unchanged in Compare) values are neutral greys at about 0.72 of the lit value, so the
+// largest masses in the frame have cool, readable shadow sides instead of warm taupe.
+export const DIMMED_VENDOR = 0x8a8d90;
+const VENDOR = { color: 0x9c9ea0, dimmed: DIMMED_VENDOR, roughness: 0.86, threshold: 42 };
 const MATERIALS = {
-  custom: { color: 0xcec3b0, roughness: 0.80, threshold: 32 },
+  custom: { color: 0xcec3b0, dimmed: 0x9a9894, roughness: 0.80, threshold: 32 },
   vendor_step: VENDOR,
   donor_cad: VENDOR,
   measured: { color: 0xe4e2dc, roughness: 0.74, threshold: 32, creaseOpacity: 1 },
@@ -34,19 +37,18 @@ const MATERIALS = {
   unknown: { color: null, edgeColor: 0x9097a0, pattern: [3, 2] },
 };
 
-// Unchanged parts in Compare: 80% toward their own luminance grey, then value × 0.62.
+// Bases without a listed dimmed value: their luminance grey, fully neutral, at value × 0.72.
 export function dimmedColor(hex) {
   const channels = [16, 8, 0].map((shift) => (hex >> shift) & 255);
-  const luminance = 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
-  return channels.map((value) => Math.round((value * 0.2 + luminance * 0.8) * 0.62))
-    .reduce((out, value) => out * 256 + value, 0);
+  const grey = Math.round((0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]) * 0.72);
+  return grey * 0x10101;
 }
 
 export function materialSpec(basis, delta, dimmed = false) {
-  const { color, threshold = 32, creaseOpacity = 0.35, edgeColor = color,
+  const { color, dimmed: dimmedValue, threshold = 32, creaseOpacity = 0.35, edgeColor = color,
     fillOpacity = 0, pattern = null, roughness, hatch = null } = MATERIALS[basis] ?? MATERIALS.unknown;
   return {
-    color: dimmed && color != null ? dimmedColor(color) : color, roughness, metalness: 0, hatch, fillOpacity, pattern,
+    color: dimmed && color != null ? dimmedValue ?? dimmedColor(color) : color, roughness, metalness: 0, hatch, fillOpacity, pattern,
     threshold, creaseColor: CREASE_INK, creaseOpacity: dimmed ? 0.25 : creaseOpacity,
     edgeColor: pattern ? edgeColor : DIFF_COLORS[delta] ?? CREASE_INK,
   };

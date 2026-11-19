@@ -78,8 +78,9 @@ describe("Fielddeck state and mapping", () => {
     expect(materialSpec("vendor_step", "added")).toMatchObject({
       color: 0x9c9ea0, roughness: 0.86, metalness: 0, creaseColor: 0x1a1d22, edgeColor: 0x2dd4bf,
     });
-    expect(materialSpec("vendor_step", "unchanged", true)).toMatchObject({ color: dimmedColor(0x9c9ea0), creaseOpacity: 0.25 });
-    expect(materialSpec("custom", "unchanged", true)).toMatchObject({ color: dimmedColor(0xcec3b0) });
+    expect(materialSpec("vendor_step", "unchanged", true)).toMatchObject({ color: 0x8a8d90, creaseOpacity: 0.25 });
+    expect(materialSpec("custom", "unchanged", true)).toMatchObject({ color: 0x9a9894 });
+    expect(materialSpec("proxy", "unchanged", true).color).toBe(dimmedColor(0xa6a098));
     expect(materialSpec("custom", "changed")).toMatchObject({ color: 0xcec3b0, edgeColor: 0xa78bfa });
     expect(materialSpec("donor_cad", "added")).toEqual(materialSpec("vendor_step", "added"));
     expect(materialSpec("measured")).toMatchObject({ color: 0xe4e2dc, creaseOpacity: 1 });
@@ -226,9 +227,9 @@ describe("Fielddeck state and mapping", () => {
     expect(oldRevisionCaption(0)).toBe("old revision coincident");
   });
 
-  it("dims unchanged parts toward their luminance grey", () => {
-    expect(dimmedColor(0xcec3b0)).toBe(0x7b7977);
-    expect(dimmedColor(0x93a3ae)).toBe(0x626465);
+  it("dims bases without a listed value to a neutral grey at 0.72 of their luminance", () => {
+    expect(dimmedColor(0xa6a098)).toBe(0x747474);
+    expect(dimmedColor(0xffffff)).toBe(0xb8b8b8);
   });
 
   it("repels pins to 24 px apart and 12 px clear of the pill without moving fixed pins", () => {

@@ -17,7 +17,7 @@ import {
 import { N8AOPostPass } from "n8ao";
 import { fielddeckSceneUrl } from "../api.js";
 import {
-  bracketPath, chooseTier, closedEdgeLoops, cullIsolatedChains, totalChainLength, classifyPart, convexHull, cullCoincidentChains, DEFAULT_EXPLODE, diffAccentChains,
+  bracketPath, chooseTier, DIMMED_VENDOR, closedEdgeLoops, cullIsolatedChains, totalChainLength, classifyPart, convexHull, cullCoincidentChains, DEFAULT_EXPLODE, diffAccentChains,
   DIFF_COLORS, dimensionLabel, explodeGroupOffsets, FIELDDECK_NARROW, footprintDelta, ghostDeltaKey,
   ghostOutlineLoops, materialSpec, repelPins, meshMeasures, nearestPoint, placeBesideEndpoint, placeCallouts,
   projectedFitScale, QUALITY_SAMPLE_COUNT, rowForNode, weldEdgeChains,
@@ -373,6 +373,11 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
           baseColor.lerp(new THREE.Color(materialSpec("donor_cad").color), 0.4);
         }
         const mutedColor = new THREE.Color(materialSpec(basis, row.delta, true).color ?? spec.edgeColor);
+        // Rubber feet read as the dimmed vendor grey in every mode, never as near-white plastic.
+        if (row.part.part_id.startsWith("foot-")) {
+          baseColor.setHex(DIMMED_VENDOR);
+          mutedColor.setHex(DIMMED_VENDOR);
+        }
         const fill = spec.fillOpacity ? own(new THREE.MeshBasicMaterial({
           color: baseColor, transparent: true, depthWrite: false, toneMapped: false,
         })) : null;
@@ -604,7 +609,7 @@ function createContactShadow(scene, bounds, resources) {
   const height = spread.y + 100;
   const target = new THREE.WebGLRenderTarget(size, size);
   const blurTarget = new THREE.WebGLRenderTarget(size, size, { depthBuffer: false });
-  const bakes = [1.4, 0.5].map((blur) => ({
+  const bakes = [1.4, 0.5, 0.25].map((blur) => ({
     blur, target: new THREE.WebGLRenderTarget(size, size, { depthBuffer: false }),
   }));
   const capture = new THREE.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2,
@@ -640,7 +645,7 @@ function createContactShadow(scene, bounds, resources) {
     target.texture.repeat.x = -1;
     target.texture.offset.x = 1;
     const material = new THREE.MeshBasicMaterial({
-      map: target.texture, transparent: true, depthWrite: false, opacity: 0.45, toneMapped: false,
+      map: target.texture, transparent: true, depthWrite: false, opacity: i === 2 ? 0.55 : 0.45, toneMapped: false,
     });
     resources.add(target);
     resources.add(material);
@@ -686,7 +691,7 @@ function createContactShadow(scene, bounds, resources) {
   [target, blurTarget, depth, quadGeometry, horizontal, vertical, groundGeometry, poolMaterial, keyFloorMaterial]
     .forEach((resource) => resources.add(resource));
 
-  return (renderer, floor, withAssembled = (render) => render()) => {
+  return (renderer, floor, withAssembled = (render) => render(), withFeetOnly = (render) => render()) => {
     pool.visible = keyFloor.visible = Number.isFinite(floor);
     // Bake and composite at the lowest assembly z so the feet touch their contact shadow.
     ground.forEach((mesh) => {
@@ -725,6 +730,9 @@ function createContactShadow(scene, bounds, resources) {
     blurInto(bakes[0]);
     renderDepth();
     blurInto(bakes[1]);
+    // A third, tight 0.25/512 layer at 0.55 from the feet alone, so each foot sits on a dark spot.
+    withFeetOnly(renderDepth);
+    blurInto(bakes[2]);
     renderer.setRenderTarget(null);
     renderer.shadowMap.autoUpdate = shadowUpdates;
   };
@@ -882,7 +890,7 @@ function createComposer(renderer, scene, technical, camera) {
     add(ao);
     ao.setQualityMode("Medium");
     for (const [key, value] of Object.entries({
-      aoRadius: 3, distanceFalloff: 1, intensity: 2.2, aoSamples: 16, denoiseSamples: 8,
+      aoRadius: 5, distanceFalloff: 1, intensity: 3, aoSamples: 16, denoiseSamples: 8,
       denoiseRadius: 12, gammaCorrection: false, screenSpaceRadius: false, halfRes: false,
     })) {
       if (ao.configuration[key] !== undefined) ao.configuration[key] = value;
@@ -1319,7 +1327,8 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
   // The key is a spot at a finite distance, so its incidence changes across a plate and the
   // cream tops carry a gradient instead of one flat value.
   const key = light(0xfff3e6, 2.25, -3, -5, 55, true);
-  light(0xe6eef7, 0.45, 6, -2, 17);
+  // A cool fill, so shadow sides of the dimmed masses go cool grey instead of brown.
+  light(0xe6eef7, 0.6, 6, -2, 17);
   light(0xffffff, 1.3, 2, 7, 28);
   // Part-on-part shadows come from presentation offsets, so they read as soft form, not placement.
   key.shadow.radius = 6;
@@ -1741,7 +1750,7 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
     const sample = interacting && sampler?.begin(frameStart);
     try {
       if (bake) {
-        renderContact(renderer, floor, withAssembledPose);
+        renderContact(renderer, floor, withAssembledPose, withFeetOnly);
         contactPending = false;
       }
       updateScreenDashes(technical, camera, width, height);
@@ -1774,6 +1783,17 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
     } finally {
       all.forEach(({ group }, i) => group.position.copy(saved[i]));
       scene.updateMatrixWorld();
+    }
+  }
+
+  function withFeetOnly(render) {
+    const hidden = all.filter(({ row }) => !row.part.part_id.startsWith("foot-"))
+      .flatMap(({ style }) => style.surface).filter((mesh) => mesh.layers.isEnabled(CONTACT_LAYER));
+    hidden.forEach((mesh) => mesh.layers.disable(CONTACT_LAYER));
+    try {
+      render();
+    } finally {
+      hidden.forEach((mesh) => mesh.layers.enable(CONTACT_LAYER));
     }
   }
 
