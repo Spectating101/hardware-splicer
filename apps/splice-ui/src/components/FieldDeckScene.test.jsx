@@ -578,7 +578,7 @@ describe("Fielddeck evidence UI", () => {
     const label = annotations.querySelector("[data-route-label]");
     expect(label).toHaveTextContent("Routing unknown");
     expect(label.querySelector("path")).toBeNull();
-    expect(annotations.querySelector("[data-route-leaders]")).toBeInTheDocument();
+    expect(annotations.querySelector("[data-route-leaders]")).toBeNull();
     expect(annotations.querySelector('[data-question-number="1"]').parentElement).toHaveAttribute("data-dimmed", "true");
     expect(annotations.querySelector('[data-question-number="2"]').parentElement).toHaveAttribute("data-dimmed", "false");
     const tree = screen.getByRole("complementary", { name: "Part tree" });

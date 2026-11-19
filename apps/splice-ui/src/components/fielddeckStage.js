@@ -991,7 +991,6 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
   const pinLeaders = [];
   const endpointPositions = new Map();
   const routeLabel = host.querySelector("[data-route-label]");
-  const routeLeaders = host.querySelector("[data-route-leaders]");
   function mark(node, anchor, fixed = false) {
     const clear = (point) => point.x >= viewport.left + 12 && point.x <= viewport.right - 12
       && point.y >= viewport.top + 12 && point.y <= viewport.bottom - 12
@@ -1022,24 +1021,27 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
   for (const node of host.querySelectorAll("[data-endpoint-pin]")) {
     endpointPositions.set(node.dataset.endpointPin, mark(node, centerFor(node.dataset.pinAnchor)));
   }
-  const from = endpointPositions.get("A");
-  const to = endpointPositions.get("B");
-  const midpoint = from && to ? { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 } : from ?? to;
+  // Routing is unknown, so nothing is drawn between A and B: the pill sits beside endpoint B and
+  // the interface's questions gather around the pill.
+  const endpoint = endpointPositions.get("B") ?? endpointPositions.get("A");
+  let routePoint = null;
+  if (routeLabel) {
+    routePoint = endpoint && placeBesideEndpoint(viewport, [...occupied, ...pinRects], endpoint,
+      routeLabel.offsetWidth, routeLabel.offsetHeight);
+    position(routeLabel, routePoint);
+    if (routePoint) {
+      const rect = rectFor(routeLabel);
+      occupied.push(rect);
+      pinRects.push(rect);
+    }
+  }
   const footprint = host.querySelector("[data-footprint]");
   for (const node of host.querySelectorAll("[data-pin-anchor]:not([data-endpoint-pin]), [data-interface-question]")) {
     const display = footprint && entries.get(node.dataset.pinAnchor)?.displayOverlay;
     const lug = display?.lug && project(display.lug.clone().add(display.object.position));
-    mark(node, node.dataset.interfaceQuestion ? midpoint : lug ?? centerFor(node.dataset.pinAnchor), Boolean(footprint));
+    mark(node, node.dataset.interfaceQuestion ? routePoint ?? endpoint : lug ?? centerFor(node.dataset.pinAnchor), Boolean(footprint));
   }
   host.querySelector("[data-pin-leaders]").setAttribute("d", pinLeaders.join(" "));
-  if (routeLabel) {
-    const point = midpoint && placeRoutingLabel(viewport, occupied, pinRects, midpoint,
-      routeLabel.offsetWidth, routeLabel.offsetHeight);
-    position(routeLabel, point);
-    routeLeaders.setAttribute("d", point
-      ? [from, to].filter(Boolean).map(({ x, y }) => `M${point.x},${point.y}L${x},${y}`).join(" ") : "");
-    if (point) pinRects.push(rectFor(routeLabel));
-  }
 
   if (footprint) {
     const older = entries.get(`${base}:part:${focusPart}`)?.bounds;
