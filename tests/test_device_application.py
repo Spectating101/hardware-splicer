@@ -49,7 +49,10 @@ PACKAGE_MEMBERS = {
 }
 
 # Frozen before the I2C helper extract. The diagnostic ZIP must stay byte-identical.
-DIAGNOSTIC_EXAMPLE_ZIP_SHA256 = "e26a56bcaf861e64f434b6732ed1446e20dec3442de388a78dc2cbd3906f7e7b"
+# The diagnostic zip for the example spec. It changed once, deliberately, when the case began to meet Espressif's 15 mm antenna
+# clearance and gained two board stops (the previous value was e26a56bc...). The ESP32 plans themselves are still pinned to their
+# original bytes, under the options that restore the old case, in test_device_controllers.py.
+DIAGNOSTIC_EXAMPLE_ZIP_SHA256 = "f9d5eefe75453894827ef7f4bc2cc8728fe05b57f4b92d90c088a8ef7a6419b1"
 
 SCENARIOS = (
     "boot_ok",

@@ -18,10 +18,22 @@ def test_ci_runs_the_fail_closed_verifier_and_transcript_regressions():
     assert "tests/test_device_observations.py" in text
     # The application, its part descriptors and the benchmark that scores its tests run in this workflow too.
     for name in ("test_device_application.py", "test_device_application_vendor.py", "test_device_parts.py",
-                 "test_device_bh1750.py", "test_device_vendor_profiles.py", "test_device_fault_matrix_benchmark.py"):
+                 "test_device_bh1750.py", "test_device_vendor_profiles.py", "test_device_case.py", "test_device_engineering.py", "test_device_fault_matrix_benchmark.py"):
         assert f"tests/{name}" in text
 
 
 def test_ci_runs_the_bh1750_vendor_host_lane_through_the_same_verifier():
     text = (Path(__file__).resolve().parents[1] / ".github/workflows/device-plan-deliverables.yml").read_text()
     assert "scripts/verify_device_application.py --part bh1750 --platformio" in text
+
+
+def test_every_device_browser_spec_is_in_the_script_default_and_in_the_mock_ci_lane():
+    """A spec that is in neither list is never run, and a green workflow then says nothing about it."""
+    root = Path(__file__).resolve().parents[1]
+    specs = sorted(p.name.removesuffix(".spec.js") for p in (root / "apps/circuit-ai/circuit-ai-frontend/e2e").glob("device-*.spec.js"))
+    assert specs
+    default = next(line for line in (root / "scripts/verify_device_frontend.sh").read_text().splitlines() if line.lstrip().startswith("if [[ $# -eq 0 ]]"))
+    mock = next(line for line in (root / ".github/workflows/device-plan-deliverables.yml").read_text().splitlines() if "verify_device_frontend.sh mock" in line)
+    for name in specs:
+        assert name in default.split(), f"{name} is not in the default spec list of scripts/verify_device_frontend.sh"
+        assert name in mock.split(), f"{name} is not in the mock lane of the device workflow"

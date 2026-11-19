@@ -35,12 +35,44 @@ SOURCE_FILES = {
     "https://learn.adafruit.com/adafruit-4-channel-adc-breakouts/pinouts": "ada_ads_pinouts.txt",
     "https://www.adafruit.com/product/1085": "ada_ads_product.txt",
     "https://www.ti.com/lit/ds/symlink/ads1115.pdf": "ads1115_datasheet.txt",
+    "https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf": "pico_datasheet.txt",
+    "https://documentation.espressif.com/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf": "esp32_wroom_32e.txt",
+    "https://cdn-shop.adafruit.com/datasheets/SSD1306.pdf": "ssd1306.txt",
+    "https://docs.espressif.com/projects/esp-hardware-design-guidelines/en/latest/esp32/pcb-layout-design.html": "esp_hw_design_pcb_layout.txt",
 }
 
 
 def normalise(text: str) -> str:
     text = unicodedata.normalize("NFKC", text).replace("−", "-").replace("–", "-").replace("’", "'")
     return re.sub(r"\s+", " ", text).strip()
+
+
+def _walk(node, path=""):
+    """Every dict that carries a verbatim quote, with where it sits in the module, however the library nests it."""
+    if isinstance(node, dict):
+        if "quote" in node:
+            yield path, node
+        for key, value in node.items():
+            yield from _walk(value, f"{path}.{key}" if path else key)
+    elif isinstance(node, list):
+        for index, value in enumerate(node):
+            yield from _walk(value, f"{path}[{index}]")
+
+
+def _quoted_items(module):
+    """The module's `quotes` list and every other quote (a pull-up, an antenna clearance, a temperature note, a current)."""
+    for item in module.get("quotes", []):
+        yield item["claim"], item
+    for path, item in _walk({key: value for key, value in module.items() if key != "quotes"}):
+        yield path, item
+
+
+def _figures_without_quote(module):
+    """Engineering figures that state a number but carry no quote, so nothing can check them. Reported, not failed."""
+    engineering = module.get("engineering", {})
+    rows = [(name, engineering[name]) for name in ("operating_temp_c", "supply_min_a", "power_stage") if name in engineering]
+    rows += [(f"loads[{index}]", row) for index, row in enumerate(engineering.get("loads", []))]
+    return [f"{module['id']}.engineering.{name}" for name, row in rows if "quote" not in row]
 
 
 def main() -> int:
@@ -51,10 +83,11 @@ def main() -> int:
     library = json.loads(args.library.read_text(encoding="utf-8"))
     sources = {}
     checks = []
+    unquoted = []
     for module in library["modules"]:
-        declared = {source["url"] for source in module["sources"]}
-        for item in module.get("quotes", []):
-            url = item["source"]
+        declared = {source["url"] for source in module["sources"]} | {source["url"] for source in module.get("engineering_sources", [])}
+        for claim, item in _quoted_items(module):
+            url = item.get("source")
             filename = SOURCE_FILES.get(url)
             path = args.source_dir / filename if filename else None
             supported = False
@@ -62,9 +95,11 @@ def main() -> int:
                 raw = path.read_bytes()
                 sources[url] = {"file": filename, "sha256": hashlib.sha256(raw).hexdigest()}
                 supported = bool(item["quote"].strip()) and normalise(item["quote"]) in normalise(raw.decode("utf-8"))
-            checks.append({"module": module["id"], "claim": item["claim"], "source": url, "supported": supported})
+            checks.append({"module": module["id"], "claim": claim, "source": url, "supported": supported})
+        unquoted += _figures_without_quote(module)
     passed = bool(checks) and all(row["supported"] for row in checks)
-    print(json.dumps({"pass": passed, "quotes_checked": len(checks), "failed": [row for row in checks if not row["supported"]], "sources": sources}, indent=2))
+    print(json.dumps({"pass": passed, "quotes_checked": len(checks), "failed": [row for row in checks if not row["supported"]],
+                      "figures_without_a_quote": unquoted, "sources": sources}, indent=2))
     return 0 if passed else 1
 
 
