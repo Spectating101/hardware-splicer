@@ -1,0 +1,30 @@
+{
+  "schema": "hardware_splicer.scene_manifest.v1",
+  "project_id": "drone-build",
+  "title": "Holybro X500 V2 frame",
+  "subtitle": "manufacturer reference-frame CAD",
+  "revisions": [
+    {
+      "id": "v1",
+      "label": "ISO 10303-21 STEP AP214",
+      "glb": null,
+      "parts": null
+    }
+  ],
+  "compare": null,
+  "focus": null,
+  "tour": [],
+  "geometry_status": "unavailable",
+  "geometry_note": "downloaded_and_hash_identified_not_geometrically_validated\nImport source STEP into a working CAD kernel, extract mounting geometries and establish accurate dimensions and tolerances; compare actual donor CAD. Do not claim mechanical fit until done.",
+  "sources": [
+    {
+      "label": "Manufacturer 3D CAD File: x500v2-frame.step",
+      "href": "https://holybro.com/collections/multicopter-kit/products/x500-v2-kits",
+      "sha256": "e7ccd422cf7825b61ad8270a98d8fbbbc12aced102cc6a20ed17ee66b816c360"
+    },
+    {
+      "label": "geometry-source.json",
+      "path": "projects/drone-build/geometry-source.json"
+    }
+  ]
+}

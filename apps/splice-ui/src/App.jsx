@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import {
   benchStatus,
   benchSubmit,
@@ -32,6 +32,8 @@ import {
   sessionHasBuild,
   sessionIsResumable,
 } from "./projectSession/projectSession.js";
+
+const FieldDeckScene = lazy(() => import("./components/FieldDeckScene.jsx"));
 
 function Toast({ message, onDismiss }) {
   useEffect(() => {
@@ -412,7 +414,7 @@ export default function App() {
   const advancedActive = isAdvancedView(view);
 
   return (
-    <div className="app-shell" data-testid="app-shell">
+    <div className={`app-shell${view === VIEWS.fielddeck ? " fielddeck-shell" : ""}`} data-testid="app-shell">
       <BuildOverlay
         active={spliceJob.active}
         status={spliceJob.job?.status}
@@ -450,6 +452,14 @@ export default function App() {
             data-testid="nav-project" onClick={resumeProject} disabled={!health?.ok}>Resume project</button>}
           <button type="button" className={`nav-button ${[VIEWS.library, VIEWS.sortcell, VIEWS.reference, VIEWS.showcase].includes(view) ? "active" : ""}`}
             data-testid="nav-library" onClick={openLibrary}>Design library</button>
+          <button
+            type="button"
+            className={`nav-button ${view === VIEWS.fielddeck ? "active" : ""}`}
+            data-testid="nav-fielddeck"
+            onClick={() => setView(VIEWS.fielddeck)}
+          >
+            3D scene (preview)
+          </button>
           <button
             type="button"
             className={`nav-button ${advancedActive ? "active" : ""}`}
@@ -589,6 +599,9 @@ export default function App() {
           {view === VIEWS.showcase && <ProductShowcase />}
           {view === VIEWS.reference && <DetailedAssemblyReference />}
           {view === VIEWS.sortcell && <SortingWorkcell />}
+          {view === VIEWS.fielddeck && (
+            <Suspense fallback={null}><FieldDeckScene onExit={() => setView(VIEWS.home)} /></Suspense>
+          )}
 
           {view === VIEWS.workspace && (
             <ProjectWorkspace

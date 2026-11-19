@@ -1,0 +1,30 @@
+{
+  "schema": "hardware_splicer.scene_manifest.v1",
+  "project_id": "ender3-penplotter-digital",
+  "title": "Virtual Ender-3 pen plotter",
+  "subtitle": "Digital engineering study",
+  "revisions": [
+    {
+      "id": "v1",
+      "label": "v1",
+      "glb": "projects/ender3-penplotter-digital/exports/plotter.glb",
+      "parts": "projects/ender3-penplotter-digital/exports/parts.json",
+      "glb_native_units": "mm"
+    }
+  ],
+  "compare": null,
+  "focus": null,
+  "tour": [],
+  "geometry_status": "available",
+  "geometry_note": "",
+  "sources": [
+    {
+      "label": "Export manifest",
+      "path": "projects/ender3-penplotter-digital/reports/export_manifest.json"
+    },
+    {
+      "label": "Bill of materials",
+      "path": "projects/ender3-penplotter-digital/BOM.md"
+    }
+  ]
+}

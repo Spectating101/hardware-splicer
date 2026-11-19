@@ -1,0 +1,60 @@
+{
+  "schema": "hardware_splicer.scene_manifest.v1",
+  "project_id": "cyberdeck-real-trial-20261020",
+  "title": "Fielddeck display swap",
+  "subtitle": "7-inch → 5-inch",
+  "revisions": [
+    {
+      "id": "7",
+      "label": "7-inch",
+      "glb": "projects/cyberdeck-real-trial-20261020/digital_v1/cad/FIELDDECK_7.glb",
+      "parts": "projects/cyberdeck-real-trial-20261020/digital_v1/cad/parts.json"
+    },
+    {
+      "id": "5",
+      "label": "5-inch",
+      "glb": "projects/cyberdeck-real-trial-20261020/display_swap/cad/FIELDDECK_5.glb",
+      "parts": "projects/cyberdeck-real-trial-20261020/display_swap/parts.json"
+    }
+  ],
+  "compare": {
+    "base": "7",
+    "target": "5"
+  },
+  "focus": {
+    "part_id": "display",
+    "label": "Display"
+  },
+  "tour": [
+    {
+      "label": "Display stack",
+      "select": "display",
+      "revision": "compare",
+      "explode": 1
+    },
+    {
+      "label": "Cable (DSI)",
+      "select": "display-ribbon",
+      "revision": "compare",
+      "explode": 0.45
+    },
+    {
+      "label": "Changed parts",
+      "select": "tray-rear-left",
+      "revision": "compare",
+      "explode": 1
+    }
+  ],
+  "geometry_status": "available",
+  "geometry_note": "",
+  "sources": [
+    {
+      "label": "Baseline geometry report",
+      "path": "projects/cyberdeck-real-trial-20261020/digital_v1/cad/geometry_report.json"
+    },
+    {
+      "label": "Display swap evidence",
+      "path": "docs/status/generated/fielddeck-display-swap-20261118.json"
+    }
+  ]
+}
