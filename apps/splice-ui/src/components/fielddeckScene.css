@@ -103,7 +103,9 @@
 .fd-header > div { display: flex; align-items: center; gap: 12px; }
 .fd-header h1 { margin: 0; font-size: 15px; font-weight: 600; }
 .fd-header .fd-exit { background: transparent; border-color: transparent; }
-.fd-header .fd-validation { background: transparent; color: var(--question); text-align: end; }
+/* Amber belongs to pins and question numbers; the header reads as text with an amber count. */
+.fd-header .fd-validation { background: transparent; color: #e6e8eb; font-weight: 600; text-align: end; }
+.fd-header .fd-validation .fd-count { color: var(--question); }
 .fd-revision { color: var(--text-2); white-space: nowrap; }
 
 .fd-panel {
