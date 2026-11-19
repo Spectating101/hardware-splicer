@@ -1470,3 +1470,14 @@ export function standoffPairingLabel(distances) {
   const count = `${distances.length} standoff${distances.length === 1 ? "" : "s"}`;
   return values.length ? `${count} · nearest-centre pairing · Δ ${range} mm · computed` : null;
 }
+
+// Phone: an interface's question pins fan out in one row above its pill (below when the top is
+// out of room), centred on the pill and clamped to the viewport, so no pin reads as tied to another.
+export function fanPinsAbovePill(pill, count, viewport, { spacing = 30, lift = 22, radius = 12 } = {}) {
+  const width = (count - 1) * spacing;
+  const centre = (pill.left + pill.right) / 2;
+  const start = Math.min(Math.max(centre - width / 2, viewport.left + radius), viewport.right - radius - width);
+  const above = pill.top - lift;
+  const y = above - radius >= viewport.top ? above : pill.bottom + lift;
+  return Array.from({ length: count }, (_, i) => ({ x: start + i * spacing, y }));
+}

@@ -372,6 +372,8 @@
     right: 12px;
     border-radius: 999px;
   }
+  /* In Face view the caption owns the space under the drawing, so Back to 3D moves to the top. */
+  .fd-stage:has(.fd-footprint) .fd-face-pill { top: 96px; bottom: auto; }
   .fd-tour > button:last-child { flex: 1; }
   .fd-legend {
     inset: auto 4px calc(var(--peek) + var(--safe) + 8px) auto;

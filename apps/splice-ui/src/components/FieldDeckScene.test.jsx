@@ -10,7 +10,7 @@ import {
   toggleFielddeckSheet, weldEdgeChains,
   apertureFromSection, footprintDeltaPair, linearDimension, tightestSide,
   pointInPolygon, polygonArea, projectedSideDistances, sectionSegments, vertexCentroid, weldSectionLoops,
-  apertureSizeLabel, coverDetail, coverHeadline, perHalfCover, seamLabel, sideCoverLabel, standoffPairingLabel,
+  apertureSizeLabel, coverDetail, coverHeadline, fanPinsAbovePill, perHalfCover, seamLabel, sideCoverLabel, standoffPairingLabel,
 } from "./fielddeckLogic.js";
 
 const stageMock = vi.hoisted(() => ({ load: vi.fn(), create: vi.fn() }));
@@ -577,6 +577,16 @@ describe("Fielddeck Face view fit layer", () => {
     expect(lonely.sides.right).toEqual({ value: null, part: null, reason: "no inner edge of either half faces the display" });
     expect(sideCoverLabel("right", lonely.sides.right)).toBe("R ? · no inner edge of either half faces the display");
     expect(lonely.aperture).toBeNull();
+  });
+
+  it("fans a phone interface's pins in one row above its pill, or below when the top is full", () => {
+    const viewport = { left: 8, right: 382, top: 100, bottom: 560 };
+    const row = fanPinsAbovePill({ left: 240, right: 350, top: 220, bottom: 244 }, 4, viewport);
+    expect(row.map(({ y }) => y)).toEqual([198, 198, 198, 198]);
+    expect(row.map(({ x }) => x)).toEqual([250, 280, 310, 340]);
+    const clamped = fanPinsAbovePill({ left: 300, right: 380, top: 105, bottom: 129 }, 4, viewport);
+    expect(clamped[0].y).toBe(151);
+    expect(clamped.at(-1).x).toBe(370);
   });
 
   it("merges standoff pairs into one pairing label with the real distance range", () => {

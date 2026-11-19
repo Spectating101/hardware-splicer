@@ -21,7 +21,7 @@ import {
   DIFF_COLORS, explodeGroupOffsets, FIELDDECK_NARROW, footprintDeltaPair, ghostDeltaKey,
   ghostOutlineLoops, materialSpec, repelPins, meshMeasures, nearestPoint, placeBesideEndpoint, placeCallouts,
   projectedFitScale, QUALITY_SAMPLE_COUNT, rowForNode, weldEdgeChains,
-  apertureSizeLabel, FACE_APERTURE_PARTS, standoffPairingLabel, formatEvidenceValue, linearDimension, perHalfCover,
+  apertureSizeLabel, FACE_APERTURE_PARTS, fanPinsAbovePill, standoffPairingLabel, formatEvidenceValue, linearDimension, perHalfCover,
   projectedSideDistances, sectionSegments, seamLabel, sideCoverLabel, tightestSide, vertexCentroid,
 } from "./fielddeckLogic.js";
 
@@ -1465,8 +1465,9 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
     // Repel in screen space: 24 px between pin centres, 12 px clear of the pill, then a 1 px amber
     // tick from each pin back to the pill it belongs to.
     const pill = routePoint && rectFor(routeLabel);
-    const settled = repelPins([...fixedMarkers.map((point) => ({ ...point, fixed: true })),
-      ...interfacePins.map(({ point }) => point)], { minDistance: 28, obstacles: pill ? [pill] : [], clearance: window.matchMedia(FIELDDECK_NARROW).matches ? 26 : 18 })
+    const phone = window.matchMedia(FIELDDECK_NARROW).matches;
+    const settled = phone && pill ? fanPinsAbovePill(pill, interfacePins.length, viewport) : repelPins([...fixedMarkers.map((point) => ({ ...point, fixed: true })),
+      ...interfacePins.map(({ point }) => point)], { minDistance: 28, obstacles: pill ? [pill] : [], clearance: 18 })
       .slice(fixedMarkers.length);
     interfacePins.forEach(({ node }, i) => {
       const point = settled[i];

@@ -729,7 +729,13 @@ export default function FieldDeckScene({ onExit }) {
     setExplodeMotion(null);
     setView((old) => (old.faceView
       ? { ...old, faceView: false, touring: false, explode: old.faceExplode ?? old.explode, faceExplode: undefined }
-      : { ...old, faceView: true, touring: false, faceExplode: old.explode }));
+      // Face view is about the display: an interface or empty selection gives way to it, so the
+      // phone sheet shows the display rather than a cable.
+      : {
+        ...old, faceView: true, touring: false, faceExplode: old.explode,
+        selected: index.byKey.get(old.selected)?.part ? old.selected
+          : index.byPart.get(`${old.mode === "compare" ? target : old.mode}:${focusPart}`)?.key ?? old.selected,
+      }));
     setMoreOpen(false);
   };
 
