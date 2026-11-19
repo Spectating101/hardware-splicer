@@ -160,7 +160,7 @@ function stylePart(entry, compare, weight, ghost, accent, emphasis) {
   // Unchanged parts in Compare take their edges to 25%.
   const edgeOpacity = outline ? entry.outlineOpacity ?? 1 : entry.spec.creaseOpacity;
   edge.base.opacity = weight * THREE.MathUtils.lerp(edgeOpacity, Math.min(edgeOpacity, 0.25), dimming);
-  if (edge.diff) edge.diff.opacity = weight * accent * emphasis;
+  if (edge.diff) edge.diff.opacity = weight * accent * emphasis * (entry.accentScale ?? 1);
 
   for (const mesh of surface) {
     mesh.visible = Boolean(solid || fill) && !ghost;
@@ -292,28 +292,34 @@ function displayContours(entry) {
   };
 }
 
-// Removed and old-revision geometry: one screen-space 6/4 dash, 1.25 px, #F17E70 at 70%.
+// Removed and old-revision geometry: a screen-space 6/4 dash, 1.25 px, #F17E70. Small closed
+// old-revision loops (AABB under 6 mm) are solid 1 px circles at 40%, never dashed fragments.
 function makeGhost(chains, own, { xray = false } = {}) {
   const object = new THREE.Group();
-  // Old-revision features are often a few millimetres across, so they take a finer 3/2 dash at
-  // 1.5 px that still reads as dashed on a 12 px ring instead of breaking into specks.
-  const material = own(xray ? edgeMaterial(DIFF_COLORS.removed, [3, 2], 1.5) : edgeMaterial(DIFF_COLORS.removed, [6, 4], 1.25));
+  const material = own(edgeMaterial(DIFF_COLORS.removed, [6, 4], 1.25));
+  const small = own(edgeMaterial(DIFF_COLORS.removed, null, 1));
   // The old revision often lies inside the current solid; draw it through so the change is visible.
-  if (xray) material.depthTest = false;
-  for (const points of chains) {
-    if (points.length < 2) continue;
+  if (xray) material.depthTest = small.depthTest = false;
+  const loops = xray ? closedEdgeLoops(chainSegments(chains), 0.01).filter(({ min, max }) =>
+    Math.max(max[0] - min[0], max[1] - min[1], max[2] - min[2]) < 6) : [];
+  const inSmallLoop = (points) => loops.some(({ min, max }) => points.every((point) =>
+    point.every((value, axis) => value >= min[axis] - 0.01 && value <= max[axis] + 0.01)));
+  const add = (points, lineMaterial) => {
     const geometry = own(new LineGeometry());
     geometry.setPositions(points.flat());
-    const line = new Line2(geometry, material);
-    line.computeLineDistances();
+    const line = new Line2(geometry, lineMaterial);
+    if (lineMaterial.dashed) line.computeLineDistances();
     line.renderOrder = 3;
     object.add(line);
-  }
+  };
+  loops.forEach(({ points }) => add(points, small));
+  chains.filter((points) => points.length >= 2 && !inSmallLoop(points)).forEach((points) => add(points, material));
   object.visible = false;
   return {
     object,
     setOpacity(weight) {
       material.opacity = weight * 0.7;
+      small.opacity = Math.min(weight * 0.8, 0.4);
     },
   };
 }
@@ -431,9 +437,13 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
       if (style.edge.diff) {
         // Added parts carry their outer outline only. Changed parts carry their outline and large
         // boundary loops; vent slots, small cutouts, hole rims and smooth walls stay in ink.
-        const chains = entry.row.delta === "added"
-          ? ghostOutlineLoops(positions, { maxChains: 1 })
-          : diffAccentChains(edgePositions(geometry, 60), geometry.boundingBox.getSize(new THREE.Vector3()).toArray());
+        // Changed parts get violet after both revisions load, only where geometry differs; their
+        // outline is kept as the fallback when nothing measurable differs.
+        if (entry.row.delta === "changed") {
+          entry.outlineAccent = (entry.outlineAccent ?? []).concat(diffAccentChains(edgePositions(geometry, 60),
+            geometry.boundingBox.getSize(new THREE.Vector3()).toArray()));
+        }
+        const chains = entry.row.delta === "added" ? ghostOutlineLoops(positions, { maxChains: 1 }) : [];
         if (chains.length) {
           const line = featureLine(chainSegments(chains), style.edge.diff, own);
           line.renderOrder = 2;
@@ -449,6 +459,25 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
   }
   for (const entry of entries.values()) {
     entry.samples = new Float32Array(entry.samples);
+    const pairedEdges = entry.paired && entries.get(entry.paired)?.ghostEdges;
+    if (entry.style.edge.diff && entry.row.delta === "changed" && entry.row.revision === target && pairedEdges) {
+      // Diff-only violet: the ghost-culling coincidence test, run against the old revision.
+      let chains = cullIsolatedChains(cullCoincidentChains(weldEdgeChains(entry.ghostEdges), pairedEdges));
+      if (totalChainLength(chains) <= 3) {
+        // Nothing measurable differs: one 1 px violet silhouette at 60% still marks the part as changed.
+        chains = entry.outlineAccent ?? [];
+        entry.style.edge.diff.userData.cssWidth = 1;
+        entry.accentScale = 0.6;
+      }
+      entry.diffLength = totalChainLength(chains);
+      if (chains.length) {
+        const line = featureLine(chainSegments(chains), entry.style.edge.diff, own);
+        line.renderOrder = 2;
+        entry.style.accents.push(line);
+        entry.strokes.add(line);
+      }
+    }
+    delete entry.outlineAccent;
     if (entry.ghostEdges && entry.row.revision === base) {
       if (entry.row.delta === "removed") {
         // The outer silhouette and at most one inner loop, never the PCB, FPC and tab edges.
