@@ -215,3 +215,24 @@ def test_actual_generic_compile_exports_logical_preview_with_unassessed_electric
     assert saved == quality
     native = (tmp_path / "main_ctrl_build.kicad_pcb").read_text()
     assert native_pin_net_map(native) == pin_net_map(unfamiliar())
+
+
+def test_catalog_module_without_body_size_keeps_its_catalog_pins_in_the_preview_package():
+    # ili9341_tft has catalog pins but no catalog body size, so it is drawn as a logical
+    # preview. A catalog node carries no pinIds; the preview must still carry every catalog
+    # pin, or the module's wires silently disappear from the board.
+    from hardware_splicer.pcb.module_registry import find_module, resolve_module_body_mm
+
+    assert resolve_module_body_mm("ili9341_tft") is None
+    result = compose_build_graph_from_module_ids(["usb-power-5v", "esp32-devkit", "ili9341_tft"])
+    graph = result["graph"]
+    tft = next(n for n in graph["nodes"] if n["moduleId"] == "ili9341_tft")
+    assert not tft.get("pinIds")
+    geometry = build_graph_to_geometry(graph)
+    preview = next(fp for fp in geometry["footprints"] if fp["synthetic_package_geometry"])
+    catalog_pins = [p["id"] for p in find_module("ili9341_tft")["pins"]]
+    assert len(preview["pads"]) == len(catalog_pins)
+    assert geometry["geometry_fidelity"]["status"] == "logical_preview"
+    wired = {w["to"]["pinId"] for w in graph["wires"] if w["to"]["nodeId"] == tft["id"]} | {
+        w["from"]["pinId"] for w in graph["wires"] if w["from"]["nodeId"] == tft["id"]}
+    assert wired and wired <= set(catalog_pins)
