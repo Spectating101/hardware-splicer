@@ -1,13 +1,13 @@
 # Hardware-Splicer setup
 
-One-time bootstrap for the professor/demo path. No API keys required for the default walkthrough.
+For the headless service and CLI, follow the [backend installation](PACKAGING_AND_DEPLOYMENT.md#current-headless-backend). The following setup also installs the dashboard and developer tools.
 
 ## Prerequisites
 
 | Tool | Required for | Install |
 |------|----------------|---------|
 | Python 3.12+ | compiler, intake, tests | system package or pyenv |
-| Node.js 18+ | KiCad PCB build compiler (`compile_build_graph.cjs`) | [nodejs.org](https://nodejs.org/) |
+| Node.js 18+ | dashboard and TypeScript catalog maintenance | [nodejs.org](https://nodejs.org/) |
 | KiCad 9+ (`kicad-cli`) | Gerber export + honest fab audit | [kicad.org](https://www.kicad.org/download/) |
 | npm | dashboard demo | bundled with Node |
 
@@ -25,7 +25,7 @@ make setup
 source .venv/bin/activate   # created by setup_demo.sh
 ```
 
-`make setup` creates a venv, installs Python deps, runs `npm install` in **both** `apps/circuit-ai/circuit-ai-frontend` (required for the KiCad build compiler) and `apps/hardware-splicer-demo` (dashboard), then runs doctor.
+`make setup` creates a venv, installs Python deps, runs `npm install` in **both** `apps/circuit-ai/circuit-ai-frontend` (TypeScript catalog and parity tools) and `apps/hardware-splicer-demo` (dashboard), then runs doctor.
 
 Expected `doctor` output for a full fab demo:
 
