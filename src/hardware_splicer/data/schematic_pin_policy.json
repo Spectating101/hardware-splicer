@@ -20,6 +20,9 @@
     "esp32-devkit": {
       "3V3": {"disposition": "unused_supply_output", "reason": "On-board 3.3V regulator output; nothing in the build has to consume it."}
     },
+    "4n35-optocoupler": {
+      "BASE": {"disposition": "optional_input", "reason": "Module note: the phototransistor base is usually left floating in basic on/off isolation; a base-emitter resistor is an optional speed-for-sensitivity trade (base is pin 6 in the Vishay 4N35 datasheet)."}
+    },
     "rpi-pico": {
       "3V3": {"disposition": "unused_supply_output", "reason": "On-board 3.3V regulator output; nothing in the build has to consume it."},
       "VSYS": {"disposition": "alternate_supply_input", "requires_connected": ["VBUS"], "reason": "VBUS feeds VSYS through the Pico's on-board diode, so VSYS may stay open while VBUS is supplied."}
