@@ -76,9 +76,9 @@ describe("Fielddeck state and mapping", () => {
 
   it("uses added teal only on the edges of a matte vendor part", () => {
     expect(materialSpec("vendor_step", "added")).toMatchObject({
-      color: 0x93a3ae, roughness: 0.86, metalness: 0, creaseColor: 0x1a1d22, edgeColor: 0x2dd4bf,
+      color: 0x9c9ea0, roughness: 0.86, metalness: 0, creaseColor: 0x1a1d22, edgeColor: 0x2dd4bf,
     });
-    expect(materialSpec("vendor_step", "unchanged", true)).toMatchObject({ color: dimmedColor(0x93a3ae), creaseOpacity: 0.25 });
+    expect(materialSpec("vendor_step", "unchanged", true)).toMatchObject({ color: dimmedColor(0x9c9ea0), creaseOpacity: 0.25 });
     expect(materialSpec("custom", "unchanged", true)).toMatchObject({ color: dimmedColor(0xcec3b0) });
     expect(materialSpec("custom", "changed")).toMatchObject({ color: 0xcec3b0, edgeColor: 0xa78bfa });
     expect(materialSpec("donor_cad", "added")).toEqual(materialSpec("vendor_step", "added"));

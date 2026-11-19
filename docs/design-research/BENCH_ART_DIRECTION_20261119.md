@@ -53,7 +53,7 @@ p90 over the first 60 interactive frames > 14 ms drops one tier. Orbiting uses h
 | Source | Colour | Roughness | Treatment |
 |---|---|---|---|
 | Custom CAD | #D9CFBE | .80 | Ink creases |
-| Vendor | #93A3AE | .86 | Ink creases. Never glass, IOR, clearcoat or emissive |
+| Vendor | #9C9EA0 (neutral grey; was #93A3AE, see amendment 2026-11-19) | .86 | Ink creases. Never glass, IOR, clearcoat or emissive |
 | Measured (new) | #E4E2DC | .74 | Creases at 100%. Only if the sidecar holds a measurement record (instrument, date) |
 | Donor, as received (new) | #858B91 | .90 | 135° hatch, 12 px, 6% contrast |
 | Envelope | 6% unlit fill, #A5AEB5 | n/a | Dashed 6/4 px; no AO or shadow |
@@ -244,3 +244,6 @@ Keep IBM Plex Sans and Mono: the app's system, tabular Mono figures stack dimens
 - Tapping a crowded pin on phone opens its question in the sheet.
 - A section plane through the display and spacer centreline, for Z stack-up.
 - A two-point measure that reports dX, dY, dZ and distance, tagged with the weaker source of the two points.
+
+**Dated amendments**
+- 2026-11-19 vendor neutral #9C9EA0: reviewers read #93A3AE beside teal as cyan.

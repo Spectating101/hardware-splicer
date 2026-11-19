@@ -23,7 +23,7 @@ export const QUALITY_SAMPLE_COUNT = 60;
 export const DIFF_COLORS = { changed: 0xa78bfa, added: 0x2dd4bf, removed: 0xf17e70 };
 export const CREASE_INK = 0x1a1d22;
 
-const VENDOR = { color: 0x93a3ae, roughness: 0.86, threshold: 42 };
+const VENDOR = { color: 0x9c9ea0, roughness: 0.86, threshold: 42 };
 const MATERIALS = {
   custom: { color: 0xcec3b0, roughness: 0.80, threshold: 32 },
   vendor_step: VENDOR,
