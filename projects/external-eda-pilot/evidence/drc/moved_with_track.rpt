@@ -1,0 +1,30 @@
+** Drc report for design.kicad_pcb **
+** Created on 2026-11-20T02:52:46+0800 **
+
+** Found 5 DRC violations **
+[tracks_crossing]: Tracks crossing
+    Rule: netclass 'Default'; error
+    @(160.0000 mm, 98.0000 mm): Track [/DUT_MISO] on F.Cu, length 2.0000 mm
+    @(157.2800 mm, 102.2655 mm): Track [/DUT_1V8] on F.Cu, length 7.8418 mm
+[clearance]: Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.0000 mm)
+    Rule: netclass 'Default'; error
+    @(160.0000 mm, 98.0000 mm): Track [/DUT_MISO] on F.Cu, length 2.0000 mm
+    @(100.5000 mm, 60.5000 mm): Zone [/GND] on F.Cu
+[clearance]: Clearance violation (netclass 'Default' clearance 0.2000 mm; actual 0.0000 mm)
+    Rule: netclass 'Default'; error
+    @(162.0000 mm, 98.0000 mm): Pad 1 [/DUT_MISO] of TP12 on F.Cu
+    @(100.5000 mm, 60.5000 mm): Zone [/GND] on F.Cu
+[solder_mask_bridge]: Front solder mask aperture bridges items with different nets
+    Rule: board setup solder mask min width; error
+    @(157.2800 mm, 102.2655 mm): Track [/DUT_1V8] on F.Cu, length 7.8418 mm
+    @(162.0000 mm, 98.0000 mm): Pad 1 [/DUT_MISO] of TP12 on F.Cu
+[solder_mask_bridge]: Front solder mask aperture bridges items with different nets
+    Rule: board setup solder mask min width; error
+    @(162.0000 mm, 98.0000 mm): Pad 1 [/DUT_MISO] of TP12 on F.Cu
+    @(100.5000 mm, 60.5000 mm): Zone [/GND] on F.Cu
+
+** Found 0 unconnected pads **
+
+** Found 0 Footprint errors **
+
+** End of Report **

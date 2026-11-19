@@ -1,0 +1,82 @@
+{
+  "schema": "hs.external_eda_verification.v1",
+  "source_sha256": {
+    "schematic": "6f322855430c53bcac5b65b23ec2a271ae45203f894b9775339eb9ae04b5faf3",
+    "board": "cb3d06b6ea9f94e059979d989e6511c58bb1a831fa7bb742eb2671766e14f1df"
+  },
+  "upstream": {
+    "kiskill": {
+      "commit": "b27ce9e0f7bee10ef6dd606baabcbaf0c3c1eecc",
+      "license": "MIT",
+      "license_sha256": "f1cd658ae5ba5a1464e1251d9a92e4deba3d44ec601366376f128113e5423a6e"
+    },
+    "akcli": {
+      "commit": "2126c328402fa77f8f6bf2114f052595f86f14aa",
+      "license": "MIT",
+      "license_sha256": "b6f7bf9daa23d3960aeb7411e461e9b288829f6ecb8b826e695f0595843c0eb1"
+    }
+  },
+  "commands": {
+    "kiskill": {
+      "exit_code": 0,
+      "duration_ms": 137,
+      "stdout_sha256": "dfd389e66c2e82e0bd4e5be5b5033e4dd606e6d00f3e913619ebea01c482c0b3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "akcli": {
+      "exit_code": 1,
+      "duration_ms": 343,
+      "stdout_sha256": "b8c5eec91ad4bec38a3142b9a62fa456aeb5b91f86a7a1b50285d0f7b3854ffb",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native_kicad": {
+      "exit_code": 0,
+      "duration_ms": 1271,
+      "stdout_sha256": "d9beb83cc5a2429a3b3ac09a509b33beaa0bca719d6bf00ee2369da1a74412b1",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "native_drc_counts": {
+    "violations": 4,
+    "unconnected_pads": 1,
+    "footprint_errors": 0
+  },
+  "akcli_findings": [
+    {
+      "code": "SCHPCB_EXTRA_ON_PCB",
+      "severity": "warning"
+    },
+    {
+      "code": "SCHPCB_EXTRA_ON_PCB",
+      "severity": "warning"
+    },
+    {
+      "code": "SCHPCB_EXTRA_ON_PCB",
+      "severity": "warning"
+    },
+    {
+      "code": "SCHPCB_EXTRA_ON_PCB",
+      "severity": "warning"
+    },
+    {
+      "code": "SCHPCB_NET_SPLIT",
+      "severity": "error"
+    },
+    {
+      "code": "SCHPCB_NET_MERGE",
+      "severity": "error"
+    }
+  ],
+  "checks": {
+    "kiskill_roundtrip": true,
+    "akcli_schematic_pcb_equivalent": false,
+    "native_kicad_drc_clean": false,
+    "digital_review_pass": false,
+    "physical_test_performed": false
+  },
+  "limits": [
+    "External tools are read-only on copied inputs, not OS-sandboxed",
+    "No manufacturer, physical contact, or powered-device validation",
+    "Equivalence and DRC do not establish electrical design intent"
+  ]
+}

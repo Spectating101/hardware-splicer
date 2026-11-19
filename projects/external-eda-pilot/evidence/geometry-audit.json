@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "probe_bores_reopened": 18,
+  "source_nets": 16,
+  "moved": {
+    "ref": "TP12",
+    "original_xy_mm": [
+      60,
+      12
+    ],
+    "new_xy_mm": [
+      61,
+      13
+    ]
+  },
+  "other_source_locations_unchanged": 21,
+  "carrier_symmetric_difference_mm3": 0.0,
+  "physical_verification_performed": false
+}

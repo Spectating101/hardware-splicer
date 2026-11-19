@@ -1,0 +1,233 @@
+[
+  {
+    "dx": -1,
+    "dy": 0,
+    "violations": [
+      3,
+      0,
+      0
+    ],
+    "status": 0
+  },
+  {
+    "dx": -1.5,
+    "dy": 0,
+    "violations": [
+      3,
+      0,
+      0
+    ],
+    "status": 0
+  },
+  {
+    "dx": -2,
+    "dy": 0,
+    "violations": [
+      3,
+      0,
+      0
+    ],
+    "status": 0
+  },
+  {
+    "dx": -2.5,
+    "dy": 0,
+    "violations": [
+      3,
+      0,
+      0
+    ],
+    "status": 0
+  },
+  {
+    "dx": -3,
+    "dy": 0,
+    "violations": [
+      4,
+      0,
+      0
+    ],
+    "status": 0
+  },
+  {
+    "dx": -4,
+    "dy": 0,
+    "violations": [
+      4,
+      0,
+      0
+    ],
+    "status": 0
+  },
+  {
+    "dx": 0,
+    "dy": 1,
+    "violations": [
+      6,
+      0,
+      0
+    ],
+    "status": 0
+  },
+  {
+    "dx": 0,
+    "dy": -1,
+    "violations": [
+      3,
+      0,
+      0
+    ],
+    "status": 0
+  },
+  {
+    "dx": 0,
+    "dy": 1.5,
+    "violations": [
+      5,
+      0,
+      0
+    ],
+    "status": 0
+  },
+  {
+    "dx": 0,
+    "dy": -1.5,
+    "violations": [
+      5,
+      0,
+      0
+    ],
+    "status": 0
+  },
+  {
+    "dx": 0,
+    "dy": 2,
+    "violations": [
+      5,
+      0,
+      0
+    ],
+    "status": 0
+  },
+  {
+    "dx": 0,
+    "dy": -2,
+    "violations": [
+      4,
+      0,
+      0
+    ],
+    "status": 0
+  },
+  {
+    "dx": -1,
+    "dy": 1,
+    "violations": [
+      3,
+      0,
+      0
+    ],
+    "status": 0
+  },
+  {
+    "dx": -1,
+    "dy": -1,
+    "violations": [
+      3,
+      0,
+      0
+    ],
+    "status": 0
+  },
+  {
+    "dx": -2,
+    "dy": 1,
+    "violations": [
+      3,
+      0,
+      0
+    ],
+    "status": 0
+  },
+  {
+    "dx": -2,
+    "dy": -1,
+    "violations": [
+      3,
+      0,
+      0
+    ],
+    "status": 0
+  },
+  {
+    "dx": -3,
+    "dy": 1,
+    "violations": [
+      5,
+      0,
+      0
+    ],
+    "status": 0
+  },
+  {
+    "dx": -3,
+    "dy": -1,
+    "violations": [
+      4,
+      0,
+      0
+    ],
+    "status": 0
+  },
+  {
+    "dx": -1,
+    "dy": 2,
+    "violations": [
+      5,
+      0,
+      0
+    ],
+    "status": 0
+  },
+  {
+    "dx": -1,
+    "dy": -2,
+    "violations": [
+      3,
+      0,
+      0
+    ],
+    "status": 0
+  },
+  {
+    "dx": -2,
+    "dy": 2,
+    "violations": [
+      4,
+      0,
+      0
+    ],
+    "status": 0
+  },
+  {
+    "dx": -2,
+    "dy": -2,
+    "violations": [
+      3,
+      0,
+      0
+    ],
+    "status": 0
+  },
+  {
+    "dx": 1,
+    "dy": -1,
+    "violations": [
+      0,
+      0,
+      0
+    ],
+    "status": 0,
+    "board_sha256": "c0adb54c73dc965f6e3082689f9d6d15f0b0f84e438ab92d5c2f9e5e128f32e3"
+  }
+]

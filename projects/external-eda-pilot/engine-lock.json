@@ -1,0 +1,24 @@
+{
+  "schema": "hs.external_engine_lock.v1",
+  "kiskill": {
+    "repository": "https://github.com/AvatarSD/KiSkill",
+    "commit": "b27ce9e0f7bee10ef6dd606baabcbaf0c3c1eecc",
+    "license": "MIT",
+    "operations": [
+      "check:.kicad_pcb"
+    ]
+  },
+  "akcli": {
+    "repository": "https://github.com/tipoLi5890/akcli",
+    "commit": "2126c328402fa77f8f6bf2114f052595f86f14aa",
+    "license": "MIT",
+    "operations": [
+      "verify:schematic-pcb"
+    ]
+  },
+  "native": {
+    "tool": "KiCad CLI",
+    "observed_version": "9.0.2",
+    "operation": "pcb drc"
+  }
+}
