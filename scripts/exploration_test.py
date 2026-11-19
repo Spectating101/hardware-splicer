@@ -217,15 +217,8 @@ def test_splice_builds(rows: List[Dict[str, Any]], export_gerber: bool) -> None:
         rows.append(_row("splice_build", "plant_watering_brief", False, str(exc)))
 
 
-def _cleanup_stale_tmp() -> None:
-    cleanup = ROOT / "scripts" / "cleanup_test_artifacts.sh"
-    if cleanup.is_file():
-        subprocess.run(["bash", str(cleanup)], check=False)
-
-
 def main() -> int:
     os.environ.setdefault("HARDWARE_SPLICER_SKIP_VISION_LIVE", "1")
-    _cleanup_stale_tmp()
     export_gerber = shutil.which("kicad-cli") is not None and _check_frontend_deps()["frontend_npm_ready"]
     started = time.time()
     rows: List[Dict[str, Any]] = []

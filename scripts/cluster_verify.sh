@@ -19,7 +19,6 @@ fi
 # shellcheck disable=SC1091
 source .venv/bin/activate
 
-bash scripts/cleanup_test_artifacts.sh
 make verify
 make explore
 make test-apps
