@@ -327,9 +327,9 @@ function Annotations({ labels, selection, endpoints, pins, faceView, base, targe
         <div className="fd-pin-position" key={number} data-pin-anchor={anchor} data-dimmed={dimmed}
           data-interface-question={route || undefined}>
           <button className="fd-pin" type="button" data-question-number={number}
-            aria-label={`Open question ${number}`} title={questionText(reason)} onClick={() => onSelect(key, number)}><span>{number}</span></button>
-          {/* A question raised on the older revision says so beside its pin. */}
-          {revisionTag && <small className="fd-pin-revision">{revisionTag}</small>}
+            aria-label={`Open question ${number}${revisionTag ? `, ${revisionTag}` : ""}`}
+            title={revisionTag ? `${questionText(reason)} · ${revisionTag}` : questionText(reason)}
+            onClick={() => onSelect(key, number)}><span>{number}</span></button>
         </div>
       ))}
       {!faceView && <span className="fd-grid-label" data-grid-label="">Grid 10 mm</span>}
@@ -479,7 +479,9 @@ export default function FieldDeckScene({ onExit }) {
       const { key } = question;
       // On a phone, an interface selection hides the pins that are not part of it.
       if (narrow && selection?.link) continue;
-      const revisionTag = view.mode === "compare" && key.startsWith(`${base}:`) ? `${base}-inch rev.` : undefined;
+      // The older revision is named on the pin's tooltip and in the Inspector, never as a chip that
+      // would sit on the newer part.
+      const revisionTag = view.mode === "compare" && key.startsWith(`${base}:`) ? `${base}-inch revision` : undefined;
       if (linked.has(key) && displayedKeys.has(key)) pins.push({ ...question, anchor: key, dimmed: Boolean(selection?.link), revisionTag });
     }
   }

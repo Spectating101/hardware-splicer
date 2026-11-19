@@ -217,9 +217,10 @@
   border-radius: 4px;
   background: rgba(11, 14, 20, 0.82);
 }
-.fd-leaders g { visibility: hidden; stroke: var(--kind, var(--text-2)); stroke-width: 1; }
+/* Leaders are neutral 1 px with a 3 px end dot, whatever the part's change colour. */
+.fd-leaders g { visibility: hidden; stroke: #9097a0; stroke-width: 1; }
 .fd-leaders path { fill: none; }
-.fd-leaders circle { stroke: none; fill: var(--kind, var(--text-2)); }
+.fd-leaders circle { stroke: none; fill: #9097a0; }
 .fd-leaders .fd-pin-leaders { stroke: var(--text-2); }
 
 .fd-footprint {
