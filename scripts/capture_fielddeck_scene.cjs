@@ -48,7 +48,9 @@ async function main() {
     });
 
     await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
-    await page.getByRole("button", { name: "3D scene (preview)", exact: true }).click();
+    // The full-screen scene opens from Advanced → Scene manifests (the bench embeds the same scene).
+    await page.getByTestId("nav-advanced").click();
+    await page.getByTestId("advanced-scenes").getByRole("button", { name: "Fielddeck display swap", exact: true }).click();
     const scene = page.getByTestId("fielddeck-scene");
     const canvas = scene.locator("canvas[data-fielddeck-canvas='rendered']");
     const inspector = scene.getByRole("complementary", { name: "Selection details" });

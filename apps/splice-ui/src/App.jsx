@@ -7,6 +7,8 @@ import {
   fetchExamples,
   fetchHealth,
   fetchJobResult,
+  fetchSceneManifest,
+  fetchScenes,
   fetchJobs,
   fetchVisionCapabilities,
   renderProjectPackage,
@@ -110,7 +112,33 @@ function ProjectsHome({ projects, listError, loading, online, onStart, onLibrary
   </div>;
 }
 
-function AdvancedHub({ onExamples, onLab }) {
+// Every scene manifest the backend lists, opened full screen. Not part of the project journey.
+function SceneManifests({ onOpenScene }) {
+  const [scenes, setScenes] = useState(null);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchScenes(controller.signal).then((rows) => { if (!controller.signal.aborted) setScenes(rows); })
+      .catch((cause) => { if (!controller.signal.aborted) setError(cause.message); });
+    return () => controller.abort();
+  }, []);
+  async function open(projectId) {
+    try { onOpenScene({ projectId, manifest: await fetchSceneManifest(projectId) }); }
+    catch (cause) { setError(cause.message); }
+  }
+  return <section className="card" data-testid="advanced-scenes"><h2>Scene manifests</h2>
+    {error && <p role="status">Scenes: unknown. {error}</p>}
+    {scenes && !scenes.length && <p className="muted">No scene manifests found.</p>}
+    {scenes?.length > 0 && <ul className="scene-manifest-list">{scenes.map((row) => <li key={row.project_id}>
+      {row.geometry_status === "available"
+        ? <button type="button" className="secondary" onClick={() => open(row.project_id)}>{row.title}</button>
+        : <span>{row.title}</span>}
+      <small className="muted"> · {row.project_id} · geometry {row.geometry_status} · {row.revisions.length} revision{row.revisions.length === 1 ? "" : "s"}</small>
+    </li>)}</ul>}
+  </section>;
+}
+
+function AdvancedHub({ onExamples, onLab, onOpenScene }) {
   return (
     <section className="card advanced-hub" data-testid="advanced-hub">
       <h1>Developer tools</h1>
@@ -128,6 +156,7 @@ function AdvancedHub({ onExamples, onLab }) {
           <span>Integration adapters, netlist fixtures, and design-preview probes.</span>
         </button>
       </div>
+      {onOpenScene && <SceneManifests onOpenScene={onOpenScene} />}
     </section>
   );
 }
@@ -147,6 +176,8 @@ export default function App() {
   const [session, dispatch] = useReducer(projectSessionReducer, undefined, () => createEmptySession());
   const [creatingDigital, setCreatingDigital] = useState(false);
   const [newEntry, setNewEntry] = useState("goal");
+  const [fullScene, setFullScene] = useState(null);
+  const openScene = (scene, returnTo) => { setFullScene({ ...scene, returnTo }); setView(VIEWS.fielddeck); };
 
   const spliceJob = useSpliceJob();
   const projectPersistence = useProjectPersistence({
@@ -454,14 +485,6 @@ export default function App() {
             data-testid="nav-library" onClick={openLibrary}>Design library</button>
           <button
             type="button"
-            className={`nav-button ${view === VIEWS.fielddeck ? "active" : ""}`}
-            data-testid="nav-fielddeck"
-            onClick={() => setView(VIEWS.fielddeck)}
-          >
-            3D scene (preview)
-          </button>
-          <button
-            type="button"
             className={`nav-button ${advancedActive ? "active" : ""}`}
             data-testid="nav-advanced"
             onClick={() => setView(VIEWS.advanced)}
@@ -599,8 +622,9 @@ export default function App() {
           {view === VIEWS.showcase && <ProductShowcase />}
           {view === VIEWS.reference && <DetailedAssemblyReference />}
           {view === VIEWS.sortcell && <SortingWorkcell />}
-          {view === VIEWS.fielddeck && (
-            <Suspense fallback={null}><FieldDeckScene onExit={() => setView(VIEWS.home)} /></Suspense>
+          {view === VIEWS.fielddeck && fullScene && (
+            <Suspense fallback={null}><FieldDeckScene projectId={fullScene.projectId} manifest={fullScene.manifest}
+              onExit={() => setView(fullScene.returnTo)} /></Suspense>
           )}
 
           {view === VIEWS.workspace && (
@@ -627,6 +651,7 @@ export default function App() {
               onToast={setToast}
               activeJobId={session.activeJobId}
               onProjectReload={openSavedProject}
+              onOpenScene={(scene) => openScene(scene, VIEWS.workspace)}
             />
           )}
 
@@ -634,6 +659,7 @@ export default function App() {
             <AdvancedHub
               onExamples={() => setView(VIEWS.example)}
               onLab={() => setView(VIEWS.lab)}
+              onOpenScene={(scene) => openScene(scene, VIEWS.advanced)}
             />
           )}
 
