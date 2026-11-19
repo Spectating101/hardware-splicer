@@ -17,7 +17,7 @@ import {
 import { N8AOPostPass } from "n8ao";
 import { fielddeckSceneUrl } from "../api.js";
 import {
-  bracketPath, chooseTier, classifyPart, convexHull, cullCoincidentChains, DEFAULT_EXPLODE, diffAccentChains,
+  bracketPath, chooseTier, cullIsolatedChains, totalChainLength, classifyPart, convexHull, cullCoincidentChains, DEFAULT_EXPLODE, diffAccentChains,
   DIFF_COLORS, dimensionLabel, explodeGroupOffsets, FIELDDECK_NARROW, footprintDelta, ghostDeltaKey,
   ghostOutlineLoops, materialSpec, meshMeasures, nearestPoint, placeBesideEndpoint, placeCallouts,
   projectedFitScale, QUALITY_SAMPLE_COUNT, rowForNode, weldEdgeChains,
@@ -295,7 +295,9 @@ function displayContours(entry) {
 // Removed and old-revision geometry: one screen-space 6/4 dash, 1.25 px, #F17E70 at 70%.
 function makeGhost(chains, own, { xray = false } = {}) {
   const object = new THREE.Group();
-  const material = own(edgeMaterial(DIFF_COLORS.removed, [6, 4], 1.25));
+  // Old-revision features are often a few millimetres across, so they take a finer 3/2 dash at
+  // 1.5 px that still reads as dashed on a 12 px ring instead of breaking into specks.
+  const material = own(xray ? edgeMaterial(DIFF_COLORS.removed, [3, 2], 1.5) : edgeMaterial(DIFF_COLORS.removed, [6, 4], 1.25));
   // The old revision often lies inside the current solid; draw it through so the change is visible.
   if (xray) material.depthTest = false;
   for (const points of chains) {
@@ -455,8 +457,10 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
       } else {
         const current = entries.get(entry.paired)?.ghostEdges ?? [];
         // Compare the original geometry before simplification can turn a matched arc into a chord.
-        const chains = cullCoincidentChains(weldEdgeChains(entry.ghostEdges), current, { simplify: true });
+        const chains = cullIsolatedChains(cullCoincidentChains(weldEdgeChains(entry.ghostEdges), current, { simplify: true }));
         entry.overlay = makeGhost(chains, own, { xray: true });
+        // What the scene label may claim: the length of old-revision geometry actually drawn.
+        entry.overlay.length = totalChainLength(chains);
         technical.add(entry.overlay.object);
       }
     }
@@ -1876,6 +1880,7 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
   return {
     linked: new Set(entries.keys()),
     meshStats: new Map(all.map(({ row, meshStats }) => [row.key, meshStats])),
+    ghostLengths: new Map(all.filter(({ overlay }) => overlay).map(({ row, overlay }) => [row.key, overlay.length])),
     update: (next) => { config = next; resize(); },
     dispose() {
       if (frame !== null) cancelAnimationFrame(frame);

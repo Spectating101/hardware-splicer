@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   BASIS_LABELS, DEFAULT_EXPLODE, DIFF_LABELS, FIELDDECK_COMPARE, FIELDDECK_NARROW,
-  changeSummary, classifyPart, evidenceCells, formatEvidenceSource, indexFielddeck, rowsForMode, selectedPartKeys,
+  changeSummary, classifyPart, oldRevisionCaption, evidenceCells, formatEvidenceSource, indexFielddeck, rowsForMode, selectedPartKeys,
   countClippedItems, evidenceLabel, ghostDeltaKey, openQuestions, shortPartName, toggleFielddeckSheet,
 } from "./fielddeckLogic.js";
 import { createFielddeckStage, disposeFielddeck, loadFielddeck } from "./fielddeckStage.js";
@@ -322,6 +322,7 @@ export default function FieldDeckScene({ onExit }) {
   const focusPart = focus?.part_id;
   const [linked, setLinked] = useState(new Set());
   const [meshStats, setMeshStats] = useState(null);
+  const [ghostLengths, setGhostLengths] = useState(null);
   const [rendered, setRendered] = useState(false);
   const [stageError, setStageError] = useState("");
   const [view, setView] = useState(INITIAL);
@@ -420,7 +421,9 @@ export default function FieldDeckScene({ onExit }) {
     const endpoint = endpoints.find(([, key]) => key === row.key)?.[0];
     const caption = row.delta === "removed" && view.mode === "compare" ? `${nameOf(row)} · removed` : undefined;
     // The old revision shares the selected part's label as a sub-line instead of a second callout.
-    const detail = oldKey && linked.has(oldKey) && row.key === selection?.key ? "old revision dashed" : undefined;
+    // It says "dashed" only when more than 20 mm of old-revision chains are actually drawn.
+    const detail = oldKey && linked.has(oldKey) && row.key === selection?.key
+      ? oldRevisionCaption(ghostLengths?.get(oldKey) ?? 0, meshStats?.get(oldKey), meshStats?.get(row.key)) : undefined;
     return [{ ...row, endpoint, caption, detail }];
   });
   const pins = [];
@@ -503,6 +506,7 @@ export default function FieldDeckScene({ onExit }) {
         stage.current = runtime;
         setLinked(runtime.linked);
         setMeshStats(runtime.meshStats ?? null);
+        setGhostLengths(runtime.ghostLengths ?? null);
       } catch (error) {
         setStageError(`3D stage unavailable (${error.message}).`);
       }

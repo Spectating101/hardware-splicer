@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import FieldDeckScene, { EvidenceRows } from "./FieldDeckScene.jsx";
 import {
-  bracketPath, changeSummary, dimmedColor, chooseTier, classifyPart, closedEdgeLoops, convexHull, countClippedItems,
+  bracketPath, changeSummary, cullIsolatedChains, dimmedColor, oldRevisionCaption, totalChainLength, chooseTier, classifyPart, closedEdgeLoops, convexHull, countClippedItems,
   cullCoincidentChains, DEFAULT_EXPLODE, diffAccentChains, DIFF_COLORS, dimensionLabel, evidenceCells,
   explodeGroupOffsets, FIELDDECK_NARROW, footprintDelta, formatEvidenceSource, formatEvidenceValue, ghostOutlineLoops,
   indexFielddeck, materialSpec, meshDeltaLabel, meshMeasures, nearestPoint, placeBesideEndpoint, placeCallouts,
@@ -210,6 +210,20 @@ describe("Fielddeck state and mapping", () => {
     expect(kept).toHaveLength(2);
     expect(kept.every((chain) => chain.length === 5)).toBe(true);
     expect(kept.map((chain) => Math.max(...chain.map(([x]) => x)))).toEqual(expect.arrayContaining([100, 60]));
+  });
+
+  it("drops isolated old-revision specks and names the old revision by what is drawn", () => {
+    const speck = [[0, 0, 0], [1, 0, 0]];
+    const joined = [[1, 0, 0], [1, 1, 0]];
+    const arc = [[10, 0, 0], [20, 0, 0], [20, 15, 0]];
+    expect(cullIsolatedChains([speck, joined, arc])).toEqual([speck, joined, arc]);
+    expect(cullIsolatedChains([speck, arc])).toEqual([arc]);
+    expect(totalChainLength([arc])).toBe(25);
+    const before = { volume: 12000 };
+    const after = { volume: 11450 };
+    expect(oldRevisionCaption(25, before, after)).toBe("old revision dashed · ΔV −0.55 cm³ · computed");
+    expect(oldRevisionCaption(12, before, after)).toBe("old revision coincident · ΔV −0.55 cm³ · computed");
+    expect(oldRevisionCaption(0)).toBe("old revision coincident");
   });
 
   it("dims unchanged parts toward their luminance grey", () => {
@@ -467,6 +481,8 @@ describe("Fielddeck evidence UI", () => {
       handlers.onFrame();
       return {
         linked: new Set([...index.byKey.values()].filter(({ part }) => part).map(({ key }) => key)),
+        meshStats: new Map([["7:part:tray", { volume: 12000, area: 3000 }], ["5:part:tray", { volume: 11450, area: 2990 }]]),
+        ghostLengths: new Map([["7:part:tray", 42]]),
         update, dispose: vi.fn(),
       };
     });
@@ -638,7 +654,7 @@ describe("Fielddeck evidence UI", () => {
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ faceView: false }));
     fireEvent.click(screen.getByRole("button", { name: "Rear tray" }));
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ ghostDeltaKey: "7:part:tray" }));
-    expect(screen.getByText("old revision dashed")).toBeInTheDocument();
+    expect(screen.getByText("old revision dashed · ΔV −0.55 cm³ · computed")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "5-inch" }));
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ ghostDeltaKey: null }));
     fireEvent.click(screen.getByRole("button", { name: "Compare" }));
@@ -657,9 +673,9 @@ describe("Fielddeck evidence UI", () => {
     expect([...scene.querySelectorAll("[data-anchor]")].map((label) => label.textContent)).toEqual(["5-inch display"]);
     fireEvent.click(await screen.findByRole("button", { name: "Rear tray" }));
     expect([...scene.querySelectorAll("[data-anchor]")].map((label) => label.textContent)).toEqual([
-      "Rear trayold revision dashed",
+      "Rear trayold revision dashed · ΔV −0.55 cm³ · computed",
     ]);
-    expect(scene.querySelector("[data-anchor] .fd-label-detail")).toHaveTextContent("old revision dashed");
+    expect(scene.querySelector("[data-anchor] .fd-label-detail")).toHaveTextContent(/^old revision dashed · ΔV/);
     expect(scene.querySelectorAll("[data-leader]")).toHaveLength(1);
     fireEvent.click(pin);
     const inspector = within(screen.getByRole("complementary", { name: "Selection details" }));

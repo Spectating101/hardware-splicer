@@ -296,6 +296,26 @@ export function diffAccentChains(positions, extents, { minLength = 8, minShare =
   });
 }
 
+// Isolated old-revision chains under minLength with no welded neighbour read as specks.
+export function cullIsolatedChains(chains, { minLength = 2, weld = 0.01 } = {}) {
+  const ends = chains.map((points) => [points[0], points.at(-1)]);
+  const touches = (i) => chains.some((_, j) => j !== i && ends[i].some((a) => ends[j].some((b) =>
+    length(difference(a, b)) <= weld)));
+  return chains.filter((points, i) => chainLength(points) >= minLength || touches(i));
+}
+
+export function totalChainLength(chains) {
+  return chains.reduce((sum, points) => sum + chainLength(points), 0);
+}
+
+// The scene sub-line for a changed part's old revision says what is actually drawn.
+export function oldRevisionCaption(visibleLength, before, after) {
+  const valid = (stats) => stats && Number.isFinite(stats.volume);
+  const volume = valid(before) && valid(after)
+    ? ` · ΔV ${signedAmount((after.volume - before.volume) / 1000, 2)} cm³ · computed` : "";
+  return `old revision ${visibleLength > 20 ? "dashed" : "coincident"}${volume}`;
+}
+
 // Signed tetrahedron sum (mm³) and triangle area (mm²) of an indexed or flat triangle list.
 export function meshMeasures(positions, index = null) {
   let volume = 0;
