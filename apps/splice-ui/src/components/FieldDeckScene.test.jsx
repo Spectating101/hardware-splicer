@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import FieldDeckScene, { EvidenceRows } from "./FieldDeckScene.jsx";
 import {
-  DEFAULT_EXPLODE, FIELDDECK_NARROW, classifyPart, evidenceCells, explodeGroupOffsets, formatEvidenceSource, formatEvidenceValue,
+  DEFAULT_EXPLODE, FIELDDECK_NARROW, classifyPart, evidenceCells, explodeGroupOffsets, footprintDelta, formatEvidenceSource, formatEvidenceValue,
   indexFielddeck, placeCallouts, projectedFitScale, rowForNode, rowsForMode, selectedPartKeys, toggleFielddeckSheet,
 } from "./fielddeckLogic.js";
 
@@ -26,7 +26,7 @@ const sides = {
       part("display", "PANEL_7", "vendor_step", { label: "7-inch panel" }),
       part("tray", "Tray", "custom", { label: "Rear tray" }),
     ],
-    blockers: [],
+    blockers: [{ part_id: "display", reason: "Check pilot hole engagement" }],
     interfaces: [{
       interface_id: "display-ribbon", label: "DSI FFC", from_part_id: "pi4-dsi", to_part_id: "display",
       open_checks: ["pin_mapping_unknown", "connector_retention_unknown"],
@@ -34,7 +34,10 @@ const sides = {
   },
   "5": {
     parts: [
-      part("display", "Panel 5", "vendor_step", { label: "Touch Display 2, 5-inch · nominal only" }),
+      part("display", "Panel 5", "vendor_step", {
+        label: "Touch Display 2, 5-inch · nominal only",
+        evidence: [{ field: "physical_fit", state: "unknown", value: null }],
+      }),
       part("pi4-dsi", "pi4_dsi", "envelope", { label: "Pi DSI port" }),
       part("tray", "Tray", "custom", { label: "Rear tray" }),
     ],
@@ -113,6 +116,13 @@ describe("Fielddeck stage layout", () => {
     { minZ: 47, maxZ: 52, gap: 19 },
     { minZ: 46, maxZ: 62, gap: 29 },
   ];
+
+  it("computes signed footprint deltas from the display bounds", () => {
+    const older = { min: { x: -4, y: 6 }, max: { x: 185.32, y: 126.24 } };
+    const newer = { min: { x: 10, y: -5 }, max: { x: 153.4, y: 86.46 } };
+    expect(footprintDelta(older, newer)).toBe("Width −45.92 mm · Height −28.78 mm");
+    expect(footprintDelta(newer, older)).toBe("Width +45.92 mm · Height +28.78 mm");
+  });
 
   it("keeps the presentation layers in height order with clear gaps at the default explode", () => {
     const offsets = explodeGroupOffsets(layers, 2, DEFAULT_EXPLODE);
@@ -291,11 +301,11 @@ describe("Fielddeck evidence UI", () => {
     expect(tree.getByRole("button", { name: "Assembly" })).toHaveAttribute("aria-expanded", "true");
     const tray = await tree.findByRole("button", { name: "Rear tray" });
     expect(tree.getAllByRole("region").map((group) => group.getAttribute("aria-label"))).toEqual([
-      "Added", "Changed", "Removed", "Interfaces", "Blockers", "Unchanged",
+      "Added", "Changed", "Removed", "Unchanged", "Interfaces", "Blockers",
     ]);
     expect(tree.getByRole("heading", { name: "Added 1" })).toBeVisible();
     expect(tree.getByRole("heading", { name: "Removed 1" })).toBeVisible();
-    const unchanged = tree.getByRole("button", { name: /Unchanged 1/ });
+    const unchanged = tree.getByRole("button", { name: /Unchanged \(1\)/ });
     expect(unchanged).toHaveAttribute("aria-expanded", "false");
     expect(tree.queryByRole("button", { name: "Pi DSI port" })).toBeNull();
     fireEvent.click(unchanged);
@@ -304,12 +314,26 @@ describe("Fielddeck evidence UI", () => {
     const inspector = within(screen.getByRole("complementary", { name: "Selection details" }));
     act(() => callbacks.onPick("5:part:tray"));
     expect(tray).toHaveAttribute("aria-pressed", "true");
-    expect(inspector.getByText("Custom CAD · changed · physical fit unknown")).toBeVisible();
+    expect(inspector.getByText("Custom CAD · changed")).toBeVisible();
+    expect(inspector.queryByRole("heading", { name: "Open questions" })).toBeNull();
+    expect(panel.querySelectorAll("[data-row][aria-pressed=true]")).toHaveLength(1);
     expect(screen.getByRole("slider", { name: "Explode" })).toHaveValue("0.6");
     expect(screen.getByTestId("fielddeck-scene")).not.toHaveTextContent(/\b(?:ready|verified|measured)\b/i);
   });
 
-  it("marks cable endpoints A and B and labels their midpoint without drawing a route", async () => {
+  it("shows the presentation offset only while exploded and keeps the slider name", async () => {
+    render(<FieldDeckScene />);
+    const slider = await screen.findByRole("slider", { name: "Explode" });
+    expect(screen.getByText("Presentation offset · 60%")).toBeVisible();
+    fireEvent.change(slider, { target: { value: "0" } });
+    expect(screen.queryByText(/Presentation offset ·/)).toBeNull();
+    expect(screen.getByText("0%")).toBeVisible();
+    fireEvent.change(slider, { target: { value: "0.27" } });
+    expect(screen.getByText("Presentation offset · 27%")).toBeVisible();
+    expect(slider).toHaveAccessibleName("Explode");
+  });
+
+  it("marks cable endpoints A and B and labels their midpoint with dotted leaders", async () => {
     render(<FieldDeckScene />);
     fireEvent.click(await screen.findByRole("button", { name: "DSI FFC" }));
     const inspector = within(screen.getByRole("complementary", { name: "Selection details" }));
@@ -325,7 +349,12 @@ describe("Fielddeck evidence UI", () => {
     const label = annotations.querySelector("[data-route-label]");
     expect(label).toHaveTextContent("Routing unknown");
     expect(label.querySelector("path")).toBeNull();
-    expect(annotations.querySelector("svg > path:not([data-pin-leaders])")).toBeNull();
+    expect(annotations.querySelector("[data-route-leaders]")).toBeInTheDocument();
+    expect(annotations.querySelector('[data-question-number="1"]').parentElement).toHaveAttribute("data-dimmed", "true");
+    expect(annotations.querySelector('[data-question-number="2"]').parentElement).toHaveAttribute("data-dimmed", "false");
+    const tree = screen.getByRole("complementary", { name: "Part tree" });
+    expect(tree.querySelectorAll("[data-row][aria-pressed=true]")).toHaveLength(1);
+    expect(tree.querySelector('[data-row="5:part:display"]')).toHaveAttribute("data-linked", "true");
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({
       selectedKeys: ["5:part:pi4-dsi", "5:part:display"],
     }));
@@ -338,12 +367,12 @@ describe("Fielddeck evidence UI", () => {
     const mapping = () => inspector.getByText("Pin mapping unknown").parentElement;
     expect(mapping()).toHaveTextContent(/^2 Pin mapping unknown$/);
     expect(inspector.getByText("Connector retention unknown")).toBeVisible();
-    expect(screen.getByRole("button", { name: "Physical fit unknown · 4 open questions" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Physical fit unknown · 5 open questions" })).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "7-inch" }));
     expect(mapping()).toHaveTextContent(/^2 Pin mapping unknown$/);
     expect(inspector.queryByText("Signal voltage unknown")).toBeNull();
     expect(inspector.getByText("A").parentElement).toHaveTextContent("pi4-dsi");
-    expect(screen.getByRole("button", { name: "Physical fit unknown · 2 open questions" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Physical fit unknown · 3 open questions" })).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "5-inch" }));
     expect(mapping()).toHaveTextContent(/^2 Pin mapping unknown$/);
     expect(inspector.queryByText("Connector retention unknown")).toBeNull();
@@ -354,42 +383,55 @@ describe("Fielddeck evidence UI", () => {
     render(<FieldDeckScene />);
     fireEvent.click(await screen.findByRole("button", { name: "Face view" }));
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ faceView: true, ghostDeltaKey: null }));
+    expect(screen.getByText("5-inch minus 7-inch · CAD footprint, computed")).toBeInTheDocument();
+    const scene = screen.getByTestId("fielddeck-scene");
+    expect(scene.querySelector('[data-question-number="1"]').parentElement).toHaveAttribute("data-pin-anchor", "5:part:display");
+    expect(scene.querySelector('[title="Check pilot hole engagement"]').parentElement).toHaveAttribute("data-pin-anchor", "7:part:display");
     fireEvent.click(screen.getByRole("button", { name: "Back to 3D" }));
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ faceView: false }));
     fireEvent.click(screen.getByRole("button", { name: "Rear tray" }));
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ ghostDeltaKey: "7:part:tray" }));
+    expect(screen.getByText("Rear tray · old revision")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "5-inch" }));
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ ghostDeltaKey: null }));
     fireEvent.click(screen.getByRole("button", { name: "Compare" }));
-    fireEvent.click(screen.getByRole("button", { name: /Unchanged 1/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Unchanged \(1\)/ }));
     fireEvent.click(screen.getByRole("button", { name: "Pi DSI port" }));
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ ghostDeltaKey: null }));
   });
 
   it("uses the same blocker number on the pin, tree and inspector and keeps the qualifier intact", async () => {
     render(<FieldDeckScene />);
-    const filter = await screen.findByRole("button", { name: "Physical fit unknown · 4 open questions" });
+    const filter = await screen.findByRole("button", { name: "Physical fit unknown · 5 open questions" });
     const scene = screen.getByTestId("fielddeck-scene");
     const pin = scene.querySelector('[data-question-number="1"]');
     expect(pin).toHaveTextContent(/^1$/);
     expect(pin.closest("[data-pin-anchor]")).toHaveAttribute("data-pin-anchor", "5:part:display");
     expect([...scene.querySelectorAll("[data-anchor]")].map((label) => label.textContent).sort()).toEqual([
-      "5-inch display", "7-inch display",
+      "5-inch display", "7-inch display · removed",
     ]);
     fireEvent.click(await screen.findByRole("button", { name: "Rear tray" }));
     fireEvent.click(pin);
     const inspector = within(screen.getByRole("complementary", { name: "Selection details" }));
     expect(inspector.getByRole("heading", { name: "Touch Display 2, 5-inch · nominal only" })).toBeVisible();
-    expect(inspector.getByText("Vendor model · added · physical fit unknown")).toBeVisible();
+    const name = inspector.getByRole("heading", { name: "Touch Display 2, 5-inch · nominal only" });
+    const fit = inspector.getByText("Physical fit · Unknown");
+    const metadata = inspector.getByText("Vendor model · added");
+    expect(name.nextElementSibling).toBe(fit);
+    expect(fit.nextElementSibling).toBe(metadata);
+    expect(metadata.nextElementSibling).toHaveTextContent("Open questions");
+    expect(inspector.getByText("Check pilot hole engagement").closest("li")).toHaveTextContent("7-inch revision");
+    expect(inspector.getByRole("heading", { name: "Evidence" }).previousElementSibling).toBe(inspector.getByText("Check pilot hole engagement").closest("ul"));
+    expect(inspector.queryByText(/^Physical fit$/)).toBeNull();
     expect(inspector.getByText("Display lug thread/engagement nominal only").parentElement).toHaveTextContent(/^1 Display lug thread\/engagement nominal only$/);
     fireEvent.click(filter);
     const tree = within(screen.getByRole("complementary", { name: "Part tree" }));
     expect(filter).toHaveAttribute("aria-pressed", "true");
     expect(tree.queryByRole("region", { name: "Added" })).toBeNull();
     expect(tree.getByRole("button", { name: "1 Display lug thread/engagement nominal only" }))
-      .toHaveAttribute("aria-pressed", "true");
+      .toHaveAttribute("data-linked", "true");
     fireEvent.click(screen.getByRole("button", { name: "7-inch" }));
-    expect(scene.querySelector("[data-question-number]")).toBeNull();
+    expect(scene.querySelector('[title="Check pilot hole engagement"]')).toBeInTheDocument();
   });
 
   it("switches between narrow sheets and keeps the current selection in the peek", async () => {
@@ -400,9 +442,11 @@ describe("Fielddeck evidence UI", () => {
     expect(screen.queryByRole("slider", { name: "Explode" })).toBeNull();
     expect(screen.getByRole("heading", { name: "Fielddeck display swap" })).toBeVisible();
     expect(screen.queryByText("7-inch → 5-inch")).toBeNull();
+    expect(screen.getByRole("button", { name: "Face view" })).toHaveClass("fd-face-pill");
+    expect(screen.getByText("Presentation offset · 60%", { selector: ".fd-offset-caption" })).toBeVisible();
     fireEvent.click(more);
     expect(screen.getByRole("slider", { name: "Explode" })).toBeVisible();
-    expect(screen.getByRole("button", { name: "Face view" })).toBeVisible();
+    expect(within(document.getElementById("fd-options")).getByRole("button", { name: "Face view" })).toBeVisible();
     expect(screen.getByRole("button", { name: "Start tour" })).toBeVisible();
     const key = screen.getByRole("button", { name: "Key" });
     expect(key).toHaveAttribute("aria-expanded", "false");
@@ -415,7 +459,7 @@ describe("Fielddeck evidence UI", () => {
       selectedKeys: ["5:part:pi4-dsi", "5:part:display"],
       cameraCue: { stopIndex: 1 },
     }));
-    expect(screen.getByRole("button", { name: /4 questions\s*Fit unknown/ })).toBeVisible();
+    expect(screen.getByRole("button", { name: /5 questions\s*Fit unknown/ })).toBeVisible();
     const panels = within(screen.getByRole("group", { name: "Scene panels" }));
     const parts = panels.getByRole("button", { name: "Parts" });
     const details = panels.getByRole("button", { name: "Inspector" });
@@ -430,7 +474,7 @@ describe("Fielddeck evidence UI", () => {
     fireEvent.click(tree.getByRole("button", { name: "DSI FFC" }));
     expect(parts).toHaveAttribute("aria-expanded", "true");
     expect(screen.getByTestId("fielddeck-scene").querySelector(".fd-peek"))
-      .toHaveTextContent(/DSI FFC.*physical fit unknown.*3 open questions/);
+      .toHaveTextContent(/DSI FFC.*Physical fit · Unknown.*A.*Pi DSI port.*B.*Touch Display 2.*Pin mapping unknown/);
 
     fireEvent.click(details);
     expect(parts).toHaveAttribute("aria-expanded", "false");

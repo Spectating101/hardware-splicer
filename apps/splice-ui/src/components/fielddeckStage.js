@@ -8,7 +8,7 @@ import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment
 import { HorizontalBlurShader } from "three/examples/jsm/shaders/HorizontalBlurShader.js";
 import { VerticalBlurShader } from "three/examples/jsm/shaders/VerticalBlurShader.js";
 import { fielddeckSceneUrl } from "../api.js";
-import { classifyPart, DEFAULT_EXPLODE, explodeGroupOffsets, FIELDDECK_NARROW, placeCallouts, projectedFitScale, formatEvidenceValue, rowForNode, TOUR } from "./fielddeckLogic.js";
+import { classifyPart, DEFAULT_EXPLODE, explodeGroupOffsets, FIELDDECK_NARROW, placeCallouts, projectedFitScale, footprintDelta, formatEvidenceValue, rowForNode, TOUR } from "./fielddeckLogic.js";
 
 const COLORS = {
   custom: 0xd8ccb6, vendor_step: 0x8e979e, envelope: 0xa5aeb5,
@@ -110,7 +110,7 @@ function edgeMaterial(color, pattern, linewidth) {
 
 function stylePart(entry, compare, weight, ghost, accent) {
   const { basis, outline, row } = entry;
-  const { solid, baseColor, mutedColor, fill, edge, surface, lines } = entry.style;
+  const { solid, baseColor, mutedColor, fill, edge, surface, lines, halos } = entry.style;
   const translucent = outline || ghost;
   const dimming = row.delta === "unchanged" ? compare : 0;
   const dim = 1 - dimming * 0.6;
@@ -142,6 +142,10 @@ function stylePart(entry, compare, weight, ghost, accent) {
     else mesh.layers.disable(CONTACT_LAYER);
   }
   lines.forEach((line) => { line.material = variant; });
+  if (edge.halo) {
+    edge.halo.opacity = weight * accent;
+    halos.forEach((line) => { line.visible = variant === edge.diff; });
+  }
   return variant;
 }
 
@@ -177,7 +181,8 @@ function makeEntries(assets, index, scene, resources) {
         const solid = outline ? null : own(solidMaterial(basis));
         const baseColor = new THREE.Color(COLORS[basis]);
         const gray = baseColor.r * 0.2126 + baseColor.g * 0.7152 + baseColor.b * 0.0722;
-        const mutedColor = baseColor.clone().lerp(new THREE.Color().setRGB(gray, gray, gray), 0.65).multiplyScalar(0.4);
+        const mutedColor = basis === "custom" ? new THREE.Color(0x6e685f)
+          : baseColor.clone().lerp(new THREE.Color().setRGB(gray, gray, gray), 0.65).multiplyScalar(0.4);
         const fill = own(new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false }));
         const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
         if (basis === "proxy") applyHatch(solid, 8, pixelRatio);
@@ -188,10 +193,11 @@ function makeEntries(assets, index, scene, resources) {
             solid, baseColor, mutedColor, fill,
             edge: {
               base: own(edgeMaterial(COLORS[basis], pattern, 1)),
-              diff: ["added", "changed"].includes(row.delta) ? own(edgeMaterial(COLORS[row.delta], pattern, 1.5)) : null,
+              diff: ["added", "changed"].includes(row.delta) ? own(edgeMaterial(COLORS[row.delta], pattern, row.delta === "changed" ? 2 : 1.5)) : null,
+              halo: row.delta === "changed" ? own(edgeMaterial(0x0e1116, null, 4)) : null,
               ghost: row.delta === "removed" ? own(edgeMaterial(COLORS.removed, [5, 3], 1.5)) : null,
             },
-            surface: [], lines: [],
+            surface: [], lines: [], halos: [],
           },
         };
         entries.set(row.key, entry);
@@ -219,6 +225,13 @@ function makeEntries(assets, index, scene, resources) {
       }
 
       const line = featureEdges(row.delta === "removed" ? 40 : 28, style.edge.base);
+      if (style.edge.halo) {
+        const halo = new LineSegments2(line.geometry, style.edge.halo);
+        halo.renderOrder = 1;
+        line.renderOrder = 2;
+        style.halos.push(halo);
+        group.add(halo);
+      }
       style.lines.push(line);
       group.add(line);
 
@@ -233,7 +246,7 @@ function makeEntries(assets, index, scene, resources) {
           entry.overlay = { object, material };
           scene.add(object);
         }
-        entry.overlay.object.add(featureEdges(40, entry.overlay.material));
+        entry.overlay.object.add(featureEdges(display ? 45 : 40, entry.overlay.material));
       }
     });
   }
@@ -428,7 +441,8 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
   };
   const boundsForKey = (key) => {
     const entry = entries.get(key);
-    return entry?.group.visible ? entry.bounds.clone().translate(entry.group.position) : null;
+    const object = entry?.overlay?.object.visible ? entry.overlay.object : entry?.group;
+    return object?.visible ? entry.bounds.clone().translate(object.position) : null;
   };
   const centerFor = (key) => {
     const bounds = boundsForKey(key);
@@ -458,70 +472,90 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
   const pinRects = [];
   const markers = [];
   const pinLeaders = [];
-  for (const node of host.querySelectorAll("[data-pin-anchor]")) {
-    const anchor = centerFor(node.dataset.pinAnchor);
+  const endpointPositions = new Map();
+  const routeLabel = host.querySelector("[data-route-label]");
+  const routeLeaders = host.querySelector("[data-route-leaders]");
+  let midpoint;
+  function mark(node, anchor, fixed = false) {
     const clear = (point) => point.x >= viewport.left + 12 && point.x <= viewport.right - 12
       && point.y >= viewport.top + 12 && point.y <= viewport.bottom - 12
       && !occupied.some((rect) => point.x > rect.left - 12 && point.x < rect.right + 12
         && point.y > rect.top - 12 && point.y < rect.bottom + 12)
       && markers.every((other) => Math.hypot(point.x - other.x, point.y - other.y) >= 24);
     let point = anchor;
-    if (anchor && !clear(anchor)) {
+    const collides = anchor && markers.some((other) => Math.hypot(anchor.x - other.x, anchor.y - other.y) < 24);
+    if (anchor && (fixed ? collides : !clear(anchor))) {
       const angles = [0, 1, -1, 2, -2, 3, -3, 4].map((step) => step * Math.PI / 4);
-      point = angles.map((angle) => ({ x: anchor.x + 36 * Math.cos(angle), y: anchor.y + 36 * Math.sin(angle) }))
-        .find(clear);
-      if (point) {
+      point = [36, 64, 92].flatMap((radius) => angles.map((angle) => ({
+        x: anchor.x + radius * Math.cos(angle), y: anchor.y + radius * Math.sin(angle),
+      }))).find(clear) ?? anchor;
+      if (point !== anchor && !node.dataset.interfaceQuestion) {
         const dx = (point.x - anchor.x) / 3;
         const dy = (point.y - anchor.y) / 3;
-        pinLeaders.push(`M${anchor.x + dx},${anchor.y + dy}l${dx},${dy}`);
+        pinLeaders.push(fixed ? `M${anchor.x},${anchor.y}L${point.x},${point.y}`
+          : `M${anchor.x + dx},${anchor.y + dy}l${dx},${dy}`);
       }
     }
     position(node, point);
     if (node.style.visibility === "visible") {
       markers.push(point);
       if (placeLabels) pinRects.push(rectFor(node));
+      return point;
     }
+  }
+  for (const node of host.querySelectorAll("[data-endpoint-pin]")) {
+    endpointPositions.set(node.dataset.endpointPin, mark(node, centerFor(node.dataset.pinAnchor)));
+  }
+  if (routeLabel) {
+    const from = endpointPositions.get("A");
+    const to = endpointPositions.get("B");
+    midpoint = from && to ? { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 } : null;
+    position(routeLabel, midpoint);
+    routeLeaders.setAttribute("d", midpoint ? [from, to].map(({ x, y }) => `M${midpoint.x},${midpoint.y}L${x},${y}`).join(" ") : "");
+    if (midpoint) {
+      const rect = rectFor(routeLabel);
+      occupied.push(rect);
+      if (placeLabels) pinRects.push(rect);
+    }
+  }
+  const footprint = host.querySelector("[data-footprint]");
+  for (const node of host.querySelectorAll("[data-pin-anchor]:not([data-endpoint-pin]), [data-interface-question]")) {
+    mark(node, node.dataset.interfaceQuestion ? midpoint : centerFor(node.dataset.pinAnchor), Boolean(footprint));
   }
   host.querySelector("[data-pin-leaders]").setAttribute("d", pinLeaders.join(" "));
 
-  for (const group of host.querySelectorAll("[data-dimensions]")) {
-    const bounds = entries.get(`${group.dataset.dimensions}:part:display`)?.bounds;
-    const older = group.dataset.dimensions === "7";
-    const path = group.querySelector("path");
-    const texts = group.querySelectorAll("text");
-    group.style.visibility = "hidden";
-    if (!showDimensions || !bounds || bounds.isEmpty()) continue;
-    const { min, max } = bounds;
-    const z = max.z;
-    const corners = [project(new THREE.Vector3(min.x, older ? max.y : min.y, z)),
-      project(new THREE.Vector3(max.x, older ? max.y : min.y, z)),
-      project(new THREE.Vector3(older ? min.x : max.x, max.y, z)),
-      project(new THREE.Vector3(older ? min.x : max.x, min.y, z))];
-    if (corners.some((point) => !point)) continue;
-    const [a, b, c, d] = corners;
-    const y = a.y - 16;
-    const x = c.x - 16;
-    path.setAttribute("d", `M${a.x},${a.y}V${y - 4} M${b.x},${b.y}V${y - 4}
-      M${a.x},${y}H${b.x} M${c.x},${c.y}H${x - 4} M${d.x},${d.y}H${x - 4}
-      M${x},${c.y}V${d.y}`);
-    const dimension = (value) => `${formatEvidenceValue({ field: "dimension_mm", value })} · computed`;
-    texts[0].textContent = dimension(max.x - min.x);
-    texts[0].setAttribute("x", (a.x + b.x) / 2);
-    texts[0].setAttribute("y", y - 7);
-    texts[1].textContent = dimension(max.y - min.y);
-    texts[1].setAttribute("transform", `translate(${x - 7},${(c.y + d.y) / 2}) rotate(-90)`);
-    if (!older) {
-      // Keep both ends of the inside labels clear of the adjacent perimeter edges.
-      for (const [text, span] of [[texts[0], b.x - a.x], [texts[1], d.y - c.y]]) {
-        const available = Math.max(1, span - 32);
-        text.removeAttribute("textLength");
-        if (text.getComputedTextLength() > available) {
-          text.setAttribute("textLength", available);
-          text.setAttribute("lengthAdjust", "spacingAndGlyphs");
-        }
-      }
+  if (footprint) {
+    const older = entries.get("7:part:display")?.bounds;
+    const newer = entries.get("5:part:display")?.bounds;
+    const outlines = showDimensions && older && newer && [outlineFor(older), outlineFor(newer)];
+    const visible = outlines && outlines.every(Boolean);
+    const outer = visible && {
+      left: Math.min(...outlines.map(({ left }) => left)), right: Math.max(...outlines.map(({ right }) => right)),
+      top: Math.min(...outlines.map(({ top }) => top)), bottom: Math.max(...outlines.map(({ bottom }) => bottom)),
+    };
+    for (const [i, revision] of ["7", "5"].entries()) {
+      const group = host.querySelector(`[data-dimensions="${revision}"]`);
+      const widthLabel = host.querySelector(`[data-dimension-label="${revision}width"]`);
+      const heightLabel = host.querySelector(`[data-dimension-label="${revision}height"]`);
+      group.style.visibility = widthLabel.style.visibility = heightLabel.style.visibility = visible ? "visible" : "hidden";
+      if (!visible) continue;
+      const { left, right, top, bottom } = outlines[i];
+      const sign = i === 0 ? -1 : 1;
+      const y = (i === 0 ? outer.top : outer.bottom) + sign * 16;
+      const x = (i === 0 ? outer.left : outer.right) + sign * 16;
+      const edgeY = i === 0 ? top : bottom;
+      const edgeX = i === 0 ? left : right;
+      group.querySelector("path").setAttribute("d",
+        `M${left},${edgeY}V${y}H${right}V${edgeY} M${edgeX},${top}H${x}V${bottom}H${edgeX}`);
+      const { min, max } = i === 0 ? older : newer;
+      const dimension = (value) => `${formatEvidenceValue({ field: "dimension_mm", value })} · computed`;
+      widthLabel.textContent = dimension(max.x - min.x);
+      heightLabel.textContent = dimension(max.y - min.y);
+      widthLabel.style.transform = `translate(${(left + right) / 2}px, ${y + sign * (widthLabel.offsetHeight / 2 + 3)}px)`;
+      heightLabel.style.transform = `translate(${x + sign * (heightLabel.offsetWidth / 2 + 3)}px, ${(top + bottom) / 2}px)`;
     }
-    group.style.visibility = "visible";
+    if (visible) footprint.querySelector("[data-footprint-delta]").textContent = footprintDelta(older, newer);
+    position(footprint, visible && { x: (outer.left + outer.right) / 2, y: outer.bottom + 42 });
   }
   for (const path of host.querySelectorAll("[data-bracket]")) {
     const outline = outlineFor(boundsForKey(path.dataset.bracket), 6);
@@ -538,14 +572,6 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
     })).join(" "));
   }
 
-  for (const node of host.querySelectorAll("[data-route-label]")) {
-    const from = centerFor(node.dataset.from);
-    const to = centerFor(node.dataset.to);
-    const midpoint = from && to ? { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 } : null;
-    position(node, midpoint);
-    if (placeLabels && node.style.visibility === "visible") pinRects.push(rectFor(node));
-  }
-
   const labels = [...host.querySelectorAll("[data-anchor]")];
   if (!labels.length) return;
   const outlines = placeLabels ? [...entries.keys()].map((key) => outlineFor(boundsForKey(key))).filter(Boolean) : [];
@@ -553,7 +579,7 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
     left: Math.min(...outlines.map(({ left }) => left)),
     right: Math.max(...outlines.map(({ right }) => right)),
   };
-  const placements = placeLabels && placeCallouts(viewport, occupied, labels.map((node) => {
+  const callouts = placeLabels && labels.map((node) => {
     const anchor = centerFor(node.dataset.anchor);
     const outline = outlineFor(boundsForKey(node.dataset.anchor));
     return {
@@ -561,12 +587,16 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
       leftAnchor: outline && { ...anchor, x: outline.left },
       rightAnchor: outline && { ...anchor, x: outline.right },
     };
-  }), pinRects);
+  });
+  const placements = callouts && placeCallouts(viewport, occupied, callouts, pinRects);
+  const fallback = placements && placements.some((placement) => !placement)
+    && placeCallouts(viewport, occupied, callouts.map((callout, i) => placements[i] ? {} : { ...callout, model: null }),
+      [...pinRects, ...placements.flatMap((placement) => placement ? [placement.rect] : [])]);
   for (const [i, node] of labels.entries()) {
     const line = host.querySelector(`[data-leader="${i}"]`);
     node.style.opacity = line.style.opacity = displayOpacity;
     if (!placements) continue;
-    const placement = placements[i];
+    const placement = placements[i] ?? fallback?.[i];
     node.style.visibility = line.style.visibility = placement ? "visible" : "hidden";
     if (!placement) continue;
     const { rect, leader } = placement;
@@ -632,7 +662,7 @@ export function createFielddeckStage(host, assets, index, callbacks) {
   resources.add(grid.material);
   const center = assembled.getCenter(new THREE.Vector3());
   const radius = extended.getSize(new THREE.Vector3()).length() / 2;
-  const key = new THREE.DirectionalLight(0xfff1e0, 2.6);
+  const key = new THREE.DirectionalLight(0xfff1e0, 2.08);
   key.position.set(-4, -5, 9).normalize().multiplyScalar(radius * 2).add(center);
   key.target.position.copy(center);
   key.castShadow = true;
@@ -691,11 +721,11 @@ export function createFielddeckStage(host, assets, index, callbacks) {
   let lastHero = null;
   let firstFrame = true;
   const ray = new THREE.Raycaster();
-  const [header, bottomChrome, tree, inspector, sheet, legend] = [
-    ".fd-header", ".fd-bottom", ".fd-tree", ".fd-inspector", ".fd-sheet", ".fd-legend",
+  const [header, bottomChrome, tree, inspector, sheet, legend, options] = [
+    ".fd-header", ".fd-bottom", ".fd-tree", ".fd-inspector", ".fd-sheet", ".fd-legend", ".fd-options",
   ]
     .map((selector) => host.querySelector(selector));
-  const panels = [header, bottomChrome, tree, inspector, sheet, legend];
+  const panels = [header, bottomChrome, tree, inspector, sheet, legend, options];
   const mobileView = window.matchMedia(FIELDDECK_NARROW);
   const invalidateLayout = () => { layoutDirty = true; };
 
@@ -705,7 +735,8 @@ export function createFielddeckStage(host, assets, index, callbacks) {
     const phone = mobileView.matches;
     const { left: originX, top: originY } = host.getBoundingClientRect();
     const nextCanvasTop = canvas.offsetTop;
-    const upper = Math.max(nextCanvasTop, (phone ? bottomChrome : header).getBoundingClientRect().bottom - originY);
+    const upper = Math.max(nextCanvasTop, header.getBoundingClientRect().bottom - originY,
+      phone ? bottomChrome.getBoundingClientRect().bottom - originY : 0);
     const lowerPanels = phone ? [sheet, tree, inspector, legend] : [bottomChrome, legend];
     const lower = Math.min(nextHeight + nextCanvasTop, ...lowerPanels.filter((panel) => panel.getClientRects().length)
       .map((panel) => panel.getBoundingClientRect().top - originY));
@@ -741,104 +772,91 @@ export function createFielddeckStage(host, assets, index, callbacks) {
   window.addEventListener("scroll", invalidateLayout, true);
   resize();
 
-  function fit(bounds, angle, horizontal, { margin, face = false } = {}) {
-    const target = bounds.getCenter(new THREE.Vector3());
-    const direction = face ? UP.clone() : VIEW.clone().applyAxisAngle(UP, THREE.MathUtils.degToRad(angle));
-    const right = (face ? FACE_UP : UP).clone().cross(direction).normalize();
-    const up = direction.clone().cross(right);
-    const tangent = Math.tan(THREE.MathUtils.degToRad((face ? 12 : baseFov) / 2));
-    const usable = (size) => size > 2 * margin ? size - 2 * margin : size / 3;
-    const horizontalFit = tangent * camera.aspect * (margin === undefined
-      ? mobile ? horizontal : frameWidth / width * horizontal : usable(frameWidth) / width);
-    const verticalFit = tangent * (margin === undefined
-      ? Math.min(1, frameHeight / height) * 0.9 : usable(frameHeight) / height);
-    if (mobile && margin === undefined) {
-      const sphere = bounds.getBoundingSphere(new THREE.Sphere());
-      const distance = sphere.radius / Math.sin(Math.atan(Math.min(horizontalFit, verticalFit)));
-      return { target: sphere.center, position: direction.multiplyScalar(distance).add(sphere.center) };
-    }
-    let distance = minimumDistance;
-    for (const x of [bounds.min.x, bounds.max.x]) {
-      for (const y of [bounds.min.y, bounds.max.y]) {
-        for (const z of [bounds.min.z, bounds.max.z]) {
-          const p = new THREE.Vector3(x, y, z).sub(target);
-          distance = Math.max(distance, p.dot(direction) + Math.max(
-            Math.abs(p.dot(right)) / horizontalFit,
-            Math.abs(p.dot(up)) / verticalFit,
-          ));
-        }
-      }
-    }
-    return { target, position: direction.clone().multiplyScalar(distance).add(target) };
-  }
-
   const displays = all.filter(({ row }) => row.part.part_id === "display");
   const displayBounds = boundsFor(displays, 0);
 
-  function facePose() {
-    return { ...fit(displayBounds, 0, 1, { face: true, margin: 48 }), fov: 12, up: FACE_UP };
-  }
-
-  function assemblyPose(mode, explode) {
-    const framed = !mobile && modeEntries[mode].length ? modeEntries[mode] : all;
-    return fit(boundsFor(framed, explode), mode === "compare" ? TOUR[0].angle : 0, mobile ? 0.93 : 0.76);
-  }
-
-  function selectionPose(explode, orbitDirection) {
-    const { mode, selectedKeys, cameraCue } = config;
-    const stop = TOUR[cameraCue?.stopIndex];
-    const active = modeEntries[mode];
-    const selected = active.filter(({ row }) => selectedKeys.includes(row.key) || (stop?.diff && row.delta === stop.diff));
-    if (!selected.length) return assemblyPose(mode, explode);
-    const framed = new Set([...selected, ...active.filter(({ row: { part } }) =>
-      part.part_id === "display" || part.part_id.startsWith("display-spacer-"))]);
-    const target = boundsFor(framed, explode).getCenter(new THREE.Vector3());
-    const angle = stop?.angle ?? (selectedKeys.length >= 2 ? TOUR[1].angle : mode === "compare" ? TOUR[0].angle : 0);
-    const direction = orbitDirection ?? VIEW.clone().applyAxisAngle(UP, THREE.MathUtils.degToRad(angle));
-    const right = UP.clone().cross(direction).normalize();
+  function projectedPose(parts, direction, explode, { face = false, ghost } = {}) {
+    const upAxis = face ? FACE_UP : UP;
+    const fov = face ? 12 : baseFov;
+    const right = upAxis.clone().cross(direction).normalize();
     const up = direction.clone().cross(right);
-    const offset = new THREE.Vector3();
+    const target = (face ? displayBounds : boundsFor(parts, explode)).getCenter(new THREE.Vector3());
     const points = [];
-    for (const entry of framed) {
-      const { bounds, vector } = entry;
-      offset.copy(vector).multiplyScalar(typeof explode === "function" ? explode(entry) : explode).sub(target);
-      for (const x of [bounds.min.x, bounds.max.x]) {
-        for (const y of [bounds.min.y, bounds.max.y]) {
-          for (const z of [bounds.min.z, bounds.max.z]) {
-            const point = new THREE.Vector3(x, y, z).add(offset);
-            points.push({ x: point.dot(right), y: point.dot(up), depth: point.dot(direction) });
+    for (const entry of ghost ? [...parts, ghost] : parts) {
+      const layer = entry === ghost ? entries.get(config.selectedKeys[0]) ?? entry : entry;
+      const offset = layer.vector.clone().multiplyScalar(typeof explode === "function" ? explode(layer) : explode).sub(target);
+      for (const mesh of entry.style.surface) {
+        const { min, max } = mesh.geometry.boundingBox;
+        for (const x of [min.x, max.x]) {
+          for (const y of [min.y, max.y]) {
+            for (const z of [min.z, max.z]) {
+              const point = new THREE.Vector3(x, y, z).add(offset);
+              points.push({ x: point.dot(right), y: point.dot(up), depth: point.dot(direction) });
+            }
           }
         }
       }
     }
-    const rect = { left: -frameWidth / 2, right: frameWidth / 2, top: -frameHeight / 2, bottom: frameHeight / 2 };
-    const focalPixels = height / (2 * Math.tan(THREE.MathUtils.degToRad(baseFov / 2)));
-    const margin = mobile ? 24 : 48;
-    function fits(distance) {
+
+    // Reserve more room below the face drawing for the delta and the phone controls.
+    const topInset = Math.min(frameHeight / 4, face ? 46 : 32);
+    const bottomInset = Math.min(frameHeight * (face ? 0.4 : 0.25), face ? (mobile ? 145 : 84) : 32);
+    const rect = {
+      left: -frameWidth / 2, right: frameWidth / 2,
+      top: -frameHeight / 2 + topInset, bottom: frameHeight / 2 - bottomInset,
+    };
+    const centerY = (rect.top + rect.bottom) / 2;
+    const margin = { x: Math.min(frameWidth / 3, face ? 50 : mobile ? 16 : 32), y: 0 };
+    const focalPixels = height / (2 * Math.tan(THREE.MathUtils.degToRad(fov / 2)));
+    let shiftX = 0;
+    let shiftY = 0;
+    function project(distance) {
       const bounds = { left: Infinity, right: -Infinity, top: Infinity, bottom: -Infinity };
       for (const { x, y, depth } of points) {
         const scale = focalPixels / (distance - depth);
-        const sx = x * scale;
-        const sy = -y * scale;
+        const sx = (x - shiftX) * scale;
+        const sy = (shiftY - y) * scale;
         bounds.left = Math.min(bounds.left, sx);
         bounds.right = Math.max(bounds.right, sx);
         bounds.top = Math.min(bounds.top, sy);
         bounds.bottom = Math.max(bounds.bottom, sy);
       }
-      return projectedFitScale(bounds, rect, margin) >= 1;
+      return bounds;
     }
-    const home = assemblyPose(mode, DEFAULT_EXPLODE);
-    let near = Math.max(home.position.distanceTo(home.target) * 0.75, ...points.map(({ depth }) => depth + camera.near));
-    let far = near;
-    if (!fits(near)) {
-      while (!fits(far)) far *= 2;
+    const near = points.reduce((distance, { depth }) => Math.max(distance, depth + camera.near), minimumDistance);
+    function fitDistance() {
+      let low = near;
+      let high = near;
+      const fits = (distance) => projectedFitScale(project(distance), rect, margin) >= 1;
+      while (!fits(high)) high *= 2;
       for (let i = 0; i < 16; i++) {
-        const middle = (near + far) / 2;
-        if (fits(middle)) far = middle;
-        else near = middle;
+        const middle = (low + high) / 2;
+        if (fits(middle)) high = middle;
+        else low = middle;
       }
+      return high;
     }
-    return { target, position: direction.clone().multiplyScalar(far).add(target) };
+    let distance = fitDistance();
+    for (let i = 0; i < 3; i++) {
+      const bounds = project(distance);
+      shiftX += (bounds.left + bounds.right) / 2 * distance / focalPixels;
+      shiftY += (centerY - (bounds.top + bounds.bottom) / 2) * distance / focalPixels;
+      distance = fitDistance();
+    }
+    target.addScaledVector(right, shiftX).addScaledVector(up, shiftY);
+    return { target, position: direction.clone().multiplyScalar(distance).add(target), fov, up: upAxis };
+  }
+
+  function facePose() {
+    return projectedPose(displays, UP, 0, { face: true });
+  }
+
+  function assemblyPose(mode, explode) {
+    const parts = modeEntries[mode].length ? modeEntries[mode] : all;
+    const angle = TOUR[config.cameraCue?.stopIndex]?.angle
+      ?? (config.selectedKeys.length >= 2 ? TOUR[1].angle : mode === "compare" ? TOUR[0].angle : 0);
+    const direction = VIEW.clone().applyAxisAngle(UP, THREE.MathUtils.degToRad(angle));
+    return projectedPose(parts, direction, explode, { ghost: entries.get(config.ghostDeltaKey) });
   }
 
   function moveCamera(pose, now, duration, ease) {
@@ -948,17 +966,17 @@ export function createFielddeckStage(host, assets, index, callbacks) {
     const selectionChanged = config.selectedKeys.join() !== lastConfig?.selectedKeys.join();
     const newCue = cameraCue && cameraCue !== latestCue;
     if (heroElapsed !== null) {
-      setCamera(assemblyPose(mode, DEFAULT_EXPLODE));
+      setCamera(assemblyPose(mode, offsetFor));
     } else if (faceView !== Boolean(lastConfig?.faceView)) {
       if (faceView && !priorCamera) priorCamera = { position: camera.position.clone(), target: controls.target.clone() };
       const pose = faceView ? facePose()
-        : newCue || selectionChanged || mode !== lastConfig.mode ? selectionPose(offsetFor) : priorCamera;
+        : newCue || selectionChanged || mode !== lastConfig.mode ? assemblyPose(mode, offsetFor) : priorCamera;
       if (!faceView) latestCue = cameraCue;
       moveCamera(pose, now, 240, inOutCubic);
       cameraMove.faceTransition = { up: camera.up.clone(), fov: camera.fov };
     } else if (faceView) {
       if (resized || selectionChanged || mode !== lastConfig.mode || explode !== lastConfig.explode) {
-        priorCamera = selectionPose(offsetFor);
+        priorCamera = assemblyPose(mode, offsetFor);
       }
       if (resized) {
         const pose = facePose();
@@ -968,22 +986,22 @@ export function createFielddeckStage(host, assets, index, callbacks) {
     } else if (!cameraMove?.faceTransition) {
       if (newCue) {
         latestCue = cameraCue;
-        moveCamera(selectionPose(offsetFor), now, 1600, damped);
+        moveCamera(assemblyPose(mode, offsetFor), now, 1600, damped);
       } else if (firstFrame || lastHero !== null || resized || mobile && (selectionChanged || mode !== lastConfig.mode)) {
         cameraMove = null;
-        setCamera(selectionPose(offsetFor));
+        setCamera(assemblyPose(mode, offsetFor));
       } else if (mode !== lastConfig.mode) {
-        moveCamera(selectionPose(offsetFor), now, 450, inOutCubic);
+        moveCamera(assemblyPose(mode, offsetFor), now, 450, inOutCubic);
       } else if (selectionChanged) {
-        moveCamera(selectionPose(offsetFor), now, 240, outCubic);
+        moveCamera(assemblyPose(mode, offsetFor), now, 240, outCubic);
       } else if (explodeMotion) {
-        const pose = selectionPose(offsetFor);
+        const pose = assemblyPose(mode, offsetFor);
         if (cameraMove) cameraMove.pose = pose;
         else setCamera(pose, reduced ? 1 : 1 - Math.exp(-tick / 85));
         dirty = true;
       } else if (explode !== lastConfig.explode || lastConfig.explodeMotion) {
         cameraMove = null;
-        setCamera(selectionPose(explode));
+        setCamera(assemblyPose(mode, explode));
       }
     }
     controls.enabled = !faceView && !cameraMove?.faceTransition && heroElapsed === null;
@@ -1002,11 +1020,6 @@ export function createFielddeckStage(host, assets, index, callbacks) {
     controls.minDistance = minimumDistance;
     if (controls.enabled) {
       dirty = controls.update() || dirty;
-      if (config.selectedKeys.length && dirty && !cameraMove && heroElapsed === null) {
-        const offset = camera.position.clone().sub(controls.target);
-        const pose = selectionPose(offsetFor, offset.clone().normalize());
-        if (offset.lengthSq() < pose.position.distanceToSquared(pose.target)) setCamera(pose);
-      }
     }
 
     if (!dirty && !wasAnimating && !pointerMoved) return;
@@ -1034,8 +1047,9 @@ export function createFielddeckStage(host, assets, index, callbacks) {
       const { row, group, vector } = entry;
       const removed = row.revision === "7" && row.delta === "removed";
       const ghost = removed && (mode === "compare" || blend.current.compare > 0);
+      const ghostOpacity = ghostDeltaKey && row.part.part_id === "display" ? 0.3 : 1;
       const weight = row.revision === "5" ? blend.current.five
-        : ghost ? Math.max(blend.current.seven, blend.current.compare) * displayOpacity : blend.current.seven;
+        : ghost ? Math.max(blend.current.seven, blend.current.compare) * displayOpacity * ghostOpacity : blend.current.seven;
       if (entry.overlay) {
         const { object, material } = entry.overlay;
         object.visible = faceView ? row.part.part_id === "display" : row.key === ghostDeltaKey;
@@ -1103,7 +1117,7 @@ export function createFielddeckStage(host, assets, index, callbacks) {
 
   return {
     linked: new Set(entries.keys()),
-    update: (next) => { config = next; },
+    update: (next) => { config = next; resize(); },
     dispose() {
       cancelAnimationFrame(frame);
       observer.disconnect();

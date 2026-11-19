@@ -9,7 +9,7 @@ import "./fielddeckScene.css";
 
 const INITIAL = {
   mode: "5", explode: DEFAULT_EXPLODE, selected: null, stop: 0, cue: null,
-  hero: null, faceView: false, blockers: true, touring: false,
+  hero: null, question: null, faceView: false, blockers: true, touring: false,
 };
 const LEGEND = [["Shape source", BASIS_LABELS], ["Change", DIFF_LABELS]];
 const MODES = [["7", "7-inch"], ["5", "5-inch"], ["compare", "Compare"]];
@@ -53,12 +53,21 @@ function nameOf(row) {
 }
 
 function statusOf(row) {
-  if (!row) return "";
-  if (row.link) return "Interface · physical fit unknown";
-  const { basis } = classifyPart(row.part);
-  const diff = DIFF_LABELS[row.delta]?.toLowerCase() ?? "change unknown";
-  const fit = row.part.evidence.find(({ field }) => field === "physical_fit")?.state;
-  return `${BASIS_LABELS[basis]} · ${diff} · physical fit ${EVIDENCE_STATES.has(fit) ? fit : "unknown"}`;
+  const fit = row.part?.evidence.find(({ field }) => field === "physical_fit")?.state;
+  const state = EVIDENCE_STATES.has(fit) ? fit : "unknown";
+  return `Physical fit · ${state.charAt(0).toUpperCase() + state.slice(1)}`;
+}
+
+function Endpoints({ row: { link, revision }, index }) {
+  return (
+    <dl className="fd-endpoints">
+      {[["A", link.from_part_id], ["B", link.to_part_id]].map(([letter, id]) => (
+        <div key={letter} data-inspector-item>
+          <dt>{letter}</dt><dd>{index.byPart.get(`${revision}:${id}`)?.part.label ?? id ?? "Unknown endpoint"}</dd>
+        </div>
+      ))}
+    </dl>
+  );
 }
 
 function questionText(reason) {
@@ -105,29 +114,26 @@ function Inspector({ row, index, questions, open }) {
         {!row ? <p className="fd-empty">Select a part or interface to inspect its evidence.</p> : <>
           <h2>{part?.label ?? link.label}</h2>
           <p className="fd-status">{statusOf(row)}</p>
+          {part && <p className="fd-status" data-inspector-item>
+            {BASIS_LABELS[classifyPart(part).basis]} · {DIFF_LABELS[row.delta]?.toLowerCase() ?? "change unknown"}
+          </p>}
           {questions.length > 0 && <>
             <h3>Open questions</h3>
             <ul className="fd-checks">
-              {questions.map(({ reason, number }) => (
+              {questions.map(({ reason, number, revisionTag }) => (
                 <li data-inspector-item key={number}>
-                  <QuestionNumber number={number} />{" "}<span>{questionText(reason)}</span>
+                  <QuestionNumber number={number} />{" "}<span>{questionText(reason)}{revisionTag && <small className="fd-revision-tag">{revisionTag}</small>}</span>
                 </li>
               ))}
             </ul>
           </>}
           {link ? <>
             <h3>Routing unknown</h3>
-            <dl className="fd-endpoints">
-              {[["A", link.from_part_id], ["B", link.to_part_id]].map(([letter, id]) => (
-                <div key={letter} data-inspector-item>
-                  <dt>{letter}</dt><dd>{index.byPart.get(`${revision}:${id}`)?.part.label ?? id ?? "Unknown endpoint"}</dd>
-                </div>
-              ))}
-            </dl>
+            <Endpoints row={row} index={index} />
             {link.source && <div data-inspector-item><EvidenceSource source={formatEvidenceSource(link.source)} /></div>}
           </> : <>
             <h3>Evidence</h3>
-            <EvidenceRows evidence={part.evidence} />
+            <EvidenceRows evidence={part.evidence.filter(({ field }) => field !== "physical_fit")} />
             {part.explode_derived && <p className="fd-note" data-inspector-item>Presentation offset</p>}
           </>}
         </>}
@@ -140,54 +146,79 @@ function Inspector({ row, index, questions, open }) {
 function PartTree({ rows, view, questions, counts, blockersOnly, selectedKeys, linked, onSelect }) {
   const [unchangedOpen, setUnchangedOpen] = useState(false);
   const tree = useRef(null);
+  const [more, setMore] = useState(0);
   const groups = Object.entries(DIFF_LABELS).map(([kind, label]) => ({
     kind, label, items: rows.filter(({ part, delta }) => part && (delta ?? "unchanged") === kind),
   }));
-  groups.splice(3, 0,
+  groups.push(
     { kind: "interface", label: "Interfaces", items: rows.filter(({ link }) => link) },
     { kind: "blocker", label: "Blockers", items: questions },
   );
 
   useLayoutEffect(() => {
-    const scroller = tree.current;
-    const row = scroller?.querySelector('[aria-pressed="true"]');
-    if (!row) return;
-    const rect = row.getBoundingClientRect();
-    const bounds = scroller.getBoundingClientRect();
-    if (rect.top < bounds.top) scroller.scrollTop -= bounds.top - rect.top;
-    if (rect.bottom > bounds.bottom) scroller.scrollTop += rect.bottom - bounds.bottom;
-  }, [view.selected, view.mode]);
+    const panel = tree.current;
+    const active = panel.querySelector('[data-active-question="true"]')
+      ?? panel.querySelector('[aria-pressed="true"]');
+    if (active) {
+      const rect = active.getBoundingClientRect();
+      const bounds = panel.getBoundingClientRect();
+      if (rect.top < bounds.top) panel.scrollTop -= bounds.top - rect.top;
+      if (rect.bottom > bounds.bottom - 24) panel.scrollTop += rect.bottom - bounds.bottom + 24;
+    }
+    const update = () => {
+      const bottom = panel.getBoundingClientRect().bottom - 24;
+      setMore(panel.scrollHeight - panel.scrollTop <= panel.clientHeight + 1 ? 0
+        : [...panel.querySelectorAll("li, h3 button")].filter(
+          (item) => item.getClientRects().length && item.getBoundingClientRect().bottom > bottom,
+        ).length);
+    };
+    update();
+    panel.addEventListener("scroll", update);
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(update);
+    observer?.observe(panel);
+    return () => {
+      panel.removeEventListener("scroll", update);
+      observer?.disconnect();
+    };
+  }, [view.selected, view.question, rows, blockersOnly, unchangedOpen]);
 
+  const rowButton = (row, kind) => (
+    <li key={row.number ?? row.key}>
+      <button type="button" aria-pressed={!row.number && row.key === view.selected}
+        data-linked={row.number ? row.number === view.question : selectedKeys.includes(row.key) && row.key !== view.selected}
+        data-active-question={row.number ? row.number === view.question : undefined}
+        data-row={row.key} data-kind={kind} onClick={() => onSelect(row.key, row.number)}>
+        {row.number ? <QuestionNumber number={row.number} /> : <span className="fd-swatch" aria-hidden="true" />}
+        <span className="fd-tree-label">{row.reason ? questionText(row.reason) : nameOf(row)}</span>
+        {row.part && !linked.has(row.key) && <small>Not linked</small>}
+      </button>
+    </li>
+  );
+  const selected = blockersOnly && rows.find(({ key }) => key === view.selected);
   return (
-    <div className="fd-tree-scroll" ref={tree}>
-      {groups.filter(({ kind }) => !blockersOnly || kind === "blocker").map(({ kind, label, items }) => {
-        const count = kind === "blocker" ? questions.length : counts?.[kind] ?? items.length;
-        const heading = <>{label} <span className="fd-count">{count}</span></>;
-        return (
-          <section className="fd-tree-group" aria-label={label} key={kind}>
-            <h3>{kind === "unchanged" ? (
-              <button type="button" aria-expanded={unchangedOpen} aria-controls="fd-unchanged"
-                onClick={() => setUnchangedOpen(!unchangedOpen)}>{heading}</button>
-            ) : heading}</h3>
-            <ul id={kind === "unchanged" ? "fd-unchanged" : undefined} hidden={kind === "unchanged" && !unchangedOpen}>
-              {items.map((row) => (
-                <li key={row.number ?? row.key}>
-                  <button type="button" aria-pressed={row.key === view.selected}
-                    data-endpoint={selectedKeys.includes(row.key) && row.key !== view.selected}
-                    data-row={row.key} data-kind={kind} onClick={() => onSelect(row.key)}>
-                    {row.number ? <QuestionNumber number={row.number} /> : <span className="fd-swatch" aria-hidden="true" />}
-                    <span className="fd-tree-label">
-                      {row.reason ? questionText(row.reason) : nameOf(row)}
-                    </span>
-                    {row.part && !linked.has(row.key) && <small>Not linked</small>}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </section>
-        );
-      })}
-    </div>
+    <>
+      <div className="fd-tree-scroll" ref={tree}>
+        {selected && <div className="fd-tree-group"><ul>{rowButton(selected, selected.delta ?? "interface")}</ul></div>}
+        {groups.filter(({ kind }) => !blockersOnly || kind === "blocker").map(({ kind, label, items }) => {
+          const count = kind === "blocker" ? questions.length : counts?.[kind] ?? items.length;
+          const collapsed = kind === "unchanged" && !unchangedOpen;
+          const shown = collapsed ? items.filter(({ key }) => key === view.selected) : items;
+          const heading = <>{label} <span className="fd-count">{kind === "unchanged" ? `(${count})` : count}</span></>;
+          return (
+            <section className="fd-tree-group" aria-label={label} key={kind}>
+              <h3>{kind === "unchanged" ? (
+                <button type="button" aria-expanded={unchangedOpen} aria-controls="fd-unchanged"
+                  onClick={() => setUnchangedOpen(!unchangedOpen)}>{heading}</button>
+              ) : heading}</h3>
+              <ul id={kind === "unchanged" ? "fd-unchanged" : undefined} hidden={collapsed && !shown.length}>
+                {shown.map((row) => rowButton(row, kind))}
+              </ul>
+            </section>
+          );
+        })}
+      </div>
+      {more > 0 && <div className="fd-inspector-more"><span>{more} more</span></div>}
+    </>
   );
 }
 
@@ -199,28 +230,43 @@ function Annotations({ labels, selection, endpoints, pins, faceView, onSelect })
           <g key={key} data-kind={delta} data-leader={i}><path /><circle r="1.5" /></g>
         ))}
         <path className="fd-pin-leaders" data-pin-leaders="" />
+        {endpoints.length > 0 && <path className="fd-route-leaders" data-route-leaders="" />}
         {faceView && ["7", "5"].map((revision) => (
           <g className="fd-dimensions" data-dimensions={revision} key={revision}
             data-kind={revision === "7" ? "removed" : "added"}>
-            <path /><text /><text />
+            <path />
           </g>
         ))}
-        {selection?.part && <path className="fd-bracket" data-bracket={selection.key} />}
+        {selection?.part && <>
+          <path className="fd-bracket-halo" data-bracket={selection.key} />
+          <path className="fd-bracket" data-bracket={selection.key} />
+        </>}
       </svg>
-      {labels.map((row) => <span className="fd-label" key={row.key} data-anchor={row.key}>{nameOf(row)}</span>)}
-      {pins.map(({ key, reason, number }) => (
-        <div className="fd-pin-position" key={number} data-pin-anchor={key}>
-          <button className="fd-pin" type="button" data-question-number={number}
-            aria-label={`Open question ${number}`} title={questionText(reason)} onClick={() => onSelect(key)}><span>{number}</span></button>
+      {faceView && <>
+        {["7", "5"].flatMap((revision) => ["width", "height"].map((axis) => (
+          <span className="fd-dimension-label" key={revision + axis} data-dimension-label={revision + axis}
+            data-kind={revision === "7" ? "removed" : "added"} data-axis={axis} />
+        )))}
+        <div className="fd-footprint" data-footprint="">
+          <div>5-inch minus 7-inch · CAD footprint, computed</div>
+          <div data-footprint-delta="" />
         </div>
-      ))}
+      </>}
+      {labels.map((row) => <span className="fd-label" key={row.key} data-anchor={row.key}>{row.caption ?? nameOf(row)}</span>)}
       {endpoints.map(([letter, key]) => key && (
-        <div className="fd-pin-position" key={letter} data-pin-anchor={key}>
+        <div className="fd-pin-position" key={letter} data-pin-anchor={key} data-endpoint-pin={letter}>
           <span className="fd-endpoint" aria-label={`Endpoint ${letter}`}>{letter}</span>
         </div>
       ))}
+      {pins.map(({ key, anchor, reason, number, dimmed, route }) => (
+        <div className="fd-pin-position" key={number} data-pin-anchor={anchor} data-dimmed={dimmed}
+          data-interface-question={route || undefined}>
+          <button className="fd-pin" type="button" data-question-number={number}
+            aria-label={`Open question ${number}`} title={questionText(reason)} onClick={() => onSelect(key, number)}><span>{number}</span></button>
+        </div>
+      ))}
       {endpoints.length > 0 && (
-        <div className="fd-route-position" data-route-label="" data-from={endpoints[0][1]} data-to={endpoints[1][1]}>
+        <div className="fd-route-position" data-route-label="">
           <span className="fd-label">Routing unknown</span>
         </div>
       )}
@@ -292,22 +338,46 @@ export default function FieldDeckScene({ onExit }) {
     const visible = matching.filter((key) => displayedKeys.has(key));
     const fallback = view.mode === "compare" ? matching[0].replace(/^7:/, "5:") : matching[0];
     const key = visible[0] ?? (displayedKeys.has(fallback) ? fallback : matching[0]);
-    return [{ ...question, key, keys: visible }];
+    return [{ ...question, key }];
   }), [allQuestions, displayedKeys, revision, view.mode]);
-  const selectionQuestions = useMemo(() => questions.filter(
-    ({ key, keys }) => key === view.selected || keys.includes(view.selected),
-  ), [questions, view.selected]);
+  const selectionQuestions = useMemo(() => {
+    if (!selection) return [];
+    const keys = selection.part
+      ? ["5", "7"].map((rev) => index.byPart.get(`${rev}:${selection.part.part_id}`)?.key)
+      : view.mode === "compare" ? [selection.key, selection.key.replace(/^5:/, "7:")] : [selection.key];
+    return allQuestions.flatMap((question) => !keys.some((key) => question.keys.has(key)) ? [] : [{
+      ...question,
+      revisionTag: question.keys.has(selection.key) ? null
+        : `${[...question.keys][0].split(":")[0]}-inch revision`,
+    }]);
+  }, [allQuestions, index, selection, view.mode]);
   const treeOpen = narrow ? sheet === "parts" || sheet === "blockers" : desktopTreeOpen;
   const inspectorOpen = !narrow || sheet === "details";
   const selectedKeys = useMemo(() => selectedPartKeys(index, selection), [index, selection]);
+  const oldKey = ghostDeltaKey(index, view.mode, selection);
   const labels = view.faceView ? [] : rows.filter((row) => row.part && linked.has(row.key) && (row.key === selection?.key
-    || row.part.part_id === "display"));
-  const pins = view.blockers && !view.faceView ? questions.flatMap((question) => {
-    const key = question.key;
-    return linked.has(key) && index.byKey.get(key)?.part && displayedKeys.has(key) ? [question] : [];
-  }) : [];
+    || selectedKeys.includes(row.key) || row.part.part_id === "display")).map((row) => row.delta === "removed" && view.mode === "compare"
+    ? { ...row, caption: `${nameOf(row)} · removed` } : row);
+  if (!view.faceView && oldKey && linked.has(oldKey)) {
+    labels.push({ key: oldKey, delta: "removed", caption: `${selection.part.label} · old revision` });
+  }
   const endpoints = selection?.link && !view.faceView ? [["A", selection.link.from_part_id], ["B", selection.link.to_part_id]]
     .map(([letter, id]) => [letter, index.byPart.get(`${selection.revision}:${id}`)?.key]) : [];
+  const pins = [];
+  if (view.blockers && view.faceView) {
+    for (const question of allQuestions) {
+      const anchors = [...question.keys].filter((key) => index.byKey.get(key)?.part?.part_id === "display" && linked.has(key));
+      if (anchors.length) pins.push({ ...question, key: index.byPart.get(`${revision}:display`)?.key ?? anchors[0], anchor: anchors[0] });
+    }
+  } else if (view.blockers) {
+    if (selection?.link) {
+      for (const question of selectionQuestions) pins.push({ ...question, key: selection.key, route: true, dimmed: false });
+    }
+    for (const question of questions) {
+      const { key } = question;
+      if (linked.has(key) && displayedKeys.has(key)) pins.push({ ...question, anchor: key, dimmed: Boolean(selection?.link) });
+    }
+  }
   const comparisonAvailable = sidecars["5"]?.revision_diff?.status === "available";
   const comparisonRenderable = comparisonAvailable
     && [...linked].some((key) => key.startsWith("7:")) && [...linked].some((key) => key.startsWith("5:"));
@@ -319,8 +389,8 @@ export default function FieldDeckScene({ onExit }) {
     }));
   }
 
-  function select(key) {
-    setView((old) => ({ ...old, selected: key, cue: null, hero: null, touring: false, blockers: true }));
+  function select(key, question = null) {
+    setView((old) => ({ ...old, selected: key, question, cue: null, hero: null, touring: false, blockers: true }));
   }
   current.current = { view, reduced, finishIntro, select };
 
@@ -364,9 +434,9 @@ export default function FieldDeckScene({ onExit }) {
     stage.current?.update({
       mode: view.mode, explode: view.explode, explodeMotion, heroStart: view.hero,
       selectedKeys, cameraCue: view.cue, reduced, faceView: view.faceView,
-      ghostDeltaKey: ghostDeltaKey(index, view.mode, selection),
+      ghostDeltaKey: oldKey,
     });
-  }, [assets, view, selectedKeys, reduced, explodeMotion, treeOpen, inspectorOpen, narrow, blockersOnly, sheet, keyOpen, index, selection]);
+  }, [assets, view, selectedKeys, reduced, explodeMotion, treeOpen, inspectorOpen, narrow, blockersOnly, sheet, keyOpen, moreOpen, oldKey]);
 
   useEffect(() => {
     if (view.hero == null) return undefined;
@@ -391,7 +461,7 @@ export default function FieldDeckScene({ onExit }) {
       const rev = mode === "7" ? "7" : "5";
       const key = active?.part ? index.byPart.get(`${rev}:${active.part.part_id}`)?.key
         : active?.link ? `${rev}:link:${active.link.interface_id}` : null;
-      return { ...old, mode, selected: index.byKey.has(key) ? key : null, cue: null, touring: false, blockers: true };
+      return { ...old, mode, question: null, selected: index.byKey.has(key) ? key : null, cue: null, touring: false, blockers: true };
     });
   }
 
@@ -408,7 +478,7 @@ export default function FieldDeckScene({ onExit }) {
           : rowsForMode(index, mode).find((row) => row.part && row.delta === stop.diff);
       return {
         ...old, mode, explode: stop.interfaceId ? 0.45 : 1, hero: null,
-        stop: stopIndex, faceView: false, selected: selected?.key ?? null, touring,
+        stop: stopIndex, question: null, faceView: false, selected: selected?.key ?? null, touring,
         cue: { stopIndex }, blockers: true,
       };
     });
@@ -480,10 +550,16 @@ export default function FieldDeckScene({ onExit }) {
     }
   }
 
+  const offsetLabel = view.explode > 0 ? `Presentation offset · ${Math.round(view.explode * 100)}%` : null;
+  const toggleFace = () => {
+    setView((old) => ({ ...old, faceView: !old.faceView, touring: false }));
+    setMoreOpen(false);
+  };
+
   return (
     <section className="fd-scene fielddeck-route" aria-labelledby="fd-title" data-testid="fielddeck-scene"
       data-scene-status={playing ? "hero" : modelVisible ? "settled" : loading ? "loading" : "unavailable"}>
-      <div className="fd-stage" ref={host} tabIndex={0} aria-label="Fielddeck stage">
+      <div className="fd-stage" data-has-selection={Boolean(selection)} ref={host} tabIndex={0} aria-label="Fielddeck stage">
         <header className="fd-header">
           <div>
             {onExit && <button className="fd-exit" type="button" aria-label="Back to home" onClick={onExit}>←</button>}
@@ -532,22 +608,21 @@ export default function FieldDeckScene({ onExit }) {
                 aria-controls="fd-options" onClick={() => setMoreOpen(!moreOpen)}>More</button>}
               <div className="fd-options" id="fd-options" hidden={narrow && !moreOpen}>
                 {(modelVisible || playing) && <div className="fd-explode">
-                  <label htmlFor="fd-explode">Explode</label>
-                  <input id="fd-explode" type="range" min="0" max="1" step="0.01" value={view.explode}
+                  <label htmlFor="fd-explode">{offsetLabel ?? "Explode"}</label>
+                  <input id="fd-explode" aria-label="Explode" type="range" min="0" max="1" step="0.01" value={view.explode}
                     onChange={(event) => {
                       setExplodeMotion(null);
                       setView((old) => ({ ...old, explode: Number(event.target.value), cue: null, touring: false, blockers: true }));
                     }} />
-                  <output htmlFor="fd-explode">{Math.round(view.explode * 100)}%</output>
+                  {!offsetLabel && <output htmlFor="fd-explode">0%</output>}
                   {!narrow && <button type="button" onClick={() => {
                     setView((old) => ({ ...old, touring: false, blockers: true }));
                     setExplodeMotion({ from: view.explode, to: view.explode > 0 ? 0 : 1, start: performance.now() });
                   }}>{view.explode > 0 ? "Collapse" : "Explode view"}</button>}
                 </div>}
-                {comparisonRenderable && <button type="button" onClick={() => {
-                  setView((old) => ({ ...old, faceView: !old.faceView, touring: false }));
-                  setMoreOpen(false);
-                }}>{view.faceView ? "Back to 3D" : "Face view"}</button>}
+                {comparisonRenderable && <button type="button" onClick={toggleFace}>
+                  {view.faceView ? "Back to 3D" : "Face view"}
+                </button>}
                 {narrow && <button type="button" aria-expanded={keyOpen} aria-controls="fd-legend"
                   onClick={() => setKeyOpen(!keyOpen)}>Key</button>}
                 <div className="fd-tour" role="group" aria-label="Tour">
@@ -563,7 +638,11 @@ export default function FieldDeckScene({ onExit }) {
               </div>
             </div>
           )}
+          {narrow && offsetLabel && (modelVisible || playing) && <div className="fd-offset-caption">{offsetLabel}</div>}
         </div>
+        {narrow && comparisonRenderable && <button className="fd-face-pill" type="button" onClick={toggleFace}>
+          {view.faceView ? "Back to 3D" : "Face view"}
+        </button>}
         <div className="fd-legend" id="fd-legend" aria-label="Material legend" hidden={narrow && !keyOpen}>
           {LEGEND.map(([label, kinds]) => (
             <div key={label} role="group" aria-label={label}>
@@ -578,7 +657,11 @@ export default function FieldDeckScene({ onExit }) {
           <div className="fd-peek">
             <strong>{nameOf(selection) ?? "Select a part or interface"}</strong>
             {selection && <span className="fd-status">{statusOf(selection)}</span>}
-            <span><span className="fd-question-numbers">{selectionQuestions.length}</span> open questions</span>
+            {selection?.link && <Endpoints row={selection} index={index} />}
+            {selectionQuestions.length > 0 && <span>
+              <QuestionNumber number={selectionQuestions[0].number} /> {questionText(selectionQuestions[0].reason)}
+              {selectionQuestions[0].revisionTag && <small className="fd-revision-tag">{selectionQuestions[0].revisionTag}</small>}
+            </span>}
           </div>
           <div className="fd-sheets" role="group" aria-label="Scene panels">
             {[["details", "Inspector"], ["parts", "Parts"], ["blockers", "Blockers"]].map(([id, label]) => (

@@ -42,14 +42,24 @@ export function toggleFielddeckSheet(current, sheet) {
 
 // Scale around the unobstructed rectangle's centre. A value below 1 means an edge clips.
 export function projectedFitScale(bounds, rect, margin = 0) {
+  const { x: marginX, y: marginY } = typeof margin === "number" ? { x: margin, y: margin } : margin;
   const halfWidth = (rect.right - rect.left) / 2;
   const halfHeight = (rect.bottom - rect.top) / 2;
   const x = rect.left + halfWidth;
   const y = rect.top + halfHeight;
   return Math.min(
-    Math.max(1, halfWidth - margin) / Math.max(x - bounds.left, bounds.right - x),
-    Math.max(1, halfHeight - margin) / Math.max(y - bounds.top, bounds.bottom - y),
+    Math.max(1, halfWidth - marginX) / Math.max(x - bounds.left, bounds.right - x),
+    Math.max(1, halfHeight - marginY) / Math.max(y - bounds.top, bounds.bottom - y),
   );
+}
+
+export function footprintDelta(older, newer) {
+  const difference = (axis) => {
+    const delta = (newer.max[axis] - newer.min[axis]) - (older.max[axis] - older.min[axis]);
+    const magnitude = Math.abs(delta).toFixed(2);
+    return `${delta < 0 && magnitude !== "0.00" ? "−" : "+"}${magnitude} mm`;
+  };
+  return `Width ${difference("x")} · Height ${difference("y")}`;
 }
 
 const clampTo = (value, min, max) => Math.max(min, Math.min(max, value));

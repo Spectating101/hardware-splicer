@@ -74,11 +74,11 @@ async function main() {
     await page.waitForTimeout(500);
     await scene.getByRole("button", { name: "Compare", exact: true }).click();
     await scene.locator('[data-row="5:part:tray-rear-left"]:visible').first().click();
-    await inspector.getByText(/· changed ·/).waitFor();
+    await inspector.getByText(/ · changed$/).waitFor();
     await capture("compare", 950);
 
     await scene.locator('[data-row="5:part:display"]:visible').first().click();
-    await inspector.getByText(/^Vendor model ·/).waitFor();
+    await inspector.getByText(/^Vendor model · /).waitFor();
     await capture("display-selected");
 
     await scene.getByRole("button", { name: "Face view", exact: true }).click();
