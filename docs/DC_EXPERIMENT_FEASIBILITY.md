@@ -30,3 +30,7 @@ PYTHONPATH=src python -m unittest discover -s tests -p test_experiment_feasibili
 ```
 
 The companion Policy Lab feature uses this checker in a four-case deterministic replay and a synthetic before/after comparison. See its `docs/equipment-infrastructure/ENGINEERING_INVESTIGATION_V0.md`. That replay is a program-design proof, not an instrument test.
+
+## First real PCB candidate, strictly low power
+
+A separate, [5 V / 0.5 A KiCad witness-fixture design](../hardware/reference_designs/low_voltage_witness_fixture_v0/README.md) now has an editable schematic and PCB, native zero-violation ERC/DRC with schematic parity, a DC SPICE model, actual HS register-decoder fixture replay, and an unchanged PLRS-6 offline intake receipt. It is **UNBUILT_UNVERIFIED**; fabrication and energization are on hold for identified procurement, fuse, isolation, reference-measurement and metrological blockers. It is deliberately **not** a 24 V / 120 W design.
