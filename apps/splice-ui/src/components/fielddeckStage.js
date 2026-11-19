@@ -8,13 +8,9 @@ import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment
 import { HorizontalBlurShader } from "three/examples/jsm/shaders/HorizontalBlurShader.js";
 import { VerticalBlurShader } from "three/examples/jsm/shaders/VerticalBlurShader.js";
 import { fielddeckSceneUrl } from "../api.js";
-import { classifyPart, DEFAULT_EXPLODE, explodeGroupOffsets, FIELDDECK_NARROW, placeCallouts, projectedFitScale, footprintDelta, formatEvidenceValue, rowForNode, TOUR } from "./fielddeckLogic.js";
+import { classifyPart, DEFAULT_EXPLODE, DIFF_COLORS, dimensionLabel, explodeGroupOffsets, FIELDDECK_NARROW, placeCallouts, placeRoutingLabel, projectedFitScale, footprintDelta, materialFor, rowForNode, TOUR } from "./fielddeckLogic.js";
 
-const COLORS = {
-  custom: 0xd8ccb6, vendor_step: 0x8e979e, envelope: 0xa5aeb5,
-  unknown: 0x9097a0, proxy: 0xa6a098, changed: 0xe0a040, added: 0x2dd4bf,
-  removed: 0xf17e70,
-};
+const OLD_REVISION_RED = 0xc83e31;
 const CONTACT_LAYER = 1;
 const UP = new THREE.Vector3(0, 0, 1);
 const VIEW = new THREE.Vector3(8.2, -9.6, 9.1).normalize();
@@ -79,9 +75,9 @@ export function disposeFielddeck(assets) {
   resources.forEach((resource) => resource.dispose());
 }
 
-function solidMaterial(basis) {
+function solidMaterial(basis, color, emissive) {
   return new THREE.MeshStandardMaterial({
-    color: COLORS[basis], metalness: 0, roughness: basis === "vendor_step" ? 0.82 : 0.84,
+    color, emissive, metalness: 0, roughness: basis === "vendor_step" ? 0.82 : 0.84,
     flatShading: basis === "vendor_step",
     polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1,
   });
@@ -108,13 +104,12 @@ function edgeMaterial(color, pattern, linewidth) {
   });
 }
 
-function stylePart(entry, compare, weight, ghost, accent) {
+function stylePart(entry, compare, weight, ghost, accent, selected) {
   const { basis, outline, row } = entry;
   const { solid, baseColor, mutedColor, fill, edge, surface, lines, halos } = entry.style;
   const translucent = outline || ghost;
   const dimming = row.delta === "unchanged" ? compare : 0;
   const dim = 1 - dimming * 0.6;
-  fill.color.setHex(ghost ? COLORS.removed : COLORS[basis]);
   fill.opacity = weight * (basis === "envelope" && !ghost ? 0.06 : 0);
   if (solid) {
     solid.color.copy(baseColor).lerp(mutedColor, dimming);
@@ -128,9 +123,13 @@ function stylePart(entry, compare, weight, ghost, accent) {
   }
 
   const variant = ghost ? edge.ghost : basis !== "envelope" && edge.diff && accent > 0 ? edge.diff : edge.base;
-  if (variant === edge.diff) variant.color.setHex(COLORS[basis]).lerp(entry.accentColor, accent);
+  if (variant === edge.diff) variant.color.copy(baseColor).lerp(entry.accentColor, accent);
   const baseAlpha = outline ? 0.82 : basis === "custom" ? 0.32 : 0.48;
-  variant.opacity = weight * (basis === "envelope" || ghost ? 1 : dim * THREE.MathUtils.lerp(baseAlpha, 1, accent));
+  const selectedChange = selected && row.delta === "changed";
+  variant.linewidth = ghost || selectedChange || row.delta === "added" && variant === edge.diff ? 1.5
+    : variant === edge.diff ? 2 : 1;
+  variant.opacity = selectedChange ? 1
+    : weight * (basis === "envelope" || ghost ? 1 : dim * THREE.MathUtils.lerp(baseAlpha, 1, accent));
 
   for (const mesh of surface) {
     mesh.material = translucent ? fill : solid;
@@ -141,12 +140,126 @@ function stylePart(entry, compare, weight, ghost, accent) {
     if (mesh.castShadow) mesh.layers.enable(CONTACT_LAYER);
     else mesh.layers.disable(CONTACT_LAYER);
   }
-  lines.forEach((line) => { line.material = variant; });
+  lines.forEach((line) => {
+    line.material = variant;
+    line.visible = !ghost || !entry.displayOverlay;
+  });
   if (edge.halo) {
+    edge.halo.linewidth = variant.linewidth + 2;
     edge.halo.opacity = weight * accent;
     halos.forEach((line) => { line.visible = variant === edge.diff; });
   }
   return variant;
+}
+
+function edgePositions(geometry, threshold) {
+  const edges = new THREE.EdgesGeometry(geometry, threshold);
+  const positions = edges.getAttribute("position").array;
+  edges.dispose();
+  return positions;
+}
+
+function featureLine(positions, material, own) {
+  const segments = own(new LineSegmentsGeometry());
+  segments.setPositions(positions);
+  const line = new LineSegments2(segments, material);
+  line.computeLineDistances();
+  return line;
+}
+
+function displayContours(entry) {
+  // The display is in the XY plane. Trace connected face edges at each depth so the two
+  // ends of a bore and stacked rim edges do not join into the same contour.
+  const vertices = new Map();
+  const vertexFor = (xyz) => {
+    const key = Array.from(xyz, (value) => Math.round(value * 1000)).join(",");
+    if (!vertices.has(key)) {
+      vertices.set(key, { id: vertices.size, point: new THREE.Vector3(...xyz), neighbors: new Set() });
+    }
+    return vertices.get(key);
+  };
+  for (const positions of entry.displayEdges) {
+    for (let i = 0; i < positions.length; i += 6) {
+      if (Math.abs(positions[i + 2] - positions[i + 5]) > 0.02) continue;
+      const a = vertexFor(positions.slice(i, i + 3));
+      const b = vertexFor(positions.slice(i + 3, i + 6));
+      if (a !== b) {
+        a.neighbors.add(b);
+        b.neighbors.add(a);
+      }
+    }
+  }
+  const large = [];
+  const holes = [];
+  const seen = new Set();
+  for (const vertex of vertices.values()) {
+    if (seen.has(vertex)) continue;
+    const component = [vertex];
+    const positions = [];
+    const bounds = new THREE.Box3();
+    seen.add(vertex);
+    for (const { id, point, neighbors } of component) {
+      bounds.expandByPoint(point);
+      for (const neighbor of neighbors) {
+        if (!seen.has(neighbor)) {
+          component.push(neighbor);
+          seen.add(neighbor);
+        }
+        if (id < neighbor.id) positions.push(point.x, point.y, point.z, neighbor.point.x, neighbor.point.y, neighbor.point.z);
+      }
+    }
+    const { x: width, y: height } = bounds.getSize(new THREE.Vector3());
+    const center = bounds.getCenter(new THREE.Vector3());
+    const diameter = (width + height) / 2;
+    const closed = component.every(({ neighbors }) => neighbors.size === 2);
+    if (closed) {
+      // Feed dashed lines in contour order so they do not restart at tessellation seams.
+      positions.length = 0;
+      let previous;
+      let current = vertex;
+      do {
+        const next = [...current.neighbors].find((neighbor) => neighbor !== previous);
+        current.point.toArray(positions, positions.length);
+        next.point.toArray(positions, positions.length);
+        previous = current;
+        current = next;
+      } while (current !== vertex);
+    }
+    const contour = { positions, center, width, height, closed };
+    if (Math.max(width, height) >= 15) large.push(contour);
+    else if (closed && diameter >= 2 && diameter <= 8 && component.length >= 6
+      && Math.abs(width - height) <= diameter * 0.2
+      && component.every(({ point }) => Math.abs(Math.hypot(point.x - center.x, point.y - center.y) - diameter / 2) <= diameter * 0.1)) {
+      holes.push(contour);
+    }
+  }
+
+  const [largest] = large.sort((a, b) => b.width * b.height - a.width * a.height);
+  if (!largest) return { perimeter: [], interior: [], lug: null };
+  const [perimeter] = large.filter((loop) => loop.width * loop.height >= largest.width * largest.height * 0.998)
+    .sort((a, b) => Number(b.closed) - Number(a.closed) || b.center.z - a.center.z);
+  const { center, width, height } = perimeter;
+  const viewingArea = entry.row.part.evidence.find(({ field }) => field === "landscape_viewing_area_mm")?.value;
+  const windowScore = (loop) => viewingArea
+    ? Math.abs(loop.width - viewingArea[0]) + Math.abs(loop.height - viewingArea[1])
+    : -loop.center.z;
+  const [window] = large.filter((loop) => loop.width > width * 0.45 && loop.width < width * 0.95
+    && loop.height > height * 0.45 && loop.height < height * 0.95
+    && Math.abs(loop.center.x - center.x) < width * 0.1 && Math.abs(loop.center.y - center.y) < height * 0.1)
+    .sort((a, b) => Number(b.closed) - Number(a.closed) || windowScore(a) - windowScore(b));
+  const pitch = entry.row.part.evidence.find(({ field }) => field === "landscape_mount_pitch_mm")?.value;
+  const mounts = [1, -1].flatMap((x) => [1, -1].map((y) => {
+    const targetX = center.x + x * (pitch?.[0] ?? width) / 2;
+    const targetY = center.y + y * (pitch?.[1] ?? height) / 2;
+    const distance = (hole) => Math.hypot(hole.center.x - targetX, hole.center.y - targetY);
+    return holes.filter((hole) => x * (hole.center.x - center.x) > width * 0.18
+      && y * (hole.center.y - center.y) > height * 0.18).sort((a, b) => distance(a) - distance(b))[0];
+  }));
+  return {
+    perimeter: perimeter.positions,
+    interior: [window, ...mounts].flatMap((loop) => loop?.positions ?? []),
+    lug: mounts[0]?.center,
+  };
 }
 
 function makeEntries(assets, index, scene, resources) {
@@ -178,24 +291,26 @@ function makeEntries(assets, index, scene, resources) {
         const group = new THREE.Group();
         const vector = new THREE.Vector3();
         const pattern = basis === "envelope" ? [4, 3] : basis === "unknown" ? [0.9, 2.8] : null;
-        const solid = outline ? null : own(solidMaterial(basis));
-        const baseColor = new THREE.Color(COLORS[basis]);
+        const { color, emissive, edgeColor } = materialFor(basis, row.delta);
+        const solid = outline ? null : own(solidMaterial(basis, color, emissive));
+        const baseColor = new THREE.Color(color);
         const gray = baseColor.r * 0.2126 + baseColor.g * 0.7152 + baseColor.b * 0.0722;
         const mutedColor = basis === "custom" ? new THREE.Color(0x6e685f)
           : baseColor.clone().lerp(new THREE.Color().setRGB(gray, gray, gray), 0.65).multiplyScalar(0.4);
-        const fill = own(new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false }));
+        const fill = own(new THREE.MeshBasicMaterial({ color, transparent: true, depthWrite: false }));
         const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
         if (basis === "proxy") applyHatch(solid, 8, pixelRatio);
         entry = {
           row, basis, outline, group, vector, bounds: new THREE.Box3(),
-          accentColor: new THREE.Color(COLORS[row.delta]),
+          accentColor: new THREE.Color(edgeColor),
+          displayEdges: row.part.part_id === "display" ? [] : null,
           style: {
             solid, baseColor, mutedColor, fill,
             edge: {
-              base: own(edgeMaterial(COLORS[basis], pattern, 1)),
-              diff: ["added", "changed"].includes(row.delta) ? own(edgeMaterial(COLORS[row.delta], pattern, row.delta === "changed" ? 2 : 1.5)) : null,
+              base: own(edgeMaterial(color, pattern, 1)),
+              diff: ["added", "changed"].includes(row.delta) ? own(edgeMaterial(edgeColor, pattern, row.delta === "changed" ? 2 : 1.5)) : null,
               halo: row.delta === "changed" ? own(edgeMaterial(0x0e1116, null, 4)) : null,
-              ghost: row.delta === "removed" ? own(edgeMaterial(COLORS.removed, [5, 3], 1.5)) : null,
+              ghost: row.delta === "removed" ? own(edgeMaterial(DIFF_COLORS.removed, [5, 3], 1.5)) : null,
             },
             surface: [], lines: [], halos: [],
           },
@@ -214,17 +329,8 @@ function makeEntries(assets, index, scene, resources) {
       style.surface.push(mesh);
       group.add(mesh);
 
-      function featureEdges(threshold, material) {
-        const edges = new THREE.EdgesGeometry(geometry, threshold);
-        const segments = own(new LineSegmentsGeometry());
-        segments.setPositions(edges.getAttribute("position").array);
-        edges.dispose();
-        const line = new LineSegments2(segments, material);
-        line.computeLineDistances();
-        return line;
-      }
-
-      const line = featureEdges(row.delta === "removed" ? 40 : 28, style.edge.base);
+      const positions = edgePositions(geometry, 28);
+      const line = featureLine(positions, style.edge.base, own);
       if (style.edge.halo) {
         const halo = new LineSegments2(line.geometry, style.edge.halo);
         halo.renderOrder = 1;
@@ -235,20 +341,43 @@ function makeEntries(assets, index, scene, resources) {
       style.lines.push(line);
       group.add(line);
 
-      const display = row.part.part_id === "display";
-      if (display || revision === "7" && (row.delta === "changed"
-        || index.byPart.get(`5:${row.part.part_id}`)?.delta === "changed")) {
+      if (entry.displayEdges) {
+        entry.displayEdges.push(edgePositions(geometry, 40));
+      } else if (revision === "7" && (row.delta === "changed"
+        || index.byPart.get(`5:${row.part.part_id}`)?.delta === "changed"
+        || index.byNode.get("5")?.get(row.part.node_name)?.some((part) => part.delta === "changed"))) {
         if (!entry.overlay) {
-          const material = own(edgeMaterial(display && revision === "5" ? COLORS.added : COLORS.removed,
-            display && revision === "5" ? null : [5, 3], 1.5));
+          const material = own(edgeMaterial(OLD_REVISION_RED, [5, 3], 1.5));
+          const halo = own(edgeMaterial(0x0e1116, [5, 3], 3.5));
+          halo.opacity = 0.5;
+          material.depthTest = halo.depthTest = false;
           const object = new THREE.Group();
           object.visible = false;
-          entry.overlay = { object, material };
+          entry.overlay = { object, material, halo };
           scene.add(object);
         }
-        entry.overlay.object.add(featureEdges(display ? 45 : 40, entry.overlay.material));
+        const stroke = featureLine(positions, entry.overlay.material, own);
+        const halo = new LineSegments2(stroke.geometry, entry.overlay.halo);
+        halo.renderOrder = 3;
+        stroke.renderOrder = 4;
+        entry.overlay.object.add(halo, stroke);
       }
     });
+  }
+  for (const entry of entries.values()) {
+    if (!entry.displayEdges) continue;
+    const { perimeter, interior, lug } = displayContours(entry);
+    delete entry.displayEdges;
+    const removed = entry.row.revision === "7";
+    const color = removed ? DIFF_COLORS.removed : DIFF_COLORS.added;
+    const rim = own(edgeMaterial(color, removed ? [5, 3] : null, 1.5));
+    const details = own(edgeMaterial(color, removed ? [5, 3] : null, 1));
+    const object = new THREE.Group();
+    object.visible = false;
+    if (perimeter.length) object.add(featureLine(perimeter, rim, own));
+    if (interior.length) object.add(featureLine(interior, details, own));
+    entry.displayOverlay = { object, rim, details, lug };
+    scene.add(object);
   }
   return entries;
 }
@@ -441,7 +570,7 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
   };
   const boundsForKey = (key) => {
     const entry = entries.get(key);
-    const object = entry?.overlay?.object.visible ? entry.overlay.object : entry?.group;
+    const object = [entry?.displayOverlay?.object, entry?.overlay?.object, entry?.group].find((layer) => layer?.visible);
     return object?.visible ? entry.bounds.clone().translate(object.position) : null;
   };
   const centerFor = (key) => {
@@ -454,7 +583,7 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
     node.style.visibility = visible ? "visible" : "hidden";
     if (visible) node.style.transform = `translate(${point.x}px, ${point.y}px)`;
   }
-  function outlineFor(bounds, pad = 0) {
+  function outlineFor(bounds) {
     if (!bounds) return null;
     const corners = [bounds.min.x, bounds.max.x].flatMap((x) =>
       [bounds.min.y, bounds.max.y].flatMap((y) =>
@@ -463,8 +592,8 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
     const xs = corners.map(({ x }) => x);
     const ys = corners.map(({ y }) => y);
     return {
-      left: Math.min(...xs) - pad, right: Math.max(...xs) + pad,
-      top: Math.min(...ys) - pad, bottom: Math.max(...ys) + pad,
+      left: Math.min(...xs), right: Math.max(...xs),
+      top: Math.min(...ys), bottom: Math.max(...ys),
     };
   }
 
@@ -475,7 +604,6 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
   const endpointPositions = new Map();
   const routeLabel = host.querySelector("[data-route-label]");
   const routeLeaders = host.querySelector("[data-route-leaders]");
-  let midpoint;
   function mark(node, anchor, fixed = false) {
     const clear = (point) => point.x >= viewport.left + 12 && point.x <= viewport.right - 12
       && point.y >= viewport.top + 12 && point.y <= viewport.bottom - 12
@@ -499,30 +627,31 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
     position(node, point);
     if (node.style.visibility === "visible") {
       markers.push(point);
-      if (placeLabels) pinRects.push(rectFor(node));
+      if (placeLabels || routeLabel) pinRects.push(rectFor(node));
       return point;
     }
   }
   for (const node of host.querySelectorAll("[data-endpoint-pin]")) {
     endpointPositions.set(node.dataset.endpointPin, mark(node, centerFor(node.dataset.pinAnchor)));
   }
-  if (routeLabel) {
-    const from = endpointPositions.get("A");
-    const to = endpointPositions.get("B");
-    midpoint = from && to ? { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 } : null;
-    position(routeLabel, midpoint);
-    routeLeaders.setAttribute("d", midpoint ? [from, to].map(({ x, y }) => `M${midpoint.x},${midpoint.y}L${x},${y}`).join(" ") : "");
-    if (midpoint) {
-      const rect = rectFor(routeLabel);
-      occupied.push(rect);
-      if (placeLabels) pinRects.push(rect);
-    }
-  }
+  const from = endpointPositions.get("A");
+  const to = endpointPositions.get("B");
+  const midpoint = from && to ? { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 } : from ?? to;
   const footprint = host.querySelector("[data-footprint]");
   for (const node of host.querySelectorAll("[data-pin-anchor]:not([data-endpoint-pin]), [data-interface-question]")) {
-    mark(node, node.dataset.interfaceQuestion ? midpoint : centerFor(node.dataset.pinAnchor), Boolean(footprint));
+    const display = footprint && entries.get(node.dataset.pinAnchor)?.displayOverlay;
+    const lug = display?.lug && project(display.lug.clone().add(display.object.position));
+    mark(node, node.dataset.interfaceQuestion ? midpoint : lug ?? centerFor(node.dataset.pinAnchor), Boolean(footprint));
   }
   host.querySelector("[data-pin-leaders]").setAttribute("d", pinLeaders.join(" "));
+  if (routeLabel) {
+    const point = midpoint && placeRoutingLabel(viewport, occupied, pinRects, midpoint,
+      routeLabel.offsetWidth, routeLabel.offsetHeight);
+    position(routeLabel, point);
+    routeLeaders.setAttribute("d", point
+      ? [from, to].filter(Boolean).map(({ x, y }) => `M${point.x},${point.y}L${x},${y}`).join(" ") : "");
+    if (point) pinRects.push(rectFor(routeLabel));
+  }
 
   if (footprint) {
     const older = entries.get("7:part:display")?.bounds;
@@ -547,29 +676,43 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
       const edgeX = i === 0 ? left : right;
       group.querySelector("path").setAttribute("d",
         `M${left},${edgeY}V${y}H${right}V${edgeY} M${edgeX},${top}H${x}V${bottom}H${edgeX}`);
-      const { min, max } = i === 0 ? older : newer;
-      const dimension = (value) => `${formatEvidenceValue({ field: "dimension_mm", value })} · computed`;
-      widthLabel.textContent = dimension(max.x - min.x);
-      heightLabel.textContent = dimension(max.y - min.y);
+      const bounds = i === 0 ? older : newer;
+      widthLabel.textContent = dimensionLabel(revision, bounds, "x");
+      heightLabel.textContent = dimensionLabel(revision, bounds, "y");
       widthLabel.style.transform = `translate(${(left + right) / 2}px, ${y + sign * (widthLabel.offsetHeight / 2 + 3)}px)`;
       heightLabel.style.transform = `translate(${x + sign * (heightLabel.offsetWidth / 2 + 3)}px, ${(top + bottom) / 2}px)`;
     }
-    if (visible) footprint.querySelector("[data-footprint-delta]").textContent = footprintDelta(older, newer);
-    position(footprint, visible && { x: (outer.left + outer.right) / 2, y: outer.bottom + 42 });
+    if (visible) {
+      footprint.querySelector("[data-footprint-delta]").textContent = footprintDelta(older, newer);
+      const x = (outer.left + outer.right) / 2;
+      const halfWidth = footprint.offsetWidth / 2;
+      const clearance = Math.min(viewport.bottom, ...occupied.filter((rect) =>
+        rect.top >= outer.bottom && rect.left < x + halfWidth && rect.right > x - halfWidth).map((rect) => rect.top));
+      position(footprint, { x, y: Math.min(outer.bottom + 42, clearance - footprint.offsetHeight - 16) });
+    } else {
+      position(footprint, null);
+    }
   }
   for (const path of host.querySelectorAll("[data-bracket]")) {
-    const outline = outlineFor(boundsForKey(path.dataset.bracket), 6);
-    if (!outline) {
+    const bounds = boundsForKey(path.dataset.bracket);
+    const corners = bounds && [
+      [bounds.min.x, bounds.min.y], [bounds.max.x, bounds.min.y],
+      [bounds.max.x, bounds.max.y], [bounds.min.x, bounds.max.y],
+    ].map(([x, y]) => project(new THREE.Vector3(x, y, bounds.max.z)));
+    if (!corners || corners.some((point) => !point)) {
       path.removeAttribute("d");
       continue;
     }
-    const { left, right, top, bottom } = outline;
-    const size = Math.min(12, (right - left) / 3, (bottom - top) / 3);
-    path.setAttribute("d", [left, right].flatMap((x, i) => [top, bottom].map((y, j) => {
-      const dx = i ? -size : size;
-      const dy = j ? -size : size;
-      return `M${x + dx},${y}H${x}v${dy}`;
-    })).join(" "));
+    path.setAttribute("d", corners.map(({ x, y }, i) => {
+      const along = (offset) => {
+        const neighbor = corners[(i + offset + 4) % 4];
+        const dx = neighbor.x - x;
+        const dy = neighbor.y - y;
+        const fraction = Math.min(1 / 3, 12 / Math.hypot(dx, dy));
+        return `${x + dx * fraction},${y + dy * fraction}`;
+      };
+      return `M${along(-1)}L${x},${y}L${along(1)}`;
+    }).join(" "));
   }
 
   const labels = [...host.querySelectorAll("[data-anchor]")];
@@ -580,12 +723,13 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
     right: Math.max(...outlines.map(({ right }) => right)),
   };
   const callouts = placeLabels && labels.map((node) => {
-    const anchor = centerFor(node.dataset.anchor);
-    const outline = outlineFor(boundsForKey(node.dataset.anchor));
+    const endpoint = node.dataset.endpointLabel;
+    const anchor = endpoint ? endpointPositions.get(endpoint) : centerFor(node.dataset.anchor);
+    const outline = !endpoint && outlineFor(boundsForKey(node.dataset.anchor));
     return {
       anchor, model, width: node.offsetWidth, height: node.offsetHeight, elbow: true,
-      leftAnchor: outline && { ...anchor, x: outline.left },
-      rightAnchor: outline && { ...anchor, x: outline.right },
+      leftAnchor: outline ? { ...anchor, x: outline.left } : anchor,
+      rightAnchor: outline ? { ...anchor, x: outline.right } : anchor,
     };
   });
   const placements = callouts && placeCallouts(viewport, occupied, callouts, pinRects);
@@ -936,7 +1080,7 @@ export function createFielddeckStage(host, assets, index, callbacks) {
     if (!config) return;
     const tick = Math.min(50, now - previousTime);
     previousTime = now;
-    const { mode, heroStart, reduced, explode, explodeMotion, cameraCue, faceView, ghostDeltaKey } = config;
+    const { mode, heroStart, reduced, explode, explodeMotion, cameraCue, faceView, ghostDeltaKey, selectedKey } = config;
     const heroElapsed = heroStart == null ? null : Math.max(0, now - heroStart);
     const displayOpacity = heroElapsed === null ? 1 : clamp((heroElapsed - 850) / 250);
     let dirty = config !== lastConfig || resized || layoutDirty || heroElapsed !== null;
@@ -1043,25 +1187,34 @@ export function createFielddeckStage(host, assets, index, callbacks) {
     const block = [];
     let floor = Infinity;
     let contactDirty = firstFrame;
+    const displaySelected = config.selectedKeys.some((key) => entries.get(key)?.row.part.part_id === "display");
     for (const entry of all) {
       const { row, group, vector } = entry;
       const removed = row.revision === "7" && row.delta === "removed";
       const ghost = removed && (mode === "compare" || blend.current.compare > 0);
-      const ghostOpacity = ghostDeltaKey && row.part.part_id === "display" ? 0.3 : 1;
+      const ghostOpacity = selectedKey && !displaySelected && entry.displayOverlay ? 0.3 : 1;
       const weight = row.revision === "5" ? blend.current.five
         : ghost ? Math.max(blend.current.seven, blend.current.compare) * displayOpacity * ghostOpacity : blend.current.seven;
       if (entry.overlay) {
-        const { object, material } = entry.overlay;
-        object.visible = faceView ? row.part.part_id === "display" : row.key === ghostDeltaKey;
-        object.position.set(0, 0, 0);
-        if (object.visible && !faceView) {
-          // Apply the selected layer's presentation offset to both CAD transforms.
-          const selected = entries.get(config.selectedKeys[0]);
-          if (selected) object.position.copy(selected.vector).multiplyScalar(offsetFor(selected));
-        }
+        const { object, material, halo } = entry.overlay;
+        object.visible = !faceView && row.key === ghostDeltaKey;
         if (object.visible) {
-          material.depthTest = faceView;
+          // Apply the selected layer's presentation offset to both CAD transforms.
+          const selected = entries.get(selectedKey);
+          if (selected) object.position.copy(selected.vector).multiplyScalar(offsetFor(selected));
           scaleDashes(material, entry, object.position);
+          scaleDashes(halo, entry, object.position);
+        }
+      }
+      if (entry.displayOverlay) {
+        const { object, rim, details } = entry.displayOverlay;
+        object.visible = faceView || ghost && weight > 0.001;
+        if (object.visible) {
+          object.position.copy(vector).multiplyScalar(faceView ? 0 : offsetFor(entry));
+          rim.opacity = faceView ? 1 : weight;
+          details.opacity = faceView ? 0.2 : weight;
+          scaleDashes(rim, entry, object.position);
+          scaleDashes(details, entry, object.position);
         }
       }
       const visible = !faceView && weight > 0.001;
@@ -1075,8 +1228,9 @@ export function createFielddeckStage(host, assets, index, callbacks) {
       nextPosition.copy(vector).multiplyScalar(offsetFor(entry));
       const moved = !group.position.equals(nextPosition);
       group.position.copy(nextPosition);
-      const accent = (reduced ? accentProgress : outCubic(accentProgress)) * blend.current.compare;
-      const material = stylePart(entry, blend.current.compare, weight, ghost, entry.style.edge.diff ? accent : 0);
+      const selected = selectedKey === row.key;
+      const accent = selected && ghostDeltaKey ? 1 : (reduced ? accentProgress : outCubic(accentProgress)) * blend.current.compare;
+      const material = stylePart(entry, blend.current.compare, weight, ghost, entry.style.edge.diff ? accent : 0, selected);
       scaleDashes(material, entry, group.position);
       const casts = entry.style.surface[0].castShadow;
       contactDirty ||= casts !== wasCasting || casts && moved;

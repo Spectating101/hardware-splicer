@@ -20,7 +20,22 @@ export const TOUR = [
 ];
 
 export const DEFAULT_EXPLODE = 0.6;
-export const FIELDDECK_NARROW = "(width < 600px)";
+export const FIELDDECK_NARROW = "(width < 640px)";
+
+const BASIS_COLORS = {
+  custom: 0xd8ccb6, vendor_step: 0x959595, envelope: 0xa5aeb5,
+  unknown: 0x9097a0, proxy: 0xa6a098,
+};
+export const DIFF_COLORS = { changed: 0xe0a040, added: 0x2dd4bf, removed: 0xf17e70 };
+
+export function materialFor(basis, delta) {
+  const color = BASIS_COLORS[basis];
+  return { color, emissive: 0x000000, edgeColor: DIFF_COLORS[delta] ?? color };
+}
+
+export function countClippedItems(items, { top, bottom }) {
+  return items.filter((item) => item.top < top || item.bottom > bottom).length;
+}
 
 // Layers run bottom to top. Each gap is the clearance below that layer at the default setting.
 export function explodeGroupOffsets(layers, anchor, explode) {
@@ -62,6 +77,11 @@ export function footprintDelta(older, newer) {
   return `Width ${difference("x")} · Height ${difference("y")}`;
 }
 
+export function dimensionLabel(revision, bounds, axis) {
+  const value = bounds.max[axis] - bounds.min[axis];
+  return `${revision}-inch · ${formatEvidenceValue({ field: "dimension_mm", value })} · computed`;
+}
+
 const clampTo = (value, min, max) => Math.max(min, Math.min(max, value));
 const containsPoint = (rect, { x, y }) =>
   x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
@@ -70,6 +90,37 @@ const overlaps = (a, b) =>
 const padRect = (rect, gap) => ({
   left: rect.left - gap, right: rect.right + gap, top: rect.top - gap, bottom: rect.bottom + gap,
 });
+
+export function placeRoutingLabel(viewport, panels, pins, midpoint, width, height) {
+  const pinObstacles = pins.map((rect) => padRect(rect, 12));
+  const left = Math.min(...pinObstacles.map((rect) => rect.left));
+  const top = Math.min(...pinObstacles.map((rect) => rect.top));
+  const bottom = Math.max(...pinObstacles.map((rect) => rect.bottom));
+  const maxX = viewport.right - width;
+  const maxY = viewport.bottom - height;
+  const x = clampTo(midpoint.x - width / 2, viewport.left, maxX);
+  const y = clampTo(midpoint.y - height / 2, viewport.top, maxY);
+  const obstacles = [...pinObstacles, ...panels];
+  const xs = [x, viewport.left, maxX, ...obstacles.flatMap((rect) => [rect.left - width, rect.right])]
+    .sort((a, b) => Math.abs(a - x) - Math.abs(b - x));
+  const ys = [y, viewport.top, maxY, ...obstacles.flatMap((rect) => [rect.top - height, rect.bottom])]
+    .sort((a, b) => Math.abs(a - y) - Math.abs(b - y));
+  for (const [col, row] of [
+    ...xs.map((candidate) => [candidate, top - height]),
+    ...ys.filter((candidate) => candidate + height / 2 >= top + 12 && candidate + height / 2 <= bottom - 12)
+      .map((candidate) => [left - width, candidate]),
+    ...xs.map((candidate) => [candidate, bottom]),
+    // A scattered cluster can leave usable space between the pins.
+    ...ys.flatMap((row) => xs.map((col) => [col, row])),
+  ]) {
+    const rect = { left: col, right: col + width, top: row, bottom: row + height };
+    if (col >= viewport.left && col <= maxX && row >= viewport.top && row <= maxY
+      && !obstacles.some((obstacle) => overlaps(rect, obstacle))) {
+      return { x: col + width / 2, y: row + height / 2 };
+    }
+  }
+  return null;
+}
 
 // A segment can run along the outside edge of a padded obstacle.
 function crossesRect(from, to, rect) {

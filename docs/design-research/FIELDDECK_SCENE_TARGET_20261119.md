@@ -47,3 +47,19 @@ A revision bench for one question: does the 5-inch display fit, and what is stil
 - **Amber #F59E0B** is used only for blockers and open questions.
 - **Spacing.** 4/8/12/16/24/32.
 - **Panel radius.** 4 px.
+
+## Build status (2026-11-19)
+Built in five rounds by GPT-6.2 Sol on `agent/hero-scene`, each re-rendered headlessly and re-scored by GPT-6.2 Astra and Gemini 4 Argon from screenshots. Captures: `review-ui/fielddeck-scene-20261119/round-{c,d,e}/`.
+
+| Round | Astra craft / use | Argon craft / use |
+|---|---|---|
+| Start | 6 / 7 | 6.5 / 7.5 |
+| C | 8 / 8.5 | 8.7 / 9.0 |
+| D | 9.0 / 9.3 | 9.2 / 9.5 |
+
+Round E applied both reviewers' remaining gaps: selection owns the labels, a stripped ghost and Face view, a teal edge only on added parts, scoped question numbers, A/B tree badges and "Endpoint components". It has not been re-scored yet.
+
+Known open items:
+- In the default view only the 5-inch display label shows; the spec keeps both display labels.
+- Mount-hole positions are not in the sidecar, so Gemini's plumb lines stay deferred.
+- The packaged server does not yet serve `/v1/scenes/fielddeck`: `api:app` lacks the router and `product_api:app` lacks the UI.
