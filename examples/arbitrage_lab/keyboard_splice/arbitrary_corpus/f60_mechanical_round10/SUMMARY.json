@@ -1,0 +1,57 @@
+{
+  "schema": "hs.f60.mechanical-round10.v1",
+  "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+  "source_repository": "robertcalvert/f.60",
+  "original_kicad_4_source_file_not_vendored": true,
+  "virtual_cut_key_retention_left_right": [
+    35,
+    23
+  ],
+  "sacrificial_original_keys": [
+    {
+      "ref": "K18",
+      "label": "I"
+    },
+    {
+      "ref": "K27",
+      "label": "J"
+    },
+    {
+      "ref": "K37",
+      "label": "N"
+    },
+    {
+      "ref": "K[0]9",
+      "label": "9"
+    }
+  ],
+  "retained_source_switch_plate_apertures": 58,
+  "source_edge_cuts_vertices": 56,
+  "source_keyplate_minimum_modeled_clearance_mm": 1.7784,
+  "floating_terminal_free_copper_islands": 5,
+  "required_source_copper_gap_count": 0,
+  "postcut_reconnection_channels": 18,
+  "source_key_matrix_ideal_test_count": 91230,
+  "source_key_matrix_ideal_test_failures": 0,
+  "IDC_used_pins": 42,
+  "IDC_unused_pins": [
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50
+  ],
+  "IDC_bus_count": 16,
+  "actual_case_mounted": false,
+  "physical_donor_acquired": false,
+  "OpenSCAD_model_rendered": false,
+  "source_original_schematic_firmware_powered": false,
+  "native_original_source_refilled_DRC_recovered_elsewhere_in_PR": true,
+  "canonical_HS_requested": "build_ready",
+  "canonical_HS_achieved": "design_ready",
+  "fabrication_authorized": false,
+  "verdict": "CONDITIONAL_2D_MECHANICAL_PLATE_AND_VIRTUAL_ELECTRICAL_RECONSTRUCTION"
+}

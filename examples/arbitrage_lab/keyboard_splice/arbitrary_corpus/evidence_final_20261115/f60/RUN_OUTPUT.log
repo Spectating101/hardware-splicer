@@ -1,0 +1,9 @@
+SOURCE_SHA256 e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6
+SCAN 115 passing 0
+CENTRAL 19 segments; 14 nets; 3 switch keepouts
+BEST 105.745 mm; 11 nets; 0 matrix nets; 3 switch keepouts; 7 pads
+REPAIR_ITERATIONS 1 strategy pad_only
+MODELED_REQUIRED_GRAPH_CONNECTED True source_baseline_terminal_gaps 0
+VERDICT BLOCKED_REFERENCE_ONLY report /tmp/hs-keyboard-splice-20261115/examples/arbitrage_lab/keyboard_splice/arbitrary_corpus/evidence_final_20261115/f60/run/CUT.json
+
+STDERR:
