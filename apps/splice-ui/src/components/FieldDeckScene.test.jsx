@@ -2,9 +2,10 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import FieldDeckScene, { EvidenceRows } from "./FieldDeckScene.jsx";
 import {
-  DEFAULT_EXPLODE, FIELDDECK_NARROW, classifyPart, countClippedItems, dimensionLabel, evidenceCells, explodeGroupOffsets, footprintDelta,
-  formatEvidenceSource, formatEvidenceValue, indexFielddeck, materialFor, placeCallouts, placeRoutingLabel, projectedFitScale,
-  rowForNode, rowsForMode, selectedPartKeys, toggleFielddeckSheet,
+  changeSummary, chooseTier, classifyPart, countClippedItems, cullCoincidentChains, DEFAULT_EXPLODE, DIFF_COLORS,
+  dimensionLabel, evidenceCells, explodeGroupOffsets, FIELDDECK_NARROW, footprintDelta,
+  formatEvidenceSource, formatEvidenceValue, indexFielddeck, materialSpec, placeCallouts, placeRoutingLabel, projectedFitScale,
+  rowForNode, rowsForMode, selectedPartKeys, simplifyEdgeChain, toggleFielddeckSheet, weldEdgeChains,
 } from "./fielddeckLogic.js";
 
 const stageMock = vi.hoisted(() => ({ load: vi.fn(), create: vi.fn() }));
@@ -21,11 +22,14 @@ function part(part_id, node_name, geometry_basis, extra = {}) {
     evidence: [], explode_vector_mm: [0, 0, 10], ...extra,
   };
 }
+const meshBounds = (value) => ({ field: "mesh_bounds_mm", state: "computed", value });
 const sides = {
   "7": {
     parts: [
       part("display", "PANEL_7", "vendor_step", { label: "7-inch panel" }),
-      part("tray", "Tray", "custom", { label: "Rear tray", explode_derived: true }),
+      part("tray", "Tray", "custom", {
+        label: "Rear tray", explode_derived: true, evidence: [meshBounds([0, 0, 0, 40, 30, 5])],
+      }),
     ],
     blockers: [{ part_id: "display", reason: "Check pilot hole engagement" }],
     interfaces: [{
@@ -40,7 +44,9 @@ const sides = {
         evidence: [{ field: "physical_fit", state: "unknown", value: null }],
       }),
       part("pi4-dsi", "pi4_dsi", "envelope", { label: "Pi DSI port" }),
-      part("tray", "Tray", "custom", { label: "Rear tray", explode_derived: true }),
+      part("tray", "Tray", "custom", {
+        label: "Rear tray", explode_derived: true, evidence: [meshBounds([1, 0, 0, 39, 30, 6])],
+      }),
     ],
     blockers: [
       { part_id: "display", reason: "Display lug thread/engagement nominal only" },
@@ -67,10 +73,71 @@ describe("Fielddeck state and mapping", () => {
   const index = indexFielddeck(sides);
 
   it("uses added teal only on the edges of a matte vendor part", () => {
-    expect(materialFor("vendor_step", "added")).toEqual({
-      color: 0x959595, emissive: 0x000000, edgeColor: 0x2dd4bf,
+    expect(materialSpec("vendor_step", "added")).toMatchObject({
+      color: 0x93a3ae, roughness: 0.86, metalness: 0, creaseColor: 0x1a1d22, edgeColor: 0x2dd4bf,
     });
-    expect(materialFor("vendor_step", "unchanged")).toMatchObject({ color: 0x959595, emissive: 0x000000 });
+    expect(materialSpec("vendor_step", "unchanged", true)).toMatchObject({ color: 0x737a80, creaseOpacity: 0.0875 });
+    expect(materialSpec("custom", "unchanged", true)).toMatchObject({ color: 0x8e8b85 });
+    expect(materialSpec("custom", "changed")).toMatchObject({ color: 0xd9cfbe, edgeColor: 0xa78bfa });
+    expect(materialSpec("donor_cad", "added")).toEqual(materialSpec("vendor_step", "added"));
+    expect(materialSpec("measured")).toMatchObject({ color: 0xe4e2dc, creaseOpacity: 1 });
+    expect(materialSpec("proxy").hatch).toEqual({ angle: 45, spacing: 8, contrast: 0.1 });
+    for (const basis of ["custom", "vendor_step", "envelope", "proxy", "unknown", "measured", "donor_cad"]) {
+      for (const delta of Object.keys(DIFF_COLORS)) {
+        const { color, creaseColor, edgeColor } = materialSpec(basis, delta);
+        expect([color, creaseColor, edgeColor]).not.toContain(0xf59e0b);
+        expect([color, creaseColor]).not.toContain(0x2dd4bf);
+      }
+    }
+  });
+
+  it("requires an instrument and date for the exact measured feature", () => {
+    const feature = { geometry_basis: "measured", feature_id: "lip" };
+    const record = { state: "measured", feature_id: "lip", instrument: "caliper", date: "2026-11-19" };
+    expect(classifyPart({ ...feature, evidence: [record] }).basis).toBe("measured");
+    expect(classifyPart({ ...feature, evidence: [{ ...record, feature_id: "foot" }] }).basis).toBe("unknown");
+    expect(classifyPart({ geometry_basis: "custom", evidence: [record] }).basis).toBe("custom");
+    expect(classifyPart({ geometry_basis: "donor_cad", node_name: "REFERENCE_ENVELOPE_DONOR" }).basis).toBe("envelope");
+  });
+
+  it("chooses one tier from the first 60 timings and uses a strict p90 threshold", () => {
+    const times = Array(60).fill(14);
+    times.fill(20, 0, 6);
+    expect(chooseTier(times.slice(0, 59))).toBe("standard");
+    expect(chooseTier([...times, ...Array(60).fill(99)])).toBe("standard");
+    times[6] = 14.01;
+    expect(chooseTier(times)).toBe("reduced");
+    expect(chooseTier(times, "high")).toBe("standard");
+    expect(chooseTier(times, "reduced")).toBe("reduced");
+  });
+
+  it("welds reversed and near endpoints into a continuous chain and retains its turn", () => {
+    const [chain] = weldEdgeChains([0, 0, 0, 1.009, 0.02, 0, 2, 0, 0, 1.011, 0.02, 0, 2, 0, 0, 2, 2, 0]);
+    expect(chain).toEqual([[0, 0, 0], [1.009, 0.02, 0], [2, 0, 0], [2, 2, 0]]);
+    expect(simplifyEdgeChain(chain)).toEqual([[0, 0, 0], [2, 0, 0], [2, 2, 0]]);
+  });
+
+  it("culls coincident runs across tessellation splits and keeps small real changes", () => {
+    const chain = [[0, 0, 0], [2, 0, 0], [2, 2, 0], [0, 2, 0]];
+    const current = [
+      0, 0, 0, 1, 0, 0, 2, 0, 0, 1, 0, 0,
+      2, 0, 0, 2, 1.95, 0, 2, 2.04, 0, 0, 2.04, 0,
+    ];
+    expect(cullCoincidentChains([chain], current)).toEqual([chain.slice(1)]);
+    expect(cullCoincidentChains([[[0, 0, 0], [2, 0, 0]]], [1, -1, 0, 1, 1, 0]))
+      .toEqual([[[0, 0, 0], [2, 0, 0]]]);
+    const bump = [[0, 0, 0], [1, 0.1, 0], [2, 0, 0]];
+    expect(cullCoincidentChains([bump], current, { simplify: true })).toEqual([bump]);
+  });
+
+  it("reports only sidecar mesh evidence in a changed part's summary", () => {
+    const compare = { base: "7", target: "5" };
+    expect(changeSummary(index, index.byKey.get("5:part:tray"), compare)).toEqual({
+      title: "Changed from 7-inch revision", bounds: "dX −2.00 · dY 0.00 · dZ +1.00 mm",
+    });
+    expect(changeSummary(index, index.byKey.get("5:part:display"), compare)).toBeNull();
+    expect(changeSummary(indexFielddeck({ "5": sides["5"] }), index.byKey.get("5:part:tray"), compare))
+      .toEqual({ title: "Changed from 7-inch revision", bounds: null });
   });
 
   it("counts clipped rows, including a row that is only partly visible", () => {
@@ -348,6 +415,24 @@ describe("Fielddeck evidence UI", () => {
     expect(within(power).getByRole("link", { name: "brief.pdf" })).toBeVisible();
   });
 
+  it("lists donor and measured sources only in views with those linked geometries", async () => {
+    const target = {
+      ...sides["5"],
+      parts: [...sides["5"].parts, part("donor", "Donor", "donor_cad"), part("lip", "Lip", "measured", {
+        feature_id: "lip",
+        evidence: [{ state: "measured", feature_id: "lip", instrument: "caliper", date: "2026-11-19" }],
+      })],
+    };
+    stageMock.load.mockResolvedValue({ "7": { sidecar: sides["7"], gltf: {} }, "5": { sidecar: target, gltf: {} } });
+    render(<FieldDeckScene />);
+    const legend = within(screen.getByRole("group", { name: "Shape source" }));
+    expect(await legend.findByText("Donor CAD (unverified)")).toBeVisible();
+    expect(legend.getByText("Measured")).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "7-inch" }));
+    expect(legend.queryByText("Donor CAD (unverified)")).toBeNull();
+    expect(legend.queryByText("Measured")).toBeNull();
+  });
+
   it("groups revision changes and syncs picks with the tree and inspector", async () => {
     render(<FieldDeckScene />);
     const panel = screen.getByRole("complementary", { name: "Part tree" });
@@ -369,6 +454,13 @@ describe("Fielddeck evidence UI", () => {
     act(() => callbacks.onPick("5:part:tray"));
     expect(tray).toHaveAttribute("aria-pressed", "true");
     expect(inspector.getByText("Custom CAD · changed")).toBeVisible();
+    const evidence = inspector.getByLabelText("Evidence");
+    expect([...evidence.firstElementChild.children].map((node) => node.textContent)).toEqual([
+      "Changed from 7-inch revision", "computed", "Bounds · dX −2.00 · dY 0.00 · dZ +1.00 mm",
+    ]);
+    const shapeSource = within(screen.getByRole("group", { name: "Shape source" }));
+    expect(shapeSource.queryByText("Donor CAD (unverified)")).toBeNull();
+    expect(shapeSource.queryByText("Measured")).toBeNull();
     expect(inspector.queryByText(/^Presentation offset$/)).toBeNull();
     expect(inspector.queryByRole("heading", { name: "Open questions" })).toBeNull();
     expect(panel.querySelectorAll("[data-row][aria-pressed=true]")).toHaveLength(1);

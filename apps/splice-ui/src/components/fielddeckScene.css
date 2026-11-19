@@ -203,6 +203,7 @@
 .fd-evidence-value, .fd-evidence-state { font-family: var(--mono); }
 .fd-evidence-state, .fd-evidence-source { color: var(--text-2); }
 .fd-evidence-state { text-align: end; }
+.fd-change-summary dt:only-child { grid-column: 1 / -1; }
 .fd-endpoints > div { display: flex; gap: 8px; padding-block: 4px; }
 
 .fd-annotations { z-index: 1; pointer-events: none; }
@@ -258,12 +259,13 @@
 .fd-endpoint { border: 3px double var(--focus); color: var(--focus); }
 .fd-route-position .fd-label { position: static; visibility: inherit; display: block; border-radius: 999px; background: var(--bg-0); }
 
-.fd-scene [data-kind="custom"] { --kind: #d8ccb6; }
-.fd-scene [data-kind="vendor_step"] { --kind: #8e979e; }
+.fd-scene [data-kind="custom"] { --kind: #d9cfbe; }
+.fd-scene :is([data-kind="vendor_step"], [data-kind="donor_cad"]) { --kind: #93a3ae; }
+.fd-scene [data-kind="measured"] { --kind: #e4e2dc; }
 .fd-scene [data-kind="envelope"] { --kind: #a5aeb5; }
 .fd-scene [data-kind="proxy"] { --kind: #a6a098; }
 .fd-scene [data-kind="added"] { --kind: #2dd4bf; }
-.fd-scene [data-kind="changed"] { --kind: #e0a040; }
+.fd-scene [data-kind="changed"] { --kind: #a78bfa; }
 .fd-scene [data-kind="removed"] { --kind: #f17e70; }
 .fd-swatch {
   display: inline-block;

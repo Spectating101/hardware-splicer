@@ -1,18 +1,34 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { Line2 } from "three/examples/jsm/lines/Line2.js";
+import { LineGeometry } from "three/examples/jsm/lines/LineGeometry.js";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
 import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2.js";
 import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { HorizontalBlurShader } from "three/examples/jsm/shaders/HorizontalBlurShader.js";
 import { VerticalBlurShader } from "three/examples/jsm/shaders/VerticalBlurShader.js";
+import {
+  BlendFunction, Effect, EffectComposer, EffectPass, RenderPass,
+  SMAAEffect, SMAAPreset, ToneMappingEffect, ToneMappingMode,
+} from "postprocessing";
+import { N8AOPostPass } from "n8ao";
 import { fielddeckSceneUrl } from "../api.js";
-import { classifyPart, DEFAULT_EXPLODE, DIFF_COLORS, dimensionLabel, explodeGroupOffsets, FIELDDECK_NARROW, placeCallouts, placeRoutingLabel, projectedFitScale, footprintDelta, materialFor, rowForNode } from "./fielddeckLogic.js";
+import {
+  chooseTier, classifyPart, cullCoincidentChains, DEFAULT_EXPLODE, DIFF_COLORS, dimensionLabel,
+  explodeGroupOffsets, FIELDDECK_NARROW, footprintDelta, ghostDeltaKey, materialSpec, placeCallouts,
+  placeRoutingLabel, projectedFitScale, QUALITY_SAMPLE_COUNT, rowForNode, simplifyEdgeChain, weldEdgeChains,
+} from "./fielddeckLogic.js";
 
 const TOUR_ANGLES = [18, -5, 24];
-const OLD_REVISION_RED = 0xc83e31;
 const CONTACT_LAYER = 1;
+const EXPOSURE = 1.05;
+const TIERS = {
+  high: { dpr: 2, shadowSize: 2048 },
+  standard: { dpr: 1.25, shadowSize: 1024 },
+  reduced: { dpr: 1, shadowSize: 0 },
+};
 const UP = new THREE.Vector3(0, 0, 1);
 const VIEW = new THREE.Vector3(8.2, -9.6, 9.1).normalize();
 const clamp = (n) => Math.min(1, Math.max(0, n));
@@ -76,42 +92,55 @@ export function disposeFielddeck(assets) {
   resources.forEach((resource) => resource.dispose());
 }
 
-function solidMaterial(basis, color, emissive) {
+function solidMaterial({ color, roughness, metalness }) {
   return new THREE.MeshStandardMaterial({
-    color, emissive, metalness: 0, roughness: basis === "vendor_step" ? 0.82 : 0.84,
-    flatShading: basis === "vendor_step",
+    color, metalness, roughness,
     polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1,
   });
 }
 
-function applyHatch(material, spacing, pixelRatio) {
+function applyHatch(material, { angle, spacing, contrast }, pixelRatio) {
   material.onBeforeCompile = (shader) => {
-    shader.uniforms.hatchStep = { value: spacing * pixelRatio };
+    const radians = THREE.MathUtils.degToRad(angle);
+    shader.uniforms.hatchDirection = { value: new THREE.Vector2(-Math.sin(radians), Math.cos(radians)) };
+    shader.uniforms.hatchStep = { value: spacing };
+    shader.uniforms.hatchContrast = { value: contrast };
+    shader.uniforms.hatchDpr = pixelRatio;
     shader.fragmentShader = shader.fragmentShader.replace("#include <common>",
-      "#include <common>\nuniform float hatchStep;");
+      "#include <common>\nuniform vec2 hatchDirection;\nuniform float hatchStep, hatchContrast, hatchDpr;");
     shader.fragmentShader = shader.fragmentShader.replace("#include <color_fragment>", `
       #include <color_fragment>
-      float hatch = step(0.8, fract((gl_FragCoord.x + gl_FragCoord.y) / hatchStep));
-      diffuseColor.rgb *= 1.0 - hatch * 0.24;
+      float hatch = step(0.8, fract(dot(gl_FragCoord.xy, hatchDirection) / (hatchStep * hatchDpr)));
+      diffuseColor.rgb *= 1.0 - hatch * hatchContrast;
     `);
   };
 }
 
 function edgeMaterial(color, pattern, linewidth) {
-  return new LineMaterial({
+  const material = new LineMaterial({
     color, linewidth, dashed: Boolean(pattern), dashSize: pattern?.[0] ?? 1, gapSize: pattern?.[1] ?? 1,
-    transparent: true, depthWrite: false, toneMapped: false, alphaToCoverage: true,
+    worldUnits: false, transparent: true, depthWrite: false, toneMapped: false, alphaToCoverage: true,
     polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1,
   });
+  if (pattern) {
+    material.onBeforeCompile = (shader) => {
+      // Interpolate the projected distance in screen space, including on slanted edges.
+      shader.vertexShader = shader.vertexShader.replace("#include <fog_vertex>",
+        "vLineDistance *= gl_Position.w;\n#include <fog_vertex>");
+      shader.fragmentShader = shader.fragmentShader.replace(/vLineDistance(?=\s*\+\s*dashOffset)/g,
+        "(vLineDistance * gl_FragCoord.w)");
+    };
+  }
+  return material;
 }
 
 function stylePart(entry, compare, weight, ghost, accent, selected) {
-  const { basis, outline, row } = entry;
-  const { solid, baseColor, mutedColor, fill, edge, surface, lines, halos } = entry.style;
+  const { outline, row } = entry;
+  const { solid, baseColor, mutedColor, fill, edge, surface, lines, accents, marker } = entry.style;
   const translucent = outline || ghost;
   const dimming = row.delta === "unchanged" ? compare : 0;
-  const dim = 1 - dimming * 0.6;
-  fill.opacity = weight * (basis === "envelope" && !ghost ? 0.06 : 0);
+  const dim = 1 - dimming * 0.75;
+  if (fill) fill.opacity = weight * entry.spec.fillOpacity;
   if (solid) {
     solid.color.copy(baseColor).lerp(mutedColor, dimming);
     solid.opacity = weight;
@@ -123,34 +152,24 @@ function stylePart(entry, compare, weight, ghost, accent, selected) {
     solid.depthWrite = weight > 0.55;
   }
 
-  const variant = ghost ? edge.ghost : basis !== "envelope" && edge.diff && accent > 0 ? edge.diff : edge.base;
-  if (variant === edge.diff) variant.color.copy(baseColor).lerp(entry.accentColor, accent);
-  const baseAlpha = outline ? 0.82 : basis === "custom" ? 0.32 : 0.48;
-  const selectedChange = selected && row.delta === "changed";
-  variant.linewidth = ghost || selectedChange || row.delta === "added" && variant === edge.diff ? 1.5
-    : variant === edge.diff ? 2 : 1;
-  variant.opacity = selectedChange ? 1
-    : weight * (basis === "envelope" || ghost ? 1 : dim * THREE.MathUtils.lerp(baseAlpha, 1, accent));
+  edge.base.opacity = weight * dim * (outline ? 1 : entry.spec.creaseOpacity);
+  for (const material of [edge.diff, edge.silhouette]) {
+    if (material) material.opacity = weight * accent * (selected ? 1 : 0.5);
+  }
 
   for (const mesh of surface) {
-    mesh.material = translucent ? fill : solid;
-    mesh.visible = basis !== "unknown" && !ghost;
+    mesh.visible = Boolean(solid || fill) && !ghost;
     mesh.castShadow = !translucent && weight >= 0.49;
-    // Vendor STEP can contain coincident surfaces that create self-shadow speckling.
-    mesh.receiveShadow = !translucent && basis !== "vendor_step";
+    mesh.receiveShadow = false; // Parts cast onto the floor only: in an exploded view, part-on-part key shadows darken every layer under the top plate, and AO supplies contact form.
     if (mesh.castShadow) mesh.layers.enable(CONTACT_LAYER);
     else mesh.layers.disable(CONTACT_LAYER);
   }
-  lines.forEach((line) => {
-    line.material = variant;
-    line.visible = !ghost || !entry.displayOverlay;
-  });
-  if (edge.halo) {
-    edge.halo.linewidth = variant.linewidth + 2;
-    edge.halo.opacity = weight * accent;
-    halos.forEach((line) => { line.visible = variant === edge.diff; });
+  lines.forEach((line) => { line.visible = !ghost; });
+  accents.forEach((line) => { line.visible = !ghost && accent > 0; });
+  if (marker) {
+    marker.visible = !ghost;
+    marker.material.opacity = weight * dim;
   }
-  return variant;
 }
 
 function edgePositions(geometry, threshold) {
@@ -164,8 +183,71 @@ function featureLine(positions, material, own) {
   const segments = own(new LineSegmentsGeometry());
   segments.setPositions(positions);
   const line = new LineSegments2(segments, material);
-  line.computeLineDistances();
+  if (material.dashed) line.computeLineDistances();
   return line;
+}
+
+function outlineSilhouettes(geometry, material, own) {
+  const vertices = geometry.getAttribute("position");
+  const indices = geometry.index;
+  const count = indices?.count ?? vertices.count;
+  const points = new Map();
+  const edges = new Map();
+  const positions = [];
+  const front = [];
+  const back = [];
+  function pointFor(index) {
+    const point = new THREE.Vector3().fromBufferAttribute(vertices, index);
+    const key = point.toArray().map((value) => Math.round(value * 10000)).join(",");
+    if (!points.has(key)) points.set(key, { id: points.size, point });
+    return points.get(key);
+  }
+  const ab = new THREE.Vector3();
+  const ac = new THREE.Vector3();
+  for (let i = 0; i < count; i += 3) {
+    const triangle = [0, 1, 2].map((axis) => pointFor(indices ? indices.getX(i + axis) : i + axis));
+    const [a, b, c] = triangle.map(({ point }) => point);
+    const normal = ab.subVectors(b, a).cross(ac.subVectors(c, a)).clone().normalize();
+    if (!normal.lengthSq()) continue;
+    for (let j = 0; j < 3; j++) {
+      const a = triangle[j];
+      const b = triangle[(j + 1) % 3];
+      const opposite = `${b.id}:${a.id}`;
+      const adjacent = edges.get(opposite);
+      if (!adjacent) {
+        edges.set(`${a.id}:${b.id}`, normal);
+        continue;
+      }
+      edges.delete(opposite);
+      // The separate 60° crease stroke already draws the sharper edges.
+      if (normal.dot(adjacent) <= 0.5) continue;
+      a.point.toArray(positions, positions.length);
+      b.point.toArray(positions, positions.length);
+      normal.toArray(front, front.length);
+      adjacent.toArray(back, back.length);
+    }
+  }
+  if (!positions.length) return null;
+  const line = featureLine(positions, material, own);
+  line.geometry.setAttribute("instanceNormalA", new THREE.InstancedBufferAttribute(new Float32Array(front), 3));
+  line.geometry.setAttribute("instanceNormalB", new THREE.InstancedBufferAttribute(new Float32Array(back), 3));
+  return line;
+}
+
+function silhouetteMaterial(color) {
+  const material = edgeMaterial(color, null, 1.5);
+  material.onBeforeCompile = (shader) => {
+    shader.vertexShader = shader.vertexShader.replace("void main() {", `
+      attribute vec3 instanceNormalA, instanceNormalB;
+      void main() {
+        vec3 toEye = -(modelViewMatrix * vec4((instanceStart + instanceEnd) * 0.5, 1.0)).xyz;
+        if (dot(normalMatrix * instanceNormalA, toEye) * dot(normalMatrix * instanceNormalB, toEye) >= 0.0) {
+          gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+          return;
+        }
+    `);
+  };
+  return material;
 }
 
 function displayContours(entry) {
@@ -263,7 +345,53 @@ function displayContours(entry) {
   };
 }
 
-function makeEntries(assets, index, scene, resources, { base, target, focusPart }) {
+function createUnknownMarker(own) {
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = 64;
+  const context = canvas.getContext("2d");
+  if (!context) return null;
+  context.fillStyle = "white";
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.font = "48px monospace";
+  context.fillText("?", 32, 32);
+  const texture = own(new THREE.CanvasTexture(canvas));
+  return new THREE.Sprite(own(new THREE.SpriteMaterial({
+    map: texture, color: 0x9097a0, sizeAttenuation: false, depthWrite: false, toneMapped: false,
+  })));
+}
+
+function makeGhost(chains, own, previous) {
+  const object = new THREE.Group();
+  const dashed = own(edgeMaterial(DIFF_COLORS.removed, [6, 4], 1.25));
+  const solid = own(edgeMaterial(DIFF_COLORS.removed, null, 1.25));
+  for (const points of chains) {
+    const vectors = points.map((point) => new THREE.Vector3(...point));
+    const length = vectors.slice(1).reduce((sum, point, i) => sum + point.distanceTo(vectors[i]), 0);
+    const closed = vectors[0].equals(vectors.at(-1));
+    const bounds = new THREE.Box3().setFromPoints(vectors);
+    const center = bounds.getCenter(new THREE.Vector3());
+    const radius = vectors[0].distanceTo(center);
+    const smallCircle = closed && vectors.length >= 7 && radius < 3
+      && vectors.every((point) => Math.abs(point.distanceTo(center) - radius) <= radius * 0.15);
+    const material = length < 3 || smallCircle ? solid : dashed;
+    const geometry = own(new LineGeometry());
+    geometry.setPositions((previous ? points : simplifyEdgeChain(points)).flat());
+    const line = new Line2(geometry, material);
+    if (material.dashed) line.computeLineDistances();
+    object.add(line);
+  }
+  object.visible = false;
+  return {
+    object,
+    setOpacity(weight) {
+      dashed.opacity = weight * (previous ? 0.7 : 1);
+      solid.opacity = weight * 0.4;
+    },
+  };
+}
+
+function makeEntries(assets, index, scene, technical, resources, { base, target, focusPart }) {
   const entries = new Map();
   const own = (resource) => {
     resources.add(resource);
@@ -289,35 +417,42 @@ function makeEntries(assets, index, scene, resources, { base, target, focusPart 
       let entry = entries.get(row.key);
       if (!entry) {
         const { basis, outline } = classifyPart(row.part);
+        const spec = materialSpec(basis, row.delta);
         const group = new THREE.Group();
+        const strokes = new THREE.Group();
         const vector = new THREE.Vector3();
-        const pattern = basis === "envelope" ? [4, 3] : basis === "unknown" ? [0.9, 2.8] : null;
-        const { color, emissive, edgeColor } = materialFor(basis, row.delta);
-        const solid = outline ? null : own(solidMaterial(basis, color, emissive));
-        const baseColor = new THREE.Color(color);
-        const gray = baseColor.r * 0.2126 + baseColor.g * 0.7152 + baseColor.b * 0.0722;
-        const mutedColor = basis === "custom" ? new THREE.Color(0x6e685f)
-          : baseColor.clone().lerp(new THREE.Color().setRGB(gray, gray, gray), 0.65).multiplyScalar(0.4);
-        const fill = own(new THREE.MeshBasicMaterial({ color, transparent: true, depthWrite: false }));
-        const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
-        if (basis === "proxy") applyHatch(solid, 8, pixelRatio);
+        const solid = outline ? null : own(solidMaterial(spec));
+        const baseColor = new THREE.Color(spec.color ?? spec.edgeColor);
+        if (basis === "envelope" && row.part.geometry_basis === "donor_cad") {
+          baseColor.lerp(new THREE.Color(materialSpec("donor_cad").color), 0.4);
+        }
+        const mutedColor = new THREE.Color(materialSpec(basis, row.delta, true).color ?? spec.edgeColor);
+        const fill = spec.fillOpacity ? own(new THREE.MeshBasicMaterial({
+          color: baseColor, transparent: true, depthWrite: false, toneMapped: false,
+        })) : null;
+        const hatchDpr = { value: 1 };
+        if (spec.hatch) applyHatch(solid, spec.hatch, hatchDpr);
+        const marker = basis === "unknown" ? createUnknownMarker(own) : null;
+        if (marker) strokes.add(marker);
+        const accent = !outline && ["added", "changed"].includes(row.delta);
+        const paired = row.delta === "changed" ? ghostDeltaKey(index, "compare", row, { base, target }) : null;
         entry = {
-          row, basis, outline, group, vector, bounds: new THREE.Box3(),
-          accentColor: new THREE.Color(edgeColor),
+          row, basis, outline, spec, group, strokes, vector, hatchDpr, bounds: new THREE.Box3(),
+          ghostEdges: row.delta === "removed" || paired ? [] : null, paired,
           displayEdges: row.part.part_id === focusPart ? [] : null,
           style: {
-            solid, baseColor, mutedColor, fill,
+            solid, baseColor, mutedColor, fill, marker,
             edge: {
-              base: own(edgeMaterial(color, pattern, 1)),
-              diff: ["added", "changed"].includes(row.delta) ? own(edgeMaterial(edgeColor, pattern, row.delta === "changed" ? 2 : 1.5)) : null,
-              halo: row.delta === "changed" ? own(edgeMaterial(0x0e1116, null, 4)) : null,
-              ghost: row.delta === "removed" ? own(edgeMaterial(DIFF_COLORS.removed, [5, 3], 1.5)) : null,
+              base: own(edgeMaterial(outline ? baseColor : spec.creaseColor, spec.pattern, 1)),
+              diff: accent ? own(edgeMaterial(spec.edgeColor, null, 1.5)) : null,
+              silhouette: accent ? own(silhouetteMaterial(spec.edgeColor)) : null,
             },
-            surface: [], lines: [], halos: [],
+            surface: [], lines: [], accents: [],
           },
         };
         entries.set(row.key, entry);
         scene.add(group);
+        technical.add(strokes);
       }
 
       // Bake the GLB's node hierarchy into mm so presentation offsets remain in scene axes.
@@ -325,61 +460,70 @@ function makeEntries(assets, index, scene, resources, { base, target, focusPart 
       if (!geometry.getAttribute("normal")) geometry.computeVertexNormals();
       geometry.computeBoundingBox();
       entry.bounds.union(geometry.boundingBox);
-      const { style, group } = entry;
-      const mesh = new THREE.Mesh(geometry, style.solid ?? style.fill);
+      const { style, group, strokes } = entry;
+      const mesh = new THREE.Mesh(geometry, style.solid ?? style.fill ?? style.edge.base);
       style.surface.push(mesh);
-      group.add(mesh);
+      if (entry.outline) strokes.add(mesh);
+      else group.add(mesh);
 
-      const positions = edgePositions(geometry, 28);
-      const line = featureLine(positions, style.edge.base, own);
-      if (style.edge.halo) {
-        const halo = new LineSegments2(line.geometry, style.edge.halo);
-        halo.renderOrder = 1;
-        line.renderOrder = 2;
-        style.halos.push(halo);
-        group.add(halo);
-      }
-      style.lines.push(line);
-      group.add(line);
-
-      if (entry.displayEdges) {
-        entry.displayEdges.push(edgePositions(geometry, 40));
-      } else if (revision === base && (row.delta === "changed"
-        || index.byPart.get(`${target}:${row.part.part_id}`)?.delta === "changed"
-        || index.byNode.get(target)?.get(row.part.node_name)?.some((part) => part.delta === "changed"))) {
-        if (!entry.overlay) {
-          const material = own(edgeMaterial(OLD_REVISION_RED, [5, 3], 1.5));
-          const halo = own(edgeMaterial(0x0e1116, [5, 3], 3.5));
-          halo.opacity = 0.5;
-          material.depthTest = halo.depthTest = false;
-          const object = new THREE.Group();
-          object.visible = false;
-          entry.overlay = { object, material, halo };
-          scene.add(object);
+      const positions = edgePositions(geometry, entry.spec.threshold);
+      if (positions.length && style.edge.base.dashed) {
+        for (const points of weldEdgeChains(positions)) {
+          const chain = own(new LineGeometry());
+          chain.setPositions(points.flat());
+          const line = new Line2(chain, style.edge.base);
+          line.computeLineDistances();
+          style.lines.push(line);
+          strokes.add(line);
         }
-        const stroke = featureLine(positions, entry.overlay.material, own);
-        const halo = new LineSegments2(stroke.geometry, entry.overlay.halo);
-        halo.renderOrder = 3;
-        stroke.renderOrder = 4;
-        entry.overlay.object.add(halo, stroke);
+      } else if (positions.length) {
+        const line = featureLine(positions, style.edge.base, own);
+        style.lines.push(line);
+        strokes.add(line);
       }
+      if (style.edge.diff) {
+        const sharp = edgePositions(geometry, 60);
+        const silhouette = outlineSilhouettes(geometry, style.edge.silhouette, own);
+        const accents = [sharp.length ? featureLine(sharp, style.edge.diff, own) : null, silhouette].filter(Boolean);
+        accents.forEach((line) => { line.renderOrder = 2; });
+        style.accents.push(...accents);
+        if (accents.length) strokes.add(...accents);
+      }
+      if (entry.ghostEdges) {
+        for (const value of positions) entry.ghostEdges.push(value);
+      }
+      if (entry.displayEdges) entry.displayEdges.push(edgePositions(geometry, 40));
     });
   }
   for (const entry of entries.values()) {
+    entry.style.marker?.position.copy(entry.bounds.getCenter(new THREE.Vector3()));
+    if (entry.ghostEdges && entry.row.revision === base) {
+      const chains = weldEdgeChains(entry.ghostEdges);
+      if (entry.row.delta === "removed") {
+        entry.removed = makeGhost(chains, own, false);
+        technical.add(entry.removed.object);
+      } else {
+        const current = entries.get(entry.paired)?.ghostEdges ?? [];
+        // Compare the original geometry before simplification can turn a matched arc into a chord.
+        entry.overlay = makeGhost(cullCoincidentChains(chains, current, { simplify: true }), own, true);
+        technical.add(entry.overlay.object);
+      }
+    }
     if (!entry.displayEdges) continue;
     const { perimeter, interior, lug } = displayContours(entry);
     delete entry.displayEdges;
     const removed = entry.row.revision === base;
     const color = removed ? DIFF_COLORS.removed : DIFF_COLORS.added;
-    const rim = own(edgeMaterial(color, removed ? [5, 3] : null, 1.5));
-    const details = own(edgeMaterial(color, removed ? [5, 3] : null, 1));
+    const rim = own(edgeMaterial(color, removed ? [6, 4] : null, 1.5));
+    const details = own(edgeMaterial(color, removed ? [6, 4] : null, 1));
     const object = new THREE.Group();
     object.visible = false;
     if (perimeter.length) object.add(featureLine(perimeter, rim, own));
     if (interior.length) object.add(featureLine(interior, details, own));
     entry.displayOverlay = { object, rim, details, lug };
-    scene.add(object);
+    technical.add(object);
   }
+  for (const entry of entries.values()) delete entry.ghostEdges;
   return entries;
 }
 
@@ -450,7 +594,7 @@ function groupExplode(entries) {
   }
 }
 
-function createContactShadow(scene, renderer, bounds, resources) {
+function createContactShadow(scene, bounds, resources) {
   const size = 512;
   const center = bounds.getCenter(new THREE.Vector3());
   const spread = bounds.getSize(new THREE.Vector3());
@@ -458,6 +602,9 @@ function createContactShadow(scene, renderer, bounds, resources) {
   const height = spread.y + 100;
   const target = new THREE.WebGLRenderTarget(size, size);
   const blurTarget = new THREE.WebGLRenderTarget(size, size, { depthBuffer: false });
+  const bakes = [1.4, 0.5].map((blur) => ({
+    blur, target: new THREE.WebGLRenderTarget(size, size, { depthBuffer: false }),
+  }));
   const capture = new THREE.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2,
     0, Math.max(80, spread.z * 1.1));
   capture.layers.set(CONTACT_LAYER);
@@ -481,21 +628,24 @@ function createContactShadow(scene, renderer, bounds, resources) {
   const horizontal = blurMaterial(HorizontalBlurShader);
   const vertical = blurMaterial(VerticalBlurShader);
   horizontal.uniforms.tDiffuse.value = target.texture;
-  horizontal.uniforms.h.value = 1.4 / size;
   vertical.uniforms.tDiffuse.value = blurTarget.texture;
-  vertical.uniforms.v.value = 1.4 / size;
   const quad = new THREE.Mesh(quadGeometry, horizontal);
   blurScene.add(quad);
 
   // Looking up from the ground mirrors the X axis in the captured texture.
-  target.texture.repeat.x = -1;
-  target.texture.offset.x = 1;
   const groundGeometry = new THREE.PlaneGeometry(width, height);
-  const groundMaterial = new THREE.MeshBasicMaterial({
-    map: target.texture, transparent: true, depthWrite: false, opacity: 0.66, toneMapped: false,
+  const ground = bakes.map(({ target }, i) => {
+    target.texture.repeat.x = -1;
+    target.texture.offset.x = 1;
+    const material = new THREE.MeshBasicMaterial({
+      map: target.texture, transparent: true, depthWrite: false, opacity: i ? 0.35 : 0.45, toneMapped: false,
+    });
+    resources.add(target);
+    resources.add(material);
+    const mesh = new THREE.Mesh(groundGeometry, material);
+    mesh.renderOrder = -1;
+    return mesh;
   });
-  const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-  ground.renderOrder = -1;
   const poolMaterial = new THREE.ShaderMaterial({
     transparent: true, depthWrite: false, toneMapped: false,
     uniforms: { tint: { value: new THREE.Color(0x9baebf) } },
@@ -517,16 +667,19 @@ function createContactShadow(scene, renderer, bounds, resources) {
   const pool = new THREE.Mesh(quadGeometry, poolMaterial);
   pool.scale.set(width * 0.74, height * 0.74, 1);
   pool.renderOrder = -2;
-  scene.add(ground, pool);
-  [target, blurTarget, depth, quadGeometry, horizontal, vertical, groundGeometry, groundMaterial, poolMaterial]
+  scene.add(...ground, pool);
+  [target, blurTarget, depth, quadGeometry, horizontal, vertical, groundGeometry, poolMaterial]
     .forEach((resource) => resources.add(resource));
 
-  return (floor) => {
-    pool.visible = ground.visible = Number.isFinite(floor);
-    if (!ground.visible) return;
-    ground.position.set(center.x, center.y, floor - 1);
+  return (renderer, floor) => {
+    pool.visible = Number.isFinite(floor);
+    ground.forEach((mesh) => {
+      mesh.visible = pool.visible;
+      mesh.position.set(center.x, center.y, floor - 1);
+    });
+    if (!pool.visible) return;
     pool.position.set(center.x, center.y, floor - 1.1);
-    capture.position.copy(ground.position);
+    capture.position.copy(ground[0].position);
     capture.lookAt(center.x, center.y, floor + 1);
 
     // Depth from below, then two separable blur passes before compositing the ground.
@@ -534,17 +687,288 @@ function createContactShadow(scene, renderer, bounds, resources) {
     const shadowUpdates = renderer.shadowMap.autoUpdate;
     renderer.shadowMap.autoUpdate = false;
     renderer.setRenderTarget(target);
+    renderer.clear();
     scene.overrideMaterial = depth;
     renderer.render(scene, capture);
     scene.overrideMaterial = override;
-    quad.material = horizontal;
-    renderer.setRenderTarget(blurTarget);
-    renderer.render(blurScene, blurCamera);
-    quad.material = vertical;
-    renderer.setRenderTarget(target);
-    renderer.render(blurScene, blurCamera);
+    for (const { blur, target } of bakes) {
+      horizontal.uniforms.h.value = vertical.uniforms.v.value = blur / size;
+      quad.material = horizontal;
+      renderer.setRenderTarget(blurTarget);
+      renderer.render(blurScene, blurCamera);
+      quad.material = vertical;
+      renderer.setRenderTarget(target);
+      renderer.render(blurScene, blurCamera);
+    }
     renderer.setRenderTarget(null);
     renderer.shadowMap.autoUpdate = shadowUpdates;
+  };
+}
+
+function createGrid(center, radius, resources) {
+  const fadeRadius = radius * 0.6;
+  const geometry = new THREE.PlaneGeometry(fadeRadius * 2, fadeRadius * 2);
+  const material = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, toneMapped: false,
+    uniforms: {
+      fadeRadius: { value: fadeRadius }, opacity: { value: 1 },
+      tint: { value: new THREE.Color(0x9097a0) },
+    },
+    vertexShader: `
+      varying vec2 mm;
+      void main() {
+        mm = position.xy;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }`,
+    fragmentShader: `
+      varying vec2 mm;
+      uniform float fadeRadius, opacity;
+      uniform vec3 tint;
+      float grid(float spacing) {
+        vec2 width = max(fwidth(mm), vec2(0.0001));
+        vec2 dist = abs(fract(mm / spacing - 0.5) - 0.5) * spacing / width;
+        vec2 line = 1.0 - smoothstep(vec2(0.0), vec2(1.0), dist);
+        return max(line.x, line.y);
+      }
+      void main() {
+        float fade = 1.0 - smoothstep(0.0, fadeRadius, length(mm));
+        gl_FragColor = vec4(tint, max(0.03 * grid(10.0), 0.06 * grid(50.0)) * fade * opacity);
+        #include <colorspace_fragment>
+      }`,
+  });
+  const grid = new THREE.Mesh(geometry, material);
+  grid.name = "Grid 10 mm";
+  grid.position.copy(center);
+  resources.add(geometry);
+  resources.add(material);
+  return grid;
+}
+
+function screenQuad(fragmentShader, uniforms, options) {
+  return new THREE.Mesh(new THREE.PlaneGeometry(2, 2), new THREE.ShaderMaterial({
+    uniforms, ...options,
+    vertexShader: `varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = vec4(position.xy, 0.0, 1.0);
+      }`,
+    fragmentShader,
+  }));
+}
+
+class TechnicalPass extends RenderPass {
+  constructor(scene, camera) {
+    super(scene, camera);
+    this.clearPass.enabled = false;
+    this.needsDepthTexture = true;
+    this.target = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType });
+    this.quads = new THREE.Scene();
+    this.quadCamera = new THREE.Camera();
+    this.quads.add(this.depthCopy = screenQuad(`
+      uniform sampler2D sceneDepth;
+      varying vec2 vUv;
+      void main() {
+        gl_FragDepth = texture2D(sceneDepth, vUv).r;
+        gl_FragColor = vec4(0.0);
+      }`, { sceneDepth: { value: null } }, { colorWrite: false, depthFunc: THREE.AlwaysDepth }));
+    this.quads.add(this.sobel = screenQuad(`
+      #include <packing>
+      uniform sampler2D sceneDepth;
+      uniform vec2 pixel, clip;
+      uniform vec3 ink;
+      varying vec2 vUv;
+      float distanceAt(float x, float y) {
+        float z = texture2D(sceneDepth, vUv + vec2(x, y) * pixel).r;
+        return -perspectiveDepthToViewZ(z, clip.x, clip.y);
+      }
+      void main() {
+        float nw = distanceAt(-1.0, 1.0), n = distanceAt(0.0, 1.0), ne = distanceAt(1.0, 1.0);
+        float w = distanceAt(-1.0, 0.0), e = distanceAt(1.0, 0.0);
+        float sw = distanceAt(-1.0, -1.0), s = distanceAt(0.0, -1.0), se = distanceAt(1.0, -1.0);
+        // A first-derivative (Sobel) test flags every sloped plane in perspective.
+        // A depth discontinuity shows up as a large second derivative relative to
+        // distance, which planar surfaces do not produce.
+        float c = distanceAt(0.0, 0.0);
+        float lap = abs(n + s + e + w - 4.0 * c) + 0.5 * abs(nw + ne + sw + se - 4.0 * c);
+        float edge = smoothstep(0.012 * c, 0.03 * c, lap);
+        gl_FragColor = vec4(ink, 0.6 * edge);
+      }`, {
+      sceneDepth: { value: null }, pixel: { value: new THREE.Vector2() }, clip: { value: new THREE.Vector2() },
+      ink: { value: new THREE.Color(0x0b0d10) },
+    }, { transparent: true, depthTest: false, depthWrite: false }));
+    this.depthCopy.frustumCulled = this.sobel.frustumCulled = false;
+    this.cameraForDepth = camera;
+  }
+
+  setSize(width, height) {
+    this.target.setSize(width, height);
+  }
+
+  setDepthTexture(texture) {
+    this.depthCopy.material.uniforms.sceneDepth.value = texture;
+    this.sobel.material.uniforms.sceneDepth.value = texture;
+  }
+
+  render(renderer) {
+    if (!this.depthCopy.material.uniforms.sceneDepth.value) throw new Error("Scene depth unavailable");
+    const { near, far } = this.cameraForDepth;
+    const dpr = renderer.getPixelRatio();
+    this.sobel.material.uniforms.clip.value.set(near, far);
+    this.sobel.material.uniforms.pixel.value.set(dpr / this.target.width, dpr / this.target.height);
+    this.sobel.visible = this.high;
+    // AO can swap the composer's color buffers. Copy only the original scene depth,
+    // then retain it across the technical RenderPass with its clear pass disabled.
+    renderer.setRenderTarget(this.target);
+    // The overlay must start fully transparent, or its clear colour is composited
+    // over the whole assembly and darkens it.
+    const clearColor = renderer.getClearColor(new THREE.Color());
+    const clearAlpha = renderer.getClearAlpha();
+    renderer.setClearColor(0x000000, 0);
+    renderer.clear();
+    renderer.setClearColor(clearColor, clearAlpha);
+    renderer.render(this.quads, this.quadCamera);
+    super.render(renderer, this.target);
+  }
+
+  dispose() {
+    this.target.dispose();
+    for (const quad of this.quads.children) {
+      quad.geometry.dispose();
+      quad.material.dispose();
+    }
+    super.dispose();
+  }
+}
+
+function createComposer(renderer, scene, technical, camera) {
+  const composer = new EffectComposer(renderer, { frameBufferType: THREE.HalfFloatType });
+  const passes = [];
+  const add = (pass) => {
+    passes.push(pass);
+    composer.addPass(pass);
+  };
+  try {
+    add(new RenderPass(scene, camera));
+    const ao = new N8AOPostPass(scene, camera, 1, 1);
+    add(ao);
+    ao.setQualityMode("Medium");
+    for (const [key, value] of Object.entries({
+      aoRadius: 3, distanceFalloff: 1, intensity: 2.2, aoSamples: 16, denoiseSamples: 8,
+      denoiseRadius: 12, gammaCorrection: false, screenSpaceRadius: false, halfRes: false,
+    })) {
+      if (ao.configuration[key] !== undefined) ao.configuration[key] = value;
+    }
+    const overlay = new TechnicalPass(technical, camera);
+    add(overlay);
+    const exposure = new Effect("Bench exposure", `
+      uniform float exposure;
+      void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {
+        outputColor = vec4(inputColor.rgb * exposure, inputColor.a);
+      }`, {
+      blendFunction: BlendFunction.SRC,
+      uniforms: new Map([["exposure", new THREE.Uniform(EXPOSURE)]]),
+    });
+    const tone = new ToneMappingEffect({ mode: ToneMappingMode.NEUTRAL });
+    // The overlay is premultiplied in its own linear buffer. Apply exposure to the
+    // assembly only, then mix the drafting colors after the neutral tone curve.
+    const composite = new Effect("Technical overlay", `
+      uniform sampler2D technical;
+      void mainImage(const in vec4 inputColor, const in vec2 uv, out vec4 outputColor) {
+        vec4 overlay = texture2D(technical, uv);
+        outputColor = overlay + inputColor * (1.0 - overlay.a);
+      }`, {
+      blendFunction: BlendFunction.SRC,
+      uniforms: new Map([["technical", new THREE.Uniform(overlay.target.texture)]]),
+    });
+    add(new EffectPass(camera, exposure, tone, composite));
+    add(new EffectPass(camera, new SMAAEffect({ preset: SMAAPreset.HIGH })));
+    return {
+      setSize: (width, height) => composer.setSize(width, height, false),
+      render(tier, orbiting) {
+        overlay.high = tier === "high";
+        // N8AO 2.0 builds its half-resolution targets only at construction, so toggling
+        // halfRes at runtime leaves them undefined. Cost is controlled by the tier's DPR,
+        // and AO is skipped entirely while orbiting on the standard tier.
+        ao.enabled = !(orbiting && tier === "standard");
+        composer.render();
+      },
+      dispose: () => composer.dispose(),
+    };
+  } catch (error) {
+    // A pass that failed initialization may not yet belong to the composer.
+    for (const pass of passes) {
+      if (!composer.passes.includes(pass)) pass.dispose();
+    }
+    composer.dispose();
+    throw error;
+  }
+}
+
+function updateScreenDashes(scene, camera, width, height) {
+  const point = new THREE.Vector3();
+  const start = new THREE.Vector2();
+  const end = new THREE.Vector2();
+  const toScreen = (attribute, instance, matrix, out) => {
+    point.fromBufferAttribute(attribute, instance).applyMatrix4(matrix).applyMatrix4(camera.matrixWorldInverse);
+    point.z = Math.min(point.z, -camera.near);
+    point.applyMatrix4(camera.projectionMatrix);
+    return out.set(point.x * width * 0.5, point.y * height * 0.5);
+  };
+  scene.updateMatrixWorld();
+  scene.traverseVisible((line) => {
+    if (!line.isLineSegments2 || !line.material.dashed) return;
+    const { instanceStart, instanceEnd, instanceDistanceStart, instanceDistanceEnd } = line.geometry.attributes;
+    let distance = 0;
+    for (let i = 0; i < instanceStart.count; i++) {
+      toScreen(instanceStart, i, line.matrixWorld, start);
+      toScreen(instanceEnd, i, line.matrixWorld, end);
+      instanceDistanceStart.setX(i, distance);
+      distance += start.distanceTo(end);
+      instanceDistanceEnd.setX(i, distance);
+    }
+    instanceDistanceStart.data.needsUpdate = true;
+  });
+}
+
+function createFrameSampler(renderer) {
+  const gl = renderer.getContext();
+  const timer = gl.getExtension("EXT_disjoint_timer_query_webgl2");
+  const samples = [];
+  const pending = [];
+  let started = 0;
+  return {
+    begin(start) {
+      if (started >= QUALITY_SAMPLE_COUNT) return null;
+      started++;
+      const query = timer && gl.createQuery();
+      if (query) gl.beginQuery(timer.TIME_ELAPSED_EXT, query);
+      return { query, start };
+    },
+    end(sample) {
+      if (!sample) return;
+      if (sample.query) gl.endQuery(timer.TIME_ELAPSED_EXT);
+      const submitted = performance.now();
+      pending.push({ query: sample.query, cpu: submitted - sample.start, submitted });
+    },
+    collect() {
+      const disjoint = timer && (gl.isContextLost() || gl.getParameter(timer.GPU_DISJOINT_EXT));
+      while (pending.length) {
+        const { query, cpu, submitted } = pending[0];
+        const available = query && !disjoint && gl.getQueryParameter(query, gl.QUERY_RESULT_AVAILABLE);
+        if (query && !disjoint && !available && performance.now() - submitted < 250) break;
+        const gpu = available ? gl.getQueryParameter(query, gl.QUERY_RESULT) / 1e6 : 0;
+        if (query) gl.deleteQuery(query);
+        samples.push(Math.max(cpu, gpu));
+        pending.shift();
+      }
+      return samples;
+    },
+    waiting: () => started === QUALITY_SAMPLE_COUNT && pending.length > 0,
+    dispose() {
+      for (const { query } of pending) {
+        if (query) gl.deleteQuery(query);
+      }
+    },
   };
 }
 
@@ -691,25 +1115,16 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
     }
   }
   for (const path of host.querySelectorAll("[data-bracket]")) {
-    const bounds = boundsForKey(path.dataset.bracket);
-    const corners = bounds && [
-      [bounds.min.x, bounds.min.y], [bounds.max.x, bounds.min.y],
-      [bounds.max.x, bounds.max.y], [bounds.min.x, bounds.max.y],
-    ].map(([x, y]) => project(new THREE.Vector3(x, y, bounds.max.z)));
-    if (!corners || corners.some((point) => !point)) {
+    const bounds = outlineFor(boundsForKey(path.dataset.bracket));
+    if (!bounds) {
       path.removeAttribute("d");
       continue;
     }
-    path.setAttribute("d", corners.map(({ x, y }, i) => {
-      const along = (offset) => {
-        const neighbor = corners[(i + offset + 4) % 4];
-        const dx = neighbor.x - x;
-        const dy = neighbor.y - y;
-        const fraction = Math.min(1 / 3, 12 / Math.hypot(dx, dy));
-        return `${x + dx * fraction},${y + dy * fraction}`;
-      };
-      return `M${along(-1)}L${x},${y}L${along(1)}`;
-    }).join(" "));
+    const { left, right, top, bottom } = bounds;
+    const corners = [[left - 8, top - 8, 1, 1], [right + 8, top - 8, -1, 1],
+      [right + 8, bottom + 8, -1, -1], [left - 8, bottom + 8, 1, -1]];
+    path.setAttribute("d", corners.map(([x, y, dx, dy]) =>
+      `M${x + 10 * dx},${y}H${x}v${10 * dy}`).join(" "));
   }
 
   const labels = [...host.querySelectorAll("[data-anchor]")];
@@ -753,36 +1168,35 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
   const { base, target, focusPart } = sceneConfig;
   const scene = new THREE.Scene();
   const resources = new Set();
-  const entries = makeEntries(assets, index, scene, resources, sceneConfig);
+  const technical = new THREE.Scene();
+  const entries = makeEntries(assets, index, scene, technical, resources, sceneConfig);
   const all = [...entries.values()];
   if (!all.length) {
     resources.forEach((resource) => resource.dispose());
     throw new Error("No GLB mesh names match the Fielddeck sidecars.");
   }
 
-  let renderer;
-  try {
-    renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-  } catch (error) {
-    resources.forEach((resource) => resource.dispose());
-    throw error;
+  function createRenderer(antialias) {
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias });
+    renderer.autoClear = false;
+    renderer.shadowMap.type = THREE.PCFShadowMap;
+    renderer.domElement.setAttribute("aria-label", "Interactive Fielddeck assembly");
+    return renderer;
   }
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
-  renderer.toneMapping = THREE.NeutralToneMapping;
-  renderer.toneMappingExposure = 1;
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFShadowMap;
-  renderer.domElement.setAttribute("aria-label", "Interactive Fielddeck assembly");
-  host.prepend(renderer.domElement);
-
-  const pmrem = new THREE.PMREMGenerator(renderer);
-  const room = new RoomEnvironment();
-  room.rotation.x = Math.PI / 2;
-  const environment = pmrem.fromScene(room, 0.04);
-  room.dispose();
-  pmrem.dispose();
-  scene.environment = environment.texture;
-  scene.environmentIntensity = 0.55;
+  function createEnvironment(renderer) {
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    const room = new RoomEnvironment();
+    room.rotation.x = Math.PI / 2;
+    try {
+      const environment = pmrem.fromScene(room, 0.04);
+      scene.environment = environment.texture;
+      scene.environmentIntensity = 0.32;
+      return environment;
+    } finally {
+      room.dispose();
+      pmrem.dispose();
+    }
+  }
 
   const modeEntries = {
     [base]: all.filter(({ row }) => row.revision === base),
@@ -791,48 +1205,87 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
   };
   groupExplode(all);
   const extended = boundsFor(all, 1).union(boundsFor(all, 0));
-  const renderContact = createContactShadow(scene, renderer, extended, resources);
+  const renderContact = createContactShadow(scene, extended, resources);
   const assembled = boundsFor(all, 0);
-  const grid = new THREE.GridHelper(600, 30, 0x59636e, 0x59636e);
-  grid.rotation.x = Math.PI / 2;
-  grid.position.copy(assembled.getCenter(new THREE.Vector3()));
-  grid.material.transparent = true;
-  grid.material.depthWrite = false;
-  grid.material.opacity = 0.2;
-  scene.add(grid);
-  resources.add(grid.geometry);
-  resources.add(grid.material);
   const center = assembled.getCenter(new THREE.Vector3());
   const radius = extended.getSize(new THREE.Vector3()).length() / 2;
-  const key = new THREE.DirectionalLight(0xfff1e0, 2.08);
-  key.position.set(-4, -5, 9).normalize().multiplyScalar(radius * 2).add(center);
-  key.target.position.copy(center);
-  key.castShadow = true;
-  key.shadow.mapSize.set(2048, 2048);
-  key.shadow.radius = 6;
+  const grid = createGrid(center, radius, resources);
+  scene.add(grid);
+
+  function light(color, intensity, x, y, elevation) {
+    const lamp = new THREE.DirectionalLight(color, intensity);
+    const pitch = THREE.MathUtils.degToRad(elevation);
+    lamp.position.set(x, y, 0).normalize().multiplyScalar(Math.cos(pitch));
+    lamp.position.z = Math.sin(pitch);
+    lamp.position.multiplyScalar(radius * 2).add(center);
+    lamp.target.position.copy(center);
+    scene.add(lamp, lamp.target);
+    return lamp;
+  }
+  const key = light(0xfff3e6, 2.6, -3, -5, 55);
+  light(0xe6eef7, 0.45, 6, -2, 17);
+  light(0xffffff, 1.3, 2, 7, 28);
+  key.shadow.radius = 4;
+  key.shadow.bias = -0.0002;
   key.shadow.normalBias = 0.02;
   key.shadow.autoUpdate = false;
   Object.assign(key.shadow.camera, {
     left: -radius, right: radius, top: radius, bottom: -radius, near: 1, far: 4 * radius,
   });
   key.shadow.camera.updateProjectionMatrix();
-  const rim = new THREE.DirectionalLight(0xffffff, 1.4);
-  rim.position.set(5, 6, 3).normalize().multiplyScalar(radius * 2).add(center);
-  rim.target.position.copy(center);
-  scene.add(key, key.target, rim, rim.target);
 
   const camera = new THREE.PerspectiveCamera(26, 1, 0.5, radius * 15);
   camera.up.copy(UP);
   camera.position.copy(VIEW).multiplyScalar(radius * 4).add(center);
-  const canvas = renderer.domElement;
-  const controls = new OrbitControls(camera, canvas);
-  controls.target.copy(center);
-  controls.enableDamping = true;
-  controls.dampingFactor = 0.15;
+  // `?quality=high|standard|reduced` pins the tier and turns off automatic downgrade,
+  // so reviews and slow software renderers see a fixed, named quality level.
+  const pinnedTier = (() => {
+    try {
+      const value = new URLSearchParams(globalThis.location?.search ?? "").get("quality");
+      return Object.hasOwn(TIERS, value) ? value : null;
+    } catch { return null; }
+  })();
+  let tier = pinnedTier ?? (Object.hasOwn(TIERS, sceneConfig.quality) ? sceneConfig.quality : "standard");
+  let renderer;
+  let composer;
+  let environment;
+  try {
+    renderer = createRenderer(tier === "reduced");
+    if (tier !== "reduced") {
+      try {
+        composer = createComposer(renderer, scene, technical, camera);
+      } catch (error) {
+        // Keep the reason visible for diagnostics; the scene still renders plainly.
+        host.dataset.qualityFallback = `composer: ${error?.message ?? error}`;
+        console.warn("Fielddeck: post-processing unavailable, using the reduced tier.", error);
+        renderer.dispose();
+        renderer = createRenderer(true);
+        tier = "reduced";
+      }
+    }
+    environment = createEnvironment(renderer);
+  } catch (error) {
+    composer?.dispose();
+    renderer?.dispose();
+    resources.forEach((resource) => resource.dispose());
+    throw error;
+  }
+  function applyTier() {
+    const { dpr, shadowSize } = TIERS[tier];
+    renderer.setPixelRatio(dpr);
+    for (const entry of all) entry.hatchDpr.value = dpr;
+    renderer.toneMapping = composer ? THREE.NoToneMapping : THREE.NeutralToneMapping;
+    renderer.toneMappingExposure = composer ? 1 : EXPOSURE;
+    renderer.shadowMap.enabled = key.castShadow = shadowSize > 0;
+    if (shadowSize) key.shadow.mapSize.set(shadowSize, shadowSize);
+    key.shadow.needsUpdate = true;
+    host.dataset.quality = tier;
+  }
+  applyTier();
+  let canvas = renderer.domElement;
+  host.prepend(canvas);
   const minimumDistance = radius * 0.2;
-  controls.minDistance = minimumDistance;
-  controls.maxDistance = radius * 13;
-  controls.update();
+  let controls;
 
   let config;
   let lastConfig;
@@ -847,7 +1300,7 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
   let mobile = false;
   let resized = true;
   let layoutDirty = true;
-  let frame;
+  let frame = null;
   let previousTime = 0;
   let lastLayout = -Infinity;
   let pressed;
@@ -862,6 +1315,12 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
   let priorCamera;
   let lastHero = null;
   let firstFrame = true;
+  let contactPending = true;
+  let orbiting = false;
+  let controlsMoving = false;
+  let explodePointer = null;
+  let sampler = tier === "reduced" || pinnedTier ? null : createFrameSampler(renderer);
+  let nextTier = tier;
   const ray = new THREE.Raycaster();
   const [header, bottomChrome, tree, inspector, sheet, legend, options] = [
     ".fd-header", ".fd-bottom", ".fd-tree", ".fd-inspector", ".fd-sheet", ".fd-legend", ".fd-options",
@@ -869,7 +1328,13 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
     .map((selector) => host.querySelector(selector));
   const panels = [header, bottomChrome, tree, inspector, sheet, legend, options];
   const mobileView = window.matchMedia(FIELDDECK_NARROW);
-  const invalidateLayout = () => { layoutDirty = true; };
+  function invalidate() {
+    if (frame === null) frame = requestAnimationFrame(animate);
+  }
+  const invalidateLayout = () => {
+    layoutDirty = true;
+    invalidate();
+  };
 
   function resize() {
     const nextWidth = Math.max(1, canvas.clientWidth);
@@ -888,7 +1353,10 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
     const nextFrameWidth = Math.max(1, right - left);
     const nextFrameCenter = (upper + lower) / 2 - nextCanvasTop;
     const nextFrameCenterX = (left + right) / 2;
-    if (nextWidth !== width || nextHeight !== height || resized) renderer.setSize(nextWidth, nextHeight, false);
+    if (nextWidth !== width || nextHeight !== height || resized) {
+      if (composer) composer.setSize(nextWidth, nextHeight);
+      else renderer.setSize(nextWidth, nextHeight, false);
+    }
     resized ||= width !== nextWidth || height !== nextHeight || phone !== mobile
       || frameHeight !== nextFrameHeight || frameWidth !== nextFrameWidth
       || frameCenter !== nextFrameCenter || frameCenterX !== nextFrameCenterX;
@@ -905,13 +1373,14 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
     camera.setViewOffset(width, height, width / 2 - frameCenterX, height / 2 - frameCenter, width, height);
     controls.enablePan = !mobile;
     controls.enableZoom = !mobile;
-    layoutDirty = true;
+    invalidateLayout();
   }
   const observer = new ResizeObserver(resize);
   [host, ...panels].forEach((element) => observer.observe(element));
   mobileView.addEventListener("change", resize);
   window.addEventListener("resize", invalidateLayout);
   window.addEventListener("scroll", invalidateLayout, true);
+  controls = makeControls(center);
   resize();
 
   const displays = all.filter(({ row }) => row.part.part_id === focusPart);
@@ -1055,33 +1524,150 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
     if (event.pointerType !== "mouse") return;
     pointer = event;
     pointerMoved = true;
+    invalidate();
   }
   function leave() {
     pointer = undefined;
     hovered = undefined;
     pressed = undefined;
     pointerMoved = true;
+    invalidate();
   }
-  canvas.addEventListener("pointerdown", down);
-  canvas.addEventListener("pointerup", up);
-  canvas.addEventListener("pointermove", move);
-  canvas.addEventListener("pointerleave", leave);
-  canvas.addEventListener("pointercancel", leave);
-  canvas.addEventListener("wheel", () => { if (!cameraMove?.faceTransition) cameraMove = null; }, { passive: true });
+  function makeControls(target) {
+    const controls = new OrbitControls(camera, canvas);
+    controls.target.copy(target);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.15;
+    controls.minDistance = minimumDistance;
+    controls.maxDistance = radius * 13;
+    controls.enableZoom = !mobile;
+    controls.update();
+    controls.addEventListener("start", () => { orbiting = true; });
+    controls.addEventListener("end", () => {
+      orbiting = false;
+      controlsMoving = true;
+      invalidate();
+    });
+    controls.addEventListener("change", () => {
+      controlsMoving = true;
+      invalidate();
+    });
+    canvas.addEventListener("pointerdown", down);
+    canvas.addEventListener("pointerup", up);
+    canvas.addEventListener("pointermove", move);
+    canvas.addEventListener("pointerleave", leave);
+    canvas.addEventListener("pointercancel", leave);
+    canvas.addEventListener("wheel", () => { if (!cameraMove?.faceTransition) cameraMove = null; }, { passive: true });
+    return controls;
+  }
+  function startExplode(event) {
+    if (event.target.id === "fd-explode") explodePointer = event.pointerId;
+  }
+  function settleExplode(event) {
+    if (explodePointer === null || event.type !== "blur" && explodePointer !== event.pointerId) return;
+    explodePointer = null;
+    invalidate();
+  }
+  host.addEventListener("pointerdown", startExplode);
+  window.addEventListener("pointerup", settleExplode);
+  window.addEventListener("pointercancel", settleExplode);
+  window.addEventListener("blur", settleExplode);
+
+  function changeTier(next) {
+    tier = nextTier = next;
+    sampler?.dispose();
+    sampler = null;
+    key.shadow.dispose();
+    key.shadow.map = null;
+    if (tier === "reduced") {
+      composer?.dispose();
+      composer = null;
+      let replacement;
+      let replacementEnvironment;
+      try {
+        replacement = createRenderer(true);
+        replacementEnvironment = createEnvironment(replacement);
+      } catch {
+        replacement?.dispose();
+        replacement = null;
+      }
+      if (replacement) {
+        const target = controls.target.clone();
+        controls.dispose();
+        environment.dispose();
+        renderer.dispose();
+        renderer.forceContextLoss();
+        renderer = replacement;
+        environment = replacementEnvironment;
+        canvas.replaceWith(renderer.domElement);
+        canvas = renderer.domElement;
+        controls = makeControls(target);
+        contactPending = true;
+      }
+    }
+    applyTier();
+    if (composer) composer.setSize(width, height);
+    else renderer.setSize(width, height, false);
+  }
+
+  function renderFrame(floor, bake, interacting, orbitMotion, frameStart) {
+    const sample = interacting && sampler?.begin(frameStart);
+    try {
+      if (bake) {
+        renderContact(renderer, floor);
+        contactPending = false;
+      }
+      updateScreenDashes(technical, camera, width, height);
+      if (composer) composer.render(tier, orbitMotion);
+      else renderPlain();
+    } catch (error) {
+      if (!composer) throw error;
+      host.dataset.qualityFallback = `render: ${error?.message ?? error}`;
+      console.warn("Fielddeck: post-processing failed while rendering, using the reduced tier.", error);
+      sampler?.end(sample);
+      changeTier("reduced");
+      if (contactPending) {
+        renderContact(renderer, floor);
+        contactPending = false;
+      }
+      renderPlain();
+      return;
+    }
+    sampler?.end(sample);
+  }
+
+  function renderPlain() {
+    renderer.setRenderTarget(null);
+    renderer.clear();
+    renderer.render(scene, camera);
+    renderer.render(technical, camera);
+  }
   for (const entry of all) {
     entry.style.surface.forEach((mesh) => { mesh.userData.fielddeckKey = entry.row.key; });
   }
   const nextPosition = new THREE.Vector3();
 
   function animate(now) {
-    frame = requestAnimationFrame(animate);
+    frame = null;
     if (!config) return;
+    const frameStart = performance.now();
+    const samples = sampler?.collect();
+    if (samples?.length === QUALITY_SAMPLE_COUNT) {
+      nextTier = chooseTier(samples, tier);
+      sampler.dispose();
+      sampler = null;
+    }
+    if (sampler?.waiting()) invalidate();
     const tick = Math.min(50, now - previousTime);
     previousTime = now;
     const { mode, heroStart, reduced, explode, explodeMotion, cameraCue, faceView, ghostDeltaKey, selectedKey } = config;
     const heroElapsed = heroStart == null ? null : Math.max(0, now - heroStart);
     const displayOpacity = heroElapsed === null ? 1 : clamp((heroElapsed - 850) / 250);
-    let dirty = config !== lastConfig || resized || layoutDirty || heroElapsed !== null;
+    const orbitMotion = orbiting || controlsMoving && config === lastConfig && !cameraMove;
+    const userMotion = orbitMotion || explodePointer !== null
+      || lastConfig && explode !== lastConfig.explode && !explodeMotion;
+    let dirty = config !== lastConfig || resized || layoutDirty || heroElapsed !== null || controlsMoving;
+    controlsMoving = false;
     const motion = explodeMotion;
     const offsetFor = heroElapsed !== null
       ? () => DEFAULT_EXPLODE * introEase(clamp((heroElapsed - 250) / 600))
@@ -1165,7 +1751,12 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
     if (controls.enabled) {
       dirty = controls.update() || dirty;
     }
-
+    const settling = explodePointer === null && !orbitMotion && !motion && heroElapsed === null && progress === 1;
+    if (nextTier !== tier && settling) {
+      changeTier(nextTier);
+      dirty = true;
+    }
+    dirty ||= settling && contactPending;
     if (!dirty && !wasAnimating && !pointerMoved) return;
     if (pointer && !pressed && (dirty || pointerMoved)) {
       camera.updateMatrixWorld();
@@ -1175,65 +1766,63 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
     canvas.style.cursor = hovered ? "pointer" : "grab";
 
     camera.updateMatrixWorld();
-    function scaleDashes(material, entry, position) {
-      if (!material.dashed) return;
-      const center = entry.bounds.getCenter(new THREE.Vector3()).add(position).applyMatrix4(camera.matrixWorldInverse);
-      material.dashScale = height / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * Math.max(1, -center.z));
-    }
     grid.visible = !faceView;
-    grid.material.opacity = 0.2 * (heroElapsed === null ? 1 : clamp(heroElapsed / 250));
+    grid.material.uniforms.opacity.value = heroElapsed === null ? 1 : clamp(heroElapsed / 250);
 
     const pick = [];
     const block = [];
     let floor = Infinity;
-    let contactDirty = firstFrame;
+    let shadowDirty = firstFrame;
     const displaySelected = config.selectedKeys.some((key) => entries.get(key)?.row.part.part_id === focusPart);
     for (const entry of all) {
-      const { row, group, vector } = entry;
+      const { row, group, strokes, vector } = entry;
       const removed = row.revision === base && row.delta === "removed";
       const ghost = removed && (mode === "compare" || blend.current.compare > 0);
       const ghostOpacity = selectedKey && !displaySelected && entry.displayOverlay ? 0.3 : 1;
       const weight = row.revision === target ? blend.current.target
         : ghost ? Math.max(blend.current.base, blend.current.compare) * displayOpacity * ghostOpacity : blend.current.base;
       if (entry.overlay) {
-        const { object, material, halo } = entry.overlay;
+        const { object, setOpacity } = entry.overlay;
         object.visible = !faceView && row.key === ghostDeltaKey;
         if (object.visible) {
           // Apply the selected layer's presentation offset to both CAD transforms.
           const selected = entries.get(selectedKey);
           if (selected) object.position.copy(selected.vector).multiplyScalar(offsetFor(selected));
-          scaleDashes(material, entry, object.position);
-          scaleDashes(halo, entry, object.position);
+          setOpacity(1);
         }
       }
       if (entry.displayOverlay) {
         const { object, rim, details } = entry.displayOverlay;
-        object.visible = faceView || ghost && weight > 0.001;
+        object.visible = faceView;
         if (object.visible) {
-          object.position.copy(vector).multiplyScalar(faceView ? 0 : offsetFor(entry));
-          rim.opacity = faceView ? 1 : weight;
-          details.opacity = faceView ? 0.2 : weight;
-          scaleDashes(rim, entry, object.position);
-          scaleDashes(details, entry, object.position);
+          object.position.set(0, 0, 0);
+          rim.opacity = 1;
+          details.opacity = 0.2;
         }
       }
       const visible = !faceView && weight > 0.001;
       const wasCasting = group.visible && entry.style.surface[0].castShadow;
       dirty ||= visible !== group.visible;
-      group.visible = visible;
+      group.visible = strokes.visible = visible;
+      if (entry.removed) entry.removed.object.visible = visible && ghost;
       if (!visible) {
-        contactDirty ||= wasCasting;
+        shadowDirty ||= wasCasting;
         continue;
       }
       nextPosition.copy(vector).multiplyScalar(offsetFor(entry));
       const moved = !group.position.equals(nextPosition);
       group.position.copy(nextPosition);
+      strokes.position.copy(nextPosition);
+      if (entry.removed?.object.visible) {
+        entry.removed.object.position.copy(nextPosition);
+        entry.removed.setOpacity(weight);
+      }
       const selected = selectedKey === row.key;
       const accent = selected && ghostDeltaKey ? 1 : (reduced ? accentProgress : outCubic(accentProgress)) * blend.current.compare;
-      const material = stylePart(entry, blend.current.compare, weight, ghost, entry.style.edge.diff ? accent : 0, selected);
-      scaleDashes(material, entry, group.position);
+      stylePart(entry, blend.current.compare, weight, ghost, accent, selected);
+      entry.style.marker?.scale.setScalar(32 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) / height);
       const casts = entry.style.surface[0].castShadow;
-      contactDirty ||= casts !== wasCasting || casts && moved;
+      shadowDirty ||= casts !== wasCasting || casts && moved;
       if (casts) floor = Math.min(floor, entry.bounds.min.z + group.position.z);
       if (row.revision === (mode === "compare" ? target : mode) || mode === "compare" && ghost) {
         pick.push(...entry.style.surface);
@@ -1244,46 +1833,50 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
     // A step that lands after the final animation frame still needs to draw its exact endpoint.
     if (dirty || wasAnimating) {
       grid.position.z = Number.isFinite(floor) ? floor - 0.9 : assembled.min.z - 0.9;
-      if (contactDirty) {
-        renderContact(floor);
-        key.shadow.needsUpdate = true;
-      }
-      renderer.render(scene, camera);
+      contactPending ||= shadowDirty;
+      if (shadowDirty) key.shadow.needsUpdate = true;
+      renderFrame(floor, contactPending && (settling || firstFrame),
+        userMotion && heroElapsed === null && !cameraMove, orbitMotion, frameStart);
       pickable = pick;
       opaque = block;
       const placeLabels = layoutDirty || resized || config !== lastConfig || !dirty || now - lastLayout > 60;
       layoutAnnotations(host, camera, entries, width, height, canvasTop, panels, placeLabels, displayOpacity, !cameraMove, sceneConfig);
       if (placeLabels) lastLayout = now;
     }
-    if (firstFrame) {
-      canvas.dataset.fielddeckCanvas = "rendered";
-      callbacks.onFrame();
-    }
+    canvas.dataset.fielddeckCanvas = "rendered";
+    if (firstFrame) callbacks.onFrame();
     wasAnimating = dirty;
     firstFrame = false;
     lastConfig = config;
     lastHero = heroStart;
     resized = false;
     layoutDirty = false;
+    if (dirty || sampler?.waiting()) invalidate();
   }
   let wasAnimating = false;
-  frame = requestAnimationFrame(animate);
 
   return {
     linked: new Set(entries.keys()),
     update: (next) => { config = next; resize(); },
     dispose() {
-      cancelAnimationFrame(frame);
+      if (frame !== null) cancelAnimationFrame(frame);
       observer.disconnect();
       mobileView.removeEventListener("change", resize);
       window.removeEventListener("resize", invalidateLayout);
       window.removeEventListener("scroll", invalidateLayout, true);
+      host.removeEventListener("pointerdown", startExplode);
+      window.removeEventListener("pointerup", settleExplode);
+      window.removeEventListener("pointercancel", settleExplode);
+      window.removeEventListener("blur", settleExplode);
       controls.dispose();
+      sampler?.dispose();
+      composer?.dispose();
       environment.dispose();
       key.shadow.dispose();
       resources.forEach((resource) => resource.dispose());
       renderer.dispose();
       canvas.remove();
+      delete host.dataset.quality;
     },
   };
 }

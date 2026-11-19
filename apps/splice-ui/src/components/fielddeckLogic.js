@@ -1,6 +1,8 @@
 export const BASIS_LABELS = {
   custom: "Custom CAD",
   vendor_step: "Vendor model",
+  donor_cad: "Donor CAD (unverified)",
+  measured: "Measured",
   envelope: "Envelope",
   proxy: "Proxy",
   unknown: "Unknown",
@@ -16,16 +18,183 @@ export const DIFF_LABELS = {
 export const FIELDDECK_COMPARE = { base: "7", target: "5" };
 export const DEFAULT_EXPLODE = 0.6;
 export const FIELDDECK_NARROW = "(width < 640px)";
+export const QUALITY_SAMPLE_COUNT = 60;
 
-const BASIS_COLORS = {
-  custom: 0xd8ccb6, vendor_step: 0x959595, envelope: 0xa5aeb5,
-  unknown: 0x9097a0, proxy: 0xa6a098,
+export const DIFF_COLORS = { changed: 0xa78bfa, added: 0x2dd4bf, removed: 0xf17e70 };
+export const CREASE_INK = 0x1a1d22;
+
+const VENDOR = { color: 0x93a3ae, muted: 0x737a80, roughness: 0.86, threshold: 42 };
+const MATERIALS = {
+  custom: { color: 0xd9cfbe, muted: 0x8e8b85, roughness: 0.80, threshold: 32 },
+  vendor_step: VENDOR,
+  donor_cad: VENDOR,
+  measured: { color: 0xe4e2dc, roughness: 0.74, threshold: 32, creaseOpacity: 1 },
+  envelope: { color: 0xa5aeb5, fillOpacity: 0.06, pattern: [6, 4] },
+  proxy: { color: 0xa6a098, roughness: 0.88, threshold: 32, hatch: { angle: 45, spacing: 8, contrast: 0.1 } },
+  unknown: { color: null, edgeColor: 0x9097a0, pattern: [1, 3] },
 };
-export const DIFF_COLORS = { changed: 0xe0a040, added: 0x2dd4bf, removed: 0xf17e70 };
 
-export function materialFor(basis, delta) {
-  const color = BASIS_COLORS[basis];
-  return { color, emissive: 0x000000, edgeColor: DIFF_COLORS[delta] ?? color };
+export function materialSpec(basis, delta, dimmed = false) {
+  const { color, muted, threshold = 32, creaseOpacity = 0.35, edgeColor = color,
+    fillOpacity = 0, pattern = null, roughness, hatch = null } = MATERIALS[basis] ?? MATERIALS.unknown;
+  return {
+    color: dimmed ? muted ?? color : color, roughness, metalness: 0, hatch, fillOpacity, pattern,
+    threshold, creaseColor: CREASE_INK, creaseOpacity: creaseOpacity * (dimmed ? 0.25 : 1),
+    edgeColor: pattern ? edgeColor : DIFF_COLORS[delta] ?? CREASE_INK,
+  };
+}
+
+export function chooseTier(samples, tier = "standard") {
+  if (samples.length < QUALITY_SAMPLE_COUNT) return tier;
+  const ordered = samples.slice(0, QUALITY_SAMPLE_COUNT).sort((a, b) => a - b);
+  const p90 = ordered[Math.ceil(0.9 * QUALITY_SAMPLE_COUNT) - 1];
+  if (p90 <= 14) return tier;
+  return tier === "high" ? "standard" : "reduced";
+}
+
+const difference = (a, b) => a.map((value, axis) => value - b[axis]);
+const dot = (a, b) => a.reduce((sum, value, axis) => sum + value * b[axis], 0);
+const length = (v) => Math.hypot(...v);
+
+export function weldEdgeChains(positions, tolerance = 0.01) {
+  const cells = new Map();
+  const vertices = [];
+  function vertexFor(point) {
+    const [x, y, z] = point.map((value) => Math.floor(value / tolerance));
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dz = -1; dz <= 1; dz++) {
+          for (const vertex of cells.get(`${x + dx},${y + dy},${z + dz}`) ?? []) {
+            if (length(difference(vertex.point, point)) <= tolerance) return vertex;
+          }
+        }
+      }
+    }
+    const key = `${x},${y},${z}`;
+    const vertex = { point, neighbors: new Map() };
+    if (!cells.has(key)) cells.set(key, []);
+    cells.get(key).push(vertex);
+    vertices.push(vertex);
+    return vertex;
+  }
+  for (let i = 0; i < positions.length; i += 6) {
+    const a = vertexFor(Array.from(positions.slice(i, i + 3)));
+    const b = vertexFor(Array.from(positions.slice(i + 3, i + 6)));
+    if (a === b || a.neighbors.has(b)) continue;
+    const edge = { used: false };
+    a.neighbors.set(b, edge);
+    b.neighbors.set(a, edge);
+  }
+  const chains = [];
+  function trace(start, next, edge) {
+    const points = [start.point];
+    while (edge && !edge.used) {
+      edge.used = true;
+      points.push(next.point);
+      if (next.neighbors.size !== 2) break;
+      const onward = [...next.neighbors].find(([, candidate]) => !candidate.used);
+      if (!onward) break;
+      [next, edge] = onward;
+    }
+    chains.push(points);
+  }
+  for (const start of [...vertices.filter(({ neighbors }) => neighbors.size !== 2), ...vertices]) {
+    for (const [next, edge] of start.neighbors) {
+      if (!edge.used) trace(start, next, edge);
+    }
+  }
+  return chains;
+}
+
+export function simplifyEdgeChain(points, tolerance = 0.2) {
+  if (points.length < 3) return points.slice();
+  const last = points.length - 1;
+  const keep = new Set([0, last]);
+  const spans = [[0, last]];
+  while (spans.length) {
+    const [from, to] = spans.pop();
+    const axis = difference(points[to], points[from]);
+    const squared = dot(axis, axis);
+    let farthest = tolerance;
+    let split = from;
+    for (let i = from + 1; i < to; i++) {
+      const offset = difference(points[i], points[from]);
+      const t = squared ? Math.min(1, Math.max(0, dot(offset, axis) / squared)) : 0;
+      const distance = length(offset.map((value, j) => value - t * axis[j]));
+      if (distance <= farthest) continue;
+      farthest = distance;
+      split = i;
+    }
+    if (split === from) continue;
+    keep.add(split);
+    spans.push([from, split], [split, to]);
+  }
+  const closed = points[0].every((value, i) => value === points[last][i]);
+  return closed && keep.size < 4 ? points.slice() : points.filter((_, i) => keep.has(i));
+}
+
+export function cullCoincidentChains(chains, positions, { tolerance = 0.15, simplify = false } = {}) {
+  // Use the tolerance to find candidates. A nearby, parallel CAD change can still be real.
+  const epsilon = Math.min(tolerance, 0.0001);
+  const bins = new Map();
+  const bin = (x) => Math.floor(x / 5);
+  for (let i = 0; i < positions.length; i += 6) {
+    const a = Array.from(positions.slice(i, i + 3));
+    const b = Array.from(positions.slice(i + 3, i + 6));
+    const edge = [a, b];
+    for (let j = bin(Math.min(a[0], b[0]) - tolerance); j <= bin(Math.max(a[0], b[0]) + tolerance); j++) {
+      if (!bins.has(j)) bins.set(j, []);
+      bins.get(j).push(edge);
+    }
+  }
+  function coincides(a, b) {
+    const axis = difference(b, a);
+    const size = length(axis);
+    if (!size) return true;
+    const direction = axis.map((value) => value / size);
+    const candidates = new Set();
+    for (let i = bin(Math.min(a[0], b[0])); i <= bin(Math.max(a[0], b[0])); i++) {
+      for (const edge of bins.get(i) ?? []) candidates.add(edge);
+    }
+    const spans = [];
+    for (const edge of candidates) {
+      const offsets = edge.map((point) => difference(point, a));
+      const [start, end] = offsets.map((v) => dot(v, direction));
+      if (Math.max(start, end) < 0 || Math.min(start, end) > size) continue;
+      if (offsets.some((v, i) => length(v.map((value, j) => value - (i ? end : start) * direction[j])) > epsilon)) continue;
+      spans.push([Math.min(start, end), Math.max(start, end)]);
+    }
+    let covered = 0;
+    spans.sort(([a], [b]) => a - b);
+    for (const [start, end] of spans) {
+      if (start > covered + epsilon) break;
+      covered = Math.max(covered, end);
+      if (covered >= size - epsilon) return true;
+    }
+    return false;
+  }
+  const remaining = [];
+  function append(run) {
+    if (run.length < 2) return;
+    const shorter = simplify ? simplifyEdgeChain(run) : run;
+    // A simplified chord can land on the current edge and hide a small CAD change.
+    const hidesChange = shorter.length < run.length
+      && shorter.some((end, i) => i > 0 && coincides(shorter[i - 1], end));
+    remaining.push(hidesChange ? run : shorter);
+  }
+  for (const points of chains) {
+    let run = [points[0]];
+    for (let i = 1; i < points.length; i++) {
+      if (coincides(points[i - 1], points[i])) {
+        append(run);
+        run = [points[i]];
+      } else {
+        run.push(points[i]);
+      }
+    }
+    append(run);
+  }
+  return remaining;
 }
 
 export function countClippedItems(items, { top, bottom }) {
@@ -290,7 +459,12 @@ export function placeCallouts(viewport, panelRects, callouts, clearSpace = []) {
 }
 
 export function classifyPart(part, delta, mode) {
-  const basis = Object.hasOwn(BASIS_LABELS, part.geometry_basis) ? part.geometry_basis : "unknown";
+  let basis = Object.hasOwn(BASIS_LABELS, part.geometry_basis) ? part.geometry_basis : "unknown";
+  if (basis === "measured" && !(part.feature_id && part.evidence?.some((record) =>
+    record.state === "measured" && record.feature_id === part.feature_id && record.instrument && record.date))) {
+    basis = "unknown";
+  }
+  if (basis === "donor_cad" && /^REFERENCE_ENVELOPE/i.test(part.node_name)) basis = "envelope";
   const diff = mode === "compare" ? delta : undefined;
   const outline = diff === "removed" || basis === "envelope" || basis === "unknown";
   return { basis, diff, outline, dimmed: diff === "unchanged" };
@@ -382,8 +556,30 @@ export function ghostDeltaKey(index, mode, row, compare = FIELDDECK_COMPARE) {
   if (!compare || mode !== "compare" || !row?.part || row.delta !== "changed") return null;
   const revision = row.revision === compare.target ? compare.base : compare.target;
   const { part_id, node_name } = row.part;
+  const occurrence = index.byNode.get(row.revision)?.get(node_name)?.indexOf(row);
   return (index.byPart.get(`${revision}:${part_id}`)
-    ?? index.byNode.get(revision)?.get(node_name)?.[0])?.key ?? null;
+    ?? index.byNode.get(revision)?.get(node_name)?.[occurrence])?.key ?? null;
+}
+
+export function changeSummary(index, row, compare) {
+  if (!compare || row?.delta !== "changed") return null;
+  const counterpart = index.byKey.get(ghostDeltaKey(index, "compare", row, compare));
+  const older = row.revision === compare.base ? row : counterpart;
+  const newer = row.revision === compare.target ? row : counterpart;
+  const title = `Changed from ${compare.base}-inch revision`;
+  const meshBounds = (entry) => entry?.part.evidence.find(({ field, state }) =>
+    field === "mesh_bounds_mm" && state === "computed")?.value;
+  const before = meshBounds(older);
+  const after = meshBounds(newer);
+  const valid = (bounds) => Array.isArray(bounds) && bounds.length === 6 && bounds.every(Number.isFinite);
+  if (!valid(before) || !valid(after)) return { title, bounds: null };
+  const bounds = ["X", "Y", "Z"].map((axis, i) => {
+    const delta = (after[i + 3] - after[i]) - (before[i + 3] - before[i]);
+    const amount = Math.abs(delta).toFixed(2);
+    const sign = amount === "0.00" ? "" : delta < 0 ? "−" : "+";
+    return `d${axis} ${sign}${amount}`;
+  }).join(" · ");
+  return { title, bounds: `${bounds} mm` };
 }
 
 const SHORT_NAMES = {

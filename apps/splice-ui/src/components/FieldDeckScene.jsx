@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   BASIS_LABELS, DEFAULT_EXPLODE, DIFF_LABELS, FIELDDECK_COMPARE, FIELDDECK_NARROW,
-  classifyPart, evidenceCells, formatEvidenceSource, indexFielddeck, rowsForMode, selectedPartKeys,
+  changeSummary, classifyPart, evidenceCells, formatEvidenceSource, indexFielddeck, rowsForMode, selectedPartKeys,
   countClippedItems, evidenceLabel, ghostDeltaKey, openQuestions, shortPartName, toggleFielddeckSheet,
 } from "./fielddeckLogic.js";
 import { createFielddeckStage, disposeFielddeck, loadFielddeck } from "./fielddeckStage.js";
@@ -37,9 +37,16 @@ function hasNumericValue({ value, state }) {
     || Array.isArray(value) && value.some((item) => typeof item === "number"));
 }
 
-export function EvidenceRows({ evidence }) {
+export function EvidenceRows({ evidence, change }) {
   return (
     <dl className="fd-evidence" aria-label="Evidence">
+      {change && <div className="fd-evidence-row fd-change-summary" data-inspector-item>
+        <dt>{change.title}</dt>
+        {change.bounds && <>
+          <dd className="fd-evidence-state">computed</dd>
+          <dd className="fd-evidence-value" data-numeric="true">Bounds · {change.bounds}</dd>
+        </>}
+      </div>}
       {evidence.map((row, i) => {
         const [field, value, state, source] = evidenceCells(row);
         const label = evidenceLabel(field);
@@ -91,7 +98,7 @@ function QuestionNumber({ number }) {
   return <span className="fd-question-numbers">{number}</span>;
 }
 
-function Inspector({ row, index, questions, open }) {
+function Inspector({ row, index, questions, open, compare }) {
   const scroll = useRef(null);
   const [more, setMore] = useState(0);
   useLayoutEffect(() => {
@@ -147,7 +154,8 @@ function Inspector({ row, index, questions, open }) {
             {link.source && <div data-inspector-item><EvidenceSource source={formatEvidenceSource(link.source)} /></div>}
           </> : <>
             <h3>Evidence</h3>
-            <EvidenceRows evidence={part.evidence.filter(({ field }) => field !== "physical_fit")} />
+            <EvidenceRows change={changeSummary(index, row, compare)}
+              evidence={part.evidence.filter(({ field }) => field !== "physical_fit")} />
           </>}
         </>}
       </div>
@@ -660,7 +668,7 @@ export default function FieldDeckScene({ onExit }) {
               questions={questions} blockersOnly={filtered} counts={view.mode === "compare" ? sidecars[target]?.revision_diff?.counts : null} />
           </div>
         </aside>
-        <Inspector row={selection} index={index} questions={selectionQuestions} open={inspectorOpen} />
+        <Inspector row={selection} index={index} questions={selectionQuestions} open={inspectorOpen} compare={sceneCompare} />
 
         {!modelVisible && <div className="fd-stage-message" role="status">
           {loading ? "Loading Fielddeck models…" : errors.join(" ") || "Fielddeck model unavailable."}
@@ -724,9 +732,12 @@ export default function FieldDeckScene({ onExit }) {
           {LEGEND.map(([label, kinds]) => (
             <div key={label} role="group" aria-label={label}>
               <strong>{label}</strong>
-              {Object.entries(kinds).map(([kind, text]) => (
-                <span key={kind} data-kind={kind}><i className="fd-swatch" aria-hidden="true" />{text}</span>
-              ))}
+              {Object.entries(kinds)
+                .filter(([kind]) => !["donor_cad", "measured"].includes(kind)
+                  || rows.some(({ key, part }) => linked.has(key) && part && classifyPart(part).basis === kind))
+                .map(([kind, text]) => (
+                  <span key={kind} data-kind={kind}><i className="fd-swatch" aria-hidden="true" />{text}</span>
+                ))}
             </div>
           ))}
         </div>
