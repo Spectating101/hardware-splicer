@@ -21,6 +21,7 @@ from typing import Any, Dict, Mapping
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from .file_integrity import sha256_file
 from .machine_project import AuthorityState
 from .project_store import default_project_root, validate_project_id
 
@@ -408,8 +409,7 @@ def _write_content_addressed_blob(
     _assert_no_symlink(target, root)
 
     if target.exists():
-        existing = target.read_bytes()
-        if hashlib.sha256(existing).hexdigest() != digest_hex:
+        if target.stat().st_size != len(content) or sha256_file(target) != digest_hex:
             raise ValueError("existing content-addressed blob failed hash verification")
         return target.relative_to(project_dir).as_posix(), True
 
@@ -424,7 +424,7 @@ def _write_content_addressed_blob(
             handle.write(content)
             handle.flush()
             os.fsync(handle.fileno())
-        if hashlib.sha256(temp_path.read_bytes()).hexdigest() != digest_hex:
+        if sha256_file(temp_path) != digest_hex:
             raise ValueError("temporary engineering source failed hash verification")
         os.replace(temp_path, target)
     finally:

@@ -12,6 +12,7 @@ import shutil
 import tempfile
 from datetime import datetime, timedelta, timezone
 from enum import Enum
+from io import BytesIO
 from pathlib import Path
 from typing import Any, Dict, Mapping
 
@@ -21,6 +22,7 @@ from .engineering_source_ingestion import (
     MAX_ENGINEERING_SOURCE_BYTES,
     MAX_SOURCE_FILENAME_CHARACTERS,
 )
+from .file_integrity import sha256_file
 from .machine_project import AuthorityState
 from .project_store import default_project_root, validate_project_id
 
@@ -367,9 +369,7 @@ def store_source_upload_chunk(
             raise SourceUploadSessionConflict(
                 f"chunk path exists but is not a file: {target}"
             )
-        current = target.read_bytes()
-        current_hash = f"sha256:{hashlib.sha256(current).hexdigest()}"
-        if current_hash != digest or len(current) != len(content):
+        if target.stat().st_size != len(content) or sha256_file(target) != digest[7:]:
             raise SourceUploadSessionConflict(
                 f"chunk {chunk_index} is already stored with different content"
             )
@@ -392,7 +392,7 @@ def store_source_upload_chunk(
             handle.write(content)
             handle.flush()
             os.fsync(handle.fileno())
-        if hashlib.sha256(temp_path.read_bytes()).hexdigest() != digest[7:]:
+        if sha256_file(temp_path) != digest[7:]:
             raise ValueError("temporary upload chunk failed hash verification")
         os.replace(temp_path, target)
     finally:
@@ -435,7 +435,8 @@ def assemble_source_upload_session(
         raise SourceUploadSessionConflict(
             f"upload session is incomplete; missing chunks: {missing}"
         )
-    content = bytearray()
+    content = BytesIO()
+    records = {row.chunk_index: row for row in session.received_chunks}
     for index in range(session.chunk_count):
         target = _chunk_path(
             project_root,
@@ -445,25 +446,25 @@ def assemble_source_upload_session(
         )
         if not target.is_file():
             raise SourceUploadSessionConflict(f"chunk {index} is missing")
-        chunk = target.read_bytes()
-        record = next(
-            row for row in session.received_chunks if row.chunk_index == index
-        )
+        record = records[index]
+        with target.open("rb") as handle:
+            chunk = handle.read(record.size_bytes + 1)
         digest = f"sha256:{hashlib.sha256(chunk).hexdigest()}"
         if len(chunk) != record.size_bytes or digest != record.content_hash:
             raise SourceUploadSessionConflict(
                 f"chunk {index} no longer matches its manifest"
             )
-        content.extend(chunk)
-        if len(content) > session.total_size_bytes:
+        content.write(chunk)
+        if content.tell() > session.total_size_bytes:
             raise SourceUploadSessionConflict(
                 "assembled upload exceeds declared total size"
             )
-    if len(content) != session.total_size_bytes:
+    if content.tell() != session.total_size_bytes:
         raise SourceUploadSessionConflict(
             "assembled upload does not match declared total size"
         )
-    content_hash = f"sha256:{hashlib.sha256(content).hexdigest()}"
+    assembled = content.getvalue()
+    content_hash = f"sha256:{hashlib.sha256(assembled).hexdigest()}"
     if (
         session.expected_content_hash
         and content_hash != session.expected_content_hash
@@ -471,7 +472,7 @@ def assemble_source_upload_session(
         raise SourceUploadSessionConflict(
             "assembled upload does not match expected_content_hash"
         )
-    return session, bytes(content), content_hash
+    return session, assembled, content_hash
 
 
 def finalize_source_upload_session_manifest(

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 from pathlib import Path
 from typing import Any, Dict, Mapping
 
@@ -11,6 +10,7 @@ from fastapi.responses import FileResponse
 
 from .engineering_package import InvalidEngineeringPackage, validate_package_id
 from .engineering_package_api import package_api_error, package_rows
+from .file_integrity import sha256_file
 from .project_store import ProjectNotFound, ProjectStore, validate_project_id
 
 
@@ -40,14 +40,13 @@ def verified_package_zip(
         raise InvalidEngineeringPackage("package download path escapes package root")
     if not zip_path.is_file():
         raise ProjectNotFound(f"Engineering Package ZIP {package_id!r}")
-    payload = zip_path.read_bytes()
     expected_size = int(package.get("zip_size_bytes") or 0)
     expected_sha = str(package.get("zip_sha256") or "")
-    if len(payload) != expected_size:
+    if zip_path.stat().st_size != expected_size:
         raise InvalidEngineeringPackage(
             f"Engineering Package ZIP size mismatch for {package_id}"
         )
-    if hashlib.sha256(payload).hexdigest() != expected_sha:
+    if sha256_file(zip_path) != expected_sha:
         raise InvalidEngineeringPackage(
             f"Engineering Package ZIP hash mismatch for {package_id}"
         )

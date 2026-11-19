@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 from copy import deepcopy
+from io import BytesIO
 from pathlib import Path
 from typing import Any, Dict, Mapping
 
@@ -121,21 +122,21 @@ def _metadata(value: str) -> Dict[str, Any]:
 
 
 async def _read_bounded_upload(upload: UploadFile) -> bytes:
-    content = bytearray()
+    content = BytesIO()
     try:
         while True:
             chunk = await upload.read(UPLOAD_READ_CHUNK_BYTES)
             if not chunk:
                 break
-            content.extend(chunk)
-            if len(content) > MAX_ENGINEERING_SOURCE_BYTES:
+            if content.tell() + len(chunk) > MAX_ENGINEERING_SOURCE_BYTES:
                 raise ValueError(
                     "multipart engineering source exceeds "
                     f"{MAX_ENGINEERING_SOURCE_BYTES} bytes"
                 )
+            content.write(chunk)
     finally:
         await upload.close()
-    return bytes(content)
+    return content.getvalue()
 
 
 def ingest_multipart_source_bytes(
