@@ -635,7 +635,7 @@ function createContactShadow(scene, bounds, resources) {
     target.texture.repeat.x = -1;
     target.texture.offset.x = 1;
     const material = new THREE.MeshBasicMaterial({
-      map: target.texture, transparent: true, depthWrite: false, opacity: i ? 0.5 : 0.7, toneMapped: false,
+      map: target.texture, transparent: true, depthWrite: false, opacity: 0.45, toneMapped: false,
     });
     resources.add(target);
     resources.add(material);
@@ -681,7 +681,7 @@ function createContactShadow(scene, bounds, resources) {
   [target, blurTarget, depth, quadGeometry, horizontal, vertical, groundGeometry, poolMaterial, keyFloorMaterial]
     .forEach((resource) => resources.add(resource));
 
-  return (renderer, floor) => {
+  return (renderer, floor, withAssembled = (render) => render()) => {
     pool.visible = keyFloor.visible = Number.isFinite(floor);
     // Bake and composite at the lowest assembly z so the feet touch their contact shadow.
     ground.forEach((mesh) => {
@@ -694,24 +694,32 @@ function createContactShadow(scene, bounds, resources) {
     capture.position.copy(ground[0].position);
     capture.lookAt(center.x, center.y, floor + 1);
 
-    // Depth from below, then two separable blur passes before compositing the ground.
+    // Depth from below, then two separable blur passes per scale before compositing the ground.
+    // The 1.4/512 footprint scale is baked at explode 0 so it sits under the assembled footprint;
+    // the tight 0.5/512 scale uses the current pose so every foot touches its own dark spot.
     const override = scene.overrideMaterial;
     const shadowUpdates = renderer.shadowMap.autoUpdate;
     renderer.shadowMap.autoUpdate = false;
-    renderer.setRenderTarget(target);
-    renderer.clear();
-    scene.overrideMaterial = depth;
-    renderer.render(scene, capture);
-    scene.overrideMaterial = override;
-    for (const { blur, target } of bakes) {
+    const renderDepth = () => {
+      renderer.setRenderTarget(target);
+      renderer.clear();
+      scene.overrideMaterial = depth;
+      renderer.render(scene, capture);
+      scene.overrideMaterial = override;
+    };
+    const blurInto = ({ blur, target: output }) => {
       horizontal.uniforms.h.value = vertical.uniforms.v.value = blur / size;
       quad.material = horizontal;
       renderer.setRenderTarget(blurTarget);
       renderer.render(blurScene, blurCamera);
       quad.material = vertical;
-      renderer.setRenderTarget(target);
+      renderer.setRenderTarget(output);
       renderer.render(blurScene, blurCamera);
-    }
+    };
+    withAssembled(renderDepth);
+    blurInto(bakes[0]);
+    renderDepth();
+    blurInto(bakes[1]);
     renderer.setRenderTarget(null);
     renderer.shadowMap.autoUpdate = shadowUpdates;
   };
@@ -1728,7 +1736,7 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
     const sample = interacting && sampler?.begin(frameStart);
     try {
       if (bake) {
-        renderContact(renderer, floor);
+        renderContact(renderer, floor, withAssembledPose);
         contactPending = false;
       }
       updateScreenDashes(technical, camera, width, height);
@@ -1750,6 +1758,20 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
     sampler?.end(sample);
   }
 
+  // The body goes back to explode 0 for the footprint bake; the feet stay where they are drawn,
+  // so each foot keeps its own contact spot in both scales.
+  function withAssembledPose(render) {
+    const saved = all.map(({ group }) => group.position.clone());
+    all.forEach(({ group, row }) => { if (!row.part.part_id.startsWith("foot-")) group.position.set(0, 0, 0); });
+    scene.updateMatrixWorld();
+    try {
+      render();
+    } finally {
+      all.forEach(({ group }, i) => group.position.copy(saved[i]));
+      scene.updateMatrixWorld();
+    }
+  }
+
   function renderPlain() {
     renderer.setRenderTarget(null);
     renderer.clear();
@@ -1764,7 +1786,7 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
   function gridLabelPoint() {
     const toCamera = camera.position.clone().sub(center).setZ(0).normalize();
     const right = new THREE.Vector3(-toCamera.y, toCamera.x, 0);
-    return toCamera.add(right).normalize().multiplyScalar(footprint * 0.92).add(center).setZ(grid.position.z);
+    return toCamera.add(right).normalize().multiplyScalar(radius * 0.52).add(center).setZ(grid.position.z);
   }
 
   function animate(now) {

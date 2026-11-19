@@ -430,3 +430,6 @@
   .fd-leaders .fd-bracket-halo { stroke-width: 3; }
 }
 .fd-leaders .fd-pin-ticks { stroke: var(--question); stroke-width: 1; fill: none; }
+@media (width < 640px) {
+  .fd-grid-label { display: none; }
+}
