@@ -735,9 +735,11 @@ describe("Fielddeck evidence UI", () => {
     expect(screen.getByRole("heading", { name: "Fielddeck display swap" })).toBeVisible();
     expect(screen.queryByText("7-inch → 5-inch")).toBeNull();
     expect(screen.getByRole("button", { name: "Face view" })).toHaveClass("fd-face-pill");
-    expect(screen.getByText("Presentation offset · 60%", { selector: ".fd-offset-caption" })).toBeVisible();
+    // The offset readout lives in the More sheet, not as loose text on the canvas.
+    expect(document.querySelector(".fd-offset-caption")).toBeNull();
     fireEvent.click(more);
     expect(screen.getByRole("slider", { name: "Explode" })).toBeVisible();
+    expect(within(document.getElementById("fd-options")).getByText("Presentation offset · 60%")).toBeVisible();
     expect(within(document.getElementById("fd-options")).getByRole("button", { name: "Face view" })).toBeVisible();
     expect(screen.getByRole("button", { name: "Start tour" })).toBeVisible();
     const key = screen.getByRole("button", { name: "Key" });
@@ -751,7 +753,7 @@ describe("Fielddeck evidence UI", () => {
       selectedKeys: ["5:part:pi4-dsi", "5:part:display"],
       cameraCue: { stopIndex: 1 },
     }));
-    expect(screen.getByRole("button", { name: /^Fit unknown\s*5 questions$/ })).toBeVisible();
+    expect(screen.getByRole("button", { name: /^Physical fit unknown\s*5 questions$/ })).toBeVisible();
     const panels = within(screen.getByRole("group", { name: "Scene panels" }));
     const parts = panels.getByRole("button", { name: "Parts" });
     const details = panels.getByRole("button", { name: "Inspector" });
@@ -768,7 +770,9 @@ describe("Fielddeck evidence UI", () => {
     expect(screen.getByTestId("fielddeck-scene").querySelector(".fd-peek"))
       .toHaveTextContent(/DSI FFC.*Physical fit · Unknown.*A.*Pi DSI port.*B.*Touch Display 2.*Pin mapping unknown/);
     const annotations = screen.getByLabelText("Scene callouts");
-    expect(annotations.querySelector("[data-anchor], [data-interface-question]")).toBeNull();
+    expect(annotations.querySelector("[data-anchor]")).toBeNull();
+    // The active interface keeps its own pins on a phone, repelled from the pill.
+    expect(annotations.querySelectorAll("[data-interface-question]").length).toBeGreaterThan(0);
     // Below 640 px an interface selection hides the pins that are not part of it.
     expect(annotations.querySelector('[data-question-number="1"]')).toBeNull();
     expect(screen.getByTestId("fielddeck-scene").querySelector(".fd-peek")).toHaveTextContent("Signal voltage unknown");

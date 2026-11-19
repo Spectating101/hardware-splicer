@@ -438,3 +438,8 @@
 }
 .fd-leaders .fd-ghost-marks { stroke: #f17e70; stroke-opacity: 0.6; stroke-width: 1; fill: none; }
 .fd-leaders .fd-ghost-pairs { stroke: #f17e70; stroke-opacity: 0.7; stroke-width: 0.75; fill: none; }
+.fd-pin-revision {
+  position: absolute; left: 50%; top: calc(100% + 2px); translate: -50% 0;
+  color: var(--question); font: 10px/1 var(--mono); white-space: nowrap;
+  padding: 1px 3px; background: rgb(14 17 22 / 0.85); border-radius: 2px;
+}

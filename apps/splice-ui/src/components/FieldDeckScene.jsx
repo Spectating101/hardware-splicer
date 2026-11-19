@@ -301,11 +301,13 @@ function Annotations({ labels, selection, endpoints, pins, faceView, base, targe
           <span className="fd-endpoint" aria-label={`Endpoint ${letter}`}>{letter}</span>
         </div>
       ))}
-      {pins.map(({ key, anchor, reason, number, dimmed, route }) => (
+      {pins.map(({ key, anchor, reason, number, dimmed, route, revisionTag }) => (
         <div className="fd-pin-position" key={number} data-pin-anchor={anchor} data-dimmed={dimmed}
           data-interface-question={route || undefined}>
           <button className="fd-pin" type="button" data-question-number={number}
             aria-label={`Open question ${number}`} title={questionText(reason)} onClick={() => onSelect(key, number)}><span>{number}</span></button>
+          {/* A question raised on the older revision says so beside its pin. */}
+          {revisionTag && <small className="fd-pin-revision">{revisionTag}</small>}
         </div>
       ))}
       {!faceView && <span className="fd-grid-label" data-grid-label="">Grid 10 mm</span>}
@@ -444,14 +446,15 @@ export default function FieldDeckScene({ onExit }) {
       if (anchors.length) pins.push({ ...question, key: index.byPart.get(`${revision}:${focusPart}`)?.key ?? anchors[0], anchor: anchors[0] });
     }
   } else if (view.blockers) {
-    if (selection?.link && !narrow) {
+    if (selection?.link) {
       for (const question of selectionQuestions) pins.push({ ...question, key: selection.key, route: true, dimmed: false });
     }
     for (const question of questions) {
       const { key } = question;
       // On a phone, an interface selection hides the pins that are not part of it.
       if (narrow && selection?.link) continue;
-      if (linked.has(key) && displayedKeys.has(key)) pins.push({ ...question, anchor: key, dimmed: Boolean(selection?.link) });
+      const revisionTag = view.mode === "compare" && key.startsWith(`${base}:`) ? `${base}-inch rev.` : undefined;
+      if (linked.has(key) && displayedKeys.has(key)) pins.push({ ...question, anchor: key, dimmed: Boolean(selection?.link), revisionTag });
     }
   }
   const comparisonAvailable = comparisonEnabled && sidecars[target]?.revision_diff?.status === "available";
@@ -690,7 +693,7 @@ export default function FieldDeckScene({ onExit }) {
           <button className="fd-validation" type="button" aria-pressed={filtered} aria-controls="fd-tree"
             onClick={toggleBlockers}>
             {narrow ? <>
-              <span>Fit unknown</span>
+              <span>Physical fit unknown</span>
               <span><span className="fd-count">{questions.length}</span> questions</span>
             </> : <>Physical fit unknown · <span className="fd-count">{questions.length}</span> open questions</>}
           </button>
@@ -761,7 +764,6 @@ export default function FieldDeckScene({ onExit }) {
               </div>
             </div>
           )}
-          {narrow && offsetLabel && (modelVisible || playing) && <div className="fd-offset-caption">{offsetLabel}</div>}
         </div>
         {narrow && faceAvailable && <button className="fd-face-pill" type="button" title={focus.label} onClick={toggleFace}>
           {view.faceView ? "Back to 3D" : "Face view"}

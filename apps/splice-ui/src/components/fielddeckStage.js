@@ -1251,13 +1251,24 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
     else path.removeAttribute("d");
   }
 
+  // "Grid 10 mm" is pinned to the bottom-left of the free viewport, 16 px in, clear of the panels.
   const gridLabel = host.querySelector("[data-grid-label]");
   if (gridLabel) {
-    const point = gridPoint && project(gridPoint);
-    const rect = point && { left: point.x - gridLabel.offsetWidth / 2, right: point.x + gridLabel.offsetWidth / 2,
-      top: point.y - gridLabel.offsetHeight / 2, bottom: point.y + gridLabel.offsetHeight / 2 };
-    position(gridLabel, rect && !occupied.some((panel) => rect.left < panel.right && rect.right > panel.left
-      && rect.top < panel.bottom && rect.bottom > panel.top) ? point : null);
+    const w = gridLabel.offsetWidth;
+    const h = gridLabel.offsetHeight;
+    let rect = { left: viewport.left + 16, right: viewport.left + 16 + w, top: viewport.bottom - 16 - h, bottom: viewport.bottom - 16 };
+    for (let i = 0; i < 6; i++) {
+      const blocker = occupied.find((panel) => rect.left < panel.right && rect.right > panel.left
+        && rect.top < panel.bottom && rect.bottom > panel.top);
+      if (!blocker) break;
+      // Step right of a side panel, or above a bottom bar.
+      if (blocker.bottom - blocker.top > 3 * (blocker.right - blocker.left) || blocker.top < rect.top - 200) {
+        rect = { ...rect, left: blocker.right + 16, right: blocker.right + 16 + w };
+      } else {
+        rect = { ...rect, top: blocker.top - 16 - h, bottom: blocker.top - 16 };
+      }
+    }
+    position(gridLabel, gridPoint ? { x: (rect.left + rect.right) / 2, y: (rect.top + rect.bottom) / 2 } : null);
   }
 
   // Old-revision small features: a 6 px centre cross each, and a 0.75 px coral leader to the
@@ -1292,8 +1303,13 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
   const callouts = placeLabels && labels.map((node) => {
     const endpoint = node.dataset.endpointLabel;
     const anchor = endpoint ? endpointPositions.get(endpoint) : centerFor(node.dataset.anchor);
-    // Endpoint labels end on the part's near silhouette too, never across the part to its marker.
-    const hull = anchor ? convexHull(pointsFor(node.dataset.anchor)) : [];
+    // Leaders end on the part's near silhouette. An endpoint label ends on its A/B marker unless
+    // the part is large on screen, where the leader would cross it (the 5-inch display).
+    let hull = anchor ? convexHull(pointsFor(node.dataset.anchor)) : [];
+    if (endpoint && hull.length) {
+      const span = Math.max(...hull.map(({ x }) => x)) - Math.min(...hull.map(({ x }) => x));
+      if (span < 160) hull = [];
+    }
     hulls.set(node, hull);
     // Leaders land on the part's own silhouette: the extreme projected vertex on each side.
     const extreme = (sign) => hull.reduce((best, point) => !best || sign * (point.x - best.x) > 0 ? point : best, null);
@@ -1306,6 +1322,7 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
   const fallback = placements && placements.some((placement) => !placement)
     && placeCallouts(viewport, occupied, callouts.map((callout, i) => placements[i] ? {} : { ...callout, model: null }),
       [...pinRects, ...placements.flatMap((placement) => placement ? [placement.rect] : [])]);
+  const cards = placements ? placements.map((placement, j) => (placement ?? fallback?.[j])?.rect).filter(Boolean) : [];
   for (const [i, node] of labels.entries()) {
     const line = host.querySelector(`[data-leader="${i}"]`);
     node.style.opacity = line.style.opacity = displayOpacity;
@@ -1316,13 +1333,39 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
     const { rect } = placement;
     let { leader } = placement;
     const hull = hulls.get(node);
+    let card = rect;
     if (hull?.length && leader.length === 3) {
       // Re-anchor on the silhouette vertex nearest the label's attachment point.
       const start = leader[0];
       const end = nearestPoint(hull, start);
       leader = [start, { x: end.x, y: start.y }, end];
     }
-    node.style.transform = `translate(${rect.left}px, ${rect.top}px)`;
+    const leaderLength = (path) => path.slice(1).reduce((sum, p, j) => sum + Math.hypot(p.x - path[j].x, p.y - path[j].y), 0);
+    if (leaderLength(leader) > 140 && hull?.length) {
+      // Leaders are capped at 140 px: set the card beside the part's own silhouette instead.
+      const xs = hull.map(({ x }) => x);
+      const ys = hull.map(({ y }) => y);
+      const midY = (Math.min(...ys) + Math.max(...ys)) / 2;
+      const cardHeight = rect.bottom - rect.top;
+      const top = Math.min(Math.max(viewport.top, midY - cardHeight / 2), viewport.bottom - cardHeight);
+      const tries = [Math.max(...xs) + 24, Math.min(...xs) - 24 - (rect.right - rect.left)];
+      const blocked = (r) => r.left < viewport.left || r.right > viewport.right
+        || [...occupied, ...cards.filter((other) => other !== rect)].some((panel) =>
+          r.left < panel.right + 8 && r.right > panel.left - 8 && r.top < panel.bottom + 8 && r.bottom > panel.top - 8);
+      const next = tries.map((left) => ({ left, right: left + rect.right - rect.left, top, bottom: top + rect.bottom - rect.top }))
+        .find((r) => !blocked(r));
+      if (next) {
+        const start = { x: next.left > Math.max(...xs) - 1 ? next.left : next.right, y: (next.top + next.bottom) / 2 };
+        const end = nearestPoint(hull, start);
+        card = next;
+        cards[cards.indexOf(rect)] = next;
+        leader = [start, end];
+      } else {
+        node.style.visibility = line.style.visibility = "hidden";
+        continue;
+      }
+    }
+    node.style.transform = `translate(${card.left}px, ${card.top}px)`;
     line.querySelector("path").setAttribute("d", leader.map(({ x, y }, j) => `${j ? "L" : "M"}${x},${y}`).join(" "));
     const dot = line.querySelector("circle");
     dot.setAttribute("cx", leader.at(-1).x);
@@ -1620,7 +1663,8 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
       top: -frameHeight / 2 + topInset, bottom: frameHeight / 2 - bottomInset,
     };
     const centerY = (rect.top + rect.bottom) / 2;
-    const margin = { x: Math.min(frameWidth / 3, face ? 50 : mobile ? 24 : 32), y: 0 };
+    // Phones frame the assembly at about 70% of the stage width.
+    const margin = { x: Math.min(frameWidth / 3, face ? 50 : mobile ? frameWidth * 0.15 : 32), y: 0 };
     const focalPixels = height / (2 * Math.tan(THREE.MathUtils.degToRad(fov / 2)));
     let shiftX = 0;
     let shiftY = 0;
