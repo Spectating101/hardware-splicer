@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import FieldDeckScene, { EvidenceRows } from "./FieldDeckScene.jsx";
 import {
-  bracketPath, changeSummary, chooseTier, classifyPart, closedEdgeLoops, convexHull, countClippedItems,
+  bracketPath, changeSummary, dimmedColor, chooseTier, classifyPart, closedEdgeLoops, convexHull, countClippedItems,
   cullCoincidentChains, DEFAULT_EXPLODE, diffAccentChains, DIFF_COLORS, dimensionLabel, evidenceCells,
   explodeGroupOffsets, FIELDDECK_NARROW, footprintDelta, formatEvidenceSource, formatEvidenceValue, ghostOutlineLoops,
   indexFielddeck, materialSpec, meshDeltaLabel, meshMeasures, nearestPoint, placeBesideEndpoint, placeCallouts,
@@ -78,8 +78,8 @@ describe("Fielddeck state and mapping", () => {
     expect(materialSpec("vendor_step", "added")).toMatchObject({
       color: 0x93a3ae, roughness: 0.86, metalness: 0, creaseColor: 0x1a1d22, edgeColor: 0x2dd4bf,
     });
-    expect(materialSpec("vendor_step", "unchanged", true)).toMatchObject({ color: 0x737a80, creaseOpacity: 0.0875 });
-    expect(materialSpec("custom", "unchanged", true)).toMatchObject({ color: 0x8e8b85 });
+    expect(materialSpec("vendor_step", "unchanged", true)).toMatchObject({ color: dimmedColor(0x93a3ae), creaseOpacity: 0.25 });
+    expect(materialSpec("custom", "unchanged", true)).toMatchObject({ color: dimmedColor(0xcec3b0) });
     expect(materialSpec("custom", "changed")).toMatchObject({ color: 0xcec3b0, edgeColor: 0xa78bfa });
     expect(materialSpec("donor_cad", "added")).toEqual(materialSpec("vendor_step", "added"));
     expect(materialSpec("measured")).toMatchObject({ color: 0xe4e2dc, creaseOpacity: 1 });
@@ -199,6 +199,11 @@ describe("Fielddeck state and mapping", () => {
     }).flat();
     const positions = [0, 0, 5, 40, 0, 5, 40, 0, 5, 40, 20, 5, 50, 50, 5, 52, 50, 5, ...circle];
     expect(diffAccentChains(positions)).toEqual([[[0, 0, 5], [40, 0, 5], [40, 20, 5]]]);
+  });
+
+  it("dims unchanged parts toward their luminance grey", () => {
+    expect(dimmedColor(0xcec3b0)).toBe(0x7b7977);
+    expect(dimmedColor(0x93a3ae)).toBe(0x626465);
   });
 
   it("frames a tight bracket from projected points and anchors leaders on the hull", () => {

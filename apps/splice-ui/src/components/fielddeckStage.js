@@ -144,20 +144,22 @@ function stylePart(entry, compare, weight, ghost, accent, emphasis) {
   const { solid, baseColor, mutedColor, fill, edge, surface, lines, accents } = entry.style;
   const translucent = outline || ghost;
   const dimming = row.delta === "unchanged" ? compare : 0;
-  const dim = 1 - dimming * 0.75;
   if (fill) fill.opacity = weight * entry.spec.fillOpacity;
   if (solid) {
     solid.color.copy(baseColor).lerp(mutedColor, dimming);
-    solid.opacity = weight;
+    // A settled solid is fully opaque; only a revision cross-fade is ever blended.
     const transparent = weight < 0.999;
+    solid.opacity = transparent ? weight : 1;
     if (solid.transparent !== transparent) {
       solid.transparent = transparent;
       solid.needsUpdate = true;
     }
-    solid.depthWrite = weight > 0.55;
+    solid.depthWrite = !transparent || weight > 0.55;
   }
 
-  edge.base.opacity = weight * dim * (outline ? entry.outlineOpacity ?? 1 : entry.spec.creaseOpacity);
+  // Unchanged parts in Compare take their edges to 25%.
+  const edgeOpacity = outline ? entry.outlineOpacity ?? 1 : entry.spec.creaseOpacity;
+  edge.base.opacity = weight * THREE.MathUtils.lerp(edgeOpacity, Math.min(edgeOpacity, 0.25), dimming);
   if (edge.diff) edge.diff.opacity = weight * accent * emphasis;
 
   for (const mesh of surface) {
