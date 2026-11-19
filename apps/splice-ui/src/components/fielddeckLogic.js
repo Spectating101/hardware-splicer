@@ -406,6 +406,47 @@ export function placeBesideEndpoint(viewport, obstacles, point, width, height, g
   return null;
 }
 
+// Screen-space repulsion for pins: centres at least minDistance apart and each pin (radius px)
+// at least `clearance` px outside every obstacle rectangle. Fixed points push but never move.
+export function repelPins(points, { minDistance = 24, obstacles = [], clearance = 12, radius = 12, iterations = 60 } = {}) {
+  const out = points.map((point) => ({ ...point }));
+  for (let step = 0; step < iterations; step++) {
+    let moved = false;
+    for (let i = 0; i < out.length; i++) {
+      for (let j = i + 1; j < out.length; j++) {
+        const a = out[i];
+        const b = out[j];
+        let dx = b.x - a.x;
+        let dy = b.y - a.y;
+        let distance = Math.hypot(dx, dy);
+        if (distance >= minDistance - 1e-6 || a.fixed && b.fixed) continue;
+        if (!distance) [dx, dy, distance] = [1, 0, 1];
+        const push = (minDistance - distance) / (a.fixed || b.fixed ? 1 : 2);
+        if (!a.fixed) { a.x -= dx / distance * push; a.y -= dy / distance * push; }
+        if (!b.fixed) { b.x += dx / distance * push; b.y += dy / distance * push; }
+        moved = true;
+      }
+    }
+    for (const point of out) {
+      if (point.fixed) continue;
+      for (const rect of obstacles) {
+        const pad = clearance + radius;
+        const left = rect.left - pad;
+        const right = rect.right + pad;
+        const top = rect.top - pad;
+        const bottom = rect.bottom + pad;
+        if (point.x <= left || point.x >= right || point.y <= top || point.y >= bottom) continue;
+        const exits = [[point.x - left, left, point.y], [right - point.x, right, point.y],
+          [point.y - top, point.x, top], [bottom - point.y, point.x, bottom]].sort((m, n) => m[0] - n[0]);
+        [, point.x, point.y] = exits[0];
+        moved = true;
+      }
+    }
+    if (!moved) break;
+  }
+  return out;
+}
+
 export function countClippedItems(items, { top, bottom }) {
   return items.filter((item) => item.top < top || item.bottom > bottom).length;
 }

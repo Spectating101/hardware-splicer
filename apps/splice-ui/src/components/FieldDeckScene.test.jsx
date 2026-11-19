@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import FieldDeckScene, { EvidenceRows } from "./FieldDeckScene.jsx";
 import {
-  bracketPath, changeSummary, cullIsolatedChains, dimmedColor, oldRevisionCaption, totalChainLength, chooseTier, classifyPart, closedEdgeLoops, convexHull, countClippedItems,
+  bracketPath, repelPins, changeSummary, cullIsolatedChains, dimmedColor, oldRevisionCaption, totalChainLength, chooseTier, classifyPart, closedEdgeLoops, convexHull, countClippedItems,
   cullCoincidentChains, DEFAULT_EXPLODE, diffAccentChains, DIFF_COLORS, dimensionLabel, evidenceCells,
   explodeGroupOffsets, FIELDDECK_NARROW, footprintDelta, formatEvidenceSource, formatEvidenceValue, ghostOutlineLoops,
   indexFielddeck, materialSpec, meshDeltaLabel, meshMeasures, nearestPoint, placeBesideEndpoint, placeCallouts,
@@ -229,6 +229,17 @@ describe("Fielddeck state and mapping", () => {
   it("dims unchanged parts toward their luminance grey", () => {
     expect(dimmedColor(0xcec3b0)).toBe(0x7b7977);
     expect(dimmedColor(0x93a3ae)).toBe(0x626465);
+  });
+
+  it("repels pins to 24 px apart and 12 px clear of the pill without moving fixed pins", () => {
+    const pill = { left: 100, right: 200, top: 90, bottom: 110 };
+    const [fixed, a, b] = repelPins([{ x: 50, y: 100, fixed: true }, { x: 52, y: 100 }, { x: 150, y: 100 }],
+      { obstacles: [pill] });
+    expect(fixed).toEqual({ x: 50, y: 100, fixed: true });
+    expect(Math.hypot(a.x - fixed.x, a.y - fixed.y)).toBeGreaterThanOrEqual(24 - 1e-6);
+    const outside = (p) => p.x <= pill.left - 24 || p.x >= pill.right + 24 || p.y <= pill.top - 24 || p.y >= pill.bottom + 24;
+    expect(outside(b)).toBe(true);
+    expect(Math.hypot(a.x - b.x, a.y - b.y)).toBeGreaterThanOrEqual(24 - 1e-6);
   });
 
   it("frames a tight bracket from projected points and anchors leaders on the hull", () => {

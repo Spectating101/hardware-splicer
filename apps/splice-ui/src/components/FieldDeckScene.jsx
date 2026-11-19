@@ -265,6 +265,7 @@ function Annotations({ labels, selection, endpoints, pins, faceView, base, targe
           <g key={key} data-kind={delta} data-leader={i}><path /><circle r="1.5" /></g>
         ))}
         <path className="fd-pin-leaders" data-pin-leaders="" />
+        <path className="fd-pin-ticks" data-pin-ticks="" />
         {faceView && [base, target].map((revision) => (
           <g className="fd-dimensions" data-dimensions={revision} key={revision}
             data-kind={revision === base ? "removed" : "added"}>

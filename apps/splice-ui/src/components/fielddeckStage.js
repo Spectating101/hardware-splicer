@@ -17,9 +17,9 @@ import {
 import { N8AOPostPass } from "n8ao";
 import { fielddeckSceneUrl } from "../api.js";
 import {
-  bracketPath, chooseTier, cullIsolatedChains, totalChainLength, classifyPart, convexHull, cullCoincidentChains, DEFAULT_EXPLODE, diffAccentChains,
+  bracketPath, chooseTier, closedEdgeLoops, cullIsolatedChains, totalChainLength, classifyPart, convexHull, cullCoincidentChains, DEFAULT_EXPLODE, diffAccentChains,
   DIFF_COLORS, dimensionLabel, explodeGroupOffsets, FIELDDECK_NARROW, footprintDelta, ghostDeltaKey,
-  ghostOutlineLoops, materialSpec, meshMeasures, nearestPoint, placeBesideEndpoint, placeCallouts,
+  ghostOutlineLoops, materialSpec, repelPins, meshMeasures, nearestPoint, placeBesideEndpoint, placeCallouts,
   projectedFitScale, QUALITY_SAMPLE_COUNT, rowForNode, weldEdgeChains,
 } from "./fielddeckLogic.js";
 
@@ -1039,7 +1039,7 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
   const markPin = (node, anchor) => {
     const display = footprint && entries.get(node.dataset.pinAnchor)?.displayOverlay;
     const lug = display?.lug && project(display.lug.clone().add(display.object.position));
-    mark(node, anchor ?? lug ?? centerFor(node.dataset.pinAnchor), Boolean(footprint));
+    return mark(node, anchor ?? lug ?? centerFor(node.dataset.pinAnchor), Boolean(footprint));
   };
   host.querySelectorAll("[data-pin-anchor]:not([data-endpoint-pin]):not([data-interface-question])")
     .forEach((node) => markPin(node));
@@ -1057,7 +1057,31 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
       pinRects.push(rect);
     }
   }
-  host.querySelectorAll("[data-interface-question]").forEach((node) => markPin(node, routePoint ?? endpoint));
+  const fixedMarkers = markers.slice();
+  const interfacePins = [...host.querySelectorAll("[data-interface-question]")]
+    .map((node) => ({ node, point: markPin(node, routePoint ?? endpoint) })).filter(({ point }) => point);
+  const ticks = [];
+  if (interfacePins.length) {
+    // Repel in screen space: 24 px between pin centres, 12 px clear of the pill, then a 1 px amber
+    // tick from each pin back to the pill it belongs to.
+    const pill = routePoint && rectFor(routeLabel);
+    const settled = repelPins([...fixedMarkers.map((point) => ({ ...point, fixed: true })),
+      ...interfacePins.map(({ point }) => point)], { minDistance: 24, obstacles: pill ? [pill] : [], clearance: 12 })
+      .slice(fixedMarkers.length);
+    interfacePins.forEach(({ node }, i) => {
+      const point = settled[i];
+      position(node, point);
+      const target = pill ? { x: Math.min(pill.right, Math.max(pill.left, point.x)), y: Math.min(pill.bottom, Math.max(pill.top, point.y)) }
+        : routePoint ?? endpoint;
+      const length = Math.hypot(target.x - point.x, target.y - point.y);
+      if (length > 13) {
+        const ux = (target.x - point.x) / length;
+        const uy = (target.y - point.y) / length;
+        ticks.push(`M${point.x + ux * 12},${point.y + uy * 12}L${target.x},${target.y}`);
+      }
+    });
+  }
+  host.querySelector("[data-pin-ticks]")?.setAttribute("d", ticks.join(" "));
   host.querySelector("[data-pin-leaders]").setAttribute("d", pinLeaders.join(" "));
 
   if (footprint) {
