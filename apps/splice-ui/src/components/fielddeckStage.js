@@ -1469,7 +1469,7 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
     // tick from each pin back to the pill it belongs to.
     const pill = routePoint && rectFor(routeLabel);
     const settled = repelPins([...fixedMarkers.map((point) => ({ ...point, fixed: true })),
-      ...interfacePins.map(({ point }) => point)], { minDistance: 24, obstacles: pill ? [pill] : [], clearance: 12 })
+      ...interfacePins.map(({ point }) => point)], { minDistance: 28, obstacles: pill ? [pill] : [], clearance: window.matchMedia(FIELDDECK_NARROW).matches ? 26 : 18 })
       .slice(fixedMarkers.length);
     interfacePins.forEach(({ node }, i) => {
       const point = settled[i];
@@ -1618,8 +1618,8 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
       leader = [start, { x: end.x, y: start.y }, end];
     }
     const leaderLength = (path) => path.slice(1).reduce((sum, p, j) => sum + Math.hypot(p.x - path[j].x, p.y - path[j].y), 0);
-    if (leaderLength(leader) > 140 && hull?.length) {
-      // Leaders are capped at 140 px: set the card beside the part's own silhouette instead.
+    if (leaderLength(leader) > 120 && hull?.length) {
+      // Leaders are capped at 120 px: set the card beside the part's own silhouette instead.
       const xs = hull.map(({ x }) => x);
       const ys = hull.map(({ y }) => y);
       const midY = (Math.min(...ys) + Math.max(...ys)) / 2;
@@ -1949,7 +1949,8 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
     };
     const centerY = (rect.top + rect.bottom) / 2;
     // Phones frame the assembly at about 70% of the stage width.
-    const margin = { x: Math.min(frameWidth / 3, face ? (mobile ? 50 : 76) : mobile ? frameWidth * 0.15 : 32), y: 0 };
+    // Phones fit the assembly to 85% of the stage width.
+    const margin = { x: Math.min(frameWidth / 3, face ? (mobile ? 50 : 76) : mobile ? frameWidth * 0.075 : 32), y: 0 };
     const focalPixels = height / (2 * Math.tan(THREE.MathUtils.degToRad(fov / 2)));
     let shiftX = 0;
     let shiftY = 0;
