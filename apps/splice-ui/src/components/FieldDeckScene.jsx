@@ -44,7 +44,7 @@ export function EvidenceRows({ evidence, change }) {
         <dt>{change.title}</dt>
         {change.bounds && <>
           <dd className="fd-evidence-state">computed</dd>
-          <dd className="fd-evidence-value" data-numeric="true">Bounds · {change.bounds}</dd>
+          <dd className="fd-evidence-value" data-numeric="true">{change.bounds}</dd>
         </>}
       </div>}
       {evidence.map((row, i) => {

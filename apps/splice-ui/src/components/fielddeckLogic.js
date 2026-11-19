@@ -197,6 +197,178 @@ export function cullCoincidentChains(chains, positions, { tolerance = 0.15, simp
   return remaining;
 }
 
+const chainLength = (points) => points.slice(1).reduce((sum, point, i) => sum + length(difference(point, points[i])), 0);
+
+// Group edge segments into connected components and return the ones that close into a simple loop.
+export function closedEdgeLoops(positions, weld = 0.001) {
+  const vertices = new Map();
+  const vertexFor = (i) => {
+    const key = [0, 1, 2].map((axis) => Math.round(positions[i + axis] / weld)).join(",");
+    if (!vertices.has(key)) {
+      vertices.set(key, { point: [positions[i], positions[i + 1], positions[i + 2]], neighbors: new Set() });
+    }
+    return vertices.get(key);
+  };
+  for (let i = 0; i < positions.length; i += 6) {
+    const a = vertexFor(i);
+    const b = vertexFor(i + 3);
+    if (a === b) continue;
+    a.neighbors.add(b);
+    b.neighbors.add(a);
+  }
+  const loops = [];
+  const seen = new Set();
+  for (const start of vertices.values()) {
+    if (seen.has(start)) continue;
+    const component = [start];
+    seen.add(start);
+    for (let i = 0; i < component.length; i++) {
+      for (const neighbor of component[i].neighbors) {
+        if (!seen.has(neighbor)) {
+          seen.add(neighbor);
+          component.push(neighbor);
+        }
+      }
+    }
+    if (component.length < 3 || component.some(({ neighbors }) => neighbors.size !== 2)) continue;
+    const points = [start.point];
+    let previous = start;
+    let current = [...start.neighbors][0];
+    while (current !== start) {
+      points.push(current.point);
+      const next = [...current.neighbors].find((neighbor) => neighbor !== previous);
+      previous = current;
+      current = next;
+    }
+    points.push(start.point);
+    const min = [0, 1, 2].map((axis) => Math.min(...points.map((point) => point[axis])));
+    const max = [0, 1, 2].map((axis) => Math.max(...points.map((point) => point[axis])));
+    loops.push({ points, perimeter: chainLength(points), min, max });
+  }
+  return loops;
+}
+
+// A removed or unknown part reads from its outer loop and at most one inner loop (bezel or
+// mounting ear). Islands shorter than minPerimeter and a stacked copy of the outer loop are culled.
+export function ghostOutlineLoops(positions, { minPerimeter = 15, maxChains = 2, stacked = false } = {}) {
+  const area = ({ min, max }) => (max[0] - min[0]) * (max[1] - min[1]);
+  const loops = closedEdgeLoops(positions).filter(({ perimeter }) => perimeter >= minPerimeter)
+    .sort((a, b) => area(b) - area(a) || b.max[2] - a.max[2]);
+  const [outer] = loops;
+  if (!outer) return [];
+  const within = (loop) => [0, 1].every((axis) =>
+    loop.min[axis] >= outer.min[axis] - 0.5 && loop.max[axis] <= outer.max[axis] + 0.5);
+  const copy = (loop) => [0, 1].every((axis) =>
+    Math.abs(loop.min[axis] - outer.min[axis]) < 1 && Math.abs(loop.max[axis] - outer.max[axis]) < 1);
+  const inner = loops.slice(1).filter((loop) => within(loop) && copy(loop) === stacked);
+  return [outer, ...inner].slice(0, maxChains).map(({ points }) => points);
+}
+
+const isSmallCircle = (points, maxRadius) => {
+  if (points.length < 7 || length(difference(points[0], points.at(-1))) > 1e-6) return false;
+  const center = [0, 1, 2].map((axis) => points.slice(1).reduce((sum, point) => sum + point[axis], 0) / (points.length - 1));
+  const radii = points.map((point) => length(difference(point, center)));
+  const radius = radii.reduce((sum, value) => sum + value, 0) / radii.length;
+  return radius < maxRadius && radii.every((value) => Math.abs(value - radius) <= radius * 0.15);
+};
+
+// Change colour belongs on sharp creases that carry form: chains longer than minLength after a
+// 1e-4 mm weld. Hole and boss rims (small closed circles) stay in ink with the other creases.
+export function diffAccentChains(positions, { minLength = 3, rimRadius = 6 } = {}) {
+  return weldEdgeChains(positions, 0.0001)
+    .filter((points) => chainLength(points) > minLength && !isSmallCircle(points, rimRadius));
+}
+
+// Signed tetrahedron sum (mm³) and triangle area (mm²) of an indexed or flat triangle list.
+export function meshMeasures(positions, index = null) {
+  let volume = 0;
+  let area = 0;
+  const count = index ? index.length : positions.length / 3;
+  const at = (i, axis) => positions[(index ? index[i] : i) * 3 + axis];
+  for (let i = 0; i + 2 < count; i += 3) {
+    const [ax, ay, az] = [0, 1, 2].map((axis) => at(i, axis));
+    const [bx, by, bz] = [0, 1, 2].map((axis) => at(i + 1, axis));
+    const [cx, cy, cz] = [0, 1, 2].map((axis) => at(i + 2, axis));
+    volume += (ax * (by * cz - bz * cy) - ay * (bx * cz - bz * cx) + az * (bx * cy - by * cx)) / 6;
+    const ux = bx - ax, uy = by - ay, uz = bz - az;
+    const vx = cx - ax, vy = cy - ay, vz = cz - az;
+    area += Math.hypot(uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx) / 2;
+  }
+  return { volume, area };
+}
+
+function signedAmount(delta, digits) {
+  const amount = Math.abs(delta).toFixed(digits);
+  return `${Number(amount) === 0 ? "" : delta < 0 ? "−" : "+"}${amount}`;
+}
+
+export function meshDeltaLabel(before, after) {
+  const valid = (stats) => stats && Number.isFinite(stats.volume) && Number.isFinite(stats.area);
+  if (!valid(before) || !valid(after)) return null;
+  return `ΔV ${signedAmount((after.volume - before.volume) / 1000, 2)} cm³ · ΔA ${signedAmount((after.area - before.area) / 100, 2)} cm²`;
+}
+
+// Screen-space helpers for annotations. Points are { x, y } in stage pixels.
+export function convexHull(points) {
+  const sorted = points.slice().sort((a, b) => a.x - b.x || a.y - b.y);
+  if (sorted.length < 3) return sorted;
+  const cross = (o, a, b) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+  const lower = [];
+  for (const point of sorted) {
+    while (lower.length >= 2 && cross(lower.at(-2), lower.at(-1), point) <= 0) lower.pop();
+    lower.push(point);
+  }
+  const upper = [];
+  for (const point of sorted.reverse()) {
+    while (upper.length >= 2 && cross(upper.at(-2), upper.at(-1), point) <= 0) upper.pop();
+    upper.push(point);
+  }
+  return lower.slice(0, -1).concat(upper.slice(0, -1));
+}
+
+export function nearestPoint(points, target) {
+  let best = null;
+  let distance = Infinity;
+  for (const point of points) {
+    const next = Math.hypot(point.x - target.x, point.y - target.y);
+    if (next < distance) {
+      distance = next;
+      best = point;
+    }
+  }
+  return best;
+}
+
+// Corner brackets around a tight screen box: arms of `arm` px, pushed `offset` px outward.
+export function bracketPath(points, { arm = 10, offset = 8 } = {}) {
+  if (!points.length) return "";
+  const left = Math.min(...points.map(({ x }) => x)) - offset;
+  const right = Math.max(...points.map(({ x }) => x)) + offset;
+  const top = Math.min(...points.map(({ y }) => y)) - offset;
+  const bottom = Math.max(...points.map(({ y }) => y)) + offset;
+  return [[left, top, 1, 1], [right, top, -1, 1], [right, bottom, -1, -1], [left, bottom, 1, -1]]
+    .map(([x, y, dx, dy]) => `M${x + arm * dx},${y}H${x}v${arm * dy}`).join(" ");
+}
+
+// The Routing unknown pill sits beside endpoint B with no connecting line.
+export function placeBesideEndpoint(viewport, obstacles, point, width, height, gap = 16) {
+  const candidates = [
+    [point.x + gap, point.y - height / 2], [point.x - gap - width, point.y - height / 2],
+    [point.x - width / 2, point.y - gap - height], [point.x - width / 2, point.y + gap],
+  ];
+  for (const radius of [0, 24, 48]) {
+    for (const [left, top] of candidates) {
+      const dx = Math.sign(left + width / 2 - point.x) * radius;
+      const dy = Math.sign(top + height / 2 - point.y) * radius;
+      const rect = { left: left + dx, top: top + dy, right: left + dx + width, bottom: top + dy + height };
+      if (rect.left < viewport.left || rect.right > viewport.right || rect.top < viewport.top
+        || rect.bottom > viewport.bottom || obstacles.some((obstacle) => overlaps(rect, obstacle))) continue;
+      return { x: rect.left + width / 2, y: rect.top + height / 2 };
+    }
+  }
+  return null;
+}
+
 export function countClippedItems(items, { top, bottom }) {
   return items.filter((item) => item.top < top || item.bottom > bottom).length;
 }
@@ -561,25 +733,27 @@ export function ghostDeltaKey(index, mode, row, compare = FIELDDECK_COMPARE) {
     ?? index.byNode.get(revision)?.get(node_name)?.[occurrence])?.key ?? null;
 }
 
-export function changeSummary(index, row, compare) {
+// Only deterministic deltas: outer bounds from the sidecars and, when the stage has loaded both
+// GLB meshes, their volume and surface area. Never a claim that features or holes moved.
+export function changeSummary(index, row, compare, meshStats = null) {
   if (!compare || row?.delta !== "changed") return null;
   const counterpart = index.byKey.get(ghostDeltaKey(index, "compare", row, compare));
   const older = row.revision === compare.base ? row : counterpart;
   const newer = row.revision === compare.target ? row : counterpart;
   const title = `Changed from ${compare.base}-inch revision`;
+  const mesh = meshDeltaLabel(meshStats?.get(older?.key), meshStats?.get(newer?.key));
   const meshBounds = (entry) => entry?.part.evidence.find(({ field, state }) =>
     field === "mesh_bounds_mm" && state === "computed")?.value;
   const before = meshBounds(older);
   const after = meshBounds(newer);
   const valid = (bounds) => Array.isArray(bounds) && bounds.length === 6 && bounds.every(Number.isFinite);
-  if (!valid(before) || !valid(after)) return { title, bounds: null };
-  const bounds = ["X", "Y", "Z"].map((axis, i) => {
-    const delta = (after[i + 3] - after[i]) - (before[i + 3] - before[i]);
-    const amount = Math.abs(delta).toFixed(2);
-    const sign = amount === "0.00" ? "" : delta < 0 ? "−" : "+";
-    return `d${axis} ${sign}${amount}`;
-  }).join(" · ");
-  return { title, bounds: `${bounds} mm` };
+  if (!valid(before) || !valid(after)) return { title, bounds: null, mesh };
+  const deltas = [0, 1, 2].map((i) => (after[i + 3] - after[i]) - (before[i + 3] - before[i]));
+  if (deltas.every((delta) => Math.abs(delta) < 0.01)) {
+    return { title, bounds: "Outer bounds unchanged · mesh differs", mesh };
+  }
+  const bounds = ["X", "Y", "Z"].map((axis, i) => `d${axis} ${signedAmount(deltas[i], 2)}`).join(" · ");
+  return { title, bounds: `Bounds · ${bounds} mm`, mesh };
 }
 
 const SHORT_NAMES = {

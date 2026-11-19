@@ -2,10 +2,12 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import FieldDeckScene, { EvidenceRows } from "./FieldDeckScene.jsx";
 import {
-  changeSummary, chooseTier, classifyPart, countClippedItems, cullCoincidentChains, DEFAULT_EXPLODE, DIFF_COLORS,
-  dimensionLabel, evidenceCells, explodeGroupOffsets, FIELDDECK_NARROW, footprintDelta,
-  formatEvidenceSource, formatEvidenceValue, indexFielddeck, materialSpec, placeCallouts, placeRoutingLabel, projectedFitScale,
-  rowForNode, rowsForMode, selectedPartKeys, simplifyEdgeChain, toggleFielddeckSheet, weldEdgeChains,
+  bracketPath, changeSummary, chooseTier, classifyPart, closedEdgeLoops, convexHull, countClippedItems,
+  cullCoincidentChains, DEFAULT_EXPLODE, diffAccentChains, DIFF_COLORS, dimensionLabel, evidenceCells,
+  explodeGroupOffsets, FIELDDECK_NARROW, footprintDelta, formatEvidenceSource, formatEvidenceValue, ghostOutlineLoops,
+  indexFielddeck, materialSpec, meshDeltaLabel, meshMeasures, nearestPoint, placeBesideEndpoint, placeCallouts,
+  placeRoutingLabel, projectedFitScale, rowForNode, rowsForMode, selectedPartKeys, simplifyEdgeChain,
+  toggleFielddeckSheet, weldEdgeChains,
 } from "./fielddeckLogic.js";
 
 const stageMock = vi.hoisted(() => ({ load: vi.fn(), create: vi.fn() }));
@@ -133,11 +135,88 @@ describe("Fielddeck state and mapping", () => {
   it("reports only sidecar mesh evidence in a changed part's summary", () => {
     const compare = { base: "7", target: "5" };
     expect(changeSummary(index, index.byKey.get("5:part:tray"), compare)).toEqual({
-      title: "Changed from 7-inch revision", bounds: "dX −2.00 · dY 0.00 · dZ +1.00 mm",
+      title: "Changed from 7-inch revision", bounds: "Bounds · dX −2.00 · dY 0.00 · dZ +1.00 mm", mesh: null,
     });
     expect(changeSummary(index, index.byKey.get("5:part:display"), compare)).toBeNull();
     expect(changeSummary(indexFielddeck({ "5": sides["5"] }), index.byKey.get("5:part:tray"), compare))
-      .toEqual({ title: "Changed from 7-inch revision", bounds: null });
+      .toEqual({ title: "Changed from 7-inch revision", bounds: null, mesh: null });
+  });
+
+  it("says outer bounds are unchanged and adds computed mesh deltas from both revisions", () => {
+    const compare = { base: "7", target: "5" };
+    const same = structuredClone(sides);
+    same["5"].parts.find(({ part_id }) => part_id === "tray").evidence = [meshBounds([0, 0, 0, 40, 30, 5.004])];
+    const sameIndex = indexFielddeck(same);
+    const stats = new Map([
+      ["7:part:tray", { volume: 12000, area: 3000 }], ["5:part:tray", { volume: 10750, area: 3012.5 }],
+    ]);
+    expect(changeSummary(sameIndex, sameIndex.byKey.get("5:part:tray"), compare, stats)).toEqual({
+      title: "Changed from 7-inch revision", bounds: "Outer bounds unchanged · mesh differs",
+      mesh: "ΔV −1.25 cm³ · ΔA +0.13 cm²",
+    });
+    expect(meshDeltaLabel({ volume: 5, area: 5 }, { volume: 5.001, area: 5 })).toBe("ΔV 0.00 cm³ · ΔA 0.00 cm²");
+    expect(meshDeltaLabel(undefined, { volume: 1, area: 1 })).toBeNull();
+  });
+
+  it("measures a closed mesh by signed tetrahedra and triangle area", () => {
+    // A 10 mm cube, outward-wound, indexed.
+    const positions = [0, 0, 0, 10, 0, 0, 10, 10, 0, 0, 10, 0, 0, 0, 10, 10, 0, 10, 10, 10, 10, 0, 10, 10];
+    const index = [0, 2, 1, 0, 3, 2, 4, 5, 6, 4, 6, 7, 0, 1, 5, 0, 5, 4, 1, 2, 6, 1, 6, 5, 2, 3, 7, 2, 7, 6, 3, 0, 4, 3, 4, 7];
+    const { volume, area } = meshMeasures(positions, index);
+    expect(volume).toBeCloseTo(1000);
+    expect(area).toBeCloseTo(600);
+    const flat = index.flatMap((i) => positions.slice(i * 3, i * 3 + 3));
+    expect(meshMeasures(flat).volume).toBeCloseTo(1000);
+  });
+
+  it("reduces a removed part's ghost to its outer loop and one inner loop", () => {
+    const rect = (x0, y0, x1, y1, z) => [
+      x0, y0, z, x1, y0, z, x1, y0, z, x1, y1, z, x1, y1, z, x0, y1, z, x0, y1, z, x0, y0, z,
+    ];
+    const positions = [
+      ...rect(0, 0, 100, 60, 5), ...rect(0, 0, 100, 60, 4), // glass top and its stacked copy
+      ...rect(5, 5, 95, 55, 2), // bezel or PCB loop
+      ...rect(10, 10, 20, 20, 1), // a smaller inner loop beyond the cap
+      ...rect(30, 30, 32, 32, 1), // 8 mm island
+      0, 0, 0, 50, 0, 0, // an open tab edge
+    ];
+    expect(closedEdgeLoops(positions)).toHaveLength(5);
+    const loops = ghostOutlineLoops(positions);
+    expect(loops).toHaveLength(2);
+    expect(loops[0]).toHaveLength(5);
+    expect(loops[0].every(([, , z]) => z === 5)).toBe(true);
+    expect(loops[1].every(([, , z]) => z === 2)).toBe(true);
+    expect(ghostOutlineLoops(positions, { stacked: true }).map((loop) => loop[0][2])).toEqual([5, 4]);
+    expect(ghostOutlineLoops(positions, { maxChains: 1 })).toHaveLength(1);
+    expect(ghostOutlineLoops([0, 0, 0, 1, 0, 0])).toEqual([]);
+  });
+
+  it("keeps change colour on long sharp creases and leaves hole rims and short chains in ink", () => {
+    const circle = Array.from({ length: 16 }, (_, i) => {
+      const a = (i / 16) * Math.PI * 2;
+      const b = ((i + 1) / 16) * Math.PI * 2;
+      return [2 * Math.cos(a), 2 * Math.sin(a), 0, 2 * Math.cos(b), 2 * Math.sin(b), 0];
+    }).flat();
+    const positions = [0, 0, 5, 40, 0, 5, 40, 0, 5, 40, 20, 5, 50, 50, 5, 52, 50, 5, ...circle];
+    expect(diffAccentChains(positions)).toEqual([[[0, 0, 5], [40, 0, 5], [40, 20, 5]]]);
+  });
+
+  it("frames a tight bracket from projected points and anchors leaders on the hull", () => {
+    const points = [{ x: 10, y: 20 }, { x: 50, y: 25 }, { x: 30, y: 60 }, { x: 30, y: 30 }];
+    expect(bracketPath(points)).toBe("M12,12H2v10 M48,12H58v10 M48,68H58v-10 M12,68H2v-10");
+    expect(bracketPath([])).toBe("");
+    const hull = convexHull(points);
+    expect(hull).toHaveLength(3);
+    expect(hull).not.toContainEqual({ x: 30, y: 30 });
+    expect(nearestPoint(hull, { x: 0, y: 0 })).toEqual({ x: 10, y: 20 });
+  });
+
+  it("puts Routing unknown beside endpoint B without overlapping pins or panels", () => {
+    const viewport = { left: 0, right: 400, top: 0, bottom: 300 };
+    expect(placeBesideEndpoint(viewport, [], { x: 100, y: 100 }, 80, 20)).toEqual({ x: 156, y: 100 });
+    const right = { left: 110, right: 200, top: 80, bottom: 120 };
+    expect(placeBesideEndpoint(viewport, [right], { x: 100, y: 100 }, 80, 20)).toEqual({ x: 44, y: 100 });
+    expect(placeBesideEndpoint({ left: 0, right: 60, top: 0, bottom: 40 }, [], { x: 30, y: 20 }, 80, 20)).toBeNull();
   });
 
   it("counts clipped rows, including a row that is only partly visible", () => {
