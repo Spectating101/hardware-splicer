@@ -1,0 +1,30 @@
+** Drc report for design.kicad_pcb **
+** Created on 2026-11-20T02:52:48+0800 **
+
+** Found 4 DRC violations **
+[shorting_items]: Items shorting two nets (nets /HOST_MISO and /DUT_MISO)
+    Local override; error
+    @(160.0000 mm, 98.0000 mm): Pad 1 [/HOST_MISO] of TP12 on F.Cu
+    @(157.4277 mm, 98.0000 mm): Track [/DUT_MISO] on F.Cu, length 2.5723 mm
+[shorting_items]: Items shorting two nets (nets /HOST_MISO and /DUT_MISO)
+    Local override; error
+    @(160.0000 mm, 98.0000 mm): Pad 1 [/HOST_MISO] of TP12 on F.Cu
+    @(160.0000 mm, 93.3078 mm): Track [/DUT_MISO] on F.Cu, length 4.6922 mm
+[solder_mask_bridge]: Front solder mask aperture bridges items with different nets
+    Rule: board setup solder mask min width; error
+    @(157.4277 mm, 98.0000 mm): Track [/DUT_MISO] on F.Cu, length 2.5723 mm
+    @(160.0000 mm, 98.0000 mm): Pad 1 [/HOST_MISO] of TP12 on F.Cu
+[solder_mask_bridge]: Front solder mask aperture bridges items with different nets
+    Rule: board setup solder mask min width; error
+    @(160.0000 mm, 93.3078 mm): Track [/DUT_MISO] on F.Cu, length 4.6922 mm
+    @(160.0000 mm, 98.0000 mm): Pad 1 [/HOST_MISO] of TP12 on F.Cu
+
+** Found 1 unconnected pads **
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(160.0000 mm, 98.0000 mm): Pad 1 [/HOST_MISO] of TP12 on F.Cu
+    @(140.4267 mm, 88.6500 mm): Track [/HOST_MISO] on F.Cu, length 1.7108 mm
+
+** Found 0 Footprint errors **
+
+** End of Report **

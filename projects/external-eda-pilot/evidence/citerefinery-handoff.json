@@ -1,0 +1,56 @@
+{
+  "schema": "cite_refinery.external_tool_benchmark_candidate.v1",
+  "authority": "REVIEW_REQUIRED_NOT_IMPORTED",
+  "source_board": "hardware/reference_designs/spi_flash_adapter_v1/spi_flash_adapter_v1.kicad_pcb",
+  "source_board_sha256": "86c0e72840b058b5dc4b56a820e560b306b2f624724a818e092fd1d003fdefbd",
+  "tool_records": [
+    {
+      "source_repo": "https://github.com/AvatarSD/KiSkill",
+      "commit": "b27ce9e0f7bee10ef6dd606baabcbaf0c3c1eecc",
+      "license": "MIT",
+      "tested_operation": [
+        "check:.kicad_pcb"
+      ],
+      "observation": "SINGLE_SOURCE_TRIAL_NOT_GENERAL_CAPABILITY"
+    },
+    {
+      "source_repo": "https://github.com/tipoLi5890/akcli",
+      "commit": "2126c328402fa77f8f6bf2114f052595f86f14aa",
+      "license": "MIT",
+      "tested_operation": [
+        "verify:schematic-pcb"
+      ],
+      "observation": "SINGLE_SOURCE_TRIAL_NOT_GENERAL_CAPABILITY"
+    }
+  ],
+  "method": "Native source snapshot with independently executed KiSkill, akcli, KiCad 9 checks; STEP re-open by CadQuery; 5 source variants",
+  "case_acceptance": {
+    "baseline": true,
+    "passing_relocation": true,
+    "moved_no_reroute": false,
+    "moved_with_track": false,
+    "wrong_net": false
+  },
+  "evidence_artifact": "projects/external-eda-pilot/evidence/pilot-summary.json",
+  "cad_evidence_artifact": "projects/external-eda-pilot/evidence/geometry-audit.json",
+  "observations": [
+    {
+      "relation": "akcli_detects_wrong_net_in_this_case",
+      "status": "OBSERVED"
+    },
+    {
+      "relation": "native_kicad_detects_spatial_invalidity_while_akcli_equivalence_remains_true",
+      "status": "OBSERVED"
+    },
+    {
+      "relation": "positive_relocation_propagated_to_single_probe_bore",
+      "status": "OBSERVED_DIGITAL_ONLY"
+    },
+    {
+      "relation": "tool_outperforms_existing_HS",
+      "status": "NOT_EVALUATED"
+    }
+  ],
+  "physical_validation": false,
+  "adoption_decision": "BENCHMARK_MORE_BEFORE_PRODUCTION"
+}

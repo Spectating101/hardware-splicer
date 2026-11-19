@@ -1,0 +1,74 @@
+{
+  "schema": "hs.external_eda_verification.v1",
+  "source_sha256": {
+    "schematic": "6f322855430c53bcac5b65b23ec2a271ae45203f894b9775339eb9ae04b5faf3",
+    "board": "1a8ed4c761e2ed639948c8236af59bf8966523b169cf31ea3b6a30fbfe60804d"
+  },
+  "upstream": {
+    "kiskill": {
+      "commit": "b27ce9e0f7bee10ef6dd606baabcbaf0c3c1eecc",
+      "license": "MIT",
+      "license_sha256": "f1cd658ae5ba5a1464e1251d9a92e4deba3d44ec601366376f128113e5423a6e"
+    },
+    "akcli": {
+      "commit": "2126c328402fa77f8f6bf2114f052595f86f14aa",
+      "license": "MIT",
+      "license_sha256": "b6f7bf9daa23d3960aeb7411e461e9b288829f6ecb8b826e695f0595843c0eb1"
+    }
+  },
+  "commands": {
+    "kiskill": {
+      "exit_code": 0,
+      "duration_ms": 130,
+      "stdout_sha256": "35b92c1310441a84bf64479944b12bd4529fe4b01200d778d48af2c285d5459a",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "akcli": {
+      "exit_code": 0,
+      "duration_ms": 219,
+      "stdout_sha256": "a3e91bd5d8b6c2c5d5fe4cf7d32a3dbc03e81d3d84fec4c2c12688c5220f17d7",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "native_kicad": {
+      "exit_code": 0,
+      "duration_ms": 1279,
+      "stdout_sha256": "1d916f110887b83f73dc4a7e9764761e2c1f2761449723cc6bc3e9f26a0edbf2",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "native_drc_counts": {
+    "violations": 5,
+    "unconnected_pads": 0,
+    "footprint_errors": 0
+  },
+  "akcli_findings": [
+    {
+      "code": "SCHPCB_EXTRA_ON_PCB",
+      "severity": "warning"
+    },
+    {
+      "code": "SCHPCB_EXTRA_ON_PCB",
+      "severity": "warning"
+    },
+    {
+      "code": "SCHPCB_EXTRA_ON_PCB",
+      "severity": "warning"
+    },
+    {
+      "code": "SCHPCB_EXTRA_ON_PCB",
+      "severity": "warning"
+    }
+  ],
+  "checks": {
+    "kiskill_roundtrip": true,
+    "akcli_schematic_pcb_equivalent": true,
+    "native_kicad_drc_clean": false,
+    "digital_review_pass": false,
+    "physical_test_performed": false
+  },
+  "limits": [
+    "External tools are read-only on copied inputs, not OS-sandboxed",
+    "No manufacturer, physical contact, or powered-device validation",
+    "Equivalence and DRC do not establish electrical design intent"
+  ]
+}

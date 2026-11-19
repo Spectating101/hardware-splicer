@@ -1,0 +1,113 @@
+{
+  "schema": "hs.external_eda_pilot.v1",
+  "source_sha256": "86c0e72840b058b5dc4b56a820e560b306b2f624724a818e092fd1d003fdefbd",
+  "upstream_pins": {
+    "schema": "hs.external_engine_lock.v1",
+    "kiskill": {
+      "repository": "https://github.com/AvatarSD/KiSkill",
+      "commit": "b27ce9e0f7bee10ef6dd606baabcbaf0c3c1eecc",
+      "license": "MIT",
+      "operations": [
+        "check:.kicad_pcb"
+      ]
+    },
+    "akcli": {
+      "repository": "https://github.com/tipoLi5890/akcli",
+      "commit": "2126c328402fa77f8f6bf2114f052595f86f14aa",
+      "license": "MIT",
+      "operations": [
+        "verify:schematic-pcb"
+      ]
+    },
+    "native": {
+      "tool": "KiCad CLI",
+      "observed_version": "9.0.2",
+      "operation": "pcb drc"
+    }
+  },
+  "cases": {
+    "baseline": {
+      "expected_acceptance": true,
+      "actual_acceptance": true,
+      "sha256": "86c0e72840b058b5dc4b56a820e560b306b2f624724a818e092fd1d003fdefbd",
+      "drc": {
+        "violations": 0,
+        "unconnected_pads": 0,
+        "footprint_errors": 0
+      },
+      "kiskill_roundtrip": true,
+      "akcli_equivalent": true
+    },
+    "passing_relocation": {
+      "expected_acceptance": true,
+      "actual_acceptance": true,
+      "sha256": "d022bc9425ef299c81002d77f5963445c75287e70c2f13f6d900532e1eab4fad",
+      "drc": {
+        "violations": 0,
+        "unconnected_pads": 0,
+        "footprint_errors": 0
+      },
+      "kiskill_roundtrip": true,
+      "akcli_equivalent": true
+    },
+    "moved_no_reroute": {
+      "expected_acceptance": false,
+      "actual_acceptance": false,
+      "sha256": "40c14634df991d2d47a5c3099e9727ed128466a21a2fa71dfaa1a3f4ff9bbc1e",
+      "drc": {
+        "violations": 4,
+        "unconnected_pads": 1,
+        "footprint_errors": 0
+      },
+      "kiskill_roundtrip": true,
+      "akcli_equivalent": true
+    },
+    "moved_with_track": {
+      "expected_acceptance": false,
+      "actual_acceptance": false,
+      "sha256": "1a8ed4c761e2ed639948c8236af59bf8966523b169cf31ea3b6a30fbfe60804d",
+      "drc": {
+        "violations": 5,
+        "unconnected_pads": 0,
+        "footprint_errors": 0
+      },
+      "kiskill_roundtrip": true,
+      "akcli_equivalent": true
+    },
+    "wrong_net": {
+      "expected_acceptance": false,
+      "actual_acceptance": false,
+      "sha256": "cb3d06b6ea9f94e059979d989e6511c58bb1a831fa7bb742eb2671766e14f1df",
+      "drc": {
+        "violations": 4,
+        "unconnected_pads": 1,
+        "footprint_errors": 0
+      },
+      "kiskill_roundtrip": true,
+      "akcli_equivalent": false
+    }
+  },
+  "geometry": {
+    "passed": true,
+    "probe_bores_reopened": 18,
+    "source_nets": 16,
+    "moved": {
+      "ref": "TP12",
+      "original_xy_mm": [
+        60,
+        12
+      ],
+      "new_xy_mm": [
+        61,
+        13
+      ]
+    },
+    "other_source_locations_unchanged": 21,
+    "carrier_symmetric_difference_mm3": 0.0,
+    "physical_verification_performed": false
+  },
+  "expected_case_outcomes_matched": true,
+  "digital_validation_only": true,
+  "physical_test_performed": false,
+  "citerefinery_handoff": "candidate_evidence_requires_review"
+}
