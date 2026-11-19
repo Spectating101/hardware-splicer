@@ -7,7 +7,7 @@ import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
 import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2.js";
 import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
-import { toCreasedNormals } from "three/examples/jsm/utils/BufferGeometryUtils.js";
+import { mergeVertices, toCreasedNormals } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { HorizontalBlurShader } from "three/examples/jsm/shaders/HorizontalBlurShader.js";
 import { VerticalBlurShader } from "three/examples/jsm/shaders/VerticalBlurShader.js";
 import {
@@ -401,6 +401,11 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
 
       // Bake the GLB's node hierarchy into mm so presentation offsets remain in scene axes.
       let geometry = source.geometry.clone().applyMatrix4(new THREE.Matrix4().multiplyMatrices(scale, source.matrixWorld));
+      // Weld coincident vertices at 1e-4 mm first, so a smooth cylinder wall has no seam crease.
+      if (geometry.getAttribute("color")) geometry.deleteAttribute("color");
+      const welded = mergeVertices(geometry, 1e-4);
+      if (welded !== geometry) geometry.dispose();
+      geometry = welded;
       if (!geometry.getAttribute("normal")) {
         // The GLBs carry no normals. Smoothing shared vertices across 90° edges tilts the normals of
         // flat faces and streaks every triangle fan, so split normals at a 30° crease instead.
@@ -815,7 +820,7 @@ class TechnicalPass extends RenderPass {
         float c = distanceAt(0.0, 0.0);
         float lap = abs(n + s + e + w - 4.0 * c) + 0.5 * abs(nw + ne + sw + se - 4.0 * c);
         float edge = smoothstep(0.012 * c, 0.03 * c, lap);
-        gl_FragColor = vec4(ink, 0.6 * edge);
+        gl_FragColor = vec4(ink, 0.35 * edge);
       }`, {
       sceneDepth: { value: null }, pixel: { value: new THREE.Vector2() }, clip: { value: new THREE.Vector2() },
       ink: { value: new THREE.Color(0x0b0d10) },
