@@ -919,7 +919,8 @@ function createGrid(center, footprint, radius, resources) {
       }
       void main() {
         float fade = 1.0 - smoothstep(fadeStart, fadeRadius, length(mm));
-        gl_FragColor = vec4(tint, max(0.035 * grid(10.0), 0.07 * grid(50.0)) * fade * opacity);
+        // The grid composites after tone mapping now, so it takes about half its old alpha.
+        gl_FragColor = vec4(tint, max(0.018 * grid(10.0), 0.036 * grid(50.0)) * fade * opacity);
         #include <colorspace_fragment>
       }`,
   });
