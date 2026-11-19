@@ -814,14 +814,36 @@ function createContactShadow(scene, bounds, resources) {
       uniform vec3 tint;
       varying vec2 floorUv;
       void main() {
-        float falloff = 1.0 - smoothstep(0.0, 1.0, length(floorUv * 2.0 - 1.0));
-        gl_FragColor = vec4(tint, 0.13 * falloff * falloff);
+        // A ring of light around the footprint, so the floor under the assembly stays darker.
+        float r = length(floorUv * 2.0 - 1.0);
+        float ring = smoothstep(0.3, 0.55, r) * (1.0 - smoothstep(0.55, 1.0, r));
+        gl_FragColor = vec4(tint, 0.1 * ring);
         #include <colorspace_fragment>
       }`,
   });
   const pool = new THREE.Mesh(quadGeometry, poolMaterial);
-  pool.scale.set(width * 0.74, height * 0.74, 1);
+  pool.scale.set(width * 1.1, height * 1.1, 1);
   pool.renderOrder = -2;
+  // A soft shadow pool under the assembly footprint: about 9% darker, fading out past its edge.
+  const shadowPoolMaterial = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, toneMapped: false,
+    vertexShader: `
+      varying vec2 floorUv;
+      void main() {
+        floorUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }`,
+    fragmentShader: `
+      varying vec2 floorUv;
+      void main() {
+        vec2 p = abs(floorUv * 2.0 - 1.0);
+        float d = pow(pow(p.x, 4.0) + pow(p.y, 4.0), 0.25);
+        gl_FragColor = vec4(0.0, 0.0, 0.0, 0.5 * (1.0 - smoothstep(0.7, 1.0, d)));
+      }`,
+  });
+  const shadowPool = new THREE.Mesh(quadGeometry, shadowPoolMaterial);
+  shadowPool.scale.set(spread.x * 0.9, spread.y * 0.9, 1);
+  shadowPool.renderOrder = -1.5;
   // The key light's own shadow on the floor, inside the light pool, so the assembly sits down.
   // It spans the scene bounds × 1.2 and fades radially to zero, so it never shows a hard edge.
   const keyFloorMaterial = new THREE.ShadowMaterial({ opacity: 0.3, depthWrite: false });
@@ -835,12 +857,12 @@ function createContactShadow(scene, bounds, resources) {
   keyFloor.scale.set(spread.x * 0.6, spread.y * 0.6, 1);
   keyFloor.receiveShadow = true;
   keyFloor.renderOrder = -1;
-  scene.add(...ground, pool, keyFloor);
-  [target, blurTarget, depth, quadGeometry, horizontal, vertical, groundGeometry, poolMaterial, keyFloorMaterial]
+  scene.add(...ground, pool, shadowPool, keyFloor);
+  [target, blurTarget, depth, quadGeometry, horizontal, vertical, groundGeometry, poolMaterial, shadowPoolMaterial, keyFloorMaterial]
     .forEach((resource) => resources.add(resource));
 
   return (renderer, floor, withAssembled = (render) => render(), withFeetOnly = (render) => render()) => {
-    pool.visible = keyFloor.visible = Number.isFinite(floor);
+    pool.visible = keyFloor.visible = shadowPool.visible = Number.isFinite(floor);
     // Bake and composite at the lowest assembly z so the feet touch their contact shadow.
     ground.forEach((mesh) => {
       mesh.visible = pool.visible;
@@ -848,6 +870,7 @@ function createContactShadow(scene, bounds, resources) {
     });
     if (!pool.visible) return;
     pool.position.set(center.x, center.y, floor - 0.2);
+    shadowPool.position.set(center.x, center.y, floor - 0.15);
     keyFloor.position.set(center.x, center.y, floor - 0.03);
     capture.position.copy(ground[0].position);
     capture.lookAt(center.x, center.y, floor + 1);
@@ -1656,7 +1679,8 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
     try {
       const environment = pmrem.fromScene(room, 0.04);
       scene.environment = environment.texture;
-      scene.environmentIntensity = 0.32;
+      // A lower ambient floor lets the key carry the value structure: lit tops, darker walls.
+      scene.environmentIntensity = 0.2;
       return environment;
     } finally {
       room.dispose();
@@ -1692,10 +1716,11 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
   }
   // The key is a spot at a finite distance, so its incidence changes across a plate and the
   // cream tops carry a gradient instead of one flat value.
-  const key = light(0xfff3e6, 2.25, -3, -5, 55, true);
+  const key = light(0xfff3e6, 3.1, -3, -5, 55, true);
   // A cool fill, so shadow sides of the dimmed masses go cool grey instead of brown.
   light(0xe6eef7, 0.6, 6, -2, 17);
-  light(0xffffff, 1.3, 2, 7, 28);
+  // Rim from behind, strong enough to lift the back plate edges off the background.
+  light(0xffffff, 2.4, 2, 7, 28);
   // Part-on-part shadows come from presentation offsets, so they read as soft form, not placement.
   key.shadow.radius = 6;
   key.shadow.intensity = 0.55;
