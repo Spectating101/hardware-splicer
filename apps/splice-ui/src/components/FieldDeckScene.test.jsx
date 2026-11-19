@@ -10,7 +10,7 @@ import {
   toggleFielddeckSheet, weldEdgeChains,
   apertureFromSection, footprintDeltaPair, linearDimension, tightestSide,
   pointInPolygon, polygonArea, projectedSideDistances, sectionSegments, vertexCentroid, weldSectionLoops,
-  apertureSizeLabel, coverDetail, coverHeadline, fanPinsAbovePill, perHalfCover, seamLabel, sideCoverLabel, standoffPairingLabel,
+  apertureSizeLabel, coverDetail, coverHeadline, shortPartName, fanPinsAbovePill, perHalfCover, seamLabel, sideCoverLabel, standoffPairingLabel,
 } from "./fielddeckLogic.js";
 
 const stageMock = vi.hoisted(() => ({ load: vi.fn(), create: vi.fn() }));
@@ -757,6 +757,13 @@ describe("Fielddeck evidence UI", () => {
     fireEvent.click(tree.getByRole("button", { name: "Pen adapter" }));
     const inspector = within(screen.getByRole("complementary", { name: "Selection details" }));
     expect(inspector.queryByText(/change unknown|unchanged/i)).toBeNull();
+  });
+
+  it("names long-labelled parts by their id instead of a generic placeholder", () => {
+    expect(shortPartName({ part_id: "reference-envelope-bed-235x235", label: "REFERENCE_ENVELOPE_bed_235x235" }, "v1"))
+      .toBe("reference-envelope-bed-235x235");
+    expect(shortPartName({ part_id: "x".repeat(40), label: "y".repeat(30) }, "v1")).toBe(`${"x".repeat(31)}…`);
+    expect(shortPartName({ part_id: "pen-clamp", label: "pen_clamp" }, "v1")).toBe("pen_clamp");
   });
 
   it("renders unknown values and preserves known fields and sources", () => {

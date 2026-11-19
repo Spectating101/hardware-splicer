@@ -877,9 +877,10 @@ const SHORT_NAMES = {
 
 export function shortPartName(part, revision) {
   if (part.part_id === "display") return `${revision}-inch display`;
-  return SHORT_NAMES[part.part_id] ?? (part.label.length <= 24 && !/nominal only/i.test(part.label)
-    ? part.label
-    : "Selected part");
+  if (SHORT_NAMES[part.part_id]) return SHORT_NAMES[part.part_id];
+  // A long or hedged label falls back to the part id, so every tree row still names its part.
+  const name = part.label.length <= 24 && !/nominal only/i.test(part.label) ? part.label : part.part_id;
+  return name.length <= 32 ? name : `${name.slice(0, 31)}…`;
 }
 
 export function evidenceLabel(field) {
