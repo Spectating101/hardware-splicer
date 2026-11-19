@@ -10,6 +10,7 @@ import {
   toggleFielddeckSheet, weldEdgeChains,
   apertureFromSection, footprintDeltaPair, gapLabel, linearDimension, minimumGapLabel, minimumSideGap,
   pointInPolygon, polygonArea, projectedSideGaps, sectionSegments, vertexCentroid, weldSectionLoops,
+  halfGapLabel, perHalfGaps, perHalfMinimumLabel, seamLabel,
 } from "./fielddeckLogic.js";
 
 const stageMock = vi.hoisted(() => ({ load: vi.fn(), create: vi.fn() }));
@@ -528,6 +529,48 @@ describe("Fielddeck Face view fit layer", () => {
     expect(gapLabel("top", gaps.top)).toBe("Projected CAD gap · T ? · aperture not derivable");
     expect(minimumSideGap(gaps).value).toBeNull();
     expect(minimumGapLabel(minimumSideGap(gaps))).toBe("Min projected XY gap · ? · not derivable");
+  });
+
+
+  // Two halves with a 0.3 mm seam at x 30–30.3; the right half's window edge at the top sits 1 mm
+  // lower, so the top gap comes from Face Rear Right.
+  function halves(seam = 0.3, rightTop = 29) {
+    const prism = (rects, dx = 0) => rects.flatMap(([[x0, y0], [x1, y1]]) => box([x0 + dx, y0, 0], [x1 + dx, y1, 3]));
+    const left = prism([[[0, 0], [10, 10]], [[0, 10], [10, 30]], [[0, 30], [10, 40]], [[10, 0], [30, 10]], [[10, 30], [30, 40]]]);
+    const right = prism([[[30, 0], [50, 10]], [[30, rightTop], [50, 40]], [[50, 0], [60, 10]], [[50, 10], [60, rightTop]],
+      [[50, rightTop], [60, 40]]], seam);
+    return [
+      { label: "Face Rear Left", side: "left", segments: sectionSegments(left, 1.5) },
+      { label: "Face Rear Right", side: "right", segments: sectionSegments(right, 1.5) },
+    ];
+  }
+
+  it("measures each side against its own half when a 0.3 mm seam keeps the loop open", () => {
+    const centre = [30.15, 20];
+    expect(apertureFromSection(halves(), centre).loop).toBeNull();
+    const { gaps, seam, inner } = perHalfGaps(rect(12, 11, 48, 28.5), halves(), centre);
+    expect(gaps.left).toEqual({ value: expect.closeTo(2, 6), part: null, reason: null });
+    expect(gaps.right.value).toBeCloseTo(2.3, 6);
+    expect(gaps.top).toEqual({ value: expect.closeTo(0.5, 6), part: "Face Rear Right", reason: null });
+    expect(gaps.bottom).toEqual({ value: expect.closeTo(1, 6), part: "both halves", reason: null });
+    expect(halfGapLabel("top", gaps.top)).toBe("Projected CAD gap · T 0.50 mm (Face Rear Right) · computed");
+    expect(halfGapLabel("left", gaps.left)).toBe("Projected CAD gap · L 2.00 mm · computed");
+    expect(perHalfMinimumLabel(gaps)).toBe("Min projected XY gap · 0.50 mm · computed (per half)");
+    expect(seam.gap).toBeCloseTo(0.3, 6);
+    expect(seamLabel({ ...seam, at: [155.01, 250] })).toBe("Faceplate halves 0.30 mm apart at x 155 · computed");
+    // Seam edges never count as aperture edges.
+    expect(inner.every(([a, b]) => !(Math.abs(a[0] - 30) < 0.01 && Math.abs(b[0] - 30) < 0.01))).toBe(true);
+    expect(inner.length).toBeGreaterThan(0);
+  });
+
+  it("calls a covered side an overlap in ink and names a side without an inner edge", () => {
+    const centre = [30.15, 20];
+    const { gaps } = perHalfGaps(rect(5, 11, 48, 28.5), halves(), centre);
+    expect(halfGapLabel("left", gaps.left)).toBe("Projected CAD gap · L overlap −5.00 mm · computed");
+    const lonely = perHalfGaps(rect(12, 11, 48, 28.5), halves().slice(0, 1), centre);
+    expect(lonely.gaps.right).toEqual({ value: null, part: null, reason: "no inner edge of either half faces the display" });
+    expect(halfGapLabel("right", lonely.gaps.right)).toBe("Projected CAD gap · R ? · no inner edge of either half faces the display");
+    expect(perHalfMinimumLabel(lonely.gaps)).toBe("Min projected XY gap · ? · not derivable");
   });
 
   it("averages mesh vertices for spacer centroids and states the footprint delta as a pair", () => {

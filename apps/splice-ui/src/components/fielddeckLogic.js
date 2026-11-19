@@ -1246,3 +1246,167 @@ export function linearDimension(from, to, normal, offset, {
 }
 const THREE_DEG = Math.PI / 180;
 const r = (value) => Math.round(value * 100) / 100;
+
+// ---------------------------------------------------------------------------------------------
+// Per-half aperture. The two printed halves need not close into one loop: each half's own section
+// loops are oriented (material on the left of every directed edge), and the aperture boundary is
+// the union of the edges whose outward normal faces the display centre, minus the seam edges where
+// one half faces the other.
+
+function orientLoops(loops) {
+  return loops.map((loop) => {
+    const depth = loops.filter((other) => other !== loop && pointInPolygon(loop[0], other)).length;
+    const counterClockwise = polygonArea(loop) > 0;
+    // Outer boundaries run counter-clockwise and holes clockwise, so material is always on the left.
+    return (depth % 2 === 0) === counterClockwise ? loop : loop.slice().reverse();
+  });
+}
+
+export function orientedSectionEdges(segments, weld = APERTURE_WELD_MM) {
+  const edges = [];
+  for (const loop of orientLoops(weldSectionLoops(segments, weld).loops)) {
+    for (let i = 0; i < loop.length; i++) {
+      const a = loop[i];
+      const b = loop[(i + 1) % loop.length];
+      const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
+      if (length > 0) edges.push({ a, b, normal: [(b[1] - a[1]) / length, -(b[0] - a[0]) / length] });
+    }
+  }
+  return edges;
+}
+
+function pointSegmentDistance([px, py], [ax, ay], [bx, by]) {
+  const dx = bx - ax;
+  const dy = by - ay;
+  const t = dx || dy ? Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy))) : 0;
+  return Math.hypot(px - ax - t * dx, py - ay - t * dy);
+}
+
+// The seam: the closest approach between two halves' section edges, taking the pair nearest the
+// display centre among those within 0.01 mm of the minimum.
+export function seamBetween(first, second, centre) {
+  let gap = Infinity;
+  const pairs = [];
+  for (const { a, b } of first) {
+    for (const point of [a, b]) {
+      for (const edge of second) {
+        const distance = pointSegmentDistance(point, edge.a, edge.b);
+        if (distance < gap - 0.01) pairs.length = 0;
+        if (distance <= gap + 0.01) pairs.push({ point, edge, distance });
+        gap = Math.min(gap, distance);
+      }
+    }
+  }
+  if (!pairs.length) return null;
+  const near = pairs.filter(({ distance }) => distance <= gap + 0.01)
+    .sort((p, q) => Math.hypot(p.point[0] - centre[0], p.point[1] - centre[1]) - Math.hypot(q.point[0] - centre[0], q.point[1] - centre[1]))[0];
+  const { point, edge } = near;
+  const dx = edge.b[0] - edge.a[0];
+  const dy = edge.b[1] - edge.a[1];
+  const t = dx || dy ? Math.max(0, Math.min(1, ((point[0] - edge.a[0]) * dx + (point[1] - edge.a[1]) * dy) / (dx * dx + dy * dy))) : 0;
+  const other = [edge.a[0] + t * dx, edge.a[1] + t * dy];
+  return { gap, from: point, to: other, at: [(point[0] + other[0]) / 2, (point[1] + other[1]) / 2] };
+}
+
+const SIDE_SPEC = {
+  left: { axis: 0, facing: [1, 0], toward: -1 },
+  right: { axis: 0, facing: [-1, 0], toward: 1 },
+  bottom: { axis: 1, facing: [0, 1], toward: -1 },
+  top: { axis: 1, facing: [0, -1], toward: 1 },
+};
+
+// Edges of one half that bound the aperture on `side`: their outward normal points at the display
+// centre within 45° along that side's axis, they lie on that side of the centre, and they are not
+// seam edges (both ends within `seamReach` of the other half).
+export function innerEdgesForSide(edges, side, centre, otherHalf = [], seamReach = 0) {
+  const { axis, facing, toward } = SIDE_SPEC[side];
+  return edges.filter(({ a, b, normal }) => {
+    if (normal[0] * facing[0] + normal[1] * facing[1] < Math.SQRT1_2) return false;
+    const middle = (a[axis] + b[axis]) / 2;
+    if ((middle - centre[axis]) * toward <= 0) return false;
+    const seam = seamReach > 0 && [a, b].every((point) => otherHalf.some((edge) => pointSegmentDistance(point, edge.a, edge.b) <= seamReach));
+    return !seam;
+  });
+}
+
+// Signed gap on `side` between the outline polygon and a set of inner edges, minimised over
+// scanlines across the outline. Positive clears; negative is overlap.
+export function gapToEdges(outline, edges, side, centre, { samples = 96, used = null } = {}) {
+  const { axis, toward } = SIDE_SPEC[side];
+  const other = 1 - axis;
+  const low = Math.min(...outline.map((p) => p[other]));
+  const high = Math.max(...outline.map((p) => p[other]));
+  let best = null;
+  for (let k = 0; k <= samples; k++) {
+    const at = low + (high - low) * (0.001 + 0.998 * k / samples);
+    const shape = scanCrossings(outline, axis, at);
+    if (shape.length < 2) continue;
+    let nearest = null;
+    let nearestEdge = null;
+    for (const edge of edges) {
+      const { a, b } = edge;
+      if ((a[other] > at) === (b[other] > at)) continue;
+      const value = a[axis] + (at - a[other]) * (b[axis] - a[axis]) / (b[other] - a[other]);
+      if ((value - centre[axis]) * toward <= 0) continue;
+      if (nearest === null || Math.abs(value - centre[axis]) < Math.abs(nearest - centre[axis])) {
+        nearest = value;
+        nearestEdge = edge;
+      }
+    }
+    if (nearest === null) continue;
+    used?.add(nearestEdge);
+    const gap = toward < 0 ? shape[0] - nearest : nearest - shape.at(-1);
+    if (best === null || gap < best) best = gap;
+  }
+  return best;
+}
+
+// halves: [{ label, side: "left" | "right", segments }]. Left and right gaps use their own half;
+// top and bottom take the minimum over both halves and name the half that gives it.
+export function perHalfGaps(outline, halves, centre, { weld = APERTURE_WELD_MM } = {}) {
+  const edges = halves.map((half) => ({ ...half, edges: orientedSectionEdges(half.segments, weld) }));
+  const seam = edges.length === 2 ? seamBetween(edges[0].edges, edges[1].edges, centre) : null;
+  const reach = seam ? seam.gap + weld : 0;
+  const otherOf = (half) => edges.find((other) => other !== half)?.edges ?? [];
+  const inner = [];
+  const gaps = {};
+  for (const side of ["left", "right", "top", "bottom"]) {
+    const candidates = side === "left" || side === "right" ? edges.filter((half) => half.side === side) : edges;
+    const results = candidates.map((half) => {
+      const own = innerEdgesForSide(half.edges, side, centre, otherOf(half), reach);
+      // Only the edges that bound the aperture at some scanline are drawn, not hole rims behind them.
+      const used = new Set();
+      const value = own.length && outline?.length ? gapToEdges(outline, own, side, centre, { used }) : null;
+      inner.push(...[...used].map(({ a, b }) => [a, b]));
+      return { label: half.label, value };
+    }).filter(({ value }) => value !== null);
+    if (!results.length) {
+      const names = candidates.map(({ label }) => label).join(" or ") || "either half";
+      gaps[side] = { value: null, part: null, reason: `no inner edge of ${names} faces the display` };
+      continue;
+    }
+    const value = Math.min(...results.map((result) => result.value));
+    const givers = results.filter((result) => result.value.toFixed(2) === value.toFixed(2));
+    gaps[side] = {
+      value, reason: null,
+      part: side === "left" || side === "right" ? null : givers.length > 1 ? "both halves" : givers[0].label,
+    };
+  }
+  return { gaps, seam, inner };
+}
+
+export function seamLabel(seam) {
+  return seam ? `Faceplate halves ${seam.gap.toFixed(2)} mm apart at x ${formatNumber(Math.round(seam.at[0] * 10) / 10)} · computed` : null;
+}
+
+export function halfGapLabel(side, gap) {
+  const letter = SIDE_LETTER[side];
+  if (gap?.value == null) return `Projected CAD gap · ${letter} ? · ${gap?.reason ?? "not derivable"}`;
+  return `Projected CAD gap · ${letter} ${formatGapValue(gap.value)}${gap.part ? ` (${gap.part})` : ""} · computed`;
+}
+
+export function perHalfMinimumLabel(gaps) {
+  const minimum = minimumSideGap(gaps);
+  if (minimum.value == null) return "Min projected XY gap · ? · not derivable";
+  return `Min projected XY gap · ${formatGapValue(minimum.value)} · computed (per half)`;
+}
