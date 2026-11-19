@@ -7,7 +7,7 @@ import json
 from datetime import datetime, timezone
 from typing import Any, Dict, Iterable, Mapping
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field
 
 from .physical_evidence import (
     AuthorizationDecision,
@@ -336,3 +336,7 @@ def validate_authorization_ledger(
             "authorization_carries_across_revisions": False,
         },
     )
+
+
+# Install compatibility corrections before callers access this module.
+from . import physical_evidence_ledger_compat as _physical_evidence_ledger_compat  # noqa: E402,F401

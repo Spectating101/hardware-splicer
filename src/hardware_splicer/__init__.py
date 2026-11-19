@@ -1,167 +1,89 @@
-from .build_compiler import CATALOG_BUILD_IDS, compile_catalog_build, resolve_build_id
-from .module_resolver import resolve_parts_to_modules
-from .salvage_bridge import build_intake_salvage_package
-from .scratch_pipeline import compile_scratch_build, prove_module_ids
-from .sdk import (
-    compose_design,
-    circuit_synthesis_capability,
-    dump_json,
-    engine_doctor,
-    list_catalog_builds,
-    plan_analog_conditioning_circuit,
-    plan_battery_power_circuit,
-    plan_circuit_synthesis,
-    plan_h_bridge_circuit,
-    plan_level_shift_circuit,
-    plan_motor_driver_circuit,
-    plan_power_rail_circuit,
-    plan_salvage,
-    plan_relay_switch_circuit,
-    plan_sensor_interface_circuit,
-    resolve_inventory_parts,
-    salvage_bringup,
-    sdk_info,
-    suggest_modules,
-    synthesize_circuit,
-    verify_engine,
-)
-from .compiler import compile_hardware_bundle
-from .design_quality import build_design_quality_gate
-from .engineering_assurance import (
-    build_engineering_assurance,
-    build_independent_review_packet,
-    changed_assurance_dependencies,
-    evaluate_assurance_delta,
-)
-from .evidence_extractor import build_evidence_extraction_report, enrich_intake_with_extracted_evidence
-from .circuit_synthesis import (
-    CircuitIntent,
-    Constraint,
-    FunctionalPart,
-    Port,
-    SynthesisCandidate,
-    TopologyOperator,
-    apply_operator_lowering,
-    compile_synthesis_candidate,
-    evaluate_topology_authority,
-    plan_analog_conditioning,
-    plan_battery_power,
-    plan_circuit,
-    plan_h_bridge,
-    plan_level_shift,
-    plan_motor_driver,
-    plan_power_rail,
-    plan_relay_switch,
-    plan_sensor_interface,
-    topology_library_card,
-)
-from .mechatronics_authority import build_mechatronics_authority
-from .mechanical_authority import build_mechanical_authority
-from .project_intake import (
-    build_authority_upgrade_plan,
-    build_evidence_capture_kit,
-    load_project_intake,
-    plan_project_from_intake,
-    run_project_intake,
-)
-from .production_release_metrics import build_production_release_metrics
-from .robotics_actuation import build_robotics_actuation_packet
-from .robotics_platform_authority import build_robotics_platform_authority
-from .robotics_simulation import build_robotics_simulation_packet
-from .scenario_runner import (
-    build_project_authority_packet,
-    load_hardware_scenario,
-    run_hardware_scenario,
-    scenario_to_compile_spec,
-)
-from .schemas import HardwareCompileResult, HardwareCompileSpec
-from .vision_evidence_assistant import build_vision_evidence_report, enrich_intake_with_vision_assistance
+"""Programmatic hardware engineering API."""
 
-# Install narrowly scoped compatibility corrections before callers import the
-# affected submodule APIs. These preserve the canonical models and authority rules.
-from . import robot_model_import_compat as _robot_model_import_compat  # noqa: F401,E402
-from . import physical_evidence_ledger_compat as _physical_evidence_ledger_compat  # noqa: F401,E402
-from . import engineering_status_compat as _engineering_status_compat  # noqa: F401,E402
-from . import engineering_status_revalidation_compat as _engineering_status_revalidation_compat  # noqa: F401,E402
-from . import manufacturing_closure_compat as _manufacturing_closure_compat  # noqa: F401,E402
-from . import engineering_revision_diff_compat as _engineering_revision_diff_compat  # noqa: F401,E402
-from . import engineering_revision_authority_compat as _engineering_revision_authority_compat  # noqa: F401,E402
-from . import engineering_action_audit_compat as _engineering_action_audit_compat  # noqa: F401,E402
+from ._exports import resolve_export as _resolve_export
+
+_MODULES = {
+    "HardwareCompileResult": "schemas",
+    "HardwareCompileSpec": "schemas",
+    "CircuitIntent": "circuit_synthesis",
+    "Constraint": "circuit_synthesis",
+    "FunctionalPart": "circuit_synthesis",
+    "Port": "circuit_synthesis",
+    "SynthesisCandidate": "circuit_synthesis",
+    "TopologyOperator": "circuit_synthesis",
+    "apply_operator_lowering": "circuit_synthesis",
+    "build_engineering_assurance": "engineering_assurance",
+    "build_independent_review_packet": "engineering_assurance",
+    "changed_assurance_dependencies": "engineering_assurance",
+    "evaluate_assurance_delta": "engineering_assurance",
+    "evaluate_topology_authority": "circuit_synthesis",
+    "topology_library_card": "circuit_synthesis",
+    "build_mechatronics_authority": "mechatronics_authority",
+    "build_mechanical_authority": "mechanical_authority",
+    "build_project_authority_packet": "scenario_runner",
+    "build_authority_upgrade_plan": "project_intake",
+    "build_evidence_capture_kit": "project_intake",
+    "build_evidence_extraction_report": "evidence_extractor",
+    "build_production_release_metrics": "production_release_metrics",
+    "build_robotics_actuation_packet": "robotics_actuation",
+    "build_robotics_platform_authority": "robotics_platform_authority",
+    "build_robotics_simulation_packet": "robotics_simulation",
+    "compile_scratch_build": "scratch_pipeline",
+    "circuit_synthesis_capability": "sdk",
+    "compose_design": "sdk",
+    "dump_json": "sdk",
+    "engine_doctor": "sdk",
+    "list_catalog_builds": "sdk",
+    "plan_analog_conditioning": "circuit_synthesis",
+    "plan_battery_power": "circuit_synthesis",
+    "plan_motor_driver": "circuit_synthesis",
+    "plan_h_bridge": "circuit_synthesis",
+    "plan_level_shift": "circuit_synthesis",
+    "plan_power_rail": "circuit_synthesis",
+    "plan_relay_switch": "circuit_synthesis",
+    "plan_sensor_interface": "circuit_synthesis",
+    "plan_circuit": "circuit_synthesis",
+    "compile_synthesis_candidate": "circuit_synthesis",
+    "plan_analog_conditioning_circuit": "sdk",
+    "plan_battery_power_circuit": "sdk",
+    "plan_circuit_synthesis": "sdk",
+    "plan_h_bridge_circuit": "sdk",
+    "plan_level_shift_circuit": "sdk",
+    "plan_motor_driver_circuit": "sdk",
+    "plan_power_rail_circuit": "sdk",
+    "plan_salvage": "sdk",
+    "plan_relay_switch_circuit": "sdk",
+    "plan_sensor_interface_circuit": "sdk",
+    "prove_module_ids": "scratch_pipeline",
+    "resolve_inventory_parts": "sdk",
+    "salvage_bringup": "sdk",
+    "sdk_info": "sdk",
+    "suggest_modules": "sdk",
+    "synthesize_circuit": "sdk",
+    "verify_engine": "sdk",
+    "build_vision_evidence_report": "vision_evidence_assistant",
+    "build_design_quality_gate": "design_quality",
+    "CATALOG_BUILD_IDS": "build_compiler",
+    "build_intake_salvage_package": "salvage_bridge",
+    "compile_catalog_build": "build_compiler",
+    "compile_hardware_bundle": "compiler",
+    "resolve_build_id": "build_compiler",
+    "resolve_parts_to_modules": "module_resolver",
+    "enrich_intake_with_extracted_evidence": "evidence_extractor",
+    "enrich_intake_with_vision_assistance": "vision_evidence_assistant",
+    "load_project_intake": "project_intake",
+    "load_hardware_scenario": "scenario_runner",
+    "plan_project_from_intake": "project_intake",
+    "run_project_intake": "project_intake",
+    "run_hardware_scenario": "scenario_runner",
+    "scenario_to_compile_spec": "scenario_runner",
+}
+__all__ = list(_MODULES)
 
 
-__all__ = [
-    "HardwareCompileResult",
-    "HardwareCompileSpec",
-    "CircuitIntent",
-    "Constraint",
-    "FunctionalPart",
-    "Port",
-    "SynthesisCandidate",
-    "TopologyOperator",
-    "apply_operator_lowering",
-    "build_engineering_assurance",
-    "build_independent_review_packet",
-    "changed_assurance_dependencies",
-    "evaluate_assurance_delta",
-    "evaluate_topology_authority",
-    "topology_library_card",
-    "build_mechatronics_authority",
-    "build_mechanical_authority",
-    "build_project_authority_packet",
-    "build_authority_upgrade_plan",
-    "build_evidence_capture_kit",
-    "build_evidence_extraction_report",
-    "build_production_release_metrics",
-    "build_robotics_actuation_packet",
-    "build_robotics_platform_authority",
-    "build_robotics_simulation_packet",
-    "compile_scratch_build",
-    "circuit_synthesis_capability",
-    "compose_design",
-    "dump_json",
-    "engine_doctor",
-    "list_catalog_builds",
-    "plan_analog_conditioning",
-    "plan_battery_power",
-    "plan_motor_driver",
-    "plan_h_bridge",
-    "plan_level_shift",
-    "plan_power_rail",
-    "plan_relay_switch",
-    "plan_sensor_interface",
-    "plan_circuit",
-    "compile_synthesis_candidate",
-    "plan_analog_conditioning_circuit",
-    "plan_battery_power_circuit",
-    "plan_circuit_synthesis",
-    "plan_h_bridge_circuit",
-    "plan_level_shift_circuit",
-    "plan_motor_driver_circuit",
-    "plan_power_rail_circuit",
-    "plan_salvage",
-    "plan_relay_switch_circuit",
-    "plan_sensor_interface_circuit",
-    "prove_module_ids",
-    "resolve_inventory_parts",
-    "salvage_bringup",
-    "sdk_info",
-    "suggest_modules",
-    "synthesize_circuit",
-    "verify_engine",
-    "build_vision_evidence_report",
-    "build_design_quality_gate",
-    "CATALOG_BUILD_IDS",
-    "build_intake_salvage_package",
-    "compile_catalog_build",
-    "compile_hardware_bundle",
-    "resolve_build_id",
-    "resolve_parts_to_modules",
-    "enrich_intake_with_extracted_evidence",
-    "enrich_intake_with_vision_assistance",
-    "load_project_intake",
-    "load_hardware_scenario",
-    "plan_project_from_intake",
-    "run_project_intake",
-    "run_hardware_scenario",
-    "scenario_to_compile_spec",
-]
+def __getattr__(name):
+    return _resolve_export(globals(), _MODULES, name)
+
+
+def __dir__():
+    return sorted(set(globals()).union(__all__, _MODULES.values()))

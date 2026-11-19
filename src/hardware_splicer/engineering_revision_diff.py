@@ -375,3 +375,8 @@ def diff_engineering_revisions(
             "release_authorized": False,
         },
     )
+
+
+# Install compatibility corrections before callers access this module.
+from . import engineering_revision_diff_compat as _engineering_revision_diff_compat  # noqa: E402,F401
+from . import engineering_revision_authority_compat as _engineering_revision_authority_compat  # noqa: E402,F401

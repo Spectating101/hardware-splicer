@@ -55,7 +55,7 @@ from .splice_bench import bench_status, submit_bench_measurements
 from .robotics_actuation import build_robotics_actuation_packet
 from .robotics_platform_authority import build_robotics_platform_authority
 from .robotics_simulation import build_robotics_simulation_packet
-from .runtime import ServiceStartError, runtime_status
+from .runtime import ServiceStartError, headless_status, runtime_status
 from .scenario_runner import run_hardware_scenario, scenario_to_compile_spec
 from .schemas import HardwareCompileSpec
 from .validation import raise_for_validation_errors, validate_compile_spec, validation_errors
@@ -531,9 +531,10 @@ def create_app() -> FastAPI:
         from ._version import __version__
         from .integrations.llm_policy import llm_policy_summary
 
-        status = runtime_status()
+        status = headless_status()
         return {
-            "ok": bool(status.get("ok")),
+            "ok": status["ok"],
+            "headless_ready": status["headless_ready"],
             "version": __version__,
             "app_roots": status.get("app_roots"),
             "llm_policy": llm_policy_summary(),

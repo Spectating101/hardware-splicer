@@ -507,3 +507,7 @@ def build_manufacturing_closure(
             "release_authorized": False,
         },
     )
+
+
+# Install compatibility corrections before callers access this module.
+from . import manufacturing_closure_compat as _manufacturing_closure_compat  # noqa: E402,F401

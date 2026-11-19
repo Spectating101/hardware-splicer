@@ -269,3 +269,7 @@ def prepare_engineering_action(
 # Compatibility marker retained for callers/tests that previously installed an external
 # action-layer wrapper. Revalidation is now native to prepare_engineering_action itself.
 _physical_action_revalidation_installed = True
+
+
+# Install compatibility corrections before callers access this module.
+from . import engineering_action_audit_compat as _engineering_action_audit_compat  # noqa: E402,F401

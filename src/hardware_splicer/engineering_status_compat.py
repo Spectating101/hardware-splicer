@@ -10,10 +10,6 @@ from __future__ import annotations
 
 from typing import Any, Mapping
 
-from . import engineering_status as _target
-from .physical_evidence_attestation import verify_evidence_file_attestation
-from .physical_evidence_ledger import PhysicalEvidenceEnvelope
-
 
 def _mapping(value: Any) -> dict[str, Any]:
     return dict(value) if isinstance(value, Mapping) else {}
@@ -43,6 +39,9 @@ def _attestation_state(audited: Mapping[str, Any]) -> dict[str, Any]:
             "attested_raw_file_count": 0,
             "blockers": [],
         }
+
+    from .physical_evidence_attestation import verify_evidence_file_attestation
+    from .physical_evidence_ledger import PhysicalEvidenceEnvelope
 
     blockers: list[str] = []
     raw_file_count = 0
@@ -150,6 +149,8 @@ def _physical_scope(plan: Mapping[str, Any]) -> dict[str, Any] | None:
 
 
 def _release_action(report):
+    from . import engineering_status as _target
+
     spec = _target._ACTIONS["release"]
     return _target.NextAction(
         action_id="next-release",
@@ -169,6 +170,8 @@ def _release_action(report):
 
 
 def install_status_message_compatibility() -> None:
+    from . import engineering_status as _target
+
     if getattr(_target, "_containment_deduplication_installed", False):
         return
     original_missing = _target._generic_missing
@@ -324,6 +327,3 @@ def install_status_message_compatibility() -> None:
     _target._generic_missing = _generic_missing
     _target.build_engineering_status = build_engineering_status
     _target._containment_deduplication_installed = True
-
-
-install_status_message_compatibility()

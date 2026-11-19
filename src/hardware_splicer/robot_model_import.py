@@ -599,3 +599,7 @@ def topology_from_robot_model(
             "motion_authorized": False,
         },
     )
+
+
+# Install compatibility corrections before callers access this module.
+from . import robot_model_import_compat as _robot_model_import_compat  # noqa: E402,F401

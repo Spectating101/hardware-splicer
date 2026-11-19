@@ -1,20 +1,25 @@
-"""General circuit netlist IR — source of truth for the compile engine."""
+"""General circuit netlist IR and compilation."""
 
-from .compile import compile_netlist_to_artifacts, netlist_from_build_graph
-from .erc import run_erc
-from .import_kicad import parse_kicad_netlist
-from .ir import CircuitNetlist, ComponentInstance, Net, PinRef
-from .lower import build_graph_to_netlist, netlist_to_build_graph
+from .._exports import resolve_export as _resolve_export
 
-__all__ = [
-    "CircuitNetlist",
-    "ComponentInstance",
-    "Net",
-    "PinRef",
-    "build_graph_to_netlist",
-    "netlist_to_build_graph",
-    "netlist_from_build_graph",
-    "run_erc",
-    "parse_kicad_netlist",
-    "compile_netlist_to_artifacts",
-]
+_MODULES = {
+    "CircuitNetlist": "ir",
+    "ComponentInstance": "ir",
+    "Net": "ir",
+    "PinRef": "ir",
+    "build_graph_to_netlist": "lower",
+    "netlist_to_build_graph": "lower",
+    "netlist_from_build_graph": "compile",
+    "run_erc": "erc",
+    "parse_kicad_netlist": "import_kicad",
+    "compile_netlist_to_artifacts": "compile",
+}
+__all__ = list(_MODULES)
+
+
+def __getattr__(name):
+    return _resolve_export(globals(), _MODULES, name)
+
+
+def __dir__():
+    return sorted(set(globals()).union(__all__, _MODULES.values()))

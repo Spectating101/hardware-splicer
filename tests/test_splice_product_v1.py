@@ -31,18 +31,43 @@ def test_version_single_source() -> None:
         pytest.fail("version not found in pyproject.toml")
 
 
-def test_health_reports_package_version() -> None:
+def test_health_reports_package_version_without_native_probes(monkeypatch) -> None:
     pytest.importorskip("fastapi")
     from fastapi.testclient import TestClient
 
+    from hardware_splicer import runtime
+
+    def unexpected_probe(*args):
+        pytest.fail("The health poll started a tool subprocess")
+
+    monkeypatch.setattr(runtime, "_python_import_ok", unexpected_probe)
+    monkeypatch.setenv("PATH", "")
     client = TestClient(create_app())
     response = client.get("/health")
     assert response.status_code == 200
     body = response.json()
     assert body.get("ok") is True
+    assert body["headless_ready"] is True
     assert body.get("version") == _version.__version__
     assert "llm_policy" in body
     assert "qwen_llm_first" in body["llm_policy"]
+
+
+def test_doctor_distinguishes_backend_demo_and_fabrication_readiness(monkeypatch, tmp_path):
+    from hardware_splicer import runtime
+
+    monkeypatch.setattr(runtime, "_python_import_ok", lambda *args: False)
+    monkeypatch.setenv("PATH", "")
+    status = runtime.runtime_status()
+    assert status["ok"] and status["headless_ready"]
+    assert not status["demo_ready"] and not status["fab_export_ready"]
+    assert not any(status["splicer3d_dependencies"].values())
+
+    monkeypatch.setenv("HARDWARE_SPLICER_TESTING_MODE", "1")
+    assert not runtime.headless_status()["ok"]
+    monkeypatch.delenv("HARDWARE_SPLICER_TESTING_MODE")
+    monkeypatch.setattr(runtime, "CIRCUIT_ROOT", tmp_path / "missing")
+    assert not runtime.headless_status()["headless_ready"]
 
 
 def test_compose_request_accepts_allow_llm_first() -> None:

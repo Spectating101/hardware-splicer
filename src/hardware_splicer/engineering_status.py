@@ -8,6 +8,11 @@ from typing import Any, Dict, Iterable, Mapping
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from .engineering_status_compat import install_status_message_compatibility as _install_status
+from .engineering_status_revalidation_compat import (
+    install_physical_revalidation_compatibility as _install_revalidation,
+)
+
 
 ENGINEERING_STATUS_SCHEMA = "hardware_splicer.engineering_status.v1"
 
@@ -508,3 +513,8 @@ def build_engineering_status(plan: Mapping[str, Any]) -> EngineeringStatus:
             "release_authorized": False,
         },
     )
+
+
+# Each importer must see the fully wrapped status builder.
+_install_status()
+_install_revalidation()

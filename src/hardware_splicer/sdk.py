@@ -190,6 +190,7 @@ def engine_doctor() -> Dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
         "ok": bool(status.get("ok")),
+        "headless_ready": status.get("headless_ready"),
         "demo_ready": status.get("demo_ready"),
         "fab_export_ready": status.get("fab_export_ready"),
         "testing_mode": testing_mode,
