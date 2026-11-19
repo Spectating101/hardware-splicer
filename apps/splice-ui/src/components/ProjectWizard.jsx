@@ -42,8 +42,9 @@ export default function ProjectWizard({
   buildError,
   stageLabel,
   embedded = false,
+  initialMode = INITIAL_WIZARD.mode,
 }) {
-  const [wizard, setWizard] = useState({ ...INITIAL_WIZARD });
+  const [wizard, setWizard] = useState({ ...INITIAL_WIZARD, mode: initialMode });
   const [stepId, setStepId] = useState("goal");
   const [clarifyLoading, setClarifyLoading] = useState(false);
   const [clarifyError, setClarifyError] = useState(null);
@@ -247,7 +248,7 @@ export default function ProjectWizard({
           <h2>{embedded ? "Project intake" : "Start a hardware project"}</h2>
           <p className="muted">
             {embedded
-              ? "Choose greenfield or salvage. This session stays in memory until you cancel or leave."
+              ? "Describe the goal and requirements for this project."
               : "Describe what you want — we’ll turn it into a splice plan and carrier board."}
           </p>
         </div>

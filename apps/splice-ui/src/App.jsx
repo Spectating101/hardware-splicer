@@ -17,7 +17,7 @@ import ProductShowcase from "./components/ProductShowcase.jsx";
 import DetailedAssemblyReference from "./components/DetailedAssemblyReference.jsx";
 import SortingWorkcell from "./components/SortingWorkcell.jsx";
 import InterfaceLabPanel from "./components/InterfaceLabPanel.jsx";
-import DigitalStudyLibrary from "./projectSession/DigitalStudyLibrary.jsx";
+import NewProject from "./projectSession/NewProject.jsx";
 import { StatusPill } from "./components/ProjectPanels.jsx";
 import { useSpliceJob } from "./hooks/useSpliceJob.js";
 import { ADVANCED_VIEWS, VIEWS, isAdvancedView } from "./nav.js";
@@ -55,15 +55,14 @@ function jobStatusClass(status) {
 }
 
 function persistenceStatusClass(status) {
-  if (status === "saved" || status === "restored") return "job-ok";
   if (status === "saving") return "job-run";
   if (status === "failed" || status === "conflict") return "job-fail";
   return "";
 }
 
 function formatProjectName(name) {
-  if (!name) return "Untitled build";
-  return name.replace(/_/g, " ").replace(/\s+/g, " ").trim();
+  if (!name) return "Untitled project";
+  return name.replace(/_/g, " ").replace(/\s+/g, " ").trim() || "Untitled project";
 }
 
 function formatJobStatus(status) {
@@ -74,7 +73,7 @@ function formatJobStatus(status) {
 function formatSavedAt(value) {
   if (!value) return "Not saved";
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Saved";
+  if (Number.isNaN(date.getTime())) return "Not saved";
   return `Saved ${date.toLocaleString()}`;
 }
 
@@ -98,9 +97,10 @@ function ProjectsHome({ projects, listError, loading, online, onStart, onLibrary
       {!online && <p role="status">{loading ? "Connecting to the engineering backend…" : "The engineering backend is offline."}</p>}
       {listError && <p role="alert">{listError} <button type="button" onClick={onRetry}>Retry project list</button></p>}
       {matches.length > 0 ? <div className="project-rows">
-        {matches.map((project) => <button type="button" key={project.project_id} onClick={() => onOpen(project.project_id)} disabled={!online}>
+        {matches.map((project) => <button type="button" key={project.project_id} data-project-id={project.project_id} onClick={() => onOpen(project.project_id)} disabled={!online}>
           <span><strong>{formatProjectName(project.name)}</strong><small>{formatSavedAt(project.saved_at)}</small></span>
-          <span className="project-stage">{project.current_stage}</span><span>Rev {project.latest_revision}</span>
+          {project.current_stage && <span className="project-stage">{project.current_stage}</span>}
+          {project.latest_revision != null && <span>Rev {project.latest_revision}</span>}
         </button>)}
       </div> : online && !listError && <p className="muted">{loading ? "Loading saved projects…" : projects.length
         ? "No projects match this name." : "Your first saved project will appear here."}</p>}
@@ -111,7 +111,6 @@ function ProjectsHome({ projects, listError, loading, online, onStart, onLibrary
 function AdvancedHub({ onExamples, onLab }) {
   return (
     <section className="card advanced-hub" data-testid="advanced-hub">
-      <p className="eyebrow">Advanced</p>
       <h1>Developer tools</h1>
       <p className="muted">
         Adapters and demos that are not part of the normal project journey. Prefer{" "}
@@ -145,6 +144,7 @@ export default function App() {
   const [previewContext, setPreviewContext] = useState(null);
   const [session, dispatch] = useReducer(projectSessionReducer, undefined, () => createEmptySession());
   const [creatingDigital, setCreatingDigital] = useState(false);
+  const [newEntry, setNewEntry] = useState("goal");
 
   const spliceJob = useSpliceJob();
   const projectPersistence = useProjectPersistence({
@@ -244,8 +244,8 @@ export default function App() {
   }, [session.buildDir]);
 
   const startProject = () => {
-    dispatch({ type: ACTIONS.START_PROJECT });
-    setView(VIEWS.workspace);
+    setNewEntry("goal");
+    setView(VIEWS.newProject);
   };
 
   const openSavedProject = useCallback(
@@ -289,14 +289,21 @@ export default function App() {
     } finally { setCreatingDigital(false); }
   };
 
-  const cancelIntake = () => {
-    dispatch({ type: ACTIONS.RESET });
-    setView(VIEWS.home);
+  const cancelIntake = () => setView(VIEWS.home);
+
+  const completeIntake = (payload) => {
+    if ([VIEWS.newProject, VIEWS.library].includes(view)) dispatch({ type: ACTIONS.RESET });
+    dispatch({ type: ACTIONS.COMMIT_INTAKE, intake: payload.intake, goal: payload.goal,
+      projectName: payload.projectName, composeMode: payload.composeMode, constraints: payload.constraints });
+    setView(VIEWS.workspace);
   };
+
+  const openLibrary = () => { setNewEntry("reference"); setView(VIEWS.library); };
 
   const startBuild = async (payload, { exampleId, route = "splice" } = {}) => {
     spliceJob.clearError();
     setPreviewContext(null);
+    if ([VIEWS.newProject, VIEWS.library].includes(view)) dispatch({ type: ACTIONS.RESET });
     dispatch({ type: ACTIONS.START_FROM_INTAKE, intake: payload });
     setView(VIEWS.workspace);
     const jobId =
@@ -442,7 +449,7 @@ export default function App() {
           {canResume && <button type="button" className={`nav-button ${inWorkspace ? "active" : ""}`}
             data-testid="nav-project" onClick={resumeProject} disabled={!health?.ok}>Resume project</button>}
           <button type="button" className={`nav-button ${[VIEWS.library, VIEWS.sortcell, VIEWS.reference, VIEWS.showcase].includes(view) ? "active" : ""}`}
-            data-testid="nav-library" onClick={() => setView(VIEWS.library)}>Design library</button>
+            data-testid="nav-library" onClick={openLibrary}>Design library</button>
           <button
             type="button"
             className={`nav-button ${advancedActive ? "active" : ""}`}
@@ -488,7 +495,7 @@ export default function App() {
           <div className="sidebar-section">
             <div className="sidebar-label">Project state</div>
             <div className={`project-button ${persistenceStatusClass(session.persistenceStatus)}`}>
-              <strong>{session.projectName || "Untitled project"}</strong>
+              <strong>{formatProjectName(session.projectName)}</strong>
               <span className="job-status">
                 {session.persistenceStatus === "saving"
                   ? "Saving…"
@@ -496,7 +503,7 @@ export default function App() {
                     ? "Save conflict"
                     : session.persistenceStatus === "failed"
                       ? "Save failed"
-                      : session.persistenceStatus === "restored"
+                      : session.persistenceStatus === "restored" && session.snapshotRevision
                         ? `Restored r${session.snapshotRevision}`
                         : session.snapshotRevision
                           ? `Saved r${session.snapshotRevision}`
@@ -521,7 +528,7 @@ export default function App() {
                 >
                   <strong>{formatProjectName(project.name)}</strong>
                   <span className="job-status">
-                    {project.current_stage} · r{project.latest_revision}
+                    {[project.current_stage, project.latest_revision != null ? `r${project.latest_revision}` : null].filter(Boolean).join(" · ")}
                   </span>
                 </button>
               ))}
@@ -563,16 +570,19 @@ export default function App() {
           {view === VIEWS.home && <ProjectsHome projects={projectPersistence.projects} listError={projectPersistence.listError}
             loading={(!health && !loadError) || projectPersistence.listLoading} online={health?.ok}
             onStart={startProject} onOpen={openSavedProject} onRetry={projectPersistence.refreshProjects}
-            onLibrary={() => setView(VIEWS.library)} />}
+            onLibrary={openLibrary} />}
 
-          {view === VIEWS.library && <div className="library-page">
-            <DigitalStudyLibrary onStart={startDigitalProject} online={health?.ok} busy={creatingDigital} />
+          {[VIEWS.newProject, VIEWS.library].includes(view) && <div className="library-page">
+            <NewProject key={view} initialEntry={newEntry} online={health?.ok} busy={creatingDigital}
+              onStartStudy={startDigitalProject} onComplete={completeIntake} onCancel={cancelIntake}
+              donorFixtures={donorFixtures} visionCapabilities={visionCapabilities} llmPolicy={health?.llm_policy}
+              onBuild={startBuild} building={spliceJob.active} buildError={spliceJob.error} stageLabel={spliceJob.stageLabel} />
             <section className="card"><h2>Explore reference projects</h2><div className="hero-actions">
-              <button data-testid="nav-sortcell" onClick={() => setView(VIEWS.sortcell)}>Sorting workcell</button>
-              <button data-testid="nav-complete-assembly" onClick={() => setView(VIEWS.reference)}>Complete CAD assembly</button>
-              <button data-testid="nav-product-explorer" onClick={() => setView(VIEWS.showcase)}>Product explorer</button>
-              <button onClick={() => setView(VIEWS.example)}>Example projects</button>
-              <button onClick={handleQuickDemo} disabled={!health?.ok}>Quick demo</button>
+              <button className="secondary" data-testid="nav-sortcell" onClick={() => setView(VIEWS.sortcell)}>Sorting workcell</button>
+              <button className="secondary" data-testid="nav-complete-assembly" onClick={() => setView(VIEWS.reference)}>Complete CAD assembly</button>
+              <button className="secondary" data-testid="nav-product-explorer" onClick={() => setView(VIEWS.showcase)}>Product explorer</button>
+              <button className="secondary" onClick={() => setView(VIEWS.example)}>Example projects</button>
+              <button className="secondary" onClick={handleQuickDemo} disabled={!health?.ok}>Quick demo</button>
             </div></section>
           </div>}
 
@@ -590,18 +600,8 @@ export default function App() {
               visionCapabilities={visionCapabilities}
               llmPolicy={health?.llm_policy}
               onIntakeBuild={(payload, options) => startBuild(payload, options)}
-              onIntakeComplete={(payload) => {
-                dispatch({
-                  type: ACTIONS.COMMIT_INTAKE,
-                  intake: payload.intake,
-                  goal: payload.goal,
-                  projectName: payload.projectName,
-                  composeMode: payload.composeMode,
-                  constraints: payload.constraints,
-                });
-                setView(VIEWS.workspace);
-                setToast("Intake saved — Design Studio is ready with your project goal");
-              }}
+              onIntakeComplete={completeIntake}
+              onReference={(target) => setView(VIEWS[target])}
               onIntakeCancel={cancelIntake}
               intakeBuilding={spliceJob.active}
               intakeBuildError={spliceJob.error}
@@ -629,7 +629,7 @@ export default function App() {
               <section className="card">
                 <div className="preview-toolbar" style={{ marginBottom: "0.75rem" }}>
                   <button type="button" className="ghost" onClick={() => setView(VIEWS.advanced)}>
-                    ← Advanced
+                    Advanced
                   </button>
                 </div>
                 <h2>Example projects</h2>
@@ -671,7 +671,7 @@ export default function App() {
             <div className="preview-shell">
               <div className="preview-toolbar card">
                 <button type="button" className="ghost" onClick={() => setView(VIEWS.lab)}>
-                  ← Back to Interface Lab
+                  Back to Interface Lab
                 </button>
                 <button
                   type="button"
@@ -705,7 +705,7 @@ export default function App() {
             <div className="lab-shell" data-testid="interface-lab">
               <div className="preview-toolbar" style={{ marginBottom: "0.75rem" }}>
                 <button type="button" className="ghost" onClick={() => setView(VIEWS.advanced)}>
-                  ← Advanced
+                  Advanced
                 </button>
               </div>
               <InterfaceLabPanel
