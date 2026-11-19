@@ -28,17 +28,21 @@ const sides = {
   },
   "5": {
     parts: [
-      part("display", "Panel 5", "vendor_step", { label: "5-inch panel" }),
+      part("display", "Panel 5", "vendor_step", { label: "Touch Display 2, 5-inch · nominal only" }),
       part("pi4-dsi", "pi4_dsi", "envelope", { label: "Pi DSI port" }),
       part("tray", "Tray", "custom", { label: "Rear tray" }),
     ],
-    blockers: [{ part_id: "display", reason: "display lug thread/engagement nominal only" }],
+    blockers: [
+      { part_id: "display", reason: "Display lug thread/engagement nominal only" },
+      { interface_id: "display-ribbon", reason: "pin_mapping_unknown" },
+    ],
     interfaces: [{
       interface_id: "display-ribbon", label: "DSI FFC", from_part_id: "pi4-dsi", to_part_id: "display",
       open_checks: ["pin_mapping_unknown", "signal_voltage_unknown"],
     }],
     revision_diff: {
       status: "available",
+      counts: { added: 1, changed: 1, removed: 1, unchanged: 1 },
       nodes: [
         { node_name: "PANEL_7", occurrence: 1, status: "removed" },
         { node_name: "Panel 5", occurrence: 1, status: "added" },
@@ -237,45 +241,97 @@ describe("Fielddeck evidence UI", () => {
       { field: "pin_mapping", value: false, state: "unknown", source: null },
       { field: "documented_power_w", value: 1.4, state: "datasheet", source: "brief.pdf" },
     ]} />);
-    const unknown = screen.getByText("pin_mapping").parentElement;
-    expect(unknown.querySelector(".fd-evidence-value")).toHaveTextContent(/^unknown$/);
-    expect(unknown.querySelector(".fd-evidence-source")).toHaveTextContent(/^unknown$/);
+    const unknown = screen.getByText("Pin mapping").parentElement;
+    expect(unknown).toHaveAttribute("title", "pin_mapping");
+    expect(unknown).toHaveTextContent(/^Pin mapping · Unknown$/);
     expect(screen.getByText("1.4 W")).toBeVisible();
     expect(screen.getByText("datasheet")).toBeVisible();
     expect(screen.getByRole("link", { name: "brief.pdf" })).toBeVisible();
   });
 
-  it("syncs picks and interface selection with the tree and shows no readiness claim", async () => {
+  it("groups revision changes and syncs picks with the tree and inspector", async () => {
     render(<FieldDeckScene />);
-    const tree = within(screen.getByRole("complementary", { name: "Part tree" }));
-    const assembly = tree.getByRole("button", { name: "Assembly" });
-    expect(assembly).toHaveAttribute("aria-expanded", "false");
-    expect(screen.queryByRole("complementary", { name: "Selection details" })).toBeNull();
-    fireEvent.click(assembly);
+    const panel = screen.getByRole("complementary", { name: "Part tree" });
+    const tree = within(panel);
+    expect(tree.getByRole("button", { name: "Assembly" })).toHaveAttribute("aria-expanded", "true");
     const tray = await tree.findByRole("button", { name: "Rear tray" });
+    expect(tree.getAllByRole("region").map((group) => group.getAttribute("aria-label"))).toEqual([
+      "Added", "Changed", "Removed", "Interfaces", "Blockers", "Unchanged",
+    ]);
+    expect(tree.getByRole("heading", { name: "Added 1" })).toBeVisible();
+    expect(tree.getByRole("heading", { name: "Removed 1" })).toBeVisible();
+    const unchanged = tree.getByRole("button", { name: /Unchanged 1/ });
+    expect(unchanged).toHaveAttribute("aria-expanded", "false");
+    expect(tree.queryByRole("button", { name: "Pi DSI port" })).toBeNull();
+    fireEvent.click(unchanged);
+    expect(tree.getByRole("button", { name: "Pi DSI port" })).toBeVisible();
+
     const inspector = within(screen.getByRole("complementary", { name: "Selection details" }));
     act(() => callbacks.onPick("5:part:tray"));
     expect(tray).toHaveAttribute("aria-pressed", "true");
-    expect(inspector.getByText("geometry changed")).toBeVisible();
-    fireEvent.click(tree.getByRole("button", { name: "DSI FFC" }));
-    expect(inspector.getByText("pin_mapping_unknown")).toBeVisible();
-    expect(inspector.getByText("signal_voltage_unknown")).toBeVisible();
+    expect(inspector.getByText("Custom CAD · changed · physical fit unknown")).toBeVisible();
     expect(screen.getByRole("slider", { name: "Explode" })).toHaveValue("0.6");
+    expect(screen.getByTestId("fielddeck-scene")).not.toHaveTextContent(/\b(?:ready|verified|measured)\b/i);
+  });
+
+  it("marks cable endpoints A and B and labels their midpoint without drawing a route", async () => {
+    render(<FieldDeckScene />);
+    fireEvent.click(await screen.findByRole("button", { name: "DSI FFC" }));
+    const inspector = within(screen.getByRole("complementary", { name: "Selection details" }));
+    expect(inspector.getByText("Routing unknown")).toBeVisible();
+    expect(inspector.getByText("A").parentElement).toHaveTextContent("Pi DSI port");
+    expect(inspector.getByText("B").parentElement).toHaveTextContent("5-inch display");
+    expect(inspector.getAllByText("Pin mapping unknown")).toHaveLength(1);
+    expect(inspector.getByText("Pin mapping unknown").parentElement).toHaveTextContent("2, 3");
+    expect(inspector.getByText("Signal voltage unknown")).toBeVisible();
+    const annotations = screen.getByLabelText("Scene callouts");
+    expect(within(annotations).getByLabelText("Endpoint A").parentElement)
+      .toHaveAttribute("data-pin-anchor", "5:part:pi4-dsi");
+    expect(within(annotations).getByLabelText("Endpoint B").parentElement)
+      .toHaveAttribute("data-pin-anchor", "5:part:display");
+    const label = annotations.querySelector("[data-route-label]");
+    expect(label).toHaveTextContent("Routing unknown");
+    expect(label.querySelector("path")).toBeNull();
+    expect(annotations.querySelector("svg > path")).toBeNull();
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({
       selectedKeys: ["5:part:pi4-dsi", "5:part:display"],
     }));
-    expect(screen.getByText("No physical validation performed")).toBeVisible();
-    expect(screen.getByText("1 blocker")).toBeVisible();
-    expect(screen.getByTestId("fielddeck-scene")).not.toHaveTextContent(/\bready\b/i);
-    act(() => callbacks.onCalloutLayout(["5:link:display-ribbon"]));
-    expect(within(inspector.getByLabelText("Scene callouts")).getByText("DSI FFC")).toBeVisible();
   });
 
-  it("opens only one narrow sheet and keeps callouts inside Details", async () => {
+  it("uses the same blocker number on the pin, tree and inspector and keeps the qualifier intact", async () => {
+    render(<FieldDeckScene />);
+    const filter = await screen.findByRole("button", { name: "Physical fit unknown · 4 open questions" });
+    const scene = screen.getByTestId("fielddeck-scene");
+    const pin = scene.querySelector('[data-question-number="1"]');
+    expect(pin).toHaveTextContent(/^1$/);
+    expect(pin.closest("[data-pin-anchor]")).toHaveAttribute("data-pin-anchor", "5:part:display");
+    expect([...scene.querySelectorAll("[data-anchor]")].map((label) => label.textContent).sort()).toEqual([
+      "5-inch display", "7-inch display",
+    ]);
+    fireEvent.click(await screen.findByRole("button", { name: "Rear tray" }));
+    fireEvent.click(pin);
+    const inspector = within(screen.getByRole("complementary", { name: "Selection details" }));
+    expect(inspector.getByRole("heading", { name: "Touch Display 2, 5-inch · nominal only" })).toBeVisible();
+    expect(inspector.getByText("Vendor model · added · physical fit unknown")).toBeVisible();
+    expect(inspector.getByText("Display lug thread/engagement nominal only").parentElement).toHaveTextContent(/^1 Display lug thread\/engagement nominal only$/);
+    fireEvent.click(filter);
+    const tree = within(screen.getByRole("complementary", { name: "Part tree" }));
+    expect(filter).toHaveAttribute("aria-pressed", "true");
+    expect(tree.queryByRole("region", { name: "Added" })).toBeNull();
+    expect(tree.getByRole("button", { name: "1 Display lug thread/engagement nominal only" }))
+      .toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByRole("button", { name: "7-inch" }));
+    expect(scene.querySelector("[data-question-number]")).toBeNull();
+  });
+
+  it("switches between narrow sheets and keeps the current selection in the peek", async () => {
     narrow = true;
     render(<FieldDeckScene />);
-    const parts = await screen.findByRole("button", { name: "Parts" });
-    const details = screen.getByRole("button", { name: "Details" });
+    await screen.findByRole("slider", { name: "Explode" });
+    const panels = within(screen.getByRole("group", { name: "Scene panels" }));
+    const parts = panels.getByRole("button", { name: "Parts" });
+    const details = panels.getByRole("button", { name: "Inspector" });
+    const blockers = panels.getByRole("button", { name: "Blockers" });
     expect(parts).toHaveAttribute("aria-expanded", "false");
     expect(details).toHaveAttribute("aria-expanded", "false");
     expect(screen.queryByRole("complementary", { name: "Part tree" })).toBeNull();
@@ -285,21 +341,23 @@ describe("Fielddeck evidence UI", () => {
     const tree = within(screen.getByRole("complementary", { name: "Part tree" }));
     fireEvent.click(tree.getByRole("button", { name: "DSI FFC" }));
     expect(parts).toHaveAttribute("aria-expanded", "true");
-    expect(screen.queryByLabelText("Scene callouts")).toBeNull();
+    expect(screen.getByTestId("fielddeck-scene").querySelector(".fd-peek"))
+      .toHaveTextContent(/DSI FFC.*physical fit unknown.*3 open questions/);
 
     fireEvent.click(details);
     expect(parts).toHaveAttribute("aria-expanded", "false");
     expect(details).toHaveAttribute("aria-expanded", "true");
     expect(screen.queryByRole("complementary", { name: "Part tree" })).toBeNull();
     const inspector = within(screen.getByRole("complementary", { name: "Selection details" }));
-    expect(within(inspector.getByLabelText("Scene callouts")).getByText("DSI FFC")).toBeVisible();
-    expect(inspector.getByText("pin_mapping_unknown")).toBeVisible();
-    expect(screen.getByTestId("fielddeck-scene").querySelector("[data-anchor]")).toBeNull();
+    expect(inspector.getByText("Routing unknown")).toBeVisible();
+    expect(inspector.getByText("Pin mapping unknown")).toBeVisible();
 
-    fireEvent.click(parts);
+    fireEvent.click(blockers);
     expect(details).toHaveAttribute("aria-expanded", "false");
     expect(screen.queryByRole("complementary", { name: "Selection details" })).toBeNull();
-    fireEvent.click(parts);
+    expect(tree.getByRole("region", { name: "Blockers" })).toBeVisible();
+    expect(tree.queryByRole("region", { name: "Added" })).toBeNull();
+    fireEvent.click(blockers);
     expect(screen.queryByRole("complementary", { name: "Part tree" })).toBeNull();
   });
 });

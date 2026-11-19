@@ -73,17 +73,16 @@ async function main() {
     await scene.getByRole("button", { name: "5-inch", exact: true }).click();
     await page.waitForTimeout(500);
     await scene.getByRole("button", { name: "Compare", exact: true }).click();
-    await scene.getByRole("button", { name: "Assembly", exact: true }).click();
-    await scene.locator('[data-row="5:part:tray-rear-left"]').click();
-    await inspector.getByText("geometry changed", { exact: true }).waitFor();
+    await scene.locator('[data-row="5:part:tray-rear-left"]:visible').first().click();
+    await inspector.getByText(/· changed ·/).waitFor();
     await capture("compare", 950);
 
-    await scene.locator('[data-row="5:part:display"]').click();
-    await inspector.getByText("vendor model", { exact: true }).waitFor();
+    await scene.locator('[data-row="5:part:display"]:visible').first().click();
+    await inspector.getByText(/^Vendor model ·/).waitFor();
     await capture("display-selected");
 
-    await scene.locator('[data-row="5:link:display-ribbon"]').click();
-    await inspector.getByText("pin_mapping_unknown", { exact: true }).waitFor();
+    await scene.locator('[data-row="5:link:display-ribbon"]:visible').first().click();
+    await inspector.getByText("Routing unknown", { exact: true }).waitFor();
     await scene.getByRole("button", { name: "Next stop", exact: true }).click();
     await capture("cable-selected", 3000);
     await page.setViewportSize({ width: 390, height: 844 });

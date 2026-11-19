@@ -1,6 +1,9 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
+import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2.js";
+import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { HorizontalBlurShader } from "three/examples/jsm/shaders/HorizontalBlurShader.js";
 import { VerticalBlurShader } from "three/examples/jsm/shaders/VerticalBlurShader.js";
@@ -8,9 +11,9 @@ import { fielddeckSceneUrl } from "../api.js";
 import { classifyPart, DEFAULT_EXPLODE, explodeGroupOffsets, FIELDDECK_NARROW, placeCallouts, rowForNode, TOUR } from "./fielddeckLogic.js";
 
 const COLORS = {
-  custom: 0x35302a, vendor_step: 0x626b77, envelope: 0x8fa8c4,
-  unknown: 0xa6b0bc, proxy: 0xa6b0bc, changed: 0xf2b84b, added: 0x4cc2a8,
-  removed: 0xff7a6b, focus: 0x8ab4ff,
+  custom: 0xd8ccb6, vendor_step: 0x94a6b2, envelope: 0x94a6b2,
+  unknown: 0x9097a0, proxy: 0xa6a098, changed: 0xe0a040, added: 0x2dd4bf,
+  removed: 0xf17e70,
 };
 const CONTACT_LAYER = 1;
 const UP = new THREE.Vector3(0, 0, 1);
@@ -62,62 +65,43 @@ export function disposeFielddeck(assets) {
   resources.forEach((resource) => resource.dispose());
 }
 
-function solidMaterial(basis, displayTop) {
-  if (basis === "custom") {
-    return new THREE.MeshPhysicalMaterial({ color: 0xc5bdb2, roughness: 0.68, clearcoat: 0.07 });
-  }
-  if (!displayTop) {
-    return new THREE.MeshStandardMaterial({ color: COLORS.vendor_step, roughness: 0.82, flatShading: true });
-  }
-  const material = new THREE.MeshPhysicalMaterial({ color: 0x39414a, roughness: 0.82, flatShading: true });
-  // Shade the existing vendor mesh's front face in its baked CAD coordinates.
+function solidMaterial(basis) {
+  return new THREE.MeshStandardMaterial({
+    color: COLORS[basis], metalness: 0, roughness: basis === "vendor_step" ? 0.78 : 0.84,
+    polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1,
+  });
+}
+
+function applyHatch(material, spacing, pixelRatio) {
   material.onBeforeCompile = (shader) => {
-    shader.uniforms.fielddeckDisplayTop = displayTop;
-    shader.uniforms.fielddeckGlass = { value: new THREE.Color(0x101319) };
-    shader.vertexShader = shader.vertexShader.replace("#include <common>",
-      "#include <common>\nvarying vec2 fielddeckFace;");
-    shader.vertexShader = shader.vertexShader.replace("#include <begin_vertex>",
-      "#include <begin_vertex>\nfielddeckFace = vec2(position.z, normal.z);");
-    shader.fragmentShader = shader.fragmentShader.replace("#include <common>", `
-      #include <common>
-      varying vec2 fielddeckFace;
-      uniform float fielddeckDisplayTop;
-      uniform vec3 fielddeckGlass;
-    `);
+    shader.uniforms.hatchStep = { value: spacing * pixelRatio };
+    shader.fragmentShader = shader.fragmentShader.replace("#include <common>",
+      "#include <common>\nuniform float hatchStep;");
     shader.fragmentShader = shader.fragmentShader.replace("#include <color_fragment>", `
       #include <color_fragment>
-      float glass = step(fielddeckDisplayTop - 2.5, fielddeckFace.x) * smoothstep(0.85, 0.99, fielddeckFace.y);
-      diffuseColor.rgb = mix(diffuseColor.rgb, fielddeckGlass, glass);
+      float hatch = step(0.8, fract((gl_FragCoord.x + gl_FragCoord.y) / hatchStep));
+      diffuseColor.rgb *= 1.0 - hatch * 0.24;
     `);
-    shader.fragmentShader = shader.fragmentShader.replace("#include <roughnessmap_fragment>",
-      "#include <roughnessmap_fragment>\nroughnessFactor = mix(roughnessFactor, 0.22, glass);");
   };
-  return material;
 }
 
-function edgeMaterial(color, pattern) {
-  const options = { color, transparent: true, depthWrite: false, toneMapped: false };
-  return pattern
-    ? new THREE.LineDashedMaterial({ ...options, dashSize: pattern[0], gapSize: pattern[1] })
-    : new THREE.LineBasicMaterial(options);
+function edgeMaterial(color, pattern, linewidth) {
+  return new LineMaterial({
+    color, linewidth, dashed: Boolean(pattern), dashSize: pattern?.[0] ?? 1, gapSize: pattern?.[1] ?? 1,
+    transparent: true, depthWrite: false, toneMapped: false, alphaToCoverage: true,
+  });
 }
 
-function stylePart(entry, compare, weight, ghost, emphasis, accent) {
+function stylePart(entry, compare, weight, ghost, accent) {
   const { basis, outline, row } = entry;
-  const { solid, baseColor, fill, edge, focus, hull, surface, lines, rings, shells } = entry.style;
+  const { solid, baseColor, mutedColor, fill, edge, surface, lines } = entry.style;
   const translucent = outline || ghost;
-  const dim = row.delta === "unchanged" ? 1 - compare * (1 - emphasis) * 0.38 : 1;
-  const fillAlpha = ghost ? 0.035 : basis === "envelope" ? 0.008 : 0.012;
-  const detail = ghost ? COLORS.removed : COLORS[basis];
-  const edgeAlpha = ghost || outline ? 0.82 : basis === "custom" ? 0.32 : 0.48;
-  const highlight = !ghost && (row.delta === "changed" || row.delta === "added");
-
-  fill.color.setHex(detail);
-  fill.opacity = fillAlpha * weight * dim;
+  const dimming = row.delta === "unchanged" ? compare : 0;
+  const dim = 1 - dimming * 0.6;
+  fill.color.setHex(ghost ? COLORS.removed : COLORS[basis]);
+  fill.opacity = weight * dim * (ghost ? 0.035 : basis === "envelope" ? 0.06 : 0);
   if (solid) {
-    solid.color.copy(baseColor);
-    if (row.delta === "changed") solid.color.lerp(entry.accentColor, accent * 0.12);
-    solid.color.multiplyScalar(dim);
+    solid.color.copy(baseColor).lerp(mutedColor, dimming);
     solid.opacity = weight;
     const transparent = weight < 0.999;
     if (solid.transparent !== transparent) {
@@ -127,27 +111,20 @@ function stylePart(entry, compare, weight, ghost, emphasis, accent) {
     solid.depthWrite = weight > 0.55;
   }
 
-  const edgeVariant = ghost ? edge.ghost : edge.base;
-  edgeVariant.color.setHex(detail);
-  if (highlight) edgeVariant.color.lerp(entry.accentColor, accent);
-  const opacity = ghost ? edgeAlpha + 0.18 * emphasis : THREE.MathUtils.lerp(edgeAlpha, 0.9, highlight ? accent : 0);
-  edgeVariant.opacity = opacity * weight * dim;
-  focus.opacity = ghost ? 0 : emphasis * weight * (highlight ? 1 - 0.75 * accent : 1);
-  if (hull) {
-    hull.opacity = accent * weight * 0.62;
-    hull.visible = hull.opacity > 0.01 && !ghost;
-  }
+  const variant = ghost ? edge.ghost : edge.diff && accent > 0 ? edge.diff : edge.base;
+  if (variant === edge.diff) variant.color.setHex(COLORS[basis]).lerp(entry.accentColor, accent);
+  const baseAlpha = outline ? 0.82 : basis === "custom" ? 0.32 : 0.48;
+  variant.opacity = weight * dim * (ghost ? 1 : THREE.MathUtils.lerp(baseAlpha, 1, accent));
 
   for (const mesh of surface) {
     mesh.material = translucent ? fill : solid;
+    mesh.visible = basis !== "unknown" || ghost;
     mesh.castShadow = !translucent && weight >= 0.49;
     mesh.receiveShadow = !translucent;
     if (mesh.castShadow) mesh.layers.enable(CONTACT_LAYER);
     else mesh.layers.disable(CONTACT_LAYER);
   }
-  lines.forEach((line) => { line.material = edgeVariant; });
-  rings.forEach((line) => { line.visible = focus.opacity > 0.01; });
-  shells.forEach((mesh) => { mesh.visible = hull.visible; });
+  lines.forEach((line) => { line.material = variant; });
 }
 
 function makeEntries(assets, index, scene, resources) {
@@ -178,22 +155,26 @@ function makeEntries(assets, index, scene, resources) {
         const { basis, outline } = classifyPart(row.part);
         const group = new THREE.Group();
         const vector = new THREE.Vector3();
-        const pattern = basis === "envelope" ? [4, 2.5] : outline ? [1.3, 2.8] : null;
-        const displayTop = basis === "vendor_step" && row.part.part_id === "display" ? { value: 0 } : null;
-        const solid = outline ? null : own(solidMaterial(basis, displayTop));
-        const hull = row.delta === "added" && !outline
-          ? own(new THREE.MeshBasicMaterial({
-              color: COLORS.added, side: THREE.BackSide, transparent: true, depthWrite: false, toneMapped: false,
-            })) : null;
+        const pattern = basis === "envelope" ? [4, 2.5] : basis === "unknown" ? [0.9, 2.8] : null;
+        const solid = outline ? null : own(solidMaterial(basis));
+        const baseColor = new THREE.Color(COLORS[basis]);
+        const gray = baseColor.r * 0.2126 + baseColor.g * 0.7152 + baseColor.b * 0.0722;
+        const mutedColor = baseColor.clone().lerp(new THREE.Color().setRGB(gray, gray, gray), 0.65).multiplyScalar(0.4);
+        const fill = own(new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false }));
+        const pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+        if (basis === "envelope") applyHatch(fill, 8, pixelRatio);
+        if (basis === "proxy") applyHatch(solid, 8, pixelRatio);
         entry = {
-          row, basis, outline, group, vector, displayTop, bounds: new THREE.Box3(), emphasis: 0, hover: 0,
+          row, basis, outline, group, vector, bounds: new THREE.Box3(), hover: 0,
           accentColor: new THREE.Color(COLORS[row.delta]),
           style: {
-            solid, baseColor: solid?.color.clone(),
-            fill: own(new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, side: THREE.DoubleSide })),
-            edge: { base: own(edgeMaterial(COLORS[basis], pattern)), ghost: own(edgeMaterial(COLORS.removed, [3.25, 2.25])) },
-            focus: own(edgeMaterial(COLORS.focus, pattern)),
-            hull, surface: [], lines: [], rings: [], shells: [],
+            solid, baseColor, mutedColor, fill,
+            edge: {
+              base: own(edgeMaterial(COLORS[basis], pattern, 1)),
+              diff: ["added", "changed"].includes(row.delta) ? own(edgeMaterial(COLORS[row.delta], pattern, 1.5)) : null,
+              ghost: row.delta === "removed" ? own(edgeMaterial(COLORS.removed, [5, 3], 1.5)) : null,
+            },
+            surface: [], lines: [],
           },
         };
         entries.set(row.key, entry);
@@ -205,29 +186,19 @@ function makeEntries(assets, index, scene, resources) {
       if (!geometry.getAttribute("normal")) geometry.computeVertexNormals();
       geometry.computeBoundingBox();
       entry.bounds.union(geometry.boundingBox);
-      if (entry.displayTop) entry.displayTop.value = entry.bounds.max.z;
       const { style, group } = entry;
       const mesh = new THREE.Mesh(geometry, style.solid ?? style.fill);
       style.surface.push(mesh);
       group.add(mesh);
 
-      const edges = own(new THREE.EdgesGeometry(geometry, 28));
-      const line = new THREE.LineSegments(edges, style.edge.base);
-      const ring = new THREE.LineSegments(edges, style.focus);
-      line.computeLineDistances();
-      ring.renderOrder = 2;
+      const edges = new THREE.EdgesGeometry(geometry, 28);
+      const segments = own(new LineSegmentsGeometry());
+      segments.setPositions(edges.getAttribute("position").array);
+      edges.dispose();
+      const line = new LineSegments2(segments, style.edge.base);
+      if (style.edge.base.dashed || style.edge.ghost) line.computeLineDistances();
       style.lines.push(line);
-      style.rings.push(ring);
-      group.add(line, ring);
-
-      if (style.hull) {
-        const shell = new THREE.Mesh(geometry, style.hull);
-        const center = geometry.boundingBox.getCenter(new THREE.Vector3());
-        shell.scale.setScalar(1.012);
-        shell.position.copy(center).multiplyScalar(1 - shell.scale.x);
-        style.shells.push(shell);
-        group.add(shell);
-      }
+      group.add(line);
     });
   }
   return entries;
@@ -402,138 +373,101 @@ function modelWeights(mode) {
   return { seven: mode === "7" ? 1 : 0, five: mode === "7" ? 0 : 1, compare: mode === "compare" ? 1 : 0 };
 }
 
-function layoutCallouts(host, camera, entries, meshes, width, height, ray, panels) {
-  const annotations = [...host.querySelectorAll("[data-anchor]")];
-  if (!annotations.length) return [];
+function layoutAnnotations(host, camera, entries, width, height, canvasTop, panels, placeLabels) {
   const origin = host.getBoundingClientRect();
   const viewport = {
-    left: Math.max(0, -origin.left),
-    top: Math.max(0, -origin.top),
-    right: Math.min(origin.width, document.documentElement.clientWidth - origin.left),
-    bottom: Math.min(origin.height, document.documentElement.clientHeight - origin.top),
+    left: Math.max(8, 8 - origin.left),
+    top: Math.max(canvasTop + 8, 8 - origin.top),
+    right: Math.min(width, document.documentElement.clientWidth - origin.left) - 8,
+    bottom: Math.min(canvasTop + height, document.documentElement.clientHeight - origin.top) - 8,
   };
-  const occupied = panels.map((panel) => panel.getBoundingClientRect())
-    .filter((rect) => rect.width && rect.height)
-    .map(({ left, right, top, bottom }) => ({
-      left: left - origin.left, right: right - origin.left,
-      top: top - origin.top, bottom: bottom - origin.top,
-    }));
-  const ndc = new THREE.Vector2();
+  function rectFor(panel) {
+    const { left, right, top, bottom } = panel.getBoundingClientRect();
+    return { left: left - origin.left, right: right - origin.left, top: top - origin.top, bottom: bottom - origin.top };
+  }
   const project = (point) => {
-    const p = point.project(camera);
-    return { x: (p.x + 1) * width / 2, y: (1 - p.y) * height / 2, z: p.z };
+    const { x, y, z } = point.project(camera);
+    if (z < -1 || z > 1) return null;
+    return { x: (x + 1) * width / 2, y: canvasTop + (1 - y) * height / 2 };
   };
-  const hitAt = (x, y, objects) => {
-    ray.setFromCamera(ndc.set(x * 2 / width - 1, 1 - y * 2 / height), camera);
-    return ray.intersectObjects(objects, false)[0];
+  const boundsForKey = (key) => {
+    const entry = entries.get(key);
+    return entry?.group.visible ? entry.bounds.clone().translate(entry.group.position) : null;
   };
-  const covered = (x, y, surface, hit) => {
-    const first = hitAt(x, y, meshes);
-    return first && !surface.includes(first.object) && (!hit || first.distance < hit.distance - 0.1);
+  const centerFor = (key) => {
+    const bounds = boundsForKey(key);
+    return bounds && project(bounds.getCenter(new THREE.Vector3()));
   };
+  function position(node, point) {
+    const visible = point && point.x >= viewport.left && point.x <= viewport.right
+      && point.y >= viewport.top && point.y <= viewport.bottom;
+    node.style.visibility = visible ? "visible" : "hidden";
+    if (visible) node.style.transform = `translate(${point.x}px, ${point.y}px)`;
+  }
+  function outlineFor(bounds, pad = 0) {
+    if (!bounds) return null;
+    const corners = [bounds.min.x, bounds.max.x].flatMap((x) =>
+      [bounds.min.y, bounds.max.y].flatMap((y) =>
+        [bounds.min.z, bounds.max.z].map((z) => project(new THREE.Vector3(x, y, z)))));
+    if (corners.some((point) => !point)) return null;
+    const xs = corners.map(({ x }) => x);
+    const ys = corners.map(({ y }) => y);
+    return {
+      left: Math.min(...xs) - pad, right: Math.max(...xs) + pad,
+      top: Math.min(...ys) - pad, bottom: Math.max(...ys) + pad,
+    };
+  }
 
-  const inputs = annotations.map((annotation) => {
-    const entry = entries.get(annotation.dataset.anchor);
-    if (!entry?.group.visible) return {};
-    const bounds = entry.bounds.clone().translate(entry.group.position);
-    const anchor = project(bounds.getCenter(new THREE.Vector3()));
-    if (anchor.z < -1 || anchor.z > 1) return {};
-    const corners = [];
-    for (const x of [bounds.min.x, bounds.max.x]) {
-      for (const y of [bounds.min.y, bounds.max.y]) {
-        for (const z of [bounds.min.z, bounds.max.z]) {
-          corners.push(project(new THREE.Vector3(x, y, z)));
-        }
-      }
-    }
-    const left = Math.min(...corners.map(({ x }) => x));
-    const right = Math.max(...corners.map(({ x }) => x));
-    const outline = corners.every(({ z }) => z >= -1 && z <= 1) ? {
-      left: left - 5, right: right + 5,
-      top: Math.min(...corners.map(({ y }) => y)) - 5,
-      bottom: Math.max(...corners.map(({ y }) => y)) + 5,
-    } : null;
-    return { entry, anchor, outline, left, right };
-  });
-
-  const labels = placeCallouts(viewport, occupied, inputs.map(({ anchor, outline }, i) => {
-    if (!outline) return {};
-    const { width, height } = annotations[i].querySelector(".fd-label").getBoundingClientRect();
-    return width && height ? { anchor, outline, width, height } : {};
-  }));
-
-  const cards = placeCallouts(viewport, [...occupied, ...labels.filter(Boolean).map(({ rect }) => rect)],
-    inputs.map(({ anchor, entry, left, right }, i) => {
-      if (!anchor || labels[i]) return {};
-      const { width, height } = annotations[i].querySelector(".fd-callout").getBoundingClientRect();
-      if (!width || !height) return {};
-
-      // Use the part's silhouette on the side facing the fallback card when the center ray hits.
-      const surface = entry.style.surface;
-      const centerHit = hitAt(anchor.x, anchor.y, surface);
-      function silhouette(outer) {
-        if (!centerHit) return anchor;
-        let inside = anchor.x;
-        for (let i = 0; i < 8; i++) {
-          const x = (inside + outer) / 2;
-          if (hitAt(x, anchor.y, surface)) inside = x;
-          else outer = x;
-        }
-        return { x: inside, y: anchor.y };
-      }
-      return { width, height, anchor, leftAnchor: silhouette(left), rightAnchor: silhouette(right) };
-    }));
-
-  const folded = [];
-  for (const [i, annotation] of annotations.entries()) {
-    const line = host.querySelector(`[data-leader="${annotation.dataset.callout}"]`);
-    const label = annotation.querySelector(".fd-label");
-    const card = annotation.querySelector(".fd-callout");
-    const placement = labels[i] ?? cards[i];
-    label.style.visibility = labels[i] ? "visible" : "hidden";
-    card.style.visibility = cards[i] ? "visible" : "hidden";
-    const { outline, entry, anchor } = inputs[i];
-    line.style.visibility = outline || placement ? "visible" : "hidden";
-    line.dataset.card = Boolean(cards[i]);
-    const dimension = line.querySelector(".fd-dimension");
-    const ticks = line.querySelector(".fd-ticks");
-    if (outline) {
-      const { left, top, right, bottom } = outline;
-      const surface = entry.style.surface;
-      const hit = hitAt(anchor.x, anchor.y, surface);
-      const opacity = hit && covered(anchor.x, anchor.y, surface, hit) ? 0.4 : 1;
-      dimension.setAttribute("opacity", opacity);
-      ticks.setAttribute("opacity", opacity);
-      dimension.setAttribute("d", `M${left},${top}H${right}V${bottom}H${left}Z`);
-      ticks.setAttribute("d", [left, right].flatMap((x) => [top, bottom].map((y) =>
-        `M${x - 3},${y}h6 M${x},${y - 3}v6`,
-      )).join(" "));
-    } else {
-      dimension.removeAttribute("d");
-      ticks.removeAttribute("d");
-    }
-
-    const path = line.querySelector(".fd-leader");
-    if (!placement) {
+  const pinRects = [];
+  for (const node of host.querySelectorAll("[data-pin-anchor]")) {
+    position(node, centerFor(node.dataset.pinAnchor));
+    if (placeLabels && node.style.visibility === "visible") pinRects.push(rectFor(node));
+  }
+  for (const path of host.querySelectorAll("[data-bracket]")) {
+    const outline = outlineFor(boundsForKey(path.dataset.bracket), 6);
+    if (!outline) {
       path.removeAttribute("d");
-      folded.push(annotation.dataset.calloutKey);
       continue;
     }
-
-    const { rect, leader } = placement;
-    const text = labels[i] ? label : card;
-    text.style.transform = `translate(${rect.left}px, ${rect.top}px)`;
-    path.setAttribute("d", leader.map(({ x, y }, j) => `${j ? "L" : "M"}${x},${y}`).join(" "));
-    if (!cards[i]) continue;
-    const { x, y } = leader.at(-1);
-    const surface = entry.style.surface;
-    const hit = hitAt(x, y, surface);
-    const ring = line.querySelector("circle");
-    ring.setAttribute("cx", x);
-    ring.setAttribute("cy", y);
-    ring.setAttribute("opacity", !hit || covered(x, y, surface, hit) ? 0.4 : 1);
+    const { left, right, top, bottom } = outline;
+    const size = Math.min(12, (right - left) / 3, (bottom - top) / 3);
+    path.setAttribute("d", [left, right].flatMap((x, i) => [top, bottom].map((y, j) => {
+      const dx = i ? -size : size;
+      const dy = j ? -size : size;
+      return `M${x + dx},${y}H${x}v${dy}`;
+    })).join(" "));
   }
-  return folded;
+
+  for (const node of host.querySelectorAll("[data-route-label]")) {
+    const from = centerFor(node.dataset.from);
+    const to = centerFor(node.dataset.to);
+    const midpoint = from && to ? { x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 } : null;
+    position(node, midpoint);
+    if (placeLabels && node.style.visibility === "visible") pinRects.push(rectFor(node));
+  }
+
+  if (!placeLabels) return;
+  const labels = [...host.querySelectorAll("[data-anchor]")];
+  if (!labels.length) return;
+  const occupied = panels.filter((panel) => panel.getClientRects().length).map(rectFor);
+  const outlines = [...entries.values()].filter(({ group }) => group.visible)
+    .map(({ row }) => outlineFor(boundsForKey(row.key))).filter(Boolean);
+  const placements = placeCallouts(viewport, occupied, labels.map((node) => {
+    const anchor = centerFor(node.dataset.anchor);
+    return { anchor, width: node.offsetWidth, height: node.offsetHeight, elbow: true };
+  }), [...outlines, ...pinRects]);
+  for (const [i, node] of labels.entries()) {
+    const line = host.querySelector(`[data-leader="${i}"]`);
+    const placement = placements[i];
+    node.style.visibility = line.style.visibility = placement ? "visible" : "hidden";
+    if (!placement) continue;
+    const { rect, leader } = placement;
+    node.style.transform = `translate(${rect.left}px, ${rect.top}px)`;
+    line.querySelector("path").setAttribute("d", leader.map(({ x, y }, j) => `${j ? "L" : "M"}${x},${y}`).join(" "));
+    const dot = line.querySelector("circle");
+    dot.setAttribute("cx", leader.at(-1).x);
+    dot.setAttribute("cy", leader.at(-1).y);
+  }
 }
 
 export function createFielddeckStage(host, assets, index, callbacks) {
@@ -615,6 +549,9 @@ export function createFielddeckStage(host, assets, index, callbacks) {
   let width = 1;
   let height = 1;
   let frameHeight = 1;
+  let frameWidth = 1;
+  let frameCenterX = 0;
+  let canvasTop = 0;
   let frameCenter = 0;
   let mobile = false;
   let resized = true;
@@ -634,32 +571,45 @@ export function createFielddeckStage(host, assets, index, callbacks) {
   let lastHero = null;
   let firstFrame = true;
   const ray = new THREE.Raycaster();
-  const [header, bottomChrome, tree, inspector] = [".fd-header", ".fd-bottom", ".fd-tree", ".fd-inspector"]
+  const [header, bottomChrome, tree, inspector, sheet, legend] = [
+    ".fd-header", ".fd-bottom", ".fd-tree", ".fd-inspector", ".fd-sheet", ".fd-legend",
+  ]
     .map((selector) => host.querySelector(selector));
-  const panels = [header, bottomChrome, tree, inspector];
+  const panels = [header, bottomChrome, tree, inspector, sheet, legend];
   const mobileView = window.matchMedia(FIELDDECK_NARROW);
   const invalidateLayout = () => { layoutDirty = true; };
 
   function resize() {
-    const nextWidth = Math.max(1, host.clientWidth);
-    const nextHeight = Math.max(1, host.clientHeight);
-    const origin = host.getBoundingClientRect().top;
-    const upper = header.getBoundingClientRect().bottom - origin;
-    const openSheets = mobileView.matches
-      ? [tree, inspector].map((panel) => panel.getBoundingClientRect()).filter((rect) => rect.height)
-      : [];
-    const lower = Math.min(bottomChrome.getBoundingClientRect().top, ...openSheets.map(({ top }) => top)) - origin;
+    const nextWidth = Math.max(1, canvas.clientWidth);
+    const nextHeight = Math.max(1, canvas.clientHeight);
+    const phone = mobileView.matches;
+    const { left: originX, top: originY } = host.getBoundingClientRect();
+    const upper = (phone ? bottomChrome : header).getBoundingClientRect().bottom - originY;
+    const nextCanvasTop = canvas.offsetTop;
+    const lower = phone ? nextHeight + nextCanvasTop : bottomChrome.getBoundingClientRect().top - originY;
+    const left = phone ? 0 : Math.max(0, tree.getBoundingClientRect().right - originX);
+    const right = phone ? nextWidth : Math.min(nextWidth, inspector.getBoundingClientRect().left - originX);
     const nextFrameHeight = Math.max(1, lower - upper);
-    const nextFrameCenter = (upper + lower) / 2;
-    if (nextWidth !== width || nextHeight !== height) renderer.setSize(nextWidth, nextHeight, false);
-    resized ||= width !== nextWidth || height !== nextHeight || Math.abs(frameHeight - nextFrameHeight) > 1
-      || Math.abs(frameCenter - nextFrameCenter) > 1 || mobile !== mobileView.matches;
+    const nextFrameWidth = Math.max(1, right - left);
+    const nextFrameCenter = (upper + lower) / 2 - nextCanvasTop;
+    const nextFrameCenterX = (left + right) / 2;
+    if (nextWidth !== width || nextHeight !== height || resized) renderer.setSize(nextWidth, nextHeight, false);
+    resized ||= width !== nextWidth || height !== nextHeight || phone !== mobile
+      || frameHeight !== nextFrameHeight || frameWidth !== nextFrameWidth
+      || frameCenter !== nextFrameCenter || frameCenterX !== nextFrameCenterX;
     width = nextWidth;
     height = nextHeight;
-    mobile = mobileView.matches;
+    mobile = phone;
+    canvasTop = nextCanvasTop;
     frameHeight = nextFrameHeight;
+    frameWidth = nextFrameWidth;
     frameCenter = nextFrameCenter;
-    camera.setViewOffset(width, height, mobile ? 0 : width * 0.012, height / 2 - frameCenter, width, height);
+    frameCenterX = nextFrameCenterX;
+    const aspect = width / height;
+    camera.fov = mobile ? THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(13)) / aspect)) : 26;
+    camera.setViewOffset(width, height, width / 2 - frameCenterX, height / 2 - frameCenter, width, height);
+    controls.enablePan = !mobile;
+    controls.enableZoom = !mobile;
     layoutDirty = true;
   }
   const observer = new ResizeObserver(resize);
@@ -675,8 +625,16 @@ export function createFielddeckStage(host, assets, index, callbacks) {
     const right = UP.clone().cross(direction).normalize();
     const up = direction.clone().cross(right);
     const tangent = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
-    const horizontalFit = tangent * camera.aspect * horizontal;
+    const horizontalFit = tangent * camera.aspect * (mobile ? horizontal : frameWidth / width * 0.92);
     const verticalFit = tangent * Math.min(1, frameHeight / height) * 0.9;
+    if (mobile) {
+      const sphere = bounds.getBoundingSphere(new THREE.Sphere());
+      const distance = sphere.radius / Math.sin(Math.atan(Math.min(horizontalFit, verticalFit)));
+      controls.maxDistance = Math.max(radius * 13, distance);
+      camera.far = controls.maxDistance + radius * 2;
+      camera.updateProjectionMatrix();
+      return { target: sphere.center, position: direction.multiplyScalar(distance).add(sphere.center) };
+    }
     let distance = controls.minDistance;
     for (const x of [bounds.min.x, bounds.max.x]) {
       for (const y of [bounds.min.y, bounds.max.y]) {
@@ -693,11 +651,12 @@ export function createFielddeckStage(host, assets, index, callbacks) {
   }
 
   function assemblyPose(mode, explode, turn = mode === "compare" ? 1 : 0) {
-    const framed = modeEntries[mode].length ? modeEntries[mode] : all;
+    const framed = !mobile && modeEntries[mode].length ? modeEntries[mode] : all;
     return fit(boundsFor(framed, explode), TOUR[0].angle * turn, mobile ? 0.93 : 0.76);
   }
 
   function tourPose(stopIndex) {
+    if (mobile) return assemblyPose(config.mode, config.explode);
     const stop = TOUR[stopIndex];
     const framed = modeEntries[config.mode].length ? modeEntries[config.mode] : all;
     const targetItems = framed.filter(({ row }) => config.selectedKeys.includes(row.key)
@@ -764,7 +723,7 @@ export function createFielddeckStage(host, assets, index, callbacks) {
     if (!config) return;
     const tick = Math.min(50, now - previousTime);
     previousTime = now;
-    const { mode, heroStart, reduced, explode, explodeMotion, cameraCue, selectedKeys } = config;
+    const { mode, heroStart, reduced, explode, explodeMotion, cameraCue } = config;
     const heroElapsed = heroStart == null ? null : now - heroStart;
     let dirty = config !== lastConfig || resized || layoutDirty || heroElapsed !== null;
     const motion = heroElapsed === null ? explodeMotion : { from: 0, to: DEFAULT_EXPLODE, start: heroStart + 400 };
@@ -790,6 +749,10 @@ export function createFielddeckStage(host, assets, index, callbacks) {
     if (heroElapsed !== null) {
       const turn = damped(clamp((heroElapsed - 4200) / 800));
       setCamera(assemblyPose(mode, offsetFor, turn));
+    } else if (mobile && (firstFrame || resized || lastHero !== null || mode !== lastConfig.mode
+      || explode !== lastConfig.explode || explodeMotion || lastConfig.explodeMotion)) {
+      cameraMove = null;
+      setCamera(assemblyPose(mode, offsetFor));
     } else if (cameraCue && cameraCue !== latestCue) {
       latestCue = cameraCue;
       moveCamera(tourPose(cameraCue.stopIndex), now, 1600, damped);
@@ -826,7 +789,6 @@ export function createFielddeckStage(host, assets, index, callbacks) {
     pointerMoved = false;
     canvas.style.cursor = hovered ? "pointer" : "grab";
 
-    const selected = new Set(selectedKeys);
     const pick = [];
     const block = [];
     let floor = Infinity;
@@ -845,20 +807,17 @@ export function createFielddeckStage(host, assets, index, callbacks) {
         contactDirty ||= wasCasting;
         continue;
       }
-      const selectedOrHovered = selected.has(row.key) || hovered === row.key;
-      const emphasis = Number(selected.has(row.key)) || (selectedOrHovered ? 0.65 : 0);
-      const distance = reduced ? 1 : tick / (selected.has(row.key) ? 160 : 120);
-      const step = (value, target) => value + Math.sign(target - value) * Math.min(distance, Math.abs(target - value));
-      dirty ||= emphasis !== entry.emphasis || Number(hovered === row.key) !== entry.hover;
-      entry.emphasis = step(entry.emphasis, emphasis);
-      entry.hover = step(entry.hover, Number(hovered === row.key));
+      const hover = Number(hovered === row.key);
+      dirty ||= hover !== entry.hover;
+      const distance = reduced ? 1 : tick / 120;
+      entry.hover += Math.sign(hover - entry.hover) * Math.min(distance, Math.abs(hover - entry.hover));
       const length = vector.length();
       const offset = offsetFor(entry) + (length && !reduced ? 2 * outCubic(entry.hover) / length : 0);
       nextPosition.copy(vector).multiplyScalar(offset);
       const moved = !group.position.equals(nextPosition);
       group.position.copy(nextPosition);
       const accent = (reduced ? accentProgress : outCubic(accentProgress)) * blend.current.compare;
-      stylePart(entry, blend.current.compare, weight, ghost, entry.emphasis, accent);
+      stylePart(entry, blend.current.compare, weight, ghost, entry.style.edge.diff ? accent : 0);
       const casts = entry.style.surface[0].castShadow;
       contactDirty ||= casts !== wasCasting || casts && moved;
       if (casts) floor = Math.min(floor, entry.bounds.min.z + group.position.z);
@@ -877,10 +836,9 @@ export function createFielddeckStage(host, assets, index, callbacks) {
       renderer.render(scene, camera);
       pickable = pick;
       opaque = block;
-      if (!mobile && (layoutDirty || resized || config !== lastConfig || !dirty || now - lastLayout > 60)) {
-        callbacks.onCalloutLayout(layoutCallouts(host, camera, entries, opaque, width, height, ray, panels));
-        lastLayout = now;
-      }
+      const placeLabels = layoutDirty || resized || config !== lastConfig || !dirty || now - lastLayout > 60;
+      layoutAnnotations(host, camera, entries, width, height, canvasTop, panels, placeLabels);
+      if (placeLabels) lastLayout = now;
     }
     if (firstFrame) {
       canvas.dataset.fielddeckCanvas = "rendered";

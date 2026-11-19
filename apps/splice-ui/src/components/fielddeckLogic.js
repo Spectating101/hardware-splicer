@@ -1,16 +1,16 @@
 export const BASIS_LABELS = {
-  custom: "CAD part",
-  vendor_step: "vendor model",
-  envelope: "envelope",
-  proxy: "proxy",
-  unknown: "unknown geometry",
+  custom: "Custom CAD",
+  vendor_step: "Vendor model",
+  envelope: "Envelope",
+  proxy: "Proxy",
+  unknown: "Unknown",
 };
 
 export const DIFF_LABELS = {
-  changed: "geometry changed",
-  added: "added",
-  removed: "removed · rev 7",
-  unchanged: "unchanged",
+  added: "Added",
+  changed: "Changed",
+  removed: "Removed",
+  unchanged: "Unchanged",
 };
 
 export const TOUR = [
@@ -19,9 +19,8 @@ export const TOUR = [
   { label: "Changed parts", diff: "changed", angle: 24 },
 ];
 
-export const VALIDATION_LABEL = "No physical validation performed";
 export const DEFAULT_EXPLODE = 0.6;
-export const FIELDDECK_NARROW = "(width < 700px)";
+export const FIELDDECK_NARROW = "(width < 600px)";
 
 // Layers run bottom to top. Each gap is the clearance below that layer at the default setting.
 export function explodeGroupOffsets(layers, anchor, explode) {
@@ -69,12 +68,26 @@ function crossesRect(from, to, rect) {
   return enter < exit;
 }
 
-function leaderPath(anchor, card, viewport, panels) {
+function leaderPath(anchor, card, viewport, panels, elbow) {
   const edge = {
     x: clampTo(anchor.x, card.left, card.right),
     y: clampTo(anchor.y, card.top, card.bottom),
   };
   const clear = (from, to) => !panels.some((panel) => crossesRect(from, to, panel));
+  if (elbow) {
+    const side = anchor.x < (card.left + card.right) / 2 ? card.left : card.right;
+    const top = anchor.y < (card.top + card.bottom) / 2 ? card.top : card.bottom;
+    const middleX = (card.left + card.right) / 2;
+    const middleY = (card.top + card.bottom) / 2;
+    for (const [start, bend] of [
+      [{ x: side, y: middleY }, { x: anchor.x, y: middleY }],
+      [{ x: middleX, y: top }, { x: middleX, y: anchor.y }],
+    ]) {
+      if (!crossesRect(start, bend, card) && !crossesRect(bend, anchor, card)
+        && clear(start, bend) && clear(bend, anchor)) return [start, bend, anchor];
+    }
+    return null;
+  }
   if (clear(edge, anchor)) return [edge, anchor];
 
   // Route around blocked straight lines using the visible corners of the panels.
@@ -106,11 +119,11 @@ function leaderPath(anchor, card, viewport, panels) {
 }
 
 // Rectangles and anchors use stage coordinates. A null result folds that card into Details.
-export function placeCallouts(viewport, panelRects, callouts) {
-  const occupied = [...panelRects];
+export function placeCallouts(viewport, panelRects, callouts, clearSpace = []) {
+  const occupied = [...panelRects, ...clearSpace];
   const leaderObstacles = panelRects.map((rect) => padRect(rect, 4));
   const center = (viewport.left + viewport.right) / 2;
-  return callouts.map(({ width, height, anchor, leftAnchor = anchor, rightAnchor = anchor, outline }) => {
+  return callouts.map(({ width, height, anchor, leftAnchor = anchor, rightAnchor = anchor, outline, elbow }) => {
     if (!anchor) return null;
     const maxX = viewport.right - width;
     const maxY = viewport.bottom - height;
@@ -142,7 +155,7 @@ export function placeCallouts(viewport, panelRects, callouts) {
     }
 
     const preferredX = anchor.x < center ? viewport.left + 18 : maxX - 18;
-    const preferredY = anchor.y - height / 2;
+    const preferredY = anchor.y - height / 2 - (elbow ? height : 0);
     for (const gap of [8, 0]) {
       const obstacles = occupied.map((rect) => padRect(rect, gap));
       const panels = gap ? leaderObstacles : panelRects;
@@ -172,7 +185,7 @@ export function placeCallouts(viewport, panelRects, callouts) {
       }
       candidates.sort((a, b) => a.score - b.score);
       for (const { rect, point } of candidates) {
-        const leader = leaderPath(point, rect, viewport, panels);
+        const leader = leaderPath(point, rect, viewport, panels, elbow);
         if (!leader) continue;
         occupied.push(rect);
         return { rect, leader };
@@ -185,7 +198,7 @@ export function placeCallouts(viewport, panelRects, callouts) {
 export function classifyPart(part, delta, mode) {
   const basis = Object.hasOwn(BASIS_LABELS, part.geometry_basis) ? part.geometry_basis : "unknown";
   const diff = mode === "compare" ? delta : undefined;
-  const outline = diff === "removed" || basis !== "custom" && basis !== "vendor_step";
+  const outline = diff === "removed" || basis === "envelope" || basis === "unknown";
   return { basis, diff, outline, dimmed: diff === "unchanged" };
 }
 
@@ -194,7 +207,7 @@ export function indexFielddeck(scenes) {
   const byKey = new Map();
   const byNode = new Map();
   const byPart = new Map();
-  const { nodes = [] } = scenes["5"]?.revision_diff ?? {};
+  const { nodes = [] } = scenes["5"]?.revision_diff ?? scenes["7"]?.revision_diff ?? {};
   const diff = new Map(nodes.map((row) => [JSON.stringify([row.node_name, row.occurrence]), row.status]));
   for (const [revision, scene] of Object.entries(scenes)) {
     if (!scene) continue;
@@ -243,6 +256,38 @@ export function selectedPartKeys(index, row) {
   return [row.link.from_part_id, row.link.to_part_id]
     .map((id) => index.byPart.get(`${row.revision}:${id}`)?.key)
     .filter(Boolean);
+}
+
+export function openQuestions(scene, revision) {
+  if (!scene) return [];
+  const questions = scene.blockers.map(({ part_id, interface_id, reason }) => ({
+    key: part_id ? `${revision}:part:${part_id}` : `${revision}:link:${interface_id}`, reason,
+  }));
+  for (const link of scene.interfaces) {
+    for (const reason of link.open_checks) {
+      questions.push({ key: `${revision}:link:${link.interface_id}`, reason });
+    }
+  }
+  return questions.map((question, i) => ({ ...question, number: i + 1 }));
+}
+
+const SHORT_NAMES = {
+  "keyboard-nominal-envelope": "Keyboard envelope",
+  "power-bank-nominal-envelope": "Power bank envelope",
+  "pi4-board-envelope": "Raspberry Pi 4",
+  "fan-envelope": "Fan envelope",
+};
+
+export function shortPartName(part, revision) {
+  if (part.part_id === "display") return `${revision}-inch display`;
+  return SHORT_NAMES[part.part_id] ?? (part.label.length <= 24 && !/nominal only/i.test(part.label)
+    ? part.label
+    : "Selected part");
+}
+
+export function evidenceLabel(field) {
+  const words = field.replace(/_(mm3|mm|w)$/, "").replaceAll("_", " ");
+  return words.charAt(0).toUpperCase() + words.slice(1);
 }
 
 const precision = new Intl.NumberFormat("en", { useGrouping: false, maximumFractionDigits: 2 });

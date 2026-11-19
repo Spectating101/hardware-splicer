@@ -707,7 +707,7 @@ export default function App() {
           {view === VIEWS.reference && <DetailedAssemblyReference />}
           {view === VIEWS.sortcell && <SortingWorkcell />}
           {view === VIEWS.fielddeck && (
-            <Suspense fallback={null}><FieldDeckScene /></Suspense>
+            <Suspense fallback={null}><FieldDeckScene onExit={() => setView(VIEWS.home)} /></Suspense>
           )}
 
           {view === VIEWS.workspace && (
