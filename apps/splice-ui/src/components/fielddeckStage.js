@@ -665,9 +665,16 @@ function createContactShadow(scene, bounds, resources) {
   pool.scale.set(width * 0.74, height * 0.74, 1);
   pool.renderOrder = -2;
   // The key light's own shadow on the floor, inside the light pool, so the assembly sits down.
+  // It spans the scene bounds × 1.2 and fades radially to zero, so it never shows a hard edge.
   const keyFloorMaterial = new THREE.ShadowMaterial({ opacity: 0.3, depthWrite: false });
+  keyFloorMaterial.onBeforeCompile = (shader) => {
+    shader.vertexShader = shader.vertexShader.replace("void main() {", "varying vec2 floorLocal;\nvoid main() {\n  floorLocal = position.xy;");
+    shader.fragmentShader = shader.fragmentShader.replace("void main() {", "varying vec2 floorLocal;\nvoid main() {")
+      .replace("gl_FragColor = vec4( color, opacity * ( 1.0 - getShadowMask() ) );",
+        "gl_FragColor = vec4( color, opacity * ( 1.0 - getShadowMask() ) * ( 1.0 - smoothstep( 0.35, 1.0, length( floorLocal ) ) ) );");
+  };
   const keyFloor = new THREE.Mesh(quadGeometry, keyFloorMaterial);
-  keyFloor.scale.copy(pool.scale);
+  keyFloor.scale.set(spread.x * 0.6, spread.y * 0.6, 1);
   keyFloor.receiveShadow = true;
   keyFloor.renderOrder = -1;
   scene.add(...ground, pool, keyFloor);
