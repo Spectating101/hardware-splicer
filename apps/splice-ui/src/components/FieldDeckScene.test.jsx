@@ -191,14 +191,25 @@ describe("Fielddeck state and mapping", () => {
     expect(ghostOutlineLoops([0, 0, 0, 1, 0, 0])).toEqual([]);
   });
 
-  it("keeps change colour on long sharp creases and leaves hole rims and short chains in ink", () => {
+  it("keeps change colour on the outline and large loops and leaves slots, rims and short chains in ink", () => {
     const circle = Array.from({ length: 16 }, (_, i) => {
       const a = (i / 16) * Math.PI * 2;
       const b = ((i + 1) / 16) * Math.PI * 2;
       return [2 * Math.cos(a), 2 * Math.sin(a), 0, 2 * Math.cos(b), 2 * Math.sin(b), 0];
     }).flat();
-    const positions = [0, 0, 5, 40, 0, 5, 40, 0, 5, 40, 20, 5, 50, 50, 5, 52, 50, 5, ...circle];
-    expect(diffAccentChains(positions)).toEqual([[[0, 0, 5], [40, 0, 5], [40, 20, 5]]]);
+    const rect = (x0, y0, x1, y1) => [x0, y0, 5, x1, y0, 5, x1, y0, 5, x1, y1, 5, x1, y1, 5, x0, y1, 5, x0, y1, 5, x0, y0, 5];
+    const positions = [
+      ...rect(0, 0, 100, 60), // outer boundary
+      ...rect(10, 10, 60, 40), // large opening: 25% of the bounds
+      ...rect(70, 10, 74, 30), // vent slot
+      90, 80, 0, 90, 80, 6, // a short free-standing edge
+      50, 50, 10, 55, 50, 10, // 5 mm chain
+      ...circle,
+    ];
+    const kept = diffAccentChains(positions, [100, 60, 5]);
+    expect(kept).toHaveLength(2);
+    expect(kept.every((chain) => chain.length === 5)).toBe(true);
+    expect(kept.map((chain) => Math.max(...chain.map(([x]) => x)))).toEqual(expect.arrayContaining([100, 60]));
   });
 
   it("dims unchanged parts toward their luminance grey", () => {

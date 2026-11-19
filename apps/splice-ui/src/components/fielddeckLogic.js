@@ -280,11 +280,20 @@ const isSmallCircle = (points, maxRadius) => {
   return radius < maxRadius && radii.every((value) => Math.abs(value - radius) <= radius * 0.15);
 };
 
-// Change colour belongs on sharp creases that carry form: chains longer than minLength after a
-// 1e-4 mm weld. Hole and boss rims (small closed circles) stay in ink with the other creases.
-export function diffAccentChains(positions, { minLength = 3, rimRadius = 6 } = {}) {
-  return weldEdgeChains(positions, 0.0001)
-    .filter((points) => chainLength(points) > minLength && !isSmallCircle(points, rimRadius));
+// Change colour belongs on the outer silhouette and on boundary loops that enclose more than 15%
+// of the part's bounds, after a 1e-4 mm weld. Vent slots, small cutouts and hole rims stay in ink,
+// and chains under 8 mm are dropped. `extents` is the part's bounding-box size [x, y, z].
+export function diffAccentChains(positions, extents, { minLength = 8, minShare = 0.15, rimRadius = 6 } = {}) {
+  const [major, minor] = extents.slice().sort((a, b) => b - a);
+  return weldEdgeChains(positions, 0.0001).filter((points) => {
+    const length = chainLength(points);
+    if (length < minLength || isSmallCircle(points, rimRadius)) return false;
+    const size = [0, 1, 2].map((axis) => Math.max(...points.map((point) => point[axis]))
+      - Math.min(...points.map((point) => point[axis]))).sort((a, b) => b - a);
+    // A loop counts by the area it encloses; an open run counts when it is long against the part.
+    const closed = length > 0 && points.length > 3 && chainLength([points[0], points.at(-1)]) < 1e-6;
+    return size[0] * size[1] >= minShare * major * minor || !closed && length >= 0.3 * major;
+  });
 }
 
 // Signed tetrahedron sum (mm³) and triangle area (mm²) of an indexed or flat triangle list.

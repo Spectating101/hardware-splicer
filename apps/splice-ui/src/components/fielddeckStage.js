@@ -427,11 +427,11 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
         strokes.add(line);
       }
       if (style.edge.diff) {
-        // Added parts carry their outer outline only. Changed parts carry creases sharper than 60°
-        // with chains longer than 3 mm; hole rims and smooth walls stay in ink.
+        // Added parts carry their outer outline only. Changed parts carry their outline and large
+        // boundary loops; vent slots, small cutouts, hole rims and smooth walls stay in ink.
         const chains = entry.row.delta === "added"
           ? ghostOutlineLoops(positions, { maxChains: 1 })
-          : diffAccentChains(edgePositions(geometry, 60));
+          : diffAccentChains(edgePositions(geometry, 60), geometry.boundingBox.getSize(new THREE.Vector3()).toArray());
         if (chains.length) {
           const line = featureLine(chainSegments(chains), style.edge.diff, own);
           line.renderOrder = 2;
@@ -1795,7 +1795,8 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
       const { row, group, strokes, vector } = entry;
       const removed = row.revision === base && row.delta === "removed";
       const ghost = removed && (mode === "compare" || blend.current.compare > 0);
-      const ghostOpacity = selectedKey && !displaySelected && entry.displayOverlay ? 0.3 : 1;
+      // With anything else selected, removed ghosts drop from 70% to 35%.
+      const ghostOpacity = selectedKey && !displaySelected && entry.displayOverlay ? 0.5 : 1;
       const weight = row.revision === target ? blend.current.target
         : ghost ? Math.max(blend.current.base, blend.current.compare) * displayOpacity * ghostOpacity : blend.current.base;
       if (entry.overlay) {
