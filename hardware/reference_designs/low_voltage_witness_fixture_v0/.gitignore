@@ -1,3 +1,6 @@
 # KiCad interactive UI state is machine-local and must not be versioned.
 *.kicad_prl
 *-backups/
+
+# KiCad CLI XML netlist is regenerated from schematic and contains checkout-path metadata.
+netlist.xml

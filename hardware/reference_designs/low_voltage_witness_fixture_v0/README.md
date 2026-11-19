@@ -30,7 +30,7 @@ R1 is a proposed **genuine four-terminal** Vishay WSK2512R0100FEA. KiCad footpri
 
 - `low_voltage_witness_fixture_v0.kicad_sch` — native editable schematic, 12 components, seven named nets, measured current topology.
 - `low_voltage_witness_fixture_v0.kicad_pcb` — native KiCad 9 board, 2 layers; routed without unconnected pads, **125 × 58 mm outline** nominal (PCB API includes 0.05 mm edge stroke in bbox).
-- `low_voltage_witness_fixture_v0.kicad_pro`, `sym-lib-table`, `netlist.xml` — project/library/netlist. Design generator uses original installed KiCad symbols and native footprint geometry.
+- `low_voltage_witness_fixture_v0.kicad_pro`, `sym-lib-table` — tracked project/library metadata. `netlist.xml` is **generated** from the editable schematic on each run and deliberately not committed because KiCad embeds checkout-sensitive data. Design generators use installed KiCad symbols and native footprint geometry.
 - `generate_schematic.py`, `generate_pcb.py` — source regenerators. Board geometry is validated semantically rather than claiming byte-identical KiCad UUIDs.
 - `erc.txt`, `drc.txt`, `pad-map.txt` — native reports. Both have zero violations; DRC has zero unconnected pads and zero schematic/PCB parity errors.
 - `board-geometry-preview.step` — actual KiCad board-only geometric export (no modeled populated assembly).

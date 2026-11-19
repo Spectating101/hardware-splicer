@@ -88,9 +88,10 @@ def build():
  netclass.SetTrackWidth(MM(0.25));netclass.SetClearance(MM(0.2))
  for ref,spec in P.items():fp(board,ref,spec)
  xml=ROOT/"netlist.xml"
- if not xml.exists():
-  subprocess.run(["kicad-cli","sch","export","netlist",str(ROOT/(NAME+".kicad_sch")),
-                  "--format","kicadxml","-o",str(xml)],check=True,stdout=subprocess.DEVNULL)
+ # A prior XML export can come from another checkout or an earlier schematic.
+ # Always regenerate the working netlist immediately before board construction.
+ subprocess.run(["kicad-cli","sch","export","netlist",str(ROOT/(NAME+".kicad_sch")),
+                 "--format","kicadxml","-o",str(xml)],check=True,stdout=subprocess.DEVNULL)
  root=ET.parse(xml).getroot()
  for item in root.findall("./components/comp"):
   ref=item.get("ref"); f=board.FindFootprintByReference(ref)
