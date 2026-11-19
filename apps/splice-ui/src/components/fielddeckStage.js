@@ -16,9 +16,10 @@ import {
 import { N8AOPostPass } from "n8ao";
 import { fielddeckSceneUrl } from "../api.js";
 import {
-  chooseTier, classifyPart, cullCoincidentChains, DEFAULT_EXPLODE, DIFF_COLORS, dimensionLabel,
-  explodeGroupOffsets, FIELDDECK_NARROW, footprintDelta, ghostDeltaKey, materialSpec, placeCallouts,
-  placeRoutingLabel, projectedFitScale, QUALITY_SAMPLE_COUNT, rowForNode, simplifyEdgeChain, weldEdgeChains,
+  bracketPath, chooseTier, classifyPart, convexHull, cullCoincidentChains, DEFAULT_EXPLODE, diffAccentChains,
+  DIFF_COLORS, dimensionLabel, explodeGroupOffsets, FIELDDECK_NARROW, footprintDelta, ghostDeltaKey,
+  ghostOutlineLoops, materialSpec, meshMeasures, nearestPoint, placeBesideEndpoint, placeCallouts,
+  projectedFitScale, QUALITY_SAMPLE_COUNT, rowForNode, weldEdgeChains,
 } from "./fielddeckLogic.js";
 
 const TOUR_ANGLES = [18, -5, 24];
@@ -122,6 +123,9 @@ function edgeMaterial(color, pattern, linewidth) {
     worldUnits: false, transparent: true, depthWrite: false, toneMapped: false, alphaToCoverage: true,
     polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1,
   });
+  // Widths are CSS pixels. applyTier scales them by the drawing-buffer ratio so a 1.5 px line
+  // stays 1.5 px after the browser downsamples a DPR 2 canvas, instead of a soft 0.75 px fringe.
+  material.userData.cssWidth = linewidth;
   if (pattern) {
     material.onBeforeCompile = (shader) => {
       // Interpolate the projected distance in screen space, including on slanted edges.
@@ -134,9 +138,9 @@ function edgeMaterial(color, pattern, linewidth) {
   return material;
 }
 
-function stylePart(entry, compare, weight, ghost, accent, selected) {
+function stylePart(entry, compare, weight, ghost, accent, emphasis) {
   const { outline, row } = entry;
-  const { solid, baseColor, mutedColor, fill, edge, surface, lines, accents, marker } = entry.style;
+  const { solid, baseColor, mutedColor, fill, edge, surface, lines, accents } = entry.style;
   const translucent = outline || ghost;
   const dimming = row.delta === "unchanged" ? compare : 0;
   const dim = 1 - dimming * 0.75;
@@ -152,10 +156,8 @@ function stylePart(entry, compare, weight, ghost, accent, selected) {
     solid.depthWrite = weight > 0.55;
   }
 
-  edge.base.opacity = weight * dim * (outline ? 1 : entry.spec.creaseOpacity);
-  for (const material of [edge.diff, edge.silhouette]) {
-    if (material) material.opacity = weight * accent * (selected ? 1 : 0.5);
-  }
+  edge.base.opacity = weight * dim * (outline ? entry.outlineOpacity ?? 1 : entry.spec.creaseOpacity);
+  if (edge.diff) edge.diff.opacity = weight * accent * emphasis;
 
   for (const mesh of surface) {
     mesh.visible = Boolean(solid || fill) && !ghost;
@@ -166,10 +168,6 @@ function stylePart(entry, compare, weight, ghost, accent, selected) {
   }
   lines.forEach((line) => { line.visible = !ghost; });
   accents.forEach((line) => { line.visible = !ghost && accent > 0; });
-  if (marker) {
-    marker.visible = !ghost;
-    marker.material.opacity = weight * dim;
-  }
 }
 
 function edgePositions(geometry, threshold) {
@@ -187,67 +185,12 @@ function featureLine(positions, material, own) {
   return line;
 }
 
-function outlineSilhouettes(geometry, material, own) {
-  const vertices = geometry.getAttribute("position");
-  const indices = geometry.index;
-  const count = indices?.count ?? vertices.count;
-  const points = new Map();
-  const edges = new Map();
+function chainSegments(chains) {
   const positions = [];
-  const front = [];
-  const back = [];
-  function pointFor(index) {
-    const point = new THREE.Vector3().fromBufferAttribute(vertices, index);
-    const key = point.toArray().map((value) => Math.round(value * 10000)).join(",");
-    if (!points.has(key)) points.set(key, { id: points.size, point });
-    return points.get(key);
+  for (const points of chains) {
+    for (let i = 1; i < points.length; i++) positions.push(...points[i - 1], ...points[i]);
   }
-  const ab = new THREE.Vector3();
-  const ac = new THREE.Vector3();
-  for (let i = 0; i < count; i += 3) {
-    const triangle = [0, 1, 2].map((axis) => pointFor(indices ? indices.getX(i + axis) : i + axis));
-    const [a, b, c] = triangle.map(({ point }) => point);
-    const normal = ab.subVectors(b, a).cross(ac.subVectors(c, a)).clone().normalize();
-    if (!normal.lengthSq()) continue;
-    for (let j = 0; j < 3; j++) {
-      const a = triangle[j];
-      const b = triangle[(j + 1) % 3];
-      const opposite = `${b.id}:${a.id}`;
-      const adjacent = edges.get(opposite);
-      if (!adjacent) {
-        edges.set(`${a.id}:${b.id}`, normal);
-        continue;
-      }
-      edges.delete(opposite);
-      // The separate 60° crease stroke already draws the sharper edges.
-      if (normal.dot(adjacent) <= 0.5) continue;
-      a.point.toArray(positions, positions.length);
-      b.point.toArray(positions, positions.length);
-      normal.toArray(front, front.length);
-      adjacent.toArray(back, back.length);
-    }
-  }
-  if (!positions.length) return null;
-  const line = featureLine(positions, material, own);
-  line.geometry.setAttribute("instanceNormalA", new THREE.InstancedBufferAttribute(new Float32Array(front), 3));
-  line.geometry.setAttribute("instanceNormalB", new THREE.InstancedBufferAttribute(new Float32Array(back), 3));
-  return line;
-}
-
-function silhouetteMaterial(color) {
-  const material = edgeMaterial(color, null, 1.5);
-  material.onBeforeCompile = (shader) => {
-    shader.vertexShader = shader.vertexShader.replace("void main() {", `
-      attribute vec3 instanceNormalA, instanceNormalB;
-      void main() {
-        vec3 toEye = -(modelViewMatrix * vec4((instanceStart + instanceEnd) * 0.5, 1.0)).xyz;
-        if (dot(normalMatrix * instanceNormalA, toEye) * dot(normalMatrix * instanceNormalB, toEye) >= 0.0) {
-          gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
-          return;
-        }
-    `);
-  };
-  return material;
+  return positions;
 }
 
 function displayContours(entry) {
@@ -345,48 +288,26 @@ function displayContours(entry) {
   };
 }
 
-function createUnknownMarker(own) {
-  const canvas = document.createElement("canvas");
-  canvas.width = canvas.height = 64;
-  const context = canvas.getContext("2d");
-  if (!context) return null;
-  context.fillStyle = "white";
-  context.textAlign = "center";
-  context.textBaseline = "middle";
-  context.font = "48px monospace";
-  context.fillText("?", 32, 32);
-  const texture = own(new THREE.CanvasTexture(canvas));
-  return new THREE.Sprite(own(new THREE.SpriteMaterial({
-    map: texture, color: 0x9097a0, sizeAttenuation: false, depthWrite: false, toneMapped: false,
-  })));
-}
-
-function makeGhost(chains, own, previous) {
+// Removed and old-revision geometry: one screen-space 6/4 dash, 1.25 px, #F17E70 at 70%.
+function makeGhost(chains, own, { xray = false } = {}) {
   const object = new THREE.Group();
-  const dashed = own(edgeMaterial(DIFF_COLORS.removed, [6, 4], 1.25));
-  const solid = own(edgeMaterial(DIFF_COLORS.removed, null, 1.25));
+  const material = own(edgeMaterial(DIFF_COLORS.removed, [6, 4], 1.25));
+  // The old revision often lies inside the current solid; draw it through so the change is visible.
+  if (xray) material.depthTest = false;
   for (const points of chains) {
-    const vectors = points.map((point) => new THREE.Vector3(...point));
-    const length = vectors.slice(1).reduce((sum, point, i) => sum + point.distanceTo(vectors[i]), 0);
-    const closed = vectors[0].equals(vectors.at(-1));
-    const bounds = new THREE.Box3().setFromPoints(vectors);
-    const center = bounds.getCenter(new THREE.Vector3());
-    const radius = vectors[0].distanceTo(center);
-    const smallCircle = closed && vectors.length >= 7 && radius < 3
-      && vectors.every((point) => Math.abs(point.distanceTo(center) - radius) <= radius * 0.15);
-    const material = length < 3 || smallCircle ? solid : dashed;
+    if (points.length < 2) continue;
     const geometry = own(new LineGeometry());
-    geometry.setPositions((previous ? points : simplifyEdgeChain(points)).flat());
+    geometry.setPositions(points.flat());
     const line = new Line2(geometry, material);
-    if (material.dashed) line.computeLineDistances();
+    line.computeLineDistances();
+    line.renderOrder = 3;
     object.add(line);
   }
   object.visible = false;
   return {
     object,
     setOpacity(weight) {
-      dashed.opacity = weight * (previous ? 0.7 : 1);
-      solid.opacity = weight * 0.4;
+      material.opacity = weight * 0.7;
     },
   };
 }
@@ -432,8 +353,6 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
         })) : null;
         const hatchDpr = { value: 1 };
         if (spec.hatch) applyHatch(solid, spec.hatch, hatchDpr);
-        const marker = basis === "unknown" ? createUnknownMarker(own) : null;
-        if (marker) strokes.add(marker);
         const accent = !outline && ["added", "changed"].includes(row.delta);
         const paired = row.delta === "changed" ? ghostDeltaKey(index, "compare", row, { base, target }) : null;
         entry = {
@@ -441,11 +360,10 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
           ghostEdges: row.delta === "removed" || paired ? [] : null, paired,
           displayEdges: row.part.part_id === focusPart ? [] : null,
           style: {
-            solid, baseColor, mutedColor, fill, marker,
+            solid, baseColor, mutedColor, fill,
             edge: {
-              base: own(edgeMaterial(outline ? baseColor : spec.creaseColor, spec.pattern, 1)),
+              base: own(edgeMaterial(outline ? baseColor : spec.creaseColor, spec.pattern, basis === "unknown" ? 1.25 : 1)),
               diff: accent ? own(edgeMaterial(spec.edgeColor, null, 1.5)) : null,
-              silhouette: accent ? own(silhouetteMaterial(spec.edgeColor)) : null,
             },
             surface: [], lines: [], accents: [],
           },
@@ -468,11 +386,19 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
 
       const positions = edgePositions(geometry, entry.spec.threshold);
       if (positions.length && style.edge.base.dashed) {
-        for (const points of weldEdgeChains(positions)) {
+        // Unknown shapes show their outer loop only. A dotted loop on a part a few millimetres across
+        // reads as grey stipple, so a short loop is drawn as one thin, quieter stroke instead.
+        const chains = entry.basis === "unknown" ? ghostOutlineLoops(positions, { maxChains: 1 }) : weldEdgeChains(positions);
+        if (entry.basis === "unknown" && chains.length && chains.every((points) => points.length < 2
+          || points.slice(1).reduce((sum, point, i) => sum + Math.hypot(...point.map((v, k) => v - points[i][k])), 0) < 40)) {
+          style.edge.base = own(edgeMaterial(style.baseColor, null, 1));
+          entry.outlineOpacity = 0.55;
+        }
+        for (const points of chains) {
           const chain = own(new LineGeometry());
           chain.setPositions(points.flat());
           const line = new Line2(chain, style.edge.base);
-          line.computeLineDistances();
+          if (line.material.dashed) line.computeLineDistances();
           style.lines.push(line);
           strokes.add(line);
         }
@@ -482,12 +408,17 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
         strokes.add(line);
       }
       if (style.edge.diff) {
-        const sharp = edgePositions(geometry, 60);
-        const silhouette = outlineSilhouettes(geometry, style.edge.silhouette, own);
-        const accents = [sharp.length ? featureLine(sharp, style.edge.diff, own) : null, silhouette].filter(Boolean);
-        accents.forEach((line) => { line.renderOrder = 2; });
-        style.accents.push(...accents);
-        if (accents.length) strokes.add(...accents);
+        // Added parts carry their outer outline only. Changed parts carry creases sharper than 60°
+        // with chains longer than 3 mm; hole rims and smooth walls stay in ink.
+        const chains = entry.row.delta === "added"
+          ? ghostOutlineLoops(positions, { maxChains: 1 })
+          : diffAccentChains(edgePositions(geometry, 60));
+        if (chains.length) {
+          const line = featureLine(chainSegments(chains), style.edge.diff, own);
+          line.renderOrder = 2;
+          style.accents.push(line);
+          strokes.add(line);
+        }
       }
       if (entry.ghostEdges) {
         for (const value of positions) entry.ghostEdges.push(value);
@@ -496,16 +427,17 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
     });
   }
   for (const entry of entries.values()) {
-    entry.style.marker?.position.copy(entry.bounds.getCenter(new THREE.Vector3()));
+    entry.samples = new Float32Array(entry.samples);
     if (entry.ghostEdges && entry.row.revision === base) {
-      const chains = weldEdgeChains(entry.ghostEdges);
       if (entry.row.delta === "removed") {
-        entry.removed = makeGhost(chains, own, false);
+        // The outer silhouette and at most one inner loop, never the PCB, FPC and tab edges.
+        entry.removed = makeGhost(ghostOutlineLoops(entry.ghostEdges), own);
         technical.add(entry.removed.object);
       } else {
         const current = entries.get(entry.paired)?.ghostEdges ?? [];
         // Compare the original geometry before simplification can turn a matched arc into a chord.
-        entry.overlay = makeGhost(cullCoincidentChains(chains, current, { simplify: true }), own, true);
+        const chains = cullCoincidentChains(weldEdgeChains(entry.ghostEdges), current, { simplify: true });
+        entry.overlay = makeGhost(chains, own, { xray: true });
         technical.add(entry.overlay.object);
       }
     }
@@ -1819,8 +1751,8 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
       }
       const selected = selectedKey === row.key;
       const accent = selected && ghostDeltaKey ? 1 : (reduced ? accentProgress : outCubic(accentProgress)) * blend.current.compare;
-      stylePart(entry, blend.current.compare, weight, ghost, accent, selected);
-      entry.style.marker?.scale.setScalar(32 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) / height);
+      // With a selection, the other changed parts drop to half edge opacity.
+      stylePart(entry, blend.current.compare, weight, ghost, accent, selected || !selectedKey ? 1 : 0.5);
       const casts = entry.style.surface[0].castShadow;
       shadowDirty ||= casts !== wasCasting || casts && moved;
       if (casts) floor = Math.min(floor, entry.bounds.min.z + group.position.z);

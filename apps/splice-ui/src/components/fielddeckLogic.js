@@ -31,7 +31,7 @@ const MATERIALS = {
   measured: { color: 0xe4e2dc, roughness: 0.74, threshold: 32, creaseOpacity: 1 },
   envelope: { color: 0xa5aeb5, fillOpacity: 0.06, pattern: [6, 4] },
   proxy: { color: 0xa6a098, roughness: 0.88, threshold: 32, hatch: { angle: 45, spacing: 8, contrast: 0.1 } },
-  unknown: { color: null, edgeColor: 0x9097a0, pattern: [1, 3] },
+  unknown: { color: null, edgeColor: 0x9097a0, pattern: [3, 2] },
 };
 
 export function materialSpec(basis, delta, dimmed = false) {
