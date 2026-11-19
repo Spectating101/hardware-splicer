@@ -12,6 +12,8 @@
 
 Hardware Splicer takes a board design through KiCad electrical and design-rule checks, a bill of materials and fabrication-file check, and a staged list of what must pass before bench work begins. An AI agent can do parts of the engineering, but only through those same checks: a model's suggestion never becomes a physical instruction on its own say-so.
 
+The offline manufacturing catalog covers 270 product offers. Its engineering reader links 153 of them to editable designs or models, replay results and the next physical check. Extract the ZIP and open `catalog/index.html`. [Offline catalog](projects/engineering-opportunity-portfolio/HS-manufacturing-catalog.zip) · [Portfolio guide](projects/engineering-opportunity-portfolio/README.md)
+
 | | |
 |---|---|
 | **Checks** | KiCad ERC and DRC, schematic-to-PCB parity, BOM and fabrication outputs, staged bench gates |
