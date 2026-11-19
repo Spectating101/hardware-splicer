@@ -452,10 +452,16 @@ export default function FieldDeckScene({ onExit }) {
     }
     panel.scrollTop = 0;
     const update = () => {
-      const bottom = panel.getBoundingClientRect().bottom;
-      const items = [...panel.querySelectorAll("[data-peek-question]")].map((item) => item.getBoundingClientRect());
+      const { top, bottom } = panel.getBoundingClientRect();
+      const nodes = [...panel.querySelectorAll("[data-peek-question]")];
+      const items = nodes.map((item) => item.getBoundingClientRect());
       const clipped = countClippedItems(items, { top: -Infinity, bottom });
-      setPeekMore(clipped ? countClippedItems(items, { top: -Infinity, bottom: bottom - 24 }) : 0);
+      const limit = clipped ? bottom - 24 : bottom;
+      // Show whole rows only: a row cut by the sheet edge is hidden and counted as more.
+      nodes.forEach((node, i) => {
+        node.dataset.clipped = String(items[i].top < top - 1 || items[i].bottom > limit + 1);
+      });
+      setPeekMore(clipped ? countClippedItems(items, { top: -Infinity, bottom: limit }) : 0);
     };
     update();
     panel.addEventListener("scroll", update);
@@ -665,8 +671,8 @@ export default function FieldDeckScene({ onExit }) {
           <button className="fd-validation" type="button" aria-pressed={filtered} aria-controls="fd-tree"
             onClick={toggleBlockers}>
             {narrow ? <>
-              <span><span className="fd-count">{questions.length}</span> questions</span>
               <span>Fit unknown</span>
+              <span><span className="fd-count">{questions.length}</span> questions</span>
             </> : <>Physical fit unknown · <span className="fd-count">{questions.length}</span> open questions</>}
           </button>
         </header>

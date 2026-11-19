@@ -694,7 +694,7 @@ describe("Fielddeck evidence UI", () => {
       selectedKeys: ["5:part:pi4-dsi", "5:part:display"],
       cameraCue: { stopIndex: 1 },
     }));
-    expect(screen.getByRole("button", { name: /5 questions\s*Fit unknown/ })).toBeVisible();
+    expect(screen.getByRole("button", { name: /^Fit unknown\s*5 questions$/ })).toBeVisible();
     const panels = within(screen.getByRole("group", { name: "Scene panels" }));
     const parts = panels.getByRole("button", { name: "Parts" });
     const details = panels.getByRole("button", { name: "Inspector" });

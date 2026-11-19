@@ -411,3 +411,10 @@
 }
 
 .fd-label-detail { display: block; color: var(--text-2); font-size: 11px; line-height: 1.3; }
+@media (width < 640px) {
+  .fd-peek { scroll-snap-type: y mandatory; scroll-padding-top: 12px; }
+  .fd-peek > * { scroll-snap-align: start; }
+  .fd-peek [data-peek-question][data-clipped="true"] { visibility: hidden; }
+  .fd-tree-scroll { scroll-snap-type: y mandatory; }
+  .fd-tree-scroll li, .fd-tree-scroll h3 { scroll-snap-align: start; }
+}
