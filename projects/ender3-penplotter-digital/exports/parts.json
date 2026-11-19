@@ -1,0 +1,447 @@
+{
+  "schema_version": "hardware_splicer.parts_sidecar.v1",
+  "revision": "v1",
+  "units": "mm",
+  "glb_native_units": "mm",
+  "glb_scale_to_mm": 1,
+  "glb_source": "exports/plotter.glb",
+  "glb_sha256": "38fa947b0c118e392391d81cc5b5bb426e291a2a9fccd0352adcb62cf50a9a84",
+  "parts": [
+    {
+      "node_name": "REFERENCE_ENVELOPE_bed_235x235",
+      "node_index": 1,
+      "part_id": "reference-envelope-bed-235x235",
+      "label": "REFERENCE_ENVELOPE_bed_235x235",
+      "geometry_basis": "envelope",
+      "bom_line": null,
+      "no_bom_line": true,
+      "group": "reference-envelope-bed-235x235",
+      "explode_vector_mm": [
+        -26.5,
+        -12.5,
+        -129.5
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "036d58dea257d96a9c976d2cb91f604a30354c14ce949ff656e96a71e09066b5",
+      "evidence": []
+    },
+    {
+      "node_name": "REFERENCE_ENVELOPE_left_base",
+      "node_index": 2,
+      "part_id": "reference-envelope-left-base",
+      "label": "REFERENCE_ENVELOPE_left_base",
+      "geometry_basis": "envelope",
+      "bom_line": null,
+      "no_bom_line": true,
+      "group": "reference-envelope-left-base",
+      "explode_vector_mm": [
+        -166.0,
+        0.0,
+        -212.5
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "2781ba3fe4b3a0f5fb68a448e627777d7db52e1a5d16989f1c121a2d1b5d757b",
+      "evidence": []
+    },
+    {
+      "node_name": "REFERENCE_ENVELOPE_right_base",
+      "node_index": 3,
+      "part_id": "reference-envelope-right-base",
+      "label": "REFERENCE_ENVELOPE_right_base",
+      "geometry_basis": "envelope",
+      "bom_line": null,
+      "no_bom_line": true,
+      "group": "reference-envelope-right-base",
+      "explode_vector_mm": [
+        143.0,
+        0.0,
+        -212.5
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "c3b06d3562cc560876a33f6b61a84b34efff77941ac8af52966d7ca6dc7e36a0",
+      "evidence": []
+    },
+    {
+      "node_name": "REFERENCE_ENVELOPE_central_base",
+      "node_index": 4,
+      "part_id": "reference-envelope-central-base",
+      "label": "REFERENCE_ENVELOPE_central_base",
+      "geometry_basis": "envelope",
+      "bom_line": null,
+      "no_bom_line": true,
+      "group": "reference-envelope-central-base",
+      "explode_vector_mm": [
+        -11.5,
+        -12.5,
+        -212.5
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "bc31dbc46de14354c83a59b691203f43b8cb4d59e986330dd0306a915a3acd8c",
+      "evidence": []
+    },
+    {
+      "node_name": "REFERENCE_ENVELOPE_left_upright",
+      "node_index": 5,
+      "part_id": "reference-envelope-left-upright",
+      "label": "REFERENCE_ENVELOPE_left_upright",
+      "geometry_basis": "envelope",
+      "bom_line": null,
+      "no_bom_line": true,
+      "group": "reference-envelope-left-upright",
+      "explode_vector_mm": [
+        -176.0,
+        43.550003,
+        7.5
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "741faee092075bd6fef756834dcd8104a9be159486cdfdb54e097b27e01c873a",
+      "evidence": []
+    },
+    {
+      "node_name": "REFERENCE_ENVELOPE_right_upright",
+      "node_index": 6,
+      "part_id": "reference-envelope-right-upright",
+      "label": "REFERENCE_ENVELOPE_right_upright",
+      "geometry_basis": "envelope",
+      "bom_line": null,
+      "no_bom_line": true,
+      "group": "reference-envelope-right-upright",
+      "explode_vector_mm": [
+        153.0,
+        43.550003,
+        7.5
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "92639dd4de04024c5062239274aa3b8d6184ea6e6b8ed55c154486bc3ed1e6bf",
+      "evidence": []
+    },
+    {
+      "node_name": "REFERENCE_ENVELOPE_top",
+      "node_index": 7,
+      "part_id": "reference-envelope-top",
+      "label": "REFERENCE_ENVELOPE_top",
+      "geometry_basis": "envelope",
+      "bom_line": null,
+      "no_bom_line": true,
+      "group": "reference-envelope-top",
+      "explode_vector_mm": [
+        -11.5,
+        43.550003,
+        217.5
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "9b5708323e757760e6c3aa25f9579a49a2400ec77ed0f37fc3981513dbf3c24e",
+      "evidence": []
+    },
+    {
+      "node_name": "REFERENCE_ENVELOPE_X_rail",
+      "node_index": 8,
+      "part_id": "reference-envelope-x-rail",
+      "label": "REFERENCE_ENVELOPE_X_rail",
+      "geometry_basis": "envelope",
+      "bom_line": null,
+      "no_bom_line": true,
+      "group": "reference-envelope-x-rail",
+      "explode_vector_mm": [
+        -23.799994,
+        33.550003,
+        -62.400002
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "98e6974bccad68860eaf2be1455ddacc58bc62f6a7bfd40b00a614e4a36cd062",
+      "evidence": []
+    },
+    {
+      "node_name": "REFERENCE_ENVELOPE_X_belt",
+      "node_index": 9,
+      "part_id": "reference-envelope-x-belt",
+      "label": "REFERENCE_ENVELOPE_X_belt",
+      "geometry_basis": "envelope",
+      "bom_line": null,
+      "no_bom_line": true,
+      "group": "reference-envelope-x-belt",
+      "explode_vector_mm": [
+        -23.799994,
+        27.0,
+        -62.400002
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "91488c53eb1dbf6fcb016376d66ab05283a7334e614450d935a5183f54ebac98",
+      "evidence": []
+    },
+    {
+      "node_name": "REFERENCE_ENVELOPE_Y_belt",
+      "node_index": 10,
+      "part_id": "reference-envelope-y-belt",
+      "label": "REFERENCE_ENVELOPE_Y_belt",
+      "geometry_basis": "envelope",
+      "bom_line": null,
+      "no_bom_line": true,
+      "group": "reference-envelope-y-belt",
+      "explode_vector_mm": [
+        -26.5,
+        -10.0,
+        -186.5
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "5eb62c555255b67d8c737d525ed9b156b5b577742ec20e1e8b0cbd5112115fe1",
+      "evidence": []
+    },
+    {
+      "node_name": "REFERENCE_ENVELOPE_X_motor",
+      "node_index": 11,
+      "part_id": "reference-envelope-x-motor",
+      "label": "REFERENCE_ENVELOPE_X_motor",
+      "geometry_basis": "envelope",
+      "bom_line": null,
+      "no_bom_line": true,
+      "group": "reference-envelope-x-motor",
+      "explode_vector_mm": [
+        -186.0,
+        33.550003,
+        -62.400002
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "d75ab303d73ed518c69040c7e6a465e3cb1e01600913458bf5fce67e72d2fa41",
+      "evidence": []
+    },
+    {
+      "node_name": "REFERENCE_ENVELOPE_Y_motor",
+      "node_index": 12,
+      "part_id": "reference-envelope-y-motor",
+      "label": "REFERENCE_ENVELOPE_Y_motor",
+      "geometry_basis": "envelope",
+      "bom_line": null,
+      "no_bom_line": true,
+      "group": "reference-envelope-y-motor",
+      "explode_vector_mm": [
+        -26.5,
+        160.0,
+        -192.5
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "4fccdc13bb857b09d7651dc3f1f43a94947f7d2484a9c2082ca1b321e9239c97",
+      "evidence": []
+    },
+    {
+      "node_name": "REFERENCE_ENVELOPE_Z_motor",
+      "node_index": 13,
+      "part_id": "reference-envelope-z-motor",
+      "label": "REFERENCE_ENVELOPE_Z_motor",
+      "geometry_basis": "envelope",
+      "bom_line": null,
+      "no_bom_line": true,
+      "group": "reference-envelope-z-motor",
+      "explode_vector_mm": [
+        -196.0,
+        43.550003,
+        -172.5
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "cd4c9dc27be88e95c71edbc4235df330adab1ab7f49fb9c7b497bdbdbeff2a56",
+      "evidence": []
+    },
+    {
+      "node_name": "REFERENCE_ENVELOPE_enclosed_PSU",
+      "node_index": 14,
+      "part_id": "reference-envelope-enclosed-psu",
+      "label": "REFERENCE_ENVELOPE_enclosed_PSU",
+      "geometry_basis": "envelope",
+      "bom_line": null,
+      "no_bom_line": true,
+      "group": "reference-envelope-enclosed-psu",
+      "explode_vector_mm": [
+        192.0,
+        4.5,
+        -80.0
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "90a9ff6a085de83307cd7184a0bc46944a4e12f6f974c0267252997f6f12b072",
+      "evidence": []
+    },
+    {
+      "node_name": "REFERENCE_ENVELOPE_controller_enclosure",
+      "node_index": 15,
+      "part_id": "reference-envelope-controller-enclosure",
+      "label": "REFERENCE_ENVELOPE_controller_enclosure",
+      "geometry_basis": "envelope",
+      "bom_line": null,
+      "no_bom_line": true,
+      "group": "reference-envelope-controller-enclosure",
+      "explode_vector_mm": [
+        -111.5,
+        -120.0,
+        -173.5
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "fd8da5b3254f161cbb7bf4c8bf1839be4f34df61d3492c1d4659062d543b67dd",
+      "evidence": []
+    },
+    {
+      "node_name": "REFERENCE_ENVELOPE_LCD",
+      "node_index": 16,
+      "part_id": "reference-envelope-lcd",
+      "label": "REFERENCE_ENVELOPE_LCD",
+      "geometry_basis": "envelope",
+      "bom_line": null,
+      "no_bom_line": true,
+      "group": "reference-envelope-lcd",
+      "explode_vector_mm": [
+        111.0,
+        -152.5,
+        -155.0
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "0402282128a688e33001a68dad367b2fac3d4409da6793c401c4f463dfc8109e",
+      "evidence": []
+    },
+    {
+      "node_name": "paper_180mm_square",
+      "node_index": 17,
+      "part_id": "paper-180mm-square",
+      "label": "paper_180mm_square",
+      "geometry_basis": "unknown",
+      "bom_line": null,
+      "no_bom_line": true,
+      "group": "paper-180mm-square",
+      "explode_vector_mm": [
+        -26.5,
+        -12.5,
+        -127.45
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "d49b932d55e5a3e31d2869c518048985299061c2d7960158632a8162dd562f8a",
+      "evidence": []
+    },
+    {
+      "node_name": "pen_adapter",
+      "node_index": 18,
+      "part_id": "pen-adapter",
+      "label": "pen_adapter",
+      "geometry_basis": "custom",
+      "bom_line": null,
+      "no_bom_line": true,
+      "group": "pen-adapter",
+      "explode_vector_mm": [
+        -26.5,
+        0.199997,
+        -69.900001
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "87392dc243e84c655fd65c30e7778abfe0d320e1cc9568b298796effd50fbe83",
+      "evidence": []
+    },
+    {
+      "node_name": "pen_clamp",
+      "node_index": 19,
+      "part_id": "pen-clamp",
+      "label": "pen_clamp",
+      "geometry_basis": "custom",
+      "bom_line": null,
+      "no_bom_line": true,
+      "group": "pen-clamp",
+      "explode_vector_mm": [
+        -26.5,
+        -18.949997,
+        -87.400001
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "1394af70a60123d54d9e4330277fea39d09b04fdcf2703af08343f88f018ef73",
+      "evidence": []
+    },
+    {
+      "node_name": "manufacturer_E_plate",
+      "node_index": 20,
+      "part_id": "manufacturer-e-plate",
+      "label": "manufacturer_E_plate",
+      "geometry_basis": "unknown",
+      "bom_line": null,
+      "no_bom_line": true,
+      "group": "manufacturer-e-plate",
+      "explode_vector_mm": [
+        -43.0,
+        26.400002,
+        -62.400002
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "248a7c28315b4591e78e168e38a6ec4dd4a41f1aa1d9d2ae5aa2bac9657d03b2",
+      "evidence": []
+    },
+    {
+      "node_name": "pen_envelope",
+      "node_index": 21,
+      "part_id": "pen-envelope",
+      "label": "pen_envelope",
+      "geometry_basis": "unknown",
+      "bom_line": null,
+      "no_bom_line": true,
+      "group": "pen-envelope",
+      "explode_vector_mm": [
+        -26.5,
+        -12.5,
+        -77.400001
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "981a5f56a81332362b46b761ad53db0c4846686314e45eaa43b503f50378b367",
+      "evidence": []
+    },
+    {
+      "node_name": "hotend_parking_plate",
+      "node_index": 22,
+      "part_id": "hotend-parking-plate",
+      "label": "hotend_parking_plate",
+      "geometry_basis": "custom",
+      "bom_line": null,
+      "no_bom_line": true,
+      "group": "hotend-parking-plate",
+      "explode_vector_mm": [
+        -116.0,
+        31.550003,
+        185.0
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "55dc0180317405582bb69f8f451494328f943945bd8548a2289aea7b16bb95d6",
+      "evidence": []
+    },
+    {
+      "node_name": "REFERENCE_ENVELOPE_parked_intact_hotend",
+      "node_index": 23,
+      "part_id": "reference-envelope-parked-intact-hotend",
+      "label": "REFERENCE_ENVELOPE_parked_intact_hotend",
+      "geometry_basis": "envelope",
+      "bom_line": null,
+      "no_bom_line": true,
+      "group": "reference-envelope-parked-intact-hotend",
+      "explode_vector_mm": [
+        -116.0,
+        11.550003,
+        167.5
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "6cece9e5ab7e63b105fdc243ccd2450b94abc88108cad7b4497d04f628d3c007",
+      "evidence": []
+    },
+    {
+      "node_name": "REFERENCE_ENVELOPE_parked_fans_and_shroud",
+      "node_index": 24,
+      "part_id": "reference-envelope-parked-fans-and-shroud",
+      "label": "REFERENCE_ENVELOPE_parked_fans_and_shroud",
+      "geometry_basis": "envelope",
+      "bom_line": null,
+      "no_bom_line": true,
+      "group": "reference-envelope-parked-fans-and-shroud",
+      "explode_vector_mm": [
+        -116.0,
+        9.050003,
+        157.5
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "14cf8df9c9a6c79a77eb3a2555af1c2dbc5638bac3154e4e8602338e620b906d",
+      "evidence": []
+    }
+  ],
+  "interfaces": [],
+  "blockers": [],
+  "alternates": [],
+  "missing_inputs": []
+}

@@ -4,6 +4,8 @@ import json
 from pathlib import Path
 import shutil
 import struct
+import subprocess
+import sys
 import zipfile
 
 import pytest
@@ -18,6 +20,48 @@ DISPLAY7 = "touch_display_2_manufacturer"
 DISPLAY5 = "touch_display_2_5inch_sc1975"
 STATES = {"datasheet", "assumed", "computed", "unknown"}
 DIFF_STATES = {"unchanged", "changed", "added", "removed"}
+
+
+def test_manifest_cli_builds_single_revision_from_glb_and_project_records(tmp_path):
+    project = tmp_path / "projects" / "penplotter"
+    exports = project / "exports"
+    exports.mkdir(parents=True)
+    glb = exports / "plotter.glb"
+    glb.write_bytes(_glb([
+        ("hotend_parking_plate", 0, {}),
+        ("pen_adapter", 2, {}),
+        ("pen_clamp", 4, {}),
+        ("REFERENCE_ENVELOPE_frame", 6, {}),
+        ("bracket", 8, {"geometry_basis": "vendor_step"}),
+    ]))
+    for name in ("hotend_parking_plate", "pen_adapter", "pen_clamp"):
+        (exports / f"{name}.step").touch()
+    evidence = {"field": "physical_fit", "value": None, "state": "unknown",
+                "source": None, "source_sha256": None}
+    (project / "evidence.json").write_text(json.dumps({"parts": {"pen-adapter": {"evidence": [evidence]}}}))
+    (project / "bom.json").write_text(json.dumps({"items": [{"id": "pen-adapter", "name": "Pen adapter"}]}))
+    sidecar = exports / "parts.json"
+    manifest = project / "scene.json"
+    manifest.write_text(json.dumps({
+        "schema": "hardware_splicer.scene_manifest.v1", "project_id": project.name, "compare": None,
+        "revisions": [{"id": "v1", "glb": glb.relative_to(tmp_path).as_posix(),
+                       "parts": sidecar.relative_to(tmp_path).as_posix(), "glb_native_units": "mm"}],
+    }))
+
+    subprocess.run([sys.executable, str(ROOT / "scripts/build_parts_sidecar.py"),
+                    "--manifest", str(manifest), "--revision", "v1"], check=True)
+    scene = json.loads(sidecar.read_text())
+    assert scene["revision"] == "v1"
+    assert scene["glb_scale_to_mm"] == 1
+    assert "revision_diff" not in scene
+    parts = {part["node_name"]: part for part in scene["parts"]}
+    assert {name: part["geometry_basis"] for name, part in parts.items()} == {
+        "hotend_parking_plate": "custom", "pen_adapter": "custom", "pen_clamp": "custom",
+        "REFERENCE_ENVELOPE_frame": "envelope", "bracket": "vendor_step",
+    }
+    assert parts["pen_adapter"]["bom_line"] == "pen-adapter"
+    assert parts["pen_adapter"]["evidence"] == [evidence]
+    assert all(part["evidence"] == [] for name, part in parts.items() if name != "pen_adapter")
 
 
 def _glb(parts, *, padding=0):

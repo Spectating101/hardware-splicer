@@ -1,4 +1,4 @@
-"""Build Fielddeck part selections from the delivered meshes and source records."""
+"""Build scene part selections from delivered meshes and source records."""
 
 from __future__ import annotations
 
@@ -189,7 +189,10 @@ def _centre(bounds):
 def _nodes(data):
     if data is None:
         return {}
-    doc, binary = _glb_chunks(data)
+    return _glb_nodes(*_glb_chunks(data))
+
+
+def _glb_nodes(doc, binary):
     meshes = [_mesh_geometry(doc, binary, mesh) for mesh in doc.get("meshes", [])]
     nodes = doc.get("nodes", [])
     parents = {child: i for i, node in enumerate(nodes) for child in node.get("children", [])}
@@ -263,12 +266,13 @@ def _diff(base, swap, available):
             "status": "available" if available else "unavailable", "nodes": rows, "counts": counts}
 
 
-def _part_id(name, occurrence=1):
-    if name in (_DISPLAY7, _DISPLAY5):
-        slug = "display"
-    else:
-        slug = re.sub(r"[^a-z0-9]+", "-", (name or "").lower()).strip("-") or "node"
+def _node_id(name, occurrence=1):
+    slug = re.sub(r"[^a-z0-9]+", "-", (name or "").lower()).strip("-") or "node"
     return slug if occurrence == 1 else f"{slug}-{occurrence}"
+
+
+def _part_id(name, occurrence=1):
+    return _node_id("display" if name in (_DISPLAY7, _DISPLAY5) else name, occurrence)
 
 
 def _bom_line(name, basis, revised_ids):
@@ -542,4 +546,88 @@ def build_parts_sidecar(project_dir, revision) -> dict:
         "parts": parts, "interfaces": interfaces, "blockers": blockers, "alternates": alternates,
         "revision_diff": _diff(base_nodes, swap_nodes, base_data is not None and swap_data is not None),
         "missing_inputs": missing,
+    }
+
+
+def _project_part_records(glb, project):
+    """Find structured BOM and evidence records with explicit part identifiers."""
+    bom = {}
+    evidence = {}
+    for directory in dict.fromkeys((project, glb.parent.parent, glb.parent)):
+        if not directory.is_relative_to(project):
+            continue
+        for name in ("BOM.json", "bom.json", "evidence.json", "sources/evidence.json"):
+            path = directory / name
+            if not path.is_file():
+                continue
+            document = json.loads(path.read_text(encoding="utf-8"))
+            if not isinstance(document, dict):
+                continue
+            if name.lower() == "bom.json":
+                for item in document.get("items", []):
+                    if item_id := item.get("id"):
+                        bom[item_id] = item
+            records = document.get("parts", {})
+            if isinstance(records, list):
+                records = {row.get("part_id") or row.get("id"): row for row in records}
+            if isinstance(records, dict):
+                for part_id, row in records.items():
+                    if isinstance(row, dict) and isinstance(row.get("evidence"), list):
+                        evidence[part_id] = row["evidence"]
+    return bom, evidence
+
+
+def build_parts_sidecar_for(glb_path, project_dir, revision_id, *, glb_native_units=None) -> dict:
+    """Read one GLB without inferring a comparison or engineering evidence."""
+    project = Path(project_dir).resolve()
+    glb = Path(glb_path).resolve()
+    source = glb.relative_to(project).as_posix()
+    data = glb.read_bytes()
+    doc, binary = _glb_chunks(data)
+    extras = doc.get("extras")
+    declared_units = extras.get("glb_native_units") if isinstance(extras, dict) else None
+    units = glb_native_units or declared_units or "m"
+    scale = {"mm": 1, "m": 1000}[units]
+    nodes = _glb_nodes(doc, binary)
+    bom, evidence = _project_part_records(glb, project)
+    custom = {path.stem for path in (project / "exports").glob("*.step") if path.is_file()}
+    extents = _bounds(point for _, _, bounds, _, _ in nodes.values()
+                      if bounds for point in (bounds[:3], bounds[3:]))
+    centre = _centre(extents) if extents else [0, 0, 0]
+    parts = []
+    used_ids = set()
+    for (name, occurrence), (index, digest, bounds, extras, _) in nodes.items():
+        if digest is None:
+            continue
+        extras = extras if isinstance(extras, dict) else {}
+        part_id = _node_id(name, occurrence)
+        while part_id in used_ids:
+            part_id = f"{part_id}-{index}"
+        used_ids.add(part_id)
+        kind = extras.get("geometry_basis") or extras.get("basis") or extras.get("kind")
+        basis = _BASIS.get(kind, "unknown") if isinstance(kind, str) else "unknown"
+        if name in custom:
+            basis = "custom"
+        elif basis == "unknown" and name.upper().startswith("REFERENCE_ENVELOPE"):
+            # The author named this node as a reference envelope, not real part geometry.
+            basis = "envelope"
+        line = next((key for key in (extras.get("bom_line"), name, part_id)
+                     if isinstance(key, str) and key in bom), None)
+        item = bom.get(line, {})
+        rows = evidence.get(part_id, evidence.get(name, item.get("evidence", [])))
+        radial = ([round((pos - mid) * scale, 6) for pos, mid in zip(_centre(bounds), centre)]
+                  if bounds else [0, 0, 0])
+        vector, derived = _explode(name, extras, {}, None, radial)
+        parts.append({
+            "node_name": name, "node_index": index, "part_id": part_id,
+            "label": item.get("name") or item.get("description") or extras.get("label") or name or f"Node {index}",
+            "geometry_basis": basis, "bom_line": line, "no_bom_line": line is None,
+            "group": part_id, "explode_vector_mm": vector, "explode_derived": derived,
+            "geometry_sha256": digest, "evidence": rows if isinstance(rows, list) else [],
+        })
+    return {
+        "schema_version": "hardware_splicer.parts_sidecar.v1",
+        "revision": str(revision_id), "units": "mm", "glb_native_units": units, "glb_scale_to_mm": scale,
+        "glb_source": source, "glb_sha256": _sha(data),
+        "parts": parts, "interfaces": [], "blockers": [], "alternates": [], "missing_inputs": [],
     }
