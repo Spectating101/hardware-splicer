@@ -13,12 +13,7 @@ export const DIFF_LABELS = {
   unchanged: "Unchanged",
 };
 
-export const TOUR = [
-  { label: "Display stack", partId: "display", angle: 18 },
-  { label: "Cable (DSI)", interfaceId: "display-ribbon", angle: -5 },
-  { label: "Changed parts", diff: "changed", angle: 24 },
-];
-
+export const FIELDDECK_COMPARE = { base: "7", target: "5" };
 export const DEFAULT_EXPLODE = 0.6;
 export const FIELDDECK_NARROW = "(width < 640px)";
 
@@ -302,11 +297,11 @@ export function classifyPart(part, delta, mode) {
 }
 
 // Revision-qualified keys distinguish the two displays, which share a part_id.
-export function indexFielddeck(scenes) {
+export function indexFielddeck(scenes, compare = FIELDDECK_COMPARE) {
   const byKey = new Map();
   const byNode = new Map();
   const byPart = new Map();
-  const { nodes = [] } = scenes["5"]?.revision_diff ?? scenes["7"]?.revision_diff ?? {};
+  const { nodes = [] } = scenes[compare?.target]?.revision_diff ?? scenes[compare?.base]?.revision_diff ?? {};
   const diff = new Map(nodes.map((row) => [JSON.stringify([row.node_name, row.occurrence]), row.status]));
   for (const [revision, scene] of Object.entries(scenes)) {
     if (!scene) continue;
@@ -341,10 +336,10 @@ export function rowForNode(index, revision, exactName, nodeIndex) {
   return matches?.find(({ part }) => part.node_index === nodeIndex);
 }
 
-export function rowsForMode(index, mode) {
+export function rowsForMode(index, mode, compare = FIELDDECK_COMPARE) {
   return [...index.byKey.values()].filter((row) =>
     mode === "compare"
-      ? row.revision === "5" || row.part && row.delta === "removed"
+      ? row.revision === compare?.target || row.part && row.delta === "removed"
       : row.revision === mode,
   );
 }
@@ -383,9 +378,9 @@ export function openQuestions(scenes, index) {
   return [...questions.values()];
 }
 
-export function ghostDeltaKey(index, mode, row) {
-  if (mode !== "compare" || !row?.part || row.delta !== "changed") return null;
-  const revision = row.revision === "5" ? "7" : "5";
+export function ghostDeltaKey(index, mode, row, compare = FIELDDECK_COMPARE) {
+  if (!compare || mode !== "compare" || !row?.part || row.delta !== "changed") return null;
+  const revision = row.revision === compare.target ? compare.base : compare.target;
   const { part_id, node_name } = row.part;
   return (index.byPart.get(`${revision}:${part_id}`)
     ?? index.byNode.get(revision)?.get(node_name)?.[0])?.key ?? null;

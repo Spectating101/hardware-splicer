@@ -8,8 +8,9 @@ import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment
 import { HorizontalBlurShader } from "three/examples/jsm/shaders/HorizontalBlurShader.js";
 import { VerticalBlurShader } from "three/examples/jsm/shaders/VerticalBlurShader.js";
 import { fielddeckSceneUrl } from "../api.js";
-import { classifyPart, DEFAULT_EXPLODE, DIFF_COLORS, dimensionLabel, explodeGroupOffsets, FIELDDECK_NARROW, placeCallouts, placeRoutingLabel, projectedFitScale, footprintDelta, materialFor, rowForNode, TOUR } from "./fielddeckLogic.js";
+import { classifyPart, DEFAULT_EXPLODE, DIFF_COLORS, dimensionLabel, explodeGroupOffsets, FIELDDECK_NARROW, placeCallouts, placeRoutingLabel, projectedFitScale, footprintDelta, materialFor, rowForNode } from "./fielddeckLogic.js";
 
+const TOUR_ANGLES = [18, -5, 24];
 const OLD_REVISION_RED = 0xc83e31;
 const CONTACT_LAYER = 1;
 const UP = new THREE.Vector3(0, 0, 1);
@@ -262,7 +263,7 @@ function displayContours(entry) {
   };
 }
 
-function makeEntries(assets, index, scene, resources) {
+function makeEntries(assets, index, scene, resources, { base, target, focusPart }) {
   const entries = new Map();
   const own = (resource) => {
     resources.add(resource);
@@ -303,7 +304,7 @@ function makeEntries(assets, index, scene, resources) {
         entry = {
           row, basis, outline, group, vector, bounds: new THREE.Box3(),
           accentColor: new THREE.Color(edgeColor),
-          displayEdges: row.part.part_id === "display" ? [] : null,
+          displayEdges: row.part.part_id === focusPart ? [] : null,
           style: {
             solid, baseColor, mutedColor, fill,
             edge: {
@@ -343,9 +344,9 @@ function makeEntries(assets, index, scene, resources) {
 
       if (entry.displayEdges) {
         entry.displayEdges.push(edgePositions(geometry, 40));
-      } else if (revision === "7" && (row.delta === "changed"
-        || index.byPart.get(`5:${row.part.part_id}`)?.delta === "changed"
-        || index.byNode.get("5")?.get(row.part.node_name)?.some((part) => part.delta === "changed"))) {
+      } else if (revision === base && (row.delta === "changed"
+        || index.byPart.get(`${target}:${row.part.part_id}`)?.delta === "changed"
+        || index.byNode.get(target)?.get(row.part.node_name)?.some((part) => part.delta === "changed"))) {
         if (!entry.overlay) {
           const material = own(edgeMaterial(OLD_REVISION_RED, [5, 3], 1.5));
           const halo = own(edgeMaterial(0x0e1116, [5, 3], 3.5));
@@ -368,7 +369,7 @@ function makeEntries(assets, index, scene, resources) {
     if (!entry.displayEdges) continue;
     const { perimeter, interior, lug } = displayContours(entry);
     delete entry.displayEdges;
-    const removed = entry.row.revision === "7";
+    const removed = entry.row.revision === base;
     const color = removed ? DIFF_COLORS.removed : DIFF_COLORS.added;
     const rim = own(edgeMaterial(color, removed ? [5, 3] : null, 1.5));
     const details = own(edgeMaterial(color, removed ? [5, 3] : null, 1));
@@ -547,11 +548,7 @@ function createContactShadow(scene, renderer, bounds, resources) {
   };
 }
 
-function modelWeights(mode) {
-  return { seven: mode === "7" ? 1 : 0, five: mode === "7" ? 0 : 1, compare: mode === "compare" ? 1 : 0 };
-}
-
-function layoutAnnotations(host, camera, entries, width, height, canvasTop, panels, placeLabels, displayOpacity, showDimensions) {
+function layoutAnnotations(host, camera, entries, width, height, canvasTop, panels, placeLabels, displayOpacity, showDimensions, { base, target, focusPart }) {
   const origin = host.getBoundingClientRect();
   const viewport = {
     left: Math.max(8, 8 - origin.left),
@@ -654,15 +651,15 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
   }
 
   if (footprint) {
-    const older = entries.get("7:part:display")?.bounds;
-    const newer = entries.get("5:part:display")?.bounds;
+    const older = entries.get(`${base}:part:${focusPart}`)?.bounds;
+    const newer = entries.get(`${target}:part:${focusPart}`)?.bounds;
     const outlines = showDimensions && older && newer && [outlineFor(older), outlineFor(newer)];
     const visible = outlines && outlines.every(Boolean);
     const outer = visible && {
       left: Math.min(...outlines.map(({ left }) => left)), right: Math.max(...outlines.map(({ right }) => right)),
       top: Math.min(...outlines.map(({ top }) => top)), bottom: Math.max(...outlines.map(({ bottom }) => bottom)),
     };
-    for (const [i, revision] of ["7", "5"].entries()) {
+    for (const [i, revision] of [base, target].entries()) {
       const group = host.querySelector(`[data-dimensions="${revision}"]`);
       const widthLabel = host.querySelector(`[data-dimension-label="${revision}width"]`);
       const heightLabel = host.querySelector(`[data-dimension-label="${revision}height"]`);
@@ -752,10 +749,11 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
   }
 }
 
-export function createFielddeckStage(host, assets, index, callbacks) {
+export function createFielddeckStage(host, assets, index, callbacks, sceneConfig) {
+  const { base, target, focusPart } = sceneConfig;
   const scene = new THREE.Scene();
   const resources = new Set();
-  const entries = makeEntries(assets, index, scene, resources);
+  const entries = makeEntries(assets, index, scene, resources, sceneConfig);
   const all = [...entries.values()];
   if (!all.length) {
     resources.forEach((resource) => resource.dispose());
@@ -787,9 +785,9 @@ export function createFielddeckStage(host, assets, index, callbacks) {
   scene.environmentIntensity = 0.55;
 
   const modeEntries = {
-    "7": all.filter(({ row }) => row.revision === "7"),
-    "5": all.filter(({ row }) => row.revision === "5"),
-    compare: all.filter(({ row }) => row.revision === "5" || row.delta === "removed"),
+    [base]: all.filter(({ row }) => row.revision === base),
+    [target]: all.filter(({ row }) => row.revision === target),
+    compare: all.filter(({ row }) => row.revision === target || row.delta === "removed"),
   };
   groupExplode(all);
   const extended = boundsFor(all, 1).union(boundsFor(all, 0));
@@ -916,7 +914,7 @@ export function createFielddeckStage(host, assets, index, callbacks) {
   window.addEventListener("scroll", invalidateLayout, true);
   resize();
 
-  const displays = all.filter(({ row }) => row.part.part_id === "display");
+  const displays = all.filter(({ row }) => row.part.part_id === focusPart);
   const displayBounds = boundsFor(displays, 0);
 
   function projectedPose(parts, direction, explode, { face = false, ghost } = {}) {
@@ -997,8 +995,8 @@ export function createFielddeckStage(host, assets, index, callbacks) {
 
   function assemblyPose(mode, explode) {
     const parts = modeEntries[mode].length ? modeEntries[mode] : all;
-    const angle = TOUR[config.cameraCue?.stopIndex]?.angle
-      ?? (config.selectedKeys.length >= 2 ? TOUR[1].angle : mode === "compare" ? TOUR[0].angle : 0);
+    const angle = TOUR_ANGLES[config.cameraCue?.stopIndex]
+      ?? (config.selectedKeys.length >= 2 ? TOUR_ANGLES[1] : mode === "compare" ? TOUR_ANGLES[0] : 0);
     const direction = VIEW.clone().applyAxisAngle(UP, THREE.MathUtils.degToRad(angle));
     return projectedPose(parts, direction, explode, { ghost: entries.get(config.ghostDeltaKey) });
   }
@@ -1093,14 +1091,16 @@ export function createFielddeckStage(host, assets, index, callbacks) {
           return THREE.MathUtils.lerp(motion.from, motion.to, phase);
         } : () => explode;
     if (!blend || mode !== blend.mode) {
-      const next = modelWeights(mode);
+      const next = {
+        base: Number(mode === base), target: Number(mode !== base), compare: Number(mode === "compare"),
+      };
       blend = { mode, start: now, from: blend?.current ?? next, to: next, current: next };
     }
     const progress = clamp((now - blend.start) / (reduced ? 100 : 450));
     const mix = reduced ? progress : inOutCubic(progress);
     blend.current = {
-      seven: THREE.MathUtils.lerp(blend.from.seven, blend.to.seven, mix),
-      five: THREE.MathUtils.lerp(blend.from.five, blend.to.five, mix),
+      base: THREE.MathUtils.lerp(blend.from.base, blend.to.base, mix),
+      target: THREE.MathUtils.lerp(blend.from.target, blend.to.target, mix),
       compare: THREE.MathUtils.lerp(blend.from.compare, blend.to.compare, mix),
     };
     const accentProgress = clamp((now - blend.start - (reduced ? 0 : 700)) / (reduced ? 100 : 180));
@@ -1187,14 +1187,14 @@ export function createFielddeckStage(host, assets, index, callbacks) {
     const block = [];
     let floor = Infinity;
     let contactDirty = firstFrame;
-    const displaySelected = config.selectedKeys.some((key) => entries.get(key)?.row.part.part_id === "display");
+    const displaySelected = config.selectedKeys.some((key) => entries.get(key)?.row.part.part_id === focusPart);
     for (const entry of all) {
       const { row, group, vector } = entry;
-      const removed = row.revision === "7" && row.delta === "removed";
+      const removed = row.revision === base && row.delta === "removed";
       const ghost = removed && (mode === "compare" || blend.current.compare > 0);
       const ghostOpacity = selectedKey && !displaySelected && entry.displayOverlay ? 0.3 : 1;
-      const weight = row.revision === "5" ? blend.current.five
-        : ghost ? Math.max(blend.current.seven, blend.current.compare) * displayOpacity * ghostOpacity : blend.current.seven;
+      const weight = row.revision === target ? blend.current.target
+        : ghost ? Math.max(blend.current.base, blend.current.compare) * displayOpacity * ghostOpacity : blend.current.base;
       if (entry.overlay) {
         const { object, material, halo } = entry.overlay;
         object.visible = !faceView && row.key === ghostDeltaKey;
@@ -1235,7 +1235,7 @@ export function createFielddeckStage(host, assets, index, callbacks) {
       const casts = entry.style.surface[0].castShadow;
       contactDirty ||= casts !== wasCasting || casts && moved;
       if (casts) floor = Math.min(floor, entry.bounds.min.z + group.position.z);
-      if (row.revision === (mode === "7" ? "7" : "5") || mode === "compare" && ghost) {
+      if (row.revision === (mode === "compare" ? target : mode) || mode === "compare" && ghost) {
         pick.push(...entry.style.surface);
         if (!entry.outline && !ghost) block.push(...entry.style.surface);
       }
@@ -1252,7 +1252,7 @@ export function createFielddeckStage(host, assets, index, callbacks) {
       pickable = pick;
       opaque = block;
       const placeLabels = layoutDirty || resized || config !== lastConfig || !dirty || now - lastLayout > 60;
-      layoutAnnotations(host, camera, entries, width, height, canvasTop, panels, placeLabels, displayOpacity, !cameraMove);
+      layoutAnnotations(host, camera, entries, width, height, canvasTop, panels, placeLabels, displayOpacity, !cameraMove, sceneConfig);
       if (placeLabels) lastLayout = now;
     }
     if (firstFrame) {

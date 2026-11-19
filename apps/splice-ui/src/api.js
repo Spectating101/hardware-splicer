@@ -22,6 +22,11 @@ export function fielddeckSceneUrl(revision) {
   return `${API_BASE}/v1/scenes/fielddeck/${revision}`;
 }
 
+export async function fetchSceneManifest(projectId, signal) {
+  const res = await fetch(`${API_BASE}/v1/scenes/${encodeURIComponent(projectId)}`, { signal });
+  return parseJson(res);
+}
+
 export async function fetchHealth() {
   const res = await fetch(`${API_BASE}/health`);
   return parseJson(res);

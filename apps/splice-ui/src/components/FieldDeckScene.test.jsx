@@ -292,6 +292,7 @@ describe("Fielddeck evidence UI", () => {
   const update = vi.fn();
   beforeEach(() => {
     narrow = false;
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("Scene manifest unavailable")));
     vi.stubGlobal("matchMedia", vi.fn((query) => ({
       matches: query === FIELDDECK_NARROW ? narrow : query === "(prefers-reduced-motion: reduce)",
       addEventListener: vi.fn(), removeEventListener: vi.fn(),
@@ -309,6 +310,27 @@ describe("Fielddeck evidence UI", () => {
     });
   });
   afterEach(() => vi.unstubAllGlobals());
+
+  it("uses the scene manifest for the heading, tour and view availability", async () => {
+    fetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        schema: "hardware_splicer.scene_manifest.v1",
+        title: "Project scene title", subtitle: "Project scene subtitle", compare: null,
+        tour: [{ label: "Inspect the tray", select: "tray", revision: "7", explode: 0.25 }],
+      }),
+    });
+    render(<FieldDeckScene />);
+    expect(await screen.findByRole("heading", { name: "Project scene title" })).toBeVisible();
+    expect(screen.getByText("Project scene subtitle")).toBeVisible();
+    expect(screen.queryByRole("button", { name: "Compare" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Face view" })).toBeNull();
+    expect(await screen.findByText("Inspect the tray")).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Start tour" }));
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({
+      mode: "7", explode: 0.25, selectedKey: "7:part:tray",
+    }));
+  });
 
   it("renders unknown values and preserves known fields and sources", () => {
     render(<EvidenceRows evidence={[

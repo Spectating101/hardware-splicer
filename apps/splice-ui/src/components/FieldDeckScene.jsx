@@ -1,10 +1,11 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
-  BASIS_LABELS, DEFAULT_EXPLODE, DIFF_LABELS, FIELDDECK_NARROW, TOUR,
+  BASIS_LABELS, DEFAULT_EXPLODE, DIFF_LABELS, FIELDDECK_COMPARE, FIELDDECK_NARROW,
   classifyPart, evidenceCells, formatEvidenceSource, indexFielddeck, rowsForMode, selectedPartKeys,
   countClippedItems, evidenceLabel, ghostDeltaKey, openQuestions, shortPartName, toggleFielddeckSheet,
 } from "./fielddeckLogic.js";
 import { createFielddeckStage, disposeFielddeck, loadFielddeck } from "./fielddeckStage.js";
+import { fetchSceneManifest } from "../api.js";
 import "./fielddeckScene.css";
 
 const INITIAL = {
@@ -13,6 +14,17 @@ const INITIAL = {
 };
 const LEGEND = [["Shape source", BASIS_LABELS], ["Change", DIFF_LABELS]];
 const MODES = [["7", "7-inch"], ["5", "5-inch"], ["compare", "Compare"]];
+const FALLBACK_MANIFEST = {
+  title: "Fielddeck display swap",
+  subtitle: "7-inch → 5-inch",
+  compare: FIELDDECK_COMPARE,
+  focus: { part_id: "display", label: "Display" },
+  tour: [
+    { label: "Display stack", select: "display", explode: 1 },
+    { label: "Cable (DSI)", select: "display-ribbon", explode: 0.45 },
+    { label: "Changed parts", select: null, revision: "compare", explode: 1, diff: "changed" },
+  ],
+};
 const EVIDENCE_STATES = new Set(["datasheet", "assumed", "computed", "unknown"]);
 let introSeen = false;
 
@@ -231,7 +243,7 @@ function PartTree({ rows, view, questions, counts, blockersOnly, endpoints, link
   );
 }
 
-function Annotations({ labels, selection, endpoints, pins, faceView, onSelect }) {
+function Annotations({ labels, selection, endpoints, pins, faceView, base, target, onSelect }) {
   return (
     <div className="fd-annotations" aria-label="Scene callouts">
       <svg className="fd-leaders" aria-hidden="true">
@@ -240,9 +252,9 @@ function Annotations({ labels, selection, endpoints, pins, faceView, onSelect })
         ))}
         <path className="fd-pin-leaders" data-pin-leaders="" />
         {endpoints.length > 0 && <path className="fd-route-leaders" data-route-leaders="" />}
-        {faceView && ["7", "5"].map((revision) => (
+        {faceView && [base, target].map((revision) => (
           <g className="fd-dimensions" data-dimensions={revision} key={revision}
-            data-kind={revision === "7" ? "removed" : "added"}>
+            data-kind={revision === base ? "removed" : "added"}>
             <path />
           </g>
         ))}
@@ -252,12 +264,12 @@ function Annotations({ labels, selection, endpoints, pins, faceView, onSelect })
         </>}
       </svg>
       {faceView && <>
-        {["7", "5"].flatMap((revision) => ["width", "height"].map((axis) => (
+        {[base, target].flatMap((revision) => ["width", "height"].map((axis) => (
           <span className="fd-dimension-label" key={revision + axis} data-dimension-label={revision + axis}
-            data-kind={revision === "7" ? "removed" : "added"} data-axis={axis} />
+            data-kind={revision === base ? "removed" : "added"} data-axis={axis} />
         )))}
         <div className="fd-footprint" data-footprint="">
-          <div>5-inch minus 7-inch · CAD footprint, computed</div>
+          <div>{target}-inch minus {base}-inch · CAD footprint, computed</div>
           <div data-footprint-delta="" />
         </div>
       </>}
@@ -289,6 +301,11 @@ export default function FieldDeckScene({ onExit }) {
   const stage = useRef(null);
   const current = useRef(null);
   const [assets, setAssets] = useState(null);
+  const [manifest, setManifest] = useState(FALLBACK_MANIFEST);
+  const { compare, focus, tour } = manifest;
+  const { base, target } = compare ?? FIELDDECK_COMPARE;
+  const comparisonEnabled = Boolean(compare);
+  const focusPart = focus?.part_id;
   const [linked, setLinked] = useState(new Set());
   const [rendered, setRendered] = useState(false);
   const [stageError, setStageError] = useState("");
@@ -320,6 +337,16 @@ export default function FieldDeckScene({ onExit }) {
 
   useEffect(() => {
     const controller = new AbortController();
+    fetchSceneManifest("cyberdeck-real-trial-20261020", controller.signal).then((result) => {
+      if (!controller.signal.aborted && result?.schema === "hardware_splicer.scene_manifest.v1") {
+        setManifest(result);
+      }
+    }).catch(() => {});
+    return () => controller.abort();
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
     let loaded;
     loadFielddeck(controller.signal).then((result) => {
       if (controller.signal.aborted) disposeFielddeck(result);
@@ -337,10 +364,12 @@ export default function FieldDeckScene({ onExit }) {
   const sidecars = useMemo(() => ({
     "7": assets?.["7"].sidecar, "5": assets?.["5"].sidecar,
   }), [assets]);
-  const index = useMemo(() => indexFielddeck(sidecars), [sidecars]);
-  const rows = useMemo(() => rowsForMode(index, view.mode), [index, view.mode]);
+  const sceneCompare = useMemo(() => comparisonEnabled ? { base, target } : null,
+    [base, target, comparisonEnabled]);
+  const index = useMemo(() => indexFielddeck(sidecars, sceneCompare), [sidecars, sceneCompare]);
+  const rows = useMemo(() => rowsForMode(index, view.mode, sceneCompare), [index, view.mode, sceneCompare]);
   const selection = index.byKey.get(view.selected);
-  const revision = view.mode === "7" ? "7" : "5";
+  const revision = view.mode === "compare" ? target : view.mode;
   const allQuestions = useMemo(() => openQuestions(sidecars, index), [sidecars, index]);
   const displayedKeys = useMemo(() => new Set(rows.map(({ key }) => key)), [rows]);
   const questions = useMemo(() => allQuestions.flatMap(({ keys, ...question }) => {
@@ -348,31 +377,31 @@ export default function FieldDeckScene({ onExit }) {
     if (!matching.length) return [];
     // An older revision's check can still be inspected from its visible counterpart.
     const visible = matching.filter((key) => displayedKeys.has(key));
-    const fallback = view.mode === "compare" ? matching[0].replace(/^7:/, "5:") : matching[0];
+    const fallback = view.mode === "compare" ? matching[0].replace(`${base}:`, `${target}:`) : matching[0];
     const key = visible[0] ?? (displayedKeys.has(fallback) ? fallback : matching[0]);
     return [{ ...question, key }];
-  }), [allQuestions, displayedKeys, revision, view.mode]);
+  }), [allQuestions, displayedKeys, revision, view.mode, base, target]);
   const selectionQuestions = useMemo(() => {
     if (!selection) return [];
     const keys = selection.part
-      ? ["5", "7"].map((rev) => index.byPart.get(`${rev}:${selection.part.part_id}`)?.key)
-      : view.mode === "compare" ? [selection.key, selection.key.replace(/^5:/, "7:")] : [selection.key];
+      ? [target, base].map((rev) => index.byPart.get(`${rev}:${selection.part.part_id}`)?.key)
+      : view.mode === "compare" ? [selection.key, selection.key.replace(`${target}:`, `${base}:`)] : [selection.key];
     return allQuestions.flatMap((question) => !keys.some((key) => question.keys.has(key)) ? [] : [{
       ...question,
       scope: question.keys.has(selection.key) ? nameOf(selection)
         : `${[...question.keys][0].split(":")[0]}-inch revision`,
     }]);
-  }, [allQuestions, index, selection, view.mode]);
+  }, [allQuestions, index, selection, view.mode, base, target]);
   const treeOpen = narrow ? sheet === "parts" || sheet === "blockers" : desktopTreeOpen;
   const inspectorOpen = !narrow || sheet === "details";
   const selectedKeys = useMemo(() => selectedPartKeys(index, selection), [index, selection]);
-  const oldKey = ghostDeltaKey(index, view.mode, selection);
+  const oldKey = ghostDeltaKey(index, view.mode, selection, sceneCompare);
   const treeEndpoints = selection?.link ? [["A", selection.link.from_part_id], ["B", selection.link.to_part_id]]
     .map(([letter, id]) => [letter, index.byPart.get(`${selection.revision}:${id}`)?.key]) : [];
   const endpoints = view.faceView ? [] : treeEndpoints;
   const labels = view.faceView || narrow && selection?.link ? [] : rows.flatMap((row) => {
     if (!row.part || !linked.has(row.key)
-      || !(selection ? selectedKeys.includes(row.key) : row.part.part_id === "display")) return [];
+      || !(selection ? selectedKeys.includes(row.key) : row.part.part_id === focusPart)) return [];
     const endpoint = endpoints.find(([, key]) => key === row.key)?.[0];
     const caption = row.delta === "removed" && view.mode === "compare" ? `${nameOf(row)} · removed` : undefined;
     return [{ ...row, endpoint, caption }];
@@ -383,8 +412,8 @@ export default function FieldDeckScene({ onExit }) {
   const pins = [];
   if (view.blockers && view.faceView) {
     for (const question of allQuestions) {
-      const anchors = [...question.keys].filter((key) => index.byKey.get(key)?.part?.part_id === "display" && linked.has(key));
-      if (anchors.length) pins.push({ ...question, key: index.byPart.get(`${revision}:display`)?.key ?? anchors[0], anchor: anchors[0] });
+      const anchors = [...question.keys].filter((key) => index.byKey.get(key)?.part?.part_id === focusPart && linked.has(key));
+      if (anchors.length) pins.push({ ...question, key: index.byPart.get(`${revision}:${focusPart}`)?.key ?? anchors[0], anchor: anchors[0] });
     }
   } else if (view.blockers) {
     if (selection?.link && !narrow) {
@@ -395,9 +424,11 @@ export default function FieldDeckScene({ onExit }) {
       if (linked.has(key) && displayedKeys.has(key)) pins.push({ ...question, anchor: key, dimmed: Boolean(selection?.link) });
     }
   }
-  const comparisonAvailable = sidecars["5"]?.revision_diff?.status === "available";
+  const comparisonAvailable = comparisonEnabled && sidecars[target]?.revision_diff?.status === "available";
   const comparisonRenderable = comparisonAvailable
-    && [...linked].some((key) => key.startsWith("7:")) && [...linked].some((key) => key.startsWith("5:"));
+    && [base, target].every((rev) => [...linked].some((key) => key.startsWith(`${rev}:`)));
+  const faceAvailable = comparisonRenderable && focusPart
+    && [base, target].every((rev) => linked.has(index.byPart.get(`${rev}:${focusPart}`)?.key));
 
   useLayoutEffect(() => {
     const panel = peek.current;
@@ -425,7 +456,7 @@ export default function FieldDeckScene({ onExit }) {
   function finishIntro() {
     setView((old) => ({
       ...old, mode: "compare", explode: DEFAULT_EXPLODE, hero: null, blockers: true,
-      selected: index.byPart.get("5:display")?.key ?? null,
+      selected: index.byPart.get(`${target}:${focusPart}`)?.key ?? null,
     }));
   }
 
@@ -448,7 +479,7 @@ export default function FieldDeckScene({ onExit }) {
           onPick: (key) => {
             if (current.current.view.hero === null && key) current.current.select(key);
           },
-        });
+        }, { base, target, focusPart });
         stage.current = runtime;
         setLinked(runtime.linked);
       } catch (error) {
@@ -456,7 +487,7 @@ export default function FieldDeckScene({ onExit }) {
       }
     }
     const hasRevision = (rev) => [...(runtime?.linked ?? [])].some((key) => key.startsWith(`${rev}:`));
-    const canPlay = comparisonAvailable && hasRevision("7") && hasRevision("5");
+    const canPlay = comparisonAvailable && hasRevision(base) && hasRevision(target);
     if (canPlay && !introSeen && !current.current.reduced) {
       introSeen = true;
       setView({ ...INITIAL, mode: "compare", hero: performance.now(), blockers: false });
@@ -464,14 +495,14 @@ export default function FieldDeckScene({ onExit }) {
       introSeen = true;
       current.current.finishIntro();
     } else {
-      const mode = hasRevision("5") || !hasRevision("7") && sidecars["5"] ? "5" : "7";
-      setView({ ...INITIAL, mode, selected: index.byPart.get(`${mode}:display`)?.key ?? null });
+      const mode = hasRevision(target) || !hasRevision(base) && sidecars[target] ? target : base;
+      setView({ ...INITIAL, mode, selected: index.byPart.get(`${mode}:${focusPart}`)?.key ?? null });
     }
     return () => {
       stage.current = null;
       runtime?.dispose();
     };
-  }, [assets, index, sidecars, comparisonAvailable]);
+  }, [assets, index, sidecars, comparisonAvailable, base, target, focusPart]);
 
   useLayoutEffect(() => {
     stage.current?.update({
@@ -501,7 +532,7 @@ export default function FieldDeckScene({ onExit }) {
   function changeMode(mode) {
     setView((old) => {
       const active = index.byKey.get(old.selected);
-      const rev = mode === "7" ? "7" : "5";
+      const rev = mode === "compare" ? target : mode;
       const key = active?.part ? index.byPart.get(`${rev}:${active.part.part_id}`)?.key
         : active?.link ? `${rev}:link:${active.link.interface_id}` : null;
       return { ...old, mode, question: null, selected: index.byKey.has(key) ? key : null, cue: null, touring: false, blockers: true };
@@ -509,18 +540,21 @@ export default function FieldDeckScene({ onExit }) {
   }
 
   function goTo(stopIndex, touring = false) {
-    const stop = TOUR[stopIndex];
+    const stop = tour[stopIndex];
     if (!stop) return;
     setMoreOpen(false);
     setExplodeMotion(null);
     setView((old) => {
-      const mode = stop.diff && comparisonAvailable && (comparisonRenderable || !rendered) ? "compare" : old.mode;
-      const rev = mode === "7" ? "7" : "5";
-      const selected = stop.partId ? index.byPart.get(`${rev}:${stop.partId}`)
-        : stop.interfaceId ? index.byKey.get(`${rev}:link:${stop.interfaceId}`)
-          : rowsForMode(index, mode).find((row) => row.part && row.delta === stop.diff);
+      const showCompare = comparisonAvailable && (comparisonRenderable || !rendered);
+      const mode = stop.revision === "compare" ? (showCompare ? "compare" : old.mode)
+        : (sidecars[stop.revision] ? stop.revision : old.mode);
+      const rev = mode === "compare" ? target : mode;
+      const selected = stop.select ? index.byPart.get(`${rev}:${stop.select}`)
+        ?? index.byKey.get(`${rev}:link:${stop.select}`)
+        ?? rowsForMode(index, mode, sceneCompare).find((row) => row.part?.part_id === stop.select)
+        : stop.diff && rowsForMode(index, mode, sceneCompare).find((row) => row.part && row.delta === stop.diff);
       return {
-        ...old, mode, explode: stop.interfaceId ? 0.45 : 1, hero: null,
+        ...old, mode, explode: stop.explode, hero: null,
         stop: stopIndex, question: null, faceView: false, selected: selected?.key ?? null, touring,
         cue: { stopIndex }, blockers: true,
       };
@@ -531,11 +565,11 @@ export default function FieldDeckScene({ onExit }) {
     if (!view.touring) return undefined;
     const next = view.stop + 1;
     const timer = window.setTimeout(() => {
-      if (next < TOUR.length) goTo(next, true);
+      if (next < tour.length) goTo(next, true);
       else setView((old) => ({ ...old, touring: false }));
     }, 6000);
     return () => window.clearTimeout(timer);
-  }, [view.cue, view.touring, view.stop, rendered, index, comparisonAvailable, comparisonRenderable]);
+  }, [view.cue, view.touring, view.stop, rendered, index, comparisonAvailable, comparisonRenderable, tour, sceneCompare, sidecars, target]);
 
   useEffect(() => {
     if (!explodeMotion) return undefined;
@@ -606,8 +640,8 @@ export default function FieldDeckScene({ onExit }) {
         <header className="fd-header">
           <div>
             {onExit && <button className="fd-exit" type="button" aria-label="Back to home" onClick={onExit}>←</button>}
-            <h1 id="fd-title">Fielddeck display swap</h1>
-            {!narrow && <span className="fd-revision">7-inch → 5-inch</span>}
+            <h1 id="fd-title">{manifest.title}</h1>
+            {!narrow && <span className="fd-revision">{manifest.subtitle}</span>}
           </div>
           <button className="fd-validation" type="button" aria-pressed={filtered} aria-controls="fd-tree"
             onClick={toggleBlockers}>
@@ -623,7 +657,7 @@ export default function FieldDeckScene({ onExit }) {
             onClick={() => { setDesktopTreeOpen(!treeOpen); setBlockersOnly(false); }}>Assembly</button></h2>}
           <div className="fd-panel-content" id="fd-tree-content" hidden={!treeOpen}>
             <PartTree rows={rows} view={view} endpoints={treeEndpoints} linked={linked} onSelect={select}
-              questions={questions} blockersOnly={filtered} counts={view.mode === "compare" ? sidecars["5"]?.revision_diff?.counts : null} />
+              questions={questions} blockersOnly={filtered} counts={view.mode === "compare" ? sidecars[target]?.revision_diff?.counts : null} />
           </div>
         </aside>
         <Inspector row={selection} index={index} questions={selectionQuestions} open={inspectorOpen} />
@@ -635,7 +669,7 @@ export default function FieldDeckScene({ onExit }) {
         {playing && <button className="fd-skip" type="button" onClick={finishIntro}>Skip intro</button>}
 
         <Annotations labels={labels} selection={view.faceView ? null : selection} endpoints={endpoints}
-          pins={pins} faceView={view.faceView} onSelect={select} />
+          pins={pins} faceView={view.faceView} base={base} target={target} onSelect={select} />
         <div className="fd-bottom">
           {assets && (
             <div className="fd-controls" data-intro={playing}>
@@ -663,27 +697,27 @@ export default function FieldDeckScene({ onExit }) {
                     setExplodeMotion({ from: view.explode, to: view.explode > 0 ? 0 : 1, start: performance.now() });
                   }}>{view.explode > 0 ? "Collapse" : "Explode view"}</button>}
                 </div>}
-                {comparisonRenderable && <button type="button" onClick={toggleFace}>
+                {faceAvailable && <button type="button" title={focus.label} onClick={toggleFace}>
                   {view.faceView ? "Back to 3D" : "Face view"}
                 </button>}
                 {narrow && <button type="button" aria-expanded={keyOpen} aria-controls="fd-legend"
                   onClick={() => setKeyOpen(!keyOpen)}>Key</button>}
-                <div className="fd-tour" role="group" aria-label="Tour">
+                {tour.length > 0 && <div className="fd-tour" role="group" aria-label="Tour">
                   <button type="button" disabled={!view.stop} onClick={() => goTo(view.stop - 1)}
                     aria-label="Previous stop">←</button>
-                  <strong>{TOUR[view.stop].label}</strong>
-                  <button type="button" disabled={view.stop === TOUR.length - 1} onClick={() => goTo(view.stop + 1)}
+                  <strong>{(tour[view.stop] ?? tour[0]).label}</strong>
+                  <button type="button" disabled={view.stop === tour.length - 1} onClick={() => goTo(view.stop + 1)}
                     aria-label="Next stop">→</button>
                   <button type="button" onClick={() => view.touring
                     ? setView((old) => ({ ...old, touring: false }))
                     : goTo(0, !reduced)}>{view.touring ? "Pause tour" : "Start tour"}</button>
-                </div>
+                </div>}
               </div>
             </div>
           )}
           {narrow && offsetLabel && (modelVisible || playing) && <div className="fd-offset-caption">{offsetLabel}</div>}
         </div>
-        {narrow && comparisonRenderable && <button className="fd-face-pill" type="button" onClick={toggleFace}>
+        {narrow && faceAvailable && <button className="fd-face-pill" type="button" title={focus.label} onClick={toggleFace}>
           {view.faceView ? "Back to 3D" : "Face view"}
         </button>}
         <div className="fd-legend" id="fd-legend" aria-label="Material legend" hidden={narrow && !keyOpen}>
