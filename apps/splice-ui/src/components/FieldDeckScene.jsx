@@ -257,7 +257,7 @@ function PartTree({ rows, view, questions, counts, blockersOnly, endpoints, link
   );
 }
 
-function Annotations({ labels, selection, endpoints, pins, faceView, base, target, onSelect }) {
+function Annotations({ labels, selection, endpoints, pins, faceView, base, target, onSelect, glbSources = {} }) {
   return (
     <div className="fd-annotations" aria-label="Scene callouts">
       <svg className="fd-leaders" aria-hidden="true">
@@ -285,6 +285,10 @@ function Annotations({ labels, selection, endpoints, pins, faceView, base, targe
         <div className="fd-footprint" data-footprint="">
           <div>{target}-inch minus {base}-inch · CAD footprint, computed</div>
           <div data-footprint-delta="" />
+          {/* Every Face view mark names its source; the inner rectangle and circles are CAD contours. */}
+          <div className="fd-footprint-source" data-footprint-source="">
+            Window and mount-hole contours · computed from {[target, base].map((rev) => glbSources[rev] ?? `${rev}-inch GLB`).join(" and ")}
+          </div>
         </div>
       </>}
       {labels.map((row) => <span className="fd-label" key={row.key} data-anchor={row.key}
@@ -382,6 +386,9 @@ export default function FieldDeckScene({ onExit }) {
   const sidecars = useMemo(() => ({
     "7": assets?.["7"].sidecar, "5": assets?.["5"].sidecar,
   }), [assets]);
+  const glbSources = useMemo(() => Object.fromEntries(Object.entries(sidecars)
+    .filter(([, sidecar]) => sidecar?.glb_source).map(([rev, sidecar]) => [rev, sidecar.glb_source.split("/").at(-1)])),
+  [sidecars]);
   const sceneCompare = useMemo(() => comparisonEnabled ? { base, target } : null,
     [base, target, comparisonEnabled]);
   const index = useMemo(() => indexFielddeck(sidecars, sceneCompare), [sidecars, sceneCompare]);
@@ -703,7 +710,8 @@ export default function FieldDeckScene({ onExit }) {
         {playing && <button className="fd-skip" type="button" onClick={finishIntro}>Skip intro</button>}
 
         <Annotations labels={labels} selection={view.faceView ? null : selection} endpoints={endpoints}
-          pins={pins} faceView={view.faceView} base={base} target={target} onSelect={select} />
+          pins={pins} faceView={view.faceView} base={base} target={target} onSelect={select}
+          glbSources={glbSources} />
         <div className="fd-bottom">
           {assets && (
             <div className="fd-controls" data-intro={playing}>

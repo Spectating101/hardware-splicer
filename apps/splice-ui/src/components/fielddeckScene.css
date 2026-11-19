@@ -429,7 +429,10 @@
   .fd-leaders .fd-bracket { stroke-width: 1; }
   .fd-leaders .fd-bracket-halo { stroke-width: 3; }
 }
+.fd-footprint-source { color: #9097a0; font-size: 10px; }
 .fd-leaders .fd-pin-ticks { stroke: var(--question); stroke-width: 1; fill: none; }
+/* Face view sits on the dark stage, so its pins take a raised fill to read as filled discs, as in 3D. */
+.fd-stage:has(.fd-footprint) .fd-pin span { background: #262b33; }
 @media (width < 640px) {
   .fd-grid-label { display: none; }
 }
