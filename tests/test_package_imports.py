@@ -21,7 +21,16 @@ import pytest
     from hardware_splicer.schemas import HardwareCompileSpec as spec
     assert HardwareCompileSpec is spec
     assert hs.sdk.compose_design is compose_design
+    assert salvage_bringup is hs.sdk.salvage_bringup
     assert not hasattr(hs, "nonexistent_export")
+    """,
+    """
+    import importlib
+    import hardware_splicer as hs
+    leaf = importlib.import_module("hardware_splicer.salvage_bringup")
+    from hardware_splicer import sdk
+    assert callable(leaf.run_salvage_bringup)
+    assert hs.salvage_bringup is sdk.salvage_bringup
     """,
     """
     from hardware_splicer.integrations.schematic_export import write_schematic_for_netlist

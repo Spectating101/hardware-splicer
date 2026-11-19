@@ -1,6 +1,11 @@
 """Programmatic hardware engineering API."""
 
 from ._exports import resolve_export as _resolve_export
+from . import salvage_bringup
+
+# Python normally binds an imported child module to the parent. Cache this
+# lightweight child first so later SDK imports cannot shadow the public function.
+del salvage_bringup
 
 _MODULES = {
     "HardwareCompileResult": "schemas",
