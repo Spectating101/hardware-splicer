@@ -49,7 +49,8 @@
   height: 100svh;
   min-width: 0;
   overflow: hidden;
-  background: linear-gradient(var(--bg-0) 35%, var(--bg-1));
+  /* Flat stage floor: the floor pool decays monotonically to this value, never to a lighter band. */
+  background: #0b0d10;
 }
 .fd-stage canvas, .fd-leaders, .fd-annotations {
   position: absolute;

@@ -213,10 +213,12 @@ function stylePart(entry, compare, weight, ghost, accent, emphasis, focus = null
 
   for (const mesh of surface) {
     mesh.visible = Boolean(solid || fill) && !ghost;
-    mesh.castShadow = !translucent && weight >= 0.49;
-    // Part-on-part key shadows separate the stacked layers; the frustum is fitted to the model.
+    const casts = !translucent && weight >= 0.49;
+    // A part lifted by the presentation offset casts onto the floor (contact layer) only, never a
+    // key shadow onto the assembly below it.
+    mesh.castShadow = casts && !entry.lifted;
     mesh.receiveShadow = !translucent;
-    if (mesh.castShadow) mesh.layers.enable(CONTACT_LAYER);
+    if (casts) mesh.layers.enable(CONTACT_LAYER);
     else mesh.layers.disable(CONTACT_LAYER);
   }
   lines.forEach((line) => { line.visible = !ghost && !veiled; });
@@ -745,7 +747,7 @@ function groupExplode(entries) {
   }
 }
 
-function createContactShadow(scene, bounds, resources) {
+function createContactShadow(scene, bounds, resources, overlay = scene) {
   const size = 512;
   const center = bounds.getCenter(new THREE.Vector3());
   const spread = bounds.getSize(new THREE.Vector3());
@@ -789,7 +791,7 @@ function createContactShadow(scene, bounds, resources) {
     target.texture.repeat.x = -1;
     target.texture.offset.x = 1;
     const material = new THREE.MeshBasicMaterial({
-      map: target.texture, transparent: true, depthWrite: false, opacity: i === 2 ? 0.55 : 0.45, toneMapped: false,
+      map: target.texture, transparent: true, depthWrite: false, opacity: i === 0 ? 0.15 : i === 2 ? 0.55 : 0.45, toneMapped: false,
     });
     resources.add(target);
     resources.add(material);
@@ -799,7 +801,7 @@ function createContactShadow(scene, bounds, resources) {
   });
   const poolMaterial = new THREE.ShaderMaterial({
     transparent: true, depthWrite: false, toneMapped: false,
-    uniforms: { tint: { value: new THREE.Color(0xc9c3b8) } },
+    uniforms: { tint: { value: new THREE.Color(0x1e1c1a) } },
     vertexShader: `
       varying vec2 floorUv;
       void main() {
@@ -810,36 +812,15 @@ function createContactShadow(scene, bounds, resources) {
       uniform vec3 tint;
       varying vec2 floorUv;
       void main() {
-        // A ring of light around the footprint, so the floor under the assembly stays darker.
-        float r = length(floorUv * 2.0 - 1.0);
-        float ring = smoothstep(0.3, 0.55, r) * (1.0 - smoothstep(0.55, 1.0, r));
-        gl_FragColor = vec4(tint, 0.1 * ring);
+        // A cool dark-grey pool, brightest at the centre and decaying monotonically to the stage.
+        float falloff = 1.0 - smoothstep(0.15, 1.0, length(floorUv * 2.0 - 1.0));
+        gl_FragColor = vec4(tint * 0.6 * falloff, 0.6 * falloff);
         #include <colorspace_fragment>
       }`,
   });
   const pool = new THREE.Mesh(quadGeometry, poolMaterial);
-  pool.scale.set(width * 1.1, height * 1.1, 1);
+  pool.scale.set(width * 1.8, height * 1.8, 1);
   pool.renderOrder = -2;
-  // A soft shadow pool under the assembly footprint: about 9% darker, fading out past its edge.
-  const shadowPoolMaterial = new THREE.ShaderMaterial({
-    transparent: true, depthWrite: false, toneMapped: false,
-    vertexShader: `
-      varying vec2 floorUv;
-      void main() {
-        floorUv = uv;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-      }`,
-    fragmentShader: `
-      varying vec2 floorUv;
-      void main() {
-        vec2 p = abs(floorUv * 2.0 - 1.0);
-        float d = pow(pow(p.x, 4.0) + pow(p.y, 4.0), 0.25);
-        gl_FragColor = vec4(0.0, 0.0, 0.0, 0.5 * (1.0 - smoothstep(0.7, 1.0, d)));
-      }`,
-  });
-  const shadowPool = new THREE.Mesh(quadGeometry, shadowPoolMaterial);
-  shadowPool.scale.set(spread.x * 0.9, spread.y * 0.9, 1);
-  shadowPool.renderOrder = -1.5;
   // The key light's own shadow on the floor, inside the light pool, so the assembly sits down.
   // It spans the scene bounds × 1.2 and fades radially to zero, so it never shows a hard edge.
   const keyFloorMaterial = new THREE.ShadowMaterial({ opacity: 0.3, depthWrite: false });
@@ -853,12 +834,15 @@ function createContactShadow(scene, bounds, resources) {
   keyFloor.scale.set(spread.x * 0.6, spread.y * 0.6, 1);
   keyFloor.receiveShadow = true;
   keyFloor.renderOrder = -1;
-  scene.add(...ground, pool, shadowPool, keyFloor);
-  [target, blurTarget, depth, quadGeometry, horizontal, vertical, groundGeometry, poolMaterial, shadowPoolMaterial, keyFloorMaterial]
+  // The floor pool draws in the overlay, after tone mapping, so its dark values are not crushed;
+  // scene depth still hides it behind the assembly.
+  scene.add(...ground, keyFloor);
+  overlay.add(pool);
+  [target, blurTarget, depth, quadGeometry, horizontal, vertical, groundGeometry, poolMaterial, keyFloorMaterial]
     .forEach((resource) => resources.add(resource));
 
   return (renderer, floor, withAssembled = (render) => render(), withFeetOnly = (render) => render()) => {
-    pool.visible = keyFloor.visible = shadowPool.visible = Number.isFinite(floor);
+    pool.visible = keyFloor.visible = Number.isFinite(floor);
     // Bake and composite at the lowest assembly z so the feet touch their contact shadow.
     ground.forEach((mesh) => {
       mesh.visible = pool.visible;
@@ -866,7 +850,6 @@ function createContactShadow(scene, bounds, resources) {
     });
     if (!pool.visible) return;
     pool.position.set(center.x, center.y, floor - 0.2);
-    shadowPool.position.set(center.x, center.y, floor - 0.15);
     keyFloor.position.set(center.x, center.y, floor - 0.03);
     capture.position.copy(ground[0].position);
     capture.lookAt(center.x, center.y, floor + 1);
@@ -1732,13 +1715,15 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
   };
   groupExplode(all);
   const extended = boundsFor(all, 1).union(boundsFor(all, 0));
-  const renderContact = createContactShadow(scene, extended, resources);
+  const renderContact = createContactShadow(scene, extended, resources, technical);
   const assembled = boundsFor(all, 0);
   const center = assembled.getCenter(new THREE.Vector3());
   const radius = extended.getSize(new THREE.Vector3()).length() / 2;
   const footprint = Math.hypot(assembled.max.x - assembled.min.x, assembled.max.y - assembled.min.y) / 2;
   const grid = createGrid(center, footprint, radius, resources);
-  scene.add(grid);
+  // The grid draws in the overlay after the floor pool, so the pool never veils it.
+  grid.renderOrder = -1;
+  technical.add(grid);
 
   function light(color, intensity, x, y, elevation, spot = false) {
     const lamp = spot ? new THREE.SpotLight(color, intensity, 0, Math.PI / 4, 0.35, 0)
@@ -1759,7 +1744,7 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
   // Rim from behind, strong enough to lift the back plate edges off the background.
   light(0xffffff, 2.4, 2, 7, 28);
   // Part-on-part shadows come from presentation offsets, so they read as soft form, not placement.
-  key.shadow.radius = 6;
+  key.shadow.radius = 8;
   key.shadow.intensity = 0.55;
   key.shadow.bias = -0.002;
   key.shadow.normalBias = 0.05;
@@ -2448,6 +2433,7 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
         continue;
       }
       nextPosition.copy(vector).multiplyScalar(offsetFor(entry));
+      entry.lifted = nextPosition.z > 1;
       const moved = !group.position.equals(nextPosition);
       group.position.copy(nextPosition);
       strokes.position.copy(nextPosition);
