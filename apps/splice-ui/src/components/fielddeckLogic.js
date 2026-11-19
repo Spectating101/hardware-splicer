@@ -40,6 +40,18 @@ export function toggleFielddeckSheet(current, sheet) {
   return current === sheet ? null : sheet;
 }
 
+// Scale around the unobstructed rectangle's centre. A value below 1 means an edge clips.
+export function projectedFitScale(bounds, rect, margin = 0) {
+  const halfWidth = (rect.right - rect.left) / 2;
+  const halfHeight = (rect.bottom - rect.top) / 2;
+  const x = rect.left + halfWidth;
+  const y = rect.top + halfHeight;
+  return Math.min(
+    Math.max(1, halfWidth - margin) / Math.max(x - bounds.left, bounds.right - x),
+    Math.max(1, halfHeight - margin) / Math.max(y - bounds.top, bounds.bottom - y),
+  );
+}
+
 const clampTo = (value, min, max) => Math.max(min, Math.min(max, value));
 const containsPoint = (rect, { x, y }) =>
   x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;

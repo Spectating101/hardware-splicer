@@ -36,9 +36,9 @@ export function EvidenceRows({ evidence }) {
         return (
           <div key={`${field}:${i}`} className="fd-evidence-row" data-inspector-item title={field}>
             <dt>{label}</dt>
-            {unknown ? <dd className="fd-evidence-state">Unknown</dd> : <>
+            <dd className="fd-evidence-state">{unknown ? "Unknown" : state}</dd>
+            {!unknown && <>
               <dd className="fd-evidence-value" data-numeric={hasNumericValue(row)}>{value}</dd>
-              <dd className="fd-evidence-state">{state}</dd>
               <dd className="fd-evidence-source"><EvidenceSource source={source} /></dd>
             </>}
           </div>
@@ -241,6 +241,7 @@ export default function FieldDeckScene({ onExit }) {
   const [blockersOnly, setBlockersOnly] = useState(false);
   const [narrow, setNarrow] = useState(() => window.matchMedia(FIELDDECK_NARROW).matches);
   const [keyOpen, setKeyOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const [sheet, setSheet] = useState(null);
   const [explodeMotion, setExplodeMotion] = useState(null);
   const [reduced, setReduced] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
@@ -397,6 +398,7 @@ export default function FieldDeckScene({ onExit }) {
   function goTo(stopIndex, touring = false) {
     const stop = TOUR[stopIndex];
     if (!stop) return;
+    setMoreOpen(false);
     setExplodeMotion(null);
     setView((old) => {
       const mode = stop.diff && comparisonAvailable && (comparisonRenderable || !rendered) ? "compare" : old.mode;
@@ -450,7 +452,10 @@ export default function FieldDeckScene({ onExit }) {
 
   function onKeyDown(event) {
     if (playing) current.current.finishIntro();
-    if (event.key === "Escape") setKeyOpen(false);
+    if (event.key === "Escape") {
+      setKeyOpen(false);
+      setMoreOpen(false);
+    }
     if (playing || !assets || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey
       || event.target.matches?.("input, textarea, select, [contenteditable=true]")) return;
     if (["ArrowLeft", "ArrowRight", "j", "k"].includes(event.key)) {
@@ -483,11 +488,14 @@ export default function FieldDeckScene({ onExit }) {
           <div>
             {onExit && <button className="fd-exit" type="button" aria-label="Back to home" onClick={onExit}>←</button>}
             <h1 id="fd-title">Fielddeck display swap</h1>
-            <span className="fd-revision">7-inch → 5-inch</span>
+            {!narrow && <span className="fd-revision">7-inch → 5-inch</span>}
           </div>
           <button className="fd-validation" type="button" aria-pressed={filtered} aria-controls="fd-tree"
             onClick={toggleBlockers}>
-            {narrow ? "Fit unknown" : "Physical fit unknown"} · <span className="fd-count">{questions.length}</span> {narrow ? "questions" : "open questions"}
+            {narrow ? <>
+              <span><span className="fd-count">{questions.length}</span> questions</span>
+              <span>Fit unknown</span>
+            </> : <>Physical fit unknown · <span className="fd-count">{questions.length}</span> open questions</>}
           </button>
         </header>
 
@@ -520,34 +528,39 @@ export default function FieldDeckScene({ onExit }) {
                   </button>
                 ))}
               </div>
-              {(modelVisible || playing) && <div className="fd-explode">
-                <label htmlFor="fd-explode">Explode</label>
-                <input id="fd-explode" type="range" min="0" max="1" step="0.01" value={view.explode}
-                  onChange={(event) => {
-                    setExplodeMotion(null);
-                    setView((old) => ({ ...old, explode: Number(event.target.value), cue: null, touring: false, blockers: true }));
-                  }} />
-                <output htmlFor="fd-explode">{Math.round(view.explode * 100)}%</output>
-                {!narrow && <button type="button" onClick={() => {
-                  setView((old) => ({ ...old, touring: false, blockers: true }));
-                  setExplodeMotion({ from: view.explode, to: view.explode > 0 ? 0 : 1, start: performance.now() });
-                }}>{view.explode > 0 ? "Collapse" : "Explode view"}</button>}
-              </div>}
-              {comparisonRenderable && <button type="button" onClick={() => {
-                setView((old) => ({ ...old, faceView: !old.faceView, touring: false }));
-              }}>{view.faceView ? "Back to 3D" : "Face view"}</button>}
-              {narrow && <button type="button" aria-expanded={keyOpen} aria-controls="fd-legend"
-                onClick={() => setKeyOpen(!keyOpen)}>Key</button>}
-              {!narrow && <div className="fd-tour" role="group" aria-label="Tour">
-                <button type="button" disabled={!view.stop} onClick={() => goTo(view.stop - 1)}
-                  aria-label="Previous stop">←</button>
-                <strong>{TOUR[view.stop].label}</strong>
-                <button type="button" disabled={view.stop === TOUR.length - 1} onClick={() => goTo(view.stop + 1)}
-                  aria-label="Next stop">→</button>
-                <button type="button" onClick={() => view.touring
-                  ? setView((old) => ({ ...old, touring: false }))
-                  : goTo(0, !reduced)}>{view.touring ? "Pause tour" : "Start tour"}</button>
-              </div>}
+              {narrow && <button className="fd-more" type="button" aria-expanded={moreOpen}
+                aria-controls="fd-options" onClick={() => setMoreOpen(!moreOpen)}>More</button>}
+              <div className="fd-options" id="fd-options" hidden={narrow && !moreOpen}>
+                {(modelVisible || playing) && <div className="fd-explode">
+                  <label htmlFor="fd-explode">Explode</label>
+                  <input id="fd-explode" type="range" min="0" max="1" step="0.01" value={view.explode}
+                    onChange={(event) => {
+                      setExplodeMotion(null);
+                      setView((old) => ({ ...old, explode: Number(event.target.value), cue: null, touring: false, blockers: true }));
+                    }} />
+                  <output htmlFor="fd-explode">{Math.round(view.explode * 100)}%</output>
+                  {!narrow && <button type="button" onClick={() => {
+                    setView((old) => ({ ...old, touring: false, blockers: true }));
+                    setExplodeMotion({ from: view.explode, to: view.explode > 0 ? 0 : 1, start: performance.now() });
+                  }}>{view.explode > 0 ? "Collapse" : "Explode view"}</button>}
+                </div>}
+                {comparisonRenderable && <button type="button" onClick={() => {
+                  setView((old) => ({ ...old, faceView: !old.faceView, touring: false }));
+                  setMoreOpen(false);
+                }}>{view.faceView ? "Back to 3D" : "Face view"}</button>}
+                {narrow && <button type="button" aria-expanded={keyOpen} aria-controls="fd-legend"
+                  onClick={() => setKeyOpen(!keyOpen)}>Key</button>}
+                <div className="fd-tour" role="group" aria-label="Tour">
+                  <button type="button" disabled={!view.stop} onClick={() => goTo(view.stop - 1)}
+                    aria-label="Previous stop">←</button>
+                  <strong>{TOUR[view.stop].label}</strong>
+                  <button type="button" disabled={view.stop === TOUR.length - 1} onClick={() => goTo(view.stop + 1)}
+                    aria-label="Next stop">→</button>
+                  <button type="button" onClick={() => view.touring
+                    ? setView((old) => ({ ...old, touring: false }))
+                    : goTo(0, !reduced)}>{view.touring ? "Pause tour" : "Start tour"}</button>
+                </div>
+              </div>
             </div>
           )}
         </div>

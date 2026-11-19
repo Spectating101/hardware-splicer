@@ -8,7 +8,7 @@ import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment
 import { HorizontalBlurShader } from "three/examples/jsm/shaders/HorizontalBlurShader.js";
 import { VerticalBlurShader } from "three/examples/jsm/shaders/VerticalBlurShader.js";
 import { fielddeckSceneUrl } from "../api.js";
-import { classifyPart, DEFAULT_EXPLODE, explodeGroupOffsets, FIELDDECK_NARROW, placeCallouts, formatEvidenceValue, rowForNode, TOUR } from "./fielddeckLogic.js";
+import { classifyPart, DEFAULT_EXPLODE, explodeGroupOffsets, FIELDDECK_NARROW, placeCallouts, projectedFitScale, formatEvidenceValue, rowForNode, TOUR } from "./fielddeckLogic.js";
 
 const COLORS = {
   custom: 0xd8ccb6, vendor_step: 0x8e979e, envelope: 0xa5aeb5,
@@ -82,6 +82,7 @@ export function disposeFielddeck(assets) {
 function solidMaterial(basis) {
   return new THREE.MeshStandardMaterial({
     color: COLORS[basis], metalness: 0, roughness: basis === "vendor_step" ? 0.82 : 0.84,
+    flatShading: basis === "vendor_step",
     polygonOffset: true, polygonOffsetFactor: 1, polygonOffsetUnits: 1,
   });
 }
@@ -103,6 +104,7 @@ function edgeMaterial(color, pattern, linewidth) {
   return new LineMaterial({
     color, linewidth, dashed: Boolean(pattern), dashSize: pattern?.[0] ?? 1, gapSize: pattern?.[1] ?? 1,
     transparent: true, depthWrite: false, toneMapped: false, alphaToCoverage: true,
+    polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1,
   });
 }
 
@@ -134,7 +136,8 @@ function stylePart(entry, compare, weight, ghost, accent) {
     mesh.material = translucent ? fill : solid;
     mesh.visible = basis !== "unknown" && !ghost;
     mesh.castShadow = !translucent && weight >= 0.49;
-    mesh.receiveShadow = !translucent;
+    // Vendor STEP can contain coincident surfaces that create self-shadow speckling.
+    mesh.receiveShadow = !translucent && basis !== "vendor_step";
     if (mesh.castShadow) mesh.layers.enable(CONTACT_LAYER);
     else mesh.layers.disable(CONTACT_LAYER);
   }
@@ -496,17 +499,28 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
       project(new THREE.Vector3(older ? min.x : max.x, min.y, z))];
     if (corners.some((point) => !point)) continue;
     const [a, b, c, d] = corners;
-    const y = (older ? Math.min(a.y, b.y) : Math.max(a.y, b.y)) + (older ? -16 : 16);
-    const x = (older ? Math.min(c.x, d.x) : Math.max(c.x, d.x)) + (older ? -16 : 16);
-    path.setAttribute("d", `M${a.x},${a.y}V${y + (older ? -4 : 4)} M${b.x},${b.y}V${y + (older ? -4 : 4)}
-      M${a.x},${y}H${b.x} M${c.x},${c.y}H${x + (older ? -4 : 4)} M${d.x},${d.y}H${x + (older ? -4 : 4)}
+    const y = a.y - 16;
+    const x = c.x - 16;
+    path.setAttribute("d", `M${a.x},${a.y}V${y - 4} M${b.x},${b.y}V${y - 4}
+      M${a.x},${y}H${b.x} M${c.x},${c.y}H${x - 4} M${d.x},${d.y}H${x - 4}
       M${x},${c.y}V${d.y}`);
     const dimension = (value) => `${formatEvidenceValue({ field: "dimension_mm", value })} · computed`;
     texts[0].textContent = dimension(max.x - min.x);
     texts[0].setAttribute("x", (a.x + b.x) / 2);
-    texts[0].setAttribute("y", y + (older ? -5 : 13));
+    texts[0].setAttribute("y", y - 7);
     texts[1].textContent = dimension(max.y - min.y);
-    texts[1].setAttribute("transform", `translate(${x + (older ? -5 : 13)},${(c.y + d.y) / 2}) rotate(-90)`);
+    texts[1].setAttribute("transform", `translate(${x - 7},${(c.y + d.y) / 2}) rotate(-90)`);
+    if (!older) {
+      // Keep both ends of the inside labels clear of the adjacent perimeter edges.
+      for (const [text, span] of [[texts[0], b.x - a.x], [texts[1], d.y - c.y]]) {
+        const available = Math.max(1, span - 32);
+        text.removeAttribute("textLength");
+        if (text.getComputedTextLength() > available) {
+          text.setAttribute("textLength", available);
+          text.setAttribute("lengthAdjust", "spacingAndGlyphs");
+        }
+      }
+    }
     group.style.visibility = "visible";
   }
   for (const path of host.querySelectorAll("[data-bracket]")) {
@@ -690,12 +704,11 @@ export function createFielddeckStage(host, assets, index, callbacks) {
     const nextHeight = Math.max(1, canvas.clientHeight);
     const phone = mobileView.matches;
     const { left: originX, top: originY } = host.getBoundingClientRect();
-    const upper = (phone ? bottomChrome : header).getBoundingClientRect().bottom - originY;
     const nextCanvasTop = canvas.offsetTop;
-    const lower = phone
-      ? Math.min(nextHeight + nextCanvasTop, ...[tree, inspector, legend].filter((panel) => panel.getClientRects().length)
-        .map((panel) => panel.getBoundingClientRect().top - originY))
-      : bottomChrome.getBoundingClientRect().top - originY;
+    const upper = Math.max(nextCanvasTop, (phone ? bottomChrome : header).getBoundingClientRect().bottom - originY);
+    const lowerPanels = phone ? [sheet, tree, inspector, legend] : [bottomChrome, legend];
+    const lower = Math.min(nextHeight + nextCanvasTop, ...lowerPanels.filter((panel) => panel.getClientRects().length)
+      .map((panel) => panel.getBoundingClientRect().top - originY));
     const left = phone ? 0 : Math.max(0, tree.getBoundingClientRect().right - originX);
     const right = phone ? nextWidth : Math.min(nextWidth, inspector.getBoundingClientRect().left - originX);
     const nextFrameHeight = Math.max(1, lower - upper);
@@ -728,10 +741,9 @@ export function createFielddeckStage(host, assets, index, callbacks) {
   window.addEventListener("scroll", invalidateLayout, true);
   resize();
 
-  function fit(bounds, angle, horizontal, options = {}) {
-    const { target = bounds.getCenter(new THREE.Vector3()), margin, face = false,
-      direction = face ? UP.clone() : VIEW.clone().applyAxisAngle(UP, THREE.MathUtils.degToRad(angle)),
-    } = options;
+  function fit(bounds, angle, horizontal, { margin, face = false } = {}) {
+    const target = bounds.getCenter(new THREE.Vector3());
+    const direction = face ? UP.clone() : VIEW.clone().applyAxisAngle(UP, THREE.MathUtils.degToRad(angle));
     const right = (face ? FACE_UP : UP).clone().cross(direction).normalize();
     const up = direction.clone().cross(right);
     const tangent = Math.tan(THREE.MathUtils.degToRad((face ? 12 : baseFov) / 2));
@@ -743,9 +755,6 @@ export function createFielddeckStage(host, assets, index, callbacks) {
     if (mobile && margin === undefined) {
       const sphere = bounds.getBoundingSphere(new THREE.Sphere());
       const distance = sphere.radius / Math.sin(Math.atan(Math.min(horizontalFit, verticalFit)));
-      controls.maxDistance = Math.max(radius * 13, distance);
-      camera.far = controls.maxDistance + radius * 2;
-      camera.updateProjectionMatrix();
       return { target: sphere.center, position: direction.multiplyScalar(distance).add(sphere.center) };
     }
     let distance = minimumDistance;
@@ -760,23 +769,14 @@ export function createFielddeckStage(host, assets, index, callbacks) {
         }
       }
     }
-    controls.maxDistance = Math.max(radius * 13, distance);
-    camera.far = controls.maxDistance + radius * 2;
-    camera.updateProjectionMatrix();
     return { target, position: direction.clone().multiplyScalar(distance).add(target) };
   }
 
   const displays = all.filter(({ row }) => row.part.part_id === "display");
   const displayBounds = boundsFor(displays, 0);
 
-  function facePose(target) {
-    return { ...fit(displayBounds, 0, 1, { target, face: true, margin: 48 }), fov: 12, up: FACE_UP };
-  }
-
-  function cablePose(direction) {
-    const endpoints = config.selectedKeys.map((key) => entries.get(key)).filter(Boolean);
-    if (config.selectedKeys.length < 2 || !endpoints.length) return null;
-    return fit(boundsFor(endpoints, config.explode), TOUR[1].angle, 1, { margin: 48, direction });
+  function facePose() {
+    return { ...fit(displayBounds, 0, 1, { face: true, margin: 48 }), fov: 12, up: FACE_UP };
   }
 
   function assemblyPose(mode, explode) {
@@ -784,16 +784,61 @@ export function createFielddeckStage(host, assets, index, callbacks) {
     return fit(boundsFor(framed, explode), mode === "compare" ? TOUR[0].angle : 0, mobile ? 0.93 : 0.76);
   }
 
-  function tourPose(stopIndex) {
-    if (stopIndex === 1) return cablePose() ?? assemblyPose(config.mode, config.explode);
-    if (mobile) return assemblyPose(config.mode, config.explode);
-    const stop = TOUR[stopIndex];
-    const framed = modeEntries[config.mode].length ? modeEntries[config.mode] : all;
-    const targetItems = framed.filter(({ row }) => config.selectedKeys.includes(row.key)
-      || stop.diff && row.delta === stop.diff);
-    const bounds = boundsFor(targetItems.length ? targetItems : framed, config.explode);
-    bounds.expandByScalar(36);
-    return fit(bounds, stop.angle, mobile ? 0.89 : 0.72);
+  function selectionPose(explode, orbitDirection) {
+    const { mode, selectedKeys, cameraCue } = config;
+    const stop = TOUR[cameraCue?.stopIndex];
+    const active = modeEntries[mode];
+    const selected = active.filter(({ row }) => selectedKeys.includes(row.key) || (stop?.diff && row.delta === stop.diff));
+    if (!selected.length) return assemblyPose(mode, explode);
+    const framed = new Set([...selected, ...active.filter(({ row: { part } }) =>
+      part.part_id === "display" || part.part_id.startsWith("display-spacer-"))]);
+    const target = boundsFor(framed, explode).getCenter(new THREE.Vector3());
+    const angle = stop?.angle ?? (selectedKeys.length >= 2 ? TOUR[1].angle : mode === "compare" ? TOUR[0].angle : 0);
+    const direction = orbitDirection ?? VIEW.clone().applyAxisAngle(UP, THREE.MathUtils.degToRad(angle));
+    const right = UP.clone().cross(direction).normalize();
+    const up = direction.clone().cross(right);
+    const offset = new THREE.Vector3();
+    const points = [];
+    for (const entry of framed) {
+      const { bounds, vector } = entry;
+      offset.copy(vector).multiplyScalar(typeof explode === "function" ? explode(entry) : explode).sub(target);
+      for (const x of [bounds.min.x, bounds.max.x]) {
+        for (const y of [bounds.min.y, bounds.max.y]) {
+          for (const z of [bounds.min.z, bounds.max.z]) {
+            const point = new THREE.Vector3(x, y, z).add(offset);
+            points.push({ x: point.dot(right), y: point.dot(up), depth: point.dot(direction) });
+          }
+        }
+      }
+    }
+    const rect = { left: -frameWidth / 2, right: frameWidth / 2, top: -frameHeight / 2, bottom: frameHeight / 2 };
+    const focalPixels = height / (2 * Math.tan(THREE.MathUtils.degToRad(baseFov / 2)));
+    const margin = mobile ? 24 : 48;
+    function fits(distance) {
+      const bounds = { left: Infinity, right: -Infinity, top: Infinity, bottom: -Infinity };
+      for (const { x, y, depth } of points) {
+        const scale = focalPixels / (distance - depth);
+        const sx = x * scale;
+        const sy = -y * scale;
+        bounds.left = Math.min(bounds.left, sx);
+        bounds.right = Math.max(bounds.right, sx);
+        bounds.top = Math.min(bounds.top, sy);
+        bounds.bottom = Math.max(bounds.bottom, sy);
+      }
+      return projectedFitScale(bounds, rect, margin) >= 1;
+    }
+    const home = assemblyPose(mode, DEFAULT_EXPLODE);
+    let near = Math.max(home.position.distanceTo(home.target) * 0.75, ...points.map(({ depth }) => depth + camera.near));
+    let far = near;
+    if (!fits(near)) {
+      while (!fits(far)) far *= 2;
+      for (let i = 0; i < 16; i++) {
+        const middle = (near + far) / 2;
+        if (fits(middle)) far = middle;
+        else near = middle;
+      }
+    }
+    return { target, position: direction.clone().multiplyScalar(far).add(target) };
   }
 
   function moveCamera(pose, now, duration, ease) {
@@ -802,8 +847,12 @@ export function createFielddeckStage(host, assets, index, callbacks) {
 
   function setCamera({ position, target, fov = baseFov, up = UP }, amount = 1,
     from = camera.position, fromTarget = controls.target, faceTransition) {
+    controls.maxDistance = Math.max(radius * 13, position.distanceTo(target));
+    camera.far = controls.maxDistance + radius * 2;
     controls.target.lerpVectors(fromTarget, target, amount);
-    if (faceTransition) {
+    if (amount === 1) {
+      camera.position.copy(position);
+    } else {
       const fromOffset = from.clone().sub(fromTarget);
       const toOffset = position.clone().sub(target);
       const direction = fromOffset.clone().normalize();
@@ -811,10 +860,11 @@ export function createFielddeckStage(host, assets, index, callbacks) {
       direction.applyQuaternion(new THREE.Quaternion().slerp(turn, amount));
       camera.position.copy(direction.multiplyScalar(THREE.MathUtils.lerp(fromOffset.length(), toOffset.length(), amount))
         .add(controls.target));
+    }
+    if (faceTransition) {
       camera.up.lerpVectors(faceTransition.up, up, amount).normalize();
       fov = THREE.MathUtils.lerp(faceTransition.fov, fov, amount);
     } else {
-      camera.position.lerpVectors(from, position, amount);
       camera.up.copy(up);
     }
     camera.fov = fov;
@@ -895,46 +945,45 @@ export function createFielddeckStage(host, assets, index, callbacks) {
     dirty ||= progress < 1 || (mode === "compare" && accentProgress < 1);
 
     const cable = config.selectedKeys.length >= 2;
+    const selectionChanged = config.selectedKeys.join() !== lastConfig?.selectedKeys.join();
+    const newCue = cameraCue && cameraCue !== latestCue;
     if (heroElapsed !== null) {
       setCamera(assemblyPose(mode, DEFAULT_EXPLODE));
     } else if (faceView !== Boolean(lastConfig?.faceView)) {
       if (faceView && !priorCamera) priorCamera = { position: camera.position.clone(), target: controls.target.clone() };
-      moveCamera(faceView ? facePose(controls.target.clone()) : priorCamera, now, 240, inOutCubic);
+      const pose = faceView ? facePose()
+        : newCue || selectionChanged || mode !== lastConfig.mode ? selectionPose(offsetFor) : priorCamera;
+      if (!faceView) latestCue = cameraCue;
+      moveCamera(pose, now, 240, inOutCubic);
       cameraMove.faceTransition = { up: camera.up.clone(), fov: camera.fov };
     } else if (faceView) {
+      if (resized || selectionChanged || mode !== lastConfig.mode || explode !== lastConfig.explode) {
+        priorCamera = selectionPose(offsetFor);
+      }
       if (resized) {
-        const pose = facePose(controls.target.clone());
+        const pose = facePose();
         if (cameraMove) cameraMove.pose = pose;
         else setCamera(pose);
       }
     } else if (!cameraMove?.faceTransition) {
-      if (cable && (firstFrame || resized || mode !== lastConfig.mode || explode !== lastConfig.explode
-        || cameraCue !== latestCue || config.selectedKeys.join() !== lastConfig.selectedKeys.join())) {
+      if (newCue) {
         latestCue = cameraCue;
+        moveCamera(selectionPose(offsetFor), now, 1600, damped);
+      } else if (firstFrame || lastHero !== null || resized || mobile && (selectionChanged || mode !== lastConfig.mode)) {
         cameraMove = null;
-        setCamera(cablePose() ?? assemblyPose(mode, offsetFor));
-      } else if (mobile && (firstFrame || resized || lastHero !== null || mode !== lastConfig.mode
-        || explode !== lastConfig.explode || explodeMotion || lastConfig.explodeMotion)) {
-        cameraMove = null;
-        setCamera(assemblyPose(mode, offsetFor));
-      } else if (cameraCue && cameraCue !== latestCue) {
-        latestCue = cameraCue;
-        moveCamera(tourPose(cameraCue.stopIndex), now, 1600, damped);
-      } else if (firstFrame || lastHero !== null) {
-        setCamera(assemblyPose(mode, offsetFor));
+        setCamera(selectionPose(offsetFor));
       } else if (mode !== lastConfig.mode) {
-        moveCamera(assemblyPose(mode, offsetFor), now, 450, inOutCubic);
-      } else if (resized) {
-        const pose = cameraCue ? tourPose(cameraCue.stopIndex) : assemblyPose(mode, offsetFor);
-        const remaining = cameraMove && cameraMove.duration - (now - cameraMove.start);
-        moveCamera(pose, now, Math.max(240, remaining || 0), outCubic);
-      } else if (explodeMotion && !cable) {
-        const pose = assemblyPose(mode, offsetFor);
+        moveCamera(selectionPose(offsetFor), now, 450, inOutCubic);
+      } else if (selectionChanged) {
+        moveCamera(selectionPose(offsetFor), now, 240, outCubic);
+      } else if (explodeMotion) {
+        const pose = selectionPose(offsetFor);
         if (cameraMove) cameraMove.pose = pose;
         else setCamera(pose, reduced ? 1 : 1 - Math.exp(-tick / 85));
         dirty = true;
-      } else if (!cable && (explode !== lastConfig.explode || lastConfig.explodeMotion)) {
-        moveCamera(assemblyPose(mode, explode), now, 220, outCubic);
+      } else if (explode !== lastConfig.explode || lastConfig.explodeMotion) {
+        cameraMove = null;
+        setCamera(selectionPose(explode));
       }
     }
     controls.enabled = !faceView && !cameraMove?.faceTransition && heroElapsed === null;
@@ -953,10 +1002,10 @@ export function createFielddeckStage(host, assets, index, callbacks) {
     controls.minDistance = minimumDistance;
     if (controls.enabled) {
       dirty = controls.update() || dirty;
-      if (cable && dirty) {
+      if (config.selectedKeys.length && dirty && !cameraMove && heroElapsed === null) {
         const offset = camera.position.clone().sub(controls.target);
-        const pose = cablePose(offset.clone().normalize());
-        if (pose && offset.lengthSq() < pose.position.distanceToSquared(pose.target)) setCamera(pose);
+        const pose = selectionPose(offsetFor, offset.clone().normalize());
+        if (offset.lengthSq() < pose.position.distanceToSquared(pose.target)) setCamera(pose);
       }
     }
 

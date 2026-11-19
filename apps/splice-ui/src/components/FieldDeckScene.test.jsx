@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import FieldDeckScene, { EvidenceRows } from "./FieldDeckScene.jsx";
 import {
   DEFAULT_EXPLODE, FIELDDECK_NARROW, classifyPart, evidenceCells, explodeGroupOffsets, formatEvidenceSource, formatEvidenceValue,
-  indexFielddeck, placeCallouts, rowForNode, rowsForMode, selectedPartKeys, toggleFielddeckSheet,
+  indexFielddeck, placeCallouts, projectedFitScale, rowForNode, rowsForMode, selectedPartKeys, toggleFielddeckSheet,
 } from "./fielddeckLogic.js";
 
 const stageMock = vi.hoisted(() => ({ load: vi.fn(), create: vi.fn() }));
@@ -94,6 +94,16 @@ describe("Fielddeck stage layout", () => {
   const card = (x, y, width = 228, height = 115) => ({ width, height, anchor: { x, y } });
   const overlaps = (a, b) =>
     a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+
+  it("fits off-centre projected bounds inside the stage margins", () => {
+    const desktop = rect(200, 100, 696, 596);
+    expect(projectedFitScale(rect(148, 248, 548, 448), desktop, 48)).toBeCloseTo(2 / 3);
+    expect(projectedFitScale(rect(348, 148, 548, 548), desktop, 48)).toBe(1);
+    expect(projectedFitScale(rect(348, 248, 548, 448), desktop, 48)).toBe(2);
+
+    const phone = rect(0, 88, 390, 772);
+    expect(projectedFitScale(rect(-33, 230, 309, 630), phone, 24)).toBe(0.75);
+  });
 
   const layers = [
     { minZ: -6, maxZ: 0, gap: 0 },
@@ -268,9 +278,10 @@ describe("Fielddeck evidence UI", () => {
     expect(unknown).toHaveAttribute("title", "pin_mapping");
     expect(within(unknown).getByText("Unknown")).toHaveClass("fd-evidence-state");
     expect(screen.getByText("Vendor model")).toBeVisible();
-    expect(screen.getByText("1.4 W")).toBeVisible();
-    expect(screen.getByText("datasheet")).toBeVisible();
-    expect(screen.getByRole("link", { name: "brief.pdf" })).toBeVisible();
+    const power = screen.getByText("Documented power").parentElement;
+    expect([...power.children].map((node) => node.textContent))
+      .toEqual(["Documented power", "datasheet", "1.4 W", "brief.pdf"]);
+    expect(within(power).getByRole("link", { name: "brief.pdf" })).toBeVisible();
   });
 
   it("groups revision changes and syncs picks with the tree and inspector", async () => {
@@ -384,13 +395,27 @@ describe("Fielddeck evidence UI", () => {
   it("switches between narrow sheets and keeps the current selection in the peek", async () => {
     narrow = true;
     render(<FieldDeckScene />);
-    await screen.findByRole("slider", { name: "Explode" });
+    const more = await screen.findByRole("button", { name: "More" });
+    expect(more).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("slider", { name: "Explode" })).toBeNull();
+    expect(screen.getByRole("heading", { name: "Fielddeck display swap" })).toBeVisible();
+    expect(screen.queryByText("7-inch → 5-inch")).toBeNull();
+    fireEvent.click(more);
+    expect(screen.getByRole("slider", { name: "Explode" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Face view" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Start tour" })).toBeVisible();
     const key = screen.getByRole("button", { name: "Key" });
     expect(key).toHaveAttribute("aria-expanded", "false");
     fireEvent.click(key);
     expect(screen.getByRole("group", { name: "Shape source" })).toBeVisible();
     fireEvent.click(key);
-    expect(screen.getByRole("button", { name: "Fit unknown · 4 questions" })).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Next stop" }));
+    expect(more).toHaveAttribute("aria-expanded", "false");
+    expect(update).toHaveBeenLastCalledWith(expect.objectContaining({
+      selectedKeys: ["5:part:pi4-dsi", "5:part:display"],
+      cameraCue: { stopIndex: 1 },
+    }));
+    expect(screen.getByRole("button", { name: /4 questions\s*Fit unknown/ })).toBeVisible();
     const panels = within(screen.getByRole("group", { name: "Scene panels" }));
     const parts = panels.getByRole("button", { name: "Parts" });
     const details = panels.getByRole("button", { name: "Inspector" });

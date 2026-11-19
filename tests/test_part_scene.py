@@ -160,6 +160,7 @@ def test_parts_schema_and_evidence(fixture_project, revision):
     for part in ("pi4_board_envelope", "pi4_dsi", "keyboard_nominal_envelope"):
         assert by_name[part]["geometry_basis"] == "envelope"
     assert by_name["pi4_board_envelope"]["group"] == by_name["pi4_dsi"]["group"] == "pi4"
+    assert by_name["pi4_dsi"]["label"] == "Pi4 DSI"
     assert by_name["pi4_board_envelope"]["explode_vector_mm"] == by_name["pi4_dsi"]["explode_vector_mm"]
     assert by_name["pi4_dsi"]["explode_vector_mm"] == ([-29, 0, 0] if revision == "7" else [-29.5, 0, 0])
     assert by_name["pi4_dsi"]["explode_derived"] is True
@@ -184,6 +185,25 @@ def test_parts_schema_and_evidence(fixture_project, revision):
     assert scene["alternates"][0]["status"] == "blocked"
     assert scene["alternates"][0]["failed_checks"] == status["incompatible_control"]["failed_checks"]
     _assert_diff(scene["revision_diff"], baseline, swap)
+
+
+def test_part_labels_prefer_exact_project_names_and_preserve_derived_acronyms(fixture_project):
+    project, _, _ = fixture_project
+    (project / GLB7).write_bytes(_glb([
+        ("pi4_dsi", 0, {"label": "Node label"}),
+        ("gpio_adapter", 1, {}),
+        ("pi_usb_ffc_gpio_pcb", 2, {}),
+    ]))
+    (project / "digital_v1/bom.json").write_text(json.dumps({
+        "items": [{"id": "pi4-dsi", "name": "DSI connector"}],
+    }))
+    (project / "digital_v1/design.json").write_text(json.dumps({
+        "parts": [{"part_id": "gpio-adapter", "name": "GPIO adapter"}],
+    }))
+    labels = {part["part_id"]: part["label"] for part in build_parts_sidecar(project, "7")["parts"]}
+    assert labels["pi4-dsi"] == "DSI connector"
+    assert labels["gpio-adapter"] == "GPIO adapter"
+    assert labels["pi-usb-ffc-gpio-pcb"] == "Pi USB FFC GPIO PCB"
 
 
 def test_missing_inputs_do_not_create_parts_or_infer_removals(fixture_project):

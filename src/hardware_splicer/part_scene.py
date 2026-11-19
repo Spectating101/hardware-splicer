@@ -350,6 +350,9 @@ def _documented_evidence(name, design, refs, swap_source):
 def _parts(nodes, report, design, references, swap_source, swap_geometry, bom, revised_ids, origins, revision):
     base_origin, mesh_origin, design_origin, swap_origin = origins
     records = {row["name"]: row for row in report.get("parts", [])}
+    design_parts = design.get("parts", {})
+    if isinstance(design_parts, list):
+        design_parts = {row.get("part_id") or row.get("id"): row for row in design_parts}
     exports = swap_geometry.get("exports", {}).get("exported_parts", [])
     revised = {row["part"]: row for row in exports}
     spacer = revised.get("display_spacer_1", {})
@@ -394,9 +397,14 @@ def _parts(nodes, report, design, references, swap_source, swap_geometry, bom, r
         if name in {_DISPLAY7, _DISPLAY5} and "allocated" in design.get("engineering_assumptions", {}).get("display_w", {}):
             evidence.append(_evidence("allocated_power_w", design["engineering_assumptions"]["display_w"]["allocated"],
                                       "assumption", design_origin))
-        label = (record.get("label") or extras.get("label")
+        exact_item = bom.get(part_id, {})
+        design_part = design_parts.get(part_id) or design.get(part_id)
+        derived_label = re.sub(r"\b(?:dsi|usb|ffc|gpio|pcb)\b", lambda word: word[0].upper(),
+                               name.replace("_", " ").title(), flags=re.IGNORECASE)
+        label = (exact_item.get("name") or (design_part.get("name") if isinstance(design_part, dict) else None)
+                 or exact_item.get("description") or record.get("label") or extras.get("label")
                  or (item.get("description") if line not in {"computer", "printed_parts"} or name == "pi4_board_envelope" else None)
-                 or name.replace("_", " ").title() or f"Node {index}")
+                 or derived_label or f"Node {index}")
         parts.append({"node_name": node_name, "node_index": index, "part_id": part_id, "label": label,
                       "geometry_basis": basis, "bom_line": line if item else None, "no_bom_line": not bool(item),
                       "group": group, "explode_vector_mm": vector, "explode_derived": derived,

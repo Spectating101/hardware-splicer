@@ -78,7 +78,7 @@
 }
 .fd-stage-warning { color: var(--text-2); pointer-events: none; }
 
-.fd-header, .fd-panel, .fd-controls, .fd-legend, .fd-sheet {
+.fd-header, .fd-panel, .fd-controls, .fd-options, .fd-legend, .fd-sheet {
   background: var(--panel);
   backdrop-filter: blur(12px);
   border: 1px solid var(--line);
@@ -175,11 +175,18 @@
 .fd-checks li { display: flex; gap: 8px; padding-block: 4px; }
 .fd-checks .fd-question-numbers { flex: none; min-width: 2ch; }
 .fd-evidence, .fd-evidence dd, .fd-endpoints, .fd-endpoints dd { margin: 0; }
-.fd-evidence-row { display: flex; flex-wrap: wrap; align-items: baseline; padding: 6px 0; border-top: 1px solid var(--line); }
-.fd-evidence-value { flex: 1 1 70%; }
-.fd-evidence-row:has(.fd-evidence-value) dt, .fd-evidence-source { flex-basis: 100%; }
+.fd-evidence-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 72px;
+  align-items: baseline;
+  gap: 2px 8px;
+  padding: 6px 0;
+  border-top: 1px solid var(--line);
+}
+.fd-evidence-value, .fd-evidence-source { grid-column: 1 / -1; overflow-wrap: anywhere; }
+.fd-evidence-value, .fd-evidence-state { font-family: var(--mono); }
 .fd-evidence-state, .fd-evidence-source { color: var(--text-2); }
-.fd-evidence .fd-evidence-state { margin-inline-start: auto; }
+.fd-evidence-state { text-align: end; }
 .fd-endpoints > div { display: flex; gap: 8px; padding-block: 4px; }
 
 .fd-annotations { z-index: 1; pointer-events: none; }
@@ -255,6 +262,7 @@
 .fd-controls { width: max-content; max-width: 100%; justify-content: center; flex-wrap: wrap; padding: 4px; }
 .fd-controls[data-intro="true"] { visibility: hidden; }
 .fd-controls button { white-space: nowrap; }
+.fd-options { display: contents; }
 .fd-explode input { width: clamp(60px, 8vw, 112px); accent-color: var(--focus); }
 .fd-explode output { min-width: 4ch; text-align: end; }
 .fd-tour strong { min-width: 83px; text-align: center; font-weight: 600; }
@@ -278,10 +286,10 @@
   .fd-stage canvas { top: 44px; height: calc(100% - 44px - var(--peek) - var(--safe)); }
   .fd-header { height: 44px; padding: 0 4px; gap: 4px; }
   .fd-header > div { min-width: 0; gap: 4px; }
-  .fd-header h1 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .fd-header h1, .fd-header .fd-revision, .fd-header .fd-validation { font-size: 11px; }
+  .fd-header h1 { font-size: 14px; line-height: 1.15; }
   .fd-header .fd-exit, .fd-header .fd-validation { flex: none; }
-  .fd-header .fd-validation { white-space: nowrap; padding-inline: 4px; }
+  .fd-header .fd-validation { font-size: 11px; line-height: 1.15; white-space: nowrap; padding-inline: 4px; }
+  .fd-validation > span { display: block; }
   .fd-header .fd-validation[aria-pressed="false"] { border-color: transparent; }
   .fd-scene button, .fd-inspector a { min-height: 44px; min-width: 44px; }
   .fd-inspector a { display: inline-flex; align-items: center; }
@@ -290,11 +298,24 @@
     min-height: 44px;
     translate: 0;
   }
-  .fd-controls { width: 100%; gap: 4px; padding: 0 4px; }
-  .fd-modes button { padding-inline: 4px; }
-  .fd-explode { gap: 2px; }
-  .fd-explode input { width: clamp(44px, 16vw, 96px); min-height: 44px; margin: 0; }
-  .fd-explode output { display: none; }
+  .fd-controls { width: 100%; flex-wrap: nowrap; gap: 4px; padding: 0 4px; }
+  .fd-modes { flex: 1; gap: 0; }
+  .fd-modes button { flex: 1; border-radius: 0; padding-inline: 4px; }
+  .fd-modes button:first-child { border-radius: 4px 0 0 4px; }
+  .fd-modes button:last-child { border-radius: 0 4px 4px 0; }
+  .fd-modes button:only-child { border-radius: 4px; }
+  .fd-scene button.fd-more { width: 44px; flex: none; padding-inline: 0; }
+  .fd-more[aria-expanded="true"] { border-color: var(--focus); }
+  .fd-options {
+    position: absolute;
+    inset: calc(100% + 4px) 4px auto auto;
+    display: grid;
+    gap: 4px;
+    width: min(280px, calc(100% - 8px));
+    padding: 8px;
+  }
+  .fd-explode input { flex: 1; min-height: 44px; margin: 0; }
+  .fd-tour > button:last-child { flex: 1; }
   .fd-legend {
     inset: auto 4px calc(var(--peek) + var(--safe) + 8px) auto;
     z-index: 4;
