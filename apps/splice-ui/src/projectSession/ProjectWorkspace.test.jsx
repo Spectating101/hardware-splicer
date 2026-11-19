@@ -73,6 +73,7 @@ vi.mock("../components/ProjectWizard.jsx", () => ({
 }));
 
 vi.mock("../api.js", () => ({
+  fetchScenes: vi.fn(async () => []), fetchSceneManifest: vi.fn(), fetchSceneRecords: vi.fn(async () => ({ records: [] })),
   jobBundleUrl: (id) => `/bundle/${id}`,
   buildPackageArchiveUrl: (dir) => `/archive?build_dir=${encodeURIComponent(dir)}`,
 }));
@@ -135,7 +136,7 @@ describe("ProjectWorkspace continuity + polish", () => {
     render(<Harness initial={state} />);
     await user.click(screen.getByText("Project tools", { selector: "summary" }));
     expect(screen.getByTestId("project-bench")).toBeInTheDocument();
-    expect(screen.getByText("No reference study yet")).toBeInTheDocument();
+    expect(await screen.findByText("Design view · not linked")).toBeInTheDocument();
     expect(screen.getByTestId("stage-tab-design")).toBeDisabled();
     expect(screen.getByTestId("stage-tab-verify")).toBeDisabled();
 

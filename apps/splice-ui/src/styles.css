@@ -2656,3 +2656,38 @@ textarea, select { font: inherit; }
   .bench-heading { overflow-wrap: anywhere; }
   .new-project .study-library { padding: 0; border: 0; box-shadow: none; background: transparent; }
 }
+
+/* Bench layout: the design view leads across the full width; parts and evidence sit beneath it. */
+.bench-columns { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "design design" "parts evidence"; }
+.bench-design { grid-area: design; }
+.bench-parts { grid-area: parts; }
+.bench-evidence { grid-area: evidence; }
+@media (min-width: 900px) and (max-width: 1279px) {
+  .bench-columns { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .bench-parts { grid-row: auto; }
+  .bench-evidence { grid-column: auto; }
+}
+.bench-objective { display: flex; gap: .6rem; align-items: baseline; flex-wrap: wrap; max-width: 72ch; }
+.bench-objective span { font-size: .75rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.design-view { margin-bottom: 1.25rem; }
+.design-view-source { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
+.design-view-source p { margin: 0 0 .6rem; font-size: .85rem; }
+.design-view .fd-scene { border-radius: 4px; overflow: hidden; }
+.design-records h3 { font-size: 1.05rem; margin: 0 0 .4rem; }
+.design-records h4 { font-size: .95rem; margin: 1.1rem 0 .4rem; }
+.design-records .mono, .design-records code { font-family: ui-monospace, "IBM Plex Mono", monospace; font-size: .85rem; overflow-wrap: anywhere; }
+.design-record-list { margin: 0; padding-left: 1.2rem; line-height: 1.6; }
+.bench-stale { display: inline-block; margin-right: .5rem; font-size: .8rem; font-weight: 600; color: #9a4a00; }
+.bench-rows > li.is-stale > strong, .bench-rows > li.is-stale > a { text-decoration: line-through; text-decoration-thickness: 1px; }
+.bench-link-state { margin-top: 1rem; }
+.bench-package { margin-top: 1rem; background: var(--surface); padding: 1rem; }
+.bench-package h2 { font-size: 1.15rem; margin: 0 0 1rem; }
+.bench-package h3 { font-size: 1rem; margin: 0 0 .5rem; }
+.bench-package-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; }
+.bench-next { margin: 0; padding-left: 1.2rem; line-height: 1.55; }
+.digital-compare caption { text-align: left; font-weight: 600; padding: .6rem 0 .3rem; }
+.digital-compare tr[data-transition="regressed"] td:last-child { color: #a12a1c; font-weight: 600; }
+.scene-manifest-list { list-style: none; padding: 0; margin: 0; display: grid; gap: .5rem; }
+@media (max-width: 899px) {
+  .bench-package-grid { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+}

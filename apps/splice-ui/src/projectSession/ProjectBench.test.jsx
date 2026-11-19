@@ -3,9 +3,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import ProjectBench from "./ProjectBench.jsx";
 import NewProject from "./NewProject.jsx";
 import * as api from "./digitalStudyApi.js";
+import * as sceneApi from "../api.js";
 import { listProjectReviews, listProjectRevisions, loadProjectReview } from "./projectReviewApi.js";
 
+vi.mock("../api.js", () => ({
+  fetchScenes: vi.fn(async () => []), fetchSceneManifest: vi.fn(), fetchSceneRecords: vi.fn(async () => ({ records: [] })),
+}));
 vi.mock("./digitalStudyApi.js", () => ({
+  fetchEngineeringPackages: vi.fn(async () => ({ packages: [] })), fetchEvidenceDelta: vi.fn(),
+  fetchEngineeringRevisionDiff: vi.fn(), fetchDigitalCompare: vi.fn(),
+  engineeringPackageUrl: (project, id) => `/packages/${project}/${id}`,
   fetchProjectAssurance: vi.fn(), fetchProjectMaterials: vi.fn(), fetchMaterialAssessment: vi.fn(),
   fetchPartSubstitution: vi.fn(), assessMachineRelease: vi.fn(), fetchDigitalCases: vi.fn(),
   digitalArtifactUrl: (path) => path,
@@ -22,6 +29,10 @@ const session = { projectId: "bench-1", projectName: "Plotter", snapshotRevision
 
 beforeEach(() => {
   vi.resetAllMocks();
+  api.fetchEngineeringPackages.mockResolvedValue({ packages: [] });
+  api.fetchEvidenceDelta.mockResolvedValue({ base_revision: 3, candidate_revision: 4,
+    evidence_delta: { affected_outputs: [], blocked_outputs: [], retained_outputs: [] } });
+  sceneApi.fetchScenes.mockResolvedValue([]);
   api.fetchProjectAssurance.mockResolvedValue({ revision: 4, assurance: { claims: [], outputs: [] } });
   api.fetchProjectMaterials.mockResolvedValue({ assessments: [] });
   listProjectReviews.mockResolvedValue({ reviews: [] });
@@ -46,7 +57,7 @@ describe("Project bench truth", () => {
     expect(parts).toHaveTextContent("Owned unit · Origin: salvaged");
     expect(parts).toHaveTextContent("Knowledge state: unknown · Geometry: not linked");
     expect(parts).toHaveTextContent("Catalogue part: unknown");
-    expect(screen.getByText("No reference study yet")).toBeInTheDocument();
+    expect(await screen.findByText("Design view · not linked")).toBeInTheDocument();
     expect(document.querySelector("iframe, .digital-render")).toBeNull();
     const evidence = screen.getByRole("region", { name: "Evidence" });
     expect(await within(evidence).findByText(/The backend returned no blockers for this revision. Revision 4/)).toBeInTheDocument();
@@ -71,6 +82,42 @@ describe("Project bench truth", () => {
     expect(evidence.textContent).not.toMatch(/\b(?:ready|build-ready)\b/i);
     expect(evidence.querySelector(".success, .pass, .status-chip--ok")).toBeNull();
     expect(within(evidence).queryByText(/no blockers/)).toBeNull();
+  });
+
+  it("marks only the outputs the backend invalidated as stale from the earlier revision", async () => {
+    api.fetchProjectAssurance.mockResolvedValue({ revision: 4, assurance: {
+      claims: [], outputs: [{ kind: "calculation", node_id: "torque-margin", summary: "Torque margin" }],
+    } });
+    api.fetchEvidenceDelta.mockResolvedValue({ base_revision: 3, candidate_revision: 4, evidence_delta: {
+      affected_outputs: [{ evidence_id: "output:torque-margin", status: "invalidated", metadata: { summary: "Torque margin" } }],
+      blocked_outputs: [], retained_outputs: [{ evidence_id: "output:other", status: "retained" }],
+    } });
+    render(<ProjectBench session={session} />);
+    const delta = await screen.findByTestId("evidence-delta");
+    expect(api.fetchEvidenceDelta).toHaveBeenCalledWith("bench-1", 3, 4, expect.anything());
+    expect(delta).toHaveTextContent("stale · from revision 3Torque margin");
+    expect(delta).toHaveTextContent("1 output retained by the backend.");
+  });
+
+  it("says the evidence link is not linked when the backend graph has no outputs", async () => {
+    render(<ProjectBench session={session} />);
+    expect(await screen.findByText("Evidence-to-revision link · not linked")).toBeInTheDocument();
+    expect(api.fetchEvidenceDelta).not.toHaveBeenCalled();
+  });
+
+  it("lists revision-bound packages, marks an older one stale and keeps the objective visible", async () => {
+    api.fetchEngineeringPackages.mockResolvedValue({ packages: [{ package_id: "pkg-old", source_revision: 2 }] });
+    render(<ProjectBench session={{ ...session, goal: "Plot A4 drawings from salvaged steppers" }} />);
+    const panel = screen.getByTestId("bench-package");
+    expect(panel).toHaveTextContent("Plot A4 drawings from salvaged steppers");
+    expect(await within(panel).findByText("stale · from revision 2")).toBeInTheDocument();
+    expect(within(panel).getByRole("link", { name: /Engineering package pkg-old/ })).toHaveAttribute("href", "/packages/bench-1/pkg-old");
+  });
+
+  it("says Package · not linked when nothing has been built", async () => {
+    render(<ProjectBench session={session} />);
+    expect(await screen.findByText("Package · not linked")).toBeInTheDocument();
+    expect(screen.getByTestId("bench-package")).toHaveTextContent("Objective · not recorded for this project");
   });
 
   it("does not rewrite a backend authority, even if its text contains verified", async () => {

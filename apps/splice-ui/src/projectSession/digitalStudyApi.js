@@ -42,3 +42,18 @@ export const fetchPartSubstitution = (projectId, assessmentId, signal) =>
 export const assessMachineRelease = (project, signal) => request("/v1/machine-projects/assess-release", {
   method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ project }), signal,
 });
+export const fetchDigitalCompare = (projectId, before, after, signal) =>
+  request(`/v1/projects/${encodeURIComponent(projectId)}/digital/compare?before_revision=${before}&after_revision=${after}`, { signal });
+export const fetchEvidenceDelta = (projectId, base, candidate, signal) =>
+  request(`/v1/projects/${encodeURIComponent(projectId)}/engineering/assurance/evidence-delta`, {
+    method: "POST", headers: { "Content-Type": "application/json" }, signal,
+    body: JSON.stringify({ base_revision: base, candidate_revision: candidate }),
+  });
+export const fetchEngineeringPackages = (projectId, signal) =>
+  request(`/v1/projects/${encodeURIComponent(projectId)}/engineering-packages`, { signal });
+export const engineeringPackageUrl = (projectId, packageId) =>
+  `${API_BASE}/v1/projects/${encodeURIComponent(projectId)}/engineering-packages/${encodeURIComponent(packageId)}/download`;
+export const fetchEngineeringRevisionDiff = (projectId, base, candidate, signal) => request("/v1/engineering/revisions/diff", {
+  method: "POST", headers: { "Content-Type": "application/json" }, signal,
+  body: JSON.stringify({ project_id: projectId, base_revision: base, candidate_revision: candidate }),
+});
