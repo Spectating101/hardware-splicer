@@ -957,6 +957,20 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
     node.style.visibility = visible ? "visible" : "hidden";
     if (visible) node.style.transform = `translate(${point.x}px, ${point.y}px)`;
   }
+  // Project the part's own sampled vertices from whichever layer is drawn.
+  function screenPointsFor(key) {
+    const entry = entries.get(key);
+    const object = entry?.group.visible ? entry.group : null;
+    if (!object || !entry.samples.length) return [];
+    const points = [];
+    const vector = new THREE.Vector3();
+    for (let i = 0; i < entry.samples.length; i += 3) {
+      vector.set(entry.samples[i], entry.samples[i + 1], entry.samples[i + 2]).add(object.position);
+      const point = project(vector);
+      if (point) points.push(point);
+    }
+    return points;
+  }
   function outlineFor(bounds) {
     if (!bounds) return null;
     const corners = [bounds.min.x, bounds.max.x].flatMap((x) =>
@@ -1067,17 +1081,16 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
       position(footprint, null);
     }
   }
+  const pointCache = new Map();
+  const pointsFor = (key) => {
+    if (!pointCache.has(key)) pointCache.set(key, screenPointsFor(key));
+    return pointCache.get(key);
+  };
   for (const path of host.querySelectorAll("[data-bracket]")) {
-    const bounds = outlineFor(boundsForKey(path.dataset.bracket));
-    if (!bounds) {
-      path.removeAttribute("d");
-      continue;
-    }
-    const { left, right, top, bottom } = bounds;
-    const corners = [[left - 8, top - 8, 1, 1], [right + 8, top - 8, -1, 1],
-      [right + 8, bottom + 8, -1, -1], [left - 8, bottom + 8, 1, -1]];
-    path.setAttribute("d", corners.map(([x, y, dx, dy]) =>
-      `M${x + 10 * dx},${y}H${x}v${10 * dy}`).join(" "));
+    // A tight box from the selected part's own projected vertices, not its 3D bounding box.
+    const d = bracketPath(pointsFor(path.dataset.bracket), { arm: 10, offset: 8 });
+    if (d) path.setAttribute("d", d);
+    else path.removeAttribute("d");
   }
 
   const labels = [...host.querySelectorAll("[data-anchor]")];
@@ -1087,14 +1100,17 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
     left: Math.min(...outlines.map(({ left }) => left)),
     right: Math.max(...outlines.map(({ right }) => right)),
   };
+  const hulls = new Map();
   const callouts = placeLabels && labels.map((node) => {
     const endpoint = node.dataset.endpointLabel;
     const anchor = endpoint ? endpointPositions.get(endpoint) : centerFor(node.dataset.anchor);
-    const outline = !endpoint && outlineFor(boundsForKey(node.dataset.anchor));
+    const hull = !endpoint && anchor ? convexHull(pointsFor(node.dataset.anchor)) : [];
+    hulls.set(node, hull);
+    // Leaders land on the part's own silhouette: the extreme projected vertex on each side.
+    const extreme = (sign) => hull.reduce((best, point) => !best || sign * (point.x - best.x) > 0 ? point : best, null);
     return {
       anchor, model, width: node.offsetWidth, height: node.offsetHeight, elbow: true,
-      leftAnchor: outline ? { ...anchor, x: outline.left } : anchor,
-      rightAnchor: outline ? { ...anchor, x: outline.right } : anchor,
+      leftAnchor: extreme(-1) ?? anchor, rightAnchor: extreme(1) ?? anchor,
     };
   });
   const placements = callouts && placeCallouts(viewport, occupied, callouts, pinRects);
@@ -1108,7 +1124,15 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
     const placement = placements[i] ?? fallback?.[i];
     node.style.visibility = line.style.visibility = placement ? "visible" : "hidden";
     if (!placement) continue;
-    const { rect, leader } = placement;
+    const { rect } = placement;
+    let { leader } = placement;
+    const hull = hulls.get(node);
+    if (hull?.length && leader.length === 3) {
+      // Re-anchor on the silhouette vertex nearest the label's attachment point.
+      const start = leader[0];
+      const end = nearestPoint(hull, start);
+      leader = [start, { x: end.x, y: start.y }, end];
+    }
     node.style.transform = `translate(${rect.left}px, ${rect.top}px)`;
     line.querySelector("path").setAttribute("d", leader.map(({ x, y }, j) => `${j ? "L" : "M"}${x},${y}`).join(" "));
     const dot = line.querySelector("circle");

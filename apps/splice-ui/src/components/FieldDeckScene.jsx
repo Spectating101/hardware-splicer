@@ -282,7 +282,8 @@ function Annotations({ labels, selection, endpoints, pins, faceView, base, targe
         </div>
       </>}
       {labels.map((row) => <span className="fd-label" key={row.key} data-anchor={row.key}
-        data-endpoint-label={row.endpoint}>{row.caption ?? nameOf(row)}</span>)}
+        data-endpoint-label={row.endpoint}>{row.caption ?? nameOf(row)}
+        {row.detail && <small className="fd-label-detail">{row.detail}</small>}</span>)}
       {endpoints.map(([letter, key]) => key && (
         <div className="fd-pin-position" key={letter} data-pin-anchor={key} data-endpoint-pin={letter}>
           <span className="fd-endpoint" aria-label={`Endpoint ${letter}`}>{letter}</span>
@@ -412,11 +413,10 @@ export default function FieldDeckScene({ onExit }) {
       || !(selection ? selectedKeys.includes(row.key) : row.part.part_id === focusPart)) return [];
     const endpoint = endpoints.find(([, key]) => key === row.key)?.[0];
     const caption = row.delta === "removed" && view.mode === "compare" ? `${nameOf(row)} · removed` : undefined;
-    return [{ ...row, endpoint, caption }];
+    // The old revision shares the selected part's label as a sub-line instead of a second callout.
+    const detail = oldKey && linked.has(oldKey) && row.key === selection?.key ? "old revision dashed" : undefined;
+    return [{ ...row, endpoint, caption, detail }];
   });
-  if (!view.faceView && oldKey && linked.has(oldKey)) {
-    labels.push({ key: oldKey, delta: "removed", caption: `${selection.part.label} · old revision` });
-  }
   const pins = [];
   if (view.blockers && view.faceView) {
     for (const question of allQuestions) {

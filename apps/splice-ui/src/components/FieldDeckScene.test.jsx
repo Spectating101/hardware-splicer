@@ -622,7 +622,7 @@ describe("Fielddeck evidence UI", () => {
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ faceView: false }));
     fireEvent.click(screen.getByRole("button", { name: "Rear tray" }));
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ ghostDeltaKey: "7:part:tray" }));
-    expect(screen.getByText("Rear tray · old revision")).toBeInTheDocument();
+    expect(screen.getByText("old revision dashed")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "5-inch" }));
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({ ghostDeltaKey: null }));
     fireEvent.click(screen.getByRole("button", { name: "Compare" }));
@@ -641,9 +641,10 @@ describe("Fielddeck evidence UI", () => {
     expect([...scene.querySelectorAll("[data-anchor]")].map((label) => label.textContent)).toEqual(["5-inch display"]);
     fireEvent.click(await screen.findByRole("button", { name: "Rear tray" }));
     expect([...scene.querySelectorAll("[data-anchor]")].map((label) => label.textContent)).toEqual([
-      "Rear tray", "Rear tray · old revision",
+      "Rear trayold revision dashed",
     ]);
-    expect(scene.querySelectorAll("[data-leader]")).toHaveLength(2);
+    expect(scene.querySelector("[data-anchor] .fd-label-detail")).toHaveTextContent("old revision dashed");
+    expect(scene.querySelectorAll("[data-leader]")).toHaveLength(1);
     fireEvent.click(pin);
     const inspector = within(screen.getByRole("complementary", { name: "Selection details" }));
     expect(inspector.getByRole("heading", { name: "Touch Display 2, 5-inch · nominal only" })).toBeVisible();

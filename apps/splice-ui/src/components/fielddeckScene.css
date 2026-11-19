@@ -409,3 +409,5 @@
   .fd-stage-message { top: 88px; bottom: calc(var(--peek) + var(--safe)); }
   .fd-stage-warning, .fd-stage .fd-skip { bottom: calc(var(--peek) + var(--safe) + 8px); }
 }
+
+.fd-label-detail { display: block; color: var(--text-2); font-size: 11px; line-height: 1.3; }
