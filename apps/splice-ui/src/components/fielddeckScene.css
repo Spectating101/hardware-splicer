@@ -236,6 +236,7 @@
 .fd-leaders .fd-bracket-halo { stroke: #0e1116; stroke-width: 3.5; }
 .fd-pin-position[data-dimmed="true"] { opacity: 0.35; }
 .fd-leaders .fd-bracket { stroke: var(--focus); stroke-width: 1.5; }
+.fd-leaders :is(.fd-bracket, .fd-bracket-halo) { opacity: 0.65; }
 .fd-grid-label {
   position: absolute; top: 0; left: 0; visibility: hidden; translate: -50% -50%;
   color: rgb(144 151 160 / 0.45); font: 11px/1 var(--mono); white-space: nowrap;

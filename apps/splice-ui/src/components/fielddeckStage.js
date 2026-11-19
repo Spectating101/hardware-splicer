@@ -1104,7 +1104,7 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
   };
   for (const path of host.querySelectorAll("[data-bracket]")) {
     // A tight box from the selected part's own projected vertices, not its 3D bounding box.
-    const d = bracketPath(pointsFor(path.dataset.bracket), { arm: 10, offset: 8 });
+    const d = bracketPath(convexHull(pointsFor(path.dataset.bracket)), { arm: 10, offset: 4 });
     if (d) path.setAttribute("d", d);
     else path.removeAttribute("d");
   }
