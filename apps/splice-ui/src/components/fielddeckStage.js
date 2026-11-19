@@ -1870,6 +1870,7 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
 
   return {
     linked: new Set(entries.keys()),
+    meshStats: new Map(all.map(({ row, meshStats }) => [row.key, meshStats])),
     update: (next) => { config = next; resize(); },
     dispose() {
       if (frame !== null) cancelAnimationFrame(frame);

@@ -47,6 +47,12 @@ export function EvidenceRows({ evidence, change }) {
           <dd className="fd-evidence-value" data-numeric="true">{change.bounds}</dd>
         </>}
       </div>}
+      {change?.mesh && <div className="fd-evidence-row" data-inspector-item>
+        <dt>Mesh volume and area</dt>
+        <dd className="fd-evidence-state">computed</dd>
+        <dd className="fd-evidence-value" data-numeric="true">{change.mesh}</dd>
+        <dd className="fd-evidence-source">Both revisions&apos; GLB meshes</dd>
+      </div>}
       {evidence.map((row, i) => {
         const [field, value, state, source] = evidenceCells(row);
         const label = evidenceLabel(field);
@@ -98,7 +104,7 @@ function QuestionNumber({ number }) {
   return <span className="fd-question-numbers">{number}</span>;
 }
 
-function Inspector({ row, index, questions, open, compare }) {
+function Inspector({ row, index, questions, open, compare, meshStats }) {
   const scroll = useRef(null);
   const [more, setMore] = useState(0);
   useLayoutEffect(() => {
@@ -154,7 +160,7 @@ function Inspector({ row, index, questions, open, compare }) {
             {link.source && <div data-inspector-item><EvidenceSource source={formatEvidenceSource(link.source)} /></div>}
           </> : <>
             <h3>Evidence</h3>
-            <EvidenceRows change={changeSummary(index, row, compare)}
+            <EvidenceRows change={changeSummary(index, row, compare, meshStats)}
               evidence={part.evidence.filter(({ field }) => field !== "physical_fit")} />
           </>}
         </>}
@@ -316,6 +322,7 @@ export default function FieldDeckScene({ onExit }) {
   const comparisonEnabled = Boolean(compare);
   const focusPart = focus?.part_id;
   const [linked, setLinked] = useState(new Set());
+  const [meshStats, setMeshStats] = useState(null);
   const [rendered, setRendered] = useState(false);
   const [stageError, setStageError] = useState("");
   const [view, setView] = useState(INITIAL);
@@ -490,6 +497,7 @@ export default function FieldDeckScene({ onExit }) {
         }, { base, target, focusPart });
         stage.current = runtime;
         setLinked(runtime.linked);
+        setMeshStats(runtime.meshStats ?? null);
       } catch (error) {
         setStageError(`3D stage unavailable (${error.message}).`);
       }
@@ -668,7 +676,8 @@ export default function FieldDeckScene({ onExit }) {
               questions={questions} blockersOnly={filtered} counts={view.mode === "compare" ? sidecars[target]?.revision_diff?.counts : null} />
           </div>
         </aside>
-        <Inspector row={selection} index={index} questions={selectionQuestions} open={inspectorOpen} compare={sceneCompare} />
+        <Inspector row={selection} index={index} questions={selectionQuestions} open={inspectorOpen} compare={sceneCompare}
+          meshStats={meshStats} />
 
         {!modelVisible && <div className="fd-stage-message" role="status">
           {loading ? "Loading Fielddeck models…" : errors.join(" ") || "Fielddeck model unavailable."}
