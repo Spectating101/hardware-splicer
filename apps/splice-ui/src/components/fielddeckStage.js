@@ -17,7 +17,7 @@ import {
 import { N8AOPostPass } from "n8ao";
 import { fielddeckSceneUrl } from "../api.js";
 import {
-  bracketPath, chooseTier, DIMMED_VENDOR, closedEdgeLoops, cullIsolatedChains, totalChainLength, classifyPart, convexHull, cullCoincidentChains, DEFAULT_EXPLODE, diffAccentChains,
+  bracketPath, chooseTier, DIMMED_VENDOR, pairMovedFeatures, closedEdgeLoops, cullIsolatedChains, totalChainLength, classifyPart, convexHull, cullCoincidentChains, DEFAULT_EXPLODE, diffAccentChains,
   DIFF_COLORS, dimensionLabel, explodeGroupOffsets, FIELDDECK_NARROW, footprintDelta, ghostDeltaKey,
   ghostOutlineLoops, materialSpec, repelPins, meshMeasures, nearestPoint, placeBesideEndpoint, placeCallouts,
   projectedFitScale, QUALITY_SAMPLE_COUNT, rowForNode, weldEdgeChains,
@@ -161,7 +161,9 @@ function diffMaterial(color) {
   return material;
 }
 
-function stylePart(entry, compare, weight, ghost, accent, emphasis) {
+const STAGE_BACKGROUND = new THREE.Color(0x0e1116);
+
+function stylePart(entry, compare, weight, ghost, accent, emphasis, focus = null) {
   const { outline, row } = entry;
   const { solid, baseColor, mutedColor, fill, edge, surface, lines, accents } = entry.style;
   const translucent = outline || ghost;
@@ -169,14 +171,18 @@ function stylePart(entry, compare, weight, ghost, accent, emphasis) {
   if (fill) fill.opacity = weight * entry.spec.fillOpacity;
   if (solid) {
     solid.color.copy(baseColor).lerp(mutedColor, dimming);
-    // A settled solid is fully opaque; only a revision cross-fade is ever blended.
-    const transparent = weight < 0.999;
-    solid.opacity = transparent ? weight : 1;
+    // Compare focus: parts that recede shift 40% toward the stage background.
+    if (focus?.recede) solid.color.lerp(STAGE_BACKGROUND, focus.recede);
+    // A settled solid is fully opaque; only a revision cross-fade, or a part above the selection
+    // that overlaps it on screen (22%, no depth write), is ever blended.
+    const faded = Boolean(focus?.fade);
+    const transparent = weight < 0.999 || faded;
+    solid.opacity = faded ? weight * focus.fade : transparent ? weight : 1;
     if (solid.transparent !== transparent) {
       solid.transparent = transparent;
       solid.needsUpdate = true;
     }
-    solid.depthWrite = !transparent || weight > 0.55;
+    solid.depthWrite = faded ? false : !transparent || weight > 0.55;
   }
 
   // Unchanged parts in Compare take their edges to 25%.
@@ -184,6 +190,12 @@ function stylePart(entry, compare, weight, ghost, accent, emphasis) {
   edge.base.opacity = weight * THREE.MathUtils.lerp(edgeOpacity, Math.min(edgeOpacity, 0.25), dimming)
     * (outline && row.delta === "added" ? emphasis : 1);
   if (edge.diff) edge.diff.opacity = weight * accent * emphasis * (entry.accentScale ?? 1);
+  if (focus) {
+    // Everything but the selection keeps its edges at 20% (faded overlaps scale with the solid).
+    const scale = focus.fade ?? 1;
+    edge.base.opacity = Math.min(edge.base.opacity, 0.2 * weight) * scale;
+    if (edge.diff) edge.diff.opacity = Math.min(edge.diff.opacity, 0.2 * weight) * scale;
+  }
 
   for (const mesh of surface) {
     mesh.visible = Boolean(solid || fill) && !ghost;
@@ -320,7 +332,7 @@ function displayContours(entry) {
 function makeGhost(chains, own, { xray = false } = {}) {
   const object = new THREE.Group();
   const material = own(edgeMaterial(DIFF_COLORS.removed, [6, 4], 1.25));
-  const small = own(edgeMaterial(DIFF_COLORS.removed, null, 1));
+  const small = own(edgeMaterial(DIFF_COLORS.removed, null, 1.25));
   // The old revision often lies inside the current solid; draw it through so the change is visible.
   if (xray) material.depthTest = small.depthTest = false;
   const loops = xray ? closedEdgeLoops(chainSegments(chains), 0.01).filter(({ min, max }) =>
@@ -340,6 +352,11 @@ function makeGhost(chains, own, { xray = false } = {}) {
   object.visible = false;
   return {
     object,
+    // Small old features, for centre crosses and moved-feature leaders in the annotation layer.
+    features: loops.map(({ min, max }) => ({
+      center: [0, 1, 2].map((axis) => (min[axis] + max[axis]) / 2),
+      size: Math.max(max[0] - min[0], max[1] - min[1], max[2] - min[2]),
+    })),
     setOpacity(weight) {
       material.opacity = weight * 0.7;
       small.opacity = Math.min(weight * 0.8, 0.4);
@@ -506,6 +523,7 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
         entry.accentScale = 0.6;
       }
       entry.diffLength = totalChainLength(chains);
+      entry.diffChains = chains;
       if (chains.length) {
         const line = featureLine(chainSegments(chains), entry.style.edge.diff, own);
         line.renderOrder = 2;
@@ -543,7 +561,21 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
     entry.displayOverlay = { object, rim, details, lug };
     technical.add(object);
   }
-  for (const entry of entries.values()) delete entry.ghostEdges;
+  for (const entry of entries.values()) {
+    // A moved old feature gets a leader to its new position only when the match is unambiguous.
+    const newer = entry.overlay && entries.get(entry.paired)?.diffChains;
+    if (newer) {
+      const features = closedEdgeLoops(chainSegments(newer), 0.01).map(({ min, max }) => ({
+        center: [0, 1, 2].map((axis) => (min[axis] + max[axis]) / 2),
+        size: Math.max(max[0] - min[0], max[1] - min[1], max[2] - min[2]),
+      })).filter(({ size }) => size < 6);
+      entry.overlay.pairs = pairMovedFeatures(entry.overlay.features, features);
+    }
+  }
+  for (const entry of entries.values()) {
+    delete entry.ghostEdges;
+    delete entry.diffChains;
+  }
   return entries;
 }
 
@@ -1214,7 +1246,7 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
   };
   for (const path of host.querySelectorAll("[data-bracket]")) {
     // A tight box from the selected part's own projected vertices, not its 3D bounding box.
-    const d = bracketPath(convexHull(pointsFor(path.dataset.bracket)), { arm: 10, offset: 4 });
+    const d = bracketPath(pointsFor(path.dataset.bracket), { arm: 10, offset: 8 });
     if (d) path.setAttribute("d", d);
     else path.removeAttribute("d");
   }
@@ -1227,6 +1259,27 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
     position(gridLabel, rect && !occupied.some((panel) => rect.left < panel.right && rect.right > panel.left
       && rect.top < panel.bottom && rect.bottom > panel.top) ? point : null);
   }
+
+  // Old-revision small features: a 6 px centre cross each, and a 0.75 px coral leader to the
+  // new position of a feature that moved (only for unambiguous pairs).
+  const marks = [];
+  const pairs = [];
+  for (const entry of entries.values()) {
+    const overlay = entry.overlay;
+    if (!overlay?.object.visible) continue;
+    const at = (center) => project(new THREE.Vector3(...center).add(overlay.object.position));
+    for (const { center } of overlay.features) {
+      const point = at(center);
+      if (point) marks.push(`M${point.x - 3},${point.y}h6M${point.x},${point.y - 3}v6`);
+    }
+    for (const [older, newer] of overlay.pairs ?? []) {
+      const from = at(older.center);
+      const to = at(newer.center);
+      if (from && to) pairs.push(`M${from.x},${from.y}L${to.x},${to.y}`);
+    }
+  }
+  host.querySelector("[data-ghost-marks]")?.setAttribute("d", marks.join(""));
+  host.querySelector("[data-ghost-pairs]")?.setAttribute("d", pairs.join(""));
 
   const labels = [...host.querySelectorAll("[data-anchor]")];
   if (!labels.length) return;
@@ -1965,6 +2018,27 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
     let floor = Infinity;
     let shadowDirty = firstFrame;
     const displaySelected = config.selectedKeys.some((key) => entries.get(key)?.row.part.part_id === focusPart);
+    // Compare focus on a part the user selected: overlapping parts in higher explode layers fade to
+    // 22%, everything else recedes, and the selection keeps full-strength edges.
+    const focused = mode === "compare" && !faceView && config.focusSelection ? entries.get(selectedKey) : null;
+    const screenBox = (entry) => {
+      const offset = entry.vector.clone().multiplyScalar(offsetFor(entry));
+      const box = { left: Infinity, right: -Infinity, top: Infinity, bottom: -Infinity };
+      for (const x of [entry.bounds.min.x, entry.bounds.max.x]) {
+        for (const y of [entry.bounds.min.y, entry.bounds.max.y]) {
+          for (const z of [entry.bounds.min.z, entry.bounds.max.z]) {
+            const point = new THREE.Vector3(x, y, z).add(offset).project(camera);
+            box.left = Math.min(box.left, point.x);
+            box.right = Math.max(box.right, point.x);
+            box.top = Math.min(box.top, point.y);
+            box.bottom = Math.max(box.bottom, point.y);
+          }
+        }
+      }
+      return box;
+    };
+    const focusBox = focused && screenBox(focused);
+    const focusHeight = focused && focused.vector.z * offsetFor(focused);
     for (const entry of all) {
       const { row, group, strokes, vector } = entry;
       const removed = row.revision === base && row.delta === "removed";
@@ -2014,7 +2088,14 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
       const accent = selected && ghostDeltaKey ? 1 : (reduced ? accentProgress : outCubic(accentProgress)) * blend.current.compare;
       // With a selection, the other added and changed parts drop to half strength. The overlay is
       // composited in linear light, where 0.35 reads as about 50% on screen (measured 0.5-0.6).
-      stylePart(entry, blend.current.compare, weight, ghost, accent, selected || !selectedKey ? 1 : 0.35);
+      let focus = null;
+      if (focused && !selected && !ghost) {
+        const box = screenBox(entry);
+        const overlaps = box.left < focusBox.right && box.right > focusBox.left
+          && box.top < focusBox.bottom && box.bottom > focusBox.top;
+        focus = overlaps && entry.vector.z * offsetFor(entry) > focusHeight + 0.5 ? { fade: 0.22 } : { recede: 0.4 };
+      }
+      stylePart(entry, blend.current.compare, weight, ghost, accent, selected || !selectedKey ? 1 : 0.35, focus);
       const casts = entry.style.surface[0].castShadow;
       shadowDirty ||= casts !== wasCasting || casts && moved;
       if (casts) floor = Math.min(floor, entry.bounds.min.z + group.position.z);

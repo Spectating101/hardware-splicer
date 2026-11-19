@@ -266,6 +266,8 @@ function Annotations({ labels, selection, endpoints, pins, faceView, base, targe
         ))}
         <path className="fd-pin-leaders" data-pin-leaders="" />
         <path className="fd-pin-ticks" data-pin-ticks="" />
+        <path className="fd-ghost-marks" data-ghost-marks="" />
+        <path className="fd-ghost-pairs" data-ghost-pairs="" />
         {faceView && [base, target].map((revision) => (
           <g className="fd-dimensions" data-dimensions={revision} key={revision}
             data-kind={revision === base ? "removed" : "added"}>
@@ -489,7 +491,7 @@ export default function FieldDeckScene({ onExit }) {
 
   function finishIntro() {
     setView((old) => ({
-      ...old, mode: "compare", explode: DEFAULT_EXPLODE, hero: null, blockers: true,
+      ...old, mode: "compare", explode: DEFAULT_EXPLODE, hero: null, blockers: true, focus: false,
       selected: index.byPart.get(`${target}:${focusPart}`)?.key ?? null,
     }));
   }
@@ -497,6 +499,8 @@ export default function FieldDeckScene({ onExit }) {
   function select(key, question = null) {
     setView((old) => ({
       ...old, selected: key, question, cue: null, hero: null, touring: false, blockers: true,
+      // A selection the user makes puts Compare into focus; the intro's default selection does not.
+      focus: Boolean(key),
       faceView: old.faceView && !index.byKey.get(key)?.link,
     }));
   }
@@ -544,7 +548,7 @@ export default function FieldDeckScene({ onExit }) {
     stage.current?.update({
       mode: view.mode, explode: view.explode, explodeMotion, heroStart: view.hero,
       selectedKeys, cameraCue: view.cue, reduced, faceView: view.faceView,
-      ghostDeltaKey: oldKey, selectedKey: selection?.key,
+      ghostDeltaKey: oldKey, selectedKey: selection?.key, focusSelection: Boolean(view.focus),
     });
   }, [assets, view, selectedKeys, reduced, explodeMotion, treeOpen, inspectorOpen, narrow, blockersOnly, sheet, keyOpen, moreOpen, oldKey, selection]);
 
@@ -592,7 +596,7 @@ export default function FieldDeckScene({ onExit }) {
       return {
         ...old, mode, explode: stop.explode, hero: null,
         stop: stopIndex, question: null, faceView: false, selected: selected?.key ?? null, touring,
-        cue: { stopIndex }, blockers: true,
+        cue: { stopIndex }, blockers: true, focus: Boolean(selected),
       };
     });
   }

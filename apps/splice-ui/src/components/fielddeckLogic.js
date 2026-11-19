@@ -449,6 +449,36 @@ export function repelPins(points, { minDistance = 24, obstacles = [], clearance 
   return out;
 }
 
+// Pair each old-revision feature with the nearest new feature of the same size, only when the
+// match is unambiguous: nearest within maxDistance and no other candidate within ratio × that.
+// Features are { center: [x, y, z], size }.
+// The two rims of one hole (same axis, same size) are one feature: keep the upper rim.
+export function mergeCoaxialFeatures(features, { axisTolerance = 0.5, sizeTolerance = 0.2 } = {}) {
+  const merged = [];
+  for (const feature of features.slice().sort((a, b) => b.center[2] - a.center[2])) {
+    const coaxial = merged.some(({ center, size }) => Math.abs(size - feature.size) <= sizeTolerance
+      && Math.hypot(center[0] - feature.center[0], center[1] - feature.center[1]) <= axisTolerance);
+    if (!coaxial) merged.push(feature);
+  }
+  return merged;
+}
+
+export function pairMovedFeatures(olderFeatures, newerFeatures, { maxDistance = 25, ratio = 1.5, sizeTolerance = 0.2 } = {}) {
+  const older = mergeCoaxialFeatures(olderFeatures, { sizeTolerance });
+  const newer = mergeCoaxialFeatures(newerFeatures, { sizeTolerance });
+  const pairs = [];
+  for (const feature of older) {
+    const candidates = newer.filter(({ size }) => Math.abs(size - feature.size) <= sizeTolerance)
+      .map((candidate) => ({ candidate, distance: length(difference(candidate.center, feature.center)) }))
+      .sort((a, b) => a.distance - b.distance);
+    const [nearest, second] = candidates;
+    if (!nearest || nearest.distance > maxDistance) continue;
+    if (second && second.distance <= nearest.distance * ratio) continue;
+    pairs.push([feature, nearest.candidate]);
+  }
+  return pairs;
+}
+
 export function countClippedItems(items, { top, bottom }) {
   return items.filter((item) => item.top < top || item.bottom > bottom).length;
 }

@@ -436,3 +436,5 @@
 @media (width < 640px) {
   .fd-grid-label { display: none; }
 }
+.fd-leaders .fd-ghost-marks { stroke: #f17e70; stroke-opacity: 0.6; stroke-width: 1; fill: none; }
+.fd-leaders .fd-ghost-pairs { stroke: #f17e70; stroke-opacity: 0.7; stroke-width: 0.75; fill: none; }

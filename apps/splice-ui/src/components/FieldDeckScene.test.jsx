@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import FieldDeckScene, { EvidenceRows } from "./FieldDeckScene.jsx";
 import {
-  bracketPath, repelPins, changeSummary, cullIsolatedChains, dimmedColor, oldRevisionCaption, totalChainLength, chooseTier, classifyPart, closedEdgeLoops, convexHull, countClippedItems,
+  bracketPath, pairMovedFeatures, repelPins, changeSummary, cullIsolatedChains, dimmedColor, oldRevisionCaption, totalChainLength, chooseTier, classifyPart, closedEdgeLoops, convexHull, countClippedItems,
   cullCoincidentChains, DEFAULT_EXPLODE, diffAccentChains, DIFF_COLORS, dimensionLabel, evidenceCells,
   explodeGroupOffsets, FIELDDECK_NARROW, footprintDelta, formatEvidenceSource, formatEvidenceValue, ghostOutlineLoops,
   indexFielddeck, materialSpec, meshDeltaLabel, meshMeasures, nearestPoint, placeBesideEndpoint, placeCallouts,
@@ -230,6 +230,19 @@ describe("Fielddeck state and mapping", () => {
   it("dims bases without a listed value to a neutral grey at 0.72 of their luminance", () => {
     expect(dimmedColor(0xa6a098)).toBe(0x747474);
     expect(dimmedColor(0xffffff)).toBe(0xb8b8b8);
+  });
+
+  it("pairs a moved feature only when the nearest same-size match is unambiguous", () => {
+    const old = [{ center: [85, 174.65, 52.54], size: 2.8 }, { center: [0, 0, 0], size: 2.8 }];
+    const moved = { center: [103.15, 184.5, 47.08], size: 2.8 };
+    const far = { center: [103.15, 235.5, 47.08], size: 2.8 };
+    const other = { center: [85, 174.65, 52.54], size: 6 };
+    expect(pairMovedFeatures(old, [moved, far, other])).toEqual([[old[0], moved]]);
+    expect(pairMovedFeatures([old[0]], [moved, { center: [104, 186, 47], size: 2.8 }])).toEqual([]);
+    // The lower rim of the same moved hole is the same feature, not a competing candidate.
+    expect(pairMovedFeatures([old[0], { center: [85, 174.65, 49.54], size: 2.8 }],
+      [moved, { center: [103.15, 184.5, 44.08], size: 2.8 }])).toEqual([[old[0], moved]]);
+    expect(pairMovedFeatures([{ center: [0, 0, 0], size: 2.8 }], [{ center: [30, 0, 0], size: 2.8 }])).toEqual([]);
   });
 
   it("repels pins to 24 px apart and 12 px clear of the pill without moving fixed pins", () => {
