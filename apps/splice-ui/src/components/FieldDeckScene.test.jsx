@@ -8,6 +8,8 @@ import {
   indexFielddeck, materialSpec, meshDeltaLabel, meshMeasures, nearestPoint, placeBesideEndpoint, placeCallouts,
   placeRoutingLabel, projectedFitScale, rowForNode, rowsForMode, selectedPartKeys, simplifyEdgeChain,
   toggleFielddeckSheet, weldEdgeChains,
+  apertureFromSection, footprintDeltaPair, gapLabel, linearDimension, minimumGapLabel, minimumSideGap,
+  pointInPolygon, polygonArea, projectedSideGaps, sectionSegments, vertexCentroid, weldSectionLoops,
 } from "./fielddeckLogic.js";
 
 const stageMock = vi.hoisted(() => ({ load: vi.fn(), create: vi.fn() }));
@@ -451,6 +453,108 @@ describe("Fielddeck stage layout", () => {
     expect(details).toBe("details");
     expect(toggleFielddeckSheet(details, "parts")).toBe("parts");
     expect(toggleFielddeckSheet(details, "details")).toBeNull();
+  });
+});
+
+describe("Fielddeck Face view fit layer", () => {
+  // Triangle soup for an axis-aligned box, 12 triangles, in mm.
+  function box([x0, y0, z0], [x1, y1, z1]) {
+    const c = (i) => [i & 1 ? x1 : x0, i & 2 ? y1 : y0, i & 4 ? z1 : z0];
+    const faces = [[0, 1, 3, 2], [4, 6, 7, 5], [0, 4, 5, 1], [2, 3, 7, 6], [0, 2, 6, 4], [1, 5, 7, 3]];
+    return faces.flatMap(([a, b, cc, d]) => [...c(a), ...c(b), ...c(cc), ...c(a), ...c(cc), ...c(d)]);
+  }
+  // A faceplate split down the middle at x = 30 into two C-shaped parts around a 40 × 20 window.
+  // The right part sits `seam` mm to the right, as two printed halves do.
+  function faceplate(seam) {
+    const z = [0, 3];
+    const left = [
+      [[0, 0], [10, 10]], [[0, 10], [10, 30]], [[0, 30], [10, 40]], [[10, 0], [30, 10]], [[10, 30], [30, 40]],
+    ].flatMap(([[x0, y0], [x1, y1]]) => box([x0, y0, z[0]], [x1, y1, z[1]]));
+    const right = [
+      [[30, 0], [50, 10]], [[30, 30], [50, 40]], [[50, 0], [60, 10]], [[50, 10], [60, 30]], [[50, 30], [60, 40]],
+    ].flatMap(([[x0, y0], [x1, y1]]) => box([x0 + seam, y0, z[0]], [x1 + seam, y1, z[1]]));
+    return [
+      { label: "Face Rear Left", segments: sectionSegments(left, 1.5) },
+      { label: "Face Rear Right", segments: sectionSegments(right, 1.5) },
+    ];
+  }
+  const rect = (x0, y0, x1, y1) => [[x0, y0], [x1, y0], [x1, y1], [x0, y1]];
+
+  it("sections triangles into in-plane segments and skips triangles the plane misses", () => {
+    const segments = sectionSegments(box([0, 0, 0], [10, 4, 2]), 1);
+    expect(segments.length).toBe(8);
+    for (const [a, b] of segments) {
+      for (const [x, y] of [a, b]) expect(x === 0 || x === 10 || y === 0 || y === 4).toBe(true);
+    }
+    expect(sectionSegments(box([0, 0, 0], [10, 4, 2]), 5)).toEqual([]);
+  });
+
+  it("welds a two-part seam within 0.05 mm, cancels the shared seam edges and finds the window", () => {
+    const parts = faceplate(0.03);
+    const { loops, openChains } = weldSectionLoops(parts.flatMap(({ segments }) => segments), 0.05);
+    expect(openChains).toBe(0);
+    expect(loops.map((loop) => Math.round(Math.abs(polygonArea(loop))))).toEqual(expect.arrayContaining([2401, 801]));
+    const { loop, reason } = apertureFromSection(parts, [30, 20]);
+    expect(reason).toBeNull();
+    expect(Math.abs(polygonArea(loop))).toBeCloseTo(40.03 * 20, 1);
+    expect(pointInPolygon([30, 20], loop)).toBe(true);
+    expect(pointInPolygon([5, 20], loop)).toBe(false);
+  });
+
+  it("reports the seam instead of drawing an aperture when the halves stay apart after the weld", () => {
+    const { loop, reason } = apertureFromSection(faceplate(0.3), [30, 20]);
+    expect(loop).toBeNull();
+    expect(reason).toBe("section loop not closed after 0.05 mm weld · 0.30 mm seam between Face Rear Left and Face Rear Right");
+    expect(apertureFromSection([{ label: "Face", segments: [] }], [0, 0]).reason).toBe("section plane misses the faceplate");
+  });
+
+  it("measures signed projected gaps per side and calls a negative gap an overlap", () => {
+    const aperture = apertureFromSection(faceplate(0), [30, 20]).loop;
+    const gaps = projectedSideGaps(rect(12, 11, 48, 29.5), aperture, [30, 20]);
+    expect(gaps.left.value).toBeCloseTo(2, 6);
+    expect(gaps.right.value).toBeCloseTo(2, 6);
+    expect(gaps.bottom.value).toBeCloseTo(1, 6);
+    expect(gaps.top.value).toBeCloseTo(0.5, 6);
+    expect(minimumSideGap(gaps)).toEqual({ value: expect.closeTo(0.5, 6), side: "top", reason: null });
+    expect(gapLabel("left", gaps.left)).toBe("Projected CAD gap · L 2.00 mm · computed");
+    const covered = projectedSideGaps(rect(8, 11, 48, 29.5), aperture, [30, 20]);
+    expect(gapLabel("left", covered.left)).toBe("Projected CAD gap · L overlap −2.00 mm · computed");
+    expect(minimumGapLabel(minimumSideGap(covered))).toBe("Min projected XY gap · overlap −2.00 mm · computed");
+  });
+
+  it("marks every side unknown, with its reason, when the aperture is not derivable", () => {
+    const gaps = projectedSideGaps(rect(12, 11, 48, 29.5), null, [30, 20]);
+    expect(Object.values(gaps).every(({ value }) => value === null)).toBe(true);
+    expect(gapLabel("top", gaps.top)).toBe("Projected CAD gap · T ? · aperture not derivable");
+    expect(minimumSideGap(gaps).value).toBeNull();
+    expect(minimumGapLabel(minimumSideGap(gaps))).toBe("Min projected XY gap · ? · not derivable");
+  });
+
+  it("averages mesh vertices for spacer centroids and states the footprint delta as a pair", () => {
+    expect(vertexCentroid([0, 0, 0, 2, 4, 6])).toEqual([1, 2, 3]);
+    expect(vertexCentroid([])).toBeNull();
+    const older = { min: { x: -4, y: 6 }, max: { x: 185.32, y: 126.24 } };
+    const newer = { min: { x: 10, y: -5 }, max: { x: 153.4, y: 86.46 } };
+    expect(footprintDeltaPair(older, newer)).toBe("−45.92 × −28.78 mm");
+    expect(footprintDeltaPair(newer, older)).toBe("+45.92 × +28.78 mm");
+  });
+
+  it("draws ISO dimensions: offset extension lines, an unbroken line, 7 px 30° arrows, text 3 px above", () => {
+    const dim = linearDimension([0, 0], [100, 0], [0, 1], 20);
+    expect(dim.extensions).toBe("M0,3L0,24M100,3L100,24");
+    expect(dim.line).toBe("M0,20L100,20");
+    const heads = [...dim.arrows.matchAll(/M([\d.-]+),([\d.-]+)L([\d.-]+),([\d.-]+)L([\d.-]+),([\d.-]+)Z/g)]
+      .map((match) => match.slice(1).map(Number));
+    expect(heads).toHaveLength(2);
+    const [tipX, tipY, ax, ay, bx, by] = heads[0];
+    expect([tipX, tipY]).toEqual([0, 20]);
+    expect(Math.hypot((ax + bx) / 2 - tipX, (ay + by) / 2 - tipY)).toBeCloseTo(7, 1);
+    const included = Math.atan2(Math.abs(by - ay) / 2, 7) * 2 * 180 / Math.PI;
+    expect(included).toBeCloseTo(30, 0);
+    expect(dim.text).toEqual({ x: 50, y: 17, rotate: 0 });
+    const vertical = linearDimension([0, 100], [0, 0], [-1, 0], 20);
+    expect(vertical.text).toEqual({ x: -23, y: 50, rotate: -90 });
+    expect(vertical.vertical).toBe(true);
   });
 });
 

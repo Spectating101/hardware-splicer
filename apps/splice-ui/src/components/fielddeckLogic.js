@@ -929,3 +929,320 @@ export function formatEvidenceSource(source) {
 export function evidenceCells(row) {
   return [row.field, formatEvidenceValue(row), row.state, formatEvidenceSource(row.source)];
 }
+
+// ---------------------------------------------------------------------------------------------
+// Face view fit layer. Pure functions over plain arrays; the stage feeds them GLB triangles in mm.
+// Nothing here claims a physical fit: every value is a projection of CAD meshes.
+
+export const FACE_APERTURE_PARTS = ["face-rear-left", "face-rear-right"];
+export const APERTURE_WELD_MM = 0.05;
+const MINUS = "−";
+const mm2 = (value) => `${value < 0 ? MINUS : ""}${Math.abs(value).toFixed(2)}`;
+
+// Section triangle soup (x, y, z per vertex, 9 numbers per triangle) with the plane
+// coordinate[axis] = level. Returns 2D segments [[u0, v0], [u1, v1]] in the other two axes, in
+// order. A vertex exactly on the plane counts as above it, so shared edges never double up.
+export function sectionSegments(positions, level, axis = 2) {
+  const [u, v] = [0, 1, 2].filter((a) => a !== axis);
+  const segments = [];
+  for (let t = 0; t + 8 < positions.length; t += 9) {
+    const points = [];
+    for (let e = 0; e < 3; e++) {
+      const a = t + e * 3;
+      const b = t + ((e + 1) % 3) * 3;
+      const da = positions[a + axis] - level;
+      const db = positions[b + axis] - level;
+      if ((da < 0) === (db < 0)) continue;
+      const s = da / (da - db);
+      points.push([positions[a + u] + s * (positions[b + u] - positions[a + u]),
+        positions[a + v] + s * (positions[b + v] - positions[a + v])]);
+    }
+    if (points.length === 2) segments.push(points);
+  }
+  return segments;
+}
+
+// Weld segment ends that lie within `tolerance` of each other, cancel seam edges both parts share,
+// then split the graph into closed loops (every vertex of degree 2) and open chains. `openGap` is the shortest distance between two
+// loose ends of different chains, so a reason can say how far a seam is from closing.
+export function weldSectionLoops(segments, tolerance = APERTURE_WELD_MM) {
+  const vertices = [];
+  const cells = new Map();
+  const cellKey = (x, y) => `${Math.floor(x / tolerance)},${Math.floor(y / tolerance)}`;
+  const vertexFor = ([x, y]) => {
+    const cx = Math.floor(x / tolerance);
+    const cy = Math.floor(y / tolerance);
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        for (const id of cells.get(`${cx + dx},${cy + dy}`) ?? []) {
+          if (Math.hypot(vertices[id].point[0] - x, vertices[id].point[1] - y) <= tolerance) return id;
+        }
+      }
+    }
+    const id = vertices.length;
+    vertices.push({ point: [x, y], neighbors: new Set() });
+    const key = cellKey(x, y);
+    if (!cells.has(key)) cells.set(key, []);
+    cells.get(key).push(id);
+    return id;
+  };
+  // Two parts that touch along a seam both contribute the seam edge. After welding, an edge that
+  // occurs an even number of times is interior to the sectioned union and cancels out.
+  const edges = new Map();
+  for (const [a, b] of segments) {
+    const i = vertexFor(a);
+    const j = vertexFor(b);
+    if (i === j) continue;
+    const key = i < j ? `${i},${j}` : `${j},${i}`;
+    edges.set(key, (edges.get(key) ?? 0) + 1);
+  }
+  for (const [key, count] of edges) {
+    if (count % 2 === 0) continue;
+    const [i, j] = key.split(",").map(Number);
+    vertices[i].neighbors.add(j);
+    vertices[j].neighbors.add(i);
+  }
+  const loops = [];
+  const open = [];
+  const seen = new Set();
+  for (let start = 0; start < vertices.length; start++) {
+    if (seen.has(start) || !vertices[start].neighbors.size) continue;
+    const component = [start];
+    seen.add(start);
+    for (let k = 0; k < component.length; k++) {
+      for (const next of vertices[component[k]].neighbors) {
+        if (!seen.has(next)) {
+          seen.add(next);
+          component.push(next);
+        }
+      }
+    }
+    if (component.length >= 3 && component.every((id) => vertices[id].neighbors.size === 2)) {
+      const loop = [];
+      let previous = -1;
+      let current = start;
+      do {
+        loop.push(vertices[current].point);
+        const next = [...vertices[current].neighbors].find((id) => id !== previous);
+        previous = current;
+        current = next;
+      } while (current !== start);
+      loops.push(loop);
+    } else {
+      open.push(component.filter((id) => vertices[id].neighbors.size === 1).map((id) => vertices[id].point));
+    }
+  }
+  let openGap = null;
+  for (let i = 0; i < open.length; i++) {
+    for (let j = i + 1; j < open.length; j++) {
+      for (const a of open[i]) {
+        for (const b of open[j]) {
+          const distance = Math.hypot(a[0] - b[0], a[1] - b[1]);
+          if (openGap === null || distance < openGap) openGap = distance;
+        }
+      }
+    }
+  }
+  return { loops, openChains: open.length, openGap };
+}
+
+export function polygonArea(loop) {
+  let area = 0;
+  for (let i = 0; i < loop.length; i++) {
+    const [x0, y0] = loop[i];
+    const [x1, y1] = loop[(i + 1) % loop.length];
+    area += x0 * y1 - x1 * y0;
+  }
+  return area / 2;
+}
+
+export function pointInPolygon([x, y], loop) {
+  let inside = false;
+  for (let i = 0, j = loop.length - 1; i < loop.length; j = i++) {
+    const [xi, yi] = loop[i];
+    const [xj, yj] = loop[j];
+    if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
+// Closest approach between the section vertices of two parts, near the display centre.
+function partSeamGap(a, b, centre, reach) {
+  const near = (segments) => segments.flat().filter(([x, y]) => Math.hypot(x - centre[0], y - centre[1]) <= reach);
+  const left = near(a);
+  const right = near(b);
+  let best = null;
+  for (const p of left) {
+    for (const q of right) {
+      const distance = Math.hypot(p[0] - q[0], p[1] - q[1]);
+      if (best === null || distance < best) best = distance;
+    }
+  }
+  return best;
+}
+
+// The aperture is the smallest closed section loop that contains the display's projected centre.
+// `parts` are [{ label, segments }] for the faceplate parts sectioned together. When no welded loop
+// contains the centre, the result carries the reason and no loop: nothing is drawn for it.
+export function apertureFromSection(parts, centre, { weld = APERTURE_WELD_MM, reach = 200 } = {}) {
+  const segments = parts.flatMap(({ segments: own }) => own);
+  if (!segments.length) return { loop: null, reason: "section plane misses the faceplate" };
+  const { loops, openChains, openGap } = weldSectionLoops(segments, weld);
+  const containing = loops.filter((loop) => pointInPolygon(centre, loop))
+    .sort((a, b) => Math.abs(polygonArea(a)) - Math.abs(polygonArea(b)));
+  if (containing.length) return { loop: containing[0], reason: null };
+  const notClosed = `section loop not closed after ${weld} mm weld`;
+  for (let i = 0; i < parts.length; i++) {
+    for (let j = i + 1; j < parts.length; j++) {
+      const gap = partSeamGap(parts[i].segments, parts[j].segments, centre, reach);
+      if (gap !== null && gap > weld) {
+        return { loop: null, reason: `${notClosed} · ${gap.toFixed(2)} mm seam between ${parts[i].label} and ${parts[j].label}` };
+      }
+    }
+  }
+  if (openChains) {
+    const ends = openGap === null ? "" : ` · nearest open ends ${openGap.toFixed(2)} mm apart`;
+    return { loop: null, reason: notClosed + ends };
+  }
+  return { loop: null, reason: "no closed section loop contains the display centre" };
+}
+
+function scanCrossings(loop, axis, at) {
+  const other = 1 - axis;
+  const hits = [];
+  for (let i = 0; i < loop.length; i++) {
+    const a = loop[i];
+    const b = loop[(i + 1) % loop.length];
+    if ((a[other] > at) === (b[other] > at)) continue;
+    hits.push(a[axis] + (at - a[other]) * (b[axis] - a[axis]) / (b[other] - a[other]));
+  }
+  return hits.sort((p, q) => p - q);
+}
+
+const SIDES = [["left", 0, -1], ["right", 0, 1], ["bottom", 1, -1], ["top", 1, 1]];
+
+// Signed in-plane gap per side between the display's projected outline and the aperture loop,
+// measured along that side's normal and minimised over scanlines across the span both share.
+// Positive clears; negative means the faceplate overlaps the outline on that side.
+export function projectedSideGaps(outline, aperture, centre, { samples = 96 } = {}) {
+  const result = {};
+  for (const [side, axis, sign] of SIDES) {
+    if (!aperture?.length) {
+      result[side] = { value: null, reason: "aperture not derivable" };
+      continue;
+    }
+    if (!outline?.length) {
+      result[side] = { value: null, reason: "display outline not derivable" };
+      continue;
+    }
+    const other = 1 - axis;
+    const span = (loop) => [Math.min(...loop.map((p) => p[other])), Math.max(...loop.map((p) => p[other]))];
+    const [o0, o1] = span(outline);
+    const [a0, a1] = span(aperture);
+    const low = Math.max(o0, a0);
+    const high = Math.min(o1, a1);
+    let best = null;
+    for (let k = 0; k <= samples && high > low; k++) {
+      // Stay a hair inside the shared span so a scanline never runs along a horizontal edge.
+      const at = low + (high - low) * (0.001 + 0.998 * k / samples);
+      const shape = scanCrossings(outline, axis, at);
+      const hole = scanCrossings(aperture, axis, at);
+      if (shape.length < 2) continue;
+      const index = hole.findIndex((value, i) => i % 2 === 0 && value <= centre[axis] && hole[i + 1] >= centre[axis]);
+      if (index < 0) continue;
+      const gap = sign < 0 ? shape[0] - hole[index] : hole[index + 1] - shape.at(-1);
+      if (best === null || gap < best) best = gap;
+    }
+    result[side] = best === null ? { value: null, reason: "no shared span with the aperture" } : { value: best, reason: null };
+  }
+  return result;
+}
+
+export function minimumSideGap(gaps) {
+  const sides = Object.entries(gaps);
+  const unknown = sides.find(([, gap]) => gap.value == null);
+  if (!sides.length || unknown) return { value: null, side: null, reason: unknown?.[1].reason ?? "no sides" };
+  const [side, { value }] = sides.reduce((a, b) => (b[1].value < a[1].value ? b : a));
+  return { value, side, reason: null };
+}
+
+const SIDE_LETTER = { left: "L", right: "R", top: "T", bottom: "B" };
+
+export function formatGapValue(value) {
+  return value < 0 ? `overlap ${mm2(value)} mm` : `${mm2(value)} mm`;
+}
+
+export function gapLabel(side, gap) {
+  const letter = SIDE_LETTER[side];
+  if (gap?.value == null) return `Projected CAD gap · ${letter} ? · ${gap?.reason ?? "not derivable"}`;
+  return `Projected CAD gap · ${letter} ${formatGapValue(gap.value)} · computed`;
+}
+
+export function minimumGapLabel(minimum) {
+  if (minimum?.value == null) return "Min projected XY gap · ? · not derivable";
+  return `Min projected XY gap · ${formatGapValue(minimum.value)} · computed`;
+}
+
+export function footprintDeltaPair(older, newer) {
+  const delta = (axis) => mm2((newer.max[axis] - newer.min[axis]) - (older.max[axis] - older.min[axis]))
+    .replace(/^(?!−)/, "+").replace(/^[+−]0\.00$/, "0.00");
+  return `${delta("x")} × ${delta("y")} mm`;
+}
+
+// Mean of a part's mesh vertices, in mm.
+export function vertexCentroid(positions) {
+  const sum = [0, 0, 0];
+  const count = Math.floor(positions.length / 3);
+  for (let i = 0; i < count * 3; i += 3) {
+    sum[0] += positions[i];
+    sum[1] += positions[i + 1];
+    sum[2] += positions[i + 2];
+  }
+  return count ? sum.map((value) => value / count) : null;
+}
+
+// ISO 128 / 129-1 linear dimension in screen pixels. `from` and `to` are the two feature points,
+// `normal` the unit direction from the object toward the dimension line, `offset` the distance of
+// the dimension line from the object along it. Extension lines start `gap` px off the object and
+// run `overrun` px past the dimension line; the dimension line is unbroken with filled 30° arrows of
+// `arrow` px at both ends; text sits `textGap` px above the line, and vertical text reads
+// bottom-to-top (rotate −90°).
+export function linearDimension(from, to, normal, offset, {
+  gap = 3, overrun = 4, arrow = 7, angle = 30, textGap = 3,
+} = {}) {
+  const [nx, ny] = normal;
+  const at = (point, distance) => [point[0] + nx * distance, point[1] + ny * distance];
+  const a = at(from, offset);
+  const b = at(to, offset);
+  const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
+  const ux = length ? (b[0] - a[0]) / length : 1;
+  const uy = length ? (b[1] - a[1]) / length : 0;
+  const half = arrow * Math.tan(THREE_DEG * angle / 2);
+  // Arrows point outward to the extension lines; on a short span they sit outside, pointing in.
+  const outside = length < arrow * 2 + 4;
+  const head = (tip, direction) => {
+    const [dx, dy] = direction;
+    const baseX = tip[0] - dx * arrow;
+    const baseY = tip[1] - dy * arrow;
+    return `M${r(tip[0])},${r(tip[1])}L${r(baseX - dy * half)},${r(baseY + dx * half)}L${r(baseX + dy * half)},${r(baseY - dx * half)}Z`;
+  };
+  const extension = (point) => {
+    const start = at(point, gap);
+    const end = at(point, offset + overrun);
+    return `M${r(start[0])},${r(start[1])}L${r(end[0])},${r(end[1])}`;
+  };
+  const line = outside
+    ? `M${r(a[0] - ux * arrow * 2)},${r(a[1] - uy * arrow * 2)}L${r(b[0] + ux * arrow * 2)},${r(b[1] + uy * arrow * 2)}`
+    : `M${r(a[0])},${r(a[1])}L${r(b[0])},${r(b[1])}`;
+  const arrows = outside
+    ? head(a, [ux, uy]) + head(b, [-ux, -uy])
+    : head(a, [-ux, -uy]) + head(b, [ux, uy]);
+  const vertical = Math.abs(uy) > Math.abs(ux);
+  // "Above" is screen-up for horizontal text and screen-left for text rotated to read upward.
+  const text = vertical
+    ? { x: r((a[0] + b[0]) / 2 - textGap), y: r((a[1] + b[1]) / 2), rotate: -90 }
+    : { x: r((a[0] + b[0]) / 2), y: r((a[1] + b[1]) / 2 - textGap), rotate: 0 };
+  return { extensions: extension(from) + extension(to), line, arrows, text, length, vertical };
+}
+const THREE_DEG = Math.PI / 180;
+const r = (value) => Math.round(value * 100) / 100;
