@@ -473,12 +473,10 @@
   .fd-grid-label { display: none; }
 }
 .fd-leaders .fd-ghost-marks { stroke: #f17e70; stroke-opacity: 0.6; stroke-width: 1; fill: none; }
-.fd-leaders .fd-ghost-pairs { stroke: #f17e70; stroke-opacity: 0.7; stroke-width: 0.75; fill: none; }
-.fd-pin-revision {
-  position: absolute; left: 50%; top: calc(100% + 2px); translate: -50% 0;
-  color: var(--question); font: 10px/1 var(--mono); white-space: nowrap;
-  padding: 1px 3px; background: rgb(14 17 22 / 0.85); border-radius: 2px;
-}
+.fd-leaders .fd-ghost-links, .fd-leaders .fd-ghost-links g { visibility: visible; }
+.fd-ghost-links .fd-ghost-leader { stroke: #f17e70; stroke-width: 1; fill: none; }
+.fd-ghost-links .fd-ghost-arrow { fill: #f17e70; stroke: none; }
+.fd-ghost-links .fd-ghost-delta { fill: #f17e70; stroke: #0e1116; stroke-width: 3px; stroke-linejoin: round; font: 11px var(--mono); paint-order: stroke; }
 .fd-fit-compact { display: none; font: 10px/1.4 var(--mono); }
 @media (width < 640px) {
   .fd-fit-compact { display: block; }

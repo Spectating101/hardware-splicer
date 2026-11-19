@@ -228,6 +228,8 @@ describe("Fielddeck state and mapping", () => {
     expect(oldRevisionCaption(25, before, after)).toBe("old revision dashed · ΔV −0.55 cm³ · computed");
     expect(oldRevisionCaption(12, before, after)).toBe("old revision coincident · ΔV −0.55 cm³ · computed");
     expect(oldRevisionCaption(0)).toBe("old revision coincident");
+    expect(oldRevisionCaption(12, before, after, 4)).toBe("old outline coincides except standoffs · ΔV −0.55 cm³ · computed");
+    expect(oldRevisionCaption(25, before, after, 4)).toBe("old revision dashed · ΔV −0.55 cm³ · computed");
   });
 
   it("dims bases without a listed value to a neutral grey at 0.72 of their luminance", () => {

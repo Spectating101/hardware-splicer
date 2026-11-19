@@ -311,10 +311,12 @@ export function totalChainLength(chains) {
 }
 
 // The scene sub-line for a changed part's old revision says what is actually drawn.
-export function oldRevisionCaption(visibleLength, before, after) {
+// `moved` counts old small features (standoffs) paired with a new position.
+export function oldRevisionCaption(visibleLength, before, after, moved = 0) {
   const valid = (stats) => stats && Number.isFinite(stats.volume);
   const volume = valid(before) && valid(after)
     ? ` · ΔV ${signedAmount((after.volume - before.volume) / 1000, 2)} cm³ · computed` : "";
+  if (moved > 0 && visibleLength <= 20) return `old outline coincides except standoffs${volume}`;
   return `old revision ${visibleLength > 20 ? "dashed" : "coincident"}${volume}`;
 }
 

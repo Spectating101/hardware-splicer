@@ -307,7 +307,7 @@ function Annotations({ labels, selection, endpoints, pins, faceView, base, targe
         <path className="fd-pin-leaders" data-pin-leaders="" />
         <path className="fd-pin-ticks" data-pin-ticks="" />
         <path className="fd-ghost-marks" data-ghost-marks="" />
-        <path className="fd-ghost-pairs" data-ghost-pairs="" />
+        <g className="fd-ghost-links" data-ghost-links="" />
         {faceView && <g className="fd-face-drawing" data-face-drawing="" />}
         {selection?.part && <>
           <path className="fd-bracket-halo" data-bracket={selection.key} />
@@ -355,6 +355,7 @@ export default function FieldDeckScene({ onExit }) {
   const [linked, setLinked] = useState(new Set());
   const [meshStats, setMeshStats] = useState(null);
   const [ghostLengths, setGhostLengths] = useState(null);
+  const [ghostMoves, setGhostMoves] = useState(null);
   const [faceFit, setFaceFit] = useState(null);
   const [rendered, setRendered] = useState(false);
   const [stageError, setStageError] = useState("");
@@ -459,7 +460,8 @@ export default function FieldDeckScene({ onExit }) {
     // The old revision shares the selected part's label as a sub-line instead of a second callout.
     // It says "dashed" only when more than 20 mm of old-revision chains are actually drawn.
     const detail = oldKey && linked.has(oldKey) && row.key === selection?.key
-      ? oldRevisionCaption(ghostLengths?.get(oldKey) ?? 0, meshStats?.get(oldKey), meshStats?.get(row.key)) : undefined;
+      ? oldRevisionCaption(ghostLengths?.get(oldKey) ?? 0, meshStats?.get(oldKey), meshStats?.get(row.key), ghostMoves?.get(oldKey) ?? 0)
+      : undefined;
     return [{ ...row, endpoint, caption, detail }];
   });
   const pins = [];
@@ -558,6 +560,7 @@ export default function FieldDeckScene({ onExit }) {
         setLinked(runtime.linked);
         setMeshStats(runtime.meshStats ?? null);
         setGhostLengths(runtime.ghostLengths ?? null);
+        setGhostMoves(runtime.ghostMoves ?? null);
         setFaceFit(runtime.faceFit ?? null);
       } catch (error) {
         setStageError(`3D stage unavailable (${error.message}).`);

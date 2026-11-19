@@ -346,7 +346,8 @@ function displayContours(entry) {
 function makeGhost(chains, own, { xray = false } = {}) {
   const object = new THREE.Group();
   const material = own(edgeMaterial(DIFF_COLORS.removed, [6, 4], 1.25));
-  const small = own(edgeMaterial(DIFF_COLORS.removed, null, 1.25));
+  // Old rims of small features (standoffs, holes) are coral dashed circles, 1.25 px, 6/4.
+  const small = own(edgeMaterial(DIFF_COLORS.removed, [6, 4], 1.25));
   // The old revision often lies inside the current solid; draw it through so the change is visible.
   if (xray) material.depthTest = small.depthTest = false;
   const loops = xray ? closedEdgeLoops(chainSegments(chains), 0.01).filter(({ min, max }) =>
@@ -362,10 +363,13 @@ function makeGhost(chains, own, { xray = false } = {}) {
     object.add(line);
   };
   loops.forEach(({ points }) => add(points, small));
-  chains.filter((points) => points.length >= 2 && !inSmallLoop(points)).forEach((points) => add(points, material));
+  const outlineChains = chains.filter((points) => points.length >= 2 && !inSmallLoop(points));
+  outlineChains.forEach((points) => add(points, material));
   object.visible = false;
   return {
     object,
+    // Old geometry drawn outside the small feature loops: what "old outline" may claim.
+    outlineLength: totalChainLength(outlineChains),
     // Small old features, for centre crosses and moved-feature leaders in the annotation layer.
     features: loops.map(({ min, max }) => ({
       center: [0, 1, 2].map((axis) => (min[axis] + max[axis]) / 2),
@@ -373,7 +377,7 @@ function makeGhost(chains, own, { xray = false } = {}) {
     })),
     setOpacity(weight) {
       material.opacity = weight * 0.7;
-      small.opacity = Math.min(weight * 0.8, 0.4);
+      small.opacity = weight * 0.7;
     },
   };
 }
@@ -597,7 +601,7 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
         const chains = cullIsolatedChains(cullCoincidentChains(weldEdgeChains(entry.ghostEdges), current, { simplify: true }));
         entry.overlay = makeGhost(chains, own, { xray: true });
         // What the scene label may claim: the length of old-revision geometry actually drawn.
-        entry.overlay.length = totalChainLength(chains);
+        entry.overlay.length = entry.overlay.outlineLength;
         technical.add(entry.overlay.object);
       }
     }
@@ -1505,26 +1509,42 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
     position(gridLabel, gridPoint ? { x: (rect.left + rect.right) / 2, y: (rect.top + rect.bottom) / 2 } : null);
   }
 
-  // Old-revision small features: a 6 px centre cross each, and a 0.75 px coral leader to the
-  // new position of a feature that moved (only for unambiguous pairs).
+  // Old-revision small features: a moved one gets a 1 px leader from its old centre to its new
+  // centre with a 5 px arrowhead and its computed centre distance; an unpaired one keeps a 6 px
+  // centre cross.
   const marks = [];
-  const pairs = [];
+  const links = host.querySelector("[data-ghost-links]");
+  links?.replaceChildren();
   for (const entry of entries.values()) {
     const overlay = entry.overlay;
     if (!overlay?.object.visible) continue;
     const at = (center) => project(new THREE.Vector3(...center).add(overlay.object.position));
-    for (const { center } of overlay.features) {
-      const point = at(center);
+    const paired = new Set((overlay.pairs ?? []).map(([older]) => older));
+    for (const feature of overlay.features) {
+      const point = !paired.has(feature) && at(feature.center);
       if (point) marks.push(`M${point.x - 3},${point.y}h6M${point.x},${point.y - 3}v6`);
     }
     for (const [older, newer] of overlay.pairs ?? []) {
       const from = at(older.center);
       const to = at(newer.center);
-      if (from && to) pairs.push(`M${from.x},${from.y}L${to.x},${to.y}`);
+      if (!from || !to || !links) continue;
+      const length = Math.hypot(to.x - from.x, to.y - from.y);
+      const distance = Math.hypot(...newer.center.map((value, axis) => value - older.center[axis]));
+      const group = svgNode(links, "g", { class: "fd-ghost-link" });
+      if (length > 6) {
+        const ux = (to.x - from.x) / length;
+        const uy = (to.y - from.y) / length;
+        const half = 5 * Math.tan(Math.PI / 12);
+        const bx = to.x - ux * 5;
+        const by = to.y - uy * 5;
+        svgNode(group, "path", { class: "fd-ghost-leader", d: `M${from.x},${from.y}L${bx},${by}` });
+        svgNode(group, "path", { class: "fd-ghost-arrow", d: `M${to.x},${to.y}L${bx - uy * half},${by + ux * half}L${bx + uy * half},${by - ux * half}Z` });
+      }
+      svgNode(group, "text", { class: "fd-ghost-delta", x: (from.x + to.x) / 2 + 6, y: (from.y + to.y) / 2 - 6 },
+        `Δ ${distance.toFixed(2)} mm · computed`);
     }
   }
   host.querySelector("[data-ghost-marks]")?.setAttribute("d", marks.join(""));
-  host.querySelector("[data-ghost-pairs]")?.setAttribute("d", pairs.join(""));
 
   const labels = [...host.querySelectorAll("[data-anchor]")];
   if (!labels.length) return;
@@ -2424,6 +2444,7 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
     linked: new Set(entries.keys()),
     meshStats: new Map(all.map(({ row, meshStats }) => [row.key, meshStats])),
     ghostLengths: new Map(all.filter(({ overlay }) => overlay).map(({ row, overlay }) => [row.key, overlay.length])),
+    ghostMoves: new Map(all.filter(({ overlay }) => overlay).map(({ row, overlay }) => [row.key, overlay.pairs?.length ?? 0])),
     faceFit: faceFit && {
       gaps: faceFit.gaps, minimum: faceFit.minimum, seam: seamLabel(faceFit.seam),
       spacers: faceFit.spacers.length, level: faceFit.level,
