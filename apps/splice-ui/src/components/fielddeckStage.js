@@ -121,7 +121,9 @@ function applyHatch(material, { angle, spacing, contrast }, pixelRatio) {
 function edgeMaterial(color, pattern, linewidth) {
   const material = new LineMaterial({
     color, linewidth, dashed: Boolean(pattern), dashSize: pattern?.[0] ?? 1, gapSize: pattern?.[1] ?? 1,
-    worldUnits: false, transparent: true, depthWrite: false, toneMapped: false, alphaToCoverage: true,
+    // No alphaToCoverage: without MSAA it turned every partial opacity into a solid line, so 50%
+    // and 35% strokes drew at full strength.
+    worldUnits: false, transparent: true, depthWrite: false, toneMapped: false, alphaToCoverage: false,
     polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1,
   });
   // Widths are CSS pixels. applyTier scales them by the drawing-buffer ratio so a 1.5 px line
@@ -136,6 +138,17 @@ function edgeMaterial(color, pattern, linewidth) {
         "(vLineDistance * gl_FragCoord.w)");
     };
   }
+  return material;
+}
+
+// Change colour draws each pixel once (stencil), so parallel edges that overlap on screen do
+// not stack a 50% stroke back up to full strength.
+function diffMaterial(color) {
+  const material = edgeMaterial(color, null, 1.5);
+  Object.assign(material, {
+    stencilWrite: true, stencilRef: 1, stencilFunc: THREE.NotEqualStencilFunc,
+    stencilZPass: THREE.ReplaceStencilOp, stencilFail: THREE.KeepStencilOp, stencilZFail: THREE.KeepStencilOp,
+  });
   return material;
 }
 
@@ -376,7 +389,7 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
             solid, baseColor, mutedColor, fill,
             edge: {
               base: own(edgeMaterial(outline ? baseColor : spec.creaseColor, spec.pattern, basis === "unknown" ? 1.25 : 1)),
-              diff: accent ? own(edgeMaterial(spec.edgeColor, null, 1.5)) : null,
+              diff: accent ? own(diffMaterial(spec.edgeColor)) : null,
             },
             surface: [], lines: [], accents: [],
           },
@@ -757,7 +770,7 @@ class TechnicalPass extends RenderPass {
     super(scene, camera);
     this.clearPass.enabled = false;
     this.needsDepthTexture = true;
-    this.target = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType });
+    this.target = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, stencilBuffer: true });
     this.quads = new THREE.Scene();
     this.quadCamera = new THREE.Camera();
     this.quads.add(this.depthCopy = screenQuad(`
@@ -1900,7 +1913,8 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
           // Apply the selected layer's presentation offset to both CAD transforms.
           const selected = entries.get(selectedKey);
           if (selected) object.position.copy(selected.vector).multiplyScalar(offsetFor(selected));
-          setOpacity(1);
+          // Ghosts sit at 35% under a selection: dashes 0.7 × 0.5, small solid loops capped at 40%.
+          setOpacity(0.5);
         }
       }
       if (entry.displayOverlay) {
@@ -1931,8 +1945,9 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
       }
       const selected = selectedKey === row.key;
       const accent = selected && ghostDeltaKey ? 1 : (reduced ? accentProgress : outCubic(accentProgress)) * blend.current.compare;
-      // With a selection, the other changed parts drop to half edge opacity.
-      stylePart(entry, blend.current.compare, weight, ghost, accent, selected || !selectedKey ? 1 : 0.5);
+      // With a selection, the other added and changed parts drop to half strength. The overlay is
+      // composited in linear light, where 0.35 reads as about 50% on screen (measured 0.5-0.6).
+      stylePart(entry, blend.current.compare, weight, ghost, accent, selected || !selectedKey ? 1 : 0.35);
       const casts = entry.style.surface[0].castShadow;
       shadowDirty ||= casts !== wasCasting || casts && moved;
       if (casts) floor = Math.min(floor, entry.bounds.min.z + group.position.z);
