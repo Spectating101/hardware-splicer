@@ -56,6 +56,20 @@ def test_unavailable_drone_geometry_surfaces_source_verbatim(client):
         assert client.get(f"{url}/{revision}/{asset}").status_code == 404
 
 
+def test_scene_records_return_listed_project_json_verbatim(client):
+    source = json.loads((ROOT / "projects/drone-build/geometry-source.json").read_text())
+    body = client.get("/v1/scenes/drone-build/records").json()
+    assert body["project_id"] == "drone-build"
+    assert body["records"] == [{
+        "label": "geometry-source.json", "path": "projects/drone-build/geometry-source.json",
+        "status": "read", "data": source,
+    }]
+    # Sources outside the project folder are never read through a scene.
+    fielddeck = client.get(f"/v1/scenes/{FIELDDECK}/records").json()["records"]
+    assert all(row["path"].startswith(f"projects/{FIELDDECK}/") for row in fielddeck)
+    assert client.get("/v1/scenes/missing/records").status_code == 404
+
+
 def test_fielddeck_alias_serves_the_same_assets(client, tmp_path, monkeypatch):
     relative = Path("projects") / FIELDDECK
     project = tmp_path / relative

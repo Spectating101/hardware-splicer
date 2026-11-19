@@ -107,3 +107,28 @@ def get_scene_parts(project_id: str, revision: str) -> FileResponse:
 def get_scene_model(project_id: str, revision: str) -> FileResponse:
     return _scene_asset(project_id, revision, "glb")
 
+
+@project_scene_router.get(f"{_SCENES}/{{project_id}}/records")
+def get_scene_records(project_id: str) -> dict:
+    """Return the JSON source records a manifest lists inside its own project folder, verbatim."""
+    manifest = _manifest(project_id)
+    if manifest is None:
+        raise HTTPException(404, "Scene project not found")
+    project = _REPO_ROOT / "projects" / project_id
+    prefix = project.relative_to(_REPO_ROOT)
+    records = []
+    for source in manifest.get("sources") or []:
+        relative = source.get("path") if isinstance(source, dict) else None
+        if not isinstance(relative, str) or not relative.endswith(".json") or not Path(relative).is_relative_to(prefix):
+            continue
+        path = _confined_path(project, str(Path(relative).relative_to(prefix)))
+        if path is None or not path.is_file():
+            records.append({"label": source.get("label"), "path": relative, "status": "missing", "data": None})
+            continue
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            records.append({"label": source.get("label"), "path": relative, "status": "unreadable", "data": None})
+            continue
+        records.append({"label": source.get("label"), "path": relative, "status": "read", "data": data})
+    return {"project_id": project_id, "records": records}
