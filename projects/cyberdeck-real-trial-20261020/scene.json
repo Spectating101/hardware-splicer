@@ -3,6 +3,10 @@
   "project_id": "cyberdeck-real-trial-20261020",
   "title": "Fielddeck display swap",
   "subtitle": "7-inch → 5-inch",
+  "registered_cases": [
+    "fielddeck-7",
+    "fielddeck-5"
+  ],
   "revisions": [
     {
       "id": "7",

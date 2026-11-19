@@ -3,6 +3,9 @@
   "project_id": "ender3-penplotter-digital",
   "title": "Virtual Ender-3 pen plotter",
   "subtitle": "Digital engineering study",
+  "registered_cases": [
+    "ender3-penplotter"
+  ],
   "revisions": [
     {
       "id": "v1",

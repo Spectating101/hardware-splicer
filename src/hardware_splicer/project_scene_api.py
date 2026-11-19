@@ -73,11 +73,18 @@ def get_fielddeck_model(revision: str) -> FileResponse:
 project_scene_router.include_router(fielddeck_router)
 
 
+def _registered_cases(manifest: dict) -> list[str]:
+    """Registered digital cases this scene explicitly declares; a project is never matched by name."""
+    cases = manifest.get("registered_cases")
+    return [case for case in cases if isinstance(case, str)] if isinstance(cases, list) else []
+
+
 @project_scene_router.get(_SCENES)
 def list_scenes() -> list[dict]:
     return [
         {"project_id": manifest["project_id"], "title": manifest["title"],
-         "geometry_status": manifest["geometry_status"], "revisions": [row["id"] for row in manifest["revisions"]]}
+         "geometry_status": manifest["geometry_status"], "revisions": [row["id"] for row in manifest["revisions"]],
+         "registered_cases": _registered_cases(manifest)}
         for path in sorted((_REPO_ROOT / "projects").glob("*/scene.json"))
         if (manifest := _manifest(path.parent.name)) is not None
     ]
@@ -99,3 +106,4 @@ def get_scene_parts(project_id: str, revision: str) -> FileResponse:
 @project_scene_router.get(f"{_SCENES}/{{project_id}}/{{revision}}/model", response_class=FileResponse)
 def get_scene_model(project_id: str, revision: str) -> FileResponse:
     return _scene_asset(project_id, revision, "glb")
+

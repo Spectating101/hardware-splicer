@@ -23,21 +23,21 @@ def client():
 
 def test_list_and_read_scene_manifests(client):
     expected = {
-        FIELDDECK: ("available", ["7", "5"]),
-        PLOTTER: ("available", ["v1"]),
-        "drone-build": ("unavailable", ["v1"]),
+        FIELDDECK: ("available", ["7", "5"], ["fielddeck-7", "fielddeck-5"]),
+        PLOTTER: ("available", ["v1"], ["ender3-penplotter"]),
+        "drone-build": ("unavailable", ["v1"], []),
     }
     response = client.get("/v1/scenes")
     assert response.status_code == 200
     rows = {row["project_id"]: row for row in response.json()}
-    for project_id, (status, revisions) in expected.items():
+    for project_id, (status, revisions, cases) in expected.items():
         manifest = json.loads((ROOT / "projects" / project_id / "scene.json").read_text())
         response = client.get(f"/v1/scenes/{project_id}")
         assert response.status_code == 200
         assert response.json() == manifest
         assert rows[project_id] == {
             "project_id": project_id, "title": manifest["title"],
-            "geometry_status": status, "revisions": revisions,
+            "geometry_status": status, "revisions": revisions, "registered_cases": cases,
         }
     assert client.get("/v1/scenes/missing").status_code == 404
 
