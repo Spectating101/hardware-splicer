@@ -1231,7 +1231,9 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
   const key = light(0xfff3e6, 2.25, -3, -5, 55, true);
   light(0xe6eef7, 0.45, 6, -2, 17);
   light(0xffffff, 1.3, 2, 7, 28);
-  key.shadow.radius = 4;
+  // Part-on-part shadows come from presentation offsets, so they read as soft form, not placement.
+  key.shadow.radius = 6;
+  key.shadow.intensity = 0.55;
   key.shadow.bias = -0.002;
   key.shadow.normalBias = 0.05;
   key.shadow.autoUpdate = false;
