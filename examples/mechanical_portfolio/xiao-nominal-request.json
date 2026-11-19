@@ -1,0 +1,35 @@
+{
+  "schema": "hardware_splicer.mechanical_fixture_request.v1",
+  "project_id": "seeed-xiao-esp32c3-optical-tray",
+  "revision": 1,
+  "objective": "Source-bound stationary optical inspection tray for a Seeed XIAO ESP32C3 module",
+  "source": {
+    "filename": "XIAO-ESP32C3-DXF.zip",
+    "url": "https://files.seeedstudio.com/wiki/XIAO_WiFi/Resources/XIAO-ESP32C3-DXF.zip",
+    "sha256": "eb3c9986857353440ee2e53f1d5a01745c7e0330371563fcde1c9d2df023f9fe",
+    "geometry_basis": "manufacturer_nominal_dimensions",
+    "reproduction_rights": "external_reference_not_redistributed"
+  },
+  "board": {
+    "width_mm": 21.0,
+    "depth_mm": 17.8,
+    "thickness_mm": 1.0,
+    "thickness_basis": "unverified_assumption",
+    "outline_xy_mm": null,
+    "mounting_holes": [],
+    "mounting_holes_status": "unverified",
+    "unknown_contacts": true
+  },
+  "interface": {
+    "usb_corridor_width_mm": 9.0,
+    "usb_corridor_depth_mm": 6.0,
+    "antenna_geometry_status": "unknown",
+    "edge_contacts_status": "unknown"
+  },
+  "requirements": {
+    "min_nominal_edge_gap_mm": 0.4,
+    "max_base_width_mm": 50.0,
+    "max_base_depth_mm": 40.0,
+    "stationary_unpowered_only": true
+  }
+}
