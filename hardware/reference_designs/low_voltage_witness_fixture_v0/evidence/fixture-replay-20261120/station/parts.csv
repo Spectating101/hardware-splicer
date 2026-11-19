@@ -1,0 +1,9 @@
+ref,item,requirement,unresolved
+PS1,"External isolated, current-limited DC bench source",0 to 5.25 V; 2.5 W working envelope,"Exact source, isolation/earthing, output current limit and fault behavior"
+F1,DC fuse and accessible manual disconnect before the shunt,"Coordinate with supply short-circuit current, conductors, connectors and load","Part, DC interrupt rating, time-current curve, inrush and fault-energy coordination"
+RSH1,Separate four-terminal current shunt,0.015 ohm; 0.25 W stated rating; 1% stated tolerance,"Exact part, Kelvin terminals, rating conditions, temperature coefficient, resistance measurement and mounting"
+U1,TI INA228 monitor or documented external-shunt carrier,3.3 V logic supply; ADCRANGE=0; no onboard shunt in parallel with RSH1,"Exact carrier schematic, routing, connector pin order and thermal/mechanical dimensions"
+RSH2,Distinct four-terminal precision shunt for the independent reference,0.01 ohm; 1 W stated rating; 1% stated tolerance,"Independent calibration, part, temperature coefficient, mounting and four-wire connections"
+J1/J2,"Covered, polarized source/load connectors and power conductors",Working current >= 0.75 A; working voltage >= 5.25 V before chosen derating,"Exact parts, wire gauge/length, contact loss, temperature rise and strain relief"
+C1/RPU,Local VS bypass and I2C pull-ups,"100 nF near VS/GND; calculate SDA/SCL pull-ups for actual capacitance and existing pull-ups, 3.3 V only","Carrier fitted parts, I2C edge timing and actual pull-up rail"
+REF,Independent voltage/current reference logger,Paired load-voltage and RSH2 differential-voltage inputs with documented common-mode capability,"Actual instrument, dual-input or scan timing, input isolation/common-mode, calibration, UTC alignment and uncertainty"

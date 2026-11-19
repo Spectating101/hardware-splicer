@@ -1,0 +1,19 @@
+from,to,role,note
+PS1.+,F1.input,power,Upstream source protection
+F1.output,RSH1.power+,power,High-side source terminal
+RSH1.power-,RSH2.power+,power,The primary and independent reference shunts carry the same series load current
+RSH2.power-,J2.load+,power,Both shunt burdens are upstream of the measured load boundary
+PS1.-,J2.load-,power,"Dedicated load return, separate from sense conductors"
+RSH1.sense+,U1.IN+ (pin 10),Kelvin sense,Separate sense conductor at source-side shunt terminal
+RSH1.sense-,U1.IN- (pin 9),Kelvin sense,Separate sense conductor at load-side shunt terminal
+J2.load+,U1.VBUS (pin 8),voltage sense,Voltage measurement at load boundary; includes no shunt loss
+J2.load-,U1.GND (pin 7),sense return,Common reference; INA228 is not galvanically isolated
+RSH2.sense+,REF.shunt high,reference Kelvin sense,Separate reference pair; instrument must accept the load common-mode voltage
+RSH2.sense-,REF.shunt low,reference Kelvin sense,Do not join to return; high-side differential measurement
+J2.load+,REF.voltage high,reference voltage sense,Same load boundary as INA228 VBUS
+J2.load-,REF.voltage low,reference voltage sense,Record voltage/shunt channel pairing and any scan time offset
+3V3.logic,U1.VS (pin 6),logic power,100 nF bypass to U1.GND at the device
+host.SDA,U1.SDA (pin 4),I2C,Open drain; pull up only to 3.3 V
+host.SCL,U1.SCL (pin 5),I2C,Start at 100 kHz; check bus capacitance and edges
+host.GND,U1.GND (pin 7),logic reference,A direct host connection may earth the DC circuit
+"U1.A0 (pin 2), U1.A1 (pin 1)",U1.GND,address straps,"0x40, verify carrier straps; ALERT pin 3 unused, status polled"

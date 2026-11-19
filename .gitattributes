@@ -1,0 +1,6 @@
+# Keep exact software-fixture source bytes and binary/manufacturing previews unnormalized.
+hardware/reference_designs/low_voltage_witness_fixture_v0/evidence/** -text -diff
+hardware/reference_designs/low_voltage_witness_fixture_v0/fabrication_preview/** -text -diff
+hardware/reference_designs/low_voltage_witness_fixture_v0/preview/** -text -diff
+hardware/reference_designs/low_voltage_witness_fixture_v0/board-geometry-preview.step -text -diff
+hardware/reference_designs/low_voltage_witness_fixture_v0/BOM_candidate.csv -text

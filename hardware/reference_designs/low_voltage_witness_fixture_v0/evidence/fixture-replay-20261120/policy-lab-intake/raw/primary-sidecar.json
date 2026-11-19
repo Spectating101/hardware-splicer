@@ -1,0 +1,81 @@
+{
+  "bus": {
+    "address": 64,
+    "number": null
+  },
+  "calibration_status": "User-supplied shunt parameters; not certification",
+  "capture_kind": "TEST_FIXTURE",
+  "clock_source_declared": "Synthetic fixture UTC only; NO physical clock",
+  "clock_synchronization_verified": false,
+  "completed_samples": 183,
+  "configuration": {
+    "adc_config": 15210,
+    "bus_lsb_v": 0.0001953125,
+    "config": 0,
+    "conversion": "Triggered bus + shunt, 1052 us each, 16 averages",
+    "current_lsb_a": 3.814697265625e-06,
+    "energy_register_used": false,
+    "i2c_address": 64,
+    "nominal_conversion_seconds": 0.033664,
+    "shunt_cal": 750,
+    "shunt_lsb_v": 3.125e-07,
+    "shunt_tempco": 0
+  },
+  "device_identity": {
+    "device_id": 8833,
+    "manufacturer_id": 21577,
+    "revision": 1
+  },
+  "energy_register_used": false,
+  "files": {
+    "registers.jsonl": {
+      "bytes": 72343,
+      "sha256": "8c151c01f9d05dd883364adf59c2b9c3b8a7f47261a883b1a8e652602c8908f2"
+    },
+    "samples.csv": {
+      "bytes": 10466,
+      "sha256": "3ef91d43e37898954fab77b6e3e5944439497fa14fe7c316f95cef365fae3b10"
+    }
+  },
+  "finished_utc": "2026-11-20T00:03:01.037000Z",
+  "first_sample_utc": "2026-11-19T23:59:59.037000Z",
+  "last_sample_utc": "2026-11-20T00:03:01.037000Z",
+  "measurement_boundary": "Both voltage channels measure at J2 after both shunts. Load energy excludes both shunt losses; 120 W is the source-envelope ceiling, not guaranteed delivered load power.",
+  "period_seconds": 1,
+  "requested_samples": 183,
+  "runtime_limit_boundary": "Logger voltage/power checks apply only at J2. The program cannot enforce upstream source voltage, power or fault limits and does not disconnect the load.",
+  "sampling_limit": "Steady or slowly varying bench loads; samples do not continuously observe intersample transients",
+  "sampling_method": "Discrete bus/shunt sample pairs; integrate V*I separately using actual timestamps",
+  "schema_version": "hardware_splicer.ina228_capture.v1",
+  "source": {
+    "document": "TI SLYS021A, revision A, May 2022",
+    "sections": [
+      "5 pin functions",
+      "6.3 recommended operation",
+      "7.6 registers",
+      "8.1.2 calibration",
+      "10.1 Kelvin layout"
+    ],
+    "url": "https://www.ti.com/lit/ds/symlink/ina228.pdf"
+  },
+  "source_kind": "register_fixture",
+  "started_utc": "2026-11-19T23:59:59.000000Z",
+  "station_spec": {
+    "calibration_full_scale_a": 2,
+    "maximum_bus_voltage_v": 5.25,
+    "maximum_power_w": 2.5,
+    "monitor_headroom_a": 0.75,
+    "nominal_voltage_v": 5,
+    "reference_shunt_ohm": 0.01,
+    "reference_shunt_rated_power_w": 1,
+    "reference_shunt_tolerance_percent": 1,
+    "reference_shunt_value_basis": "Vishay WSK2512R0100FEA exact four-terminal candidate, 10 mOhm +/-1%, 1 W, +/-35 ppm/C; component not procured or characterized",
+    "shunt_ohm": 0.015,
+    "shunt_power_derating": 0.5,
+    "shunt_rated_power_w": 0.25,
+    "shunt_tolerance_percent": 1,
+    "shunt_value_basis": "Adafruit 5832 populated onboard 15 mOhm shunt; 0.25 W rating is a conservative UNVERIFIED planning allowance; schematic vs product tolerance conflicts; inspect actual board before assembly"
+  },
+  "status": "COMPLETE",
+  "timestamp_basis": "Host UTC after completed triggered conversion and register/config reads"
+}

@@ -1,0 +1,9 @@
+J1 [('1', '/SRC_PLUS', (110.0, 90.0)), ('2', '/RETURN', (115.0, 90.0))]
+F1 [('1', '/SRC_PLUS', (130.0, 90.0)), ('2', '/FUSED_PLUS', (140.0, 90.0))]
+J3 [('1', '/FUSED_PLUS', (169.0, 90.0)), ('2', '/ADA_OUT', (174.0, 90.0))]
+R1 [('1', '/ADA_OUT', (177.015, 100.365)), ('2', '/REF_SENSE_P', (176.57, 102.27)), ('3', '/REF_SENSE_N', (183.43, 99.73)), ('4', '/LOAD_PLUS', (182.985, 101.635))]
+J2 [('1', '/LOAD_PLUS', (202.0, 90.0)), ('2', '/RETURN', (207.0, 90.0))]
+J4 [('1', '/LOAD_PLUS', (195.0, 110.0)), ('2', '/RETURN', (195.0, 112.54))]
+J5 [('1', '/REF_SENSE_P', (162.0, 112.0)), ('2', '/REF_SENSE_N', (162.0, 114.54))]
+J6 [('1', '/LOAD_PLUS', (195.0, 122.0)), ('2', '/RETURN', (195.0, 124.54))]
+WROTE /home/phyrexian/Downloads/llm_automation/project_portfolio/.worktrees/hs-witness-fixture-20261120/hardware/reference_designs/low_voltage_witness_fixture_v0/low_voltage_witness_fixture_v0.kicad_pcb

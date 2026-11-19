@@ -1,0 +1,129 @@
+{
+  "schema": "policylab.dc_bench_sample_conversion.v1",
+  "version": "1.0.0",
+  "capture_kind": "TEST_FIXTURE",
+  "channel": "source_dc",
+  "requested_window": {
+    "start_utc": "2026-11-20T00:00:00Z",
+    "end_utc": "2026-11-20T00:03:00Z",
+    "interval_seconds": 60,
+    "intervals": 3
+  },
+  "input_source_sha256": {
+    "raw/primary.csv": "3ef91d43e37898954fab77b6e3e5944439497fa14fe7c316f95cef365fae3b10",
+    "raw/reference.csv": "436f096faed314ed2a1fdb4b3c46a16bf4a80ba6ae884372f9754890287dbcfa",
+    "raw/station-config.json": "0cf0b0f1367fb866e871383df9ecec70d85c8735cda62f21d07da7ca95aa8803",
+    "raw/primary-sidecar.json": "5e1839ef8dd100aea8e50c3cf825202a0ad6f2003384b57144509aebf678577c",
+    "raw/primary-registers.jsonl": "8c151c01f9d05dd883364adf59c2b9c3b8a7f47261a883b1a8e652602c8908f2"
+  },
+  "derived_capture_sha256": {
+    "captures/primary.json": "dbf633a3547da1acd81e738e9122c961052c75c105513f9d2cafa45304716141",
+    "captures/reference.json": "bb793d01b7a466fe35ff29f8e5cf92bbeb7d2e67cf4895878e9e2850ce413357"
+  },
+  "algorithm": {
+    "energy": "Sum timestamp-derived trapezoids of sampled voltage_v * current_a; divide watt-seconds by 3600.",
+    "reference_current": "shunt_voltage_v / declared shunt_resistance_ohms",
+    "reference_shunt_resistance_ohms": 0.01,
+    "reference_voltage_current_pairing_as_declared": "Simulated simultaneous fixture values, not a physical DMM",
+    "interval_voltage_current": "Separate time-weighted sample averages; their product is not used as interval energy.",
+    "boundary_handling": "Linear interpolation of sample powers and individual V/I only inside measured bracketing segments; no extrapolation or missing-sample filling.",
+    "maximum_sample_gap_seconds": 1.5,
+    "timestamp_arithmetic": "Exact integer UTC microseconds",
+    "decimal_output_places": 12
+  },
+  "primary": {
+    "samples": 183,
+    "first_sample_utc_microseconds": 1795132799037000,
+    "last_sample_utc_microseconds": 1795132981037000,
+    "samples_strictly_outside_requested_window": 3,
+    "boundary_interpolations": [
+      {
+        "at_utc": "2026-11-20T00:00:00Z",
+        "bracketing_span_seconds": 1
+      },
+      {
+        "at_utc": "2026-11-20T00:01:00Z",
+        "bracketing_span_seconds": 1
+      },
+      {
+        "at_utc": "2026-11-20T00:02:00Z",
+        "bracketing_span_seconds": 1
+      },
+      {
+        "at_utc": "2026-11-20T00:03:00Z",
+        "bracketing_span_seconds": 1
+      }
+    ],
+    "total_energy_wh": 0.123143541216
+  },
+  "reference": {
+    "samples": 183,
+    "first_sample_utc_microseconds": 1795132799173000,
+    "last_sample_utc_microseconds": 1795132981173000,
+    "samples_strictly_outside_requested_window": 3,
+    "boundary_interpolations": [
+      {
+        "at_utc": "2026-11-20T00:00:00Z",
+        "bracketing_span_seconds": 1
+      },
+      {
+        "at_utc": "2026-11-20T00:01:00Z",
+        "bracketing_span_seconds": 1
+      },
+      {
+        "at_utc": "2026-11-20T00:02:00Z",
+        "bracketing_span_seconds": 1
+      },
+      {
+        "at_utc": "2026-11-20T00:03:00Z",
+        "bracketing_span_seconds": 1
+      }
+    ],
+    "total_energy_wh": 0.123145901829
+  },
+  "primary_session": {
+    "recognized": true,
+    "supplied": true,
+    "schema_version": "hardware_splicer.ina228_capture.v1",
+    "status": "COMPLETE",
+    "source_kind": "register_fixture",
+    "capture_kind": "TEST_FIXTURE",
+    "original_csv_hash_verified": true,
+    "raw_register_file_supplied_and_hash_verified": true,
+    "checks_performed": [
+      "completed session",
+      "source kind",
+      "no fixture promotion",
+      "exact CSV digest and size",
+      "sample count",
+      "first and last timestamps",
+      "exact raw register digest and size"
+    ],
+    "source_authenticated": false,
+    "primary_file_hashes": [
+      "3ef91d43e37898954fab77b6e3e5944439497fa14fe7c316f95cef365fae3b10",
+      "8c151c01f9d05dd883364adf59c2b9c3b8a7f47261a883b1a8e652602c8908f2"
+    ]
+  },
+  "implementation_sha256": "c43bbca97169d27f8fc2a74d8e24e2a19fe8a6b92ee7aebc195b16a2210e2b07",
+  "frozen_receiver": {
+    "repository": "Spectating101/solarpunk-coin",
+    "commit": "9c2e103540662c7a9a6f9a0827e4964c1d01d46d",
+    "file_sha256": {
+      "scripts/energy_reference_v3/intake_core.mjs": "5b9fd7ea6267f590600e1d8345da49ef5bdcdd25fc0bcc94b9802bae15e6d09b",
+      "scripts/energy_reference_v3/intake.mjs": "656eb23e692ddd1d6811bb267fdb451aca736a40022d6734ef084e1d6bbde14d",
+      "docs/product/energy_reference_v3/FROZEN_PROTOCOL.json": "cc81825c7c2b86745df060898c230bb3af9c3f54ddcb7b5cd7800db0c459202d"
+    }
+  },
+  "limitations": [
+    "Trapezoidal energy is a sampled-data estimate, not a hardware energy-counter reading or calibrated energy measurement.",
+    "The declared voltage/current pairing and shunt resistance are not independently verified.",
+    "A recognized HS sidecar is checked for internal consistency; an omitted or unrecognized sidecar adds no capture-origin verification.",
+    "Common requested UTC intervals do not verify that the two hardware clocks were synchronized.",
+    "Distinct IDs and source bytes do not independently establish device custody or source truth."
+  ],
+  "physical_ready": false,
+  "calibration_verified": false,
+  "external_clock_verified": false,
+  "source_authenticated": false
+}

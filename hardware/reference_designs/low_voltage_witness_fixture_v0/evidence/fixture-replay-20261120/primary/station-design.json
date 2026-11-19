@@ -1,0 +1,326 @@
+{
+  "calculations": {
+    "combined_nominal_shunt_drop_v": 0.012625,
+    "combined_nominal_shunt_loss_w": 0.0063125,
+    "current_positive_range_a": 1.9999961853027344,
+    "derated_shunt_power_w": 0.125,
+    "headroom_shunt_dissipation_w": 0.008521875,
+    "headroom_shunt_drop_v": 0.011362500000000001,
+    "load_power_at_nominal_current_w": 2.4936875,
+    "load_voltage_at_nominal_source_v": 4.987375,
+    "monitor_headroom_a": 0.75,
+    "nominal_current_a": 0.5,
+    "nominal_shunt_dissipation_w": 0.0037875,
+    "nominal_shunt_drop_v": 0.007575,
+    "reference_derated_shunt_power_w": 0.5,
+    "reference_headroom_shunt_dissipation_w": 0.00568125,
+    "shunt_adc_current_range_a": 10.814521452145215,
+    "worst_tolerance_shunt_ohm": 0.01515
+  },
+  "checks": [
+    {
+      "actual": 5,
+      "equation": "nominal <= maximum bus",
+      "id": "nominal_bus",
+      "limit": 5.25,
+      "passed": true,
+      "unit": "V"
+    },
+    {
+      "actual": 5.25,
+      "equation": "maximum bus <= INA228 recommended bus range",
+      "id": "ina228_bus_range",
+      "limit": 85,
+      "passed": true,
+      "unit": "V"
+    },
+    {
+      "actual": 0.75,
+      "equation": "monitor headroom >= 1.5 * P / V",
+      "id": "monitor_headroom",
+      "limit": 0.75,
+      "passed": true,
+      "unit": "A"
+    },
+    {
+      "actual": 1.9999961853027344,
+      "equation": "effective positive current range >= monitor headroom",
+      "id": "current_register_range",
+      "limit": 0.75,
+      "passed": true,
+      "unit": "A"
+    },
+    {
+      "actual": 10.814521452145215,
+      "equation": "0.16384 / worst-tolerance R > monitor headroom",
+      "id": "shunt_adc_range",
+      "limit": 0.75,
+      "passed": true,
+      "unit": "A"
+    },
+    {
+      "actual": 0.008521875,
+      "equation": "I_headroom^2 * worst-tolerance R <= rated W * derating",
+      "id": "shunt_dissipation",
+      "limit": 0.125,
+      "passed": true,
+      "unit": "W"
+    },
+    {
+      "actual": 0.00568125,
+      "equation": "I_headroom^2 * reference R_max <= reference rated W * derating",
+      "id": "reference_shunt_dissipation",
+      "limit": 0.5,
+      "passed": true,
+      "unit": "W"
+    },
+    {
+      "actual": 0.012625,
+      "equation": "I_nominal * (R_primary_max + R_reference_max) < nominal source voltage",
+      "id": "combined_burden",
+      "limit": 5,
+      "passed": true,
+      "unit": "V"
+    },
+    {
+      "actual": 750,
+      "equation": "1 <= SHUNT_CAL <= 32767",
+      "id": "calibration_register",
+      "limit": 32767,
+      "passed": true,
+      "unit": "register count"
+    }
+  ],
+  "design_checks_passed": true,
+  "ina228_configuration": {
+    "adc_config": 15210,
+    "bus_lsb_v": 0.0001953125,
+    "config": 0,
+    "conversion": "Triggered bus + shunt, 1052 us each, 16 averages",
+    "current_lsb_a": 3.814697265625e-06,
+    "energy_register_used": false,
+    "i2c_address": 64,
+    "nominal_conversion_seconds": 0.033664,
+    "shunt_cal": 750,
+    "shunt_lsb_v": 3.125e-07,
+    "shunt_tempco": 0
+  },
+  "isolation": {
+    "host_barrier": "Not provided. Specify and verify an isolator plus isolated power if floating operation is required.",
+    "monitor_is_galvanically_isolated": false
+  },
+  "measurement_boundary": "Both voltage channels measure at J2 after both shunts. Load energy excludes both shunt losses; 120 W is the source-envelope ceiling, not guaranteed delivered load power.",
+  "mechanical": {
+    "requirements": [
+      "Covered power terminals with separate strain relief for source and load",
+      "Keep shunt heat away from logic, plastic supports and reference sensors",
+      "Route twisted Kelvin pair separately from load conductors",
+      "Provide accessible fuse/disconnect and labeled reference test points",
+      "Measure actual hole patterns and cable bend radii before CAD/export"
+    ],
+    "status": "Dimensioned fixture pending exact component measurements"
+  },
+  "name": "DC measurement station with independent reference interface",
+  "parts": [
+    {
+      "item": "External isolated, current-limited DC bench source",
+      "ref": "PS1",
+      "requirement": "0 to 5.25 V; 2.5 W working envelope",
+      "unresolved": "Exact source, isolation/earthing, output current limit and fault behavior"
+    },
+    {
+      "item": "DC fuse and accessible manual disconnect before the shunt",
+      "ref": "F1",
+      "requirement": "Coordinate with supply short-circuit current, conductors, connectors and load",
+      "unresolved": "Part, DC interrupt rating, time-current curve, inrush and fault-energy coordination"
+    },
+    {
+      "item": "Separate four-terminal current shunt",
+      "ref": "RSH1",
+      "requirement": "0.015 ohm; 0.25 W stated rating; 1% stated tolerance",
+      "unresolved": "Exact part, Kelvin terminals, rating conditions, temperature coefficient, resistance measurement and mounting"
+    },
+    {
+      "item": "TI INA228 monitor or documented external-shunt carrier",
+      "ref": "U1",
+      "requirement": "3.3 V logic supply; ADCRANGE=0; no onboard shunt in parallel with RSH1",
+      "unresolved": "Exact carrier schematic, routing, connector pin order and thermal/mechanical dimensions"
+    },
+    {
+      "item": "Distinct four-terminal precision shunt for the independent reference",
+      "ref": "RSH2",
+      "requirement": "0.01 ohm; 1 W stated rating; 1% stated tolerance",
+      "unresolved": "Independent calibration, part, temperature coefficient, mounting and four-wire connections"
+    },
+    {
+      "item": "Covered, polarized source/load connectors and power conductors",
+      "ref": "J1/J2",
+      "requirement": "Working current >= 0.75 A; working voltage >= 5.25 V before chosen derating",
+      "unresolved": "Exact parts, wire gauge/length, contact loss, temperature rise and strain relief"
+    },
+    {
+      "item": "Local VS bypass and I2C pull-ups",
+      "ref": "C1/RPU",
+      "requirement": "100 nF near VS/GND; calculate SDA/SCL pull-ups for actual capacitance and existing pull-ups, 3.3 V only",
+      "unresolved": "Carrier fitted parts, I2C edge timing and actual pull-up rail"
+    },
+    {
+      "item": "Independent voltage/current reference logger",
+      "ref": "REF",
+      "requirement": "Paired load-voltage and RSH2 differential-voltage inputs with documented common-mode capability",
+      "unresolved": "Actual instrument, dual-input or scan timing, input isolation/common-mode, calibration, UTC alignment and uncertainty"
+    }
+  ],
+  "parts_status": "UNPROCURED_CANDIDATES",
+  "physical_status": "UNBUILT_UNVERIFIED",
+  "runtime_limit_boundary": "Logger voltage/power checks apply only at J2. The program cannot enforce upstream source voltage, power or fault limits and does not disconnect the load.",
+  "schema_version": "hardware_splicer.dc_measurement_station.v1",
+  "scope": "Externally isolated DC source; no batteries, mains wiring or grid connection in the station",
+  "source": {
+    "document": "TI SLYS021A, revision A, May 2022",
+    "sections": [
+      "5 pin functions",
+      "6.3 recommended operation",
+      "7.6 registers",
+      "8.1.2 calibration",
+      "10.1 Kelvin layout"
+    ],
+    "url": "https://www.ti.com/lit/ds/symlink/ina228.pdf"
+  },
+  "spec": {
+    "calibration_full_scale_a": 2,
+    "maximum_bus_voltage_v": 5.25,
+    "maximum_power_w": 2.5,
+    "monitor_headroom_a": 0.75,
+    "nominal_voltage_v": 5,
+    "reference_shunt_ohm": 0.01,
+    "reference_shunt_rated_power_w": 1,
+    "reference_shunt_tolerance_percent": 1,
+    "reference_shunt_value_basis": "Vishay WSK2512R0100FEA exact four-terminal candidate, 10 mOhm +/-1%, 1 W, +/-35 ppm/C; component not procured or characterized",
+    "shunt_ohm": 0.015,
+    "shunt_power_derating": 0.5,
+    "shunt_rated_power_w": 0.25,
+    "shunt_tolerance_percent": 1,
+    "shunt_value_basis": "Adafruit 5832 populated onboard 15 mOhm shunt; 0.25 W rating is a conservative UNVERIFIED planning allowance; schematic vs product tolerance conflicts; inspect actual board before assembly"
+  },
+  "unresolved": [
+    "Source/host isolation and earth continuity",
+    "Fuse and wire fault coordination",
+    "Exact carrier and shunt sourcing",
+    "Thermal rise and touch-safe covers",
+    "Traceable current/voltage calibration and temperature effects",
+    "Independent reference instrument and shared measurement boundary",
+    "UTC clock synchronization and sampling uncertainty",
+    "Actual I2C, load and loss-of-power tests"
+  ],
+  "wiring": [
+    {
+      "from": "PS1.+",
+      "note": "Upstream source protection",
+      "role": "power",
+      "to": "F1.input"
+    },
+    {
+      "from": "F1.output",
+      "note": "High-side source terminal",
+      "role": "power",
+      "to": "RSH1.power+"
+    },
+    {
+      "from": "RSH1.power-",
+      "note": "The primary and independent reference shunts carry the same series load current",
+      "role": "power",
+      "to": "RSH2.power+"
+    },
+    {
+      "from": "RSH2.power-",
+      "note": "Both shunt burdens are upstream of the measured load boundary",
+      "role": "power",
+      "to": "J2.load+"
+    },
+    {
+      "from": "PS1.-",
+      "note": "Dedicated load return, separate from sense conductors",
+      "role": "power",
+      "to": "J2.load-"
+    },
+    {
+      "from": "RSH1.sense+",
+      "note": "Separate sense conductor at source-side shunt terminal",
+      "role": "Kelvin sense",
+      "to": "U1.IN+ (pin 10)"
+    },
+    {
+      "from": "RSH1.sense-",
+      "note": "Separate sense conductor at load-side shunt terminal",
+      "role": "Kelvin sense",
+      "to": "U1.IN- (pin 9)"
+    },
+    {
+      "from": "J2.load+",
+      "note": "Voltage measurement at load boundary; includes no shunt loss",
+      "role": "voltage sense",
+      "to": "U1.VBUS (pin 8)"
+    },
+    {
+      "from": "J2.load-",
+      "note": "Common reference; INA228 is not galvanically isolated",
+      "role": "sense return",
+      "to": "U1.GND (pin 7)"
+    },
+    {
+      "from": "RSH2.sense+",
+      "note": "Separate reference pair; instrument must accept the load common-mode voltage",
+      "role": "reference Kelvin sense",
+      "to": "REF.shunt high"
+    },
+    {
+      "from": "RSH2.sense-",
+      "note": "Do not join to return; high-side differential measurement",
+      "role": "reference Kelvin sense",
+      "to": "REF.shunt low"
+    },
+    {
+      "from": "J2.load+",
+      "note": "Same load boundary as INA228 VBUS",
+      "role": "reference voltage sense",
+      "to": "REF.voltage high"
+    },
+    {
+      "from": "J2.load-",
+      "note": "Record voltage/shunt channel pairing and any scan time offset",
+      "role": "reference voltage sense",
+      "to": "REF.voltage low"
+    },
+    {
+      "from": "3V3.logic",
+      "note": "100 nF bypass to U1.GND at the device",
+      "role": "logic power",
+      "to": "U1.VS (pin 6)"
+    },
+    {
+      "from": "host.SDA",
+      "note": "Open drain; pull up only to 3.3 V",
+      "role": "I2C",
+      "to": "U1.SDA (pin 4)"
+    },
+    {
+      "from": "host.SCL",
+      "note": "Start at 100 kHz; check bus capacitance and edges",
+      "role": "I2C",
+      "to": "U1.SCL (pin 5)"
+    },
+    {
+      "from": "host.GND",
+      "note": "A direct host connection may earth the DC circuit",
+      "role": "logic reference",
+      "to": "U1.GND (pin 7)"
+    },
+    {
+      "from": "U1.A0 (pin 2), U1.A1 (pin 1)",
+      "note": "0x40, verify carrier straps; ALERT pin 3 unused, status polled",
+      "role": "address straps",
+      "to": "U1.GND"
+    }
+  ]
+}

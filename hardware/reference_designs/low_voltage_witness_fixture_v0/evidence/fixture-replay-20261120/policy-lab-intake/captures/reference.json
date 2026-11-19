@@ -1,0 +1,28 @@
+{
+  "schema": "policylab.plrs6_interval_capture.v1",
+  "channel": "source_dc",
+  "role": "reference",
+  "readings": [
+    {
+      "start_utc": "2026-11-20T00:00:00Z",
+      "end_utc": "2026-11-20T00:01:00Z",
+      "voltage_v": 4.962779,
+      "current_a": 0.496278,
+      "energy_wh": 0.041048633943
+    },
+    {
+      "start_utc": "2026-11-20T00:01:00Z",
+      "end_utc": "2026-11-20T00:02:00Z",
+      "voltage_v": 4.962779,
+      "current_a": 0.496278,
+      "energy_wh": 0.041048633943
+    },
+    {
+      "start_utc": "2026-11-20T00:02:00Z",
+      "end_utc": "2026-11-20T00:03:00Z",
+      "voltage_v": 4.962779,
+      "current_a": 0.496278,
+      "energy_wh": 0.041048633943
+    }
+  ]
+}

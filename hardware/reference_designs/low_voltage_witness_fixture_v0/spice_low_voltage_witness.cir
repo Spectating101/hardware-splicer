@@ -1,0 +1,18 @@
+* DC approximation of the 5 V low-voltage witness fixture (SIMULATION ONLY).
+* External Adafruit integrated Rshunt 15 mOhm; Kelvin R1 four terminal 10 mOhm.
+* F1 fuse/contact DCR 0.05 ohm is a HYPOTHETICAL assumption, not a rating.
+* External resistive load 10 ohm (10 W package recommended), steady state.
+V_SRC SRC_PLUS 0 DC 5
+R_FUSE SRC_PLUS FUSED_PLUS 0.05
+R_ADAFRUIT FUSED_PLUS ADA_OUT 0.015
+R_REFERENCE ADA_OUT LOAD_PLUS 0.010
+R_LOAD LOAD_PLUS 0 10
+.control
+set noaskquit
+op
+print v(load_plus) v(ada_out) v(fused_plus) i(v_src)
+let load_power_w=v(load_plus)*v(load_plus)/10
+print load_power_w
+quit
+.endc
+.end

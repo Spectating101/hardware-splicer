@@ -1,0 +1,41 @@
+{
+  "ada_shunt_ohm_unverified": 0.015,
+  "calibration_verified": false,
+  "expected_net_pads": 22,
+  "fabrication_released": false,
+  "fuse_resistance_ohm_ASSUMED": 0.05,
+  "hardware_powered": false,
+  "limitations": [
+    "No actual carrier, shunt, fuse, power source, logger or reference DMM connected.",
+    "SPICE is an idealized DC network; conductor/contact/temperature effects omitted.",
+    "Shunt carrier product page and schematic disagree on tolerance; exact board revision unknown.",
+    "1A fuse holder is chosen, but fuse DC clearing rating and coordination still need review.",
+    "Manufacturing drill/track checks are not assembly, safety, traceability or calibration checks.",
+    "No direct physical measurement, timebase proof, or observed energy/efficiency claim."
+  ],
+  "load_resistance_ohm_assumed": 10.0,
+  "native_drc": "ZERO_VIOLATIONS_ZERO_UNCONNECTED_ZERO_PARITY_ERRORS",
+  "native_erc": "ZERO_VIOLATIONS",
+  "physical_equipment_built": false,
+  "pl_intake_decision": "TEST_FIXTURE_STRUCTURALLY_INGESTED_NO_PHYSICAL_CLAIMS",
+  "pl_intake_evidence_root": "8207a99b8696bad5640764fc1d33333fa8f5fe0c375174776d5bece7b2bb3f38",
+  "primary_samples_fixture": 183,
+  "reference_shunt_ohm_nominal": 0.01,
+  "schema": "hardware_splicer.5v_witness_design_replay.v1",
+  "source_sha256": {
+    "generate_pcb.py": "b9452eac203ab405a9a5ba098d0456d08b1e8c09e06884faf4f16b24974d3532",
+    "generate_schematic.py": "5b0f3c6c2a24daf732a6da325617250d080f93f13100dafd96bbb5cefdd73c35",
+    "low_voltage_witness_fixture_v0.kicad_pcb": "06b461e05b6772e202c079b52c4fa4f2353d793180f9eecec1dd8f3bc215dccf",
+    "low_voltage_witness_fixture_v0.kicad_pro": "ba09dac7863fb6079f6f6cc77b5c36113ed161a1849c9b3590550bc1959eb433",
+    "low_voltage_witness_fixture_v0.kicad_sch": "1cd365d10a85fd8b9e411d3b77dcb70508fd67aac8c5640102e87f517a9b8cca",
+    "spice_low_voltage_witness.cir": "d47459fd995a3449e753a001156cf8334b5be28aa93befa0976397578a73621e",
+    "station-spec-5v.json": "78257576dd6b78c158ed35157ade26d79a10ee9071b9d704758d0c17e29ad016"
+  },
+  "source_voltage_v_assumed": 5.0,
+  "spice_3min_load_energy_wh": 0.1231459,
+  "spice_current_a": 0.496278,
+  "spice_load_power_w": 2.462918,
+  "spice_load_voltage_v": 4.962779,
+  "station_design_checks_passed": true,
+  "status": "SOFTWARE_DESIGN_VALIDATED_ONLY"
+}
