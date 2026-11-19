@@ -2,33 +2,33 @@ import { useEffect, useRef, useState } from "react";
 import {
   cancelDigitalJob, digitalArtifactUrl, fetchDigitalJob, fetchDigitalStudy, submitDigitalRun,
 } from "./digitalStudyApi.js";
+import ProjectBench from "./ProjectBench.jsx";
 import { SavedDisplayComparison } from "./FieldDeckDisplayComparison.jsx";
 import { fieldLabel } from "./digitalStudyLabels.js";
 import "./digitalStudy.css";
 
 const isPending = (status) => status === "queued" || status === "running";
-const number = (value, digits = 2) => Number.isFinite(value) ? value.toFixed(digits) : "—";
+const number = (value, digits = 2) => Number.isFinite(value) ? value.toFixed(digits) : "unknown";
+const millimetres = (value) => Number.isFinite(value) ? value * 1000 : undefined;
 const metrics = [
   ["Mass", "g", (s) => s.mass_g],
   ["Mass margin", "g", (s) => s.mass_margin_g],
-  ["Payload", "g", (s) => s.requirements.payload_mass_g],
-  ["Gust force scale", "×", (s) => s.requirements.gust_scale],
-  ["Tracking RMS error", "mm", (s) => s.metrics.tracking_rms_m * 1000],
-  ["Gust recovery error", "mm", (s) => s.metrics.gust_recovery_error_m * 1000],
-  ["Peak current estimate", "A", (s) => s.metrics.peak_current_a_est],
-  ["Mission charge estimate", "mAh", (s) => s.metrics.consumed_mah_est],
+  ["Payload", "g", (s) => s.requirements?.payload_mass_g],
+  ["Gust force scale", "×", (s) => s.requirements?.gust_scale],
+  ["Tracking RMS error", "mm", (s) => millimetres(s.metrics?.tracking_rms_m)],
+  ["Gust recovery error", "mm", (s) => millimetres(s.metrics?.gust_recovery_error_m)],
+  ["Peak current estimate", "A", (s) => s.metrics?.peak_current_a_est],
+  ["Mission charge estimate", "mAh", (s) => s.metrics?.consumed_mah_est],
 ];
 
 function StudyViewer({ study, label }) {
   const files = study.artifacts;
   if (!files["VIEWER.html"]) {
     const render = Object.keys(files).find((name) => /(?:^|\/)(?:assembled|device_render)\.png$/i.test(name));
-    const model = Object.keys(files).find((name) => name.endsWith(".glb"));
     return <section className="digital-viewer-card">
       <h3>{label} · revision {study.revision}</h3>
       {render && <img className="digital-render" src={digitalArtifactUrl(files[render])} alt={`Assembly render for revision ${study.revision}`} />}
-      {model && <p><a href={digitalArtifactUrl(files[model])}>Download 3D assembly (GLB)</a></p>}
-      {!render && <p className="muted">Inspect the saved geometry in your CAD viewer.</p>}
+      {!render && <p className="muted">Geometry preview: unknown. Inspect any saved geometry using the artifact links.</p>}
     </section>;
   }
   return (
@@ -41,11 +41,11 @@ function StudyViewer({ study, label }) {
   );
 }
 
-export default function DigitalStudyPanel({ session, onProjectReload }) {
+export default function DigitalStudyPanel({ session, onProjectReload, onToast, onReference }) {
   const [data, setData] = useState(null);
   const [selectedRevision, setSelectedRevision] = useState(null);
   const [compareRevision, setCompareRevision] = useState(1);
-  const [showPrevious, setShowPrevious] = useState(false);
+  const [compareMode, setCompareMode] = useState(false);
   const [change, setChange] = useState("Add 10 g of payload");
   const [gustScale, setGustScale] = useState("1");
   const [massLimit, setMassLimit] = useState("250");
@@ -69,12 +69,12 @@ export default function DigitalStudyPanel({ session, onProjectReload }) {
       if (controller.signal.aborted) return;
       setData(result);
       setSelectedRevision(result.study.revision);
-      setCompareRevision(result.study.parent_revision || 1);
-      const requirements = result.study.summary.requirements;
+      setCompareRevision(result.history.find((row) => row.revision !== result.study.revision)?.revision ?? null);
+      const requirements = result.study.summary.requirements || {};
       setInputs(requirements);
       setGustScale(String(requirements.gust_scale ?? ""));
       setMassLimit(String(requirements.max_mass_g ?? ""));
-      const pending = result.jobs.find((candidate) => isPending(candidate.status));
+      const pending = (result.jobs || []).find((candidate) => isPending(candidate.status));
       if (pending) setJob(pending);
     }).catch((cause) => { if (!controller.signal.aborted) setError(cause.message); });
     return () => controller.abort();
@@ -142,56 +142,68 @@ export default function DigitalStudyPanel({ session, onProjectReload }) {
     <p role={error ? "alert" : "status"}>{error || "Opening saved geometry and simulation results…"}</p>
     {error ? <button onClick={() => { setError(""); setRefresh((v) => v + 1); }}>Retry</button> : null}</section>;
 
-  const selected = data.history.find((entry) => entry.revision === selectedRevision) || data.study;
-  const previous = data.history.find((entry) => entry.revision === compareRevision) || data.history.at(-1);
+  const selected = selectedRevision === data.study.revision ? data.study
+    : data.history.find((entry) => entry.revision === selectedRevision) || data.study;
+  const saved = data.history.filter((entry) => Number.isInteger(entry.revision) && entry.revision > 0 && entry.run_id && entry.artifacts);
+  const canCompare = new Set(saved.map((entry) => entry.revision)).size >= 2;
+  const previous = saved.find((entry) => entry.revision === compareRevision && entry.revision !== selected.revision)
+    || saved.find((entry) => entry.revision !== selected.revision);
+  const measurementBase = previous || selected;
   const summary = selected.summary;
-  const failed = summary.constraints.filter((constraint) => !constraint.passed);
-  const comparing = selected.revision !== previous.revision;
+  const comparing = compareMode && canCompare && Boolean(previous) && saved.some((row) => row.revision === selected.revision);
   const comparisonMetrics = registered
-    ? [...new Set([...Object.keys(previous.summary.metrics), ...Object.keys(summary.metrics)])].map((key) => [
-      fieldLabel(key), "", (entry) => entry.metrics[key],
+    ? [...new Set([...Object.keys(measurementBase.summary.metrics || {}), ...Object.keys(summary.metrics || {})])].map((key) => [
+      fieldLabel(key), "", (entry) => entry.metrics?.[key],
     ]) : metrics;
-  const changedInputs = Object.entries(summary.requirements).filter(([key, value]) => previous.summary.requirements[key] !== value);
+  const changedInputs = Object.entries(summary.requirements || {}).filter(([key, value]) => measurementBase.summary.requirements?.[key] !== value);
   const bom = Object.keys(selected.artifacts).find((name) => /(^|\/)bom\.csv$/i.test(name));
   const downloadable = registered ? Object.entries(selected.artifacts).filter(([name]) => name !== "STUDY.zip") : [];
   const older = selected.revision !== data.study.revision;
 
-  return (
-    <div className="digital-workshop" data-testid="digital-study">
-      <header className="card digital-heading">
-        <div><p className="eyebrow">Digital workshop · Revision {selected.revision}</p>
-          <h1>{session.projectName}</h1><p className="muted">{selected.change_request}</p></div>
-        <span className={`digital-verdict ${summary.requirements_met ? "pass" : "fail"}`}>
-          {summary.requirements_met ? "Requirements passed" : "Requirements not met"}</span>
-      </header>
+  const referenceLinks = <><h3>Saved artifacts</h3>{!Object.keys(selected.artifacts).length && <p>unknown</p>}<div className="digital-downloads">
+    {(registered ? [["STUDY.zip", "Complete digital package"], [bom, "Bill of materials (CSV)"]] : [
+      ["STUDY.zip", "Complete digital package"], ["VIEWER.html", "Open standalone 3D viewer"],
+      ["HS3G_B_ASSEMBLY.step", "Editable STEP"], ["HS3G_B_ASSEMBLY.glb", "3D GLB"],
+      ["nominal.csv", "Nominal telemetry CSV"], ["mass_plus_5g.csv", "+5 g uncertainty CSV"],
+      ["motor_failure.csv", "Motor failure CSV"], ["verification.json", "Verification receipt"],
+    ]).filter(([name]) => selected.artifacts[name]).map(([name, label]) =>
+      <a key={name} href={digitalArtifactUrl(selected.artifacts[name])} target={name === "VIEWER.html" ? "_blank" : undefined} rel="noreferrer">{label}</a>)}
+    </div>{registered && <details><summary>Browse {downloadable.length} saved files</summary>
+      <ul className="study-files">{downloadable.map(([name, url]) => <li key={name}><a href={digitalArtifactUrl(url)}>{name}</a></li>)}</ul></details>}
+    <details><summary>Model assumptions and scope</summary><ul>{(summary.scope_limits || []).map((limit) => <li key={limit}>{limit}</li>)}</ul></details></>;
 
-      <div className="digital-controls card">
+  return (
+    <ProjectBench session={session} study={selected} onToast={onToast} onReference={onReference} references={referenceLinks}
+      evidenceExtra={summary.case_id === "fielddeck-5" ? <SavedDisplayComparison key={selected.run_id} study={selected} /> : null}>
+    <div className="digital-workshop" data-testid="digital-study">
+      {selected.change_request && <p>{selected.change_request}</p>}
+      <div className="digital-mode" role="group" aria-label="Design mode">
+        <button className="secondary" type="button" aria-pressed={!comparing} onClick={() => setCompareMode(false)}>Single</button>
+        <button className="secondary" type="button" aria-pressed={comparing} disabled={!canCompare} onClick={() => setCompareMode(true)}>Compare</button>
+      </div>
+      {!canCompare && <p className="muted">Compare requires two real saved revisions.</p>}
+      <div className="digital-controls">
         <label>View revision<select value={selected.revision} onChange={(event) => setSelectedRevision(Number(event.target.value))}>
           {data.history.map((entry) => <option key={entry.revision} value={entry.revision}>
-            {entry.revision} · {entry.change_request} · {entry.summary.requirements_met ? "passed" : "not met"}</option>)}
+            {entry.revision} · {entry.change_request}</option>)}
         </select></label>
-        <label>Compare with<select value={previous.revision} onChange={(event) => setCompareRevision(Number(event.target.value))}>
-          {data.history.map((entry) => <option key={entry.revision} value={entry.revision}>Revision {entry.revision} · {entry.change_request}</option>)}
-        </select></label>
-        <button type="button" onClick={() => { setError(""); setRefresh((v) => v + 1); reloadRef.current?.(projectId); }}>Reload saved project</button>
+        {comparing && <label>Compare with<select value={previous.revision} onChange={(event) => setCompareRevision(Number(event.target.value))}>
+          {saved.filter((entry) => entry.revision !== selected.revision).map((entry) => <option key={entry.revision} value={entry.revision}>Revision {entry.revision} · {entry.change_request}</option>)}
+        </select></label>}
+        <button type="button" className="secondary" onClick={() => { setError(""); setRefresh((v) => v + 1); reloadRef.current?.(projectId); }}>Reload saved project</button>
       </div>
 
       <div className="digital-layout">
-        <div className="digital-models card">
+        <div className={`digital-models ${comparing ? "is-comparing" : ""}`}>
           <StudyViewer key={selected.run_id} study={selected} label="Selected design" />
-          {summary.case_id === "fielddeck-5" && <SavedDisplayComparison key={`comparison-${selected.run_id}`} study={selected} />}
-          {comparing ? <>
-            <button type="button" className="ghost" aria-expanded={showPrevious} onClick={() => setShowPrevious(!showPrevious)}>
-              {showPrevious ? "Hide comparison design" : `Show comparison design (revision ${previous.revision})`}</button>
-            {showPrevious ? <StudyViewer key={previous.run_id} study={previous} label="Comparison design" /> : null}
-          </> : null}
+          {comparing && <StudyViewer key={previous.run_id} study={previous} label="Comparison design" />}
         </div>
-        <section className="card digital-change">
-          <p className="eyebrow">Next revision</p><h2>Change the requirements</h2>
-          {!registered && <p className="muted small">Run from revision {data.study.revision}, currently carrying {number(data.study.summary.requirements.payload_mass_g, 1)} g of study payload.</p>}
+        <section className="digital-change">
+          <h2>Change the requirements</h2>
+          {!registered && <p className="muted small">Run from revision {data.study.revision}, currently carrying {number(data.study.summary.requirements?.payload_mass_g, 1)} g of study payload.</p>}
           <form onSubmit={submit}>
             {registered ? <div className="digital-field-pair">
-              {Object.keys(data.study.summary.requirements).map((key) => {
+              {Object.keys(data.study.summary.requirements || {}).map((key) => {
                 const bounds = data.requirement_bounds?.[key];
                 return <label key={key}>{fieldLabel(key)}
                   <input type="number" step="any" required min={bounds?.minimum} max={bounds?.maximum}
@@ -218,7 +230,7 @@ export default function DigitalStudyPanel({ session, onProjectReload }) {
           {!data.runtime.available ? <p role="status">{data.runtime.setup_hint}</p> : null}
           <div aria-live="polite" className="digital-job-status">
             {job ? <p>{isPending(job.status) ? `${job.status === "queued" ? "Queued" : "Computing"}: generating and checking this revision. You can reopen the project while it runs.`
-              : job.status === "succeeded" ? "Run completed and revision saved. Review the requirements verdict and comparison below."
+              : job.status === "succeeded" ? "Run completed and revision saved. Review the evidence and comparison."
                 : job.status === "cancelled" ? "Run cancelled. The previous revision remains saved." : "Run failed; no new design was published."}</p> : null}
             {pollError ? <p>{pollError}</p> : null}
           </div>
@@ -227,44 +239,26 @@ export default function DigitalStudyPanel({ session, onProjectReload }) {
         </section>
       </div>
 
-      <section className="card">
+      <section>
         <h2>{!comparing ? "Revision measurements" : "Before and after"}</h2>
+        {!comparisonMetrics.length && <p>Measurements: unknown</p>}
         {comparing && <div className="digital-input-diff">
           <strong>Requirement changes from revision {previous.revision}</strong>
           {changedInputs.length ? <ul>{changedInputs.map(([key, value]) => <li key={key}>
-            {fieldLabel(key)} · {previous.summary.requirements[key] ?? "—"} → {value}
+            {fieldLabel(key)} · {previous.summary.requirements[key] ?? "unknown"} → {value ?? "unknown"}
           </li>)}</ul> : <p>The two revisions use the same requirements.</p>}
         </div>}
         <div className="digital-table-wrap"><table className="digital-table"><thead><tr>
           <th scope="col">Measure</th>{comparing && <th scope="col">Revision {previous.revision}</th>}<th scope="col">Revision {selected.revision}</th>{comparing && <th scope="col">Change</th>}
         </tr></thead><tbody>{comparisonMetrics.map(([label, unit, value]) => <tr key={label}>
           <th scope="row">{label}{unit && ` (${unit})`}</th>{comparing && <td>{number(value(previous.summary))}</td>}<td>{number(value(summary))}</td>
-          {comparing && <td>{number(value(summary) - value(previous.summary))}</td>}</tr>)}
-          {!registered && <tr><th scope="row">Centre of mass (x, y, z mm)</th>{comparing && <td>{previous.summary.centre_of_mass_mm.map((v) => number(v)).join(", ")}</td>}
-            <td>{summary.centre_of_mass_mm.map((v) => number(v)).join(", ")}</td>{comparing && <td>Recomputed from mass proxies</td>}</tr>}
+          {comparing && <td>{number(Number.isFinite(value(summary)) && Number.isFinite(value(previous.summary)) ? value(summary) - value(previous.summary) : undefined)}</td>}</tr>)}
+          {!registered && <tr><th scope="row">Centre of mass (x, y, z mm)</th>{comparing && <td>{previous.summary.centre_of_mass_mm?.map((v) => number(v)).join(", ") || "unknown"}</td>}
+            <td>{summary.centre_of_mass_mm?.map((v) => number(v)).join(", ") || "unknown"}</td>{comparing && <td>Recomputed from mass proxies</td>}</tr>}
         </tbody></table></div>
       </section>
 
-      <section className="card digital-evidence">
-        <div><h2>{failed.length ? `${failed.length} requirement${failed.length === 1 ? "" : "s"} not met` : "Requirements passed"}</h2>
-          <p>Run completed · artifact integrity verified · revision {selected.revision} saved</p>
-          {failed.length ? <ul>{failed.map((constraint) => <li key={constraint.id}><strong>{constraint.label || fieldLabel(constraint.id)}</strong>
-            {typeof constraint.actual === "number" && typeof constraint.limit === "number" ? `: ${number(constraint.actual)} ${constraint.unit || ""} ${registered ? "against target" : "exceeds"} ${number(constraint.limit)} ${constraint.unit || ""}` : ": check did not pass"}</li>)}</ul> : null}
-          <details><summary>Inspect all {summary.constraints.length} requirement checks</summary>
-            <ul>{summary.constraints.map((constraint) => <li key={constraint.id}>{constraint.passed ? "Pass" : "Fail"} · {constraint.label || fieldLabel(constraint.id)}
-              {typeof constraint.actual === "number" && typeof constraint.limit === "number" ? ` · ${number(constraint.actual, 3)} / ${number(constraint.limit, 3)} ${constraint.unit || ""}` : ""}</li>)}</ul></details>
-          <p className="muted small">{summary.note}</p>
-        </div>
-        <div><h3>Saved artifacts</h3><div className="digital-downloads">
-          {(registered ? [["STUDY.zip", "Complete digital package"], [bom, "Bill of materials (CSV)"]] : [["STUDY.zip", "Complete digital package"], ["VIEWER.html", "Open standalone 3D viewer"],
-            ["HS3G_B_ASSEMBLY.step", "Editable STEP"], ["HS3G_B_ASSEMBLY.glb", "3D GLB"], ["nominal.csv", "Nominal telemetry CSV"],
-            ["mass_plus_5g.csv", "+5 g uncertainty CSV"], ["motor_failure.csv", "Motor failure CSV"],
-            ["verification.json", "Verification receipt"]]).filter(([name]) => selected.artifacts[name]).map(([name, label]) => <a key={name}
-            href={digitalArtifactUrl(selected.artifacts[name])} target={name === "VIEWER.html" ? "_blank" : undefined} rel="noreferrer">{label}</a>)}
-        </div>{registered && <details><summary>Browse {downloadable.length} saved files</summary>
-          <ul className="study-files">{downloadable.map(([name, url]) => <li key={name}><a href={digitalArtifactUrl(url)}>{name}</a></li>)}</ul></details>}
-        <details><summary>Model assumptions and scope</summary><ul>{summary.scope_limits.map((limit) => <li key={limit}>{limit}</li>)}</ul></details></div>
-      </section>
     </div>
+    </ProjectBench>
   );
 }

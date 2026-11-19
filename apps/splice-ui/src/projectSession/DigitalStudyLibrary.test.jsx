@@ -20,20 +20,18 @@ it("retries discovery and opens the selected available design by its backend ID"
   expect(onStart).toHaveBeenCalledWith("plotter");
 });
 
-it("switches scenario and starts the exact display selected in the comparison", async () => {
+it("starts the selected FieldDeck study and leaves display comparison inside its evidence pane", async () => {
   const onStart = vi.fn();
   const cases = ["fielddeck-7", "fielddeck-5"].map((case_id) => ({
     case_id, name: case_id, requirements: {}, source_inputs_available: true,
   }));
   fetchDigitalCases.mockResolvedValueOnce({ cases, default_case_id: "fielddeck-7" });
   render(<DigitalStudyLibrary online onStart={onStart} />);
-  expect(await screen.findByText("3.17–4.47 h")).toBeInTheDocument();
-  fireEvent.change(screen.getByLabelText("Power scenario"), { target: { value: "high_keyboard_demand" } });
-  expect(screen.getAllByText("0.08 A")).toHaveLength(2);
-  fireEvent.click(screen.getByRole("button", { name: "5-inch" }));
+  fireEvent.click(await screen.findByRole("radio", { name: /FieldDeck 5/ }));
   expect(screen.getByRole("radio", { name: /FieldDeck 5/ })).toBeChecked();
-  fireEvent.click(screen.getByText("What changes with the 5-inch display?"));
-  expect(screen.getByText(/4 × display spacer/)).toBeVisible();
+  expect(screen.getByText("Reference preview: unknown. Open a study to inspect its saved design.")).toBeInTheDocument();
+  expect(screen.queryByRole("img")).toBeNull();
+  expect(screen.queryByLabelText("Power scenario")).toBeNull();
   fireEvent.click(screen.getByRole("button", { name: "Start digital design" }));
   expect(onStart).toHaveBeenCalledWith("fielddeck-5");
 });

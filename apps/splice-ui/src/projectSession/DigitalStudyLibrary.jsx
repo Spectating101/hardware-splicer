@@ -1,19 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchDigitalCases } from "./digitalStudyApi.js";
-import { ReferenceDisplayComparison } from "./FieldDeckDisplayComparison.jsx";
 import { fieldLabel } from "./digitalStudyLabels.js";
 import "./digitalStudy.css";
-
-import droneRender from "../../../../examples/drone_proving_ground/digital/reference/ASSEMBLY.png";
-import deckRender from "../../../../projects/cyberdeck-real-trial-20261020/digital_v1/views/assembled.png";
-import plotterRender from "../../../../projects/ender3-penplotter-digital/exports/device_render.png";
-
-const previews = {
-  "hs3g-b": [droneRender, "HS-3G-B reference assembly"],
-  "fielddeck-7": [deckRender, "FieldDeck 7 enclosure and controls"],
-  "fielddeck-5": [deckRender, "FieldDeck 7 donor enclosure for the 5-inch display swap"],
-  "ender3-penplotter": [plotterRender, "Ender-3 pen plotter assembly"],
-};
 
 const titles = {
   "hs3g-b": "HS-3G-B drone",
@@ -46,17 +34,14 @@ export default function DigitalStudyLibrary({ online, onStart, busy }) {
     catch (cause) { setError(cause.message); }
   }
   const selected = cases?.find((item) => item.case_id === selection);
-  const preview = selected && previews[selected.case_id];
-  const comparingDisplays = online && ["fielddeck-7", "fielddeck-5"].includes(selection);
   function choose(id) {
     setSelection(id);
     setError("");
   }
-  return <section className="home-hero card study-library">
-    <p className="eyebrow">Digital workshop</p>
-    <h1>Choose a design to study</h1>
+  return <section className="study-library">
+    <h2>Choose a design to study</h2>
     <p className="muted">Open a working design, change a requirement, and compare what happens.</p>
-    <div className="study-choice"><div>
+    <div className="study-picker">
     {online && cases ? <fieldset disabled={busy}>
       <legend>Available designs</legend>
       <div className="study-options">{cases.map((item) => <label key={item.case_id} className={item.case_id === selection ? "selected" : ""}>
@@ -71,15 +56,10 @@ export default function DigitalStudyLibrary({ online, onStart, busy }) {
     {selected && online && <p className="study-fields"><strong>Adjustable requirements</strong><br/>
       {Object.keys(selected.requirements).map(fieldLabel).join(" · ")}</p>}
     </div>
-    {online && preview && <figure className="study-preview">
-      <img src={preview[0]} alt={preview[1]} />
-      <figcaption>{preview[1]}</figcaption>
-    </figure>}
-    </div>
-    {comparingDisplays && <ReferenceDisplayComparison cases={cases} selection={selection} onSelect={choose} busy={busy} />}
+    {selected && <p className="muted">Reference preview: unknown. Open a study to inspect its saved design.</p>}
     <div className="study-start">
       {error && <p role="alert" className="digital-error">{error}</p>}
-      {online && error && !cases && <button onClick={() => setAttempt((n) => n + 1)}>Reload designs</button>}
+      {online && error && !cases && <button className="secondary" onClick={() => setAttempt((n) => n + 1)}>Reload designs</button>}
       <button type="button" className="primary large" disabled={!online || !selected || busy} onClick={start}>
         {busy ? "Opening digital project…" : "Start digital design"}</button>
     </div>
