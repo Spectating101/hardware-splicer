@@ -50,10 +50,10 @@ export const INGESTED_DATASHEETS: ModuleSpec[] = [
     source: "ingested-datasheet-pdf",
     pins: [
       { id: "ANODE", label: "Anode (1)", role: "digital_in", notes: "Input-side LED anode; drive via current-limit resistor from source MCU." },
-      { id: "CATHODE", label: "Cathode (2)", role: "gnd", notes: "Input-side LED cathode; tie to input-circuit ground." },
+      { id: "CATHODE", label: "Cathode (2)", role: "other", notes: "Input-side LED cathode; returns to the input circuit's own ground, which stays isolated from the output side." },
       { id: "NC", label: "NC (3)", role: "other", notes: "Not internally connected." },
       { id: "EMITTER", label: "Emitter (4)", role: "gnd", notes: "Output-side transistor emitter; tie to output-circuit ground." },
-      { id: "COLLECTOR", label: "Collector (5)", role: "power_out", notes: "Output-side transistor collector; pulled high through external resistor." },
+      { id: "COLLECTOR", label: "Collector (5)", role: "digital_out", notes: "Output-side phototransistor collector (open collector); pulled high through external resistor." },
       { id: "BASE", label: "Base (6)", role: "other", notes: "Usually left floating in basic on/off isolation." },
     ],
     warnings: ["Provides galvanic isolation — never share grounds between input and output sides."],

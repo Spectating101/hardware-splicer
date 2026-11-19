@@ -4374,8 +4374,8 @@
         {
           "id": "CATHODE",
           "label": "Cathode (2)",
-          "role": "gnd",
-          "notes": "Input-side LED cathode; tie to input-circuit ground."
+          "role": "other",
+          "notes": "Input-side LED cathode; returns to the input circuit's own ground, which stays isolated from the output side."
         },
         {
           "id": "NC",
@@ -4392,8 +4392,8 @@
         {
           "id": "COLLECTOR",
           "label": "Collector (5)",
-          "role": "power_out",
-          "notes": "Output-side transistor collector; pulled high through external resistor."
+          "role": "digital_out",
+          "notes": "Output-side phototransistor collector (open collector); pulled high through external resistor."
         },
         {
           "id": "BASE",
