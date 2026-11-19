@@ -7,6 +7,7 @@ import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
 import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2.js";
 import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry.js";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
+import { toCreasedNormals } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { HorizontalBlurShader } from "three/examples/jsm/shaders/HorizontalBlurShader.js";
 import { VerticalBlurShader } from "three/examples/jsm/shaders/VerticalBlurShader.js";
 import {
@@ -24,7 +25,7 @@ import {
 
 const TOUR_ANGLES = [18, -5, 24];
 const CONTACT_LAYER = 1;
-const EXPOSURE = 1.05;
+const EXPOSURE = 0.92;
 const TIERS = {
   high: { dpr: 2, shadowSize: 2048 },
   standard: { dpr: 1.25, shadowSize: 1024 },
@@ -162,7 +163,8 @@ function stylePart(entry, compare, weight, ghost, accent, emphasis) {
   for (const mesh of surface) {
     mesh.visible = Boolean(solid || fill) && !ghost;
     mesh.castShadow = !translucent && weight >= 0.49;
-    mesh.receiveShadow = false; // Parts cast onto the floor only: in an exploded view, part-on-part key shadows darken every layer under the top plate, and AO supplies contact form.
+    // Part-on-part key shadows separate the stacked layers; the frustum is fitted to the model.
+    mesh.receiveShadow = !translucent;
     if (mesh.castShadow) mesh.layers.enable(CONTACT_LAYER);
     else mesh.layers.disable(CONTACT_LAYER);
   }
@@ -357,6 +359,7 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
         const paired = row.delta === "changed" ? ghostDeltaKey(index, "compare", row, { base, target }) : null;
         entry = {
           row, basis, outline, spec, group, strokes, vector, hatchDpr, bounds: new THREE.Box3(),
+          meshStats: { volume: 0, area: 0 }, samples: [],
           ghostEdges: row.delta === "removed" || paired ? [] : null, paired,
           displayEdges: row.part.part_id === focusPart ? [] : null,
           style: {
@@ -374,10 +377,24 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
       }
 
       // Bake the GLB's node hierarchy into mm so presentation offsets remain in scene axes.
-      const geometry = own(source.geometry.clone().applyMatrix4(new THREE.Matrix4().multiplyMatrices(scale, source.matrixWorld)));
-      if (!geometry.getAttribute("normal")) geometry.computeVertexNormals();
+      let geometry = source.geometry.clone().applyMatrix4(new THREE.Matrix4().multiplyMatrices(scale, source.matrixWorld));
+      if (!geometry.getAttribute("normal")) {
+        // The GLBs carry no normals. Smoothing shared vertices across 90° edges tilts the normals of
+        // flat faces and streaks every triangle fan, so split normals at a 30° crease instead.
+        const creased = toCreasedNormals(geometry, THREE.MathUtils.degToRad(30));
+        if (creased !== geometry) geometry.dispose();
+        geometry = creased;
+      }
+      own(geometry);
       geometry.computeBoundingBox();
       entry.bounds.union(geometry.boundingBox);
+      const vertices = geometry.getAttribute("position");
+      const { volume, area } = meshMeasures(vertices.array, geometry.index?.array);
+      entry.meshStats.volume += volume;
+      entry.meshStats.area += area;
+      // A bounded sample of the part's own vertices, for tight screen boxes and silhouette anchors.
+      const stride = Math.max(1, Math.ceil(vertices.count / 2500));
+      for (let i = 0; i < vertices.count; i += stride) entry.samples.push(vertices.getX(i), vertices.getY(i), vertices.getZ(i));
       const { style, group, strokes } = entry;
       const mesh = new THREE.Mesh(geometry, style.solid ?? style.fill ?? style.edge.base);
       style.surface.push(mesh);
@@ -570,7 +587,7 @@ function createContactShadow(scene, bounds, resources) {
     target.texture.repeat.x = -1;
     target.texture.offset.x = 1;
     const material = new THREE.MeshBasicMaterial({
-      map: target.texture, transparent: true, depthWrite: false, opacity: i ? 0.35 : 0.45, toneMapped: false,
+      map: target.texture, transparent: true, depthWrite: false, opacity: i ? 0.6 : 0.7, toneMapped: false,
     });
     resources.add(target);
     resources.add(material);
@@ -580,7 +597,7 @@ function createContactShadow(scene, bounds, resources) {
   });
   const poolMaterial = new THREE.ShaderMaterial({
     transparent: true, depthWrite: false, toneMapped: false,
-    uniforms: { tint: { value: new THREE.Color(0x9baebf) } },
+    uniforms: { tint: { value: new THREE.Color(0xc9c3b8) } },
     vertexShader: `
       varying vec2 floorUv;
       void main() {
@@ -592,7 +609,7 @@ function createContactShadow(scene, bounds, resources) {
       varying vec2 floorUv;
       void main() {
         float falloff = 1.0 - smoothstep(0.0, 1.0, length(floorUv * 2.0 - 1.0));
-        gl_FragColor = vec4(tint, 0.085 * falloff * falloff);
+        gl_FragColor = vec4(tint, 0.13 * falloff * falloff);
         #include <colorspace_fragment>
       }`,
   });
@@ -637,13 +654,16 @@ function createContactShadow(scene, bounds, resources) {
   };
 }
 
-function createGrid(center, radius, resources) {
-  const fadeRadius = radius * 0.6;
+function createGrid(center, footprint, radius, resources) {
+  // The grid must reach past the assembly to be seen: full strength inside the footprint, fading
+  // to zero 0.6 × the model radius beyond it. A fade that ended inside the footprint hid the grid.
+  const fadeStart = footprint;
+  const fadeRadius = footprint + radius * 0.6;
   const geometry = new THREE.PlaneGeometry(fadeRadius * 2, fadeRadius * 2);
   const material = new THREE.ShaderMaterial({
     transparent: true, depthWrite: false, toneMapped: false,
     uniforms: {
-      fadeRadius: { value: fadeRadius }, opacity: { value: 1 },
+      fadeStart: { value: fadeStart }, fadeRadius: { value: fadeRadius }, opacity: { value: 1 }, dpr: { value: 1 },
       tint: { value: new THREE.Color(0x9097a0) },
     },
     vertexShader: `
@@ -654,17 +674,18 @@ function createGrid(center, radius, resources) {
       }`,
     fragmentShader: `
       varying vec2 mm;
-      uniform float fadeRadius, opacity;
+      uniform float fadeStart, fadeRadius, opacity, dpr;
       uniform vec3 tint;
+      // mm per drawing-buffer pixel comes from fwidth, so a line is one CSS pixel wide at any DPR.
       float grid(float spacing) {
-        vec2 width = max(fwidth(mm), vec2(0.0001));
+        vec2 width = max(fwidth(mm), vec2(1e-4));
         vec2 dist = abs(fract(mm / spacing - 0.5) - 0.5) * spacing / width;
-        vec2 line = 1.0 - smoothstep(vec2(0.0), vec2(1.0), dist);
+        vec2 line = 1.0 - smoothstep(vec2(0.5 * dpr), vec2(0.5 * dpr + 1.0), dist);
         return max(line.x, line.y);
       }
       void main() {
-        float fade = 1.0 - smoothstep(0.0, fadeRadius, length(mm));
-        gl_FragColor = vec4(tint, max(0.03 * grid(10.0), 0.06 * grid(50.0)) * fade * opacity);
+        float fade = 1.0 - smoothstep(fadeStart, fadeRadius, length(mm));
+        gl_FragColor = vec4(tint, max(0.035 * grid(10.0), 0.07 * grid(50.0)) * fade * opacity);
         #include <colorspace_fragment>
       }`,
   });
@@ -1141,30 +1162,51 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
   const assembled = boundsFor(all, 0);
   const center = assembled.getCenter(new THREE.Vector3());
   const radius = extended.getSize(new THREE.Vector3()).length() / 2;
-  const grid = createGrid(center, radius, resources);
+  const footprint = Math.hypot(assembled.max.x - assembled.min.x, assembled.max.y - assembled.min.y) / 2;
+  const grid = createGrid(center, footprint, radius, resources);
   scene.add(grid);
 
-  function light(color, intensity, x, y, elevation) {
-    const lamp = new THREE.DirectionalLight(color, intensity);
+  function light(color, intensity, x, y, elevation, spot = false) {
+    const lamp = spot ? new THREE.SpotLight(color, intensity, 0, Math.PI / 4, 0.35, 0)
+      : new THREE.DirectionalLight(color, intensity);
     const pitch = THREE.MathUtils.degToRad(elevation);
     lamp.position.set(x, y, 0).normalize().multiplyScalar(Math.cos(pitch));
     lamp.position.z = Math.sin(pitch);
-    lamp.position.multiplyScalar(radius * 2).add(center);
+    lamp.position.multiplyScalar(radius * (spot ? 2.2 : 2)).add(center);
     lamp.target.position.copy(center);
     scene.add(lamp, lamp.target);
     return lamp;
   }
-  const key = light(0xfff3e6, 2.6, -3, -5, 55);
+  // The key is a spot at a finite distance, so its incidence changes across a plate and the
+  // cream tops carry a gradient instead of one flat value.
+  const key = light(0xfff3e6, 2.25, -3, -5, 55, true);
   light(0xe6eef7, 0.45, 6, -2, 17);
   light(0xffffff, 1.3, 2, 7, 28);
   key.shadow.radius = 4;
-  key.shadow.bias = -0.0002;
-  key.shadow.normalBias = 0.02;
+  key.shadow.bias = -0.002;
+  key.shadow.normalBias = 0.05;
   key.shadow.autoUpdate = false;
-  Object.assign(key.shadow.camera, {
-    left: -radius, right: radius, top: radius, bottom: -radius, near: 1, far: 4 * radius,
-  });
-  key.shadow.camera.updateProjectionMatrix();
+  {
+    // Fit the cone and the shadow frustum to the model's assembled and exploded bounds.
+    const axis = center.clone().sub(key.position).normalize();
+    let widest = 0;
+    let nearest = Infinity;
+    let farthest = 0;
+    for (const x of [extended.min.x, extended.max.x]) {
+      for (const y of [extended.min.y, extended.max.y]) {
+        for (const z of [extended.min.z, extended.max.z]) {
+          const ray = new THREE.Vector3(x, y, z).sub(key.position);
+          const depth = ray.dot(axis);
+          widest = Math.max(widest, ray.angleTo(axis));
+          nearest = Math.min(nearest, depth);
+          farthest = Math.max(farthest, depth);
+        }
+      }
+    }
+    key.angle = Math.min(Math.PI / 2.2, widest * 1.4);
+    Object.assign(key.shadow.camera, { near: Math.max(1, nearest - 5), far: farthest + 5 });
+    key.shadow.camera.updateProjectionMatrix();
+  }
 
   const camera = new THREE.PerspectiveCamera(26, 1, 0.5, radius * 15);
   camera.up.copy(UP);
@@ -1206,6 +1248,11 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
     const { dpr, shadowSize } = TIERS[tier];
     renderer.setPixelRatio(dpr);
     for (const entry of all) entry.hatchDpr.value = dpr;
+    technical.traverse((object) => {
+      const { material } = object;
+      if (material?.isLineMaterial) material.linewidth = material.userData.cssWidth * dpr;
+    });
+    grid.material.uniforms.dpr.value = dpr;
     renderer.toneMapping = composer ? THREE.NoToneMapping : THREE.NeutralToneMapping;
     renderer.toneMappingExposure = composer ? 1 : EXPOSURE;
     renderer.shadowMap.enabled = key.castShadow = shadowSize > 0;
@@ -1409,7 +1456,6 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
   function setCamera({ position, target, fov = baseFov, up = UP }, amount = 1,
     from = camera.position, fromTarget = controls.target, faceTransition) {
     controls.maxDistance = Math.max(radius * 13, position.distanceTo(target));
-    camera.far = controls.maxDistance + radius * 2;
     controls.target.lerpVectors(fromTarget, target, amount);
     if (amount === 1) {
       camera.position.copy(position);
@@ -1682,6 +1728,17 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
     controls.minDistance = minimumDistance;
     if (controls.enabled) {
       dirty = controls.update() || dirty;
+    }
+    {
+      // Depth precision for AO and flat floors: near scales with distance, far hugs the model.
+      const distance = camera.position.distanceTo(controls.target);
+      const near = Math.max(1, 0.02 * distance);
+      const far = Math.max(4 * radius, distance + 2 * radius);
+      if (camera.near !== near || camera.far !== far) {
+        camera.near = near;
+        camera.far = far;
+        camera.updateProjectionMatrix();
+      }
     }
     const settling = explodePointer === null && !orbitMotion && !motion && heroElapsed === null && progress === 1;
     if (nextTier !== tier && settling) {

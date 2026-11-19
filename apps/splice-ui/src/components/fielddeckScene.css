@@ -259,7 +259,7 @@
 .fd-endpoint { border: 3px double var(--focus); color: var(--focus); }
 .fd-route-position .fd-label { position: static; visibility: inherit; display: block; border-radius: 999px; background: var(--bg-0); }
 
-.fd-scene [data-kind="custom"] { --kind: #d9cfbe; }
+.fd-scene [data-kind="custom"] { --kind: #cec3b0; }
 .fd-scene :is([data-kind="vendor_step"], [data-kind="donor_cad"]) { --kind: #93a3ae; }
 .fd-scene [data-kind="measured"] { --kind: #e4e2dc; }
 .fd-scene [data-kind="envelope"] { --kind: #a5aeb5; }

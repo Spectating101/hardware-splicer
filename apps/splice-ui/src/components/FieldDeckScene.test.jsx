@@ -80,7 +80,7 @@ describe("Fielddeck state and mapping", () => {
     });
     expect(materialSpec("vendor_step", "unchanged", true)).toMatchObject({ color: 0x737a80, creaseOpacity: 0.0875 });
     expect(materialSpec("custom", "unchanged", true)).toMatchObject({ color: 0x8e8b85 });
-    expect(materialSpec("custom", "changed")).toMatchObject({ color: 0xd9cfbe, edgeColor: 0xa78bfa });
+    expect(materialSpec("custom", "changed")).toMatchObject({ color: 0xcec3b0, edgeColor: 0xa78bfa });
     expect(materialSpec("donor_cad", "added")).toEqual(materialSpec("vendor_step", "added"));
     expect(materialSpec("measured")).toMatchObject({ color: 0xe4e2dc, creaseOpacity: 1 });
     expect(materialSpec("proxy").hatch).toEqual({ angle: 45, spacing: 8, contrast: 0.1 });

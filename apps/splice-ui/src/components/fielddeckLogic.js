@@ -25,7 +25,7 @@ export const CREASE_INK = 0x1a1d22;
 
 const VENDOR = { color: 0x93a3ae, muted: 0x737a80, roughness: 0.86, threshold: 42 };
 const MATERIALS = {
-  custom: { color: 0xd9cfbe, muted: 0x8e8b85, roughness: 0.80, threshold: 32 },
+  custom: { color: 0xcec3b0, muted: 0x8e8b85, roughness: 0.80, threshold: 32 },
   vendor_step: VENDOR,
   donor_cad: VENDOR,
   measured: { color: 0xe4e2dc, roughness: 0.74, threshold: 32, creaseOpacity: 1 },
