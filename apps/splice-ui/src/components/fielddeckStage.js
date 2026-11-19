@@ -21,8 +21,8 @@ import {
   DIFF_COLORS, explodeGroupOffsets, FIELDDECK_NARROW, footprintDeltaPair, ghostDeltaKey,
   ghostOutlineLoops, materialSpec, repelPins, meshMeasures, nearestPoint, placeBesideEndpoint, placeCallouts,
   projectedFitScale, QUALITY_SAMPLE_COUNT, rowForNode, weldEdgeChains,
-  apertureFromSection, FACE_APERTURE_PARTS, formatEvidenceValue, gapLabel, linearDimension, minimumSideGap,
-  projectedSideGaps, sectionSegments, vertexCentroid,
+  FACE_APERTURE_PARTS, formatEvidenceValue, formatGapValue, halfGapLabel, linearDimension, minimumSideGap,
+  perHalfGaps, projectedSideGaps, sectionSegments, seamLabel, vertexCentroid,
 } from "./fielddeckLogic.js";
 
 const TOUR_ANGLES = [18, -5, 24];
@@ -619,22 +619,23 @@ function computeFaceFit(entries, { target, focusPart }) {
   const outline = convexHull(points).map(({ x, y }) => [x, y]);
   const faces = FACE_APERTURE_PARTS.map((id) => entries.get(`${target}:part:${id}`));
   let level = null;
-  let aperture;
-  if (faces.some((entry) => !entry)) {
-    aperture = { loop: null, reason: "Face Rear Left or Right mesh missing" };
-  } else {
+  let fit = { gaps: projectedSideGaps(outline, null, centre), seam: null, inner: [] };
+  if (faces.every(Boolean)) {
     const bounds = boundsFor(faces, 0);
     level = (bounds.min.z + bounds.max.z) / 2;
-    aperture = apertureFromSection(faces.map((entry) => ({
-      label: entry.row.part.label, segments: sectionSegments(triangleSoup(entry), level),
+    // Each half is measured on its own: the halves need not close into one aperture loop.
+    fit = perHalfGaps(outline, faces.map((entry) => ({
+      label: entry.row.part.label,
+      side: (entry.bounds.min.x + entry.bounds.max.x) / 2 < centre[0] ? "left" : "right",
+      segments: sectionSegments(triangleSoup(entry), level),
     })), centre);
   }
-  const gaps = projectedSideGaps(outline, aperture.loop, centre);
+  const { gaps, seam, inner } = fit;
   const spacers = [...entries.values()]
     .filter(({ row }) => row.revision === target && row.part.part_id.startsWith("display-spacer-"))
     .map((entry) => ({ key: entry.row.key, point: vertexCentroid(triangleSoup(entry)) }))
     .filter(({ point }) => point);
-  return { level, centre, outline, aperture, gaps, minimum: minimumSideGap(gaps), spacers, top: display.bounds.max.z };
+  return { level, centre, outline, gaps, seam, inner, minimum: minimumSideGap(gaps), spacers, top: display.bounds.max.z };
 }
 
 function groupExplode(entries) {
@@ -1134,7 +1135,7 @@ function drawFace(host, project, entries, face, visible, { base, target, focusPa
     top: Math.min(a.top, b.top), bottom: Math.max(a.bottom, b.bottom),
   }));
   const label = (feature, value, revision) => ({
-    short: `${feature} · ${formatEvidenceValue({ field: "dimension_mm", value })} · computed`,
+    short: `${compact ? feature.replace(" display outline", "") : feature} · ${formatEvidenceValue({ field: "dimension_mm", value })}${compact ? "" : " · computed"}`,
     source: compact ? "" : ` from ${sources?.[revision] ?? `${revision}-inch GLB`}`,
   });
   const dimensions = [];
@@ -1172,11 +1173,20 @@ function drawFace(host, project, entries, face, visible, { base, target, focusPa
   }
   if (n && fit) {
     const at = ([x, y], z) => project(new THREE.Vector3(x, y, z));
-    // Aperture: the faceplate's mid-thickness section, only when a closed loop was derived.
-    if (fit.aperture.loop) {
-      const points = fit.aperture.loop.map((point) => at(point, fit.level));
-      if (points.every(Boolean)) {
-        svgNode(layer, "path", { class: "fd-aperture", d: points.map(({ x, y }, i) => `${i ? "L" : "M"}${x},${y}`).join("") + "Z" });
+    // Aperture: the inner-facing section edges of each faceplate half that bound it.
+    const inner = fit.inner.map(([a, b]) => [at(a, fit.level), at(b, fit.level)]).filter(([a, b]) => a && b);
+    if (inner.length) svgNode(layer, "path", { class: "fd-aperture", d: inner.map(([a, b]) => `M${a.x},${a.y}L${b.x},${b.y}`).join("") });
+    // The seam between the halves, as its own short ink dimension.
+    if (fit.seam) {
+      const from = at(fit.seam.from, fit.level);
+      const to = at(fit.seam.to, fit.level);
+      if (from && to) {
+        const seam = linearDimension([from.x, from.y], [to.x, to.y], [0, 1], 0, { gap: 0, overrun: 0 });
+        const group = svgNode(layer, "g", { class: "fd-gap fd-seam", "data-known": "true" });
+        svgNode(group, "path", { class: "fd-dim-line", d: seam.line });
+        svgNode(group, "path", { class: "fd-dim-arrow", d: seam.arrows });
+        svgNode(group, "text", { class: "fd-gap-text", "text-anchor": "middle", x: (from.x + to.x) / 2, y: from.y + 14 },
+          compact ? `Seam ${fit.seam.gap.toFixed(2)} mm` : seamLabel(fit.seam));
       }
     }
     // Spacer mesh centroids: a 12 px cross each.
@@ -1184,18 +1194,21 @@ function drawFace(host, project, entries, face, visible, { base, target, focusPa
       .map(({ x, y }) => `M${x - 6},${y}h12M${x},${y - 6}v12`).join("");
     if (crosses) svgNode(layer, "path", { class: "fd-spacer-marks", d: crosses });
     // Projected gaps per side: a signed dimension when derived, otherwise a dotted "?" stub.
-    const [cx, cy] = fit.centre;
+    const [, cy] = fit.centre;
+    // Top and bottom gap marks sit left of the seam so they never cover it.
     const middle = { left: [n.left, (n.top + n.bottom) / 2], right: [n.right, (n.top + n.bottom) / 2],
-      top: [(n.left + n.right) / 2, n.top], bottom: [(n.left + n.right) / 2, n.bottom] };
+      top: [n.left + (n.right - n.left) * 0.2, n.top], bottom: [n.left + (n.right - n.left) * 0.2, n.bottom] };
     const inward = { left: [1, 0], right: [-1, 0], top: [0, 1], bottom: [0, -1] };
     for (const side of ["left", "right", "top", "bottom"]) {
       const gap = fit.gaps[side];
       const [x, y] = middle[side];
       const [ix, iy] = inward[side];
-      const text = compact ? `Gap ${side[0].toUpperCase()} ${gap.value == null ? "?" : gapLabel(side, gap).split(" · ")[1].slice(2)}`
-        : gapLabel(side, gap);
+      const letter = side[0].toUpperCase();
+      // Known gaps carry the short form on the drawing; the strip lists every full label.
+      const text = gap.value == null ? (compact ? `Gap ${letter} ?` : halfGapLabel(side, gap)) : `${letter} ${formatGapValue(gap.value)}`;
       const vertical = side === "left" || side === "right";
       const group = svgNode(layer, "g", { class: "fd-gap", "data-side": side, "data-known": String(gap.value != null) });
+      let textAt = null;
       if (gap.value == null) {
         svgNode(group, "path", { class: "fd-gap-unknown", d: `M${x - ix * 6},${y - iy * 6}L${x + ix * 14},${y + iy * 14}` });
       } else {
@@ -1205,18 +1218,27 @@ function drawFace(host, project, entries, face, visible, { base, target, focusPa
         const extreme = side === "left" || side === "bottom"
           ? Math.min(...fit.outline.map((point) => point[axis])) - gap.value
           : Math.max(...fit.outline.map((point) => point[axis])) + gap.value;
-        const edge = at(vertical ? [extreme, cy] : [cx, extreme], fit.level);
+        const xs = fit.outline.map((point) => point[0]);
+        const markX = Math.min(...xs) + (Math.max(...xs) - Math.min(...xs)) * 0.2;
+        const edge = at(vertical ? [extreme, cy] : [markX, extreme], fit.level);
         if (edge) {
           const dimension = linearDimension([x, y], vertical ? [edge.x, y] : [x, edge.y], vertical ? [0, -1] : [1, 0], 0, { gap: 0, overrun: 0 });
           svgNode(group, "path", { class: "fd-dim-line", d: dimension.line });
           svgNode(group, "path", { class: "fd-dim-arrow", d: dimension.arrows });
+          // The value reads inside the aperture, just past the arrow at the aperture edge.
+          textAt = {
+            left: { x: edge.x + 6, y: y + 4, anchor: "start" }, right: { x: edge.x - 6, y: y + 4, anchor: "end" },
+            top: { x: x + 6, y: edge.y + 14, anchor: "start" }, bottom: { x: x + 6, y: edge.y - 6, anchor: "start" },
+          }[side];
         }
       }
-      const tx = x + ix * 18;
-      const ty = y + iy * 18;
+      // Phones keep the marks; the strip carries the values.
+      if (compact && gap.value != null) continue;
+      const { x: tx, y: ty, rotate = 0, anchor = "middle" } = textAt
+        ?? { x: x + ix * 18, y: y + iy * 18, rotate: vertical ? -90 : 0 };
       svgNode(group, "text", {
-        class: "fd-gap-text", "text-anchor": "middle", "dominant-baseline": "central",
-        transform: `translate(${tx},${ty}) rotate(${vertical ? -90 : 0})`,
+        class: "fd-gap-text", "text-anchor": anchor, "dominant-baseline": textAt ? "auto" : "central",
+        transform: `translate(${tx},${ty}) rotate(${rotate})`,
       }, text);
     }
   }
@@ -1831,7 +1853,7 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
     };
     const centerY = (rect.top + rect.bottom) / 2;
     // Phones frame the assembly at about 70% of the stage width.
-    const margin = { x: Math.min(frameWidth / 3, face ? (mobile ? 40 : 76) : mobile ? frameWidth * 0.15 : 32), y: 0 };
+    const margin = { x: Math.min(frameWidth / 3, face ? (mobile ? 50 : 76) : mobile ? frameWidth * 0.15 : 32), y: 0 };
     const focalPixels = height / (2 * Math.tan(THREE.MathUtils.degToRad(fov / 2)));
     let shiftX = 0;
     let shiftY = 0;
@@ -2352,7 +2374,7 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
     meshStats: new Map(all.map(({ row, meshStats }) => [row.key, meshStats])),
     ghostLengths: new Map(all.filter(({ overlay }) => overlay).map(({ row, overlay }) => [row.key, overlay.length])),
     faceFit: faceFit && {
-      apertureReason: faceFit.aperture.reason, gaps: faceFit.gaps, minimum: faceFit.minimum,
+      gaps: faceFit.gaps, minimum: faceFit.minimum, seam: seamLabel(faceFit.seam),
       spacers: faceFit.spacers.length, level: faceFit.level,
       footprint: entries.has(`${base}:part:${focusPart}`)
         ? footprintDeltaPair(entries.get(`${base}:part:${focusPart}`).bounds, entries.get(`${target}:part:${focusPart}`).bounds) : null,

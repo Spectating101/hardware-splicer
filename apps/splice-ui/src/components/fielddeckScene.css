@@ -454,6 +454,9 @@
 .fd-fit-primary { font: 600 14px/1.3 "IBM Plex Sans", system-ui, sans-serif; }
 .fd-fit-gap { font: 500 20px/1.3 var(--mono); }
 .fd-fit-reason { color: var(--text-2); font-size: 11px; }
+.fd-fit-sides { display: grid; grid-template-columns: repeat(2, max-content); gap: 0 16px; font: 11px/1.4 var(--mono); color: var(--text-2); }
+.fd-fit-sides [data-known="true"] { color: var(--text); }
+.fd-fit-sides span:nth-child(5) { grid-column: 1 / -1; justify-self: center; }
 .fd-fit-delta { display: flex; gap: 8px; align-items: baseline; color: var(--text-2); font-size: 11px; }
 .fd-fit-delta [data-footprint-delta] { color: var(--text); font: 500 14px/1.3 var(--mono); }
 .fd-fit-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 14px; color: var(--text-2); font-size: 10px; }
@@ -474,4 +477,11 @@
   position: absolute; left: 50%; top: calc(100% + 2px); translate: -50% 0;
   color: var(--question); font: 10px/1 var(--mono); white-space: nowrap;
   padding: 1px 3px; background: rgb(14 17 22 / 0.85); border-radius: 2px;
+}
+.fd-fit-compact { display: none; font: 10px/1.4 var(--mono); }
+@media (width < 640px) {
+  .fd-fit-compact { display: block; }
+  .fd-fit-sides, .fd-fit-delta, .fd-fit-legend { display: none; }
+  .fd-fit-gap { font-size: 14px; }
+  .fd-fit-primary { font-size: 13px; }
 }

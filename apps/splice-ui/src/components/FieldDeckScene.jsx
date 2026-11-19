@@ -3,7 +3,7 @@ import {
   BASIS_LABELS, DEFAULT_EXPLODE, DIFF_LABELS, FIELDDECK_COMPARE, FIELDDECK_NARROW,
   changeSummary, classifyPart, oldRevisionCaption, evidenceCells, formatEvidenceSource, indexFielddeck, rowsForMode, selectedPartKeys,
   countClippedItems, evidenceLabel, ghostDeltaKey, openQuestions, shortPartName, toggleFielddeckSheet,
-  formatEvidenceValue, minimumGapLabel,
+  formatEvidenceValue, formatGapValue, halfGapLabel, perHalfMinimumLabel,
 } from "./fielddeckLogic.js";
 import { createFielddeckStage, disposeFielddeck, loadFielddeck } from "./fielddeckStage.js";
 import { fetchSceneManifest } from "../api.js";
@@ -258,6 +258,15 @@ function PartTree({ rows, view, questions, counts, blockersOnly, endpoints, link
   );
 }
 
+// One line for phones: each side's signed value, with overlap spelled out.
+function compactGaps(gaps) {
+  const sides = ["left", "right", "top", "bottom"].map((side) => {
+    const { value } = gaps[side];
+    return `${side[0].toUpperCase()} ${value == null ? "?" : formatGapValue(value)}`;
+  });
+  return `Projected CAD gap · ${sides.join(" · ")} · computed`;
+}
+
 // Face view strip: physical fit stays the primary line, the minimum projected gap is the one large
 // number, and every mark in the drawing has its source here or on the dimension itself.
 function FaceStrip({ fit, mode, base, target, glbSources, pitch }) {
@@ -265,9 +274,13 @@ function FaceStrip({ fit, mode, base, target, glbSources, pitch }) {
   return (
     <div className="fd-footprint" data-footprint="">
       <div className="fd-fit-primary">Physical fit · Unknown</div>
-      <div className="fd-fit-gap" data-fit-gap="">{minimumGapLabel(fit?.minimum)}</div>
-      {fit?.apertureReason && <div className="fd-fit-reason">Aperture not derivable · {fit.apertureReason}</div>}
-      {!fit && <div className="fd-fit-reason">Aperture not derivable · fit layer unavailable</div>}
+      <div className="fd-fit-gap" data-fit-gap="">{fit ? perHalfMinimumLabel(fit.gaps) : "Min projected XY gap · ? · not derivable"}</div>
+      {fit ? <div className="fd-fit-sides">
+        {["left", "right", "top", "bottom"].map((side) => <span key={side} data-known={fit.gaps[side].value != null}>
+          {halfGapLabel(side, fit.gaps[side])}</span>)}
+        {fit.seam && <span data-known="true">{fit.seam}</span>}
+      </div> : <div className="fd-fit-reason">Fit layer unavailable</div>}
+      {fit && <div className="fd-fit-compact">{compactGaps(fit.gaps)}</div>}
       {mode === "compare" && fit?.footprint && <div className="fd-fit-delta">
         <span data-footprint-delta="">{fit.footprint}</span>
         <span>{target}-inch minus {base}-inch · CAD footprint, computed</span>

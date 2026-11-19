@@ -656,10 +656,11 @@ describe("Fielddeck evidence UI", () => {
         meshStats: new Map([["7:part:tray", { volume: 12000, area: 3000 }], ["5:part:tray", { volume: 11450, area: 2990 }]]),
         ghostLengths: new Map([["7:part:tray", 42]]),
         faceFit: {
-          apertureReason: "section loop not closed after 0.05 mm weld · 0.30 mm seam between Face Rear Left and Face Rear Right",
-          gaps: Object.fromEntries(["left", "right", "top", "bottom"].map((side) => [side, { value: null, reason: "aperture not derivable" }])),
-          minimum: { value: null, side: null, reason: "aperture not derivable" }, spacers: 4, level: 62.5,
-          footprint: "−45.92 × −28.78 mm",
+          gaps: { left: { value: -14.7, part: null, reason: null }, right: { value: -14.7, part: null, reason: null },
+            top: { value: -12.98, part: "both halves", reason: null },
+            bottom: { value: null, part: null, reason: "no inner edge of either half faces the display" } },
+          minimum: { value: null, side: null, reason: "no inner edge of either half faces the display" }, spacers: 4, level: 62.5,
+          seam: "Faceplate halves 0.30 mm apart at x 155 · computed", footprint: "−45.92 × −28.78 mm",
         },
         update, dispose: vi.fn(),
       };
@@ -829,7 +830,10 @@ describe("Fielddeck evidence UI", () => {
     const strip = within(document.querySelector("[data-footprint]"));
     expect(strip.getByText("Physical fit · Unknown")).toHaveClass("fd-fit-primary");
     expect(strip.getByText("Min projected XY gap · ? · not derivable")).toBeInTheDocument();
-    expect(screen.getByText(/^Aperture not derivable · section loop not closed after 0.05 mm weld/)).toBeInTheDocument();
+    expect(strip.getByText("Projected CAD gap · L overlap −14.70 mm · computed")).toBeInTheDocument();
+    expect(strip.getByText("Projected CAD gap · T overlap −12.98 mm (both halves) · computed")).toBeInTheDocument();
+    expect(strip.getByText("Projected CAD gap · B ? · no inner edge of either half faces the display")).toBeInTheDocument();
+    expect(strip.getByText("Faceplate halves 0.30 mm apart at x 155 · computed")).toBeInTheDocument();
     expect(screen.getByText("−45.92 × −28.78 mm")).toBeInTheDocument();
     expect(screen.getByText(/Spacer mesh centroid · computed \(hole axis unverified\)/)).toBeInTheDocument();
     const scene = screen.getByTestId("fielddeck-scene");
