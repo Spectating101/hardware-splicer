@@ -143,6 +143,15 @@ function edgeMaterial(color, pattern, linewidth) {
 
 // Change colour draws each pixel once (stencil), so parallel edges that overlap on screen do
 // not stack a 50% stroke back up to full strength.
+// An added part whose shape is unknown still reads as added: a teal 1.5 px outline of its end
+// loops. It draws before the violet strokes and wins the shared stencil where an added cap meets
+// a changed part, so the two colours never merge into one ring.
+function addedOutlineMaterial() {
+  const material = diffMaterial(DIFF_COLORS.added);
+  material.polygonOffsetFactor = material.polygonOffsetUnits = -2;
+  return material;
+}
+
 function diffMaterial(color) {
   const material = edgeMaterial(color, null, 1.5);
   Object.assign(material, {
@@ -172,7 +181,8 @@ function stylePart(entry, compare, weight, ghost, accent, emphasis) {
 
   // Unchanged parts in Compare take their edges to 25%.
   const edgeOpacity = outline ? entry.outlineOpacity ?? 1 : entry.spec.creaseOpacity;
-  edge.base.opacity = weight * THREE.MathUtils.lerp(edgeOpacity, Math.min(edgeOpacity, 0.25), dimming);
+  edge.base.opacity = weight * THREE.MathUtils.lerp(edgeOpacity, Math.min(edgeOpacity, 0.25), dimming)
+    * (outline && row.delta === "added" ? emphasis : 1);
   if (edge.diff) edge.diff.opacity = weight * accent * emphasis * (entry.accentScale ?? 1);
 
   for (const mesh of surface) {
@@ -393,7 +403,8 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
           style: {
             solid, baseColor, mutedColor, fill,
             edge: {
-              base: own(edgeMaterial(outline ? baseColor : spec.creaseColor, spec.pattern, basis === "unknown" ? 1.25 : 1)),
+              base: outline && row.delta === "added" ? own(addedOutlineMaterial())
+                : own(edgeMaterial(outline ? baseColor : spec.creaseColor, spec.pattern, basis === "unknown" ? 1.25 : 1)),
               diff: accent ? own(diffMaterial(spec.edgeColor)) : null,
             },
             surface: [], lines: [], accents: [],
@@ -438,8 +449,10 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
       if (positions.length && style.edge.base.dashed) {
         // Unknown shapes show their outer loop only. A dotted loop on a part a few millimetres across
         // reads as grey stipple, so a short loop is drawn as one thin, quieter stroke instead.
-        const chains = entry.basis === "unknown" ? ghostOutlineLoops(positions, { maxChains: 1 }) : weldEdgeChains(positions);
-        if (entry.basis === "unknown" && chains.length && chains.every((points) => points.length < 2
+        const chains = entry.basis === "unknown"
+          ? ghostOutlineLoops(positions, { maxChains: entry.row.delta === "added" ? 2 : 1, stacked: entry.row.delta === "added" })
+          : weldEdgeChains(positions);
+        if (entry.basis === "unknown" && entry.row.delta !== "added" && chains.length && chains.every((points) => points.length < 2
           || points.slice(1).reduce((sum, point, i) => sum + Math.hypot(...point.map((v, k) => v - points[i][k])), 0) < 40)) {
           style.edge.base = own(edgeMaterial(style.baseColor, null, 1));
           entry.outlineOpacity = 0.55;
