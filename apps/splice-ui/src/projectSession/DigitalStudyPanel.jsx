@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  cancelDigitalJob, digitalArtifactUrl, fetchDigitalJob, fetchDigitalStudy, submitDigitalRun,
+  cancelDigitalJob, digitalArtifactUrl, fetchDigitalCompare, fetchDigitalJob, fetchDigitalStudy, submitDigitalRun,
 } from "./digitalStudyApi.js";
 import ProjectBench from "./ProjectBench.jsx";
 import { SavedDisplayComparison } from "./FieldDeckDisplayComparison.jsx";
@@ -41,7 +41,48 @@ function StudyViewer({ study, label }) {
   );
 }
 
-export default function DigitalStudyPanel({ session, onProjectReload, onToast, onReference }) {
+// Compare reads the backend's revision comparison; the bench does not difference two summaries itself.
+function RevisionComparison({ projectId, before, after }) {
+  const [state, setState] = useState(null);
+  useEffect(() => {
+    setState(null);
+    const controller = new AbortController();
+    fetchDigitalCompare(projectId, before, after, controller.signal)
+      .then((body) => { if (!controller.signal.aborted) setState({ body }); })
+      .catch((cause) => { if (!controller.signal.aborted) setState({ error: cause.message }); });
+    return () => controller.abort();
+  }, [projectId, before, after]);
+  if (!state) return <p className="muted">Comparing revision {before} with revision {after}…</p>;
+  if (state.error) return <p role="status">Revision compare · unknown. {state.error}</p>;
+  const { body } = state;
+  const changes = Object.entries(body.requirements_changes || {});
+  const metricRows = Object.entries(body.metrics || {});
+  return <div className="digital-compare" data-testid="revision-compare">
+    <div className="digital-input-diff">
+      <strong>Requirement changes, revision {body.before_revision} → {body.after_revision}</strong>
+      {changes.length ? <ul>{changes.map(([key, row]) => <li key={key}>
+        {fieldLabel(key)} · {String(row.before ?? "unknown")} → {String(row.after ?? "unknown")}</li>)}</ul>
+        : <p>The backend reports the same requirements in both revisions.</p>}
+      <p className="muted">Engine sources: {body.same_engine_sources === true ? "same files and hashes in both revisions"
+        : body.same_engine_sources === false ? "changed between the revisions" : "unknown"}</p>
+    </div>
+    <div className="digital-table-wrap"><table className="digital-table"><caption>Checks</caption><thead><tr>
+      <th scope="col">Check</th><th scope="col">Revision {body.before_revision}</th><th scope="col">Revision {body.after_revision}</th><th scope="col">Transition</th>
+    </tr></thead><tbody>{(body.constraints || []).map((row) => <tr key={row.id} data-transition={row.transition}>
+      <th scope="row">{fieldLabel(row.id)}</th>
+      <td>{row.before ? `${row.before.passed ? "pass" : "fail"} · ${number(row.before.actual, 3)}` : "not run"}</td>
+      <td>{row.after ? `${row.after.passed ? "pass" : "fail"} · ${number(row.after.actual, 3)}` : "not run"}</td>
+      <td>{row.transition}</td></tr>)}</tbody></table></div>
+    <div className="digital-table-wrap"><table className="digital-table"><caption>Measurements</caption><thead><tr>
+      <th scope="col">Measure</th><th scope="col">Revision {body.before_revision}</th><th scope="col">Revision {body.after_revision}</th><th scope="col">Change</th>
+    </tr></thead><tbody>{metricRows.map(([key, row]) => <tr key={key}>
+      <th scope="row">{fieldLabel(key)}</th>
+      {["before", "after", "delta"].map((side) => <td key={side}>{Array.isArray(row[side]) ? row[side].map((v) => number(v)).join(", ") : number(row[side])}</td>)}
+    </tr>)}</tbody></table></div>
+  </div>;
+}
+
+export default function DigitalStudyPanel({ session, onProjectReload, onToast, onReference, onOpenScene }) {
   const [data, setData] = useState(null);
   const [selectedRevision, setSelectedRevision] = useState(null);
   const [compareRevision, setCompareRevision] = useState(1);
@@ -148,14 +189,10 @@ export default function DigitalStudyPanel({ session, onProjectReload, onToast, o
   const canCompare = new Set(saved.map((entry) => entry.revision)).size >= 2;
   const previous = saved.find((entry) => entry.revision === compareRevision && entry.revision !== selected.revision)
     || saved.find((entry) => entry.revision !== selected.revision);
-  const measurementBase = previous || selected;
   const summary = selected.summary;
   const comparing = compareMode && canCompare && Boolean(previous) && saved.some((row) => row.revision === selected.revision);
   const comparisonMetrics = registered
-    ? [...new Set([...Object.keys(measurementBase.summary.metrics || {}), ...Object.keys(summary.metrics || {})])].map((key) => [
-      fieldLabel(key), "", (entry) => entry.metrics?.[key],
-    ]) : metrics;
-  const changedInputs = Object.entries(summary.requirements || {}).filter(([key, value]) => measurementBase.summary.requirements?.[key] !== value);
+    ? Object.keys(summary.metrics || {}).map((key) => [fieldLabel(key), "", (entry) => entry.metrics?.[key]]) : metrics;
   const bom = Object.keys(selected.artifacts).find((name) => /(^|\/)bom\.csv$/i.test(name));
   const downloadable = registered ? Object.entries(selected.artifacts).filter(([name]) => name !== "STUDY.zip") : [];
   const older = selected.revision !== data.study.revision;
@@ -174,14 +211,20 @@ export default function DigitalStudyPanel({ session, onProjectReload, onToast, o
 
   return (
     <ProjectBench session={session} study={selected} onToast={onToast} onReference={onReference} references={referenceLinks}
+      caseId={summary.case_id} latestRevision={data.study.revision} onOpenScene={onOpenScene}
+      studyPackages={selected.artifacts["STUDY.zip"] ? [{
+        label: `Digital study package (STUDY.zip) · revision ${selected.revision}`,
+        href: digitalArtifactUrl(selected.artifacts["STUDY.zip"]), revision: selected.revision,
+      }] : []}
       evidenceExtra={summary.case_id === "fielddeck-5" ? <SavedDisplayComparison key={selected.run_id} study={selected} /> : null}>
     <div className="digital-workshop" data-testid="digital-study">
       {selected.change_request && <p>{selected.change_request}</p>}
-      <div className="digital-mode" role="group" aria-label="Design mode">
-        <button className="secondary" type="button" aria-pressed={!comparing} onClick={() => setCompareMode(false)}>Single</button>
-        <button className="secondary" type="button" aria-pressed={comparing} disabled={!canCompare} onClick={() => setCompareMode(true)}>Compare</button>
+      <h3 className="digital-revisions-title">Project revisions</h3>
+      <div className="digital-mode" role="group" aria-label="Project revisions">
+        <button className="secondary" type="button" aria-pressed={!comparing} onClick={() => setCompareMode(false)}>One revision</button>
+        <button className="secondary" type="button" aria-pressed={comparing} disabled={!canCompare} onClick={() => setCompareMode(true)}>Compare revisions</button>
       </div>
-      {!canCompare && <p className="muted">Compare requires two real saved revisions.</p>}
+      {!canCompare && <p className="muted">Compare revisions needs two real saved revisions.</p>}
       <div className="digital-controls">
         <label>View revision<select value={selected.revision} onChange={(event) => setSelectedRevision(Number(event.target.value))}>
           {data.history.map((entry) => <option key={entry.revision} value={entry.revision}>
@@ -241,21 +284,16 @@ export default function DigitalStudyPanel({ session, onProjectReload, onToast, o
 
       <section>
         <h2>{!comparing ? "Revision measurements" : "Before and after"}</h2>
-        {!comparisonMetrics.length && <p>Measurements: unknown</p>}
-        {comparing && <div className="digital-input-diff">
-          <strong>Requirement changes from revision {previous.revision}</strong>
-          {changedInputs.length ? <ul>{changedInputs.map(([key, value]) => <li key={key}>
-            {fieldLabel(key)} · {previous.summary.requirements[key] ?? "unknown"} → {value ?? "unknown"}
-          </li>)}</ul> : <p>The two revisions use the same requirements.</p>}
-        </div>}
-        <div className="digital-table-wrap"><table className="digital-table"><thead><tr>
-          <th scope="col">Measure</th>{comparing && <th scope="col">Revision {previous.revision}</th>}<th scope="col">Revision {selected.revision}</th>{comparing && <th scope="col">Change</th>}
-        </tr></thead><tbody>{comparisonMetrics.map(([label, unit, value]) => <tr key={label}>
-          <th scope="row">{label}{unit && ` (${unit})`}</th>{comparing && <td>{number(value(previous.summary))}</td>}<td>{number(value(summary))}</td>
-          {comparing && <td>{number(Number.isFinite(value(summary)) && Number.isFinite(value(previous.summary)) ? value(summary) - value(previous.summary) : undefined)}</td>}</tr>)}
-          {!registered && <tr><th scope="row">Centre of mass (x, y, z mm)</th>{comparing && <td>{previous.summary.centre_of_mass_mm?.map((v) => number(v)).join(", ") || "unknown"}</td>}
-            <td>{summary.centre_of_mass_mm?.map((v) => number(v)).join(", ") || "unknown"}</td>{comparing && <td>Recomputed from mass proxies</td>}</tr>}
-        </tbody></table></div>
+        {comparing ? <RevisionComparison projectId={projectId} before={previous.revision} after={selected.revision} /> : <>
+          {!comparisonMetrics.length && <p>Measurements: unknown</p>}
+          <div className="digital-table-wrap"><table className="digital-table"><thead><tr>
+            <th scope="col">Measure</th><th scope="col">Revision {selected.revision}</th>
+          </tr></thead><tbody>{comparisonMetrics.map(([label, unit, value]) => <tr key={label}>
+            <th scope="row">{label}{unit && ` (${unit})`}</th><td>{number(value(summary))}</td></tr>)}
+            {!registered && <tr><th scope="row">Centre of mass (x, y, z mm)</th>
+              <td>{summary.centre_of_mass_mm?.map((v) => number(v)).join(", ") || "unknown"}</td></tr>}
+          </tbody></table></div>
+        </>}
       </section>
 
     </div>

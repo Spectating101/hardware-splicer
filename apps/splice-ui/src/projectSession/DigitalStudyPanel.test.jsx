@@ -1,9 +1,18 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import DigitalStudyPanel from "./DigitalStudyPanel.jsx";
-import { fetchDigitalJob, fetchDigitalStudy, submitDigitalRun, fetchProjectAssurance, fetchProjectMaterials } from "./digitalStudyApi.js";
+import {
+  fetchDigitalCompare, fetchDigitalJob, fetchDigitalStudy, fetchEngineeringPackages, submitDigitalRun, fetchProjectAssurance, fetchProjectMaterials,
+} from "./digitalStudyApi.js";
+import { fetchScenes } from "../api.js";
 
+vi.mock("../api.js", () => ({
+  fetchScenes: vi.fn(async () => []), fetchSceneManifest: vi.fn(), fetchSceneRecords: vi.fn(async () => ({ records: [] })),
+}));
 vi.mock("./digitalStudyApi.js", () => ({
+  fetchEngineeringPackages: vi.fn(async () => ({ packages: [] })), fetchEvidenceDelta: vi.fn(),
+  fetchEngineeringRevisionDiff: vi.fn(), fetchDigitalCompare: vi.fn(),
+  engineeringPackageUrl: (project, id) => `/packages/${project}/${id}`,
   fetchDigitalStudy: vi.fn(), fetchDigitalJob: vi.fn(), submitDigitalRun: vi.fn(), cancelDigitalJob: vi.fn(),
   digitalArtifactUrl: (path) => path,
   fetchProjectAssurance: vi.fn(), fetchProjectMaterials: vi.fn(), fetchMaterialAssessment: vi.fn(),
@@ -38,6 +47,14 @@ const data = (current = baseline, jobs = []) => ({
 
 beforeEach(() => {
   vi.resetAllMocks(); fetchDigitalStudy.mockResolvedValue(data());
+  fetchEngineeringPackages.mockResolvedValue({ packages: [] });
+  fetchScenes.mockResolvedValue([]);
+  fetchDigitalCompare.mockImplementation(async (_, before, after) => ({
+    before_revision: before, after_revision: after, same_engine_sources: true,
+    requirements_changes: { payload_mass_g: { before: 0, after: 30, delta: 30 } },
+    metrics: { mass_g: { before: 234.9, after: 264.9, delta: 30 } },
+    constraints: [{ id: "nominal_mass", before: { passed: true, actual: 234.9 }, after: { passed: false, actual: 264.9 }, transition: "regressed" }],
+  }));
   fetchProjectAssurance.mockImplementation(async (_, revision) => ({ revision, assurance: { claims: [], outputs: [] } }));
   fetchProjectMaterials.mockResolvedValue({ assessments: [] });
 });
@@ -63,12 +80,20 @@ describe("Saved digital requirement revisions", () => {
   it("shows a saved failed requirement and allows comparing the earlier revision", async () => {
     fetchDigitalStudy.mockResolvedValue(data(study(2, 264.9, false)));
     render(<DigitalStudyPanel session={session} />);
-    await screen.findByRole("button", { name: "Compare" });
+    await screen.findByRole("button", { name: "Compare revisions" });
     expect(screen.getByRole("region", { name: "Evidence" })).toHaveTextContent("Check result: false · Actual: 264.9 · Limit: 250 g");
+    // A failed check becomes the next action, quoted from the run; there is no ready or pass badge.
+    expect(screen.getByTestId("bench-package")).toHaveTextContent("Failed check Nominal mass: actual 264.9 g, limit 250 g");
+    expect(await within(screen.getByTestId("bench-package")).findByText("Package · not linked")).toBeInTheDocument();
     expect(screen.queryByTitle("Comparison design 3D assembly revision 1")).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "Compare", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Compare revisions", exact: true }));
     expect(screen.getByTitle("Comparison design 3D assembly revision 1")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Before and after" })).toBeInTheDocument();
+    // Compare shows the backend's comparison, not a client-side difference of two summaries.
+    expect(fetchDigitalCompare).toHaveBeenCalledWith("digital-test", 1, 2, expect.anything());
+    const compared = await screen.findByTestId("revision-compare");
+    expect(compared).toHaveTextContent("Payload mass (g) · 0 → 30");
+    expect(within(compared).getByRole("row", { name: /regressed/ })).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("View revision"), { target: { value: "1" } });
     expect(screen.getByRole("button", { name: "Run and save new revision" })).toBeDisabled();
     expect(screen.getByText("Viewing history.")).toBeInTheDocument();
@@ -115,12 +140,12 @@ it("uses the registered device's inputs, measurements and nested artifacts", asy
 
 it("requires two distinct real saved revisions before enabling Compare", async () => {
   const { rerender } = render(<DigitalStudyPanel session={session} />);
-  expect(await screen.findByRole("button", { name: "Compare", exact: true })).toBeDisabled();
-  expect(screen.getByText("Compare requires two real saved revisions.")).toBeInTheDocument();
+  expect(await screen.findByRole("button", { name: "Compare revisions", exact: true })).toBeDisabled();
+  expect(screen.getByText("Compare revisions needs two real saved revisions.")).toBeInTheDocument();
   fetchDigitalStudy.mockResolvedValue({ ...data(), history: [baseline, baseline, { ...study(2), run_id: null }] });
   rerender(<DigitalStudyPanel session={{ ...session, snapshotRevision: 2 }} />);
   await waitFor(() => expect(fetchDigitalStudy).toHaveBeenCalledTimes(2));
-  expect(screen.getByRole("button", { name: "Compare", exact: true })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Compare revisions", exact: true })).toBeDisabled();
   expect(screen.queryByTitle(/Comparison design/)).toBeNull();
 });
 
@@ -134,7 +159,7 @@ it("uses unknown for absent measurements and does not create an authority label 
   await waitFor(() => expect(screen.getByRole("row", { name: "Mass (g) unknown" })).toBeInTheDocument());
   const evidence = screen.getByRole("region", { name: "Evidence" });
   expect(evidence).toHaveTextContent("Authority: unknown");
-  expect(evidence).toHaveTextContent("Source: unknown");
+  expect(evidence).toHaveTextContent("Source: Digital study run run-1 · revision 1");
   expect(evidence.textContent).not.toMatch(/\b(?:ready|build-ready|verified)\b/i);
 });
 
