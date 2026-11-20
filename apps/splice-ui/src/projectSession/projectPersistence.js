@@ -113,6 +113,9 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
   const savedSerializedRef = useRef(null);
   const machineSeedRef = useRef(null);
   const activeProjectRef = useRef(session?.projectId || null);
+  // A project opened at an explicit revision is read-only: saving an older one would fork history.
+  const historicalProjectRef = useRef(null);
+  const [historicalProjectId, setHistoricalProjectId] = useState(null);
 
   useEffect(() => {
     activeProjectRef.current = session?.projectId || null;
@@ -184,6 +187,7 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
       pendingSerializedRef.current = null;
     }
     if (!enabled || session?.mode === "digital" || !sessionIsPersistable(session)) return undefined;
+    if (historicalProjectRef.current && historicalProjectRef.current === session.projectId) return undefined;
 
     const snapshot = projectSnapshot(session);
     let serialized;
@@ -260,6 +264,9 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
         const recovery = envelope.recovery || {};
         savedSerializedRef.current = JSON.stringify(snapshot);
         pendingSerializedRef.current = null;
+        historicalProjectRef.current = revision !== null && revision !== undefined
+          ? envelope.project_id || projectId : null;
+        setHistoricalProjectId(historicalProjectRef.current);
         machineSeedRef.current = snapshot.machineProject ? "restored" : null;
         dispatch({
           type: ACTIONS.RESTORE_PROJECT_SNAPSHOT,
@@ -314,6 +321,7 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
 
   return {
     listLoading: enabled && !firstListLoaded,
+    historicalProjectId,
     projects,
     listError,
     machineSeedError,

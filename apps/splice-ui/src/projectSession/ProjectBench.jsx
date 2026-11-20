@@ -192,7 +192,7 @@ function PackagePanel({ projectId, revision, latestRevision, studyPackages, obje
 }
 
 export default function ProjectBench({ session, study, children, references, evidenceExtra, tools, onToast, onReference,
-  caseId, latestRevision, studyPackages, onOpenScene }) {
+  caseId, latestRevision, studyPackages, onOpenScene, readOnlyRevision = false }) {
   const [tab, setTab] = useState("design");
   const [compact, setCompact] = useState(() => window.matchMedia?.("(max-width: 899px)").matches ?? false);
   useEffect(() => {
@@ -275,7 +275,8 @@ export default function ProjectBench({ session, study, children, references, evi
   }
   return <div className="project-bench" data-testid="project-bench" data-active-pane={tab}>
     <header className="bench-heading"><h1>{session.projectName?.trim() || "Untitled project"}</h1>
-      <p className="muted">{revision ? `Revision ${revision}` : "Not saved yet"}{olderRevision ? ` · the latest saved revision is ${latest}` : ""}{session.persistenceStatus === "saving" ? " · Saving…" : ""}</p>
+      <p className="muted">{revision ? `Revision ${revision}` : "Not saved yet"}{olderRevision ? ` · the latest saved revision is ${latest}` : ""}{readOnlyRevision
+        ? " · opened from a revision link, read-only; changes here are not saved" : ""}{!readOnlyRevision && session.persistenceStatus === "saving" ? " · Saving…" : ""}</p>
       <p className="bench-objective"><span>Objective</span> {objective || "not recorded for this project"}</p>
     </header>
     {compact && <div className="bench-tabs" role="tablist" aria-label="Project bench panes">

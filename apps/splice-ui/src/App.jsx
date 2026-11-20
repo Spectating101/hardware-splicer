@@ -367,10 +367,15 @@ export default function App() {
     setRouteLoad({ key: routeKey, state: "loading" });
     (async () => {
       try {
-        let envelope = await openProjectRoute(projectId);
-        // Digital studies choose their revision on the bench; saved snapshots load the asked revision.
-        if (revision != null && envelope?.snapshot?.mode !== "digital" && envelope?.revision !== revision) {
+        // Load the asked revision directly: loading the latest first would let it autosave in between.
+        let envelope;
+        try {
           envelope = await openProjectRoute(projectId, { revision });
+        } catch (error) {
+          if (revision == null || error.status !== 404) throw error;
+          // Digital studies number their revisions on the bench, which reports an unknown one itself.
+          envelope = await openProjectRoute(projectId);
+          if (envelope?.snapshot?.mode !== "digital") throw error;
         }
         if (cancelled) return;
         setRouteLoad({ key: routeKey, state: "ready" });
@@ -788,6 +793,7 @@ export default function App() {
               activeJobId={session.activeJobId}
               onProjectReload={reloadProject}
               routeRevision={route.revision}
+              readOnlyRevision={Boolean(session.projectId) && projectPersistence.historicalProjectId === session.projectId}
               onRevisionRoute={route.projectId ? revisionRoute : undefined}
               onOpenScene={openScene}
             />

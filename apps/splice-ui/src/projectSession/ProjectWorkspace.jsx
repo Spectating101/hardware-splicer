@@ -39,6 +39,7 @@ export default function ProjectWorkspace(props) {
       routeRevision={props.routeRevision} onRevisionRoute={props.onRevisionRoute} />;
   }
   return <ProjectBench key={props.session.projectId} session={props.session} onToast={props.onToast} onReference={props.onReference}
+    readOnlyRevision={props.readOnlyRevision}
     onOpenScene={props.onOpenScene} tools={<ProjectTools {...props} />} />;
 }
 

@@ -126,6 +126,10 @@ describe("App URL routing", () => {
     expect(await screen.findByRole("heading", { level: 1, name: "Pen plotter" })).toBeInTheDocument();
     expect(projectRequests()).toContain("/v1/projects/plotter?revision=1");
     expect(window.location.search).toBe("?rev=1");
+    expect(screen.getByText(/opened from a revision link, read-only; changes here are not saved/)).toBeInTheDocument();
+    // An older revision is never written back: saving it would fork the project's history.
+    await new Promise((resolve) => setTimeout(resolve, 900));
+    expect(fetch.mock.calls.filter(([, options]) => options?.method === "PUT")).toEqual([]);
   });
 
   it("shows a not-found state for an unknown project id or revision", async () => {
