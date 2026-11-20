@@ -143,7 +143,7 @@ describe("App navigation integration", () => {
       { project_id: "untitled", saved_at: savedAt },
     ] }) });
     render(<App />);
-    const project = await screen.findByRole("button", { name: "Untitled project Not saved" });
+    const project = await screen.findByRole("button", { name: "Untitled project Objective · not recorded Not saved" });
     expect(project).not.toHaveTextContent(/unknown|Rev/);
     expect(project.querySelector(".project-stage")).toBeNull();
     await userEvent.click(screen.getByTestId("nav-advanced"));

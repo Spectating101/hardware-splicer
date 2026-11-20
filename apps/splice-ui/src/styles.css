@@ -67,7 +67,7 @@ code,
 .app-shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 300px 1fr;
+  grid-template-columns: 240px 1fr;
 }
 
 .sidebar {
@@ -2781,3 +2781,27 @@ details.bench-objective summary { font-size: .75rem; font-weight: 600; letter-sp
   .bench-tabs { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: .4rem 0; margin-bottom: .75rem; }
   .bench-tabs button { min-height: 44px; }
 }
+
+/* Sidebar: 240 px, folds to the brand mark and its toggle. */
+.sidebar-toggle { display: grid; place-items: center; margin-left: auto; width: 32px; height: 32px; padding: 0; border: 1px solid #2b3542; border-radius: 6px; background: transparent; color: #c9d2dc; }
+.sidebar-toggle:hover, .sidebar-toggle:focus-visible { border-color: #667381; color: #fff; }
+.app-shell.sidebar-collapsed { grid-template-columns: 64px 1fr; }
+.sidebar-collapsed .sidebar { padding-inline: 10px; }
+.sidebar-collapsed .brand { flex-direction: column; gap: 10px; }
+.sidebar-collapsed .brand > div:not(.brand-mark), .sidebar-collapsed .sidebar-body { display: none; }
+.sidebar-collapsed .sidebar-toggle { margin-left: 0; }
+.sidebar-view-all { margin-top: .4rem; }
+@media (max-width: 960px) {
+  .sidebar-toggle { display: none; }
+  .app-shell.sidebar-collapsed { grid-template-columns: minmax(0, 1fr); }
+  .sidebar-collapsed .brand { flex-direction: row; }
+  .sidebar-collapsed .brand > div:not(.brand-mark) { display: block; }
+}
+/* Saved project rows: name, objective, save and creation time, stage and revision. */
+.project-rows button { grid-template-columns: minmax(0, 1fr) auto auto; min-height: 3.5rem; }
+.project-row-main { display: grid; gap: .2rem; min-width: 0; }
+.project-objective { color: var(--text); font-size: .9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.project-rows .project-id { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: .8125rem; font-weight: 400; color: var(--muted); }
+.project-rev { font-variant-numeric: tabular-nums; font-size: .875rem; }
+.brand strong { white-space: nowrap; font-size: .95rem; }
+.project-objective.muted { color: var(--muted); }
