@@ -1,0 +1,23 @@
+{
+  "all_cases_pass_digital_gate": true,
+  "baseline_clean_confirmed": 4,
+  "benchmark_pass": true,
+  "cohort_case_count": 8,
+  "cohort_lock_sha256": "e9b149f5d0c760d10ba3db78938dc22aaf5d056167b1b8c12de636847be94a1b",
+  "corpus_commit": "1e999b4eefd5fdfcc90dc376d2882390245a8e0d",
+  "distinct_source_repositories": 8,
+  "fabrication_authorized": false,
+  "fault_injections_rejected": 4,
+  "inherited_drc_confirmed": 4,
+  "kicad_version": "9.0.2",
+  "physical_test_performed": false,
+  "round_semantic_sha256": [
+    "61a3ce8162fc9e98640858ed60f3442d62053ab5da08f94659e65ad293100db8",
+    "61a3ce8162fc9e98640858ed60f3442d62053ab5da08f94659e65ad293100db8"
+  ],
+  "rounds": 2,
+  "same_semantic_result_across_fresh_rounds": true,
+  "schema": "hs.heldout_pcb_benchmark.v1",
+  "schematic_parity": "NOT_TESTABLE_CORPUS_HAS_NO_SCHEMATIC",
+  "structural_parser_pass": 8
+}

@@ -1,0 +1,12 @@
+{
+  "cases": 8,
+  "clean_board_copper_fault_controls_verified_per_round": 4,
+  "distinct_source_repositories": 8,
+  "fabrication_authorized": false,
+  "original_source_drc_counts_verified": 8,
+  "physical_test_performed": false,
+  "rounds_verified": 2,
+  "schema": "hs.heldout_pcb_independent_audit.v1",
+  "semantic_receipt_sha256": "61a3ce8162fc9e98640858ed60f3442d62053ab5da08f94659e65ad293100db8",
+  "status": "PASS"
+}
