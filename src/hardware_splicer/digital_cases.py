@@ -170,6 +170,43 @@ PLOTTER = RegisteredCase(
 
 CASES = {case.case_id: case for case in (FIELDDECK, FIELDDECK_5, PLOTTER)}
 
+# Which numeric requirements each registered check reads, as read from the
+# evaluator source named here. The declaration only applies to a run whose
+# retained evaluator files have exactly these hashes; any other run, and any
+# check not listed, depends on every requirement. A declaration can therefore
+# narrow invalidation only for the code it was read from.
+CHECK_REQUIREMENTS = {
+    'fielddeck-5': {
+        # study_contract.engineering_result sets each limit; build.power_comparison
+        # feeds pi_work_current_a and keyboard_current_a into the work and stress
+        # scenarios. high_keyboard_demand uses fixed stress currents and a fixed 0 A limit.
+        'evaluator_sha256': {
+            f'{_SWAP}/study_contract.py': '3ac77d3e9f75ae1115d6db09c2d4aa69349fde6ec535a26153dbda06fcbd73b3',
+            f'{_SWAP}/build.py': '9d2604b997e39a7c00feac6843f0e100585ba8040698396ca191d3df7bb5833e',
+            f'{_SWAP}/study_build.py': '365417d3d03c5c67441dd9785b2621bc254849b4945708da8b6f6d87e1c75245',
+        },
+        'checks': {
+            'work_runtime': ('minimum_work_runtime_h', 'pi_work_current_a', 'keyboard_current_a'),
+            'ordinary_source_margin': ('minimum_supply_margin_a', 'pi_work_current_a', 'keyboard_current_a'),
+            'high_keyboard_supply_limit': (),
+        },
+    },
+}
+
+
+def check_requirements(case_id, check_id, requirements, source_sha256):
+    """Return (requirement names a check reads, how that was decided)."""
+    every = tuple(sorted(requirements))
+    declared = CHECK_REQUIREMENTS.get(case_id)
+    if not declared or check_id not in declared['checks']:
+        return every, 'every_study_input'
+    if any(source_sha256.get(name) != digest for name, digest in declared['evaluator_sha256'].items()):
+        return every, 'every_study_input'
+    names = declared['checks'][check_id]
+    if not set(names) <= set(requirements):
+        return every, 'every_study_input'
+    return tuple(sorted(names)), 'declared_for_evaluator'
+
 
 def registered(case_id):
     if not isinstance(case_id, str) or case_id not in CASES:
