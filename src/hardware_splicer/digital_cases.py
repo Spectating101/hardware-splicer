@@ -15,9 +15,10 @@ import re
 import shutil
 
 from .project_store import CorruptProject
+from .state_paths import repo_root
 
 DEFAULT_CASE = 'hs3g-b'
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = repo_root()
 CONTRACT = 'study-contract.json'
 RECEIPT = 'study-verification.json'
 ENTRYPOINT = 'STUDY_README.md'

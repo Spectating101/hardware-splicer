@@ -64,6 +64,44 @@ def job_db_path(package_dir: Path | None = None) -> Path:
     return state_dir(package_dir) / "jobs.sqlite3"
 
 
+def repo_root(package_dir: Path | None = None) -> Path:
+    """Checkout that supplies ``projects/``, ``examples/`` and ``apps/``.
+
+    ``HARDWARE_SPLICER_REPO_ROOT`` (set by ``hs-serve --repo-root`` and
+    ``hs-doctor --repo-root``) wins; a source checkout is its own root. An installed
+    package without one falls back to the old layout guess, where checkout-only
+    inputs are simply absent and report themselves unavailable.
+    """
+
+    explicit = _env_path("HARDWARE_SPLICER_REPO_ROOT")
+    if explicit is not None:
+        return explicit.resolve()
+    package = Path(package_dir) if package_dir is not None else _PACKAGE_DIR
+    return checkout_root(package) or package.parent.parent
+
+
+def user_cache_dir() -> Path:
+    xdg = _env_path("XDG_CACHE_HOME")
+    base = xdg if xdg is not None and xdg.is_absolute() else Path.home() / ".cache"
+    return base / "hardware-splicer"
+
+
+def scratch_dir(package_dir: Path | None = None) -> Path:
+    """Default KiCad/Gerber scratch root when ``HARDWARE_SPLICER_TMP_ROOT`` is unset.
+
+    A checkout keeps its gitignored ``.cache/hardware-splicer``; an installed package
+    uses the per-user cache rather than writing beside ``site-packages``.
+    """
+
+    explicit = _env_path("HARDWARE_SPLICER_TMP_ROOT")
+    if explicit is not None:
+        return explicit
+    root = checkout_root(package_dir)
+    if root is not None:
+        return root / ".cache" / "hardware-splicer"
+    return user_cache_dir()
+
+
 def output_root(package_dir: Path | None = None) -> Path:
     """API-owned build outputs; projects live under ``<output_root>/projects`` by default."""
 

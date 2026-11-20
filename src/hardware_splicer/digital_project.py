@@ -23,8 +23,9 @@ from functools import lru_cache
 
 from .project_store import CorruptProject, ProjectNotFound, RevisionConflict, validate_project_id
 from . import digital_cases as cases
+from .state_paths import repo_root
 
-CASE = Path(__file__).resolve().parents[2] / 'examples/drone_proving_ground/digital'
+CASE = repo_root() / 'examples/drone_proving_ground/digital'
 DESIGN = CASE.parent / 'revision_b/reference'
 ARTIFACTS = frozenset({
     'ASSEMBLY.png', 'EXPLODED.png', 'FLIGHT.gif', 'HS-LICENSE.txt', 'HS3G_B_ASSEMBLY.glb',

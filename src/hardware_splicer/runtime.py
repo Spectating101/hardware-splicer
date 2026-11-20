@@ -13,17 +13,17 @@ import urllib.request
 from pathlib import Path
 from typing import Dict, Iterator, Optional
 
+from .state_paths import repo_root, scratch_dir
 from .testing_mode import testing_mode_enabled
 
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = repo_root()
 CIRCUIT_ROOT = ROOT / "apps" / "circuit-ai"
 
 
 def scratch_root() -> Path:
-    """Writable scratch area for KiCad/Gerber trees (defaults to repo-local .cache)."""
-    raw = os.environ.get("HARDWARE_SPLICER_TMP_ROOT", "").strip()
-    root = Path(raw).expanduser() if raw else (ROOT / ".cache" / "hardware-splicer")
+    """Writable scratch area for KiCad/Gerber trees (see state_paths.scratch_dir)."""
+    root = scratch_dir()
     root.mkdir(parents=True, exist_ok=True)
     return root
 
