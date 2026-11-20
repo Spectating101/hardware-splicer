@@ -308,8 +308,11 @@ def _run_kdif(
     }
 
 
+IBOM_HARDENING = ("--new-session", "--clearenv", "--setenv", "PATH", "/usr/bin:/bin")
+
+
 def _ibom_bwrap_args(checkout: Path, board: Path, output_dir: Path) -> list[str]:
-    """The exact argv of the recorded offline trial that approval was based on."""
+    """The recorded offline trial's argv that approval was based on, plus session and environment hardening."""
     bwrap = shutil.which("bwrap")
     if not bwrap:
         raise SignalEvaluationError("bubblewrap unavailable; never run iBOM directly on host")
@@ -320,6 +323,9 @@ def _ibom_bwrap_args(checkout: Path, board: Path, output_dir: Path) -> list[str]
         for x in IBOM_ARGV
     ]
     argv[0] = bwrap
+    # Hardening beyond the recorded trial, matching the sibling adapters: a new session stops the
+    # tool reaching the caller's terminal (TIOCSTI), and the sandbox starts from an empty environment.
+    argv[1:1] = list(IBOM_HARDENING)
     return argv
 
 
@@ -370,7 +376,7 @@ def _run_ibom(
     run = run_fn or subprocess.run
     result = run(
         args, capture_output=True, text=True, errors="replace", timeout=120, check=False,
-        cwd="/", env={"PATH": "/usr/bin:/bin", "HOME": "/tmp"},
+        cwd="/", env={"PATH": "/usr/bin:/bin", "HOME": "/tmp"}, stdin=subprocess.DEVNULL,
     )
     if result.returncode != 0:
         raise SignalEvaluationError(

@@ -165,8 +165,11 @@ def test_router_runs_approved_ibom_with_trial_argv(source, board, fake_host, tmp
                          out=(out / router.IBOM_OUTPUT_DIRNAME).resolve())
                 for x in proposals.IBOM_ARGV]
     expected[0] = "/usr/bin/bwrap"
+    expected[1:1] = list(router.IBOM_HARDENING)
     assert argv == expected and "--unshare-all" in argv and argv.count("--bind") == 1
+    assert "--new-session" in argv and argv.index("--clearenv") < argv.index("HOME")
     assert kwargs["env"] == {"PATH": "/usr/bin:/bin", "HOME": "/tmp"}
+    assert kwargs["stdin"] == subprocess.DEVNULL
     cap = json.loads((out / router.IBOM_CAPABILITY_FILENAME).read_text())
     assert cap["accepted"] is True and cap["fab_approved"] is False
     assert cap["electrical_correctness_verified"] is False and cap["build_ready"] is False
