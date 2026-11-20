@@ -58,7 +58,7 @@ hs-wiring = "hardware_splicer.wiring_cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-hardware_splicer = ["data/*.json"]
+hardware_splicer = ["data/*.json", "ui_dist/*", "ui_dist/**/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
