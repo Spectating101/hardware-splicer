@@ -3,7 +3,8 @@
 
     HS revision 1 export -> Policy Lab review (real run.mjs) -> HS-validated proposal
     -> HS revision 2 (native rerun) -> change evidence -> Cite dossier edition
-    -> HS revision 3 -> Cite marks the revision-2 edition stale and refuses reissue
+    -> Policy Lab modelled candidate on revision 2 -> HS revision 3 (native rerun) -> Cite edition
+    -> each later revision makes the earlier edition stale; Cite refuses to reissue it
 
 Negative controls: a covered file changed after export, a packet naming the wrong
 run, stale Policy Lab feedback after the revision, and a change packet for a
@@ -24,6 +25,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -43,6 +45,8 @@ from hardware_splicer.project_store import RevisionConflict  # noqa: E402
 
 CASE_ID = "fielddeck-5"
 POLICY = "applications/hardware-policy/evidence/fielddeck-20261119/policies/runtime-4h.json"
+CANDIDATE_POLICY = "applications/hardware-policy/evidence/change-dossier-20261120/policies/runtime-4h-pi-load-candidate.json"
+CANDIDATE_ID = "pi-work-load-budget"
 
 
 class ChainError(RuntimeError):
@@ -92,6 +96,7 @@ def policy_review(log, policy_lab: Path, policy: Path, export: Path, out: Path, 
                                "--evidence", str(export)]).stdout)
     if verified.get("verified") is not True:
         raise ChainError("Policy Lab review did not replay.")
+    (out / "replay.json").write_bytes(canonical_json_bytes(verified))
     log(f"  Policy Lab {review['policy']['id']} on r{revision}: {review['decision']} (exit {done.returncode}); "
         f"replay verified: {verified['verified']}")
     for row in review["unmet_constraints"]:
@@ -145,6 +150,7 @@ def _chain(log, policy_lab, cite_root, policy, work, exchange, args):
                "cite_commit": run(["git", "-C", str(cite_root), "rev-parse", "HEAD"]).stdout.strip(),
                "policy_file": str(policy.relative_to(policy_lab)), "policy_sha256": sha(policy.read_bytes()),
                "node": run(["node", "--version"]).stdout.strip()}
+    run_mjs = policy_lab / "applications/hardware-policy/run.mjs"
     log(f"HS {sources['hs_commit'][:12]} · Policy Lab {sources['policy_lab_commit'][:12]} · "
         f"Cite {sources['cite_commit'][:12]} · node {sources['node']}")
     with DigitalStudyEngine(project_root=work / "projects", job_db=work / "jobs.sqlite3") as engine:
@@ -160,7 +166,8 @@ def _chain(log, policy_lab, cite_root, policy, work, exchange, args):
 
         log("2. Policy Lab: review revision 1 against its checked-in runtime policy")
         base_review, review1, replay1 = policy_review(log, policy_lab, policy, base_export, exchange / "r1-review", 1, project)
-        proposal = validate_policy_feedback(engine, base_export.read_bytes(), base_review.read_bytes())
+        proposal = validate_policy_feedback(engine, base_export.read_bytes(), base_review.read_bytes(),
+                                            policy_lab_run=run_mjs)
         proposal_path = write_exchange(exchange / "proposal.json", proposal)
         log(f"  HS validated proposal: {json.dumps(proposal['requirement_changes'], sort_keys=True)} "
             f"(automatic_execution={proposal['automatic_execution']})")
@@ -180,7 +187,7 @@ def _chain(log, policy_lab, cite_root, policy, work, exchange, args):
         candidate_review, review2, replay2 = policy_review(log, policy_lab, policy, candidate_export,
                                                            exchange / "r2-review", 2, project)
         try:
-            validate_policy_feedback(engine, base_export.read_bytes(), base_review.read_bytes())
+            validate_policy_feedback(engine, base_export.read_bytes(), base_review.read_bytes(), policy_lab_run=run_mjs)
             problems.append("stale revision-1 feedback was accepted after revision 2")
         except RevisionConflict as exc:
             negatives["stale_policy_feedback"] = {"refused": True, "by": "HS policy_layer", "reason": str(exc)}
@@ -235,15 +242,39 @@ def _chain(log, policy_lab, cite_root, policy, work, exchange, args):
         negatives["wrong_revision_identity"] = {"refused": code == 1, "exit_code": code, "reason": result.get("error")}
         log(f"  NEGATIVE packet naming the wrong run: exit {code} {result.get('error')}")
 
-        log(f"7. HS: a further change (revision 3, minimum_work_runtime_h={args.stale_runtime_target:g})")
-        further = engine.run_revision(project, base_revision=2,
-                                      requirements={**r2["summary"]["requirements"],
-                                                    "minimum_work_runtime_h": args.stale_runtime_target},
-                                      change_request="Further change after the dossier was issued")
-        if not further.get("ok"):
-            raise ChainError("revision 3 failed")
+        log("7. Policy Lab: review failing revision 2 under a policy declaring a modelled candidate design change")
+        candidate_policy = policy_lab / CANDIDATE_POLICY
+        r2_candidate_review, review2c, replay2c = policy_review(log, policy_lab, candidate_policy, candidate_export,
+                                                               exchange / "r2-candidate-review", 2, project)
+        offered = {row["id"]: row for row in review2c.get("candidate_design_changes", [])}
+        candidate = offered.get(CANDIDATE_ID)
+        if candidate is None or candidate["status"] != "PROPOSED":
+            raise ChainError(f"Policy Lab proposed no {CANDIDATE_ID} candidate: {json.dumps(candidate)[:400]}")
+        log(f"  candidate {candidate['id']}: {candidate['input']} {candidate['before']} -> {candidate['after']} "
+            f"({candidate['status']})")
+        log(f"    formula: {candidate['formula']}")
+        log(f"    numbers: {json.dumps(candidate['numbers'], sort_keys=True)}")
+        proposal3 = validate_policy_feedback(engine, candidate_export.read_bytes(), r2_candidate_review.read_bytes(),
+                                             policy_lab_run=run_mjs, candidates=(CANDIDATE_ID,))
+        proposal3_path = write_exchange(exchange / "proposal-r3.json", proposal3)
+        log(f"  HS validated proposal (replay: {proposal3['policy_review_verification']}): "
+            f"{json.dumps(proposal3['requirement_changes'], sort_keys=True)}")
+
+        log("8. HS: apply the candidate as revision 3 (native rerun)")
+        applied3 = engine.run_revision(project, base_revision=2, requirements=proposal3["resolved_requirements"],
+                                       change_request=f"Apply Policy Lab modelled candidate {CANDIDATE_ID}",
+                                       request_id=str(uuid5(NAMESPACE_URL, "change-dossier:" + sha(r2_candidate_review.read_bytes()))))
+        if not applied3.get("ok"):
+            raise ChainError(f"revision 3 failed: {json.dumps(applied3.get('job', {}).get('error'))[:600]}")
         r3 = engine.study(project, 3)
-        log(f"  r3 run {r3['run_id']} requirements_met={r3['summary']['requirements_met']}")
+        log(f"  r3 run {r3['run_id']} parent {r3['parent_revision']} requirements_met={r3['summary']['requirements_met']}")
+        log(f"    metrics: {json.dumps(r3['summary']['metrics'], sort_keys=True)}")
+        for row in r3["summary"]["constraints"]:
+            log(f"    {row['id']}: {'pass' if row['passed'] else 'FAIL'} {row['actual']} {row['unit']} "
+                f"vs {row['limit']} {row['unit']}")
+        r3_export = write_exchange(exchange / "r3-export.json", export_policy_evidence(engine, project, 3))
+        r3_review, review3, replay3 = policy_review(log, policy_lab, candidate_policy, r3_export,
+                                                    exchange / "r3-review", 3, project)
         head3 = write_exchange(exchange / "head-r3.json", export_revision_head(engine.projects, project))
         try:
             build_change_evidence(engine.projects, project, base_revision=1, candidate_revision=2,
@@ -252,28 +283,77 @@ def _chain(log, policy_lab, cite_root, policy, work, exchange, args):
         except RevisionConflict as exc:
             negatives["hs_repackage_after_change"] = {"refused": True, "by": "HS change_dossier", "reason": str(exc)}
             log(f"  NEGATIVE HS refuses to repackage r2: {exc}")
+        files3 = {"base_export": candidate_export, "base_review": r2_candidate_review, "proposal": proposal3_path,
+                  "candidate_export": r3_export, "candidate_review": r3_review}
+        packet3 = build_change_evidence(engine.projects, project, base_revision=2, candidate_revision=3,
+                                        root=exchange, files=files3)
+        packet3_receipt = write_change_evidence(exchange / "change-evidence-r3.json", packet3)
+        [outcome] = [row["native_outcome"] for row in packet3["proposal"]["candidate_design_changes"]]
+        log(f"  change-evidence-r3.json sha256 {packet3_receipt['sha256']}")
+        log(f"  NATIVE OUTCOME {outcome['fact']} = {outcome['native_value']} {outcome['unit']} "
+            f"(required {outcome['operator']} {outcome['required']}): met={outcome['met']}")
 
-    log("8. Cite: recheck the revision-2 edition against the new head")
-    code, currency = cite(log, cite_root, "check", "--dossier", edition / "dossier.json", "--head", head3,
-                          "--out", work / "cite" / "edition-r2-recheck", "--workspace", work / "cite" / "workspace",
-                          "--cite-project-id", issued["workspace_record"]["project_id"], allowed=(3,))
-    negatives["stale_edition_check"] = {"status": currency["status"], "exit_code": code, "reasons": currency["reasons"]}
-    log(f"  edition {currency['edition_id'][:16]}: {currency['status']} (exit {code}); {'; '.join(currency['reasons'])}")
-    code, refused = cite(log, cite_root, "issue", "--packet", exchange / "change-evidence.json", "--root", exchange,
-                         "--head", head3, "--out", work / "cite" / "edition-r2-reissue", allowed=(3,))
-    negatives["stale_edition_reissue"] = {"refused": refused["status"] == "refused_stale", "exit_code": code,
-                                          "issued": (work / "cite" / "edition-r2-reissue").exists()}
-    log(f"  reissue with r3 head: {refused['status']} (exit {code}); output written: "
-        f"{negatives['stale_edition_reissue']['issued']}")
-    stale_md = (work / "cite" / "edition-r2-recheck" / "dossier.md").read_text()
+        log("9. Cite: recheck the revision-2 edition against the revision-3 head")
+        code, currency = cite(log, cite_root, "check", "--dossier", edition / "dossier.json", "--head", head3,
+                              "--out", work / "cite" / "edition-r2-recheck", "--workspace", work / "cite" / "workspace",
+                              "--cite-project-id", issued["workspace_record"]["project_id"], allowed=(3,))
+        negatives["stale_edition_check"] = {"status": currency["status"], "exit_code": code, "reasons": currency["reasons"]}
+        log(f"  edition {currency['edition_id'][:16]}: {currency['status']} (exit {code}); {'; '.join(currency['reasons'])}")
+        code, refused = cite(log, cite_root, "issue", "--packet", exchange / "change-evidence.json", "--root", exchange,
+                             "--head", head3, "--out", work / "cite" / "edition-r2-reissue", allowed=(3,))
+        negatives["stale_edition_reissue"] = {"refused": refused["status"] == "refused_stale", "exit_code": code,
+                                              "issued": (work / "cite" / "edition-r2-reissue").exists()}
+        log(f"  reissue with r3 head: {refused['status']} (exit {code}); output written: "
+            f"{negatives['stale_edition_reissue']['issued']}")
+        stale_md = (work / "cite" / "edition-r2-recheck" / "dossier.md").read_text()
+
+        log("10. Cite: issue the revision-3 (candidate) dossier edition")
+        edition3 = work / "cite" / "edition-r3"
+        code, issued3 = cite(log, cite_root, "issue", "--packet", exchange / "change-evidence-r3.json", "--root", exchange,
+                             "--head", head3, "--out", edition3, "--workspace", work / "cite" / "workspace")
+        log(f"  issued edition {issued3['edition_id']} bound to r{issued3['bound_to_revision']} (exit {code})")
+        dossier3 = json.loads((edition3 / "dossier.json").read_bytes())
+        dossier3_md = (edition3 / "dossier.md").read_text()
+        if "unknown / not tested" not in dossier3_md:
+            problems.append("the revision-3 dossier does not state the physical means as unknown")
+
+        log(f"11. HS: a further change (revision 4, minimum_work_runtime_h={args.stale_runtime_target:g})")
+        further = engine.run_revision(project, base_revision=3,
+                                      requirements={**r3["summary"]["requirements"],
+                                                    "minimum_work_runtime_h": args.stale_runtime_target},
+                                      change_request="Further change after the revision-3 dossier was issued")
+        if not further.get("ok"):
+            raise ChainError("revision 4 failed")
+        r4 = engine.study(project, 4)
+        log(f"  r4 run {r4['run_id']} requirements_met={r4['summary']['requirements_met']}")
+        head4 = write_exchange(exchange / "head-r4.json", export_revision_head(engine.projects, project))
+
+    log("12. Cite: recheck the revision-3 (candidate) edition against the revision-4 head")
+    code, currency3 = cite(log, cite_root, "check", "--dossier", edition3 / "dossier.json", "--head", head4,
+                           "--out", work / "cite" / "edition-r3-recheck", "--workspace", work / "cite" / "workspace",
+                           "--cite-project-id", issued3["workspace_record"]["project_id"], allowed=(3,))
+    negatives["candidate_edition_stale_check"] = {"status": currency3["status"], "exit_code": code,
+                                                  "reasons": currency3["reasons"]}
+    log(f"  edition {currency3['edition_id'][:16]}: {currency3['status']} (exit {code}); {'; '.join(currency3['reasons'])}")
+    code, refused3 = cite(log, cite_root, "issue", "--packet", exchange / "change-evidence-r3.json", "--root", exchange,
+                          "--head", head4, "--out", work / "cite" / "edition-r3-reissue", allowed=(3,))
+    negatives["candidate_edition_reissue"] = {"refused": refused3["status"] == "refused_stale", "exit_code": code,
+                                              "issued": (work / "cite" / "edition-r3-reissue").exists()}
+    log(f"  reissue with r4 head: {refused3['status']} (exit {code}); output written: "
+        f"{negatives['candidate_edition_reissue']['issued']}")
+    stale3_md = (work / "cite" / "edition-r3-recheck" / "dossier.md").read_text()
+    for text in (dossier_md, dossier3_md, stale_md, stale3_md):
+        lowered = text.lower()
+        if any(re.search(pattern, lowered) for pattern in (r"\bfix(es|ed)?\b", r"\bready\b", r"\bapproved\b")):
+            problems.append("fix/ready/approved wording appeared in a dossier")
 
     for name, row in negatives.items():
-        if name == "stale_edition_check":
+        if "status" in row:
             if row["status"] != "stale":
-                problems.append("the revision-2 edition was not marked stale after revision 3")
+                problems.append(f"an edition was not marked stale after a further change: {name}")
         elif not row.get("refused") or row.get("issued"):
             problems.append(f"negative control not refused: {name}")
-    if packet["physical_authority_granted"] or dossier["physical_authority_granted"]:
+    if any(value["physical_authority_granted"] for value in (packet, dossier, packet3, dossier3)):
         problems.append("physical authority appeared")
     return {
         "sources": sources,
@@ -283,7 +363,7 @@ def _chain(log, policy_lab, cite_root, policy, work, exchange, args):
                              "requirements_met": row["summary"]["requirements_met"],
                              "package_sha256": row["artifact_manifest"]["STUDY.zip"]["sha256"],
                              "checks": row["summary"]["constraints"]}
-                      for name, row in (("r1", r1), ("r2", r2), ("r3", r3))},
+                      for name, row in (("r1", r1), ("r2", r2), ("r3", r3), ("r4", r4))},
         "identity": {"base": {k: packet["base"][k] for k in ("snapshot_sha256", "seal_sha256", "package_sha256")},
                      "candidate": {k: packet["candidate"][k] for k in ("snapshot_sha256", "seal_sha256", "package_sha256")}},
         "policy_reviews": {
@@ -304,6 +384,18 @@ def _chain(log, policy_lab, cite_root, policy, work, exchange, args):
         "dossier": {"edition_id": dossier["edition"]["edition_id"], "bound_to": dossier["edition"]["bound_to"],
                     "failing_checks": failing, "markdown": dossier_md, "stale_markdown": stale_md,
                     "json": dossier},
+        "candidate": {"policy": review2c["policy"]["id"], "policy_decision": review2c["decision"],
+                      "row": {key: candidate[key] for key in ("id", "status", "input", "before", "after", "formula",
+                                                              "numbers", "assumptions", "basis")},
+                      "requirement_changes": proposal3["requirement_changes"],
+                      "replay": proposal3["policy_review_verification"],
+                      "native_outcome": outcome, "r3_metrics": r3["summary"]["metrics"],
+                      "r3_review": {"decision": review3["decision"],
+                                    "unmet": [row["explanation"] for row in review3["unmet_constraints"]]},
+                      "change_evidence_sha256": packet3_receipt["sha256"],
+                      "not_tested": packet3["not_tested"], "unresolved": packet3["unresolved"]},
+        "dossier_r3": {"edition_id": dossier3["edition"]["edition_id"], "bound_to": dossier3["edition"]["bound_to"],
+                       "markdown": dossier3_md, "stale_markdown": stale3_md, "json": dossier3},
         "negative_controls": negatives,
         "exchange_dir": exchange,
         "problems": problems,
@@ -326,6 +418,12 @@ def _publish(log, summary, work, evidence, tag):
         Path(str(stem) + "-dossier.json").write_text(json.dumps(dossier.pop("json"), indent=2, sort_keys=True) + "\n")
         summary["tracked"] = {"exchange": tracked.name, "dossier": stem.name + "-dossier.md",
                               "stale_dossier": stem.name + "-dossier-stale.md", "dossier_json": stem.name + "-dossier.json"}
+        dossier3 = summary["dossier_r3"]
+        Path(str(stem) + "-dossier-r3.md").write_text(dossier3.pop("markdown"))
+        Path(str(stem) + "-dossier-r3-stale.md").write_text(dossier3.pop("stale_markdown"))
+        Path(str(stem) + "-dossier-r3.json").write_text(json.dumps(dossier3.pop("json"), indent=2, sort_keys=True) + "\n")
+        summary["tracked"].update(dossier_r3=stem.name + "-dossier-r3.md", stale_dossier_r3=stem.name + "-dossier-r3-stale.md",
+                                  dossier_r3_json=stem.name + "-dossier-r3.json")
     log(f"RESULT ok={summary['ok']} problems={summary.get('problems', [summary.get('error')])} "
         f"elapsed={summary['elapsed_s']} s")
     Path(str(stem) + ".json").write_text(json.dumps(summary, indent=2, sort_keys=True, default=str) + "\n")
@@ -337,19 +435,23 @@ ADAPTERS = (
     ("HS export → Policy Lab review", "executable integration",
      "HS `policy_layer` export bytes are reviewed and replay-verified by Policy Lab's own `run.mjs` in this replay."),
     ("Policy Lab review → HS proposal", "executable integration",
-     "HS `validate_policy_feedback` binds the review to the exact export bytes and resolves the overrides."),
+     "HS `validate_policy_feedback` checks the decision against its rows, runs Policy Lab `verify` itself, "
+     "and binds the review to the exact export bytes."),
     ("HS proposal → new HS revision", "executable integration",
      "`DigitalStudyEngine.run_revision` reruns the registered native study; the check delta comes from `study_evidence`."),
+    ("Policy Lab → modelled candidate design change → HS revision 3", "executable integration",
+     "Policy Lab computes the `pi_work_current_a` candidate from exported modeled numbers; HS applies the selected "
+     "candidate and reruns natively; the packet reports the native value against the target."),
     ("HS change evidence → Cite dossier", "executable integration",
-     "Cite's `engineering_change_cli` (new receiving contract) rereads and hash-checks every covered file."),
+     "Cite's `engineering_change_cli` rereads and hash-checks every covered file and rederives the candidate outcome."),
     ("Cite stale-edition gate", "executable integration",
-     "Triggered here by a real third HS revision; Cite compares the edition with HS's exported revision head."),
+     "Triggered by real HS revisions 3 and 4; Cite compares each edition with HS's exported revision head."),
     ("Cite edition → Cite workspace claims", "tested isolated adapter",
      "`record_in_workspace` writes through Cite's project/claim/evidence store; exercised here, with no reader beyond the store."),
+    ("Candidate load → physical means (underclock, board, peripheral)", "not linked",
+     "Nothing identifies or tests how the Pi would draw the candidate current; stated as unknown / not tested."),
     ("Automatic HS → Cite revision watcher", "proposed",
      "Nothing notifies Cite of a new HS revision; the head is exported and passed by this script."),
-    ("Policy Lab → computed design fix", "proposed",
-     "Policy Lab returns the policy's declared target as the override; it does not propose a design change that meets it."),
 )
 
 
@@ -379,7 +481,28 @@ def _markdown(summary, stem):
               f"- Change evidence sha256 `{summary['change_evidence']['sha256']}`.",
               f"- Cite edition `{summary['dossier']['edition_id'][:16]}` bound to r{summary['dossier']['bound_to']['revision']}; "
               f"failing checks kept: {', '.join(row['check'] for row in summary['dossier']['failing_checks'])}.",
-              f"- r3 run `{rev['r3']['run_id']}`: {checks(rev['r3'])}.", "",
+              f"- r3 run `{rev['r3']['run_id']}` (modelled candidate applied): {checks(rev['r3'])}. "
+              f"Requirements met: {rev['r3']['requirements_met']}.",
+              f"- r4 run `{rev['r4']['run_id']}` (further change): {checks(rev['r4'])}.", ""]
+    cand = summary["candidate"]
+    row, outcome = cand["row"], cand["native_outcome"]
+    lines += ["## Modelled candidate design change (revision 3)", "",
+              f"Policy Lab `{cand['policy']}` on the failing revision 2 ({cand['policy_decision']}) proposed "
+              f"`{row['id']}`: `{row['input']}` {row['before']} → **{row['after']}** A ({row['status']}).", "",
+              f"- Formula: `{row['formula']}`.",
+              "- Numbers: " + ", ".join(f"{k} = {v}" for k, v in sorted(row["numbers"].items())) + ".",
+              *[f"- Assumption: {item}" for item in row["assumptions"]],
+              f"- HS replay check: {cand['replay']}.",
+              f"- HS requirement changes applied as revision 3: `{json.dumps(cand['requirement_changes'], sort_keys=True)}`.",
+              f"- **Native rerun:** {outcome['fact']} = **{outcome['native_value']} {outcome['unit']}** against "
+              f"{outcome['operator']} {outcome['required']} {outcome['unit']}: "
+              f"{'meets the target' if outcome['met'] else 'does NOT meet the target'} (modeled, margin "
+              f"{round(outcome['native_value'] - outcome['required'], 3)} {outcome['unit']}).",
+              f"- Revision 3 metrics: `{json.dumps(cand['r3_metrics'], sort_keys=True)}`.",
+              f"- Policy Lab on revision 3: {cand['r3_review']['decision']}"
+              + (f" ({'; '.join(cand['r3_review']['unmet'])})" if cand["r3_review"]["unmet"] else "") + ".",
+              "- Physical means of reaching this load: **unknown / not tested**. Nothing here says what would make "
+              "the Pi draw this current.", "",
               "## Negative and stale controls", ""]
     for name, row in summary["negative_controls"].items():
         detail = row.get("reason") or "; ".join(row.get("reasons", [])) or ""
@@ -390,11 +513,14 @@ def _markdown(summary, stem):
     lines += [f"| {name} | {kind} | {note} |" for name, kind, note in ADAPTERS]
     tracked = summary.get("tracked", {})
     lines += ["", "## Not tested or not linked", ""] + [f"- {item}" for item in summary["change_evidence"]["not_tested"]]
+    lines += [f"- {item}" for item in summary["candidate"]["not_tested"] if item not in summary["change_evidence"]["not_tested"]]
     lines += [f"- {item}" for item in summary["change_evidence"]["not_linked"]]
     lines += ["- LivePresenter: not linked (optional, skipped).", "",
               "## Files", "",
-              f"- Readable dossier: [`{tracked.get('dossier')}`]({tracked.get('dossier')}); "
+              f"- Revision-2 dossier: [`{tracked.get('dossier')}`]({tracked.get('dossier')}); "
               f"stale-marked recheck: [`{tracked.get('stale_dossier')}`]({tracked.get('stale_dossier')}).",
+              f"- Revision-3 (candidate) dossier: [`{tracked.get('dossier_r3')}`]({tracked.get('dossier_r3')}); "
+              f"stale-marked recheck: [`{tracked.get('stale_dossier_r3')}`]({tracked.get('stale_dossier_r3')}).",
               f"- Exact exchanged bytes: `{tracked.get('exchange')}/`.",
               f"- Log and JSON summary: `{stem}.log`, `{stem}.json`.",
               f"- Sources: HS `{summary['sources']['hs_commit'][:12]}`, Policy Lab "
