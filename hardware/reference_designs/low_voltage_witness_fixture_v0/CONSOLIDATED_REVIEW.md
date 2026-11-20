@@ -4,6 +4,8 @@
 
 Canonical navigation and reviewer handoff for one **consolidated witness draft**. Historical source artifacts and measurements are software-only. No previously published source or evidence is silently rewritten.
 
+**Scope and dependency audit:** [CONSOLIDATION_DEPENDENCY_AND_SCOPE.md](CONSOLIDATION_DEPENDENCY_AND_SCOPE.md) distinguishes the nine actually executed PR #370 review stages from separate experimental PRs #359/#365/#369, and documents a post-review `review_scope.py` hash/scope audit. Do not imply the separate experiments ran as part of this source revision.
+
 ## Current truth
 
 The prototype has an editable routed KiCad9 PCB, zero-violation electrical checks, a nominal 10Ω SPICE model, 183-sample INA228 fake-register replay, unchanged Policy Lab PLRS-6 structural receipt, a strict software fault-discrimination layer, 12Ω externally mounted load candidates, source/fuse research, two-meter read-only SCPI mock, and a physical-evidence preflight.
