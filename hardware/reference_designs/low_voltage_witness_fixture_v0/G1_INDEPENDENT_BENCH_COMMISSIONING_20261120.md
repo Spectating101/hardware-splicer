@@ -152,6 +152,10 @@ cannot measure 4mV shunt and 5V VBUS simultaneously simply by
 switching ranges. Sequential readings under varying load are not
 equivalent to synchronized channels.
 
+## G1 source/OVP qualification follow-up (20 Nov 2026)
+
+Vendor research and new `source_suitability.py` identify the Rigol DP832A CH1 as a preferred *borrow-only* source lead with programmable OVP/OCP. The Siglent SPD3303X-E has CC/OCP but vendor support says it lacks user-settable OVP and cannot be taken as a standalone 5.25 V protection solution. The G1 protection input now requires verified OVP enabled state, proposed trip level below 5.25 V and actual observed J2 fault-event peak. See [G1_SOURCE_SELECTION_AND_INSTRUMENT_BORROW_20261120.md](G1_SOURCE_SELECTION_AND_INSTRUMENT_BORROW_20261120.md). None of this means a source is available or meets the physical trip transient. Borrowing two calibrated DC voltage channels and obtaining high-side-safe independent timing remains unclosed.
+
 ## Unclosed gates and honest end state
 
 PHY-01...PHY-10 remain subject to their original build hold.

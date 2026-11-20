@@ -16,7 +16,12 @@ class ProtectionPreflightTests(unittest.TestCase):
         x=copy.deepcopy(TEMPLATE)
         x["source"].update({
             "manufacturer":"SIM_ONLY","model":"SIM_ONLY","serial":"SIM_ONLY",
-            "voltage_limit_v":5.25,"measured_sustained_short_current_a":.65,
+            "voltage_limit_v":5.0,"measured_sustained_short_current_a":.65,
+            "ovp_configurable_documented":True,
+            "ovp_protection_enabled_verified":True,
+            "ovp_setpoint_v":5.2,
+            "measured_max_j2_voltage_during_protection_trip_v":5.21,
+            "independent_ovp_trip_test_verified":True,
             "measured_peak_short_current_a":.80,
             "measured_current_limit_response_ms":20,
             "independent_source_limit_test_verified":True,
@@ -82,6 +87,25 @@ class ProtectionPreflightTests(unittest.TestCase):
         x["thermal"]["derated_allowable_load_w_at_actual_ambient"]=2
         r=g1.assess(x)
         self.assertEqual(sum("below" in q for q in r["contradictions"]),3)
+
+    def test_nonprogrammable_ovp_source_does_not_claim_strict_ceiling(self):
+        x=self.specimen()
+        x["source"]["manufacturer"]="SIGLENT"
+        x["source"]["model"]="SPD3303X-E"
+        r=g1.assess(x)
+        self.assertTrue(any("lacks documented configurable OVP" in y for y in r["contradictions"]))
+
+    def test_trip_overshoot_above_5_25_blocks_even_if_ovp_enabled(self):
+        x=self.specimen()
+        x["source"]["measured_max_j2_voltage_during_protection_trip_v"]=5.45
+        r=g1.assess(x)
+        self.assertTrue(any("despite the claimed OVP" in y for y in r["contradictions"]))
+
+    def test_unverified_source_ovp_cannot_close_physical_preflight(self):
+        x=self.specimen()
+        x["source"]["ovp_protection_enabled_verified"]=False
+        r=g1.assess(x)
+        self.assertTrue(any("ovp_protection_enabled_verified" in y for y in r["missing_evidence"]))
 
     def test_measured_sustained_short_exceeds_source_setpoint(self):
         x=self.specimen()
