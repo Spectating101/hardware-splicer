@@ -1,0 +1,42 @@
+[15:31:29] HS c9abb1db547f · Policy Lab c565530a9fca · Cite 9bc8ff12c0bb · node v22.21.1
+[15:31:29] 1. HS: create fielddeck-5 revision 1 (native build)
+[15:32:26]   project digital-278ce63f5bb5427795e172920cefa95b r1 run 765e60c3a0b24c95bf14cc28f05fd7ad requirements_met=True
+[15:32:26]     work_runtime: pass 3.166 h vs 2.5 h
+[15:32:26]     ordinary_source_margin: pass 0.48 A vs 0.3 A
+[15:32:26]     high_keyboard_supply_limit: pass 0.08 A vs 0 A
+[15:32:26]   export r1-export.json sha256 dbb752ec7360981cb19e5b2fc8265588b0ce1d8f0dfab22b8d5980b555ec92c2
+[15:32:26] 2. Policy Lab: review revision 1 against its checked-in runtime policy
+[15:32:26]   Policy Lab portable-runtime-4h on r1: BLOCKED (exit 2); replay verified: True
+[15:32:26]     unmet work-runtime: metric.work_runtime_lower_h is 3.166 h; target >= 4 h.
+[15:32:26]     revision_requirements proposed: {"minimum_work_runtime_h": 4}
+[15:32:27]   HS validated proposal: {"minimum_work_runtime_h": {"after": 4.0, "before": 2.5}} (automatic_execution=False)
+[15:32:27] 3. HS: apply the accepted proposal as a new revision (native rerun)
+[15:33:22]   r2 run 22f91786d72648938a9c657f593f9e33 parent 1 requirements_met=False
+[15:33:22]     work_runtime: FAIL 3.166 h vs 4.0 h
+[15:33:22]     ordinary_source_margin: pass 0.48 A vs 0.3 A
+[15:33:22]     high_keyboard_supply_limit: pass 0.08 A vs 0 A
+[15:33:23]   Policy Lab portable-runtime-4h on r2: BLOCKED (exit 2); replay verified: True
+[15:33:23]     unmet engineering.work_runtime: Revise the design to satisfy HS constraint work_runtime.
+[15:33:23]     unmet work-runtime: metric.work_runtime_lower_h is 3.166 h; target >= 4 h.
+[15:33:23]     revision_requirements proposed: {"minimum_work_runtime_h": 4}
+[15:33:23]   NEGATIVE stale r1 feedback refused by HS: The project changed after the policy assessment; export and assess the new revision.
+[15:33:23] 4. HS: package the change evidence and the current revision head
+[15:33:23]   change-evidence.json sha256 5c29ac1bf4c13347a7946ca8f9634ba92c56b4acdc56a056329cbc79972c8c73
+[15:33:23]     STALE work_runtime from r1: passed=True 3.166 vs 2.5; rerun r2 passed=False
+[15:33:23]     retained ordinary_source_margin from r1
+[15:33:23]     retained high_keyboard_supply_limit from r1
+[15:33:23]     unresolved {"actual": 3.166, "check": "work_runtime", "kind": "failing_check", "limit": 4.0, "revision": 2, "run_id": "22f91786d72648938a9c657f593f9e33", "transition": "regressed", "unit": "h"}
+[15:33:23]     unresolved {"actual": 3.166, "fact": "HS engineering check", "kind": "policy_target_unmet", "policy_id": "portable-runtime-4h", "reason": "ENGINEERING_CONSTRAINT_FAILED", "required": "HS limit 4 h", "revision": 2, "target": "engineering.work_runtime"}
+[15:33:23]     unresolved {"actual": 3.166, "fact": "metric.work_runtime_lower_h", "kind": "policy_target_unmet", "policy_id": "portable-runtime-4h", "reason": "TARGET_NOT_MET", "required": ">= 4 h", "revision": 2, "target": "work-runtime"}
+[15:33:23] 5. Cite: issue the revision-2 dossier edition
+[15:33:23]   issued edition ba12b22711425655376b6af8eb638833674394865db7f368a761bcfb31f6daca bound to r2 (exit 0)
+[15:33:23] 6. Negative controls at the Cite boundary
+[15:33:24]   NEGATIVE changed r2-export.json: exit 1 candidate_export: r2-export.json does not match its recorded SHA-256; the bytes changed
+[15:33:24]   NEGATIVE packet naming the wrong run: exit 1 candidate_export: export is not revision 2 of digital-278ce63f5bb5427795e172920cefa95b with the recorded run and package
+[15:33:24] 7. HS: a further change (revision 3, minimum_work_runtime_h=3)
+[15:34:19]   r3 run 02889759d72843afa9d9c7a0d4e98591 requirements_met=True
+[15:34:19]   NEGATIVE HS refuses to repackage r2: Revision 2 is not the latest (3); export the current change.
+[15:34:19] 8. Cite: recheck the revision-2 edition against the new head
+[15:34:19]   edition ba12b22711425655: stale (exit 3); HS project is at revision 3; this edition describes revision 2; run_id changed from 22f91786d72648938a9c657f593f9e33 to 02889759d72843afa9d9c7a0d4e98591; snapshot_sha256 changed from f368826ad623d0b9ce3abb2ed23ff5e0004c73464efec71b9b0622fc7f694a3a to 209a3a69f5c82fcd672eb34b67bce5370c1b4592672b2784452f04598f45b524; seal_sha256 changed from bd9013d7c812fe93dc7d3bbecb70b2ab1739eec2dbc878f05e5f1d6b5fc74195 to 8297d57da31a059a6b0db19d7b2e695ebb3cd0b4c19088ddfb1672abb97266b0; package_sha256 changed from 7e53b5f7385b28dbd030962ef10135b934c6dcbec957329001c93a923f782aad to 88effccc3d409037179754b33b4438cfbb86b63966d3b8013fec12b8b6200dc1
+[15:34:19]   reissue with r3 head: refused_stale (exit 3); output written: False
+[15:34:19] RESULT ok=True problems=[] elapsed=170.0 s
