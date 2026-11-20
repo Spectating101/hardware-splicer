@@ -758,6 +758,8 @@ export default function FieldDeckScene({ projectId, manifest, onExit, embedded =
         <aside className="fd-tree fd-panel" id="fd-tree" aria-label="Part tree" hidden={narrow && !treeOpen}>
           {!narrow && <h2><button type="button" aria-expanded={treeOpen} aria-controls="fd-tree-content"
             onClick={() => { setDesktopTreeOpen(!treeOpen); setBlockersOnly(false); }}>Assembly</button></h2>}
+          {/* The phone tree opens from the toolbar; the heading stays so the part groups keep their outline level. */}
+          {narrow && <h2 className="visually-hidden">Assembly</h2>}
           <div className="fd-panel-content" id="fd-tree-content" hidden={!treeOpen}>
             <PartTree rows={rows} view={view} endpoints={treeEndpoints} linked={linked} onSelect={select}
               questions={questions} blockersOnly={filtered} counts={view.mode === "compare" ? sidecars[target]?.revision_diff?.counts : null}
