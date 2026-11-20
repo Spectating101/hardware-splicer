@@ -429,7 +429,9 @@ def _netlist_fixture_description(row: Dict[str, Any]) -> str:
 
 
 def _api_output_root() -> Path:
-    return Path(os.getenv("HARDWARE_SPLICER_OUTPUT_ROOT", "/tmp/hardware_splicer_api")).resolve()
+    from .state_paths import output_root
+
+    return output_root().resolve()
 
 
 def _allow_arbitrary_out_dir() -> bool:

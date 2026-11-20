@@ -32,8 +32,9 @@ class DigitalStudyEngine:
             raise ValueError('Supply project_store or project_root, not both.')
         self.projects = project_store if project_store is not None else ProjectStore(project_root)
         if job_backend is None:
-            state = Path(os.getenv('HARDWARE_SPLICER_STATE_DIR', '/tmp/hardware_splicer_state'))
-            path = job_db or os.getenv('HARDWARE_SPLICER_JOB_DB') or state / 'jobs.sqlite3'
+            from .state_paths import job_db_path
+
+            path = job_db or job_db_path()
             job_backend = JobBackend(JobStore(path), worker_count=0)
             self._owns_backend = True
         else:

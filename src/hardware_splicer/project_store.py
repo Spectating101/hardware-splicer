@@ -62,8 +62,9 @@ def default_project_root() -> Path:
     configured = os.getenv("HARDWARE_SPLICER_PROJECT_ROOT")
     if configured:
         return Path(configured).expanduser().resolve()
-    output_root = Path(os.getenv("HARDWARE_SPLICER_OUTPUT_ROOT", "/tmp/hardware_splicer_api"))
-    return (output_root / "projects").expanduser().resolve()
+    from .state_paths import output_root
+
+    return (output_root() / "projects").expanduser().resolve()
 
 
 def validate_project_id(project_id: str) -> str:

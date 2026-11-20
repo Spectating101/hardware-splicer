@@ -370,8 +370,9 @@ class JobBackend:
 
     @classmethod
     def from_env(cls) -> "JobBackend":
-        state_dir = Path(os.getenv("HARDWARE_SPLICER_STATE_DIR", "/tmp/hardware_splicer_state"))
-        db_path = Path(os.getenv("HARDWARE_SPLICER_JOB_DB", str(state_dir / "jobs.sqlite3")))
+        from .state_paths import job_db_path
+
+        db_path = job_db_path()
         worker_count = int(os.getenv("HARDWARE_SPLICER_JOB_WORKERS", "1"))
         poll_interval_s = float(os.getenv("HARDWARE_SPLICER_JOB_POLL_INTERVAL_S", "0.2"))
         store = JobStore(db_path)
