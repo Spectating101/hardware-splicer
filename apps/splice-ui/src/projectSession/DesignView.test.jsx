@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
 import DesignView, { matchScene, splitGeometryNote } from "./DesignView.jsx";
 import { fetchSceneManifest, fetchSceneRecords, fetchScenes } from "../api.js";
@@ -71,8 +71,11 @@ it("shows the unavailable geometry as records, with no stage or placeholder", as
   expect(screen.getByText("e7cc")).toBeInTheDocument();
   expect(screen.getByRole("link", { name: "Manufacturer 3D CAD File: x500v2-frame.step" })).toBeInTheDocument();
   expect(screen.getByText("Import source STEP into a working CAD kernel.")).toBeInTheDocument();
-  expect(await screen.findByText("cad_kernel_available", { selector: "code" })).toBeInTheDocument();
-  expect(screen.getByText("licensing_review_completed", { selector: "code" })).toBeInTheDocument();
+  // Open questions read as words; the machine key stays one disclosure away.
+  const questions = (await screen.findByText("CAD kernel available", { selector: "strong" })).closest("ol");
+  expect(questions).toHaveTextContent("CAD kernel available · recorded as no");
+  expect(within(questions).getByText("cad_kernel_available", { selector: "code" }).closest("details")).not.toHaveAttribute("open");
+  expect(within(questions).getByText("Licensing review completed", { selector: "strong" })).toBeInTheDocument();
   expect(screen.queryByTestId("scene")).toBeNull();
   expect(container.querySelector("canvas, .fd-stage")).toBeNull();
 });

@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { fetchSceneManifest, fetchSceneRecords, fetchScenes } from "../api.js";
 import { sceneRevisions } from "../components/sceneRevisions.js";
+import { formatValue, keyLabel } from "./digitalStudyLabels.js";
 
 const FieldDeckScene = lazy(() => import("../components/FieldDeckScene.jsx"));
 const SCENE_SCHEMA = "hardware_splicer.scene_manifest.v1";
@@ -63,18 +64,25 @@ function GeometryRecords({ manifest }) {
     {!error && !records && <p className="muted">Loading records…</p>}
     {records && !questions.length && <p>None recorded as false in the listed records.</p>}
     {questions.length > 0 && <ol className="design-record-list">
-      {questions.map(({ field, path }) => <li key={`${path}:${field}`}><code>{field}</code> · false · {path}</li>)}
+      {questions.map(({ field, path }) => <li key={`${path}:${field}`}><strong>{keyLabel(field).label}</strong> · recorded as no
+        <details className="bench-raw"><summary>Key and source</summary><code>{field}</code> · false · {path}</details></li>)}
     </ol>}
     {(records || []).map((record) => <details key={record.path}><summary>{record.label || record.path} · {record.status}</summary>
       {record.data && <dl className="bench-facts">{Object.entries(record.data).filter(([, value]) => scalar(value)).map(([key, value]) =>
-        <div key={key}><dt>{key}</dt><dd>{shown(value)}</dd></div>)}</dl>}
+        <div key={key}><dt title={key}>{keyLabel(key).label}</dt><dd>{typeof value === "boolean" || value === null ? formatValue(value) : shown(value)}
+          {" "}<code className="bench-key">{key}</code></dd></div>)}</dl>}
     </details>)}
   </div>;
 }
 
-export default function DesignView({ projectId, caseId, revision, onOpenScene, onManifest }) {
+export default function DesignView({ projectId, caseId, revision, onOpenScene, onManifest, onStatus }) {
   const [state, setState] = useState({ status: "loading" });
   useEffect(() => { onManifest?.(state.status === "linked" ? state.manifest : null); }, [state, onManifest]);
+  useEffect(() => {
+    const drawable = state.status === "linked" && state.manifest.geometry_status === "available"
+      && sceneRevisions(state.manifest).length > 0;
+    onStatus?.(state.status === "linked" ? (drawable ? "scene" : "records") : state.status);
+  }, [state, onStatus]);
   useEffect(() => {
     const controller = new AbortController();
     const { signal } = controller;
