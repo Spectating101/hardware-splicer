@@ -211,7 +211,8 @@ function RevisionSummary({ summary, blockers, blockersKnown, studied }) {
   </section>;
 }
 
-function PackagePanel({ projectId, revision, latestRevision, studyPackages, objective, blockers, blockersKnown, sceneNext, failedChecks = [] }) {
+function PackagePanel({ projectId, revision, latestRevision, studyPackages, objective, blockers, blockersKnown, sceneNext, failedChecks = [],
+  summaryNext = null }) {
   const [packages, setPackages] = useState(null);
   const [error, setError] = useState("");
   useEffect(() => {
@@ -261,8 +262,10 @@ function PackagePanel({ projectId, revision, latestRevision, studyPackages, obje
       <div>
         <h3>Next action</h3>
         {next.length ? <ol className="bench-next">{next.map((row, index) => <li key={index}>{row.text} <small className="muted">· {row.source}</small></li>)}</ol>
-          : blockersKnown ? <p>Next action · unknown. The backend returned no blockers and no next action for revision {revision}.</p>
-            : <p>Next action · unknown</p>}
+          // Same next action as the summary at the top, so the two never disagree.
+          : summaryNext ? <p>{summaryNext.text} <small className="muted">· {summaryNext.source}</small></p>
+            : blockersKnown ? <p>Next action · unknown. The backend returned no blockers and no next action for revision {revision}.</p>
+              : <p>Next action · unknown</p>}
       </div>
     </div>
   </section>;
@@ -430,7 +433,8 @@ export default function ProjectBench({ session, study, children, references, evi
       </section>
     </div>
     <PackagePanel projectId={session.projectId} revision={revision} latestRevision={latest} studyPackages={studyPackages}
-      objective={objective} blockers={blockerText} blockersKnown={blockersKnown} sceneNext={sceneNext} failedChecks={failedChecks} />
+      objective={objective} blockers={blockerText} blockersKnown={blockersKnown} sceneNext={sceneNext} failedChecks={failedChecks}
+      summaryNext={summary.next} />
     <details className="bench-references"><summary>References</summary>
       {references || <p>Reference artifacts: unknown</p>}
       {onReference && <div className="hero-actions">
