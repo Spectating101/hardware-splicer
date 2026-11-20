@@ -1,16 +1,20 @@
 #!/usr/bin/env node
 /*
- * Headless walk of the project journey on a running HS product server that serves the built UI:
+ * Headless walk of the project journey on the one served HS app (hs-serve: API, scenes and built UI):
  *   Projects home → New project (goal, owned parts, reference study) → Fielddeck bench → design view
  *   → Compare (scene and project revisions) → package and next action → plotter bench → drone bench.
  *
  * Usage: node scripts/verify_project_journey.cjs [base-url] [output-dir]
- *   base-url   default http://127.0.0.1:8795
+ *   base-url   default http://127.0.0.1:8787 (the hs-serve default)
  *   output-dir default review-ui/project-bench-20261120
  *
- * Server: HARDWARE_SPLICER_SERVE_UI=1 uvicorn hardware_splicer.product_api:app, with its own
- * HARDWARE_SPLICER_OUTPUT_ROOT and HARDWARE_SPLICER_STATE_DIR, and HARDWARE_SPLICER_DIGITAL_PYTHON set
- * to an interpreter with CadQuery so registered studies can run.
+ * Server: build the UI (make splice-ui-build), then start the canonical app the documented way,
+ *   HARDWARE_SPLICER_STATE_DIR=<fresh dir> HARDWARE_SPLICER_DIGITAL_PYTHON=<python with CadQuery> \
+ *     make serve HS_SERVE_ARGS="--port 8796"        (or: hs-serve --ui --port 8796)
+ * The state dir alone isolates the job database, outputs and projects. --ui refuses to start
+ * without a UI build, so a passing walk also proves the UI came from this app.
+ *
+ * Browser: NODE_PATH=<dir with playwright> PLAYWRIGHT_BROWSERS_PATH=<browsers> node scripts/verify_project_journey.cjs
  *
  * Seeding goes through the same public API the UI uses and only when a project is missing:
  *   - a Fielddeck 5 study (registered case fielddeck-5) plus one requirement change, so it has two
@@ -28,7 +32,7 @@ const { randomUUID } = require("node:crypto");
 const { chromium } = require("playwright");
 
 const ROOT = path.resolve(__dirname, "..");
-const BASE = (process.argv[2] || "http://127.0.0.1:8795").replace(/\/$/, "");
+const BASE = (process.argv[2] || "http://127.0.0.1:8787").replace(/\/$/, "");
 const OUT = path.resolve(process.argv[3] || path.join(ROOT, "review-ui/project-bench-20261120"));
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
