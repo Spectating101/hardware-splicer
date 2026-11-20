@@ -161,10 +161,11 @@ export function projectSessionReducer(state, action) {
       };
 
     case ACTIONS.SET_MACHINE_PROJECT:
+      // A model derived from a reopened project's own intake is not an edit.
       return {
         ...state,
         machineProject: action.machineProject || null,
-        dirty: true,
+        dirty: action.derived ? state.dirty : true,
       };
 
     case ACTIONS.START_PROJECT:
@@ -459,6 +460,19 @@ export function projectSnapshot(session) {
     ...snapshot
   } = session;
   return snapshot;
+}
+
+/**
+ * Order-independent JSON for comparing snapshots. The backend stores snapshots with sorted keys
+ * while the session builds them in its own order, so plain JSON.stringify never matches.
+ */
+export function canonicalJson(value) {
+  if (Array.isArray(value)) return `[${value.map((item) => canonicalJson(item ?? null)).join(",")}]`;
+  if (value && typeof value === "object") {
+    return `{${Object.keys(value).sort().filter((key) => value[key] !== undefined)
+      .map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`).join(",")}}`;
+  }
+  return JSON.stringify(value) ?? "null";
 }
 
 export function canReturnToDesign(session) {

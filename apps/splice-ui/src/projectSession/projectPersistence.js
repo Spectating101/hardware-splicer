@@ -2,6 +2,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ACTIONS,
   PERSISTENCE_STATUS,
+  canonicalJson,
+  createEmptySession,
+  projectSessionReducer,
   projectSnapshot,
   sessionIsPersistable,
 } from "./projectSession.js";
@@ -155,12 +158,22 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
     if (machineSeedRef.current === seedKey) return undefined;
     machineSeedRef.current = seedKey;
     let cancelled = false;
+    // A reopened project whose snapshot predates machine models gets one derived from its intake.
+    // It is shown, not saved: it reaches storage only with the next real edit.
+    const reopened = session.sessionOrigin === "persistent_project" && Number(session.snapshotRevision) > 0;
+    const baseline = savedSerializedRef.current;
+    const unedited = reopened && baseline === canonicalJson(projectSnapshot(session));
     seedMachineProjectFromIntake(session.intake)
       .then((body) => {
         if (cancelled || activeProjectRef.current !== session.projectId) return;
+        const machineProject = body.project || null;
+        if (unedited && savedSerializedRef.current === baseline) {
+          savedSerializedRef.current = canonicalJson(projectSnapshot({ ...session, machineProject }));
+        }
         dispatch({
           type: ACTIONS.SET_MACHINE_PROJECT,
-          machineProject: body.project || null,
+          machineProject,
+          derived: reopened,
         });
         setMachineSeedError(null);
       })
@@ -192,7 +205,7 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
     const snapshot = projectSnapshot(session);
     let serialized;
     try {
-      serialized = JSON.stringify(snapshot);
+      serialized = canonicalJson(snapshot);
     } catch (error) {
       dispatch({
         type: ACTIONS.SET_PERSISTENCE,
@@ -262,7 +275,13 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
         const envelope = body.project || {};
         const snapshot = envelope.snapshot || {};
         const recovery = envelope.recovery || {};
-        savedSerializedRef.current = JSON.stringify(snapshot);
+        // Compare future saves with the snapshot as the session will hold it, so loading
+        // (key order, default fields) never counts as a change.
+        const restored = projectSessionReducer(createEmptySession(), {
+          type: ACTIONS.RESTORE_PROJECT_SNAPSHOT, projectId: envelope.project_id || projectId, snapshot,
+          revision: envelope.revision, savedAt: envelope.saved_at, recovered: Boolean(recovery.used),
+        });
+        savedSerializedRef.current = canonicalJson(projectSnapshot(restored));
         pendingSerializedRef.current = null;
         historicalProjectRef.current = revision !== null && revision !== undefined
           ? envelope.project_id || projectId : null;
