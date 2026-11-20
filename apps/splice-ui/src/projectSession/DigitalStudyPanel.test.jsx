@@ -197,3 +197,21 @@ describe("Revision links", () => {
     expect(screen.getByLabelText("View revision")).toHaveValue("1");
   });
 });
+
+describe("Revision link normalisation", () => {
+  it("drops ?rev= when it names the latest revision, replacing the history entry", async () => {
+    fetchDigitalStudy.mockResolvedValue(data(study(2, 244.9)));
+    const onRevisionRoute = vi.fn();
+    render(<DigitalStudyPanel session={session} routeRevision={2} onRevisionRoute={onRevisionRoute} />);
+    await screen.findByLabelText("View revision");
+    expect(onRevisionRoute).toHaveBeenCalledWith(null, { replace: true });
+  });
+
+  it("keeps ?rev= for an older or unknown revision", async () => {
+    fetchDigitalStudy.mockResolvedValue(data(study(2, 244.9)));
+    const onRevisionRoute = vi.fn();
+    render(<DigitalStudyPanel session={session} routeRevision={1} onRevisionRoute={onRevisionRoute} />);
+    await screen.findByLabelText("View revision");
+    expect(onRevisionRoute).not.toHaveBeenCalled();
+  });
+});

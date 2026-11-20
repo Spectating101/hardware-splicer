@@ -134,6 +134,12 @@ export default function DigitalStudyPanel({ session, onProjectReload, onToast, o
     setSelectedRevision(linked ?? data.study.revision);
   }, [data, routeRevision]);
 
+  // One URL per view: ?rev= names an older revision only, so a link to the latest drops it.
+  // An unknown revision keeps it, because the notice below explains that link.
+  useEffect(() => {
+    if (data && routeRevision === data.study.revision) onRevisionRoute?.(null, { replace: true });
+  }, [data, routeRevision, onRevisionRoute]);
+
   function chooseRevision(revision) {
     setSelectedRevision(revision);
     onRevisionRoute?.(revision === data.study.revision ? null : revision);
