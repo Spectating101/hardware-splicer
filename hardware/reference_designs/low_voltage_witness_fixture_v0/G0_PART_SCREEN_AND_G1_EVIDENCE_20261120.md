@@ -126,6 +126,8 @@ mechanical safety or independence merely from file bytes.
   threshold, then run blind bias/timing/fault controls and independent repeat.
 - **G3:** only afterwards measure economic and workflow value.
 
+**Later G1 preflight extension:** See G1_INDEPENDENT_BENCH_COMMISSIONING_20261120.md for the external-lab source/fuse/thermal qualification contract, simulated dual SCPI reference logger and integrated evidence gate. None closes a physical gate.
+
 **All physical approval, procurement, manufacturing and energization
 gates remain HOLD.** The executable work here is a sourced design
 choice, native software replay and controlled evidence contract,

@@ -1,0 +1,52 @@
+{
+  "schema": "hardware_splicer.witness_g1_protection_preflight.v1",
+  "description": "UNSELECTED, NO PHYSICAL AUTHORIZATION. Candidate 0.65 A source and 1 A fuse are not proven protective. Fill with documented source/device test evidence under qualified independent review.",
+  "normal_operation": {
+    "maximum_j2_bus_voltage_v": 5.25,
+    "normal_current_upper_bound_a": 0.4605,
+    "load_worst_case_power_w": 2.330564,
+    "nominal_supply_v": 5
+  },
+  "source": {
+    "manufacturer": null,
+    "model": null,
+    "serial": null,
+    "voltage_limit_v": null,
+    "set_current_limit_a": 0.65,
+    "measured_sustained_short_current_a": null,
+    "measured_peak_short_current_a": null,
+    "measured_current_limit_response_ms": null,
+    "independent_source_limit_test_verified": false,
+    "isolation_and_earth_review_verified": false,
+    "independent_fault_shutdown_review_verified": false
+  },
+  "fuse": {
+    "holder_mpn": "0031.3551",
+    "fuse_link_mpn": null,
+    "nominal_current_a": 1,
+    "dc_voltage_rating_v": null,
+    "dc_breaking_current_a": null,
+    "time_current_curve_verified": false,
+    "clearing_at_measured_sustained_fault_current_verified": false,
+    "manufacturer_fuse_link_holder_match_verified": false,
+    "holder_thermal_derating_checked": false
+  },
+  "wiring": {
+    "cable_assembly_mpn": null,
+    "continuous_current_ampacity_a": null,
+    "connector_dc_current_rating_a": null,
+    "independent_short_and_shield_review_verified": false
+  },
+  "thermal": {
+    "mounting_part": null,
+    "derated_allowable_load_w_at_actual_ambient": null,
+    "measured_load_temperature_c": null,
+    "independent_thermal_mount_review_verified": false
+  },
+  "review": {
+    "engineering_reviewer": null,
+    "operator": null,
+    "actual_source_and_fuse_identification_confirmed": false,
+    "source_characterization_physical": false
+  }
+}
