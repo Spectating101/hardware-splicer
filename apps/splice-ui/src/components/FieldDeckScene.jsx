@@ -343,7 +343,7 @@ function Annotations({ labels, selection, endpoints, pins, faceView, base, targe
 
 // The scene draws whichever project's manifest it is given: two revisions get Compare and the
 // change legend, a single revision groups parts by shape source, and nothing here names a project.
-export default function FieldDeckScene({ projectId, manifest, onExit, embedded = false }) {
+export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel = "Back", embedded = false }) {
   const host = useRef(null);
   const stage = useRef(null);
   const current = useRef(null);
@@ -739,7 +739,7 @@ export default function FieldDeckScene({ projectId, manifest, onExit, embedded =
       <div className="fd-stage" data-has-selection={Boolean(selection)} ref={host} tabIndex={0} aria-label={`${manifest.title} stage`}>
         <header className="fd-header">
           <div>
-            {onExit && <button className="fd-exit" type="button" aria-label="Back to home" onClick={onExit}>←</button>}
+            {onExit && <button className="fd-exit" type="button" aria-label={exitLabel} title={exitLabel} onClick={onExit}>←</button>}
             <h1 id="fd-title">{manifest.title}</h1>
             {!narrow && <span className="fd-revision">{manifest.subtitle}</span>}
           </div>
