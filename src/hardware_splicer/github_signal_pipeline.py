@@ -6,6 +6,7 @@ Only a reviewer-approved, exact repository/adapter pair can be run, from an
 exact 40-hex commit, with source license verified against the checkout.
 
 First supported adapter: tipoLi5890/akcli -- read-only schematic diagnostics.
+The task router also runs the reviewed kdif and Interactive HTML BOM adapters.
 No installers, arbitrary command execution, device access, firmware flashing,
 network from the tool sandbox, or authorization to fabricate are supported.
 """
@@ -52,6 +53,38 @@ ADAPTERS = {
         "license": "MIT",
         "input_suffix": ".kicad_pcb",
         "module_file": "kdif/__main__.py",
+    },
+    "openscopeproject/InteractiveHtmlBom": {
+        # Promoted from PROPOSED_ADAPTERS by the owner on 2026-11-20. Only this
+        # exact commit (release v2.12.0) is approved; upgrades need a fresh review.
+        "approved_commit_sha": "5c192e794cd66fde04bab11810601b711bf8581b",
+        "release": "v2.12.0",
+        "capability_id": "signal-ibom-assembly-viewer",
+        "name": "Interactive HTML BOM assembly/placement viewer",
+        "layer": "electrical",
+        "adapter": "ibom_readonly_assembly_viewer",
+        "license": "MIT",
+        "input_suffix": ".kicad_pcb",
+        "module_file": "InteractiveHtmlBom/generate_interactive_bom.py",
+        # Needs host KiCad 9 pcbnew and wx; no reviewed container exists, so
+        # Docker is refused rather than substituted.
+        "sandbox_backends": ["bwrap"],
+        "authority": "presentation_only",
+        "approval": {
+            "approved_by": "owner",
+            "approved_on": "2026-11-20",
+            "approved_commit_sha": "5c192e794cd66fde04bab11810601b711bf8581b",
+            "basis": (
+                "Recorded offline trial (github_signal_proposals.IBOM_TRIAL_EVIDENCE): "
+                "bwrap with no network, clean pinned checkout, exit 0, all 40 board "
+                "references of spi_flash_adapter_v1 matched in the decoded pcbdata; "
+                "the trial itself had approval_effect none"
+            ),
+            "grants": (
+                "presentation only, no authority: a read-only assembly/placement "
+                "viewer; no build, fabrication or electrical authority"
+            ),
+        },
     },
 }
 

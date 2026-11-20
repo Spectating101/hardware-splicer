@@ -1,4 +1,4 @@
-"""HS GitHub-source-native engineering task router, with two *reviewed* adapters.
+"""HS GitHub-source-native engineering task router, with three *reviewed* adapters.
 
 The deterministic selection is transparent capability matching, NOT an LLM or
 general-purpose automatic installation of discovered GitHub repositories.
@@ -7,6 +7,9 @@ Supported tasks:
 - review an existing KiCad schematic with pinned akcli (reuse v1 integration)
 - compare two committed versions of a KiCad PCB with pinned kdif, which drives
   the actual KiCad CLI and creates an interactive, source-based HTML diff.
+- render a read-only interactive assembly/placement viewer for a KiCad PCB with
+  pinned Interactive HTML BOM (owner-approved 2026-11-20). The page is
+  presentation only: it grants no build, fabrication or electrical authority.
 
 No discovery result alone authorizes tool execution, hardware control,
 electrical correctness or fabrication.
@@ -31,12 +34,28 @@ from .github_signal_pipeline import (
     registry_row as akcli_registry_row,
     sha256_file,
 )
-from .github_signal_proposals import IBOM, KIKIT, PROPOSED_ADAPTERS
+from .github_signal_proposals import (
+    IBOM,
+    IBOM_ARGV,
+    IBOM_HOST_CAPABILITIES,
+    KIKIT,
+    PROPOSED_ADAPTERS,
+    _host_capabilities,
+    _verify_checkout,
+    check_ibom_output,
+)
 
 TASK_SCHEMA = "hardware_splicer.github_signal_task.v1"
 VERDICT_FILENAME = "HS_SIGNAL_TASK_RESULT.json"
 KDIF_CAPABILITY_FILENAME = "HS_SIGNAL_KDIF_CAPABILITY.json"
 KDIF_HTML_FILENAME = "HS_SIGNAL_KDIF_REVISIONS.html"
+IBOM_CAPABILITY_FILENAME = "HS_SIGNAL_IBOM_CAPABILITY.json"
+IBOM_OUTPUT_DIRNAME = "ibom_native"
+IBOM_HTML_FILENAME = "ibom.html"
+IBOM_AUTHORITY_STATEMENT = (
+    "Read-only assembly/placement viewer; presentation only. Grants no build, "
+    "fabrication or electrical authority and marks nothing build-ready."
+)
 # Official KiCad kicad-cli container image, pre-pulled by CI/host.
 # Docker is selected explicitly and never used as an implicit bwrap fallback.
 KDIF_DOCKER_IMAGE = (
@@ -289,6 +308,116 @@ def _run_kdif(
     }
 
 
+def _ibom_bwrap_args(checkout: Path, board: Path, output_dir: Path) -> list[str]:
+    """The exact argv of the recorded offline trial that approval was based on."""
+    bwrap = shutil.which("bwrap")
+    if not bwrap:
+        raise SignalEvaluationError("bubblewrap unavailable; never run iBOM directly on host")
+    if Path(bwrap).resolve().is_relative_to(checkout.resolve()):
+        raise SignalEvaluationError("bubblewrap must not come from the tool checkout")
+    argv = [
+        x.format(checkout=checkout.resolve(), board=board.resolve(), out=output_dir.resolve())
+        for x in IBOM_ARGV
+    ]
+    argv[0] = bwrap
+    return argv
+
+
+def _run_ibom(
+    *,
+    candidate: Mapping[str, Any],
+    checkout: Path,
+    board: Path,
+    output_dir: Path,
+    fetch: bool,
+    run_fn: Any | None = None,
+    sandbox_backend: str = "bwrap",
+) -> dict[str, Any]:
+    """Run pinned iBOM in bwrap; accept output only if every board ref is present."""
+    spec = ADAPTERS[IBOM]
+    if sandbox_backend not in spec["sandbox_backends"]:
+        raise SignalEvaluationError(
+            "iBOM runs only in bwrap with host KiCad 9; no reviewed container exists")
+    if candidate["repository"] != IBOM or candidate["discovered_only"]:
+        raise SignalEvaluationError("iBOM adapter not approved at this revision")
+    if candidate["commit_sha"] != spec["approved_commit_sha"]:
+        raise SignalEvaluationError("source revision not approved for this adapter")
+    if candidate["license_claim"] != "MIT":
+        raise SignalEvaluationError("unverified/non-MIT source metadata")
+    if (board.is_symlink() or board.suffix != spec["input_suffix"] or not board.is_file()
+            or board.stat().st_size > 12 * 1024 * 1024):
+        raise SignalEvaluationError("iBOM requires an existing, non-symlink .kicad_pcb under 12 MiB")
+    source = acquire_pinned_repo(candidate, checkout, fetch=fetch).resolve()
+    # Stricter than acquisition: ignored files (e.g. stale __pycache__) would
+    # also be importable, so the executed bytes must be the pinned tree only.
+    pin = {"proposed_commit": spec["approved_commit_sha"], "license_claim": spec["license"]}
+    _verify_checkout(source, pin)
+    native_dir = output_dir / IBOM_OUTPUT_DIRNAME
+    resolved_out = native_dir.resolve()
+    if (output_dir.is_symlink() or native_dir.exists() or native_dir.is_symlink()
+            or resolved_out.is_relative_to(source) or source.is_relative_to(resolved_out)):
+        raise SignalEvaluationError("iBOM output must be a new directory outside the checkout")
+    bwrap = shutil.which("bwrap")
+    if not bwrap:
+        raise SignalEvaluationError("bubblewrap unavailable; never run iBOM directly on host")
+    capabilities = _host_capabilities(bwrap)
+    if not all(capabilities.get(name) for name in IBOM_HOST_CAPABILITIES):
+        raise SignalEvaluationError(
+            "iBOM host capabilities unavailable: " + json.dumps(capabilities))
+    args = _ibom_bwrap_args(source, board, native_dir)
+    input_sha = sha256_file(board)
+    native_dir.mkdir()
+    run = run_fn or subprocess.run
+    result = run(
+        args, capture_output=True, text=True, errors="replace", timeout=120, check=False,
+        cwd="/", env={"PATH": "/usr/bin:/bin", "HOME": "/tmp"},
+    )
+    if result.returncode != 0:
+        raise SignalEvaluationError(
+            "iBOM isolated native invocation failed: " + str(result.stderr or "")[-500:]
+        )
+    try:
+        _verify_checkout(source, pin)
+    except (OSError, ValueError, subprocess.SubprocessError) as exc:
+        raise SignalEvaluationError("iBOM run modified its pinned checkout") from exc
+    if sha256_file(board) != input_sha:
+        raise SignalEvaluationError("iBOM run modified its input board")
+    artifact = native_dir / IBOM_HTML_FILENAME
+    check = check_ibom_output(board, artifact)
+    accepted = check.get("ok") is True
+    return {
+        "id": spec["capability_id"],
+        "repository": candidate["repository"],
+        "repository_url": candidate["url"],
+        "pinned_revision": candidate["commit_sha"],
+        "license": "MIT",
+        "approval": spec["approval"],
+        "status": "accepted" if accepted else "rejected_incomplete",
+        "accepted": accepted,
+        "output_check": check,
+        "artifact": IBOM_OUTPUT_DIRNAME + "/" + IBOM_HTML_FILENAME,
+        "artifact_sha256": (sha256_file(artifact) if artifact.is_file()
+                            and not artifact.is_symlink() else None),
+        "artifact_bytes": (artifact.stat().st_size if artifact.is_file()
+                           and not artifact.is_symlink() else None),
+        "input": {"file_name": board.name, "sha256": input_sha},
+        "sandbox_backend": "bwrap",
+        "network_isolated": True,
+        "execution_proven": True,
+        "source_commit_verified": True,
+        "source_license_verified": True,
+        "authority": "presentation_only",
+        "authority_statement": IBOM_AUTHORITY_STATEMENT,
+        "build_ready": False,
+        "physical_authority": False,
+        "electrical_correctness_verified": False,
+        "fab_approved": False,
+        "next_action": ("Engineer uses the viewer for assembly/placement reference only"
+                        if accepted else
+                        "Output rejected: board references missing from iBOM data; do not use"),
+    }
+
+
 def run_task(
     *,
     objective: str,
@@ -359,6 +488,41 @@ def run_task(
             "native_result_kind": "schematic_findings",
             "finding_count": cap["finding_count"],
             "license": cap["license"], "source_commit": cap["pinned_revision"],
+        }
+    elif plan["selected_task"] == "interactive_assembly_bom":
+        if board is None:
+            raise SignalEvaluationError("assembly viewer requires an existing .kicad_pcb")
+        cap = _run_ibom(
+            candidate=selected[0], checkout=checkout, board=board,
+            output_dir=output_dir, fetch=fetch, run_fn=run_fn,
+            sandbox_backend=sandbox_backend,
+        )
+        (output_dir / IBOM_CAPABILITY_FILENAME).write_text(
+            json.dumps(cap, indent=2, sort_keys=True) + "\n"
+        )
+        if not cap["accepted"]:
+            # Executed but rejected: never reported as a passed capability.
+            verdict = {
+                "schema_version": TASK_SCHEMA, "ok": False, "executed": True,
+                "objective": objective, "selection": plan,
+                "status": "rejected_incomplete", "output_check": cap["output_check"],
+                "evidence": None, "authority": "presentation_only",
+                "physical_authority": False, "build_ready": False,
+                "tool_selection_authority": "rules_v1",
+            }
+            (output_dir / VERDICT_FILENAME).write_text(
+                json.dumps(verdict, indent=2, sort_keys=True) + "\n"
+            )
+            return verdict
+        evidence = {
+            "id": cap["id"], "artifact": cap["artifact"],
+            "artifact_sha256": cap["artifact_sha256"],
+            "native_result_kind": "interactive_assembly_placement_viewer",
+            "board_reference_count": cap["output_check"]["board_reference_count"],
+            "license": cap["license"], "source_commit": cap["pinned_revision"],
+            "input": cap["input"], "authority": cap["authority"],
+            "authority_statement": cap["authority_statement"],
+            "build_ready": False,
         }
     else:
         if board_repo is None or board is None or revision_a is None or revision_b is None:

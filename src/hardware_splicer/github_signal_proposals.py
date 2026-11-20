@@ -18,7 +18,7 @@ from .kicad_diff import parse_kicad_sexp
 IBOM = "openscopeproject/InteractiveHtmlBom"
 KIKIT = "yaqwsx/KiKit"
 TRIAL_FILENAME = "HS_SIGNAL_PROPOSAL_TRIAL.json"
-_IBOM_ARGV = [
+IBOM_ARGV = [
     "bwrap", "--unshare-all", "--die-with-parent",
     "--ro-bind", "/usr", "/usr", "--symlink", "usr/lib", "/lib",
     "--symlink", "usr/lib64", "/lib64", "--symlink", "usr/bin", "/bin",
@@ -31,35 +31,29 @@ _IBOM_ARGV = [
     "--no-browser", "--dest-dir", "/output", "--name-format", "ibom",
     "/input/board.kicad_pcb",
 ]
+IBOM_HOST_CAPABILITIES = ["bwrap", "/usr/bin/python3", "pcbnew", "wx", "KiCad 9"]
 _DEPENDENCIES = ["shapely", "markdown2", "pybars", "commentjson", "solidpython"]
 _DEPENDENCY_BLOCKER = (
     "Missing host Python packages: " + ", ".join(_DEPENDENCIES) +
     "; runtime installation forbidden; requires a pinned, reviewed dependency environment"
 )
+# Interactive HTML BOM was promoted to github_signal_pipeline.ADAPTERS by the
+# owner on 2026-11-20 (exact commit only). This is the recorded offline trial
+# that formed the basis of that approval; on its own it never approved anything.
+IBOM_TRIAL_EVIDENCE = {
+    "source": "operator-established offline trial",
+    "argv_template": IBOM_ARGV,
+    "board": "hardware/reference_designs/spi_flash_adapter_v1/spi_flash_adapter_v1.kicad_pcb",
+    "exit_code": 0, "output": "/output/ibom.html",
+    "output_bytes_approx": 229000, "checkout_clean_after": True,
+    "host": "/usr/bin/python3 with KiCad 9 pcbnew and wx",
+    "other_dependencies": [], "installation": False, "network": False,
+    "pcbdata_encoding": 'JSON.parse(LZString.decompressFromBase64("..."))',
+    "references_match_board": True, "reference_count": 40,
+    "bom_keys": ["both", "skipped", "fields", "F", "B"],
+    "bom_both_rows": 10, "approval_effect": "none",
+}
 PROPOSED_ADAPTERS = {
-    IBOM: {
-        "repository": IBOM,
-        "proposed_commit": "5c192e794cd66fde04bab11810601b711bf8581b",
-        "release": "v2.12.0", "license_claim": "MIT",
-        "objective": "interactive assembly BOM / placement viewer for a KiCad board",
-        "argv_template": _IBOM_ARGV,
-        "required_host_capabilities": ["bwrap", "/usr/bin/python3", "pcbnew", "wx", "KiCad 9"],
-        "expected_outputs": ["ibom.html"],
-        "status": "proposed_pending_human_approval", "blockers": [],
-        "trial_evidence": {
-            "source": "operator-established offline trial",
-            "argv_template": _IBOM_ARGV,
-            "board": "hardware/reference_designs/spi_flash_adapter_v1/spi_flash_adapter_v1.kicad_pcb",
-            "exit_code": 0, "output": "/output/ibom.html",
-            "output_bytes_approx": 229000, "checkout_clean_after": True,
-            "host": "/usr/bin/python3 with KiCad 9 pcbnew and wx",
-            "other_dependencies": [], "installation": False, "network": False,
-            "pcbdata_encoding": 'JSON.parse(LZString.decompressFromBase64("..."))',
-            "references_match_board": True, "reference_count": 40,
-            "bom_keys": ["both", "skipped", "fields", "F", "B"],
-            "bom_both_rows": 10, "approval_effect": "none",
-        },
-    },
     KIKIT: {
         "repository": KIKIT,
         "proposed_commit": "d1957c535781371db5a2f507f8154d460095f9f1",
@@ -68,7 +62,7 @@ PROPOSED_ADAPTERS = {
         # Exact candidate panelisation command, NOT trialled or executable.
         "argv_template": [
             *[x.replace("/opt/ibom", "/opt/kikit")
-              for x in _IBOM_ARGV[:_IBOM_ARGV.index("/usr/bin/python3")]],
+              for x in IBOM_ARGV[:IBOM_ARGV.index("/usr/bin/python3")]],
             "--setenv", "PYTHONPATH", "/opt/kikit", "/usr/bin/python3", "-B",
             "-m", "kikit", "panelize", "/input/board.kicad_pcb", "/output/panel.kicad_pcb",
         ],

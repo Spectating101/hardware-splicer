@@ -12,6 +12,18 @@ from hardware_splicer.github_signal_pipeline import (
 from hardware_splicer.github_signal_task_router import run_task, select_task
 
 IBOM, KIKIT = proposals.IBOM, proposals.KIKIT
+# iBOM left the proposal queue when the owner approved it (2026-11-20). The
+# trial runner is still exercised against its pre-approval proposal record.
+IBOM_TRIAL_PROPOSAL = {
+    "repository": IBOM,
+    "proposed_commit": ADAPTERS[IBOM]["approved_commit_sha"],
+    "release": "v2.12.0", "license_claim": "MIT",
+    "argv_template": proposals.IBOM_ARGV,
+    "required_host_capabilities": proposals.IBOM_HOST_CAPABILITIES,
+    "expected_outputs": ["ibom.html"],
+    "status": "proposed_pending_human_approval", "blockers": [],
+    "trial_evidence": proposals.IBOM_TRIAL_EVIDENCE,
+}
 
 
 def _literal_base64(text):
@@ -118,12 +130,13 @@ def test_independent_ibom_check_requires_bom_and_valid_data(board, tmp_path, dat
 
 @pytest.fixture
 def trial(tmp_path, board, monkeypatch):
+    monkeypatch.setitem(proposals.PROPOSED_ADAPTERS, IBOM, IBOM_TRIAL_PROPOSAL)
     checkout = tmp_path / "source"
     (checkout / ".git").mkdir(parents=True)
     (checkout / "InteractiveHtmlBom").mkdir()
     (checkout / "InteractiveHtmlBom/generate_interactive_bom.py").write_text("# fixture")
     (checkout / "LICENSE").write_text("MIT License\n\nFixture\n")
-    state = {"head": proposals.PROPOSED_ADAPTERS[IBOM]["proposed_commit"],
+    state = {"head": IBOM_TRIAL_PROPOSAL["proposed_commit"],
              "dirty": "", "bwrap": "/usr/bin/bwrap", "calls": [],
              "capabilities": {"pcbnew": True, "wx": True, "KiCad 9": True},
              "exit": 0, "output_refs": ["R1", "C1"], "timeout": False}
@@ -187,7 +200,7 @@ def test_trial_uses_exact_offline_argv_and_records_evidence(trial):
     checkout, board, out, state = trial
     record = proposals.trial_proposed_adapter(IBOM, checkout, board, out)
     expected = [x.format(checkout=checkout, board=board, out=out)
-                for x in proposals.PROPOSED_ADAPTERS[IBOM]["argv_template"]]
+                for x in IBOM_TRIAL_PROPOSAL["argv_template"]]
     expected[0] = "/usr/bin/bwrap"
     assert state["calls"][0][0] == expected
     assert "--unshare-all" in expected and expected.count("--bind") == 1
@@ -236,7 +249,13 @@ def _feed(repo):
             }]}
 
 
-@pytest.mark.parametrize("repo", [IBOM, KIKIT])
+def test_approved_ibom_is_not_a_trialable_proposal(tmp_path):
+    assert IBOM not in proposals.PROPOSED_ADAPTERS
+    with pytest.raises(SignalEvaluationError, match="unknown proposed adapter"):
+        proposals.trial_proposed_adapter(IBOM, tmp_path, tmp_path, tmp_path)
+
+
+@pytest.mark.parametrize("repo", [KIKIT])
 def test_pipeline_never_executes_proposals(tmp_path, monkeypatch, repo):
     def forbidden(*args, **kwargs):
         pytest.fail("proposal entered normal acquisition/execution")
@@ -254,9 +273,6 @@ def test_pipeline_never_executes_proposals(tmp_path, monkeypatch, repo):
 
 
 @pytest.mark.parametrize("objective,repo,status", [
-    ("interactive assembly BOM / placement viewer for a KiCad board", IBOM, "tool_proposed_pending_approval"),
-    ("Interactive HTML BOM", IBOM, "tool_proposed_pending_approval"),
-    ("placement viewer", IBOM, "tool_proposed_pending_approval"),
     ("panelisation", KIKIT, "tool_blocked"),
     ("panelization", KIKIT, "tool_blocked"),
     ("fab outputs", KIKIT, "tool_blocked"),
@@ -278,6 +294,7 @@ def test_router_reports_proposal_and_never_executes(tmp_path, monkeypatch, objec
         assert "shapely" in result["blockers"][0] and "runtime installation forbidden" in result["blockers"][0]
 
 
-def test_approved_adapter_set_unchanged():
-    assert set(ADAPTERS) == {"tipoLi5890/akcli", "0x12net/kdif"}
+def test_approved_adapter_set_is_exactly_the_reviewed_three():
+    assert set(ADAPTERS) == {"tipoLi5890/akcli", "0x12net/kdif", IBOM}
+    assert KIKIT not in ADAPTERS
     assert set(ADAPTERS).isdisjoint(proposals.PROPOSED_ADAPTERS)
