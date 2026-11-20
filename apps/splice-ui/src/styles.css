@@ -2738,3 +2738,28 @@ textarea, select { font: inherit; }
 @media (max-width: 899px) {
   .bench-package-grid { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
 }
+/* Change history: Policy Lab decisions as recorded by HS. Neutral ink; failure in the danger hue, never a success colour. */
+.change-history { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+.change-history h3 { font-size: 1.05rem; margin: 0 0 .75rem; }
+.change-history a { color: var(--text); text-decoration: underline; text-underline-offset: .2em; }
+.change-history code { font-family: ui-monospace, "IBM Plex Mono", monospace; font-size: .85rem; overflow-wrap: anywhere; }
+.change-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.25rem; }
+.change-entry { padding-bottom: 1rem; border-bottom: 1px solid var(--line); }
+.change-entry p { margin: 0 0 .4rem; }
+.change-policy { font-weight: 500; }
+.change-decision { display: inline-block; padding: .05rem .4rem; border: 1px solid var(--line); border-radius: 3px;
+  font-size: .8rem; font-weight: 600; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+.change-unmet { margin: 0 0 .5rem; padding-left: 1.2rem; font-size: .9rem; color: var(--muted); }
+.change-facts { display: grid; gap: .4rem; margin: .5rem 0; }
+.change-facts > div { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: .75rem; }
+.change-facts dt { font-size: .85rem; font-weight: 600; color: var(--muted); }
+.change-facts dd { margin: 0; }
+.change-facts ul { margin: 0; padding: 0; list-style: none; }
+.change-candidate { margin-top: .75rem; padding: .75rem; background: var(--surface-2); border-radius: 4px; }
+.change-formula code { font-size: .8rem; }
+.change-failed { color: var(--danger); font-weight: 500; }
+.change-cite { list-style: none; margin: .75rem 0; padding: 0; display: grid; gap: .5rem; }
+.change-cite p { margin: 0 0 .2rem; }
+@media (max-width: 899px) {
+  .change-facts > div { grid-template-columns: minmax(0, 1fr); gap: .1rem; }
+}

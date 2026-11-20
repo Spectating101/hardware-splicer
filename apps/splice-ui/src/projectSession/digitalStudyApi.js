@@ -57,3 +57,5 @@ export const fetchEngineeringRevisionDiff = (projectId, base, candidate, signal)
   method: "POST", headers: { "Content-Type": "application/json" }, signal,
   body: JSON.stringify({ project_id: projectId, base_revision: base, candidate_revision: candidate }),
 });
+export const fetchChangeDossier = (projectId, signal) =>
+  request(`/v1/projects/${encodeURIComponent(projectId)}/change-dossier`, { signal });

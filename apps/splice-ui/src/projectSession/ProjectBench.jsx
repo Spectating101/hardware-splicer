@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import ProjectReviewPanel from "../components/ProjectReviewPanel.jsx";
+import ChangeHistoryPanel from "./ChangeHistoryPanel.jsx";
 import DesignView, { splitGeometryNote } from "./DesignView.jsx";
 import {
   assessMachineRelease, digitalArtifactUrl, engineeringPackageUrl, fetchEngineeringPackages, fetchEngineeringRevisionDiff, fetchEvidenceDelta,
@@ -192,7 +193,7 @@ function PackagePanel({ projectId, revision, latestRevision, studyPackages, obje
 }
 
 export default function ProjectBench({ session, study, children, references, evidenceExtra, tools, onToast, onReference,
-  caseId, latestRevision, studyPackages, onOpenScene, readOnlyRevision = false }) {
+  caseId, latestRevision, studyPackages, onOpenScene, onOpenRevision, readOnlyRevision = false }) {
   const [tab, setTab] = useState("design");
   const [compact, setCompact] = useState(() => window.matchMedia?.("(max-width: 899px)").matches ?? false);
   useEffect(() => {
@@ -327,6 +328,7 @@ export default function ProjectBench({ session, study, children, references, evi
         <EvidenceRevisionLink projectId={session.projectId} revision={revision} assurance={assurance}
           assuranceKnown={Boolean(assurance) && !evidenceError} />
         {evidenceExtra}
+        <ChangeHistoryPanel projectId={session.projectId} latestRevision={latest} onOpenRevision={onOpenRevision} />
         <ProjectReviewPanel projectId={session.projectId} currentRevision={session.snapshotRevision} onToast={onToast} disclosure />
         <div className="bench-blockers"><h3>Blockers</h3>
           {blockers.length ? <ul>{blockerText.map((text, index) => <li key={index}>{text}</li>)}</ul>
