@@ -15,12 +15,12 @@ const DOSSIER = {
   head_revision: 4, cite_linked: true,
   changes: [
     { proposal_sha256: "p1", policy_id: "portable-runtime-4h", policy_version: "1.0.0", policy_decision: "BLOCKED",
-      base_revision: 1, unmet: [{ id: "work-runtime", explanation: "metric.work_runtime_lower_h is 3.166 h; target >= 4 h." }],
+      base_revision: 1, base_checks: checks(3.166, 2.5), unmet: [{ id: "work-runtime", explanation: "metric.work_runtime_lower_h is 3.166 h; target >= 4 h." }],
       requirement_changes: { minimum_work_runtime_h: { before: 2.5, after: 4 } },
       applied_revision: { revision: 2, run_id: "r2", requirements_met: false, checks: checks(3.166, 4) },
       candidates: [], change_evidence: { packet_sha256: "a".repeat(64) } },
     { proposal_sha256: "p2", policy_id: "portable-runtime-4h-pi-load-candidate", policy_version: "1.0.0",
-      policy_decision: "BLOCKED", base_revision: 2, unmet: [],
+      policy_decision: "BLOCKED", base_revision: 2, base_checks: checks(3.166, 4), unmet: [],
       requirement_changes: { pi_work_current_a: { before: 1, after: 0.697 } },
       applied_revision: { revision: 3, run_id: "r3", requirements_met: true, checks: checks(4.002, 4) },
       candidates: [{ id: "pi-work-load-budget", input: "pi_work_current_a", before: 1, after: 0.697,
@@ -42,12 +42,18 @@ describe("ChangeHistoryPanel", () => {
     render(<ChangeHistoryPanel projectId="digital-x" latestRevision={4} onOpenRevision={onOpenRevision} />);
     const [first, second] = await screen.findAllByTestId("change-entry");
     expect(first).toHaveTextContent("BLOCKED Policy Lab portable-runtime-4h 1.0.0 on revision 1");
-    expect(first).toHaveTextContent("minimum_work_runtime_h 2.5 → 4");
-    expect(first).toHaveTextContent("failed: work_runtime 3.166 h against limit 4 h");
+    expect(first).toHaveTextContent("Minimum work runtime · 2.5 → 4 h");
+    // Same derivation as the revision compare: the limit rose, the measured value did not move.
+    expect(first).toHaveTextContent("Work runtime: Newly fails: requirement increased");
+    expect(first).toHaveTextContent("Measured 3.166 h, unchanged · target 4 h, up from 2.5 h");
+    expect(first).not.toHaveTextContent("minimum_work_runtime_h 2.5");
+    const raw = within(first).getByText("Machine keys and raw values").closest("details");
+    expect(raw).not.toHaveAttribute("open");
+    expect(raw).toHaveTextContent('minimum_work_runtime_h{"before":2.5,"after":4}');
     expect(first).toHaveTextContent(`sha256 ${"a".repeat(16)}`);
     expect(second).toHaveTextContent("Not exported for this change.");
     const candidate = within(second).getByTestId("change-candidate");
-    expect(candidate).toHaveTextContent("pi_work_current_a 1 → 0.697");
+    expect(candidate).toHaveTextContent("Pi current at work load · 1 → 0.697 A");
     expect(candidate).toHaveTextContent("metric.work_runtime_lower_h = 4.002 h against >= 4 h · meets the target (modeled, not measured)");
     expect(candidate).toHaveTextContent("Physical means of reaching this value: unknown / not tested");
     const link = within(second).getByRole("link", { name: "revision 3" });

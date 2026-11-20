@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { VIEWS } from "../nav.js";
 import { pathForRoute } from "../router.js";
+import { describeTransition } from "./checkTransition.js";
 import { fetchChangeDossier } from "./digitalStudyApi.js";
+import { formatValue, keyLabel } from "./digitalStudyLabels.js";
 
 // HS's record of Policy Lab changes for this project. Every value is the backend's; the panel
 // adds no judgement. Unknown and unlinked states are said in words, never implied by absence.
@@ -29,9 +31,37 @@ function Outcome({ outcome }) {
   </p>;
 }
 
+// "Pi current at work load · 1 → 0.697 A", from the shared label map.
+function changeText(key, before, after) {
+  const { label, unit } = keyLabel(key);
+  return `${label} · ${formatValue(before)} → ${formatValue(after, unit)}`;
+}
+
+// A failed check is described the way the revision compare describes it: from the base and
+// applying revisions' own results, so a raised requirement is not called a design regression.
+function failureText(check, baseChecks) {
+  const before = (baseChecks || []).find((row) => row.id === check.id) || null;
+  const { label: name } = keyLabel(check.id);
+  const transition = describeTransition(before, check, "failed");
+  return { name, label: transition.label, detail: transition.detail };
+}
+
+function RawValues({ change }) {
+  const rows = [
+    ...Object.entries(change.requirement_changes || {}).map(([key, row]) => [key, row]),
+    ...(change.candidates || []).flatMap((candidate) => [[`${candidate.id}.input`, candidate.input],
+      [`${candidate.id}.numbers`, candidate.numbers]]),
+  ];
+  if (!rows.length) return null;
+  return <details className="bench-raw"><summary>Machine keys and raw values</summary>
+    <dl className="bench-facts">{rows.map(([key, raw]) =>
+      <div key={key}><dt><code>{key}</code></dt><dd><code>{JSON.stringify(raw ?? null)}</code></dd></div>)}</dl>
+  </details>;
+}
+
 function Change({ change, projectId, onOpenRevision }) {
   const applied = change.applied_revision;
-  const failed = applied ? applied.checks.filter((check) => !check.passed) : [];
+  const failed = applied ? applied.checks.filter((check) => !check.passed).map((check) => failureText(check, change.base_checks)) : [];
   return <li className="change-entry" data-testid="change-entry">
     <p className="change-policy"><span className="change-decision">{change.policy_decision}</span>{" "}
       Policy Lab <code>{change.policy_id}</code> {change.policy_version} on revision {change.base_revision}</p>
@@ -39,12 +69,15 @@ function Change({ change, projectId, onOpenRevision }) {
       <li key={row.id}>{shown(row.explanation, row.id)}</li>)}</ul>}
     <dl className="change-facts">
       <div><dt>Proposal</dt><dd><ul>{Object.entries(change.requirement_changes || {}).map(([name, row]) =>
-        <li key={name}><code>{name}</code> {shown(row.before)} → {shown(row.after)}</li>)}</ul>
+        <li key={name}>{changeText(name, row.before, row.after)}</li>)}</ul>
         {!Object.keys(change.requirement_changes || {}).length && "No requirement change stated."}</dd></div>
       <div><dt>Applied as</dt><dd>{applied ? <>
         <RevisionLink projectId={projectId} revision={applied.revision} onOpenRevision={onOpenRevision} />
-        {applied.requirements_met ? " · every modeled check passed" : <span className="change-failed"> · failed: {failed.map((check) =>
-          `${check.id} ${shown(check.actual)}${check.unit ? ` ${check.unit}` : ""} against limit ${shown(check.limit)}${check.unit ? ` ${check.unit}` : ""}`).join("; ") || "requirements not met"}</span>}
+        {applied.requirements_met ? " · every modeled check passed" : failed.length
+          ? failed.map((row) => <span key={row.name} className="change-failed-row">
+            <span className="change-failed">{row.name}: {row.label}</span>
+            {row.detail && <span className="muted"> · {row.detail}</span>}</span>)
+          : <span className="change-failed"> · requirements not met</span>}
       </> : "Not applied to any saved revision."}</dd></div>
       <div><dt>Change packet</dt><dd>{change.change_evidence
         ? <>sha256 <code>{short(change.change_evidence.packet_sha256)}</code></>
@@ -52,12 +85,13 @@ function Change({ change, projectId, onOpenRevision }) {
     </dl>
     {change.candidates.map((candidate) => <div className="change-candidate" key={candidate.id} data-testid="change-candidate">
       <p><strong>Modelled candidate design change <code>{candidate.id}</code></strong></p>
-      <p><code>{candidate.input}</code> {shown(candidate.before)} → {shown(candidate.after)}</p>
+      <p>{changeText(candidate.input, candidate.before, candidate.after)}</p>
       <p className="change-formula"><code>{shown(candidate.formula)}</code></p>
       {candidate.numbers && <p className="muted">Inputs: {Object.entries(candidate.numbers).map(([key, number]) => `${key} ${number}`).join(" · ")}</p>}
       <Outcome outcome={candidate.native_outcome} />
       <p>Physical means of reaching this value: <strong>{candidate.physical_means}</strong></p>
     </div>)}
+    <RawValues change={change} />
   </li>;
 }
 
