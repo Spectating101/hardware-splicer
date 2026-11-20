@@ -5,6 +5,8 @@ import {
   assessMachineRelease, digitalArtifactUrl, engineeringPackageUrl, fetchEngineeringPackages, fetchEngineeringRevisionDiff, fetchEvidenceDelta,
   fetchMaterialAssessment, fetchPartSubstitution, fetchProjectAssurance, fetchProjectMaterials,
 } from "./digitalStudyApi.js";
+import { describeTransition, invalidationReason } from "./checkTransition.js";
+import { factText, formatValue, keyLabel } from "./digitalStudyLabels.js";
 
 // Missing information stays missing. In particular, known facts never confer authority.
 const value = (item, fallback = "unknown") => item === undefined || item === null || item === ""
@@ -39,6 +41,11 @@ function EvidenceRevisionLink({ projectId, revision, assurance, assuranceKnown }
   const { affected_outputs: affected = [], blocked_outputs: blocked = [], retained_outputs: retained = [],
     study_checks: checks } = delta.evidence_delta || {};
   const isCheck = (row) => row.metadata?.kind === "check";
+  // A check that fails now and was invalidated from the earlier revision is one result with a
+  // history, not two rows: the current failure leads and the earlier result folds under it.
+  const failingIds = new Set((checks?.failing_outputs || []).map((row) => row.node_id));
+  const historyFor = (nodeId) => affected.find((row) => isCheck(row) && row.metadata?.node_id === nodeId);
+  const staleRows = affected.filter((row) => !(isCheck(row) && failingIds.has(row.metadata?.node_id)));
   const retainedChecks = retained.filter(isCheck);
   const otherRetained = retained.length - retainedChecks.length;
   const reasons = (row) => (row.reasons || []).flatMap((reason) => reason.kind === "changed_dependency"
@@ -48,13 +55,15 @@ function EvidenceRevisionLink({ projectId, revision, assurance, assuranceKnown }
     <p><strong>Changes since revision {delta.base_revision}</strong></p>
     {checks?.changed_dependencies?.length > 0 && <ul className="bench-changes">
       {checks.changed_dependencies.map((row) => <li key={row.dependency_id}>
-        Changed {row.dependency_id.replace(/^requirement:/, "requirement ")}: {value(row.before)} → {value(row.after)}</li>)}
+        {row.dependency_id.startsWith("requirement:")
+          ? <>Changed requirement {keyLabel(row.dependency_id.slice(12)).label}: {formatValue(row.before, keyLabel(row.dependency_id.slice(12)).unit)} → {formatValue(row.after, keyLabel(row.dependency_id.slice(12)).unit)}</>
+          : <>Changed {row.dependency_id}: {value(row.before)} → {value(row.after)}</>}</li>)}
     </ul>}
     {!affected.length && !blocked.length && <p>The backend reports no invalidated outputs.</p>}
     <ul className="bench-rows">
-      {affected.map((row) => <li key={row.evidence_id} className="is-stale" data-testid={isCheck(row) ? "stale-check" : undefined}>
+      {staleRows.map((row) => <li key={row.evidence_id} className="is-stale" data-testid={isCheck(row) ? "stale-check" : undefined}>
         <span className="bench-stale">stale · from revision {row.metadata?.revision ?? delta.base_revision}</span>
-        <strong>{value(row.metadata?.summary || row.evidence_id)}</strong>
+        <strong>{checkName(row.metadata?.summary || row.evidence_id)}</strong>
         {isCheck(row) && <>
           <p>Revision {row.metadata.revision} result: {checkResult(row.metadata)} · run {String(row.metadata.run_id).slice(0, 12)}</p>
           <p>{row.metadata.rerun ? `Rerun in revision ${row.metadata.rerun.revision}: ${checkResult(row.metadata.rerun)}`
@@ -67,7 +76,7 @@ function EvidenceRevisionLink({ projectId, revision, assurance, assuranceKnown }
       </li>)}
       {retainedChecks.map((row) => <li key={row.evidence_id}>
         <span className="bench-retained">retained · from revision {row.metadata.revision}</span>
-        <strong>{value(row.metadata.summary)}</strong>
+        <strong>{checkName(row.metadata.summary)}</strong>
         <p>Inputs unchanged. Rerun in revision {row.metadata.rerun?.revision} matches: {row.metadata.rerun ? checkResult(row.metadata.rerun) : "unknown"}</p>
       </li>)}
     </ul>
@@ -75,10 +84,20 @@ function EvidenceRevisionLink({ projectId, revision, assurance, assuranceKnown }
     {checks && <>
       {checks.failing_outputs?.length > 0 && <div data-testid="failing-checks">
         <p><strong>Failing in revision {checks.candidate_revision} · kept</strong></p>
-        <ul className="bench-rows">{checks.failing_outputs.map((row) => <li key={row.node_id} className="is-failed">
-          <span className="bench-failed">failed · revision {row.revision}</span> <strong>{value(row.summary)}</strong>
-          <p>{checkResult(row)} · {row.transition === "regressed" ? `passed in revision ${checks.base_revision}` : row.transition}</p>
-        </li>)}</ul>
+        <ul className="bench-rows">{checks.failing_outputs.map((row) => {
+          const history = historyFor(row.node_id);
+          const change = history ? describeTransition(history.metadata, row, row.transition) : null;
+          return <li key={row.node_id} className="is-failed" data-transition={change?.kind}>
+            <span className="bench-failed">failed · revision {row.revision}</span> <strong>{checkName(row.summary)}</strong>
+            <p>{checkResult(row)}</p>
+            {change ? <p className="bench-transition"><strong>{change.label}</strong> · {change.detail}</p>
+              : <p>{row.transition === "regressed" ? `Passed in revision ${checks.base_revision}` : row.transition}</p>}
+            {history && <details className="bench-history" data-testid="check-history">
+              <summary>Historical · invalidated by {invalidationReason(history.reasons)} · not counted for revision {delta.candidate_revision}</summary>
+              <p>Revision {history.metadata.revision} result: {checkResult(history.metadata)} · run {String(history.metadata.run_id).slice(0, 12)}</p>
+            </details>}
+          </li>;
+        })}</ul>
       </div>}
       <div data-testid="package-pair">
         <p><strong>Package before and after</strong></p>
@@ -103,6 +122,11 @@ export function thresholdLabel(row) {
     comparator = (actual > limit) === passed ? "≥" : "≤";
   }
   return comparator ? `required ${comparator} ${value(limit)}${unit}` : `threshold ${value(limit)}${unit}`;
+}
+
+// Check ids are machine keys; the bench names them in words and keeps the key in a tooltip.
+function checkName(id) {
+  return <span title={String(id)}>{keyLabel(String(id).replace(/^check:/, "")).label}</span>;
 }
 
 function checkResult(row) {
@@ -134,6 +158,59 @@ function RevisionCompare({ projectId, revision }) {
   </div>;
 }
 
+// What the bench can say about a revision in one glance. Counts come from backend results only;
+// nothing here promotes a modeled pass to a tested one, and an empty list is never "ready".
+export function summarizeRevision({ revision, studyChecks = [], blockers = [], blockersKnown, designStatus, sceneNext,
+  partsKnown, evidenceKnown }) {
+  const proven = studyChecks.filter((row) => row.passed === true);
+  const failed = studyChecks.filter((row) => row.passed === false);
+  const unknown = [];
+  if (designStatus === "scene") unknown.push({ text: "Physical fit · not tested", section: "bench-design",
+    next: "Test physical fit on hardware and record the result; the model shows reference geometry only" });
+  if (designStatus === "records") unknown.push({ text: "Design geometry · unavailable", section: "bench-design",
+    next: sceneNext || "Import the source geometry so the design can be drawn and checked" });
+  if (designStatus === "not-linked") unknown.push({ text: "Design geometry · not linked", section: "bench-design",
+    next: "Link design geometry: add a scene manifest for this project" });
+  if (designStatus === "error") unknown.push({ text: "Design view · unknown", section: "bench-design", next: "Reload the design view" });
+  if (!partsKnown) unknown.push({ text: "Parts · not recorded", section: "bench-parts", next: "Record the parts this project uses" });
+  if (!evidenceKnown) unknown.push({ text: "Evidence · unknown", section: "bench-evidence", next: "Reload the evidence for this revision" });
+  else if (!blockersKnown) unknown.push({ text: "Backend blockers · unknown", section: "bench-evidence", next: "Reload the release assessment" });
+  const unit = (row) => (row.unit ? ` ${row.unit}` : "");
+  let next;
+  if (failed.length) {
+    const row = failed[0];
+    next = { text: `Resolve failed check ${keyLabel(row.label || row.id).label}: measured ${value(row.actual)}${unit(row)}, ${thresholdLabel(row)}`,
+      source: `study run, revision ${revision}`, section: "bench-evidence" };
+  } else if (blockers.length) {
+    next = { text: blockers[0], source: "backend blocker", section: "bench-evidence" };
+  } else if (unknown.length) {
+    next = { text: unknown[0].next, source: unknown[0].text, section: unknown[0].section };
+  } else {
+    next = { text: `No next action can be derived for revision ${revision ?? "unsaved"}. Missing input: an engineering check or test plan for this revision.`,
+      source: "nothing failing, blocked or unknown was returned", section: "bench-package", missing: true };
+  }
+  return { proven, failed, unknown, next };
+}
+
+function RevisionSummary({ summary, blockers, blockersKnown, studied }) {
+  const { proven, failed, unknown, next } = summary;
+  return <section className="bench-summary" aria-label="Revision summary" data-testid="revision-summary">
+    <dl className="bench-summary-counts">
+      <div data-state="proven"><dt>Proven (modeled)</dt>
+        <dd><a href="#bench-evidence">{proven.length}</a> {studied ? `study check${proven.length === 1 ? "" : "s"} passed in the model, not tested` : "no modeled checks for this revision"}</dd></div>
+      <div data-state="unknown"><dt>Unknown</dt>
+        <dd><a href={`#${unknown[0]?.section || "bench-evidence"}`}>{unknown.length}</a> {unknown.length ? unknown.map((row) => row.text.split(" · ")[0]).join(", ") : "none listed"}</dd></div>
+      <div data-state="failed" data-count={failed.length}><dt>Failed</dt>
+        <dd><a href="#bench-evidence">{failed.length}</a> {failed.length ? failed.map((row) => keyLabel(row.label || row.id).label).join(", ") : studied ? "no failing study checks" : "no checks run"}</dd></div>
+      <div data-state="blockers"><dt>Backend blockers</dt>
+        <dd>{blockersKnown ? (blockers.length ? <><a href="#bench-evidence">{blockers.length}</a> returned</> : "none returned (not the same as passing)") : "unknown"}</dd></div>
+    </dl>
+    <p className="bench-summary-next" data-missing={next.missing || undefined}>
+      <strong>Next action</strong> <span>{next.text}</span> <small>· {next.source}</small> <a href={`#${next.section}`}>Details</a>
+    </p>
+  </section>;
+}
+
 function PackagePanel({ projectId, revision, latestRevision, studyPackages, objective, blockers, blockersKnown, sceneNext, failedChecks = [] }) {
   const [packages, setPackages] = useState(null);
   const [error, setError] = useState("");
@@ -158,7 +235,7 @@ function PackagePanel({ projectId, revision, latestRevision, studyPackages, obje
     ...(sceneNext ? [{ text: sceneNext, source: "scene manifest" }] : []),
     ...blockers.map((text) => ({ text, source: "backend blocker" })),
     ...failedChecks.map((check) => ({
-      text: `Failed check ${value(check.label || check.id)}: actual ${value(check.actual)}${check.unit ? ` ${check.unit}` : ""}, ${thresholdLabel(check)}`,
+      text: `Failed check ${keyLabel(check.label || check.id).label}: actual ${value(check.actual)}${check.unit ? ` ${check.unit}` : ""}, ${thresholdLabel(check)}`,
       source: `study run, revision ${revision}`,
     })),
   ];
@@ -209,6 +286,7 @@ export default function ProjectBench({ session, study, children, references, evi
   const [evidenceError, setEvidenceError] = useState("");
   const [materialsError, setMaterialsError] = useState("");
   const [sceneManifest, setSceneManifest] = useState(null);
+  const [designStatus, setDesignStatus] = useState("loading");
   const revision = study?.revision ?? session.snapshotRevision;
   const latest = latestRevision ?? session.snapshotRevision;
   useEffect(() => {
@@ -261,7 +339,11 @@ export default function ProjectBench({ session, study, children, references, evi
   // A failed study check is the backend's own result for this revision; it is listed, never re-judged.
   const failedChecks = (study?.summary?.constraints || []).filter((row) => row.passed === false);
   const olderRevision = Boolean(study && latest && revision !== latest);
+  const partsKnown = Boolean(units.length || parts.length || materials?.inventory?.lots?.length || materials?.requirements?.length);
   const sceneNext = sceneManifest?.geometry_status === "unavailable" ? splitGeometryNote(sceneManifest.geometry_note).next : "";
+  const summary = summarizeRevision({ revision, studyChecks: study?.summary?.constraints || [], blockers: blockerText, blockersKnown,
+    designStatus, sceneNext, partsKnown, evidenceKnown: !evidenceError });
+  const requirementSource = study ? studySource : "project intake";
   function partRow(part, kind, index) {
     const id = part.unit_id || part.part_id || part.component_id || part.material_id || part.stock_id;
     const offered = substitution?.specification?.replace_part_id === id ? [substitution.specification.candidate] : part.substitutions || [];
@@ -277,8 +359,10 @@ export default function ProjectBench({ session, study, children, references, evi
     <header className="bench-heading"><h1>{session.projectName?.trim() || "Untitled project"}</h1>
       <p className="muted">{revision ? `Revision ${revision}` : "Not saved yet"}{olderRevision ? ` · the latest saved revision is ${latest}` : ""}{readOnlyRevision
         ? " · opened from a revision link, read-only; changes here are not saved" : ""}{!readOnlyRevision && session.persistenceStatus === "saving" ? " · Saving…" : ""}</p>
-      <p className="bench-objective"><span>Objective</span> {objective || "not recorded for this project"}</p>
+      {compact ? <details className="bench-objective"><summary>Objective</summary>{objective || "not recorded for this project"}</details>
+        : <p className="bench-objective"><span>Objective</span> {objective || "not recorded for this project"}</p>}
     </header>
+    <RevisionSummary summary={summary} blockers={blockerText} blockersKnown={blockersKnown} studied={Boolean(study)} />
     {compact && <div className="bench-tabs" role="tablist" aria-label="Project bench panes">
       {[["parts", "Parts"], ["design", "Design"], ["evidence", "Evidence"]].map(([id, label], index) => <button key={id}
         id={`bench-tab-${id}`} type="button" role="tab" aria-selected={tab === id} aria-controls={`bench-${id}`}
@@ -292,7 +376,8 @@ export default function ProjectBench({ session, study, children, references, evi
     <div className="bench-columns">
       <section className="bench-pane bench-design" id="bench-design" role={compact ? "tabpanel" : "region"} hidden={compact && tab !== "design"} aria-labelledby={compact ? "bench-tab-design" : "bench-design-title"}>
         <h2 id="bench-design-title">Design</h2>
-        <DesignView projectId={session.projectId} caseId={caseId} revision={revision} onOpenScene={onOpenScene} onManifest={setSceneManifest} />
+        <DesignView projectId={session.projectId} caseId={caseId} revision={revision} onOpenScene={onOpenScene} onManifest={setSceneManifest}
+          onStatus={setDesignStatus} />
         {children || <RevisionCompare projectId={session.projectId} revision={session.snapshotRevision} />}
       </section>
       <section className="bench-pane bench-parts" id="bench-parts" role={compact ? "tabpanel" : "region"} hidden={compact && tab !== "parts"} aria-labelledby={compact ? "bench-tab-parts" : "bench-parts-title"}>
@@ -305,17 +390,25 @@ export default function ProjectBench({ session, study, children, references, evi
           {(materials?.inventory?.lots || []).map((part, index) => partRow(part, "Inventory unit", index))}
           {(materials?.requirements || []).map((part, index) => partRow(part, "Catalogue requirement", index))}
         </ul>
-        {!units.length && !parts.length && !materials?.inventory?.lots?.length && !materials?.requirements?.length && <p>Parts: unknown</p>}
+        {!partsKnown && <p>Parts: unknown</p>}
         <h3>Requirements</h3>
-        {requirements && Object.keys(requirements).length ? <dl className="bench-facts">{Object.entries(requirements).map(([key, fact]) =>
-          <div key={key}><dt>{key}</dt><dd>{value(fact)}</dd></div>)}</dl> : <p>unknown</p>}
+        {requirements && Object.keys(requirements).length ? <>
+          <ul className="bench-requirements">{Object.entries(requirements).map(([key, fact]) =>
+            <li key={key}>{factText(key, fact)}</li>)}</ul>
+          <details className="bench-raw"><summary>Machine keys and raw values</summary>
+            <p className="muted">Source: {requirementSource}</p>
+            <dl className="bench-facts">{Object.entries(requirements).map(([key, fact]) =>
+              <div key={key}><dt><code>{key}</code></dt><dd><code>{JSON.stringify(fact ?? null)}</code></dd></div>)}</dl>
+          </details>
+        </> : <p>unknown</p>}
       </section>
       <section className="bench-pane bench-evidence" id="bench-evidence" role={compact ? "tabpanel" : "region"} hidden={compact && tab !== "evidence"} aria-labelledby={compact ? "bench-tab-evidence" : "bench-evidence-title"}>
         <h2 id="bench-evidence-title">Evidence</h2>
         {Boolean(revision) && <p>Revision {revision}{olderRevision ? ` · superseded by revision ${latest}` : ""}</p>}
         {evidenceError && <p role="status">Evidence: unknown. {evidenceError}</p>}
         <ul className="bench-rows">{claims.map((claim, index) => <li key={claim.claim_id || claim.id || index}>
-          <strong>{value(claim.statement || claim.label || claim.predicate || claim.claim_id || claim.id)}</strong>
+          <strong>{claim.statement || claim.label ? value(claim.statement || claim.label)
+            : claim.id ? checkName(claim.id) : value(claim.predicate || claim.claim_id)}</strong>
           <p>Authority: <span>{value(claim.authority)}</span></p>
           <p>Source: {value(claim.source || claim.source_id || claim.source_ref)}</p>
           {claim.evidence_locator && <p>{value(claim.evidence_locator)}</p>}
