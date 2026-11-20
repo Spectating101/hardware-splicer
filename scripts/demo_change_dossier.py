@@ -38,10 +38,12 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from hardware_splicer.change_dossier import (build_change_evidence, export_revision_head,  # noqa: E402
                                              write_change_evidence)
+from hardware_splicer.change_history import (change_dossier, record_change_evidence,  # noqa: E402
+                                             record_cite_edition, record_proposal)
 from hardware_splicer.digital_engine import DigitalStudyEngine  # noqa: E402
 from hardware_splicer.policy_layer import (canonical_json_bytes, export_policy_evidence,  # noqa: E402
                                            validate_policy_feedback)
-from hardware_splicer.project_store import RevisionConflict  # noqa: E402
+from hardware_splicer.project_store import ProjectStore, RevisionConflict  # noqa: E402
 
 CASE_ID = "fielddeck-5"
 POLICY = "applications/hardware-policy/evidence/fielddeck-20261119/policies/runtime-4h.json"
@@ -123,6 +125,9 @@ def main(argv=None):
     parser.add_argument("--cite", type=Path, required=True)
     parser.add_argument("--policy", type=Path, help=f"default: <policy-lab>/{POLICY}")
     parser.add_argument("--work", type=Path, default=ROOT / ".cache/hardware-splicer/change-dossier")
+    parser.add_argument("--project-root", type=Path,
+                        help="HS project store to create the study in (default: a fresh one under --work); "
+                             "point a served app at it to see the change history on the bench")
     parser.add_argument("--evidence", type=Path, default=ROOT / "docs/status/generated")
     parser.add_argument("--tag", default="20261120")
     parser.add_argument("--stale-runtime-target", type=float, default=3.0,
@@ -157,7 +162,8 @@ def _chain(log, policy_lab, cite_root, policy, work, exchange, args):
     run_mjs = policy_lab / "applications/hardware-policy/run.mjs"
     log(f"HS {sources['hs_commit'][:12]} · Policy Lab {sources['policy_lab_commit'][:12]} · "
         f"Cite {sources['cite_commit'][:12]} · node {sources['node']}")
-    with DigitalStudyEngine(project_root=work / "projects", job_db=work / "jobs.sqlite3") as engine:
+    project_root = (args.project_root or work / "projects").resolve()
+    with DigitalStudyEngine(project_root=project_root, job_db=work / "jobs.sqlite3") as engine:
         log(f"1. HS: create {CASE_ID} revision 1 (native build)")
         project = engine.create(case_id=CASE_ID)["project"]["project_id"]
         r1 = engine.study(project, 1)
@@ -173,6 +179,7 @@ def _chain(log, policy_lab, cite_root, policy, work, exchange, args):
         proposal = validate_policy_feedback(engine, base_export.read_bytes(), base_review.read_bytes(),
                                             policy_lab_run=run_mjs)
         proposal_path = write_exchange(exchange / "proposal.json", proposal)
+        record_proposal(engine.projects, proposal, review1)
         log(f"  HS validated proposal: {json.dumps(proposal['requirement_changes'], sort_keys=True)} "
             f"(automatic_execution={proposal['automatic_execution']})")
 
@@ -205,6 +212,7 @@ def _chain(log, policy_lab, cite_root, policy, work, exchange, args):
         packet = build_change_evidence(engine.projects, project, base_revision=1, candidate_revision=2,
                                        root=exchange, files=files)
         packet_receipt = write_change_evidence(exchange / "change-evidence.json", packet)
+        record_change_evidence(engine.projects, packet, packet_receipt["sha256"])
         head2 = write_exchange(exchange / "head-r2.json", export_revision_head(engine.projects, project))
         log(f"  change-evidence.json sha256 {packet_receipt['sha256']}")
         for row in packet["check_delta"]["stale"]:
@@ -221,6 +229,8 @@ def _chain(log, policy_lab, cite_root, policy, work, exchange, args):
         code, issued = cite(log, cite_root, "issue", "--packet", exchange / "change-evidence.json", "--root", exchange,
                             "--head", head2, "--out", edition, "--workspace", work / "cite" / "workspace")
         log(f"  issued edition {issued['edition_id']} bound to r{issued['bound_to_revision']} (exit {code})")
+        record_cite_edition(engine.projects, project, edition_id=issued["edition_id"], bound_revision=2,
+                            packet_sha256=packet_receipt["sha256"], event="issued", status="current", head_revision=2)
         dossier = json.loads((edition / "dossier.json").read_bytes())
         dossier_md = (edition / "dossier.md").read_text()
         failing = [row for row in dossier["checks"] if row["result"] == "FAIL"]
@@ -263,6 +273,7 @@ def _chain(log, policy_lab, cite_root, policy, work, exchange, args):
         proposal3 = validate_policy_feedback(engine, candidate_export.read_bytes(), r2_candidate_review.read_bytes(),
                                              policy_lab_run=run_mjs, candidates=(CANDIDATE_ID,))
         proposal3_path = write_exchange(exchange / "proposal-r3.json", proposal3)
+        record_proposal(engine.projects, proposal3, review2c)
         log(f"  HS validated proposal (replay: {proposal3['policy_review_verification']}): "
             f"{json.dumps(proposal3['requirement_changes'], sort_keys=True)}")
 
@@ -296,6 +307,7 @@ def _chain(log, policy_lab, cite_root, policy, work, exchange, args):
         packet3 = build_change_evidence(engine.projects, project, base_revision=2, candidate_revision=3,
                                         root=exchange, files=files3)
         packet3_receipt = write_change_evidence(exchange / "change-evidence-r3.json", packet3)
+        record_change_evidence(engine.projects, packet3, packet3_receipt["sha256"])
         outcomes = {row["id"]: row["native_outcome"] for row in packet3["proposal"]["candidate_design_changes"]}
         if CANDIDATE_ID not in outcomes:
             raise ChainError(f"the revision-3 packet does not carry candidate {CANDIDATE_ID}")
@@ -310,6 +322,9 @@ def _chain(log, policy_lab, cite_root, policy, work, exchange, args):
                               "--cite-project-id", issued["workspace_record"]["project_id"], allowed=(3,))
         negatives["stale_edition_check"] = {"status": currency["status"], "exit_code": code, "reasons": currency["reasons"]}
         log(f"  edition {currency['edition_id'][:16]}: {currency['status']} (exit {code}); {'; '.join(currency['reasons'])}")
+        record_cite_edition(engine.projects, project, edition_id=currency["edition_id"], bound_revision=2,
+                            packet_sha256=packet_receipt["sha256"], event="currency_check", status=currency["status"],
+                            head_revision=currency["head"]["revision"], reasons=currency["reasons"])
         code, refused = cite(log, cite_root, "issue", "--packet", exchange / "change-evidence.json", "--root", exchange,
                              "--head", head3, "--out", work / "cite" / "edition-r2-reissue", allowed=(3,))
         negatives["stale_edition_reissue"] = {"refused": refused["status"] == "refused_stale", "exit_code": code,
@@ -325,6 +340,8 @@ def _chain(log, policy_lab, cite_root, policy, work, exchange, args):
         code, issued3 = cite(log, cite_root, "issue", "--packet", exchange / "change-evidence-r3.json", "--root", exchange,
                              "--head", head3, "--out", edition3, "--workspace", work / "cite" / "workspace")
         log(f"  issued edition {issued3['edition_id']} bound to r{issued3['bound_to_revision']} (exit {code})")
+        record_cite_edition(engine.projects, project, edition_id=issued3["edition_id"], bound_revision=3,
+                            packet_sha256=packet3_receipt["sha256"], event="issued", status="current", head_revision=3)
         dossier3 = json.loads((edition3 / "dossier.json").read_bytes())
         dossier3_md = (edition3 / "dossier.md").read_text()
         if "unknown / not tested" not in dossier3_md:
@@ -348,6 +365,12 @@ def _chain(log, policy_lab, cite_root, policy, work, exchange, args):
     negatives["candidate_edition_stale_check"] = {"status": currency3["status"], "exit_code": code,
                                                   "reasons": currency3["reasons"]}
     log(f"  edition {currency3['edition_id'][:16]}: {currency3['status']} (exit {code}); {'; '.join(currency3['reasons'])}")
+    record_cite_edition(ProjectStore(project_root), project, edition_id=currency3["edition_id"], bound_revision=3,
+                        packet_sha256=packet3_receipt["sha256"], event="currency_check", status=currency3["status"],
+                        head_revision=currency3["head"]["revision"], reasons=currency3["reasons"])
+    history = change_dossier(ProjectStore(project_root), project)
+    log(f"13. HS change history: {len(history['changes'])} recorded change(s), "
+        f"{len(history['cite_editions'])} Cite edition(s); served at /v1/projects/{project}/change-dossier")
     code, refused3 = cite(log, cite_root, "issue", "--packet", exchange / "change-evidence-r3.json", "--root", exchange,
                           "--head", head4, "--out", work / "cite" / "edition-r3-reissue", allowed=(3,))
     negatives["candidate_edition_reissue"] = {"refused": refused3["status"] == "refused_stale", "exit_code": code,
@@ -411,6 +434,8 @@ def _chain(log, policy_lab, cite_root, policy, work, exchange, args):
                       "not_tested": packet3["not_tested"], "unresolved": packet3["unresolved"]},
         "dossier_r3": {"edition_id": dossier3["edition"]["edition_id"], "bound_to": dossier3["edition"]["bound_to"],
                        "markdown": dossier3_md, "stale_markdown": stale3_md, "json": dossier3},
+        "change_history": {"changes": len(history["changes"]), "cite_editions": len(history["cite_editions"]),
+                           "api": f"/v1/projects/{project}/change-dossier"},
         "negative_controls": negatives,
         "exchange_dir": exchange,
         "problems": problems,
