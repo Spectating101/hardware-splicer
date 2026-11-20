@@ -1,0 +1,176 @@
+{
+  "schema": "hs.witness_g0_g4_assessment.experimental.v1",
+  "campaign_id": "HS-PL-WITNESS-G0-G4-20261120",
+  "source_status": "ORIGINAL_PINNED_UNMODIFIED",
+  "original_station_sha256": "78257576dd6b78c158ed35157ade26d79a10ee9071b9d704758d0c17e29ad016",
+  "digital_candidate": "13R_1pct_TE355013RFT",
+  "candidates": [
+    {
+      "id": "original_10R_5pct",
+      "nominal_ohms": 10,
+      "tolerance_pct": 5,
+      "source": null,
+      "qualification": "ORIGINAL_CONTROL",
+      "worst_normal_load_power_w": 2.90131579,
+      "worst_normal_current_a": 0.55263158,
+      "minimum_normal_current_a": 0.44600939,
+      "checks": {
+        "under_original_power_ceiling": false,
+        "has_required_design_reserve": false,
+        "above_test_reference_current_floor": true,
+        "below_assumed_supply_current_limit": true,
+        "load_rated_power_ge_worst_modeled": null
+      },
+      "digital_pass": false,
+      "physical_part_qualified": false
+    },
+    {
+      "id": "12R_5pct",
+      "nominal_ohms": 12,
+      "tolerance_pct": 5,
+      "source": null,
+      "qualification": "UNSELECTED_HS_360_MODEL",
+      "worst_normal_load_power_w": 2.41776316,
+      "worst_normal_current_a": 0.46052632,
+      "minimum_normal_current_a": 0.37254902,
+      "checks": {
+        "under_original_power_ceiling": true,
+        "has_required_design_reserve": false,
+        "above_test_reference_current_floor": true,
+        "below_assumed_supply_current_limit": true,
+        "load_rated_power_ge_worst_modeled": null
+      },
+      "digital_pass": false,
+      "physical_part_qualified": false
+    },
+    {
+      "id": "13R_5pct",
+      "nominal_ohms": 13,
+      "tolerance_pct": 5,
+      "source": "https://www.ohmite.com/catalog/90-series/95J13RE/",
+      "qualification": "UNSELECTED_HS_359_MODEL",
+      "worst_normal_load_power_w": 2.23178138,
+      "worst_normal_current_a": 0.42510121,
+      "minimum_normal_current_a": 0.3442029,
+      "checks": {
+        "under_original_power_ceiling": true,
+        "has_required_design_reserve": true,
+        "above_test_reference_current_floor": true,
+        "below_assumed_supply_current_limit": true,
+        "load_rated_power_ge_worst_modeled": null
+      },
+      "digital_pass": true,
+      "physical_part_qualified": false
+    },
+    {
+      "id": "13R_1pct_TE355013RFT",
+      "nominal_ohms": 13,
+      "tolerance_pct": 1,
+      "source": "https://www.te.com/en/product-2-2176403-8.html",
+      "qualification": "MANUFACTURER_IDENTIFIED_NOT_PROCURED",
+      "worst_normal_load_power_w": 2.14160839,
+      "worst_normal_current_a": 0.40792541,
+      "minimum_normal_current_a": 0.35768072,
+      "checks": {
+        "under_original_power_ceiling": true,
+        "has_required_design_reserve": true,
+        "above_test_reference_current_floor": true,
+        "below_assumed_supply_current_limit": true,
+        "load_rated_power_ge_worst_modeled": true
+      },
+      "digital_pass": true,
+      "physical_part_qualified": false
+    },
+    {
+      "id": "15R_5pct",
+      "nominal_ohms": 15,
+      "tolerance_pct": 5,
+      "source": null,
+      "qualification": "CURRENT_FLOOR_NEGATIVE_CONTROL",
+      "worst_normal_load_power_w": 1.93421053,
+      "worst_normal_current_a": 0.36842105,
+      "minimum_normal_current_a": 0.29874214,
+      "checks": {
+        "under_original_power_ceiling": true,
+        "has_required_design_reserve": true,
+        "above_test_reference_current_floor": false,
+        "below_assumed_supply_current_limit": true,
+        "load_rated_power_ge_worst_modeled": null
+      },
+      "digital_pass": false,
+      "physical_part_qualified": false
+    }
+  ],
+  "reference_sensitivity_screen": {
+    "minimum_current_a": 0.35768072,
+    "nominal_minimum_10mohm_reference_shunt_mv": 3.576807,
+    "manufacturer_dmm_bound_microvolts_illustrative": 8.536521,
+    "manufacturer_dmm_bound_percent_illustrative": 0.238663,
+    "uncalibrated_shunt_tolerance_percent": 1,
+    "simple_sum_percent_not_a_traceable_uncertainty": 1.238663,
+    "fixture_only_sensitivity_threshold_pct": 0.75,
+    "g2_physical_agreement_verified": false,
+    "note": "Not an uncertainty budget. DMM datasheet at 23\u00b15\u00b0C / 1 year alone plus nominal shunt tolerance cannot validate a 0.75% physical threshold."
+  },
+  "gates": {
+    "G0": {
+      "status": "DIGITAL_MODEL_PASS_PHYSICAL_BUILD_HOLD",
+      "passed_numerical_corner_checks": true,
+      "next_evidence": [
+        "exact purchased load model/lot and measured resistance",
+        "thermal mounting and derating",
+        "selected DC-rated fuse+holder and fault-current/time-current coordination",
+        "actual isolated/limited supply and independent overvoltage protection",
+        "earth/I2C isolation, connectors and safety sign-off"
+      ]
+    },
+    "G1": {
+      "status": "HOLD_NO_PHYSICAL_EVIDENCE",
+      "next_evidence": [
+        "identified operator and controlled bench",
+        "meter/supply serial numbers",
+        "reference calibration and original raw capture",
+        "documented UTC alignment",
+        "signed/source-custody receipt from a distinct authorized operator"
+      ]
+    },
+    "G2": {
+      "status": "HOLD_UNCALIBRATED_REFERENCE",
+      "next_evidence": [
+        "traceable independent reference calibration including shunt resistance",
+        "measured covariance/timebase/shunt thermal drift and uncertainty",
+        "pre-registered physical comparison tolerance and negative controls"
+      ]
+    },
+    "G3": {
+      "status": "SOFTWARE_FIXTURE_ONLY",
+      "next_evidence": [
+        "authentic G1/G2 source evidence",
+        "unchanged Policy Lab PLRS-6 original-byte intake",
+        "independent review, strict decision and reproduction"
+      ]
+    },
+    "G4": {
+      "status": "NOT_ASSESSED",
+      "next_evidence": [
+        "authenticated electrical cost and billing period",
+        "independently verified useful output and cost allocation",
+        "actual invoices/contracts/revenues or explicitly state unknown"
+      ]
+    }
+  },
+  "build_authorized": false,
+  "power_on_authorized": false,
+  "physical_measurements_established": false,
+  "policy_lab_financial_claim_authorized": false,
+  "not_established": [
+    "physical source authenticity",
+    "primary/reference calibration",
+    "safe equipment/protection",
+    "physical source-clock independence",
+    "G3 external verified intake",
+    "G4 economic transactions"
+  ],
+  "campaign_sha256": "607f5b6c6ff2850c2e520b9a466d24d260733ab31bd606b09a5b2025184e4ceb",
+  "decision_sha256": "289177826993345b092563e9d9b949ef6904c2629580f0bb44ce257fa851b9f7"
+}
