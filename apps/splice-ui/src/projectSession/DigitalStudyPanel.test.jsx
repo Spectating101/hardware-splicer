@@ -81,9 +81,9 @@ describe("Saved digital requirement revisions", () => {
     fetchDigitalStudy.mockResolvedValue(data(study(2, 264.9, false)));
     render(<DigitalStudyPanel session={session} />);
     await screen.findByRole("button", { name: "Compare revisions" });
-    expect(screen.getByRole("region", { name: "Evidence" })).toHaveTextContent("Check result: false · Actual: 264.9 · Limit: 250 g");
+    expect(screen.getByRole("region", { name: "Evidence" })).toHaveTextContent("Check result: false · Actual: 264.9 g · required ≤ 250 g");
     // A failed check becomes the next action, quoted from the run; there is no ready or pass badge.
-    expect(screen.getByTestId("bench-package")).toHaveTextContent("Failed check Nominal mass: actual 264.9 g, limit 250 g");
+    expect(screen.getByTestId("bench-package")).toHaveTextContent("Failed check Nominal mass: actual 264.9 g, required ≤ 250 g");
     expect(await within(screen.getByTestId("bench-package")).findByText("Package · not linked")).toBeInTheDocument();
     expect(screen.queryByTitle("Comparison design 3D assembly revision 1")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Compare revisions", exact: true }));

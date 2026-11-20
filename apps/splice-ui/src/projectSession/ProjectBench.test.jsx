@@ -125,8 +125,8 @@ describe("Project bench truth", () => {
     expect(delta).toHaveTextContent("Changed requirement minimum_work_runtime_h: 2.5 → 3.5");
     const stale = within(delta).getByTestId("stale-check");
     expect(stale).toHaveTextContent("stale · from revision 3work_runtime");
-    expect(stale).toHaveTextContent("Revision 3 result: passed · actual 3.166 h · limit 2.5 h · run run-three-ab");
-    expect(stale).toHaveTextContent("Rerun in revision 4: failed · actual 3.166 h · limit 3.5 h");
+    expect(stale).toHaveTextContent("Revision 3 result: passed · actual 3.166 h · required ≥ 2.5 h · run run-three-ab");
+    expect(stale).toHaveTextContent("Rerun in revision 4: failed · actual 3.166 h · required ≥ 3.5 h");
     expect(stale).toHaveTextContent("not counted for revision 4");
     expect(delta).toHaveTextContent("retained · from revision 3ordinary_source_margin");
     expect(delta).not.toHaveTextContent("retained by the backend");
@@ -256,4 +256,16 @@ it("offers three list entries and submits distinct owned units, without claiming
     { unit_id: "unit-1", name: "Printer stepper", source: "salvaged", known_facts: "Current unknown" },
     { unit_id: "unit-2", name: "Second stepper", source: "owned", known_facts: "" },
   ] }) });
+});
+
+describe("thresholdLabel", () => {
+  it("states a minimum, a maximum, or a neutral threshold from unambiguous results only", async () => {
+    const { thresholdLabel } = await import("./ProjectBench.jsx");
+    expect(thresholdLabel({ actual: 0.08, limit: 0, passed: true, unit: "A" })).toBe("required ≥ 0 A");
+    expect(thresholdLabel({ actual: 3.166, limit: 3.5, passed: false, unit: "h" })).toBe("required ≥ 3.5 h");
+    expect(thresholdLabel({ actual: 230, limit: 250, passed: true, unit: "g" })).toBe("required ≤ 250 g");
+    expect(thresholdLabel({ actual: 260, limit: 250, passed: false, unit: "g" })).toBe("required ≤ 250 g");
+    expect(thresholdLabel({ actual: 2, limit: 2, passed: true, unit: "A" })).toBe("threshold 2 A");
+    expect(thresholdLabel({ actual: 2, limit: 3 })).toBe("threshold 3");
+  });
 });

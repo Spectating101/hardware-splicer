@@ -93,9 +93,21 @@ function EvidenceRevisionLink({ projectId, revision, assurance, assuranceKnown }
   </div>;
 }
 
+// Checks do not record their comparison direction, and minimums and maximums both occur.
+// Infer it only when the result makes it unambiguous; otherwise call it a threshold.
+export function thresholdLabel(row) {
+  const unit = row.unit ? ` ${row.unit}` : "";
+  const { actual, limit, passed } = row;
+  let comparator = null;
+  if (typeof actual === "number" && typeof limit === "number" && typeof passed === "boolean" && actual !== limit) {
+    comparator = (actual > limit) === passed ? "≥" : "≤";
+  }
+  return comparator ? `required ${comparator} ${value(limit)}${unit}` : `threshold ${value(limit)}${unit}`;
+}
+
 function checkResult(row) {
   const unit = row.unit ? ` ${row.unit}` : "";
-  return `${row.passed === true ? "passed" : row.passed === false ? "failed" : "unknown"} · actual ${value(row.actual)}${unit} · limit ${value(row.limit)}${unit}`;
+  return `${row.passed === true ? "passed" : row.passed === false ? "failed" : "unknown"} · actual ${value(row.actual)}${unit} · ${thresholdLabel(row)}`;
 }
 
 // Stored-revision compare for non-study projects, via the engineering revision diff.
@@ -146,7 +158,7 @@ function PackagePanel({ projectId, revision, latestRevision, studyPackages, obje
     ...(sceneNext ? [{ text: sceneNext, source: "scene manifest" }] : []),
     ...blockers.map((text) => ({ text, source: "backend blocker" })),
     ...failedChecks.map((check) => ({
-      text: `Failed check ${value(check.label || check.id)}: actual ${value(check.actual)}${check.unit ? ` ${check.unit}` : ""}, limit ${value(check.limit)}${check.unit ? ` ${check.unit}` : ""}`,
+      text: `Failed check ${value(check.label || check.id)}: actual ${value(check.actual)}${check.unit ? ` ${check.unit}` : ""}, ${thresholdLabel(check)}`,
       source: `study run, revision ${revision}`,
     })),
   ];
@@ -306,7 +318,7 @@ export default function ProjectBench({ session, study, children, references, evi
           <p>Authority: <span>{value(claim.authority)}</span></p>
           <p>Source: {value(claim.source || claim.source_id || claim.source_ref)}</p>
           {claim.evidence_locator && <p>{value(claim.evidence_locator)}</p>}
-          {Object.hasOwn(claim, "passed") && <p>Check result: {value(claim.passed)} · Actual: {value(claim.actual)} · Limit: {value(claim.limit)} {claim.unit}</p>}
+          {Object.hasOwn(claim, "passed") && <p>Check result: {value(claim.passed)} · Actual: {value(claim.actual)} {claim.unit} · {thresholdLabel(claim)}</p>}
           {claim.value !== undefined && <p>Value: {value(claim.value)} {claim.units}</p>}
         </li>)}</ul>
         {!claims.length && <p>Claims: unknown</p>}
