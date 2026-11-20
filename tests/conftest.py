@@ -23,7 +23,39 @@ def _module_available(name: str) -> bool:
         return False
 
 
+def _bind_import_time_repo_roots() -> None:
+    """Import every module that binds ``repo_root()`` at import, against the real checkout.
+
+    In production the root is fixed before the server starts (``hs-serve --repo-root``
+    re-executes with it set). In a test session, whichever test first imports such a
+    module would otherwise decide its root, so a test that points
+    ``HARDWARE_SPLICER_REPO_ROOT`` at a temporary checkout would leak that path into
+    every later test. Modules are found by source scan so new ones are covered.
+    """
+    import importlib
+    import os
+    import re
+    from pathlib import Path
+
+    package = Path(__file__).resolve().parents[1] / "src" / "hardware_splicer"
+    binds = re.compile(r"^[A-Z_][A-Z0-9_]*\s*(?::[^=]+)?=\s*_?repo_root\(\)", re.M)
+    saved = os.environ.pop("HARDWARE_SPLICER_REPO_ROOT", None)
+    try:
+        for path in sorted(package.rglob("*.py")):
+            if binds.search(path.read_text(encoding="utf-8", errors="replace")):
+                relative = path.relative_to(package.parent).with_suffix("")
+                try:
+                    importlib.import_module(".".join(relative.parts))
+                except ImportError:
+                    # Optional extras missing: the module's own tests skip or fail on their own.
+                    pass
+    finally:
+        if saved is not None:
+            os.environ["HARDWARE_SPLICER_REPO_ROOT"] = saved
+
+
 def pytest_configure(config: pytest.Config) -> None:
+    _bind_import_time_repo_roots()
     for marker, module in _OPTIONAL_CAD_MODULES.items():
         config.addinivalue_line(
             "markers",
