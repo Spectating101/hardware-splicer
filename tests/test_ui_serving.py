@@ -96,7 +96,10 @@ def test_ui_routes_health_and_cache_headers(ui_paths, monkeypatch, tmp_path, pro
     else:
         app = api.create_app(ui_dist=dist)
     with TestClient(app) as client:
-        for path in ("/", "/projects/project-123", "/index.html"):
+        # Every client route the SPA router owns reloads to index.html, query string included.
+        for path in ("/", "/projects/project-123", "/index.html", "/projects/new",
+                     "/projects/project-123?rev=2", "/library", "/library/sorting-workcell",
+                     "/advanced", "/advanced/interface-lab", "/scenes/fielddeck", "/no/such/page"):
             response = client.get(path)
             assert response.status_code == 200
             assert response.text == (dist / "index.html").read_text(encoding="utf-8")
