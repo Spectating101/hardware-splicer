@@ -234,3 +234,55 @@ def test_written_packet_is_never_replaced(chain, tmp_path):
     assert receipt['sha256'] == sha256((tmp_path / 'out' / 'change.json').read_bytes()).hexdigest()
     with pytest.raises(FileExistsError):
         write_change_evidence(tmp_path / 'out' / 'change.json', packet)
+
+
+CANDIDATE = {'id': 'load-budget', 'kind': 'modelled_candidate_design_change', 'status': 'PROPOSED',
+             'label': 'controlled stand-in', 'target': 'work-runtime', 'input': 'load_w', 'before': 5, 'after': 4,
+             'requirement_overrides': {'load_w': 4}, 'model': 'runtime_inverse_to_work_power',
+             'formula': 'R = 15 / load_w', 'numbers': {'runtime_h': 3.0}, 'assumptions': ['fixture'], 'basis': 'fixture'}
+
+
+@pytest.fixture
+def candidate_chain(chain):
+    """Review the failing r2 with a candidate, apply it as r3, export and review r3."""
+    engine, project, root, files = chain
+    export = json.loads(files['candidate_export'].read_bytes())
+    unmet = [dict(UNMET[0], actual=3.0), {**UNMET[1], 'fact': 'metric.runtime_h'}]
+    review = _review(files['candidate_export'], export, {'minimum_work_runtime_h': 3.5}, unmet)
+    review['target_results'] = [{'id': 'work-runtime', 'fact': 'metric.runtime_h', 'operator': '>=', 'value': 3.5,
+                                 'unit': 'h', 'passed': False}]
+    review['candidate_design_changes'] = [CANDIDATE]
+    review_path = _write(root / 'r2-candidate-review.json', review)
+    proposal = validate_policy_feedback(engine, files['candidate_export'].read_bytes(), review_path.read_bytes(),
+                                        replay_receipt_bytes=_receipt(review_path), candidates=('load-budget',))
+    proposal_path = _write(root / 'proposal-r3.json', proposal)
+    assert engine.run_revision(project, base_revision=2, requirements=proposal['resolved_requirements'])['ok']
+    r3_path = _write(root / 'r3-export.json', export_policy_evidence(engine, project, 3))
+    return engine, project, root, {'base_export': files['candidate_export'], 'base_review': review_path,
+                                   'proposal': proposal_path, 'candidate_export': r3_path}
+
+
+def test_candidate_change_reports_native_outcome_and_unknown_physical_means(candidate_chain):
+    engine, project, root, files = candidate_chain
+    packet = build_change_evidence(engine.projects, project, base_revision=2, candidate_revision=3, root=root, files=files)
+    [row] = packet['proposal']['candidate_design_changes']
+    assert row['input'] == 'load_w' and row['after'] == 4
+    assert row['physical_means'] == 'unknown / not tested'
+    # Fixture runtime is 15 / load_w = 3.75 h against the 3.5 h target.
+    assert row['native_outcome'] == {'target': 'work-runtime', 'fact': 'metric.runtime_h', 'operator': '>=',
+                                     'required': 3.5, 'unit': 'h', 'native_value': 3.75, 'met': True,
+                                     'basis': 'native HS rerun of the candidate revision; modeled, not measured'}
+    assert packet['proposal']['requirement_changes'] == {'load_w': {'before': 5, 'after': 4}}
+    assert 'Physical means of reaching load_w = 4: unknown / not tested.' in packet['not_tested']
+    assert [r['check'] for r in packet['check_delta']['stale']] and packet['unresolved'] == []
+    text = json.dumps(packet).lower()
+    assert ' fix' not in text and 'approved' not in text and '"ready"' not in text
+
+
+def test_candidate_altered_after_review_is_refused(candidate_chain):
+    engine, project, root, files = candidate_chain
+    proposal = json.loads(files['proposal'].read_bytes())
+    proposal['applied_candidates'][0]['after'] = 3
+    _write(files['proposal'], proposal)
+    with pytest.raises(ChangeDossierError, match='differs from the Policy Lab review'):
+        build_change_evidence(engine.projects, project, base_revision=2, candidate_revision=3, root=root, files=files)

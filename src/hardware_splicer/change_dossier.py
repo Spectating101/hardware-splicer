@@ -43,6 +43,8 @@ FILE_ROLES = {
     "candidate_review": REVIEW_SCHEMA,
 }
 REQUIRED_ROLES = ("base_export", "base_review", "proposal", "candidate_export")
+PHYSICAL_MEANS = "unknown / not tested"
+CANDIDATE_LABEL = "Modelled candidate design change; the model is unverified until the native rerun below"
 
 
 class ChangeDossierError(ValueError):
@@ -72,6 +74,42 @@ def _unmet(row: Mapping[str, Any]) -> dict[str, Any]:
         required, fact = f"HS limit {row.get('limit')} {row.get('unit')}", "HS engineering check"
     return {"target": row["id"], "fact": fact, "actual": row.get("actual"), "required": required,
             "reason": row.get("reason")}
+
+
+def _candidate_outcomes(proposal: Mapping[str, Any], review: Mapping[str, Any],
+                        candidate_export: Mapping[str, Any]) -> list[dict[str, Any]]:
+    """Each applied modelled candidate, rebound to the review row it came from, with its native rerun outcome."""
+    applied = proposal.get("applied_candidates") or []
+    stated = {row.get("id"): row for row in review.get("candidate_design_changes") or [] if isinstance(row, dict)}
+    overrides = {}
+    for row in applied:
+        if stated.get(row.get("id")) != row or row.get("status") != "PROPOSED":
+            raise ChangeDossierError(f"Applied candidate {row.get('id')!r} differs from the Policy Lab review.")
+        overrides.update(row["requirement_overrides"])
+    if overrides != (proposal.get("candidate_overrides") or {}):
+        raise ChangeDossierError("The proposal's candidate overrides differ from its applied candidates.")
+    targets = {row["id"]: row for row in review.get("target_results") or []}
+    metrics = candidate_export["study"]["summary"]["metrics"]
+    rows = []
+    for row in applied:
+        target = targets.get(row["target"])
+        if target is None:
+            raise ChangeDossierError(f"Candidate {row['id']} names a target the review did not evaluate.")
+        fact = target["fact"].split(".", 1)[1]
+        value = metrics.get(fact)
+        met = None if value is None else (value >= target["value"] if target["operator"] == ">="
+                                          else value <= target["value"] if target["operator"] == "<="
+                                          else value == target["value"])
+        rows.append({"id": row["id"], "label": CANDIDATE_LABEL, "input": row["input"], "before": row["before"],
+                     "after": row["after"], "requirement_overrides": row["requirement_overrides"],
+                     "model": row["model"], "formula": row["formula"], "numbers": row["numbers"],
+                     "assumptions": row["assumptions"], "basis": row["basis"],
+                     "physical_means": PHYSICAL_MEANS,
+                     "native_outcome": {"target": row["target"], "fact": target["fact"], "operator": target["operator"],
+                                        "required": target["value"], "unit": target["unit"],
+                                        "native_value": value, "met": met,
+                                        "basis": "native HS rerun of the candidate revision; modeled, not measured"}})
+    return rows
 
 
 def revision_identity(store, project_id: str, revision: int) -> dict[str, Any]:
@@ -171,6 +209,7 @@ def build_change_evidence(store, project_id: str, *, base_revision: int, candida
         raise ChangeDossierError("The proposal's requirement overrides differ from the Policy Lab review.")
     if proposal.get("resolved_requirements") != candidate["requirements"]:
         raise ChangeDossierError(f"Revision {candidate_revision} does not carry the proposal's resolved requirements.")
+    candidates = _candidate_outcomes(proposal, review, values["candidate_export"])
 
     delta = evaluate_study_check_delta(_assurance(store, project_id, base_revision),
                                        _assurance(store, project_id, candidate_revision))
@@ -219,6 +258,7 @@ def build_change_evidence(store, project_id: str, *, base_revision: int, candida
             "revision_requirements": proposal["revision_requirements"],
             "requirement_changes": proposal["requirement_changes"],
             "unmet_targets": [_unmet(row) for row in review["unmet_constraints"]],
+            "candidate_design_changes": candidates,
             "applied_as_revision": candidate_revision,
         },
         "check_delta": {
@@ -230,7 +270,8 @@ def build_change_evidence(store, project_id: str, *, base_revision: int, candida
             "stale_counted_as_passing": delta["stale_counted_as_passing"],
         },
         "unresolved": unresolved,
-        "not_tested": list(NOT_TESTED),
+        "not_tested": list(NOT_TESTED) + [
+            f"Physical means of reaching {row['input']} = {row['after']}: {PHYSICAL_MEANS}." for row in candidates],
         "not_linked": not_linked,
         "head_at_export": {"revision": latest, "run_id": candidate["run_id"]},
         "files": records,
