@@ -243,7 +243,7 @@ it("offers three list entries and submits distinct owned units, without claiming
   render(<NewProject online onComplete={complete} onCancel={vi.fn()} />);
   const choices = screen.getByRole("list", { name: "Project starting points" });
   expect(within(choices).getAllByRole("listitem")).toHaveLength(3);
-  expect(within(choices).getAllByRole("button").map((button) => button.textContent)).toEqual([
+  expect(within(choices).getAllByRole("button").map((button) => button.getAttribute("aria-label"))).toEqual([
     "Start from a goal", "Start from parts you have", "Start from a reference study",
   ]);
   fireEvent.click(screen.getByRole("button", { name: "Start from parts you have" }));

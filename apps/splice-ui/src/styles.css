@@ -2621,10 +2621,24 @@ button.primary:disabled {
 table { font-variant-numeric: tabular-nums; }
 textarea, select { font: inherit; }
 .new-project { display: grid; gap: 1rem; min-width: 0; }
-.project-entry-list { list-style: none; margin: 0; padding: 0; display: grid; }
-.project-entry-list li { border-bottom: 1px solid var(--line); }
-.project-entry-list button { width: 100%; text-align: left; border: 0; border-radius: 0; padding: 1rem; background: transparent; }
-.project-entry-list button[aria-pressed="true"] { color: var(--accent); background: var(--surface); font-weight: 600; }
+/* Three starting points as one choice: each option is a selectable tile with a radio mark. */
+.project-entry-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
+.project-entry-list li { min-width: 0; display: flex; }
+.project-entry { position: relative; width: 100%; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .3rem .6rem; align-content: start;
+  text-align: left; padding: .9rem 1rem; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--text); font-weight: 400; }
+.project-entry:hover { border-color: var(--muted); }
+.project-entry[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.project-entry-mark { grid-row: 1; width: 16px; height: 16px; margin-top: .15rem; border-radius: 50%; border: 1.5px solid var(--muted); background: var(--surface); }
+.project-entry[aria-pressed="true"] .project-entry-mark { border-color: var(--accent); background: radial-gradient(circle, var(--accent) 0 4px, var(--surface) 4.5px); }
+.project-entry-label { font-weight: 600; }
+.project-entry-detail { grid-column: 2; color: var(--muted); font-size: .875rem; line-height: 1.45; }
+@media (max-width: 760px) { .project-entry-list { grid-template-columns: minmax(0, 1fr); } }
+.wizard-progress { margin: 0 0 1.1rem; max-width: 40rem; }
+.wizard-progress p { margin: 0 0 .45rem; font-size: .9375rem; }
+.wizard-progress-count { color: var(--muted); font-variant-numeric: tabular-nums; }
+.wizard-progress-next { color: var(--muted); font-size: .875rem; }
+.wizard-progress-track { height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; }
+.wizard-progress-track span { display: block; height: 100%; background: var(--text); transition: width .2s ease-out; }
 .owned-unit-editor { display: grid; gap: 1rem; }
 .owned-unit-editor fieldset { border: 0; border-top: 1px solid var(--line); margin: 0; padding: 1rem 0; min-width: 0; display: grid; gap: .75rem; }
 .owned-unit-editor label { display: grid; gap: .3rem; }

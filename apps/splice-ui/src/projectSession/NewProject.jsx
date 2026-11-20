@@ -2,6 +2,12 @@ import { useState } from "react";
 import ProjectWizard from "../components/ProjectWizard.jsx";
 import DigitalStudyLibrary from "./DigitalStudyLibrary.jsx";
 
+const ENTRIES = [
+  ["goal", "Start from a goal", "Describe what it should do; the intake asks for the rest."],
+  ["parts", "Start from parts you have", "List the units you own, salvaged or bought, and what is known about them."],
+  ["reference", "Start from a reference study", "Open a registered design with saved geometry and simulation."],
+];
+
 export default function NewProject({ online, busy, onStartStudy, onComplete, onCancel, initialEntry = "goal", ...wizardProps }) {
   const [entry, setEntry] = useState(initialEntry);
   const [units, setUnits] = useState([{ unit_id: "unit-1", name: "", source: "owned", known_facts: "" }]);
@@ -20,8 +26,13 @@ export default function NewProject({ online, busy, onStartStudy, onComplete, onC
     <header className="projects-heading"><h1>New project</h1><button className="ghost" onClick={onCancel}>Cancel</button></header>
     <p className="muted">Not saved yet. Submit an intake or start a reference study to create a project.</p>
     <ul className="project-entry-list" aria-label="Project starting points">
-      {[["goal", "Start from a goal"], ["parts", "Start from parts you have"], ["reference", "Start from a reference study"]].map(([id, label]) =>
-        <li key={id}><button type="button" className="secondary" aria-pressed={entry === id} onClick={() => setEntry(id)}>{label}</button></li>)}
+      {ENTRIES.map(([id, label, detail]) =>
+        <li key={id}><button type="button" className="project-entry" aria-label={label} aria-pressed={entry === id} aria-describedby={`entry-${id}-detail`}
+          onClick={() => setEntry(id)}>
+          <span className="project-entry-mark" aria-hidden="true" />
+          <span className="project-entry-label">{label}</span>
+          <span className="project-entry-detail" id={`entry-${id}-detail`}>{detail}</span>
+        </button></li>)}
     </ul>
     {entry === "goal" && <div data-testid="stage-intake"><ProjectWizard {...wizardProps} embedded initialMode="greenfield"
       onCancel={onCancel} onCompleteIntake={onComplete} /></div>}
