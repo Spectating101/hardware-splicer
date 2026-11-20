@@ -28,7 +28,7 @@ Install KiCad from [kicad.org](https://www.kicad.org/download/) and ensure `kica
 ```bash
 git clone https://github.com/Spectating101/hardware-splicer.git
 cd hardware-splicer
-git checkout v1.0.1    # or main for latest
+git checkout <release-tag>    # the release you deploy, or main for latest
 bash scripts/install_splice_v1.sh
 source .venv/bin/activate
 hs-doctor
