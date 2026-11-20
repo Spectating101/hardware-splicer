@@ -20,7 +20,7 @@
   flex: 1;
   min-width: 0;
   color: var(--text);
-  font: 400 12px/1.4 "IBM Plex Sans", system-ui, sans-serif;
+  font: 400 13px/1.4 "IBM Plex Sans", system-ui, sans-serif;
   font-variant-numeric: tabular-nums;
   color-scheme: dark;
 }
@@ -99,7 +99,7 @@
 }
 .fd-header > div { display: flex; align-items: center; gap: 12px; }
 .fd-header h1 { margin: 0; font-size: 15px; font-weight: 600; }
-.fd-fit-unknown { font-weight: 700; }
+.fd-fit-unknown { font-weight: 700; color: var(--text); }
 .fd-header .fd-exit { background: transparent; border-color: transparent; }
 /* Amber belongs to pins and question numbers; the header reads as text with an amber count. */
 .fd-header .fd-validation { background: transparent; color: #e6e8eb; font-weight: 600; text-align: end; }
@@ -178,7 +178,7 @@
 #fd-tree [data-row][aria-pressed="true"] { border-color: var(--focus); }
 #fd-tree [data-endpoint-row] { outline: 1px dashed #9097a0; outline-offset: -1px; }
 #fd-tree [data-endpoint-row]:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
-#fd-tree .fd-endpoint { min-width: 16px; height: 16px; padding: 0; font-size: 10px; line-height: 1; align-self: center; }
+#fd-tree .fd-endpoint { min-width: 18px; height: 18px; padding: 0; font-size: 12px; line-height: 1; align-self: center; }
 .fd-tree-scroll { padding-bottom: 8px; }
 .fd-tree-label { overflow-wrap: anywhere; }
 .fd-tree-group small { margin-inline-start: auto; color: var(--text-2); }
@@ -241,7 +241,7 @@
   padding: 2px 6px;
   background: #0e1116;
   color: var(--kind, var(--text));
-  font: 11px/1.4 var(--mono);
+  font: 12px/1.4 var(--mono);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -252,7 +252,7 @@
 .fd-leaders :is(.fd-bracket, .fd-bracket-halo) { opacity: 0.65; }
 .fd-grid-label {
   position: absolute; top: 0; left: 0; visibility: hidden; translate: -50% -50%;
-  color: #9097a0; font: 11px/1 var(--mono); white-space: nowrap;
+  color: #9097a0; font: 12px/1 var(--mono); white-space: nowrap;
 }
 .fd-pin-position, .fd-route-position { translate: -50% -50%; }
 .fd-scene button.fd-pin {
@@ -344,7 +344,7 @@
   .fd-header > div { min-width: 0; gap: 4px; }
   .fd-header h1 { font-size: 14px; line-height: 1.15; }
   .fd-header .fd-exit, .fd-header .fd-validation { flex: none; }
-  .fd-header .fd-validation { font-size: 11px; line-height: 1.15; white-space: nowrap; padding-inline: 4px; }
+  .fd-header .fd-validation { font-size: 12px; line-height: 1.15; white-space: nowrap; padding-inline: 4px; }
   .fd-validation > span { display: block; }
   .fd-header .fd-validation[aria-pressed="false"] { border-color: transparent; }
   .fd-scene button, .fd-inspector a { min-height: 44px; min-width: 44px; }
@@ -375,7 +375,7 @@
     padding: 4px 8px;
     background: var(--bg-0);
     color: var(--text-2);
-    font: 11px/1.4 var(--mono);
+    font: 12px/1.4 var(--mono);
   }
   .fd-stage .fd-face-pill {
     position: absolute;
@@ -391,7 +391,7 @@
     inset: auto 4px calc(var(--peek) + var(--safe) + 8px) auto;
     z-index: 4;
     width: min(260px, calc(100% - 8px));
-    font-size: 11px;
+    font-size: 12px;
   }
   .fd-panel {
     inset: auto 0 calc(var(--peek) + var(--safe));
@@ -432,7 +432,7 @@
   .fd-stage-warning, .fd-stage .fd-skip { bottom: calc(var(--peek) + var(--safe) + 8px); }
 }
 
-.fd-label-detail { display: block; color: var(--text-2); font-size: 11px; line-height: 1.3; }
+.fd-label-detail { display: block; color: var(--text-2); font-size: 12px; line-height: 1.3; }
 @media (width < 640px) {
   .fd-peek { scroll-snap-type: y mandatory; scroll-padding-top: 12px; }
   .fd-peek > * { scroll-snap-align: start; }
@@ -455,14 +455,14 @@
 .fd-face-drawing .fd-dim[data-kind="removed"] { opacity: 0.35; }
 .fd-face-drawing .fd-seam-chain { stroke: var(--text); stroke-opacity: 0.6; stroke-width: 0.75; stroke-dasharray: 12 3 2 3; fill: none; }
 .fd-face-drawing text {
-  fill: var(--kind, var(--text)); stroke: none; font: 11px var(--mono); font-variant-numeric: tabular-nums;
+  fill: var(--kind, var(--text)); stroke: none; font: 12px var(--mono); font-variant-numeric: tabular-nums;
 }
 .fd-face-drawing .fd-aperture { stroke: #d9cfbe; stroke-width: 1.5; fill: none; }
 .fd-face-drawing .fd-spacer-marks { stroke: var(--text); stroke-width: 1; fill: none; }
 .fd-face-drawing .fd-cover { stroke: var(--text); fill: none; }
 .fd-face-drawing .fd-cover .fd-dim-arrow { fill: var(--text); }
 .fd-face-drawing .fd-cover-unknown { stroke: var(--text-2); stroke-width: 1; stroke-dasharray: 1 3; }
-.fd-face-drawing .fd-cover-text { fill: var(--text-2); font-size: 10px; }
+.fd-face-drawing .fd-cover-text { fill: var(--text-2); font-size: 12px; }
 .fd-face-drawing .fd-cover[data-known="true"] .fd-cover-text { fill: var(--text); }
 
 .fd-stage .fd-footprint {
@@ -471,11 +471,11 @@
 }
 .fd-fit-primary { font: 600 14px/1.3 "IBM Plex Sans", system-ui, sans-serif; }
 .fd-fit-gap { font: 500 20px/1.3 var(--mono); }
-.fd-fit-reason { color: var(--text-2); font-size: 11px; }
-.fd-fit-line { font: 11px/1.4 var(--mono); color: var(--text); }
+.fd-fit-reason { color: var(--text-2); font-size: 12px; }
+.fd-fit-line { font: 12px/1.4 var(--mono); color: var(--text); }
 .fd-fit-secondary { color: var(--text-2); }
 .fd-fit-unknown { color: var(--text-2); }
-.fd-fit-source { font: 10px/1.4 var(--mono); }
+.fd-fit-source { font: 12px/1.4 var(--mono); }
 .fd-footprint a { color: inherit; pointer-events: auto; }
 .fd-leaders .fd-pin-ticks { stroke: var(--question); stroke-width: 1; fill: none; }
 /* Face view sits on the dark stage, so its pins take a raised fill to read as filled discs, as in 3D. */
@@ -488,16 +488,22 @@
 .fd-ghost-links .fd-ghost-leader { stroke: #f17e70; stroke-width: 1; fill: none; }
 .fd-ghost-links .fd-ghost-arrow { fill: #f17e70; stroke: none; }
 /* Old-to-new pairing chip: neutral label chip, Mono 11 px, no stroke, with a neutral leader. */
-.fd-pairing-chip { font: 11px/1.4 var(--mono); color: #e6e8eb; }
+.fd-pairing-chip { font: 12px/1.4 var(--mono); color: #e6e8eb; }
 .fd-leaders .fd-pairing-leader { stroke: #9097a0; stroke-width: 1; fill: none; }
 @media (width < 640px) {
   .fd-fit-gap { font-size: 13px; }
   .fd-fit-primary { font-size: 12px; }
-  .fd-fit-line, .fd-fit-source { font-size: 9px; }
+  .fd-fit-line, .fd-fit-source { font-size: 12px; }
   .fd-fit-secondary { display: none; }
-  .fd-face-drawing text { font-size: 9px; }
+  .fd-face-drawing text { font-size: 12px; }
 }
 
 /* Inside a project bench the scene is one pane, not the whole viewport. */
 .fd-scene.is-embedded { flex: none; width: 100%; }
 .fd-scene.is-embedded .fd-stage { height: min(720px, 78svh); }
+
+/* Type floor: primary technical text 14 px, metadata 12 px. */
+.fd-inspector-scroll { font-size: 14px; }
+.fd-inspector h3 { font-size: 13px; }
+.fd-tree-scroll li > button { font-size: 14px; }
+.fd-tree-group h3 { font-size: 12px; }
