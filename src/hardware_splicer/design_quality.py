@@ -10,6 +10,7 @@ def build_design_quality_gate(
     design_quality: Mapping[str, Any] | None,
     *,
     engineering: Mapping[str, Any] | None = None,
+    request_fidelity: Mapping[str, Any] | None = None,
 ) -> Dict[str, Any]:
     body = dict(design_quality or {})
     engineering = dict(engineering or {})
@@ -39,6 +40,13 @@ def build_design_quality_gate(
     if readiness == "draft" and build_ready and not compiler_verified:
         blockers.append("Circuit engineering readiness is still draft while build graph claims readiness.")
 
+    if request_fidelity and request_fidelity.get("status") == "mismatch":
+        for row in request_fidelity.get("missing_parts") or []:
+            blockers.append(
+                f"Design leaves out requested part {row['module_id']}: requested {row['requested']}, "
+                f"design has {row['in_design']} ({', '.join(row['names'])})."
+            )
+
     fabrication_blockers = list(blockers)
     if not gerber_ready:
         fabrication_blockers.append("Gerber export is not ready.")
@@ -62,7 +70,7 @@ def build_design_quality_gate(
     strict_build_ready = build_ready and not blockers
     fabrication_ready = bool(body.get("fabrication_ready")) and gerber_ready and bom_ready and not fabrication_blockers
 
-    return {
+    gate = {
         "schema_version": SCHEMA_VERSION,
         "design_quality_score": round(min(score, 1.0), 3),
         "build_ready": strict_build_ready,
@@ -75,3 +83,6 @@ def build_design_quality_gate(
         "blockers": blockers,
         "summary": body,
     }
+    if request_fidelity is not None:
+        gate["request_fidelity"] = dict(request_fidelity)
+    return gate

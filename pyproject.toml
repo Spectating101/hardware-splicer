@@ -31,6 +31,9 @@ mcp = ["mcp>=1.2,<2"]
 # Canonical whole-product MCP gateway targets the current stable SDK line.
 backend-mcp = ["mcp>=2,<3"]
 dev = ["pytest>=8.0", "httpx>=0.27", "jinja2>=3.1"]
+# Native CAD paths: STEP/STL generation, hinge and print-geometry studies, and the
+# project-intake STEP assembly. Without these, those paths fail at import time.
+cad = ["cadquery>=2.5", "trimesh>=4"]
 
 [project.scripts]
 hs-doctor = "hardware_splicer.cli_entry:main_doctor"
