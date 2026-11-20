@@ -1,0 +1,6 @@
+# Preserve manufactured-tool/native CAD export bytes without newline conversion.
+# STEP is text-serialized ISO-10303 but has exporter-defined spacing and headers.
+cad/*.step -text -diff
+cad/*.stl -text -diff
+cad/*.csv -text -diff
+pcb/*.kicad_pcb -text -diff

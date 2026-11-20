@@ -1,0 +1,5 @@
+part,qty,candidate,physical_status
+carrier,1,"nonconductive polymer, dimensions to be independently checked",UNBUILT
+hole template,1,"3D printed or machined, 3.45mm nominal guide diameter",UNBUILT
+M3 insulated standoff / bolt set,4,"operator selection, proper head clearance required",UNSOURCED
+PCB specimen,1,"source board revision only, not actual constructed board",UNBUILT
