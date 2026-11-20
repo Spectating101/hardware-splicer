@@ -1,5 +1,7 @@
 # HS / Policy Lab — 5 V independent DC witness fixture v0
 
+**Consolidated review:** [CONSOLIDATED_REVIEW.md](CONSOLIDATED_REVIEW.md) is the canonical status; [CONSOLIDATION_DEPENDENCY_AND_SCOPE.md](CONSOLIDATION_DEPENDENCY_AND_SCOPE.md) shows the exact PR lineage and independently rechecks review report scope without claiming physical certification.
+
 **Start here:** [CONSOLIDATED_REVIEW.md](CONSOLIDATED_REVIEW.md) is the current review map, single replay command, authoritative status hierarchy and historical audit index. [BUILD_HOLD.md](BUILD_HOLD.md) controls physical readiness. The dated sections below retain the original engineering chronology; none authorize fabrication.
 
 **Status:** Native KiCad schematic and routed PCB pass KiCad 9 ERC / DRC / schematic parity. Analog DC simulation and the original HS INA228 decoder → Policy Lab frozen PLRS-6 intake replay pass **software fixtures only**. **No hardware has been purchased, built, connected, energized, calibrated, or tested. This design is NOT released for fabrication or power-on.**
