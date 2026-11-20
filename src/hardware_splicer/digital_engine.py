@@ -77,7 +77,11 @@ class DigitalStudyEngine:
         if case_id != cases.DEFAULT_CASE:
             descriptor = cases.registered(case_id).describe()
             if not descriptor['source_inputs_available']:
-                raise DigitalRuntimeUnavailable('Registered case inputs are unavailable: ' + ', '.join(descriptor['missing_inputs']))
+                missing = descriptor['missing_inputs']
+                shown = ', '.join(missing[:3]) + (f' and {len(missing) - 3} more' if len(missing) > 3 else '')
+                raise DigitalRuntimeUnavailable(
+                    f'Registered case inputs are unavailable ({shown}). They live in a Hardware-Splicer '
+                    'checkout: start hs-serve with --repo-root <checkout> or set HARDWARE_SPLICER_REPO_ROOT.')
             available = digital.runtime_for_case(case_id)
             if not available['available']:
                 raise DigitalRuntimeUnavailable(available['setup_hint'])

@@ -62,3 +62,25 @@ def test_doctor_reports_install_mode_and_configured_checkout(tmp_path):
     assert install["state_dir"] == str(tmp_path / "state")
     assert install["scratch_dir"] == str(tmp_path / "builds")
     assert report["app_roots"]["root"]["path"] == str(repo.resolve())
+
+
+def test_missing_case_inputs_point_the_operator_at_a_checkout(tmp_path, monkeypatch):
+    from dataclasses import replace
+
+    import pytest
+
+    from hardware_splicer import digital_cases as cases
+    from hardware_splicer.digital_engine import DigitalRuntimeUnavailable, DigitalStudyEngine
+
+    detached = replace(cases.CASES["fielddeck-5"], root=tmp_path / "no-checkout")
+    monkeypatch.setitem(cases.CASES, "fielddeck-5", detached)
+    engine = DigitalStudyEngine(project_root=tmp_path / "projects", job_db=tmp_path / "jobs.sqlite3")
+    try:
+        with pytest.raises(DigitalRuntimeUnavailable) as raised:
+            engine.create(case_id="fielddeck-5")
+    finally:
+        engine.close()
+    message = str(raised.value)
+    assert "--repo-root" in message and "HARDWARE_SPLICER_REPO_ROOT" in message
+    assert f"and {len(detached.inputs) - 3} more" in message
+    assert len(message) < 400
