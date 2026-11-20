@@ -2,7 +2,8 @@
 /*
  * Headless walk of the project journey on the one served HS app (hs-serve: API, scenes and built UI):
  *   Projects home → New project (goal, owned parts, reference study) → Fielddeck bench → design view
- *   → Compare (scene and project revisions) → package and next action → plotter bench → drone bench.
+ *   → Compare (scene and project revisions) → package and next action → plotter bench → drone bench
+ *   → URL routing (deep link, ?rev= reload, Back/Forward, not-found states).
  *
  * Usage: node scripts/verify_project_journey.cjs [base-url] [output-dir]
  *   base-url   default http://127.0.0.1:8787 (the hs-serve default)
@@ -271,6 +272,44 @@ async function main() {
     await mobile.screenshot({ path: path.join(OUT, "16-phone-fielddeck-bench.jpg"), type: "jpeg", quality: 88 });
     shots.push(path.relative(ROOT, path.join(OUT, "16-phone-fielddeck-bench.jpg")));
     await phone.close();
+
+    // 9. URL routing: deep link, reload, revision link, Back/Forward, unknown ids.
+    await page.goto(`${BASE}/projects/${encodeURIComponent(fielddeckId)}`, { waitUntil: "networkidle" });
+    await page.getByTestId("digital-study").waitFor({ timeout: 30000 });
+    const picker = page.getByLabel("View revision");
+    const latestRev = await picker.inputValue();
+    const olderRev = await picker.locator("option").evaluateAll((options, latest) =>
+      options.map((option) => option.value).find((value) => value !== latest), latestRev);
+    await picker.selectOption(olderRev);
+    await page.waitForURL(`**/projects/${encodeURIComponent(fielddeckId)}?rev=${olderRev}`);
+    await page.reload({ waitUntil: "networkidle" });
+    await page.getByTestId("digital-study").waitFor({ timeout: 30000 });
+    if (await page.getByLabel("View revision").inputValue() !== olderRev) problems.push(`reload of ?rev=${olderRev} did not reopen that revision`);
+    await shot("17-routing-revision-link");
+    await page.goBack();
+    await page.waitForURL(`**/projects/${encodeURIComponent(fielddeckId)}`);
+    await page.waitForFunction((latest) => document.querySelector("select")?.closest("label") &&
+      [...document.querySelectorAll("label")].find((label) => label.textContent.startsWith("View revision"))
+        ?.querySelector("select").value === latest, latestRev, { timeout: 10000 })
+      .catch(() => problems.push("Back from ?rev= did not return to the latest revision"));
+    await page.getByTestId("nav-library").click();
+    await page.waitForURL("**/library");
+    await page.goBack();
+    await page.getByTestId("digital-study").waitFor({ timeout: 30000 });
+    await page.goForward();
+    await page.waitForURL("**/library");
+    await page.getByTestId("new-project").waitFor();
+
+    // Unknown ids answer 404 from the API by design, so they run on a page without the failure listener.
+    const lost = await context.newPage();
+    lost.on("pageerror", (error) => problems.push(`not-found pageerror: ${error.message}`));
+    await lost.goto(`${BASE}/projects/no-such-project-${Date.now()}`, { waitUntil: "networkidle" });
+    await lost.getByRole("heading", { name: "Project not found" }).waitFor({ timeout: 15000 });
+    await lost.screenshot({ path: path.join(OUT, "18-routing-project-not-found.jpg"), type: "jpeg", quality: 88 });
+    shots.push(path.relative(ROOT, path.join(OUT, "18-routing-project-not-found.jpg")));
+    await lost.goto(`${BASE}/no/such/page`, { waitUntil: "networkidle" });
+    await lost.getByRole("heading", { name: "Page not found" }).waitFor({ timeout: 15000 });
+    await lost.close();
   } finally {
     await browser.close();
   }
