@@ -114,12 +114,54 @@ first showed it as 000; with a longer timeout it is 200.)
   htpasswd and key-map files created on the server.
 - An installed wheel still needs the checkout at the same release for registered
   cases, scenes and examples, and the `digital` extra (CadQuery) for studies.
-- `/health` returns absolute filesystem paths (`app_roots`, UI dist) and takes
-  about 2.4 s per call; it sits behind the nginx credentials, but a lighter,
-  path-free health response would suit load balancers.
-- About 14 other modules still compute a checkout path at import time
-  (`api.py` example fixtures, `board_vision_salvage`, `project_intake`, ...). They
-  were not on this smoke path; with `HARDWARE_SPLICER_REPO_ROOT` set in the unit
-  environment they still use `site-packages/..`.
+- ~~`/health` returned absolute paths and took about 2.4 s~~ and ~~14 modules
+  computed the checkout from `__file__`~~: fixed, see the addendum below.
 - `project.license` as a TOML table is deprecated by setuptools (removal after
   2027-02-18).
+
+## Addendum (same day, second round)
+
+Two caveats above were fixed on `agent/project-bench` and re-checked with a fresh
+wheel (UI rebuilt from the current tip) installed into the same venv.
+
+**`/health` and `/v1/status`.** `/health` called `runtime_status()`, which started
+three subprocesses to probe the 3D interpreter for FastAPI, uvicorn and CadQuery
+(about 2.4 s with CadQuery installed). It now uses `headless_status()` (PATH and
+import lookups only); the interpreter probes stay in `runtime_status()` for
+`hs-doctor` and `/v1/status`, cached once per process. Neither endpoint returns a
+filesystem path any more: app roots report `available` (or `exists`/`is_dir`),
+the Python executable and 3D interpreter paths are dropped, and the UI reports
+`served`, `source` (`argument`, `environment`, `packaged`, `checkout`) and the
+index hash. The UI directory is logged once at startup ("Serving the UI build
+from ...") and kept in `app.state.ui_dist`. Tests: no absolute path in either
+JSON body, and `/health` answers with `subprocess.run`/`Popen` patched to fail.
+
+**Checkout paths.** `mechanism_bridge`, `project_intake`, `golden_real_bench`,
+`aerial_product_generator`, `board_vision_salvage`, `public_web_bench`,
+`workshop_operator`, `drone_product_delivery`, `splice_manifest`,
+`teardown_product`, `project_scene_api`, `integrations/engineering_review`,
+`part_substitution_geometry` and `api.py` (example fixtures and the checkout UI
+build) now use `state_paths.repo_root()`. A test fails if any module walks out of
+the package from its own `__file__`; package-internal data (`data/`, `ui_dist`,
+`tool_workers/`, `_pcbnew_helpers/`) is still found from `__file__`. With no
+checkout configured, `GET /v1/examples/netlist-fixtures/<id>` answers 404 instead
+of a 500.
+
+| Check (installed wheel, port 8813) | `--repo-root <checkout>` | no checkout |
+|------|------|------|
+| `/health` `ok` | true | false (app roots unavailable) |
+| Absolute-path strings in `/health` / `/v1/status` | 0 / 0 | 0 / 0 |
+| `/health` time, three calls | 3.6 ms, 3.7 ms, 3.6 ms | 4.1 ms, 3.8 ms, 3.6 ms |
+| `/v1/examples/splice-intakes` | 200, 7 examples | 200, 0 |
+| `/v1/examples/donor-fixtures` | 200, 2 fixtures | 200, 0 |
+| `/v1/examples/netlist-fixtures` | 200, 18 fixtures; one payload 200 | 200, 0; payload 404 |
+| `/v1/scenes` | 3 | 0 |
+| Tracebacks in the server log | 0 | 0 |
+| Project journey (fresh state) | PASS, 18 captures, no console errors or failed requests | not run |
+
+Full Python suite on the branch with these changes: 4619 passed, 81 skipped,
+3 subtests passed (15 min 54 s, sequential).
+
+Before this change an installed wheel served zero examples even with
+`--repo-root`, because `api.py` looked beside `site-packages` (found by reading the
+code, not re-run).
