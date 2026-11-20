@@ -51,8 +51,9 @@ function Toast({ message, onDismiss }) {
   );
 }
 
+// A job finishing says nothing about whether its design passed, so a completed run is neutral.
 function jobStatusClass(status) {
-  if (status === "succeeded") return "job-ok";
+  if (status === "succeeded") return "job-done";
   if (status === "failed" || status === "cancelled") return "job-fail";
   if (status === "running" || status === "queued") return "job-run";
   return "";
@@ -78,9 +79,19 @@ function formatDate(value) {
 
 const SIDEBAR_RECENT = 5;
 
-function formatJobStatus(status) {
+const JOB_STATUS_LABELS = { queued: "Queued", running: "Running", succeeded: "Run completed", failed: "Run failed", cancelled: "Run cancelled" };
+
+function formatJobStatus(status, outcome) {
   if (!status) return "Unknown";
-  return status.charAt(0).toUpperCase() + status.slice(1);
+  const label = JOB_STATUS_LABELS[status] || status.charAt(0).toUpperCase() + status.slice(1);
+  return outcome ? `${label} · ${outcome}` : label;
+}
+
+// What a completed study run's result says, in the backend's own terms; nothing when it says nothing.
+export function jobOutcome(result) {
+  if (result?.requirements_met === false) return "requirements not met";
+  if (result?.requirements_met === true) return "modeled requirements met";
+  return "";
 }
 
 function formatSavedAt(value) {
@@ -221,6 +232,7 @@ export default function App() {
   const [examples, setExamples] = useState([]);
   const [donorFixtures, setDonorFixtures] = useState([]);
   const [recentJobs, setRecentJobs] = useState([]);
+  const [jobOutcomes, setJobOutcomes] = useState({});
   const [visionCapabilities, setVisionCapabilities] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
@@ -275,6 +287,23 @@ export default function App() {
       return true;
     });
   }, [recentJobs]);
+
+  // Completed study runs carry a result summary; read it once the page is idle so it never
+  // competes with the open project's own requests.
+  useEffect(() => {
+    const wanted = uniqueRecentJobs.slice(0, SIDEBAR_RECENT).filter((job) => job.status === "succeeded"
+      && job.options?.job_type === "digital_study" && !(job.job_id in jobOutcomes));
+    if (!wanted.length) return undefined;
+    let cancelled = false;
+    const run = () => Promise.all(wanted.map((job) => fetchJobResult(job.job_id)
+      .then((body) => [job.job_id, jobOutcome(body?.result)]).catch(() => [job.job_id, ""])))
+      .then((rows) => { if (!cancelled) setJobOutcomes((old) => ({ ...old, ...Object.fromEntries(rows) })); });
+    const idle = window.requestIdleCallback ? window.requestIdleCallback(run, { timeout: 4000 }) : window.setTimeout(run, 2000);
+    return () => {
+      cancelled = true;
+      if (window.cancelIdleCallback && window.requestIdleCallback) window.cancelIdleCallback(idle); else window.clearTimeout(idle);
+    };
+  }, [uniqueRecentJobs, jobOutcomes]);
 
   const selectedExample = useMemo(
     () => examples.find((row) => row.id === selectedExampleId) || examples[0] || null,
@@ -751,10 +780,10 @@ export default function App() {
                   onClick={() => job.status === "succeeded" && (job.options?.job_type === "digital_study"
                     ? openSavedProject(job.options.payload.project_id) : loadJobResult(job.job_id))}
                   disabled={job.status !== "succeeded"}
-                  title={job.status}
+                  title={formatJobStatus(job.status, jobOutcomes[job.job_id])}
                 >
                   <strong>{formatProjectName(job.project_name || job.job_id)}</strong>
-                  <span className="job-status">{formatJobStatus(job.status)}</span>
+                  <span className="job-status">{formatJobStatus(job.status, jobOutcomes[job.job_id])}</span>
                 </button>
               ))}
             </div>

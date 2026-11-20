@@ -853,8 +853,8 @@ button.primary:disabled {
   overflow: auto;
 }
 
-.project-button.job-ok span {
-  color: #6dd4a8;
+.project-button.job-done span {
+  color: #9aa6b2;
 }
 
 .project-button.job-fail span {
@@ -1479,13 +1479,14 @@ button.primary:disabled {
   flex-shrink: 0;
 }
 
+/* Build progress is state, not approval: neutral ink, no green. */
 .build-stage-list li.done .build-stage-dot {
-  background: var(--accent);
+  background: var(--muted);
 }
 
 .build-stage-list li.active .build-stage-dot {
-  background: var(--accent);
-  box-shadow: 0 0 0 3px #c8ebdc;
+  background: var(--text);
+  box-shadow: 0 0 0 3px var(--line);
 }
 
 .toast {
