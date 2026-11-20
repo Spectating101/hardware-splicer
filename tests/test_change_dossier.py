@@ -93,7 +93,14 @@ def _review(export_path, export, requirements, unmet):
 def _receipt(review_path):
     review = json.loads(review_path.read_bytes())
     return canonical_json_bytes({'schema': VERIFICATION_SCHEMA, 'verified': True, 'decision': review['decision'],
-                                 'source_binding': review['source_binding'], 'physical_authority_granted': False})
+                                 'source_binding': review['source_binding'], 'physical_authority_granted': False,
+                                 'review_sha256': sha256(review_path.read_bytes()).hexdigest()})
+
+
+def _replay_file(review_path):
+    path = review_path.with_name(review_path.stem + '-replay.json')
+    path.write_bytes(_receipt(review_path))
+    return path
 
 
 def _feedback(engine, base_path, review_path):
@@ -125,8 +132,9 @@ def chain(engine, tmp_path):
     candidate_path = _write(root / 'r2-export.json', candidate_export)
     candidate_review = _write(root / 'r2-review.json',
                               _review(candidate_path, candidate_export, {'minimum_work_runtime_h': 3.5}, UNMET))
-    files = {'base_export': base_path, 'base_review': review_path, 'proposal': proposal_path,
-             'candidate_export': candidate_path, 'candidate_review': candidate_review}
+    files = {'base_export': base_path, 'base_review': review_path, 'base_review_replay': _replay_file(review_path),
+             'proposal': proposal_path, 'candidate_export': candidate_path, 'candidate_review': candidate_review,
+             'candidate_review_replay': _replay_file(candidate_review)}
     return engine, project, root, files
 
 
@@ -172,6 +180,7 @@ def test_packet_binds_both_revisions_and_keeps_the_failing_rerun(chain):
 def test_missing_candidate_review_is_reported_as_not_linked(chain):
     engine, project, root, files = chain
     files.pop('candidate_review')
+    files.pop('candidate_review_replay')
     packet = _build(engine, project, root, files)
     assert packet['not_linked'] == ['No Policy Lab review of revision 2 was supplied.']
     assert 'candidate_review' not in packet['files']
@@ -182,6 +191,10 @@ def test_changed_file_bytes_or_wrong_revision_are_refused(chain):
     review = json.loads(files['base_review'].read_bytes())
     review['revision_requirements'] = {'minimum_work_runtime_h': 4.0}
     _write(files['base_review'], review)
+    with pytest.raises(ChangeDossierError, match='receipt does not bind the review'):
+        _build(engine, project, root, files)
+    # Even with a matching receipt, the proposal still binds the original review bytes.
+    _write(files['base_review_replay'], json.loads(_receipt(files['base_review'])))
     with pytest.raises(ChangeDossierError, match='proposal does not bind'):
         _build(engine, project, root, files)
 
@@ -224,6 +237,7 @@ def test_requirements_not_from_the_proposal_are_refused(engine, tmp_path):
     with pytest.raises(ChangeDossierError, match='resolved requirements'):
         build_change_evidence(engine.projects, project, base_revision=1, candidate_revision=2, root=root,
                               files={'base_export': base_path, 'base_review': review_path,
+                                     'base_review_replay': _replay_file(review_path),
                                      'proposal': proposal_path, 'candidate_export': candidate_path})
 
 
@@ -259,6 +273,7 @@ def candidate_chain(chain):
     assert engine.run_revision(project, base_revision=2, requirements=proposal['resolved_requirements'])['ok']
     r3_path = _write(root / 'r3-export.json', export_policy_evidence(engine, project, 3))
     return engine, project, root, {'base_export': files['candidate_export'], 'base_review': review_path,
+                                   'base_review_replay': _replay_file(review_path),
                                    'proposal': proposal_path, 'candidate_export': r3_path}
 
 
@@ -285,4 +300,92 @@ def test_candidate_altered_after_review_is_refused(candidate_chain):
     proposal['applied_candidates'][0]['after'] = 3
     _write(files['proposal'], proposal)
     with pytest.raises(ChangeDossierError, match='differs from the Policy Lab review'):
+        build_change_evidence(engine.projects, project, base_revision=2, candidate_revision=3, root=root, files=files)
+
+
+def _rereview(files, mutate):
+    """Rewrite the base review and its receipt; the proposal no longer binds it, so test only refusals before that."""
+    review = json.loads(files['base_review'].read_bytes())
+    mutate(review)
+    _write(files['base_review'], review)
+    _write(files['base_review_replay'], json.loads(_receipt(files['base_review'])))
+
+
+def test_nested_authority_in_a_review_is_refused(chain):
+    engine, project, root, files = chain
+    _rereview(files, lambda review: review.setdefault('assessment', {}).update(fabrication_authorized=True))
+    with pytest.raises(ChangeDossierError, match='cannot assert fabrication_authorized'):
+        _build(engine, project, root, files)
+
+
+def test_reviews_need_receipts_bound_to_their_bytes(chain):
+    engine, project, root, files = chain
+    replay = files.pop('candidate_review_replay')
+    with pytest.raises(ChangeDossierError, match='needs its Policy Lab verify receipt'):
+        _build(engine, project, root, files)
+    receipt = json.loads(replay.read_bytes())
+    receipt['review_sha256'] = '0' * 64
+    _write(replay, receipt)
+    files['candidate_review_replay'] = replay
+    with pytest.raises(ChangeDossierError, match='receipt does not bind the review'):
+        _build(engine, project, root, files)
+
+
+def test_base_receipt_must_be_the_one_the_proposal_was_validated_with(chain):
+    engine, project, root, files = chain
+    receipt = json.loads(files['base_review_replay'].read_bytes())
+    receipt['extra'] = 'different receipt'
+    _write(files['base_review_replay'], receipt)
+    with pytest.raises(ChangeDossierError, match='not validated against the covered Policy Lab replay'):
+        _build(engine, project, root, files)
+
+
+def _candidate_with_target(candidate_chain, **target):
+    engine, project, root, files = candidate_chain
+    review = json.loads(files['base_review'].read_bytes())
+    review['target_results'][0].update(target)
+    review_path = _write(files['base_review'], review)
+    _write(files['base_review_replay'], json.loads(_receipt(review_path)))
+    proposal = json.loads(files['proposal'].read_bytes())
+    proposal['policy_review_sha256'] = sha256(review_path.read_bytes()).hexdigest()
+    proposal['policy_review_replay_sha256'] = sha256(_receipt(review_path)).hexdigest()
+    _write(files['proposal'], proposal)
+    return build_change_evidence(engine.projects, project, base_revision=2, candidate_revision=3, root=root, files=files)
+
+
+def test_strict_operators_are_evaluated_strictly(candidate_chain):
+    packet = _candidate_with_target(candidate_chain, operator='>', value=3.75)
+    [row] = packet['proposal']['candidate_design_changes']
+    assert row['native_outcome']['met'] is False  # 3.75 > 3.75 is false
+    assert any(item['kind'] == 'candidate_target_not_met' for item in packet['unresolved'])
+
+
+def test_unknown_operator_or_fact_prefix_is_refused(candidate_chain):
+    with pytest.raises(ChangeDossierError, match='operator'):
+        _candidate_with_target(candidate_chain, operator='~=')
+
+
+def test_fact_without_prefix_is_refused(candidate_chain):
+    with pytest.raises(ChangeDossierError, match='metric.\\* or requirement'):
+        _candidate_with_target(candidate_chain, fact='runtime_h')
+
+
+def test_unknown_native_value_is_unresolved(candidate_chain):
+    packet = _candidate_with_target(candidate_chain, fact='metric.not_exported')
+    kinds = [item['kind'] for item in packet['unresolved']]
+    assert 'candidate_target_unknown' in kinds
+
+
+def test_candidate_targeting_an_unmet_engineering_row_is_refused(candidate_chain):
+    engine, project, root, files = candidate_chain
+    review = json.loads(files['base_review'].read_bytes())
+    review['candidate_design_changes'][0]['target'] = 'engineering.work_runtime'
+    _write(files['base_review'], review)
+    _write(files['base_review_replay'], json.loads(_receipt(files['base_review'])))
+    proposal = json.loads(files['proposal'].read_bytes())
+    proposal['applied_candidates'][0]['target'] = 'engineering.work_runtime'
+    proposal['policy_review_sha256'] = sha256(files['base_review'].read_bytes()).hexdigest()
+    proposal['policy_review_replay_sha256'] = sha256(_receipt(files['base_review'])).hexdigest()
+    _write(files['proposal'], proposal)
+    with pytest.raises(ChangeDossierError, match='only as an unmet constraint'):
         build_change_evidence(engine.projects, project, base_revision=2, candidate_revision=3, root=root, files=files)

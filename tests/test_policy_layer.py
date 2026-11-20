@@ -43,9 +43,11 @@ class PolicyLayerTests(unittest.TestCase):
                 "revision_requirements": {"payload_mass_g": 10} if overrides is None else overrides,
                 "physical_authority_granted": False}
 
-    def receipt(self, review):
+    def receipt(self, review, review_bytes=None):
+        review_bytes = canonical_json_bytes(review) if review_bytes is None else review_bytes
         return canonical_json_bytes({"schema": VERIFICATION_SCHEMA, "verified": True, "source_binding": review["source_binding"],
-                                     "decision": review["decision"], "physical_authority_granted": False})
+                                     "decision": review["decision"], "physical_authority_granted": False,
+                                     "review_sha256": hashlib.sha256(review_bytes).hexdigest()})
 
     def feedback(self, review, **kwargs):
         kwargs.setdefault("replay_receipt_bytes", self.receipt(review))
@@ -101,7 +103,7 @@ class PolicyLayerTests(unittest.TestCase):
         self.assertEqual(json.loads(different_bytes), self.evidence)
         with self.assertRaisesRegex(PolicyLayerError, "exact evidence bytes"):
             validate_policy_feedback(self.engine, different_bytes, canonical_json_bytes(self.review()),
-                                     replay_receipt_bytes=self.receipt(self.review()))
+                                     replay_receipt_bytes=self.receipt(self.review()))  # binds the review bytes
 
     def test_feedback_rejects_project_revision_run_and_hash_substitution(self):
         for field, value in (("project_id", "another-project"), ("revision", 2),
@@ -137,7 +139,7 @@ class PolicyLayerTests(unittest.TestCase):
             raw = json.dumps(self.review()).replace('"payload_mass_g": 10', '"payload_mass_g": ' + token).encode()
             with self.subTest(token=token), self.assertRaisesRegex(PolicyLayerError, "finite"):
                 validate_policy_feedback(self.engine, self.evidence_bytes, raw,
-                                         replay_receipt_bytes=self.receipt(self.review()))
+                                         replay_receipt_bytes=self.receipt(self.review(), raw))
 
     def test_physical_promotion_is_rejected_at_any_depth(self):
         for location in ("root", "nested"):
@@ -293,6 +295,27 @@ class PolicyLayerTests(unittest.TestCase):
                 self.feedback(review, candidates=("lighter-payload",))
         with self.assertRaisesRegex(PolicyLayerError, "not a proposed"):
             self.feedback(self.blocked(candidate_design_changes=[]), candidates=("missing",))
+
+
+    def test_receipt_must_bind_the_exact_review_bytes(self):
+        review = self.review()
+        legacy = json.loads(self.receipt(review))
+        del legacy["review_sha256"]
+        with self.assertRaisesRegex(PolicyLayerError, "receipt does not bind the review"):
+            self.feedback(review, replay_receipt_bytes=canonical_json_bytes(legacy))
+        # A forged review with the same decision and binding but invented requirements.
+        honest_receipt = self.receipt(review)
+        forged = self.review({"payload_mass_g": 40})
+        forged["candidate_design_changes"] = [self.candidate()]
+        with self.assertRaisesRegex(PolicyLayerError, "receipt does not bind the review"):
+            self.feedback(forged, replay_receipt_bytes=honest_receipt)
+
+    def test_admit_for_a_study_that_failed_its_requirements_is_refused(self):
+        failed = deepcopy(self.evidence["study"])
+        failed["summary"]["requirements_met"] = False
+        with patch("hardware_splicer.policy_layer.validate_policy_evidence", return_value={**self.evidence, "study": failed}):
+            with self.assertRaisesRegex(PolicyLayerError, "contradicts"):
+                self.feedback(self.review())
 
 
 if __name__ == "__main__":

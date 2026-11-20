@@ -297,7 +297,8 @@ def _review_decision(review: Mapping[str, Any], evidence: Mapping[str, Any]) -> 
     failed_checks = {"engineering." + row["id"] for row in evidence["study"]["summary"]["constraints"]
                      if row.get("passed") is not True}
     listed = {row["id"] for row in unmet}
-    if decision == "ADMIT_WITH_LIMIT" and (unmet or failed_targets or failed_checks):
+    study_failed = evidence["study"]["summary"].get("requirements_met") is not True
+    if decision == "ADMIT_WITH_LIMIT" and (unmet or failed_targets or failed_checks or study_failed):
         raise PolicyLayerError("Policy review decision ADMIT_WITH_LIMIT contradicts its unmet rows or the failed study checks.")
     if decision == "BLOCKED" and not unmet:
         raise PolicyLayerError("Policy review decision BLOCKED states no unmet rows.")
@@ -321,6 +322,17 @@ def _replay_policy_review(evidence_bytes: bytes, review_bytes: bytes, run_mjs: P
     return read_json_bytes(done.stdout.encode("utf-8"))
 
 
+def verify_replay_receipt(receipt: Mapping[str, Any], review_bytes: bytes, review: Mapping[str, Any]) -> None:
+    """A verify receipt must name these exact review bytes, their source binding and decision."""
+    _no_physical_authority(receipt)
+    if receipt.get("review_sha256") != hashlib.sha256(review_bytes).hexdigest():
+        raise PolicyLayerError("Policy review replay not verified: the receipt does not bind the review.")
+    if (receipt.get("schema") != VERIFICATION_SCHEMA or receipt.get("verified") is not True
+            or receipt.get("source_binding") != review.get("source_binding") or receipt.get("decision") != review.get("decision")
+            or receipt.get("physical_authority_granted") is not False):
+        raise PolicyLayerError("Policy review replay not verified: the receipt does not verify this review.")
+
+
 def _verified_replay(evidence_bytes, review_bytes, review, binding, replay_receipt_bytes, policy_lab_run):
     """Require Policy Lab's own replay: run its verifier if configured, else check a supplied receipt."""
     run_mjs = policy_lab_run or os.environ.get(POLICY_LAB_VERIFY_ENV)
@@ -328,15 +340,12 @@ def _verified_replay(evidence_bytes, review_bytes, review, binding, replay_recei
         receipt, how = _replay_policy_review(evidence_bytes, review_bytes, Path(run_mjs)), "replayed by Policy Lab verify here"
     elif replay_receipt_bytes is not None:
         receipt = read_json_bytes(replay_receipt_bytes)
-        how = ("supplied Policy Lab verify receipt; it binds the evidence bytes and decision, "
-               "not the review bytes, so it was not replayed here")
+        how = "supplied Policy Lab verify receipt bound to these review bytes; not replayed here"
     else:
         raise PolicyLayerError("Policy review replay not verified: supply Policy Lab's verify receipt "
                                "or configure " + POLICY_LAB_VERIFY_ENV + ".")
-    _no_physical_authority(receipt)
-    if (receipt.get("schema") != VERIFICATION_SCHEMA or receipt.get("verified") is not True
-            or receipt.get("source_binding") != binding or receipt.get("decision") != review["decision"]
-            or receipt.get("physical_authority_granted") is not False):
+    verify_replay_receipt(receipt, review_bytes, review)
+    if receipt["source_binding"] != binding:
         raise PolicyLayerError("Policy review replay not verified: the receipt does not verify this review.")
     return receipt, how
 

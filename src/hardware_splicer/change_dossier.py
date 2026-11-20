@@ -22,8 +22,9 @@ from pathlib import Path, PurePosixPath
 from typing import Any, Mapping
 
 from .engineering_assurance import build_engineering_assurance
-from .policy_layer import (EVIDENCE_SCHEMA, FEEDBACK_SCHEMA, REVIEW_SCHEMA, PolicyLayerError,
-                           canonical_json_bytes, read_json_bytes, validate_policy_evidence)
+from .policy_layer import (EVIDENCE_SCHEMA, FEEDBACK_SCHEMA, REVIEW_SCHEMA, VERIFICATION_SCHEMA, PolicyLayerError,
+                           _no_physical_authority, canonical_json_bytes, read_json_bytes, validate_policy_evidence,
+                           verify_replay_receipt)
 from .project_store import RevisionConflict, validate_project_id
 from .study_evidence import evaluate_study_check_delta, load_study_evidence
 
@@ -41,8 +42,12 @@ FILE_ROLES = {
     "proposal": FEEDBACK_SCHEMA,
     "candidate_export": EVIDENCE_SCHEMA,
     "candidate_review": REVIEW_SCHEMA,
+    "base_review_replay": VERIFICATION_SCHEMA,
+    "candidate_review_replay": VERIFICATION_SCHEMA,
 }
-REQUIRED_ROLES = ("base_export", "base_review", "proposal", "candidate_export")
+REQUIRED_ROLES = ("base_export", "base_review", "base_review_replay", "proposal", "candidate_export")
+OPERATORS = {">=": lambda a, b: a >= b, ">": lambda a, b: a > b, "<=": lambda a, b: a <= b,
+             "<": lambda a, b: a < b, "==": lambda a, b: a == b}
 PHYSICAL_MEANS = "unknown / not tested"
 CANDIDATE_LABEL = "Modelled candidate design change; the model is unverified until the native rerun below"
 
@@ -88,25 +93,36 @@ def _candidate_outcomes(proposal: Mapping[str, Any], review: Mapping[str, Any],
         overrides.update(row["requirement_overrides"])
     if overrides != (proposal.get("candidate_overrides") or {}):
         raise ChangeDossierError("The proposal's candidate overrides differ from its applied candidates.")
-    targets = {row["id"]: row for row in review.get("target_results") or []}
-    metrics = candidate_export["study"]["summary"]["metrics"]
+    targets = {row.get("id"): row for row in review.get("target_results") or [] if isinstance(row, dict)}
+    unmet_only = {row.get("id") for row in review.get("unmet_constraints") or [] if isinstance(row, dict)}
+    summary = candidate_export["study"]["summary"]
     rows = []
     for row in applied:
         target = targets.get(row["target"])
         if target is None:
+            if row["target"] in unmet_only:
+                raise ChangeDossierError(f"Candidate {row['id']} targets {row['target']}, which the review lists only as an "
+                                         "unmet constraint; candidates must target a declared policy target.")
             raise ChangeDossierError(f"Candidate {row['id']} names a target the review did not evaluate.")
-        fact = target["fact"].split(".", 1)[1]
-        value = metrics.get(fact)
-        met = None if value is None else (value >= target["value"] if target["operator"] == ">="
-                                          else value <= target["value"] if target["operator"] == "<="
-                                          else value == target["value"])
+        fact_id, operator = target.get("fact"), target.get("operator")
+        prefix, _, fact = fact_id.partition(".") if isinstance(fact_id, str) else ("", "", "")
+        if prefix not in {"metric", "requirement"} or not fact:
+            raise ChangeDossierError(f"Candidate {row['id']} target fact {fact_id!r} is not a metric.* or requirement.* fact.")
+        if operator not in OPERATORS:
+            raise ChangeDossierError(f"Candidate {row['id']} target operator {operator!r} is not supported.")
+        if prefix == "requirement":
+            value = summary.get("requirements", {}).get(fact)
+        else:
+            # Drone studies keep mass at summary level, as policy_layer.numeric_facts does.
+            value = summary.get("metrics", {}).get(fact, summary.get(fact) if fact in ("mass_g", "mass_margin_g") else None)
+        met = None if value is None else OPERATORS[operator](value, target["value"])
         rows.append({"id": row["id"], "label": CANDIDATE_LABEL, "input": row["input"], "before": row["before"],
                      "after": row["after"], "requirement_overrides": row["requirement_overrides"],
                      "model": row["model"], "formula": row["formula"], "numbers": row["numbers"],
                      "assumptions": row["assumptions"], "basis": row["basis"],
                      "physical_means": PHYSICAL_MEANS,
-                     "native_outcome": {"target": row["target"], "fact": target["fact"], "operator": target["operator"],
-                                        "required": target["value"], "unit": target["unit"],
+                     "native_outcome": {"target": row["target"], "fact": fact_id, "operator": operator,
+                                        "required": target.get("value"), "unit": target.get("unit"),
                                         "native_value": value, "met": met,
                                         "basis": "native HS rerun of the candidate revision; modeled, not measured"}})
     return rows
@@ -143,7 +159,7 @@ def _covered(root: Path, files: Mapping[str, Path]) -> tuple[dict[str, dict], di
     if missing or unknown:
         raise ChangeDossierError(f"Change evidence files: missing {missing}, unknown {unknown}.")
     root = root.resolve()
-    records, values = {}, {}
+    records, values, raws = {}, {}, {}
     for role, path in sorted(files.items()):
         path = Path(path).resolve()
         try:
@@ -159,7 +175,12 @@ def _covered(root: Path, files: Mapping[str, Path]) -> tuple[dict[str, dict], di
             raise ChangeDossierError(f"{role} has schema {value.get('schema')!r}, expected {FILE_ROLES[role]!r}.")
         records[role] = {"path": relative.as_posix(), "schema": value["schema"], "sha256": _sha(raw), "bytes": len(raw)}
         values[role] = value
-    return records, values
+        raws[role] = raw
+    if "candidate_review" in files and "candidate_review_replay" not in files:
+        raise ChangeDossierError("candidate_review needs its Policy Lab verify receipt (candidate_review_replay).")
+    if "candidate_review_replay" in files and "candidate_review" not in files:
+        raise ChangeDossierError("candidate_review_replay was supplied without its candidate_review.")
+    return records, values, raws
 
 
 def _bind_export(role: str, export: Mapping[str, Any], project_id: str, identity: Mapping[str, Any]) -> None:
@@ -169,7 +190,13 @@ def _bind_export(role: str, export: Mapping[str, Any], project_id: str, identity
         raise ChangeDossierError(f"{role} does not export revision {identity['revision']} of {project_id}.")
 
 
-def _bind_review(role: str, review: Mapping[str, Any], export_record: Mapping[str, Any], export: Mapping[str, Any]) -> None:
+def _bind_review(role: str, review: Mapping[str, Any], export_record: Mapping[str, Any], export: Mapping[str, Any],
+                 review_raw: bytes, receipt: Mapping[str, Any]) -> None:
+    try:
+        _no_physical_authority(review)
+        verify_replay_receipt(receipt, review_raw, review)
+    except PolicyLayerError as exc:
+        raise ChangeDossierError(f"{role}: {exc}") from exc
     binding = review.get("source_binding") or {}
     if (binding.get("evidence_sha256") != export_record["sha256"] or binding.get("project_id") != export["project_id"]
             or binding.get("revision") != export["revision"] or binding.get("run_id") != export["run_id"]
@@ -193,18 +220,22 @@ def build_change_evidence(store, project_id: str, *, base_revision: int, candida
     candidate = revision_identity(store, project_id, candidate_revision)
     if candidate["parent_revision"] != base_revision:
         raise ChangeDossierError(f"Revision {candidate_revision} does not descend from revision {base_revision}.")
-    records, values = _covered(Path(root), files)
+    records, values, raws = _covered(Path(root), files)
     _bind_export("base_export", values["base_export"], project_id, base)
     _bind_export("candidate_export", values["candidate_export"], project_id, candidate)
-    _bind_review("base_review", values["base_review"], records["base_export"], values["base_export"])
+    _bind_review("base_review", values["base_review"], records["base_export"], values["base_export"],
+                 raws["base_review"], values["base_review_replay"])
     if "candidate_review" in values:
-        _bind_review("candidate_review", values["candidate_review"], records["candidate_export"], values["candidate_export"])
+        _bind_review("candidate_review", values["candidate_review"], records["candidate_export"], values["candidate_export"],
+                     raws["candidate_review"], values["candidate_review_replay"])
     proposal, review = values["proposal"], values["base_review"]
     if (proposal.get("source_binding") != review["source_binding"]
             or proposal.get("policy_review_sha256") != records["base_review"]["sha256"]
             or proposal.get("project_id") != project_id or proposal.get("base_revision") != base_revision
             or proposal.get("physical_authority_granted") is not False or proposal.get("automatic_execution") is not False):
         raise ChangeDossierError("The proposal does not bind the base review and revision.")
+    if proposal.get("policy_review_replay_sha256") != _sha(canonical_json_bytes(values["base_review_replay"])):
+        raise ChangeDossierError("The proposal was not validated against the covered Policy Lab replay receipt.")
     if proposal.get("revision_requirements") != review.get("revision_requirements"):
         raise ChangeDossierError("The proposal's requirement overrides differ from the Policy Lab review.")
     if proposal.get("resolved_requirements") != candidate["requirements"]:
@@ -233,6 +264,15 @@ def build_change_evidence(store, project_id: str, *, base_revision: int, candida
         unresolved += [{"kind": "policy_target_unmet", "policy_id": candidate_review["policy"]["id"],
                         **_unmet(row), "revision": candidate_revision}
                        for row in candidate_review["unmet_constraints"]]
+    for row in candidates:
+        outcome = row["native_outcome"]
+        if outcome["met"] is not True:
+            # The candidate's own native outcome is kept whatever any review says.
+            unresolved.append({"kind": "candidate_target_unknown" if outcome["met"] is None else "candidate_target_not_met",
+                               "candidate": row["id"], "target": outcome["target"], "fact": outcome["fact"],
+                               "actual": outcome["native_value"],
+                               "required": f"{outcome['operator']} {outcome['required']} {outcome['unit']}",
+                               "revision": candidate_revision})
     not_linked = [] if candidate_review is not None else [
         f"No Policy Lab review of revision {candidate_revision} was supplied."]
     return {
