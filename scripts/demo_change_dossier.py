@@ -306,7 +306,7 @@ def _chain(log, policy_lab, cite_root, policy, work, exchange, args):
 
         log("9. Cite: recheck the revision-2 edition against the revision-3 head")
         code, currency = cite(log, cite_root, "check", "--dossier", edition / "dossier.json", "--head", head3,
-                              "--out", work / "cite" / "edition-r2-recheck", "--workspace", work / "cite" / "workspace",
+                              "--out", edition, "--workspace", work / "cite" / "workspace",
                               "--cite-project-id", issued["workspace_record"]["project_id"], allowed=(3,))
         negatives["stale_edition_check"] = {"status": currency["status"], "exit_code": code, "reasons": currency["reasons"]}
         log(f"  edition {currency['edition_id'][:16]}: {currency['status']} (exit {code}); {'; '.join(currency['reasons'])}")
@@ -316,7 +316,9 @@ def _chain(log, policy_lab, cite_root, policy, work, exchange, args):
                                               "issued": (work / "cite" / "edition-r2-reissue").exists()}
         log(f"  reissue with r3 head: {refused['status']} (exit {code}); output written: "
             f"{negatives['stale_edition_reissue']['issued']}")
-        stale_md = (work / "cite" / "edition-r2-recheck" / "dossier.md").read_text()
+        stale_md = (Path(currency["out"]) / "dossier.md").read_text()
+        if (edition / "dossier.md").read_text() != dossier_md:
+            problems.append("the stale check overwrote the issued revision-2 edition")
 
         log("10. Cite: issue the revision-3 (candidate) dossier edition")
         edition3 = work / "cite" / "edition-r3"
@@ -341,7 +343,7 @@ def _chain(log, policy_lab, cite_root, policy, work, exchange, args):
 
     log("12. Cite: recheck the revision-3 (candidate) edition against the revision-4 head")
     code, currency3 = cite(log, cite_root, "check", "--dossier", edition3 / "dossier.json", "--head", head4,
-                           "--out", work / "cite" / "edition-r3-recheck", "--workspace", work / "cite" / "workspace",
+                           "--out", edition3, "--workspace", work / "cite" / "workspace",
                            "--cite-project-id", issued3["workspace_record"]["project_id"], allowed=(3,))
     negatives["candidate_edition_stale_check"] = {"status": currency3["status"], "exit_code": code,
                                                   "reasons": currency3["reasons"]}
@@ -352,7 +354,9 @@ def _chain(log, policy_lab, cite_root, policy, work, exchange, args):
                                               "issued": (work / "cite" / "edition-r3-reissue").exists()}
     log(f"  reissue with r4 head: {refused3['status']} (exit {code}); output written: "
         f"{negatives['candidate_edition_reissue']['issued']}")
-    stale3_md = (work / "cite" / "edition-r3-recheck" / "dossier.md").read_text()
+    stale3_md = (Path(currency3["out"]) / "dossier.md").read_text()
+    if (edition3 / "dossier.md").read_text() != dossier3_md:
+        problems.append("the stale check overwrote the issued revision-3 edition")
     for text in (dossier_md, dossier3_md, stale_md, stale3_md):
         lowered = text.lower()
         if any(re.search(pattern, lowered) for pattern in (r"\bfix(es|ed)?\b", r"\bready\b", r"\bapproved\b")):
