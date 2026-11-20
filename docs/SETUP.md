@@ -33,6 +33,49 @@ Expected `doctor` output for a full fab demo:
 - `fab_export_ready=True` (`kicad-cli` on PATH)
 - `dependencies=node:ok, kicad_cli:ok, fastapi:ok, uvicorn:ok`
 
+## Run the app
+
+One app serves the whole product: `hardware_splicer.product_api:app`. It carries
+the engine routes from `hardware_splicer.api` (health, jobs, examples, vision,
+splice, build files, project scenes), every product router (projects, digital
+studies, machine and electrical design, reviews, packages), and the built UI behind
+them. `hs-serve` runs it; nothing else is needed for the UI.
+
+```bash
+make splice-ui-build   # once per UI change: npm test + Vite build into apps/splice-ui/dist
+make serve             # hs-serve --ui on http://127.0.0.1:8787
+make serve HS_SERVE_ARGS="--port 8796"
+```
+
+With the package installed, `hs-serve` does the same. Its UI options:
+
+- no flag: serve the UI when a build is found, else API only;
+- `--ui`: require a build and refuse to start without one, listing the paths tried;
+- `--no-ui`: API only.
+
+The build is looked up in this order: `--ui-dist PATH`, `HARDWARE_SPLICER_UI_DIST`,
+the packaged copy `hardware_splicer/ui_dist/` (staged by `make ui-package`, which
+also writes a SHA-256 `manifest.json`), then `apps/splice-ui/dist` in a source
+checkout. Re-run `make ui-package` after UI changes if you staged one, or the
+packaged copy wins with stale assets. `/health` reports `ui.served`, `ui.dist` and
+`ui.index_sha256`. API routes always win over the UI's catch-all, and an unknown
+`/v1/...` path is a JSON 404, never `index.html`.
+
+For a wheel that needs neither Node nor the checkout: `make ui-package`, then
+`python -m pip wheel --no-deps --no-build-isolation . -w dist`.
+
+`hs-serve` refuses a non-loopback `--host` (or `HARDWARE_SPLICER_HOST`) unless
+`--allow-remote` is given; there is no in-app authentication yet, so remote access
+needs the nginx front in [DEPLOY.md](../deploy/DEPLOY.md). `HARDWARE_SPLICER_PORT`
+changes the default port.
+
+The older entry points still work as aliases, not separate products:
+`make splice-ui-serve` builds the UI and runs the same `hs-serve --ui`;
+`uvicorn hardware_splicer.product_api:app` with `HARDWARE_SPLICER_SERVE_UI=1` (or
+`auto`) is what `hs-serve` runs. `hardware_splicer.api:app` remains the engine-only
+app for tests and embedding: it lacks the product routes, so the UI does not work
+against it.
+
 ## Where server state lives
 
 The job database, saved projects and API build outputs are durable state. Their

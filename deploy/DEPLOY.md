@@ -28,19 +28,24 @@ hs-doctor
 ## Single-port demo (API + UI)
 
 ```bash
-make splice-ui-serve
+make splice-ui-build
+make serve
 # open http://127.0.0.1:8787
 ```
+
+`make serve` runs `hs-serve --ui`, which serves the canonical app
+`hardware_splicer.product_api:app`: every API route plus the built UI on one port.
+See [`../docs/SETUP.md`](../docs/SETUP.md#run-the-app) for UI lookup order and
+`make ui-package` (stages the UI into the Python package for wheels).
 
 Equivalent:
 
 ```bash
 make splice-ui-build
-export HARDWARE_SPLICER_SERVE_UI=1
 export HARDWARE_SPLICER_TMP_ROOT=/var/lib/hardware-splicer/builds
 export HARDWARE_SPLICER_STATE_DIR=/var/lib/hardware-splicer/state
 mkdir -p "$HARDWARE_SPLICER_TMP_ROOT" "$HARDWARE_SPLICER_STATE_DIR"
-hs-serve --host 127.0.0.1 --port 8787
+hs-serve --ui --host 127.0.0.1 --port 8787
 ```
 
 ---
@@ -52,13 +57,14 @@ export PYTHONPATH=src
 export HARDWARE_SPLICER_TMP_ROOT=/var/lib/hardware-splicer/builds
 export HARDWARE_SPLICER_STATE_DIR=/var/lib/hardware-splicer/state
 mkdir -p "$HARDWARE_SPLICER_TMP_ROOT" "$HARDWARE_SPLICER_STATE_DIR"
-hs-serve --host 127.0.0.1 --port 8787
+hs-serve --no-ui --host 127.0.0.1 --port 8787
 ```
 
 - OpenAPI: http://127.0.0.1:8787/docs  
 - Health: http://127.0.0.1:8787/health  
 
 **Do not** bind `0.0.0.0` on the public internet without nginx + TLS + API key.
+`hs-serve` refuses a non-loopback host unless `--allow-remote` is given.
 
 ---
 
@@ -72,13 +78,10 @@ sudo systemctl enable --now hardware-splicer
 sudo journalctl -u hardware-splicer -f
 ```
 
-To serve UI from systemd, add to the unit:
-
-```ini
-Environment=HARDWARE_SPLICER_SERVE_UI=1
-```
-
-Ensure `apps/splice-ui/dist` exists (`make splice-ui-build` after each UI upgrade).
+The example runs `hs-serve --ui`, which refuses to start without a UI build. Run
+`make ui-package` (or `make splice-ui-build`) after each UI upgrade, or install a
+wheel built after `make ui-package`. To use a separate build, set
+`Environment=HARDWARE_SPLICER_UI_DIST=/path/to/dist`.
 
 ---
 

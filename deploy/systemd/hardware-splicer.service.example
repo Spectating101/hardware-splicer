@@ -1,5 +1,5 @@
 [Unit]
-Description=Hardware-Splicer Splice Agent API
+Description=Hardware-Splicer API and UI
 After=network.target
 
 [Service]
@@ -12,9 +12,8 @@ Environment=HARDWARE_SPLICER_DRC_FIX_LOOP=1
 Environment=HARDWARE_SPLICER_TMP_ROOT=/var/lib/hardware-splicer/builds
 # Job database, projects and outputs; the checkout default (.cache/ under /opt) is not for services.
 Environment=HARDWARE_SPLICER_STATE_DIR=/var/lib/hardware-splicer/state
-# Serve built splice-ui at / (recommended for pilots — run make splice-ui-build after upgrades)
-Environment=HARDWARE_SPLICER_SERVE_UI=1
-ExecStart=/opt/hardware-splicer/.venv/bin/uvicorn hardware_splicer.api:app --host 127.0.0.1 --port 8787
+# The one served app (API + UI). Run make ui-package after UI upgrades; --ui refuses to start without a build.
+ExecStart=/opt/hardware-splicer/.venv/bin/hs-serve --ui --host 127.0.0.1 --port 8787
 Restart=on-failure
 
 [Install]

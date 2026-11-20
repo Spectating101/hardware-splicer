@@ -202,7 +202,7 @@ INSTALL_DEV=1 bash scripts/install_splice_v1.sh
 | Command | Maps to |
 |---------|---------|
 | `hs-doctor` | `hardware_splicer.sdk:engine_doctor` wrapper or CLI doctor |
-| `hs-serve` | uvicorn `hardware_splicer.api:app` |
+| `hs-serve` | uvicorn `hardware_splicer.product_api:app` (API + built UI; see SETUP.md "Run the app") |
 | `hs-mcp` | `python -m hardware_splicer.mcp_server` |
 
 **Extras:**
@@ -277,7 +277,8 @@ WorkingDirectory=/opt/hardware-splicer
 Environment=PYTHONPATH=src
 Environment=HARDWARE_SPLICER_AUTOROUTE=0
 Environment=HARDWARE_SPLICER_TMP_ROOT=/var/lib/hardware-splicer/builds
-ExecStart=/opt/hardware-splicer/.venv/bin/uvicorn hardware_splicer.api:app --host 127.0.0.1 --port 8787
+Environment=HARDWARE_SPLICER_STATE_DIR=/var/lib/hardware-splicer/state
+ExecStart=/opt/hardware-splicer/.venv/bin/hs-serve --ui --host 127.0.0.1 --port 8787
 Restart=on-failure
 
 [Install]
