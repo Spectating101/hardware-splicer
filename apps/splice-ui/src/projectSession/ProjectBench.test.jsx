@@ -99,6 +99,46 @@ describe("Project bench truth", () => {
     expect(delta).toHaveTextContent("1 output retained by the backend.");
   });
 
+  it("shows study checks the backend marked stale, the rerun failure and the package pair", async () => {
+    const check = (id, passed, actual, limit, unit, revision, run) => ({ passed, actual, limit, unit, revision, run_id: run });
+    api.fetchProjectAssurance.mockResolvedValue({ revision: 4, assurance: {
+      claims: [], outputs: [{ kind: "check", node_id: "check:work_runtime", summary: "work_runtime" }],
+    } });
+    api.fetchEvidenceDelta.mockResolvedValue({ base_revision: 3, candidate_revision: 4, evidence_delta: {
+      affected_outputs: [{ evidence_id: "output:check:work_runtime", status: "invalidated",
+        reasons: [{ kind: "changed_dependency", ids: ["requirement:minimum_work_runtime_h"] }],
+        metadata: { kind: "check", summary: "work_runtime", ...check("w", true, 3.166, 2.5, "h", 3, "run-three-abcdef"),
+          rerun: check("w", false, 3.166, 3.5, "h", 4, "run-four") } }],
+      blocked_outputs: [],
+      retained_outputs: [{ evidence_id: "output:check:ordinary_source_margin", status: "retained",
+        metadata: { kind: "check", summary: "ordinary_source_margin", ...check("o", true, .48, .3, "A", 3, "run-three"),
+          rerun: check("o", true, .48, .3, "A", 4, "run-four") } }],
+      study_checks: { base_revision: 3, candidate_revision: 4,
+        changed_dependencies: [{ dependency_id: "requirement:minimum_work_runtime_h", before: 2.5, after: 3.5 }],
+        failing_outputs: [{ node_id: "check:work_runtime", summary: "work_runtime", transition: "regressed",
+          ...check("w", false, 3.166, 3.5, "h", 4, "run-four") }],
+        packages: { before: { revision: 3, name: "STUDY.zip", sha256: "fddca455d5e8cf68ff", path: "/r3/STUDY.zip" },
+          after: { revision: 4, name: "STUDY.zip", sha256: null, path: "/r4/STUDY.zip" } } },
+    } });
+    render(<ProjectBench session={session} />);
+    const delta = await screen.findByTestId("evidence-delta");
+    expect(delta).toHaveTextContent("Changed requirement minimum_work_runtime_h: 2.5 → 3.5");
+    const stale = within(delta).getByTestId("stale-check");
+    expect(stale).toHaveTextContent("stale · from revision 3work_runtime");
+    expect(stale).toHaveTextContent("Revision 3 result: passed · actual 3.166 h · limit 2.5 h · run run-three-ab");
+    expect(stale).toHaveTextContent("Rerun in revision 4: failed · actual 3.166 h · limit 3.5 h");
+    expect(stale).toHaveTextContent("not counted for revision 4");
+    expect(delta).toHaveTextContent("retained · from revision 3ordinary_source_margin");
+    expect(delta).not.toHaveTextContent("retained by the backend");
+    expect(within(delta).getByTestId("failing-checks")).toHaveTextContent("failed · revision 4 work_runtime");
+    const pair = within(delta).getByTestId("package-pair");
+    expect(within(pair).getByRole("link", { name: "STUDY.zip" })).toHaveAttribute("href", "/r3/STUDY.zip");
+    expect(pair).toHaveTextContent("sha256 fddca455d5e8cf68");
+    // A package the backend did not hash is not linked, never assumed.
+    expect(pair).toHaveTextContent("Package · not linked (after)");
+    expect(screen.queryByText(/ready/i)).not.toBeInTheDocument();
+  });
+
   it("says the evidence link is not linked when the backend graph has no outputs", async () => {
     render(<ProjectBench session={session} />);
     expect(await screen.findByText("Evidence-to-revision link · not linked")).toBeInTheDocument();

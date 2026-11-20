@@ -2680,6 +2680,11 @@ textarea, select { font: inherit; }
 .bench-stale { display: inline-block; margin-right: .5rem; font-size: .8rem; font-weight: 600; color: #9a4a00; }
 .bench-rows > li.is-stale > strong, .bench-rows > li.is-stale > a { text-decoration: line-through; text-decoration-thickness: 1px; }
 .bench-link-state { margin-top: 1rem; }
+.bench-retained, .bench-failed { display: inline-block; margin-right: .5rem; font-size: .8rem; font-weight: 600; }
+.bench-retained { color: var(--muted); }
+.bench-failed { color: var(--danger); }
+.bench-changes { margin: .25rem 0 .75rem; padding-left: 1.2rem; }
+.bench-link-state code { font-family: ui-monospace, "IBM Plex Mono", monospace; font-size: .85rem; overflow-wrap: anywhere; }
 .bench-package { margin-top: 1rem; background: var(--surface); padding: 1rem; }
 .bench-package h2 { font-size: 1.15rem; margin: 0 0 1rem; }
 .bench-package h3 { font-size: 1rem; margin: 0 0 .5rem; }

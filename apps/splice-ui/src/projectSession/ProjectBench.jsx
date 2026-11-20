@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import ProjectReviewPanel from "../components/ProjectReviewPanel.jsx";
 import DesignView, { splitGeometryNote } from "./DesignView.jsx";
 import {
-  assessMachineRelease, engineeringPackageUrl, fetchEngineeringPackages, fetchEngineeringRevisionDiff, fetchEvidenceDelta,
+  assessMachineRelease, digitalArtifactUrl, engineeringPackageUrl, fetchEngineeringPackages, fetchEngineeringRevisionDiff, fetchEvidenceDelta,
   fetchMaterialAssessment, fetchPartSubstitution, fetchProjectAssurance, fetchProjectMaterials,
 } from "./digitalStudyApi.js";
 
@@ -36,21 +36,66 @@ function EvidenceRevisionLink({ projectId, revision, assurance, assuranceKnown }
   </div>;
   if (error) return <p className="bench-link-state" role="status">Evidence-to-revision link · unknown. {error}</p>;
   if (!delta) return <p className="muted">Checking evidence against revision {revision - 1}…</p>;
-  const { affected_outputs: affected = [], blocked_outputs: blocked = [], retained_outputs: retained = [] } = delta.evidence_delta || {};
+  const { affected_outputs: affected = [], blocked_outputs: blocked = [], retained_outputs: retained = [],
+    study_checks: checks } = delta.evidence_delta || {};
+  const isCheck = (row) => row.metadata?.kind === "check";
+  const retainedChecks = retained.filter(isCheck);
+  const otherRetained = retained.length - retainedChecks.length;
+  const reasons = (row) => (row.reasons || []).flatMap((reason) => reason.kind === "changed_dependency"
+    ? reason.ids : reason.kind === "rerun_result_differs" ? ["the rerun result differs"]
+      : reason.kind === "check_absent_in_candidate" ? ["the check is absent from the new revision"] : []);
   return <div className="bench-link-state" data-testid="evidence-delta">
     <p><strong>Changes since revision {delta.base_revision}</strong></p>
+    {checks?.changed_dependencies?.length > 0 && <ul className="bench-changes">
+      {checks.changed_dependencies.map((row) => <li key={row.dependency_id}>
+        Changed {row.dependency_id.replace(/^requirement:/, "requirement ")}: {value(row.before)} → {value(row.after)}</li>)}
+    </ul>}
     {!affected.length && !blocked.length && <p>The backend reports no invalidated outputs.</p>}
     <ul className="bench-rows">
-      {affected.map((row) => <li key={row.evidence_id} className="is-stale">
-        <span className="bench-stale">stale · from revision {delta.base_revision}</span>
+      {affected.map((row) => <li key={row.evidence_id} className="is-stale" data-testid={isCheck(row) ? "stale-check" : undefined}>
+        <span className="bench-stale">stale · from revision {row.metadata?.revision ?? delta.base_revision}</span>
         <strong>{value(row.metadata?.summary || row.evidence_id)}</strong>
+        {isCheck(row) && <>
+          <p>Revision {row.metadata.revision} result: {checkResult(row.metadata)} · run {String(row.metadata.run_id).slice(0, 12)}</p>
+          <p>{row.metadata.rerun ? `Rerun in revision ${row.metadata.rerun.revision}: ${checkResult(row.metadata.rerun)}`
+            : "No rerun of this check in the new revision."}</p>
+          {reasons(row).length > 0 && <p className="muted">Invalidated by {reasons(row).join(", ")}. Kept as revision {row.metadata.revision} evidence, not counted for revision {delta.candidate_revision}.</p>}
+        </>}
       </li>)}
       {blocked.map((row) => <li key={row.evidence_id}>
         <span className="bench-stale">blocked</span> <strong>{value(row.metadata?.summary || row.evidence_id)}</strong>
       </li>)}
+      {retainedChecks.map((row) => <li key={row.evidence_id}>
+        <span className="bench-retained">retained · from revision {row.metadata.revision}</span>
+        <strong>{value(row.metadata.summary)}</strong>
+        <p>Inputs unchanged. Rerun in revision {row.metadata.rerun?.revision} matches: {row.metadata.rerun ? checkResult(row.metadata.rerun) : "unknown"}</p>
+      </li>)}
     </ul>
-    {retained.length > 0 && <p className="muted">{retained.length} output{retained.length === 1 ? "" : "s"} retained by the backend.</p>}
+    {otherRetained > 0 && <p className="muted">{otherRetained} output{otherRetained === 1 ? "" : "s"} retained by the backend.</p>}
+    {checks && <>
+      {checks.failing_outputs?.length > 0 && <div data-testid="failing-checks">
+        <p><strong>Failing in revision {checks.candidate_revision} · kept</strong></p>
+        <ul className="bench-rows">{checks.failing_outputs.map((row) => <li key={row.node_id} className="is-failed">
+          <span className="bench-failed">failed · revision {row.revision}</span> <strong>{value(row.summary)}</strong>
+          <p>{checkResult(row)} · {row.transition === "regressed" ? `passed in revision ${checks.base_revision}` : row.transition}</p>
+        </li>)}</ul>
+      </div>}
+      <div data-testid="package-pair">
+        <p><strong>Package before and after</strong></p>
+        {["before", "after"].map((side) => {
+          const pkg = checks.packages?.[side];
+          return pkg?.sha256 ? <p key={side}>{side === "before" ? "Before" : "After"} · revision {pkg.revision}:{" "}
+            <a href={digitalArtifactUrl(pkg.path)} download>{pkg.name}</a> · sha256 <code>{pkg.sha256.slice(0, 16)}</code></p>
+            : <p key={side}><strong>Package · not linked</strong> ({side})</p>;
+        })}
+      </div>
+    </>}
   </div>;
+}
+
+function checkResult(row) {
+  const unit = row.unit ? ` ${row.unit}` : "";
+  return `${row.passed === true ? "passed" : row.passed === false ? "failed" : "unknown"} · actual ${value(row.actual)}${unit} · limit ${value(row.limit)}${unit}`;
 }
 
 // Stored-revision compare for non-study projects, via the engineering revision diff.
