@@ -57,6 +57,8 @@ describe("reopening a saved project", () => {
     for (let open = 0; open < 4; open += 1) {
       await act(async () => { await result.current.persistence.openProject("drone-build"); });
       await waitFor(() => expect(result.current.session.machineProject).toEqual(MACHINE));
+      // The design panel reports its unchanged graph as it mounts.
+      act(() => result.current.dispatch({ type: ACTIONS.SYNC_GRAPH, ...result.current.session.graph }));
       await act(async () => { await new Promise((resolve) => setTimeout(resolve, 80)); });
     }
     expect(puts(fetchMock)).toEqual([]);

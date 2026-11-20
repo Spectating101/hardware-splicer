@@ -250,6 +250,8 @@ export function projectSessionReducer(state, action) {
         phrase: action.phrase ?? state.graph.phrase,
         composeMode: action.composeMode ?? state.graph.composeMode,
       };
+      // The design panel reports its graph on mount; an unchanged graph is not an edit.
+      if (canonicalJson(graph) === canonicalJson(state.graph)) return state;
       return {
         ...state,
         graph,
