@@ -212,10 +212,11 @@ export default function DigitalStudyPanel({ session, onProjectReload, onToast, o
   return (
     <ProjectBench session={session} study={selected} onToast={onToast} onReference={onReference} references={referenceLinks}
       caseId={summary.case_id} latestRevision={data.study.revision} onOpenScene={onOpenScene}
-      studyPackages={selected.artifacts["STUDY.zip"] ? [{
-        label: `Digital study package (STUDY.zip) · revision ${selected.revision}`,
-        href: digitalArtifactUrl(selected.artifacts["STUDY.zip"]), revision: selected.revision,
-      }] : []}
+      studyPackages={[data.history.find((entry) => entry.revision === selected.parent_revision), selected]
+        .filter((entry) => entry?.artifacts?.["STUDY.zip"]).map((entry) => ({
+          label: `Digital study package (STUDY.zip) · revision ${entry.revision}`,
+          href: digitalArtifactUrl(entry.artifacts["STUDY.zip"]), revision: entry.revision,
+        }))}
       evidenceExtra={summary.case_id === "fielddeck-5" ? <SavedDisplayComparison key={selected.run_id} study={selected} /> : null}>
     <div className="digital-workshop" data-testid="digital-study">
       {selected.change_request && <p>{selected.change_request}</p>}
