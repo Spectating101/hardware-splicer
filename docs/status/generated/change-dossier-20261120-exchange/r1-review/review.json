@@ -2,7 +2,7 @@
   "schema": "policylab.hardware_policy_review.v1",
   "adapter_version": "1.1.0",
   "implementation_sha256": {
-    "./review.mjs": "7d90877b8f381d8358795ca80d7a38c20789494c15debe290abafe13260a64fe",
+    "./review.mjs": "35590a57b57c41a94af7b8405824ba128ab88362029c4463dfcb95990f9e911b",
     "../../packages/policy-foundation/src/index.js": "3fcb5225faa646e5eefdeeb1a3e925779c1075dddfa9b2b8dab851319faced17",
     "../../packages/constraint-core/src/constraints.js": "13818f9e8f8fe2b8b38fd6c8ac118d4442d243e0a06b207dff98a72745599b82",
     "../../packages/constraint-core/src/decision.js": "c77a53ac9b94901522e6fb09871210a0245c8453adaf3a72c7bca012623574a5",
@@ -10,10 +10,10 @@
     "../../packages/constraint-core/src/stable.js": "4c10779d153dc04e96336335a1f96c428c031bb1b680cc6a0012bc17b49b7619"
   },
   "source_binding": {
-    "evidence_sha256": "df3cbb1ceffb6a8de1fd53010e68472ce68af33aed817f9533682d86d8d963f6",
-    "project_id": "digital-ad6d77eab00448cd9eb3c07e2691ddeb",
+    "evidence_sha256": "91272ded76ee6dc7ea682f19167c74dd0d1f43d5e109588168978db71628f776",
+    "project_id": "digital-9fa33a1ccc9c4c4aa677de4bcbb84317",
     "revision": 1,
-    "run_id": "6d65be4868854bf2a848499979fc7b50"
+    "run_id": "d5d2aa1848874439aa048cb7665588a7"
   },
   "policy": {
     "schema": "policylab.hardware_policy.v1",
@@ -77,10 +77,10 @@
     "evidence": {
       "schema": "policylab.application_evidence.v1",
       "application_id": "hardware-design-review",
-      "event_id": "f2e4d5a0510aa637a8fcc00b51146a743ddac3a902938ec58d681fa9145ccf72",
-      "subject": "digital-ad6d77eab00448cd9eb3c07e2691ddeb",
+      "event_id": "d75ac4a08674de8592242032a1c0733d555d2e2574cb68207967543c90018a3c",
+      "subject": "digital-9fa33a1ccc9c4c4aa677de4bcbb84317",
       "facts": {
-        "evidence_sha256": "df3cbb1ceffb6a8de1fd53010e68472ce68af33aed817f9533682d86d8d963f6",
+        "evidence_sha256": "91272ded76ee6dc7ea682f19167c74dd0d1f43d5e109588168978db71628f776",
         "hs_source": {
           "audit_scope": "Stored revision identity, declared result consistency, artifact hashes and ZIP membership only; no new native verification, measurement or physical test.",
           "case_id": "fielddeck-5",
@@ -237,26 +237,26 @@
             },
             "ok": true,
             "physical_authority_granted": false,
-            "project_id": "digital-ad6d77eab00448cd9eb3c07e2691ddeb",
+            "project_id": "digital-9fa33a1ccc9c4c4aa677de4bcbb84317",
             "requirements_met": true,
             "revision": 1,
-            "run_id": "6d65be4868854bf2a848499979fc7b50",
+            "run_id": "d5d2aa1848874439aa048cb7665588a7",
             "schema": "hardware_splicer.digital_audit.v1"
           },
           "package": {
-            "bytes": 3051453,
+            "bytes": 3051446,
             "path": "STUDY.zip",
-            "sha256": "a9a0c1aac9c3e898bb725bc33708df47d31a837f34a2f04a35b9f437a3e5f24b"
+            "sha256": "e9c99154500a0f2b623e701e0cbd0d5e2ed03d4c59a92f26ba7dc08f3e0bc50b"
           },
           "physical_authority_granted": false,
-          "project_id": "digital-ad6d77eab00448cd9eb3c07e2691ddeb",
+          "project_id": "digital-9fa33a1ccc9c4c4aa677de4bcbb84317",
           "revision": 1,
-          "run_id": "6d65be4868854bf2a848499979fc7b50",
+          "run_id": "d5d2aa1848874439aa048cb7665588a7",
           "schema": "hardware_splicer.policy_evidence.v1",
           "source_revision": {
-            "exporter_sha256": "e515521024f1d039d293ea8c318767ce1244dfa4122d3b3417d9ac61e378024d",
+            "exporter_sha256": "e8e4ec39f8410369e349b1964842ccedf687bd77b5146e266993063f48aa4ad5",
             "meaning": "Exporter checkout only; original design inputs are study.summary.source_sha256.",
-            "repository_commit": "55d3f4cda7f79a9f175630c330281e19a0bb89b4",
+            "repository_commit": "f4e1cbc3ea424c9a0b9b6093aaa5e026e0d83ad2",
             "working_tree_dirty": false
           },
           "study": {
@@ -266,8 +266,8 @@
                 "sha256": "e243ac85fd7b0580eba9147640bd18047c3f4f799def65081f95b3a929518be6"
               },
               "STUDY.zip": {
-                "bytes": 3051453,
-                "sha256": "a9a0c1aac9c3e898bb725bc33708df47d31a837f34a2f04a35b9f437a3e5f24b"
+                "bytes": 3051446,
+                "sha256": "e9c99154500a0f2b623e701e0cbd0d5e2ed03d4c59a92f26ba7dc08f3e0bc50b"
               },
               "STUDY_README.md": {
                 "bytes": 2340,
@@ -471,11 +471,11 @@
               },
               "revision/cad/FIELDDECK_5.step": {
                 "bytes": 4813857,
-                "sha256": "d0c6a4725186a75ae98140a25e5ef1bcd89471e2401a12315a8677adc98d7857"
+                "sha256": "0fd1078797c1ac625d8f32434424468ced730e4aa8c9ef593434f79bdfe0db32"
               },
               "revision/cad/changed_parts/display_spacer_1.step": {
                 "bytes": 9247,
-                "sha256": "54b1de1f8fd47861d12b5d6eeee49be07a84155792db7f12c3be2944c8572021"
+                "sha256": "ed24dd1dcca16752f82b7acff1b1d9a0b68846442e164dac8cea30e51f64ecbe"
               },
               "revision/cad/changed_parts/display_spacer_1.stl": {
                 "bytes": 42084,
@@ -483,7 +483,7 @@
               },
               "revision/cad/changed_parts/face_rear_left.step": {
                 "bytes": 102198,
-                "sha256": "f36de2db6bdab69f80bb95cf537646832712422578891992e2246c4612fc689a"
+                "sha256": "04852a80a22f7efcc1aafa4ec240b6538a2635005b34b6d77ad2689a1e9af69d"
               },
               "revision/cad/changed_parts/face_rear_left.stl": {
                 "bytes": 195484,
@@ -491,7 +491,7 @@
               },
               "revision/cad/changed_parts/face_rear_right.step": {
                 "bytes": 77202,
-                "sha256": "fe93773485260490d082320aa8ef566bb57f88a68439b46b95554cfdb85b24d6"
+                "sha256": "b4f2eb417892df8a274867a08048e12843592a411b16187c319def3442eae530"
               },
               "revision/cad/changed_parts/face_rear_right.stl": {
                 "bytes": 89484,
@@ -499,7 +499,7 @@
               },
               "revision/cad/changed_parts/tray_rear_left.step": {
                 "bytes": 373839,
-                "sha256": "fe653dd96f536e376e32d96d6b8c6bfbdafcee995e00d7492d2ed8c28f06c37a"
+                "sha256": "4037579526fcb940d9562fb328a3d5ada53990359bec2fdfec357df33cc3125a"
               },
               "revision/cad/changed_parts/tray_rear_left.stl": {
                 "bytes": 691484,
@@ -507,7 +507,7 @@
               },
               "revision/cad/changed_parts/tray_rear_right.step": {
                 "bytes": 363816,
-                "sha256": "e956795b2871f3298f88885470ca9a7059116ca63614e08d8cae05c6a3ff7845"
+                "sha256": "bd48bf9c57cc362e8cf0d9c717af6d2de4e8c48ebbeb4bbff7ece1cbbc4916a9"
               },
               "revision/cad/changed_parts/tray_rear_right.stl": {
                 "bytes": 520884,
@@ -527,7 +527,7 @@
               },
               "revision/geometry.json": {
                 "bytes": 4752,
-                "sha256": "517185c2e727ee25e8ad50c65d93c1eb2d7b7d903c5bf793a98ce38b3badb466"
+                "sha256": "80fa2487bf214edfa38aba6d976e6af7b8c47e7c07be177e617f8a9fc964bf8d"
               },
               "revision/power.json": {
                 "bytes": 1643,
@@ -543,7 +543,7 @@
               },
               "revision/verification.json": {
                 "bytes": 2587,
-                "sha256": "2f84ef26c2df1795faacaa2f8715b89fe3b2162837855d4b40ed3bd2c2d5ecaf"
+                "sha256": "343efc19a01c6f0f0c5ce1ad0027d39e0f7050c84bfcab85b55f2cffcbb32279"
               },
               "src/hardware_splicer/part_substitution.py": {
                 "bytes": 42033,
@@ -555,7 +555,7 @@
               },
               "study-verification.json": {
                 "bytes": 18042,
-                "sha256": "329e7a5775a6ea45cd3f1286d5bdc81ad33769f8048204b05a6c66b0802da307"
+                "sha256": "30f235827d06ed942c33eee7527f58b302571d30b3d7bad246dfaea7adfd2e36"
               }
             },
             "attempt_id": null,
@@ -563,8 +563,8 @@
             "job_id": null,
             "parent_revision": null,
             "revision": 1,
-            "run_id": "6d65be4868854bf2a848499979fc7b50",
-            "saved_at": "2026-11-20T09:27:20.840734+00:00",
+            "run_id": "d5d2aa1848874439aa048cb7665588a7",
+            "saved_at": "2026-11-20T11:03:04.295328+00:00",
             "summary": {
               "artifact_integrity": true,
               "case_id": "fielddeck-5",
@@ -665,7 +665,7 @@
           "unmapped_numeric_fields": []
         },
         "consumer_implementation": {
-          "./review.mjs": "7d90877b8f381d8358795ca80d7a38c20789494c15debe290abafe13260a64fe",
+          "./review.mjs": "35590a57b57c41a94af7b8405824ba128ab88362029c4463dfcb95990f9e911b",
           "../../packages/policy-foundation/src/index.js": "3fcb5225faa646e5eefdeeb1a3e925779c1075dddfa9b2b8dab851319faced17",
           "../../packages/constraint-core/src/constraints.js": "13818f9e8f8fe2b8b38fd6c8ac118d4442d243e0a06b207dff98a72745599b82",
           "../../packages/constraint-core/src/decision.js": "c77a53ac9b94901522e6fb09871210a0245c8453adaf3a72c7bca012623574a5",
@@ -680,21 +680,21 @@
       }
     },
     "request": {
-      "subject": "digital-ad6d77eab00448cd9eb3c07e2691ddeb",
+      "subject": "digital-9fa33a1ccc9c4c4aa677de4bcbb84317",
       "quantity": 1
     },
-    "event_key": "b41213e5017866e61b0f60ce1f8e6167679f3e96ee2e88c96d9270bd27f9b7cb",
+    "event_key": "803aad8b411d5096efb2b16617e21455e718f16681cc153a5d4b122e046e64a4",
     "entitlement": 1,
     "allowable_quantity": 1,
     "decision": {
       "schema": "solarpunk.constraint.decision_result.v1",
-      "case_id": "hardware-design-review:f2e4d5a0510aa637a8fcc00b51146a743ddac3a902938ec58d681fa9145ccf72",
-      "case_hash": "da8794a1d31c09a631d0ba190461708fd18fe4c2c608c04c8febac8a71d3e192",
+      "case_id": "hardware-design-review:d75ac4a08674de8592242032a1c0733d555d2e2574cb68207967543c90018a3c",
+      "case_hash": "3ecc6af0bcfe0aeae57725fa803d4ee90fd76b5c51f97f71d13918729e88910e",
       "policy_id": "portable-runtime-4h",
       "policy_version": "1.0.0",
       "policy_manifest_hash": "ad35fb07661ca754f513a93cf5d8d0756bb2cac0b49deeae6067431bf9d5a62e",
       "evidence_hashes": [
-        "842a242dfa3ea5775ccfc189b7f02136c610ca046c88b4ac7d8930b71f58e160"
+        "754301fe02ba088e0d231fefa18359a933c053d356b84a6feb2a808037492426"
       ],
       "context_refs": [],
       "admission": {
@@ -711,7 +711,7 @@
             "quantity_decimals": null,
             "capacity": null,
             "input_refs": [
-              "842a242dfa3ea5775ccfc189b7f02136c610ca046c88b4ac7d8930b71f58e160",
+              "754301fe02ba088e0d231fefa18359a933c053d356b84a6feb2a808037492426",
               "ad35fb07661ca754f513a93cf5d8d0756bb2cac0b49deeae6067431bf9d5a62e"
             ],
             "observed_inputs": {},
@@ -720,7 +720,7 @@
             "warnings": [],
             "explanation": "Application policy is enabled.",
             "boundary": "Application decision under declared inputs and a registered module; source truth and real-world rights remain external.",
-            "evaluation_id": "c2cd33a6a5ec6f0bbb6feda780ac1b1461659ea2c4f32849faa5a090fdb3b5b4"
+            "evaluation_id": "bdf8b63357925b7124e453229c2692b04d9b010c88f07f43a88c2bac9d40a399"
           },
           {
             "schema": "solarpunk.constraint.constraint_evaluation.v1",
@@ -733,7 +733,7 @@
             "quantity_decimals": null,
             "capacity": null,
             "input_refs": [
-              "842a242dfa3ea5775ccfc189b7f02136c610ca046c88b4ac7d8930b71f58e160",
+              "754301fe02ba088e0d231fefa18359a933c053d356b84a6feb2a808037492426",
               "ad35fb07661ca754f513a93cf5d8d0756bb2cac0b49deeae6067431bf9d5a62e"
             ],
             "observed_inputs": {},
@@ -742,7 +742,7 @@
             "warnings": [],
             "explanation": "The requested recipient must match the evidence subject.",
             "boundary": "Application decision under declared inputs and a registered module; source truth and real-world rights remain external.",
-            "evaluation_id": "4494200217eb3934feab849f9cd70b2d9f4b56c72b7b2f8822dc44bf6663862e"
+            "evaluation_id": "08fa878fe2ab4e2bac5201582bad9a03324e568f380ddb4c2da79beff1f17d16"
           },
           {
             "schema": "solarpunk.constraint.constraint_evaluation.v1",
@@ -755,7 +755,7 @@
             "quantity_decimals": null,
             "capacity": null,
             "input_refs": [
-              "842a242dfa3ea5775ccfc189b7f02136c610ca046c88b4ac7d8930b71f58e160",
+              "754301fe02ba088e0d231fefa18359a933c053d356b84a6feb2a808037492426",
               "ad35fb07661ca754f513a93cf5d8d0756bb2cac0b49deeae6067431bf9d5a62e"
             ],
             "observed_inputs": {},
@@ -764,7 +764,7 @@
             "warnings": [],
             "explanation": "This review concerns modeled digital design only.",
             "boundary": "Application decision under declared inputs and a registered module; source truth and real-world rights remain external.",
-            "evaluation_id": "12dab1af6e850d64ff347e9aa6fe0a6c6396b3e780bec78c0f8bd1d86bbc40a3"
+            "evaluation_id": "e31f37f24f62086c4b040a06b3810901429371854cf94b611720e6ca0f8a0346"
           },
           {
             "schema": "solarpunk.constraint.constraint_evaluation.v1",
@@ -777,7 +777,7 @@
             "quantity_decimals": null,
             "capacity": null,
             "input_refs": [
-              "842a242dfa3ea5775ccfc189b7f02136c610ca046c88b4ac7d8930b71f58e160",
+              "754301fe02ba088e0d231fefa18359a933c053d356b84a6feb2a808037492426",
               "ad35fb07661ca754f513a93cf5d8d0756bb2cac0b49deeae6067431bf9d5a62e"
             ],
             "observed_inputs": {},
@@ -786,7 +786,7 @@
             "warnings": [],
             "explanation": "The archived HS engineering constraints passed.",
             "boundary": "Application decision under declared inputs and a registered module; source truth and real-world rights remain external.",
-            "evaluation_id": "b62d76cb3e0998a9f70c017acf75c9c9df0db42ab6355529e5e00273a78dad60"
+            "evaluation_id": "342f11228a245056d73dac5f97aefb25788e0d63295acedafacc749b2d73db63"
           },
           {
             "schema": "solarpunk.constraint.constraint_evaluation.v1",
@@ -799,7 +799,7 @@
             "quantity_decimals": null,
             "capacity": null,
             "input_refs": [
-              "842a242dfa3ea5775ccfc189b7f02136c610ca046c88b4ac7d8930b71f58e160",
+              "754301fe02ba088e0d231fefa18359a933c053d356b84a6feb2a808037492426",
               "ad35fb07661ca754f513a93cf5d8d0756bb2cac0b49deeae6067431bf9d5a62e"
             ],
             "observed_inputs": {},
@@ -808,7 +808,7 @@
             "warnings": [],
             "explanation": "metric.work_runtime_lower_h is 3.166 h; target >= 4 h.",
             "boundary": "Application decision under declared inputs and a registered module; source truth and real-world rights remain external.",
-            "evaluation_id": "b49537fc732a0e76302986f0f8b7769ac20528633b3df587a65b37a331ff537e"
+            "evaluation_id": "3c15165ae5c656f18cb435ca0c672f2e7afa8426a4f2137c7fa553eb2f74bf97"
           },
           {
             "schema": "solarpunk.constraint.constraint_evaluation.v1",
@@ -821,7 +821,7 @@
             "quantity_decimals": null,
             "capacity": null,
             "input_refs": [
-              "842a242dfa3ea5775ccfc189b7f02136c610ca046c88b4ac7d8930b71f58e160",
+              "754301fe02ba088e0d231fefa18359a933c053d356b84a6feb2a808037492426",
               "ad35fb07661ca754f513a93cf5d8d0756bb2cac0b49deeae6067431bf9d5a62e"
             ],
             "observed_inputs": {},
@@ -830,7 +830,7 @@
             "warnings": [],
             "explanation": "Requested 1; evidence entitlement 1; policy limit 1.",
             "boundary": "Application decision under declared inputs and a registered module; source truth and real-world rights remain external.",
-            "evaluation_id": "aaa46d2a1450767f5a576fb12c3f143660368494cb477523c3edbda09c00c8d1"
+            "evaluation_id": "06322f940a5c4e67612b11a1891fa82e82c61a67167d81b070b2a5536d1a6a40"
           }
         ],
         "blocking_rules": [
@@ -850,13 +850,13 @@
         "This application uses declared facts; an accepted decision does not authenticate its source."
       ],
       "boundary": "Application decision under declared inputs and a registered module; source truth and real-world rights remain external.",
-      "decision_id": "14d46a9e77854c72b923403c6f06f10c446917af9991ba83bef03c808e64bdbb"
+      "decision_id": "4bc42f852cffb170df6740c776349bc407e44d3edc21abefe1327fbbc07a6661"
     },
     "receipt": {
       "schema": "solarpunk.constraint.decision_receipt.v1",
-      "decision_id": "14d46a9e77854c72b923403c6f06f10c446917af9991ba83bef03c808e64bdbb",
-      "case_id": "hardware-design-review:f2e4d5a0510aa637a8fcc00b51146a743ddac3a902938ec58d681fa9145ccf72",
-      "evaluated_at": "2026-11-20T09:27:21.608Z",
+      "decision_id": "4bc42f852cffb170df6740c776349bc407e44d3edc21abefe1327fbbc07a6661",
+      "case_id": "hardware-design-review:d75ac4a08674de8592242032a1c0733d555d2e2574cb68207967543c90018a3c",
+      "evaluated_at": "2026-11-20T11:03:05.134Z",
       "policy": {
         "id": "portable-runtime-4h",
         "version": "1.0.0",
@@ -864,7 +864,7 @@
       },
       "evidence": [
         {
-          "hash": "842a242dfa3ea5775ccfc189b7f02136c610ca046c88b4ac7d8930b71f58e160",
+          "hash": "754301fe02ba088e0d231fefa18359a933c053d356b84a6feb2a808037492426",
           "raw_included": true
         }
       ],
@@ -876,7 +876,7 @@
       },
       "evaluated_rules": [
         {
-          "evaluation_id": "c2cd33a6a5ec6f0bbb6feda780ac1b1461659ea2c4f32849faa5a090fdb3b5b4",
+          "evaluation_id": "bdf8b63357925b7124e453229c2692b04d9b010c88f07f43a88c2bac9d40a399",
           "calculator_id": "foundation:policy-enabled",
           "calculator_version": "1.0.0",
           "policy_rule_id": "foundation:policy-enabled",
@@ -884,7 +884,7 @@
           "status": "PASS"
         },
         {
-          "evaluation_id": "4494200217eb3934feab849f9cd70b2d9f4b56c72b7b2f8822dc44bf6663862e",
+          "evaluation_id": "08fa878fe2ab4e2bac5201582bad9a03324e568f380ddb4c2da79beff1f17d16",
           "calculator_id": "foundation:subject-binding",
           "calculator_version": "1.0.0",
           "policy_rule_id": "foundation:subject-binding",
@@ -892,7 +892,7 @@
           "status": "PASS"
         },
         {
-          "evaluation_id": "12dab1af6e850d64ff347e9aa6fe0a6c6396b3e780bec78c0f8bd1d86bbc40a3",
+          "evaluation_id": "e31f37f24f62086c4b040a06b3810901429371854cf94b611720e6ca0f8a0346",
           "calculator_id": "hardware-design-review:digital-scope",
           "calculator_version": "1.0.0",
           "policy_rule_id": "hardware-design-review:digital-scope",
@@ -900,7 +900,7 @@
           "status": "PASS"
         },
         {
-          "evaluation_id": "b62d76cb3e0998a9f70c017acf75c9c9df0db42ab6355529e5e00273a78dad60",
+          "evaluation_id": "342f11228a245056d73dac5f97aefb25788e0d63295acedafacc749b2d73db63",
           "calculator_id": "hardware-design-review:engineering-requirements",
           "calculator_version": "1.0.0",
           "policy_rule_id": "hardware-design-review:engineering-requirements",
@@ -908,7 +908,7 @@
           "status": "PASS"
         },
         {
-          "evaluation_id": "b49537fc732a0e76302986f0f8b7769ac20528633b3df587a65b37a331ff537e",
+          "evaluation_id": "3c15165ae5c656f18cb435ca0c672f2e7afa8426a4f2137c7fa553eb2f74bf97",
           "calculator_id": "hardware-design-review:target.work-runtime",
           "calculator_version": "1.0.0",
           "policy_rule_id": "hardware-design-review:target.work-runtime",
@@ -916,7 +916,7 @@
           "status": "BLOCK"
         },
         {
-          "evaluation_id": "aaa46d2a1450767f5a576fb12c3f143660368494cb477523c3edbda09c00c8d1",
+          "evaluation_id": "06322f940a5c4e67612b11a1891fa82e82c61a67167d81b070b2a5536d1a6a40",
           "calculator_id": "foundation:requested-quantity",
           "calculator_version": "1.0.0",
           "policy_rule_id": "foundation:requested-quantity",

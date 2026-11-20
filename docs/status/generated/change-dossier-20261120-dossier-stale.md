@@ -1,21 +1,21 @@
-# Engineering change dossier: digital-ad6d77eab00448cd9eb3c07e2691ddeb
+# Engineering change dossier: digital-9fa33a1ccc9c4c4aa677de4bcbb84317
 
-Edition `e4c64c1113d79581` · case `fielddeck-5` · evidence level **modeled** · physical authority granted: **no**
+Edition `7e2edb6b950a2c25` · case `fielddeck-5` · evidence level **modeled** · physical authority granted: **no**
 
-> **STALE EDITION.** HS project is at revision 3; this edition describes revision 2 run_id changed from df70f6a5008b4489b20e63a7885b71d0 to 7fbc1add497d47ba94b4de021bd2e2ef snapshot_sha256 changed from dfa3a253f6fc40750ad9e20c1b58ceb8f5cd89e8ec4bee6b5df1729e0fef2d46 to 4591bf4cefc077a19ac362d606b3d1cd48df77cf5dfd299efd20932ed8185a85 seal_sha256 changed from 5b926bcd4be2c58274e36bcc27dab6cae7f6a35c2ef0b28c2b082e44ce3c5f50 to 1e8c3f7a93338db720f6ff857e81e3911e48729992d2c2d0bd966010499b1141 package_sha256 changed from 9f05656fe0282dcc349cba248e8f1894560746578b5d484ff005d6347b62db93 to 27e330d6fc826822ca1b7112561e450a43cc24582d81078272325a4dda6c3d2c Do not reuse this dossier.
+> **STALE EDITION.** HS project is at revision 3; this edition describes revision 2 run_id changed from 73a17dbce2414d46883a61f8dd974ced to 78ea06aa03b241fe921cb102a8423442 package_sha256 changed from b630c5ded559584a91c57211db0f8263bc2e6ba49ea20b26b2fc83927b1b688b to 7234517b8267886f0b6ed7a69b027fbf61061187e97bf9b2456c3fd5038f737c snapshot_sha256 (declared by HS) changed from d2ecf433e7ba5b6b80da8c667b141347fc125486f9b57ba3071f337b5e816451 to b06b165100d1cf1ae65ed38e5aa39fe38fa6583e4f20ac20ad792c872d39c872 seal_sha256 (declared by HS) changed from 50c6b86ae6597ce2a70dce4842933a02b618d596ca1c42a9a8e016779c7957c7 to 61c8e4d525dfffe42e05f92a719e52b3f98d675389b38d77826cf2f62108c996 Do not reuse this dossier.
 
 ## Decision under review
 
 Should revision 2 replace revision 1 under policy portable-runtime-4h 1.0.0?
 
-Not decided by this dossier. Revision 2 has 1 failing modeled check(s) and no physical evidence.
+Not decided by this dossier. Revision 2 has 1 failing and 0 untested modeled check(s) and no physical evidence.
 
 ## Revisions
 
-| | Revision | Run | Snapshot | Package | Requirements met |
+| | Revision | Run | Package | Requirements met | Snapshot / seal (declared by HS, not verified by Cite) |
 |---|---:|---|---|---|---|
-| base | 1 | `6d65be486885` | `e3fe20fc51cf` | `a9a0c1aac9c3` | yes (modeled) |
-| candidate | 2 | `df70f6a5008b` | `dfa3a253f6fc` | `9f05656fe028` | no |
+| base | 1 | `d5d2aa184887` | `e9c99154500a` | yes (modeled) | `36178ffeae03` / `248a09784317` |
+| candidate | 2 | `73a17dbce241` | `b630c5ded559` | no | `d2ecf433e7ba` / `50c6b86ae659` |
 
 Revision 2 change request: Apply Policy Lab portable-runtime-4h proposal
 
@@ -57,16 +57,20 @@ Policy `portable-runtime-4h` on revision 2: **BLOCKED** (unmet: engineering.work
 
 | Role | File | SHA-256 |
 |---|---|---|
-| base_export | `r1-export.json` | `df3cbb1ceffb6a8de1fd53010e68472ce68af33aed817f9533682d86d8d963f6` |
-| base_review | `r1-review/review.json` | `fb8d50bfccbfcc5d07293768b812e4fad64788b5ac2a5c3f2d1361aedddf5101` |
-| candidate_export | `r2-export.json` | `634a91e17cacc190075593339cafa7126aaf3b843e04181c44d5d1a22be2f861` |
-| candidate_review | `r2-review/review.json` | `5e0bf55b05c4d7f60e5ce2d079b674dc45dc8706a83c95909e81053b022aff39` |
-| proposal | `proposal.json` | `01984116c31b51653b83ee398e145bfaacf8e14ca39d9e15193d1b22bf9063cc` |
+| base_export | `r1-export.json` | `91272ded76ee6dc7ea682f19167c74dd0d1f43d5e109588168978db71628f776` |
+| base_review | `r1-review/review.json` | `10230b9120c5736f87cd00800e52cfc78857fc2fbfa67b22c1bca8fe891a4577` |
+| base_review_replay | `r1-review/replay.json` | `e2f70e0e1c2903e736726252ef910031136cbdd51934e0f3b71171329ef29427` |
+| candidate_export | `r2-export.json` | `f3050ab7eb3f0b93c85b639336630aa5aeed8d6c24006cc3eb02bff1ccdef0c6` |
+| candidate_review | `r2-review/review.json` | `16cb6d662fedb1558879a86cf7a2bc60e8ac22773d300c99d367c4f3e0ee5bc6` |
+| candidate_review_replay | `r2-review/replay.json` | `a824b9bdc4bfba5a36a9521c559d9cd4271b4c5d60843e9cb64f2ed86e3055c8` |
+| proposal | `proposal.json` | `deb21e3dc1bee2f3e586f5c69e7580bda1e2bb4cae0e6cedc48808a75cfb253c` |
 
 Receiver checks performed:
 
 - every covered file's bytes match its recorded SHA-256
-- base and candidate exports match the packet's project, revision, run, package hash, requirements and checks
+- base and candidate exports match the packet's project, revision, run, package hash, requirements, requirements_met and checks
+- each Policy Lab review has a verify receipt naming its exact bytes
+- the proposal shown (policy, decision, unmet targets, requirement changes) is read from the covered files
 - the Policy Lab review binds the exact base export bytes
 - the HS proposal binds that review, and the candidate carries its resolved requirements
 - every failing candidate check from the export is listed as unresolved
