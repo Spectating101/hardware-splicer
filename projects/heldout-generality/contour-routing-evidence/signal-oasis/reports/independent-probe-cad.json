@@ -1,0 +1,37 @@
+{
+  "actual_step_symmetric_difference_mm3": [
+    0.0,
+    0.0
+  ],
+  "adversarial_controls": {
+    "false_fabrication": {
+      "reason": "FALSE_PHYSICAL_OPERATION_AUTHORITY",
+      "rejected": true
+    },
+    "invented_source_cutout": {
+      "reason": "STEP_PLATE_VS_SOURCE_BOOLEAN_DIFFERENCE",
+      "rejected": true
+    },
+    "misplaced_bore": {
+      "reason": "CLAIMED_PROBE_XY_DISAGREES_WITH_SOURCE",
+      "rejected": true
+    },
+    "wrong_pcb": {
+      "reason": "REVISED_PCB_DIGEST_CONFLICT",
+      "rejected": true
+    }
+  },
+  "fabrication_authorized": false,
+  "model_hole_centre_mm": [
+    7.532781,
+    -5.96599
+  ],
+  "modeled_bore_diameter_mm": 0.6,
+  "physical_probe_contact": "NOT_PERFORMED",
+  "revised_pcb_sha256": "7d79d7ad60ee3af376462d4640af8286c74b2bedad4f331d988e2f6e80211e58",
+  "schema": "hs.independent_probe_guide_audit.v1",
+  "signal_net": "Net-(U2-IO9)",
+  "source_cutouts_preserved": 1,
+  "source_testpoint": "TP1",
+  "status": "PASS"
+}

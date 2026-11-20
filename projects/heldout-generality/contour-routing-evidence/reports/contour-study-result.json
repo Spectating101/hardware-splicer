@@ -1,0 +1,18 @@
+{
+  "derived_revision_source_to_step_pass": true,
+  "fabrication_authorized": false,
+  "fresh_replay_identical": true,
+  "frozen_original_board_count": 4,
+  "independent_physical_fit_validation": false,
+  "invalid_or_blocked_results": [],
+  "original_sources_source_to_step_pass": 4,
+  "physical_measurement": false,
+  "pilot_pass": true,
+  "revised_mounting_geometry_propagates": true,
+  "schema": "hs.heldout_contour_generalization.v1",
+  "source_revisions_tested": 5,
+  "two_round_semantic_sha256": [
+    "5669801c7b18a55cd41c371de23bbe08dd7979b2154b1ad235ce4030785bded9",
+    "5669801c7b18a55cd41c371de23bbe08dd7979b2154b1ad235ce4030785bded9"
+  ]
+}

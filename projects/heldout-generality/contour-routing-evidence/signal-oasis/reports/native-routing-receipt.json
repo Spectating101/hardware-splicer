@@ -1,0 +1,37 @@
+{
+  "branch_end_mm": [
+    107.53401,
+    105.96599
+  ],
+  "branch_start_mm": [
+    109.125,
+    104.375
+  ],
+  "candidate_attempts": 1,
+  "edited_sha256": "7d79d7ad60ee3af376462d4640af8286c74b2bedad4f331d988e2f6e80211e58",
+  "fabrication_authorized": false,
+  "native_drc": {
+    "errors": 0,
+    "exit_code": 0,
+    "finding_types": {},
+    "unconnected": 0
+  },
+  "new_testpoint": "TP1",
+  "new_track_count": 264,
+  "original_source_sha256": "ad9a2d691785a04877b7a1971d2a6c12e0a07092abd7277a1cd92c5373c17ec3",
+  "physical_probe_tested": false,
+  "schema": "hs.heldout_track_tap.v1",
+  "signal_integrity_unverified": true,
+  "source_anchor_end_mm": [
+    110.5,
+    105.75
+  ],
+  "source_anchor_net": "Net-(U2-IO9)",
+  "source_anchor_start_mm": [
+    107.75,
+    103.0
+  ],
+  "source_original_track_count": 263,
+  "stable_created_ids": 10,
+  "status": "DIGITAL_DRC_ZERO"
+}
