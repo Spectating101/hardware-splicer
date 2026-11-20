@@ -66,6 +66,19 @@ def _load(store: ProjectStore, project_id: str, revision: int | None) -> Dict[st
     )
 
 
+def _assurance(store: ProjectStore, project_id: str, envelope: Dict[str, Any]) -> Dict[str, Any]:
+    """Project one revision, including the sealed checks of a digital study revision."""
+    from .study_evidence import load_study_evidence
+
+    revision = int(envelope["revision"])
+    return build_engineering_assurance(
+        envelope["snapshot"],
+        project_id=project_id,
+        revision=revision,
+        study=load_study_evidence(store, project_id, revision),
+    )
+
+
 def _error(exc: Exception) -> HTTPException:
     if isinstance(exc, ProjectNotFound):
         code = status.HTTP_404_NOT_FOUND
@@ -101,11 +114,7 @@ def create_engineering_assurance_router(project_store: ProjectStore) -> APIRoute
     ) -> Dict[str, Any]:
         try:
             envelope = _load(project_store, project_id, revision)
-            assurance = build_engineering_assurance(
-                envelope["snapshot"],
-                project_id=project_id,
-                revision=int(envelope["revision"]),
-            )
+            assurance = _assurance(project_store, project_id, envelope)
         except Exception as exc:
             raise _error(exc) from exc
         return {
@@ -153,25 +162,21 @@ def create_engineering_assurance_router(project_store: ProjectStore) -> APIRoute
             candidate_envelope = _load(
                 project_store, project_id, request.candidate_revision
             )
-            candidate = build_engineering_assurance(
-                candidate_envelope["snapshot"],
-                project_id=project_id,
-                revision=int(candidate_envelope["revision"]),
-            )
+            candidate = _assurance(project_store, project_id, candidate_envelope)
             changed_source_ids = set(request.changed_source_ids)
             changed_claim_ids = set(request.changed_claim_ids)
             base_revision = request.base_revision
+            study_delta = None
             if base_revision is not None:
                 base_envelope = _load(project_store, project_id, base_revision)
-                base = build_engineering_assurance(
-                    base_envelope["snapshot"],
-                    project_id=project_id,
-                    revision=int(base_envelope["revision"]),
-                )
+                base = _assurance(project_store, project_id, base_envelope)
                 derived = changed_assurance_dependencies(base, candidate)
                 changed_source_ids.update(derived["source_ids"])
                 changed_claim_ids.update(derived["claim_ids"])
-            if not changed_source_ids and not changed_claim_ids and not request.unresolved_source_ids and not request.unresolved_claim_ids:
+                from .study_evidence import evaluate_study_check_delta
+
+                study_delta = evaluate_study_check_delta(base, candidate)
+            if study_delta is None and not changed_source_ids and not changed_claim_ids and not request.unresolved_source_ids and not request.unresolved_claim_ids:
                 raise ValueError(
                     "supply a base_revision or at least one changed/unresolved source or claim id"
                 )
@@ -182,6 +187,13 @@ def create_engineering_assurance_router(project_store: ProjectStore) -> APIRoute
                 unresolved_source_ids=request.unresolved_source_ids,
                 unresolved_claim_ids=request.unresolved_claim_ids,
             )
+            if study_delta is not None:
+                # Earlier study checks join the same stale/blocked/retained lists,
+                # each naming the revision and run it came from.
+                delta["affected_outputs"].extend(study_delta["stale_outputs"])
+                delta["blocked_outputs"].extend(study_delta["blocked_outputs"])
+                delta["retained_outputs"].extend(study_delta["retained_outputs"])
+                delta["study_checks"] = study_delta
         except Exception as exc:
             raise _error(exc) from exc
         return {
