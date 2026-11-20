@@ -28,7 +28,7 @@ def invoke(args,cwd,name,seconds=180):
 def run(corpus,lock,out):
     if out.exists():raise FileExistsError("refusing to reuse heldout output")
     frozen=json.loads(lock.read_text())
-    if frozen["schema"]!="hs.posttuning_electrical_holdout.v1" or len(frozen["cases"])!=6:
+    if frozen["schema"] not in ("hs.posttuning_electrical_holdout.v1", "hs.postfix_electrical_confirmatory_v2") or len(frozen["cases"])!=6:
         raise ValueError("must use exactly the frozen cohort")
     head=subprocess.check_output(["git","-C",str(corpus),"rev-parse","HEAD"],text=True).strip()
     if head!=frozen["corpus_git_commit"]:raise ValueError("corpus revision disagreement")
@@ -122,7 +122,7 @@ def run(corpus,lock,out):
         "schema":"hs.posttuning_electrical_benchmark_result.v1",
         "precommitted_lock_sha256":sha(lock.read_bytes()),
         "original_corpus_commit":frozen["corpus_git_commit"],
-        "development_branch_baseline":"HS #371, unchanged track_tap.py",
+        "development_branch_baseline":("HS #371 unchanged original electrical candidate search" if frozen["schema"]=="hs.posttuning_electrical_holdout.v1" else "HS #371 electrical search unchanged; only source-UUID serialization and empty-cutout negative-control fixes"),
         "allowed_candidates_per_board":LIMIT,
         "distinct_unseen_original_repositories":len({r["original_repo"] for r in rounds[0]}),
         "total_cases":len(rounds[0]),
