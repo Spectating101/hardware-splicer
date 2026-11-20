@@ -55,3 +55,21 @@ def test_repo_root_redirects_checkout_lookups(tmp_path, monkeypatch):
     monkeypatch.setenv("HARDWARE_SPLICER_REPO_ROOT", str(tmp_path))
     assert repo_root() == tmp_path.resolve()
     assert project_scene_api._repo_root() == tmp_path.resolve()
+
+
+def test_example_routes_without_a_checkout_answer_empty_or_404(tmp_path, monkeypatch):
+    from fastapi.testclient import TestClient
+
+    from hardware_splicer import api
+
+    monkeypatch.setenv("HARDWARE_SPLICER_REPO_ROOT", str(tmp_path / "no-checkout"))
+    monkeypatch.setenv("HARDWARE_SPLICER_JOB_DB", str(tmp_path / "jobs.sqlite"))
+    with TestClient(api.create_app()) as client:
+        for route, key in (("/v1/examples/splice-intakes", "examples"),
+                           ("/v1/examples/donor-fixtures", "fixtures"),
+                           ("/v1/examples/netlist-fixtures", "fixtures")):
+            response = client.get(route)
+            assert response.status_code == 200 and response.json()[key] == [], route
+        missing = client.get("/v1/examples/netlist-fixtures/anything")
+        assert missing.status_code == 404
+        assert client.get("/v1/scenes").json() == []

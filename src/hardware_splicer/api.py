@@ -626,6 +626,8 @@ def create_app(*, ui_dist: str | Path | None = None) -> FastAPI:
         from .netlist.ir import CircuitNetlist
 
         manifest = repo_root() / "examples" / "netlist_fixtures" / "manifest.json"
+        if not manifest.is_file():
+            raise _error(404, "fixture_not_found", f"Unknown netlist fixture: {fixture_id}")
         data = json.loads(manifest.read_text(encoding="utf-8"))
         row = next((f for f in data.get("fixtures") or [] if f.get("id") == fixture_id), None)
         if not row:
