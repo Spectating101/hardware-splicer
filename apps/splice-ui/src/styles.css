@@ -2673,6 +2673,10 @@ textarea, select { font: inherit; }
   .bench-parts { grid-row: auto; }
   .bench-evidence { grid-column: auto; }
 }
+/* Evidence usually runs far longer than parts; keep parts and requirements beside it while reading instead of leaving an empty column. */
+@media (min-width: 900px) {
+  .bench-parts { position: sticky; top: 1rem; max-height: calc(100vh - 2rem); overflow-y: auto; overscroll-behavior: contain; }
+}
 .bench-objective { display: flex; gap: .6rem; align-items: baseline; flex-wrap: wrap; max-width: 72ch; }
 .bench-objective span { font-size: .75rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
 .design-view { margin-bottom: 1.25rem; }
