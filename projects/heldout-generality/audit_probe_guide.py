@@ -73,7 +73,14 @@ if __name__=="__main__":
         r=revision
         if name=="wrong_pcb":r="0"*64
         elif name=="misplaced_bore":mm["probe_guide_local_xy_mm"][0]+=1
-        elif name=="invented_source_cutout":ll["cutout_xy"]=[]
+        elif name=="invented_source_cutout":
+            if ll["cutout_xy"]:
+                ll["cutout_xy"]=[]
+            else:
+                # A no-cutout board needs a *real* negative mutation: erasing
+                # zero existing cutouts is a no-op that falsely fails the test.
+                ll["outer_xy"][0][0]+=3.0
+                ll["outer_xy"][0][1]+=5.0
         else:mm["fabrication_authorized"]=True
         try:inspect(ll,r,tt,nn,mm,a["model"])
         except ValueError as exc:negatives[name]={"rejected":True,"reason":str(exc)}

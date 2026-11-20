@@ -77,22 +77,19 @@ def candidates(board):
     return choices,new_ref
 
 def stabilize(source:Path,edited:Path,payload):
-    orig=set(UUID_RE.findall(source.read_text(errors="replace")))
-    code=edited.read_text()
-    # Assign deterministic identities by source serialization *order*, not
-    # by sorting the newly generated RANDOM UUID strings.
-    unseen=set(UUID_RE.findall(code))-orig
-    added=list(dict.fromkeys(value for value in UUID_RE.findall(code) if value in unseen))
-    if len(added)<2:raise ValueError("NEW_SOURCE_BOUND_ITEMS_NOT_SERIALIZED")
-    for i,old in enumerate(added):
-        safe=str(uuid.uuid5(uuid.NAMESPACE_URL,sha(source)+"|"+repr(payload)+"|"+str(i)))
-        code=code.replace('(uuid "'+old+'")','(uuid "'+safe+'")')
-    edited.write_text(code)
-    # Reload/save once after fixing UUIDs so pcbnew's canonical object order
-    # cannot depend on original random in-memory UUID insertion order.
+    # KiCad can synthesize IDs not only for the newly added test point and
+    # trace but also for existing legacy source objects. Their insertion
+    # order is not stable across load/save. Bind new UUIDs to each native
+    # top-level object's semantic source content, never global ordering.
+    from canonical_pcb_uuid import stabilize_ids
+    stats=stabilize_ids(source,edited)
+    if stats["synthesized_identifiers_stabilized"]<2:
+        raise ValueError("NEW_SOURCE_BOUND_ITEMS_NOT_SERIALIZED")
+    # KiCad's actual serializing is still authoritative after the source-
+    # bound IDs are stabilized; the second save sorts consistently.
     normalized=pcbnew.LoadBoard(str(edited))
     pcbnew.SaveBoard(str(edited),normalized)
-    return len(added)
+    return stats["synthesized_identifiers_stabilized"]
 
 def check(folder:Path):
     argv=["kicad-cli","pcb","drc","--format","json","--severity-error",

@@ -36,12 +36,21 @@ def audit(source:Path,edited:Path,receipt:dict):
     if len(changed)!=1:raise ValueError("EXPECTED_SINGLE_NEW_COPPER_BRANCH")
     _,net,layer,x1,y1,x2,y2=next(iter(changed))
     if net!=receipt["source_anchor_net"] or layer!=pcbnew.F_Cu:raise ValueError("BRANCH_NET_OR_LAYER_WRONG")
-    if {(x1,y1),(x2,y2)}!={tuple(receipt["branch_start_mm"]),tuple(receipt["branch_end_mm"])}:
+    # Native KiCad writes integral nanometres, and its FromMM conversion may
+    # quantize a Python-computed midpoint downward by ONE nanometre. Compare
+    # at a strict 2 nm absolute tolerance, not float equality or a loose DRC
+    # clearance: a real displacement is still rejected.
+    coord=lambda xy:tuple(round(float(q),6) for q in xy)
+    close=lambda a,b:all(abs(float(x)-float(y))<=0.000002 for x,y in zip(a,b))
+    expected_start,expected_end=receipt["branch_start_mm"],receipt["branch_end_mm"]
+    actual_start,actual_end=(x1,y1),(x2,y2)
+    if not ((close(actual_start,expected_start) and close(actual_end,expected_end))
+            or (close(actual_start,expected_end) and close(actual_end,expected_start))):
         raise ValueError("BRANCH_COORDINATES_NOT_REPORTED")
     start,end=receipt["source_anchor_start_mm"],receipt["source_anchor_end_mm"]
     original=[t for t in a.GetTracks() if t.GetClass()=="PCB_TRACK" and t.GetLayer()==pcbnew.F_Cu
               and t.GetNetname()==net and {(mm(t.GetStart().x),mm(t.GetStart().y)),
-                 (mm(t.GetEnd().x),mm(t.GetEnd().y))}=={tuple(start),tuple(end)}]
+                 (mm(t.GetEnd().x),mm(t.GetEnd().y))}=={coord(start),coord(end)}]
     if len(original)!=1:raise ValueError("ANCHOR_SOURCE_TRACE_MISSING")
     mid=receipt["branch_start_mm"]
     if abs((end[0]-start[0])*(mid[1]-start[1])-(end[1]-start[1])*(mid[0]-start[0]))>.0001:
@@ -56,7 +65,7 @@ def audit(source:Path,edited:Path,receipt:dict):
     dx,dy=mm(pad.GetSize().x),mm(pad.GetSize().y)
     if pad.GetShape()!=pcbnew.PAD_SHAPE_CIRCLE or abs(dx-dy)>.00001 or abs(dx-1.0)>.00001:
         raise ValueError("SOURCE_TESTPOINT_PAD_DIAMETER_UNSUPPORTED")
-    if (mm(pad.GetPosition().x),mm(pad.GetPosition().y))!=tuple(receipt["branch_end_mm"]):
+    if (mm(pad.GetPosition().x),mm(pad.GetPosition().y))!=coord(receipt["branch_end_mm"]):
         raise ValueError("TESTPOINT_NOT_AT_BRANCH_END")
     if receipt["fabrication_authorized"] is not False:raise ValueError("FALSE_FAB_AUTHORITY")
     return {"schema":"hs.independent_native_track_tap.v1","status":"PASS",

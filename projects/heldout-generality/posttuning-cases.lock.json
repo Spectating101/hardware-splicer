@@ -1,0 +1,285 @@
+{
+  "board_count": 6,
+  "cases": [
+    {
+      "id": "stack-chan__stack-chan__m5-pantilt",
+      "metadata": {
+        "bare_drv": 0,
+        "commit": "2f6b5a65e30278fdbd1c5114cab6d42cdb7b7a0d",
+        "connections": 76,
+        "copper_layers": 2,
+        "footprints": 39,
+        "height_mm": 50.0,
+        "id": "stack-chan__stack-chan__m5-pantilt",
+        "licence": "Apache-2.0",
+        "pads": 135,
+        "parts": 33,
+        "path": "schematics/m5-pantilt/m5-pantilt.kicad_pcb",
+        "ref_drv": 0,
+        "ref_open": 0,
+        "repo": "stack-chan/stack-chan",
+        "segments": 285,
+        "stars": 1748,
+        "vias": 114,
+        "width_mm": 50.0,
+        "zones": 2
+      },
+      "origin_commit": "2f6b5a65e30278fdbd1c5114cab6d42cdb7b7a0d",
+      "origin_repo": "stack-chan/stack-chan",
+      "sha256": {
+        "LICENSE": "5123845c54a384c407e364dcc45f7680ed12afe01cbc7a851a164d3370a35a04",
+        "SOURCE.json": "acaece77b4d6e91b18a40a4cf681b44c4acca8f9bf7b073cef037f031c392d83",
+        "board.kicad_pcb": "946037a645752feb8d29ad74d7c21cc249026218567abd53bfb1030a22018966",
+        "board.kicad_pro": "406f9b8e68636973fb3dc9616d99227a1ef6101f4b254e4b38a5af7815f33f4b"
+      },
+      "source": {
+        "changes": "board.* are unmodified copies, renamed. unrouted.kicad_pcb is board.kicad_pcb with tracks, vias and zone fills removed.",
+        "commit": "2f6b5a65e30278fdbd1c5114cab6d42cdb7b7a0d",
+        "extras": [
+          "schematics/m5-pantilt/m5-pantilt.kicad_pro"
+        ],
+        "licence": "Apache-2.0",
+        "licence_file": "LICENSE",
+        "path": "schematics/m5-pantilt/m5-pantilt.kicad_pcb",
+        "repo": "stack-chan/stack-chan",
+        "stars": 1748,
+        "url": "https://github.com/stack-chan/stack-chan/blob/2f6b5a65e30278fdbd1c5114cab6d42cdb7b7a0d/schematics/m5-pantilt/m5-pantilt.kicad_pcb"
+      }
+    },
+    {
+      "id": "KabukiFlux__MIDI4MiSTer__MIDI_4_MiSTer",
+      "metadata": {
+        "bare_drv": 1,
+        "commit": "ec68313e4b5a2be382f41cdfd56340fd08b3e9e6",
+        "connections": 48,
+        "copper_layers": 2,
+        "footprints": 40,
+        "height_mm": 44.8,
+        "id": "KabukiFlux__MIDI4MiSTer__MIDI_4_MiSTer",
+        "licence": "MIT",
+        "pads": 97,
+        "parts": 27,
+        "path": "kicad/MIDI_4_MiSTer.kicad_pcb",
+        "ref_drv": 0,
+        "ref_open": 0,
+        "repo": "KabukiFlux/MIDI4MiSTer",
+        "segments": 227,
+        "stars": 13,
+        "vias": 9,
+        "width_mm": 44.0,
+        "zones": 28
+      },
+      "origin_commit": "ec68313e4b5a2be382f41cdfd56340fd08b3e9e6",
+      "origin_repo": "KabukiFlux/MIDI4MiSTer",
+      "sha256": {
+        "LICENSE": "479cae27957e7e18b7d00443725c65750442a8600893667310c3f77dbfb7a981",
+        "SOURCE.json": "1350a8c4b89ea3517f477894dac752637300075afc2247a0feedb7e9a1064bf7",
+        "board.kicad_pcb": "279a9e437719641dd8e98f224b432d716d9d2ed66ce6165d07f32f2cc34ef07b",
+        "board.kicad_pro": "23b3da5d8dfcfdf2152ab461938ea633ed18a887febb9f7bab858748ad0428f7"
+      },
+      "source": {
+        "changes": "board.* are unmodified copies, renamed. unrouted.kicad_pcb is board.kicad_pcb with tracks, vias and zone fills removed.",
+        "commit": "ec68313e4b5a2be382f41cdfd56340fd08b3e9e6",
+        "extras": [
+          "kicad/MIDI_4_MiSTer.kicad_pro"
+        ],
+        "licence": "MIT",
+        "licence_file": "LICENSE",
+        "path": "kicad/MIDI_4_MiSTer.kicad_pcb",
+        "repo": "KabukiFlux/MIDI4MiSTer",
+        "stars": 13,
+        "url": "https://github.com/KabukiFlux/MIDI4MiSTer/blob/ec68313e4b5a2be382f41cdfd56340fd08b3e9e6/kicad/MIDI_4_MiSTer.kicad_pcb"
+      }
+    },
+    {
+      "id": "pcbcupid__Kicad-7-Series__Schematics",
+      "metadata": {
+        "bare_drv": 0,
+        "commit": "b238f8e5d67399d43a7bb0dc4f6e7acb7c812059",
+        "connections": 10,
+        "copper_layers": 2,
+        "footprints": 14,
+        "height_mm": 60.1,
+        "id": "pcbcupid__Kicad-7-Series__Schematics",
+        "licence": "MIT",
+        "pads": 25,
+        "parts": 9,
+        "path": "14_Create_Custom_Library_part-2/Schematics.kicad_pcb",
+        "ref_drv": 0,
+        "ref_open": 0,
+        "repo": "pcbcupid/Kicad-7-Series",
+        "segments": 42,
+        "stars": 37,
+        "vias": 0,
+        "width_mm": 60.1,
+        "zones": 1
+      },
+      "origin_commit": "b238f8e5d67399d43a7bb0dc4f6e7acb7c812059",
+      "origin_repo": "pcbcupid/Kicad-7-Series",
+      "sha256": {
+        "LICENSE": "d5881e24a16e163cffa7035f5ea510845060d736f668874d457aef645fdd0c9a",
+        "SOURCE.json": "bb3b85eacdb0fb2a0f04c8a669481ea82aadba7fa6a19d8b9b0a33e8851208d8",
+        "board.kicad_pcb": "8fa41e199c01d4b489b9cea83a8df9702e6e89b15c57442a1bf927320b8bb363",
+        "board.kicad_pro": "70f34d92bad37d883d2f8d0a07e4d363bc3b8fe0e172fcc022db4208931a14c1"
+      },
+      "source": {
+        "changes": "board.* are unmodified copies, renamed. unrouted.kicad_pcb is board.kicad_pcb with tracks, vias and zone fills removed.",
+        "commit": "b238f8e5d67399d43a7bb0dc4f6e7acb7c812059",
+        "extras": [
+          "14_Create_Custom_Library_part-2/Schematics.kicad_pro"
+        ],
+        "licence": "MIT",
+        "licence_file": "LICENSE",
+        "path": "14_Create_Custom_Library_part-2/Schematics.kicad_pcb",
+        "repo": "pcbcupid/Kicad-7-Series",
+        "stars": 37,
+        "url": "https://github.com/pcbcupid/Kicad-7-Series/blob/b238f8e5d67399d43a7bb0dc4f6e7acb7c812059/14_Create_Custom_Library_part-2/Schematics.kicad_pcb"
+      }
+    },
+    {
+      "id": "bentwire__USB-C-FUSB302-PI__USB-C-FUSB302-PI",
+      "metadata": {
+        "bare_drv": 0,
+        "commit": "7d95292262b42767bbeefebadb6bafe055923d50",
+        "connections": 140,
+        "copper_layers": 4,
+        "footprints": 64,
+        "height_mm": 22.1,
+        "id": "bentwire__USB-C-FUSB302-PI__USB-C-FUSB302-PI",
+        "licence": "MIT",
+        "pads": 281,
+        "parts": 64,
+        "path": "USB-C-FUSB302-PI.kicad_pcb",
+        "ref_drv": 0,
+        "ref_open": 0,
+        "repo": "bentwire/USB-C-FUSB302-PI",
+        "segments": 457,
+        "stars": 12,
+        "vias": 107,
+        "width_mm": 66.8,
+        "zones": 15
+      },
+      "origin_commit": "7d95292262b42767bbeefebadb6bafe055923d50",
+      "origin_repo": "bentwire/USB-C-FUSB302-PI",
+      "sha256": {
+        "LICENSE": "e3bd2123ddfedf44c2b4078b86e3d6c5be483f3675612bfc6076bbacc03077c8",
+        "SOURCE.json": "a88f377b64447fea43f1ae03764ba83f059fa1f392dcd7c5589eca9f841d6fb7",
+        "board.kicad_dru": "782a7547b2aa69dde9a558b21f4da2c91e70b8a2eb110698f8b63c5bdcd95034",
+        "board.kicad_pcb": "2f3b4a62d4034342854fe1ac1c47c62f289756875668acf0320e72ff7868241d",
+        "board.kicad_pro": "76192f5fc1b8b1734a426155e2f924fdd9107eae3e57e3dafbd16cc99ccaeda9"
+      },
+      "source": {
+        "changes": "board.* are unmodified copies, renamed. unrouted.kicad_pcb is board.kicad_pcb with tracks, vias and zone fills removed.",
+        "commit": "7d95292262b42767bbeefebadb6bafe055923d50",
+        "extras": [
+          "USB-C-FUSB302-PI.kicad_pro",
+          "USB-C-FUSB302-PI.kicad_dru"
+        ],
+        "licence": "MIT",
+        "licence_file": "LICENSE",
+        "path": "USB-C-FUSB302-PI.kicad_pcb",
+        "repo": "bentwire/USB-C-FUSB302-PI",
+        "stars": 12,
+        "url": "https://github.com/bentwire/USB-C-FUSB302-PI/blob/7d95292262b42767bbeefebadb6bafe055923d50/USB-C-FUSB302-PI.kicad_pcb"
+      }
+    },
+    {
+      "id": "valletw__esp-atx-power__esp-atx-power",
+      "metadata": {
+        "bare_drv": 0,
+        "commit": "aa33f61b839b2c357b7aa94e3c55a752e198a9f3",
+        "connections": 86,
+        "copper_layers": 4,
+        "footprints": 55,
+        "height_mm": 25.3,
+        "id": "valletw__esp-atx-power__esp-atx-power",
+        "licence": "MIT",
+        "pads": 199,
+        "parts": 51,
+        "path": "kicad/esp-atx-power.kicad_pcb",
+        "ref_drv": 0,
+        "ref_open": 0,
+        "repo": "valletw/esp-atx-power",
+        "segments": 413,
+        "stars": 28,
+        "vias": 303,
+        "width_mm": 76.8,
+        "zones": 4
+      },
+      "origin_commit": "aa33f61b839b2c357b7aa94e3c55a752e198a9f3",
+      "origin_repo": "valletw/esp-atx-power",
+      "sha256": {
+        "LICENSE": "8c781e6a6e44a70e202786aca86bf484ff7b0502a43ef8c5f629e9af4c8f1c2f",
+        "SOURCE.json": "7386fc4205e961353dc45bdb91733dbebb5ea9ad081ade3875d7f049c6c53555",
+        "board.kicad_pcb": "ff0d6ae46ad1edcfc08014e833c9067e9f13bdce53e386c58ab23c06081fbf35",
+        "board.kicad_pro": "4584b8b1d3c0e66db19fc99d9b32cb32c0ddac62cc25dc5bf40c11d42f4e278e"
+      },
+      "source": {
+        "changes": "board.* are unmodified copies, renamed. unrouted.kicad_pcb is board.kicad_pcb with tracks, vias and zone fills removed.",
+        "commit": "aa33f61b839b2c357b7aa94e3c55a752e198a9f3",
+        "extras": [
+          "kicad/esp-atx-power.kicad_pro"
+        ],
+        "licence": "MIT",
+        "licence_file": "LICENSE",
+        "path": "kicad/esp-atx-power.kicad_pcb",
+        "repo": "valletw/esp-atx-power",
+        "stars": 28,
+        "url": "https://github.com/valletw/esp-atx-power/blob/aa33f61b839b2c357b7aa94e3c55a752e198a9f3/kicad/esp-atx-power.kicad_pcb"
+      }
+    },
+    {
+      "id": "caffeinated-labs__Caffeinated-AFTONSPARV__Caffeinated-AFTONSPARV",
+      "metadata": {
+        "bare_drv": 0,
+        "commit": "d154757c2b817662bcc6fe4e06032a28d3a08222",
+        "connections": 47,
+        "copper_layers": 4,
+        "footprints": 37,
+        "height_mm": 16.2,
+        "id": "caffeinated-labs__Caffeinated-AFTONSPARV__Caffeinated-AFTONSPARV",
+        "licence": "CERN-OHL-S-2.0",
+        "pads": 146,
+        "parts": 35,
+        "path": "Caffeinated-AFTONSPARV.kicad_pcb",
+        "ref_drv": 0,
+        "ref_open": 0,
+        "repo": "caffeinated-labs/Caffeinated-AFTONSPARV",
+        "segments": 207,
+        "stars": 14,
+        "vias": 66,
+        "width_mm": 42.6,
+        "zones": 6
+      },
+      "origin_commit": "d154757c2b817662bcc6fe4e06032a28d3a08222",
+      "origin_repo": "caffeinated-labs/Caffeinated-AFTONSPARV",
+      "sha256": {
+        "LICENSE": "253ad3f89603e728abfa60c36fbcaf8225cf55c1eab12725f19fb3d74d647f3a",
+        "SOURCE.json": "c7abb5d85d196449945e355bd7f6a9c745e9990f2f599a5352d81a364e475d06",
+        "board.kicad_pcb": "e648cc8d036df09ea32fcf3b94096620d109567d7aacd8bf48fe2c278b1f18ce",
+        "board.kicad_pro": "036dc7972e2b320838362110a0c5e2db9df92b9c5014f5b804c9e29d97540856"
+      },
+      "source": {
+        "changes": "board.* are unmodified copies, renamed. unrouted.kicad_pcb is board.kicad_pcb with tracks, vias and zone fills removed.",
+        "commit": "d154757c2b817662bcc6fe4e06032a28d3a08222",
+        "extras": [
+          "Caffeinated-AFTONSPARV.kicad_pro"
+        ],
+        "licence": "CERN-OHL-S-2.0",
+        "licence_file": "LICENSE",
+        "path": "Caffeinated-AFTONSPARV.kicad_pcb",
+        "repo": "caffeinated-labs/Caffeinated-AFTONSPARV",
+        "stars": 14,
+        "url": "https://github.com/caffeinated-labs/Caffeinated-AFTONSPARV/blob/d154757c2b817662bcc6fe4e06032a28d3a08222/Caffeinated-AFTONSPARV.kicad_pcb"
+      }
+    }
+  ],
+  "corpus_git_commit": "1e999b4eefd5fdfcc90dc376d2882390245a8e0d",
+  "corpus_manifest_sha256": "8b27eb404ec917cc7142e488fd0168ae99935c6320984957cd2462ee15a69758",
+  "method": "first 3 SHA256-seeded metadata-only eligible boards per layer, 2-layer and 4-layer; mutually distinct source repos; excludes all original training repos; 0 initial DRC errors and 0 open pads; <=360 pads, <=700 segments",
+  "no_physical_tests": true,
+  "prior_training_cohort_sha256": "e9b149f5d0c760d10ba3db78938dc22aaf5d056167b1b8c12de636847be94a1b",
+  "schema": "hs.posttuning_electrical_holdout.v1",
+  "selection_locked_before_electrical_invocation": true,
+  "selection_seed": "hs-post-tuning-20261120-independent-v1"
+}
