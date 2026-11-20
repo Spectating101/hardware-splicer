@@ -137,6 +137,8 @@ describe("App URL routing", () => {
     render(<App />);
     expect(await screen.findByRole("heading", { name: "Project not found" })).toBeInTheDocument();
     expect(screen.getByText("no-such-project", { selector: "code" })).toBeInTheDocument();
+    // Nothing is open, so the sidebar does not claim a project is being resumed.
+    expect(screen.getByTestId("nav-project")).not.toHaveClass("active");
     expect(screen.queryByTestId("project-bench")).toBeNull();
     await userEvent.click(screen.getByRole("button", { name: "Back to projects" }));
     expect(await screen.findByRole("heading", { name: "Saved projects" })).toBeInTheDocument();

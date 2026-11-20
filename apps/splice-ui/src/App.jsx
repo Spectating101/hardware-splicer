@@ -410,9 +410,9 @@ export default function App() {
     return () => controller.abort();
   }, [view, route.sceneId, fullScene?.projectId]);
 
-  const revisionRoute = useCallback((revision) => {
+  const revisionRoute = useCallback((revision, { replace = false } = {}) => {
     if (!route.projectId) return;
-    navigate({ view: VIEWS.workspace, projectId: route.projectId, revision: revision ?? null });
+    navigate({ view: VIEWS.workspace, projectId: route.projectId, revision: revision ?? null }, { replace });
   }, [navigate, route.projectId]);
 
   const resumeProject = () => {
@@ -598,7 +598,7 @@ export default function App() {
           >
             Projects
           </button>
-          {canResume && <button type="button" className={`nav-button ${inWorkspace ? "active" : ""}`}
+          {canResume && <button type="button" className={`nav-button ${inWorkspace && !routeBlocked ? "active" : ""}`}
             data-testid="nav-project" onClick={resumeProject} disabled={!health?.ok}>Resume project</button>}
           <button type="button" className={`nav-button ${[VIEWS.library, VIEWS.sortcell, VIEWS.reference, VIEWS.showcase].includes(view) ? "active" : ""}`}
             data-testid="nav-library" onClick={openLibrary}>Design library</button>
@@ -749,7 +749,7 @@ export default function App() {
           {view === VIEWS.sortcell && <SortingWorkcell />}
           {view === VIEWS.fielddeck && fullScene?.projectId === route.sceneId && (
             <Suspense fallback={null}><FieldDeckScene projectId={fullScene.projectId} manifest={fullScene.manifest}
-              onExit={exitScene} /></Suspense>
+              onExit={exitScene} exitLabel={canGoBackInApp() ? "Back to the previous page" : "Back to projects"} /></Suspense>
           )}
           {view === VIEWS.fielddeck && fullScene?.projectId !== route.sceneId && (sceneError
             ? <RouteMessage title={sceneError.status === 404 ? "Scene not found" : "Scene could not be opened"}
