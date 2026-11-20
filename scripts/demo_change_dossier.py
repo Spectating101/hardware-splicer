@@ -75,6 +75,12 @@ def run(command, *, allowed=(0,), env=None, timeout=300):
     return done
 
 
+def _commit(path: Path) -> str:
+    """The checkout's commit, or "unknown" for a tree without git metadata."""
+    done = subprocess.run(["git", "-C", str(path), "rev-parse", "HEAD"], text=True, capture_output=True, check=False)
+    return done.stdout.strip() if done.returncode == 0 else "unknown"
+
+
 def write_exchange(path: Path, value) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("xb") as handle:
@@ -145,9 +151,7 @@ def main(argv=None):
 
 def _chain(log, policy_lab, cite_root, policy, work, exchange, args):
     problems, negatives = [], {}
-    sources = {"hs_commit": run(["git", "-C", str(ROOT), "rev-parse", "HEAD"]).stdout.strip(),
-               "policy_lab_commit": run(["git", "-C", str(policy_lab), "rev-parse", "HEAD"]).stdout.strip(),
-               "cite_commit": run(["git", "-C", str(cite_root), "rev-parse", "HEAD"]).stdout.strip(),
+    sources = {"hs_commit": _commit(ROOT), "policy_lab_commit": _commit(policy_lab), "cite_commit": _commit(cite_root),
                "policy_file": str(policy.relative_to(policy_lab)), "policy_sha256": sha(policy.read_bytes()),
                "node": run(["node", "--version"]).stdout.strip()}
     run_mjs = policy_lab / "applications/hardware-policy/run.mjs"
@@ -194,8 +198,10 @@ def _chain(log, policy_lab, cite_root, policy, work, exchange, args):
             log(f"  NEGATIVE stale r1 feedback refused by HS: {exc}")
 
         log("4. HS: package the change evidence and the current revision head")
-        files = {"base_export": base_export, "base_review": base_review, "proposal": proposal_path,
-                 "candidate_export": candidate_export, "candidate_review": candidate_review}
+        files = {"base_export": base_export, "base_review": base_review,
+                 "base_review_replay": base_review.parent / "replay.json", "proposal": proposal_path,
+                 "candidate_export": candidate_export, "candidate_review": candidate_review,
+                 "candidate_review_replay": candidate_review.parent / "replay.json"}
         packet = build_change_evidence(engine.projects, project, base_revision=1, candidate_revision=2,
                                        root=exchange, files=files)
         packet_receipt = write_change_evidence(exchange / "change-evidence.json", packet)
@@ -283,12 +289,17 @@ def _chain(log, policy_lab, cite_root, policy, work, exchange, args):
         except RevisionConflict as exc:
             negatives["hs_repackage_after_change"] = {"refused": True, "by": "HS change_dossier", "reason": str(exc)}
             log(f"  NEGATIVE HS refuses to repackage r2: {exc}")
-        files3 = {"base_export": candidate_export, "base_review": r2_candidate_review, "proposal": proposal3_path,
-                  "candidate_export": r3_export, "candidate_review": r3_review}
+        files3 = {"base_export": candidate_export, "base_review": r2_candidate_review,
+                  "base_review_replay": r2_candidate_review.parent / "replay.json", "proposal": proposal3_path,
+                  "candidate_export": r3_export, "candidate_review": r3_review,
+                  "candidate_review_replay": r3_review.parent / "replay.json"}
         packet3 = build_change_evidence(engine.projects, project, base_revision=2, candidate_revision=3,
                                         root=exchange, files=files3)
         packet3_receipt = write_change_evidence(exchange / "change-evidence-r3.json", packet3)
-        [outcome] = [row["native_outcome"] for row in packet3["proposal"]["candidate_design_changes"]]
+        outcomes = {row["id"]: row["native_outcome"] for row in packet3["proposal"]["candidate_design_changes"]}
+        if CANDIDATE_ID not in outcomes:
+            raise ChainError(f"the revision-3 packet does not carry candidate {CANDIDATE_ID}")
+        outcome = outcomes[CANDIDATE_ID]
         log(f"  change-evidence-r3.json sha256 {packet3_receipt['sha256']}")
         log(f"  NATIVE OUTCOME {outcome['fact']} = {outcome['native_value']} {outcome['unit']} "
             f"(required {outcome['operator']} {outcome['required']}): met={outcome['met']}")
