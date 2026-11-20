@@ -20,7 +20,6 @@ import DetailedAssemblyReference from "./components/DetailedAssemblyReference.js
 import SortingWorkcell from "./components/SortingWorkcell.jsx";
 import InterfaceLabPanel from "./components/InterfaceLabPanel.jsx";
 import NewProject from "./projectSession/NewProject.jsx";
-import { StatusPill } from "./components/ProjectPanels.jsx";
 import { useSpliceJob } from "./hooks/useSpliceJob.js";
 import { ADVANCED_VIEWS, VIEWS, isAdvancedView } from "./nav.js";
 import ProjectWorkspace from "./projectSession/ProjectWorkspace.jsx";
@@ -516,7 +515,13 @@ export default function App() {
 
         <div className="sidebar-section">
           <div className="sidebar-label">Engine</div>
-          <StatusPill ok={health?.ok} label={health?.ok ? "Online" : "Offline"} />
+          {/* Reachability only: a connected engine says nothing about any project's readiness, so it stays neutral. */}
+          <span
+            className={`status-pill ${health?.ok || (!health && !loadError) ? "neutral" : "warn"}`}
+            data-testid="engine-status"
+          >
+            {health?.ok ? "Connected" : !health && !loadError ? "Checking…" : "Not reachable"}
+          </span>
           {loadError && (
             <button type="button" className="link-button small" onClick={loadBootstrap}>
               Retry connection

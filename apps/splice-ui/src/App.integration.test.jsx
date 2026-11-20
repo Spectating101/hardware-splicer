@@ -117,6 +117,14 @@ describe("App navigation integration", () => {
       String(url).endsWith("/snapshot") && options?.method === "PUT")).toBe(true), { timeout: 2000 });
   });
 
+  it("reports engine reachability in neutral terms, never as an approval colour", async () => {
+    render(<App />);
+    const status = screen.getByTestId("engine-status");
+    await waitFor(() => expect(status).toHaveTextContent("Connected"));
+    expect(status).toHaveClass("neutral");
+    expect(status).not.toHaveClass("ok");
+  });
+
   it("opens on Projects and keeps the reference viewers in the design library", async () => {
     render(<App />);
     expect(screen.getByRole("heading", { name: "Projects" })).toBeInTheDocument();

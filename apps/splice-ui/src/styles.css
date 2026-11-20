@@ -256,6 +256,12 @@ code,
   color: #0b6e4f;
 }
 
+.status-pill.neutral {
+  background: var(--surface-2);
+  color: var(--muted);
+  border: 1px solid var(--line);
+}
+
 .status-pill.warn {
   background: #fde8e6;
   color: var(--danger);
