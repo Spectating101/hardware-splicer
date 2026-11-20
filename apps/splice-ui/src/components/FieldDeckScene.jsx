@@ -108,7 +108,7 @@ function Inspector({ row, index, questions, open, compare, meshStats, footprint,
     panel.scrollTop = 0;
     const update = () => {
       const overflowing = panel.scrollHeight - panel.scrollTop > panel.clientHeight + 1;
-      const bottom = panel.getBoundingClientRect().bottom - 24;
+      const { bottom } = panel.getBoundingClientRect();
       if (!overflowing) {
         setMore(0);
         return;
@@ -201,7 +201,7 @@ function PartTree({ rows, view, questions, counts, blockersOnly, endpoints, link
       const rect = active.getBoundingClientRect();
       const bounds = panel.getBoundingClientRect();
       if (rect.top < bounds.top) panel.scrollTop -= bounds.top - rect.top;
-      if (rect.bottom > bounds.bottom - 24) panel.scrollTop += rect.bottom - bounds.bottom + 24;
+      if (rect.bottom > bounds.bottom) panel.scrollTop += rect.bottom - bounds.bottom;
     }
     const update = () => {
       const { top, bottom } = panel.getBoundingClientRect();
@@ -209,7 +209,7 @@ function PartTree({ rows, view, questions, counts, blockersOnly, endpoints, link
         .filter((item) => item.getClientRects().length)
         .map((item) => item.getBoundingClientRect());
       setMore(panel.scrollHeight <= panel.clientHeight + 1 ? 0
-        : countClippedItems(items, { top, bottom: bottom - 24 }));
+        : countClippedItems(items, { top, bottom }));
     };
     update();
     panel.addEventListener("scroll", update);
