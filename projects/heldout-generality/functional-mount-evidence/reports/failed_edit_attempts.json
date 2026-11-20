@@ -1,0 +1,92 @@
+{
+  "schema": "hs.functional_attempts_negative_results.v1",
+  "failures": [
+    {
+      "task": "add_new_copper_testpoint_and_trace",
+      "source": "rniwase",
+      "candidates_tried": 60,
+      "zero_error_candidates": 0,
+      "min_native_drc_errors": 3,
+      "examples": [
+        {
+          "trial": 1,
+          "finding_types": {
+            "clearance": 2,
+            "hole_clearance": 1,
+            "shorting_items": 1,
+            "solder_mask_bridge": 2,
+            "tracks_crossing": 2
+          }
+        },
+        {
+          "trial": 2,
+          "finding_types": {
+            "clearance": 2,
+            "shorting_items": 1,
+            "solder_mask_bridge": 1,
+            "tracks_crossing": 2
+          }
+        },
+        {
+          "trial": 3,
+          "finding_types": {
+            "clearance": 2,
+            "hole_clearance": 1,
+            "shorting_items": 3,
+            "solder_mask_bridge": 2
+          }
+        }
+      ],
+      "result": "BLOCKED"
+    },
+    {
+      "task": "add_new_copper_testpoint_and_trace",
+      "source": "protolux",
+      "candidates_tried": 65,
+      "zero_error_candidates": 0,
+      "min_native_drc_errors": 3,
+      "examples": [
+        {
+          "trial": 1,
+          "finding_types": {
+            "clearance": 2,
+            "courtyards_overlap": 1,
+            "solder_mask_bridge": 1
+          }
+        },
+        {
+          "trial": 2,
+          "finding_types": {
+            "clearance": 2,
+            "solder_mask_bridge": 1
+          }
+        },
+        {
+          "trial": 3,
+          "finding_types": {
+            "clearance": 3,
+            "solder_mask_bridge": 1
+          }
+        }
+      ],
+      "result": "BLOCKED"
+    },
+    {
+      "task": "enlarge_existing_2layer_testpoint",
+      "source": "rniwase",
+      "candidates_tried": 18,
+      "zero_error_candidates": 0,
+      "min_native_drc_errors": 1,
+      "result": "BLOCKED"
+    },
+    {
+      "task": "add_new_2layer_M2_mount_hole",
+      "source": "rniwase",
+      "candidates_tried": 100,
+      "zero_error_candidates": 0,
+      "min_native_drc_errors": 3,
+      "result": "BLOCKED"
+    }
+  ],
+  "physical_test_performed": false
+}

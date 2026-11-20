@@ -1,0 +1,27 @@
+{
+  "blocked_source_ids": [
+    "dnlbauer__corax-keyboard__keyboard_5db1e9",
+    "rniwase__sdtv2csi__sdtv2csi",
+    "justbuchanan__oasis__pcb"
+  ],
+  "cohort_lock_sha256": "e9b149f5d0c760d10ba3db78938dc22aaf5d056167b1b8c12de636847be94a1b",
+  "corpus_revision": "1e999b4eefd5fdfcc90dc376d2882390245a8e0d",
+  "exact_semantic_replay": true,
+  "explicitly_blocked_unsupported": 3,
+  "fabrication_authorized": false,
+  "general_board_editing_proven": false,
+  "originally_clean_cases_attempted": 4,
+  "pilot_pass": true,
+  "real_hardware_measurement": "NOT_PERFORMED",
+  "rounds": 2,
+  "schema": "hs.heldout_functional_mount_study.v1",
+  "semantic_round_hashes": [
+    "758bda9b945f6f49a53547a3764bfa24c190fad3e583336f65c1700ef31bd3b0",
+    "758bda9b945f6f49a53547a3764bfa24c190fad3e583336f65c1700ef31bd3b0"
+  ],
+  "source_footprint_library_mismatch_hold": true,
+  "successful_source_ids": [
+    "protolux-electronics__trellis_core__trellis_core"
+  ],
+  "successful_source_to_verified_STEP": 1
+}

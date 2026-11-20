@@ -1,0 +1,31 @@
+{
+  "electrical_powered_measurement": "NOT_PERFORMED",
+  "fabrication_authorized": false,
+  "guide_clearance_mm": 3.45,
+  "mechanical_contact_or_fit_measurement": "NOT_PERFORMED",
+  "negative_controls": {
+    "fabrication_promotion": {
+      "reason": "FALSE_FABRICATION_AUTHORITY",
+      "rejected": true
+    },
+    "shifted_reported_hole": {
+      "reason": "CLAIMED_MODEL_HOLES_DO_NOT_MATCH_NATIVE_SOURCE",
+      "rejected": true
+    },
+    "wrong_pcb_revision": {
+      "reason": "REVISED_PCB_REVISION_MISMATCH",
+      "rejected": true
+    }
+  },
+  "original_pcb_sha256": "3c640f77fb7e53b45115bb746899b73bd673e92b3919ef3056e4a0f0ba4f994d",
+  "reopened_source_mapped_holes": 4,
+  "revised_pcb_sha256": "f80212680c43319b987b3a0a5ab8332612eec2bf4361f2f5e0ba4a309b3939f3",
+  "schema": "hs.heldout_mount_step_independent_audit.v1",
+  "source_dimension_mm": [
+    50.0,
+    50.0
+  ],
+  "source_drill_mm": 3.2,
+  "source_footprint_library_alignment": "REVIEW_HOLD",
+  "status": "PASS"
+}

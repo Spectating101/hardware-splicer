@@ -1,0 +1,83 @@
+{
+  "edit_kind": "ALL_FOUR_MOUNTING_DRILLS_M2.5_TO_M3_CANDIDATE",
+  "edited_sha256": "f80212680c43319b987b3a0a5ab8332612eec2bf4361f2f5e0ba4a309b3939f3",
+  "fabrication_authorized": false,
+  "footprint_library_mismatch": "REVIEW_HOLD:old M2.5 library identity retained while pad bore revised",
+  "mechanical_fastener_head_and_keepouts": "UNVERIFIED",
+  "native_drc_error_count": 0,
+  "native_drc_unconnected": 0,
+  "native_drc_warning_count": 97,
+  "native_drc_warning_types": {
+    "lib_footprint_issues": 1,
+    "lib_footprint_mismatch": 10,
+    "silk_over_copper": 1,
+    "text_height": 84,
+    "via_dangling": 1
+  },
+  "original_copper_count": 620,
+  "original_holes": [
+    {
+      "drill": 2.7,
+      "ref": "H1",
+      "x": 52.99999,
+      "y": 53.0
+    },
+    {
+      "drill": 2.7,
+      "ref": "H2",
+      "x": 52.99999,
+      "y": 97.0
+    },
+    {
+      "drill": 2.7,
+      "ref": "H3",
+      "x": 96.99999,
+      "y": 53.0
+    },
+    {
+      "drill": 2.7,
+      "ref": "H4",
+      "x": 96.99999,
+      "y": 97.0
+    }
+  ],
+  "original_pad_count": 342,
+  "outline": {
+    "height": 50.0,
+    "radius": 3.0,
+    "width": 50.0,
+    "x": 49.99999,
+    "y": 50.0
+  },
+  "physical_fit": "UNVERIFIED",
+  "revised_copper_count": 620,
+  "revised_holes": [
+    {
+      "drill": 3.2,
+      "ref": "H1",
+      "x": 52.99999,
+      "y": 53.0
+    },
+    {
+      "drill": 3.2,
+      "ref": "H2",
+      "x": 52.99999,
+      "y": 97.0
+    },
+    {
+      "drill": 3.2,
+      "ref": "H3",
+      "x": 96.99999,
+      "y": 53.0
+    },
+    {
+      "drill": 3.2,
+      "ref": "H4",
+      "x": 96.99999,
+      "y": 97.0
+    }
+  ],
+  "revised_pad_count": 342,
+  "schema": "hs.heldout_mechanical_edit.v1",
+  "source_sha256": "3c640f77fb7e53b45115bb746899b73bd673e92b3919ef3056e4a0f0ba4f994d"
+}

@@ -1,0 +1,99 @@
+{
+  "STEP_validated_against_source_coordinates": false,
+  "artifacts_sha256": {
+    "candidate-bom.csv": "138c75f2612da9f7f9e60173ca31e1309c0b371e82f441de971dcae0c0a7d9a3",
+    "exploded-UNASSEMBLED.step": "ea972ba4c667be7b6973f855241908f3a942bf5c276c757e27db18b63f3aa965",
+    "fixture-carrier.step": "9d2ba9f56f0fd6c6a950022d1d4caf7d53f757d629597dc3bca01cc8a11f312b",
+    "fixture-carrier.stl": "4cbfde71a6bae0ba5ffeeecc42c7e5e39402c1222b4fb2c7d8b9be83b73164a4",
+    "hole-inspection-template.step": "4a34edd2dea2f6cfeb2a020efe3bc29b3e9dd22f0af8bab2f7e2fa48b9aeb520",
+    "hole-inspection-template.stl": "8154ed05d7eb0dbb4bb3ba5379064f95ed37309f5dc9c1e96da28f008e5f15d5",
+    "hole-map.csv": "c8d82779a2432df3d461034e82010285b277a751888bb8bea712180354fc92c5",
+    "nominal-unpopulated-board.step": "6c2cd9e39170aa3b49ae074816321c638803e659fe61219d4e3036bce2abc9af"
+  },
+  "fabrication_authorized": false,
+  "model_hole_centres_mm": [
+    [
+      -22.0,
+      22.0
+    ],
+    [
+      -22.0,
+      -22.0
+    ],
+    [
+      22.0,
+      22.0
+    ],
+    [
+      22.0,
+      -22.0
+    ]
+  ],
+  "modified_holes": [
+    {
+      "drill": 3.2,
+      "ref": "H1",
+      "x": 52.99999,
+      "y": 53.0
+    },
+    {
+      "drill": 3.2,
+      "ref": "H2",
+      "x": 52.99999,
+      "y": 97.0
+    },
+    {
+      "drill": 3.2,
+      "ref": "H3",
+      "x": 96.99999,
+      "y": 53.0
+    },
+    {
+      "drill": 3.2,
+      "ref": "H4",
+      "x": 96.99999,
+      "y": 97.0
+    }
+  ],
+  "nominal_board_thickness_mm": 1.6,
+  "nominal_clearance_diameter_mm": 3.45,
+  "original_holes": [
+    {
+      "drill": 2.7,
+      "ref": "H1",
+      "x": 52.99999,
+      "y": 53.0
+    },
+    {
+      "drill": 2.7,
+      "ref": "H2",
+      "x": 52.99999,
+      "y": 97.0
+    },
+    {
+      "drill": 2.7,
+      "ref": "H3",
+      "x": 96.99999,
+      "y": 53.0
+    },
+    {
+      "drill": 2.7,
+      "ref": "H4",
+      "x": 96.99999,
+      "y": 97.0
+    }
+  ],
+  "physical_status": "UNBUILT_UNMEASURED",
+  "schema": "hs.heldout_mount_fixture_design.v1",
+  "source_library_footprints_not_updated": true,
+  "source_modified_sha256": "f80212680c43319b987b3a0a5ab8332612eec2bf4361f2f5e0ba4a309b3939f3",
+  "source_original_sha256": "3c640f77fb7e53b45115bb746899b73bd673e92b3919ef3056e4a0f0ba4f994d",
+  "source_outline": {
+    "height": 50.0,
+    "radius": 3.0,
+    "width": 50.0,
+    "x": 49.99999,
+    "y": 50.0
+  },
+  "source_to_step_independent_audit": "PENDING"
+}

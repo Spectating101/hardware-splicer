@@ -1,0 +1,5 @@
+source_hole_ref,source_x_mm,source_y_mm,model_x_mm,model_y_mm,source_drill_mm,template_dia_mm,physical_fit_validated
+H1,52.99999,53.0,-22.0,22.0,3.2,3.45,NO
+H2,52.99999,97.0,-22.0,-22.0,3.2,3.45,NO
+H3,96.99999,53.0,22.0,22.0,3.2,3.45,NO
+H4,96.99999,97.0,22.0,-22.0,3.2,3.45,NO
