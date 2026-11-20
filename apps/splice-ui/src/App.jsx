@@ -126,7 +126,7 @@ function SceneManifests({ onOpenScene }) {
     try { onOpenScene({ projectId, manifest: await fetchSceneManifest(projectId) }); }
     catch (cause) { setError(cause.message); }
   }
-  return <section className="card" data-testid="advanced-scenes"><h2>Scene manifests</h2>
+  return <section className="advanced-scenes" data-testid="advanced-scenes"><h2>Scene manifests</h2>
     {error && <p role="status">Scenes: unknown. {error}</p>}
     {scenes && !scenes.length && <p className="muted">No scene manifests found.</p>}
     {scenes?.length > 0 && <ul className="scene-manifest-list">{scenes.map((row) => <li key={row.project_id}>
