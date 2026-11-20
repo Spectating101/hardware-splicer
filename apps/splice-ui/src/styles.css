@@ -24,6 +24,23 @@ body {
   color: var(--text);
 }
 
+p,
+li,
+dd,
+figcaption,
+caption {
+  text-wrap: pretty;
+}
+
+h1,
+h2,
+h3,
+h4,
+legend,
+summary {
+  text-wrap: balance;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
