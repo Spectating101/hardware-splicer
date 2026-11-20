@@ -76,7 +76,9 @@ Those are **numerical model outputs**, not measurements. The *independently writ
 6. **Operator-controlled bench steps:** after review, work from supply OFF, verify connectivity and shunt polarity with suitable instruments, begin with a tightly current-limited low-voltage bring-up, then run predefined steady-current profiles; watch for unexpected heat/current and shut down manually on faults. No remotely commanded energization was implemented here.
 7. **Independent repeat:** second operator repeats three independently timed capture intervals, reference compares, and records blind/negative-control cases. A correct result or a recorded disagreement can be a valid outcome, but physical data cannot be replaced with synthetic data.
 
-**Nothing in the software reports closes these gates.** The v0 board is not a ready-to-order product and absolutely must not be extrapolated to the old 24 V / 120 W station. Any higher-power revision requires new part selection, current-carrying design and separate review.
+**Nothing in the software reports closes these gates.**
+
+**Independent readiness audit (20 Nov):** [INDEPENDENT_READINESS_AUDIT_20261120.md](INDEPENDENT_READINESS_AUDIT_20261120.md) records an additional 2.5 W / 5.25 V specification mismatch, source-dated reference-instrument requirements, and seven controlled fault-injection intake cases. It includes a fail-if-held release gate. This is a new independent review, not authorization to construct or power hardware. The v0 board is not a ready-to-order product and absolutely must not be extrapolated to the old 24 V / 120 W station. Any higher-power revision requires new part selection, current-carrying design and separate review.
 
 ## Vendor leads and caveats
 
