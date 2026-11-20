@@ -191,6 +191,85 @@ CHECK_REQUIREMENTS = {
             'high_keyboard_supply_limit': (),
         },
     },
+    'fielddeck-7': {
+        # study_contract.calculate builds every check; engineering.py feeds it
+        # requirements.json, and author_cad.py derives the geometry report from
+        # design.json alone. The light and stress scenarios take keyboard_current_a,
+        # the work scenario also pi_work_current_a; the high-power keyboard scenario
+        # uses fixed design currents. The supply limit, USB limit and post stress
+        # come from design.json, never from a requirement.
+        'evaluator_sha256': {
+            'study_contract.py': '69d141f403e5399a63a6a0743545b741e5b79eae1deb0b4f0038f89a55504b9f',
+            'engineering.py': '1e8924b81567366ca692cebcec2061c38721c3829f230cabe864c96aa9983de5',
+            'author_cad.py': '000480690a347006001ba026098183597caf6275860a24c69dd06c8cc7e4119c',
+        },
+        'checks': {
+            'work_runtime': ('minimum_work_runtime_h', 'pi_work_current_a', 'keyboard_current_a'),
+            'supply_current_margin': ('minimum_supply_margin_a', 'pi_work_current_a', 'keyboard_current_a'),
+            'sensitivity_supply_limit': ('pi_work_current_a', 'keyboard_current_a'),
+            'usb_current_limit': ('keyboard_current_a',),
+            'case_width': ('maximum_case_width_mm',),
+            'case_depth': ('maximum_case_depth_mm',),
+            'case_height': ('maximum_case_height_mm',),
+            'print_bed_x': ('printer_bed_x_mm',),
+            'print_bed_y': ('printer_bed_y_mm',),
+            'display_post_bending': (),
+        },
+    },
+    'ender3-penplotter': {
+        # build.py writes the geometry checks; simulate.py appends the motion_*
+        # checks from G-code it generates and replays. The pen bore and envelope take
+        # pen_diameter_mm, so donor_interference keeps it. XY positions take only the
+        # drawing size; Z positions and the travel/lift checks take pen_lift_mm.
+        # Mount pitch, bolt engagement, beam proxy, T-nut fit and fixture clearance
+        # are fixed numbers or retained vendor geometry.
+        'evaluator_sha256': {
+            'scripts/common.py': '753dcc16b79181e21aa05a4c13c305da6c7451015a861911214330d753b75614',
+            'scripts/build.py': '4f874a06cc7c9417104fb2c1ba5da18102da647f89b0deb77511bbac44a9e96d',
+            'scripts/simulate.py': 'bdf37e739f3f3c01636bb994e4a6e7fbc789ffae80b56227bf10293a30a90783',
+        },
+        'checks': {
+            'manufacturer_mount_pitch': (),
+            'donor_interference': ('pen_diameter_mm',),
+            'bolt_engagement': (),
+            'beam_proxy': (),
+            'bed_limited_drawing_width': ('drawing_width_mm',),
+            'bed_limited_drawing_height': ('drawing_height_mm',),
+            'parking_tnut_profile_fit': (),
+            'parking_hotend_clearance': ('pen_lift_mm',),
+            'motion_pen_tip_on_bed': ('drawing_width_mm', 'drawing_height_mm'),
+            'motion_fixture_vertical_clearance': (),
+            'motion_controller_travel': ('drawing_width_mm', 'drawing_height_mm'),
+            'motion_pen_up_travel': ('drawing_width_mm', 'drawing_height_mm', 'pen_lift_mm'),
+            'motion_pen_lift_clearance': ('pen_lift_mm',),
+            'motion_Z_travel': ('pen_lift_mm',),
+        },
+    },
+    DEFAULT_CASE: {
+        # study_requirements.constraints reads max_mass_g and the model mass;
+        # hs3g_model adds payload_mass_g to mass and inertia. configure() scales
+        # the gust by gust_scale, and hs3g_sim never reads max_mass_g, so every
+        # flight scenario check (named by digital_project.summarize) reads payload
+        # and gust only. simulation.json fixes the scenarios and gust window.
+        'evaluator_sha256': {
+            'study_requirements.py': 'a002f285c2d4f251b9eaf5e575d01958240a1535e3ed509e3882209304200da2',
+            'hs3g_model.py': 'd2794ccf6fa02698ae3d9c9f5a1c5064585ebc0cae4d562eeae9af03c1fd1b08',
+            'hs3g_sim.py': '8dc63892f8681daf5aa05f1db4d43e9842f2db276fa792f4f9ce883f61f1a874',
+            'build_digital.py': 'bf456e0a8dd2f3673777f6b03c86e475b5683d3ea256ad5690b47ff611556bdf',
+            'simulation.json': '375a6850ab092febad3a95b6c62858c5f3dafbe227c719eb4fc3ff41cb56c340',
+        },
+        'checks': {
+            'nominal_mass': ('max_mass_g', 'payload_mass_g'),
+            'mass_uncertainty': ('max_mass_g', 'payload_mass_g'),
+            'inertia_approximation': ('payload_mass_g',),
+            **{f'{scenario}_{key}': ('gust_scale', 'payload_mass_g')
+               for scenario in ('nominal', 'mass_plus_5g')
+               for key in ('tracking_rms_m', 'hover_error_m', 'gust_recovery_error_m', 'max_tracking_tilt_deg',
+                           'landing_speed_m_s', 'yaw_tracking', 'controlled_ground_contact')},
+            **{'motor_failure_' + key: ('gust_scale', 'payload_mass_g')
+               for key in ('injected_motor_stopped', 'loss_of_control_observed', 'failure_reached_ground')},
+        },
+    },
 }
 
 
