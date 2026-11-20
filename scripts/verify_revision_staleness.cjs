@@ -5,8 +5,10 @@
  * Run scripts/demo_revision_staleness.py against the same served app first; it leaves a
  * Fielddeck 5 study whose latest revision changed the runtime target. This walk opens that
  * study's bench and requires, from backend data only:
- *   - the changed requirement and a "stale · from revision N" row for the affected check;
- *   - the rerun failure kept under "Failing in revision N+1";
+ *   - the changed requirement, and each invalidated check shown once: a check that now fails
+ *     appears under "Failing in revision N+1" with its revision N result folded into a collapsed
+ *     "Historical · invalidated by …" row; any other invalidated check keeps a "stale" row;
+ *   - a failure caused only by a moved limit reads "Newly fails: requirement …", never "regressed";
  *   - the before/after STUDY.zip pair with hashes;
  *   - no "ready" wording and no physical authorisation.
  *
@@ -52,8 +54,10 @@ async function main() {
   const delta = (await api(`/v1/projects/${encodeURIComponent(projectId)}/engineering/assurance/evidence-delta`, {
     method: "POST", body: JSON.stringify({ base_revision: latest - 1, candidate_revision: latest }),
   })).body.evidence_delta.study_checks;
-  const staleIds = delta.stale_outputs.map((row) => row.metadata.summary);
-  const failingIds = delta.failing_outputs.map((row) => row.summary);
+  const failingIds = delta.failing_outputs.map((row) => row.node_id);
+  const staleOnly = delta.stale_outputs.filter((row) => !failingIds.includes(row.metadata.node_id));
+  const folded = delta.stale_outputs.filter((row) => failingIds.includes(row.metadata.node_id));
+  const limitOnly = folded.filter((row) => row.metadata.actual === row.metadata.rerun?.actual && row.metadata.limit !== row.metadata.rerun?.limit);
 
   const browser = await chromium.launch({ headless: true, args: ["--use-gl=swiftshader", "--enable-unsafe-swiftshader"] });
   const problems = [];
@@ -87,12 +91,21 @@ async function main() {
     const evidence = page.getByTestId("evidence-delta");
     await evidence.waitFor({ timeout: 60000 });
     const text = await evidence.innerText();
-    for (const id of staleIds) {
-      if (!new RegExp(`stale · from revision ${latest - 1}\\s*${id}`).test(text)) problems.push(`no stale row for ${id}`);
+    const staleRows = await evidence.getByTestId("stale-check").count();
+    if (staleRows !== staleOnly.length) problems.push(`expected ${staleOnly.length} stale rows, found ${staleRows}`);
+    const failing = evidence.getByTestId("failing-checks").locator("li");
+    if (await failing.count() !== failingIds.length) problems.push(`expected ${failingIds.length} failing rows, found ${await failing.count()}`);
+    const histories = evidence.getByTestId("check-history");
+    if (await histories.count() !== folded.length) problems.push(`expected ${folded.length} folded history rows, found ${await histories.count()}`);
+    for (let i = 0; i < await histories.count(); i += 1) {
+      const row = histories.nth(i);
+      if (await row.getAttribute("open") !== null) problems.push("a history row is expanded by default");
+      if (!/^Historical · invalidated by .+ · not counted for revision \d+/.test(await row.locator("summary").innerText())) {
+        problems.push("history row summary wording changed");
+      }
     }
-    for (const id of failingIds) {
-      if (!new RegExp(`failed · revision ${latest}\\s*${id}`).test(text)) problems.push(`no failing row for ${id}`);
-    }
+    if (limitOnly.length && !/Newly fails: requirement (increased|lowered|changed)/.test(text)) problems.push("a limit-only failure is not described as a requirement change");
+    if (/regress/i.test(text) && limitOnly.length === folded.length) problems.push("the evidence calls a limit-only change a regression");
     if (!/Package before and after/.test(text)) problems.push("no package pair");
     for (const side of ["before", "after"]) {
       const sha = delta.packages[side]?.sha256;
@@ -123,7 +136,7 @@ async function main() {
   } finally {
     await browser.close();
   }
-  console.log(`project ${projectId} revision ${latest}: stale ${staleIds.join(", ")}; failing ${failingIds.join(", ")}`);
+  console.log(`project ${projectId} revision ${latest}: stale ${staleOnly.length}; failing ${failingIds.join(", ")}; folded ${folded.length}`);
   console.log(shots.map((file) => `captured ${file}`).join("\n"));
   if (problems.length) {
     console.error(`Staleness capture problems (${problems.length}):\n${problems.join("\n")}`);

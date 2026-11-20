@@ -250,7 +250,7 @@ async function main() {
     await openProject(droneId);
     await page.locator("[data-design-state=records]").waitFor({ timeout: 30000 });
     if (await page.locator(".fd-stage, canvas").count()) problems.push("Drone bench drew a 3D stage");
-    await page.getByText("cad_kernel_available", { exact: true }).first().waitFor();
+    await page.getByText("CAD kernel available", { exact: true }).first().waitFor();
     await shot("14-drone-bench-records");
     await page.getByTestId("bench-package").scrollIntoViewIfNeeded();
     await shot("15-drone-package-next-action");
