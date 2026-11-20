@@ -99,6 +99,7 @@
 }
 .fd-header > div { display: flex; align-items: center; gap: 12px; }
 .fd-header h1 { margin: 0; font-size: 15px; font-weight: 600; }
+.fd-fit-unknown { font-weight: 700; }
 .fd-header .fd-exit { background: transparent; border-color: transparent; }
 /* Amber belongs to pins and question numbers; the header reads as text with an amber count. */
 .fd-header .fd-validation { background: transparent; color: #e6e8eb; font-weight: 600; text-align: end; }

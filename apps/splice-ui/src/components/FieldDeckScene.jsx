@@ -247,7 +247,7 @@ function PartTree({ rows, view, questions, counts, blockersOnly, endpoints, link
         {groups.filter(({ kind }) => !blockersOnly || kind === "blocker").map(({ kind, label, items }) => {
           // Blockers count the project total; a filtered view names its own count beside it.
           const count = kind === "blocker"
-            ? total === questions.length ? total : `${total} open · ${questions.length} in ${viewName}`
+            ? total === questions.length ? total : `${total} tracked · ${questions.length} in ${viewName}`
             : counts?.[kind] ?? items.length;
           const collapsed = kind === "unchanged" && !unchangedOpen;
           const shown = collapsed ? items.filter(({ key }) => key === view.selected || endpointFor(key)) : items;
@@ -746,12 +746,15 @@ export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel 
           <button className="fd-validation" type="button" aria-pressed={filtered} aria-controls="fd-tree"
             onClick={toggleBlockers}>
             {/* The count is project state: always the total, with the filtered view named beside it. */}
+            {/* The count is of questions someone recorded, not of what fit validation would find, so
+                zero never reads as proof: the unknown leads and the count says "tracked". */}
             {narrow ? <>
-              <span>Physical fit unknown</span>
+              <span className="fd-fit-unknown">Physical fit unknown</span>
               <span><span className="fd-count">{allQuestions.length}</span> {inViewCount === allQuestions.length
-                ? "questions" : `open · ${inViewCount} in view`}</span>
-            </> : <>Physical fit unknown · <span className="fd-count">{allQuestions.length}</span> {inViewCount === allQuestions.length
-              ? "open questions" : `open · ${inViewCount} in ${labelOf(view.mode)} view`}</>}
+                ? "tracked" : `tracked · ${inViewCount} in view`}</span>
+            </> : <><span className="fd-fit-unknown">Physical fit unknown</span> · not tested · <span className="fd-count">{allQuestions.length}</span>{" "}
+              {inViewCount === allQuestions.length ? `tracked question${allQuestions.length === 1 ? "" : "s"}`
+                : `tracked · ${inViewCount} in ${labelOf(view.mode)} view`}</>}
           </button>
         </header>
 
