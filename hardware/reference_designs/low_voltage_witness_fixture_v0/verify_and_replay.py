@@ -80,6 +80,8 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out",required=True,type=Path,help="fresh output directory")
     parser.add_argument("--pl-root",type=Path,help="optional Policy Lab checkout containing PLRS-6 bridge")
+    parser.add_argument("--load-profile",type=Path,help="optional independently evaluated external load plan, never physical authority")
+    parser.add_argument("--parent-verification",type=Path,help="required exact original native verification when a load profile is supplied")
     args=parser.parse_args()
     out=args.out.resolve()
     out.mkdir(parents=True,exist_ok=False)
@@ -97,7 +99,33 @@ def main():
         raise RuntimeError("native KiCad PCB DRC, connectivity or parity not clean")
     original_source_check()
 
-    spice_output=run(["ngspice","-b",str(HERE/"spice_low_voltage_witness.cir")],HERE)
+    external_load_ohm=10.0
+    profile_sha=None
+    simulator_file=HERE/"spice_low_voltage_witness.cir"
+    if args.load_profile:
+        if not args.parent_verification:
+            raise ValueError("A revised load requires original native verification")
+        profile=json.loads(args.load_profile.read_bytes())
+        source_spec_sha=sha(HERE/"station-spec-5v.json")
+        parent_sha=sha(args.parent_verification)
+        if profile.get("schema")!="hardware_splicer.proposed_operating_spec_v1" or            profile.get("parent_spec_sha256")!=source_spec_sha or            profile.get("parent_native_verification_sha256")!=parent_sha or            profile.get("physical_build_status")!="HOLD":
+            raise ValueError("Revised external-load plan not bound to original HS design and native proof")
+        if profile.get("source_max_bus_v")!=5.25 or profile.get("declared_max_load_power_w")!=2.5:
+            raise ValueError("Original design power envelope must remain unchanged")
+        external_load_ohm=profile.get("proposed_external_load_nominal_ohm")
+        if external_load_ohm not in (10,11,12,13,15,18):
+            raise ValueError("Unsupported external load proposal")
+        profile_sha=sha(args.load_profile)
+        (out/"operating-load-profile.json").write_bytes(args.load_profile.read_bytes())
+        source_circuit=simulator_file.read_text()
+        if source_circuit.count("R_LOAD LOAD_PLUS 0 10\n")!=1 or            source_circuit.count("let load_power_w=v(load_plus)*v(load_plus)/10\n")!=1:
+            raise ValueError("Original SPICE circuit changed; cannot generate load overlay")
+        changed=source_circuit.replace("R_LOAD LOAD_PLUS 0 10\n", f"R_LOAD LOAD_PLUS 0 {external_load_ohm}\n")
+        changed=changed.replace("let load_power_w=v(load_plus)*v(load_plus)/10\n",
+                                f"let load_power_w=v(load_plus)*v(load_plus)/{external_load_ohm}\n")
+        simulator_file=out/"operating-profile-spice.cir"
+        simulator_file.write_text(changed)
+    spice_output=run(["ngspice","-b",str(simulator_file)],HERE)
     (out/"spice-result.txt").write_text(spice_output)
     def parse(label):
         m=re.search(r"(?m)^"+re.escape(label)+r"\s*=\s*([-+0-9.eE]+)",spice_output)
@@ -106,9 +134,9 @@ def main():
     pwr=parse("load_power_w")
     voltage=parse("v(load_plus)")
     amps=-parse("i(v_src)")
-    expected_i=5/(10+.05+.015+.010)
+    expected_i=5/(external_load_ohm+.05+.015+.010)
     if not all(math.isclose(actual,expected,rel_tol=3e-6) for actual,expected in [
-        (amps,expected_i),(voltage,10*expected_i),(pwr,10*expected_i**2)]):
+        (amps,expected_i),(voltage,external_load_ohm*expected_i),(pwr,external_load_ohm*expected_i**2)]):
         raise RuntimeError("SPICE and independent series-resistance arithmetic disagree")
     expected_wh=pwr*180/3600
 
@@ -176,7 +204,9 @@ def main():
             "expected_net_pads":sum(map(len,schematic.NETS.values())),
             "station_design_checks_passed":True,
             "source_voltage_v_assumed":5.0,
-            "load_resistance_ohm_assumed":10.0,
+            "load_resistance_ohm_assumed":external_load_ohm,
+            "operating_load_profile_sha256":profile_sha,
+            "operating_load_profile_review_required":profile_sha is not None,
             "fuse_resistance_ohm_ASSUMED":.05,
             "ada_shunt_ohm_unverified":.015,
             "reference_shunt_ohm_nominal":.01,

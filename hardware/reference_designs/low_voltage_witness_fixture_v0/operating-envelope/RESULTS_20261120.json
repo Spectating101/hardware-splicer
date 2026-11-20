@@ -1,0 +1,128 @@
+{
+  "schema": "hardware_splicer.witness_operating_envelope_trial_summary.v1",
+  "date": "2026-11-20",
+  "original_source_hashes": {
+    "station_spec_sha256": "78257576dd6b78c158ed35157ade26d79a10ee9071b9d704758d0c17e29ad016",
+    "original_spice_sha256": "d47459fd995a3449e753a001156cf8334b5be28aa93befa0976397578a73621e",
+    "frozen_experiment_sha256": "2440f2fac6ce150e2b5e186019f2cf2a26b8fa0cfa4977a733470228dd4ec8aa",
+    "original_native_verification_sha256": "e9e2b853575b0d3aaba487be9136da7b5b783f9c04fb902d3918e3f8ffa8fd93"
+  },
+  "experiment_assumptions": {
+    "bus_v": [
+      4.75,
+      5.0,
+      5.25
+    ],
+    "load_tolerance_pct": 5,
+    "series_resistance_ohm": [
+      0,
+      0.075,
+      0.15
+    ],
+    "maximum_load_power_w": 2.5,
+    "imposed_power_reserve_fraction": 0.1,
+    "minimum_corner_current_a": 0.34
+  },
+  "candidates": [
+    {
+      "load_ohm": 10,
+      "nominal_power_w": 2.4629177,
+      "worst_power_w": 2.90131579,
+      "minimum_current_a": 0.44600939,
+      "eligible_under_trial_conditions": false,
+      "checks": {
+        "at_least_declared_headroom": false,
+        "load_power_below_declared_ceiling": false,
+        "minimum_current_for_reference_signal": true,
+        "source_current_limit_not_needed_at_high_corner": true
+      }
+    },
+    {
+      "load_ohm": 11,
+      "nominal_power_w": 2.24204964,
+      "worst_power_w": 2.63755981,
+      "minimum_current_a": 0.40598291,
+      "eligible_under_trial_conditions": false,
+      "checks": {
+        "at_least_declared_headroom": false,
+        "load_power_below_declared_ceiling": false,
+        "minimum_current_for_reference_signal": true,
+        "source_current_limit_not_needed_at_high_corner": true
+      }
+    },
+    {
+      "load_ohm": 12,
+      "nominal_power_w": 2.05753379,
+      "worst_power_w": 2.41776316,
+      "minimum_current_a": 0.37254902,
+      "eligible_under_trial_conditions": false,
+      "checks": {
+        "at_least_declared_headroom": false,
+        "load_power_below_declared_ceiling": true,
+        "minimum_current_for_reference_signal": true,
+        "source_current_limit_not_needed_at_high_corner": true
+      }
+    },
+    {
+      "load_ohm": 13,
+      "nominal_power_w": 1.90107813,
+      "worst_power_w": 2.23178138,
+      "minimum_current_a": 0.3442029,
+      "eligible_under_trial_conditions": true,
+      "checks": {
+        "at_least_declared_headroom": true,
+        "load_power_below_declared_ceiling": true,
+        "minimum_current_for_reference_signal": true,
+        "source_current_limit_not_needed_at_high_corner": true
+      }
+    },
+    {
+      "load_ohm": 15,
+      "nominal_power_w": 1.65012417,
+      "worst_power_w": 1.93421053,
+      "minimum_current_a": 0.29874214,
+      "eligible_under_trial_conditions": false,
+      "checks": {
+        "at_least_declared_headroom": true,
+        "load_power_below_declared_ceiling": true,
+        "minimum_current_for_reference_signal": false,
+        "source_current_limit_not_needed_at_high_corner": true
+      }
+    },
+    {
+      "load_ohm": 18,
+      "nominal_power_w": 1.37738675,
+      "worst_power_w": 1.61184211,
+      "minimum_current_a": 0.24934383,
+      "eligible_under_trial_conditions": false,
+      "checks": {
+        "at_least_declared_headroom": true,
+        "load_power_below_declared_ceiling": true,
+        "minimum_current_for_reference_signal": false,
+        "source_current_limit_not_needed_at_high_corner": true
+      }
+    }
+  ],
+  "selected_external_load_ohm": 13,
+  "original_native_KiCad_ERC_DRC": "ZERO_VIOLATIONS",
+  "native_replay_results": {
+    "original_10ohm_nominal_power_w": 2.462918,
+    "proposed_13ohm_nominal_power_w": 1.901078,
+    "proposed_13ohm_three_minute_wh": 0.09505390000000001,
+    "frozen_PL_measurement_intake": "TEST_FIXTURE_STRUCTURALLY_INGESTED_NO_PHYSICAL_CLAIMS"
+  },
+  "policy_lab_responses": {
+    "10": "BLOCKED",
+    "13": "ADMIT_WITH_LIMIT",
+    "15": "BLOCKED"
+  },
+  "cross_stage_checks": {
+    "passed": 12,
+    "total": 12
+  },
+  "physical_validation_performed": false,
+  "fabrication_release_allowed": false,
+  "meter_calibration_established": false,
+  "independent_business_value_measured": false,
+  "qualification": "The original defect was already discovered by audit PR358; this experiment generates and replays a conditional design alternative. Do not treat test fixture data as measured energy."
+}
