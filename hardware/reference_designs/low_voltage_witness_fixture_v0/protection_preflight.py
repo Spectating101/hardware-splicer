@@ -61,6 +61,8 @@ def assess(packet: dict) -> dict:
     load=numeric(normal,"load_worst_case_power_w","normal load power bound",missing)
     voltage_source=numeric(source,"voltage_limit_v","source maximum voltage",missing)
     ilim=numeric(source,"set_current_limit_a","source set current limit",missing)
+    ovp_set=numeric(source,"ovp_setpoint_v","source programmed overvoltage limit",missing)
+    ovp_peak=numeric(source,"measured_max_j2_voltage_during_protection_trip_v","observed J2 overvoltage trip peak",missing)
     sustained=numeric(source,"measured_sustained_short_current_a","measured sustained-short current",missing)
     peak=numeric(source,"measured_peak_short_current_a","measured prospective fault peak",missing)
     latency=numeric(source,"measured_current_limit_response_ms","source current-limit response time",missing)
@@ -75,9 +77,12 @@ def assess(packet: dict) -> dict:
             not math.isfinite(measured_t)):
         missing.append("Missing or invalid finite measured load temperature C")
         measured_t=None
-    named(source,"manufacturer","source manufacturer",missing)
-    named(source,"model","source model",missing)
+    model=named(source,"model","source model",missing)
+    manufacturer=named(source,"manufacturer","source manufacturer",missing)
     named(source,"serial","source serial",missing)
+    if (manufacturer and model and manufacturer.upper()=="SIGLENT" and
+            model.upper().replace(" ","") in ("SPD3303X-E","SPD3303X","SPD3303C")):
+        contradictions.append("Selected Siglent SPD3303 source lacks documented configurable OVP; strict 5.25 V envelope not proved")
     named(fuse,"fuse_link_mpn","fuse link exact MPN",missing)
     named(wiring,"cable_assembly_mpn","wiring/harness identification",missing)
     named(thermal,"mounting_part","load thermal chassis/mount identity",missing)
@@ -89,7 +94,9 @@ def assess(packet: dict) -> dict:
         contradictions.append("Holder differs from original PCB candidate; requires new geometry and datasheet review")
     for section,keys in (
         (source,("independent_source_limit_test_verified","isolation_and_earth_review_verified",
-                 "independent_fault_shutdown_review_verified")),
+                 "independent_fault_shutdown_review_verified",
+                 "ovp_configurable_documented","ovp_protection_enabled_verified",
+                 "independent_ovp_trip_test_verified")),
         (fuse,("time_current_curve_verified","clearing_at_measured_sustained_fault_current_verified",
                 "manufacturer_fuse_link_holder_match_verified","holder_thermal_derating_checked")),
         (wiring,("independent_short_and_shield_review_verified",)),
@@ -104,6 +111,12 @@ def assess(packet: dict) -> dict:
         contradictions.append("Source voltage limit exceeds nominal design ceiling")
     if ilim is not None and ilim>.65:
         contradictions.append("Source set current limit exceeds 0.65 A review candidate")
+    if ovp_set is not None and ovp_set>=5.25:
+        contradictions.append("Configured source OVP setpoint must stay below the 5.25 V J2 ceiling")
+    if ovp_peak is not None and ovp_peak>5.25:
+        contradictions.append("Observed J2 voltage exceeded 5.25 V despite the claimed OVP configuration")
+    if ovp_set is not None and voltage_source is not None and ovp_set<=voltage_source:
+        contradictions.append("OVP trip setpoint is not above planned source constant-voltage setting")
     if sustained is not None and ilim is not None and sustained > ilim*1.01:
         contradictions.append("Measured sustained short current exceeds current-limit set point")
     if peak is not None and sustained is not None and peak+1e-9<sustained:

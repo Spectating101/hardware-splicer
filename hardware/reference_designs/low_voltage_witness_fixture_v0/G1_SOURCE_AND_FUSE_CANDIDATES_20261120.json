@@ -1,0 +1,93 @@
+{
+  "schema": "hardware_splicer.witness_g1_source_candidate_evidence.v1",
+  "capture_kind": "DESKTOP_DOCUMENT_REVIEW_NOT_PHYSICAL_EVIDENCE",
+  "nominal_source_set_v": 5,
+  "max_j2_v": 5.25,
+  "source_ocp_candidate_a": 0.65,
+  "source_ovp_candidate_v": 5.2,
+  "min_worst_case_load_ohms": 11.82654,
+  "source_candidates": [
+    {
+      "id": "rigol_dp832a_ch1",
+      "brand": "RIGOL",
+      "model": "DP832A",
+      "output_channel": "CH1",
+      "rated_max_v": 30,
+      "rated_max_a": 3,
+      "programmable_ovp": true,
+      "programmable_ocp": true,
+      "ovp_software_range_max_v": 33,
+      "ocp_software_range_max_a": 3.3,
+      "manufacturer_source": "https://www.rigol.com/dam/global/downloads/brochures/en/data-sheet/dc-powers/DP800_DataSheet_EN.pdf",
+      "manufacturer_programming_guide": "https://int.rigol.com/Public/Uploads/uploadfile/files/20211028/20211028151336_617a4da001f78.pdf",
+      "evidence": "DP832A CH1 0–30V/0–3A; OVP/OCP settable 1mV–33V and 1mA–3.3A; no measured trip latency.",
+      "status": "BORROW_CANDIDATE_NOT_SELECTED"
+    },
+    {
+      "id": "siglent_spd3303xe_ch1",
+      "brand": "SIGLENT",
+      "model": "SPD3303X-E",
+      "output_channel": "CH1",
+      "rated_max_v": 32,
+      "rated_max_a": 3.2,
+      "programmable_ovp": false,
+      "programmable_ocp": true,
+      "ovp_software_range_max_v": null,
+      "ocp_software_range_max_a": null,
+      "manufacturer_source": "https://www.siglent.com/na/products-overview/spd3303x-x-e/",
+      "manufacturer_support": "https://siglent.tawk.help/article/spd3303x-spd3303x-e-spd3303c-and-charging-applications",
+      "evidence": "Variable CH1 CC and OCP exist; SIGLENT support explicitly reports no user-configurable OVP. Requires separate independently verified overvoltage interlock to meet strict maximum.",
+      "status": "NOT_STANDALONE_OVP_QUALIFIED"
+    },
+    {
+      "id": "siglent_spd4000x_family",
+      "brand": "SIGLENT",
+      "model": "SPD4000X SERIES",
+      "output_channel": null,
+      "rated_max_v": null,
+      "rated_max_a": null,
+      "programmable_ovp": true,
+      "programmable_ocp": true,
+      "ovp_software_range_max_v": null,
+      "ocp_software_range_max_a": null,
+      "manufacturer_source": "https://siglentna.com/power-supplies/spd4000x-series-programmable-linear-dc-power-supply/",
+      "evidence": "OVP/OCP advertised at family level; exact model/channel and settings not selected. Not a valid build input until specific model datasheet reviewed.",
+      "status": "MODEL_AND_CHANNEL_UNSELECTED"
+    }
+  ],
+  "fuse": {
+    "holder_mpn": "0031.3551",
+    "holder_ac_rating_v": 250,
+    "holder_ac_rating_is_not_fuse_dc_rating": true,
+    "selected_link_mpn": null,
+    "family_to_evaluate": "SCHURTER SPT 5x20, high-breaking-capacity time-lag",
+    "family_max_advertised_dc_rating_v": 300,
+    "exact_link_dc_rating_v": null,
+    "family_current_range_a": [
+      0.5,
+      16
+    ],
+    "manufacturer_source": "https://www.schurter.com/en/datasheet/0001.2510",
+    "role": "SUPPLEMENTARY_UNCREDITED_PROTECTION_CANDIDATE",
+    "can_clear_source_limited_sustained_0_65a": false,
+    "note": "SPT family has DC ratings, but no individual fuse SKU, time-current curve, DC conditions, thermal derating or fault-current waveform has been selected or verified. A nominal 1A time-lag link cannot be relied upon for clearing 0.65A."
+  },
+  "required_physical_evidence": {
+    "source_serial": null,
+    "source_calibration": null,
+    "configured_ovp_readback_v": null,
+    "configured_ocp_readback_a": null,
+    "observed_highest_voltage_during_fault_v": null,
+    "measured_short_current_peak_a": null,
+    "measured_short_current_sustained_a": null,
+    "measured_trip_time_ms": null,
+    "source_earth_isolation_review": null,
+    "fuse_link_exact_mpn": null,
+    "fuse_link_holder_coordination_review": null,
+    "reference_meter_serials": null,
+    "reference_meter_calibration": null,
+    "independent_lab_operator": null
+  },
+  "release_state": "HOLD_NO_FABRICATION_NO_ENERGIZATION",
+  "sources_checked_utc_date": "2026-11-20"
+}
