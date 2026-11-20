@@ -1,0 +1,356 @@
+{
+  "cases": [
+    {
+      "baseline": {
+        "error_count": 0,
+        "exit_code": 0,
+        "finding_types": {},
+        "schematic_parity_count": 0,
+        "semantic_finding_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "status": "PROCESSED",
+        "unconnected_count": 0
+      },
+      "digital_gate_pass": true,
+      "fault_injection": {
+        "fabrication_authorized": false,
+        "introduced_error_detected": true,
+        "native_drc": {
+          "error_count": 1,
+          "exit_code": 5,
+          "finding_types": {
+            "solder_mask_bridge": 1
+          },
+          "schematic_parity_count": 0,
+          "semantic_finding_sha256": "2b3fc85222964e1003d3b5f3899c048d2781cac993da031795111c3d1b6c8b2d",
+          "status": "PROCESSED",
+          "unconnected_count": 0
+        },
+        "strategy": {
+          "distance_mm": 1.016,
+          "origin_net": "ENCA_GND",
+          "origin_ref": "J5",
+          "physical_test_performed": false,
+          "target_net": "GND",
+          "target_ref": "J5",
+          "type": "intentional_F_Cu_different_net_bridge"
+        }
+      },
+      "file_hashes": {
+        "LICENSE": "30ee0986ae447c9fd6ae7d449c907607fb09ba50b5231397ccbb0cc496562a60",
+        "SOURCE.json": "026affea336ba031458410909221b6eed6bec603012d0e791749862122e88a60",
+        "board.kicad_pcb": "05dd8f1abce881a757dafe1cf55467d8a3bc87ddcf6427fd6f504f6043ec1b1e",
+        "board.kicad_pro": "2678d17b50cca66f50e0995320a278589a782eaf78e748e5b0faf08b1ede4985"
+      },
+      "id": "dnlbauer__corax-keyboard__keyboard_5db1e9",
+      "kiskill": {
+        "exit_code": 0,
+        "status": "PASS"
+      },
+      "original_corpus_error_count": 0,
+      "physical_test_performed": false,
+      "sch_pcb_equivalence": "NOT_TESTABLE_NO_SCHEMATIC",
+      "source_class_matches": true,
+      "source_commit": "7e01724621f12f1c1099f78c978bcb6aca19b795",
+      "source_repository": "dnlbauer/corax-keyboard",
+      "stratum": "2layer-clean"
+    },
+    {
+      "baseline": {
+        "error_count": 0,
+        "exit_code": 0,
+        "finding_types": {},
+        "schematic_parity_count": 0,
+        "semantic_finding_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "status": "PROCESSED",
+        "unconnected_count": 0
+      },
+      "digital_gate_pass": true,
+      "fault_injection": {
+        "fabrication_authorized": false,
+        "introduced_error_detected": true,
+        "native_drc": {
+          "error_count": 2,
+          "exit_code": 5,
+          "finding_types": {
+            "solder_mask_bridge": 1,
+            "tracks_crossing": 1
+          },
+          "schematic_parity_count": 0,
+          "semantic_finding_sha256": "1f12659bd0839a9d15e06dc3780420689783f31a7f24687ab79dcdb6b2d4e05e",
+          "status": "PROCESSED",
+          "unconnected_count": 0
+        },
+        "strategy": {
+          "distance_mm": 1.0,
+          "origin_net": "+3V3",
+          "origin_ref": "J2",
+          "physical_test_performed": false,
+          "target_net": "/SDA",
+          "target_ref": "J2",
+          "type": "intentional_F_Cu_different_net_bridge"
+        }
+      },
+      "file_hashes": {
+        "LICENSE": "a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499",
+        "SOURCE.json": "6244dc43a3900bece8dc7ebf318f66c06bd5f2fc418d3bdb07b391f61b20c334",
+        "board.kicad_pcb": "955c9a0d6a5ae685831e4a48ea4ee853f45764b584eaea02c6258f63be1663b4",
+        "board.kicad_pro": "f37358246c3c21afd1a78c76f0b51522c14ef3e76778bda021235dca50e829b7"
+      },
+      "id": "rniwase__sdtv2csi__sdtv2csi",
+      "kiskill": {
+        "exit_code": 0,
+        "status": "PASS"
+      },
+      "original_corpus_error_count": 0,
+      "physical_test_performed": false,
+      "sch_pcb_equivalence": "NOT_TESTABLE_NO_SCHEMATIC",
+      "source_class_matches": true,
+      "source_commit": "abe6b2edf319fa3128b6ef93bbeb7eeb4f215bb5",
+      "source_repository": "rniwase/sdtv2csi",
+      "stratum": "2layer-clean"
+    },
+    {
+      "baseline": {
+        "error_count": 1,
+        "exit_code": 5,
+        "finding_types": {
+          "invalid_outline": 1
+        },
+        "schematic_parity_count": 0,
+        "semantic_finding_sha256": "65d20f82e33886e0a439e015a2e13bc2b06665a5e1388813028133148d5923ea",
+        "status": "PROCESSED",
+        "unconnected_count": 0
+      },
+      "digital_gate_pass": true,
+      "file_hashes": {
+        "LICENSE": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+        "SOURCE.json": "975502f4e43a53e25dad75f0d9f0fa6515a836cd14015226aed6ddecabe336f7",
+        "board.kicad_dru": "bbef6e119424cbf626d6fec0697069e203a9bde1d54f30517b179a0375f28b6b",
+        "board.kicad_pcb": "3d30040141645d863040d59650b2c6f379b69d4cf0c92abebe48644459cdeda5",
+        "board.kicad_pro": "01b434d7e3577f01a5f7650a428926921583d686909a3b189624399390ed33f0"
+      },
+      "id": "DIYSynthMNL__Eurorack-Multi-Saturation-Module__Multi_saturation_module_board_a",
+      "kiskill": {
+        "exit_code": 0,
+        "status": "PASS"
+      },
+      "original_corpus_error_count": 1,
+      "physical_test_performed": false,
+      "sch_pcb_equivalence": "NOT_TESTABLE_NO_SCHEMATIC",
+      "source_class_matches": true,
+      "source_commit": "281ab92a5fad830589a045e4be12e66a5104dbd5",
+      "source_repository": "DIYSynthMNL/Eurorack-Multi-Saturation-Module",
+      "stratum": "2layer-inherited-drc"
+    },
+    {
+      "baseline": {
+        "error_count": 7,
+        "exit_code": 5,
+        "finding_types": {
+          "clearance": 3,
+          "footprint_type_mismatch": 1,
+          "invalid_outline": 3
+        },
+        "schematic_parity_count": 0,
+        "semantic_finding_sha256": "42ba160a173672dd9bf819db9e5d00aaff46de5cbb093abfc6f132e7d85bc847",
+        "status": "PROCESSED",
+        "unconnected_count": 0
+      },
+      "digital_gate_pass": true,
+      "file_hashes": {
+        "LICENSE": "7abe19ec9bb73b36141b999b861d24ad855e808bafe0f81e84cce28556f6c297",
+        "SOURCE.json": "5e65f6774295a410795265d280e991a1cf191823f8ba060f09bf4db4cee4f0d9",
+        "board.kicad_pcb": "b36cac475b018f5b1742ced4df443a9c97a729fbc5cdbe134fbaa023f3f52005",
+        "board.kicad_pro": "f30bd84bcb6349f9eea660aca7b9ff3f9f33e76943f3d45a61a7e9c2fd655abc"
+      },
+      "id": "TweetyDaBird__Little-Big-Scroll__Little_Big_Scroll_6_-_PCB",
+      "kiskill": {
+        "exit_code": 0,
+        "status": "PASS"
+      },
+      "original_corpus_error_count": 7,
+      "physical_test_performed": false,
+      "sch_pcb_equivalence": "NOT_TESTABLE_NO_SCHEMATIC",
+      "source_class_matches": true,
+      "source_commit": "97dc5f4876bb283ea938eaba5a553b861abf4b4e",
+      "source_repository": "TweetyDaBird/Little-Big-Scroll",
+      "stratum": "2layer-inherited-drc"
+    },
+    {
+      "baseline": {
+        "error_count": 0,
+        "exit_code": 0,
+        "finding_types": {},
+        "schematic_parity_count": 0,
+        "semantic_finding_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "status": "PROCESSED",
+        "unconnected_count": 0
+      },
+      "digital_gate_pass": true,
+      "fault_injection": {
+        "fabrication_authorized": false,
+        "introduced_error_detected": true,
+        "native_drc": {
+          "error_count": 4,
+          "exit_code": 5,
+          "finding_types": {
+            "shorting_items": 1,
+            "solder_mask_bridge": 3
+          },
+          "schematic_parity_count": 0,
+          "semantic_finding_sha256": "64e04c978c084aa334fe88de8397e62cdabaf2e15f632a2ddb34437ecc48c46b",
+          "status": "PROCESSED",
+          "unconnected_count": 0
+        },
+        "strategy": {
+          "distance_mm": 1.3,
+          "origin_net": "/usb_dminus",
+          "origin_ref": "J2",
+          "physical_test_performed": false,
+          "target_net": "unconnected-(J2-ID-Pad4)",
+          "target_ref": "J2",
+          "type": "intentional_F_Cu_different_net_bridge"
+        }
+      },
+      "file_hashes": {
+        "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+        "SOURCE.json": "1314f5f3c98dd7fb0adb6bcba184a0f6b867a08daf6e35a13b2c82995810a098",
+        "board.kicad_dru": "c128deaa2d8046124a50e4e507de96d21969918a635148cc901410575a59dfe9",
+        "board.kicad_pcb": "ad9a2d691785a04877b7a1971d2a6c12e0a07092abd7277a1cd92c5373c17ec3",
+        "board.kicad_pro": "6d55e0956765b9bedf1b0c33576d5b79fd001cc2cd91722873fd66200c18ede6"
+      },
+      "id": "justbuchanan__oasis__pcb",
+      "kiskill": {
+        "exit_code": 0,
+        "status": "PASS"
+      },
+      "original_corpus_error_count": 0,
+      "physical_test_performed": false,
+      "sch_pcb_equivalence": "NOT_TESTABLE_NO_SCHEMATIC",
+      "source_class_matches": true,
+      "source_commit": "3462f162f80e11c78705218441af37639d87bfdc",
+      "source_repository": "justbuchanan/oasis",
+      "stratum": "4layer-clean"
+    },
+    {
+      "baseline": {
+        "error_count": 0,
+        "exit_code": 0,
+        "finding_types": {},
+        "schematic_parity_count": 0,
+        "semantic_finding_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "status": "PROCESSED",
+        "unconnected_count": 0
+      },
+      "digital_gate_pass": true,
+      "fault_injection": {
+        "fabrication_authorized": false,
+        "introduced_error_detected": true,
+        "native_drc": {
+          "error_count": 5,
+          "exit_code": 5,
+          "finding_types": {
+            "solder_mask_bridge": 2,
+            "tracks_crossing": 3
+          },
+          "schematic_parity_count": 0,
+          "semantic_finding_sha256": "3748f03f939edc230f3e956eff0a2c8c86a47a9f9fb394dcaf16bfc4a6621869",
+          "status": "PROCESSED",
+          "unconnected_count": 0
+        },
+        "strategy": {
+          "distance_mm": 1.0,
+          "origin_net": "/Architecture/USB/USB0_CC1",
+          "origin_ref": "J1",
+          "physical_test_performed": false,
+          "target_net": "Net-(J1-D+-PadA6)",
+          "target_ref": "J1",
+          "type": "intentional_F_Cu_different_net_bridge"
+        }
+      },
+      "file_hashes": {
+        "LICENSE": "6e471d647db50527d0c75ee5f1a55a74012ab177c73282bef0bdc7f6562b7ded",
+        "SOURCE.json": "c39367f14609ec3d8793fc323914bdbb7949ed30cf48f0e7754783feb0d83b1b",
+        "board.kicad_pcb": "3c640f77fb7e53b45115bb746899b73bd673e92b3919ef3056e4a0f0ba4f994d",
+        "board.kicad_pro": "5657419e4136e70c0948457186a8d79ed0a79177afbc8920b2cee437f8c4339a"
+      },
+      "id": "protolux-electronics__trellis_core__trellis_core",
+      "kiskill": {
+        "exit_code": 0,
+        "status": "PASS"
+      },
+      "original_corpus_error_count": 0,
+      "physical_test_performed": false,
+      "sch_pcb_equivalence": "NOT_TESTABLE_NO_SCHEMATIC",
+      "source_class_matches": true,
+      "source_commit": "db4fe71623c14bcea47d7457d0db4c99d3899124",
+      "source_repository": "protolux-electronics/trellis_core",
+      "stratum": "4layer-clean"
+    },
+    {
+      "baseline": {
+        "error_count": 4,
+        "exit_code": 5,
+        "finding_types": {
+          "clearance": 4
+        },
+        "schematic_parity_count": 0,
+        "semantic_finding_sha256": "985991f717fe4a5980fb6e1b5ef8157f429f6c7677fe2e1bac62018e880c08c5",
+        "status": "PROCESSED",
+        "unconnected_count": 0
+      },
+      "digital_gate_pass": true,
+      "file_hashes": {
+        "LICENSE": "bc3afeda740ad80005ff8aef69ae0f0e64a66af47ef07a3d064ca3e31a24b528",
+        "SOURCE.json": "855d605728befa3e5a54fb24e531ce89f9704f49d8c1c767b24078aa90292039",
+        "board.kicad_pcb": "bcef749ece0d50480dc5b6886e94d57faf3111ddc03a760b0ac9fd1837e6cfcb",
+        "board.kicad_pro": "4ff06c4abce7d1eb6c85b3df6650147ea8e624f0e89f52de0b30ea0ad9c955f3"
+      },
+      "id": "brenocq__bldc-motor__BLDCM-Power",
+      "kiskill": {
+        "exit_code": 0,
+        "status": "PASS"
+      },
+      "original_corpus_error_count": 4,
+      "physical_test_performed": false,
+      "sch_pcb_equivalence": "NOT_TESTABLE_NO_SCHEMATIC",
+      "source_class_matches": true,
+      "source_commit": "b74fb1d7a4637e437ef5a33e78a36db7c28fac7e",
+      "source_repository": "brenocq/bldc-motor",
+      "stratum": "4layer-inherited-drc"
+    },
+    {
+      "baseline": {
+        "error_count": 222,
+        "exit_code": 5,
+        "finding_types": {
+          "clearance": 220,
+          "starved_thermal": 2
+        },
+        "schematic_parity_count": 0,
+        "semantic_finding_sha256": "ead6aa725f5c7637763aaf7b549bc9911e8ab5e2af4a63584b6cfc92cda4ddfb",
+        "status": "PROCESSED",
+        "unconnected_count": 0
+      },
+      "digital_gate_pass": true,
+      "file_hashes": {
+        "LICENSE": "cb5e8e7e5f4a3988e1063c142c60dc2df75605f4c46515e776e3aca6df976e14",
+        "SOURCE.json": "51a19ef16222e13a811c3bb13f9a8a032a3a7f461473f5f9d6218f99ac713d1c",
+        "board.kicad_pcb": "b299eb419f4e482894f7c5d68ab8fc4604d2d8311784270ae222486c08b4846b",
+        "board.kicad_pro": "6958d844fad57193467cc00ec0038b788817120fff189b606f62dd4cdfbe1f5d"
+      },
+      "id": "Miceuz__rs485-moist-sensor__rs485-moist-sensor",
+      "kiskill": {
+        "exit_code": 0,
+        "status": "PASS"
+      },
+      "original_corpus_error_count": 222,
+      "physical_test_performed": false,
+      "sch_pcb_equivalence": "NOT_TESTABLE_NO_SCHEMATIC",
+      "source_class_matches": true,
+      "source_commit": "8cba0cd29e35b25de832e92b6521192ec9c6ec69",
+      "source_repository": "Miceuz/rs485-moist-sensor",
+      "stratum": "4layer-inherited-drc"
+    }
+  ]
+}
