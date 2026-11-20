@@ -110,14 +110,29 @@
   position: absolute;
   z-index: 3;
   top: 52px;
-  max-height: calc(100% - 156px);
+  max-height: calc(100% - 172px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 .fd-scene [hidden] { display: none; }
-.fd-tree { left: 12px; width: min(240px, 25%); }
-.fd-inspector { right: 12px; width: min(320px, 30%); }
+/* Side panels stay narrow and fold away; the canvas keeps the flexible centre. */
+.fd-tree { left: 12px; width: min(220px, 24%); }
+.fd-inspector { right: 12px; width: min(280px, 28%); }
+.fd-inspector[data-collapsed] { width: auto; }
+.fd-panel-toggle {
+  width: 100%;
+  min-height: 32px;
+  padding: 6px 12px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: start;
+}
+.fd-inspector[data-collapsed] .fd-panel-toggle { border-bottom: 0; }
 .fd-panel-content { display: flex; flex-direction: column; min-height: 0; }
 .fd-tree-scroll, .fd-inspector-scroll {
   width: 100%;

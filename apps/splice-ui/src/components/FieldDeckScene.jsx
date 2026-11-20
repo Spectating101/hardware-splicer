@@ -98,7 +98,7 @@ function QuestionNumber({ number }) {
   return <span className="fd-question-numbers">{number}</span>;
 }
 
-function Inspector({ row, index, questions, open, compare, meshStats, footprint, other = null }) {
+function Inspector({ row, index, questions, open, compare, meshStats, footprint, other = null, collapsed = false, onToggle = null }) {
   const comparing = Boolean(compare);
   const scroll = useRef(null);
   const [more, setMore] = useState(0);
@@ -129,8 +129,11 @@ function Inspector({ row, index, questions, open, compare, meshStats, footprint,
 
   const { part, link, revision } = row ?? {};
   return (
-    <aside className="fd-inspector fd-panel" id="fd-inspector" aria-label="Selection details" hidden={!open}>
-      <div className="fd-inspector-scroll" id="fd-inspector-content" ref={scroll} tabIndex={0}>
+    <aside className="fd-inspector fd-panel" id="fd-inspector" aria-label="Selection details" hidden={!open} data-collapsed={collapsed || undefined}>
+      {/* Desktop: the panel folds to its title so the canvas can take the width. */}
+      {onToggle && <button type="button" className="fd-panel-toggle" aria-expanded={!collapsed} aria-controls="fd-inspector-content"
+        onClick={onToggle}>Details</button>}
+      <div className="fd-inspector-scroll" id="fd-inspector-content" ref={scroll} tabIndex={0} hidden={collapsed}>
         {!row ? <p className="fd-empty">Select a part or interface to inspect its evidence.</p> : <>
           <h2>{part?.label ?? link.label}</h2>
           <p className="fd-status">{statusOf(row)}</p>
@@ -170,7 +173,7 @@ function Inspector({ row, index, questions, open, compare, meshStats, footprint,
           </>}
         </>}
       </div>
-      {open && more > 0 && <div className="fd-inspector-more"><span>{more} more</span></div>}
+      {open && !collapsed && more > 0 && <div className="fd-inspector-more"><span>{more} more</span></div>}
     </aside>
   );
 }
@@ -367,6 +370,7 @@ export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel 
   const [stageError, setStageError] = useState("");
   const [view, setView] = useState(() => ({ ...INITIAL, mode: target }));
   const [desktopTreeOpen, setDesktopTreeOpen] = useState(true);
+  const [desktopInspectorOpen, setDesktopInspectorOpen] = useState(true);
   const [blockersOnly, setBlockersOnly] = useState(false);
   const [narrow, setNarrow] = useState(() => window.matchMedia(FIELDDECK_NARROW).matches);
   const [keyOpen, setKeyOpen] = useState(false);
@@ -546,6 +550,7 @@ export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel 
       focus: Boolean(key),
       faceView: old.faceView && !index.byKey.get(key)?.link,
     }));
+    if (key) setDesktopInspectorOpen(true);
   }
   current.current = { view, reduced, finishIntro, select };
 
@@ -770,6 +775,7 @@ export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel 
           </div>
         </aside>
         <Inspector row={selection} index={index} questions={ownQuestions} open={inspectorOpen} compare={sceneCompare}
+          collapsed={!narrow && !desktopInspectorOpen} onToggle={narrow ? null : () => setDesktopInspectorOpen(!desktopInspectorOpen)}
           other={otherQuestions.length ? { revision: otherRevision, label: labelOf(otherRevision), questions: otherQuestions } : null}
           meshStats={meshStats} footprint={view.mode === "compare" && selection?.part?.part_id === focusPart && faceFit?.footprint
             ? { base, label: labelOf(base), value: faceFit.footprint } : null} />
