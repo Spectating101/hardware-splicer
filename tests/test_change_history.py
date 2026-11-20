@@ -46,6 +46,9 @@ def test_changes_are_rebound_to_their_applying_revisions(recorded):
     # The target-only revision stays visibly failed.
     assert first['applied_revision']['revision'] == 2 and first['applied_revision']['requirements_met'] is False
     assert [c['id'] for c in first['applied_revision']['checks'] if not c['passed']] == ['work_runtime']
+    # The base revision's checks come along so a reader can tell a raised requirement from a regression.
+    base_runtime = next(c for c in first['base_checks'] if c['id'] == 'work_runtime')
+    assert base_runtime['passed'] is True and base_runtime['limit'] == 2.5
     assert first['candidates'] == [] and first['change_evidence'] is None
     assert second['applied_revision']['revision'] == 3
     [candidate] = second['candidates']

@@ -198,6 +198,8 @@ def change_dossier(store: ProjectStore, project_id: str) -> dict[str, Any]:
             "policy_id": review["policy_id"], "policy_version": review["policy_version"],
             "policy_decision": review["decision"], "unmet": review["unmet"],
             "base_revision": proposal["base_revision"],
+            "base_checks": _checks(revisions[proposal["base_revision"]]["summary"])
+            if proposal["base_revision"] in revisions else None,
             "requirement_changes": proposal["requirement_changes"],
             "review_verification": proposal.get("policy_review_verification"),
             "applied_revision": None if applying is None else {
