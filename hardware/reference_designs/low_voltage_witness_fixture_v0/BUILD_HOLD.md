@@ -15,6 +15,7 @@
 | PHY-07 | Mechanical and thermal of screw terminals, load mounting, shunt, cables uninspected | Mechanical drawing/fitted enclosure, standoffs, load thermal mounting, cable strain relief and temperature checks |
 | PHY-08 | No independent operator or genuine recorded bench run | Controlled, permitted physical commissioning with true source identity and independent repeat |
 | PHY-09 | This 5 V fixture has no authority for 24 V / 120 W | New higher-power design with independently reviewed ratings, protection and measured validation |
+| PHY-10 | Declared 2.5 W power ceiling is exceeded under some allowable 5.25 V / load corner assumptions | Reconcile maximum bus voltage, actual load tolerance and 2.5 W maximum before authorizing any test or build; independently rerun corner checks |
 
 ## Hardware selection ledger
 
