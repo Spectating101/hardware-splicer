@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
+import hashlib
 import json
 import os
 import re
@@ -492,11 +493,13 @@ def _error(status_code: int, error_type: str, message: str, *, request_id: str |
     return HTTPException(status_code=status_code, detail={"error": payload})
 
 
-def create_app() -> FastAPI:
+def create_app(*, ui_dist: str | Path | None = None) -> FastAPI:
     job_backend = JobBackend.from_env()
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
+        if app.state.ui_error:
+            raise RuntimeError(app.state.ui_error)
         try:
             job_backend.start()
             yield
@@ -539,6 +542,7 @@ def create_app() -> FastAPI:
             "version": __version__,
             "app_roots": status.get("app_roots"),
             "llm_policy": llm_policy_summary(),
+            "ui": app.state.ui,
         }
 
     @app.get("/v1/examples/splice-intakes")
@@ -1846,40 +1850,99 @@ def create_app() -> FastAPI:
     from .project_scene_api import project_scene_router
 
     app.include_router(project_scene_router)
-    _maybe_mount_splice_ui(app)
+    _maybe_mount_splice_ui(app, ui_dist=ui_dist)
     return app
 
 
-def _maybe_mount_splice_ui(app: FastAPI) -> None:
+UI_MODES_ON = {"1", "true", "yes", "on"}
+
+
+def ui_dist_candidates(ui_dist: str | Path | None = None) -> list[Path]:
+    """UI build locations in lookup order: explicit, environment, packaged, checkout."""
+
+    package = Path(__file__).resolve().parent
+    raw = [
+        ui_dist,
+        os.environ.get("HARDWARE_SPLICER_UI_DIST", "").strip() or None,
+        package / "ui_dist",
+        package.parents[1] / "apps" / "splice-ui" / "dist",
+    ]
+    return [Path(item).expanduser().resolve() for item in raw if item not in (None, "")]
+
+
+def _resolve_ui_dist(ui_dist: str | Path | None = None) -> Path:
+    candidates = ui_dist_candidates(ui_dist)
+    for directory in candidates:
+        if (directory / "index.html").is_file():
+            return directory
+    raise RuntimeError(
+        "UI serving requested, but no index.html was found. Tried: "
+        + ", ".join(str(directory / "index.html") for directory in candidates)
+        + ". Run make ui-package (or make splice-ui-build) or set HARDWARE_SPLICER_UI_DIST / --ui-dist."
+    )
+
+
+def _maybe_mount_splice_ui(app: FastAPI, *, ui_dist: str | Path | None = None) -> None:
+    """Serve the built UI when HARDWARE_SPLICER_SERVE_UI asks for it.
+
+    ``1``/``true``/``yes``/``on`` require a build and fail startup without one;
+    ``auto`` serves a build when one is found; anything else leaves the UI off.
+    """
+
+    app.state.ui = {"served": False, "dist": None, "index_sha256": None}
+    app.state.ui_error = None
     flag = os.environ.get("HARDWARE_SPLICER_SERVE_UI", "").strip().lower()
-    if flag not in {"1", "true", "yes", "on"}:
+    if flag not in UI_MODES_ON and flag != "auto":
         return
-
-    ui_dist = Path(__file__).resolve().parents[2] / "apps" / "splice-ui" / "dist"
-    index_path = ui_dist / "index.html"
-    if not index_path.is_file():
+    try:
+        dist = _resolve_ui_dist(ui_dist)
+    except RuntimeError as exc:
+        if flag != "auto":
+            app.state.ui_error = str(exc)
         return
+    index_path = dist / "index.html"
+    app.state.ui = {
+        "served": True,
+        "dist": str(dist),
+        "index_sha256": hashlib.sha256(index_path.read_bytes()).hexdigest(),
+    }
 
-    assets_dir = ui_dist / "assets"
+    assets_dir = dist / "assets"
     if assets_dir.is_dir():
         from fastapi.staticfiles import StaticFiles
 
-        app.mount("/assets", StaticFiles(directory=assets_dir), name="splice-ui-assets")
+        class CachedAssets(StaticFiles):
+            async def get_response(self, path: str, scope):
+                response = await super().get_response(path, scope)
+                if response.status_code in {200, 304} and re.search(
+                    r"[-.][A-Za-z0-9_-]{8,}\.", Path(path).name
+                ):
+                    response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+                return response
 
-    reserved = ("v1", "health", "openapi.json", "docs", "redoc")
+        app.mount("/assets", CachedAssets(directory=assets_dir), name="splice-ui-assets")
+
+    reserved = ("api", "v1", "health", "openapi.json", "docs", "redoc", "assets")
+
+    def index_response() -> FileResponse:
+        return FileResponse(index_path, headers={"Cache-Control": "no-cache"})
 
     @app.get("/", include_in_schema=False)
     def splice_ui_root() -> FileResponse:
-        return FileResponse(index_path)
+        return index_response()
 
     @app.get("/{spa_path:path}", include_in_schema=False)
     def splice_ui_spa(spa_path: str) -> FileResponse:
         if spa_path.split("/", 1)[0] in reserved:
             raise HTTPException(status_code=404, detail="Not found")
-        candidate = ui_dist / spa_path
+        candidate = (dist / spa_path).resolve()
+        if not candidate.is_relative_to(dist):
+            raise HTTPException(status_code=404, detail="Not found")
         if candidate.is_file():
+            if candidate == index_path:
+                return index_response()
             return FileResponse(candidate)
-        return FileResponse(index_path)
+        return index_response()
 
 
 app = create_app()
