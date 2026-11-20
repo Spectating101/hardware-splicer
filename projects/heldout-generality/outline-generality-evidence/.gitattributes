@@ -1,0 +1,8 @@
+# Native CAD/KiCad exports may contain intentional whitespace, CRLF, and
+# OpenCascade serialization headers. Preserve exact authored bytes.
+**/*.step -text -diff
+**/*.stl -text -diff
+**/*.kicad_pcb -text -diff
+**/*.kicad_pro -text -diff
+**/*.kicad_dru -text -diff
+**/*.csv -text -diff

@@ -1,0 +1,706 @@
+[
+  {
+    "error_count": 3,
+    "exit_code": 5,
+    "net": "/~{INTRQ}",
+    "offset_mm": [
+      0.3,
+      0
+    ],
+    "ref": "TP1",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 2,
+    "exit_code": 5,
+    "net": "/~{INTRQ}",
+    "offset_mm": [
+      -0.3,
+      0
+    ],
+    "ref": "TP1",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 2,
+    "exit_code": 5,
+    "net": "/~{INTRQ}",
+    "offset_mm": [
+      0,
+      0.3
+    ],
+    "ref": "TP1",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 1,
+    "exit_code": 5,
+    "net": "/~{INTRQ}",
+    "offset_mm": [
+      0,
+      -0.3
+    ],
+    "ref": "TP1",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 4,
+    "exit_code": 5,
+    "net": "/~{INTRQ}",
+    "offset_mm": [
+      0.5,
+      0
+    ],
+    "ref": "TP1",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 2,
+    "exit_code": 5,
+    "net": "/~{INTRQ}",
+    "offset_mm": [
+      -0.5,
+      0
+    ],
+    "ref": "TP1",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 3,
+    "exit_code": 5,
+    "net": "/~{INTRQ}",
+    "offset_mm": [
+      0,
+      0.5
+    ],
+    "ref": "TP1",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 1,
+    "exit_code": 5,
+    "net": "/~{INTRQ}",
+    "offset_mm": [
+      0,
+      -0.5
+    ],
+    "ref": "TP1",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 8,
+    "exit_code": 5,
+    "net": "/~{INTRQ}",
+    "offset_mm": [
+      0.8,
+      0
+    ],
+    "ref": "TP1",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 4,
+    "exit_code": 5,
+    "net": "/~{INTRQ}",
+    "offset_mm": [
+      -0.8,
+      0
+    ],
+    "ref": "TP1",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 4,
+    "exit_code": 5,
+    "net": "/~{INTRQ}",
+    "offset_mm": [
+      0,
+      0.8
+    ],
+    "ref": "TP1",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 1,
+    "exit_code": 5,
+    "net": "/~{INTRQ}",
+    "offset_mm": [
+      0,
+      -0.8
+    ],
+    "ref": "TP1",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 8,
+    "exit_code": 5,
+    "net": "/~{INTRQ}",
+    "offset_mm": [
+      1.2,
+      0
+    ],
+    "ref": "TP1",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 6,
+    "exit_code": 5,
+    "net": "/~{INTRQ}",
+    "offset_mm": [
+      -1.2,
+      0
+    ],
+    "ref": "TP1",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 4,
+    "exit_code": 5,
+    "net": "/~{INTRQ}",
+    "offset_mm": [
+      0,
+      1.2
+    ],
+    "ref": "TP1",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 1,
+    "exit_code": 5,
+    "net": "/~{INTRQ}",
+    "offset_mm": [
+      0,
+      -1.2
+    ],
+    "ref": "TP1",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 3,
+    "exit_code": 5,
+    "net": "/GPO2",
+    "offset_mm": [
+      0.3,
+      0
+    ],
+    "ref": "TP2",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 4,
+    "exit_code": 5,
+    "net": "/GPO2",
+    "offset_mm": [
+      -0.3,
+      0
+    ],
+    "ref": "TP2",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 2,
+    "exit_code": 5,
+    "net": "/GPO2",
+    "offset_mm": [
+      0,
+      0.3
+    ],
+    "ref": "TP2",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 6,
+    "exit_code": 5,
+    "net": "/GPO2",
+    "offset_mm": [
+      0,
+      -0.3
+    ],
+    "ref": "TP2",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 4,
+    "exit_code": 5,
+    "net": "/GPO2",
+    "offset_mm": [
+      0.5,
+      0
+    ],
+    "ref": "TP2",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 6,
+    "exit_code": 5,
+    "net": "/GPO2",
+    "offset_mm": [
+      -0.5,
+      0
+    ],
+    "ref": "TP2",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 3,
+    "exit_code": 5,
+    "net": "/GPO2",
+    "offset_mm": [
+      0,
+      0.5
+    ],
+    "ref": "TP2",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 7,
+    "exit_code": 5,
+    "net": "/GPO2",
+    "offset_mm": [
+      0,
+      -0.5
+    ],
+    "ref": "TP2",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 8,
+    "exit_code": 5,
+    "net": "/GPO2",
+    "offset_mm": [
+      0.8,
+      0
+    ],
+    "ref": "TP2",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 8,
+    "exit_code": 5,
+    "net": "/GPO2",
+    "offset_mm": [
+      -0.8,
+      0
+    ],
+    "ref": "TP2",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 4,
+    "exit_code": 5,
+    "net": "/GPO2",
+    "offset_mm": [
+      0,
+      0.8
+    ],
+    "ref": "TP2",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 8,
+    "exit_code": 5,
+    "net": "/GPO2",
+    "offset_mm": [
+      0,
+      -0.8
+    ],
+    "ref": "TP2",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 8,
+    "exit_code": 5,
+    "net": "/GPO2",
+    "offset_mm": [
+      1.2,
+      0
+    ],
+    "ref": "TP2",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 8,
+    "exit_code": 5,
+    "net": "/GPO2",
+    "offset_mm": [
+      -1.2,
+      0
+    ],
+    "ref": "TP2",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 4,
+    "exit_code": 5,
+    "net": "/GPO2",
+    "offset_mm": [
+      0,
+      1.2
+    ],
+    "ref": "TP2",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 8,
+    "exit_code": 5,
+    "net": "/GPO2",
+    "offset_mm": [
+      0,
+      -1.2
+    ],
+    "ref": "TP2",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 5,
+    "exit_code": 5,
+    "net": "/GPO1",
+    "offset_mm": [
+      0.3,
+      0
+    ],
+    "ref": "TP3",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 5,
+    "exit_code": 5,
+    "net": "/GPO1",
+    "offset_mm": [
+      -0.3,
+      0
+    ],
+    "ref": "TP3",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 2,
+    "exit_code": 5,
+    "net": "/GPO1",
+    "offset_mm": [
+      0,
+      0.3
+    ],
+    "ref": "TP3",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 3,
+    "exit_code": 5,
+    "net": "/GPO1",
+    "offset_mm": [
+      0,
+      -0.3
+    ],
+    "ref": "TP3",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 8,
+    "exit_code": 5,
+    "net": "/GPO1",
+    "offset_mm": [
+      0.5,
+      0
+    ],
+    "ref": "TP3",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 7,
+    "exit_code": 5,
+    "net": "/GPO1",
+    "offset_mm": [
+      -0.5,
+      0
+    ],
+    "ref": "TP3",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 3,
+    "exit_code": 5,
+    "net": "/GPO1",
+    "offset_mm": [
+      0,
+      0.5
+    ],
+    "ref": "TP3",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 3,
+    "exit_code": 5,
+    "net": "/GPO1",
+    "offset_mm": [
+      0,
+      -0.5
+    ],
+    "ref": "TP3",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 10,
+    "exit_code": 5,
+    "net": "/GPO1",
+    "offset_mm": [
+      0.8,
+      0
+    ],
+    "ref": "TP3",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 9,
+    "exit_code": 5,
+    "net": "/GPO1",
+    "offset_mm": [
+      -0.8,
+      0
+    ],
+    "ref": "TP3",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 4,
+    "exit_code": 5,
+    "net": "/GPO1",
+    "offset_mm": [
+      0,
+      0.8
+    ],
+    "ref": "TP3",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 5,
+    "exit_code": 5,
+    "net": "/GPO1",
+    "offset_mm": [
+      0,
+      -0.8
+    ],
+    "ref": "TP3",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 10,
+    "exit_code": 5,
+    "net": "/GPO1",
+    "offset_mm": [
+      1.2,
+      0
+    ],
+    "ref": "TP3",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 8,
+    "exit_code": 5,
+    "net": "/GPO1",
+    "offset_mm": [
+      -1.2,
+      0
+    ],
+    "ref": "TP3",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 4,
+    "exit_code": 5,
+    "net": "/GPO1",
+    "offset_mm": [
+      0,
+      1.2
+    ],
+    "ref": "TP3",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 5,
+    "exit_code": 5,
+    "net": "/GPO1",
+    "offset_mm": [
+      0,
+      -1.2
+    ],
+    "ref": "TP3",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 2,
+    "exit_code": 5,
+    "net": "/GPO0",
+    "offset_mm": [
+      0.3,
+      0
+    ],
+    "ref": "TP4",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 3,
+    "exit_code": 5,
+    "net": "/GPO0",
+    "offset_mm": [
+      -0.3,
+      0
+    ],
+    "ref": "TP4",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 2,
+    "exit_code": 5,
+    "net": "/GPO0",
+    "offset_mm": [
+      0,
+      0.3
+    ],
+    "ref": "TP4",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 1,
+    "exit_code": 5,
+    "net": "/GPO0",
+    "offset_mm": [
+      0,
+      -0.3
+    ],
+    "ref": "TP4",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 5,
+    "exit_code": 5,
+    "net": "/GPO0",
+    "offset_mm": [
+      0.5,
+      0
+    ],
+    "ref": "TP4",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 4,
+    "exit_code": 5,
+    "net": "/GPO0",
+    "offset_mm": [
+      -0.5,
+      0
+    ],
+    "ref": "TP4",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 3,
+    "exit_code": 5,
+    "net": "/GPO0",
+    "offset_mm": [
+      0,
+      0.5
+    ],
+    "ref": "TP4",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 1,
+    "exit_code": 5,
+    "net": "/GPO0",
+    "offset_mm": [
+      0,
+      -0.5
+    ],
+    "ref": "TP4",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 6,
+    "exit_code": 5,
+    "net": "/GPO0",
+    "offset_mm": [
+      0.8,
+      0
+    ],
+    "ref": "TP4",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 8,
+    "exit_code": 5,
+    "net": "/GPO0",
+    "offset_mm": [
+      -0.8,
+      0
+    ],
+    "ref": "TP4",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 5,
+    "exit_code": 5,
+    "net": "/GPO0",
+    "offset_mm": [
+      0,
+      0.8
+    ],
+    "ref": "TP4",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 1,
+    "exit_code": 5,
+    "net": "/GPO0",
+    "offset_mm": [
+      0,
+      -0.8
+    ],
+    "ref": "TP4",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 12,
+    "exit_code": 5,
+    "net": "/GPO0",
+    "offset_mm": [
+      1.2,
+      0
+    ],
+    "ref": "TP4",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 8,
+    "exit_code": 5,
+    "net": "/GPO0",
+    "offset_mm": [
+      -1.2,
+      0
+    ],
+    "ref": "TP4",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 7,
+    "exit_code": 5,
+    "net": "/GPO0",
+    "offset_mm": [
+      0,
+      1.2
+    ],
+    "ref": "TP4",
+    "unconnected_count": 0
+  },
+  {
+    "error_count": 3,
+    "exit_code": 5,
+    "net": "/GPO0",
+    "offset_mm": [
+      0,
+      -1.2
+    ],
+    "ref": "TP4",
+    "unconnected_count": 0
+  }
+]
