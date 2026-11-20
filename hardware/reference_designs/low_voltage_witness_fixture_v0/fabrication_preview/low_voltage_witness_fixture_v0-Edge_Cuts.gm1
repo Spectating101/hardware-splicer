@@ -1,0 +1,26 @@
+%TF.GenerationSoftware,KiCad,Pcbnew,9.0.2+dfsg-1*%
+%TF.CreationDate,2026-11-20T02:52:11+08:00*%
+%TF.ProjectId,low_voltage_witness_fixture_v0,6c6f775f-766f-46c7-9461-67655f776974,rev?*%
+%TF.SameCoordinates,Original*%
+%TF.FileFunction,Profile,NP*%
+%FSLAX46Y46*%
+G04 Gerber Fmt 4.6, Leading zero omitted, Abs format (unit mm)*
+G04 Created by KiCad (PCBNEW 9.0.2+dfsg-1) date 2026-11-20 02:52:11*
+%MOMM*%
+%LPD*%
+G01*
+G04 APERTURE LIST*
+%TA.AperFunction,Profile*%
+%ADD10C,0.050000*%
+%TD*%
+G04 APERTURE END LIST*
+D10*
+X225000000Y-134000000D02*
+X100000000Y-134000000D01*
+X100000000Y-134000000D02*
+X100000000Y-76000000D01*
+X100000000Y-76000000D02*
+X225000000Y-76000000D01*
+X225000000Y-76000000D02*
+X225000000Y-134000000D01*
+M02*

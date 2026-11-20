@@ -1,0 +1,17 @@
+
+Note: No compatibility mode selected!
+
+
+Circuit: * dc approximation of the 5 v low-voltage witness fixture (simulation only).
+
+Doing analysis at TEMP = 27.000000 and TNOM = 27.000000
+
+Using SPARSE 1.3 as Direct Linear Solver
+
+No. of Data Rows : 1
+v(load_plus) = 4.962779e+00
+v(ada_out) = 4.967742e+00
+v(fused_plus) = 4.975186e+00
+i(v_src) = -4.96278e-01
+load_power_w = 2.462918e+00
+ngspice-44.2 done
