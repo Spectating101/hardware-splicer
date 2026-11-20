@@ -38,7 +38,8 @@ Equivalent:
 make splice-ui-build
 export HARDWARE_SPLICER_SERVE_UI=1
 export HARDWARE_SPLICER_TMP_ROOT=/var/lib/hardware-splicer/builds
-mkdir -p "$HARDWARE_SPLICER_TMP_ROOT"
+export HARDWARE_SPLICER_STATE_DIR=/var/lib/hardware-splicer/state
+mkdir -p "$HARDWARE_SPLICER_TMP_ROOT" "$HARDWARE_SPLICER_STATE_DIR"
 hs-serve --host 127.0.0.1 --port 8787
 ```
 
@@ -49,7 +50,8 @@ hs-serve --host 127.0.0.1 --port 8787
 ```bash
 export PYTHONPATH=src
 export HARDWARE_SPLICER_TMP_ROOT=/var/lib/hardware-splicer/builds
-mkdir -p "$HARDWARE_SPLICER_TMP_ROOT"
+export HARDWARE_SPLICER_STATE_DIR=/var/lib/hardware-splicer/state
+mkdir -p "$HARDWARE_SPLICER_TMP_ROOT" "$HARDWARE_SPLICER_STATE_DIR"
 hs-serve --host 127.0.0.1 --port 8787
 ```
 

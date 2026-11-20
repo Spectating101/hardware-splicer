@@ -26,6 +26,11 @@ export HARDWARE_SPLICER_TMP_ROOT=/mnt/bigdisk/hardware-splicer-scratch
 
 Use a mounted volume or network share when your root disk is tight — CI uses ephemeral GitHub runners and does not need this.
 
+Durable server state (job database, projects, API outputs) defaults to
+`.cache/hardware-splicer/state/` in the same checkout, separate from scratch, so
+`cleanup_test_artifacts.sh` and other worktrees do not touch it. Give a test server
+its own `HARDWARE_SPLICER_STATE_DIR`; see [SETUP.md](SETUP.md#where-server-state-lives).
+
 ## What each target covers
 
 | Target | What it proves |

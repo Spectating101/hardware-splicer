@@ -22,7 +22,7 @@
 
 | Variable | Default | Meaning |
 |----------|---------|---------|
-| `HARDWARE_SPLICER_OUTPUT_ROOT` | `/tmp/hardware_splicer_api` | Primary allowed root for `build_dir` |
+| `HARDWARE_SPLICER_OUTPUT_ROOT` | `$HARDWARE_SPLICER_STATE_DIR/api` | Primary allowed root for `build_dir` |
 | `HARDWARE_SPLICER_BUILD_FILE_ROOTS` | (empty) | Extra allowed roots (`:`-separated on Unix) |
 | `HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR` | `0` | Set `1` for trusted local dev (allows any existing `build_dir`) |
 | `HARDWARE_SPLICER_MAX_BUILD_FILE_BYTES` | `8388608` | Max download/artifact size |

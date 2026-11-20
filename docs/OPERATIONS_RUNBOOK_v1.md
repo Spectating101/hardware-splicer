@@ -28,7 +28,7 @@ KiCad **must** run on the same machine as compile. There is no remote KiCad work
 |----------|---------|---------|
 | `PYTHONPATH` | — | Set to `src` if not using pip install |
 | `HARDWARE_SPLICER_TMP_ROOT` | system temp | Build output directory |
-| `HARDWARE_SPLICER_STATE_DIR` | `/tmp/hardware_splicer_state` | Job DB parent |
+| `HARDWARE_SPLICER_STATE_DIR` | checkout `.cache/hardware-splicer/state`, installed `~/.local/state/hardware-splicer` | Job DB, outputs and projects parent |
 | `HARDWARE_SPLICER_JOB_DB` | under state dir | SQLite path override |
 | `HARDWARE_SPLICER_JOB_WORKERS` | `1` | In-process job workers |
 | `HARDWARE_SPLICER_SERVE_UI` | off | `1` = serve `apps/splice-ui/dist` at `/` |

@@ -33,6 +33,26 @@ Expected `doctor` output for a full fab demo:
 - `fab_export_ready=True` (`kicad-cli` on PATH)
 - `dependencies=node:ok, kicad_cli:ok, fastapi:ok, uvicorn:ok`
 
+## Where server state lives
+
+The job database, saved projects and API build outputs are durable state. Their
+default location depends on how Hardware-Splicer runs, so separate checkouts and
+worktrees never share a job database:
+
+1. `HARDWARE_SPLICER_STATE_DIR`, `HARDWARE_SPLICER_JOB_DB`,
+   `HARDWARE_SPLICER_OUTPUT_ROOT` and `HARDWARE_SPLICER_PROJECT_ROOT` win when set.
+2. In a source checkout: `.cache/hardware-splicer/state/` inside that checkout
+   (gitignored, next to the `HARDWARE_SPLICER_TMP_ROOT` scratch default). The job
+   database is `state/jobs.sqlite3`, outputs are `state/api/`, projects are
+   `state/api/projects/`.
+3. For an installed package: `$XDG_STATE_HOME/hardware-splicer`, else
+   `~/.local/state/hardware-splicer`, with the same layout.
+
+Nothing defaults to `/tmp`. Setting only `HARDWARE_SPLICER_STATE_DIR` moves the job
+database, outputs and projects together. Scratch trees stay under
+`HARDWARE_SPLICER_TMP_ROOT` (see [TESTING.md](TESTING.md)); they are disposable,
+state is not. The resolver is `hardware_splicer.state_paths`.
+
 ## 3D-Splicer (optional mechanical path)
 
 ```bash
