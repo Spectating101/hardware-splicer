@@ -22,6 +22,12 @@ def parser():
     feedback.add_argument("evidence", type=Path)
     feedback.add_argument("review", type=Path)
     feedback.add_argument("destination", type=Path)
+    feedback.add_argument("--replay-receipt", type=Path,
+                          help="Policy Lab verify output for this review (required unless --policy-lab-run is set)")
+    feedback.add_argument("--policy-lab-run", type=Path,
+                          help="Policy Lab applications/hardware-policy/run.mjs; HS replays the review with it")
+    feedback.add_argument("--candidate", action="append", default=[],
+                          help="Apply this proposed modelled candidate design change from a BLOCKED review")
     return command
 
 
@@ -38,7 +44,10 @@ def dispatch(engine, args):
     if args.command == "export":
         value = export_policy_evidence(engine, args.project_id, args.revision)
     elif args.command == "feedback":
-        value = validate_policy_feedback(engine, args.evidence.read_bytes(), args.review.read_bytes())
+        value = validate_policy_feedback(
+            engine, args.evidence.read_bytes(), args.review.read_bytes(),
+            replay_receipt_bytes=args.replay_receipt.read_bytes() if args.replay_receipt else None,
+            policy_lab_run=args.policy_lab_run, candidates=tuple(args.candidate))
     else:
         raise ValueError("Unknown policy-layer command.")
     artifact = write_new(args.destination, value)

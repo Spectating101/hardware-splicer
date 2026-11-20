@@ -40,11 +40,15 @@ physical-operation decision stays blocked. Missing measurements remain missing.
 Verification reexecutes Policy Lab's installed domain adapter and foundation over
 the original evidence and compares the complete assessment.
 
-After replay, validate the returned proposal in HS:
+After replay, validate the returned proposal in HS, passing Policy Lab's verify
+output (or `--policy-lab-run path/to/run.mjs`, or `HARDWARE_SPLICER_POLICY_LAB_RUN`,
+so HS runs the replay itself):
 
 ```bash
+node applications/hardware-policy/run.mjs verify \
+  --review review/review.json --evidence evidence.json > review/replay.json
 hs-policy --project-root /path/to/projects --jobs-db /path/to/jobs.sqlite3 \
-  feedback evidence.json review/review.json proposal.json
+  feedback evidence.json review/review.json proposal.json --replay-receipt review/replay.json
 ```
 
 HS binds feedback to the exact original export bytes, project, revision and run;
@@ -54,9 +58,20 @@ project or queuing a job. A later explicit `DigitalStudyEngine.run_revision` use
 that proposal for a new digital calculation. Feedback for an earlier revision is
 rejected after the project changes.
 
-HS's feedback validator does not itself replay JavaScript policy logic. Its
-receipt labels the review as supplied, with source binding and HS requirements
-validated. The separate Policy Lab verifier establishes reproduction.
+Feedback is refused unless:
+
+- the review's decision is one HS understands (`BLOCKED` or `ADMIT_WITH_LIMIT`)
+  and agrees with its own rows: `ADMIT_WITH_LIMIT` with unmet rows, a failed
+  target or a failed study check is refused, as is `BLOCKED` with no unmet rows
+  or one that omits a failed target or check;
+- Policy Lab's replay is verified, either by running its verifier from a
+  configured path or through its verify receipt. A receipt binds the evidence
+  bytes and decision, not the review bytes; the proposal says which route was used.
+
+Only the review's stated `revision_requirements` become changes. A modelled
+candidate design change is applied only when named with `--candidate` and only
+from a `BLOCKED` review; an admitting review never carries a change it did not
+state, and HS refuses any resolved change outside the stated overrides.
 
 ## Reproduce the Fielddeck experiment
 

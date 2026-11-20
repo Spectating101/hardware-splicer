@@ -17,7 +17,7 @@ from hardware_splicer.change_dossier import (CHANGE_EVIDENCE_SCHEMA, REVISION_HE
                                              build_change_evidence, export_revision_head, write_change_evidence)
 from hardware_splicer.digital_engine import DigitalStudyEngine
 from hardware_splicer.jobs import JobBackend, JobStore
-from hardware_splicer.policy_layer import (REVIEW_SCHEMA, canonical_json_bytes, export_policy_evidence,
+from hardware_splicer.policy_layer import (REVIEW_SCHEMA, VERIFICATION_SCHEMA, canonical_json_bytes, export_policy_evidence,
                                            validate_policy_feedback)
 from hardware_splicer.project_store import ProjectStore, RevisionConflict
 
@@ -86,7 +86,19 @@ def _review(export_path, export, requirements, unmet):
             'source_binding': {'evidence_sha256': sha256(export_path.read_bytes()).hexdigest(),
                                'project_id': export['project_id'], 'revision': export['revision'],
                                'run_id': export['run_id']},
+            'target_results': [{'id': row['id'], 'passed': False} for row in unmet if 'operator' in row],
             'unmet_constraints': unmet, 'revision_requirements': requirements}
+
+
+def _receipt(review_path):
+    review = json.loads(review_path.read_bytes())
+    return canonical_json_bytes({'schema': VERIFICATION_SCHEMA, 'verified': True, 'decision': review['decision'],
+                                 'source_binding': review['source_binding'], 'physical_authority_granted': False})
+
+
+def _feedback(engine, base_path, review_path):
+    return validate_policy_feedback(engine, base_path.read_bytes(), review_path.read_bytes(),
+                                    replay_receipt_bytes=_receipt(review_path))
 
 
 UNMET = [{'id': 'engineering.work_runtime', 'reason': 'ENGINEERING_CONSTRAINT_FAILED', 'actual': 3.0,
@@ -104,7 +116,7 @@ def chain(engine, tmp_path):
     base_path = _write(root / 'r1-export.json', base_export)
     review_path = _write(root / 'r1-review.json',
                          _review(base_path, base_export, {'minimum_work_runtime_h': 3.5}, UNMET))
-    proposal = validate_policy_feedback(engine, base_path.read_bytes(), review_path.read_bytes())
+    proposal = _feedback(engine, base_path, review_path)
     proposal_path = _write(root / 'proposal.json', proposal)
     applied = engine.run_revision(project, base_revision=1, requirements=proposal['resolved_requirements'],
                                   change_request='Apply Policy Lab runtime proposal')
@@ -203,7 +215,7 @@ def test_requirements_not_from_the_proposal_are_refused(engine, tmp_path):
     base_path = _write(root / 'r1-export.json', export)
     review_path = _write(root / 'r1-review.json', _review(base_path, export, {'minimum_work_runtime_h': 3.5}, UNMET))
     proposal_path = _write(root / 'proposal.json',
-                           validate_policy_feedback(engine, base_path.read_bytes(), review_path.read_bytes()))
+                           _feedback(engine, base_path, review_path))
     # The revision that was actually run used a different target than the proposal.
     current = engine.study(project)
     assert engine.run_revision(project, base_revision=1,

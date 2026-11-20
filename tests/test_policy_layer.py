@@ -12,7 +12,7 @@ import zipfile
 from hardware_splicer import digital_project as digital
 from hardware_splicer.digital_engine import DigitalStudyEngine
 from hardware_splicer.policy_layer import (
-    EVIDENCE_SCHEMA, REVIEW_SCHEMA, PolicyLayerError, canonical_json_bytes,
+    EVIDENCE_SCHEMA, REVIEW_SCHEMA, VERIFICATION_SCHEMA, PolicyLayerError, canonical_json_bytes,
     export_policy_evidence, read_json_bytes, validate_policy_evidence, validate_policy_feedback,
 )
 from hardware_splicer.policy_layer_cli import run as cli_run, write_new
@@ -32,15 +32,24 @@ class PolicyLayerTests(unittest.TestCase):
         self.engine.close()
         self.directory.cleanup()
 
+    def binding(self):
+        return {"evidence_sha256": hashlib.sha256(self.evidence_bytes).hexdigest(),
+                "project_id": self.project, "revision": 1, "run_id": self.evidence["run_id"]}
+
     def review(self, overrides=None):
-        return {"schema": REVIEW_SCHEMA,
-                "source_binding": {"evidence_sha256": hashlib.sha256(self.evidence_bytes).hexdigest(),
-                                   "project_id": self.project, "revision": 1, "run_id": self.evidence["run_id"]},
+        return {"schema": REVIEW_SCHEMA, "decision": "ADMIT_WITH_LIMIT", "unmet_constraints": [],
+                "target_results": [{"id": "mass", "passed": True}],
+                "source_binding": self.binding(),
                 "revision_requirements": {"payload_mass_g": 10} if overrides is None else overrides,
                 "physical_authority_granted": False}
 
-    def feedback(self, review):
-        return validate_policy_feedback(self.engine, self.evidence_bytes, canonical_json_bytes(review))
+    def receipt(self, review):
+        return canonical_json_bytes({"schema": VERIFICATION_SCHEMA, "verified": True, "source_binding": review["source_binding"],
+                                     "decision": review["decision"], "physical_authority_granted": False})
+
+    def feedback(self, review, **kwargs):
+        kwargs.setdefault("replay_receipt_bytes", self.receipt(review))
+        return validate_policy_feedback(self.engine, self.evidence_bytes, canonical_json_bytes(review), **kwargs)
 
     def test_export_preserves_real_study_units_and_full_artifact_inventory(self):
         before = self.engine.projects.load(self.project)
@@ -63,7 +72,9 @@ class PolicyLayerTests(unittest.TestCase):
         self.assertEqual(proposal["status"], "validated_proposal")
         self.assertEqual(proposal["resolved_requirements"]["payload_mass_g"], 10)
         self.assertEqual(proposal["requirement_changes"]["payload_mass_g"], {"before": 0, "after": 10})
-        self.assertIn("replay not performed", proposal["policy_review_verification"])
+        self.assertIn("not replayed here", proposal["policy_review_verification"])
+        self.assertEqual(proposal["policy_decision"], "ADMIT_WITH_LIMIT")
+        self.assertEqual(proposal["candidate_overrides"], {})
         self.assertFalse(proposal["automatic_execution"])
         self.assertFalse(proposal["physical_authority_granted"])
         self.assertEqual(self.engine.projects.load(self.project), before)
@@ -89,7 +100,8 @@ class PolicyLayerTests(unittest.TestCase):
         different_bytes = json.dumps(self.evidence, indent=2).encode()
         self.assertEqual(json.loads(different_bytes), self.evidence)
         with self.assertRaisesRegex(PolicyLayerError, "exact evidence bytes"):
-            validate_policy_feedback(self.engine, different_bytes, canonical_json_bytes(self.review()))
+            validate_policy_feedback(self.engine, different_bytes, canonical_json_bytes(self.review()),
+                                     replay_receipt_bytes=self.receipt(self.review()))
 
     def test_feedback_rejects_project_revision_run_and_hash_substitution(self):
         for field, value in (("project_id", "another-project"), ("revision", 2),
@@ -114,7 +126,8 @@ class PolicyLayerTests(unittest.TestCase):
         review = self.review()
         review["source_binding"]["evidence_sha256"] = hashlib.sha256(changed_bytes).hexdigest()
         with self.assertRaisesRegex(PolicyLayerError, "verified stored study"):
-            validate_policy_feedback(self.engine, changed_bytes, canonical_json_bytes(review))
+            validate_policy_feedback(self.engine, changed_bytes, canonical_json_bytes(review),
+                                     replay_receipt_bytes=self.receipt(review))
 
     def test_nonfinite_boolean_unknown_and_out_of_bounds_overrides_are_rejected(self):
         for overrides in ({"payload_mass_g": True}, {"payload_mass_g": 51}, {"unknown": 1}):
@@ -123,7 +136,8 @@ class PolicyLayerTests(unittest.TestCase):
         for token in ("NaN", "Infinity", "-Infinity", "1e400"):
             raw = json.dumps(self.review()).replace('"payload_mass_g": 10', '"payload_mass_g": ' + token).encode()
             with self.subTest(token=token), self.assertRaisesRegex(PolicyLayerError, "finite"):
-                validate_policy_feedback(self.engine, self.evidence_bytes, raw)
+                validate_policy_feedback(self.engine, self.evidence_bytes, raw,
+                                         replay_receipt_bytes=self.receipt(self.review()))
 
     def test_physical_promotion_is_rejected_at_any_depth(self):
         for location in ("root", "nested"):
@@ -185,6 +199,100 @@ class PolicyLayerTests(unittest.TestCase):
         self.assertEqual(evidence_file.read_bytes(), original)
         with self.assertRaises(FileExistsError):
             write_new(evidence_file, {"replacement": True})
+
+    # Decision, replay and candidate enforcement.
+    def blocked(self, **extra):
+        review = self.review({"payload_mass_g": 10})
+        review.update(decision="BLOCKED", target_results=[{"id": "mass", "passed": False}],
+                      unmet_constraints=[{"id": "mass", "reason": "TARGET_NOT_MET"}], **extra)
+        return review
+
+    def candidate(self, **fields):
+        return {"id": "lighter-payload", "kind": "modelled_candidate_design_change", "status": "PROPOSED",
+                "requirement_overrides": {"payload_mass_g": 5}, **fields}
+
+    def test_unknown_or_missing_decision_is_refused(self):
+        for decision in ("PASS", "ALLOW", "", None):
+            review = self.review()
+            review["decision"] = decision
+            with self.subTest(decision=decision), self.assertRaisesRegex(PolicyLayerError, "Unsupported policy review decision"):
+                self.feedback(review)
+
+    def test_admit_with_unmet_rows_or_failed_target_contradicts_itself(self):
+        review = self.review()
+        review["unmet_constraints"] = [{"id": "mass", "reason": "TARGET_NOT_MET"}]
+        with self.assertRaisesRegex(PolicyLayerError, "contradicts"):
+            self.feedback(review)
+        review = self.review()
+        review["target_results"] = [{"id": "mass", "passed": False}]
+        with self.assertRaisesRegex(PolicyLayerError, "contradicts"):
+            self.feedback(review)
+
+    def test_admit_contradicted_by_a_failed_study_check_is_refused(self):
+        failed = deepcopy(self.evidence["study"])
+        failed["summary"]["constraints"][0]["passed"] = False
+        with patch("hardware_splicer.policy_layer.validate_policy_evidence", return_value={**self.evidence, "study": failed}):
+            with self.assertRaisesRegex(PolicyLayerError, "contradicts"):
+                self.feedback(self.review())
+
+    def test_blocked_without_unmet_rows_or_omitting_a_failed_target_is_refused(self):
+        review = self.blocked()
+        review["unmet_constraints"] = []
+        with self.assertRaisesRegex(PolicyLayerError, "states no unmet rows"):
+            self.feedback(review)
+        review = self.blocked()
+        review["target_results"].append({"id": "speed", "passed": False})
+        with self.assertRaisesRegex(PolicyLayerError, "omits a failed target"):
+            self.feedback(review)
+
+    def test_missing_or_mismatched_replay_is_refused(self):
+        review = self.review()
+        with self.assertRaisesRegex(PolicyLayerError, "replay not verified"):
+            self.feedback(review, replay_receipt_bytes=None)
+        for field, value in (("verified", False), ("decision", "BLOCKED"), ("schema", "other"),
+                             ("source_binding", {**review["source_binding"], "revision": 2})):
+            receipt = json.loads(self.receipt(review))
+            receipt[field] = value
+            with self.subTest(field=field), self.assertRaisesRegex(PolicyLayerError, "replay not verified"):
+                self.feedback(review, replay_receipt_bytes=canonical_json_bytes(receipt))
+
+    def test_configured_verifier_is_run_and_its_failure_refuses(self):
+        script = self.root / "fake-run.mjs"
+        script.write_text("process.stderr.write('Hardware policy review does not reproduce.'); process.exit(1);\n")
+        with self.assertRaisesRegex(PolicyLayerError, "replay not verified: Hardware policy review does not reproduce"):
+            self.feedback(self.review(), replay_receipt_bytes=None, policy_lab_run=script)
+        review = self.review()
+        script.write_text("process.stdout.write(" + json.dumps(self.receipt(review).decode()) + ");\n")
+        proposal = self.feedback(review, replay_receipt_bytes=None, policy_lab_run=script)
+        self.assertEqual(proposal["policy_review_verification"], "replayed by Policy Lab verify here")
+
+    def test_admitting_review_never_carries_an_unstated_change(self):
+        review = self.review({})
+        review["candidate_design_changes"] = [self.candidate()]
+        proposal = self.feedback(review)
+        self.assertEqual(proposal["requirement_changes"], {})
+        self.assertEqual(proposal["applied_candidates"], [])
+        with self.assertRaisesRegex(PolicyLayerError, "admits the design"):
+            self.feedback(review, candidates=("lighter-payload",))
+
+    def test_selected_candidate_of_a_blocked_review_becomes_a_stated_change(self):
+        review = self.blocked(candidate_design_changes=[self.candidate(requirement_overrides={"gust_scale": 0.5})])
+        proposal = self.feedback(review, candidates=("lighter-payload",))
+        self.assertEqual(proposal["candidate_overrides"], {"gust_scale": 0.5})
+        self.assertEqual(set(proposal["requirement_changes"]), {"payload_mass_g", "gust_scale"})
+        self.assertEqual(proposal["policy_decision"], "BLOCKED")
+        unselected = self.feedback(review)
+        self.assertEqual(set(unselected["requirement_changes"]), {"payload_mass_g"})
+
+    def test_unknown_unproposed_or_clashing_candidates_are_refused(self):
+        for row, match in ((self.candidate(status="NOT_NEEDED"), "not a proposed"),
+                           (self.candidate(kind="fix"), "not a proposed"),
+                           (self.candidate(), "already stated")):
+            review = self.blocked(candidate_design_changes=[row])
+            with self.subTest(row=row), self.assertRaisesRegex(PolicyLayerError, match):
+                self.feedback(review, candidates=("lighter-payload",))
+        with self.assertRaisesRegex(PolicyLayerError, "not a proposed"):
+            self.feedback(self.blocked(candidate_design_changes=[]), candidates=("missing",))
 
 
 if __name__ == "__main__":

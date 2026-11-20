@@ -11,9 +11,11 @@ from copy import deepcopy
 import hashlib
 import json
 import math
+import os
 from pathlib import Path, PurePosixPath
 import re
 import subprocess
+import tempfile
 from typing import Any, Mapping
 
 from . import digital_project as digital
@@ -275,8 +277,105 @@ def export_policy_evidence(engine, project_id: str, revision: int | None = None)
     return validate_policy_evidence(value)
 
 
-def validate_policy_feedback(engine, evidence_bytes: bytes, review_bytes: bytes) -> dict:
-    """Return an exact-revision numeric proposal, without applying or executing it."""
+# Decisions Policy Lab's foundation emits for a hardware review.
+REVIEW_DECISIONS = frozenset({"BLOCKED", "ADMIT_WITH_LIMIT"})
+VERIFICATION_SCHEMA = "policylab.hardware_policy_verification.v1"
+CANDIDATE_KIND = "modelled_candidate_design_change"
+POLICY_LAB_VERIFY_ENV = "HARDWARE_SPLICER_POLICY_LAB_RUN"
+
+
+def _review_decision(review: Mapping[str, Any], evidence: Mapping[str, Any]) -> str:
+    """Refuse an unknown decision, or one its own unmet rows and the evidence contradict."""
+    decision = review.get("decision")
+    if decision not in REVIEW_DECISIONS:
+        raise PolicyLayerError("Unsupported policy review decision: " + repr(decision))
+    unmet, targets = review.get("unmet_constraints"), review.get("target_results")
+    if (not isinstance(unmet, list) or any(not isinstance(row, dict) or not isinstance(row.get("id"), str) for row in unmet)
+            or not isinstance(targets, list) or any(not isinstance(row, dict) for row in targets)):
+        raise PolicyLayerError("Policy review must list its unmet constraints and target results.")
+    failed_targets = {row.get("id") for row in targets if row.get("passed") is not True}
+    failed_checks = {"engineering." + row["id"] for row in evidence["study"]["summary"]["constraints"]
+                     if row.get("passed") is not True}
+    listed = {row["id"] for row in unmet}
+    if decision == "ADMIT_WITH_LIMIT" and (unmet or failed_targets or failed_checks):
+        raise PolicyLayerError("Policy review decision ADMIT_WITH_LIMIT contradicts its unmet rows or the failed study checks.")
+    if decision == "BLOCKED" and not unmet:
+        raise PolicyLayerError("Policy review decision BLOCKED states no unmet rows.")
+    if not failed_targets <= listed or not failed_checks <= listed:
+        raise PolicyLayerError("Policy review omits a failed target or study check from its unmet rows.")
+    return decision
+
+
+def _replay_policy_review(evidence_bytes: bytes, review_bytes: bytes, run_mjs: Path) -> dict:
+    with tempfile.TemporaryDirectory(prefix="hs-policy-replay-") as scratch:
+        evidence, review = Path(scratch) / "evidence.json", Path(scratch) / "review.json"
+        evidence.write_bytes(evidence_bytes)
+        review.write_bytes(review_bytes)
+        try:
+            done = subprocess.run(["node", str(run_mjs), "verify", "--review", str(review), "--evidence", str(evidence)],
+                                  capture_output=True, text=True, timeout=120, check=False)
+        except (OSError, subprocess.SubprocessError) as exc:
+            raise PolicyLayerError("Policy review replay not verified: Policy Lab verify could not run.") from exc
+    if done.returncode != 0:
+        raise PolicyLayerError("Policy review replay not verified: " + (done.stderr.strip() or "verify failed")[-500:])
+    return read_json_bytes(done.stdout.encode("utf-8"))
+
+
+def _verified_replay(evidence_bytes, review_bytes, review, binding, replay_receipt_bytes, policy_lab_run):
+    """Require Policy Lab's own replay: run its verifier if configured, else check a supplied receipt."""
+    run_mjs = policy_lab_run or os.environ.get(POLICY_LAB_VERIFY_ENV)
+    if run_mjs:
+        receipt, how = _replay_policy_review(evidence_bytes, review_bytes, Path(run_mjs)), "replayed by Policy Lab verify here"
+    elif replay_receipt_bytes is not None:
+        receipt = read_json_bytes(replay_receipt_bytes)
+        how = ("supplied Policy Lab verify receipt; it binds the evidence bytes and decision, "
+               "not the review bytes, so it was not replayed here")
+    else:
+        raise PolicyLayerError("Policy review replay not verified: supply Policy Lab's verify receipt "
+                               "or configure " + POLICY_LAB_VERIFY_ENV + ".")
+    _no_physical_authority(receipt)
+    if (receipt.get("schema") != VERIFICATION_SCHEMA or receipt.get("verified") is not True
+            or receipt.get("source_binding") != binding or receipt.get("decision") != review["decision"]
+            or receipt.get("physical_authority_granted") is not False):
+        raise PolicyLayerError("Policy review replay not verified: the receipt does not verify this review.")
+    return receipt, how
+
+
+def _candidate_overrides(review: Mapping[str, Any], decision: str, selected: tuple[str, ...]) -> tuple[dict, list]:
+    """Requirement overrides from explicitly selected modelled candidates of a BLOCKED review."""
+    candidates = review.get("candidate_design_changes")
+    if not selected:
+        return {}, []
+    if decision != "BLOCKED":
+        raise PolicyLayerError("A review that admits the design states no candidate design change to apply.")
+    if not isinstance(candidates, list):
+        raise PolicyLayerError("The policy review states no candidate design changes.")
+    by_id = {row.get("id"): row for row in candidates if isinstance(row, dict)}
+    overrides, applied = {}, []
+    for name in selected:
+        row = by_id.get(name)
+        if (row is None or row.get("kind") != CANDIDATE_KIND or row.get("status") != "PROPOSED"
+                or not isinstance(row.get("requirement_overrides"), dict) or not row["requirement_overrides"]
+                or any(type(v) not in (int, float) for v in row["requirement_overrides"].values())):
+            raise PolicyLayerError("Candidate design change " + repr(name) + " is not a proposed modelled candidate in this review.")
+        clash = set(row["requirement_overrides"]) & (set(overrides) | set(review["revision_requirements"]))
+        if clash:
+            raise PolicyLayerError("Candidate design change overrides an already stated requirement: " + ", ".join(sorted(clash)))
+        overrides.update(row["requirement_overrides"])
+        applied.append(deepcopy(row))
+    return overrides, applied
+
+
+def validate_policy_feedback(engine, evidence_bytes: bytes, review_bytes: bytes, *,
+                             replay_receipt_bytes: bytes | None = None, policy_lab_run: str | Path | None = None,
+                             candidates: tuple[str, ...] | list[str] = ()) -> dict:
+    """Return an exact-revision numeric proposal, without applying or executing it.
+
+    The review must carry a decision HS understands that agrees with its own
+    unmet rows, and Policy Lab's replay must be verified. Only the review's
+    stated ``revision_requirements`` and explicitly selected candidates of a
+    BLOCKED review become requirement changes.
+    """
     evidence = validate_policy_evidence(read_json_bytes(evidence_bytes))
     review = read_json_bytes(review_bytes)
     _no_physical_authority(review)
@@ -287,9 +386,15 @@ def validate_policy_feedback(engine, evidence_bytes: bytes, review_bytes: bytes)
                "run_id": evidence["run_id"]}
     if review.get("source_binding") != binding or type(review.get("source_binding", {}).get("revision")) is not int:
         raise PolicyLayerError("Policy review does not bind the exact evidence bytes and revision.")
-    overrides = review.get("revision_requirements")
-    if not isinstance(overrides, dict) or any(type(v) not in (int, float) for v in overrides.values()):
+    stated = review.get("revision_requirements")
+    if not isinstance(stated, dict) or any(type(v) not in (int, float) for v in stated.values()):
         raise PolicyLayerError("Policy revision_requirements must contain explicit finite numeric overrides.")
+    decision = _review_decision(review, evidence)
+    selected = tuple(candidates)
+    extra, applied = _candidate_overrides(review, decision, selected)
+    receipt, verification = _verified_replay(evidence_bytes, review_bytes, review, binding,
+                                             replay_receipt_bytes, policy_lab_run)
+    overrides = {**stated, **extra}
     project, revision = evidence["project_id"], evidence["revision"]
     if engine.projects.load(project)["revision"] != revision:
         raise RevisionConflict("The project changed after the policy assessment; export and assess the new revision.")
@@ -306,10 +411,17 @@ def validate_policy_feedback(engine, evidence_bytes: bytes, review_bytes: bytes)
         raise PolicyLayerError("Policy revision requirements are unsupported: " + str(exc)) from exc
     changes = {key: {"before": actual["summary"]["requirements"][key], "after": val}
                for key, val in resolved.items() if val != actual["summary"]["requirements"][key]}
+    if not set(changes) <= set(overrides):
+        # A requirement the review did not state must never change.
+        raise PolicyLayerError("Resolved requirements change values the review did not state: "
+                               + ", ".join(sorted(set(changes) - set(overrides))))
     return {"schema": FEEDBACK_SCHEMA, "ok": True, "status": "validated_proposal",
             "source_binding": binding, "policy_review_sha256": hashlib.sha256(review_bytes).hexdigest(),
-            "policy_review_verification": "supplied review; source binding and HS requirements validated, Policy Lab replay not performed here",
+            "policy_decision": decision,
+            "policy_review_verification": verification,
+            "policy_review_replay_sha256": hashlib.sha256(canonical_json_bytes(receipt)).hexdigest(),
             "project_id": project, "base_revision": revision, "run_id": evidence["run_id"],
-            "revision_requirements": deepcopy(overrides), "resolved_requirements": resolved,
+            "revision_requirements": deepcopy(stated), "candidate_overrides": deepcopy(extra),
+            "applied_candidates": applied, "resolved_requirements": resolved,
             "requirement_changes": changes, "automatic_execution": False,
             "physical_authority_granted": False, "project_changed": False}
