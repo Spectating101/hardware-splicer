@@ -45,7 +45,8 @@ def main() -> int:
         print(json.dumps({"ok":False,"error":str(exc)},indent=2))
         return 2
     print(json.dumps(verdict,indent=2,sort_keys=True))
-    return 0
+    # A refused or rejected verdict (ok is not True) must not look like success to a shell or CI step.
+    return 0 if verdict.get("ok") is True else 3
 
 
 if __name__=="__main__":
