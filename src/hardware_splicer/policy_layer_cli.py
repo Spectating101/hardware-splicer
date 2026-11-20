@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import json
 from pathlib import Path
 
 from .digital_engine import DigitalStudyEngine
@@ -48,6 +49,14 @@ def dispatch(engine, args):
             engine, args.evidence.read_bytes(), args.review.read_bytes(),
             replay_receipt_bytes=args.replay_receipt.read_bytes() if args.replay_receipt else None,
             policy_lab_run=args.policy_lab_run, candidates=tuple(args.candidate))
+        # Keep the validated proposal with the project so the bench can show it.
+        from .change_history import record_proposal
+
+        artifact = write_new(args.destination, value)
+        history = record_proposal(engine.projects, value, json.loads(args.review.read_bytes()))
+        return {"ok": True, "schema": value["schema"], "artifact": artifact, "change_history": history,
+                "project_id": value["project_id"], "revision": value["base_revision"],
+                "physical_authority_granted": False, "automatic_execution": False}
     else:
         raise ValueError("Unknown policy-layer command.")
     artifact = write_new(args.destination, value)

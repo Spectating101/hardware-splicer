@@ -38,6 +38,7 @@ class PolicyLayerTests(unittest.TestCase):
 
     def review(self, overrides=None):
         return {"schema": REVIEW_SCHEMA, "decision": "ADMIT_WITH_LIMIT", "unmet_constraints": [],
+                "policy": {"id": "mass-policy", "version": "1.0.0"},
                 "target_results": [{"id": "mass", "passed": True}],
                 "source_binding": self.binding(),
                 "revision_requirements": {"payload_mass_g": 10} if overrides is None else overrides,
@@ -316,6 +317,24 @@ class PolicyLayerTests(unittest.TestCase):
         with patch("hardware_splicer.policy_layer.validate_policy_evidence", return_value={**self.evidence, "study": failed}):
             with self.assertRaisesRegex(PolicyLayerError, "contradicts"):
                 self.feedback(self.review())
+
+
+    def test_cli_feedback_writes_the_proposal_and_records_it_with_the_project(self):
+        evidence_file, review_file, receipt_file = (self.root / name for name in ("e.json", "r.json", "receipt.json"))
+        evidence_file.write_bytes(self.evidence_bytes)
+        review = self.review()
+        review_file.write_bytes(canonical_json_bytes(review))
+        receipt_file.write_bytes(self.receipt(review))
+        args = ["--project-root", str(self.engine.projects.root), "--jobs-db", str(self.root / "jobs.db"),
+                "feedback", str(evidence_file), str(review_file), str(self.root / "proposal.json"),
+                "--replay-receipt", str(receipt_file)]
+        with patch("sys.stdout", new_callable=io.StringIO) as output:
+            code = cli_run(args)
+        self.assertEqual(code, 0, output.getvalue())
+        receipt = json.loads(output.getvalue())
+        self.assertTrue(receipt["change_history"]["path"].endswith(".json"))
+        records = list((self.engine.projects.root / self.project / "change-history").glob("*-proposal-*.json"))
+        self.assertEqual(len(records), 1)
 
 
 if __name__ == "__main__":
