@@ -5,7 +5,7 @@ replacing either upstream engineering engine.
 
 ## What is now working
 
-A transparent objective classifier chooses one of two **exactly approved**
+A transparent objective classifier chooses one of three **exactly approved**
 external tools, checks whether the appropriate engineering input exists, and
 runs the original program in a non-networked sandbox:
 
@@ -13,6 +13,7 @@ runs the original program in a non-networked sandbox:
 |---|---|---|
 | Review a KiCad schematic | tipoLi5890/akcli | JSON schematic diagnostics |
 | Compare two PCB Git revisions | 0x12net/kdif | Interactive KiCad-rendered HTML diff |
+| Interactive assembly BOM / placement viewer | openscopeproject/InteractiveHtmlBom | Read-only HTML assembly/placement viewer (presentation only) |
 
 Tool selection is explicit **rules_v1**, not a language-model agent. Ambiguous
 tasks such as "review changes" fail closed rather than arbitrarily running
@@ -78,7 +79,7 @@ router select the approved akcli tool. Both calls are exercised by the tests.
 
 ## Known limitations and next gates
 
-- Currently two pre-reviewed pinned adapters, not arbitrary plugin synthesis.
+- Currently three pre-reviewed pinned adapters, not arbitrary plugin synthesis.
 - Task classification uses simple explainable rules, not model reasoning.
 - kdif fixture only proves a visualization pipeline, not engineering changes.
 - No cross-machine work dispatcher or multi-node job scheduler yet.
@@ -91,10 +92,51 @@ Reusing upstream programs is preferred: the HS contribution is source approval,
 tool selection, compatibility checks, execution isolation, provenance, artifact
 verification, project registry, and eventually multi-device orchestration.
 
+## Approved: Interactive HTML BOM (2026-11-20)
+
+The owner approved `openscopeproject/InteractiveHtmlBom` on 2026-11-20 and it
+moved from `PROPOSED_ADAPTERS` into `ADAPTERS` as
+`signal-ibom-assembly-viewer`. The approval covers exactly release v2.12.0,
+commit `5c192e794cd66fde04bab11810601b711bf8581b` (MIT); any upgrade needs a
+fresh review. The basis is the recorded offline trial below
+(`github_signal_proposals.IBOM_TRIAL_EVIDENCE`): bwrap with no network, clean
+pinned checkout, exit 0, all 40 board references matched, `approval_effect`
+none.
+
+**Presentation only, no authority.** The output is a read-only
+assembly/placement viewer. It grants no build, fabrication or electrical
+authority and never marks anything build-ready; the capability record carries
+`authority: "presentation_only"`, `build_ready: false`, `fab_approved: false`
+and `electrical_correctness_verified: false`.
+
+The router runs it only through the normal admission path: exact commit,
+clean checkout (including ignored files such as stale `__pycache__`), MIT
+`LICENSE` read from the checkout, reviewed entrypoint, host KiCad 9 `pcbnew`
+and `wx` probe, then the trial's exact bwrap argv (`--unshare-all`, read-only
+checkout and board, only a fresh `ibom_native/` output directory writable).
+Docker is refused: no reviewed container carries KiCad's Python modules. After
+the run the checkout and board must be unchanged, and `check_ibom_output` must
+find every board reference in the decoded `pcbdata`; otherwise the task verdict
+is `rejected_incomplete` with `ok: false` and no evidence.
+
+```sh
+python3 scripts/run_github_signal_task.py \
+  --feed <feed listing InteractiveHtmlBom at the pinned commit> \
+  --objective "Interactive HTML BOM" \
+  --board hardware/reference_designs/spi_flash_adapter_v1/spi_flash_adapter_v1.kicad_pcb \
+  --checkout-base /path/to/approved-source-checkouts \
+  --out /path/to/new-output --fetch
+```
+
+`tests/test_github_signal_ibom_adapter.py` includes a real sandboxed run on
+that board; it fetches the pinned checkout once into the scratch cache and
+skips when bwrap, KiCad 9 `pcbnew`/`wx` or the checkout is unavailable.
+
 ## Proposed adapters and explicit offline trials
 
 `github_signal_proposals.PROPOSED_ADAPTERS` is a review queue separate from
-`ADAPTERS`. The approved set remains akcli and kdif. A discovered repository,
+`ADAPTERS`. The approved set is akcli, kdif and (since 2026-11-20)
+InteractiveHtmlBom; KiKit remains a blocked proposal. A discovered repository,
 vetting evidence, or successful trial never approves a tool. Approving a
 proposal remains a **human code change to ADAPTERS**, with adapter/revision
 review and tests; the proposal must also leave the proposed-only guards.
@@ -103,14 +145,13 @@ The rules_v1 objective table additionally reports these proposals:
 
 | Objective | Proposal | Router result |
 |---|---|---|
-| interactive assembly BOM / placement viewer for a KiCad board | openscopeproject/InteractiveHtmlBom | `tool_proposed_pending_approval` |
 | panelisation / fab outputs | yaqwsx/KiKit | `tool_blocked` with dependency blocker |
 
-Neither result executes or acquires source. The normal signal pipeline also
+This result never executes or acquires source. The normal signal pipeline also
 refuses proposal execution, even at the proposed commit. Proposal evidence is
 never registered as an approved project-used capability.
 
-InteractiveHtmlBom is `proposed_pending_human_approval`: release v2.12.0,
+Before its approval, InteractiveHtmlBom was `proposed_pending_human_approval`: release v2.12.0,
 commit `5c192e794cd66fde04bab11810601b711bf8581b`, MIT licence claim.
 The operator-established offline trial used host KiCad 9 `/usr/bin/python3`
 with `pcbnew` and `wx`, no other dependencies and no installation. On
@@ -121,7 +162,9 @@ data contained exactly the board's 40 references; `bom` had keys `both`,
 `skipped`, `fields`, `F`, `B`, with 10 rows in `both`. These are recorded
 operator observations, not measurements from the unit tests.
 
-An operator can explicitly trial an already available clean checkout:
+The trial CLI explicitly trials an already available clean checkout of a
+pending proposal. iBOM is no longer a proposal, so this is the command that
+produced its approval basis, kept for the record:
 
 ```sh
 python3 scripts/trial_github_signal_proposal.py \
