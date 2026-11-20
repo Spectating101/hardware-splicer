@@ -62,6 +62,36 @@ to the frozen PLRS-6 structural intake. On the actual pinned 183-row fixture:
   means FAIL_FIXTURE_DISAGREEMENT or INVALID_INPUT_HOLD. Every outcome
   stays nonphysical and fabrication-ineligible.
 
+### Raw-register ↔ CSV coherence repair (independent adversarial replay)
+
+The original G2 screen verified only that `samples.csv` and
+`registers.jsonl` independently matched the *same writable session receipt*.
+It did **not** verify whether each CSV sample was actually decoded from the
+recorded INA228 registers. On the unmodified G2 branch, changing the primary
+current by +10%, changing the independent-looking reference stream by the same
+factor, and updating the primary session's CSV SHA-256 still returned
+`PASS_FIXTURE_DISCRIMINATION_ONLY`. The original sensor-register bytes did
+not change. This was a genuine **software false PASS** on source coherence,
+not a physical or metrological result.
+
+The repaired sidecar independently decodes each 20-bit INA228 VBUS/current/
+shunt register, checks its reserved bits and saturation, compares decoded
+values to JSONL-derived values and the primary CSV (12-significant-digit
+round-trip tolerance), and requires exact indices, UTC timestamps, record
+counts, session first/last timestamps, declared calibration, and the
+station operating envelope. Duplicate/nonfinite JSON fails closed.
+
+Four added adversarial tests reject coherently rehashed CSV/reference
+forgery, rehashed raw-summary forgery, reordered raw samples/count
+disagreement, and duplicate/nonfinite JSON. The inherited 16 tests still
+pass. A passing result continues to mean *fixture agreement only*.
+
+**Still unproven:** independently authenticated raw acquisition, trustworthy
+device identity, physical reference independence, hardware calibration, safe
+power-on, or a trusted out-of-band custody hash. An actor able to generate
+new raw registers, CSVs and receipts can still fabricate a coherent source
+pack; neither hashes nor the decoder establish physical truth.
+
 The existing +/-1% nominal reference-shunt tolerance, before calibration,
 already prevents a defensible 0.75% *real instrument* agreement claim.
 Reference independence, absolute clock integrity, high-side input safety and
