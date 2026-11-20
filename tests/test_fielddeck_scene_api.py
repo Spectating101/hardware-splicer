@@ -23,7 +23,7 @@ def client(tmp_path, monkeypatch):
              "glb": f"{project}/display_swap/cad/FIELDDECK_5.glb"},
         ],
     }))
-    monkeypatch.setattr(project_scene_api, "_REPO_ROOT", tmp_path)
+    monkeypatch.setenv("HARDWARE_SPLICER_REPO_ROOT", str(tmp_path))
     app = FastAPI()
     app.include_router(fielddeck_scene_api.fielddeck_router)
     with TestClient(app) as client:

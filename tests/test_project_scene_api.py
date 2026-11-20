@@ -76,7 +76,7 @@ def test_fielddeck_alias_serves_the_same_assets(client, tmp_path, monkeypatch):
     manifest = json.loads((ROOT / relative / "scene.json").read_text())
     project.mkdir(parents=True)
     (project / "scene.json").write_text(json.dumps(manifest))
-    monkeypatch.setattr(project_scene_api, "_REPO_ROOT", tmp_path)
+    monkeypatch.setenv("HARDWARE_SPLICER_REPO_ROOT", str(tmp_path))
 
     gltf = b'{"asset":{"version":"2.0"}} '
     model = struct.pack("<4sIII4s", b"glTF", 2, 20 + len(gltf), len(gltf), b"JSON") + gltf
@@ -116,8 +116,26 @@ def test_scene_asset_paths_are_confined_to_the_project(client, tmp_path, monkeyp
     (project / "scene.json").write_text(json.dumps({
         "schema": "hardware_splicer.scene_manifest.v1", "project_id": project.name, "revisions": revisions,
     }))
-    monkeypatch.setattr(project_scene_api, "_REPO_ROOT", tmp_path)
+    monkeypatch.setenv("HARDWARE_SPLICER_REPO_ROOT", str(tmp_path))
     base = "/v1/scenes/test-project"
     for revision in [row["id"] for row in revisions] + ["unlisted.json", "%2e%2e%2foutside.json"]:
         assert client.get(f"{base}/{revision}/parts").status_code == 404
     assert client.get("/v1/scenes/%2e%2e%2ftest-project").status_code == 404
+
+
+def test_scenes_follow_an_explicit_repo_root(client, tmp_path, monkeypatch):
+    # An installed package has no projects/ beside it; HARDWARE_SPLICER_REPO_ROOT points at a checkout.
+    project = tmp_path / "projects" / "bench-demo"
+    project.mkdir(parents=True)
+    (project / "parts.json").write_text('{"parts": []}')
+    manifest = {
+        "schema": "hardware_splicer.scene_manifest.v1", "project_id": "bench-demo", "title": "Bench demo",
+        "geometry_status": "available",
+        "revisions": [{"id": "r1", "parts": "projects/bench-demo/parts.json"}],
+    }
+    (project / "scene.json").write_text(json.dumps(manifest))
+    monkeypatch.setenv("HARDWARE_SPLICER_REPO_ROOT", str(tmp_path))
+    assert [row["project_id"] for row in client.get("/v1/scenes").json()] == ["bench-demo"]
+    assert client.get("/v1/scenes/bench-demo").json() == manifest
+    assert client.get("/v1/scenes/bench-demo/r1/parts").json() == {"parts": []}
+    assert client.get(f"/v1/scenes/{FIELDDECK}").status_code == 404

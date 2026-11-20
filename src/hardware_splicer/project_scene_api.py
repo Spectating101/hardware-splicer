@@ -1,17 +1,24 @@
 """Read-only manifests and assets for project scenes."""
 
 import json
+import os
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 
 
-_REPO_ROOT = Path(__file__).resolve().parents[2]
+_CHECKOUT_ROOT = Path(__file__).resolve().parents[2]
 _FIELDDECK_ID = "cyberdeck-real-trial-20261020"
 _SCENES = "/v1/scenes"
 project_scene_router = APIRouter(tags=["scenes"])
 fielddeck_router = APIRouter(prefix=f"{_SCENES}/fielddeck", tags=["scenes"])
+
+
+def _repo_root() -> Path:
+    """Project scenes live in a checkout's projects/; an installed package points at one explicitly."""
+    explicit = os.environ.get("HARDWARE_SPLICER_REPO_ROOT", "").strip()
+    return Path(explicit).expanduser().resolve() if explicit else _CHECKOUT_ROOT
 
 
 def _confined_path(root: Path, relative: str) -> Path | None:
@@ -26,8 +33,8 @@ def _confined_path(root: Path, relative: str) -> Path | None:
 
 
 def _manifest(project_id: str) -> dict | None:
-    projects = _REPO_ROOT / "projects"
-    project = _confined_path(_REPO_ROOT, f"projects/{project_id}")
+    projects = _repo_root() / "projects"
+    project = _confined_path(_repo_root(), f"projects/{project_id}")
     if project is None or project.parent != projects or project.name != project_id:
         return None
     path = _confined_path(project, "scene.json")
@@ -50,8 +57,8 @@ def _scene_asset(project_id: str, revision: str, asset: str, *, legacy: bool = F
         raise HTTPException(404, "Fielddeck revision not found" if legacy else "Scene revision not found")
 
     relative = entry.get(asset)
-    project = _REPO_ROOT / "projects" / project_id
-    prefix = project.relative_to(_REPO_ROOT)
+    project = _repo_root() / "projects" / project_id
+    prefix = project.relative_to(_repo_root())
     path = None
     if isinstance(relative, str) and Path(relative).is_relative_to(prefix):
         path = _confined_path(project, str(Path(relative).relative_to(prefix)))
@@ -85,7 +92,7 @@ def list_scenes() -> list[dict]:
         {"project_id": manifest["project_id"], "title": manifest["title"],
          "geometry_status": manifest["geometry_status"], "revisions": [row["id"] for row in manifest["revisions"]],
          "registered_cases": _registered_cases(manifest)}
-        for path in sorted((_REPO_ROOT / "projects").glob("*/scene.json"))
+        for path in sorted((_repo_root() / "projects").glob("*/scene.json"))
         if (manifest := _manifest(path.parent.name)) is not None
     ]
 
@@ -114,8 +121,8 @@ def get_scene_records(project_id: str) -> dict:
     manifest = _manifest(project_id)
     if manifest is None:
         raise HTTPException(404, "Scene project not found")
-    project = _REPO_ROOT / "projects" / project_id
-    prefix = project.relative_to(_REPO_ROOT)
+    project = _repo_root() / "projects" / project_id
+    prefix = project.relative_to(_repo_root())
     records = []
     for source in manifest.get("sources") or []:
         relative = source.get("path") if isinstance(source, dict) else None

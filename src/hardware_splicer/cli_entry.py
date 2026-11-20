@@ -36,6 +36,9 @@ def main_serve() -> None:
     ui.add_argument("--no-ui", dest="ui", action="store_const", const="0", help="API only.")
     parser.add_argument("--ui-dist", type=Path,
                         help="UI build directory; overrides HARDWARE_SPLICER_UI_DIST.")
+    parser.add_argument("--repo-root", type=Path,
+                        help="Hardware-Splicer checkout whose projects/ supply scenes; overrides "
+                             "HARDWARE_SPLICER_REPO_ROOT (needed when running from an installed package).")
     parser.add_argument("--allow-remote", action="store_true",
                         help="Allow a non-loopback bind (only behind the nginx front in deploy/DEPLOY.md).")
     args = parser.parse_args()
@@ -57,6 +60,8 @@ def main_serve() -> None:
         os.environ["HARDWARE_SPLICER_SERVE_UI"] = "auto"
     if args.ui_dist is not None:
         os.environ["HARDWARE_SPLICER_UI_DIST"] = str(args.ui_dist.expanduser().resolve())
+    if args.repo_root is not None:
+        os.environ["HARDWARE_SPLICER_REPO_ROOT"] = str(args.repo_root.expanduser().resolve())
     uvicorn.run(CANONICAL_APP, host=args.host, port=args.port, reload=False)
 
 
