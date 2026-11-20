@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="292mm" height="209mm" viewBox="0 0 292 209" data-bench-load-n="110">
+  <title>Cradle layout for spouted 58 mm portafilter envelope</title>
+  <style>text{font:4px sans-serif;fill:#18323a} .part,.dim,.test{fill:none;stroke:#22424a;stroke-width:.4}.part{fill:#dfebeb;fill-opacity:.4}.dim{stroke:#13746a}.test{stroke:#a54b25;stroke-dasharray:2 1}</style>
+  <rect id="base" class="part" x="18" y="32" width="130" height="100" />
+  <circle id="bowl" class="part" cx="83" cy="83" r="35.0" />
+  <circle id="basket" class="test" cx="83" cy="83" r="29.0" />
+  <circle id="saddle-opening" class="dim" cx="83" cy="83" r="29.5" />
+  <circle id="spout-0-0" class="test" cx="83.0" cy="105.0" r="4.5" />
+  <circle id="spout-0-1" class="test" cx="83.0" cy="61.0" r="4.5" />
+  <circle id="spout-1-0" class="test" cx="67.443651" cy="98.556349" r="4.5" />
+  <circle id="spout-1-1" class="test" cx="98.556349" cy="67.443651" r="4.5" />
+  <circle id="spout-2-0" class="test" cx="61.0" cy="83.0" r="4.5" />
+  <circle id="spout-2-1" class="test" cx="105.0" cy="83.0" r="4.5" />
+  <circle id="spout-3-0" class="test" cx="67.443651" cy="67.443651" r="4.5" />
+  <circle id="spout-3-1" class="test" cx="98.556349" cy="98.556349" r="4.5" />
+  <circle id="spout-4-0" class="test" cx="83.0" cy="61.0" r="4.5" />
+  <circle id="spout-4-1" class="test" cx="83.0" cy="105.0" r="4.5" />
+  <circle id="foot-0-0" class="part" cx="35.0" cy="49.0" r="5" />
+  <circle id="foot-0-1" class="part" cx="35.0" cy="117.0" r="5" />
+  <circle id="foot-1-0" class="part" cx="131.0" cy="49.0" r="5" />
+  <circle id="foot-1-1" class="part" cx="131.0" cy="117.0" r="5" />
+  <circle id="tamp-load" class="test" cx="97" cy="83" r="2" />
+  <line id="section-floor" class="dim" x1="162" y1="113" x2="262" y2="113" />
+  <line id="section-seat" class="dim" x1="162" y1="77" x2="262" y2="77" />
+  <rect id="section-tip" class="test" x="194" y="77" width="15" height="28" />
+  <text x="18" y="149">Support the bowl under the rim. Keep spout and handle outside their load paths.</text>
+  <text x="18" y="160">Nominal basket 58; assumed body 70; assumed recess 36</text>
+  <text x="18" y="171">Confirm the real body's shoulder, handle angle and spout dimensions before cutting.</text>
+</svg>

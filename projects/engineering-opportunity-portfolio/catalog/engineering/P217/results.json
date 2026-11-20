@@ -1,0 +1,101 @@
+{
+  "product": "P217",
+  "units": "mm",
+  "scope": "synthetic board on nominal display, digital verification",
+  "screen_size_mm": [
+    207.818,
+    155.864
+  ],
+  "combined_edge_displacement_bound_mm": 1.781,
+  "revisions": {
+    "r1": {
+      "outside": [],
+      "smallest_margin_mm": 1.419,
+      "minimum_web_between_openings_mm": 5.883,
+      "minimum_outer_web_mm": 6.1,
+      "minimum_central_clear_diameter_mm": 25.912,
+      "edge_swipe_depth_mm": 5.719
+    },
+    "r2": {
+      "outside": [],
+      "smallest_margin_mm": 1.419,
+      "minimum_web_between_openings_mm": 5.883,
+      "minimum_outer_web_mm": 6.1,
+      "minimum_central_clear_diameter_mm": 25.912,
+      "edge_swipe_depth_mm": 5.719
+    }
+  },
+  "changed_openings": [
+    "r2c2"
+  ],
+  "mount": {
+    "holes": 4,
+    "minimum_mount_edge_wall_mm": 2.25,
+    "minimum_mount_to_cut_wall_mm": 2.05,
+    "rotated_mount_mismatch_mm": 9.5
+  },
+  "rejected_side_slot": {
+    "original_reach_mm": 8.5,
+    "worst_web_mm": 4.883,
+    "required_web_mm": 5
+  },
+  "negative_controls": {
+    "old_overlay_on_revised_board": {
+      "outside": [
+        "r2c2"
+      ],
+      "smallest_margin_mm": -2.188
+    },
+    "overlay_shifted_5mm": {
+      "outside": [
+        "r1c1",
+        "r1c2",
+        "r1c3",
+        "r1c4",
+        "r2c1",
+        "r2c2",
+        "r2c3",
+        "r2c4",
+        "r3c1",
+        "r3c2",
+        "r3c3",
+        "r3c4"
+      ],
+      "smallest_margin_mm": -1.8
+    },
+    "screen_at_90_percent_top_left": {
+      "outside": [
+        "r1c1",
+        "r1c2",
+        "r1c3",
+        "r1c4",
+        "r2c1",
+        "r2c2",
+        "r2c3",
+        "r2c4",
+        "r3c1",
+        "r3c2",
+        "r3c3",
+        "r3c4"
+      ],
+      "smallest_margin_mm": -16.523
+    },
+    "screen_rotated_180_degrees": {
+      "outside": [
+        "r1c1",
+        "r1c2",
+        "r1c3",
+        "r1c4",
+        "r2c1",
+        "r2c2",
+        "r2c3",
+        "r2c4",
+        "r3c1",
+        "r3c2",
+        "r3c3",
+        "r3c4"
+      ],
+      "smallest_margin_mm": -141.118
+    }
+  }
+}

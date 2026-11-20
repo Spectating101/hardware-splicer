@@ -11,7 +11,7 @@ import sys
 import time
 import urllib.request
 from pathlib import Path
-from typing import Dict, Iterator, Optional
+from typing import Any, Dict, Iterator, Optional
 
 from .testing_mode import testing_mode_enabled
 
@@ -44,7 +44,7 @@ class ServiceStartError(RuntimeError):
 
 
 def validate_app_roots() -> None:
-    missing = [str(path) for path in (CIRCUIT_ROOT, MECHA_ROOT, SPLICER3D_ROOT) if not path.exists()]
+    missing = [str(path) for path in (CIRCUIT_ROOT, MECHA_ROOT, SPLICER3D_ROOT) if not path.is_dir()]
     if missing:
         raise FileNotFoundError(f"Missing Hardware-Splicer app roots: {', '.join(missing)}")
 
@@ -185,7 +185,8 @@ def _python_import_ok(python: Path, module: str) -> bool:
         return False
 
 
-def runtime_status(*, splicer_url: str | None = None) -> Dict[str, object]:
+def headless_status() -> dict[str, Any]:
+    """Check the backend runtime and source roots without starting tool processes."""
     roots = {
         "root": ROOT,
         "circuit_ai": CIRCUIT_ROOT,
@@ -199,6 +200,22 @@ def runtime_status(*, splicer_url: str | None = None) -> Dict[str, object]:
     dependencies = {
         "fastapi": importlib.util.find_spec("fastapi") is not None,
         "uvicorn": importlib.util.find_spec("uvicorn") is not None,
+    }
+    headless_ready = all(dependencies.values()) and all(row["is_dir"] for row in app_roots.values())
+    testing_mode = testing_mode_enabled()
+    return {
+        "ok": headless_ready and not testing_mode,
+        "headless_ready": headless_ready,
+        "testing_mode": testing_mode,
+        "app_roots": app_roots,
+        "dependencies": dependencies,
+    }
+
+
+def runtime_status(*, splicer_url: str | None = None) -> Dict[str, object]:
+    status = headless_status()
+    dependencies = {
+        **status["dependencies"],
         "pillow": importlib.util.find_spec("PIL") is not None,
         "pytest": importlib.util.find_spec("pytest") is not None,
         "cadquery": importlib.util.find_spec("cadquery") is not None,
@@ -220,23 +237,19 @@ def runtime_status(*, splicer_url: str | None = None) -> Dict[str, object]:
     }
     required_for_demo = ("fastapi", "uvicorn", "node")
     demo_ready = all(dependencies.get(key) for key in required_for_demo)
-    testing_mode = testing_mode_enabled()
-    roots_ok = all(row["exists"] for row in app_roots.values())
-    status: Dict[str, object] = {
-        "ok": roots_ok and demo_ready and not testing_mode,
+    status = {
+        **status,
         "demo_ready": demo_ready,
         "fab_export_ready": bool(dependencies.get("kicad_cli")),
-        "testing_mode": testing_mode,
         "testing_mode_blocker": (
             "HARDWARE_SPLICER_TESTING_MODE relaxes fabrication gates — unset for production."
-            if testing_mode
+            if status["testing_mode"]
             else None
         ),
         "python": sys.executable,
         "python_version": platform.python_version(),
         "splicer3d_python": str(splicer_python),
         "splicer3d_local_venv": SPLICER3D_VENV_PYTHON.exists(),
-        "app_roots": app_roots,
         "dependencies": dependencies,
         "splicer3d_dependencies": splicer_dependencies,
     }

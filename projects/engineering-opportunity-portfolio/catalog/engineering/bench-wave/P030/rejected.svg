@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="475mm" height="346mm" viewBox="0 0 475 346">
+  <title>Dry indoor inspection cart clearance and view</title>
+  <style>text{font:4px sans-serif;fill:#103341} .part,.tool,.test{stroke:#2a4148;stroke-width:.35;fill:none}.part{fill:#dce9e9;fill-opacity:.45}.tool{stroke:#006557}.test{stroke:#aa4c22;stroke-dasharray:2 1}</style>
+  <line id="ground" class="tool" x1="5" y1="125" x2="288" y2="125" />
+  <line id="roof" class="test" x1="5" y1="50" x2="288" y2="50" />
+  <rect id="cart" class="part" x="35" y="55" width="210" height="59" />
+  <circle id="wheel-0" class="test" cx="65.0" cy="95.0" r="30.0" />
+  <circle id="wheel-1" class="test" cx="215.0" cy="95.0" r="30.0" />
+  <rect id="threshold" class="test" x="255" y="119" width="16" height="6" />
+  <circle id="camera-lens" class="tool" cx="236" cy="82" r="4" />
+  <line id="ray-upper" class="test" x1="236" y1="82" x2="361" y2="5.3999" />
+  <line id="ray-lower" class="test" x1="236" y1="82" x2="361" y2="158.6001" />
+  <rect id="sighting-card" class="tool" x="361" y="82" width="4" height="28" />
+  <rect id="tow-slot" class="tool" x="25" y="92" width="9" height="9" />
+  <rect id="top-body" class="part" x="55" y="163" width="170" height="141" />
+  <rect id="top-wheel-0-0" class="part" x="55" y="151" width="60" height="20" />
+  <rect id="top-wheel-0-1" class="part" x="55" y="296" width="60" height="20" />
+  <rect id="top-wheel-1-0" class="part" x="205" y="151" width="60" height="20" />
+  <rect id="top-wheel-1-1" class="part" x="205" y="296" width="60" height="20" />
+  <text x="300" y="16">Wheelbase 150, Ø60.0 wheel</text>
+  <text x="300" y="25">Chassis high point 70, roof 75</text>
+  <text x="300" y="34">Skid 11, threshold 6</text>
+  <text x="300" y="43">Camera cone skips optical distortion and obstruction.</text>
+  <text x="300" y="52">Dry indoor use on level floors only.</text>
+</svg>

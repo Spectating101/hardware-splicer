@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="75.0mm" height="75.0mm" viewBox="0 0 75.0 75.0">
+  <title>Guard face geometry for an unpowered survey coupon</title>
+  <circle cx="37.5" cy="37.5" r="36.35" fill="none" stroke="black" stroke-width="2.3" />
+  <rect x="23.99962963471002" y="3.75" width="27.000740730579967" height="3.5" fill="black" />
+  <rect x="11.843421896129641" y="11.75" width="51.31315620774072" height="3.5" fill="black" />
+  <rect x="5.778398527186557" y="19.75" width="63.443202945626886" height="3.5" fill="black" />
+  <rect x="2.4820046261925484" y="27.75" width="70.0359907476149" height="3.5" fill="black" />
+  <rect x="1.1921496092098565" y="35.75" width="72.61570078158029" height="3.5" fill="black" />
+  <rect x="2.4820046261925484" y="43.75" width="70.0359907476149" height="3.5" fill="black" />
+  <rect x="5.778398527186557" y="51.75" width="63.443202945626886" height="3.5" fill="black" />
+  <rect x="11.843421896129641" y="59.75" width="51.31315620774072" height="3.5" fill="black" />
+  <rect x="23.99962963471002" y="67.75" width="27.000740730579967" height="3.5" fill="black" />
+</svg>

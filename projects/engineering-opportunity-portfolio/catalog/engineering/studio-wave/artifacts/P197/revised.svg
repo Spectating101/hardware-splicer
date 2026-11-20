@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="240mm" height="285mm" viewBox="0 0 240 285">
+  <title>P197 revised · full-size proof coupon</title>
+  <rect id="scale" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="10" y="6" width="20" height="10" />
+  <rect id="shell-coupon" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="35" y="48" width="132" height="83" />
+  <rect id="connector-corridor" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="35" y="68" width="40" height="37" />
+  <rect id="top-shoe-corridor" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="87" y="42" width="25" height="11" />
+  <rect id="door-sweep" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="96" y="120" width="52" height="38" />
+  <rect id="lower-plate" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="40" y="125" width="49" height="12" />
+  <rect id="right-riser" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="154" y="99" width="9" height="26" />
+  <rect id="top-plate" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="119" y="43" width="43" height="8" />
+  <circle id="base-hole-0" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="47" cy="131" r="2.25" />
+  <circle id="base-hole-1" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="81" cy="131" r="2.25" />
+</svg>

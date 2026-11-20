@@ -1,0 +1,6 @@
+{
+  "timed_cycles": 300,
+  "toggle_edges": 100,
+  "maximum_late_ms": 3,
+  "loss_of_power_closes_contact": false
+}

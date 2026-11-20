@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="274mm" height="334mm" viewBox="0 0 274 334">
+  <title>P261 rejected shop drawing, millimetres</title>
+  <style>text{font:4px sans-serif;fill:#162930} .heading{font:bold 5px sans-serif}.part,.bore,.guide,.limit{fill:none;stroke:#223842;stroke-width:.38}.bore{stroke:#00645c}.guide{stroke:#964314;stroke-dasharray:2 1}.limit{stroke:#a1384e;stroke-dasharray:1 1}.part{fill:#e6eef0;fill-opacity:.28}</style>
+  <g data-view="disc" transform="translate(12 5)">
+    <text x="0" y="4" class="heading">Marking face with independent indexed rings</text>
+    <g transform="translate(0 10)">
+      <circle id="blank" class="part" cx="95" cy="95" r="95" />
+      <circle id="receptacle" class="bore" cx="95" cy="95" r="10.8" />
+      <circle id="key-seat" class="bore" cx="126" cy="95" r="4.2" />
+      <circle id="reference-0" class="guide" cx="95" cy="95" r="52" />
+      <line id="tick-0-0" class="part" x1="95" y1="47" x2="95" y2="39" />
+      <line id="tick-0-1" class="part" x1="136.56922" y1="71" x2="143.49742" y2="67" />
+      <line id="tick-0-2" class="part" x1="136.56922" y1="119" x2="143.49742" y2="123" />
+      <line id="tick-0-3" class="part" x1="95" y1="143" x2="95" y2="151" />
+      <line id="tick-0-4" class="part" x1="53.43078" y1="119" x2="46.50258" y2="123" />
+      <line id="tick-0-5" class="part" x1="53.43078" y1="71" x2="46.50258" y2="67" />
+      <circle id="reference-1" class="guide" cx="95" cy="95" r="69" />
+      <line id="tick-1-0" class="part" x1="95" y1="30" x2="95" y2="22" />
+      <line id="tick-1-1" class="part" x1="140.96194" y1="49.03806" x2="146.6188" y2="43.3812" />
+      <line id="tick-1-2" class="part" x1="160" y1="95" x2="168" y2="95" />
+      <line id="tick-1-3" class="part" x1="140.96194" y1="140.96194" x2="146.6188" y2="146.6188" />
+      <line id="tick-1-4" class="part" x1="95" y1="160" x2="95" y2="168" />
+      <line id="tick-1-5" class="part" x1="49.03806" y1="140.96194" x2="43.3812" y2="146.6188" />
+      <line id="tick-1-6" class="part" x1="30" y1="95" x2="22" y2="95" />
+      <line id="tick-1-7" class="part" x1="49.03806" y1="49.03806" x2="43.3812" y2="43.3812" />
+      <circle id="reference-2" class="guide" cx="95" cy="95" r="86" />
+      <line id="tick-2-0" class="part" x1="95" y1="13" x2="95" y2="5" />
+      <line id="tick-2-1" class="part" x1="136" y1="23.98592" x2="140" y2="17.05771" />
+      <line id="tick-2-2" class="part" x1="166.01408" y1="54" x2="172.94229" y2="50" />
+      <line id="tick-2-3" class="part" x1="177" y1="95" x2="185" y2="95" />
+      <line id="tick-2-4" class="part" x1="166.01408" y1="136" x2="172.94229" y2="140" />
+      <line id="tick-2-5" class="part" x1="136" y1="166.01408" x2="140" y2="172.94229" />
+      <line id="tick-2-6" class="part" x1="95" y1="177" x2="95" y2="185" />
+      <line id="tick-2-7" class="part" x1="54" y1="166.01408" x2="50" y2="172.94229" />
+      <line id="tick-2-8" class="part" x1="23.98592" y1="136" x2="17.05771" y2="140" />
+      <line id="tick-2-9" class="part" x1="13" y1="95" x2="5" y2="95" />
+      <line id="tick-2-10" class="part" x1="23.98592" y1="54" x2="17.05771" y2="50" />
+      <line id="tick-2-11" class="part" x1="54" y1="23.98592" x2="50" y2="17.05771" />
+    </g>
+    <text x="0" y="212">Blank Ø190; rings [52, 69, 86]; evenly spaced counts [6, 8, 12]</text>
+  </g>
+  <g data-view="insert" transform="translate(12 238)">
+    <text x="0" y="4" class="heading">Removable centering insert and key</text>
+    <g transform="translate(0 10)">
+      <rect id="insert" class="part" x="12" y="12" width="65" height="36" />
+      <circle id="boss" class="bore" cx="28" cy="30" r="10" />
+      <circle id="key" class="bore" cx="59" cy="30" r="4" />
+    </g>
+    <text x="0" y="61">Boss Ø20 fits Ø21.6; key offset 31</text>
+  </g>
+</svg>

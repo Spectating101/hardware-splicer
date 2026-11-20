@@ -12,13 +12,13 @@ make explore-all        # explore + mecha + 3d app tests
 make smoke              # Circuit-AI → Mecha → 3D-Splicer e2e
 ```
 
-Free scratch space before long runs:
+Run the cleanup target after verification jobs finish.
 
 ```bash
-bash scripts/cleanup_test_artifacts.sh
+make cleanup
 ```
 
-By default, verify/explore write under **`.cache/hardware-splicer/`** in the repo (not `/tmp`). Override with:
+This removes the completed `exploration`, `functional_audit`, `backend_benchmark` and `tier_scores` directories containing their matching HS reports. Exploration and cluster verification leave cleanup to the operator. The default scratch directory is **`.cache/hardware-splicer/`** in the repo. To run and clean tests on another volume, choose a dedicated directory.
 
 ```bash
 export HARDWARE_SPLICER_TMP_ROOT=/mnt/bigdisk/hardware-splicer-scratch

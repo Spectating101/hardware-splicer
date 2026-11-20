@@ -1,0 +1,15 @@
+{
+  "pilot": "Freshwater pool training ROV, passive matched foam blocks",
+  "metrics": {
+    "matched": {
+      "high_side_shim_g": 30,
+      "worst_pair_mismatch_pct": 1.75,
+      "minimum_lift_g_equiv": 237.9
+    },
+    "unshimmed-control": {
+      "high_side_shim_g": 0,
+      "worst_pair_mismatch_pct": 13.1,
+      "minimum_lift_g_equiv": 238.3
+    }
+  }
+}

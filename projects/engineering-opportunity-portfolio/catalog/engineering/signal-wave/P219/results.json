@@ -1,0 +1,6 @@
+{
+  "reports": 1000,
+  "single_key_control_lost_chords": 200,
+  "reset_while_pressed": "held input inhibited until release",
+  "remap_and_reset_transitions": 10
+}

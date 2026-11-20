@@ -1,0 +1,61 @@
+{
+  "units": "mm, N, MPa",
+  "pallet_extents_mm": [
+    114.0,
+    58.0,
+    6.0
+  ],
+  "solid_volumes_mm3": {
+    "nest": 26477.466,
+    "near-shoe": 3163.915,
+    "far-shoe": 3163.915
+  },
+  "assembly_solids": 4,
+  "intersections_mm3": {
+    "pallet_nest_nominal": 0,
+    "swept_shoes_nest": 0,
+    "swept_shoes_pallet": 0,
+    "reversed_pallet_nest": 167.99999999999997,
+    "pallet_1mm_off_center": 17.14999999999972
+  },
+  "nest_worst_side_margin_mm": 0.12181782789295781,
+  "channel_vertical_margin_mm": 0.03999999999999998,
+  "minimum_closed_lip_overlap_mm_at_aligned_pickup": 1.55,
+  "open_release_margin_mm_at_aligned_pickup": 1.65,
+  "shoe_to_bench_mm": 3.7,
+  "rejected_1p5mm_lip": {
+    "factored_weight_N": 3.543,
+    "upper_reaction_N": 20.37225,
+    "lower_reaction_N": 23.91525,
+    "lip_root_stress_mpa": 47.8305,
+    "within_assumed_stress": false
+  },
+  "revised_lip": {
+    "factored_weight_N": 3.543,
+    "upper_reaction_N": 20.37225,
+    "lower_reaction_N": 23.91525,
+    "lip_root_stress_mpa": 6.7261640625000005,
+    "within_assumed_stress": true
+  },
+  "rejected_tab_handoff": {
+    "pitch_deg": 3.3837747827138593,
+    "projected_far_edge_drop_mm": 6.290904148274427,
+    "allowed_edge_drop_mm": 1.0,
+    "overlap_if_commanded_to_nominal_seat_mm3": 4545.257535752756,
+    "passes_proposed_handoff": false
+  },
+  "centered_rail_handoff": {
+    "minimum_cg_margin_inside_supports_mm": 7.0,
+    "single_pad_stress_bound_mpa": 0.9964687500000001,
+    "height_spread_mm": 0.12,
+    "max_edge_error_bound_mm": 0.9079713493530499,
+    "warp_control_height_spread_mm": 0.35,
+    "warp_control_edge_error_bound_mm": 1.5749164356130623,
+    "closed_inside_width_mm": 58.6,
+    "open_inside_width_mm": 66.6,
+    "shoe_clearance_above_nest_floor_mm": 1.7000000000000002,
+    "vertical_handoff_screen_passes": true
+  },
+  "stage": "CAD collision and analytical vertical-load screen",
+  "physical_tests": 0
+}

@@ -1,0 +1,19 @@
+{
+  "pilot": "Low-voltage dry fixture, two resistive inlet and tail pads",
+  "metrics": {
+    "candidate": {
+      "wettings": 40,
+      "correct_pad": 40,
+      "premature_latches": 0,
+      "max_wet_latency_ms": 40,
+      "latch_reset_fault_test": true
+    },
+    "one-sample-control": {
+      "wettings": 40,
+      "correct_pad": 40,
+      "premature_latches": 40,
+      "max_wet_latency_ms": 0,
+      "latch_reset_fault_test": true
+    }
+  }
+}
