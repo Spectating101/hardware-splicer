@@ -78,3 +78,29 @@ This connection exchanges design evidence and modeled performance. It does not
 create meter observations, certify physical behavior, authorize hardware operation,
 or establish economic outcomes. A future measured-evidence adapter needs its own
 measurement and source-custody contract.
+
+## Carry an applied change to a Cite dossier
+
+`hardware_splicer.change_dossier.build_change_evidence` packages one reviewed and
+applied change as `hardware_splicer.engineering_change_evidence.v1`: the base and
+new revision identities (run, snapshot, seal and package hashes), the Policy Lab
+review and HS proposal, the study check delta, and the SHA-256 of every covered
+file. It refuses a candidate that is not the latest revision, does not descend
+from the base, or does not carry the proposal's resolved requirements. Failing
+rerun checks are listed as unresolved; nothing is marked ready.
+`export_revision_head` reports the latest revision so a receiver can tell when a
+dossier it issued has gone stale.
+
+Cite-Refinery's `cite-refinery-change-dossier issue` rechecks those bytes and
+issues a revision-bound edition; `check` compares the edition with a newer head
+and reports it stale. Replay the whole chain, including the negative and stale
+controls:
+
+```bash
+HARDWARE_SPLICER_DIGITAL_PYTHON=/path/to/digital-native-venv/bin/python \
+PYTHONPATH=src python scripts/demo_change_dossier.py \
+  --policy-lab /path/to/policy-lab --cite /path/to/cite-refinery
+```
+
+Results go to `docs/status/generated/change-dossier-<tag>.{log,json,md}`, with the
+readable dossier and the exact exchanged bytes beside them.
