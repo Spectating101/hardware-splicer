@@ -39,3 +39,26 @@ def test_firmware_templates_resolve_from_the_package():
 
     assert TEMPLATE_DIR.is_relative_to(PACKAGE)
     assert (TEMPLATE_DIR / "app_core.h").is_file()
+
+
+def test_doctor_reports_install_mode_and_configured_checkout(tmp_path):
+    repo = tmp_path / "checkout"
+    (repo / "projects").mkdir(parents=True)
+    env = {"PYTHONPATH": str(ROOT / "src"), "HOME": str(tmp_path / "home"), "PATH": "/usr/bin:/bin",
+           "HARDWARE_SPLICER_STATE_DIR": str(tmp_path / "state"),
+           "HARDWARE_SPLICER_TMP_ROOT": str(tmp_path / "builds")}
+    result = subprocess.run(
+        [sys.executable, "-c", "from hardware_splicer.cli_entry import main_doctor; main_doctor()",
+         "--repo-root", str(repo)],
+        capture_output=True, text=True, env=env, cwd=tmp_path, timeout=120,
+    )
+    assert result.returncode == 0, result.stderr
+    report = json.loads(result.stdout)
+    install = report["install"]
+    assert install["mode"] == "checkout"
+    assert install["repo_root"] == str(repo.resolve())
+    assert install["repo_root_configured"] is True
+    assert install["projects_available"] is True
+    assert install["state_dir"] == str(tmp_path / "state")
+    assert install["scratch_dir"] == str(tmp_path / "builds")
+    assert report["app_roots"]["root"]["path"] == str(repo.resolve())
