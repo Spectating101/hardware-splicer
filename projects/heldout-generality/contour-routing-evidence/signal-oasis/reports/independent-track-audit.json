@@ -1,0 +1,25 @@
+{
+  "branch_net": "Net-(U2-IO9)",
+  "exposed_testpoint_diameter_mm": 1.0,
+  "fabrication_authorized": false,
+  "new_access_xy": [
+    107.53401,
+    105.96599
+  ],
+  "new_exposed_testpoints": 1,
+  "new_signal_branch_count": 1,
+  "original_copper_items_preserved": 263,
+  "original_pad_identities_preserved": 173,
+  "original_sha256": "ad9a2d691785a04877b7a1971d2a6c12e0a07092abd7277a1cd92c5373c17ec3",
+  "physical_measurement": false,
+  "revised_sha256": "7d79d7ad60ee3af376462d4640af8286c74b2bedad4f331d988e2f6e80211e58",
+  "schema": "hs.independent_native_track_tap.v1",
+  "source_contour_and_cutouts_preserved": true,
+  "status": "PASS",
+  "wrong_net_negative": {
+    "exit_code": 5,
+    "native_error_count": 96,
+    "native_unconnected": 1,
+    "rejected": true
+  }
+}

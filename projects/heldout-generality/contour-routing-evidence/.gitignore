@@ -1,0 +1,9 @@
+# Full original-source-derived editable PCB and geometry is distributed with
+# licenses and sha256 manifest in ../hs-heldout-contour-and-signal-v3.zip.
+# Keep inspectable native JSON findings in Git without duplicating 17 MB of
+# STEP, STL and native KiCad data per reviewer.
+**/*.step
+**/*.stl
+**/*.kicad_pcb
+**/*.kicad_pro
+**/*.csv

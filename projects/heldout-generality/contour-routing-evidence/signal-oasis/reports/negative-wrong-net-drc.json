@@ -1,0 +1,1515 @@
+{
+    "$schema": "https://schemas.kicad.org/drc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-11-20T18:57:17+0800",
+    "kicad_version": "9.0.2",
+    "schematic_parity": [],
+    "source": "board.kicad_pcb",
+    "unconnected_items": [
+        {
+            "description": "Missing connection between items",
+            "items": [
+                {
+                    "description": "Pad 1 [+3.3V] of TP1 on F.Cu",
+                    "pos": {
+                        "x": 107.53401,
+                        "y": 105.96599
+                    },
+                    "uuid": "42378071-d947-5c93-9b47-b8495f1843a8"
+                },
+                {
+                    "description": "Via [+3.3V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 101.25,
+                        "y": 104.0
+                    },
+                    "uuid": "a30014da-f2a2-43d8-94cb-5226c7719102"
+                }
+            ],
+            "severity": "error",
+            "type": "unconnected_items"
+        }
+    ],
+    "violations": [
+        {
+            "description": "Items shorting two nets (nets Net-(U2-IO9) and +3.3V)",
+            "items": [
+                {
+                    "description": "Track [Net-(U2-IO9)] on F.Cu, length 2.2500 mm",
+                    "pos": {
+                        "x": 109.125,
+                        "y": 104.375
+                    },
+                    "uuid": "32537274-f22e-5413-b75b-4845e5931559"
+                },
+                {
+                    "description": "Pad 1 [+3.3V] of TP1 on F.Cu",
+                    "pos": {
+                        "x": 107.53401,
+                        "y": 105.96599
+                    },
+                    "uuid": "42378071-d947-5c93-9b47-b8495f1843a8"
+                }
+            ],
+            "severity": "error",
+            "type": "shorting_items"
+        },
+        {
+            "description": "Clearance violation (netclass 'Default' clearance 0.1500 mm; actual 0.1280 mm)",
+            "items": [
+                {
+                    "description": "Track [Net-(U5-OUTA)] on B.Cu, length 5.0500 mm",
+                    "pos": {
+                        "x": 98.5,
+                        "y": 112.8
+                    },
+                    "uuid": "2911454c-1d25-40df-ac48-c70ffc6f67f8"
+                },
+                {
+                    "description": "Track [+18V] on B.Cu, length 2.3078 mm",
+                    "pos": {
+                        "x": 97.23,
+                        "y": 108.131874
+                    },
+                    "uuid": "ef49bf09-3950-4a09-84f9-3c2f9a4db770"
+                }
+            ],
+            "severity": "error",
+            "type": "clearance"
+        },
+        {
+            "description": "Clearance violation (netclass 'Default' clearance 0.1500 mm; actual 0.1280 mm)",
+            "items": [
+                {
+                    "description": "Track [Net-(U5-OUTA)] on B.Cu, length 13.0000 mm",
+                    "pos": {
+                        "x": 99.0,
+                        "y": 107.25
+                    },
+                    "uuid": "7d16485d-2faa-4938-baf0-5514e6937d91"
+                },
+                {
+                    "description": "Track [+18V] on B.Cu, length 2.3078 mm",
+                    "pos": {
+                        "x": 97.23,
+                        "y": 108.131874
+                    },
+                    "uuid": "ef49bf09-3950-4a09-84f9-3c2f9a4db770"
+                }
+            ],
+            "severity": "error",
+            "type": "clearance"
+        },
+        {
+            "description": "Clearance violation (netclass 'Default' clearance 0.1500 mm; actual 0.1280 mm)",
+            "items": [
+                {
+                    "description": "Track [Net-(U5-OUTA)] on B.Cu, length 0.7071 mm",
+                    "pos": {
+                        "x": 98.5,
+                        "y": 107.75
+                    },
+                    "uuid": "54fbeb68-4562-40ba-a128-69c316e8987d"
+                },
+                {
+                    "description": "Track [+18V] on B.Cu, length 2.3078 mm",
+                    "pos": {
+                        "x": 97.23,
+                        "y": 108.131874
+                    },
+                    "uuid": "ef49bf09-3950-4a09-84f9-3c2f9a4db770"
+                }
+            ],
+            "severity": "error",
+            "type": "clearance"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.2000 mm)",
+            "items": [
+                {
+                    "description": "PTH pad 19 [GND] of U2",
+                    "pos": {
+                        "x": 93.89,
+                        "y": 119.35
+                    },
+                    "uuid": "7d28a44d-1ee0-4f83-b6a2-17f671d02513"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.2000 mm)",
+            "items": [
+                {
+                    "description": "PTH pad 19 [GND] of U2",
+                    "pos": {
+                        "x": 93.89,
+                        "y": 118.25
+                    },
+                    "uuid": "7e805a23-c953-4961-a3bb-bb33c17fe190"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.2000 mm)",
+            "items": [
+                {
+                    "description": "PTH pad 19 [GND] of U2",
+                    "pos": {
+                        "x": 93.34,
+                        "y": 119.9
+                    },
+                    "uuid": "07a38e43-d282-495a-abf3-2f6b15d9fae7"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.2000 mm)",
+            "items": [
+                {
+                    "description": "PTH pad 19 [GND] of U2",
+                    "pos": {
+                        "x": 93.34,
+                        "y": 118.8
+                    },
+                    "uuid": "b6580677-cbbb-4a88-a4ac-c61b7b967596"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.2000 mm)",
+            "items": [
+                {
+                    "description": "PTH pad 19 [GND] of U2",
+                    "pos": {
+                        "x": 93.34,
+                        "y": 117.7
+                    },
+                    "uuid": "02f4d05b-aa69-48b9-bb2e-14f889ca887b"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.2000 mm)",
+            "items": [
+                {
+                    "description": "PTH pad 19 [GND] of U2",
+                    "pos": {
+                        "x": 92.79,
+                        "y": 119.35
+                    },
+                    "uuid": "dc9e76cf-d06e-4a13-a1cf-c360322025d7"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.2000 mm)",
+            "items": [
+                {
+                    "description": "PTH pad 19 [GND] of U2",
+                    "pos": {
+                        "x": 92.79,
+                        "y": 118.25
+                    },
+                    "uuid": "0da46d63-96e8-4b6d-bf1c-59f3c81dd8a7"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.2000 mm)",
+            "items": [
+                {
+                    "description": "PTH pad 19 [GND] of U2",
+                    "pos": {
+                        "x": 92.24,
+                        "y": 119.9
+                    },
+                    "uuid": "ef4fd6c8-0438-4560-a909-45b040574da9"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.2000 mm)",
+            "items": [
+                {
+                    "description": "PTH pad 19 [GND] of U2",
+                    "pos": {
+                        "x": 92.24,
+                        "y": 118.8
+                    },
+                    "uuid": "9f2cc563-5e7e-4b46-b53f-c1622613f7b9"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.2000 mm)",
+            "items": [
+                {
+                    "description": "PTH pad 19 [GND] of U2",
+                    "pos": {
+                        "x": 92.24,
+                        "y": 117.7
+                    },
+                    "uuid": "952787ff-a854-4170-b106-6b79f9f6ae87"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.2000 mm)",
+            "items": [
+                {
+                    "description": "PTH pad 19 [GND] of U2",
+                    "pos": {
+                        "x": 91.69,
+                        "y": 119.35
+                    },
+                    "uuid": "65a51c37-8cb5-478d-9bde-4e8ed1368ae5"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.2000 mm)",
+            "items": [
+                {
+                    "description": "PTH pad 19 [GND] of U2",
+                    "pos": {
+                        "x": 91.69,
+                        "y": 118.25
+                    },
+                    "uuid": "941bbfd2-2595-4581-b516-0356df6192fb"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 103.300001,
+                        "y": 92.349999
+                    },
+                    "uuid": "039c6333-27a7-405d-863e-ca95d5b21a41"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 100.75,
+                        "y": 121.25
+                    },
+                    "uuid": "06326573-15b8-4688-8e7e-a91a8fc19a97"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 90.0,
+                        "y": 80.0
+                    },
+                    "uuid": "18dccca8-a0b8-4811-881d-272da8cc925d"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 99.800001,
+                        "y": 92.349999
+                    },
+                    "uuid": "1f0e70d1-661e-4dfd-8d8e-2433db8f6b09"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 110.5,
+                        "y": 89.5
+                    },
+                    "uuid": "1f676969-4a2c-40fd-931e-f5a784730e94"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 91.550001,
+                        "y": 98.849999
+                    },
+                    "uuid": "22402286-13c3-4d8b-bdc6-56d2312ea468"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 88.5,
+                        "y": 81.0
+                    },
+                    "uuid": "2485117e-1786-48bd-8799-fa32c0f62b1f"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 112.0,
+                        "y": 118.0
+                    },
+                    "uuid": "30dd383e-a9e0-4fd3-b7b8-9550249a588c"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 96.050001,
+                        "y": 92.849999
+                    },
+                    "uuid": "4eec7c32-ffae-46b7-8dac-8031f3c6b526"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 90.0,
+                        "y": 82.0
+                    },
+                    "uuid": "64116c58-2eb5-4865-90f3-272cd0ddd0aa"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 112.0,
+                        "y": 89.5
+                    },
+                    "uuid": "6eeca4cc-7286-4743-bdf7-cce01ec438ba"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 90.0,
+                        "y": 81.0
+                    },
+                    "uuid": "6f8741f2-e26a-4c66-adac-4794bda83cbb"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 95.0,
+                        "y": 93.5
+                    },
+                    "uuid": "75e33d96-1a6c-4e12-8a8b-c6881ae2da02"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 104.0,
+                        "y": 113.0
+                    },
+                    "uuid": "79bde7b4-efa7-411e-8571-a31c3eaa5be7"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 93.800001,
+                        "y": 92.849999
+                    },
+                    "uuid": "7cacfbdf-34c6-432c-979b-35e656c5eb50"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 97.5,
+                        "y": 121.5
+                    },
+                    "uuid": "83c342d6-7237-42ff-8e34-a5375f16a665"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 93.425,
+                        "y": 104.575
+                    },
+                    "uuid": "8c3ffad6-d685-4c95-9829-f27dde93b0d5"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 101.550001,
+                        "y": 92.349999
+                    },
+                    "uuid": "9881edd6-cb8e-4041-b0af-1708e8880ac2"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 98.050001,
+                        "y": 92.349999
+                    },
+                    "uuid": "a34057a1-85ac-4db1-a81d-27cf6f61d5c2"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 92.5,
+                        "y": 93.5
+                    },
+                    "uuid": "aae47c1e-55eb-496b-b124-002a1e04a8a6"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 88.5,
+                        "y": 82.0
+                    },
+                    "uuid": "ab691d4c-b444-4cbc-9baa-f0591ae0024d"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 88.5,
+                        "y": 80.0
+                    },
+                    "uuid": "b3db0d68-8ea0-47ff-a42c-290b4f9937e8"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 92.5,
+                        "y": 116.0
+                    },
+                    "uuid": "b62a83c7-fde4-4b1d-b10b-2de4e24d168b"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 112.0,
+                        "y": 91.0
+                    },
+                    "uuid": "b85702b7-e075-44da-8c27-41e97989b598"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 112.25,
+                        "y": 122.0
+                    },
+                    "uuid": "bc1cb555-c926-4237-8def-85f177aae5e4"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 90.300001,
+                        "y": 98.849999
+                    },
+                    "uuid": "c08691bf-3b5d-4847-8bcc-21959cd7a76a"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 91.550001,
+                        "y": 92.849999
+                    },
+                    "uuid": "c3a77e18-cd4b-4e7d-8060-7fbca9ea4056"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 114.75,
+                        "y": 85.0
+                    },
+                    "uuid": "d00d2d94-ccb1-4b79-839e-aabed4040c37"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 112.0,
+                        "y": 80.75
+                    },
+                    "uuid": "d3d4e0d8-af77-4f1a-90b0-09909d0bb7c0"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 96.25,
+                        "y": 78.25
+                    },
+                    "uuid": "d94bccc8-1f3d-4401-afc2-c9d6ec2580a1"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 93.5,
+                        "y": 94.0
+                    },
+                    "uuid": "d991c65e-bb68-49fc-8d0d-df6e66a14b21"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 104.5875,
+                        "y": 120.1625
+                    },
+                    "uuid": "e2ff1dcd-b65c-497d-8f78-ffa25390678c"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [GND] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 110.5,
+                        "y": 91.0
+                    },
+                    "uuid": "e32832ad-e4d2-485b-9539-88d3c1f9cd53"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [/fan1_ctl] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 99.25,
+                        "y": 122.0
+                    },
+                    "uuid": "43574e99-5862-4d2c-a8ef-0d64dcddfca1"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+3.3V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 83.0,
+                        "y": 119.0
+                    },
+                    "uuid": "4388ad54-8b6f-4438-9155-1f7571c4844a"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+3.3V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 96.75,
+                        "y": 103.25
+                    },
+                    "uuid": "48993e4c-944a-451e-abe5-e99cc201291c"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+3.3V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 98.75,
+                        "y": 125.0
+                    },
+                    "uuid": "4c00670f-25bb-4c64-a52c-83ba160aaeb0"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+3.3V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 96.5,
+                        "y": 105.25
+                    },
+                    "uuid": "60000237-6a2e-4788-a1d9-2dcf91b7cd20"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+3.3V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 99.75,
+                        "y": 125.0
+                    },
+                    "uuid": "6a1e499c-4764-437f-a3c5-8fc350f44a44"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+3.3V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 107.75,
+                        "y": 115.5
+                    },
+                    "uuid": "93a66725-5d26-4f85-8eeb-2a8cd2f28888"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+3.3V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 96.75,
+                        "y": 104.25
+                    },
+                    "uuid": "a015d8ea-5cfa-44d4-b476-4ec48fd6a700"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+3.3V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 101.25,
+                        "y": 104.0
+                    },
+                    "uuid": "a30014da-f2a2-43d8-94cb-5226c7719102"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+3.3V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 109.25,
+                        "y": 124.75
+                    },
+                    "uuid": "b933a8a7-8666-47ed-b90f-2594bbf0f97a"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+3.3V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 108.75,
+                        "y": 121.5
+                    },
+                    "uuid": "c2b66c46-5c5b-47df-bc3b-dd908b03eb4f"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+3.3V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 101.0,
+                        "y": 125.0
+                    },
+                    "uuid": "fd208eeb-d938-4188-b66e-ba9b514e8bd2"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [/mist_ctl] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 95.5,
+                        "y": 121.5
+                    },
+                    "uuid": "c3e11734-cd23-43e7-b46c-1736a0f9b101"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+18V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 106.5,
+                        "y": 104.0
+                    },
+                    "uuid": "2d6018cb-4930-4d4e-8d3b-9b0b84a184c6"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+18V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 106.0,
+                        "y": 82.75
+                    },
+                    "uuid": "31c7ef06-1d19-4b0a-a390-112af1db765e"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+18V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 107.25,
+                        "y": 84.0
+                    },
+                    "uuid": "35d53fbe-6d0c-45ec-83d0-8cd40cf0bf9d"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+18V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 97.23,
+                        "y": 111.23
+                    },
+                    "uuid": "3609d1e1-b455-409c-867e-d4c75138db09"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+18V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 98.5,
+                        "y": 84.5
+                    },
+                    "uuid": "3c2d286f-3f4e-449f-a46a-2eaae9191298"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+18V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 94.0,
+                        "y": 113.0
+                    },
+                    "uuid": "53636626-73d0-48af-914e-22e67d0540ed"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+18V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 100.5,
+                        "y": 90.0
+                    },
+                    "uuid": "546518d0-a622-4406-9461-5f013adbd061"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+18V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 100.0,
+                        "y": 83.0
+                    },
+                    "uuid": "578b9ed0-b0b1-4211-b9f8-403682372a24"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+18V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 102.0,
+                        "y": 84.5
+                    },
+                    "uuid": "63321aed-6683-4035-a847-dfb347193136"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+18V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 107.25,
+                        "y": 82.75
+                    },
+                    "uuid": "637ebe5d-34db-4a9c-af1f-5ad3abdff0ab"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+18V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 99.0,
+                        "y": 90.0
+                    },
+                    "uuid": "70dbf570-fe8f-4e98-822d-06e734d77e8a"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+18V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 106.0,
+                        "y": 96.5
+                    },
+                    "uuid": "83a3836b-a401-46cf-8d92-5dc702028f49"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+18V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 103.75,
+                        "y": 82.75
+                    },
+                    "uuid": "8417ac71-9388-467c-a564-b0308685ea54"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+18V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 106.5,
+                        "y": 91.5
+                    },
+                    "uuid": "86f56a36-a0f8-49b2-a8b5-90a7c0ca3b7e"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+18V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 103.75,
+                        "y": 84.0
+                    },
+                    "uuid": "8cbcb4e5-c6c3-4dce-912d-782a84954043"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+18V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 106.5,
+                        "y": 93.5
+                    },
+                    "uuid": "9095b87e-9300-421d-9a90-6b4c84cbfe17"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+18V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 98.5,
+                        "y": 83.0
+                    },
+                    "uuid": "944c0233-739e-4d29-b0d5-93d2f8f2c90b"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+18V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 104.5,
+                        "y": 96.5
+                    },
+                    "uuid": "94709d42-41f0-4be1-821f-f22c40e21ce3"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+18V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 104.75,
+                        "y": 82.75
+                    },
+                    "uuid": "a689edab-26d7-4cfc-88f6-592a8a6f9bb1"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+18V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 103.5,
+                        "y": 90.0
+                    },
+                    "uuid": "b2f50750-3190-4cdd-8d2a-5383c7e4d015"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+18V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 100.0,
+                        "y": 84.5
+                    },
+                    "uuid": "cc8c2b20-8133-4ab5-92c4-401ae1bc4626"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+18V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 102.0,
+                        "y": 90.0
+                    },
+                    "uuid": "cf9bff63-9a78-4e42-8516-e32ac0e0d5e6"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+18V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 102.0,
+                        "y": 83.0
+                    },
+                    "uuid": "eedb31eb-887e-49cc-a65b-05efb67133f2"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+18V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 104.75,
+                        "y": 84.0
+                    },
+                    "uuid": "efbabdb2-36f1-4de0-b8fb-56548c39d200"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [+18V] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 106.0,
+                        "y": 84.0
+                    },
+                    "uuid": "f153ca5b-896c-44aa-b624-00525469af99"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [/led_ctl] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 103.25,
+                        "y": 104.0
+                    },
+                    "uuid": "803df3f3-df7e-4995-9f03-b729a6afaf7d"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [/led_ctl] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 103.25,
+                        "y": 101.75
+                    },
+                    "uuid": "c626e45d-5bfb-4648-9192-b992d1b1bf33"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [/usb_dminus] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 88.75,
+                        "y": 117.5
+                    },
+                    "uuid": "3d427f3b-2004-40ce-8955-45d4e14e33f5"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [/usb_dminus] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 108.125,
+                        "y": 119.125
+                    },
+                    "uuid": "b7d613f2-0bb2-4977-8eaf-4a3bc2f912be"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [/usb_dplus] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 88.75,
+                        "y": 119.0
+                    },
+                    "uuid": "338829d2-f7ff-4c7c-ab9d-8bbb2be8ef21"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [/usb_dplus] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 109.375,
+                        "y": 119.375
+                    },
+                    "uuid": "827c863b-89a0-4cdd-b0eb-945d75ae0565"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [/i2c_sda] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 87.0,
+                        "y": 124.25
+                    },
+                    "uuid": "2d8c0941-2eb9-4403-a332-3768dc063f96"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Hole size out of range (board setup constraints min hole 0.5080 mm; actual 0.4000 mm)",
+            "items": [
+                {
+                    "description": "Via [/i2c_scl] on F.Cu - B.Cu",
+                    "pos": {
+                        "x": 86.625,
+                        "y": 123.125
+                    },
+                    "uuid": "9ae63fb7-a27e-4ef5-b435-87d49d5211dc"
+                }
+            ],
+            "severity": "error",
+            "type": "drill_out_of_range"
+        },
+        {
+            "description": "Front solder mask aperture bridges items with different nets",
+            "items": [
+                {
+                    "description": "Track [Net-(U2-IO9)] on F.Cu, length 2.2500 mm",
+                    "pos": {
+                        "x": 109.125,
+                        "y": 104.375
+                    },
+                    "uuid": "32537274-f22e-5413-b75b-4845e5931559"
+                },
+                {
+                    "description": "Pad 1 [+3.3V] of TP1 on F.Cu",
+                    "pos": {
+                        "x": 107.53401,
+                        "y": 105.96599
+                    },
+                    "uuid": "42378071-d947-5c93-9b47-b8495f1843a8"
+                }
+            ],
+            "severity": "error",
+            "type": "solder_mask_bridge"
+        }
+    ]
+}

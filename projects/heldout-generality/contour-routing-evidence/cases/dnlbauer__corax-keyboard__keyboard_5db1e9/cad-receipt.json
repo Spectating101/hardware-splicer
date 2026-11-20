@@ -1,0 +1,83 @@
+{
+  "cad": {
+    "common-inspection-dock": {
+      "bbox_mm": [
+        188.0,
+        168.0,
+        6.0
+      ],
+      "reimported_valid": true,
+      "volume_mm3": 126372.316811
+    },
+    "inspection-gauge": {
+      "bbox_mm": [
+        180.0,
+        160.0,
+        2.0
+      ],
+      "reimported_valid": true,
+      "volume_mm3": 34285.051958
+    },
+    "nominal-unpopulated-PCB": {
+      "bbox_mm": [
+        135.96982,
+        110.9398,
+        1.6
+      ],
+      "reimported_valid": true,
+      "volume_mm3": 18283.592048
+    },
+    "source-outline-cartridge": {
+      "bbox_mm": [
+        180.0,
+        160.0,
+        6.0
+      ],
+      "reimported_valid": true,
+      "volume_mm3": 147600.337061
+    }
+  },
+  "claims_excluded": [
+    "analytic_arc_fidelity",
+    "populated_body_clearance",
+    "printed_or_machined_tolerances",
+    "retention_pullout",
+    "physical_fit",
+    "electrical_probe_access"
+  ],
+  "common_dock_mm": [
+    188.0,
+    168.0,
+    4.0
+  ],
+  "fabrication_authorized": false,
+  "file_sha256": {
+    "common-inspection-dock.step": "12bf926c7b72b9860057014702ea88ca88ec7a22bacf86ed7ba69cb92ee860d9",
+    "common-inspection-dock.stl": "24dd4fd78402ec690821d5f23c2ec5278972dd92123b4e6c2f7dc1ffb7cbd6b4",
+    "exploded-UNASSEMBLED.step": "9ee93f256f6d591bd92f825e3fb275d7cbae469b4c7967bb54dd1dd3ad90e3fe",
+    "inspection-gauge.step": "fc4938acbd148e56756d2d04501dccfb4b30269af4093062ffdec0bfff2d4354",
+    "inspection-gauge.stl": "6dc6fca84ba799a8f1b4fa966476bb3e6a26d95df8556c173d35848c80a0083f",
+    "native-hole-map.csv": "b5b10b1acdaa4bebad2d9d6610d949c73f9d3c8a0c5d26368ea6cdd1420acfb5",
+    "nominal-unpopulated-PCB.step": "476ebec15447f73e29f6f2151719d35d82a4d73b2493e41fe8e71d7892a29865",
+    "nominal-unpopulated-PCB.stl": "f057daa9de70a2f7701260c57a65da8561718004be7852077789cd59fe4900e4",
+    "source-outline-cartridge.step": "bad15341cf66c8858ac2f1b7d5f9d5e14141c75e051967446ad7e8df1c3b7f54",
+    "source-outline-cartridge.stl": "2f299bd5cab0ea37cb76fb63c16987392445b800d8f49b0b89593e173b447781"
+  },
+  "mount_strategy": "non-clamping-edge-nest",
+  "mounting_strategy_provisional": "NON_CLAMPING_CONTOUR_TRAY_NO_INVENTED_HOLES",
+  "nominal_board_thickness_mm_assumed": 1.6,
+  "physical_measurements": false,
+  "pocket_gap_mm_assumed": 0.45,
+  "schema": "hs.native_contour_3d_study.v1",
+  "source_bbox_mm": [
+    41.248562,
+    44.964001,
+    135.969824,
+    110.939802
+  ],
+  "source_board_cutouts": 1,
+  "source_board_sha256": "05dd8f1abce881a757dafe1cf55467d8a3bc87ddcf6427fd6f504f6043ec1b1e",
+  "source_mount_count": 0,
+  "source_nominal_area_mm2": 11427.24503,
+  "source_outline_vertices": 85
+}

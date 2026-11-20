@@ -1,0 +1,19 @@
+{
+  "cohort_commit": "1e999b4eefd5fdfcc90dc376d2882390245a8e0d",
+  "fabrication_authorized": false,
+  "independent_new_probe_cad_checks": true,
+  "new_source_bound_electrical_route": true,
+  "original_source_frozen": true,
+  "physical_test_performed": false,
+  "pilot_pass": true,
+  "replay_runs": 2,
+  "same_revision_board_sha256": true,
+  "same_semantic_checks": true,
+  "schema": "hs.native_source_signal_access_proof.v1",
+  "selection_note": "Oasis board was chosen after seeing pilot performance; not an untouched post-tuning holdout",
+  "two_round_semantic_digest": [
+    "3351c23ff6eb79901ae7eddcf0a4992dac5b3d64bcb02de048c6e78a463a0c69",
+    "3351c23ff6eb79901ae7eddcf0a4992dac5b3d64bcb02de048c6e78a463a0c69"
+  ],
+  "wrong_net_negative_rejected": true
+}

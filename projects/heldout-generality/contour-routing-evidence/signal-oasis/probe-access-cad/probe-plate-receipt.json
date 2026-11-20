@@ -1,0 +1,30 @@
+{
+  "bore_diameter_mm": 0.6,
+  "fabrication_authorized": false,
+  "files_sha256": {
+    "source-bound-signal-probe-plate.step": "5490144caaed54b38a2fd14636625974fa35e3080b4f88fbdd9b0d6c69ba1337",
+    "source-bound-signal-probe-plate.stl": "c4209bcd6ea223eccea79175d52183b65861bc45cedf54b2b188e1e963827ad4"
+  },
+  "new_probe_abs_xy_mm": [
+    107.53401,
+    105.96599
+  ],
+  "nominal_plate_height_mm": 2.5,
+  "nominal_test_pad_diameter_mm": 1.0,
+  "populated_component_keepouts": "UNKNOWN",
+  "powered_probe_test": "NOT_PERFORMED",
+  "printed_fit": "NOT_PERFORMED",
+  "probe_guide_local_xy_mm": [
+    7.532781,
+    -5.96599
+  ],
+  "profile_vertices": 39,
+  "reimported_step_volume_mm3": 5512.288291,
+  "schema": "hs.signal_probe_plate_digital_only.v1",
+  "source_board_cutouts": 1,
+  "source_design_bound": true,
+  "source_edited_pcb_sha256": "7d79d7ad60ee3af376462d4640af8286c74b2bedad4f331d988e2f6e80211e58",
+  "source_new_testpoint_ref": "TP1",
+  "source_signal_net": "Net-(U2-IO9)",
+  "unvalidated_radial_registration_margin_mm": 0.2
+}
