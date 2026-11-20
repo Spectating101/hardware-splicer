@@ -879,6 +879,18 @@ describe("Fielddeck evidence UI", () => {
     }));
   });
 
+  it("folds the details panel to its title and reopens it when a part is selected", async () => {
+    render(<FieldDeckScene {...FIELDDECK} />);
+    const toggle = await screen.findByRole("button", { name: "Details" });
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(document.getElementById("fd-inspector-content")).not.toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "DSI FFC" }));
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    expect(document.getElementById("fd-inspector-content")).toBeVisible();
+  });
+
   it("numbers each question once across revisions and keeps the project total and names the count in the visible mode", async () => {
     render(<FieldDeckScene {...FIELDDECK} />);
     fireEvent.click(await screen.findByRole("button", { name: "DSI FFC" }));
