@@ -1,14 +1,14 @@
 """Read-only manifests and assets for project scenes."""
 
 import json
-import os
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 
+from .state_paths import repo_root
 
-_CHECKOUT_ROOT = Path(__file__).resolve().parents[2]
+
 _FIELDDECK_ID = "cyberdeck-real-trial-20261020"
 _SCENES = "/v1/scenes"
 project_scene_router = APIRouter(tags=["scenes"])
@@ -17,8 +17,7 @@ fielddeck_router = APIRouter(prefix=f"{_SCENES}/fielddeck", tags=["scenes"])
 
 def _repo_root() -> Path:
     """Project scenes live in a checkout's projects/; an installed package points at one explicitly."""
-    explicit = os.environ.get("HARDWARE_SPLICER_REPO_ROOT", "").strip()
-    return Path(explicit).expanduser().resolve() if explicit else _CHECKOUT_ROOT
+    return repo_root()
 
 
 def _confined_path(root: Path, relative: str) -> Path | None:

@@ -553,7 +553,7 @@ def create_app(*, ui_dist: str | Path | None = None) -> FastAPI:
 
     @app.get("/v1/examples/splice-intakes")
     def splice_intake_examples() -> Dict[str, Any]:
-        root = Path(__file__).resolve().parents[2] / "examples" / "intakes"
+        root = repo_root() / "examples" / "intakes"
         examples: List[Dict[str, Any]] = []
         for path in sorted(root.glob("splice_*.json")):
             try:
@@ -574,7 +574,7 @@ def create_app(*, ui_dist: str | Path | None = None) -> FastAPI:
 
     @app.get("/v1/examples/donor-fixtures")
     def donor_fixture_examples() -> Dict[str, Any]:
-        root = Path(__file__).resolve().parents[2] / "examples" / "fixtures"
+        root = repo_root() / "examples" / "fixtures"
         fixtures: List[Dict[str, Any]] = []
         for path in sorted(root.glob("splice_donor_*.json")):
             try:
@@ -604,7 +604,7 @@ def create_app(*, ui_dist: str | Path | None = None) -> FastAPI:
 
     @app.get("/v1/examples/netlist-fixtures")
     def netlist_fixture_catalog() -> Dict[str, Any]:
-        manifest = Path(__file__).resolve().parents[2] / "examples" / "netlist_fixtures" / "manifest.json"
+        manifest = repo_root() / "examples" / "netlist_fixtures" / "manifest.json"
         if not manifest.is_file():
             return {"ok": True, "fixtures": []}
         data = json.loads(manifest.read_text(encoding="utf-8"))
@@ -625,13 +625,13 @@ def create_app(*, ui_dist: str | Path | None = None) -> FastAPI:
         from .integrations.circuit_json_adapter import netlist_to_circuit_json
         from .netlist.ir import CircuitNetlist
 
-        manifest = Path(__file__).resolve().parents[2] / "examples" / "netlist_fixtures" / "manifest.json"
+        manifest = repo_root() / "examples" / "netlist_fixtures" / "manifest.json"
         data = json.loads(manifest.read_text(encoding="utf-8"))
         row = next((f for f in data.get("fixtures") or [] if f.get("id") == fixture_id), None)
         if not row:
             raise _error(404, "fixture_not_found", f"Unknown netlist fixture: {fixture_id}")
         rel = str(row.get("path") or "")
-        path = Path(__file__).resolve().parents[2] / "examples" / "netlist_fixtures" / rel
+        path = repo_root() / "examples" / "netlist_fixtures" / rel
         if not path.is_file():
             raise _error(404, "fixture_file_missing", f"Fixture file missing: {rel}")
         if row.get("type") == "kicad_netlist":

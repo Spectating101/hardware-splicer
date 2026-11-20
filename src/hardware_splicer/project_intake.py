@@ -17,6 +17,7 @@ from .compile_casefile import write_compile_casefile
 from .scratch_pipeline import compile_scratch_build
 from .scenario_runner import run_hardware_scenario
 from .vision_evidence_assistant import enrich_intake_with_vision_assistance
+from .state_paths import repo_root
 
 
 SCHEMA_VERSION = "hardware_splicer.project_intake.v1"
@@ -33,7 +34,7 @@ PROJECT_LEVELS = [
     "production_ready_project_package",
 ]
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = repo_root()
 
 
 def _resolve_intake_fixture_refs(value: Any) -> Any:
