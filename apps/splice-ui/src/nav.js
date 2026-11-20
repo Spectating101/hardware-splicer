@@ -13,6 +13,7 @@ export const VIEWS = Object.freeze({
   example: "example",
   lab: "lab",
   preview: "preview",
+  notFound: "not-found",
 });
 
 export const ADVANCED_VIEWS = new Set([
