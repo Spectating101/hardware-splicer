@@ -98,7 +98,7 @@ function QuestionNumber({ number }) {
   return <span className="fd-question-numbers">{number}</span>;
 }
 
-function Inspector({ row, index, questions, open, compare, meshStats, footprint, other = null }) {
+function Inspector({ row, index, questions, open, compare, meshStats, footprint, other = null, collapsed = false, onToggle = null }) {
   const comparing = Boolean(compare);
   const scroll = useRef(null);
   const [more, setMore] = useState(0);
@@ -129,8 +129,11 @@ function Inspector({ row, index, questions, open, compare, meshStats, footprint,
 
   const { part, link, revision } = row ?? {};
   return (
-    <aside className="fd-inspector fd-panel" id="fd-inspector" aria-label="Selection details" hidden={!open}>
-      <div className="fd-inspector-scroll" id="fd-inspector-content" ref={scroll} tabIndex={0}>
+    <aside className="fd-inspector fd-panel" id="fd-inspector" aria-label="Selection details" hidden={!open} data-collapsed={collapsed || undefined}>
+      {/* Desktop: the panel folds to its title so the canvas can take the width. */}
+      {onToggle && <button type="button" className="fd-panel-toggle" aria-expanded={!collapsed} aria-controls="fd-inspector-content"
+        onClick={onToggle}>Details</button>}
+      <div className="fd-inspector-scroll" id="fd-inspector-content" ref={scroll} tabIndex={0} hidden={collapsed}>
         {!row ? <p className="fd-empty">Select a part or interface to inspect its evidence.</p> : <>
           <h2>{part?.label ?? link.label}</h2>
           <p className="fd-status">{statusOf(row)}</p>
@@ -170,7 +173,7 @@ function Inspector({ row, index, questions, open, compare, meshStats, footprint,
           </>}
         </>}
       </div>
-      {open && more > 0 && <div className="fd-inspector-more"><span>{more} more</span></div>}
+      {open && !collapsed && more > 0 && <div className="fd-inspector-more"><span>{more} more</span></div>}
     </aside>
   );
 }
@@ -247,7 +250,7 @@ function PartTree({ rows, view, questions, counts, blockersOnly, endpoints, link
         {groups.filter(({ kind }) => !blockersOnly || kind === "blocker").map(({ kind, label, items }) => {
           // Blockers count the project total; a filtered view names its own count beside it.
           const count = kind === "blocker"
-            ? total === questions.length ? total : `${total} open · ${questions.length} in ${viewName}`
+            ? total === questions.length ? total : `${total} tracked · ${questions.length} in ${viewName}`
             : counts?.[kind] ?? items.length;
           const collapsed = kind === "unchanged" && !unchangedOpen;
           const shown = collapsed ? items.filter(({ key }) => key === view.selected || endpointFor(key)) : items;
@@ -343,7 +346,7 @@ function Annotations({ labels, selection, endpoints, pins, faceView, base, targe
 
 // The scene draws whichever project's manifest it is given: two revisions get Compare and the
 // change legend, a single revision groups parts by shape source, and nothing here names a project.
-export default function FieldDeckScene({ projectId, manifest, onExit, embedded = false }) {
+export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel = "Back", embedded = false }) {
   const host = useRef(null);
   const stage = useRef(null);
   const current = useRef(null);
@@ -367,6 +370,7 @@ export default function FieldDeckScene({ projectId, manifest, onExit, embedded =
   const [stageError, setStageError] = useState("");
   const [view, setView] = useState(() => ({ ...INITIAL, mode: target }));
   const [desktopTreeOpen, setDesktopTreeOpen] = useState(true);
+  const [desktopInspectorOpen, setDesktopInspectorOpen] = useState(true);
   const [blockersOnly, setBlockersOnly] = useState(false);
   const [narrow, setNarrow] = useState(() => window.matchMedia(FIELDDECK_NARROW).matches);
   const [keyOpen, setKeyOpen] = useState(false);
@@ -546,6 +550,7 @@ export default function FieldDeckScene({ projectId, manifest, onExit, embedded =
       focus: Boolean(key),
       faceView: old.faceView && !index.byKey.get(key)?.link,
     }));
+    if (key) setDesktopInspectorOpen(true);
   }
   current.current = { view, reduced, finishIntro, select };
 
@@ -739,19 +744,22 @@ export default function FieldDeckScene({ projectId, manifest, onExit, embedded =
       <div className="fd-stage" data-has-selection={Boolean(selection)} ref={host} tabIndex={0} aria-label={`${manifest.title} stage`}>
         <header className="fd-header">
           <div>
-            {onExit && <button className="fd-exit" type="button" aria-label="Back to home" onClick={onExit}>←</button>}
+            {onExit && <button className="fd-exit" type="button" aria-label={exitLabel} title={exitLabel} onClick={onExit}>←</button>}
             <h1 id="fd-title">{manifest.title}</h1>
             {!narrow && <span className="fd-revision">{manifest.subtitle}</span>}
           </div>
           <button className="fd-validation" type="button" aria-pressed={filtered} aria-controls="fd-tree"
             onClick={toggleBlockers}>
             {/* The count is project state: always the total, with the filtered view named beside it. */}
+            {/* The count is of questions someone recorded, not of what fit validation would find, so
+                zero never reads as proof: the unknown leads and the count says "tracked". */}
             {narrow ? <>
-              <span>Physical fit unknown</span>
+              <span className="fd-fit-unknown">Physical fit unknown</span>
               <span><span className="fd-count">{allQuestions.length}</span> {inViewCount === allQuestions.length
-                ? "questions" : `open · ${inViewCount} in view`}</span>
-            </> : <>Physical fit unknown · <span className="fd-count">{allQuestions.length}</span> {inViewCount === allQuestions.length
-              ? "open questions" : `open · ${inViewCount} in ${labelOf(view.mode)} view`}</>}
+                ? "tracked" : `tracked · ${inViewCount} in view`}</span>
+            </> : <><span className="fd-fit-unknown">Physical fit unknown</span> · not tested · <span className="fd-count">{allQuestions.length}</span>{" "}
+              {inViewCount === allQuestions.length ? `tracked question${allQuestions.length === 1 ? "" : "s"}`
+                : `tracked · ${inViewCount} in ${labelOf(view.mode)} view`}</>}
           </button>
         </header>
 
@@ -767,6 +775,7 @@ export default function FieldDeckScene({ projectId, manifest, onExit, embedded =
           </div>
         </aside>
         <Inspector row={selection} index={index} questions={ownQuestions} open={inspectorOpen} compare={sceneCompare}
+          collapsed={!narrow && !desktopInspectorOpen} onToggle={narrow ? null : () => setDesktopInspectorOpen(!desktopInspectorOpen)}
           other={otherQuestions.length ? { revision: otherRevision, label: labelOf(otherRevision), questions: otherQuestions } : null}
           meshStats={meshStats} footprint={view.mode === "compare" && selection?.part?.part_id === focusPart && faceFit?.footprint
             ? { base, label: labelOf(base), value: faceFit.footprint } : null} />

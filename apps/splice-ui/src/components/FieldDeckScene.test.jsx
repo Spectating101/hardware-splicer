@@ -879,6 +879,18 @@ describe("Fielddeck evidence UI", () => {
     }));
   });
 
+  it("folds the details panel to its title and reopens it when a part is selected", async () => {
+    render(<FieldDeckScene {...FIELDDECK} />);
+    const toggle = await screen.findByRole("button", { name: "Details" });
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(document.getElementById("fd-inspector-content")).not.toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "DSI FFC" }));
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    expect(document.getElementById("fd-inspector-content")).toBeVisible();
+  });
+
   it("numbers each question once across revisions and keeps the project total and names the count in the visible mode", async () => {
     render(<FieldDeckScene {...FIELDDECK} />);
     fireEvent.click(await screen.findByRole("button", { name: "DSI FFC" }));
@@ -886,16 +898,16 @@ describe("Fielddeck evidence UI", () => {
     const mapping = () => inspector.getByText("Pin mapping unknown").parentElement;
     expect(mapping()).toHaveTextContent(/^2 · DSI FFC\s*Pin mapping unknown$/);
     expect(inspector.getByText("Connector retention unknown")).toBeVisible();
-    expect(screen.getByRole("button", { name: "Physical fit unknown · 5 open questions" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Physical fit unknown · not tested · 5 tracked questions" })).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "7-inch" }));
     expect(mapping()).toHaveTextContent(/^2 · DSI FFC\s*Pin mapping unknown$/);
     expect(inspector.queryByText("Signal voltage unknown")).toBeNull();
     expect(inspector.getByText("A").parentElement).toHaveTextContent("pi4-dsi");
-    expect(screen.getByRole("button", { name: "Physical fit unknown · 5 open · 3 in 7-inch view" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Physical fit unknown · not tested · 5 tracked · 3 in 7-inch view" })).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "5-inch" }));
     expect(mapping()).toHaveTextContent(/^2 · DSI FFC\s*Pin mapping unknown$/);
     expect(inspector.queryByText("Connector retention unknown")).toBeNull();
-    expect(screen.getByRole("button", { name: "Physical fit unknown · 5 open · 3 in 5-inch view" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Physical fit unknown · not tested · 5 tracked · 3 in 5-inch view" })).toBeVisible();
   });
 
   it("toggles Face view and requests ghost geometry only for changed parts in Compare", async () => {
@@ -948,7 +960,7 @@ describe("Fielddeck evidence UI", () => {
 
   it("uses the same blocker number on the pin, tree and inspector and keeps the qualifier intact", async () => {
     render(<FieldDeckScene {...FIELDDECK} />);
-    const filter = await screen.findByRole("button", { name: "Physical fit unknown · 5 open questions" });
+    const filter = await screen.findByRole("button", { name: "Physical fit unknown · not tested · 5 tracked questions" });
     const scene = screen.getByTestId("fielddeck-scene");
     const pin = scene.querySelector('[data-question-number="1"]');
     expect(pin).toHaveTextContent(/^1$/);
@@ -1011,7 +1023,7 @@ describe("Fielddeck evidence UI", () => {
       selectedKeys: ["5:part:pi4-dsi", "5:part:display"],
       cameraCue: { stopIndex: 1 },
     }));
-    expect(screen.getByRole("button", { name: /^Physical fit unknown\s*5 questions$/ })).toBeVisible();
+    expect(screen.getByRole("button", { name: /^Physical fit unknown\s*5 tracked$/ })).toBeVisible();
     const panels = within(screen.getByRole("group", { name: "Scene panels" }));
     const parts = panels.getByRole("button", { name: "Parts" });
     const details = panels.getByRole("button", { name: "Inspector" });

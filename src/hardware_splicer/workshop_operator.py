@@ -26,9 +26,10 @@ import shutil
 import subprocess
 import sys
 from typing import Any, Mapping
+from .state_paths import repo_root
 
 OPERATOR_SCHEMA = "hardware_splicer.workshop_operator.v1"
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = repo_root()
 SPI_ROOT = "hardware/reference_designs/spi_flash_adapter_v1"
 SPLICE_MANIFEST = "examples/splice/manifest.json"
 SPI_ID = "spi_flash_adapter_reference"

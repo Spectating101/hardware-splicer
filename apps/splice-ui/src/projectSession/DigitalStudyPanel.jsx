@@ -4,7 +4,8 @@ import {
 } from "./digitalStudyApi.js";
 import ProjectBench from "./ProjectBench.jsx";
 import { SavedDisplayComparison } from "./FieldDeckDisplayComparison.jsx";
-import { fieldLabel } from "./digitalStudyLabels.js";
+import { fieldLabel, formatValue, keyLabel } from "./digitalStudyLabels.js";
+import { describeTransition } from "./checkTransition.js";
 import "./digitalStudy.css";
 
 const isPending = (status) => status === "queued" || status === "running";
@@ -61,18 +62,22 @@ function RevisionComparison({ projectId, before, after }) {
     <div className="digital-input-diff">
       <strong>Requirement changes, revision {body.before_revision} → {body.after_revision}</strong>
       {changes.length ? <ul>{changes.map(([key, row]) => <li key={key}>
-        {fieldLabel(key)} · {String(row.before ?? "unknown")} → {String(row.after ?? "unknown")}</li>)}</ul>
+        {keyLabel(key).label} · {formatValue(row.before, keyLabel(key).unit)} → {formatValue(row.after, keyLabel(key).unit)}</li>)}</ul>
         : <p>The backend reports the same requirements in both revisions.</p>}
       <p className="muted">Engine sources: {body.same_engine_sources === true ? "same files and hashes in both revisions"
         : body.same_engine_sources === false ? "changed between the revisions" : "unknown"}</p>
     </div>
     <div className="digital-table-wrap"><table className="digital-table"><caption>Checks</caption><thead><tr>
       <th scope="col">Check</th><th scope="col">Revision {body.before_revision}</th><th scope="col">Revision {body.after_revision}</th><th scope="col">Transition</th>
-    </tr></thead><tbody>{(body.constraints || []).map((row) => <tr key={row.id} data-transition={row.transition}>
-      <th scope="row">{fieldLabel(row.id)}</th>
-      <td>{row.before ? `${row.before.passed ? "pass" : "fail"} · ${number(row.before.actual, 3)}` : "not run"}</td>
-      <td>{row.after ? `${row.after.passed ? "pass" : "fail"} · ${number(row.after.actual, 3)}` : "not run"}</td>
-      <td>{row.transition}</td></tr>)}</tbody></table></div>
+    </tr></thead><tbody>{(body.constraints || []).map((row) => {
+      // The label comes from the values: a limit that moved under an unchanged measurement is not a regression.
+      const change = describeTransition(row.before, row.after, row.transition);
+      return <tr key={row.id} data-transition={change.kind}>
+        <th scope="row">{fieldLabel(row.id)}</th>
+        <td>{row.before ? `${row.before.passed ? "pass" : "fail"} · ${number(row.before.actual, 3)}` : "not run"}</td>
+        <td>{row.after ? `${row.after.passed ? "pass" : "fail"} · ${number(row.after.actual, 3)}` : "not run"}</td>
+        <td><strong>{change.label}</strong>{change.detail && <small>{change.detail}</small>}</td></tr>;
+    })}</tbody></table></div>
     <div className="digital-table-wrap"><table className="digital-table"><caption>Measurements</caption><thead><tr>
       <th scope="col">Measure</th><th scope="col">Revision {body.before_revision}</th><th scope="col">Revision {body.after_revision}</th><th scope="col">Change</th>
     </tr></thead><tbody>{metricRows.map(([key, row]) => <tr key={key}>
@@ -133,6 +138,12 @@ export default function DigitalStudyPanel({ session, onProjectReload, onToast, o
     const linked = data.history.find((row) => row.revision === routeRevision)?.revision;
     setSelectedRevision(linked ?? data.study.revision);
   }, [data, routeRevision]);
+
+  // One URL per view: ?rev= names an older revision only, so a link to the latest drops it.
+  // An unknown revision keeps it, because the notice below explains that link.
+  useEffect(() => {
+    if (data && routeRevision === data.study.revision) onRevisionRoute?.(null, { replace: true });
+  }, [data, routeRevision, onRevisionRoute]);
 
   function chooseRevision(revision) {
     setSelectedRevision(revision);

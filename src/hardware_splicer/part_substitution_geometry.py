@@ -237,8 +237,9 @@ def generate_substitution_geometry(report, output_dir, *, interpreter=None):
         manifest["reason"] = "Replacement dimensions and assembly position are required for native geometry."
         return manifest
     from .bounded_process import BoundedProcessError, run_bounded
+    from .state_paths import repo_root
     configured = os.environ.get("SPLICER3D_PYTHON")
-    repository_python = Path(__file__).resolve().parents[2] / ".cache/hardware-splicer/digital-native-venv/bin/python"
+    repository_python = repo_root() / ".cache/hardware-splicer/digital-native-venv/bin/python"
     python = str(interpreter or configured or (repository_python if repository_python.is_file() else sys.executable))
     env = {key: os.environ[key] for key in ("PATH", "HOME", "SYSTEMROOT", "LD_LIBRARY_PATH") if key in os.environ}
     env.update({"PYTHONOPTIMIZE": "0", "PYTHONDONTWRITEBYTECODE": "1", "QT_QPA_PLATFORM": "offscreen",

@@ -137,6 +137,8 @@ describe("App URL routing", () => {
     render(<App />);
     expect(await screen.findByRole("heading", { name: "Project not found" })).toBeInTheDocument();
     expect(screen.getByText("no-such-project", { selector: "code" })).toBeInTheDocument();
+    // Nothing is open, so the sidebar does not claim a project is being resumed.
+    expect(screen.getByTestId("nav-project")).not.toHaveClass("active");
     expect(screen.queryByTestId("project-bench")).toBeNull();
     await userEvent.click(screen.getByRole("button", { name: "Back to projects" }));
     expect(await screen.findByRole("heading", { name: "Saved projects" })).toBeInTheDocument();
@@ -194,6 +196,37 @@ describe("App URL routing", () => {
     expect(screen.queryByRole("heading", { name: "Project not found" })).toBeNull();
     window.history.back();
     expect(await screen.findByTestId("new-project")).toBeInTheDocument();
+  });
+
+  it("keeps at most five saved projects in the sidebar with a way to see them all", async () => {
+    const many = Array.from({ length: 7 }, (_, i) => ({ project_id: `p${i}`, name: "pen_plotter", latest_revision: 1,
+      saved_at: "2026-11-20", created_at: "2026-11-19", objective: i ? `Plot sheet ${i}` : "" }));
+    fetch.mockImplementation(async (url) => respond(String(url).endsWith("/health") ? { ok: true } : { projects: many }));
+    window.history.replaceState(null, "", "/library");
+    render(<App />);
+    const all = await screen.findByTestId("sidebar-view-all");
+    expect(all).toHaveTextContent("View all 7 projects");
+    const saved = screen.getByText("Saved projects", { selector: ".sidebar-label" }).parentElement;
+    expect(within(saved).getAllByRole("button").filter((b) => b.classList.contains("project-button"))).toHaveLength(5);
+    await userEvent.click(all);
+    expect(window.location.pathname).toBe("/");
+    // Repeated names read the same way and carry the id tail and objective that tell them apart.
+    const row = await screen.findByRole("button", { name: /^Pen plotter · p1 Plot sheet 1/ });
+    expect(row).toHaveTextContent("created");
+    expect(row).toHaveTextContent("Rev 1");
+  });
+
+  it("collapses the sidebar to its toggle and remembers it", async () => {
+    render(<App />);
+    const toggle = await screen.findByRole("button", { name: "Collapse sidebar" });
+    await userEvent.click(toggle);
+    expect(screen.getByTestId("app-shell")).toHaveClass("sidebar-collapsed");
+    expect(screen.getByRole("button", { name: "Expand sidebar" })).toHaveAttribute("aria-expanded", "false");
+    cleanup();
+    render(<App />);
+    expect(screen.getByTestId("app-shell")).toHaveClass("sidebar-collapsed");
+    await userEvent.click(screen.getByRole("button", { name: "Expand sidebar" }));
+    expect(screen.getByTestId("app-shell")).not.toHaveClass("sidebar-collapsed");
   });
 
   it("opens the intake, library and advanced tools from their URLs", async () => {

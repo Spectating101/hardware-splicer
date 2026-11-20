@@ -16,8 +16,9 @@ import subprocess
 import sys
 import zipfile
 from pathlib import Path
+from .state_paths import repo_root
 
-REPO=Path(__file__).resolve().parents[2]
+REPO = repo_root()
 MECHA=REPO/"apps/mecha-splicer/src"
 if str(MECHA) not in sys.path: sys.path.insert(0,str(MECHA))
 from mecha_splicer.bundle import generate_bundle

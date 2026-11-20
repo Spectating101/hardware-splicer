@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import ProjectBench from "./ProjectBench.jsx";
+import ProjectBench, { summarizeRevision } from "./ProjectBench.jsx";
 import NewProject from "./NewProject.jsx";
 import * as api from "./digitalStudyApi.js";
 import * as sceneApi from "../api.js";
@@ -108,7 +108,7 @@ describe("Project bench truth", () => {
     api.fetchEvidenceDelta.mockResolvedValue({ base_revision: 3, candidate_revision: 4, evidence_delta: {
       affected_outputs: [{ evidence_id: "output:check:work_runtime", status: "invalidated",
         reasons: [{ kind: "changed_dependency", ids: ["requirement:minimum_work_runtime_h"] }],
-        metadata: { kind: "check", summary: "work_runtime", ...check("w", true, 3.166, 2.5, "h", 3, "run-three-abcdef"),
+        metadata: { kind: "check", node_id: "check:work_runtime", summary: "work_runtime", ...check("w", true, 3.166, 2.5, "h", 3, "run-three-abcdef"),
           rerun: check("w", false, 3.166, 3.5, "h", 4, "run-four") } }],
       blocked_outputs: [],
       retained_outputs: [{ evidence_id: "output:check:ordinary_source_margin", status: "retained",
@@ -123,15 +123,19 @@ describe("Project bench truth", () => {
     } });
     render(<ProjectBench session={session} />);
     const delta = await screen.findByTestId("evidence-delta");
-    expect(delta).toHaveTextContent("Changed requirement minimum_work_runtime_h: 2.5 → 3.5");
-    const stale = within(delta).getByTestId("stale-check");
-    expect(stale).toHaveTextContent("stale · from revision 3work_runtime");
-    expect(stale).toHaveTextContent("Revision 3 result: passed · actual 3.166 h · required ≥ 2.5 h · run run-three-ab");
-    expect(stale).toHaveTextContent("Rerun in revision 4: failed · actual 3.166 h · required ≥ 3.5 h");
-    expect(stale).toHaveTextContent("not counted for revision 4");
-    expect(delta).toHaveTextContent("retained · from revision 3ordinary_source_margin");
+    expect(delta).toHaveTextContent("Changed requirement Minimum work runtime: 2.5 h → 3.5 h");
+    // The current failure is shown once; the invalidated revision 3 result folds under it.
+    expect(within(delta).queryByTestId("stale-check")).toBeNull();
+    const failing = within(delta).getByTestId("failing-checks");
+    expect(failing).toHaveTextContent("failed · revision 4 Work runtime");
+    expect(failing).toHaveTextContent("Newly fails: requirement increased · Measured 3.166 h, unchanged · target 3.5 h, up from 2.5 h");
+    expect(failing).not.toHaveTextContent(/regress/i);
+    const history = within(failing).getByTestId("check-history");
+    expect(history).not.toHaveAttribute("open");
+    expect(history).toHaveTextContent("Historical · invalidated by changed requirement · not counted for revision 4");
+    expect(history).toHaveTextContent("Revision 3 result: passed · actual 3.166 h · required ≥ 2.5 h · run run-three-ab");
+    expect(delta).toHaveTextContent("retained · from revision 3Supply margin, ordinary load");
     expect(delta).not.toHaveTextContent("retained by the backend");
-    expect(within(delta).getByTestId("failing-checks")).toHaveTextContent("failed · revision 4 work_runtime");
     const pair = within(delta).getByTestId("package-pair");
     expect(within(pair).getByRole("link", { name: "STUDY.zip" })).toHaveAttribute("href", "/r3/STUDY.zip");
     expect(pair).toHaveTextContent("sha256 fddca455d5e8cf68");
@@ -240,7 +244,7 @@ it("offers three list entries and submits distinct owned units, without claiming
   render(<NewProject online onComplete={complete} onCancel={vi.fn()} />);
   const choices = screen.getByRole("list", { name: "Project starting points" });
   expect(within(choices).getAllByRole("listitem")).toHaveLength(3);
-  expect(within(choices).getAllByRole("button").map((button) => button.textContent)).toEqual([
+  expect(within(choices).getAllByRole("button").map((button) => button.getAttribute("aria-label"))).toEqual([
     "Start from a goal", "Start from parts you have", "Start from a reference study",
   ]);
   fireEvent.click(screen.getByRole("button", { name: "Start from parts you have" }));
@@ -268,5 +272,38 @@ describe("thresholdLabel", () => {
     expect(thresholdLabel({ actual: 260, limit: 250, passed: false, unit: "g" })).toBe("required ≤ 250 g");
     expect(thresholdLabel({ actual: 2, limit: 2, passed: true, unit: "A" })).toBe("threshold 2 A");
     expect(thresholdLabel({ actual: 2, limit: 3 })).toBe("threshold 3");
+  });
+});
+
+describe("Revision summary", () => {
+  const runtime = { id: "work_runtime", passed: false, actual: 3.166, limit: 3.5, unit: "h" };
+  const margin = { id: "ordinary_source_margin", passed: true, actual: .48, limit: .3, unit: "A" };
+
+  it("leads with the first failing check and counts modeled passes separately", () => {
+    const summary = summarizeRevision({ revision: 2, studyChecks: [margin, runtime], blockers: [], blockersKnown: true,
+      designStatus: "scene", partsKnown: false, evidenceKnown: true });
+    expect(summary.proven).toHaveLength(1);
+    expect(summary.failed).toHaveLength(1);
+    expect(summary.unknown.map((row) => row.text)).toEqual(["Physical fit · not tested", "Parts · not recorded"]);
+    expect(summary.next.text).toBe("Resolve failed check Work runtime: measured 3.166 h, required ≥ 3.5 h");
+  });
+
+  it("falls back to a blocker, then the first unknown, then names the missing input", () => {
+    expect(summarizeRevision({ revision: 1, blockers: ["Import the STEP file"], blockersKnown: true, designStatus: "records",
+      partsKnown: true, evidenceKnown: true }).next.text).toBe("Import the STEP file");
+    expect(summarizeRevision({ revision: 1, blockers: [], blockersKnown: true, designStatus: "records", sceneNext: "Import source STEP",
+      partsKnown: true, evidenceKnown: true }).next.text).toBe("Import source STEP");
+    const none = summarizeRevision({ revision: 3, blockers: [], blockersKnown: true, designStatus: "loading", partsKnown: true, evidenceKnown: true });
+    expect(none.next.missing).toBe(true);
+    expect(none.next.text).toMatch(/^No next action can be derived for revision 3\. Missing input:/);
+  });
+
+  it("renders above the columns without calling the project ready", async () => {
+    render(<ProjectBench session={session} />);
+    const strip = await screen.findByTestId("revision-summary");
+    expect(strip.compareDocumentPosition(screen.getByRole("heading", { name: "Evidence" })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(strip).toHaveTextContent("Proven (modeled)");
+    expect(strip).toHaveTextContent("Next action");
+    expect(strip).not.toHaveTextContent(/ready|all checks passed/i);
   });
 });

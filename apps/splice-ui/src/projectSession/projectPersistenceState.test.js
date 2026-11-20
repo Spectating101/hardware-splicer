@@ -127,3 +127,16 @@ it("restores owned units independently of catalogue identity and retains backend
   expect(restored.intake.owned_units[0]).not.toHaveProperty("catalog_part_id");
   expect(restored.intake.owned_units[0]).not.toHaveProperty("authority");
 });
+
+describe("graph sync", () => {
+  it("leaves the session untouched when the design panel reports the graph it already has", () => {
+    const graph = { nodes: [{ id: "controller", data: { label: "MCU" } }], edges: [], phrase: "robot", composeMode: "canvas" };
+    const state = createEmptySession({ projectId: "robot", projectName: "Robot", graph, dirty: false });
+    const same = projectSessionReducer(state, { type: ACTIONS.SYNC_GRAPH, nodes: [{ data: { label: "MCU" }, id: "controller" }],
+      edges: [], phrase: "robot", composeMode: "canvas" });
+    expect(same).toBe(state);
+    const edited = projectSessionReducer(state, { type: ACTIONS.SYNC_GRAPH, phrase: "robot arm" });
+    expect(edited.dirty).toBe(true);
+    expect(edited.graph.phrase).toBe("robot arm");
+  });
+});

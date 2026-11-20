@@ -33,6 +33,7 @@ def fake_dist(path: Path) -> Path:
 def ui_paths(tmp_path, monkeypatch):
     module = tmp_path / "checkout/src/hardware_splicer/api.py"
     monkeypatch.setattr(api, "__file__", str(module))
+    monkeypatch.setenv("HARDWARE_SPLICER_REPO_ROOT", str(tmp_path / "checkout"))
     monkeypatch.delenv("HARDWARE_SPLICER_UI_DIST", raising=False)
     monkeypatch.delenv("HARDWARE_SPLICER_SERVE_UI", raising=False)
     monkeypatch.setenv("HARDWARE_SPLICER_JOB_DB", str(tmp_path / "jobs.sqlite"))
@@ -61,7 +62,8 @@ def test_auto_mode_serves_a_build_when_found_and_skips_quietly_otherwise(ui_path
         assert client.get("/").status_code == 404
     fake_dist(ui_paths[3])
     with TestClient(api.create_app()) as client:
-        assert client.get("/health").json()["ui"]["dist"] == str(ui_paths[3])
+        assert client.get("/health").json()["ui"]["source"] == "checkout"
+        assert client.app.state.ui_dist == str(ui_paths[3])
         assert "test UI" in client.get("/").text
 
 
@@ -81,7 +83,7 @@ def test_ui_disabled_health(ui_paths):
     with TestClient(api.create_app()) as client:
         assert client.get("/").status_code == 404
         assert client.get("/health").json()["ui"] == {
-            "served": False, "dist": None, "index_sha256": None,
+            "served": False, "source": None, "index_sha256": None,
         }
 
 
@@ -107,7 +109,7 @@ def test_ui_routes_health_and_cache_headers(ui_paths, monkeypatch, tmp_path, pro
         ui = client.get("/health").json()["ui"]
         assert ui == {
             "served": True,
-            "dist": str(dist),
+            "source": "argument",
             "index_sha256": hashlib.sha256((dist / "index.html").read_bytes()).hexdigest(),
         }
         assert client.get("/docs").status_code == 200
@@ -186,7 +188,8 @@ def test_serve_ui_dist_option_overrides_environment(serve, ui_paths, monkeypatch
     assert os.environ["HARDWARE_SPLICER_SERVE_UI"] == "1"
     assert os.environ["HARDWARE_SPLICER_UI_DIST"] == str(cli_dist)
     with TestClient(product_factory()(ProjectStore(ui_paths[0].parent / "store"))) as client:
-        assert client.get("/health").json()["ui"]["dist"] == str(cli_dist)
+        assert client.get("/health").json()["ui"]["source"] == "environment"
+        assert client.app.state.ui_dist == str(cli_dist)
 
 
 def test_serve_ui_flags(serve):

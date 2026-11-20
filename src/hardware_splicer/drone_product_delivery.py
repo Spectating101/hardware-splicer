@@ -24,8 +24,9 @@ from pathlib import Path
 from typing import Any
 
 from .robot_topology import build_robot_topology
+from .state_paths import repo_root
 
-_REPO = Path(__file__).resolve().parents[2]
+_REPO = repo_root()
 _MECHA = _REPO / "apps" / "mecha-splicer" / "src"
 if str(_MECHA) not in sys.path:
     sys.path.insert(0, str(_MECHA))

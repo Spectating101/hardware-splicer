@@ -66,8 +66,17 @@ function persistenceStatusClass(status) {
 
 function formatProjectName(name) {
   if (!name) return "Untitled project";
-  return name.replace(/_/g, " ").replace(/\s+/g, " ").trim() || "Untitled project";
+  const text = name.replace(/_/g, " ").replace(/\s+/g, " ").trim();
+  // Sentence case, so the same name saved two ways reads the same.
+  return text ? text.charAt(0).toUpperCase() + text.slice(1) : "Untitled project";
 }
+
+function formatDate(value) {
+  const date = value ? new Date(value) : null;
+  return date && !Number.isNaN(date.getTime()) ? date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) : null;
+}
+
+const SIDEBAR_RECENT = 5;
 
 function formatJobStatus(status) {
   if (!status) return "Unknown";
@@ -83,7 +92,13 @@ function formatSavedAt(value) {
 
 function ProjectsHome({ projects, listError, loading, online, onStart, onLibrary, onOpen, onRetry }) {
   const [query, setQuery] = useState("");
-  const matches = projects.filter((project) => formatProjectName(project.name).toLowerCase().includes(query.trim().toLowerCase()));
+  const needle = query.trim().toLowerCase();
+  const matches = projects.filter((project) => `${formatProjectName(project.name)} ${project.objective || ""}`.toLowerCase().includes(needle));
+  // Names repeat (the same idea started twice); the id tail tells the projects apart without guessing.
+  const nameCounts = projects.reduce((counts, project) => {
+    const key = formatProjectName(project.name).toLowerCase();
+    return counts.set(key, (counts.get(key) || 0) + 1);
+  }, new Map());
   return <div className="projects-home">
     <header className="projects-heading">
       <div><h1>Projects</h1><p className="muted">Start with a build idea, adapt a reference design, or pick up where you left off.</p></div>
@@ -101,11 +116,20 @@ function ProjectsHome({ projects, listError, loading, online, onStart, onLibrary
       {!online && <p role="status">{loading ? "Connecting to the engineering backend…" : "The engineering backend is offline."}</p>}
       {listError && <p role="alert">{listError} <button type="button" onClick={onRetry}>Retry project list</button></p>}
       {matches.length > 0 ? <div className="project-rows">
-        {matches.map((project) => <button type="button" key={project.project_id} data-project-id={project.project_id} onClick={() => onOpen(project.project_id)} disabled={!online}>
-          <span><strong>{formatProjectName(project.name)}</strong><small>{formatSavedAt(project.saved_at)}</small></span>
-          {project.current_stage && <span className="project-stage">{project.current_stage}</span>}
-          {project.latest_revision != null && <span>Rev {project.latest_revision}</span>}
-        </button>)}
+        {matches.map((project) => {
+          const name = formatProjectName(project.name);
+          const repeated = nameCounts.get(name.toLowerCase()) > 1;
+          const objective = project.objective && project.objective.toLowerCase() !== name.toLowerCase() ? project.objective : "";
+          const created = formatDate(project.created_at);
+          return <button type="button" key={project.project_id} data-project-id={project.project_id} onClick={() => onOpen(project.project_id)} disabled={!online}>
+            <span className="project-row-main"><strong>{name}{repeated && <code className="project-id"> · {project.project_id.slice(0, 8)}</code>}</strong>
+              {objective ? <span className="project-objective">{objective}</span>
+                : !project.objective && <span className="project-objective muted">Objective · not recorded</span>}
+              <small>{formatSavedAt(project.saved_at)}{created ? ` · created ${created}` : ""}</small></span>
+            {project.current_stage && <span className="project-stage">{project.current_stage}</span>}
+            {project.latest_revision != null && <span className="project-rev">Rev {project.latest_revision}</span>}
+          </button>;
+        })}
       </div> : online && !listError && <p className="muted">{loading ? "Loading saved projects…" : projects.length
         ? "No projects match this name." : "Your first saved project will appear here."}</p>}
     </section>
@@ -199,6 +223,13 @@ export default function App() {
   const [recentJobs, setRecentJobs] = useState([]);
   const [visionCapabilities, setVisionCapabilities] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try { return window.localStorage.getItem("hs.sidebarCollapsed") === "1"; } catch { return false; }
+  });
+  const toggleSidebar = () => setSidebarCollapsed((value) => {
+    try { window.localStorage.setItem("hs.sidebarCollapsed", value ? "0" : "1"); } catch { /* per-viewer preference only */ }
+    return !value;
+  });
   const [route, navigate] = useRoute();
   const view = route.view;
   // In-app moves to the workspace carry no id: the URL follows the session's project id once it exists.
@@ -410,9 +441,9 @@ export default function App() {
     return () => controller.abort();
   }, [view, route.sceneId, fullScene?.projectId]);
 
-  const revisionRoute = useCallback((revision) => {
+  const revisionRoute = useCallback((revision, { replace = false } = {}) => {
     if (!route.projectId) return;
-    navigate({ view: VIEWS.workspace, projectId: route.projectId, revision: revision ?? null });
+    navigate({ view: VIEWS.workspace, projectId: route.projectId, revision: revision ?? null }, { replace });
   }, [navigate, route.projectId]);
 
   const resumeProject = () => {
@@ -564,7 +595,7 @@ export default function App() {
   const advancedActive = isAdvancedView(view);
 
   return (
-    <div className={`app-shell${view === VIEWS.fielddeck ? " fielddeck-shell" : ""}`} data-testid="app-shell">
+    <div className={`app-shell${view === VIEWS.fielddeck ? " fielddeck-shell" : ""}${sidebarCollapsed ? " sidebar-collapsed" : ""}`} data-testid="app-shell">
       <BuildOverlay
         active={spliceJob.active}
         status={spliceJob.job?.status}
@@ -586,6 +617,12 @@ export default function App() {
           </div>
           <button type="button" className="mobile-nav-toggle" aria-controls="workbench-navigation"
             aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>Menu</button>
+          <button type="button" className="sidebar-toggle" aria-controls="workbench-navigation" aria-expanded={!sidebarCollapsed}
+            aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            onClick={toggleSidebar}>
+            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d={sidebarCollapsed ? "M6 3l5 5-5 5" : "M10 3L5 8l5 5"}
+              fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          </button>
         </div>
 
         <div id="workbench-navigation" className={menuOpen ? "sidebar-body open" : "sidebar-body"}
@@ -598,7 +635,7 @@ export default function App() {
           >
             Projects
           </button>
-          {canResume && <button type="button" className={`nav-button ${inWorkspace ? "active" : ""}`}
+          {canResume && <button type="button" className={`nav-button ${inWorkspace && !routeBlocked ? "active" : ""}`}
             data-testid="nav-project" onClick={resumeProject} disabled={!health?.ok}>Resume project</button>}
           <button type="button" className={`nav-button ${[VIEWS.library, VIEWS.sortcell, VIEWS.reference, VIEWS.showcase].includes(view) ? "active" : ""}`}
             data-testid="nav-library" onClick={openLibrary}>Design library</button>
@@ -676,7 +713,7 @@ export default function App() {
           <div className="sidebar-section">
             <div className="sidebar-label">Saved projects</div>
             <div className="project-list">
-              {projectPersistence.projects.slice(0, 8).map((project) => (
+              {projectPersistence.projects.slice(0, SIDEBAR_RECENT).map((project) => (
                 <button
                   key={project.project_id}
                   type="button"
@@ -691,6 +728,9 @@ export default function App() {
                 </button>
               ))}
             </div>
+            {projectPersistence.projects.length > SIDEBAR_RECENT && <button type="button" className="link-button small sidebar-view-all"
+              data-testid="sidebar-view-all" onClick={() => navigate({ view: VIEWS.home })}>
+              View all {projectPersistence.projects.length} projects</button>}
             {projectPersistence.listError && (
               <button type="button" className="link-button small" onClick={projectPersistence.refreshProjects}>
                 Retry projects
@@ -703,7 +743,7 @@ export default function App() {
           <div className="sidebar-section sidebar-grow">
             <div className="sidebar-label">Recent builds</div>
             <div className="project-list">
-              {uniqueRecentJobs.slice(0, 8).map((job) => (
+              {uniqueRecentJobs.slice(0, SIDEBAR_RECENT).map((job) => (
                 <button
                   key={job.job_id}
                   type="button"
@@ -749,7 +789,7 @@ export default function App() {
           {view === VIEWS.sortcell && <SortingWorkcell />}
           {view === VIEWS.fielddeck && fullScene?.projectId === route.sceneId && (
             <Suspense fallback={null}><FieldDeckScene projectId={fullScene.projectId} manifest={fullScene.manifest}
-              onExit={exitScene} /></Suspense>
+              onExit={exitScene} exitLabel={canGoBackInApp() ? "Back to the previous page" : "Back to projects"} /></Suspense>
           )}
           {view === VIEWS.fielddeck && fullScene?.projectId !== route.sceneId && (sceneError
             ? <RouteMessage title={sceneError.status === 404 ? "Scene not found" : "Scene could not be opened"}
