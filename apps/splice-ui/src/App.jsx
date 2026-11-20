@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useReducer, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import {
   benchStatus,
   benchSubmit,
@@ -22,6 +22,7 @@ import InterfaceLabPanel from "./components/InterfaceLabPanel.jsx";
 import NewProject from "./projectSession/NewProject.jsx";
 import { useSpliceJob } from "./hooks/useSpliceJob.js";
 import { ADVANCED_VIEWS, VIEWS, isAdvancedView } from "./nav.js";
+import { canGoBackInApp, useRoute } from "./router.js";
 import ProjectWorkspace from "./projectSession/ProjectWorkspace.jsx";
 import { createDigitalProject } from "./projectSession/digitalStudyApi.js";
 import { useProjectPersistence } from "./projectSession/projectPersistence.js";
@@ -160,6 +161,37 @@ function AdvancedHub({ onExamples, onLab, onOpenScene }) {
   );
 }
 
+function RouteMessage({ title, children, onHome }) {
+  return <section className="card route-message" data-testid="route-message">
+    <h1>{title}</h1>
+    {children}
+    <div className="hero-actions"><button type="button" className="secondary" onClick={onHome}>Back to projects</button></div>
+  </section>;
+}
+
+function ProjectRouteState({ route, load, online, connecting, onHome, onRetry }) {
+  const rev = Number.isInteger(route.revision) ? ` at revision ${route.revision}` : "";
+  if (load.state === "missing") {
+    return <RouteMessage title="Project not found" onHome={onHome}>
+      {Number.isNaN(route.revision)
+        ? <p>The link asks for a revision that is not a number. Open the project without <code>?rev=</code> to see its latest saved revision.</p>
+        : <p>No saved project has the id <code>{route.projectId}</code>{rev}. It may have been deleted, or it was never saved.</p>}
+    </RouteMessage>;
+  }
+  if (load.state === "error") {
+    return <RouteMessage title="Project could not be opened" onHome={onHome}>
+      <p role="alert">{load.message || "The engineering backend did not return this project."}</p>
+      <button type="button" className="secondary" onClick={onRetry}>Try again</button>
+    </RouteMessage>;
+  }
+  if (!online && !connecting) {
+    return <RouteMessage title="Engineering backend not reachable" onHome={onHome}>
+      <p role="status">Project <code>{route.projectId}</code> opens once the backend is reachable. Its state is unknown until then.</p>
+    </RouteMessage>;
+  }
+  return <section className="card" aria-busy="true"><p role="status">Opening project <code>{route.projectId}</code>{rev}…</p></section>;
+}
+
 export default function App() {
   const [health, setHealth] = useState(null);
   const [examples, setExamples] = useState([]);
@@ -167,7 +199,11 @@ export default function App() {
   const [recentJobs, setRecentJobs] = useState([]);
   const [visionCapabilities, setVisionCapabilities] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [view, setView] = useState(VIEWS.home);
+  const [route, navigate] = useRoute();
+  const view = route.view;
+  // In-app moves to the workspace carry no id: the URL follows the session's project id once it exists.
+  const setView = useCallback((next) => navigate(next === VIEWS.workspace ? { view: next, projectId: null } : { view: next }),
+    [navigate]);
   const [selectedExampleId, setSelectedExampleId] = useState(null);
   const [loadError, setLoadError] = useState(null);
   const [toast, setToast] = useState("");
@@ -176,7 +212,21 @@ export default function App() {
   const [creatingDigital, setCreatingDigital] = useState(false);
   const [newEntry, setNewEntry] = useState("goal");
   const [fullScene, setFullScene] = useState(null);
-  const openScene = (scene, returnTo) => { setFullScene({ ...scene, returnTo }); setView(VIEWS.fielddeck); };
+  const [sceneError, setSceneError] = useState(null);
+  const [routeLoad, setRouteLoad] = useState({ key: null, state: "idle" });
+  const [routeAttempt, setRouteAttempt] = useState(0);
+  const loadedRouteKey = useRef(null);
+  const sessionRef = useRef(session);
+  sessionRef.current = session;
+  const openScene = (scene) => {
+    setFullScene(scene);
+    setSceneError(null);
+    navigate({ view: VIEWS.fielddeck, sceneId: scene.projectId });
+  };
+  const exitScene = () => {
+    if (canGoBackInApp()) window.history.back();
+    else navigate({ view: VIEWS.home });
+  };
 
   const spliceJob = useSpliceJob();
   const projectPersistence = useProjectPersistence({
@@ -280,27 +330,89 @@ export default function App() {
     setView(VIEWS.newProject);
   };
 
-  const openSavedProject = useCallback(
-    async (projectId) => {
+  const openSavedProject = useCallback((projectId) => {
+    setPreviewContext(null);
+    navigate({ view: VIEWS.workspace, projectId });
+  }, [navigate]);
+
+  // Re-read the saved project in place (after a run saves a revision); the URL stays put.
+  const reloadProject = useCallback(async (projectId) => {
+    try {
+      await projectPersistence.openProject(projectId);
+    } catch (error) {
+      setToast(error.message);
+    }
+  }, [projectPersistence]);
+
+  const openProjectRoute = projectPersistence.openProject;
+  const routeKey = view === VIEWS.workspace && route.projectId
+    ? `${route.projectId}@${route.revision ?? ""}#${routeAttempt}` : null;
+
+  // A /projects/<id> URL opens that saved project (and revision) unless the session already holds it.
+  useEffect(() => {
+    if (!routeKey || loadedRouteKey.current === routeKey || !health?.ok) return undefined;
+    const { projectId, revision } = route;
+    loadedRouteKey.current = routeKey;
+    if (Number.isNaN(revision)) {
+      setRouteLoad({ key: routeKey, state: "missing" });
+      return undefined;
+    }
+    const current = sessionRef.current;
+    if (current.projectId === projectId
+      && (revision == null || current.mode === "digital" || current.snapshotRevision === revision)) {
+      setRouteLoad({ key: routeKey, state: "ready" });
+      return undefined;
+    }
+    let cancelled = false;
+    setRouteLoad({ key: routeKey, state: "loading" });
+    (async () => {
       try {
-        const envelope = await projectPersistence.openProject(projectId);
-        setPreviewContext(null);
-        setView(VIEWS.workspace);
-        setToast(
-          envelope?.recovery?.used
-            ? `Recovered project revision ${envelope.revision}`
-            : `Opened ${envelope?.snapshot?.projectName || projectId}`,
-        );
+        let envelope = await openProjectRoute(projectId);
+        // Digital studies choose their revision on the bench; saved snapshots load the asked revision.
+        if (revision != null && envelope?.snapshot?.mode !== "digital" && envelope?.revision !== revision) {
+          envelope = await openProjectRoute(projectId, { revision });
+        }
+        if (cancelled) return;
+        setRouteLoad({ key: routeKey, state: "ready" });
+        if (envelope?.recovery?.used) setToast(`Recovered project revision ${envelope.revision}`);
       } catch (error) {
-        setToast(error.message);
+        if (cancelled) return;
+        setRouteLoad({ key: routeKey, state: error.status === 404 ? "missing" : "error", message: error.message });
       }
-    },
-    [projectPersistence],
-  );
+    })();
+    return () => {
+      cancelled = true;
+      if (loadedRouteKey.current === routeKey) loadedRouteKey.current = null;
+    };
+  }, [routeKey, route, health?.ok, openProjectRoute]);
+
+  // After an in-app move to the workspace, give the page its project URL.
+  useEffect(() => {
+    if (view !== VIEWS.workspace || route.projectId || !session.projectId) return;
+    loadedRouteKey.current = `${session.projectId}@#${routeAttempt}`;
+    setRouteLoad({ key: loadedRouteKey.current, state: "ready" });
+    navigate({ view: VIEWS.workspace, projectId: session.projectId });
+  }, [view, route.projectId, session.projectId, routeAttempt, navigate]);
+
+  // A /scenes/<id> URL fetches its manifest when the scene was not opened from inside the app.
+  useEffect(() => {
+    if (view !== VIEWS.fielddeck || !route.sceneId || fullScene?.projectId === route.sceneId) return undefined;
+    const controller = new AbortController();
+    setSceneError(null);
+    fetchSceneManifest(route.sceneId, controller.signal)
+      .then((manifest) => { if (!controller.signal.aborted) setFullScene({ projectId: route.sceneId, manifest }); })
+      .catch((cause) => { if (!controller.signal.aborted) setSceneError(cause); });
+    return () => controller.abort();
+  }, [view, route.sceneId, fullScene?.projectId]);
+
+  const revisionRoute = useCallback((revision) => {
+    if (!route.projectId) return;
+    navigate({ view: VIEWS.workspace, projectId: route.projectId, revision: revision ?? null });
+  }, [navigate, route.projectId]);
 
   const resumeProject = () => {
     if (sessionIsResumable(session)) {
-      setView(VIEWS.workspace);
+      navigate({ view: VIEWS.workspace, projectId: session.projectId });
       return;
     }
     const latest = projectPersistence.projects[0];
@@ -441,6 +553,9 @@ export default function App() {
   };
 
   const inWorkspace = view === VIEWS.workspace;
+  // The bench waits for the URL's project; switching revision of the open project keeps it mounted.
+  const routeBlocked = inWorkspace && Boolean(route.projectId) && (session.projectId !== route.projectId
+    || (routeLoad.key === routeKey && routeLoad.state !== "ready"));
   const advancedActive = isAdvancedView(view);
 
   return (
@@ -627,12 +742,28 @@ export default function App() {
           {view === VIEWS.showcase && <ProductShowcase />}
           {view === VIEWS.reference && <DetailedAssemblyReference />}
           {view === VIEWS.sortcell && <SortingWorkcell />}
-          {view === VIEWS.fielddeck && fullScene && (
+          {view === VIEWS.fielddeck && fullScene?.projectId === route.sceneId && (
             <Suspense fallback={null}><FieldDeckScene projectId={fullScene.projectId} manifest={fullScene.manifest}
-              onExit={() => setView(fullScene.returnTo)} /></Suspense>
+              onExit={exitScene} /></Suspense>
+          )}
+          {view === VIEWS.fielddeck && fullScene?.projectId !== route.sceneId && (sceneError
+            ? <RouteMessage title={sceneError.status === 404 ? "Scene not found" : "Scene could not be opened"}
+              onHome={() => navigate({ view: VIEWS.home })}>
+              <p>{sceneError.status === 404 ? <>No scene manifest has the id <code>{route.sceneId}</code>.</> : sceneError.message}</p>
+            </RouteMessage>
+            : <section className="card" aria-busy="true"><p role="status">Opening scene <code>{route.sceneId}</code>…</p></section>)}
+
+          {view === VIEWS.notFound && <RouteMessage title="Page not found" onHome={() => navigate({ view: VIEWS.home })}>
+            <p>Nothing in Hardware Splicer lives at <code>{route.path}</code>.</p>
+          </RouteMessage>}
+
+          {routeBlocked && (
+            <ProjectRouteState route={route} load={routeLoad.key === routeKey ? routeLoad : { state: "loading" }}
+              online={health?.ok} connecting={!health && !loadError} onHome={() => navigate({ view: VIEWS.home })}
+              onRetry={() => setRouteAttempt((value) => value + 1)} />
           )}
 
-          {view === VIEWS.workspace && (
+          {view === VIEWS.workspace && !routeBlocked && (
             <ProjectWorkspace
               session={session}
               onSetStage={(stage) => dispatch({ type: ACTIONS.SET_STAGE, stage })}
@@ -655,8 +786,10 @@ export default function App() {
               onBenchCaptureSubmit={handleBenchCaptureSubmit}
               onToast={setToast}
               activeJobId={session.activeJobId}
-              onProjectReload={openSavedProject}
-              onOpenScene={(scene) => openScene(scene, VIEWS.workspace)}
+              onProjectReload={reloadProject}
+              routeRevision={route.revision}
+              onRevisionRoute={route.projectId ? revisionRoute : undefined}
+              onOpenScene={openScene}
             />
           )}
 
@@ -664,7 +797,7 @@ export default function App() {
             <AdvancedHub
               onExamples={() => setView(VIEWS.example)}
               onLab={() => setView(VIEWS.lab)}
-              onOpenScene={(scene) => openScene(scene, VIEWS.advanced)}
+              onOpenScene={openScene}
             />
           )}
 
