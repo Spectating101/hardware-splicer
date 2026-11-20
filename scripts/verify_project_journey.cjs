@@ -177,6 +177,7 @@ async function main() {
     await saved();
     await page.waitForLoadState("networkidle");
     await shot("03-bench-from-goal");
+    const goalId = decodeURIComponent(new URL(page.url()).pathname.split("/").pop());
 
     // 3. Intake: start from parts you own.
     await page.getByRole("button", { name: "Projects", exact: true }).click();
@@ -253,6 +254,30 @@ async function main() {
     await shot("14-drone-bench-records");
     await page.getByTestId("bench-package").scrollIntoViewIfNeeded();
     await shot("15-drone-package-next-action");
+
+    // 7b. Reopening is not editing: opening saved projects again must write no revision.
+    const reopenIds = [droneId, goalId];
+    const before = Object.fromEntries(await Promise.all(reopenIds.map(async (id) =>
+      [id, (await api(`/v1/projects/${encodeURIComponent(id)}`)).body.project?.revision])));
+    const writes = [];
+    const onRequest = (request) => { if (request.method() !== "GET" && /\/v1\/projects\//.test(request.url())) writes.push(`${request.method()} ${request.url()}`); };
+    page.on("request", onRequest);
+    for (let round = 0; round < 3; round += 1) {
+      for (const id of reopenIds) {
+        if (round % 2) await openProject(id);
+        else {
+          await page.goto(`${BASE}/projects/${encodeURIComponent(id)}`, { waitUntil: "networkidle" });
+          await page.getByTestId("project-bench").waitFor({ timeout: 30000 });
+        }
+        await page.waitForTimeout(1500);
+      }
+    }
+    page.off("request", onRequest);
+    if (writes.length) problems.push(`reopening saved projects wrote to them:\n  ${writes.join("\n  ")}`);
+    for (const id of reopenIds) {
+      const after = (await api(`/v1/projects/${encodeURIComponent(id)}`)).body.project?.revision;
+      if (after !== before[id]) problems.push(`reopening ${id} moved its revision ${before[id]} → ${after}`);
+    }
 
     // 8. Phone width: the Fielddeck bench design tab.
     const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
