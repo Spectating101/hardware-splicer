@@ -1,0 +1,22 @@
+{
+  "design_spec": "Unpopulated loose board shape in a gravity tray, without electrical contacts or measured component keepouts",
+  "fab_authority": false,
+  "files_sha256": {
+    "inspection-tray.step": "36dde67ee00d5f99bd69d6b4ae5b732101b647626801abba9f89ae7d6b7aa22e",
+    "inspection-tray.stl": "dd13703a5a09bc976abf2e4d1995f184d644139df6b7477820f7d5c647d9ffab",
+    "nominal-source-board.step": "0aeadfda8d47a45900b49e09b4f675a858a6cee70e5a2a49f93c0e0a6bf2c137",
+    "nominal-source-board.stl": "e40dc101f2d4c90bba6055bf01e6626c7ad08a282ae4897f1bdfd7bb553e5879"
+  },
+  "fixture_mechanical_fit": "UNTESTED",
+  "nominal_board_thickness_mm": 1.6,
+  "schema": "hs.source_contour_cad.v1",
+  "source_device_energization": "NOT_AUTHORIZED",
+  "source_internal_cutouts": 1,
+  "source_outline_vertices": 39,
+  "source_polygon_area_mm2": 2205.19806,
+  "source_sha256": "ad9a2d691785a04877b7a1971d2a6c12e0a07092abd7277a1cd92c5373c17ec3",
+  "source_strategy": "SINGLE_HOLE_NONRETAINING_GRAVITY_TRAY",
+  "standoff_posts_modeled": 0,
+  "tray_cavity_clearance_mm": 0.6,
+  "tray_is_nonretaining": true
+}

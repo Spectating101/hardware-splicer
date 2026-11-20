@@ -1,0 +1,54 @@
+[
+  {
+    "adversarial_controls_rejected": 3,
+    "cutouts": 1,
+    "fabrication_authorized": false,
+    "mounts": 0,
+    "nominal_collision_mm3": 0.0,
+    "original_board_sha256": "05dd8f1abce881a757dafe1cf55467d8a3bc87ddcf6427fd6f504f6043ec1b1e",
+    "source_area_mm2": 11427.24503,
+    "source_id": "dnlbauer__corax-keyboard__keyboard_5db1e9",
+    "status": "SOURCE_CONTOUR_AND_STEP_AUDITED",
+    "strategy": "HOLELESS_NONRETAINING_GRAVITY_TRAY",
+    "vertices": 85
+  },
+  {
+    "adversarial_controls_rejected": 3,
+    "cutouts": 0,
+    "fabrication_authorized": false,
+    "mounts": 0,
+    "nominal_collision_mm3": 0.0,
+    "original_board_sha256": "955c9a0d6a5ae685831e4a48ea4ee853f45764b584eaea02c6258f63be1663b4",
+    "source_area_mm2": 999.13752,
+    "source_id": "rniwase__sdtv2csi__sdtv2csi",
+    "status": "SOURCE_CONTOUR_AND_STEP_AUDITED",
+    "strategy": "HOLELESS_NONRETAINING_GRAVITY_TRAY",
+    "vertices": 40
+  },
+  {
+    "adversarial_controls_rejected": 3,
+    "cutouts": 1,
+    "fabrication_authorized": false,
+    "mounts": 1,
+    "nominal_collision_mm3": 0.0,
+    "original_board_sha256": "ad9a2d691785a04877b7a1971d2a6c12e0a07092abd7277a1cd92c5373c17ec3",
+    "source_area_mm2": 2205.19806,
+    "source_id": "justbuchanan__oasis__pcb",
+    "status": "SOURCE_CONTOUR_AND_STEP_AUDITED",
+    "strategy": "SINGLE_HOLE_NONRETAINING_GRAVITY_TRAY",
+    "vertices": 39
+  },
+  {
+    "adversarial_controls_rejected": 3,
+    "cutouts": 0,
+    "fabrication_authorized": false,
+    "mounts": 4,
+    "nominal_collision_mm3": 0.0,
+    "original_board_sha256": "3c640f77fb7e53b45115bb746899b73bd673e92b3919ef3056e4a0f0ba4f994d",
+    "source_area_mm2": 2492.2619,
+    "source_id": "protolux-electronics__trellis_core__trellis_core",
+    "status": "SOURCE_CONTOUR_AND_STEP_AUDITED",
+    "strategy": "SOURCE_HOLES_PRESENT_NONRETAINING_TRAY",
+    "vertices": 64
+  }
+]

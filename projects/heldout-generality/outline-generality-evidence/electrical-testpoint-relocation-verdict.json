@@ -1,0 +1,6 @@
+{
+  "attempts": 64,
+  "fabrication_authorized": false,
+  "source_sha256": "955c9a0d6a5ae685831e4a48ea4ee853f45764b584eaea02c6258f63be1663b4",
+  "status": "NO_DRC_CLEAN_RELOCATION_WITHIN_SEARCH"
+}

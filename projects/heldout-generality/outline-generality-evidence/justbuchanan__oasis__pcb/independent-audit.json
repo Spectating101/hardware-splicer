@@ -1,0 +1,35 @@
+{
+  "fabrication_authorized": false,
+  "negative_controls": {
+    "fake_retention": {
+      "reason": "FALSE_FABRICATION_AUTHORITY",
+      "rejected": true
+    },
+    "source_cutout_deleted": {
+      "reason": "SOURCE_POLYGON_AREA_MISMATCH",
+      "rejected": true
+    },
+    "wrong_revision": {
+      "reason": "STALE_PCB_SOURCE",
+      "rejected": true
+    }
+  },
+  "nominal_unpopulated_board_tray_overlap_mm3": 0.0,
+  "physical_contact_or_fit": "NOT_VERIFIED",
+  "planar_polygon_area_mm2": 2205.19806,
+  "reopened_model_source_bounds_mm": [
+    35.9345,
+    65.0
+  ],
+  "reopened_step_planar_area_mm2": 2205.19806,
+  "reopened_tray_bounds_mm": [
+    49.9345,
+    79.0
+  ],
+  "schema": "hs.independent_contour_step_audit.v1",
+  "source_cutout_count": 1,
+  "source_outline_vertices": 39,
+  "source_pcb_sha256": "ad9a2d691785a04877b7a1971d2a6c12e0a07092abd7277a1cd92c5373c17ec3",
+  "source_strategy": "SINGLE_HOLE_NONRETAINING_GRAVITY_TRAY",
+  "status": "PASS"
+}

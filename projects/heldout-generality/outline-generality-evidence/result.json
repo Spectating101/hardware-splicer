@@ -1,0 +1,21 @@
+{
+  "blocked": 0,
+  "distinct_original_repositories": 4,
+  "fabrication_authorized": false,
+  "generalized_electrical_routing": "NOT_DEMONSTRATED",
+  "independently_audited_source_to_STEP": 4,
+  "pass_bounded_digital_gate": true,
+  "physical_validation": "NOT_PERFORMED",
+  "prior_m3_edit_evidence": "SEPARATE_PR_366",
+  "rounds": 2,
+  "same_semantic_findings": true,
+  "schema": "hs.heldout_outline_generality.v1",
+  "semantic_hashes": [
+    "9426b927a2e36f2c053d6af2198b4d4d8c7c46635fb0a86991f916ff9ce29ce8",
+    "9426b927a2e36f2c053d6af2198b4d4d8c7c46635fb0a86991f916ff9ce29ce8"
+  ],
+  "source_cohort_lock_sha256": "e9b149f5d0c760d10ba3db78938dc22aaf5d056167b1b8c12de636847be94a1b",
+  "source_corpus_revision": "1e999b4eefd5fdfcc90dc376d2882390245a8e0d",
+  "third_party_source_board_modification": "NONE_FOR_THIS_OUTLINE_TRAY_EXPERIMENT",
+  "total_frozen_clean_boards": 4
+}
