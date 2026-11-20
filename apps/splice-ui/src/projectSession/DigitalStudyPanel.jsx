@@ -82,7 +82,8 @@ function RevisionComparison({ projectId, before, after }) {
   </div>;
 }
 
-export default function DigitalStudyPanel({ session, onProjectReload, onToast, onReference, onOpenScene }) {
+export default function DigitalStudyPanel({ session, onProjectReload, onToast, onReference, onOpenScene,
+  routeRevision = null, onRevisionRoute }) {
   const [data, setData] = useState(null);
   const [selectedRevision, setSelectedRevision] = useState(null);
   const [compareRevision, setCompareRevision] = useState(1);
@@ -97,6 +98,8 @@ export default function DigitalStudyPanel({ session, onProjectReload, onToast, o
   const [pollError, setPollError] = useState("");
   const [refresh, setRefresh] = useState(0);
   const reloadRef = useRef(onProjectReload);
+  const routeRevisionRef = useRef(routeRevision);
+  routeRevisionRef.current = routeRevision;
   const alive = useRef(true);
   const projectId = session.projectId;
   const savedRevision = session.snapshotRevision;
@@ -109,8 +112,11 @@ export default function DigitalStudyPanel({ session, onProjectReload, onToast, o
     fetchDigitalStudy(projectId, controller.signal).then((result) => {
       if (controller.signal.aborted) return;
       setData(result);
-      setSelectedRevision(result.study.revision);
-      setCompareRevision(result.history.find((row) => row.revision !== result.study.revision)?.revision ?? null);
+      // A ?rev= link opens that saved revision; an unknown one falls back to the latest and says so.
+      const linked = result.history.find((row) => row.revision === routeRevisionRef.current)?.revision;
+      const shown = linked ?? result.study.revision;
+      setSelectedRevision(shown);
+      setCompareRevision(result.history.find((row) => row.revision !== shown)?.revision ?? null);
       const requirements = result.study.summary.requirements || {};
       setInputs(requirements);
       setGustScale(String(requirements.gust_scale ?? ""));
@@ -120,6 +126,18 @@ export default function DigitalStudyPanel({ session, onProjectReload, onToast, o
     }).catch((cause) => { if (!controller.signal.aborted) setError(cause.message); });
     return () => controller.abort();
   }, [projectId, savedRevision, refresh]);
+
+  // Back and Forward between ?rev= entries move the selection without refetching.
+  useEffect(() => {
+    if (!data) return;
+    const linked = data.history.find((row) => row.revision === routeRevision)?.revision;
+    setSelectedRevision(linked ?? data.study.revision);
+  }, [data, routeRevision]);
+
+  function chooseRevision(revision) {
+    setSelectedRevision(revision);
+    onRevisionRoute?.(revision === data.study.revision ? null : revision);
+  }
 
   const jobId = job?.job_id;
   const pending = isPending(job?.status);
@@ -196,6 +214,7 @@ export default function DigitalStudyPanel({ session, onProjectReload, onToast, o
   const bom = Object.keys(selected.artifacts).find((name) => /(^|\/)bom\.csv$/i.test(name));
   const downloadable = registered ? Object.entries(selected.artifacts).filter(([name]) => name !== "STUDY.zip") : [];
   const older = selected.revision !== data.study.revision;
+  const unknownLinkedRevision = Number.isInteger(routeRevision) && !data.history.some((row) => row.revision === routeRevision);
 
   const referenceLinks = <><h3>Saved artifacts</h3>{!Object.keys(selected.artifacts).length && <p>unknown</p>}<div className="digital-downloads">
     {(registered ? [["STUDY.zip", "Complete digital package"], [bom, "Bill of materials (CSV)"]] : [
@@ -219,6 +238,7 @@ export default function DigitalStudyPanel({ session, onProjectReload, onToast, o
         }))}
       evidenceExtra={summary.case_id === "fielddeck-5" ? <SavedDisplayComparison key={selected.run_id} study={selected} /> : null}>
     <div className="digital-workshop" data-testid="digital-study">
+      {unknownLinkedRevision && <p role="status">This link asks for revision {routeRevision}, which this project has not saved. Showing the latest saved revision, {data.study.revision}.</p>}
       {selected.change_request && <p>{selected.change_request}</p>}
       <h3 className="digital-revisions-title">Project revisions</h3>
       <div className="digital-mode" role="group" aria-label="Project revisions">
@@ -227,7 +247,7 @@ export default function DigitalStudyPanel({ session, onProjectReload, onToast, o
       </div>
       {!canCompare && <p className="muted">Compare revisions needs two real saved revisions.</p>}
       <div className="digital-controls">
-        <label>View revision<select value={selected.revision} onChange={(event) => setSelectedRevision(Number(event.target.value))}>
+        <label>View revision<select value={selected.revision} onChange={(event) => chooseRevision(Number(event.target.value))}>
           {data.history.map((entry) => <option key={entry.revision} value={entry.revision}>
             {entry.revision} · {entry.change_request}</option>)}
         </select></label>
@@ -267,7 +287,7 @@ export default function DigitalStudyPanel({ session, onProjectReload, onToast, o
                 onChange={(event) => setMassLimit(event.target.value)} disabled={pending || submitting} /></label>
             </div>
             <p className="muted small">1× applies a [0.12, −0.08, 0] N gust for 2 seconds. This is an assumed force, not wind speed.</p></>}
-            {older ? <p>Viewing history. <button type="button" className="ghost" onClick={() => setSelectedRevision(data.study.revision)}>Return to latest revision to run</button></p> : null}
+            {older ? <p>Viewing history. <button type="button" className="ghost" onClick={() => chooseRevision(data.study.revision)}>Return to latest revision to run</button></p> : null}
             <button type="submit" className="primary" disabled={pending || submitting || older || !data.runtime.available}>
               {pending ? "Simulation running…" : submitting ? "Starting simulation…" : "Run and save new revision"}</button>
           </form>
