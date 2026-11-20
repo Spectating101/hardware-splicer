@@ -9,10 +9,63 @@ from pathlib import Path
 from typing import Any
 
 
+def _apply_repo_root(repo_root: Path | None) -> None:
+    """Point every module at an explicit checkout.
+
+    Importing this entry point imports the whole package, and several modules
+    resolve the checkout once at import time. Setting the variable now would reach
+    only some of them, so the process re-executes itself (same PID, same arguments)
+    with ``HARDWARE_SPLICER_REPO_ROOT`` already in its environment.
+    """
+
+    import os
+
+    if repo_root is None:
+        return
+    value = str(repo_root.expanduser().resolve())
+    if os.environ.get("HARDWARE_SPLICER_REPO_ROOT") == value:
+        return
+    os.environ["HARDWARE_SPLICER_REPO_ROOT"] = value
+    sys.stdout.flush()
+    sys.stderr.flush()
+    os.execv(sys.executable, [sys.executable, *sys.orig_argv[1:]])
+
+
+def install_summary() -> dict[str, Any]:
+    """How this copy is installed and which checkout and UI build it will use."""
+
+    import os
+
+    from hardware_splicer.api import ui_dist_candidates
+    from hardware_splicer.state_paths import checkout_root, repo_root, scratch_dir, state_dir
+
+    checkout = checkout_root()
+    root = repo_root()
+    ui = next((path for path in ui_dist_candidates() if (path / "index.html").is_file()), None)
+    return {
+        "mode": "checkout" if checkout is not None else "installed",
+        "repo_root": str(root),
+        "repo_root_configured": bool(os.environ.get("HARDWARE_SPLICER_REPO_ROOT", "").strip()),
+        "projects_available": (root / "projects").is_dir(),
+        "ui_build": str(ui) if ui is not None else None,
+        "state_dir": str(state_dir()),
+        "scratch_dir": str(scratch_dir()),
+    }
+
+
 def main_doctor() -> None:
+    parser = argparse.ArgumentParser(prog="hs-doctor", description="Report runtime readiness as JSON.")
+    parser.add_argument("--repo-root", type=Path,
+                        help="Hardware-Splicer checkout to check, as given to hs-serve --repo-root; "
+                             "overrides HARDWARE_SPLICER_REPO_ROOT.")
+    args = parser.parse_args()
+    _apply_repo_root(args.repo_root)
+
     from hardware_splicer.sdk import engine_doctor
 
-    print(json.dumps(engine_doctor(), indent=2))
+    report = engine_doctor()
+    report["install"] = install_summary()
+    print(json.dumps(report, indent=2))
     raise SystemExit(0)
 
 
@@ -53,6 +106,7 @@ def main_serve() -> None:
         if not args.allow_remote:
             parser.error("Refusing non-loopback host without --allow-remote. " + warning)
         print(warning, file=sys.stderr)
+    _apply_repo_root(args.repo_root)
     # Default: serve the UI when a build exists (packaged ui_dist, else apps/splice-ui/dist).
     if args.ui is not None:
         os.environ["HARDWARE_SPLICER_SERVE_UI"] = args.ui
@@ -60,8 +114,6 @@ def main_serve() -> None:
         os.environ["HARDWARE_SPLICER_SERVE_UI"] = "auto"
     if args.ui_dist is not None:
         os.environ["HARDWARE_SPLICER_UI_DIST"] = str(args.ui_dist.expanduser().resolve())
-    if args.repo_root is not None:
-        os.environ["HARDWARE_SPLICER_REPO_ROOT"] = str(args.repo_root.expanduser().resolve())
     uvicorn.run(CANONICAL_APP, host=args.host, port=args.port, reload=False)
 
 

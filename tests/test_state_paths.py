@@ -15,6 +15,9 @@ ENV = (
     "HARDWARE_SPLICER_OUTPUT_ROOT",
     "HARDWARE_SPLICER_PROJECT_ROOT",
     "XDG_STATE_HOME",
+    "XDG_CACHE_HOME",
+    "HARDWARE_SPLICER_REPO_ROOT",
+    "HARDWARE_SPLICER_TMP_ROOT",
 )
 
 
@@ -84,3 +87,28 @@ def test_a_src_layout_without_pyproject_is_not_a_checkout(tmp_path):
     package.mkdir(parents=True)
     assert state_paths.checkout_root(package) is None
     assert str(state_paths.state_dir(package)).startswith(str(tmp_path / "home"))
+
+
+def test_repo_root_prefers_explicit_checkout_then_own_checkout(tmp_path, monkeypatch):
+    package = checkout(tmp_path / "repo")
+    assert state_paths.repo_root(package) == tmp_path / "repo"
+    installed = tmp_path / "venv/lib/python3.13/site-packages/hardware_splicer"
+    installed.mkdir(parents=True)
+    monkeypatch.setenv("HARDWARE_SPLICER_REPO_ROOT", str(tmp_path / "repo"))
+    assert state_paths.repo_root(installed) == (tmp_path / "repo").resolve()
+
+
+def test_installed_scratch_uses_user_cache_not_site_packages(tmp_path, monkeypatch):
+    installed = tmp_path / "venv/lib/python3.13/site-packages/hardware_splicer"
+    installed.mkdir(parents=True)
+    assert state_paths.scratch_dir(installed) == tmp_path / "home/.cache/hardware-splicer"
+    monkeypatch.setenv("XDG_CACHE_HOME", str(tmp_path / "xdg-cache"))
+    assert state_paths.scratch_dir(installed) == tmp_path / "xdg-cache/hardware-splicer"
+    # A configured checkout supplies inputs, not a place to write scratch.
+    monkeypatch.setenv("HARDWARE_SPLICER_REPO_ROOT", str(tmp_path / "repo"))
+    assert state_paths.scratch_dir(installed) == tmp_path / "xdg-cache/hardware-splicer"
+    monkeypatch.setenv("HARDWARE_SPLICER_TMP_ROOT", str(tmp_path / "builds"))
+    assert state_paths.scratch_dir(installed) == tmp_path / "builds"
+    assert state_paths.scratch_dir(checkout(tmp_path / "co")) == tmp_path / "builds"
+    monkeypatch.delenv("HARDWARE_SPLICER_TMP_ROOT")
+    assert state_paths.scratch_dir(tmp_path / "co/src/hardware_splicer") == tmp_path / "co/.cache/hardware-splicer"

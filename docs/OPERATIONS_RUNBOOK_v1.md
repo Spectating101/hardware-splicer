@@ -109,7 +109,7 @@ v1 does not auto-prune old builds. Schedule cron cleanup for dirs older than N d
 cd /opt/hardware-splicer
 sudo systemctl stop hardware-splicer
 git fetch
-git checkout v1.0.1   # or new tag
+git checkout <release-tag>   # the release you deploy
 bash scripts/install_splice_v1.sh
 make splice-ui-build    # if serving UI
 hs-doctor
@@ -139,8 +139,8 @@ Do **not** bind `0.0.0.0` without a reverse proxy.
 Use [`../deploy/nginx/splice-agent.conf.example`](../deploy/nginx/splice-agent.conf.example):
 
 - TLS termination
-- API key header check
-- Rate limit (optional)
+- Basic auth for browsers or a listed `X-API-Key` for scripts, on every path
+- Rate limit; unbuffered project event stream
 
 ---
 

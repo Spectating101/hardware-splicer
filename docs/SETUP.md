@@ -61,8 +61,14 @@ packaged copy wins with stale assets. `/health` reports `ui.served`, `ui.dist` a
 `ui.index_sha256`. API routes always win over the UI's catch-all, and an unknown
 `/v1/...` path is a JSON 404, never `index.html`.
 
-For a wheel that needs neither Node nor the checkout: `make ui-package`, then
-`python -m pip wheel --no-deps --no-build-isolation . -w dist`.
+For a wheel that serves the UI without Node: `make ui-package`, then
+`python -m build` (or `python -m pip wheel --no-deps . -w dist`). The wheel carries
+the API, the UI and the package data, but registered digital cases, project scenes
+and examples stay in the checkout: run `hs-serve --repo-root <checkout>` (or set
+`HARDWARE_SPLICER_REPO_ROOT`) and check with `hs-doctor --repo-root <checkout>`,
+whose `install` block names the checkout, UI build, state and scratch directories
+in use. Registered Fielddeck and plotter studies need the `digital` extra
+(`pip install 'hardware-splicer[digital]'`) or `HARDWARE_SPLICER_DIGITAL_PYTHON`.
 
 `hs-serve` refuses a non-loopback `--host` (or `HARDWARE_SPLICER_HOST`) unless
 `--allow-remote` is given; there is no in-app authentication yet, so remote access

@@ -35,9 +35,11 @@ import { derivePackageHandoff } from "./packageHandoff.js";
 export default function ProjectWorkspace(props) {
   if (props.session.mode === "digital") {
     return <DigitalStudyPanel key={props.session.projectId} session={props.session} onProjectReload={props.onProjectReload}
-      onToast={props.onToast} onReference={props.onReference} onOpenScene={props.onOpenScene} />;
+      onToast={props.onToast} onReference={props.onReference} onOpenScene={props.onOpenScene}
+      routeRevision={props.routeRevision} onRevisionRoute={props.onRevisionRoute} />;
   }
   return <ProjectBench key={props.session.projectId} session={props.session} onToast={props.onToast} onReference={props.onReference}
+    readOnlyRevision={props.readOnlyRevision}
     onOpenScene={props.onOpenScene} tools={<ProjectTools {...props} />} />;
 }
 

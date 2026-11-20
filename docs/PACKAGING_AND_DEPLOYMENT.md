@@ -406,7 +406,7 @@ curl -s localhost:8787/...   # add GET /health if missing (v1.0.1)
 **Packaging done when:** stranger on Ubuntu with KiCad runs:
 
 ```bash
-git clone … && cd Hardware-Splicer && git checkout v1.0.0
+git clone … && cd Hardware-Splicer && git checkout <release-tag>
 bash scripts/install_splice_v1.sh
 hs-doctor   # ok: true, kicad_cli: ok
 make verify-splice-loop

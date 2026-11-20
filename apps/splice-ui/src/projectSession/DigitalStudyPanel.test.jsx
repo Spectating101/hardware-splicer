@@ -173,3 +173,27 @@ it("places the selected FieldDeck display reports inside its evidence pane", asy
   expect(within(screen.getByRole("region", { name: "Evidence" })).getByTestId("saved-display-evidence")).toBe(reports);
   expect(screen.getByRole("region", { name: "Design" })).not.toContainElement(reports);
 });
+
+describe("Revision links", () => {
+  it("opens the revision named by the URL and reports revision choices back to it", async () => {
+    fetchDigitalStudy.mockResolvedValue(data(study(2, 244.9)));
+    const onRevisionRoute = vi.fn();
+    const { rerender } = render(<DigitalStudyPanel session={session} routeRevision={1} onRevisionRoute={onRevisionRoute} />);
+    const picker = await screen.findByLabelText("View revision");
+    expect(picker).toHaveValue("1");
+    fireEvent.change(picker, { target: { value: "2" } });
+    expect(onRevisionRoute).toHaveBeenLastCalledWith(null);
+    rerender(<DigitalStudyPanel session={session} routeRevision={null} onRevisionRoute={onRevisionRoute} />);
+    expect(screen.getByLabelText("View revision")).toHaveValue("2");
+    // Back to ?rev=1 moves the selection without another fetch.
+    rerender(<DigitalStudyPanel session={session} routeRevision={1} onRevisionRoute={onRevisionRoute} />);
+    expect(screen.getByLabelText("View revision")).toHaveValue("1");
+    expect(fetchDigitalStudy).toHaveBeenCalledTimes(1);
+  });
+
+  it("says when a linked revision does not exist and shows the latest", async () => {
+    render(<DigitalStudyPanel session={session} routeRevision={7} onRevisionRoute={vi.fn()} />);
+    expect(await screen.findByText(/asks for revision 7, which this project has not saved/)).toBeInTheDocument();
+    expect(screen.getByLabelText("View revision")).toHaveValue("1");
+  });
+});

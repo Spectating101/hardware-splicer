@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+
 from copy import deepcopy
 from enum import Enum
 from typing import Any, Dict
@@ -98,7 +100,13 @@ def _error(exc: Exception) -> HTTPException:
     else:
         code = status.HTTP_500_INTERNAL_SERVER_ERROR
         error_type = "engineering_assurance_error"
-    return HTTPException(status_code=code, detail={"type": error_type, "message": str(exc)})
+    message = str(exc)
+    if code == status.HTTP_500_INTERNAL_SERVER_ERROR:
+        # Server-side failures can carry on-disk paths; log the detail, return a fixed message.
+        logging.getLogger(__name__).error("%s: %s", error_type, exc)
+        message = ("Stored project data is unreadable or inconsistent. Details are in the server log." if error_type == "corrupt_project"
+                   else "The engineering assurance service failed. Details are in the server log.")
+    return HTTPException(status_code=code, detail={"type": error_type, "message": message})
 
 
 def create_engineering_assurance_router(project_store: ProjectStore) -> APIRouter:

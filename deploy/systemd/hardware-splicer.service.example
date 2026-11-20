@@ -1,20 +1,56 @@
 [Unit]
 Description=Hardware-Splicer API and UI
-After=network.target
+After=network-online.target
+Wants=network-online.target
 
 [Service]
 Type=simple
+# A dedicated system account, never root:
+#   sudo useradd --system --home-dir /var/lib/hardware-splicer --shell /usr/sbin/nologin hsplicer
 User=hsplicer
+Group=hsplicer
+# /opt/hardware-splicer is the checkout (projects/, examples/, apps/) at the release
+# you deploy, with its venv from scripts/install_splice_v1.sh or a wheel installed
+# into .venv. Both stay read-only to the service.
 WorkingDirectory=/opt/hardware-splicer
-Environment=PYTHONPATH=/opt/hardware-splicer/src
+# Checkout that supplies registered cases and project scenes to an installed wheel.
+Environment=HARDWARE_SPLICER_REPO_ROOT=/opt/hardware-splicer
 Environment=HARDWARE_SPLICER_AUTOROUTE=0
 Environment=HARDWARE_SPLICER_DRC_FIX_LOOP=1
-Environment=HARDWARE_SPLICER_TMP_ROOT=/var/lib/hardware-splicer/builds
 # Job database, projects and outputs; the checkout default (.cache/ under /opt) is not for services.
 Environment=HARDWARE_SPLICER_STATE_DIR=/var/lib/hardware-splicer/state
+Environment=HARDWARE_SPLICER_TMP_ROOT=/var/lib/hardware-splicer/builds
+# kicad-cli, matplotlib and fontconfig write their caches under HOME.
+Environment=HOME=/var/lib/hardware-splicer
+# Creates /var/lib/hardware-splicer owned by User= on start.
+StateDirectory=hardware-splicer
+StateDirectoryMode=0750
 # The one served app (API + UI). Run make ui-package after UI upgrades; --ui refuses to start without a build.
+# Loopback only: deploy/nginx/splice-agent.conf.example is the access control.
 ExecStart=/opt/hardware-splicer/.venv/bin/hs-serve --ui --host 127.0.0.1 --port 8787
 Restart=on-failure
+RestartSec=5
+
+# Hardening. The service writes only its state directory and a private /tmp.
+NoNewPrivileges=yes
+ProtectSystem=strict
+ReadWritePaths=/var/lib/hardware-splicer
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictSUIDSGID=yes
+RestrictRealtime=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+UMask=0027
+# Not set on purpose: RestrictNamespaces (the GitHub-signal sandbox uses bwrap) and
+# MemoryDenyWriteExecute (Node and some numeric libraries need JIT pages).
 
 [Install]
 WantedBy=multi-user.target

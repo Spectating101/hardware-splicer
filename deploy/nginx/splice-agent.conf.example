@@ -1,42 +1,88 @@
-# Splice Agent — nginx reverse proxy (example)
+# Hardware Splicer: nginx reverse proxy (example)
 #
-# Install: sudo cp splice-agent.conf.example /etc/nginx/sites-available/splice-agent
-#          sudo ln -s /etc/nginx/sites-available/splice-agent /etc/nginx/sites-enabled/
-#          sudo nginx -t && sudo systemctl reload nginx
+# The app has no login of its own. This front is its only access control, so every
+# request (UI, /v1/*, /docs, /openapi.json, /health and the per-project event
+# stream) passes the same check before it reaches hs-serve on 127.0.0.1:8787.
 #
-# Replace:
-#   splice.example.lan  — your LAN hostname
-#   /etc/ssl/splice/    — your TLS cert paths
-#   CHANGE_ME_API_KEY   — shared secret for clients
+# Install:
+#   sudo cp splice-agent.conf.example /etc/nginx/sites-available/splice-agent
+#   sudo ln -s /etc/nginx/sites-available/splice-agent /etc/nginx/sites-enabled/
+#   sudo nginx -t && sudo systemctl reload nginx
+#
+# Replace splice.example.lan and the certificate paths, then create the two
+# credential files below. Neither belongs in git.
+#
+#   Browser and person access: HTTP basic auth.
+#     sudo htpasswd -c /etc/nginx/splice-agent.htpasswd <user>     (apache2-utils)
+#   Scripts and agents: an X-API-Key header, one key per line.
+#     key=$(openssl rand -hex 32)
+#     printf '"%s" off;\n' "$key" | sudo tee /etc/nginx/splice-agent-api-keys.map
+#     sudo chmod 640 /etc/nginx/splice-agent-api-keys.map /etc/nginx/splice-agent.htpasswd
+#     sudo chgrp www-data /etc/nginx/splice-agent-api-keys.map /etc/nginx/splice-agent.htpasswd
+#
+# A browser cannot attach a custom header to page loads, scripts or EventSource,
+# so the UI is reached with basic auth; a request that carries a listed key skips
+# the password prompt. A request with neither gets 401. If either file is missing,
+# nginx -t fails, so the front cannot come up open.
 
-limit_req_zone $binary_remote_addr zone=splice_limit:10m rate=10r/s;
+limit_req_zone $binary_remote_addr zone=splice_limit:10m rate=20r/s;
+
+# A 64-character key does not fit the default 64-byte map hash bucket.
+map_hash_bucket_size 128;
+
+# "off" disables basic auth for a listed key; anything else (including no header)
+# keeps the password requirement.
+map $http_x_api_key $splice_auth {
+    default "Hardware Splicer";
+    include /etc/nginx/splice-agent-api-keys.map;
+}
 
 server {
-    listen 443 ssl http2;
+    listen 443 ssl http2;   # nginx >= 1.25.1 may prefer: listen 443 ssl; http2 on;
     server_name splice.example.lan;
 
     ssl_certificate     /etc/ssl/splice/fullchain.pem;
     ssl_certificate_key /etc/ssl/splice/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers off;
+    ssl_session_timeout 1d;
+    ssl_session_cache shared:splice_tls:10m;
+    ssl_session_tickets off;
+    add_header Strict-Transport-Security "max-age=31536000" always;
 
-    # Optional: restrict to lab subnet
+    # Engineering sources and packages are uploaded through the API (STEP files,
+    # vendor zips, KiCad projects); the app enforces its own per-route limits.
+    client_max_body_size 64m;
+
+    # Optional: restrict to a lab subnet or VPN as well.
     # allow 192.168.1.0/24;
     # deny all;
 
-    location / {
-        limit_req zone=splice_limit burst=20 nodelay;
+    auth_basic $splice_auth;
+    auth_basic_user_file /etc/nginx/splice-agent.htpasswd;
 
-        if ($http_x_api_key != "CHANGE_ME_API_KEY") {
-            return 401;
-        }
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    # The upstream never needs the client's credentials.
+    proxy_set_header Authorization "";
+    proxy_set_header X-API-Key "";
 
+    # Server-sent events: GET /v1/projects/<id>/events stays open and must not be buffered.
+    # Keep proxy_set_header out of the locations: one there drops every header set above.
+    location ~ ^/v1/projects/[^/]+/events$ {
         proxy_pass http://127.0.0.1:8787;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 1h;
+    }
 
-        # Long-running splice builds
+    location / {
+        limit_req zone=splice_limit burst=60 nodelay;
+        proxy_pass http://127.0.0.1:8787;
+        # Long-running builds and studies.
         proxy_read_timeout 300s;
         proxy_send_timeout 300s;
     }
