@@ -42,6 +42,8 @@
 | Operator energization / power-on | Not authorized |
 | Real-world research statement | Not established |
 
+**PHY-10 follow-up, still HOLD (20 Nov):** Supplier-backed G0 screening in G0_PART_SCREEN_AND_G1_EVIDENCE_20261120.md shows YAGEO SQP10AJB-12R (12 ohm, +/-5%, conservatively 300 ppm/C) can exceed 2.5 W at 5.25 V over the whole stated component temperature range (**2.516 W**), despite its room-temperature-bound pass. Vishay RE65G12R0C02 (12 ohm, +/-1%, 20 ppm/C) meets the normal-load resistance/power upper bound (**2.331 W**) but its required external chassis/heatsinking, real thermal derating and all source/protection/physical evidence are unverified. Neither is procured or qualified, and the original 10-ohm KiCad/SPICE/BOM remains unchanged. G1_BENCH_EVIDENCE_TEMPLATE.json and g1_evidence_gate.py establish an independent physical evidence preflight; they never grant release.
+
 **Measurement-discrimination boundary:** The additional strict software screen detects controlled 1% and 5% reference bias and +500 ms reference-clock offset on pinned TEST_FIXTURE data. It never proves real reference independence, resistor calibration, external clock synchronization, or electrical safety. See WITNESS_G0_G2_DISCRIMINATION.md. PHY-06/PHY-08 remain OPEN.
 
 **Stop condition:** If the selected part dimensions, pin naming, breakout shunt, power fuse or reference instrument are incompatible, revise schematic and PCB and repeat ERC/DRC. Never silently reclassify the candidate as safe/fabrication-ready because an electronic check returns zero violations.

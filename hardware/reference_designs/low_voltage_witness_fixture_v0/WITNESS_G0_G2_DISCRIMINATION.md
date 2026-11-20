@@ -106,4 +106,6 @@ does not complete G2.
 **G3 economics:** no performance or cost-saving claim until physical
 reproducibility and useful operational comparison exist.
 
+**Subsequent sourced review (20 Nov):** The earlier 12-ohm +/-5% arithmetic is restricted to initial manufacturing tolerance; it omits temperature coefficient. G0_PART_SCREEN_AND_G1_EVIDENCE_20261120.md tests named YAGEO and Vishay parts over full stated component operating-temperature bounds, finds the YAGEO case above 2.5 W, and supplies a new separate 12-ohm synthetic replay plus G1 evidence protocol. No prior data were rewritten.
+
 **Release remains HOLD.**
