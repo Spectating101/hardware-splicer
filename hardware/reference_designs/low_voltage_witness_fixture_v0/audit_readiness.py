@@ -19,6 +19,9 @@ import re
 import subprocess
 from datetime import datetime, timedelta
 
+from measurement_screen import (ScreeningError, conservative_load_power_bound,
+                                screen as strict_fixture_screen)
+
 HERE = Path(__file__).resolve().parent
 R_SERIES = 0.05 + 0.015 + 0.010  # original stated SPICE assumption, NOT measured
 FUSE_CANDIDATE_A = 1.0
@@ -174,7 +177,19 @@ def test_capture_scenarios(pl_root: Path, prior_run: Path, out: Path) -> list[di
             "--out", str(target / "policy-lab-intake")],
             cwd=pl_root, capture_output=True, text=True, timeout=40
         )
+        # Second, deliberately stricter screen: no physical calibration or
+        # independent reference custody may be inferred from its success.
+        try:
+            strict = strict_fixture_screen(primary_path, ref_path, sidecar, registers)
+            strict_decision = strict["decision"]
+            strict_energy_pct = strict["energy_disagreement_primary_denominator_pct"]
+            strict_error = None
+        except (ScreeningError, OSError) as exc:
+            strict_decision, strict_energy_pct, strict_error = "INVALID_INPUT_HOLD", None, str(exc)
         record = {
+            "strict_screen_decision": strict_decision,
+            "strict_screen_disagreement_pct": strict_energy_pct,
+            "strict_screen_error": strict_error,
             "name": name, "mutation": mutations, "converter_exit": trial.returncode,
             "error": trial.stderr.strip()[-400:],
             "reference_input_sha256": hashfile(ref_path),
@@ -241,10 +256,20 @@ def main(argv=None) -> int:
         "missing_reference_samples_blocked": by_name["missing_reference_sample"]["converter_exit"] != 0,
         "tampered_primary_against_sidecar_blocked": by_name["primary_tampered_against_original_session"]["converter_exit"] != 0,
         "all_captures_remain_nonphysical": all(c.get("physical_ready") is False for c in cases if c["converter_exit"] == 0),
+        "strict_control_fixture_passes_without_physical_claim": by_name["control"]["strict_screen_decision"] == "PASS_FIXTURE_DISCRIMINATION_ONLY",
+        "strict_screen_detects_1pct_reference_bias": by_name["reference_one_percent_high"]["strict_screen_decision"] == "FAIL_FIXTURE_DISAGREEMENT",
+        "strict_screen_detects_5pct_reference_bias": by_name["reference_five_percent_high"]["strict_screen_decision"] == "FAIL_FIXTURE_DISAGREEMENT",
+        "strict_screen_detects_reference_clock_shift": by_name["reference_time_plus_500ms"]["strict_screen_decision"] == "INVALID_INPUT_HOLD",
+        "strict_screen_detects_sample_dropout": by_name["missing_reference_sample"]["strict_screen_decision"] == "INVALID_INPUT_HOLD",
+        "strict_screen_rejects_primary_receipt_tamper": by_name["primary_tampered_against_original_session"]["strict_screen_decision"] == "INVALID_INPUT_HOLD",
     }
     if not all(controls.values()):
         raise AssertionError("Adversarial matrix behavior changed; inspect output rather than claiming pass")
     dmm = dmm_shunt_uncertainty_example()
+    original_envelope = conservative_load_power_bound(spec["maximum_bus_voltage_v"], 10.0, 5.0, spec["maximum_power_w"])
+    proposed_envelope = conservative_load_power_bound(spec["maximum_bus_voltage_v"], 12.0, 5.0, spec["maximum_power_w"])
+    if original_envelope["within_ceiling"] or not proposed_envelope["within_ceiling"]:
+        raise AssertionError("Conservative G0 option needs new independent review")
     report = {
         "schema": "hardware_splicer.witness_metrology_readiness_audit.v1",
         "source_baseline_git": "Witness fixture PR #356 source files (verify branch revision independently)",
@@ -257,6 +282,12 @@ def main(argv=None) -> int:
         "status": "HOLD_PHYSICAL_INSTRUMENT_AND_ENVELOPE_RECONCILIATION",
         "checks": controls,
         "corner_cases": corners,
+        "conservative_unselected_load_option": {
+            "original_10ohm_minus5pct": original_envelope,
+            "candidate_12ohm_minus5pct": proposed_envelope,
+            "canonical_v0_unchanged": True,
+            "phy10_hold_still_open": True,
+        },
         "capture_cases": cases,
         "reference_instrument_candidate": dmm,
         "fuse_candidate_issue": {
@@ -294,15 +325,19 @@ def main(argv=None) -> int:
         for x in corners
     ]
     rows += [
+        "", "## Conservative normal-load option (not physically selected)", "",
+        f"Original 10 ohm nominal / -5% hypothetical load at 5.25 V: {original_envelope['max_load_power_w_conservative']:.4f} W (FAIL).",
+        f"Unselected 12 ohm nominal / -5% candidate at 5.25 V: {proposed_envelope['max_load_power_w_conservative']:.4f} W (within 2.5 W).",
+        "These bounds do not establish fuse, source, wire, thermal or actual part suitability. Canonical 10 ohm v0 SPICE and PHY-10 HOLD are unchanged.",
         "", "## Injected fixture faults and Policy Lab outcome","",
-        "| Input alteration | Bridge exit | Relative energy difference | Disagreement windows |",
-        "|---|---:|---:|---:|",
+        "| Input alteration | PL bridge exit | PL energy disagreement | PL discrepancy windows | Strict fixture screen |",
+        "|---|---:|---:|---:|---|",
     ]
     rows += [
         f"| {c['name']} | {c['converter_exit']} | "
-        f"{c['abs_percent_reference_larger_denominator']:.3f}% | {c['reported_disagreement_windows']} |"
+        f"{c['abs_percent_reference_larger_denominator']:.3f}% | {c['reported_disagreement_windows']} | {c['strict_screen_decision']} |"
         if c["converter_exit"] == 0 else
-        f"| {c['name']} | {c['converter_exit']} (rejected) | — | — |"
+        f"| {c['name']} | {c['converter_exit']} (rejected) | — | — | {c['strict_screen_decision']} |"
         for c in cases
     ]
     rows += [

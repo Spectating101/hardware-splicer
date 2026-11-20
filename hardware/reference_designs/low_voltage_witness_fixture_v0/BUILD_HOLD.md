@@ -15,7 +15,7 @@
 | PHY-07 | Mechanical and thermal of screw terminals, load mounting, shunt, cables uninspected | Mechanical drawing/fitted enclosure, standoffs, load thermal mounting, cable strain relief and temperature checks |
 | PHY-08 | No independent operator or genuine recorded bench run | Controlled, permitted physical commissioning with true source identity and independent repeat |
 | PHY-09 | This 5 V fixture has no authority for 24 V / 120 W | New higher-power design with independently reviewed ratings, protection and measured validation |
-| PHY-10 | Declared 2.5 W power ceiling is exceeded under some allowable 5.25 V / load corner assumptions | Reconcile maximum bus voltage, actual load tolerance and 2.5 W maximum before authorizing any test or build; independently rerun corner checks |
+| PHY-10 | Declared 2.5 W power ceiling is exceeded under some allowable 5.25 V / load corner assumptions | Reconcile maximum bus voltage, actual load tolerance and 2.5 W maximum before authorizing any test or build; independently rerun corner checks. A mathematically sufficient **unselected** 12 ohm +/-5% candidate is detailed in WITNESS_G0_G2_DISCRIMINATION.md; PHY-10 remains OPEN until an actual part and revised canonical test model are approved |
 
 ## Hardware selection ledger
 
@@ -41,5 +41,7 @@
 | Calibration / actual independent reference capture | No |
 | Operator energization / power-on | Not authorized |
 | Real-world research statement | Not established |
+
+**Measurement-discrimination boundary:** The additional strict software screen detects controlled 1% and 5% reference bias and +500 ms reference-clock offset on pinned TEST_FIXTURE data. It never proves real reference independence, resistor calibration, external clock synchronization, or electrical safety. See WITNESS_G0_G2_DISCRIMINATION.md. PHY-06/PHY-08 remain OPEN.
 
 **Stop condition:** If the selected part dimensions, pin naming, breakout shunt, power fuse or reference instrument are incompatible, revise schematic and PCB and repeat ERC/DRC. Never silently reclassify the candidate as safe/fabrication-ready because an electronic check returns zero violations.

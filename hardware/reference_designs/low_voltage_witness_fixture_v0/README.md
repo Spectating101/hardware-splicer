@@ -78,6 +78,8 @@ Those are **numerical model outputs**, not measurements. The *independently writ
 
 **Nothing in the software reports closes these gates.**
 
+**G0/G2 controlled follow-on:** [WITNESS_G0_G2_DISCRIMINATION.md](WITNESS_G0_G2_DISCRIMINATION.md) documents a conservative **unselected 12 ohm +/-5% load option** and a fail-closed software-only reference-disagreement screen. Run `python3 -m unittest -v test_measurement_screen.py`. The original 10 ohm SPICE baseline, BOM and station spec remain unchanged; this is not fabrication clearance. The screen does not establish independent physical calibration.
+
 **Independent readiness audit (20 Nov):** [INDEPENDENT_READINESS_AUDIT_20261120.md](INDEPENDENT_READINESS_AUDIT_20261120.md) records an additional 2.5 W / 5.25 V specification mismatch, source-dated reference-instrument requirements, and seven controlled fault-injection intake cases. It includes a fail-if-held release gate. This is a new independent review, not authorization to construct or power hardware. The v0 board is not a ready-to-order product and absolutely must not be extrapolated to the old 24 V / 120 W station. Any higher-power revision requires new part selection, current-carrying design and separate review.
 
 ## Vendor leads and caveats
