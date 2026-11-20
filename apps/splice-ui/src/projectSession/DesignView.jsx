@@ -95,9 +95,13 @@ export default function DesignView({ projectId, caseId, revision, onOpenScene, o
     <p><strong>Design view · unknown</strong></p><p role="status">{state.error}</p></div>;
   if (state.status === "not-linked") return <div className="design-view" data-design-state="not-linked">
     <p><strong>Design view · not linked</strong></p>
+    <p>No design geometry is linked to this project yet, so there is nothing to draw. None has been generated or assumed.</p>
+    <details className="design-view-howto">
+      <summary>How a design view gets linked</summary>
     <p className="muted">A scene manifest (<code>projects/&lt;folder&gt;/scene.json</code>, schema <code>{SCENE_SCHEMA}</code>) whose
       {" "}<code>project_id</code> is <code>{projectId || "this project's id"}</code>
       {caseId ? <> or whose <code>registered_cases</code> lists <code>{caseId}</code></> : null} would link this project to a design view.</p>
+    </details>
   </div>;
 
   const { manifest, via } = state;

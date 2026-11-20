@@ -2682,6 +2682,8 @@ textarea, select { font: inherit; }
 .design-view { margin-bottom: 1.25rem; }
 .design-view-source { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
 .design-view-source p { margin: 0 0 .6rem; font-size: .85rem; }
+.design-view-howto { margin-top: .6rem; font-size: .9rem; }
+.design-view-howto summary { font-weight: 500; color: var(--muted); }
 .design-view .fd-scene { border-radius: 4px; overflow: hidden; }
 .design-records h3 { font-size: 1.05rem; margin: 0 0 .4rem; }
 .design-records h4 { font-size: .95rem; margin: 1.1rem 0 .4rem; }

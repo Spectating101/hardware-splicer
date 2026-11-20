@@ -45,6 +45,7 @@ it("splits the geometry note into status and next action verbatim", () => {
 it("says not linked and names what would link the project", async () => {
   render(<DesignView projectId="digital-9" caseId="hs3g-b" revision={2} />);
   expect(await screen.findByText("Design view · not linked")).toBeInTheDocument();
+  expect(screen.getByText(/nothing to draw\. None has been generated or assumed/)).toBeInTheDocument();
   expect(screen.getByText(/would link this project/)).toHaveTextContent("hs3g-b");
   expect(fetchSceneManifest).not.toHaveBeenCalled();
 });
