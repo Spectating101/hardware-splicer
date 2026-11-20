@@ -92,8 +92,9 @@ describe("Saved digital requirement revisions", () => {
     // Compare shows the backend's comparison, not a client-side difference of two summaries.
     expect(fetchDigitalCompare).toHaveBeenCalledWith("digital-test", 1, 2, expect.anything());
     const compared = await screen.findByTestId("revision-compare");
-    expect(compared).toHaveTextContent("Payload mass (g) · 0 → 30");
-    expect(within(compared).getByRole("row", { name: /regressed/ })).toBeInTheDocument();
+    expect(compared).toHaveTextContent("Payload mass · 0 g → 30 g");
+    // The mass rose against the same limit, so this one really is a regression.
+    expect(within(compared).getByRole("row", { name: /Regressed: measured value worsened/ })).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("View revision"), { target: { value: "1" } });
     expect(screen.getByRole("button", { name: "Run and save new revision" })).toBeDisabled();
     expect(screen.getByText("Viewing history.")).toBeInTheDocument();
@@ -213,5 +214,25 @@ describe("Revision link normalisation", () => {
     render(<DigitalStudyPanel session={session} routeRevision={1} onRevisionRoute={onRevisionRoute} />);
     await screen.findByLabelText("View revision");
     expect(onRevisionRoute).not.toHaveBeenCalled();
+  });
+});
+
+describe("Honest check transitions", () => {
+  it("says a check newly fails because its requirement rose, not that it regressed", async () => {
+    fetchDigitalStudy.mockResolvedValue(data(study(2, 244.9)));
+    fetchDigitalCompare.mockResolvedValue({
+      before_revision: 1, after_revision: 2, same_engine_sources: true,
+      requirements_changes: { minimum_work_runtime_h: { before: 2.5, after: 3.5, delta: 1 } }, metrics: {},
+      constraints: [{ id: "work_runtime", transition: "regressed",
+        before: { passed: true, actual: 3.166, limit: 2.5, unit: "h" }, after: { passed: false, actual: 3.166, limit: 3.5, unit: "h" } }],
+    });
+    render(<DigitalStudyPanel session={session} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Compare revisions" }));
+    const compared = await screen.findByTestId("revision-compare");
+    expect(compared).toHaveTextContent("Minimum work runtime · 2.5 h → 3.5 h");
+    const row = within(compared).getByRole("row", { name: /Work runtime/ });
+    expect(row).toHaveTextContent("Newly fails: requirement increased");
+    expect(row).toHaveTextContent("Measured 3.166 h, unchanged · target 3.5 h, up from 2.5 h");
+    expect(compared).not.toHaveTextContent(/regress/i);
   });
 });
