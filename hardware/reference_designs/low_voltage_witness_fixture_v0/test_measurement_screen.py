@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import csv
 from datetime import datetime, timedelta
+import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -93,6 +94,66 @@ class WitnessDiscriminationTests(unittest.TestCase):
         altered = self.mutate_csv(R, "missing.csv", drop=77)
         with self.assertRaisesRegex(screen.ScreeningError, "Sampling gap"):
             self.call(altered)
+
+    def mutated_session(self, *, primary=P, registers=REG, **changes):
+        """Re-sign mutable local SHA fields to test coherence beyond hashes."""
+        receipt = json.loads(S.read_text(encoding="utf-8"))
+        for name, source in (("samples.csv", primary), ("registers.jsonl", registers)):
+            receipt["files"][name] = {
+                "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
+                "bytes": source.stat().st_size,
+            }
+        receipt.update(changes)
+        out = self.work / "forged-session.json"
+        out.write_text(json.dumps(receipt), encoding="utf-8")
+        return out
+
+    def test_coherently_reforged_primary_and_reference_cannot_pass_unchanged_raw_registers(self):
+        # Before this repair: both currents +10% and rehashed session PASSed,
+        # even though the raw INA228 CURRENT register was untouched.
+        primary = self.mutate_csv(P, "forged-primary.csv", factor=1.10)
+        reference = self.mutate_csv(R, "forged-reference.csv", factor=1.10)
+        session = self.mutated_session(primary=primary)
+        with self.assertRaisesRegex(screen.ScreeningError, "Primary CSV does not match INA228 raw register"):
+            screen.screen(primary, reference, session, REG)
+
+    def test_coherently_reforged_register_summary_rejected_by_raw_register_decoder(self):
+        # Raw hex remains genuine; only derived JSON current/voltage fields
+        # have been rewritten. Rehashing registers and session is insufficient.
+        originals = [json.loads(line) for line in REG.read_text().splitlines()]
+        originals[0]["voltage_v"] *= 1.10
+        forged_raw = self.work / "fake-registers.jsonl"
+        forged_raw.write_text("".join(json.dumps(row) + "\n" for row in originals), encoding="utf-8")
+        session = self.mutated_session(registers=forged_raw)
+        with self.assertRaisesRegex(screen.ScreeningError, "raw register decode mismatch"):
+            screen.screen(P, R, session, forged_raw)
+
+    def test_rehashed_register_row_reordering_and_session_count_mismatch_rejected(self):
+        rows = REG.read_text(encoding="utf-8").splitlines()
+        rows[0], rows[1] = rows[1], rows[0]
+        forged_raw = self.work / "reordered-registers.jsonl"
+        forged_raw.write_text("\n".join(rows) + "\n", encoding="utf-8")
+        session = self.mutated_session(registers=forged_raw)
+        with self.assertRaisesRegex(screen.ScreeningError, "raw index mismatch"):
+            screen.screen(P, R, session, forged_raw)
+        count_session = self.mutated_session(completed_samples=182)
+        with self.assertRaisesRegex(screen.ScreeningError, "session sample count disagrees"):
+            screen.screen(P, R, count_session, REG)
+
+    def test_duplicate_keys_and_nonfinite_json_do_not_pass_rehashed_receipt(self):
+        rows = REG.read_text(encoding="utf-8").splitlines()
+        rows[0] = rows[0].replace('"index": 0,', '"index": 0, "index": 0,', 1)
+        forged_raw = self.work / "duplicate-key-registers.jsonl"
+        forged_raw.write_text("\n".join(rows) + "\n", encoding="utf-8")
+        session = self.mutated_session(registers=forged_raw)
+        with self.assertRaisesRegex(screen.ScreeningError, "Duplicate JSON key"):
+            screen.screen(P, R, session, forged_raw)
+        valid = json.loads(S.read_text(encoding="utf-8"))
+        valid["configuration"]["bus_lsb_v"] = float("nan")
+        bad_session = self.work / "nan-session.json"
+        bad_session.write_text(json.dumps(valid), encoding="utf-8")
+        with self.assertRaisesRegex(screen.ScreeningError, "Nonfinite JSON"):
+            screen.screen(P, R, bad_session, REG)
 
     def test_receipted_primary_tampering_is_rejected(self):
         altered = self.mutate_csv(P, "changed-primary.csv", factor=1.05)

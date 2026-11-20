@@ -26,7 +26,7 @@ def sha256(path: Path) -> str:
 
 
 def _time(value: str) -> datetime:
-    if not value.endswith("Z"):
+    if not isinstance(value, str) or not value.endswith("Z"):
         raise ScreeningError("Timestamp must be explicitly UTC (Z)")
     try:
         result = datetime.fromisoformat(value[:-1] + "+00:00")
@@ -72,20 +72,145 @@ def _read(path: Path, names: tuple[str, ...], max_gap_s: float) -> list[dict]:
 
 def _verify_primary(session: Path, primary: Path, registers: Path) -> dict:
     try:
-        receipt = json.loads(session.read_text(encoding="utf-8"))
+        receipt = _strict_json_document(session.read_text(encoding="utf-8"), "primary session")
         files = receipt["files"]
-    except (KeyError, ValueError, OSError) as exc:
+    except ScreeningError:
+        raise
+    except (KeyError, ValueError, OSError, TypeError) as exc:
         raise ScreeningError("Unreadable primary INA228 receipt") from exc
     if receipt.get("capture_kind") != "TEST_FIXTURE" or receipt.get("source_kind") != "register_fixture":
         raise ScreeningError("This screen only accepts original TEST_FIXTURE INA228 receipts")
+    if not isinstance(files, dict):
+        raise ScreeningError("INA228 receipt files must be an object")
     for name, file in (("samples.csv", primary), ("registers.jsonl", registers)):
-        if not file.is_file() or files.get(name, {}).get("sha256") != sha256(file):
+        item = files.get(name)
+        if not isinstance(item, dict) or not file.is_file() or item.get("sha256") != sha256(file):
             raise ScreeningError("Primary raw capture/receipt SHA mismatch: " + name)
-        if files[name].get("bytes") != file.stat().st_size:
+        if type(item.get("bytes")) is not int or item["bytes"] != file.stat().st_size:
             raise ScreeningError("Primary raw capture/receipt size mismatch: " + name)
-    if receipt.get("status") != "COMPLETE" or receipt.get("completed_samples", 0) < 3:
+    count = receipt.get("completed_samples")
+    if receipt.get("status") != "COMPLETE" or type(count) is not int or count < 3:
         raise ScreeningError("Incomplete INA228 receipt")
     return receipt
+
+
+def _strict_json_document(text: str, label: str) -> dict:
+    """Reject duplicate JSON keys and nonfinite pseudo-JSON before trusting a receipt."""
+    def unique_pairs(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ScreeningError(f"Duplicate JSON key in {label}: {key}")
+            result[key] = value
+        return result
+
+    def invalid_constant(value):
+        raise ScreeningError(f"Nonfinite JSON constant in {label}: {value}")
+
+    try:
+        obj = json.loads(text, object_pairs_hook=unique_pairs, parse_constant=invalid_constant)
+    except (json.JSONDecodeError, TypeError) as exc:
+        raise ScreeningError(f"Malformed JSON in {label}") from exc
+    if not isinstance(obj, dict):
+        raise ScreeningError(f"Expected JSON object in {label}")
+    return obj
+
+
+def _positive_setting(obj: dict, name: str) -> float:
+    value = obj.get(name)
+    if type(value) not in (int, float) or not math.isfinite(value) or value <= 0:
+        raise ScreeningError(f"Invalid receipt configuration: {name}")
+    return float(value)
+
+
+def _signed_20bit_register(encoded: str, name: str) -> int:
+    """Independent INA228 decode, mirroring producer's 3-byte signed-20 format."""
+    if not isinstance(encoded, str) or len(encoded) != 6:
+        raise ScreeningError(f"Malformed INA228 {name} register")
+    try:
+        raw = bytes.fromhex(encoded)
+    except ValueError as exc:
+        raise ScreeningError(f"Malformed INA228 {name} register") from exc
+    if len(raw) != 3 or (raw[-1] & 0x0F):
+        raise ScreeningError(f"INA228 {name} register has invalid reserved bits")
+    value = int.from_bytes(raw, "big") >> 4
+    value = value - (1 << 20) if (value & (1 << 19)) else value
+    if value in (-(1 << 19), (1 << 19) - 1):
+        raise ScreeningError(f"INA228 {name} register is saturated")
+    return value
+
+
+def _verify_register_trace(primary_rows: list[dict], session: dict, registers: Path) -> None:
+    """Bind displayed CSV readings to raw registers, not merely to mutable file hashes.
+
+    This tests internal source coherence, NOT the authenticity of hardware or
+    receipt signing. An attacker who replaces raw registers and every pin still
+    cannot be detected without external custody/attestation.
+    """
+    if type(session.get("completed_samples")) is not int or session["completed_samples"] != len(primary_rows):
+        raise ScreeningError("INA228 session sample count disagrees with CSV")
+    config, spec = session.get("configuration"), session.get("station_spec")
+    if not isinstance(config, dict) or not isinstance(spec, dict):
+        raise ScreeningError("INA228 receipt lacks configuration/station specification")
+    bus_lsb = _positive_setting(config, "bus_lsb_v")
+    shunt_lsb = _positive_setting(config, "shunt_lsb_v")
+    current_lsb = _positive_setting(config, "current_lsb_a")
+    shunt_cal = _positive_setting(config, "shunt_cal")
+    shunt_ohms = _positive_setting(spec, "shunt_ohm")
+    calibration_full_scale = _positive_setting(spec, "calibration_full_scale_a")
+    max_v = _positive_setting(spec, "maximum_bus_voltage_v")
+    max_i = _positive_setting(spec, "monitor_headroom_a")
+    max_power = _positive_setting(spec, "maximum_power_w")
+    cal_factor = 13107.2e6  # INA228 ADC range 0; matches HS dc_measurement_station.py
+    expected_cal = round(cal_factor * (calibration_full_scale / (2 ** 19)) * shunt_ohms)
+    if (not math.isclose(bus_lsb, 195.3125e-6, rel_tol=1e-12)
+            or not math.isclose(shunt_lsb, 312.5e-9, rel_tol=1e-12)
+            or shunt_cal != expected_cal
+            or not math.isclose(current_lsb, expected_cal / (cal_factor * shunt_ohms), rel_tol=1e-12)):
+        raise ScreeningError("INA228 receipt calibration does not agree with declared station")
+    if (session.get("first_sample_utc") != primary_rows[0]["timestamp"].isoformat(timespec="microseconds").replace("+00:00", "Z")
+            or session.get("last_sample_utc") != primary_rows[-1]["timestamp"].isoformat(timespec="microseconds").replace("+00:00", "Z")):
+        raise ScreeningError("INA228 receipt first/last UTC disagrees with CSV")
+
+    count = 0
+    try:
+        with registers.open(encoding="utf-8") as handle:
+            for number, line in enumerate(handle):
+                if number >= len(primary_rows):
+                    raise ScreeningError("INA228 raw register stream has excess samples")
+                entry = _strict_json_document(line, f"INA228 register line {number + 1}")
+                sample = primary_rows[number]
+                if type(entry.get("index")) is not int or entry["index"] != number:
+                    raise ScreeningError(f"INA228 raw index mismatch at {number}")
+                if _time(entry.get("timestamp_utc", "")) != sample["timestamp"]:
+                    raise ScreeningError(f"INA228 raw timestamp disagrees with CSV at {number}")
+                raw = entry.get("registers_hex")
+                if not isinstance(raw, dict) or set(raw) != {"vbus", "vshunt", "current"}:
+                    raise ScreeningError(f"Missing INA228 raw register trio at {number}")
+                decoded_v = _signed_20bit_register(raw["vbus"], "vbus") * bus_lsb
+                decoded_i = _signed_20bit_register(raw["current"], "current") * current_lsb
+                decoded_shunt = _signed_20bit_register(raw["vshunt"], "vshunt") * shunt_lsb
+                if not (0 <= decoded_v <= max_v and 0 <= decoded_i <= max_i
+                        and decoded_v * decoded_i <= max_power):
+                    raise ScreeningError(f"Decoded INA228 source violates station envelope at {number}")
+                quantization = 2 * shunt_lsb / shunt_ohms + 2 * current_lsb
+                if abs(decoded_i - decoded_shunt / shunt_ohms) > quantization:
+                    raise ScreeningError(f"INA228 source current/shunt inconsistency at {number}")
+                expected = {"voltage_v": decoded_v, "current_a": decoded_i,
+                            "shunt_voltage_v": decoded_shunt, "power_w": decoded_v * decoded_i}
+                for field, derived in expected.items():
+                    reported = entry.get(field)
+                    if (type(reported) not in (int, float) or not math.isfinite(reported)
+                            or not math.isclose(reported, derived, rel_tol=5e-11, abs_tol=5e-10)):
+                        raise ScreeningError(f"INA228 raw register decode mismatch: {field} at {number}")
+                for field in ("voltage_v", "current_a"):
+                    if not math.isclose(sample[field], expected[field], rel_tol=5e-11, abs_tol=5e-10):
+                        raise ScreeningError(f"Primary CSV does not match INA228 raw register: {field} at {number}")
+                count += 1
+    except OSError as exc:
+        raise ScreeningError("INA228 raw register file unreadable") from exc
+    if count != len(primary_rows):
+        raise ScreeningError("INA228 raw register stream has missing samples")
 
 
 def conservative_load_power_bound(max_bus_v: float, nominal_load_ohms: float,
@@ -128,8 +253,9 @@ def screen(primary: Path, reference: Path, receipt: Path, registers: Path,
             math.isfinite(max_pair_offset_ms) and max_pair_offset_ms > 0 and
             math.isfinite(diagnostic_threshold_pct) and diagnostic_threshold_pct > 0):
         raise ScreeningError("Screen thresholds must be positive and finite")
-    _verify_primary(receipt, primary, registers)
+    primary_session = _verify_primary(receipt, primary, registers)
     p = _read(primary, ("timestamp_utc", "voltage_v", "current_a"), max_gap_s)
+    _verify_register_trace(p, primary_session, registers)
     r = _read(reference, ("timestamp_utc", "voltage_v", "shunt_voltage_v"), max_gap_s)
     if len(p) != len(r):
         raise ScreeningError("Unpaired sample count: require strict one-to-one captures")
