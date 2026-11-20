@@ -2788,7 +2788,7 @@ details.bench-objective summary { font-size: .75rem; font-weight: 600; letter-sp
 }
 @media (max-width: 899px) {
   .bench-heading { padding-bottom: .5rem; }
-  .bench-heading h1 { font-size: 1.3rem; }
+  .bench-heading h1 { font-size: 1.5rem; }
   .bench-heading p { margin: .2rem 0; font-size: .875rem; }
   .bench-summary { padding: .75rem; }
   .bench-summary-counts { gap: .6rem .9rem; }
