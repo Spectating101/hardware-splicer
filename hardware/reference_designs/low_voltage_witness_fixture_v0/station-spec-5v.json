@@ -1,0 +1,16 @@
+{
+  "nominal_voltage_v": 5,
+  "maximum_bus_voltage_v": 5.25,
+  "maximum_power_w": 2.5,
+  "monitor_headroom_a": 0.75,
+  "calibration_full_scale_a": 2,
+  "shunt_ohm": 0.015,
+  "shunt_rated_power_w": 0.25,
+  "shunt_tolerance_percent": 1,
+  "shunt_power_derating": 0.5,
+  "shunt_value_basis": "Adafruit 5832 populated onboard 15 mOhm shunt; 0.25 W rating is a conservative UNVERIFIED planning allowance; schematic vs product tolerance conflicts; inspect actual board before assembly",
+  "reference_shunt_ohm": 0.01,
+  "reference_shunt_rated_power_w": 1,
+  "reference_shunt_tolerance_percent": 1,
+  "reference_shunt_value_basis": "Vishay WSK2512R0100FEA exact four-terminal candidate, 10 mOhm +/-1%, 1 W, +/-35 ppm/C; component not procured or characterized"
+}

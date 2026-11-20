@@ -1,0 +1,57 @@
+{
+  "schema": "hardware_splicer.witness_load_candidate_matrix.v1",
+  "design_boundary": "Separate external load for existing unchanged KiCad v0 PCB; proposed 5.25 V maximum J2 load bus, 2.5 W load envelope; no energized hardware",
+  "maximum_j2_voltage_v": 5.25,
+  "nominal_source_voltage_v": 5,
+  "maximum_load_power_w": 2.5,
+  "series_resistance_ohms_simulated": 0.075,
+  "reference_temperature_c": 25,
+  "candidates": [
+    {
+      "id": "economy_12r_sqp10ajb_12r",
+      "manufacturer": "YAGEO",
+      "mpn": "SQP10AJB-12R",
+      "value_ohms": 12,
+      "tolerance_percent": 5,
+      "tcr_absolute_ppm_per_c": 300,
+      "operating_temperature_c": {
+        "min": -55,
+        "max": 155
+      },
+      "power_rating_w": 10,
+      "source_url": "https://www.digikey.tw/en/products/detail/yageo/SQP10AJB-12R/18737",
+      "datasheet_url": "https://yageogroup.com/content/datasheet/asset/file/YAGEO-SQP_NSP_DATASHEET",
+      "mechanical_requirement": "External off-board resistor, inspect leads, nonflammable standoffs, clearances and thermal mounting",
+      "supplier_listing_observed": "2026-11-20",
+      "part_status": "SOURCED_CANDIDATE_NOT_PROCURED"
+    },
+    {
+      "id": "precision_12r_re65g12r0c02",
+      "manufacturer": "Vishay Dale",
+      "mpn": "RE65G12R0C02",
+      "value_ohms": 12,
+      "tolerance_percent": 1,
+      "tcr_absolute_ppm_per_c": 20,
+      "operating_temperature_c": {
+        "min": -55,
+        "max": 250
+      },
+      "power_rating_w": 10,
+      "source_url": "https://www.digikey.tw/en/products/detail/vishay-dale/RE65G12R0C02/26752174",
+      "datasheet_url": "https://www.vishay.com/docs/30201/rhnh.pdf",
+      "mechanical_requirement": "Chassis-mounted off-board; manufacturer-specified heatsink/thermal interface and solder lug strain relief must be demonstrated",
+      "supplier_listing_observed": "2026-11-20",
+      "part_status": "SOURCED_CANDIDATE_NOT_PROCURED"
+    }
+  ],
+  "safety_gates": {
+    "phy_02_shunt": "HOLD",
+    "phy_04_fuse_source_fault_protection": "HOLD",
+    "phy_05_supply_isolation": "HOLD",
+    "phy_06_reference_instrument": "HOLD",
+    "phy_07_thermal_mount": "HOLD",
+    "phy_08_operator": "HOLD",
+    "phy_10_operating_envelope": "HOLD_BEFORE_PHYSICAL_SELECTION"
+  },
+  "description": "Power calculations use worst-case combined resistor initial tolerance and specified absolute TCR over entire stated component temperature range. This is a screening envelope, not guaranteed thermal derating, current limiting, or physical qualification."
+}

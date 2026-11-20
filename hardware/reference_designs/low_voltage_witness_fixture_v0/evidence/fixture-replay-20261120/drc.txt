@@ -1,0 +1,10 @@
+** Drc report for low_voltage_witness_fixture_v0.kicad_pcb **
+** Created on 2026-11-20T03:04:22+0800 **
+
+** Found 0 DRC violations **
+
+** Found 0 unconnected pads **
+
+** Found 0 Footprint errors **
+
+** End of Report **
