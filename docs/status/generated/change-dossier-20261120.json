@@ -1,7 +1,7 @@
 {
   "authority_level": "modeled",
   "candidate": {
-    "change_evidence_sha256": "17518f15c487fcc2d3a149322d87e54299e071dc19273507dd010de5ec90983b",
+    "change_evidence_sha256": "090c27528ee2a70b9c37da841c5d74b2cbd0049cd95f07d5958f9eabc199e759",
     "native_outcome": {
       "basis": "native HS rerun of the candidate revision; modeled, not measured",
       "fact": "metric.work_runtime_lower_h",
@@ -69,46 +69,46 @@
   "change_evidence": {
     "files": {
       "base_export": {
-        "bytes": 26424,
+        "bytes": 26423,
         "path": "r1-export.json",
         "schema": "hardware_splicer.policy_evidence.v1",
-        "sha256": "91272ded76ee6dc7ea682f19167c74dd0d1f43d5e109588168978db71628f776"
+        "sha256": "76d039ef0ac6ed4caed5c4c3a2069fb9e2f90404d9bc473629f4c4da13bb4435"
       },
       "base_review": {
-        "bytes": 52941,
+        "bytes": 52940,
         "path": "r1-review/review.json",
         "schema": "policylab.hardware_policy_review.v1",
-        "sha256": "10230b9120c5736f87cd00800e52cfc78857fc2fbfa67b22c1bca8fe891a4577"
+        "sha256": "aa435840af09a331002c5cd1bab06cb80515869362f9214ac17281ad03193a3a"
       },
       "base_review_replay": {
         "bytes": 427,
         "path": "r1-review/replay.json",
         "schema": "policylab.hardware_policy_verification.v1",
-        "sha256": "e2f70e0e1c2903e736726252ef910031136cbdd51934e0f3b71171329ef29427"
+        "sha256": "5b1f125d154f47c273624c627fd241f20de7934953d4eec89feb72b659e7d7fd"
       },
       "candidate_export": {
-        "bytes": 26505,
+        "bytes": 26504,
         "path": "r2-export.json",
         "schema": "hardware_splicer.policy_evidence.v1",
-        "sha256": "f3050ab7eb3f0b93c85b639336630aa5aeed8d6c24006cc3eb02bff1ccdef0c6"
+        "sha256": "d1a5fa318d4013f11b534eb02634b7c4a6a675a3d7d307724a2758063ddd595d"
       },
       "candidate_review": {
-        "bytes": 53412,
+        "bytes": 53411,
         "path": "r2-review/review.json",
         "schema": "policylab.hardware_policy_review.v1",
-        "sha256": "16cb6d662fedb1558879a86cf7a2bc60e8ac22773d300c99d367c4f3e0ee5bc6"
+        "sha256": "40db9c451262c1aa2af578dfe7eb4ca9e5aae2b3fadd3309a7e4608c7486c79b"
       },
       "candidate_review_replay": {
         "bytes": 427,
         "path": "r2-review/replay.json",
         "schema": "policylab.hardware_policy_verification.v1",
-        "sha256": "a824b9bdc4bfba5a36a9521c559d9cd4271b4c5d60843e9cb64f2ed86e3055c8"
+        "sha256": "c61be06794111dd6e812396ad7a115f356f3b3437e8db06c52f0f14fa0b792cb"
       },
       "proposal": {
         "bytes": 1113,
         "path": "proposal.json",
         "schema": "hardware_splicer.policy_feedback_proposal.v1",
-        "sha256": "deb21e3dc1bee2f3e586f5c69e7580bda1e2bb4cae0e6cedc48808a75cfb253c"
+        "sha256": "a790892955e158792b85c82fe2e5b7c1d6f73cacf76c45f09500a6d86c767592"
       }
     },
     "not_linked": [],
@@ -138,7 +138,7 @@
           "limit": 0.3,
           "passed": true,
           "revision": 2,
-          "run_id": "73a17dbce2414d46883a61f8dd974ced",
+          "run_id": "597107a7c64a4a1bbad809b63d211543",
           "unit": "A"
         },
         "result": {
@@ -147,7 +147,7 @@
           "passed": true,
           "unit": "A"
         },
-        "run_id": "d5d2aa1848874439aa048cb7665588a7",
+        "run_id": "09a597a3bd07423bad8cdba4cca99098",
         "status": "retained"
       },
       {
@@ -168,7 +168,7 @@
           "limit": 0,
           "passed": true,
           "revision": 2,
-          "run_id": "73a17dbce2414d46883a61f8dd974ced",
+          "run_id": "597107a7c64a4a1bbad809b63d211543",
           "unit": "A"
         },
         "result": {
@@ -177,11 +177,11 @@
           "passed": true,
           "unit": "A"
         },
-        "run_id": "d5d2aa1848874439aa048cb7665588a7",
+        "run_id": "09a597a3bd07423bad8cdba4cca99098",
         "status": "retained"
       }
     ],
-    "sha256": "0ace438ab8a563224baacfc9200b40e2f13a31629519a544c8b828d57087a18d",
+    "sha256": "b639398c1ce60b9095381032905ba5af0b27f1763ad87ddedbe9307599881bd0",
     "stale": [
       {
         "check": "work_runtime",
@@ -200,7 +200,7 @@
           "limit": 4.0,
           "passed": false,
           "revision": 2,
-          "run_id": "73a17dbce2414d46883a61f8dd974ced",
+          "run_id": "597107a7c64a4a1bbad809b63d211543",
           "unit": "h"
         },
         "result": {
@@ -209,7 +209,7 @@
           "passed": true,
           "unit": "h"
         },
-        "run_id": "d5d2aa1848874439aa048cb7665588a7",
+        "run_id": "09a597a3bd07423bad8cdba4cca99098",
         "status": "invalidated"
       }
     ],
@@ -220,7 +220,7 @@
         "kind": "failing_check",
         "limit": 4.0,
         "revision": 2,
-        "run_id": "73a17dbce2414d46883a61f8dd974ced",
+        "run_id": "597107a7c64a4a1bbad809b63d211543",
         "transition": "regressed",
         "unit": "h"
       },
@@ -246,23 +246,28 @@
       }
     ]
   },
+  "change_history": {
+    "api": "/v1/projects/digital-996558719b13454fb1724bef8f218093/change-dossier",
+    "changes": 2,
+    "cite_editions": 2
+  },
   "dossier": {
     "bound_to": {
       "files": {
-        "base_export": "91272ded76ee6dc7ea682f19167c74dd0d1f43d5e109588168978db71628f776",
-        "base_review": "10230b9120c5736f87cd00800e52cfc78857fc2fbfa67b22c1bca8fe891a4577",
-        "base_review_replay": "e2f70e0e1c2903e736726252ef910031136cbdd51934e0f3b71171329ef29427",
-        "candidate_export": "f3050ab7eb3f0b93c85b639336630aa5aeed8d6c24006cc3eb02bff1ccdef0c6",
-        "candidate_review": "16cb6d662fedb1558879a86cf7a2bc60e8ac22773d300c99d367c4f3e0ee5bc6",
-        "candidate_review_replay": "a824b9bdc4bfba5a36a9521c559d9cd4271b4c5d60843e9cb64f2ed86e3055c8",
-        "proposal": "deb21e3dc1bee2f3e586f5c69e7580bda1e2bb4cae0e6cedc48808a75cfb253c"
+        "base_export": "76d039ef0ac6ed4caed5c4c3a2069fb9e2f90404d9bc473629f4c4da13bb4435",
+        "base_review": "aa435840af09a331002c5cd1bab06cb80515869362f9214ac17281ad03193a3a",
+        "base_review_replay": "5b1f125d154f47c273624c627fd241f20de7934953d4eec89feb72b659e7d7fd",
+        "candidate_export": "d1a5fa318d4013f11b534eb02634b7c4a6a675a3d7d307724a2758063ddd595d",
+        "candidate_review": "40db9c451262c1aa2af578dfe7eb4ca9e5aae2b3fadd3309a7e4608c7486c79b",
+        "candidate_review_replay": "c61be06794111dd6e812396ad7a115f356f3b3437e8db06c52f0f14fa0b792cb",
+        "proposal": "a790892955e158792b85c82fe2e5b7c1d6f73cacf76c45f09500a6d86c767592"
       },
-      "package_sha256": "b630c5ded559584a91c57211db0f8263bc2e6ba49ea20b26b2fc83927b1b688b",
-      "packet_sha256": "0ace438ab8a563224baacfc9200b40e2f13a31629519a544c8b828d57087a18d",
+      "package_sha256": "d4652acd9d8e95f7766ba9834d906bf8b10b8c0527c5a101947a70ae1dd16e07",
+      "packet_sha256": "b639398c1ce60b9095381032905ba5af0b27f1763ad87ddedbe9307599881bd0",
       "revision": 2,
-      "run_id": "73a17dbce2414d46883a61f8dd974ced"
+      "run_id": "597107a7c64a4a1bbad809b63d211543"
     },
-    "edition_id": "7e2edb6b950a2c2580d294fe2b45fdd907ba2c6415262155354741c93bb7cb82",
+    "edition_id": "2075bf9f3479df23dbd9448074e1444e2f3300590cbc31cf6036b39b20c65f8d",
     "failing_checks": [
       {
         "actual": 3.166,
@@ -272,14 +277,14 @@
           "limit": 2.5,
           "result": "pass (modeled)",
           "revision": 1,
-          "run_id": "d5d2aa1848874439aa048cb7665588a7",
+          "run_id": "09a597a3bd07423bad8cdba4cca99098",
           "unit": "h"
         },
         "earlier_status": "stale (revision 1 result no longer counts)",
         "limit": 4.0,
         "result": "FAIL",
         "revision": 2,
-        "run_id": "73a17dbce2414d46883a61f8dd974ced",
+        "run_id": "597107a7c64a4a1bbad809b63d211543",
         "unit": "h"
       }
     ]
@@ -287,32 +292,32 @@
   "dossier_r3": {
     "bound_to": {
       "files": {
-        "base_export": "f3050ab7eb3f0b93c85b639336630aa5aeed8d6c24006cc3eb02bff1ccdef0c6",
-        "base_review": "256edd2bdd0a1cd9476747af9b42047e714d7c471e3233ea6e1692e9dd0e672c",
-        "base_review_replay": "7acce6adc92c24041ca5b0f16b596d3d41c418d332f4594de3e975e9f71e3414",
-        "candidate_export": "5832d9562c0dd9f5d76f2cd9f0d956560fedadbb67628c9620e3e23b77e21f82",
-        "candidate_review": "218265963f91fad81bd557645dc167e95a78e2617e819f92b7c174d152e60fec",
-        "candidate_review_replay": "21215d8d2141b09164fe869a6e8e06c71a6caf72fc73220475baff97f5594b75",
-        "proposal": "b58617290d2dc4f8966eab309e68f576769928bd3dc40b5d2e9b5f1526cfcaea"
+        "base_export": "d1a5fa318d4013f11b534eb02634b7c4a6a675a3d7d307724a2758063ddd595d",
+        "base_review": "d61f0c57f35d36d9e819487c78e7a5024221f65a93b4ee35c3397f47e77ae6ee",
+        "base_review_replay": "0cf04c152835f32f7b8bbd5719f9aaa27bb6cc3715efc75c19e6350f77d24693",
+        "candidate_export": "76d1d4d6b3ce56fbe346a6a4d1182d786ac3041dfda98e6fd31f74486fae1df0",
+        "candidate_review": "36e529baa084a7ef3420d8fdebf6b053d852d3cc87a78b9f453419d109a5f8ac",
+        "candidate_review_replay": "2679ce0d44ed674ac6cef962d0aa0432b63636ee5186abe662baadb557fc768b",
+        "proposal": "e2845df3b3253b8aef91729262e89f2fcefa985bcbaf01c9c2e5c3fb5be2f498"
       },
-      "package_sha256": "7234517b8267886f0b6ed7a69b027fbf61061187e97bf9b2456c3fd5038f737c",
-      "packet_sha256": "17518f15c487fcc2d3a149322d87e54299e071dc19273507dd010de5ec90983b",
+      "package_sha256": "6591f122cea54fba525f451286596b1078317907391fbfc1e7e878fe66fadb2d",
+      "packet_sha256": "090c27528ee2a70b9c37da841c5d74b2cbd0049cd95f07d5958f9eabc199e759",
       "revision": 3,
-      "run_id": "78ea06aa03b241fe921cb102a8423442"
+      "run_id": "f35f80c0dfcb42e4b066906be52a919a"
     },
-    "edition_id": "596a6fd85ac2b5832f3225762e0e27ddaa35ad0d04d5efffcbda077c66e93336"
+    "edition_id": "d3e58c9a48049ea4ff57f0edd2c086df74ec89369c4ee78853827a4d0a0565bc"
   },
-  "elapsed_s": 245.1,
+  "elapsed_s": 294.1,
   "identity": {
     "base": {
-      "package_sha256": "e9c99154500a0f2b623e701e0cbd0d5e2ed03d4c59a92f26ba7dc08f3e0bc50b",
-      "seal_sha256": "248a0978431727ed5e3d81433b016a3cbf4a4bdc0bb034030c9b8fc44d0ca34d",
-      "snapshot_sha256": "36178ffeae037655c50b8a3e11b8a569358d0c5dcfd8b0521922833d95d98e47"
+      "package_sha256": "f505c76f745da1d771d72cd3496b3059b1a955ebe06025d1abcca33f6ffcfcd7",
+      "seal_sha256": "97086c9925f694c1037a1c341105a65b49b1b4bd287d8584a6389caa96f6937c",
+      "snapshot_sha256": "ec875bac0319d010404ea903b87566bbf47c7d3c421ba05d18dc30a59bea879a"
     },
     "candidate": {
-      "package_sha256": "b630c5ded559584a91c57211db0f8263bc2e6ba49ea20b26b2fc83927b1b688b",
-      "seal_sha256": "50c6b86ae6597ce2a70dce4842933a02b618d596ca1c42a9a8e016779c7957c7",
-      "snapshot_sha256": "d2ecf433e7ba5b6b80da8c667b141347fc125486f9b57ba3071f337b5e816451"
+      "package_sha256": "d4652acd9d8e95f7766ba9834d906bf8b10b8c0527c5a101947a70ae1dd16e07",
+      "seal_sha256": "33dc96f410b578f103a0aea49efb2fd4c762245d921067aff2fc3ab9325f365d",
+      "snapshot_sha256": "4278906014bea41049345b204215cb01abdb0c8ae78b52c68d7d51cb9dcc6a67"
     }
   },
   "negative_controls": {
@@ -325,10 +330,10 @@
       "exit_code": 3,
       "reasons": [
         "HS project is at revision 4; this edition describes revision 3",
-        "run_id changed from 78ea06aa03b241fe921cb102a8423442 to 1cef04ad3bdc4f29bf69d98610f2bacf",
-        "package_sha256 changed from 7234517b8267886f0b6ed7a69b027fbf61061187e97bf9b2456c3fd5038f737c to 3c4854d05d8dd0c4c92febf75025412527d2c40f81b521a1b574357c0a0db64a",
-        "snapshot_sha256 (declared by HS) changed from b06b165100d1cf1ae65ed38e5aa39fe38fa6583e4f20ac20ad792c872d39c872 to ea7ffdd732bf2d77ecd0463d1e57ce49752df4b2cf8833dd3958f1cab0e316bf",
-        "seal_sha256 (declared by HS) changed from 61c8e4d525dfffe42e05f92a719e52b3f98d675389b38d77826cf2f62108c996 to 11f8304aa7706af94d0c160b5a2e44a753c856d6d109df6880b36d281d5403e7"
+        "run_id changed from f35f80c0dfcb42e4b066906be52a919a to 0b05b3b8b1014fa88b8b45b75c33453b",
+        "package_sha256 changed from 6591f122cea54fba525f451286596b1078317907391fbfc1e7e878fe66fadb2d to 5536cbe0883338558ab8ee9226e27ac74df0d46be49154cc98b2bd3febed39da",
+        "snapshot_sha256 (declared by HS) changed from 5cbc24ce348e8cc355324823aacd640dc0ee4383ed29924b269c0aa3370e47ec to 9693acd83a2e8a3ac20cf03bd3d48777e35d69364df235479f671ce29ca9a543",
+        "seal_sha256 (declared by HS) changed from 90d2a4d1e24a288f72ca966563acf51f71713a18ce376eb918c1abdfeb00af30 to 539b448e8d9b45b22d183458b2d2afd6de78e818304a2e201a2707f5c387fbbd"
       ],
       "status": "stale"
     },
@@ -346,10 +351,10 @@
       "exit_code": 3,
       "reasons": [
         "HS project is at revision 3; this edition describes revision 2",
-        "run_id changed from 73a17dbce2414d46883a61f8dd974ced to 78ea06aa03b241fe921cb102a8423442",
-        "package_sha256 changed from b630c5ded559584a91c57211db0f8263bc2e6ba49ea20b26b2fc83927b1b688b to 7234517b8267886f0b6ed7a69b027fbf61061187e97bf9b2456c3fd5038f737c",
-        "snapshot_sha256 (declared by HS) changed from d2ecf433e7ba5b6b80da8c667b141347fc125486f9b57ba3071f337b5e816451 to b06b165100d1cf1ae65ed38e5aa39fe38fa6583e4f20ac20ad792c872d39c872",
-        "seal_sha256 (declared by HS) changed from 50c6b86ae6597ce2a70dce4842933a02b618d596ca1c42a9a8e016779c7957c7 to 61c8e4d525dfffe42e05f92a719e52b3f98d675389b38d77826cf2f62108c996"
+        "run_id changed from 597107a7c64a4a1bbad809b63d211543 to f35f80c0dfcb42e4b066906be52a919a",
+        "package_sha256 changed from d4652acd9d8e95f7766ba9834d906bf8b10b8c0527c5a101947a70ae1dd16e07 to 6591f122cea54fba525f451286596b1078317907391fbfc1e7e878fe66fadb2d",
+        "snapshot_sha256 (declared by HS) changed from 4278906014bea41049345b204215cb01abdb0c8ae78b52c68d7d51cb9dcc6a67 to 5cbc24ce348e8cc355324823aacd640dc0ee4383ed29924b269c0aa3370e47ec",
+        "seal_sha256 (declared by HS) changed from 33dc96f410b578f103a0aea49efb2fd4c762245d921067aff2fc3ab9325f365d to 90d2a4d1e24a288f72ca966563acf51f71713a18ce376eb918c1abdfeb00af30"
       ],
       "status": "stale"
     },
@@ -365,7 +370,7 @@
     },
     "wrong_revision_identity": {
       "exit_code": 1,
-      "reason": "candidate_export: export is not revision 2 of digital-9fa33a1ccc9c4c4aa677de4bcbb84317 with the recorded run and package",
+      "reason": "candidate_export: export is not revision 2 of digital-996558719b13454fb1724bef8f218093 with the recorded run and package",
       "refused": true
     }
   },
@@ -376,7 +381,7 @@
       "decision": "BLOCKED",
       "policy": "portable-runtime-4h",
       "replay_verified": true,
-      "review_sha256": "10230b9120c5736f87cd00800e52cfc78857fc2fbfa67b22c1bca8fe891a4577",
+      "review_sha256": "aa435840af09a331002c5cd1bab06cb80515869362f9214ac17281ad03193a3a",
       "revision_requirements": {
         "minimum_work_runtime_h": 4
       },
@@ -388,7 +393,7 @@
       "decision": "BLOCKED",
       "policy": "portable-runtime-4h",
       "replay_verified": true,
-      "review_sha256": "16cb6d662fedb1558879a86cf7a2bc60e8ac22773d300c99d367c4f3e0ee5bc6",
+      "review_sha256": "40db9c451262c1aa2af578dfe7eb4ca9e5aae2b3fadd3309a7e4608c7486c79b",
       "unmet": [
         "Revise the design to satisfy HS constraint work_runtime.",
         "metric.work_runtime_lower_h is 3.166 h; target >= 4 h."
@@ -396,7 +401,7 @@
     }
   },
   "problems": [],
-  "project_id": "digital-9fa33a1ccc9c4c4aa677de4bcbb84317",
+  "project_id": "digital-996558719b13454fb1724bef8f218093",
   "proposal": {
     "requirement_changes": {
       "minimum_work_runtime_h": {
@@ -410,7 +415,7 @@
       "minimum_work_runtime_h": 4.0,
       "pi_work_current_a": 1.0
     },
-    "sha256": "deb21e3dc1bee2f3e586f5c69e7580bda1e2bb4cae0e6cedc48808a75cfb253c",
+    "sha256": "a790892955e158792b85c82fe2e5b7c1d6f73cacf76c45f09500a6d86c767592",
     "status": "validated_proposal"
   },
   "revisions": {
@@ -439,7 +444,7 @@
           "unit": "A"
         }
       ],
-      "package_sha256": "e9c99154500a0f2b623e701e0cbd0d5e2ed03d4c59a92f26ba7dc08f3e0bc50b",
+      "package_sha256": "f505c76f745da1d771d72cd3496b3059b1a955ebe06025d1abcca33f6ffcfcd7",
       "parent_revision": null,
       "requirements": {
         "keyboard_current_a": 0.1,
@@ -449,7 +454,7 @@
       },
       "requirements_met": true,
       "revision": 1,
-      "run_id": "d5d2aa1848874439aa048cb7665588a7"
+      "run_id": "09a597a3bd07423bad8cdba4cca99098"
     },
     "r2": {
       "change_request": "Apply Policy Lab portable-runtime-4h proposal",
@@ -476,7 +481,7 @@
           "unit": "A"
         }
       ],
-      "package_sha256": "b630c5ded559584a91c57211db0f8263bc2e6ba49ea20b26b2fc83927b1b688b",
+      "package_sha256": "d4652acd9d8e95f7766ba9834d906bf8b10b8c0527c5a101947a70ae1dd16e07",
       "parent_revision": 1,
       "requirements": {
         "keyboard_current_a": 0.1,
@@ -486,7 +491,7 @@
       },
       "requirements_met": false,
       "revision": 2,
-      "run_id": "73a17dbce2414d46883a61f8dd974ced"
+      "run_id": "597107a7c64a4a1bbad809b63d211543"
     },
     "r3": {
       "change_request": "Apply Policy Lab modelled candidate pi-work-load-budget",
@@ -513,7 +518,7 @@
           "unit": "A"
         }
       ],
-      "package_sha256": "7234517b8267886f0b6ed7a69b027fbf61061187e97bf9b2456c3fd5038f737c",
+      "package_sha256": "6591f122cea54fba525f451286596b1078317907391fbfc1e7e878fe66fadb2d",
       "parent_revision": 2,
       "requirements": {
         "keyboard_current_a": 0.1,
@@ -523,7 +528,7 @@
       },
       "requirements_met": true,
       "revision": 3,
-      "run_id": "78ea06aa03b241fe921cb102a8423442"
+      "run_id": "f35f80c0dfcb42e4b066906be52a919a"
     },
     "r4": {
       "change_request": "Further change after the revision-3 dossier was issued",
@@ -550,7 +555,7 @@
           "unit": "A"
         }
       ],
-      "package_sha256": "3c4854d05d8dd0c4c92febf75025412527d2c40f81b521a1b574357c0a0db64a",
+      "package_sha256": "5536cbe0883338558ab8ee9226e27ac74df0d46be49154cc98b2bd3febed39da",
       "parent_revision": 3,
       "requirements": {
         "keyboard_current_a": 0.1,
@@ -560,13 +565,13 @@
       },
       "requirements_met": true,
       "revision": 4,
-      "run_id": "1cef04ad3bdc4f29bf69d98610f2bacf"
+      "run_id": "0b05b3b8b1014fa88b8b45b75c33453b"
     }
   },
   "schema": "hardware_splicer.change_dossier_replay.v1",
   "sources": {
-    "cite_commit": "77824d2c1f9aea6c07333c291c16726e713d1074",
-    "hs_commit": "f4e1cbc3ea424c9a0b9b6093aaa5e026e0d83ad2",
+    "cite_commit": "f964b3cb883df91ab7436f843bfac2d5c0304644",
+    "hs_commit": "f1da210217bc9fdec5f872290d59a89346c51106",
     "node": "v22.21.1",
     "policy_file": "applications/hardware-policy/evidence/fielddeck-20261119/policies/runtime-4h.json",
     "policy_lab_commit": "f6876c12bf81e0dcdc9a52b0d7a491c45d89b34e",

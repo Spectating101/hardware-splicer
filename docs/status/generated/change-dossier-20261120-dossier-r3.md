@@ -1,6 +1,6 @@
-# Engineering change dossier: digital-9fa33a1ccc9c4c4aa677de4bcbb84317
+# Engineering change dossier: digital-996558719b13454fb1724bef8f218093
 
-Edition `596a6fd85ac2b583` · case `fielddeck-5` · evidence level **modeled** · physical authority granted: **no**
+Edition `d3e58c9a48049ea4` · case `fielddeck-5` · evidence level **modeled** · physical authority granted: **no**
 
 ## Decision under review
 
@@ -12,8 +12,8 @@ Not decided by this dossier. Revision 3 has 0 failing and 0 untested modeled che
 
 | | Revision | Run | Package | Requirements met | Snapshot / seal (declared by HS, not verified by Cite) |
 |---|---:|---|---|---|---|
-| base | 2 | `73a17dbce241` | `b630c5ded559` | no | `d2ecf433e7ba` / `50c6b86ae659` |
-| candidate | 3 | `78ea06aa03b2` | `7234517b8267` | yes (modeled) | `b06b165100d1` / `61c8e4d525df` |
+| base | 2 | `597107a7c64a` | `d4652acd9d8e` | no | `4278906014be` / `33dc96f410b5` |
+| candidate | 3 | `f35f80c0dfcb` | `6591f122cea5` | yes (modeled) | `5cbc24ce348e` / `90d2a4d1e24a` |
 
 Revision 3 change request: Apply Policy Lab modelled candidate pi-work-load-budget
 
@@ -67,13 +67,13 @@ Policy `portable-runtime-4h-pi-load-candidate` on revision 3: **ADMIT_WITH_LIMIT
 
 | Role | File | SHA-256 |
 |---|---|---|
-| base_export | `r2-export.json` | `f3050ab7eb3f0b93c85b639336630aa5aeed8d6c24006cc3eb02bff1ccdef0c6` |
-| base_review | `r2-candidate-review/review.json` | `256edd2bdd0a1cd9476747af9b42047e714d7c471e3233ea6e1692e9dd0e672c` |
-| base_review_replay | `r2-candidate-review/replay.json` | `7acce6adc92c24041ca5b0f16b596d3d41c418d332f4594de3e975e9f71e3414` |
-| candidate_export | `r3-export.json` | `5832d9562c0dd9f5d76f2cd9f0d956560fedadbb67628c9620e3e23b77e21f82` |
-| candidate_review | `r3-review/review.json` | `218265963f91fad81bd557645dc167e95a78e2617e819f92b7c174d152e60fec` |
-| candidate_review_replay | `r3-review/replay.json` | `21215d8d2141b09164fe869a6e8e06c71a6caf72fc73220475baff97f5594b75` |
-| proposal | `proposal-r3.json` | `b58617290d2dc4f8966eab309e68f576769928bd3dc40b5d2e9b5f1526cfcaea` |
+| base_export | `r2-export.json` | `d1a5fa318d4013f11b534eb02634b7c4a6a675a3d7d307724a2758063ddd595d` |
+| base_review | `r2-candidate-review/review.json` | `d61f0c57f35d36d9e819487c78e7a5024221f65a93b4ee35c3397f47e77ae6ee` |
+| base_review_replay | `r2-candidate-review/replay.json` | `0cf04c152835f32f7b8bbd5719f9aaa27bb6cc3715efc75c19e6350f77d24693` |
+| candidate_export | `r3-export.json` | `76d1d4d6b3ce56fbe346a6a4d1182d786ac3041dfda98e6fd31f74486fae1df0` |
+| candidate_review | `r3-review/review.json` | `36e529baa084a7ef3420d8fdebf6b053d852d3cc87a78b9f453419d109a5f8ac` |
+| candidate_review_replay | `r3-review/replay.json` | `2679ce0d44ed674ac6cef962d0aa0432b63636ee5186abe662baadb557fc768b` |
+| proposal | `proposal-r3.json` | `e2845df3b3253b8aef91729262e89f2fcefa985bcbaf01c9c2e5c3fb5be2f498` |
 
 Receiver checks performed:
 

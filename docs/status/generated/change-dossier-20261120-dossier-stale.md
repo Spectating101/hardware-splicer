@@ -1,8 +1,8 @@
-# Engineering change dossier: digital-9fa33a1ccc9c4c4aa677de4bcbb84317
+# Engineering change dossier: digital-996558719b13454fb1724bef8f218093
 
-Edition `7e2edb6b950a2c25` · case `fielddeck-5` · evidence level **modeled** · physical authority granted: **no**
+Edition `2075bf9f3479df23` · case `fielddeck-5` · evidence level **modeled** · physical authority granted: **no**
 
-> **STALE EDITION.** HS project is at revision 3; this edition describes revision 2 run_id changed from 73a17dbce2414d46883a61f8dd974ced to 78ea06aa03b241fe921cb102a8423442 package_sha256 changed from b630c5ded559584a91c57211db0f8263bc2e6ba49ea20b26b2fc83927b1b688b to 7234517b8267886f0b6ed7a69b027fbf61061187e97bf9b2456c3fd5038f737c snapshot_sha256 (declared by HS) changed from d2ecf433e7ba5b6b80da8c667b141347fc125486f9b57ba3071f337b5e816451 to b06b165100d1cf1ae65ed38e5aa39fe38fa6583e4f20ac20ad792c872d39c872 seal_sha256 (declared by HS) changed from 50c6b86ae6597ce2a70dce4842933a02b618d596ca1c42a9a8e016779c7957c7 to 61c8e4d525dfffe42e05f92a719e52b3f98d675389b38d77826cf2f62108c996 Do not reuse this dossier.
+> **STALE EDITION.** HS project is at revision 3; this edition describes revision 2 run_id changed from 597107a7c64a4a1bbad809b63d211543 to f35f80c0dfcb42e4b066906be52a919a package_sha256 changed from d4652acd9d8e95f7766ba9834d906bf8b10b8c0527c5a101947a70ae1dd16e07 to 6591f122cea54fba525f451286596b1078317907391fbfc1e7e878fe66fadb2d snapshot_sha256 (declared by HS) changed from 4278906014bea41049345b204215cb01abdb0c8ae78b52c68d7d51cb9dcc6a67 to 5cbc24ce348e8cc355324823aacd640dc0ee4383ed29924b269c0aa3370e47ec seal_sha256 (declared by HS) changed from 33dc96f410b578f103a0aea49efb2fd4c762245d921067aff2fc3ab9325f365d to 90d2a4d1e24a288f72ca966563acf51f71713a18ce376eb918c1abdfeb00af30 Do not reuse this dossier.
 
 ## Decision under review
 
@@ -14,8 +14,8 @@ Not decided by this dossier. Revision 2 has 1 failing and 0 untested modeled che
 
 | | Revision | Run | Package | Requirements met | Snapshot / seal (declared by HS, not verified by Cite) |
 |---|---:|---|---|---|---|
-| base | 1 | `d5d2aa184887` | `e9c99154500a` | yes (modeled) | `36178ffeae03` / `248a09784317` |
-| candidate | 2 | `73a17dbce241` | `b630c5ded559` | no | `d2ecf433e7ba` / `50c6b86ae659` |
+| base | 1 | `09a597a3bd07` | `f505c76f745d` | yes (modeled) | `ec875bac0319` / `97086c9925f6` |
+| candidate | 2 | `597107a7c64a` | `d4652acd9d8e` | no | `4278906014be` / `33dc96f410b5` |
 
 Revision 2 change request: Apply Policy Lab portable-runtime-4h proposal
 
@@ -57,13 +57,13 @@ Policy `portable-runtime-4h` on revision 2: **BLOCKED** (unmet: engineering.work
 
 | Role | File | SHA-256 |
 |---|---|---|
-| base_export | `r1-export.json` | `91272ded76ee6dc7ea682f19167c74dd0d1f43d5e109588168978db71628f776` |
-| base_review | `r1-review/review.json` | `10230b9120c5736f87cd00800e52cfc78857fc2fbfa67b22c1bca8fe891a4577` |
-| base_review_replay | `r1-review/replay.json` | `e2f70e0e1c2903e736726252ef910031136cbdd51934e0f3b71171329ef29427` |
-| candidate_export | `r2-export.json` | `f3050ab7eb3f0b93c85b639336630aa5aeed8d6c24006cc3eb02bff1ccdef0c6` |
-| candidate_review | `r2-review/review.json` | `16cb6d662fedb1558879a86cf7a2bc60e8ac22773d300c99d367c4f3e0ee5bc6` |
-| candidate_review_replay | `r2-review/replay.json` | `a824b9bdc4bfba5a36a9521c559d9cd4271b4c5d60843e9cb64f2ed86e3055c8` |
-| proposal | `proposal.json` | `deb21e3dc1bee2f3e586f5c69e7580bda1e2bb4cae0e6cedc48808a75cfb253c` |
+| base_export | `r1-export.json` | `76d039ef0ac6ed4caed5c4c3a2069fb9e2f90404d9bc473629f4c4da13bb4435` |
+| base_review | `r1-review/review.json` | `aa435840af09a331002c5cd1bab06cb80515869362f9214ac17281ad03193a3a` |
+| base_review_replay | `r1-review/replay.json` | `5b1f125d154f47c273624c627fd241f20de7934953d4eec89feb72b659e7d7fd` |
+| candidate_export | `r2-export.json` | `d1a5fa318d4013f11b534eb02634b7c4a6a675a3d7d307724a2758063ddd595d` |
+| candidate_review | `r2-review/review.json` | `40db9c451262c1aa2af578dfe7eb4ca9e5aae2b3fadd3309a7e4608c7486c79b` |
+| candidate_review_replay | `r2-review/replay.json` | `c61be06794111dd6e812396ad7a115f356f3b3437e8db06c52f0f14fa0b792cb` |
+| proposal | `proposal.json` | `a790892955e158792b85c82fe2e5b7c1d6f73cacf76c45f09500a6d86c767592` |
 
 Receiver checks performed:
 
