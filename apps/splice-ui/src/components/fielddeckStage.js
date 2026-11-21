@@ -16,6 +16,7 @@ import {
 } from "postprocessing";
 import { N8AOPostPass } from "n8ao";
 import { sceneRevisionUrl } from "../api.js";
+import { runChainJobs } from "./fielddeckChains.js";
 import {
   bracketPath, chooseTier, CREASE_INK, DIMMED_VENDOR, pairMovedFeatures, closedEdgeLoops, cullIsolatedChains, totalChainLength, classifyPart, convexHull, cullCoincidentChains, DEFAULT_EXPLODE, diffAccentChains,
   DIFF_COLORS, explodeGroupOffsets, FIELDDECK_NARROW, footprintDeltaPair, ghostDeltaKey,
@@ -386,7 +387,24 @@ function makeGhost(chains, own, { xray = false } = {}) {
   };
 }
 
-function makeEntries(assets, index, scene, technical, resources, { base, target, focusPart }) {
+// Yields to the event loop between slices of work, so input, scroll and other requests keep
+// running while the stage is prepared.
+const SLICE_MS = 12;
+function yieldToMain() {
+  if (globalThis.scheduler?.yield) return globalThis.scheduler.yield();
+  return new Promise((resolve) => setTimeout(resolve, 0));
+}
+
+async function makeEntries(assets, index, scene, technical, resources, { base, target, focusPart }, { signal } = {}) {
+  // Phase marks for the browser's performance timeline; they cost nothing when nobody reads them.
+  performance.mark?.("fielddeck:meshes-start");
+  let sliceStart = performance.now();
+  const slice = async () => {
+    if (performance.now() - sliceStart < SLICE_MS) return;
+    await yieldToMain();
+    if (signal?.aborted) throw new DOMException("Stage build cancelled", "AbortError");
+    sliceStart = performance.now();
+  };
   const entries = new Map();
   let veilPrepassMaterial = null;
   let pickOnlyMaterial = null;
@@ -401,8 +419,14 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
     const mm = sidecar.glb_scale_to_mm;
     const scale = new THREE.Matrix4().makeScale(mm, mm, mm);
     gltf.scene.updateMatrixWorld(true);
-    gltf.scene.traverse((source) => {
-      if (!source.isMesh) return;
+    const meshes = [];
+    gltf.scene.traverse((source) => { if (source.isMesh) meshes.push(source); });
+    // Same order as the traversal; each mesh is one unit of work between yields.
+    for (const source of meshes) {
+      await slice();
+      processMesh(source);
+    }
+    function processMesh(source) {
       // The loader sanitizes Object3D.name. Read the original glTF name via its node association.
       let row;
       for (let node = source; node && node !== gltf.scene; node = node.parent) {
@@ -570,14 +594,37 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
         for (const value of positions) entry.ghostEdges.push(value);
       }
       if (entry.displayEdges) entry.displayEdges.push(edgePositions(geometry, 40));
-    });
+    }
   }
+  // Welding and coincidence culling are the long part: they run off the main thread in one batch.
+  const jobs = [];
+  const jobFor = new Map();
   for (const entry of entries.values()) {
+    const pairedEdges = entry.paired && entries.get(entry.paired)?.ghostEdges;
+    if (entry.style.edge.diff && entry.row.delta === "changed" && entry.row.revision === target && pairedEdges) {
+      jobFor.set(`${entry.row.key}:diff`, jobs.push({ kind: "diff", edges: entry.ghostEdges, paired: pairedEdges }) - 1);
+    }
+    if (entry.ghostEdges && entry.row.revision === base) {
+      if (entry.row.delta === "removed") {
+        jobFor.set(`${entry.row.key}:removed`, jobs.push({ kind: "removed", edges: entry.ghostEdges }) - 1);
+      } else {
+        jobFor.set(`${entry.row.key}:overlay`, jobs.push({ kind: "overlay", edges: entry.ghostEdges,
+          paired: entries.get(entry.paired)?.ghostEdges ?? [] }) - 1);
+      }
+    }
+  }
+  performance.mark?.("fielddeck:meshes-done");
+  const results = await runChainJobs(jobs);
+  performance.mark?.("fielddeck:chains-done");
+  if (signal?.aborted) throw new DOMException("Stage build cancelled", "AbortError");
+  const chainsFor = (entry, kind) => results[jobFor.get(`${entry.row.key}:${kind}`)];
+  for (const entry of entries.values()) {
+    await slice();
     entry.samples = new Float32Array(entry.samples);
     const pairedEdges = entry.paired && entries.get(entry.paired)?.ghostEdges;
     if (entry.style.edge.diff && entry.row.delta === "changed" && entry.row.revision === target && pairedEdges) {
       // Diff-only violet: the ghost-culling coincidence test, run against the old revision.
-      let chains = cullIsolatedChains(cullCoincidentChains(weldEdgeChains(entry.ghostEdges), pairedEdges));
+      let chains = chainsFor(entry, "diff");
       if (totalChainLength(chains) <= 3) {
         // Nothing measurable differs: one 1 px violet silhouette at 60% still marks the part as changed.
         chains = entry.outlineAccent ?? [];
@@ -597,12 +644,11 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
     if (entry.ghostEdges && entry.row.revision === base) {
       if (entry.row.delta === "removed") {
         // The outer silhouette and at most one inner loop, never the PCB, FPC and tab edges.
-        entry.removed = makeGhost(ghostOutlineLoops(entry.ghostEdges), own);
+        entry.removed = makeGhost(chainsFor(entry, "removed"), own);
         technical.add(entry.removed.object);
       } else {
-        const current = entries.get(entry.paired)?.ghostEdges ?? [];
         // Compare the original geometry before simplification can turn a matched arc into a chord.
-        const chains = cullIsolatedChains(cullCoincidentChains(weldEdgeChains(entry.ghostEdges), current, { simplify: true }));
+        const chains = chainsFor(entry, "overlay");
         entry.overlay = makeGhost(chains, own, { xray: true });
         // What the scene label may claim: the length of old-revision geometry actually drawn.
         entry.overlay.length = entry.overlay.outlineLength;
@@ -1679,12 +1725,20 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
   }
 }
 
-export function createFielddeckStage(host, assets, index, callbacks, sceneConfig) {
+// Async: the geometry is prepared in slices and in a worker, so the page stays responsive while
+// a large assembly builds. `signal` cancels a build whose scene was closed or replaced.
+export async function createFielddeckStage(host, assets, index, callbacks, sceneConfig, { signal } = {}) {
   const { base, target, focusPart } = sceneConfig;
   const scene = new THREE.Scene();
   const resources = new Set();
   const technical = new THREE.Scene();
-  const entries = makeEntries(assets, index, scene, technical, resources, sceneConfig);
+  let entries;
+  try {
+    entries = await makeEntries(assets, index, scene, technical, resources, sceneConfig, { signal });
+  } catch (error) {
+    resources.forEach((resource) => resource.dispose());
+    throw error;
+  }
   const all = [...entries.values()];
   const faceFit = all.length ? computeFaceFit(entries, sceneConfig) : null;
   const glbSources = Object.fromEntries(Object.entries(assets)
@@ -1809,8 +1863,11 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
         tier = "reduced";
       }
     }
+    await yieldToMain();
+    if (signal?.aborted) throw new DOMException("Stage build cancelled", "AbortError");
     environment = createEnvironment(renderer);
   } catch (error) {
+    environment?.dispose();
     composer?.dispose();
     renderer?.dispose();
     resources.forEach((resource) => resource.dispose());
@@ -1839,6 +1896,18 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
     host.dataset.quality = tier;
   }
   applyTier();
+  // Compile the scene's shader programs before the first frame. Where the browser offers
+  // KHR_parallel_shader_compile this happens off the main thread; elsewhere it costs what the first
+  // frame would have, in a task of its own.
+  await yieldToMain();
+  if (signal?.aborted) {
+    environment.dispose();
+    composer?.dispose();
+    renderer.dispose();
+    resources.forEach((resource) => resource.dispose());
+    throw new DOMException("Stage build cancelled", "AbortError");
+  }
+  performance.mark?.("fielddeck:compiled");
   let canvas = renderer.domElement;
   host.prepend(canvas);
   const minimumDistance = radius * 0.2;
