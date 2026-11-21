@@ -921,8 +921,9 @@ button.primary:disabled {
   color: #2d8f6a;
 }
 
+/* Labels are written in sentence case at the source; capitalising every word misreads results. */
 .project-button .job-status {
-  text-transform: capitalize;
+  text-transform: none;
 }
 
 .tab-badge {

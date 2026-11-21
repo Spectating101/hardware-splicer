@@ -752,7 +752,8 @@ export default function App() {
                 >
                   <strong>{formatProjectName(project.name)}</strong>
                   <span className="job-status">
-                    {[project.current_stage, project.latest_revision != null ? `r${project.latest_revision}` : null].filter(Boolean).join(" · ")}
+                    {[project.current_stage && project.current_stage.charAt(0).toUpperCase() + project.current_stage.slice(1),
+                      project.latest_revision != null ? `r${project.latest_revision}` : null].filter(Boolean).join(" · ")}
                   </span>
                 </button>
               ))}
