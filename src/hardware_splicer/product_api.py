@@ -1,4 +1,9 @@
-"""Canonical product API composition.
+"""Canonical product API composition: the one app ``hs-serve`` runs.
+
+``create_product_app`` builds on the engine app from :mod:`hardware_splicer.api`
+(health, jobs, examples, vision, splice and the project scene routes), adds every
+product router, and serves the built UI behind them, so the UI's legacy and product
+calls all land on one server.
 
 The core engine factory remains in :mod:`hardware_splicer.api`; this module mounts
 product-level routers that own durable workspace state, canonical machine and
@@ -9,6 +14,8 @@ evidence, semantic bounded-planner selection, and source-blind dual-agent evalua
 """
 
 from __future__ import annotations
+
+from pathlib import Path
 
 from fastapi import FastAPI
 
@@ -25,6 +32,7 @@ from .document_evidence_api import create_document_evidence_router
 from .electrical_design_api import create_electrical_design_router
 from .electrical_interchange_api import create_electrical_interchange_router
 from .engineering_action_api import create_engineering_action_router
+from .change_history_api import create_change_history_router
 from .engineering_assurance_api import create_engineering_assurance_router
 from .engineering_api import create_engineering_router
 from .engineering_execution_anchored_api import (
@@ -109,11 +117,13 @@ def _include_anchored_execution_surface(app: FastAPI, store: ProjectStore) -> No
     )
 
 
-def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
+def create_product_app(
+    project_store: ProjectStore | None = None, *, ui_dist: str | Path | None = None
+) -> FastAPI:
     """Build the canonical user-facing API with all product route families."""
 
     resolved_store = install_at_save_retention(project_store or CompatibleProjectStore())
-    app = create_engine_app()
+    app = create_engine_app(ui_dist=ui_dist)
     app.state.project_store = resolved_store
     app.state.job_backend.project_store = resolved_store
     from .digital_project_api import create_digital_project_router
@@ -156,6 +166,7 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_project_pre_fabrication_plan_router(resolved_store))
     app.include_router(create_project_physical_validation_router(resolved_store))
     app.include_router(create_engineering_assurance_router(resolved_store))
+    app.include_router(create_change_history_router(resolved_store))
     app.include_router(create_ai_project_orchestrator_router(resolved_store))
     app.include_router(create_dual_agent_cleanroom_router(resolved_store))
     app.include_router(create_ai_project_tool_executor_router(resolved_store))

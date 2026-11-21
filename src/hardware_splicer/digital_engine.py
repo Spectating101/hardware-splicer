@@ -32,8 +32,9 @@ class DigitalStudyEngine:
             raise ValueError('Supply project_store or project_root, not both.')
         self.projects = project_store if project_store is not None else ProjectStore(project_root)
         if job_backend is None:
-            state = Path(os.getenv('HARDWARE_SPLICER_STATE_DIR', '/tmp/hardware_splicer_state'))
-            path = job_db or os.getenv('HARDWARE_SPLICER_JOB_DB') or state / 'jobs.sqlite3'
+            from .state_paths import job_db_path
+
+            path = job_db or job_db_path()
             job_backend = JobBackend(JobStore(path), worker_count=0)
             self._owns_backend = True
         else:
@@ -76,7 +77,11 @@ class DigitalStudyEngine:
         if case_id != cases.DEFAULT_CASE:
             descriptor = cases.registered(case_id).describe()
             if not descriptor['source_inputs_available']:
-                raise DigitalRuntimeUnavailable('Registered case inputs are unavailable: ' + ', '.join(descriptor['missing_inputs']))
+                missing = descriptor['missing_inputs']
+                shown = ', '.join(missing[:3]) + (f' and {len(missing) - 3} more' if len(missing) > 3 else '')
+                raise DigitalRuntimeUnavailable(
+                    f'Registered case inputs are unavailable ({shown}). They live in a Hardware-Splicer '
+                    'checkout: start hs-serve with --repo-root <checkout> or set HARDWARE_SPLICER_REPO_ROOT.')
             available = digital.runtime_for_case(case_id)
             if not available['available']:
                 raise DigitalRuntimeUnavailable(available['setup_hint'])
@@ -97,7 +102,13 @@ class DigitalStudyEngine:
 
     def project_state(self, project_id, revision=None):
         study = self.study(project_id, revision)
-        return {'ok': True, 'study': study, 'history': self.history(project_id),
+        case_id = study['summary'].get('case_id', cases.DEFAULT_CASE)
+        bounds = {}
+        if case_id != cases.DEFAULT_CASE:
+            _, _, seal = digital.load_run(self.projects, project_id, study['revision'])
+            case = digital.revision_case(seal)
+            bounds = {key: {'minimum': low, 'maximum': high} for key, (_, low, high) in case.requirements.items()}
+        return {'ok': True, 'study': study, 'history': self.history(project_id), 'requirement_bounds': bounds,
                 'runtime': digital.runtime_for_case(study['summary'].get('case_id', cases.DEFAULT_CASE)),
                 'jobs': [j.to_dict() for j in self.backend.store.list_digital_jobs(project_id)]}
 

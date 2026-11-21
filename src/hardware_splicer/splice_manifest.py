@@ -7,9 +7,10 @@ from pathlib import Path
 from typing import Any, Dict, List, Mapping, Sequence
 
 from .project_intake import load_project_intake, splice_and_build_from_intake
+from .state_paths import repo_root
 
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = repo_root()
 DEFAULT_MANIFEST = REPO_ROOT / "examples" / "splice" / "manifest.json"
 SCHEMA_VERSION = "hardware_splicer.splice_demo_result.v1"
 

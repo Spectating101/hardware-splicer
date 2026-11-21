@@ -44,6 +44,8 @@ class ProjectSummary:
     saved_at: str
     archived: bool
     recovered: bool = False
+    objective: str = ""
+    created_at: str = ""
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -55,15 +57,25 @@ class ProjectSummary:
             "saved_at": self.saved_at,
             "archived": self.archived,
             "recovered": self.recovered,
+            "objective": self.objective,
+            "created_at": self.created_at,
         }
+
+
+def _objective(snapshot: Dict[str, Any]) -> str:
+    """The project's stated goal, as recorded; empty when none was recorded."""
+    intake = snapshot.get("intake") if isinstance(snapshot.get("intake"), dict) else {}
+    goal = snapshot.get("goal") or intake.get("goal") or ""
+    return " ".join(str(goal).split())[:200]
 
 
 def default_project_root() -> Path:
     configured = os.getenv("HARDWARE_SPLICER_PROJECT_ROOT")
     if configured:
         return Path(configured).expanduser().resolve()
-    output_root = Path(os.getenv("HARDWARE_SPLICER_OUTPUT_ROOT", "/tmp/hardware_splicer_api"))
-    return (output_root / "projects").expanduser().resolve()
+    from .state_paths import output_root
+
+    return (output_root() / "projects").expanduser().resolve()
 
 
 def validate_project_id(project_id: str) -> str:
@@ -365,6 +377,8 @@ class ProjectStore:
                         saved_at=str(latest.get("saved_at") or manifest.get("saved_at") or ""),
                         archived=archived,
                         recovered=bool(latest.get("recovery", {}).get("used")),
+                        objective=_objective(snapshot),
+                        created_at=str(manifest.get("created_at") or ""),
                     )
                 )
             except (ProjectStoreError, ValueError, OSError):

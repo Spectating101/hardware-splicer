@@ -145,7 +145,7 @@ Retained KiCad revision artifacts and redlines: [`ARTIFACT_RETENTION.md`](ARTIFA
 ## Frontend
 
 `apps/splice-ui/src/projectSession/` holds the durable workspace:
-`projectPersistence.js` (revision save/load), `projectReviewApi.js` (browser
+`projectPersistence.ts` (revision save/load), `projectReviewApi.ts` (browser
 client), and `projectSession.js`. `ProjectWorkspace.jsx` mounts
 `ProjectReviewPanel` (revision review console) and `MachineArchitecturePanel`
 (cross-discipline structure).

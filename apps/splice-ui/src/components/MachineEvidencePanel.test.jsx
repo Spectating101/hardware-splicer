@@ -2,13 +2,13 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import MachineEvidencePanel from "./MachineEvidencePanel.jsx";
-import { recordMachineEvidence } from "../projectSession/machineEvidenceApi.js";
-import { stageMachineProjectReview } from "../projectSession/machineAuthoringApi.js";
+import { recordMachineEvidence } from "../projectSession/machineEvidenceApi";
+import { stageMachineProjectReview } from "../projectSession/machineAuthoringApi";
 
-vi.mock("../projectSession/machineEvidenceApi.js", () => ({
+vi.mock("../projectSession/machineEvidenceApi", () => ({
   recordMachineEvidence: vi.fn(),
 }));
-vi.mock("../projectSession/machineAuthoringApi.js", () => ({
+vi.mock("../projectSession/machineAuthoringApi", () => ({
   stageMachineProjectReview: vi.fn(),
 }));
 

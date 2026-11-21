@@ -238,13 +238,26 @@ def test_outlines_agree_with_kicads_own_geometry_for_turned_and_flipped_parts(tm
     import shutil as _shutil
     import subprocess
 
-    python = _shutil.which("python3") or "python3"
-    probe = subprocess.run([python, "-c", "import pcbnew"], capture_output=True, timeout=60)
-    if probe.returncode != 0:
-        pytest.skip("pcbnew is not importable from the system python")
+    import os
+    import site
+    import sys
+
+    # pcbnew ships with KiCad for the system python, which may lack this package's own dependencies
+    # (pydantic). Use the first interpreter that can import both: this one, the system python, or the
+    # system python borrowing this environment's packages (same CPython version only, checked by the probe).
+    src = str(Path(__file__).resolve().parents[1] / "src")
+    need = f"import sys; sys.path.insert(0, {src!r}); import pcbnew; import hardware_splicer.assembly_plan"
+    system = _shutil.which("python3") or "python3"
+    borrowed = os.pathsep.join([*site.getsitepackages(), os.environ.get("PYTHONPATH", "")]).rstrip(os.pathsep)
+    candidates = [(sys.executable, None), (system, None), (system, {**os.environ, "PYTHONPATH": borrowed})]
+    python, env = next(((c, e) for c, e in candidates
+                        if subprocess.run([c, "-c", need], capture_output=True, timeout=60, env=e).returncode == 0),
+                       (None, None))
+    if python is None:
+        pytest.skip("no interpreter can import both pcbnew and hardware_splicer.assembly_plan")
     done = subprocess.run(
         [python, "-c", _KICAD_COMPARE, str(Path(__file__).resolve().parents[1] / "src"), str(REF / "spi_flash_adapter_v1.kicad_pcb"), str(tmp_path / "turned.kicad_pcb")],
-        capture_output=True, text=True, timeout=120,
+        capture_output=True, text=True, timeout=120, env=env,
     )
     assert done.returncode == 0, done.stderr[-800:]
     result = json.loads(done.stdout.strip().splitlines()[-1])

@@ -81,6 +81,8 @@ def test_registered_case_runs_isolated_stages_and_serves_nested_artifacts(regist
     before = {p.name: p.read_bytes() for p in case.root.iterdir()}
     project = create(engine)
     study = engine.study(project)
+    state = client(engine).get(f'/v1/projects/{project}/digital').json()
+    assert state['requirement_bounds']['load_a'] == {'minimum': .1, 'maximum': 3}
     assert study['summary']['case_id'] == 'test-device'
     assert study['summary']['metrics'] == {'power_w': 5}
     assert study['summary']['requirements_met'] is True
@@ -132,6 +134,7 @@ hashes={n:sha256((p/n).read_bytes()).hexdigest() for n in ('parts/body.step','re
 
     (case.root / "build.py").write_text("raise RuntimeError('changed current source')\n")
     monkeypatch.setitem(cases.CASES, case.case_id, replace(case, requirements={"load_a": (1, .1, 1.5)}))
+    assert engine.project_state(project)["requirement_bounds"]["load_a"]["maximum"] == 3
     revised = engine.run_revision(project, base_revision=1, requirements={"load_a": 2},
                                    change_request="Exercise the retained declared-load model")
     assert revised["ok"], revised

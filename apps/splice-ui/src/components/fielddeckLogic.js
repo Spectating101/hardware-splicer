@@ -1,0 +1,1485 @@
+export const BASIS_LABELS = {
+  custom: "Custom CAD",
+  vendor_step: "Vendor model",
+  donor_cad: "Donor CAD (unverified)",
+  measured: "Measured",
+  envelope: "Envelope",
+  proxy: "Proxy",
+  unknown: "Unknown",
+};
+
+export const DIFF_LABELS = {
+  added: "Added",
+  changed: "Changed",
+  removed: "Removed",
+  unchanged: "Unchanged",
+};
+
+export const FIELDDECK_COMPARE = { base: "7", target: "5" };
+export const DEFAULT_EXPLODE = 0.6;
+export const FIELDDECK_NARROW = "(width < 640px)";
+export const QUALITY_SAMPLE_COUNT = 60;
+
+export const DIFF_COLORS = { changed: 0xa78bfa, added: 0x2dd4bf, removed: 0xf17e70 };
+export const CREASE_INK = 0x1a1d22;
+
+// Dimmed (unchanged in Compare) values are neutral greys at about 0.72 of the lit value, so the
+// largest masses in the frame have cool, readable shadow sides instead of warm taupe.
+export const DIMMED_VENDOR = 0x8a8d90;
+const VENDOR = { color: 0x9c9ea0, dimmed: DIMMED_VENDOR, roughness: 0.86, threshold: 42 };
+const MATERIALS = {
+  custom: { color: 0xcec3b0, dimmed: 0x9a9894, roughness: 0.80, threshold: 32 },
+  vendor_step: VENDOR,
+  donor_cad: VENDOR,
+  measured: { color: 0xe4e2dc, roughness: 0.74, threshold: 32, creaseOpacity: 1 },
+  envelope: { color: 0xa5aeb5, fillOpacity: 0.06, pattern: [6, 4] },
+  proxy: { color: 0xa6a098, roughness: 0.88, threshold: 32, hatch: { angle: 45, spacing: 8, contrast: 0.1 } },
+  unknown: { color: null, edgeColor: 0x9097a0, pattern: [3, 2] },
+};
+
+// Bases without a listed dimmed value: their luminance grey, fully neutral, at value × 0.72.
+export function dimmedColor(hex) {
+  const channels = [16, 8, 0].map((shift) => (hex >> shift) & 255);
+  const grey = Math.round((0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]) * 0.72);
+  return grey * 0x10101;
+}
+
+export function materialSpec(basis, delta, dimmed = false) {
+  const { color, dimmed: dimmedValue, threshold = 32, creaseOpacity = 0.35, edgeColor = color,
+    fillOpacity = 0, pattern = null, roughness, hatch = null } = MATERIALS[basis] ?? MATERIALS.unknown;
+  return {
+    color: dimmed && color != null ? dimmedValue ?? dimmedColor(color) : color, roughness, metalness: 0, hatch, fillOpacity, pattern,
+    threshold, creaseColor: CREASE_INK, creaseOpacity: dimmed ? 0.25 : creaseOpacity,
+    edgeColor: pattern ? edgeColor : DIFF_COLORS[delta] ?? CREASE_INK,
+  };
+}
+
+export function chooseTier(samples, tier = "standard") {
+  if (samples.length < QUALITY_SAMPLE_COUNT) return tier;
+  const ordered = samples.slice(0, QUALITY_SAMPLE_COUNT).sort((a, b) => a - b);
+  const p90 = ordered[Math.ceil(0.9 * QUALITY_SAMPLE_COUNT) - 1];
+  if (p90 <= 14) return tier;
+  return tier === "high" ? "standard" : "reduced";
+}
+
+const difference = (a, b) => a.map((value, axis) => value - b[axis]);
+const dot = (a, b) => a.reduce((sum, value, axis) => sum + value * b[axis], 0);
+const length = (v) => Math.hypot(...v);
+
+export function weldEdgeChains(positions, tolerance = 0.01) {
+  const cells = new Map();
+  const vertices = [];
+  function vertexFor(point) {
+    const [x, y, z] = point.map((value) => Math.floor(value / tolerance));
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dz = -1; dz <= 1; dz++) {
+          for (const vertex of cells.get(`${x + dx},${y + dy},${z + dz}`) ?? []) {
+            if (length(difference(vertex.point, point)) <= tolerance) return vertex;
+          }
+        }
+      }
+    }
+    const key = `${x},${y},${z}`;
+    const vertex = { point, neighbors: new Map() };
+    if (!cells.has(key)) cells.set(key, []);
+    cells.get(key).push(vertex);
+    vertices.push(vertex);
+    return vertex;
+  }
+  for (let i = 0; i < positions.length; i += 6) {
+    const a = vertexFor(Array.from(positions.slice(i, i + 3)));
+    const b = vertexFor(Array.from(positions.slice(i + 3, i + 6)));
+    if (a === b || a.neighbors.has(b)) continue;
+    const edge = { used: false };
+    a.neighbors.set(b, edge);
+    b.neighbors.set(a, edge);
+  }
+  const chains = [];
+  function trace(start, next, edge) {
+    const points = [start.point];
+    while (edge && !edge.used) {
+      edge.used = true;
+      points.push(next.point);
+      if (next.neighbors.size !== 2) break;
+      const onward = [...next.neighbors].find(([, candidate]) => !candidate.used);
+      if (!onward) break;
+      [next, edge] = onward;
+    }
+    chains.push(points);
+  }
+  for (const start of [...vertices.filter(({ neighbors }) => neighbors.size !== 2), ...vertices]) {
+    for (const [next, edge] of start.neighbors) {
+      if (!edge.used) trace(start, next, edge);
+    }
+  }
+  return chains;
+}
+
+export function simplifyEdgeChain(points, tolerance = 0.2) {
+  if (points.length < 3) return points.slice();
+  const last = points.length - 1;
+  const keep = new Set([0, last]);
+  const spans = [[0, last]];
+  while (spans.length) {
+    const [from, to] = spans.pop();
+    const axis = difference(points[to], points[from]);
+    const squared = dot(axis, axis);
+    let farthest = tolerance;
+    let split = from;
+    for (let i = from + 1; i < to; i++) {
+      const offset = difference(points[i], points[from]);
+      const t = squared ? Math.min(1, Math.max(0, dot(offset, axis) / squared)) : 0;
+      const distance = length(offset.map((value, j) => value - t * axis[j]));
+      if (distance <= farthest) continue;
+      farthest = distance;
+      split = i;
+    }
+    if (split === from) continue;
+    keep.add(split);
+    spans.push([from, split], [split, to]);
+  }
+  const closed = points[0].every((value, i) => value === points[last][i]);
+  return closed && keep.size < 4 ? points.slice() : points.filter((_, i) => keep.has(i));
+}
+
+export function cullCoincidentChains(chains, positions, { tolerance = 0.15, simplify = false } = {}) {
+  // Use the tolerance to find candidates. A nearby, parallel CAD change can still be real.
+  const epsilon = Math.min(tolerance, 0.0001);
+  const bins = new Map();
+  const bin = (x) => Math.floor(x / 5);
+  for (let i = 0; i < positions.length; i += 6) {
+    const a = Array.from(positions.slice(i, i + 3));
+    const b = Array.from(positions.slice(i + 3, i + 6));
+    const edge = [a, b];
+    for (let j = bin(Math.min(a[0], b[0]) - tolerance); j <= bin(Math.max(a[0], b[0]) + tolerance); j++) {
+      if (!bins.has(j)) bins.set(j, []);
+      bins.get(j).push(edge);
+    }
+  }
+  function coincides(a, b) {
+    const axis = difference(b, a);
+    const size = length(axis);
+    if (!size) return true;
+    const direction = axis.map((value) => value / size);
+    const candidates = new Set();
+    for (let i = bin(Math.min(a[0], b[0])); i <= bin(Math.max(a[0], b[0])); i++) {
+      for (const edge of bins.get(i) ?? []) candidates.add(edge);
+    }
+    const spans = [];
+    for (const edge of candidates) {
+      const offsets = edge.map((point) => difference(point, a));
+      const [start, end] = offsets.map((v) => dot(v, direction));
+      if (Math.max(start, end) < 0 || Math.min(start, end) > size) continue;
+      if (offsets.some((v, i) => length(v.map((value, j) => value - (i ? end : start) * direction[j])) > epsilon)) continue;
+      spans.push([Math.min(start, end), Math.max(start, end)]);
+    }
+    let covered = 0;
+    spans.sort(([a], [b]) => a - b);
+    for (const [start, end] of spans) {
+      if (start > covered + epsilon) break;
+      covered = Math.max(covered, end);
+      if (covered >= size - epsilon) return true;
+    }
+    return false;
+  }
+  const remaining = [];
+  function append(run) {
+    if (run.length < 2) return;
+    const shorter = simplify ? simplifyEdgeChain(run) : run;
+    // A simplified chord can land on the current edge and hide a small CAD change.
+    const hidesChange = shorter.length < run.length
+      && shorter.some((end, i) => i > 0 && coincides(shorter[i - 1], end));
+    remaining.push(hidesChange ? run : shorter);
+  }
+  for (const points of chains) {
+    let run = [points[0]];
+    for (let i = 1; i < points.length; i++) {
+      if (coincides(points[i - 1], points[i])) {
+        append(run);
+        run = [points[i]];
+      } else {
+        run.push(points[i]);
+      }
+    }
+    append(run);
+  }
+  return remaining;
+}
+
+const chainLength = (points) => points.slice(1).reduce((sum, point, i) => sum + length(difference(point, points[i])), 0);
+
+// Group edge segments into connected components and return the ones that close into a simple loop.
+export function closedEdgeLoops(positions, weld = 0.001) {
+  const vertices = new Map();
+  const vertexFor = (i) => {
+    const key = [0, 1, 2].map((axis) => Math.round(positions[i + axis] / weld)).join(",");
+    if (!vertices.has(key)) {
+      vertices.set(key, { point: [positions[i], positions[i + 1], positions[i + 2]], neighbors: new Set() });
+    }
+    return vertices.get(key);
+  };
+  for (let i = 0; i < positions.length; i += 6) {
+    const a = vertexFor(i);
+    const b = vertexFor(i + 3);
+    if (a === b) continue;
+    a.neighbors.add(b);
+    b.neighbors.add(a);
+  }
+  const loops = [];
+  const seen = new Set();
+  for (const start of vertices.values()) {
+    if (seen.has(start)) continue;
+    const component = [start];
+    seen.add(start);
+    for (let i = 0; i < component.length; i++) {
+      for (const neighbor of component[i].neighbors) {
+        if (!seen.has(neighbor)) {
+          seen.add(neighbor);
+          component.push(neighbor);
+        }
+      }
+    }
+    if (component.length < 3 || component.some(({ neighbors }) => neighbors.size !== 2)) continue;
+    const points = [start.point];
+    let previous = start;
+    let current = [...start.neighbors][0];
+    while (current !== start) {
+      points.push(current.point);
+      const next = [...current.neighbors].find((neighbor) => neighbor !== previous);
+      previous = current;
+      current = next;
+    }
+    points.push(start.point);
+    const min = [0, 1, 2].map((axis) => Math.min(...points.map((point) => point[axis])));
+    const max = [0, 1, 2].map((axis) => Math.max(...points.map((point) => point[axis])));
+    loops.push({ points, perimeter: chainLength(points), min, max });
+  }
+  return loops;
+}
+
+// A removed or unknown part reads from its outer loop and at most one inner loop (bezel or
+// mounting ear). Islands shorter than minPerimeter and a stacked copy of the outer loop are culled.
+export function ghostOutlineLoops(positions, { minPerimeter = 15, maxChains = 2, stacked = false } = {}) {
+  const area = ({ min, max }) => (max[0] - min[0]) * (max[1] - min[1]);
+  const loops = closedEdgeLoops(positions).filter(({ perimeter }) => perimeter >= minPerimeter)
+    .sort((a, b) => area(b) - area(a) || b.max[2] - a.max[2]);
+  const [outer] = loops;
+  if (!outer) return [];
+  const within = (loop) => [0, 1].every((axis) =>
+    loop.min[axis] >= outer.min[axis] - 0.5 && loop.max[axis] <= outer.max[axis] + 0.5);
+  const copy = (loop) => [0, 1].every((axis) =>
+    Math.abs(loop.min[axis] - outer.min[axis]) < 1 && Math.abs(loop.max[axis] - outer.max[axis]) < 1);
+  const inner = loops.slice(1).filter((loop) => within(loop) && copy(loop) === stacked);
+  return [outer, ...inner].slice(0, maxChains).map(({ points }) => points);
+}
+
+const isSmallCircle = (points, maxRadius) => {
+  if (points.length < 7 || length(difference(points[0], points.at(-1))) > 1e-6) return false;
+  const center = [0, 1, 2].map((axis) => points.slice(1).reduce((sum, point) => sum + point[axis], 0) / (points.length - 1));
+  const radii = points.map((point) => length(difference(point, center)));
+  const radius = radii.reduce((sum, value) => sum + value, 0) / radii.length;
+  return radius < maxRadius && radii.every((value) => Math.abs(value - radius) <= radius * 0.15);
+};
+
+// Change colour belongs on the outer silhouette and on boundary loops that enclose more than 15%
+// of the part's bounds, after a 1e-4 mm weld. Vent slots, small cutouts and hole rims stay in ink,
+// and chains under 8 mm are dropped. `extents` is the part's bounding-box size [x, y, z]. `weld` is
+// weldEdgeChains or the Rust module's identical weld.
+export function diffAccentChains(positions, extents, { minLength = 8, minShare = 0.15, rimRadius = 6, weld = weldEdgeChains } = {}) {
+  const [major, minor] = extents.slice().sort((a, b) => b - a);
+  return weld(positions, 0.0001).filter((points) => {
+    const length = chainLength(points);
+    if (length < minLength || isSmallCircle(points, rimRadius)) return false;
+    const size = [0, 1, 2].map((axis) => Math.max(...points.map((point) => point[axis]))
+      - Math.min(...points.map((point) => point[axis]))).sort((a, b) => b - a);
+    // A loop counts by the area it encloses; an open run counts when it is long against the part.
+    const closed = length > 0 && points.length > 3 && chainLength([points[0], points.at(-1)]) < 1e-6;
+    return size[0] * size[1] >= minShare * major * minor || !closed && length >= 0.3 * major;
+  });
+}
+
+// Isolated old-revision chains under minLength with no welded neighbour read as specks.
+export function cullIsolatedChains(chains, { minLength = 2, weld = 0.01 } = {}) {
+  const ends = chains.map((points) => [points[0], points.at(-1)]);
+  const touches = (i) => chains.some((_, j) => j !== i && ends[i].some((a) => ends[j].some((b) =>
+    length(difference(a, b)) <= weld)));
+  return chains.filter((points, i) => chainLength(points) >= minLength || touches(i));
+}
+
+export function totalChainLength(chains) {
+  return chains.reduce((sum, points) => sum + chainLength(points), 0);
+}
+
+// The scene sub-line for a changed part's old revision says what is actually drawn.
+// `moved` counts old small features (standoffs) paired with a new position.
+export function oldRevisionCaption(visibleLength, before, after, moved = 0) {
+  const valid = (stats) => stats && Number.isFinite(stats.volume);
+  const volume = valid(before) && valid(after)
+    ? ` · ΔV ${signedAmount((after.volume - before.volume) / 1000, 2)} cm³ · computed` : "";
+  if (moved > 0 && visibleLength <= 20) return `old outline coincides except standoffs${volume}`;
+  return `old revision ${visibleLength > 20 ? "dashed" : "coincident"}${volume}`;
+}
+
+// Signed tetrahedron sum (mm³) and triangle area (mm²) of an indexed or flat triangle list.
+export function meshMeasures(positions, index = null) {
+  let volume = 0;
+  let area = 0;
+  const count = index ? index.length : positions.length / 3;
+  const at = (i, axis) => positions[(index ? index[i] : i) * 3 + axis];
+  for (let i = 0; i + 2 < count; i += 3) {
+    const [ax, ay, az] = [0, 1, 2].map((axis) => at(i, axis));
+    const [bx, by, bz] = [0, 1, 2].map((axis) => at(i + 1, axis));
+    const [cx, cy, cz] = [0, 1, 2].map((axis) => at(i + 2, axis));
+    volume += (ax * (by * cz - bz * cy) - ay * (bx * cz - bz * cx) + az * (bx * cy - by * cx)) / 6;
+    const ux = bx - ax, uy = by - ay, uz = bz - az;
+    const vx = cx - ax, vy = cy - ay, vz = cz - az;
+    area += Math.hypot(uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx) / 2;
+  }
+  return { volume, area };
+}
+
+function signedAmount(delta, digits) {
+  const amount = Math.abs(delta).toFixed(digits);
+  return `${Number(amount) === 0 ? "" : delta < 0 ? "−" : "+"}${amount}`;
+}
+
+export function meshDeltaLabel(before, after) {
+  const valid = (stats) => stats && Number.isFinite(stats.volume) && Number.isFinite(stats.area);
+  if (!valid(before) || !valid(after)) return null;
+  return `ΔV ${signedAmount((after.volume - before.volume) / 1000, 2)} cm³ · ΔA ${signedAmount((after.area - before.area) / 100, 2)} cm²`;
+}
+
+// Screen-space helpers for annotations. Points are { x, y } in stage pixels.
+export function convexHull(points) {
+  const sorted = points.slice().sort((a, b) => a.x - b.x || a.y - b.y);
+  if (sorted.length < 3) return sorted;
+  const cross = (o, a, b) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);
+  const lower = [];
+  for (const point of sorted) {
+    while (lower.length >= 2 && cross(lower.at(-2), lower.at(-1), point) <= 0) lower.pop();
+    lower.push(point);
+  }
+  const upper = [];
+  for (const point of sorted.reverse()) {
+    while (upper.length >= 2 && cross(upper.at(-2), upper.at(-1), point) <= 0) upper.pop();
+    upper.push(point);
+  }
+  return lower.slice(0, -1).concat(upper.slice(0, -1));
+}
+
+export function nearestPoint(points, target) {
+  let best = null;
+  let distance = Infinity;
+  for (const point of points) {
+    const next = Math.hypot(point.x - target.x, point.y - target.y);
+    if (next < distance) {
+      distance = next;
+      best = point;
+    }
+  }
+  return best;
+}
+
+// Corner brackets around a tight screen box: arms of `arm` px, pushed `offset` px outward.
+export function bracketPath(points, { arm = 10, offset = 8 } = {}) {
+  if (!points.length) return "";
+  const left = Math.min(...points.map(({ x }) => x)) - offset;
+  const right = Math.max(...points.map(({ x }) => x)) + offset;
+  const top = Math.min(...points.map(({ y }) => y)) - offset;
+  const bottom = Math.max(...points.map(({ y }) => y)) + offset;
+  return [[left, top, 1, 1], [right, top, -1, 1], [right, bottom, -1, -1], [left, bottom, 1, -1]]
+    .map(([x, y, dx, dy]) => `M${x + arm * dx},${y}H${x}v${arm * dy}`).join(" ");
+}
+
+// The Routing unknown pill sits beside endpoint B with no connecting line.
+export function placeBesideEndpoint(viewport, obstacles, point, width, height, gap = 16) {
+  const candidates = [
+    [point.x + gap, point.y - height / 2], [point.x - gap - width, point.y - height / 2],
+    [point.x - width / 2, point.y - gap - height], [point.x - width / 2, point.y + gap],
+  ];
+  for (const radius of [0, 24, 48]) {
+    for (const [left, top] of candidates) {
+      const dx = Math.sign(left + width / 2 - point.x) * radius;
+      const dy = Math.sign(top + height / 2 - point.y) * radius;
+      const rect = { left: left + dx, top: top + dy, right: left + dx + width, bottom: top + dy + height };
+      if (rect.left < viewport.left || rect.right > viewport.right || rect.top < viewport.top
+        || rect.bottom > viewport.bottom || obstacles.some((obstacle) => overlaps(rect, obstacle))) continue;
+      return { x: rect.left + width / 2, y: rect.top + height / 2 };
+    }
+  }
+  return null;
+}
+
+// Screen-space repulsion for pins: centres at least minDistance apart and each pin (radius px)
+// at least `clearance` px outside every obstacle rectangle. Fixed points push but never move.
+export function repelPins(points, { minDistance = 24, obstacles = [], clearance = 12, radius = 12, iterations = 60 } = {}) {
+  const out = points.map((point) => ({ ...point }));
+  for (let step = 0; step < iterations; step++) {
+    let moved = false;
+    for (let i = 0; i < out.length; i++) {
+      for (let j = i + 1; j < out.length; j++) {
+        const a = out[i];
+        const b = out[j];
+        let dx = b.x - a.x;
+        let dy = b.y - a.y;
+        let distance = Math.hypot(dx, dy);
+        if (distance >= minDistance - 1e-6 || a.fixed && b.fixed) continue;
+        if (!distance) [dx, dy, distance] = [1, 0, 1];
+        const push = (minDistance - distance) / (a.fixed || b.fixed ? 1 : 2);
+        if (!a.fixed) { a.x -= dx / distance * push; a.y -= dy / distance * push; }
+        if (!b.fixed) { b.x += dx / distance * push; b.y += dy / distance * push; }
+        moved = true;
+      }
+    }
+    for (const point of out) {
+      if (point.fixed) continue;
+      for (const rect of obstacles) {
+        const pad = clearance + radius;
+        const left = rect.left - pad;
+        const right = rect.right + pad;
+        const top = rect.top - pad;
+        const bottom = rect.bottom + pad;
+        if (point.x <= left || point.x >= right || point.y <= top || point.y >= bottom) continue;
+        const exits = [[point.x - left, left, point.y], [right - point.x, right, point.y],
+          [point.y - top, point.x, top], [bottom - point.y, point.x, bottom]].sort((m, n) => m[0] - n[0]);
+        [, point.x, point.y] = exits[0];
+        moved = true;
+      }
+    }
+    if (!moved) break;
+  }
+  return out;
+}
+
+// Pair each old-revision feature with the nearest new feature of the same size, only when the
+// match is unambiguous: nearest within maxDistance and no other candidate within ratio × that.
+// Features are { center: [x, y, z], size }.
+// The two rims of one hole (same axis, same size) are one feature: keep the upper rim.
+export function mergeCoaxialFeatures(features, { axisTolerance = 0.5, sizeTolerance = 0.2 } = {}) {
+  const merged = [];
+  for (const feature of features.slice().sort((a, b) => b.center[2] - a.center[2])) {
+    const coaxial = merged.some(({ center, size }) => Math.abs(size - feature.size) <= sizeTolerance
+      && Math.hypot(center[0] - feature.center[0], center[1] - feature.center[1]) <= axisTolerance);
+    if (!coaxial) merged.push(feature);
+  }
+  return merged;
+}
+
+export function pairMovedFeatures(olderFeatures, newerFeatures, { maxDistance = 25, ratio = 1.5, sizeTolerance = 0.2 } = {}) {
+  const older = mergeCoaxialFeatures(olderFeatures, { sizeTolerance });
+  const newer = mergeCoaxialFeatures(newerFeatures, { sizeTolerance });
+  const pairs = [];
+  for (const feature of older) {
+    const candidates = newer.filter(({ size }) => Math.abs(size - feature.size) <= sizeTolerance)
+      .map((candidate) => ({ candidate, distance: length(difference(candidate.center, feature.center)) }))
+      .sort((a, b) => a.distance - b.distance);
+    const [nearest, second] = candidates;
+    if (!nearest || nearest.distance > maxDistance) continue;
+    if (second && second.distance <= nearest.distance * ratio) continue;
+    pairs.push([feature, nearest.candidate]);
+  }
+  return pairs;
+}
+
+export function countClippedItems(items, { top, bottom }) {
+  return items.filter((item) => item.top < top || item.bottom > bottom).length;
+}
+
+// Layers run bottom to top. Each gap is the clearance below that layer at the default setting.
+export function explodeGroupOffsets(layers, anchor, explode) {
+  const offsets = layers.map(() => 0);
+  if (!explode) return offsets;
+  for (let i = anchor + 1; i < layers.length; i++) {
+    offsets[i] = Math.max(0, layers[i - 1].maxZ + offsets[i - 1] + layers[i].gap - layers[i].minZ);
+  }
+  for (let i = anchor - 1; i >= 0; i--) {
+    offsets[i] = Math.min(0, layers[i + 1].minZ + offsets[i + 1] - layers[i + 1].gap - layers[i].maxZ);
+  }
+  const scale = explode / DEFAULT_EXPLODE;
+  return offsets.map((offset) => offset * scale);
+}
+
+export function toggleFielddeckSheet(current, sheet) {
+  return current === sheet ? null : sheet;
+}
+
+// Scale around the unobstructed rectangle's centre. A value below 1 means an edge clips.
+export function projectedFitScale(bounds, rect, margin = 0) {
+  const { x: marginX, y: marginY } = typeof margin === "number" ? { x: margin, y: margin } : margin;
+  const halfWidth = (rect.right - rect.left) / 2;
+  const halfHeight = (rect.bottom - rect.top) / 2;
+  const x = rect.left + halfWidth;
+  const y = rect.top + halfHeight;
+  return Math.min(
+    Math.max(1, halfWidth - marginX) / Math.max(x - bounds.left, bounds.right - x),
+    Math.max(1, halfHeight - marginY) / Math.max(y - bounds.top, bounds.bottom - y),
+  );
+}
+
+export function footprintDelta(older, newer) {
+  const difference = (axis) => {
+    const delta = (newer.max[axis] - newer.min[axis]) - (older.max[axis] - older.min[axis]);
+    const magnitude = Math.abs(delta).toFixed(2);
+    return `${delta < 0 && magnitude !== "0.00" ? "−" : "+"}${magnitude} mm`;
+  };
+  return `Width ${difference("x")} · Height ${difference("y")}`;
+}
+
+export function dimensionLabel(revision, bounds, axis) {
+  const value = bounds.max[axis] - bounds.min[axis];
+  return `${revision}-inch · ${formatEvidenceValue({ field: "dimension_mm", value })} · computed`;
+}
+
+const clampTo = (value, min, max) => Math.max(min, Math.min(max, value));
+const containsPoint = (rect, { x, y }) =>
+  x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+const overlaps = (a, b) =>
+  a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+const padRect = (rect, gap) => ({
+  left: rect.left - gap, right: rect.right + gap, top: rect.top - gap, bottom: rect.bottom + gap,
+});
+
+export function placeRoutingLabel(viewport, panels, pins, midpoint, width, height) {
+  const pinObstacles = pins.map((rect) => padRect(rect, 12));
+  const left = Math.min(...pinObstacles.map((rect) => rect.left));
+  const top = Math.min(...pinObstacles.map((rect) => rect.top));
+  const bottom = Math.max(...pinObstacles.map((rect) => rect.bottom));
+  const maxX = viewport.right - width;
+  const maxY = viewport.bottom - height;
+  const x = clampTo(midpoint.x - width / 2, viewport.left, maxX);
+  const y = clampTo(midpoint.y - height / 2, viewport.top, maxY);
+  const obstacles = [...pinObstacles, ...panels];
+  const xs = [x, viewport.left, maxX, ...obstacles.flatMap((rect) => [rect.left - width, rect.right])]
+    .sort((a, b) => Math.abs(a - x) - Math.abs(b - x));
+  const ys = [y, viewport.top, maxY, ...obstacles.flatMap((rect) => [rect.top - height, rect.bottom])]
+    .sort((a, b) => Math.abs(a - y) - Math.abs(b - y));
+  for (const [col, row] of [
+    ...xs.map((candidate) => [candidate, top - height]),
+    ...ys.filter((candidate) => candidate + height / 2 >= top + 12 && candidate + height / 2 <= bottom - 12)
+      .map((candidate) => [left - width, candidate]),
+    ...xs.map((candidate) => [candidate, bottom]),
+    // A scattered cluster can leave usable space between the pins.
+    ...ys.flatMap((row) => xs.map((col) => [col, row])),
+  ]) {
+    const rect = { left: col, right: col + width, top: row, bottom: row + height };
+    if (col >= viewport.left && col <= maxX && row >= viewport.top && row <= maxY
+      && !obstacles.some((obstacle) => overlaps(rect, obstacle))) {
+      return { x: col + width / 2, y: row + height / 2 };
+    }
+  }
+  return null;
+}
+
+// A segment can run along the outside edge of a padded obstacle.
+function crossesRect(from, to, rect) {
+  let enter = 0;
+  let exit = 1;
+  for (const [start, end, min, max] of [
+    [from.x, to.x, rect.left, rect.right], [from.y, to.y, rect.top, rect.bottom],
+  ]) {
+    if (start === end) {
+      if (start <= min || start >= max) return false;
+    } else {
+      const first = (min - start) / (end - start);
+      const last = (max - start) / (end - start);
+      enter = Math.max(enter, Math.min(first, last));
+      exit = Math.min(exit, Math.max(first, last));
+    }
+  }
+  return enter < exit;
+}
+
+function leaderPath(anchor, card, viewport, panels, elbow) {
+  const edge = {
+    x: clampTo(anchor.x, card.left, card.right),
+    y: clampTo(anchor.y, card.top, card.bottom),
+  };
+  const clear = (from, to) => !panels.some((panel) => crossesRect(from, to, panel));
+  if (elbow) {
+    const side = anchor.x < (card.left + card.right) / 2 ? card.left : card.right;
+    const top = anchor.y < (card.top + card.bottom) / 2 ? card.top : card.bottom;
+    const middleX = (card.left + card.right) / 2;
+    const middleY = (card.top + card.bottom) / 2;
+    for (const [start, bend] of [
+      [{ x: side, y: middleY }, { x: anchor.x, y: middleY }],
+      [{ x: middleX, y: top }, { x: middleX, y: anchor.y }],
+    ]) {
+      if (!crossesRect(start, bend, card) && !crossesRect(bend, anchor, card)
+        && clear(start, bend) && clear(bend, anchor)) return [start, bend, anchor];
+    }
+    return null;
+  }
+  if (clear(edge, anchor)) return [edge, anchor];
+
+  // Route around blocked straight lines using the visible corners of the panels.
+  const corners = panels.flatMap(({ left, right, top, bottom }) => [
+    { x: left, y: top }, { x: right, y: top }, { x: left, y: bottom }, { x: right, y: bottom },
+  ]).filter((point) => containsPoint(viewport, point));
+  const points = [edge, anchor, ...corners];
+  const distances = points.map(() => Infinity);
+  const previous = [];
+  const remaining = new Set(points.keys());
+  distances[0] = 0;
+  while (remaining.size) {
+    const next = [...remaining].reduce((a, b) => distances[a] <= distances[b] ? a : b);
+    if (!Number.isFinite(distances[next])) break;
+    if (next === 1) {
+      const path = [];
+      for (let i = 1; i !== undefined; i = previous[i]) path.unshift(points[i]);
+      return path;
+    }
+    remaining.delete(next);
+    for (const i of remaining) {
+      const distance = distances[next] + Math.hypot(points[next].x - points[i].x, points[next].y - points[i].y);
+      if (distance >= distances[i] || !clear(points[next], points[i]) || crossesRect(points[next], points[i], card)) continue;
+      distances[i] = distance;
+      previous[i] = next;
+    }
+  }
+  return null;
+}
+
+// Rectangles and anchors use stage coordinates. A null result folds that card into Details.
+export function placeCallouts(viewport, panelRects, callouts, clearSpace = []) {
+  const occupied = [...panelRects, ...clearSpace];
+  const leaderObstacles = panelRects.map((rect) => padRect(rect, 4));
+  const center = (viewport.left + viewport.right) / 2;
+  return callouts.map(({ width, height, anchor, leftAnchor = anchor, rightAnchor = anchor, outline, elbow, model }) => {
+    if (!anchor) return null;
+    const maxX = viewport.right - width;
+    const maxY = viewport.bottom - height;
+    if (maxX < viewport.left || maxY < viewport.top) return null;
+
+    if (model) {
+      const leftSide = anchor.x < (model.left + model.right) / 2;
+      const obstacles = occupied.map((rect) => padRect(rect, 8));
+      const point = leftSide ? leftAnchor : rightAnchor;
+      if (!containsPoint(viewport, point)) return null;
+      const idealY = anchor.y - height / 2;
+      const ys = [clampTo(idealY, viewport.top, maxY),
+        ...obstacles.flatMap(({ top, bottom }) => [top - height, bottom]),
+      ].sort((a, b) => Math.abs(a - idealY) - Math.abs(b - idealY));
+      for (const gap of [40, 64, 88, 112, 140]) {
+        const left = leftSide ? model.left - gap - width : model.right + gap;
+        if (left < viewport.left || left > maxX) continue;
+        for (const top of ys) {
+          const rect = { left, top, right: left + width, bottom: top + height };
+          if (top < viewport.top || top > maxY || obstacles.some((obstacle) => overlaps(rect, obstacle))) continue;
+          const leader = leaderPath(point, rect, viewport, leaderObstacles, true);
+          const length = leader?.slice(1).reduce((sum, p, i) =>
+            sum + Math.hypot(p.x - leader[i].x, p.y - leader[i].y), 0);
+          if (!leader || length > 160) continue;
+          occupied.push(rect);
+          return { rect, leader };
+        }
+      }
+      return null;
+    }
+
+    if (outline) {
+      const { left, right, top, bottom } = outline;
+      const x = (left + right) / 2;
+      const y = (top + bottom) / 2;
+      const obstacles = occupied.map((rect) => padRect(rect, 4));
+      for (const gap of [12, 28, 44]) {
+        for (const [rectLeft, rectTop, point] of [
+          [right + gap, clampTo(y - height / 2, viewport.top, maxY), { x: right, y }],
+          [left - width - gap, clampTo(y - height / 2, viewport.top, maxY), { x: left, y }],
+          [clampTo(x - width / 2, viewport.left, maxX), top - height - gap, { x, y: top }],
+          [clampTo(x - width / 2, viewport.left, maxX), bottom + gap, { x, y: bottom }],
+        ]) {
+          const rect = { left: rectLeft, top: rectTop, right: rectLeft + width, bottom: rectTop + height };
+          if (!containsPoint(viewport, point) || obstacles.some((obstacle) => containsPoint(obstacle, point))) continue;
+          if (rectLeft < viewport.left || rectLeft > maxX || rectTop < viewport.top || rectTop > maxY
+            || obstacles.some((obstacle) => overlaps(rect, obstacle))) continue;
+          const leader = leaderPath(point, rect, viewport, obstacles);
+          if (leader?.length !== 2) continue;
+          occupied.push(rect);
+          return { rect, leader };
+        }
+      }
+      return null;
+    }
+
+    const preferredX = anchor.x < center ? viewport.left + 18 : maxX - 18;
+    const preferredY = anchor.y - height / 2 - (elbow ? height : 0);
+    for (const gap of [8, 0]) {
+      const obstacles = occupied.map((rect) => padRect(rect, gap));
+      const panels = gap ? leaderObstacles : panelRects;
+      const visible = (point) => containsPoint(viewport, point) && !panels.some((panel) => containsPoint(panel, point));
+      const centerPoint = visible(anchor) ? anchor : null;
+      const leftPoint = visible(leftAnchor) ? leftAnchor : centerPoint;
+      const rightPoint = visible(rightAnchor) ? rightAnchor : centerPoint;
+      if (!leftPoint && !rightPoint) continue;
+      const anchorGap = Math.max(gap, 1);
+      const xs = new Set([preferredX, viewport.left, maxX,
+        (leftPoint ?? anchor).x - width - anchorGap, (rightPoint ?? anchor).x + anchorGap,
+        ...obstacles.flatMap(({ left, right }) => [left - width, right]),
+      ].map((x) => clampTo(x, viewport.left, maxX)));
+      const ys = new Set([preferredY, viewport.top, maxY, anchor.y - height - anchorGap, anchor.y + anchorGap,
+        ...obstacles.flatMap(({ top, bottom }) => [top - height, bottom]),
+      ].map((y) => clampTo(y, viewport.top, maxY)));
+      const candidates = [];
+      for (const left of xs) {
+        for (const top of ys) {
+          const rect = { left, top, right: left + width, bottom: top + height };
+          const point = left + width / 2 < anchor.x ? leftPoint : rightPoint;
+          if (!point || containsPoint(rect, point) || obstacles.some((obstacle) => overlaps(rect, obstacle))) continue;
+          const score = Math.abs(top - preferredY) + 0.65 * Math.abs(left - preferredX)
+            + (left <= point.x && point.x <= rect.right ? 80 : 0);
+          candidates.push({ rect, point, score });
+        }
+      }
+      candidates.sort((a, b) => a.score - b.score);
+      for (const { rect, point } of candidates) {
+        const leader = leaderPath(point, rect, viewport, panels, elbow);
+        if (!leader) continue;
+        occupied.push(rect);
+        return { rect, leader };
+      }
+    }
+    return null;
+  });
+}
+
+export function classifyPart(part, delta, mode) {
+  let basis = Object.hasOwn(BASIS_LABELS, part.geometry_basis) ? part.geometry_basis : "unknown";
+  if (basis === "measured" && !(part.feature_id && part.evidence?.some((record) =>
+    record.state === "measured" && record.feature_id === part.feature_id && record.instrument && record.date))) {
+    basis = "unknown";
+  }
+  if (basis === "donor_cad" && /^REFERENCE_ENVELOPE/i.test(part.node_name)) basis = "envelope";
+  const diff = mode === "compare" ? delta : undefined;
+  const outline = diff === "removed" || basis === "envelope" || basis === "unknown";
+  return { basis, diff, outline, dimmed: diff === "unchanged" };
+}
+
+// Revision-qualified keys distinguish the two displays, which share a part_id.
+export function indexFielddeck(scenes, compare = FIELDDECK_COMPARE) {
+  const byKey = new Map();
+  const byNode = new Map();
+  const byPart = new Map();
+  const { nodes = [] } = scenes[compare?.target]?.revision_diff ?? scenes[compare?.base]?.revision_diff ?? {};
+  const diff = new Map(nodes.map((row) => [JSON.stringify([row.node_name, row.occurrence]), row.status]));
+  for (const [revision, scene] of Object.entries(scenes)) {
+    if (!scene) continue;
+    const occurrences = new Map();
+    for (const part of scene.parts) {
+      const name = part.node_name;
+      const occurrence = (occurrences.get(name) ?? 0) + 1;
+      occurrences.set(name, occurrence);
+      const key = `${revision}:part:${part.part_id}`;
+      const row = {
+        key, revision, part, delta: diff.get(JSON.stringify([name, occurrence])),
+      };
+      byKey.set(key, row);
+      const nodesForRevision = byNode.get(revision) ?? new Map();
+      const matches = nodesForRevision.get(name) ?? [];
+      matches.push(row);
+      nodesForRevision.set(name, matches);
+      byNode.set(revision, nodesForRevision);
+      byPart.set(`${revision}:${part.part_id}`, row);
+    }
+    for (const link of scene.interfaces) {
+      const key = `${revision}:link:${link.interface_id}`;
+      byKey.set(key, { key, revision, link });
+    }
+  }
+  return { byKey, byNode, byPart };
+}
+
+export function rowForNode(index, revision, exactName, nodeIndex) {
+  const matches = index.byNode.get(revision)?.get(exactName);
+  if (matches?.length === 1) return matches[0];
+  return matches?.find(({ part }) => part.node_index === nodeIndex);
+}
+
+export function rowsForMode(index, mode, compare = FIELDDECK_COMPARE) {
+  return [...index.byKey.values()].filter((row) =>
+    mode === "compare"
+      ? row.revision === compare?.target || row.part && row.delta === "removed"
+      : row.revision === mode,
+  );
+}
+
+export function selectedPartKeys(index, row) {
+  if (!row) return [];
+  if (row.part) return [row.key];
+  return [row.link.from_part_id, row.link.to_part_id]
+    .map((id) => index.byPart.get(`${row.revision}:${id}`)?.key)
+    .filter(Boolean);
+}
+
+export function openQuestions(scenes, index, order = Object.keys(scenes)) {
+  const questions = new Map();
+  function add(kind, id, key, reason) {
+    const identity = JSON.stringify([kind, id, reason]);
+    if (!questions.has(identity)) questions.set(identity, { reason, number: questions.size + 1, keys: new Set() });
+    questions.get(identity).keys.add(key);
+  }
+  for (const revision of order) {
+    const scene = scenes[revision];
+    if (!scene) continue;
+    for (const { part_id, node_name, interface_id, reason } of scene.blockers) {
+      if (interface_id) add("link", interface_id, `${revision}:link:${interface_id}`, reason);
+      else {
+        const part = index.byPart.get(`${revision}:${part_id}`)
+          ?? index.byNode.get(revision)?.get(node_name)?.[0];
+        const id = part_id ?? part?.part.part_id ?? node_name;
+        add("part", id, part?.key ?? `${revision}:part:${id}`, reason);
+      }
+    }
+    for (const { interface_id, open_checks } of scene.interfaces) {
+      for (const reason of open_checks) add("link", interface_id, `${revision}:link:${interface_id}`, reason);
+    }
+  }
+  return [...questions.values()];
+}
+
+export function ghostDeltaKey(index, mode, row, compare = FIELDDECK_COMPARE) {
+  if (!compare || mode !== "compare" || !row?.part || row.delta !== "changed") return null;
+  const revision = row.revision === compare.target ? compare.base : compare.target;
+  const { part_id, node_name } = row.part;
+  const occurrence = index.byNode.get(row.revision)?.get(node_name)?.indexOf(row);
+  return (index.byPart.get(`${revision}:${part_id}`)
+    ?? index.byNode.get(revision)?.get(node_name)?.[occurrence])?.key ?? null;
+}
+
+// Only deterministic deltas: outer bounds from the sidecars and, when the stage has loaded both
+// GLB meshes, their volume and surface area. Never a claim that features or holes moved.
+export function changeSummary(index, row, compare, meshStats = null) {
+  if (!compare || row?.delta !== "changed") return null;
+  const counterpart = index.byKey.get(ghostDeltaKey(index, "compare", row, compare));
+  const older = row.revision === compare.base ? row : counterpart;
+  const newer = row.revision === compare.target ? row : counterpart;
+  const title = `Changed from ${compare.base}-inch revision`;
+  const mesh = meshDeltaLabel(meshStats?.get(older?.key), meshStats?.get(newer?.key));
+  const meshBounds = (entry) => entry?.part.evidence.find(({ field, state }) =>
+    field === "mesh_bounds_mm" && state === "computed")?.value;
+  const before = meshBounds(older);
+  const after = meshBounds(newer);
+  const valid = (bounds) => Array.isArray(bounds) && bounds.length === 6 && bounds.every(Number.isFinite);
+  if (!valid(before) || !valid(after)) return { title, bounds: null, mesh };
+  const deltas = [0, 1, 2].map((i) => (after[i + 3] - after[i]) - (before[i + 3] - before[i]));
+  if (deltas.every((delta) => Math.abs(delta) < 0.01)) {
+    return { title, bounds: "Outer bounds unchanged · mesh differs", mesh };
+  }
+  const bounds = ["X", "Y", "Z"].map((axis, i) => `d${axis} ${signedAmount(deltas[i], 2)}`).join(" · ");
+  return { title, bounds: `Bounds · ${bounds} mm`, mesh };
+}
+
+const SHORT_NAMES = {
+  "keyboard-nominal-envelope": "Keyboard envelope",
+  "power-bank-nominal-envelope": "Power bank envelope",
+  "pi4-board-envelope": "Raspberry Pi 4",
+  "fan-envelope": "Fan envelope",
+};
+
+export function shortPartName(part, revision) {
+  if (part.part_id === "display") return `${revision}-inch display`;
+  if (SHORT_NAMES[part.part_id]) return SHORT_NAMES[part.part_id];
+  // A long or hedged label falls back to the part id, so every tree row still names its part.
+  const name = part.label.length <= 24 && !/nominal only/i.test(part.label) ? part.label : part.part_id;
+  return name.length <= 32 ? name : `${name.slice(0, 31)}…`;
+}
+
+export function evidenceLabel(field) {
+  const words = field.replace(/_(mm3|mm|w)$/, "").replaceAll("_", " ");
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+const precision = new Intl.NumberFormat("en", { useGrouping: false, maximumFractionDigits: 2 });
+const units = { mm: "mm", mm3: "mm³", w: "W" };
+const repo = "https://github.com/Spectating101/hardware-splicer/blob/main/";
+const fielddeckProject = "projects/cyberdeck-real-trial-20261020/";
+
+function formatNumber(value) {
+  const result = precision.format(value);
+  return result === "-0" ? "0" : result;
+}
+
+export function formatEvidenceValue({ field, value, state }) {
+  if (state === "unknown" || value == null) return "unknown";
+  const unit = units[field.match(/_(mm3|mm|w)$/)?.[1]];
+  const suffix = unit ? ` ${unit}` : "";
+  if (typeof value === "number") return formatNumber(value) + suffix;
+  if (Array.isArray(value) && value.every((item) => typeof item === "number")) {
+    if (field.endsWith("_bounds_mm") && value.length === 6) {
+      return ["X", "Y", "Z"].map((axis, i) =>
+        `${axis} ${formatNumber(value[i])}→${formatNumber(value[i + 3])}`,
+      ).join(" · ") + suffix;
+    }
+    return value.map(formatNumber).join(" × ") + suffix;
+  }
+  if (typeof value === "string" && Object.hasOwn(BASIS_LABELS, value)) return BASIS_LABELS[value];
+  return typeof value === "object"
+    ? JSON.stringify(value, (_key, item) => typeof item === "number" ? Number(formatNumber(item)) : item)
+    : String(value);
+}
+
+export function formatEvidenceSource(source) {
+  if (!source || source === "unknown") return { label: "unknown" };
+  if (/^https?:\/\//i.test(source) && URL.canParse(source)) {
+    const { hostname } = new URL(source);
+    return { label: hostname.replace(/^www\./, ""), href: source };
+  }
+  const path = source.replace(/^\.\//, "");
+  const label = path.split("/").at(-1);
+  const prefix = /^(digital_v1|display_swap)\//.test(path) ? fielddeckProject : "";
+  return { label, href: repo + prefix + path };
+}
+
+export function evidenceCells(row) {
+  return [row.field, formatEvidenceValue(row), row.state, formatEvidenceSource(row.source)];
+}
+
+// ---------------------------------------------------------------------------------------------
+// Face view fit layer. Pure functions over plain arrays; the stage feeds them GLB triangles in mm.
+// Nothing here claims a physical fit: every value is a projection of CAD meshes.
+
+export const FACE_APERTURE_PARTS = ["face-rear-left", "face-rear-right"];
+export const APERTURE_WELD_MM = 0.05;
+const MINUS = "−";
+const mm2 = (value) => `${value < 0 ? MINUS : ""}${Math.abs(value).toFixed(2)}`;
+
+// Section triangle soup (x, y, z per vertex, 9 numbers per triangle) with the plane
+// coordinate[axis] = level. Returns 2D segments [[u0, v0], [u1, v1]] in the other two axes, in
+// order. A vertex exactly on the plane counts as above it, so shared edges never double up.
+export function sectionSegments(positions, level, axis = 2) {
+  const [u, v] = [0, 1, 2].filter((a) => a !== axis);
+  const segments = [];
+  for (let t = 0; t + 8 < positions.length; t += 9) {
+    const points = [];
+    for (let e = 0; e < 3; e++) {
+      const a = t + e * 3;
+      const b = t + ((e + 1) % 3) * 3;
+      const da = positions[a + axis] - level;
+      const db = positions[b + axis] - level;
+      if ((da < 0) === (db < 0)) continue;
+      const s = da / (da - db);
+      points.push([positions[a + u] + s * (positions[b + u] - positions[a + u]),
+        positions[a + v] + s * (positions[b + v] - positions[a + v])]);
+    }
+    if (points.length === 2) segments.push(points);
+  }
+  return segments;
+}
+
+// Weld segment ends that lie within `tolerance` of each other, cancel seam edges both parts share,
+// then split the graph into closed loops (every vertex of degree 2) and open chains. `openGap` is the shortest distance between two
+// loose ends of different chains, so a reason can say how far a seam is from closing.
+export function weldSectionLoops(segments, tolerance = APERTURE_WELD_MM) {
+  const vertices = [];
+  const cells = new Map();
+  const cellKey = (x, y) => `${Math.floor(x / tolerance)},${Math.floor(y / tolerance)}`;
+  const vertexFor = ([x, y]) => {
+    const cx = Math.floor(x / tolerance);
+    const cy = Math.floor(y / tolerance);
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        for (const id of cells.get(`${cx + dx},${cy + dy}`) ?? []) {
+          if (Math.hypot(vertices[id].point[0] - x, vertices[id].point[1] - y) <= tolerance) return id;
+        }
+      }
+    }
+    const id = vertices.length;
+    vertices.push({ point: [x, y], neighbors: new Set() });
+    const key = cellKey(x, y);
+    if (!cells.has(key)) cells.set(key, []);
+    cells.get(key).push(id);
+    return id;
+  };
+  // Two parts that touch along a seam both contribute the seam edge. After welding, an edge that
+  // occurs an even number of times is interior to the sectioned union and cancels out.
+  const edges = new Map();
+  for (const [a, b] of segments) {
+    const i = vertexFor(a);
+    const j = vertexFor(b);
+    if (i === j) continue;
+    const key = i < j ? `${i},${j}` : `${j},${i}`;
+    edges.set(key, (edges.get(key) ?? 0) + 1);
+  }
+  for (const [key, count] of edges) {
+    if (count % 2 === 0) continue;
+    const [i, j] = key.split(",").map(Number);
+    vertices[i].neighbors.add(j);
+    vertices[j].neighbors.add(i);
+  }
+  const loops = [];
+  const open = [];
+  const seen = new Set();
+  for (let start = 0; start < vertices.length; start++) {
+    if (seen.has(start) || !vertices[start].neighbors.size) continue;
+    const component = [start];
+    seen.add(start);
+    for (let k = 0; k < component.length; k++) {
+      for (const next of vertices[component[k]].neighbors) {
+        if (!seen.has(next)) {
+          seen.add(next);
+          component.push(next);
+        }
+      }
+    }
+    if (component.length >= 3 && component.every((id) => vertices[id].neighbors.size === 2)) {
+      const loop = [];
+      let previous = -1;
+      let current = start;
+      do {
+        loop.push(vertices[current].point);
+        const next = [...vertices[current].neighbors].find((id) => id !== previous);
+        previous = current;
+        current = next;
+      } while (current !== start);
+      loops.push(loop);
+    } else {
+      open.push(component.filter((id) => vertices[id].neighbors.size === 1).map((id) => vertices[id].point));
+    }
+  }
+  let openGap = null;
+  for (let i = 0; i < open.length; i++) {
+    for (let j = i + 1; j < open.length; j++) {
+      for (const a of open[i]) {
+        for (const b of open[j]) {
+          const distance = Math.hypot(a[0] - b[0], a[1] - b[1]);
+          if (openGap === null || distance < openGap) openGap = distance;
+        }
+      }
+    }
+  }
+  return { loops, openChains: open.length, openGap };
+}
+
+export function polygonArea(loop) {
+  let area = 0;
+  for (let i = 0; i < loop.length; i++) {
+    const [x0, y0] = loop[i];
+    const [x1, y1] = loop[(i + 1) % loop.length];
+    area += x0 * y1 - x1 * y0;
+  }
+  return area / 2;
+}
+
+export function pointInPolygon([x, y], loop) {
+  let inside = false;
+  for (let i = 0, j = loop.length - 1; i < loop.length; j = i++) {
+    const [xi, yi] = loop[i];
+    const [xj, yj] = loop[j];
+    if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
+// Closest approach between the section vertices of two parts, near the display centre.
+function partSeamGap(a, b, centre, reach) {
+  const near = (segments) => segments.flat().filter(([x, y]) => Math.hypot(x - centre[0], y - centre[1]) <= reach);
+  const left = near(a);
+  const right = near(b);
+  let best = null;
+  for (const p of left) {
+    for (const q of right) {
+      const distance = Math.hypot(p[0] - q[0], p[1] - q[1]);
+      if (best === null || distance < best) best = distance;
+    }
+  }
+  return best;
+}
+
+// The aperture is the smallest closed section loop that contains the display's projected centre.
+// `parts` are [{ label, segments }] for the faceplate parts sectioned together. When no welded loop
+// contains the centre, the result carries the reason and no loop: nothing is drawn for it.
+export function apertureFromSection(parts, centre, { weld = APERTURE_WELD_MM, reach = 200 } = {}) {
+  const segments = parts.flatMap(({ segments: own }) => own);
+  if (!segments.length) return { loop: null, reason: "section plane misses the faceplate" };
+  const { loops, openChains, openGap } = weldSectionLoops(segments, weld);
+  const containing = loops.filter((loop) => pointInPolygon(centre, loop))
+    .sort((a, b) => Math.abs(polygonArea(a)) - Math.abs(polygonArea(b)));
+  if (containing.length) return { loop: containing[0], reason: null };
+  const notClosed = `section loop not closed after ${weld} mm weld`;
+  for (let i = 0; i < parts.length; i++) {
+    for (let j = i + 1; j < parts.length; j++) {
+      const gap = partSeamGap(parts[i].segments, parts[j].segments, centre, reach);
+      if (gap !== null && gap > weld) {
+        return { loop: null, reason: `${notClosed} · ${gap.toFixed(2)} mm seam between ${parts[i].label} and ${parts[j].label}` };
+      }
+    }
+  }
+  if (openChains) {
+    const ends = openGap === null ? "" : ` · nearest open ends ${openGap.toFixed(2)} mm apart`;
+    return { loop: null, reason: notClosed + ends };
+  }
+  return { loop: null, reason: "no closed section loop contains the display centre" };
+}
+
+function scanCrossings(loop, axis, at) {
+  const other = 1 - axis;
+  const hits = [];
+  for (let i = 0; i < loop.length; i++) {
+    const a = loop[i];
+    const b = loop[(i + 1) % loop.length];
+    if ((a[other] > at) === (b[other] > at)) continue;
+    hits.push(a[axis] + (at - a[other]) * (b[axis] - a[axis]) / (b[other] - a[other]));
+  }
+  return hits.sort((p, q) => p - q);
+}
+
+const SIDES = [["left", 0, -1], ["right", 0, 1], ["bottom", 1, -1], ["top", 1, 1]];
+
+// Signed in-plane distance per side between the display's projected outline and the aperture loop,
+// measured along that side's normal and minimised over scanlines across the span both share.
+// Positive clears; negative means the faceplate covers the outline on that side.
+export function projectedSideDistances(outline, aperture, centre, { samples = 96 } = {}) {
+  const result = {};
+  for (const [side, axis, sign] of SIDES) {
+    if (!aperture?.length) {
+      result[side] = { value: null, reason: "aperture not derivable" };
+      continue;
+    }
+    if (!outline?.length) {
+      result[side] = { value: null, reason: "display outline not derivable" };
+      continue;
+    }
+    const other = 1 - axis;
+    const span = (loop) => [Math.min(...loop.map((p) => p[other])), Math.max(...loop.map((p) => p[other]))];
+    const [o0, o1] = span(outline);
+    const [a0, a1] = span(aperture);
+    const low = Math.max(o0, a0);
+    const high = Math.min(o1, a1);
+    let best = null;
+    for (let k = 0; k <= samples && high > low; k++) {
+      // Stay a hair inside the shared span so a scanline never runs along a horizontal edge.
+      const at = low + (high - low) * (0.001 + 0.998 * k / samples);
+      const shape = scanCrossings(outline, axis, at);
+      const hole = scanCrossings(aperture, axis, at);
+      if (shape.length < 2) continue;
+      const index = hole.findIndex((value, i) => i % 2 === 0 && value <= centre[axis] && hole[i + 1] >= centre[axis]);
+      if (index < 0) continue;
+      const gap = sign < 0 ? shape[0] - hole[index] : hole[index + 1] - shape.at(-1);
+      if (best === null || gap < best) best = gap;
+    }
+    result[side] = best === null ? { value: null, reason: "no shared span with the aperture" } : { value: best, reason: null };
+  }
+  return result;
+}
+
+export function tightestSide(sides) {
+  const entries = Object.entries(sides);
+  const unknown = entries.find(([, side]) => side.value == null);
+  if (!entries.length || unknown) return { value: null, side: null, reason: unknown?.[1].reason ?? "no sides" };
+  const [side, { value }] = entries.reduce((a, b) => (b[1].value < a[1].value ? b : a));
+  return { value, side, reason: null };
+}
+
+const SIDE_LETTER = { left: "L", right: "R", top: "T", bottom: "B" };
+const SIDE_ORDER = ["left", "right", "top", "bottom"];
+const amount = (value) => Math.abs(value).toFixed(2);
+
+// A signed in-plane distance per side. Negative means the faceplate covers the glass edge on that
+// side: a bezel lip, which an XY projection cannot call interference. Positive leaves the edge
+// clear of the faceplate.
+export function sideCoverLabel(side, entry) {
+  const letter = SIDE_LETTER[side];
+  if (entry?.value == null) return `${letter} ? · ${entry?.reason ?? "not derivable"}`;
+  return entry.value < 0 ? `lip ${amount(entry.value)}` : `clear ${amount(entry.value)}`;
+}
+
+export function coverHeadline(sides) {
+  const entries = SIDE_ORDER.map((side) => [side, sides?.[side]]);
+  if (entries.some(([, entry]) => entry?.value == null)) return "Faceplate cover of glass edge · ? · not derivable";
+  const clear = entries.filter(([, entry]) => entry.value >= 0);
+  const pick = (list, key) => {
+    const best = Math.min(...list.map(([, entry]) => key(entry.value)));
+    const letters = list.filter(([, entry]) => key(entry.value).toFixed(2) === best.toFixed(2)).map(([side]) => SIDE_LETTER[side]);
+    return { best, letters: letters.join("/") };
+  };
+  if (!clear.length) {
+    const { best, letters } = pick(entries, (value) => -value);
+    return `Faceplate covers glass edge · min lip ${best.toFixed(2)} mm (${letters}) · computed`;
+  }
+  const { best, letters } = pick(clear, (value) => value);
+  return `Glass edge clear of faceplate on ${clear.map(([side]) => SIDE_LETTER[side]).join("/")} · min clear ${best.toFixed(2)} mm (${letters}) · computed`;
+}
+
+export function coverDetail(sides, source = "projected CAD, section Face Rear L+R") {
+  const entries = SIDE_ORDER.map((side) => [side, sides?.[side]]);
+  const allLips = entries.every(([, entry]) => entry?.value != null && entry.value < 0);
+  const items = entries.map(([side, entry]) => {
+    const letter = SIDE_LETTER[side];
+    if (entry?.value == null) return `${letter} ?`;
+    if (allLips) return `${letter} ${amount(entry.value)}`;
+    return `${letter} ${entry.value < 0 ? "lip" : "clear"} ${amount(entry.value)}`;
+  });
+  return `${allLips ? "Lip " : ""}${items.join(" · ")} mm · ${source}`;
+}
+
+export function apertureSizeLabel(bounds, seam) {
+  if (!bounds) return "Aperture size · not derivable";
+  const size = `${(bounds.right - bounds.left).toFixed(2)} × ${(bounds.top - bounds.bottom).toFixed(2)} mm`;
+  const seamText = seam ? `, ${seam.gap.toFixed(2)} mm seam at x ${formatNumber(Math.round(seam.at[0] * 10) / 10)}` : "";
+  return `Aperture ${size} across both halves${seamText} · computed`;
+}
+
+export function footprintDeltaPair(older, newer) {
+  const delta = (axis) => mm2((newer.max[axis] - newer.min[axis]) - (older.max[axis] - older.min[axis]))
+    .replace(/^(?!−)/, "+").replace(/^[+−]0\.00$/, "0.00");
+  return `${delta("x")} × ${delta("y")} mm`;
+}
+
+// Mean of a part's mesh vertices, in mm.
+export function vertexCentroid(positions) {
+  const sum = [0, 0, 0];
+  const count = Math.floor(positions.length / 3);
+  for (let i = 0; i < count * 3; i += 3) {
+    sum[0] += positions[i];
+    sum[1] += positions[i + 1];
+    sum[2] += positions[i + 2];
+  }
+  return count ? sum.map((value) => value / count) : null;
+}
+
+// ISO 128 / 129-1 linear dimension in screen pixels. `from` and `to` are the two feature points,
+// `normal` the unit direction from the object toward the dimension line, `offset` the distance of
+// the dimension line from the object along it. Extension lines start `gap` px off the object and
+// run `overrun` px past the dimension line; the dimension line is unbroken with filled 30° arrows of
+// `arrow` px at both ends; text sits `textGap` px above the line, and vertical text reads
+// bottom-to-top (rotate −90°).
+export function linearDimension(from, to, normal, offset, {
+  gap = 3, overrun = 4, arrow = 7, angle = 30, textGap = 3,
+} = {}) {
+  const [nx, ny] = normal;
+  const at = (point, distance) => [point[0] + nx * distance, point[1] + ny * distance];
+  const a = at(from, offset);
+  const b = at(to, offset);
+  const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
+  const ux = length ? (b[0] - a[0]) / length : 1;
+  const uy = length ? (b[1] - a[1]) / length : 0;
+  const half = arrow * Math.tan(THREE_DEG * angle / 2);
+  // Arrows point outward to the extension lines; on a short span they sit outside, pointing in.
+  const outside = length < arrow * 2 + 4;
+  const head = (tip, direction) => {
+    const [dx, dy] = direction;
+    const baseX = tip[0] - dx * arrow;
+    const baseY = tip[1] - dy * arrow;
+    return `M${r(tip[0])},${r(tip[1])}L${r(baseX - dy * half)},${r(baseY + dx * half)}L${r(baseX + dy * half)},${r(baseY - dx * half)}Z`;
+  };
+  const extension = (point) => {
+    const start = at(point, gap);
+    const end = at(point, offset + overrun);
+    return `M${r(start[0])},${r(start[1])}L${r(end[0])},${r(end[1])}`;
+  };
+  const line = outside
+    ? `M${r(a[0] - ux * arrow * 2)},${r(a[1] - uy * arrow * 2)}L${r(b[0] + ux * arrow * 2)},${r(b[1] + uy * arrow * 2)}`
+    : `M${r(a[0])},${r(a[1])}L${r(b[0])},${r(b[1])}`;
+  const arrows = outside
+    ? head(a, [ux, uy]) + head(b, [-ux, -uy])
+    : head(a, [-ux, -uy]) + head(b, [ux, uy]);
+  const vertical = Math.abs(uy) > Math.abs(ux);
+  // "Above" is screen-up for horizontal text and screen-left for text rotated to read upward.
+  const text = vertical
+    ? { x: r((a[0] + b[0]) / 2 - textGap), y: r((a[1] + b[1]) / 2), rotate: -90 }
+    : { x: r((a[0] + b[0]) / 2), y: r((a[1] + b[1]) / 2 - textGap), rotate: 0 };
+  return { extensions: extension(from) + extension(to), line, arrows, text, length, vertical };
+}
+const THREE_DEG = Math.PI / 180;
+const r = (value) => Math.round(value * 100) / 100;
+
+// ---------------------------------------------------------------------------------------------
+// Per-half aperture. The two printed halves need not close into one loop: each half's own section
+// loops are oriented (material on the left of every directed edge), and the aperture boundary is
+// the union of the edges whose outward normal faces the display centre, minus the seam edges where
+// one half faces the other.
+
+function orientLoops(loops) {
+  return loops.map((loop) => {
+    const depth = loops.filter((other) => other !== loop && pointInPolygon(loop[0], other)).length;
+    const counterClockwise = polygonArea(loop) > 0;
+    // Outer boundaries run counter-clockwise and holes clockwise, so material is always on the left.
+    return (depth % 2 === 0) === counterClockwise ? loop : loop.slice().reverse();
+  });
+}
+
+export function orientedSectionEdges(segments, weld = APERTURE_WELD_MM) {
+  const edges = [];
+  for (const [loopIndex, loop] of orientLoops(weldSectionLoops(segments, weld).loops).entries()) {
+    for (let i = 0; i < loop.length; i++) {
+      const a = loop[i];
+      const b = loop[(i + 1) % loop.length];
+      const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
+      if (length > 0) edges.push({ a, b, loop: loopIndex, normal: [(b[1] - a[1]) / length, -(b[0] - a[0]) / length] });
+    }
+  }
+  return edges;
+}
+
+function pointSegmentDistance([px, py], [ax, ay], [bx, by]) {
+  const dx = bx - ax;
+  const dy = by - ay;
+  const t = dx || dy ? Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy))) : 0;
+  return Math.hypot(px - ax - t * dx, py - ay - t * dy);
+}
+
+// The seam: the closest approach between two halves' section edges, taking the pair nearest the
+// display centre among those within 0.01 mm of the minimum.
+export function seamBetween(first, second, centre) {
+  let gap = Infinity;
+  const pairs = [];
+  for (const { a, b } of first) {
+    for (const point of [a, b]) {
+      for (const edge of second) {
+        const distance = pointSegmentDistance(point, edge.a, edge.b);
+        if (distance < gap - 0.01) pairs.length = 0;
+        if (distance <= gap + 0.01) pairs.push({ point, edge, distance });
+        gap = Math.min(gap, distance);
+      }
+    }
+  }
+  if (!pairs.length) return null;
+  const near = pairs.filter(({ distance }) => distance <= gap + 0.01)
+    .sort((p, q) => Math.hypot(p.point[0] - centre[0], p.point[1] - centre[1]) - Math.hypot(q.point[0] - centre[0], q.point[1] - centre[1]))[0];
+  const { point, edge } = near;
+  const dx = edge.b[0] - edge.a[0];
+  const dy = edge.b[1] - edge.a[1];
+  const t = dx || dy ? Math.max(0, Math.min(1, ((point[0] - edge.a[0]) * dx + (point[1] - edge.a[1]) * dy) / (dx * dx + dy * dy))) : 0;
+  const other = [edge.a[0] + t * dx, edge.a[1] + t * dy];
+  return { gap, from: point, to: other, at: [(point[0] + other[0]) / 2, (point[1] + other[1]) / 2] };
+}
+
+const SIDE_SPEC = {
+  left: { axis: 0, facing: [1, 0], toward: -1 },
+  right: { axis: 0, facing: [-1, 0], toward: 1 },
+  bottom: { axis: 1, facing: [0, 1], toward: -1 },
+  top: { axis: 1, facing: [0, -1], toward: 1 },
+};
+
+// Edges of one half that bound the aperture on `side`: their outward normal points at the display
+// centre within 45° along that side's axis, they lie on that side of the centre, and they are not
+// seam edges (both ends within `seamReach` of the other half).
+export function innerEdgesForSide(edges, side, centre, otherHalf = [], seamReach = 0) {
+  const { axis, facing, toward } = SIDE_SPEC[side];
+  return edges.filter(({ a, b, normal }) => {
+    if (normal[0] * facing[0] + normal[1] * facing[1] < Math.SQRT1_2) return false;
+    const middle = (a[axis] + b[axis]) / 2;
+    if ((middle - centre[axis]) * toward <= 0) return false;
+    const seam = seamReach > 0 && [a, b].every((point) => otherHalf.some((edge) => pointSegmentDistance(point, edge.a, edge.b) <= seamReach));
+    return !seam;
+  });
+}
+
+// Signed gap on `side` between the outline polygon and a set of inner edges, minimised over
+// scanlines across the outline. Positive clears; negative is overlap.
+export function gapToEdges(outline, edges, side, centre, { samples = 96, used = null } = {}) {
+  const { axis, toward } = SIDE_SPEC[side];
+  const other = 1 - axis;
+  const low = Math.min(...outline.map((p) => p[other]));
+  const high = Math.max(...outline.map((p) => p[other]));
+  let best = null;
+  for (let k = 0; k <= samples; k++) {
+    const at = low + (high - low) * (0.001 + 0.998 * k / samples);
+    const shape = scanCrossings(outline, axis, at);
+    if (shape.length < 2) continue;
+    let nearest = null;
+    let nearestEdge = null;
+    for (const edge of edges) {
+      const { a, b } = edge;
+      if ((a[other] > at) === (b[other] > at)) continue;
+      const value = a[axis] + (at - a[other]) * (b[axis] - a[axis]) / (b[other] - a[other]);
+      if ((value - centre[axis]) * toward <= 0) continue;
+      if (nearest === null || Math.abs(value - centre[axis]) < Math.abs(nearest - centre[axis])) {
+        nearest = value;
+        nearestEdge = edge;
+      }
+    }
+    if (nearest === null) continue;
+    used?.add(nearestEdge);
+    const gap = toward < 0 ? shape[0] - nearest : nearest - shape.at(-1);
+    if (best === null || gap < best) best = gap;
+  }
+  return best;
+}
+
+// halves: [{ label, side: "left" | "right", segments }]. Left and right use their own half; top
+// and bottom take the tighter of both halves and name the half that gives it. `aperture` is the
+// bounds of the inner edges themselves, measured, never derived from the display outline.
+export function perHalfCover(outline, halves, centre, { weld = APERTURE_WELD_MM } = {}) {
+  // Each half bounds the aperture with the section loop that comes nearest the display centre;
+  // screw holes and other loops of the same half are not aperture edges.
+  const edges = halves.map((half) => {
+    const all = orientedSectionEdges(half.segments, weld);
+    let nearest = null;
+    let best = Infinity;
+    for (const edge of all) {
+      const distance = pointSegmentDistance(centre, edge.a, edge.b);
+      if (distance < best) {
+        best = distance;
+        nearest = edge.loop;
+      }
+    }
+    return { ...half, edges: all.filter((edge) => edge.loop === nearest) };
+  });
+  const seam = edges.length === 2 ? seamBetween(edges[0].edges, edges[1].edges, centre) : null;
+  const reach = seam ? seam.gap + weld : 0;
+  const otherOf = (half) => edges.find((other) => other !== half)?.edges ?? [];
+  const inner = [];
+  const sides = {};
+  const extremes = {};
+  for (const side of SIDE_ORDER) {
+    const { axis, toward } = SIDE_SPEC[side];
+    const candidates = side === "left" || side === "right" ? edges.filter((half) => half.side === side) : edges;
+    const results = candidates.map((half) => {
+      const own = innerEdgesForSide(half.edges, side, centre, otherOf(half), reach);
+      // Only the edges that bound the aperture at some scanline are drawn, not hole rims behind them.
+      const used = new Set();
+      const value = own.length && outline?.length ? gapToEdges(outline, own, side, centre, { used }) : null;
+      for (const { a, b } of used) {
+        inner.push([a, b]);
+        for (const point of [a, b]) {
+          const reach = point[axis] * toward;
+          if (extremes[side] === undefined || reach > extremes[side] * toward) extremes[side] = point[axis];
+        }
+      }
+      return { label: half.label, value };
+    }).filter(({ value }) => value !== null);
+    if (!results.length) {
+      const names = candidates.map(({ label }) => label).join(" or ") || "either half";
+      sides[side] = { value: null, part: null, reason: `no inner edge of ${names} faces the display` };
+      continue;
+    }
+    const value = Math.min(...results.map((result) => result.value));
+    const givers = results.filter((result) => result.value.toFixed(2) === value.toFixed(2));
+    sides[side] = {
+      value, reason: null,
+      part: side === "left" || side === "right" ? null : givers.length > 1 ? "both halves" : givers[0].label,
+    };
+  }
+  const aperture = SIDE_ORDER.every((side) => extremes[side] !== undefined)
+    ? { left: extremes.left, right: extremes.right, bottom: extremes.bottom, top: extremes.top } : null;
+  return { sides, seam, inner, aperture };
+}
+
+export function seamLabel(seam) {
+  return seam ? `Faceplate halves ${seam.gap.toFixed(2)} mm apart at x ${formatNumber(Math.round(seam.at[0] * 10) / 10)} · computed` : null;
+}
+
+
+// One neutral chip for every old-to-new small-feature pair in Compare. Pairing is by nearest centre
+// of the same size, so it says pairing, never that a feature moved.
+export function standoffPairingLabel(distances) {
+  if (!distances.length) return null;
+  const values = distances.map((value) => value.toFixed(2));
+  const low = Math.min(...distances).toFixed(2);
+  const high = Math.max(...distances).toFixed(2);
+  const range = low === high ? low : `${low}–${high}`;
+  const count = `${distances.length} standoff${distances.length === 1 ? "" : "s"}`;
+  return values.length ? `${count} · nearest-centre pairing · Δ ${range} mm · computed` : null;
+}
+
+// Phone: an interface's question pins fan out in one row above its pill (below when the top is
+// out of room), centred on the pill and clamped to the viewport, so no pin reads as tied to another.
+export function fanPinsAbovePill(pill, count, viewport, { spacing = 30, lift = 22, radius = 12 } = {}) {
+  const width = (count - 1) * spacing;
+  const centre = (pill.left + pill.right) / 2;
+  const start = Math.min(Math.max(centre - width / 2, viewport.left + radius), viewport.right - radius - width);
+  const above = pill.top - lift;
+  const y = above - radius >= viewport.top ? above : pill.bottom + lift;
+  return Array.from({ length: count }, (_, i) => ({ x: start + i * spacing, y }));
+}

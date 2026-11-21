@@ -1,11 +1,27 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import DigitalStudyPanel from "./DigitalStudyPanel.jsx";
-import { fetchDigitalJob, fetchDigitalStudy, submitDigitalRun } from "./digitalStudyApi.js";
+import {
+  fetchDigitalCompare, fetchDigitalJob, fetchDigitalStudy, fetchEngineeringPackages, submitDigitalRun, fetchProjectAssurance, fetchProjectMaterials,
+} from "./digitalStudyApi";
+import { fetchScenes } from "../api";
 
-vi.mock("./digitalStudyApi.js", () => ({
+vi.mock("../api", () => ({
+  fetchScenes: vi.fn(async () => []), fetchSceneManifest: vi.fn(), fetchSceneRecords: vi.fn(async () => ({ records: [] })),
+}));
+vi.mock("./digitalStudyApi", () => ({
+  fetchChangeDossier: vi.fn(async () => ({ change_dossier: { changes: [], cite_editions: [], cite_linked: false, head_revision: 1 } })),
+  fetchEngineeringPackages: vi.fn(async () => ({ packages: [] })), fetchEvidenceDelta: vi.fn(),
+  fetchEngineeringRevisionDiff: vi.fn(), fetchDigitalCompare: vi.fn(),
+  engineeringPackageUrl: (project, id) => `/packages/${project}/${id}`,
   fetchDigitalStudy: vi.fn(), fetchDigitalJob: vi.fn(), submitDigitalRun: vi.fn(), cancelDigitalJob: vi.fn(),
   digitalArtifactUrl: (path) => path,
+  fetchProjectAssurance: vi.fn(), fetchProjectMaterials: vi.fn(), fetchMaterialAssessment: vi.fn(),
+  fetchPartSubstitution: vi.fn(), assessMachineRelease: vi.fn(),
+}));
+
+vi.mock("./FieldDeckDisplayComparison.jsx", () => ({
+  SavedDisplayComparison: ({ study }) => <div data-testid="saved-display-evidence">Display reports for revision {study.revision}</div>,
 }));
 
 function study(revision, mass = 234.9, passed = true) {
@@ -30,7 +46,19 @@ const data = (current = baseline, jobs = []) => ({
   runtime: { available: true, setup_hint: "" },
 });
 
-beforeEach(() => { vi.resetAllMocks(); fetchDigitalStudy.mockResolvedValue(data()); });
+beforeEach(() => {
+  vi.resetAllMocks(); fetchDigitalStudy.mockResolvedValue(data());
+  fetchEngineeringPackages.mockResolvedValue({ packages: [] });
+  fetchScenes.mockResolvedValue([]);
+  fetchDigitalCompare.mockImplementation(async (_, before, after) => ({
+    before_revision: before, after_revision: after, same_engine_sources: true,
+    requirements_changes: { payload_mass_g: { before: 0, after: 30, delta: 30 } },
+    metrics: { mass_g: { before: 234.9, after: 264.9, delta: 30 } },
+    constraints: [{ id: "nominal_mass", before: { passed: true, actual: 234.9 }, after: { passed: false, actual: 264.9 }, transition: "regressed" }],
+  }));
+  fetchProjectAssurance.mockImplementation(async (_, revision) => ({ revision, assurance: { claims: [], outputs: [] } }));
+  fetchProjectMaterials.mockResolvedValue({ assessments: [] });
+});
 
 describe("Saved digital requirement revisions", () => {
   it("submits the change against the saved revision, then reloads the completed project", async () => {
@@ -41,7 +69,7 @@ describe("Saved digital requirement revisions", () => {
       return { job_id: "native-run", status: "succeeded" };
     });
     render(<DigitalStudyPanel session={session} onProjectReload={reload} />);
-    fireEvent.click(await screen.findByRole("button", { name: "Run and save new revision" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Run study and save revision 2" }));
     await waitFor(() => expect(submitDigitalRun).toHaveBeenCalledWith("digital-test", expect.objectContaining({
       base_revision: 1, change_request: "Add 10 g of payload", requirements: { gust_scale: 1, max_mass_g: 250 },
     })));
@@ -53,10 +81,23 @@ describe("Saved digital requirement revisions", () => {
   it("shows a saved failed requirement and allows comparing the earlier revision", async () => {
     fetchDigitalStudy.mockResolvedValue(data(study(2, 264.9, false)));
     render(<DigitalStudyPanel session={session} />);
-    expect(await screen.findByText("Requirements not met")).toBeInTheDocument();
-    expect(screen.getByText(/264.90 g exceeds 250.00 g/)).toBeInTheDocument();
+    await screen.findByRole("button", { name: "Compare revisions" });
+    expect(screen.getByRole("region", { name: "Evidence" })).toHaveTextContent("Check result: false · Actual: 264.9 g · required ≤ 250 g");
+    // A failed check becomes the next action, quoted from the run; there is no ready or pass badge.
+    expect(screen.getByTestId("bench-package")).toHaveTextContent("Failed check Nominal mass: actual 264.9 g, required ≤ 250 g");
+    expect(await within(screen.getByTestId("bench-package")).findByText("Package · not linked")).toBeInTheDocument();
+    expect(screen.queryByTitle("Comparison design 3D assembly revision 1")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Compare revisions", exact: true }));
+    expect(screen.getByTitle("Comparison design 3D assembly revision 1")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Before and after" })).toBeInTheDocument();
+    // Compare shows the backend's comparison, not a client-side difference of two summaries.
+    expect(fetchDigitalCompare).toHaveBeenCalledWith("digital-test", 1, 2, expect.anything());
+    const compared = await screen.findByTestId("revision-compare");
+    expect(compared).toHaveTextContent("Payload mass · 0 g → 30 g");
+    // The mass rose against the same limit, so this one really is a regression.
+    expect(within(compared).getByRole("row", { name: /Regressed: measured value worsened/ })).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("View revision"), { target: { value: "1" } });
-    expect(screen.getByRole("button", { name: "Run and save new revision" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /^Run study and save revision \d+$/ })).toBeDisabled();
     expect(screen.getByText("Viewing history.")).toBeInTheDocument();
     expect(screen.getByTitle("Selected design 3D assembly revision 1")).toHaveAttribute("src", "/revision-1/VIEWER.html?embed=1");
   });
@@ -67,6 +108,132 @@ describe("Saved digital requirement revisions", () => {
     render(<DigitalStudyPanel session={session} />);
     expect(await screen.findByRole("alert")).toHaveTextContent("Independent verification failed");
     expect(screen.getByTitle("Selected design 3D assembly revision 1")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Run and save new revision" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: /^Run study and save revision \d+$/ })).toBeEnabled();
+  });
+});
+
+it("uses the registered device's inputs, measurements and nested artifacts", async () => {
+  const saved = {
+    revision: 1, run_id: "plotter-baseline", change_request: "Baseline",
+    summary: {
+      case_id: "ender3-penplotter", requirements_met: true, scope_limits: [],
+      requirements: { drawing_width_mm: 100 }, metrics: { drawing_width_mm: 100 }, constraints: [],
+    },
+    artifacts: { "revision/BOM.csv": "/files/bom", "STUDY.zip": "/files/package" },
+  };
+  fetchDigitalStudy.mockResolvedValue({
+    ...data(saved), history: [saved], requirement_bounds: { drawing_width_mm: { minimum: 60, maximum: 140 } },
+  });
+  submitDigitalRun.mockResolvedValue({ job: { job_id: "saved", status: "succeeded" } });
+  render(<DigitalStudyPanel session={session} />);
+  const width = await screen.findByRole("spinbutton", { name: /Drawing width/ });
+  expect(width).toHaveAttribute("min", "60");
+  expect(width).toHaveAttribute("max", "140");
+  expect(screen.queryByLabelText("Payload change")).toBeNull();
+  fireEvent.click(screen.getByText("References", { selector: "summary" }));
+  expect(screen.getByRole("link", { name: "Bill of materials (CSV)" })).toHaveAttribute("href", "/files/bom");
+  fireEvent.change(width, { target: { value: "120" } });
+  fireEvent.click(screen.getByRole("button", { name: /^Run study and save revision \d+$/ }));
+  await waitFor(() => expect(submitDigitalRun).toHaveBeenCalledWith(session.projectId, expect.objectContaining({
+    requirements: { drawing_width_mm: 120 }, change_request: "", base_revision: 1,
+  })));
+});
+
+
+it("requires two distinct real saved revisions before enabling Compare", async () => {
+  const { rerender } = render(<DigitalStudyPanel session={session} />);
+  expect(await screen.findByRole("button", { name: "Compare revisions", exact: true })).toBeDisabled();
+  expect(screen.getByText("Compare revisions needs two real saved revisions.")).toBeInTheDocument();
+  fetchDigitalStudy.mockResolvedValue({ ...data(), history: [baseline, baseline, { ...study(2), run_id: null }] });
+  rerender(<DigitalStudyPanel session={{ ...session, snapshotRevision: 2 }} />);
+  await waitFor(() => expect(fetchDigitalStudy).toHaveBeenCalledTimes(2));
+  expect(screen.getByRole("button", { name: "Compare revisions", exact: true })).toBeDisabled();
+  expect(screen.queryByTitle(/Comparison design/)).toBeNull();
+});
+
+it("uses unknown for absent measurements and does not create an authority label from passed checks", async () => {
+  const saved = study(1);
+  delete saved.summary.mass_g;
+  render(<DigitalStudyPanel session={session} />);
+  // Refresh to a saved response with a missing metric.
+  fetchDigitalStudy.mockResolvedValue(data(saved));
+  fireEvent.click(await screen.findByRole("button", { name: "Reload saved project" }));
+  await waitFor(() => expect(screen.getByRole("row", { name: "Mass (g) unknown" })).toBeInTheDocument());
+  const evidence = screen.getByRole("region", { name: "Evidence" });
+  expect(evidence).toHaveTextContent("Authority: unknown");
+  expect(evidence).toHaveTextContent("Source: Digital study run run-1 · revision 1");
+  expect(evidence.textContent).not.toMatch(/\b(?:ready|build-ready|verified)\b/i);
+});
+
+
+it("places the selected FieldDeck display reports inside its evidence pane", async () => {
+  const saved = study(1);
+  saved.summary.case_id = "fielddeck-5";
+  fetchDigitalStudy.mockResolvedValue(data(saved));
+  render(<DigitalStudyPanel session={session} />);
+  const reports = await screen.findByTestId("saved-display-evidence");
+  expect(within(screen.getByRole("region", { name: "Evidence" })).getByTestId("saved-display-evidence")).toBe(reports);
+  expect(screen.getByRole("region", { name: "Design" })).not.toContainElement(reports);
+});
+
+describe("Revision links", () => {
+  it("opens the revision named by the URL and reports revision choices back to it", async () => {
+    fetchDigitalStudy.mockResolvedValue(data(study(2, 244.9)));
+    const onRevisionRoute = vi.fn();
+    const { rerender } = render(<DigitalStudyPanel session={session} routeRevision={1} onRevisionRoute={onRevisionRoute} />);
+    const picker = await screen.findByLabelText("View revision");
+    expect(picker).toHaveValue("1");
+    fireEvent.change(picker, { target: { value: "2" } });
+    expect(onRevisionRoute).toHaveBeenLastCalledWith(null);
+    rerender(<DigitalStudyPanel session={session} routeRevision={null} onRevisionRoute={onRevisionRoute} />);
+    expect(screen.getByLabelText("View revision")).toHaveValue("2");
+    // Back to ?rev=1 moves the selection without another fetch.
+    rerender(<DigitalStudyPanel session={session} routeRevision={1} onRevisionRoute={onRevisionRoute} />);
+    expect(screen.getByLabelText("View revision")).toHaveValue("1");
+    expect(fetchDigitalStudy).toHaveBeenCalledTimes(1);
+  });
+
+  it("says when a linked revision does not exist and shows the latest", async () => {
+    render(<DigitalStudyPanel session={session} routeRevision={7} onRevisionRoute={vi.fn()} />);
+    expect(await screen.findByText(/asks for revision 7, which this project has not saved/)).toBeInTheDocument();
+    expect(screen.getByLabelText("View revision")).toHaveValue("1");
+  });
+});
+
+describe("Revision link normalisation", () => {
+  it("drops ?rev= when it names the latest revision, replacing the history entry", async () => {
+    fetchDigitalStudy.mockResolvedValue(data(study(2, 244.9)));
+    const onRevisionRoute = vi.fn();
+    render(<DigitalStudyPanel session={session} routeRevision={2} onRevisionRoute={onRevisionRoute} />);
+    await screen.findByLabelText("View revision");
+    expect(onRevisionRoute).toHaveBeenCalledWith(null, { replace: true });
+  });
+
+  it("keeps ?rev= for an older or unknown revision", async () => {
+    fetchDigitalStudy.mockResolvedValue(data(study(2, 244.9)));
+    const onRevisionRoute = vi.fn();
+    render(<DigitalStudyPanel session={session} routeRevision={1} onRevisionRoute={onRevisionRoute} />);
+    await screen.findByLabelText("View revision");
+    expect(onRevisionRoute).not.toHaveBeenCalled();
+  });
+});
+
+describe("Honest check transitions", () => {
+  it("says a check newly fails because its requirement rose, not that it regressed", async () => {
+    fetchDigitalStudy.mockResolvedValue(data(study(2, 244.9)));
+    fetchDigitalCompare.mockResolvedValue({
+      before_revision: 1, after_revision: 2, same_engine_sources: true,
+      requirements_changes: { minimum_work_runtime_h: { before: 2.5, after: 3.5, delta: 1 } }, metrics: {},
+      constraints: [{ id: "work_runtime", transition: "regressed",
+        before: { passed: true, actual: 3.166, limit: 2.5, unit: "h" }, after: { passed: false, actual: 3.166, limit: 3.5, unit: "h" } }],
+    });
+    render(<DigitalStudyPanel session={session} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Compare revisions" }));
+    const compared = await screen.findByTestId("revision-compare");
+    expect(compared).toHaveTextContent("Minimum work runtime · 2.5 h → 3.5 h");
+    const row = within(compared).getByRole("row", { name: /Work runtime/ });
+    expect(row).toHaveTextContent("Newly fails: requirement increased");
+    expect(row).toHaveTextContent("Measured 3.166 h, unchanged · target 3.5 h, up from 2.5 h");
+    expect(compared).not.toHaveTextContent(/regress/i);
   });
 });

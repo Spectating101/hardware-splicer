@@ -16,7 +16,7 @@ Compose writes KiCad artifacts to disk. Follow-up tools (`hs_design_quality`, BO
 
 | Env | Default | Meaning |
 |-----|---------|---------|
-| `HARDWARE_SPLICER_OUTPUT_ROOT` | `/tmp/hardware_splicer_api` | API-owned compose output |
+| `HARDWARE_SPLICER_OUTPUT_ROOT` | `$HARDWARE_SPLICER_STATE_DIR/api` | API-owned compose output |
 | `HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR` | unset / `0` | **Only** paths under output root are readable |
 
 **Agent rule:** After `hs_compose_drc_agent`, pass the returned `out_dir` (or `build_dir`) directly to `hs_design_quality`. Do not invent paths.

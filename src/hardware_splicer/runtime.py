@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import contextlib
+import functools
 import importlib.util
 import os
 import platform
@@ -13,17 +14,17 @@ import urllib.request
 from pathlib import Path
 from typing import Any, Dict, Iterator, Optional
 
+from .state_paths import repo_root, scratch_dir
 from .testing_mode import testing_mode_enabled
 
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = repo_root()
 CIRCUIT_ROOT = ROOT / "apps" / "circuit-ai"
 
 
 def scratch_root() -> Path:
-    """Writable scratch area for KiCad/Gerber trees (defaults to repo-local .cache)."""
-    raw = os.environ.get("HARDWARE_SPLICER_TMP_ROOT", "").strip()
-    root = Path(raw).expanduser() if raw else (ROOT / ".cache" / "hardware-splicer")
+    """Writable scratch area for KiCad/Gerber trees (see state_paths.scratch_dir)."""
+    root = scratch_dir()
     root.mkdir(parents=True, exist_ok=True)
     return root
 
@@ -169,7 +170,9 @@ def patched_env(values: Dict[str, Optional[str]]) -> Iterator[None]:
                 os.environ[key] = value
 
 
+@functools.lru_cache(maxsize=32)
 def _python_import_ok(python: Path, module: str) -> bool:
+    """Probe another interpreter once per process; a restart picks up new installs."""
     if not python.exists():
         return False
     try:
@@ -210,6 +213,18 @@ def headless_status() -> dict[str, Any]:
         "app_roots": app_roots,
         "dependencies": dependencies,
     }
+
+
+def client_status(status: Dict[str, Any]) -> Dict[str, Any]:
+    """A runtime status safe to return over HTTP: states only, no filesystem paths."""
+
+    hidden = {"python", "splicer3d_python", "app_roots"}
+    safe = {key: value for key, value in status.items() if key not in hidden}
+    safe["app_roots"] = {
+        name: {"exists": bool(row.get("exists")), "is_dir": bool(row.get("is_dir"))}
+        for name, row in (status.get("app_roots") or {}).items()
+    }
+    return safe
 
 
 def runtime_status(*, splicer_url: str | None = None) -> Dict[str, object]:

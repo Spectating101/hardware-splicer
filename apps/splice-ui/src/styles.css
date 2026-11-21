@@ -22,6 +22,37 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+p,
+li,
+dd,
+figcaption,
+caption {
+  text-wrap: pretty;
+}
+
+h1,
+h2,
+h3,
+h4,
+legend,
+summary {
+  text-wrap: balance;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 button,
@@ -38,7 +69,7 @@ code,
 .app-shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 300px 1fr;
+  grid-template-columns: 212px 1fr;
 }
 
 .sidebar {
@@ -63,7 +94,7 @@ code,
   border-radius: 10px;
   display: grid;
   place-items: center;
-  background: linear-gradient(145deg, #0b6e4f, #0a8f66);
+  background: linear-gradient(145deg, var(--accent-dark), var(--accent));
   font-weight: 700;
 }
 
@@ -256,6 +287,12 @@ code,
   color: #0b6e4f;
 }
 
+.status-pill.neutral {
+  background: var(--surface-2);
+  color: var(--muted);
+  border: 1px solid var(--line);
+}
+
 .status-pill.warn {
   background: #fde8e6;
   color: var(--danger);
@@ -303,10 +340,19 @@ td {
 }
 
 th {
-  font-size: 11px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--muted);
+}
+
+/* A row header names the measure; it reads as text, not as a column label. */
+th[scope="row"] {
+  font-size: inherit;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--text);
+  font-weight: 600;
 }
 
 .markdown-block {
@@ -576,7 +622,7 @@ button.ghost.large {
 
 .hint {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .choice-grid,
@@ -803,13 +849,14 @@ button.primary:disabled {
 }
 
 .sidebar-grow {
+  align-content: start;
   flex: 1;
   min-height: 0;
   overflow: auto;
 }
 
-.project-button.job-ok span {
-  color: #6dd4a8;
+.project-button.job-done span {
+  color: #9aa6b2;
 }
 
 .project-button.job-fail span {
@@ -876,8 +923,9 @@ button.primary:disabled {
   color: #2d8f6a;
 }
 
+/* Labels are written in sentence case at the source; capitalising every word misreads results. */
 .project-button .job-status {
-  text-transform: capitalize;
+  text-transform: none;
 }
 
 .tab-badge {
@@ -1434,13 +1482,14 @@ button.primary:disabled {
   flex-shrink: 0;
 }
 
+/* Build progress is state, not approval: neutral ink, no green. */
 .build-stage-list li.done .build-stage-dot {
-  background: var(--accent);
+  background: var(--muted);
 }
 
 .build-stage-list li.active .build-stage-dot {
-  background: var(--accent);
-  box-shadow: 0 0 0 3px #c8ebdc;
+  background: var(--text);
+  box-shadow: 0 0 0 3px var(--line);
 }
 
 .toast {
@@ -2555,3 +2604,317 @@ button.primary:disabled {
 .ok-text {
   color: #6ee7b7;
 }
+
+.sidebar-body { display: flex; flex: 1; flex-direction: column; gap: 20px; }
+.mobile-nav-toggle { display: none; }
+@media (max-width: 960px) {
+  .mobile-nav-toggle { display: block; margin-left: auto; color: inherit; background: transparent; border: 1px solid #667381; }
+  .sidebar-body:not(.open) { display: none; }
+}
+
+.projects-home, .library-page { display: grid; gap: 1.4rem; }
+.projects-heading { display: flex; gap: 1rem; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.projects-heading h1 { margin: 0; font-size: clamp(2rem, 4vw, 3rem); letter-spacing: -.04em; }
+.projects-heading h2, .projects-heading p { margin: .4rem 0; }
+.projects-heading .hero-actions { margin: 0; }
+.projects-heading label { display: grid; gap: .2rem; font-size: .85rem; }
+.project-rows { display: grid; margin-top: 1rem; }
+.project-rows button { display: grid; grid-template-columns: minmax(0, 1fr) minmax(5rem, .25fr) auto; gap: .75rem; align-items: center; padding: 1rem .5rem; border: 0; border-top: 1px solid var(--line); border-radius: 0; background: var(--surface); text-align: left; color: var(--text); }
+.project-rows button:hover, .project-rows button:focus-visible { background: var(--surface-2); }
+.project-rows strong { overflow-wrap: anywhere; }
+.project-rows small { display: block; margin-top: .25rem; color: var(--muted); }
+.project-stage { text-transform: capitalize; }
+@media (max-width: 540px) {
+  .project-rows button { grid-template-columns: minmax(0, 1fr) auto; }
+  .project-rows button > span:first-child { grid-column: 1 / -1; }
+}
+
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+::selection { background: var(--accent); color: white; }
+table { font-variant-numeric: tabular-nums; }
+textarea, select { font: inherit; }
+.new-project { display: grid; gap: 1rem; min-width: 0; }
+/* Three starting points as one choice: each option is a selectable tile with a radio mark. */
+.project-entry-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
+.project-entry-list li { min-width: 0; display: flex; }
+.project-entry { position: relative; width: 100%; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: .3rem .6rem; align-content: start;
+  text-align: left; padding: .9rem 1rem; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--text); font-weight: 400; }
+.project-entry:hover { border-color: var(--muted); }
+.project-entry[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.project-entry-mark { grid-row: 1; width: 16px; height: 16px; margin-top: .15rem; border-radius: 50%; border: 1.5px solid var(--muted); background: var(--surface); }
+.project-entry[aria-pressed="true"] .project-entry-mark { border-color: var(--accent); background: radial-gradient(circle, var(--accent) 0 4px, var(--surface) 4.5px); }
+.project-entry-label { font-weight: 600; }
+.project-entry-detail { grid-column: 2; color: var(--muted); font-size: .875rem; line-height: 1.45; }
+@media (max-width: 760px) { .project-entry-list { grid-template-columns: minmax(0, 1fr); } }
+.wizard-progress { margin: 0 0 1.1rem; max-width: 40rem; }
+.wizard-progress p { margin: 0 0 .45rem; font-size: .9375rem; }
+.wizard-progress-count { color: var(--muted); font-variant-numeric: tabular-nums; }
+.wizard-progress-next { color: var(--muted); font-size: .875rem; }
+.wizard-progress-track { height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; }
+.wizard-progress-track span { display: block; height: 100%; background: var(--text); transition: width .2s ease-out; }
+.owned-unit-editor { display: grid; gap: 1rem; }
+.owned-unit-editor fieldset { border: 0; border-top: 1px solid var(--line); margin: 0; padding: 1rem 0; min-width: 0; display: grid; gap: .75rem; }
+.owned-unit-editor label { display: grid; gap: .3rem; }
+.owned-unit-editor input, .owned-unit-editor select, .owned-unit-editor textarea { width: 100%; min-width: 0; }
+.project-bench { min-width: 0; }
+.bench-heading h1 { margin: 0; font-size: 1.65rem; }
+.bench-heading p { margin: .4rem 0; }
+.bench-heading { padding-bottom: 1rem; }
+.bench-columns { display: grid; grid-template-columns: 320px minmax(0, 1fr) 360px; gap: 1rem; align-items: start; }
+.bench-pane { min-width: 0; background: var(--surface); padding: 1rem; overflow-wrap: anywhere; }
+.bench-pane h2 { font-size: 1.15rem; margin: 0 0 1rem; }
+.bench-pane h3 { font-size: 1rem; }
+.bench-pane p { line-height: 1.5; }
+.bench-tabs { display: none; }
+.bench-rows { list-style: none; margin: 0; padding: 0; }
+.bench-rows > li { padding: .9rem 0; border-bottom: 1px solid var(--line); }
+.bench-rows > li:first-child { padding-top: 0; }
+.bench-rows p { margin: .4rem 0; font-size: .9rem; }
+.bench-facts { font-size: .9rem; }
+.bench-facts > div { padding: .6rem 0; border-top: 1px solid var(--line); }
+.bench-facts dd { margin: .3rem 0 0; font-variant-numeric: tabular-nums; }
+.bench-blockers { border-top: 1px solid var(--line); margin-top: 1.5rem; }
+.bench-references, .bench-tools { margin-top: 1rem; padding: 1rem 0; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
+.project-bench summary { cursor: pointer; font-weight: 600; }
+.project-bench .card { border: 0; border-radius: 0; box-shadow: none; background: transparent; }
+.project-bench .eyebrow { display: none; }
+.project-bench .honesty-card, .project-bench .bench-form.critical { border-left: 0; }
+.project-bench .digital-layout { grid-template-columns: minmax(0, 1fr); }
+.project-bench .digital-controls { gap: .75rem; }
+.project-bench .digital-controls label { min-width: 0; flex-basis: 100%; }
+.project-bench .digital-mode { display: flex; gap: .4rem; }
+.project-bench .digital-mode [aria-pressed="true"] { background: var(--accent); color: white; }
+.project-bench .digital-change { border-top: 1px solid var(--line); padding-top: 1rem; }
+.project-bench .digital-models.is-comparing { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+.project-bench .digital-viewer-card iframe { height: 360px; border-radius: 0; }
+.project-bench .digital-table { font-size: .85rem; }
+.project-bench .digital-input-diff { border-left: 0; padding: .75rem 0; background: transparent; }
+.project-bench .project-review__layout { grid-template-columns: minmax(0, 1fr); }
+.project-bench .project-review__header, .project-bench .project-review__summary { flex-wrap: wrap; }
+.project-bench .project-review__flag { border-left: 0; }
+.project-bench .agent-proposals { margin-top: 1rem; }
+.project-bench .display-comparison { overflow: hidden; }
+@media (min-width: 900px) and (max-width: 1279px) {
+  .bench-columns { grid-template-columns: 280px minmax(0, 1fr); }
+  .bench-parts { grid-row: 1 / 3; }
+  .bench-evidence { grid-column: 2; }
+}
+@media (max-width: 960px) {
+  .app-shell { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; }
+  .sidebar { align-self: start; padding: 12px 16px; gap: 0; }
+  .sidebar-body.open { padding-top: 1rem; }
+  .brand-mark { flex-shrink: 0; }
+}
+@media (max-width: 899px) {
+  .bench-columns { display: block; }
+  .bench-tabs { display: flex; gap: .4rem; margin-bottom: 1rem; }
+  .bench-tabs button { flex: 1; min-width: 0; }
+  .bench-tabs [aria-selected="true"] { background: var(--accent); color: white; }
+  .project-bench[data-active-pane="parts"] .bench-pane:not(.bench-parts),
+  .project-bench[data-active-pane="design"] .bench-pane:not(.bench-design),
+  .project-bench[data-active-pane="evidence"] .bench-pane:not(.bench-evidence) { display: none; }
+  .bench-pane { padding: .85rem; }
+  .project-bench .digital-models.is-comparing { grid-template-columns: minmax(0, 1fr); }
+  .bench-heading { overflow-wrap: anywhere; }
+  .new-project .study-library { padding: 0; border: 0; box-shadow: none; background: transparent; }
+}
+
+/* Bench layout: the design view leads across the full width; parts and evidence sit beneath it. */
+.bench-columns { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "design design" "parts evidence"; }
+.bench-design { grid-area: design; }
+.bench-parts { grid-area: parts; }
+.bench-evidence { grid-area: evidence; }
+@media (min-width: 900px) and (max-width: 1279px) {
+  .bench-columns { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .bench-parts { grid-row: auto; }
+  .bench-evidence { grid-column: auto; }
+}
+/* Evidence usually runs far longer than parts; keep parts and requirements beside it while reading instead of leaving an empty column. */
+@media (min-width: 900px) {
+  .bench-parts { position: sticky; top: 1rem; max-height: calc(100vh - 2rem); overflow-y: auto; overscroll-behavior: contain; }
+}
+.bench-objective { display: flex; gap: .6rem; align-items: baseline; flex-wrap: wrap; max-width: 72ch; }
+.bench-objective span { font-size: .75rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.design-view { margin-bottom: 1.25rem; }
+.design-view-source { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
+.design-view-source p { margin: 0 0 .6rem; font-size: .85rem; }
+.design-view-howto { margin-top: .6rem; font-size: .9rem; }
+.design-view-howto summary { font-weight: 500; color: var(--muted); }
+.design-view .fd-scene { border-radius: 4px; overflow: hidden; }
+.design-records h3 { font-size: 1.05rem; margin: 0 0 .4rem; }
+.design-records h4 { font-size: .95rem; margin: 1.1rem 0 .4rem; }
+.design-records .mono, .design-records code { font-family: ui-monospace, "IBM Plex Mono", monospace; font-size: .85rem; overflow-wrap: anywhere; }
+.design-record-list { margin: 0; padding-left: 1.2rem; line-height: 1.6; }
+.bench-stale { display: inline-block; margin-right: .5rem; font-size: .8rem; font-weight: 600; color: #9a4a00; }
+.bench-rows > li.is-stale > strong, .bench-rows > li.is-stale > a { text-decoration: line-through; text-decoration-thickness: 1px; }
+.bench-link-state { margin-top: 1rem; }
+.bench-retained, .bench-failed { display: inline-block; margin-right: .5rem; font-size: .8rem; font-weight: 600; }
+.bench-retained { color: var(--muted); }
+.bench-failed { color: var(--danger); }
+.bench-changes { margin: .25rem 0 .75rem; padding-left: 1.2rem; }
+.bench-link-state code { font-family: ui-monospace, "IBM Plex Mono", monospace; font-size: .85rem; overflow-wrap: anywhere; }
+.bench-package { margin-top: 1rem; background: var(--surface); padding: 1rem; }
+.bench-package h2 { font-size: 1.15rem; margin: 0 0 1rem; }
+.bench-package h3 { font-size: 1rem; margin: 0 0 .5rem; }
+.bench-package-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem; }
+.bench-next { margin: 0; padding-left: 1.2rem; line-height: 1.55; }
+.digital-compare caption { text-align: left; font-weight: 600; padding: .6rem 0 .3rem; }
+.digital-compare td:last-child small { display: block; color: var(--muted); font-size: .8125rem; margin-top: .15rem; }
+.digital-compare tr[data-transition^="newly-fails"] td:last-child strong,
+.digital-compare tr[data-transition="regressed"] td:last-child strong { color: #a12a1c; }
+.advanced-scenes { margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--line); }
+.scene-manifest-list { list-style: none; padding: 0; margin: 0; display: grid; gap: .5rem; }
+@media (max-width: 899px) {
+  .bench-package-grid { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+}
+/* Change history: Policy Lab decisions as recorded by HS. Neutral ink; failure in the danger hue, never a success colour. */
+.change-history { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+.change-history h3 { font-size: 1.05rem; margin: 0 0 .75rem; }
+.change-history a { color: var(--text); text-decoration: underline; text-underline-offset: .2em; }
+.change-history code { font-family: ui-monospace, "IBM Plex Mono", monospace; font-size: .85rem; overflow-wrap: anywhere; }
+.change-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.25rem; }
+.change-entry { padding-bottom: 1rem; border-bottom: 1px solid var(--line); }
+.change-entry p { margin: 0 0 .4rem; }
+.change-policy { font-weight: 500; }
+.change-decision { display: inline-block; padding: .05rem .4rem; border: 1px solid var(--line); border-radius: 3px;
+  font-size: .8rem; font-weight: 600; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+.change-unmet { margin: 0 0 .5rem; padding-left: 1.2rem; font-size: .9rem; color: var(--muted); }
+.change-facts { display: grid; gap: .4rem; margin: .5rem 0; }
+.change-facts > div { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: .75rem; }
+.change-facts dt { font-size: .85rem; font-weight: 600; color: var(--muted); }
+.change-facts dd { margin: 0; }
+.change-facts ul { margin: 0; padding: 0; list-style: none; }
+.change-candidate { margin-top: .75rem; padding: .75rem; background: var(--surface-2); border-radius: 4px; }
+.change-formula code { font-size: .8rem; }
+.change-failed { color: var(--danger); font-weight: 500; }
+.change-cite { list-style: none; margin: .75rem 0; padding: 0; display: grid; gap: .5rem; }
+.change-cite p { margin: 0 0 .2rem; }
+@media (max-width: 899px) {
+  .change-facts > div { grid-template-columns: minmax(0, 1fr); gap: .1rem; }
+}
+
+/* Revision summary: what this revision proves (in the model), leaves unknown, fails, and what to do next. */
+.bench-summary { background: var(--surface); padding: .85rem 1rem; margin-bottom: 1rem; }
+.bench-summary-counts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; margin: 0; }
+.bench-summary-counts > div { min-width: 0; }
+.bench-summary-counts dt { font-size: .75rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.bench-summary-counts dd { margin: .25rem 0 0; font-size: .875rem; line-height: 1.45; color: var(--muted); }
+.bench-summary-counts dd a { font-size: 1.25rem; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; margin-right: .3rem; text-decoration: none; }
+.bench-summary-counts dd a:hover, .bench-summary-counts dd a:focus-visible { text-decoration: underline; }
+.bench-summary-counts [data-state="failed"]:not([data-count="0"]) dd a { color: var(--danger); }
+.bench-summary-next { margin: .85rem 0 0; padding-top: .75rem; border-top: 1px solid var(--line); font-size: .9375rem; line-height: 1.5; }
+.bench-summary-next strong { margin-right: .4rem; }
+.bench-summary-next small { color: var(--muted); font-size: .8125rem; }
+.bench-summary-next a { margin-left: .4rem; font-size: .875rem; }
+.bench-summary-next[data-missing] span { font-style: italic; }
+.bench-transition { font-size: .9rem; }
+.bench-history { margin-top: .4rem; font-size: .875rem; }
+.bench-history summary { font-weight: 500; color: var(--muted); }
+.project-bench .bench-history summary { font-weight: 500; }
+.bench-requirements { list-style: none; margin: 0; padding: 0; }
+.bench-requirements li { padding: .55rem 0; border-top: 1px solid var(--line); font-size: .9375rem; font-variant-numeric: tabular-nums; min-height: 2.5rem; }
+.bench-raw { margin-top: .75rem; font-size: .875rem; }
+.project-bench .bench-raw summary, .design-records .bench-raw summary { font-weight: 500; color: var(--muted); }
+.bench-raw code, .bench-key { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: .8125rem; overflow-wrap: anywhere; }
+.bench-key { color: var(--muted); }
+.project-bench .digital-table { font-size: .875rem; }
+.digital-table th, .digital-table td, .display-comparison th, .display-comparison td { height: 2.5rem; }
+details.bench-objective { display: block; }
+details.bench-objective summary { font-size: .75rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+@media (max-width: 1100px) {
+  .bench-summary-counts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 899px) {
+  .bench-heading { padding-bottom: .5rem; }
+  .bench-heading h1 { font-size: 1.5rem; }
+  .bench-heading p { margin: .2rem 0; font-size: .875rem; }
+  .bench-summary { padding: .75rem; }
+  .bench-summary-counts { gap: .6rem .9rem; }
+  .bench-tabs { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: .4rem 0; margin-bottom: .75rem; }
+  .bench-tabs button { min-height: 44px; }
+}
+
+/* Sidebar: 240 px, folds to the brand mark and its toggle. */
+.sidebar-toggle { display: grid; place-items: center; margin-left: auto; width: 32px; height: 32px; padding: 0; border: 1px solid #2b3542; border-radius: 6px; background: transparent; color: #c9d2dc; }
+.sidebar-toggle:hover, .sidebar-toggle:focus-visible { border-color: #667381; color: #fff; }
+.app-shell.sidebar-collapsed { grid-template-columns: 64px 1fr; }
+.sidebar-collapsed .sidebar { padding-inline: 10px; }
+.sidebar-collapsed .brand { flex-direction: column; gap: 10px; }
+.sidebar-collapsed .brand > div:not(.brand-mark), .sidebar-collapsed .sidebar-body { display: none; }
+.sidebar-collapsed .sidebar-toggle { margin-left: 0; }
+.sidebar-view-all { margin-top: .4rem; }
+@media (max-width: 960px) {
+  .sidebar-toggle { display: none; }
+  .app-shell.sidebar-collapsed { grid-template-columns: minmax(0, 1fr); }
+  .sidebar-collapsed .brand { flex-direction: row; }
+  .sidebar-collapsed .brand > div:not(.brand-mark) { display: block; }
+}
+/* Saved project rows: name, objective, save and creation time, stage and revision. */
+.project-rows button { grid-template-columns: minmax(0, 1fr) auto auto; min-height: 3.5rem; }
+.project-row-main { display: grid; gap: .2rem; min-width: 0; }
+.project-objective { color: var(--text); font-size: .9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.project-rows .project-id { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: .8125rem; font-weight: 400; color: var(--muted); }
+.project-rev { font-variant-numeric: tabular-nums; font-size: .875rem; }
+.brand strong { white-space: nowrap; font-size: .95rem; }
+.project-objective.muted { color: var(--muted); }
+.change-failed-row { display: block; }
+.change-policy-id { font-size: .85rem; }
+.change-quote { margin: 0 0 .5rem; font-size: .9rem; color: var(--muted); }
+.change-quote-label { margin: 0; font-weight: 600; }
+.change-quote ul { margin: .1rem 0 0; padding-left: 1.2rem; }
+.change-inputs { margin: 0 0 .5rem; padding-left: 1.2rem; font-size: .875rem; color: var(--muted); }
+
+/* Study run: a sized action that names the revision it creates. */
+.digital-change form .digital-run { justify-self: start; min-width: 240px; max-width: 280px; }
+
+/* Intake: the progress line reads at body size; Back and Continue sit inside the form card. */
+.wizard-progress p { font-size: 1rem; }
+.wizard-progress-count { color: var(--text); }
+.wizard-progress-next { font-size: .875rem; color: var(--muted); }
+.wizard-body .wizard-footer { margin: 1.25rem -20px -18px; padding: 14px 20px; border-top: 1px solid var(--line); background: var(--surface-2); border-radius: 0 0 14px 14px; }
+
+/* Scene provenance: one line of what it is, the path behind a disclosure. */
+.design-view-provenance { min-width: 0; flex: 1; }
+.design-view-provenance p { margin: 0 0 .35rem; font-size: .9375rem; }
+.design-view-provenance details { margin-bottom: .6rem; font-size: .875rem; }
+.design-view-provenance summary { color: var(--muted); cursor: pointer; }
+.design-view-provenance code { overflow-wrap: anywhere; }
+
+/* Secondary content text at the 14 px floor; chrome labels may stay smaller. */
+.bench-rows p, .bench-facts, .digital-compare td:last-child small, .project-rows small, .bench-history,
+.design-records .mono, .design-records code { font-size: .875rem; }
+.bench-untested { font-weight: 600; color: var(--text); }
+.digital-field-pair small { font-size: .875rem; }
+/* Phone header: one 56 px bar, brand mark and name on one line. */
+@media (max-width: 960px) {
+  .sidebar { padding: 10px 16px; }
+  .brand-mark { width: 36px; height: 36px; border-radius: 9px; }
+  .brand span { display: none; }
+  .mobile-nav-toggle { min-height: 36px; padding: 0 12px; }
+}
+.brand-mark { flex-shrink: 0; }
+
+/* Phone: the summary and the design intro stay short, so the model starts on the first screen.
+   Every qualifier stays visible; only spacing, label size and the duplicated pane heading change. */
+@media (max-width: 639px) {
+  .bench-summary { padding: .6rem .75rem; margin-bottom: .6rem; }
+  .bench-summary-counts { gap: .4rem .75rem; }
+  .bench-summary-counts dt { font-size: .6875rem; }
+  .bench-summary-counts dd { margin-top: .1rem; line-height: 1.3; }
+  .bench-summary-counts dd a { font-size: 1rem; }
+  .bench-summary-next { margin-top: .5rem; padding-top: .5rem; font-size: .875rem; line-height: 1.4; }
+  .bench-tabs { margin-bottom: .5rem; }
+  /* The selected tab already names the pane and labels it for assistive technology. */
+  .project-bench .bench-pane > h2 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .design-view-source { align-items: center; gap: .5rem; }
+  .design-view-provenance p { font-size: .875rem; margin-bottom: .2rem; }
+  .design-view-provenance details { margin-bottom: .4rem; }
+  .design-view-source > button { min-height: 44px; padding: 0 .75rem; font-size: .875rem; }
+}
+
+/* Same-name projects: the newest stays a full row; older copies fold under a quiet disclosure. */
+.project-group > button, .project-group details > button { width: 100%; }
+.project-group details { border-top: 1px solid var(--line); }
+.project-group summary { padding: .6rem .5rem; min-height: 2.75rem; display: flex; align-items: center; font-size: .875rem; color: var(--muted); cursor: pointer; }
+.project-group summary:hover, .project-group summary:focus-visible { color: var(--text); background: var(--surface-2); }
+.project-group details > button { padding-left: 1.25rem; }

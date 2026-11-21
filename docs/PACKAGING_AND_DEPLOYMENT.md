@@ -224,7 +224,7 @@ INSTALL_DEV=1 bash scripts/install_splice_v1.sh
 | Command | Maps to |
 |---------|---------|
 | `hs-doctor` | `hardware_splicer.sdk:engine_doctor` wrapper or CLI doctor |
-| `hs-serve` | uvicorn `hardware_splicer.api:app` |
+| `hs-serve` | uvicorn `hardware_splicer.product_api:app` (API + built UI; see SETUP.md "Run the app") |
 | `hs-mcp` | `python -m hardware_splicer.mcp_server` |
 
 **Extras:**
@@ -299,7 +299,8 @@ WorkingDirectory=/opt/hardware-splicer
 Environment=PYTHONPATH=src
 Environment=HARDWARE_SPLICER_AUTOROUTE=0
 Environment=HARDWARE_SPLICER_TMP_ROOT=/var/lib/hardware-splicer/builds
-ExecStart=/opt/hardware-splicer/.venv/bin/uvicorn hardware_splicer.api:app --host 127.0.0.1 --port 8787
+Environment=HARDWARE_SPLICER_STATE_DIR=/var/lib/hardware-splicer/state
+ExecStart=/opt/hardware-splicer/.venv/bin/hs-serve --ui --host 127.0.0.1 --port 8787
 Restart=on-failure
 
 [Install]
@@ -427,7 +428,7 @@ curl -s localhost:8787/...   # add GET /health if missing (v1.0.1)
 **Packaging done when:** stranger on Ubuntu with KiCad runs:
 
 ```bash
-git clone … && cd Hardware-Splicer && git checkout v1.0.0
+git clone … && cd Hardware-Splicer && git checkout <release-tag>
 bash scripts/install_splice_v1.sh
 hs-doctor   # ok: true, kicad_cli: ok
 make verify-splice-loop
