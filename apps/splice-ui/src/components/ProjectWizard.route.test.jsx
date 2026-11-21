@@ -3,7 +3,7 @@ import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ProjectWizard from "./ProjectWizard.jsx";
 
-vi.mock("../api.js", () => ({
+vi.mock("../api", () => ({
   clarifyIntent: vi.fn(async () => ({ questions: [], enriched_intent: null })),
   donorBoardVision: vi.fn(),
   visionEnrichIntake: vi.fn(),

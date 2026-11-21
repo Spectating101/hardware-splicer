@@ -1,9 +1,9 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import ChangeHistoryPanel from "./ChangeHistoryPanel.jsx";
-import { fetchChangeDossier } from "./digitalStudyApi.js";
+import { fetchChangeDossier } from "./digitalStudyApi";
 
-vi.mock("./digitalStudyApi.js", () => ({ fetchChangeDossier: vi.fn() }));
+vi.mock("./digitalStudyApi", () => ({ fetchChangeDossier: vi.fn() }));
 
 const checks = (runtime, limit) => [
   { id: "work_runtime", passed: runtime >= limit, actual: runtime, limit, unit: "h" },

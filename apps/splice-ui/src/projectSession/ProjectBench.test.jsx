@@ -2,14 +2,14 @@ import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import ProjectBench, { summarizeRevision } from "./ProjectBench.jsx";
 import NewProject from "./NewProject.jsx";
-import * as api from "./digitalStudyApi.js";
-import * as sceneApi from "../api.js";
-import { listProjectReviews, listProjectRevisions, loadProjectReview } from "./projectReviewApi.js";
+import * as api from "./digitalStudyApi";
+import * as sceneApi from "../api";
+import { listProjectReviews, listProjectRevisions, loadProjectReview } from "./projectReviewApi";
 
-vi.mock("../api.js", () => ({
+vi.mock("../api", () => ({
   fetchScenes: vi.fn(async () => []), fetchSceneManifest: vi.fn(), fetchSceneRecords: vi.fn(async () => ({ records: [] })),
 }));
-vi.mock("./digitalStudyApi.js", () => ({
+vi.mock("./digitalStudyApi", () => ({
   fetchChangeDossier: vi.fn(async () => ({ change_dossier: { changes: [], cite_editions: [], cite_linked: false, head_revision: 1 } })),
   fetchEngineeringPackages: vi.fn(async () => ({ packages: [] })), fetchEvidenceDelta: vi.fn(),
   fetchEngineeringRevisionDiff: vi.fn(), fetchDigitalCompare: vi.fn(),
@@ -18,7 +18,7 @@ vi.mock("./digitalStudyApi.js", () => ({
   fetchPartSubstitution: vi.fn(), assessMachineRelease: vi.fn(), fetchDigitalCases: vi.fn(),
   digitalArtifactUrl: (path) => path,
 }));
-vi.mock("./projectReviewApi.js", () => ({
+vi.mock("./projectReviewApi", () => ({
   listProjectReviews: vi.fn(), listProjectRevisions: vi.fn(async () => ({ revisions: [] })),
   loadProjectReview: vi.fn(async () => ({ review: null })), decideProjectReview: vi.fn(),
 }));

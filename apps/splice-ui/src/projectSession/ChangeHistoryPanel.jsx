@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { VIEWS } from "../nav.js";
 import { pathForRoute } from "../router";
 import { describeTransition } from "./checkTransition";
-import { fetchChangeDossier } from "./digitalStudyApi.js";
+import { fetchChangeDossier } from "./digitalStudyApi";
 import { formatValue, keyLabel } from "./digitalStudyLabels.js";
 
 // HS's record of Policy Lab changes for this project. Every value is the backend's; the panel

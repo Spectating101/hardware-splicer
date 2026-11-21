@@ -12,7 +12,7 @@ import {
   fetchJobs,
   fetchVisionCapabilities,
   renderProjectPackage,
-} from "./api.js";
+} from "./api";
 import BuildOverlay from "./components/BuildOverlay.jsx";
 import DesignPreviewPanel from "./components/DesignPreviewPanel.jsx";
 import ProductShowcase from "./components/ProductShowcase.jsx";
@@ -24,7 +24,7 @@ import { useSpliceJob } from "./hooks/useSpliceJob.js";
 import { ADVANCED_VIEWS, VIEWS, isAdvancedView } from "./nav.js";
 import { canGoBackInApp, useRoute } from "./router";
 import ProjectWorkspace from "./projectSession/ProjectWorkspace.jsx";
-import { createDigitalProject } from "./projectSession/digitalStudyApi.js";
+import { createDigitalProject } from "./projectSession/digitalStudyApi";
 import { useProjectPersistence } from "./projectSession/projectPersistence";
 import {
   ACTIONS,

@@ -5,7 +5,7 @@ import DesignView, { splitGeometryNote } from "./DesignView.jsx";
 import {
   assessMachineRelease, digitalArtifactUrl, engineeringPackageUrl, fetchEngineeringPackages, fetchEngineeringRevisionDiff, fetchEvidenceDelta,
   fetchMaterialAssessment, fetchPartSubstitution, fetchProjectAssurance, fetchProjectMaterials,
-} from "./digitalStudyApi.js";
+} from "./digitalStudyApi";
 import { describeTransition, invalidationReason } from "./checkTransition";
 import { factText, formatValue, keyLabel } from "./digitalStudyLabels.js";
 import { blockerStatus } from "./statusLanguage";

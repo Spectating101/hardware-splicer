@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   cancelDigitalJob, digitalArtifactUrl, fetchDigitalCompare, fetchDigitalJob, fetchDigitalStudy, submitDigitalRun,
-} from "./digitalStudyApi.js";
+} from "./digitalStudyApi";
 import ProjectBench from "./ProjectBench.jsx";
 import { SavedDisplayComparison } from "./FieldDeckDisplayComparison.jsx";
 import { fieldLabel, formatValue, keyLabel } from "./digitalStudyLabels.js";

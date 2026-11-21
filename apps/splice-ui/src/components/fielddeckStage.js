@@ -15,7 +15,7 @@ import {
   SMAAEffect, SMAAPreset, ToneMappingEffect, ToneMappingMode,
 } from "postprocessing";
 import { N8AOPostPass } from "n8ao";
-import { sceneRevisionUrl } from "../api.js";
+import { sceneRevisionUrl } from "../api";
 import { runChainJobs } from "./fielddeckChains.js";
 import { loadChainModule } from "./fielddeckChainsWasm.js";
 import {

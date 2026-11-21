@@ -5,9 +5,9 @@ import MachineAuthoringPanel from "./MachineAuthoringPanel.jsx";
 import {
   editMachineProject,
   stageMachineProjectReview,
-} from "../projectSession/machineAuthoringApi.js";
+} from "../projectSession/machineAuthoringApi";
 
-vi.mock("../projectSession/machineAuthoringApi.js", () => ({
+vi.mock("../projectSession/machineAuthoringApi", () => ({
   editMachineProject: vi.fn(),
   stageMachineProjectReview: vi.fn(),
 }));

@@ -2,13 +2,13 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import BenchCaptureImportPanel from "./BenchCaptureImportPanel.jsx";
-import { projectBenchCaptureEvidence } from "../projectSession/benchCaptureEvidenceApi.js";
-import { stageMachineProjectReview } from "../projectSession/machineAuthoringApi.js";
+import { projectBenchCaptureEvidence } from "../projectSession/benchCaptureEvidenceApi";
+import { stageMachineProjectReview } from "../projectSession/machineAuthoringApi";
 
-vi.mock("../projectSession/benchCaptureEvidenceApi.js", () => ({
+vi.mock("../projectSession/benchCaptureEvidenceApi", () => ({
   projectBenchCaptureEvidence: vi.fn(),
 }));
-vi.mock("../projectSession/machineAuthoringApi.js", () => ({
+vi.mock("../projectSession/machineAuthoringApi", () => ({
   stageMachineProjectReview: vi.fn(),
 }));
 

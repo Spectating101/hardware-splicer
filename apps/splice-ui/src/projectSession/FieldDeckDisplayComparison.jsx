@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import reference from "../../../../docs/status/generated/fielddeck-display-swap-20261118.json";
-import { digitalArtifactUrl } from "./digitalStudyApi.js";
+import { digitalArtifactUrl } from "./digitalStudyApi";
 
 const referenceUrl = `data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(reference, null, 2))}`;
 

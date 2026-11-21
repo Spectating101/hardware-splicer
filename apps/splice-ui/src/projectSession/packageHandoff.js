@@ -3,7 +3,7 @@
  * Prefer deriving from session; reducer may also store a snapshot.
  */
 
-import { jobBundleUrl, buildPackageArchiveUrl } from "../api.js";
+import { jobBundleUrl, buildPackageArchiveUrl } from "../api";
 
 function hasPackage(session) {
   return Boolean(session?.projectPackage);

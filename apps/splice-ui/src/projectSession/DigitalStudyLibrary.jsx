@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchDigitalCases } from "./digitalStudyApi.js";
+import { fetchDigitalCases } from "./digitalStudyApi";
 import { fieldLabel } from "./digitalStudyLabels.js";
 import "./digitalStudy.css";
 

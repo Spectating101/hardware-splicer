@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { clarifyIntent, donorBoardVision, visionEnrichIntake } from "../api.js";
+import { clarifyIntent, donorBoardVision, visionEnrichIntake } from "../api";
 import {
   INITIAL_WIZARD,
   PART_TYPES,
