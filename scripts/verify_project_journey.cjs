@@ -250,7 +250,8 @@ async function main() {
     await openProject(droneId);
     await page.locator("[data-design-state=records]").waitFor({ timeout: 30000 });
     if (await page.locator(".fd-stage, canvas").count()) problems.push("Drone bench drew a 3D stage");
-    await page.getByText("CAD kernel available", { exact: true }).first().waitFor();
+    // The open question reads in words; the raw record sits behind Source details.
+    await page.locator(".design-record-list strong", { hasText: "CAD kernel available" }).first().waitFor();
     await shot("14-drone-bench-records");
     await page.getByTestId("bench-package").scrollIntoViewIfNeeded();
     await shot("15-drone-package-next-action");
