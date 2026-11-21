@@ -1,0 +1,13 @@
+{
+  "schema": "hs.restoration.video_heldout_outcome.v1",
+  "case_id": "ps2_2021_disc_no_read",
+  "device": "Sony PlayStation 2 Slim",
+  "root_cause": "optical_pickup_failure",
+  "repair_steps": [
+    "Creator replaced the disc drive/laser assembly",
+    "Creator adjusted optical mechanism screws afterward"
+  ],
+  "reported_outcome": "Creator reports restoring disc reading after drive/laser replacement and adjustment",
+  "evidence_quality": "creator-reported outcome; exact failing electronic component not instrumented",
+  "source_url": "https://www.youtube.com/watch?v=8hGGVW_mGEI"
+}

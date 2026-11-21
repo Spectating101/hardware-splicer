@@ -1,0 +1,39 @@
+{
+  "schema": "hs.restoration.video_blind_intake.v1",
+  "case_id": "switch_2024_dead_usb_c",
+  "device": "Nintendo Switch (original)",
+  "repair_intake": {
+    "symptoms": [
+      "Console will not turn on",
+      "Charging produces no visible response",
+      "USB-C cable is used for charging"
+    ],
+    "when_it_fails": "At attempted power-on and charging",
+    "device_hint": "Nintendo Switch (original)",
+    "repro_steps": [
+      "Attach known charger and observe any charge indication"
+    ]
+  },
+  "initial_codes": [
+    "no_power",
+    "no_charge_response",
+    "usb_c_power_input"
+  ],
+  "followup_repair_intake": {
+    "symptoms": [
+      "Charging controller checked with multimeter and appeared functional",
+      "Physical USB-C charging connector appears damaged"
+    ],
+    "device_hint": "Nintendo Switch (original)"
+  },
+  "followup_codes": [
+    "charge_ic_checked_good",
+    "charging_port_physically_damaged"
+  ],
+  "source_context": {
+    "url": "https://www.youtube.com/watch?v=0HZSA8nZd_k",
+    "creator": "Odd Tinkering",
+    "date": "2024-07-15",
+    "retrieval_limit": "creator video description; no full frame-by-frame inspection"
+  }
+}

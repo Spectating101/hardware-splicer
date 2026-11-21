@@ -1,0 +1,13 @@
+{
+  "schema": "hs.restoration.video_heldout_outcome.v1",
+  "case_id": "gbc_2020_broken_power_path",
+  "device": "Nintendo Game Boy Color",
+  "root_cause": "open_power_trace",
+  "repair_steps": [
+    "Creator bridged a broken battery-terminal connection with wire",
+    "Creator later replaced a damaged LCD polarizer and refurbished exterior"
+  ],
+  "reported_outcome": "Power returned after connection bridge; visual display subsequently restored",
+  "evidence_quality": "creator-reported outcome, not independent lab verification",
+  "source_url": "https://www.youtube.com/watch?v=2BmGMi0IEx4"
+}

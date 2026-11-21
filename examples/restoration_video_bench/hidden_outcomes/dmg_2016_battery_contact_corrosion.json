@@ -1,0 +1,12 @@
+{
+  "schema": "hs.restoration.video_heldout_outcome.v1",
+  "case_id": "dmg_2016_battery_contact_corrosion",
+  "device": "Nintendo Game Boy DMG-01",
+  "root_cause": "corroded_battery_contact",
+  "repair_steps": [
+    "Video is described as a no-power battery-contact corrosion fix; detailed electrical procedure not documented in retrieved description"
+  ],
+  "reported_outcome": "Repair claimed by title/description; specific measurements and causal proof not accessible",
+  "evidence_quality": "low-detail creator-description outcome (weak ground truth)",
+  "source_url": "https://www.youtube.com/watch?v=mMjNzPR7nVE"
+}

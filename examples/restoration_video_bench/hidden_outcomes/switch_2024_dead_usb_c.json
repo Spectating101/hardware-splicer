@@ -1,0 +1,13 @@
+{
+  "schema": "hs.restoration.video_heldout_outcome.v1",
+  "case_id": "switch_2024_dead_usb_c",
+  "device": "Nintendo Switch (original)",
+  "root_cause": "damaged_usb_c_port",
+  "repair_steps": [
+    "Creator replaced visibly damaged USB-C port",
+    "Creator separately replaced scratched digitizer"
+  ],
+  "reported_outcome": "Creator reports restoration of charging/power after USB-C replacement",
+  "evidence_quality": "creator-reported outcome; no independent solder-joint verification",
+  "source_url": "https://www.youtube.com/watch?v=0HZSA8nZd_k"
+}

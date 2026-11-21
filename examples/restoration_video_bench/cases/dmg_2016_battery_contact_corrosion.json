@@ -1,0 +1,35 @@
+{
+  "schema": "hs.restoration.video_blind_intake.v1",
+  "case_id": "dmg_2016_battery_contact_corrosion",
+  "device": "Nintendo Game Boy DMG-01",
+  "repair_intake": {
+    "symptoms": [
+      "Does not turn on with batteries",
+      "Battery terminals heavily corroded"
+    ],
+    "when_it_fails": "No power at switch-on",
+    "device_hint": "Nintendo Game Boy DMG-01",
+    "repro_steps": [
+      "Insert correct batteries and attempt power"
+    ]
+  },
+  "initial_codes": [
+    "no_power",
+    "corrosion_visible"
+  ],
+  "followup_repair_intake": {
+    "symptoms": [
+      "Battery contacts visibly show substantial corrosion"
+    ],
+    "device_hint": "Nintendo Game Boy DMG-01"
+  },
+  "followup_codes": [
+    "corrosion_visible"
+  ],
+  "source_context": {
+    "url": "https://www.youtube.com/watch?v=mMjNzPR7nVE",
+    "creator": "Retro Sales",
+    "date": "2016-08-23",
+    "retrieval_limit": "title and short YouTube description; lacks detailed repair measurements"
+  }
+}

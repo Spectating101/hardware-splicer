@@ -1,0 +1,52 @@
+name: HS video restoration retrospective diagnostic benchmark
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/hs-restoration-video-bench.yml'
+      - 'examples/restoration_video_bench/**'
+      - 'src/hardware_splicer/restoration_video_triage.py'
+      - 'tests/test_restoration_video_bench.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  outcome-leakage-and-diagnostic-gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install core HS package and pytest
+        run: python -m pip install -e . 'pytest>=8,<10'
+      - name: Source-separated re-run of four video case inputs
+        env:
+          PYTHONPATH: src
+        run: |
+          python examples/restoration_video_bench/run_trial.py
+          git diff --exit-code -- examples/restoration_video_bench/evidence/
+      - name: Evidence provenance, measured branch and safety release tests
+        env:
+          PYTHONPATH: src
+        run: python -m pytest -q tests/test_restoration_video_bench.py
+      - name: Reject accidental '4/4 AI physical repair' promotion
+        run: |
+          python - <<'PY'
+          import json
+          base='examples/restoration_video_bench/evidence'
+          a=json.load(open(base+'/evaluation.json'))
+          assert a['case_count']==4
+          assert a['metrics_counts']['initial_hit_at_1']==3
+          assert a['metrics_counts']['after_observations_hit_at_1']==4
+          assert a['methodology']['NOT_scientifically_independent_blind_test']
+          assert a['methodology']['NOT_an_LLM_autonomous_diagnosis']
+          assert a['methodology']['NOT_actual_video_frame_or_transcript_processing']
+          assert not a['methodology']['actual_restoration_repaired_by_HS']
+          PY
+      - name: Archive the measured retrospective pilot (NOT hardware repair)
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-four-video-repair-triage-retrospective
+          retention-days: 30
+          path: examples/restoration_video_bench/evidence
