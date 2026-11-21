@@ -167,6 +167,18 @@ describe("App navigation integration", () => {
     expect(await screen.findByTestId("interface-lab")).toBeInTheDocument();
   });
 
+  it("shows a completed run neutrally with the result it returned, never as a success", async () => {
+    const api = await import("./api.js");
+    api.fetchJobs.mockResolvedValueOnce({ jobs: [{ job_id: "run-1", project_name: "Fielddeck 5 display revision", status: "succeeded",
+      options: { job_type: "digital_study", payload: { project_id: "digital-fd" } } }] });
+    api.fetchJobResult.mockResolvedValueOnce({ ok: true, result: { requirements_met: false, revision: 2 } });
+    render(<App />);
+    const status = await screen.findByText("Run completed · requirements not met", {}, { timeout: 5000 });
+    expect(status.closest("button")).toHaveClass("job-done");
+    expect(status.closest("button")).not.toHaveClass("job-ok");
+    expect(screen.queryByText(/succeeded|success/i)).toBeNull();
+  });
+
   it("does not expose Design Studio as a Home front door", async () => {
     render(<App />);
     await waitFor(() => expect(screen.getByTestId("home-start-project")).toBeInTheDocument());

@@ -222,7 +222,7 @@ function PartTree({ rows, view, questions, counts, blockersOnly, endpoints, link
       panel.removeEventListener("scroll", update);
       observer?.disconnect();
     };
-  }, [view.selected, view.question, rows, blockersOnly, unchangedOpen]);
+  }, [view.selected, view.question, rows, blockersOnly, unchangedOpen, linked]);
 
   const rowButton = (row, kind) => (
     <li key={row.number ?? row.key}>
@@ -235,7 +235,7 @@ function PartTree({ rows, view, questions, counts, blockersOnly, endpoints, link
           : endpointFor(row.key) ? <span className="fd-endpoint" aria-hidden="true">{endpointFor(row.key)}</span>
           : <span className="fd-swatch" aria-hidden="true" />}
         <span className="fd-tree-label">{row.reason ? questionText(row.reason) : nameOf(row)}</span>
-        {row.part && !linked.has(row.key) && <small>Not linked</small>}
+        {row.part && linked && !linked.has(row.key) && <small>Not linked</small>}
       </button>
     </li>
   );
@@ -346,11 +346,31 @@ function Annotations({ labels, selection, endpoints, pins, faceView, base, targe
 
 // The scene draws whichever project's manifest it is given: two revisions get Compare and the
 // change legend, a single revision groups parts by shape source, and nothing here names a project.
-export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel = "Back", embedded = false }) {
+// holdStage: an embedding page asks the scene to wait before building its stage. Building the stage
+// is seconds of main-thread geometry work, so the bench lets its evidence column render first.
+export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel = "Back", embedded = false, holdStage = false }) {
   const host = useRef(null);
   const stage = useRef(null);
   const current = useRef(null);
   const [assets, setAssets] = useState(null);
+  // Released one frame after holdStage clears, so whatever the page just rendered is painted
+  // before the stage's long synchronous build starts.
+  const [stageReleased, setStageReleased] = useState(!holdStage);
+  // False until the stage for the current assets has been built (or failed): the scene reads as
+  // loading, never as unavailable, while it builds.
+  const [built, setBuilt] = useState(false);
+  const release = useRef(null);
+  if (!release.current) {
+    let resolve;
+    release.current = { promise: new Promise((done) => { resolve = done; }), resolve };
+  }
+  useEffect(() => { if (stageReleased) release.current.resolve(); }, [stageReleased]);
+  useEffect(() => {
+    if (holdStage) { setStageReleased(false); return undefined; }
+    let timer;
+    const frame = requestAnimationFrame(() => { timer = setTimeout(() => setStageReleased(true), 0); });
+    return () => { cancelAnimationFrame(frame); clearTimeout(timer); };
+  }, [holdStage]);
   const { compare = null, focus = null, tour = [] } = manifest;
   const revisions = useMemo(() => sceneRevisions(manifest), [manifest]);
   const revisionIds = useMemo(() => revisions.map(([id]) => id), [revisions]);
@@ -399,7 +419,8 @@ export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel 
     const controller = new AbortController();
     let loaded;
     setAssets(null);
-    loadFielddeck(projectId, revisionKey.split("\u0000"), controller.signal, manifest.title).then((result) => {
+    loadFielddeck(projectId, revisionKey.split("\u0000"), controller.signal, manifest.title,
+      { beforeParse: release.current.promise }).then((result) => {
       if (controller.signal.aborted) disposeFielddeck(result);
       else {
         loaded = result;
@@ -554,45 +575,61 @@ export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel 
   }
   current.current = { view, reduced, finishIntro, select };
 
-  useLayoutEffect(() => {
-    if (!assets) return undefined;
+  useEffect(() => {
+    if (!assets || !stageReleased) return undefined;
     const available = Object.keys(assets).filter((rev) => assets[rev].gltf && assets[rev].sidecar);
+    const controller = new AbortController();
     let runtime;
-    if (available.length) {
-      try {
-        runtime = createFielddeckStage(host.current, assets, index, {
-          onFrame: () => setRendered(true),
-          onPick: (key) => {
-            if (current.current.view.hero === null && key) current.current.select(key);
-          },
-        }, { base, target, focusPart });
-        stage.current = runtime;
-        setLinked(runtime.linked);
-        setMeshStats(runtime.meshStats ?? null);
-        setGhostLengths(runtime.ghostLengths ?? null);
-        setGhostMoves(runtime.ghostMoves ?? null);
-        setFaceFit(runtime.faceFit ?? null);
-      } catch (error) {
-        setStageError(`3D stage unavailable (${error.message}).`);
+    let cancelled = false;
+    function settle() {
+      const hasRevision = (rev) => [...(runtime?.linked ?? [])].some((key) => key.startsWith(`${rev}:`));
+      const canPlay = comparisonAvailable && hasRevision(base) && hasRevision(target);
+      if (canPlay && !introSeen && !current.current.reduced) {
+        introSeen = true;
+        setView({ ...INITIAL, mode: "compare", hero: performance.now(), blockers: false });
+      } else if (canPlay) {
+        introSeen = true;
+        current.current.finishIntro();
+      } else {
+        const mode = hasRevision(target) || !hasRevision(base) && sidecars[target] ? target : base;
+        setView({ ...INITIAL, mode, selected: index.byPart.get(`${mode}:${focusPart}`)?.key ?? null });
       }
     }
-    const hasRevision = (rev) => [...(runtime?.linked ?? [])].some((key) => key.startsWith(`${rev}:`));
-    const canPlay = comparisonAvailable && hasRevision(base) && hasRevision(target);
-    if (canPlay && !introSeen && !current.current.reduced) {
-      introSeen = true;
-      setView({ ...INITIAL, mode: "compare", hero: performance.now(), blockers: false });
-    } else if (canPlay) {
-      introSeen = true;
-      current.current.finishIntro();
-    } else {
-      const mode = hasRevision(target) || !hasRevision(base) && sidecars[target] ? target : base;
-      setView({ ...INITIAL, mode, selected: index.byPart.get(`${mode}:${focusPart}`)?.key ?? null });
+    if (!available.length) {
+      setBuilt(true);
+      settle();
+      return undefined;
     }
+    // The stage is built asynchronously (sliced, with its edge work in a worker); until it is
+    // ready the scene shows its loading message and the page stays responsive.
+    setBuilt(false);
+    Promise.resolve().then(() => createFielddeckStage(host.current, assets, index, {
+      onFrame: () => setRendered(true),
+      onPick: (key) => {
+        if (current.current.view.hero === null && key) current.current.select(key);
+      },
+    }, { base, target, focusPart }, { signal: controller.signal })).then((built) => {
+      if (cancelled) { built?.dispose(); return; }
+      runtime = built;
+      stage.current = runtime;
+      setLinked(runtime.linked);
+      setMeshStats(runtime.meshStats ?? null);
+      setGhostLengths(runtime.ghostLengths ?? null);
+      setGhostMoves(runtime.ghostMoves ?? null);
+      setFaceFit(runtime.faceFit ?? null);
+      settle();
+    }, (error) => {
+      if (cancelled || error?.name === "AbortError") return;
+      setStageError(`3D stage unavailable (${error.message}).`);
+      settle();
+    }).finally(() => { if (!cancelled) setBuilt(true); });
     return () => {
+      cancelled = true;
+      controller.abort();
       stage.current = null;
       runtime?.dispose();
     };
-  }, [assets, index, sidecars, comparisonAvailable, base, target, focusPart]);
+  }, [assets, index, sidecars, comparisonAvailable, base, target, focusPart, stageReleased]);
 
   useLayoutEffect(() => {
     stage.current?.update({
@@ -679,7 +716,7 @@ export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel 
 
   const playing = view.hero !== null;
   const modelVisible = rendered && [...linked].some((key) => key.startsWith(`${revision}:`));
-  const loading = !assets || linked.size > 0 && !rendered;
+  const loading = !assets || !stageReleased || !built || linked.size > 0 && !rendered;
   const errors = [...(assets ? Object.values(assets).map((revision) => revision.error).filter(Boolean) : []),
     ...(stageError ? [stageError] : [])];
   const canChoose = ([mode]) => {
@@ -769,7 +806,7 @@ export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel 
           {/* The phone tree opens from the toolbar; the heading stays so the part groups keep their outline level. */}
           {narrow && <h2 className="visually-hidden">Assembly</h2>}
           <div className="fd-panel-content" id="fd-tree-content" hidden={!treeOpen}>
-            <PartTree rows={rows} view={view} endpoints={treeEndpoints} linked={linked} onSelect={select}
+            <PartTree rows={rows} view={view} endpoints={treeEndpoints} linked={built ? linked : null} onSelect={select}
               questions={questions} blockersOnly={filtered} counts={view.mode === "compare" ? sidecars[target]?.revision_diff?.counts : null}
               total={allQuestions.length} viewName={`${labelOf(view.mode)} view`} bySource={!comparisonEnabled} />
           </div>

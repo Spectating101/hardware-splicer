@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import FieldDeckScene, { EvidenceRows } from "./FieldDeckScene.jsx";
 import {
@@ -743,7 +743,8 @@ describe("Fielddeck evidence UI", () => {
       revisions: [{ id: "v1", label: "v1", glb: "plotter.glb", parts: "parts.json" }],
       compare: null, focus: null, tour: [],
     }} />);
-    expect(stageMock.load).toHaveBeenCalledWith("ender3-penplotter-digital", ["v1"], expect.anything(), "Virtual Ender-3 pen plotter");
+    expect(stageMock.load).toHaveBeenCalledWith("ender3-penplotter-digital", ["v1"], expect.anything(), "Virtual Ender-3 pen plotter",
+      { beforeParse: expect.any(Promise) });
     const tree = within(screen.getByRole("complementary", { name: "Part tree" }));
     expect(await tree.findByRole("button", { name: "Pen adapter" })).toBeVisible();
     expect(tree.getAllByRole("region").map((group) => group.getAttribute("aria-label"))).toEqual([
@@ -877,6 +878,18 @@ describe("Fielddeck evidence UI", () => {
     expect(update).toHaveBeenLastCalledWith(expect.objectContaining({
       selectedKeys: ["5:part:pi4-dsi", "5:part:display"],
     }));
+  });
+
+  it("holds the stage build while the embedding page asks, then builds it after a frame", async () => {
+    const created = stageMock.create.mock.calls.length;
+    const loaded = stageMock.load.mock.calls.length;
+    const { rerender } = render(<FieldDeckScene {...FIELDDECK} embedded holdStage />);
+    await waitFor(() => expect(stageMock.load.mock.calls.length).toBeGreaterThan(loaded));
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 50)); });
+    expect(stageMock.create.mock.calls.length).toBe(created);
+    expect(screen.getByTestId("fielddeck-scene")).toHaveAttribute("data-scene-status", "loading");
+    rerender(<FieldDeckScene {...FIELDDECK} embedded holdStage={false} />);
+    await waitFor(() => expect(stageMock.create.mock.calls.length).toBeGreaterThan(created));
   });
 
   it("folds the details panel to its title and reopens it when a part is selected", async () => {

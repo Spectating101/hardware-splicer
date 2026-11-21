@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ProjectReviewPanel from "../components/ProjectReviewPanel.jsx";
 import ChangeHistoryPanel from "./ChangeHistoryPanel.jsx";
 import DesignView, { splitGeometryNote } from "./DesignView.jsx";
@@ -15,11 +15,13 @@ const value = (item, fallback = "unknown") => item === undefined || item === nul
 
 // Which evidence a revision change invalidates is the backend's call (assurance evidence-delta).
 // The bench only shows what it returns, and says "not linked" when there is nothing to ask.
-function EvidenceRevisionLink({ projectId, revision, assurance, assuranceKnown }) {
+function EvidenceRevisionLink({ projectId, revision, assurance, assuranceKnown, assuranceLoading = false, onSettled }) {
   const [delta, setDelta] = useState(null);
   const [error, setError] = useState("");
   const outputs = assurance?.outputs || [];
   const askable = Boolean(projectId && revision > 1 && outputs.length);
+  const settled = !assuranceLoading && (!askable || Boolean(delta) || Boolean(error));
+  useEffect(() => { if (settled) onSettled?.(); }, [settled, onSettled]);
   useEffect(() => {
     setDelta(null); setError("");
     if (!askable) return undefined;
@@ -31,6 +33,7 @@ function EvidenceRevisionLink({ projectId, revision, assurance, assuranceKnown }
   }, [projectId, revision, askable]);
   if (!projectId || !revision) return null;
   if (revision === 1) return <p className="bench-link-state">Evidence-to-revision link · revision 1 has no earlier revision to invalidate.</p>;
+  if (assuranceLoading) return <p className="muted">Checking evidence against revision {revision - 1}…</p>;
   if (!askable) return <div className="bench-link-state">
     <p><strong>Evidence-to-revision link · not linked</strong></p>
     <p className="muted">{assuranceKnown
@@ -291,6 +294,15 @@ export default function ProjectBench({ session, study, children, references, evi
   const [materialsError, setMaterialsError] = useState("");
   const [sceneManifest, setSceneManifest] = useState(null);
   const [designStatus, setDesignStatus] = useState("loading");
+  // The 3D stage waits until the evidence column has settled (or 2.5 s), so its main-thread
+  // geometry work cannot hold up the evidence requests and their render.
+  const [evidenceSettled, setEvidenceSettled] = useState(false);
+  const markEvidenceSettled = useCallback(() => setEvidenceSettled(true), []);
+  useEffect(() => {
+    setEvidenceSettled(false);
+    const timer = setTimeout(() => setEvidenceSettled(true), 2500);
+    return () => clearTimeout(timer);
+  }, [session.projectId, study?.revision, session.snapshotRevision]);
   const revision = study?.revision ?? session.snapshotRevision;
   const latest = latestRevision ?? session.snapshotRevision;
   useEffect(() => {
@@ -381,7 +393,7 @@ export default function ProjectBench({ session, study, children, references, evi
       <section className="bench-pane bench-design" id="bench-design" role={compact ? "tabpanel" : "region"} hidden={compact && tab !== "design"} aria-labelledby={compact ? "bench-tab-design" : "bench-design-title"}>
         <h2 id="bench-design-title">Design</h2>
         <DesignView projectId={session.projectId} caseId={caseId} revision={revision} onOpenScene={onOpenScene} onManifest={setSceneManifest}
-          onStatus={setDesignStatus} />
+          onStatus={setDesignStatus} holdStage={!evidenceSettled} />
         {children || <RevisionCompare projectId={session.projectId} revision={session.snapshotRevision} />}
       </section>
       <section className="bench-pane bench-parts" id="bench-parts" role={compact ? "tabpanel" : "region"} hidden={compact && tab !== "parts"} aria-labelledby={compact ? "bench-tab-parts" : "bench-parts-title"}>
@@ -422,7 +434,8 @@ export default function ProjectBench({ session, study, children, references, evi
         {!claims.length && <p>Claims: unknown</p>}
         {study && <p className="muted">Study scope: {value(study.summary?.note)}</p>}
         <EvidenceRevisionLink projectId={session.projectId} revision={revision} assurance={assurance}
-          assuranceKnown={Boolean(assurance) && !evidenceError} />
+          assuranceKnown={Boolean(assurance) && !evidenceError} assuranceLoading={!assurance && !evidenceError && Boolean(session.projectId && revision)}
+          onSettled={markEvidenceSettled} />
         {evidenceExtra}
         <ChangeHistoryPanel projectId={session.projectId} latestRevision={latest} onOpenRevision={onOpenRevision} />
         <ProjectReviewPanel projectId={session.projectId} currentRevision={session.snapshotRevision} onToast={onToast} disclosure />

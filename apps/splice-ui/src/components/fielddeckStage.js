@@ -16,6 +16,7 @@ import {
 } from "postprocessing";
 import { N8AOPostPass } from "n8ao";
 import { sceneRevisionUrl } from "../api.js";
+import { runChainJobs } from "./fielddeckChains.js";
 import {
   bracketPath, chooseTier, CREASE_INK, DIMMED_VENDOR, pairMovedFeatures, closedEdgeLoops, cullIsolatedChains, totalChainLength, classifyPart, convexHull, cullCoincidentChains, DEFAULT_EXPLODE, diffAccentChains,
   DIFF_COLORS, explodeGroupOffsets, FIELDDECK_NARROW, footprintDeltaPair, ghostDeltaKey,
@@ -62,13 +63,19 @@ async function request(url, type, signal) {
 }
 
 // Loads every drawable revision a project's scene manifest lists, through the generic scene routes.
-export async function loadFielddeck(projectId, revisionIds, signal, title = projectId) {
+// beforeParse, when given, is awaited between download and GLB parse: the bytes arrive early, and
+// the parse (seconds of main-thread work on a large model) waits until the page allows it.
+export async function loadFielddeck(projectId, revisionIds, signal, title = projectId, { beforeParse = null } = {}) {
   const loader = new GLTFLoader();
   const revisions = await Promise.all(revisionIds.map(async (revision) => {
     const url = sceneRevisionUrl(projectId, revision);
     const [sidecar, model] = await Promise.allSettled([
       request(`${url}/parts`, "json", signal),
-      request(`${url}/model`, "arrayBuffer", signal).then((bytes) => loader.parseAsync(bytes, url)),
+      request(`${url}/model`, "arrayBuffer", signal).then(async (bytes) => {
+        if (beforeParse) await beforeParse;
+        if (signal?.aborted) throw new Error("aborted");
+        return loader.parseAsync(bytes, url);
+      }),
     ]);
     return [revision, {
       sidecar: sidecar.value,
@@ -380,7 +387,24 @@ function makeGhost(chains, own, { xray = false } = {}) {
   };
 }
 
-function makeEntries(assets, index, scene, technical, resources, { base, target, focusPart }) {
+// Yields to the event loop between slices of work, so input, scroll and other requests keep
+// running while the stage is prepared.
+const SLICE_MS = 12;
+function yieldToMain() {
+  if (globalThis.scheduler?.yield) return globalThis.scheduler.yield();
+  return new Promise((resolve) => setTimeout(resolve, 0));
+}
+
+async function makeEntries(assets, index, scene, technical, resources, { base, target, focusPart }, { signal } = {}) {
+  // Phase marks for the browser's performance timeline; they cost nothing when nobody reads them.
+  performance.mark?.("fielddeck:meshes-start");
+  let sliceStart = performance.now();
+  const slice = async () => {
+    if (performance.now() - sliceStart < SLICE_MS) return;
+    await yieldToMain();
+    if (signal?.aborted) throw new DOMException("Stage build cancelled", "AbortError");
+    sliceStart = performance.now();
+  };
   const entries = new Map();
   let veilPrepassMaterial = null;
   let pickOnlyMaterial = null;
@@ -395,8 +419,14 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
     const mm = sidecar.glb_scale_to_mm;
     const scale = new THREE.Matrix4().makeScale(mm, mm, mm);
     gltf.scene.updateMatrixWorld(true);
-    gltf.scene.traverse((source) => {
-      if (!source.isMesh) return;
+    const meshes = [];
+    gltf.scene.traverse((source) => { if (source.isMesh) meshes.push(source); });
+    // Same order as the traversal; each mesh is one unit of work between yields.
+    for (const source of meshes) {
+      await slice();
+      processMesh(source);
+    }
+    function processMesh(source) {
       // The loader sanitizes Object3D.name. Read the original glTF name via its node association.
       let row;
       for (let node = source; node && node !== gltf.scene; node = node.parent) {
@@ -564,14 +594,37 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
         for (const value of positions) entry.ghostEdges.push(value);
       }
       if (entry.displayEdges) entry.displayEdges.push(edgePositions(geometry, 40));
-    });
+    }
   }
+  // Welding and coincidence culling are the long part: they run off the main thread in one batch.
+  const jobs = [];
+  const jobFor = new Map();
   for (const entry of entries.values()) {
+    const pairedEdges = entry.paired && entries.get(entry.paired)?.ghostEdges;
+    if (entry.style.edge.diff && entry.row.delta === "changed" && entry.row.revision === target && pairedEdges) {
+      jobFor.set(`${entry.row.key}:diff`, jobs.push({ kind: "diff", edges: entry.ghostEdges, paired: pairedEdges }) - 1);
+    }
+    if (entry.ghostEdges && entry.row.revision === base) {
+      if (entry.row.delta === "removed") {
+        jobFor.set(`${entry.row.key}:removed`, jobs.push({ kind: "removed", edges: entry.ghostEdges }) - 1);
+      } else {
+        jobFor.set(`${entry.row.key}:overlay`, jobs.push({ kind: "overlay", edges: entry.ghostEdges,
+          paired: entries.get(entry.paired)?.ghostEdges ?? [] }) - 1);
+      }
+    }
+  }
+  performance.mark?.("fielddeck:meshes-done");
+  const results = await runChainJobs(jobs);
+  performance.mark?.("fielddeck:chains-done");
+  if (signal?.aborted) throw new DOMException("Stage build cancelled", "AbortError");
+  const chainsFor = (entry, kind) => results[jobFor.get(`${entry.row.key}:${kind}`)];
+  for (const entry of entries.values()) {
+    await slice();
     entry.samples = new Float32Array(entry.samples);
     const pairedEdges = entry.paired && entries.get(entry.paired)?.ghostEdges;
     if (entry.style.edge.diff && entry.row.delta === "changed" && entry.row.revision === target && pairedEdges) {
       // Diff-only violet: the ghost-culling coincidence test, run against the old revision.
-      let chains = cullIsolatedChains(cullCoincidentChains(weldEdgeChains(entry.ghostEdges), pairedEdges));
+      let chains = chainsFor(entry, "diff");
       if (totalChainLength(chains) <= 3) {
         // Nothing measurable differs: one 1 px violet silhouette at 60% still marks the part as changed.
         chains = entry.outlineAccent ?? [];
@@ -591,12 +644,11 @@ function makeEntries(assets, index, scene, technical, resources, { base, target,
     if (entry.ghostEdges && entry.row.revision === base) {
       if (entry.row.delta === "removed") {
         // The outer silhouette and at most one inner loop, never the PCB, FPC and tab edges.
-        entry.removed = makeGhost(ghostOutlineLoops(entry.ghostEdges), own);
+        entry.removed = makeGhost(chainsFor(entry, "removed"), own);
         technical.add(entry.removed.object);
       } else {
-        const current = entries.get(entry.paired)?.ghostEdges ?? [];
         // Compare the original geometry before simplification can turn a matched arc into a chord.
-        const chains = cullIsolatedChains(cullCoincidentChains(weldEdgeChains(entry.ghostEdges), current, { simplify: true }));
+        const chains = chainsFor(entry, "overlay");
         entry.overlay = makeGhost(chains, own, { xray: true });
         // What the scene label may claim: the length of old-revision geometry actually drawn.
         entry.overlay.length = entry.overlay.outlineLength;
@@ -1082,6 +1134,78 @@ function createComposer(renderer, scene, technical, camera) {
         composer.render();
       },
       dispose: () => composer.dispose(),
+      // Each pass compiles its shader programs the first time it renders. Rendering the passes
+      // one task at a time, into the composer's own buffers, spreads that cost over several short
+      // tasks instead of one long first frame. The output is discarded; nothing here is drawn.
+      async warmUp(yieldFn, signal) {
+        const triangle = new THREE.BufferGeometry();
+        triangle.setAttribute("position", new THREE.Float32BufferAttribute([-1, -1, 0, 3, -1, 0, -1, 3, 0], 3));
+        triangle.setAttribute("uv", new THREE.Float32BufferAttribute([0, 0, 2, 0, 0, 2], 2));
+        // A pass's materials, including those of passes nested in its effects (SMAA's edge and
+        // weight passes): a shallow walk that skips scenes, targets, textures and the renderer.
+        const materialsOf = (root) => {
+          const found = new Set();
+          const seen = new Set();
+          const visit = (value, depth) => {
+            if (!value || typeof value !== "object" || seen.has(value) || depth > 3) return;
+            seen.add(value);
+            if (value.isMaterial) { found.add(value); return; }
+            if (value.isObject3D && !value.material) return;
+            if (value.isTexture || value.isRenderTarget || value.isWebGLRenderTarget || value.isWebGLRenderer
+              || value.isBufferGeometry || value.isCamera) return;
+            if (value.material?.isMaterial) found.add(value.material);
+            if (value.fullscreenMaterial?.isMaterial) found.add(value.fullscreenMaterial);
+            for (const child of Array.isArray(value) ? value : Object.values(value)) visit(child, depth + 1);
+          };
+          visit(root, 0);
+          return [...found];
+        };
+        for (const pass of composer.passes) {
+          await yieldFn();
+          if (signal?.aborted) break;
+          // Where KHR_parallel_shader_compile exists, compile the pass's own materials off the main
+          // thread first, into the same kind of target the pass draws to.
+          if (pass.scene?.isScene && pass.camera && renderer.compileAsync) {
+            // A scene pass draws its scene's materials into its own buffer; compile that variant
+            // (linear output into a half-float target), not the on-screen one.
+            const previous = renderer.getRenderTarget();
+            try {
+              renderer.setRenderTarget(pass.renderToScreen ? null : pass.target ?? composer.inputBuffer);
+              await renderer.compileAsync(pass.scene, pass.camera);
+            } catch {
+              // Best effort.
+            } finally {
+              renderer.setRenderTarget(previous);
+            }
+          }
+          const materials = materialsOf(pass);
+          if (materials.length && renderer.compileAsync) {
+            const scratch = new THREE.Scene();
+            for (const material of materials) {
+              const mesh = new THREE.Mesh(triangle, material);
+              mesh.frustumCulled = false;
+              scratch.add(mesh);
+            }
+            const previous = renderer.getRenderTarget();
+            try {
+              renderer.setRenderTarget(pass.renderToScreen ? null : composer.outputBuffer);
+              await renderer.compileAsync(scratch, camera);
+            } catch {
+              // Best effort, as below.
+            } finally {
+              renderer.setRenderTarget(previous);
+            }
+          }
+          await yieldFn();
+          if (signal?.aborted) break;
+          try {
+            pass.render(renderer, composer.inputBuffer, composer.outputBuffer, 0, false);
+          } catch {
+            // Best effort: anything not warmed here compiles on the first real frame instead.
+          }
+        }
+        triangle.dispose();
+      },
     };
   } catch (error) {
     // A pass that failed initialization may not yet belong to the composer.
@@ -1673,12 +1797,20 @@ function layoutAnnotations(host, camera, entries, width, height, canvasTop, pane
   }
 }
 
-export function createFielddeckStage(host, assets, index, callbacks, sceneConfig) {
+// Async: the geometry is prepared in slices and in a worker, so the page stays responsive while
+// a large assembly builds. `signal` cancels a build whose scene was closed or replaced.
+export async function createFielddeckStage(host, assets, index, callbacks, sceneConfig, { signal } = {}) {
   const { base, target, focusPart } = sceneConfig;
   const scene = new THREE.Scene();
   const resources = new Set();
   const technical = new THREE.Scene();
-  const entries = makeEntries(assets, index, scene, technical, resources, sceneConfig);
+  let entries;
+  try {
+    entries = await makeEntries(assets, index, scene, technical, resources, sceneConfig, { signal });
+  } catch (error) {
+    resources.forEach((resource) => resource.dispose());
+    throw error;
+  }
   const all = [...entries.values()];
   const faceFit = all.length ? computeFaceFit(entries, sceneConfig) : null;
   const glbSources = Object.fromEntries(Object.entries(assets)
@@ -1803,8 +1935,11 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
         tier = "reduced";
       }
     }
+    await yieldToMain();
+    if (signal?.aborted) throw new DOMException("Stage build cancelled", "AbortError");
     environment = createEnvironment(renderer);
   } catch (error) {
+    environment?.dispose();
     composer?.dispose();
     renderer?.dispose();
     resources.forEach((resource) => resource.dispose());
@@ -1833,6 +1968,36 @@ export function createFielddeckStage(host, assets, index, callbacks, sceneConfig
     host.dataset.quality = tier;
   }
   applyTier();
+  // Compile the scene's shader programs before the first frame. Where the browser offers
+  // KHR_parallel_shader_compile this happens off the main thread; elsewhere it costs what the first
+  // frame would have, in a task of its own.
+  // Without the extension, compiling ahead only moves the same blocking work and adds warm-up
+  // renders, so a software renderer keeps the original first-frame compile.
+  const parallelCompile = Boolean(renderer.getContext?.()?.getExtension?.("KHR_parallel_shader_compile"));
+  host.dataset.parallelCompile = String(parallelCompile);
+  try {
+    await yieldToMain();
+    if (parallelCompile && !signal?.aborted && renderer.compileAsync) {
+      await renderer.compileAsync(scene, camera);
+      await renderer.compileAsync(technical, camera);
+    }
+    if (parallelCompile && !signal?.aborted && composer?.warmUp) {
+      // At the size the first frame will use, so no pass rebuilds its targets and recompiles then.
+      composer.setSize(Math.max(1, host.clientWidth), Math.max(1, host.clientHeight));
+      await composer.warmUp(yieldToMain, signal);
+    }
+  } catch (error) {
+    // Compilation errors surface again, with detail, on the first render.
+    host.dataset.precompile = String(error?.message ?? error);
+  }
+  if (signal?.aborted) {
+    environment.dispose();
+    composer?.dispose();
+    renderer.dispose();
+    resources.forEach((resource) => resource.dispose());
+    throw new DOMException("Stage build cancelled", "AbortError");
+  }
+  performance.mark?.("fielddeck:compiled");
   let canvas = renderer.domElement;
   host.prepend(canvas);
   const minimumDistance = radius * 0.2;
