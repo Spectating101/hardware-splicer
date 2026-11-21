@@ -1,6 +1,6 @@
 // Machine keys stay the source of truth; these only say them in words. Unmapped keys fall back
 // to a mechanical reading of the key (snake or camel case, trailing unit word), never a guess.
-const UNIT_WORDS = { a: "A", h: "h", mm: "mm", g: "g", w: "W", v: "V", s: "s", mah: "mAh", min: "min", usd: "USD", m: "m" };
+const UNIT_WORDS = { a: "A", h: "h", mm: "mm", g: "g", w: "W", v: "V", s: "s", mah: "mAh", wh: "Wh", min: "min", usd: "USD", m: "m" };
 
 const LABELS = {
   minimum_work_runtime_h: ["Minimum work runtime", "h"],
@@ -8,6 +8,8 @@ const LABELS = {
   keyboard_current_a: ["Keyboard current", "A"],
   pi_work_current_a: ["Pi current at work load", "A"],
   work_runtime: ["Work runtime", "h"],
+  work_runtime_lower_h: ["Work runtime, lower estimate", "h"],
+  work_system_power_w: ["Work system power", "W"],
   ordinary_source_margin: ["Supply margin, ordinary load", "A"],
   high_keyboard_supply_limit: ["Supply margin, high keyboard demand", "A"],
   cad_kernel_available: ["CAD kernel available"],

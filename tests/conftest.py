@@ -6,7 +6,13 @@ import importlib.util
 from collections.abc import Callable
 from datetime import datetime, timezone, tzinfo
 
+import os
+
 import pytest
+
+# Test apps do not probe the CAD runtimes in a background thread at startup; tests that mock the
+# probes would otherwise race it. test_runtime_prewarm.py turns it on where it is under test.
+os.environ.setdefault("HARDWARE_SPLICER_PREWARM_RUNTIME", "0")
 
 # Optional ``cad`` extra. Tests marked ``requires_cadquery`` / ``requires_trimesh``
 # are skipped, with a reason, when the package cannot be found.

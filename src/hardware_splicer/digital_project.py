@@ -6,7 +6,6 @@ Client snapshots cannot supply filesystem paths or substitute result claims.
 """
 from __future__ import annotations
 
-import hashlib
 import importlib.util
 import json
 import os
@@ -17,6 +16,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import threading
 import uuid
 import zipfile
 from functools import lru_cache
@@ -24,6 +24,7 @@ from functools import lru_cache
 from .project_store import CorruptProject, ProjectNotFound, RevisionConflict, validate_project_id
 from . import digital_cases as cases
 from .state_paths import repo_root
+from .file_digest import sha256_file
 
 CASE = repo_root() / 'examples/drone_proving_ground/digital'
 DESIGN = CASE.parent / 'revision_b/reference'
@@ -46,7 +47,8 @@ def requirement_tools():
 
 
 def digest(path):
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    # Same check every read; bytes are re-read only when the file changed (see file_digest).
+    return sha256_file(path)
 
 
 def read_json(path):
@@ -88,8 +90,14 @@ def _runtime(interpreter):
             'or set HARDWARE_SPLICER_DIGITAL_PYTHON to a Python with that extra. Saved studies remain viewable.'}
 
 
+# One probe at a time: a request that arrives while the startup prewarm is probing waits for that
+# answer (then cached) instead of starting a second interpreter.
+_probe_lock = threading.Lock()
+
+
 def runtime():
-    return _runtime(native_python())
+    with _probe_lock:
+        return _runtime(native_python())
 
 
 @lru_cache(maxsize=4)
@@ -112,8 +120,25 @@ def _device_runtime(interpreter, *, substitution=False):
 
 def runtime_for_case(case_id=cases.DEFAULT_CASE):
     cases.validate_case_id(case_id)
-    return runtime() if case_id == cases.DEFAULT_CASE else _device_runtime(
-        native_python(), substitution=case_id == 'fielddeck-5')
+    if case_id == cases.DEFAULT_CASE:
+        return runtime()
+    with _probe_lock:
+        return _device_runtime(native_python(), substitution=case_id == 'fielddeck-5')
+
+
+def prewarm_runtimes():
+    """Run the runtime probes once, so the first study request does not wait seconds on them.
+
+    The probes start an interpreter and import the CAD stack; their answers are cached per process.
+    """
+    interpreter = native_python()
+    for probe in (lambda: _runtime(interpreter), lambda: _device_runtime(interpreter),
+                  lambda: _device_runtime(interpreter, substitution=True)):
+        try:
+            with _probe_lock:
+                probe()
+        except Exception:  # a failed probe is answered again, synchronously, on first use
+            pass
 
 
 def artifact_names(case_id=cases.DEFAULT_CASE, *, case=None):

@@ -9,7 +9,7 @@ import {
   createEmptySession,
   projectSessionReducer,
 } from "./projectSession.js";
-import { deriveProjectTruth } from "./deriveProjectTruth.js";
+import { deriveProjectTruth } from "./deriveProjectTruth";
 
 vi.mock("../components/DesignStudioPanel.jsx", () => ({
   default: function MockStudio({ initialPhrase, initialNodes, onOpenProject, showIntakeEmptyState }) {
@@ -72,7 +72,7 @@ vi.mock("../components/ProjectWizard.jsx", () => ({
   },
 }));
 
-vi.mock("../api.js", () => ({
+vi.mock("../api", () => ({
   fetchScenes: vi.fn(async () => []), fetchSceneManifest: vi.fn(), fetchSceneRecords: vi.fn(async () => ({ records: [] })),
   jobBundleUrl: (id) => `/bundle/${id}`,
   buildPackageArchiveUrl: (dir) => `/archive?build_dir=${encodeURIComponent(dir)}`,

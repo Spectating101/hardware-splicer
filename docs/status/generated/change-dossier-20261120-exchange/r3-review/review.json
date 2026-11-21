@@ -1,0 +1,1097 @@
+{
+  "schema": "policylab.hardware_policy_review.v1",
+  "adapter_version": "1.1.0",
+  "implementation_sha256": {
+    "./review.mjs": "35590a57b57c41a94af7b8405824ba128ab88362029c4463dfcb95990f9e911b",
+    "../../packages/policy-foundation/src/index.js": "3fcb5225faa646e5eefdeeb1a3e925779c1075dddfa9b2b8dab851319faced17",
+    "../../packages/constraint-core/src/constraints.js": "13818f9e8f8fe2b8b38fd6c8ac118d4442d243e0a06b207dff98a72745599b82",
+    "../../packages/constraint-core/src/decision.js": "c77a53ac9b94901522e6fb09871210a0245c8453adaf3a72c7bca012623574a5",
+    "../../packages/constraint-core/src/receipt.js": "79e613910b51b96079737021e87bca223476866799b8c6c2d38fa96e32b79081",
+    "../../packages/constraint-core/src/stable.js": "4c10779d153dc04e96336335a1f96c428c031bb1b680cc6a0012bc17b49b7619"
+  },
+  "source_binding": {
+    "evidence_sha256": "76d1d4d6b3ce56fbe346a6a4d1182d786ac3041dfda98e6fd31f74486fae1df0",
+    "project_id": "digital-996558719b13454fb1724bef8f218093",
+    "revision": 3,
+    "run_id": "f35f80c0dfcb42e4b066906be52a919a"
+  },
+  "policy": {
+    "schema": "policylab.hardware_policy.v1",
+    "id": "portable-runtime-4h-pi-load-candidate",
+    "version": "1.0.0",
+    "scope": "digital_design",
+    "enabled": true,
+    "constraints": [
+      {
+        "id": "work-runtime",
+        "fact": "metric.work_runtime_lower_h",
+        "operator": ">=",
+        "value": 4,
+        "unit": "h"
+      }
+    ],
+    "revision_requirements": {
+      "minimum_work_runtime_h": 4
+    },
+    "design_candidates": [
+      {
+        "id": "pi-work-load-budget",
+        "target": "work-runtime",
+        "model": "runtime_inverse_to_work_power",
+        "power_fact": "metric.work_system_power_w",
+        "adjust": "requirement.pi_work_current_a",
+        "supply_voltage_v": 5,
+        "export_resolution": 0.001,
+        "step": 0.001,
+        "minimum": 0.4,
+        "basis": "HS models Fielddeck work power as supply_voltage_v x (Pi + keyboard + fan current) + display power with supply_voltage_v = 5 V (design.json engineering_assumptions), and runtime as usable bank energy / work power. pi_work_current_a is the only HS-adjustable input with room to move runtime (keyboard_current_a is 0.1 A with a 0.02 A floor); bank capacity is fixed in the design and is not an HS revision input. The minimum is HS's registered lower bound for pi_work_current_a."
+      }
+    ]
+  },
+  "evidence_kind": "digital_design",
+  "physical_authority_granted": false,
+  "decision": "ADMIT_WITH_LIMIT",
+  "assessment": {
+    "schema": "policylab.application_assessment.v1",
+    "application": {
+      "id": "hardware-design-review",
+      "version": "1.1.0"
+    },
+    "policy": {
+      "schema": "policylab.application_policy.v1",
+      "id": "portable-runtime-4h-pi-load-candidate",
+      "version": "1.0.0",
+      "application_id": "hardware-design-review",
+      "adapter_version": "1.1.0",
+      "enabled": true,
+      "max_per_action": 1,
+      "output_unit": "DIGITAL_REVIEW",
+      "parameters": {
+        "hardware_policy": {
+          "schema": "policylab.hardware_policy.v1",
+          "id": "portable-runtime-4h-pi-load-candidate",
+          "version": "1.0.0",
+          "scope": "digital_design",
+          "enabled": true,
+          "constraints": [
+            {
+              "id": "work-runtime",
+              "fact": "metric.work_runtime_lower_h",
+              "operator": ">=",
+              "value": 4,
+              "unit": "h"
+            }
+          ],
+          "revision_requirements": {
+            "minimum_work_runtime_h": 4
+          },
+          "design_candidates": [
+            {
+              "id": "pi-work-load-budget",
+              "target": "work-runtime",
+              "model": "runtime_inverse_to_work_power",
+              "power_fact": "metric.work_system_power_w",
+              "adjust": "requirement.pi_work_current_a",
+              "supply_voltage_v": 5,
+              "export_resolution": 0.001,
+              "step": 0.001,
+              "minimum": 0.4,
+              "basis": "HS models Fielddeck work power as supply_voltage_v x (Pi + keyboard + fan current) + display power with supply_voltage_v = 5 V (design.json engineering_assumptions), and runtime as usable bank energy / work power. pi_work_current_a is the only HS-adjustable input with room to move runtime (keyboard_current_a is 0.1 A with a 0.02 A floor); bank capacity is fixed in the design and is not an HS revision input. The minimum is HS's registered lower bound for pi_work_current_a."
+            }
+          ]
+        }
+      }
+    },
+    "evidence": {
+      "schema": "policylab.application_evidence.v1",
+      "application_id": "hardware-design-review",
+      "event_id": "71226e038196a4f5e982747da8a862db70926d5db44f753bfcb2ca30cd4a3803",
+      "subject": "digital-996558719b13454fb1724bef8f218093",
+      "facts": {
+        "evidence_sha256": "76d1d4d6b3ce56fbe346a6a4d1182d786ac3041dfda98e6fd31f74486fae1df0",
+        "hs_source": {
+          "audit_scope": "Stored revision identity, declared result consistency, artifact hashes and ZIP membership only; no new native verification, measurement or physical test.",
+          "case_id": "fielddeck-5",
+          "evidence_kind": "digital_design",
+          "facts": [
+            {
+              "basis": "modeled",
+              "id": "metric.high_keyboard_source_margin_a",
+              "source_path": "/study/summary/metrics/high_keyboard_source_margin_a",
+              "unit": "A",
+              "value": 0.08
+            },
+            {
+              "basis": "modeled",
+              "id": "metric.ordinary_source_margin_a",
+              "source_path": "/study/summary/metrics/ordinary_source_margin_a",
+              "unit": "A",
+              "value": 0.48
+            },
+            {
+              "basis": "modeled",
+              "id": "metric.work_runtime_lower_h",
+              "source_path": "/study/summary/metrics/work_runtime_lower_h",
+              "unit": "h",
+              "value": 4.002
+            },
+            {
+              "basis": "modeled",
+              "id": "metric.work_runtime_upper_h",
+              "source_path": "/study/summary/metrics/work_runtime_upper_h",
+              "unit": "h",
+              "value": 5.65
+            },
+            {
+              "basis": "modeled",
+              "id": "metric.work_system_power_w",
+              "source_path": "/study/summary/metrics/work_system_power_w",
+              "unit": "W",
+              "value": 5.735
+            },
+            {
+              "basis": "design_requirement",
+              "id": "requirement.keyboard_current_a",
+              "source_path": "/study/summary/requirements/keyboard_current_a",
+              "unit": "A",
+              "value": 0.1
+            },
+            {
+              "basis": "design_requirement",
+              "id": "requirement.minimum_supply_margin_a",
+              "source_path": "/study/summary/requirements/minimum_supply_margin_a",
+              "unit": "A",
+              "value": 0.3
+            },
+            {
+              "basis": "design_requirement",
+              "id": "requirement.minimum_work_runtime_h",
+              "source_path": "/study/summary/requirements/minimum_work_runtime_h",
+              "unit": "h",
+              "value": 4
+            },
+            {
+              "basis": "design_requirement",
+              "id": "requirement.pi_work_current_a",
+              "source_path": "/study/summary/requirements/pi_work_current_a",
+              "unit": "A",
+              "value": 0.697
+            }
+          ],
+          "integrity_audit": {
+            "artifact_integrity": true,
+            "checks": {
+              "LICENSE_HS.txt": true,
+              "STUDY.zip": true,
+              "STUDY_README.md": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/analysis/verification.json": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/bom.json": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/FIELDDECK_7.step": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/geometry_report.json": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/face_front_left.step": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/face_front_left.stl": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/face_front_right.step": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/face_front_right.stl": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/fan_duct.step": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/fan_duct.stl": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/fan_guard.step": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/fan_guard.stl": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/foot_1.step": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/foot_1.stl": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/foot_2.step": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/foot_2.stl": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/foot_3.step": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/foot_3.stl": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/foot_4.step": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/foot_4.stl": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_1.step": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_1.stl": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_2.step": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_2.stl": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_3.step": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_3.stl": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_4.step": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_4.stl": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_5.step": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_5.stl": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_6.step": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_6.stl": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/tray_front_left.step": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/tray_front_left.stl": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/tray_front_right.step": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/tray_front_right.stl": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/design.json": true,
+              "projects/cyberdeck-real-trial-20261020/digital_v1/sources/touch_display2_LICENSE.txt": true,
+              "projects/cyberdeck-real-trial-20261020/display_swap/assess.py": true,
+              "projects/cyberdeck-real-trial-20261020/display_swap/build.py": true,
+              "projects/cyberdeck-real-trial-20261020/display_swap/sources/evidence.json": true,
+              "projects/cyberdeck-real-trial-20261020/display_swap/sources/vendor5.zip": true,
+              "projects/cyberdeck-real-trial-20261020/display_swap/study_build.py": true,
+              "projects/cyberdeck-real-trial-20261020/display_swap/study_contract.py": true,
+              "projects/cyberdeck-real-trial-20261020/display_swap/study_verify.py": true,
+              "requirements.json": true,
+              "revision/BOM.csv": true,
+              "revision/BOM.json": true,
+              "revision/cad/FIELDDECK_5.glb": true,
+              "revision/cad/FIELDDECK_5.step": true,
+              "revision/cad/changed_parts/display_spacer_1.step": true,
+              "revision/cad/changed_parts/display_spacer_1.stl": true,
+              "revision/cad/changed_parts/face_rear_left.step": true,
+              "revision/cad/changed_parts/face_rear_left.stl": true,
+              "revision/cad/changed_parts/face_rear_right.step": true,
+              "revision/cad/changed_parts/face_rear_right.stl": true,
+              "revision/cad/changed_parts/tray_rear_left.step": true,
+              "revision/cad/changed_parts/tray_rear_left.stl": true,
+              "revision/cad/changed_parts/tray_rear_right.step": true,
+              "revision/cad/changed_parts/tray_rear_right.stl": true,
+              "revision/connections.json": true,
+              "revision/display5-LICENSE.txt": true,
+              "revision/engineering.json": true,
+              "revision/geometry.json": true,
+              "revision/power.json": true,
+              "revision/source-evidence.json": true,
+              "revision/substitution.json": true,
+              "revision/verification.json": true,
+              "src/hardware_splicer/part_substitution.py": true,
+              "study-contract.json": true,
+              "study-verification.json": true,
+              "verified_claims_and_revision_identity": true,
+              "zip_contents_match_verified_files": true
+            },
+            "error": null,
+            "native_verification": {
+              "performed": false,
+              "requested": false
+            },
+            "ok": true,
+            "physical_authority_granted": false,
+            "project_id": "digital-996558719b13454fb1724bef8f218093",
+            "requirements_met": true,
+            "revision": 3,
+            "run_id": "f35f80c0dfcb42e4b066906be52a919a",
+            "schema": "hardware_splicer.digital_audit.v1"
+          },
+          "package": {
+            "bytes": 3051426,
+            "path": "STUDY.zip",
+            "sha256": "6591f122cea54fba525f451286596b1078317907391fbfc1e7e878fe66fadb2d"
+          },
+          "physical_authority_granted": false,
+          "project_id": "digital-996558719b13454fb1724bef8f218093",
+          "revision": 3,
+          "run_id": "f35f80c0dfcb42e4b066906be52a919a",
+          "schema": "hardware_splicer.policy_evidence.v1",
+          "source_revision": {
+            "exporter_sha256": "e8e4ec39f8410369e349b1964842ccedf687bd77b5146e266993063f48aa4ad5",
+            "meaning": "Exporter checkout only; original design inputs are study.summary.source_sha256.",
+            "repository_commit": "f1da210217bc9fdec5f872290d59a89346c51106",
+            "working_tree_dirty": true
+          },
+          "study": {
+            "artifact_manifest": {
+              "LICENSE_HS.txt": {
+                "bytes": 1102,
+                "sha256": "e243ac85fd7b0580eba9147640bd18047c3f4f799def65081f95b3a929518be6"
+              },
+              "STUDY.zip": {
+                "bytes": 3051426,
+                "sha256": "6591f122cea54fba525f451286596b1078317907391fbfc1e7e878fe66fadb2d"
+              },
+              "STUDY_README.md": {
+                "bytes": 2342,
+                "sha256": "396ece676fcc02242c7be5995dc6267a7a775ef690942d550f19bcbfe5e38939"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/analysis/verification.json": {
+                "bytes": 11093,
+                "sha256": "0f4faffa32086b67245fe6b3ffc333e224f5631db109975145a7d4953e018e49"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/bom.json": {
+                "bytes": 10799,
+                "sha256": "480a43aedbbb4bcd1b30ac6a7170a995c89b5bd92defe43fcb41c11ab4d47679"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/FIELDDECK_7.step": {
+                "bytes": 4586011,
+                "sha256": "a3a26a05db6e0086c38dbfd09bafacecc198751763ba40060569c46f82187827"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/geometry_report.json": {
+                "bytes": 19184,
+                "sha256": "0b2dd9a273bdf96e322351a033e0ecb3f107861fabf9bf4acb54686abc64f2dc"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/face_front_left.step": {
+                "bytes": 38778,
+                "sha256": "94fd4671c1b45c63e953e94f1468bbd944f8d10aff5f24d5abea3cb5c74f55ab"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/face_front_left.stl": {
+                "bytes": 41884,
+                "sha256": "28f330e32f1408bbbb6a0c977242eacd23338a9d22c6744e05b27e246480aa65"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/face_front_right.step": {
+                "bytes": 38930,
+                "sha256": "65084427113400870d53c48b2c79528df28289b62b3e5ad1e0feea7ba2b89624"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/face_front_right.stl": {
+                "bytes": 41884,
+                "sha256": "32e7954edae763a0cfc007837a865055945457ef6214b2276faadb75cadd46cc"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/fan_duct.step": {
+                "bytes": 67507,
+                "sha256": "f43a911db30bb16117aea68d1706aa5762131df741f6004d61fac3b2f42a33bd"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/fan_duct.stl": {
+                "bytes": 87284,
+                "sha256": "b94ad7519be910e4f87043c2513b7a159206c49ffe98476cc2469135186a2856"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/fan_guard.step": {
+                "bytes": 118517,
+                "sha256": "00196c825551819a95af1b74d082a4dd8ab1871811b530c6d83dff52ac8e053c"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/fan_guard.stl": {
+                "bytes": 87084,
+                "sha256": "9142c924d5c462ee493e0f18e3205dd382dd65b7d4879d5d8a6b5871536dc55c"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/foot_1.step": {
+                "bytes": 5615,
+                "sha256": "734dca82c415000ce02311d9bd684f7d0e390b2a91a0fad086e69d564c526e7e"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/foot_1.stl": {
+                "bytes": 16684,
+                "sha256": "54bb09479b3519c30aabf9ab13b333f16d5fe84d2a5af64327d3acf531574eef"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/foot_2.step": {
+                "bytes": 5615,
+                "sha256": "c0e241e32b095391ac850f5206309d7db2634f45990ac4b1d162edb459a2708e"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/foot_2.stl": {
+                "bytes": 16684,
+                "sha256": "54bb09479b3519c30aabf9ab13b333f16d5fe84d2a5af64327d3acf531574eef"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/foot_3.step": {
+                "bytes": 5615,
+                "sha256": "077d42a710a8e90313e8922d917212ef0707da964bbdaa82f4870187eea2ee03"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/foot_3.stl": {
+                "bytes": 16684,
+                "sha256": "54bb09479b3519c30aabf9ab13b333f16d5fe84d2a5af64327d3acf531574eef"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/foot_4.step": {
+                "bytes": 5615,
+                "sha256": "e78eb5f5f19bbc0ee93de39212559bf6e06e1591b4b5a1155947a9a54c67b92a"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/foot_4.stl": {
+                "bytes": 16684,
+                "sha256": "54bb09479b3519c30aabf9ab13b333f16d5fe84d2a5af64327d3acf531574eef"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_1.step": {
+                "bytes": 34344,
+                "sha256": "cd26090c66996d5eeecb2c8f3790301d310b8ecae5df842740a46e2bdec3b737"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_1.stl": {
+                "bytes": 68684,
+                "sha256": "e6a32d28036e98e26cdb7d35b9294fe0360d34a4dec43745c07d465c42c23fe6"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_2.step": {
+                "bytes": 34344,
+                "sha256": "19455d4977adca93c8000f5e729e1875094bf352f3fde4adcb80b970e25d55d0"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_2.stl": {
+                "bytes": 68684,
+                "sha256": "e6a32d28036e98e26cdb7d35b9294fe0360d34a4dec43745c07d465c42c23fe6"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_3.step": {
+                "bytes": 34344,
+                "sha256": "1cc0c118de033e906a2d597ef7459219228e1c8291285940e0a443f39b27ecff"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_3.stl": {
+                "bytes": 68684,
+                "sha256": "e6a32d28036e98e26cdb7d35b9294fe0360d34a4dec43745c07d465c42c23fe6"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_4.step": {
+                "bytes": 34344,
+                "sha256": "93eb61f4e9affa3faec66fd23e2a8c30557fc7e4a725bada1b155e2566f0f7ac"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_4.stl": {
+                "bytes": 68684,
+                "sha256": "e6a32d28036e98e26cdb7d35b9294fe0360d34a4dec43745c07d465c42c23fe6"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_5.step": {
+                "bytes": 34344,
+                "sha256": "c70faa1da966ab1cdfc5b3aa58f0129712e6fe210f35962e6292a743e93bfbb6"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_5.stl": {
+                "bytes": 68684,
+                "sha256": "533161fdb334469ea9bc19c6dfccaf2a9b13f4a7ef87206c7332295575b387b3"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_6.step": {
+                "bytes": 34344,
+                "sha256": "cce2f76057babd469f6ff56a980686f3abbb85f82903b7ea7c6e010cbaf5c869"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_6.stl": {
+                "bytes": 68684,
+                "sha256": "533161fdb334469ea9bc19c6dfccaf2a9b13f4a7ef87206c7332295575b387b3"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/tray_front_left.step": {
+                "bytes": 300419,
+                "sha256": "28b55d82e5def520b99bc7113f6f9be6397c805b91eb9964a47885ae65bb059b"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/tray_front_left.stl": {
+                "bytes": 213484,
+                "sha256": "b210b3dcc1d28feaa4b37b01e7bf3fea724feffea9b126c9d81449cf3da51be3"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/tray_front_right.step": {
+                "bytes": 191828,
+                "sha256": "daadbb4bc83eba3771f853110965ffffc524c4a826f8b01666d500021a8aa928"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/tray_front_right.stl": {
+                "bytes": 206484,
+                "sha256": "c659884ad33cec5c8bcf61665af3fe9534d4497fea5dd55d3f2bb91d8693645f"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/design.json": {
+                "bytes": 5598,
+                "sha256": "0883100a6ae3accd11c70fd731cc98bf46646b878ab5ce37a086b386bb73e192"
+              },
+              "projects/cyberdeck-real-trial-20261020/digital_v1/sources/touch_display2_LICENSE.txt": {
+                "bytes": 1881,
+                "sha256": "4ca2d350552b24137e55587e13fb09a249b757c6af49652ff02ea524d154c7fc"
+              },
+              "projects/cyberdeck-real-trial-20261020/display_swap/assess.py": {
+                "bytes": 5299,
+                "sha256": "727c15801543e3181a2f9fe8c870405be5dec28186a1797f857b3ccd328608e1"
+              },
+              "projects/cyberdeck-real-trial-20261020/display_swap/build.py": {
+                "bytes": 22982,
+                "sha256": "9d2604b997e39a7c00feac6843f0e100585ba8040698396ca191d3df7bb5833e"
+              },
+              "projects/cyberdeck-real-trial-20261020/display_swap/sources/evidence.json": {
+                "bytes": 1877,
+                "sha256": "6a95e945bb37e3e13cd1e2ec1f92987fcde5f40e98be4e873bcca604f7a3a6bd"
+              },
+              "projects/cyberdeck-real-trial-20261020/display_swap/sources/vendor5.zip": {
+                "bytes": 229182,
+                "sha256": "6552f6b12b1ec7f4b829a64ce2422fe827004ee8a149a3bc1d0f669629a449b4"
+              },
+              "projects/cyberdeck-real-trial-20261020/display_swap/study_build.py": {
+                "bytes": 703,
+                "sha256": "365417d3d03c5c67441dd9785b2621bc254849b4945708da8b6f6d87e1c75245"
+              },
+              "projects/cyberdeck-real-trial-20261020/display_swap/study_contract.py": {
+                "bytes": 2813,
+                "sha256": "3ac77d3e9f75ae1115d6db09c2d4aa69349fde6ec535a26153dbda06fcbd73b3"
+              },
+              "projects/cyberdeck-real-trial-20261020/display_swap/study_verify.py": {
+                "bytes": 3842,
+                "sha256": "b4d71a404b1c560c435a4343baa4de429842f7029be1634c31dc81567b6e2de6"
+              },
+              "requirements.json": {
+                "bytes": 129,
+                "sha256": "d37eba2e4aa25dc306ca0024ff720ee1cc8d1e934faf2d446881c761fe824c7e"
+              },
+              "revision/BOM.csv": {
+                "bytes": 4723,
+                "sha256": "bc88dab6f1eaeea78e566c644a5db3ef9fe9c0b9e3377bb5bea83a7c84b13133"
+              },
+              "revision/BOM.json": {
+                "bytes": 8802,
+                "sha256": "65fab498995829232b3c065671941de849d9018375583170fe6eaf0061b68f81"
+              },
+              "revision/cad/FIELDDECK_5.glb": {
+                "bytes": 1070444,
+                "sha256": "96c276431e662719b44975def917ee82608ed929eb7afe06771704d251533ae7"
+              },
+              "revision/cad/FIELDDECK_5.step": {
+                "bytes": 4813857,
+                "sha256": "d6f7df132230bf944b701b5e952eafa94932f730667bb34cfb04341c9e20d9f0"
+              },
+              "revision/cad/changed_parts/display_spacer_1.step": {
+                "bytes": 9247,
+                "sha256": "c20c362a4bcb5641c0b1e9f2fb295d6ea868f9f3748f4f870a6d21bb9c15c4dd"
+              },
+              "revision/cad/changed_parts/display_spacer_1.stl": {
+                "bytes": 42084,
+                "sha256": "b9164b28fb03df98dc1156024017c9d2908a7d65a40d7319b8fe73992202d5fa"
+              },
+              "revision/cad/changed_parts/face_rear_left.step": {
+                "bytes": 102198,
+                "sha256": "db0c8cdc9027ad8b27d4584ad283ed2734decb9d6c1105d6ed5410e39337afbb"
+              },
+              "revision/cad/changed_parts/face_rear_left.stl": {
+                "bytes": 195484,
+                "sha256": "ee659b9d757f53fbfe929eb9defe2abf6cc7aee6e6ec70f9357dd3af31cc5f42"
+              },
+              "revision/cad/changed_parts/face_rear_right.step": {
+                "bytes": 77202,
+                "sha256": "11c2a428979c9d7da313310a48028474adce975499e5dd687a34a31abb1f84c6"
+              },
+              "revision/cad/changed_parts/face_rear_right.stl": {
+                "bytes": 89484,
+                "sha256": "7d223c49d9a8a5aa3f374a4cbf5b4d27ea0c1d57d594ded3d20993c3cd7eb289"
+              },
+              "revision/cad/changed_parts/tray_rear_left.step": {
+                "bytes": 373839,
+                "sha256": "d49fb13caa30d527b2dff9d42ad81082b8f9e8f5d5d862609ecb1643776f555f"
+              },
+              "revision/cad/changed_parts/tray_rear_left.stl": {
+                "bytes": 691484,
+                "sha256": "cb3d0b0f1e88613213221a41b0e186a9270a5a79bdddfd338cd1ed0482dc4cd7"
+              },
+              "revision/cad/changed_parts/tray_rear_right.step": {
+                "bytes": 363816,
+                "sha256": "6e64b94c2ae2a0397f764ac25c63ad621ffd96f8a815eeed91699fac4d2e2b96"
+              },
+              "revision/cad/changed_parts/tray_rear_right.stl": {
+                "bytes": 520884,
+                "sha256": "c46f66e1f5700a3255b21b1e6f4a290f0d97f6f3b085dc03f4b99aa299f9ba58"
+              },
+              "revision/connections.json": {
+                "bytes": 2031,
+                "sha256": "26bb9b572068e91dd37082775dc958a913fbac6153e879eb3058450e68de89cd"
+              },
+              "revision/display5-LICENSE.txt": {
+                "bytes": 1881,
+                "sha256": "4ca2d350552b24137e55587e13fb09a249b757c6af49652ff02ea524d154c7fc"
+              },
+              "revision/engineering.json": {
+                "bytes": 967,
+                "sha256": "76340a99399893f6789d2234f4b50f070fbde9f3775c2204df8b002ee2efe88e"
+              },
+              "revision/geometry.json": {
+                "bytes": 4752,
+                "sha256": "f34c0e5b6e20b20bd9d4fdc2e68d4dac106e9f0a51189c373abf93bd797fa059"
+              },
+              "revision/power.json": {
+                "bytes": 1646,
+                "sha256": "6a112633e300638ce540bd2fd88e2a4dff0e1eabb8a6239557d0faa636b6ac63"
+              },
+              "revision/source-evidence.json": {
+                "bytes": 1877,
+                "sha256": "6a95e945bb37e3e13cd1e2ec1f92987fcde5f40e98be4e873bcca604f7a3a6bd"
+              },
+              "revision/substitution.json": {
+                "bytes": 46453,
+                "sha256": "267b90ae92b0ac09f2993caeff04f237c606ad1535cad19bc232837e86776e93"
+              },
+              "revision/verification.json": {
+                "bytes": 2587,
+                "sha256": "13db2f13e49a1219eade18b66a8ef561c667b6d955a56c9d46cd2faef2d0a8ee"
+              },
+              "src/hardware_splicer/part_substitution.py": {
+                "bytes": 42033,
+                "sha256": "ee802b16a2e7a38bd897b508262f88e9b1afe0698830330a56b886584361f77e"
+              },
+              "study-contract.json": {
+                "bytes": 12868,
+                "sha256": "9a11960e9b734ba130525ebb5636119077ffa49dfaec7fce8c0505067cadd46f"
+              },
+              "study-verification.json": {
+                "bytes": 18044,
+                "sha256": "58733a67f1f2f52558ab74c0972f8cadf616a56d9bcd7bbf7fe8cc2614a38783"
+              }
+            },
+            "attempt_id": "5e95724545714ee68031da37e3268bb7",
+            "change_request": "Apply Policy Lab modelled candidate pi-work-load-budget",
+            "job_id": "b6b5b3f0ecae53559076a088d93cbbe2",
+            "parent_revision": 2,
+            "revision": 3,
+            "run_id": "f35f80c0dfcb42e4b066906be52a919a",
+            "saved_at": "2026-11-20T15:14:02.750191+00:00",
+            "summary": {
+              "artifact_integrity": true,
+              "case_id": "fielddeck-5",
+              "constraints": [
+                {
+                  "actual": 4.002,
+                  "id": "work_runtime",
+                  "limit": 4,
+                  "passed": true,
+                  "unit": "h"
+                },
+                {
+                  "actual": 0.48,
+                  "id": "ordinary_source_margin",
+                  "limit": 0.3,
+                  "passed": true,
+                  "unit": "A"
+                },
+                {
+                  "actual": 0.08,
+                  "id": "high_keyboard_supply_limit",
+                  "limit": 0,
+                  "passed": true,
+                  "unit": "A"
+                }
+              ],
+              "engine": "Registered native CAD and engineering case",
+              "metrics": {
+                "high_keyboard_source_margin_a": 0.08,
+                "ordinary_source_margin_a": 0.48,
+                "work_runtime_lower_h": 4.002,
+                "work_runtime_upper_h": 5.65,
+                "work_system_power_w": 5.735
+              },
+              "physical_authority_granted": false,
+              "physical_work_requested": false,
+              "requirements": {
+                "keyboard_current_a": 0.1,
+                "minimum_supply_margin_a": 0.3,
+                "minimum_work_runtime_h": 4,
+                "pi_work_current_a": 0.697
+              },
+              "requirements_met": true,
+              "scope_limits": [
+                "Digital geometry and declared calculation/simulation models only.",
+                "No purchased/owned hardware, physical fit, operation or fabrication is established."
+              ],
+              "source_sha256": {
+                "projects/cyberdeck-real-trial-20261020/digital_v1/analysis/verification.json": "0f4faffa32086b67245fe6b3ffc333e224f5631db109975145a7d4953e018e49",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/bom.json": "480a43aedbbb4bcd1b30ac6a7170a995c89b5bd92defe43fcb41c11ab4d47679",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/FIELDDECK_7.step": "a3a26a05db6e0086c38dbfd09bafacecc198751763ba40060569c46f82187827",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/geometry_report.json": "0b2dd9a273bdf96e322351a033e0ecb3f107861fabf9bf4acb54686abc64f2dc",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/face_front_left.step": "94fd4671c1b45c63e953e94f1468bbd944f8d10aff5f24d5abea3cb5c74f55ab",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/face_front_left.stl": "28f330e32f1408bbbb6a0c977242eacd23338a9d22c6744e05b27e246480aa65",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/face_front_right.step": "65084427113400870d53c48b2c79528df28289b62b3e5ad1e0feea7ba2b89624",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/face_front_right.stl": "32e7954edae763a0cfc007837a865055945457ef6214b2276faadb75cadd46cc",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/fan_duct.step": "f43a911db30bb16117aea68d1706aa5762131df741f6004d61fac3b2f42a33bd",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/fan_duct.stl": "b94ad7519be910e4f87043c2513b7a159206c49ffe98476cc2469135186a2856",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/fan_guard.step": "00196c825551819a95af1b74d082a4dd8ab1871811b530c6d83dff52ac8e053c",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/fan_guard.stl": "9142c924d5c462ee493e0f18e3205dd382dd65b7d4879d5d8a6b5871536dc55c",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/foot_1.step": "734dca82c415000ce02311d9bd684f7d0e390b2a91a0fad086e69d564c526e7e",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/foot_1.stl": "54bb09479b3519c30aabf9ab13b333f16d5fe84d2a5af64327d3acf531574eef",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/foot_2.step": "c0e241e32b095391ac850f5206309d7db2634f45990ac4b1d162edb459a2708e",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/foot_2.stl": "54bb09479b3519c30aabf9ab13b333f16d5fe84d2a5af64327d3acf531574eef",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/foot_3.step": "077d42a710a8e90313e8922d917212ef0707da964bbdaa82f4870187eea2ee03",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/foot_3.stl": "54bb09479b3519c30aabf9ab13b333f16d5fe84d2a5af64327d3acf531574eef",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/foot_4.step": "e78eb5f5f19bbc0ee93de39212559bf6e06e1591b4b5a1155947a9a54c67b92a",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/foot_4.stl": "54bb09479b3519c30aabf9ab13b333f16d5fe84d2a5af64327d3acf531574eef",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_1.step": "cd26090c66996d5eeecb2c8f3790301d310b8ecae5df842740a46e2bdec3b737",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_1.stl": "e6a32d28036e98e26cdb7d35b9294fe0360d34a4dec43745c07d465c42c23fe6",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_2.step": "19455d4977adca93c8000f5e729e1875094bf352f3fde4adcb80b970e25d55d0",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_2.stl": "e6a32d28036e98e26cdb7d35b9294fe0360d34a4dec43745c07d465c42c23fe6",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_3.step": "1cc0c118de033e906a2d597ef7459219228e1c8291285940e0a443f39b27ecff",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_3.stl": "e6a32d28036e98e26cdb7d35b9294fe0360d34a4dec43745c07d465c42c23fe6",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_4.step": "93eb61f4e9affa3faec66fd23e2a8c30557fc7e4a725bada1b155e2566f0f7ac",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_4.stl": "e6a32d28036e98e26cdb7d35b9294fe0360d34a4dec43745c07d465c42c23fe6",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_5.step": "c70faa1da966ab1cdfc5b3aa58f0129712e6fe210f35962e6292a743e93bfbb6",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_5.stl": "533161fdb334469ea9bc19c6dfccaf2a9b13f4a7ef87206c7332295575b387b3",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_6.step": "cce2f76057babd469f6ff56a980686f3abbb85f82903b7ea7c6e010cbaf5c869",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/seam_plate_6.stl": "533161fdb334469ea9bc19c6dfccaf2a9b13f4a7ef87206c7332295575b387b3",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/tray_front_left.step": "28b55d82e5def520b99bc7113f6f9be6397c805b91eb9964a47885ae65bb059b",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/tray_front_left.stl": "b210b3dcc1d28feaa4b37b01e7bf3fea724feffea9b126c9d81449cf3da51be3",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/tray_front_right.step": "daadbb4bc83eba3771f853110965ffffc524c4a826f8b01666d500021a8aa928",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/cad/print/tray_front_right.stl": "c659884ad33cec5c8bcf61665af3fe9534d4497fea5dd55d3f2bb91d8693645f",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/design.json": "0883100a6ae3accd11c70fd731cc98bf46646b878ab5ce37a086b386bb73e192",
+                "projects/cyberdeck-real-trial-20261020/digital_v1/sources/touch_display2_LICENSE.txt": "4ca2d350552b24137e55587e13fb09a249b757c6af49652ff02ea524d154c7fc",
+                "projects/cyberdeck-real-trial-20261020/display_swap/assess.py": "727c15801543e3181a2f9fe8c870405be5dec28186a1797f857b3ccd328608e1",
+                "projects/cyberdeck-real-trial-20261020/display_swap/build.py": "9d2604b997e39a7c00feac6843f0e100585ba8040698396ca191d3df7bb5833e",
+                "projects/cyberdeck-real-trial-20261020/display_swap/sources/evidence.json": "6a95e945bb37e3e13cd1e2ec1f92987fcde5f40e98be4e873bcca604f7a3a6bd",
+                "projects/cyberdeck-real-trial-20261020/display_swap/sources/vendor5.zip": "6552f6b12b1ec7f4b829a64ce2422fe827004ee8a149a3bc1d0f669629a449b4",
+                "projects/cyberdeck-real-trial-20261020/display_swap/study_build.py": "365417d3d03c5c67441dd9785b2621bc254849b4945708da8b6f6d87e1c75245",
+                "projects/cyberdeck-real-trial-20261020/display_swap/study_contract.py": "3ac77d3e9f75ae1115d6db09c2d4aa69349fde6ec535a26153dbda06fcbd73b3",
+                "projects/cyberdeck-real-trial-20261020/display_swap/study_verify.py": "b4d71a404b1c560c435a4343baa4de429842f7029be1634c31dc81567b6e2de6",
+                "src/hardware_splicer/part_substitution.py": "ee802b16a2e7a38bd897b508262f88e9b1afe0698830330a56b886584361f77e"
+              }
+            }
+          },
+          "unmapped_numeric_fields": []
+        },
+        "consumer_implementation": {
+          "./review.mjs": "35590a57b57c41a94af7b8405824ba128ab88362029c4463dfcb95990f9e911b",
+          "../../packages/policy-foundation/src/index.js": "3fcb5225faa646e5eefdeeb1a3e925779c1075dddfa9b2b8dab851319faced17",
+          "../../packages/constraint-core/src/constraints.js": "13818f9e8f8fe2b8b38fd6c8ac118d4442d243e0a06b207dff98a72745599b82",
+          "../../packages/constraint-core/src/decision.js": "c77a53ac9b94901522e6fb09871210a0245c8453adaf3a72c7bca012623574a5",
+          "../../packages/constraint-core/src/receipt.js": "79e613910b51b96079737021e87bca223476866799b8c6c2d38fa96e32b79081",
+          "../../packages/constraint-core/src/stable.js": "4c10779d153dc04e96336335a1f96c428c031bb1b680cc6a0012bc17b49b7619"
+        },
+        "consumer_runtime": {
+          "package": "policylab.hardware-policy",
+          "package_version": "1.1.0",
+          "source_revision": "local-working-tree"
+        }
+      }
+    },
+    "request": {
+      "subject": "digital-996558719b13454fb1724bef8f218093",
+      "quantity": 1
+    },
+    "event_key": "87ce4018ea7e9d5df0d316642b0d0128c7b5640101265703548fd7e37aa41dee",
+    "entitlement": 1,
+    "allowable_quantity": 1,
+    "decision": {
+      "schema": "solarpunk.constraint.decision_result.v1",
+      "case_id": "hardware-design-review:71226e038196a4f5e982747da8a862db70926d5db44f753bfcb2ca30cd4a3803",
+      "case_hash": "e3145b4520af21227c3c08addc668b6568723e87332b4bbd89825614a523d969",
+      "policy_id": "portable-runtime-4h-pi-load-candidate",
+      "policy_version": "1.0.0",
+      "policy_manifest_hash": "c230fd8808efdebce576627593a26b91759e1d3be4776872c2799b0618fae51d",
+      "evidence_hashes": [
+        "244539c547024fb59ecbcbfb2dc6286fda702a8a6074f733e5720463b5e474a5"
+      ],
+      "context_refs": [],
+      "admission": {
+        "result": "PASS",
+        "evaluations": [
+          {
+            "schema": "solarpunk.constraint.constraint_evaluation.v1",
+            "calculator_id": "foundation:policy-enabled",
+            "calculator_version": "1.0.0",
+            "constraint_class": "ADMISSION_GATE",
+            "policy_rule_id": "foundation:policy-enabled",
+            "status": "PASS",
+            "unit": null,
+            "quantity_decimals": null,
+            "capacity": null,
+            "input_refs": [
+              "244539c547024fb59ecbcbfb2dc6286fda702a8a6074f733e5720463b5e474a5",
+              "c230fd8808efdebce576627593a26b91759e1d3be4776872c2799b0618fae51d"
+            ],
+            "observed_inputs": {},
+            "parameters": {},
+            "assumptions": [],
+            "warnings": [],
+            "explanation": "Application policy is enabled.",
+            "boundary": "Application decision under declared inputs and a registered module; source truth and real-world rights remain external.",
+            "evaluation_id": "e55aa8083ff19b51edfa2213cfea7d1ade7b37df06bc18a9e927a4249ec91d20"
+          },
+          {
+            "schema": "solarpunk.constraint.constraint_evaluation.v1",
+            "calculator_id": "foundation:subject-binding",
+            "calculator_version": "1.0.0",
+            "constraint_class": "ADMISSION_GATE",
+            "policy_rule_id": "foundation:subject-binding",
+            "status": "PASS",
+            "unit": null,
+            "quantity_decimals": null,
+            "capacity": null,
+            "input_refs": [
+              "244539c547024fb59ecbcbfb2dc6286fda702a8a6074f733e5720463b5e474a5",
+              "c230fd8808efdebce576627593a26b91759e1d3be4776872c2799b0618fae51d"
+            ],
+            "observed_inputs": {},
+            "parameters": {},
+            "assumptions": [],
+            "warnings": [],
+            "explanation": "The requested recipient must match the evidence subject.",
+            "boundary": "Application decision under declared inputs and a registered module; source truth and real-world rights remain external.",
+            "evaluation_id": "0b524089d0c340f52896ef2dae6551bf0182129b434b47e280a5f3807174c8b3"
+          },
+          {
+            "schema": "solarpunk.constraint.constraint_evaluation.v1",
+            "calculator_id": "hardware-design-review:digital-scope",
+            "calculator_version": "1.0.0",
+            "constraint_class": "ADMISSION_GATE",
+            "policy_rule_id": "hardware-design-review:digital-scope",
+            "status": "PASS",
+            "unit": null,
+            "quantity_decimals": null,
+            "capacity": null,
+            "input_refs": [
+              "244539c547024fb59ecbcbfb2dc6286fda702a8a6074f733e5720463b5e474a5",
+              "c230fd8808efdebce576627593a26b91759e1d3be4776872c2799b0618fae51d"
+            ],
+            "observed_inputs": {},
+            "parameters": {},
+            "assumptions": [],
+            "warnings": [],
+            "explanation": "This review concerns modeled digital design only.",
+            "boundary": "Application decision under declared inputs and a registered module; source truth and real-world rights remain external.",
+            "evaluation_id": "c9eb964e4373464658920f9f5b98dfda43e8ea17602b203dd3084cd129613d7a"
+          },
+          {
+            "schema": "solarpunk.constraint.constraint_evaluation.v1",
+            "calculator_id": "hardware-design-review:engineering-requirements",
+            "calculator_version": "1.0.0",
+            "constraint_class": "ADMISSION_GATE",
+            "policy_rule_id": "hardware-design-review:engineering-requirements",
+            "status": "PASS",
+            "unit": null,
+            "quantity_decimals": null,
+            "capacity": null,
+            "input_refs": [
+              "244539c547024fb59ecbcbfb2dc6286fda702a8a6074f733e5720463b5e474a5",
+              "c230fd8808efdebce576627593a26b91759e1d3be4776872c2799b0618fae51d"
+            ],
+            "observed_inputs": {},
+            "parameters": {},
+            "assumptions": [],
+            "warnings": [],
+            "explanation": "The archived HS engineering constraints passed.",
+            "boundary": "Application decision under declared inputs and a registered module; source truth and real-world rights remain external.",
+            "evaluation_id": "dd01a1e7bff31b5e013e6fefafe38b19f9412bf6172acae2038f20b0cd058e2d"
+          },
+          {
+            "schema": "solarpunk.constraint.constraint_evaluation.v1",
+            "calculator_id": "hardware-design-review:target.work-runtime",
+            "calculator_version": "1.0.0",
+            "constraint_class": "ADMISSION_GATE",
+            "policy_rule_id": "hardware-design-review:target.work-runtime",
+            "status": "PASS",
+            "unit": null,
+            "quantity_decimals": null,
+            "capacity": null,
+            "input_refs": [
+              "244539c547024fb59ecbcbfb2dc6286fda702a8a6074f733e5720463b5e474a5",
+              "c230fd8808efdebce576627593a26b91759e1d3be4776872c2799b0618fae51d"
+            ],
+            "observed_inputs": {},
+            "parameters": {},
+            "assumptions": [],
+            "warnings": [],
+            "explanation": "metric.work_runtime_lower_h is 4.002 h; target >= 4 h.",
+            "boundary": "Application decision under declared inputs and a registered module; source truth and real-world rights remain external.",
+            "evaluation_id": "b9f0c517f2c6b45477d388f73eef299ba9e40e41caf983d84053ac0c279722f1"
+          },
+          {
+            "schema": "solarpunk.constraint.constraint_evaluation.v1",
+            "calculator_id": "foundation:requested-quantity",
+            "calculator_version": "1.0.0",
+            "constraint_class": "ADMISSION_GATE",
+            "policy_rule_id": "foundation:requested-quantity",
+            "status": "PASS",
+            "unit": null,
+            "quantity_decimals": null,
+            "capacity": null,
+            "input_refs": [
+              "244539c547024fb59ecbcbfb2dc6286fda702a8a6074f733e5720463b5e474a5",
+              "c230fd8808efdebce576627593a26b91759e1d3be4776872c2799b0618fae51d"
+            ],
+            "observed_inputs": {},
+            "parameters": {},
+            "assumptions": [],
+            "warnings": [],
+            "explanation": "Requested 1; evidence entitlement 1; policy limit 1.",
+            "boundary": "Application decision under declared inputs and a registered module; source truth and real-world rights remain external.",
+            "evaluation_id": "a83139e4296f9718d08db2ea5f470b648479d874c748e2f9d6b0585421104f5a"
+          }
+        ],
+        "blocking_rules": []
+      },
+      "capacity": {
+        "evaluated": true,
+        "unit": "DIGITAL_REVIEW",
+        "quantity_decimals": 0,
+        "evaluations": [
+          {
+            "schema": "solarpunk.constraint.constraint_evaluation.v1",
+            "calculator_id": "foundation:module-entitlement",
+            "calculator_version": "1.0.0",
+            "constraint_class": "QUANTITY_CEILING",
+            "policy_rule_id": "foundation:module-entitlement",
+            "status": "PASS",
+            "unit": "DIGITAL_REVIEW",
+            "quantity_decimals": 0,
+            "capacity": 1,
+            "input_refs": [
+              "244539c547024fb59ecbcbfb2dc6286fda702a8a6074f733e5720463b5e474a5",
+              "c230fd8808efdebce576627593a26b91759e1d3be4776872c2799b0618fae51d"
+            ],
+            "observed_inputs": {},
+            "parameters": {},
+            "assumptions": [],
+            "warnings": [],
+            "explanation": "Quantity supported by the registered application module.",
+            "boundary": "Application decision under declared inputs and a registered module; source truth and real-world rights remain external.",
+            "evaluation_id": "8ecb14e633fc1ba4f24060af2d41635fa37f6c888c8fa78d4cb5f06b008b00b7"
+          },
+          {
+            "schema": "solarpunk.constraint.constraint_evaluation.v1",
+            "calculator_id": "foundation:policy-action-cap",
+            "calculator_version": "1.0.0",
+            "constraint_class": "QUANTITY_CEILING",
+            "policy_rule_id": "foundation:policy-action-cap",
+            "status": "PASS",
+            "unit": "DIGITAL_REVIEW",
+            "quantity_decimals": 0,
+            "capacity": 1,
+            "input_refs": [
+              "244539c547024fb59ecbcbfb2dc6286fda702a8a6074f733e5720463b5e474a5",
+              "c230fd8808efdebce576627593a26b91759e1d3be4776872c2799b0618fae51d"
+            ],
+            "observed_inputs": {},
+            "parameters": {},
+            "assumptions": [],
+            "warnings": [],
+            "explanation": "Maximum quantity for one action under this policy.",
+            "boundary": "Application decision under declared inputs and a registered module; source truth and real-world rights remain external.",
+            "evaluation_id": "f652e4b17412b845b7f0792aad9bfe397e4912f303df383cd852050995d0ebc4"
+          },
+          {
+            "schema": "solarpunk.constraint.constraint_evaluation.v1",
+            "calculator_id": "foundation:requested-quantity",
+            "calculator_version": "1.0.0",
+            "constraint_class": "QUANTITY_CEILING",
+            "policy_rule_id": "foundation:requested-quantity",
+            "status": "PASS",
+            "unit": "DIGITAL_REVIEW",
+            "quantity_decimals": 0,
+            "capacity": 1,
+            "input_refs": [
+              "244539c547024fb59ecbcbfb2dc6286fda702a8a6074f733e5720463b5e474a5",
+              "c230fd8808efdebce576627593a26b91759e1d3be4776872c2799b0618fae51d"
+            ],
+            "observed_inputs": {},
+            "parameters": {},
+            "assumptions": [],
+            "warnings": [],
+            "explanation": "The user requested this quantity; no extra units are issued.",
+            "boundary": "Application decision under declared inputs and a registered module; source truth and real-world rights remain external.",
+            "evaluation_id": "649b67772d1d3c179f2f2b38a02f0a481ae4afb485ac28811c2de65c8bdb93da"
+          }
+        ],
+        "admitted_maximum": 1,
+        "binding_constraints": [
+          "foundation:module-entitlement",
+          "foundation:policy-action-cap",
+          "foundation:requested-quantity"
+        ]
+      },
+      "decision": "ADMIT_WITH_LIMIT",
+      "warnings": [
+        "This application uses declared facts; an accepted decision does not authenticate its source."
+      ],
+      "boundary": "Application decision under declared inputs and a registered module; source truth and real-world rights remain external.",
+      "decision_id": "8ef6ef560d8101c253e2dcb640af1f69b76e51f94a6fdbc730ad74ff05e71868"
+    },
+    "receipt": {
+      "schema": "solarpunk.constraint.decision_receipt.v1",
+      "decision_id": "8ef6ef560d8101c253e2dcb640af1f69b76e51f94a6fdbc730ad74ff05e71868",
+      "case_id": "hardware-design-review:71226e038196a4f5e982747da8a862db70926d5db44f753bfcb2ca30cd4a3803",
+      "evaluated_at": "2026-11-20T15:14:03.640Z",
+      "policy": {
+        "id": "portable-runtime-4h-pi-load-candidate",
+        "version": "1.0.0",
+        "manifest_hash": "c230fd8808efdebce576627593a26b91759e1d3be4776872c2799b0618fae51d"
+      },
+      "evidence": [
+        {
+          "hash": "244539c547024fb59ecbcbfb2dc6286fda702a8a6074f733e5720463b5e474a5",
+          "raw_included": true
+        }
+      ],
+      "contexts": [],
+      "runtime": {
+        "package": "policylab.hardware-policy",
+        "package_version": "1.1.0",
+        "source_revision": "local-working-tree"
+      },
+      "evaluated_rules": [
+        {
+          "evaluation_id": "e55aa8083ff19b51edfa2213cfea7d1ade7b37df06bc18a9e927a4249ec91d20",
+          "calculator_id": "foundation:policy-enabled",
+          "calculator_version": "1.0.0",
+          "policy_rule_id": "foundation:policy-enabled",
+          "constraint_class": "ADMISSION_GATE",
+          "status": "PASS"
+        },
+        {
+          "evaluation_id": "0b524089d0c340f52896ef2dae6551bf0182129b434b47e280a5f3807174c8b3",
+          "calculator_id": "foundation:subject-binding",
+          "calculator_version": "1.0.0",
+          "policy_rule_id": "foundation:subject-binding",
+          "constraint_class": "ADMISSION_GATE",
+          "status": "PASS"
+        },
+        {
+          "evaluation_id": "c9eb964e4373464658920f9f5b98dfda43e8ea17602b203dd3084cd129613d7a",
+          "calculator_id": "hardware-design-review:digital-scope",
+          "calculator_version": "1.0.0",
+          "policy_rule_id": "hardware-design-review:digital-scope",
+          "constraint_class": "ADMISSION_GATE",
+          "status": "PASS"
+        },
+        {
+          "evaluation_id": "dd01a1e7bff31b5e013e6fefafe38b19f9412bf6172acae2038f20b0cd058e2d",
+          "calculator_id": "hardware-design-review:engineering-requirements",
+          "calculator_version": "1.0.0",
+          "policy_rule_id": "hardware-design-review:engineering-requirements",
+          "constraint_class": "ADMISSION_GATE",
+          "status": "PASS"
+        },
+        {
+          "evaluation_id": "b9f0c517f2c6b45477d388f73eef299ba9e40e41caf983d84053ac0c279722f1",
+          "calculator_id": "hardware-design-review:target.work-runtime",
+          "calculator_version": "1.0.0",
+          "policy_rule_id": "hardware-design-review:target.work-runtime",
+          "constraint_class": "ADMISSION_GATE",
+          "status": "PASS"
+        },
+        {
+          "evaluation_id": "a83139e4296f9718d08db2ea5f470b648479d874c748e2f9d6b0585421104f5a",
+          "calculator_id": "foundation:requested-quantity",
+          "calculator_version": "1.0.0",
+          "policy_rule_id": "foundation:requested-quantity",
+          "constraint_class": "ADMISSION_GATE",
+          "status": "PASS"
+        },
+        {
+          "evaluation_id": "8ecb14e633fc1ba4f24060af2d41635fa37f6c888c8fa78d4cb5f06b008b00b7",
+          "calculator_id": "foundation:module-entitlement",
+          "calculator_version": "1.0.0",
+          "policy_rule_id": "foundation:module-entitlement",
+          "constraint_class": "QUANTITY_CEILING",
+          "status": "PASS"
+        },
+        {
+          "evaluation_id": "f652e4b17412b845b7f0792aad9bfe397e4912f303df383cd852050995d0ebc4",
+          "calculator_id": "foundation:policy-action-cap",
+          "calculator_version": "1.0.0",
+          "policy_rule_id": "foundation:policy-action-cap",
+          "constraint_class": "QUANTITY_CEILING",
+          "status": "PASS"
+        },
+        {
+          "evaluation_id": "649b67772d1d3c179f2f2b38a02f0a481ae4afb485ac28811c2de65c8bdb93da",
+          "calculator_id": "foundation:requested-quantity",
+          "calculator_version": "1.0.0",
+          "policy_rule_id": "foundation:requested-quantity",
+          "constraint_class": "QUANTITY_CEILING",
+          "status": "PASS"
+        }
+      ],
+      "blocking_rules": [],
+      "binding_constraints": [
+        "foundation:module-entitlement",
+        "foundation:policy-action-cap",
+        "foundation:requested-quantity"
+      ],
+      "result": "ADMIT_WITH_LIMIT",
+      "data_boundary": "Local application assessment; exported snapshots include all supplied application facts."
+    }
+  },
+  "target_results": [
+    {
+      "id": "work-runtime",
+      "fact": "metric.work_runtime_lower_h",
+      "operator": ">=",
+      "value": 4,
+      "unit": "h",
+      "actual": 4.002,
+      "source_path": "/study/summary/metrics/work_runtime_lower_h",
+      "basis": "modeled",
+      "passed": true,
+      "reason": "TARGET_MET",
+      "explanation": "metric.work_runtime_lower_h is 4.002 h; target >= 4 h."
+    }
+  ],
+  "unmet_constraints": [],
+  "revision_requirements": {
+    "minimum_work_runtime_h": 4
+  },
+  "candidate_design_changes": [
+    {
+      "id": "pi-work-load-budget",
+      "kind": "modelled_candidate_design_change",
+      "label": "Modelled candidate design change, not a fix. HS must rerun its native study; no physical behaviour is established.",
+      "target": "work-runtime",
+      "input": "pi_work_current_a",
+      "model": "runtime_inverse_to_work_power",
+      "formula": "E_min = (R - r/2) x (P - r/2); P_required = E_min / T; dI = (P + r/2 - P_required) / V; I_after = floor((I_before - dI) / step) x step",
+      "basis": "HS models Fielddeck work power as supply_voltage_v x (Pi + keyboard + fan current) + display power with supply_voltage_v = 5 V (design.json engineering_assumptions), and runtime as usable bank energy / work power. pi_work_current_a is the only HS-adjustable input with room to move runtime (keyboard_current_a is 0.1 A with a 0.02 A floor); bank capacity is fixed in the design and is not an HS revision input. The minimum is HS's registered lower bound for pi_work_current_a.",
+      "status": "NOT_NEEDED",
+      "explanation": "metric.work_runtime_lower_h already meets the target."
+    }
+  ],
+  "evidence_scope": {
+    "exporter_audit": "HS stored-artifact integrity audit; native tools not rerun",
+    "consumer_check": "Original export bytes, revision identity, internal consistency, explicit units and policy targets",
+    "source_authentication": "Expected hash supplied by caller; a hash alone does not establish source identity or physical truth"
+  },
+  "boundary": "A modeled design review under declared targets. No physical operation, measurement, fabrication, purchase or payment is authorized."
+}

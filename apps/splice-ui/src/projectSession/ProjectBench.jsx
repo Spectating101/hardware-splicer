@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import ProjectReviewPanel from "../components/ProjectReviewPanel.jsx";
+import ChangeHistoryPanel from "./ChangeHistoryPanel.jsx";
 import DesignView, { splitGeometryNote } from "./DesignView.jsx";
 import {
   assessMachineRelease, digitalArtifactUrl, engineeringPackageUrl, fetchEngineeringPackages, fetchEngineeringRevisionDiff, fetchEvidenceDelta,
   fetchMaterialAssessment, fetchPartSubstitution, fetchProjectAssurance, fetchProjectMaterials,
-} from "./digitalStudyApi.js";
-import { describeTransition, invalidationReason } from "./checkTransition.js";
+} from "./digitalStudyApi";
+import { describeTransition, invalidationReason } from "./checkTransition";
 import { factText, formatValue, keyLabel } from "./digitalStudyLabels.js";
-import { blockerStatus } from "./statusLanguage.js";
+import { blockerStatus } from "./statusLanguage";
 
 // Missing information stays missing. In particular, known facts never confer authority.
 const value = (item, fallback = "unknown") => item === undefined || item === null || item === ""
@@ -277,7 +278,7 @@ function PackagePanel({ projectId, revision, latestRevision, studyPackages, obje
 }
 
 export default function ProjectBench({ session, study, children, references, evidenceExtra, tools, onToast, onReference,
-  caseId, latestRevision, studyPackages, onOpenScene, readOnlyRevision = false }) {
+  caseId, latestRevision, studyPackages, onOpenScene, onOpenRevision, readOnlyRevision = false }) {
   const [tab, setTab] = useState("design");
   const [compact, setCompact] = useState(() => window.matchMedia?.("(max-width: 899px)").matches ?? false);
   useEffect(() => {
@@ -439,6 +440,7 @@ export default function ProjectBench({ session, study, children, references, evi
           assuranceKnown={Boolean(assurance) && !evidenceError} assuranceLoading={!assurance && !evidenceError && Boolean(session.projectId && revision)}
           onSettled={markEvidenceSettled} />
         {evidenceExtra}
+        <ChangeHistoryPanel projectId={session.projectId} latestRevision={latest} onOpenRevision={onOpenRevision} />
         <ProjectReviewPanel projectId={session.projectId} currentRevision={session.snapshotRevision} onToast={onToast} disclosure />
         <div className="bench-blockers" data-blockers-state={blockersKnown ? "known" : "unknown"}><h3>Blockers</h3>
           {blockers.length ? <ul>{blockerText.map((text, index) => <li key={index}>{text}</li>)}</ul>

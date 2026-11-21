@@ -15,8 +15,9 @@ import {
   SMAAEffect, SMAAPreset, ToneMappingEffect, ToneMappingMode,
 } from "postprocessing";
 import { N8AOPostPass } from "n8ao";
-import { sceneRevisionUrl } from "../api.js";
+import { sceneRevisionUrl } from "../api";
 import { runChainJobs } from "./fielddeckChains.js";
+import { loadChainModule } from "./fielddeckChainsWasm.js";
 import {
   bracketPath, chooseTier, CREASE_INK, DIMMED_VENDOR, pairMovedFeatures, closedEdgeLoops, cullIsolatedChains, totalChainLength, classifyPart, convexHull, cullCoincidentChains, DEFAULT_EXPLODE, diffAccentChains,
   DIFF_COLORS, explodeGroupOffsets, FIELDDECK_NARROW, footprintDeltaPair, ghostDeltaKey,
@@ -233,7 +234,19 @@ function stylePart(entry, compare, weight, ghost, accent, emphasis, focus = null
   accents.forEach((line) => { line.visible = !ghost && !veiled && accent > 0; });
 }
 
+// Set once the Rust chain module has loaded: its edges() matches three's EdgesGeometry bit for bit.
+let rustChains = null;
+
+// A module that throws is dropped for the rest of the page; three's EdgesGeometry draws the same.
+function dropRustChains() {
+  rustChains = null;
+  chainModule = Promise.resolve(null);
+}
+
 function edgePositions(geometry, threshold) {
+  let fast = null;
+  try { fast = rustChains?.edges(geometry, threshold) ?? null; } catch { dropRustChains(); }
+  if (fast) return fast;
   const edges = new THREE.EdgesGeometry(geometry, threshold);
   const positions = edges.getAttribute("position").array;
   edges.dispose();
@@ -395,7 +408,20 @@ function yieldToMain() {
   return new Promise((resolve) => setTimeout(resolve, 0));
 }
 
+// The Rust chain module, loaded once per page; null where WebAssembly is unavailable.
+let chainModule = null;
+const chainModuleOnce = () => (chainModule ??= loadChainModule());
+
 async function makeEntries(assets, index, scene, technical, resources, { base, target, focusPart }, { signal } = {}) {
+  // Its weld and edges return weldEdgeChains' chains and EdgesGeometry's positions exactly, faster.
+  rustChains = await chainModuleOnce();
+  if (signal?.aborted) throw new DOMException("Stage build cancelled", "AbortError");
+  const weld = rustChains ? (positions, tolerance) => {
+    if (rustChains) {
+      try { return rustChains.weld(positions, tolerance); } catch { dropRustChains(); }
+    }
+    return weldEdgeChains(positions, tolerance);
+  } : null;
   // Phase marks for the browser's performance timeline; they cost nothing when nobody reads them.
   performance.mark?.("fielddeck:meshes-start");
   let sliceStart = performance.now();
@@ -559,7 +585,7 @@ async function makeEntries(assets, index, scene, technical, resources, { base, t
         // outline is kept as the fallback when nothing measurable differs.
         if (entry.row.delta === "changed") {
           entry.outlineAccent = (entry.outlineAccent ?? []).concat(diffAccentChains(edgePositions(geometry, 60),
-            geometry.boundingBox.getSize(new THREE.Vector3()).toArray()));
+            geometry.boundingBox.getSize(new THREE.Vector3()).toArray(), weld ? { weld } : {}));
         }
         const chains = entry.row.delta === "added" ? ghostOutlineLoops(positions, { maxChains: 1 }) : [];
         if (chains.length) {

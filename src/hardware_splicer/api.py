@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import re
+import threading
 import uuid
 from dataclasses import replace
 from pathlib import Path
@@ -495,6 +496,25 @@ def _error(status_code: int, error_type: str, message: str, *, request_id: str |
     return HTTPException(status_code=status_code, detail={"error": payload})
 
 
+def _start_runtime_prewarm() -> threading.Thread | None:
+    """Probe the digital study runtimes in the background at startup (off with
+    HARDWARE_SPLICER_PREWARM_RUNTIME=0). Until a probe finishes, a request still runs it itself."""
+    if os.environ.get("HARDWARE_SPLICER_PREWARM_RUNTIME", "1").strip().lower() in {"0", "false", "no", "off"}:
+        return None
+
+    def prewarm() -> None:
+        try:
+            from .digital_project import prewarm_runtimes
+
+            prewarm_runtimes()
+        except Exception:  # pragma: no cover - startup must never fail on a probe
+            logging.getLogger(__name__).debug("digital runtime prewarm failed", exc_info=True)
+
+    thread = threading.Thread(target=prewarm, name="hs-runtime-prewarm", daemon=True)
+    thread.start()
+    return thread
+
+
 def create_app(*, ui_dist: str | Path | None = None) -> FastAPI:
     job_backend = JobBackend.from_env()
 
@@ -504,6 +524,7 @@ def create_app(*, ui_dist: str | Path | None = None) -> FastAPI:
             raise RuntimeError(app.state.ui_error)
         try:
             job_backend.start()
+            _start_runtime_prewarm()
             yield
         finally:
             job_backend.stop()

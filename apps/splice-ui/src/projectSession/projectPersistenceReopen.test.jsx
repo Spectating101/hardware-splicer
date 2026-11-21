@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { useReducer } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { useProjectPersistence } from "./projectPersistence.js";
+import { useProjectPersistence } from "./projectPersistence";
 import { ACTIONS, canonicalJson, createEmptySession, projectSessionReducer } from "./projectSession.js";
 
 // The backend returns snapshots with sorted keys and whatever runtime flags the last save carried.

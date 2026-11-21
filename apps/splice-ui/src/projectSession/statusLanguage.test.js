@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { blockerStatus, revisionNoteText, statusText } from "./statusLanguage.js";
+import { blockerStatus, revisionNoteText, statusText } from "./statusLanguage";
 
 describe("status language", () => {
   it("renders backend tokens in words and keeps unknown tokens verbatim", () => {

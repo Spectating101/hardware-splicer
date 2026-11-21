@@ -5,7 +5,7 @@ import {
   listProjectReviews,
   listProjectRevisions,
   loadProjectReview,
-} from "../projectSession/projectReviewApi.js";
+} from "../projectSession/projectReviewApi";
 import "./ProjectReviewPanel.css";
 
 function formatTime(value) {

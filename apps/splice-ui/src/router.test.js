@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { VIEWS } from "./nav.js";
-import { parseLocation, pathForRoute } from "./router.js";
+import { parseLocation, pathForRoute } from "./router";
 
 const at = (url) => {
   const parsed = new URL(url, "http://hs.local");

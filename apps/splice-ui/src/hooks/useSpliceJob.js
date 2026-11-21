@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { fetchJob, fetchJobResult, submitComposeJob, submitSpliceJob } from "../api.js";
+import { fetchJob, fetchJobResult, submitComposeJob, submitSpliceJob } from "../api";
 
 const POLL_MS = 2000;
 /** Client-side honesty cap — backend also has HARDWARE_SPLICER_JOB_TIMEOUT_S (default 180). */

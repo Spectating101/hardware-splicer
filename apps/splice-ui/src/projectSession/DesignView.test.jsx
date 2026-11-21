@@ -1,9 +1,9 @@
 import { render, screen, within } from "@testing-library/react";
 import { beforeEach, expect, it, vi } from "vitest";
 import DesignView, { matchScene, splitGeometryNote } from "./DesignView.jsx";
-import { fetchSceneManifest, fetchSceneRecords, fetchScenes } from "../api.js";
+import { fetchSceneManifest, fetchSceneRecords, fetchScenes } from "../api";
 
-vi.mock("../api.js", () => ({ fetchScenes: vi.fn(), fetchSceneManifest: vi.fn(), fetchSceneRecords: vi.fn() }));
+vi.mock("../api", () => ({ fetchScenes: vi.fn(), fetchSceneManifest: vi.fn(), fetchSceneRecords: vi.fn() }));
 vi.mock("../components/FieldDeckScene.jsx", () => ({
   default: ({ projectId, manifest, embedded }) => <div data-testid="scene" data-project={projectId}
     data-embedded={String(embedded)}>{manifest.title}</div>,

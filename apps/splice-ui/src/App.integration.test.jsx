@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-vi.mock("./api.js", () => ({
+vi.mock("./api", () => ({
   fetchScenes: vi.fn(async () => []), fetchSceneManifest: vi.fn(), fetchSceneRecords: vi.fn(async () => ({ records: [] })),
   fetchHealth: vi.fn(async () => ({
     ok: true,
@@ -168,7 +168,7 @@ describe("App navigation integration", () => {
   });
 
   it("shows a completed run neutrally with the result it returned, never as a success", async () => {
-    const api = await import("./api.js");
+    const api = await import("./api");
     api.fetchJobs.mockResolvedValueOnce({ jobs: [{ job_id: "run-1", project_name: "Fielddeck 5 display revision", status: "succeeded",
       options: { job_type: "digital_study", payload: { project_id: "digital-fd" } } }] });
     api.fetchJobResult.mockResolvedValueOnce({ ok: true, result: { requirements_met: false, revision: 2 } });

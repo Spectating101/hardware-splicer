@@ -1,8 +1,8 @@
 import { lazy, Suspense, useEffect, useState } from "react";
-import { fetchSceneManifest, fetchSceneRecords, fetchScenes } from "../api.js";
+import { fetchSceneManifest, fetchSceneRecords, fetchScenes } from "../api";
 import { sceneRevisions } from "../components/sceneRevisions.js";
 import { formatValue, keyLabel } from "./digitalStudyLabels.js";
-import { statusText } from "./statusLanguage.js";
+import { statusText } from "./statusLanguage";
 
 const FieldDeckScene = lazy(() => import("../components/FieldDeckScene.jsx"));
 const SCENE_SCHEMA = "hardware_splicer.scene_manifest.v1";

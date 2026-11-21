@@ -3,13 +3,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import DigitalStudyPanel from "./DigitalStudyPanel.jsx";
 import {
   fetchDigitalCompare, fetchDigitalJob, fetchDigitalStudy, fetchEngineeringPackages, submitDigitalRun, fetchProjectAssurance, fetchProjectMaterials,
-} from "./digitalStudyApi.js";
-import { fetchScenes } from "../api.js";
+} from "./digitalStudyApi";
+import { fetchScenes } from "../api";
 
-vi.mock("../api.js", () => ({
+vi.mock("../api", () => ({
   fetchScenes: vi.fn(async () => []), fetchSceneManifest: vi.fn(), fetchSceneRecords: vi.fn(async () => ({ records: [] })),
 }));
-vi.mock("./digitalStudyApi.js", () => ({
+vi.mock("./digitalStudyApi", () => ({
+  fetchChangeDossier: vi.fn(async () => ({ change_dossier: { changes: [], cite_editions: [], cite_linked: false, head_revision: 1 } })),
   fetchEngineeringPackages: vi.fn(async () => ({ packages: [] })), fetchEvidenceDelta: vi.fn(),
   fetchEngineeringRevisionDiff: vi.fn(), fetchDigitalCompare: vi.fn(),
   engineeringPackageUrl: (project, id) => `/packages/${project}/${id}`,

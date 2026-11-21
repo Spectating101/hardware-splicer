@@ -1,9 +1,9 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
 import DigitalStudyLibrary from "./DigitalStudyLibrary.jsx";
-import { fetchDigitalCases } from "./digitalStudyApi.js";
+import { fetchDigitalCases } from "./digitalStudyApi";
 
-vi.mock("./digitalStudyApi.js", () => ({ fetchDigitalCases: vi.fn() }));
+vi.mock("./digitalStudyApi", () => ({ fetchDigitalCases: vi.fn() }));
 
 it("retries discovery and opens the selected available design by its backend ID", async () => {
   const onStart = vi.fn();
