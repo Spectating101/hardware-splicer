@@ -1,0 +1,35 @@
+{
+  "case_id": "intel_community_nuc11pah_display_20260429",
+  "source_url": "https://community.intel.com/t/intel-nuc11pah/138113",
+  "external_case": true,
+  "not_target_listing": true,
+  "source_timeline": [
+    {
+      "date": "2026-04-29",
+      "report": "Owner says cannot get screen/BIOS display, front power LED lit; yellow storage activity LED also lit",
+      "evidence_type": "owner statement",
+      "actual_power_led_state": "solid_no_video"
+    },
+    {
+      "date": "2026-04-29",
+      "report": "Community helper suggests isolating NVMe/SATA storage as a diagnostic, not confirmed fault",
+      "evidence_type": "third-party hypothesis"
+    },
+    {
+      "date": "2026-04-29",
+      "report": "Owner later says can boot/log in via remote desktop but HDMI screen still does not work",
+      "evidence_type": "owner statement",
+      "actual_outcome": "remote_boot_reported_HDMI_unresolved"
+    },
+    {
+      "date": "2026-04-30",
+      "report": "Intel support refers NUC support to ASUS; final HDMI repair not demonstrated",
+      "evidence_type": "support note",
+      "actual_outcome": "unresolved"
+    }
+  ],
+  "expected_classification": "solid_no_video",
+  "expected_repair_proof": false,
+  "expected_hs_route_first_step": "diagnose_post",
+  "claim_boundary": "Independent real-case public discussion, not physical lab data. Never substitute owner reports for measured target board data or falsely claim HDMI repair."
+}

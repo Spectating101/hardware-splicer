@@ -1,0 +1,103 @@
+{
+  "snapshot_date": "2026-11-05",
+  "market": "Indonesia",
+  "warning": "Listings are offers, not verified prices paid or sales velocity. Candidate print masses are hypotheses except mesh-measured HS pilot.",
+  "outsourced_petg": {
+    "supplier": "3D Print Jakarta",
+    "source": "https://shop.3dprintjakarta.com/pricing",
+    "price_per_sliced_g_idr": 1000,
+    "minimum_billed_total_g": 10,
+    "shipping_excluded": true
+  },
+  "assumptions": {
+    "marketplace_total_fee_rate": 0.2,
+    "order_processing_fee_idr": 1250,
+    "packaging_idr": 5000,
+    "fulfillment_and_quality_labor_idr": 12000,
+    "customer_acquisition_idr": 7000,
+    "returns_warranty_allowance_idr": 10000,
+    "fasteners_idr": 5000,
+    "design_cost_amortization_idr": 15000,
+    "excludes": [
+      "delivery borne by seller",
+      "tax and VAT",
+      "rent and overhead",
+      "product liability",
+      "prelaunch test/samples and design revision costs"
+    ]
+  },
+  "candidates": [
+    {
+      "id": "router3-indoor-support",
+      "product": "Two-piece Starlink Router 3 / Gen3 indoor wall support",
+      "listed_price_idr": 175700,
+      "listing_source": "https://shopee.co.id/nusatechh?entryPoint=ShopByPDP",
+      "reported_cumulative_sales": 182,
+      "grams_per_sale_assumption": 64,
+      "candidate_status": "HS native CAD pilot - requires fit/load/anchor/heat checks"
+    },
+    {
+      "id": "starlink-gen3-pipe-adapter",
+      "product": "Starlink Gen3 pipe adapter",
+      "listed_price_idr": 119000,
+      "listing_source": "https://shopee.co.id/nusatechh?tab=5",
+      "reported_cumulative_sales": 570,
+      "grams_per_sale_assumption": 55,
+      "candidate_status": "HOLD - outdoor wind-load/weather risk"
+    },
+    {
+      "id": "starlink-mini-wall",
+      "product": "Starlink Mini wall adapter",
+      "listed_price_idr": 180000,
+      "listing_source": "https://shopee.co.id/nusatechh?entryPoint=ShopByPDP",
+      "reported_cumulative_sales": 14,
+      "grams_per_sale_assumption": 70,
+      "candidate_status": "RESEARCH - fit/weather test required"
+    },
+    {
+      "id": "pi-hdd-enclosure",
+      "product": "Raspberry Pi + 3.5-inch HDD enclosure",
+      "listed_price_idr": 225000,
+      "listing_source": "https://www.blibli.com/merchant/madeintridi-flagship-store/MAI-70336",
+      "reported_cumulative_sales": null,
+      "grams_per_sale_assumption": 85,
+      "candidate_status": "NEXT - heat/fit unknown"
+    },
+    {
+      "id": "modular-hdd-rack",
+      "product": "External HDD/SSD docking mounting rack",
+      "listed_price_idr": 350000,
+      "listing_source": "https://www.blibli.com/merchant/madeintridi-flagship-store/MAI-70336",
+      "reported_cumulative_sales": null,
+      "grams_per_sale_assumption": 200,
+      "candidate_status": "RESEARCH - heavy print and mechanical/thermal risks"
+    },
+    {
+      "id": "esp32cam-case",
+      "product": "ESP32-CAM MB enclosure",
+      "listed_price_idr": 29000,
+      "listing_source": "https://www.blibli.com/merchant/madeintridi-flagship-store/MAI-70336",
+      "reported_cumulative_sales": null,
+      "grams_per_sale_assumption": 18,
+      "candidate_status": "AVOID - commodity price"
+    },
+    {
+      "id": "din-rail-small-clip",
+      "product": "Generic ESP32 DIN-rail clip",
+      "listed_price_idr": 8990,
+      "listing_source": "https://www.blibli.com/merchant/madeintridi-flagship-store/MAI-70336",
+      "reported_cumulative_sales": null,
+      "grams_per_sale_assumption": 10,
+      "candidate_status": "AVOID - commodity price"
+    },
+    {
+      "id": "intel-nuc-vesa",
+      "product": "Intel NUC6CAY VESA 100x100 bracket",
+      "listed_price_idr": 35000,
+      "listing_source": "https://shopee.co.id/search?keyword=intel+nuc6cay&noCorrection=true",
+      "reported_cumulative_sales": null,
+      "grams_per_sale_assumption": 25,
+      "candidate_status": "AVOID - commodity price"
+    }
+  ]
+}

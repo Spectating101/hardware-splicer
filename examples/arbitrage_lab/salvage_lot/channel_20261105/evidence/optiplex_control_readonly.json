@@ -1,0 +1,40 @@
+{
+  "schema": "hs.read_only_linux_host_control.v1",
+  "time_utc": "2026-11-05T14:03:17.168750+00:00",
+  "control_source": "AUTHORIZED_RUNNING_OPTIPLEX_HOST_NOT_A_SALVAGED_LOT",
+  "inspection_scope": "Read-only operating system self-description, not board-level validation",
+  "cpu": {
+    "cpu_model_generic": "Intel(R) Core(TM) i5-8500 CPU @ 3.00GHz",
+    "logical_cpu_count": 6,
+    "live_os_read_only": true
+  },
+  "memory": {
+    "memory_total_gib": 31.15
+  },
+  "block_storage": {
+    "physical_block_device_count": 2,
+    "disk_capacity_gib_sorted": [
+      476.9,
+      1863.0
+    ],
+    "disk_health_verified": false,
+    "smart_verified": false,
+    "storage_data_wiped": false
+  },
+  "claim_gates": {
+    "host_os_is_running": true,
+    "real_salvage_observed": false,
+    "a_salvaged_product_works": false,
+    "physical_repair_performed": false,
+    "post_recorded_on_target_salvage": false,
+    "memory_memtest_passed": false,
+    "disk_smart_passed": false,
+    "network_ports_tested": false,
+    "resale_approval": false
+  },
+  "prohibited_unearned_inferences": [
+    "Reading /proc cannot establish a device's legal provenance or component health",
+    "A live OS does not show a completed stress test or data sanitization",
+    "The Optiplex used to run HS is NOT a salvaged physical product"
+  ]
+}

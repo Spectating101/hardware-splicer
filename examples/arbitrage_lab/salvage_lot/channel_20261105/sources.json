@@ -1,0 +1,139 @@
+{
+  "as_of": "2026-11-05",
+  "currency": "TWD",
+  "method": "Public asking prices and buyback adverts, not confirmed transactions or inventory",
+  "counterparties": [
+    {
+      "id": "zhongli_akai",
+      "name": "神奇電腦 阿凱",
+      "source": "https://www.ruten.com.tw/store/tao200639/",
+      "public_advertisement": "Recycles obsolete and broken desktop computers; large used parts catalogue, Zhongli, 2026-11-05",
+      "published_buyback_price_twd": {
+        "complete_desktop": 140,
+        "laptop": 80,
+        "motherboard": 30,
+        "psu": 10,
+        "hdd": 10,
+        "chassis": 30
+      },
+      "quote_direction": "RECYCLER_PAYS_INBOUND_OWNER",
+      "sellback_quote_obtained": false,
+      "available_refurb_lot_verified": false,
+      "consent_for_commercial_disposition_obtained": false,
+      "condition": "Lead for partnership only, contact and contract pending"
+    },
+    {
+      "id": "daxi_j3806316",
+      "name": "登豐e倉庫",
+      "source": "https://www.ruten.com.tw/store/j3806316/",
+      "public_advertisement": "Retail and repair stock of used computers, HDDs and parts, Daxi; seller requests telephone stock check",
+      "published_buyback_price_twd": null,
+      "quote_direction": "SELLER_ASKS_PER_INDIVIDUAL_ITEM",
+      "sellback_quote_obtained": false,
+      "available_refurb_lot_verified": false,
+      "consent_for_commercial_disposition_obtained": false,
+      "condition": "Known retail seller, no verified wholesale/scrap lot"
+    }
+  ],
+  "candidate_listings": [
+    {
+      "id": "acer_tc865_working_claimed",
+      "model": "Acer Aspire TC-865 i5-8400, 8GB DDR4, 120GB SSD, GT720, DVD, 300W PSU",
+      "source": "https://www.ruten.com.tw/item/22642901029861/",
+      "ask_price_twd": 2800,
+      "shipping_scenario_twd": 225,
+      "source_condition": "Seller claims system runs normally, 3+ yrs used, Changhua, 1 listed in stock at crawl",
+      "proof_level": "seller_claim_only",
+      "category": "FUNCTIONAL_USED_PRODUCT_CONTROL",
+      "possible_resale_asking_scenarios_twd": [
+        4000,
+        4500,
+        5000,
+        6300
+      ],
+      "resale_asked_not_sold": true,
+      "actual_acquired": false,
+      "transfer_rights_verified": false,
+      "marketing_risk": "Existing working comparable for similar CPU comes with different HDD/RAM/GPU, far better GPU on high quote, tax/warranty."
+    },
+    {
+      "id": "bade_unidentified_ddr4",
+      "model": "Unlabelled desktop DDR4, possibly 8GB, makes host fail to boot",
+      "source": "https://tw.carousell.com/%E9%9B%BB%E8%85%A6%E5%8F%8A%E7%A7%91%E6%8A%80%E7%94%A2%E5%93%81/%E9%9B%BB%E8%85%A6/%E6%95%85%E9%9A%9C%E5%93%81/q-6391/",
+      "ask_price_twd": 400,
+      "shipping_scenario_twd": 100,
+      "source_condition": "Bade seller: unidentified, fails POST in their machine, no returns",
+      "proof_level": "seller_claim_only",
+      "category": "BROKEN_COMPONENT_NEGATIVE_CONTROL",
+      "possible_resale_asking_scenarios_twd": [
+        0,
+        400,
+        750
+      ],
+      "resale_asked_not_sold": true,
+      "actual_acquired": false,
+      "transfer_rights_verified": false,
+      "marketing_risk": "No validated part number/capacity; low upside against testing labor and failed-part handling."
+    }
+  ],
+  "comparators": [
+    {
+      "id": "acer_i5_8400_similar_gen",
+      "source": "https://tw.bid.yahoo.com/search/auction/product?cid=2092076476&clv=3&p=i5+8400&sort=ontime",
+      "ask_price_twd": 4500,
+      "scope": "Other 8th-gen i5 systems, often 16GB or superior SSD, cannot price equal without condition adjustment"
+    },
+    {
+      "id": "acer_tc865_upgraded",
+      "source": "https://tw.carousell.com/p/%E3%80%90%E8%89%BE%E7%88%BE%E5%B7%B4%E4%BA%8C%E6%89%8B%E3%80%91acer-aspire-tc-865-i5-8400-8g-1tb-gt1030-%E4%B8%BB%E6%A9%9F-%E5%A4%A7%E9%87%8C%E5%BA%97b9600-1462348803/",
+      "ask_price_twd": 6300,
+      "scope": "Same TC-865 family but better GT1030 and extra 1TB storage, seller services; weak maximum comparator"
+    },
+    {
+      "id": "old_i5_7500_desktop",
+      "source": "https://www.ptt.cc/bbs/HardwareSale/M.1788169513.A.0E3.html",
+      "ask_price_twd": 2200,
+      "scope": "Older i5-7500/4GB/120GB, lower benchmark. No sale evidence."
+    }
+  ],
+  "commercial_hypotheses": {
+    "example_batch_size": 5,
+    "assumed_negotiated_purchase_price_per_scrap_pc_twd": 250,
+    "buyer_costs_twd": {
+      "collection_transport_total": 600,
+      "successful_test_refurb_labor": 500,
+      "completion_parts_and_cleaning": 150,
+      "packing_and_outbound": 150,
+      "returns_reserve": 250,
+      "failed_triage_labor": 200,
+      "failed_disposal": 150
+    },
+    "seller_fee_rate": 0.1,
+    "resale_price_assumption_per_success_twd": 2200,
+    "recovery_probabilities_for_sensitivity": [
+      0.25,
+      0.5,
+      0.65,
+      0.8
+    ],
+    "desired_expected_contribution_per_acquired_pc_twd": 150,
+    "caveat": "NONE of these batch PC assets are offered or available: prices and success probabilities are entirely hypothetical. The observed recycler buyback 140 is never our buy price."
+  },
+  "used_acer_control_assumptions": {
+    "verification_and_cleaning_labor_twd": 400,
+    "minor_parts_twd": 150,
+    "outbound_packing_twd": 150,
+    "warranty_reserve_twd": 250,
+    "seller_fee_rate": 0.1
+  },
+  "required_live_physical_proof": [
+    "documented legal commercial transfer",
+    "photo model and board identity",
+    "independent power and POST",
+    "memory test and installed RAM count",
+    "storage SMART and data wipe",
+    "sustained CPU/fan thermal check",
+    "functional network/display and input",
+    "accurate warranty/disposal rights"
+  ]
+}

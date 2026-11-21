@@ -1,0 +1,185 @@
+{
+  "date": "2026-11-05",
+  "currency": "TWD",
+  "schema": "hs.salvage_lead_market_snapshot.v1",
+  "scope": "Taoyuan-Hsinchu-Northern Taiwan; public offers, no claimed availability or acquisition",
+  "rights_policy": "Commercial salvage requires legal possession and explicit appropriate disposition/resale rights. PTT Give board v1.45 explicitly forbids resale of gifts. Never enter municipal recycling stock or private bins without owner permission.",
+  "rights_source": "https://www.ptt.cc/bbs/give/M.1785164326.A.BD3.html",
+  "donor_leads": [
+    {
+      "id": "hsinchu_free_desktop",
+      "date": "2026-07-21",
+      "title": "Free Hsinchu desktop after GPU sale",
+      "url": "https://www.ptt.cc/bbs/give/M.1784598671.A.A64.html",
+      "platform": "PTT Give",
+      "location": "Hsinchu Jinshan St",
+      "asking_price_twd": 0,
+      "shipping_twd": 350,
+      "reported_included": [
+        "chassis",
+        "motherboard",
+        "power_supply"
+      ],
+      "reported_missing": [
+        "discrete_gpu"
+      ],
+      "unverified": [
+        "CPU",
+        "RAM",
+        "storage",
+        "PSU output functionality",
+        "board identity",
+        "any working boot"
+      ],
+      "physical_acquired": false,
+      "source_availability": "historical_unverified",
+      "commercial_disposition_rights": "prohibited_by_board_rule",
+      "donor_owner_permission": false
+    },
+    {
+      "id": "sanchong_scrap_20261030",
+      "date": "2026-10-30",
+      "title": "Computer odds and ends before recycling",
+      "url": "https://www.ptt.cc/bbs/give/M.1793295736.A.E7B.html",
+      "platform": "PTT Give",
+      "location": "Sanchong",
+      "asking_price_twd": 0,
+      "shipping_twd": 350,
+      "reported_included": [
+        "computer odds and ends (no itemization)"
+      ],
+      "reported_missing": [],
+      "unverified": [
+        "component types",
+        "actual board identity",
+        "condition"
+      ],
+      "physical_acquired": false,
+      "source_availability": "near_expiry_2026_11_05_not_verified",
+      "commercial_disposition_rights": "explicit_no_resale",
+      "donor_owner_permission": false
+    },
+    {
+      "id": "taoyuan_damaged_cpu_board_20261026",
+      "date": "2026-10-26",
+      "title": "i5-7400 + Z170M motherboard failed to boot / possible moisture",
+      "url": "https://www.ptt.cc/bbs/HardwareSale/M.1792988675.A.1FC.html",
+      "platform": "PTT HardwareSale",
+      "location": "Taoyuan",
+      "asking_price_twd": 600,
+      "shipping_twd": 200,
+      "reported_included": [
+        "Intel i5-7400 CPU (condition unknown)",
+        "Z170M motherboard (seller suspects moisture)"
+      ],
+      "reported_missing": [],
+      "unverified": [
+        "CPU working",
+        "Z170M actual model and fault",
+        "CPU slot condition",
+        "power rails and POST"
+      ],
+      "physical_acquired": false,
+      "source_availability": "listing_unverified",
+      "commercial_disposition_rights": "normal_paid_sale_possible_not_yet_transferred",
+      "donor_owner_permission": false
+    },
+    {
+      "id": "direct_owner_cleanout_hypothetical",
+      "date": "2026-11-05",
+      "title": "HYPOTHETICAL direct owner-transfer of complete retired i5 desktop",
+      "url": null,
+      "platform": "not_sourced_scenario",
+      "location": "Taoyuan",
+      "asking_price_twd": 0,
+      "shipping_twd": 300,
+      "reported_included": [],
+      "hypothetical_parts": [
+        "i5-7400 class CPU",
+        "DDR4 8GB UDIMM",
+        "SATA SSD 256GB",
+        "motherboard",
+        "chassis",
+        "OEM PSU"
+      ],
+      "reported_missing": [],
+      "unverified": [
+        "all parts",
+        "source owner",
+        "resale rights",
+        "data wipe",
+        "stability and thermal test"
+      ],
+      "physical_acquired": false,
+      "source_availability": "NOT_IDENTIFIED",
+      "commercial_disposition_rights": "not_obtained",
+      "donor_owner_permission": false
+    }
+  ],
+  "comparables": [
+    {
+      "product": "Functional i5-7500 desktop 4GB 120GB SSD",
+      "observed_asking_price_twd": 2200,
+      "url": "https://www.ptt.cc/bbs/HardwareSale/M.1788169513.A.0E3.html",
+      "note": "Aug 2026 asking; different machine and specs, no sale evidence"
+    },
+    {
+      "product": "Intel Core i5-7400 bare CPU",
+      "observed_asking_price_range_twd": [
+        450,
+        600
+      ],
+      "url": "https://www.ruten.com.tw/search/intel%2Bi5-7400/",
+      "note": "Public sellers listed used CPUs ~NT$450-600; not verified sales"
+    },
+    {
+      "product": "DDR4 2666 8GB desktop UDIMM",
+      "observed_asking_price_twd": 850,
+      "url": "https://www.ptt.cc/bbs/HardwareSale/M.1792395575.A.D74.html",
+      "note": "Oct 2026 single unit ask, not verified sale"
+    },
+    {
+      "product": "NVMe SSD 256GB",
+      "observed_asking_price_twd": 700,
+      "url": "https://www.ruten.com.tw/item/22640804516783/",
+      "note": "Earlier mini-PC source only; for hypothetical SATA 256GB component this is a rough, not like-for-like pricing assumption"
+    },
+    {
+      "product": "Used i3-8100 NAS case 6-bay 16GB RAM, 450W PSU no HDDs",
+      "observed_asking_price_twd": 2600,
+      "url": "https://www.ptt.cc/bbs/HardwareSale/M.1788427462.A.B3E.html",
+      "note": "Sep 2026 NAS setup asking NT$2600, NOT evidence of value of an older i5 PC converted to NAS"
+    }
+  ],
+  "commercial_salvage_permissions": {
+    "explicit_resale_authorization_required": true,
+    "appropriate_ownership_transfer_required": true,
+    "right_to_wipe_data_required": true,
+    "ptt_give_resale_disallowed": true,
+    "source_owner_recycler_approval_required": true,
+    "waste_station_access_without_authorization_disallowed": true
+  },
+  "hypothetical_unit_costs": {
+    "labor_per_hour_twd": 200,
+    "sale_fee_rate": 0.1,
+    "standard_returns_reserve_twd": 200,
+    "pickup_transport_twd": 300,
+    "disposal_if_failed_twd": 100
+  },
+  "registered_partner_candidates": [
+    {
+      "name": "大川實業中壢桃園電腦回收站",
+      "address": "桃園市中壢區新中北路217號",
+      "phone": "0985-229-558",
+      "source": "https://recycle.tyoem.gov.tw/G_Treasure_Map.aspx",
+      "status": "provider_identified_NO_CONTACT_NO_SUPPLY_RIGHTS"
+    },
+    {
+      "name": "木匠的家修惜站",
+      "address": "桃園市中壢區中北路二段387-1號",
+      "phone": "03-468-3836",
+      "source": "https://recycle.tyoem.gov.tw/G_repair_station.aspx",
+      "status": "reuse_service_identified_NO_CONTACT_NO_STOCK_RIGHTS"
+    }
+  ]
+}

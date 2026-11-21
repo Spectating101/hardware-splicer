@@ -1,0 +1,87 @@
+name: HS Salvage / Functional Refurb Product Evidence
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "examples/arbitrage_lab/**"
+      - "apps/mecha-splicer/src/mecha_splicer/**"
+      - ".github/workflows/hs-arbitrage-market-pilot.yml"
+  push:
+    branches:
+      - "feature/hs-arbitrage-marketpilot-20261105"
+    paths:
+      - "examples/arbitrage_lab/**"
+      - "apps/mecha-splicer/src/mecha_splicer/**"
+      - ".github/workflows/hs-arbitrage-market-pilot.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  product-profit-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install native CAD binary and Python requirements
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y openscad
+          python -m pip install --disable-pip-version-check 'pydantic>=2,<3' 'pytest>=8,<10' 'httpx>=0.27,<1'
+      - name: Generate ORIGINAL HS product geometry and current scenario files
+        env:
+          PYTHONPATH: apps/mecha-splicer/src
+        run: |
+          python examples/arbitrage_lab/produce_pilot.py --openscad /usr/bin/openscad
+      - name: Exercise real mini-PC refurbishment risk/authority decision (NO hardware purchase)
+        run: |
+          python examples/arbitrage_lab/refurb_nuc11/refurb_pilot.py
+      - name: Check repair evidence gate and scenario profitability
+        run: |
+          pytest -q examples/arbitrage_lab/refurb_nuc11/tests/test_refurb_pilot.py
+      - name: Screen real Zebra/TSC industrial-printer opportunities
+        run: |
+          python examples/arbitrage_lab/industrial_printer/printer_pilot.py
+      - name: Validate actual public evidence boundaries and printer economics
+        run: |
+          pytest -q examples/arbitrage_lab/industrial_printer/tests/test_printer_pilot.py
+      - name: Screen legally obtainable salvage leads and complete product routes
+        run: |
+          python examples/arbitrage_lab/salvage_lot/salvage_pilot.py
+      - name: Test no-resale and physical-inventory evidence gates
+        run: |
+          pytest -q examples/arbitrage_lab/salvage_lot/tests/test_salvage_pilot.py
+      - name: Screen live Zhongli commercial salvage supply and batch economics
+        run: |
+          python examples/arbitrage_lab/salvage_lot/channel_20261105/channel_pilot.py
+      - name: Test recycler buyback direction, bid caps, and read-only hardware probe evidence
+        run: |
+          pytest -q examples/arbitrage_lab/salvage_lot/channel_20261105/tests/test_channel.py
+      - name: Test the native product/economics contract
+        env:
+          PYTHONPATH: apps/mecha-splicer:apps/mecha-splicer/src
+        run: |
+          pytest -q examples/arbitrage_lab/tests/test_arbitrage_pilot.py apps/mecha-splicer/tests/test_bundle.py
+      - name: Publish actual source CAD, printable mesh, cost screen and assumptions
+        uses: actions/upload-artifact@v4
+        with:
+          name: HS-SALVAGE-REFURB-AND-ARBITRAGE-RESEARCH-NOT-PHYSICALLY-PROVEN
+          path: |
+            examples/arbitrage_lab/outputs/HS_INDOOR_ROUTER3_MARKET_PILOT.zip
+            examples/arbitrage_lab/outputs/market_screen.csv
+            examples/arbitrage_lab/outputs/market_screen.json
+            examples/arbitrage_lab/refurb_nuc11/evidence/refurb_decision.json
+            examples/arbitrage_lab/refurb_nuc11/evidence/sensitivity.csv
+            examples/arbitrage_lab/industrial_printer/evidence/industrial_refurb_screen.json
+            examples/arbitrage_lab/industrial_printer/evidence/zebra_profit_sensitivity.csv
+            examples/arbitrage_lab/industrial_printer/evidence/ZT230_BENCH_QC_OFFLINE.zpl
+            examples/arbitrage_lab/salvage_lot/evidence/salvage_decision.json
+            examples/arbitrage_lab/salvage_lot/evidence/route_sensitivity.csv
+            examples/arbitrage_lab/salvage_lot/channel_20261105/evidence/channel_decision.json
+            examples/arbitrage_lab/salvage_lot/channel_20261105/evidence/batch_sensitivity.csv
+            examples/arbitrage_lab/salvage_lot/channel_20261105/evidence/optiplex_control_readonly.json
+          retention-days: 30

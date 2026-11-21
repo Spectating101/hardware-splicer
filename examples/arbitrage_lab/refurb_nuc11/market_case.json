@@ -1,0 +1,140 @@
+{
+  "schema_version": "hs.refurb_arbitrage_case.v1",
+  "as_of": "2026-11-05",
+  "unit": "TWD",
+  "target": {
+    "brand": "Intel",
+    "family": "NUC11PAH",
+    "exact_cpu": null,
+    "acquired": false,
+    "component_condition": "unknown",
+    "seller_report": "Seller says fails to power on: no light, no boot, no RAM, no SSD; may have been disassembled; no returns",
+    "url": "https://www.ruten.com.tw/item/22635470508103/",
+    "listing_price": 1470,
+    "inbound_shipping": 60,
+    "seller_return_policy": "no returns",
+    "source_type": "seller claim only",
+    "condition_risks": [
+      "no LED/no power",
+      "missing RAM",
+      "missing SSD",
+      "adapter included unknown",
+      "device may have been dismantled",
+      "CPU variant unknown"
+    ]
+  },
+  "technical_references": [
+    {
+      "url": "https://www.intel.com/content/dam/support/us/en/documents/intel-nuc/NUC11PA_TechProdSpec.pdf",
+      "title": "Intel official NUC11PAx technical product specification 2023",
+      "facts": [
+        "NUC11PAH is a case family; CPU i3/i5/i7 cannot be inferred",
+        "DDR4-3200 1.2V SO-DIMM up to 64GB",
+        "M.2 2280 and 2.5 SATA options"
+      ]
+    },
+    {
+      "url": "https://www.asus.com/support/faq/1052533/",
+      "title": "ASUS official NUC adapter specification",
+      "facts": [
+        "NUC11PAH family uses a certified 19V 90W 5.5x2.5mm barrel adapter"
+      ]
+    },
+    {
+      "url": "https://rog.asus.com/support/faq/1052686/",
+      "title": "ASUS official no-power troubleshooting",
+      "facts": [
+        "check outlet, known-good compatible adapter, RAM/SSD for barebone, CMOS procedure only if required with power disconnected"
+      ]
+    },
+    {
+      "url": "https://www.asus.com/support/faq/1052510/",
+      "title": "ASUS NUC start diagnostic categories",
+      "facts": [
+        "power LED dark vs blinking vs lit but no video are different symptoms"
+      ]
+    }
+  ],
+  "price_comparators": [
+    {
+      "variant": "i5-1135G7 NUC11PAH",
+      "price": 9000,
+      "market": "Taiwan Shopee",
+      "url": "https://shopee.tw/intel-NUC11PAH-i5-WD-SN750-500GB-SSD-%E7%BE%8E%E5%85%89crucial-8-8GB-RAM-i.1816617.23130231703",
+      "condition": "used 16GB 500GB",
+      "status": "sold_out_not_sale_price",
+      "note": "old listing visible to search; high valuation reference only"
+    },
+    {
+      "variant": "i5-1135G7 RNUC11PAHi5",
+      "price": null,
+      "market": "Taiwan Ruten",
+      "url": "https://www.ruten.com.tw/item/22634440780280/",
+      "condition": "functionally tested, 16GB, no SSD, adapter",
+      "status": "ask_price_not_accessible",
+      "note": "do not treat as numeric comparable"
+    },
+    {
+      "variant": "i5-1135G7 NUC11TNHi5 DIFFERENT model",
+      "price": 8000,
+      "market": "Taiwan Carousell",
+      "url": "https://tw.carousell.com/p/intel-nuc-11-pro-%E8%BF%B7%E4%BD%A0%E4%B8%BB%E6%A9%9F-i5-1135g7-16g-500g-ssd-%E5%85%A7%E5%BB%BA%E5%8E%9F%E5%BB%A0%E6%AD%A3%E8%A6%8Fos-%E5%8E%9A%E7%89%88%E5%8F%AF%E6%93%B4%E5%85%85-%E9%99%84%E5%8E%9F%E5%BB%A0%E9%85%8D%E4%BB%B6%E7%9B%92%E8%A3%9D-1468726906/",
+      "condition": "i5 16GB 500GB",
+      "status": "different_model_competitor_asking_price_not_sold"
+    }
+  ],
+  "parts": [
+    {
+      "name": "DDR4-3200 SO-DIMM 8GB",
+      "price": 825,
+      "type": "observed_listing_median",
+      "source": "https://only2nd.com/price/ram/ddr4-sodimm-3200-8g",
+      "uncertainty": "sample 6 asks; unverified quality and actual acquisition"
+    },
+    {
+      "name": "NVMe M.2 2280 256GB",
+      "price": 700,
+      "type": "scenario_with_market_listing_range",
+      "source": "https://www.ruten.com.tw/item/22640804516783/",
+      "uncertainty": "retail listing variants Rp? No, NT$580-730 plus shipping; 700 scenario"
+    },
+    {
+      "name": "19V 90W compatible external PSU",
+      "price": 1050,
+      "type": "observed_offer",
+      "source": "https://www.low-price.com.tw/delta-19v-4.74a-ac-adapters.html",
+      "uncertainty": "assumes no usable adapter included; verify plug and polarity"
+    }
+  ],
+  "model": {
+    "selling_price_scenarios": [
+      4500,
+      6500,
+      8000,
+      9000
+    ],
+    "all_in_seller_fee_rate": 0.1,
+    "repair_consumables_allowance": 200,
+    "successful_repair_and_validation_labor": 500,
+    "packing_and_outgoing_handling": 150,
+    "warranty_returns_reserve": 350,
+    "failed_diagnostic_labor": 300,
+    "failed_disposal_allowance": 100,
+    "unrecovered_salvage_value": 0,
+    "target_expected_net_profit": 500,
+    "success_probability_scenarios": [
+      0.25,
+      0.5,
+      0.6,
+      0.75
+    ],
+    "assumption_notes": [
+      "Repair labor fixed scenario is optimistic if board-level fault requires hot air/rework",
+      "if seller includes adapter, realized cost may improve",
+      "CPU can be i3, i5 or i7; i5-based values prohibited until variant verified",
+      "competitor asking/sold-out listings are not achieved resale ASP",
+      "all amounts before profit tax, utilities, shop rent and financial cost",
+      "no customer purchase or device repair proven"
+    ]
+  }
+}

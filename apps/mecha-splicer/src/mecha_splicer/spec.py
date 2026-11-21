@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Annotated, Any, Literal, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 Mm = Annotated[float, Field(ge=0.0)]
@@ -85,6 +85,32 @@ class EnclosureSpec(BaseModel):
 
     lid_screw_hole_d_mm: MmPos = 3.2
     include_lid_screw_holes: bool = True
+
+
+class IndoorRouterMountSpec(BaseModel):
+    """Two-piece indoor router wall-support print *candidate*, not a released product."""
+    name: str = "indoor_router_mount"
+    device_depth_mm: Annotated[float, Field(gt=15, lt=100)]
+    clearance_mm: Annotated[float, Field(ge=0.5, le=5)] = 1.5
+    bracket_width_mm: Annotated[float, Field(ge=24, le=110)] = 42
+    back_height_mm: Annotated[float, Field(ge=45, le=120)] = 65
+    back_thickness_mm: Annotated[float, Field(ge=3, le=10)] = 4
+    shelf_thickness_mm: Annotated[float, Field(ge=3, le=10)] = 4
+    lip_height_mm: Annotated[float, Field(ge=10, le=35)] = 14
+    lip_thickness_mm: Annotated[float, Field(ge=2, le=10)] = 3
+    gusset_thickness_mm: Annotated[float, Field(ge=2, le=8)] = 3
+    anchor_hole_d_mm: Annotated[float, Field(ge=3.5, le=8)] = 4.5
+    anchor_hole_pitch_mm: Annotated[float, Field(ge=15, le=55)] = 27
+
+    @model_validator(mode="after")
+    def _realizable_geometry(self):
+        if self.anchor_hole_pitch_mm + 2 * self.anchor_hole_d_mm > self.back_height_mm:
+            raise ValueError("wall holes exceed backplate height")
+        if self.gusset_thickness_mm * 2 >= self.bracket_width_mm:
+            raise ValueError("gussets leave no usable device support")
+        if self.lip_height_mm >= self.back_height_mm:
+            raise ValueError("lip must remain below the wall backplate")
+        return self
 
 
 class BracketSpec(BaseModel):
@@ -473,6 +499,7 @@ class ProjectSpec(BaseModel):
     # v1 scopes
     enclosure: Optional[EnclosureSpec] = None
     bracket: Optional[BracketSpec] = None
+    indoor_router_mount: Optional[IndoorRouterMountSpec] = None
     servo_mount: Optional[ServoMountSpec] = None
     linear_axis: Optional[LinearAxisSpec] = None
     leadscrew_axis: Optional[LeadScrewAxisSpec] = None

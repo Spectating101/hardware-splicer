@@ -1,0 +1,9 @@
+sku,listed_asp_idr,estimated_billable_mass_g,print_cost_idr,base_contribution_idr,base_margin_pct,stress_contribution_idr,base_20pct_margin_gate,stress_positive_gate,status,source
+pi-hdd-enclosure,225000,85,85000,39750,17.67,-36988,False,False,NEXT - heat/fit unknown,https://www.blibli.com/merchant/madeintridi-flagship-store/MAI-70336
+modular-hdd-rack,350000,200,200000,24750,7.07,-116175,False,False,RESEARCH - heavy print and mechanical/thermal risks,https://www.blibli.com/merchant/madeintridi-flagship-store/MAI-70336
+router3-indoor-support,175700,61.314,61315,23995,13.66,-36095,False,False,HS native CAD pilot - requires fit/load/anchor/heat checks,https://shopee.co.id/nusatechh?entryPoint=ShopByPDP
+starlink-mini-wall,180000,70,70000,18750,10.42,-45440,False,False,RESEARCH - fit/weather test required,https://shopee.co.id/nusatechh?entryPoint=ShopByPDP
+starlink-gen3-pipe-adapter,119000,55,55000,-15050,-12.65,-64364,False,False,HOLD - outdoor wind-load/weather risk,https://shopee.co.id/nusatechh?tab=5
+esp32cam-case,29000,18,18000,-50050,-172.59,-71470,False,False,AVOID - commodity price,https://www.blibli.com/merchant/madeintridi-flagship-store/MAI-70336
+intel-nuc-vesa,35000,25,25000,-52250,-149.29,-77342,False,False,AVOID - commodity price,https://shopee.co.id/search?keyword=intel+nuc6cay&noCorrection=true
+din-rail-small-clip,8990,10,10000,-58058,-645.81,-73366,False,False,AVOID - commodity price,https://www.blibli.com/merchant/madeintridi-flagship-store/MAI-70336

@@ -1,0 +1,16 @@
+{
+  "status": "native_HS_CAD_mesh_only",
+  "sha256": "7c9d38328086d021f11594a994e41f32d8059f4685e79c14077f4515e090b943",
+  "triangles": 564,
+  "non_2_manifold_edges": 0,
+  "bbox_mm": [
+    42.0,
+    53.4,
+    65.0
+  ],
+  "volume_cm3_per_bracket": 24.13955,
+  "assumed_solid_PETG_grams_each": 30.65723,
+  "assumed_solid_PETG_grams_for_pair": 61.31446,
+  "assumed_density_g_cm3": 1.27,
+  "limitations": "NOT sliced mass, printed part, fit, load test, hardware installation or vendor quote."
+}
