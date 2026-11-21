@@ -93,21 +93,47 @@ def test_missing_file_raises_oserror(tmp_path):
 
 
 def test_the_racy_window_counts_from_when_the_read_started(tmp_path, monkeypatch):
-    # A file changed just before the read began is not remembered, however long the hash then takes.
+    # The clock jumps 60 s once a read has happened. Timing taken before the read sees a fresh file
+    # and does not remember it; timing taken after the read (the old code) would.
     target = tmp_path / "a.bin"
     target.write_bytes(b"one")
-    real = file_digest.time.time_ns
-    calls = []
-
-    def clock():
-        calls.append(1)
-        return real() + (0 if len(calls) == 1 else 60_000_000_000)
-
-    monkeypatch.setattr(file_digest.time, "time_ns", clock)
     reads = _count_reads(monkeypatch)
+    real = file_digest.time.time_ns
+    monkeypatch.setattr(file_digest.time, "time_ns", lambda: real() + (60_000_000_000 if reads else 0))
     file_digest.sha256_file(target)
+    assert len(reads) == 1
     file_digest.sha256_file(target)
-    assert len(reads) == 2
+    assert len(reads) == 2  # not remembered: it was fresh when the first read started
+
+
+def test_a_path_swapped_mid_read_never_pairs_bytes_with_another_files_identity(tmp_path, monkeypatch):
+    monkeypatch.setattr(file_digest, "RACY_WINDOW_NS", 0)
+    target, other = tmp_path / "a.bin", tmp_path / "b.bin"
+    target.write_bytes(b"original")
+    other.write_bytes(b"replaced")
+    original_read = os.read
+    swapped = []
+
+    def read_then_swap(fd, n):
+        data = original_read(fd, n)
+        if data and not swapped:
+            os.replace(other, target)  # the path now names a different file
+            swapped.append(True)
+        return data
+
+    monkeypatch.setattr(file_digest.os, "read", read_then_swap)
+    # The open file is still the original: its bytes and its identity agree.
+    assert file_digest.sha256_file(target) == hashlib.sha256(b"original").hexdigest()
+    monkeypatch.setattr(file_digest.os, "read", original_read)
+    # The path's new file has a new identity, so it is hashed, not served from the cache.
+    assert file_digest.sha256_file(target) == hashlib.sha256(b"replaced").hexdigest()
+
+
+def test_bytes_that_text_mode_would_change_hash_exactly(tmp_path):
+    target = tmp_path / "a.png"
+    data = b"\x89PNG\r\n\x1a\nrest\r\nmore\x1a"
+    target.write_bytes(data)
+    assert file_digest.sha256_file(target) == hashlib.sha256(data).hexdigest()
 
 
 def test_a_retargeted_symlink_hashes_the_new_target(tmp_path, monkeypatch):

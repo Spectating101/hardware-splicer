@@ -46,7 +46,8 @@ def sha256_file(path: str | os.PathLike) -> str:
     """Hex SHA-256 of the file's bytes; raises OSError as reading the file would."""
     name = os.path.abspath(os.fspath(path))
     started = time.time_ns()
-    fd = os.open(name, os.O_RDONLY | getattr(os, "O_CLOEXEC", 0))
+    # O_BINARY: on Windows a plain os.open is text mode, which rewrites CRLF and stops at 0x1A.
+    fd = os.open(name, os.O_RDONLY | getattr(os, "O_BINARY", 0) | getattr(os, "O_CLOEXEC", 0))
     try:
         before = os.fstat(fd)
         key = _key(name, before)
