@@ -8,7 +8,7 @@ const CLIENT_JOB_TIMEOUT_S = 210;
 const STAGE_LABELS = {
   queued: "Waiting in queue…",
   running: "Compiling splice plan and KiCad carrier…",
-  succeeded: "Build complete",
+  succeeded: "Build job finished",
   failed: "Build failed",
   cancelled: "Cancelled",
 };
@@ -16,7 +16,7 @@ const STAGE_LABELS = {
 const COMPOSE_STAGE_LABELS = {
   queued: "Waiting in queue…",
   running: "AI compose → KiCad compile…",
-  succeeded: "Design complete",
+  succeeded: "Design job finished",
   failed: "Compose failed",
   cancelled: "Cancelled",
 };

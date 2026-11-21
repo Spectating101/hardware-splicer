@@ -94,11 +94,11 @@ export function deriveEvidenceTruth(session = {}) {
       detail = "The salvage result does not contain donor interface contracts yet.";
     } else if (powerAuthorized && firmwareAuthorized) {
       state = "verified";
-      label = "Donor interface verified";
+      label = "Interface evidence accepted · firmware and power authorized by the backend";
       detail = "Firmware and power claims are authorized by accepted interface evidence.";
     } else if (firmwareAuthorized) {
       state = "bench_required";
-      label = "Interface verified · bench pending";
+      label = "Firmware authorized by the backend · power-on blocked until bench evidence";
       detail = "Firmware bindings are authorized, but physical power-on remains blocked.";
     } else if (unresolvedInterfaces.length) {
       state = "blocked";
@@ -153,7 +153,8 @@ export function deriveEvidenceTruth(session = {}) {
 }
 
 export function evidenceTone(state) {
-  if (state === "verified") return "ok";
+  // Accepted evidence is an authorization record, not an approval: it stays neutral, never green.
+  if (state === "verified") return "neutral";
   if (state === "blocked" || state === "missing") return "fail";
   if (state === "bench_required" || state === "partial") return "warn";
   return "neutral";
