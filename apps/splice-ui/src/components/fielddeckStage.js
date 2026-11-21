@@ -237,8 +237,15 @@ function stylePart(entry, compare, weight, ghost, accent, emphasis, focus = null
 // Set once the Rust chain module has loaded: its edges() matches three's EdgesGeometry bit for bit.
 let rustChains = null;
 
+// A module that throws is dropped for the rest of the page; three's EdgesGeometry draws the same.
+function dropRustChains() {
+  rustChains = null;
+  chainModule = Promise.resolve(null);
+}
+
 function edgePositions(geometry, threshold) {
-  const fast = rustChains?.edges(geometry, threshold);
+  let fast = null;
+  try { fast = rustChains?.edges(geometry, threshold) ?? null; } catch { dropRustChains(); }
   if (fast) return fast;
   const edges = new THREE.EdgesGeometry(geometry, threshold);
   const positions = edges.getAttribute("position").array;
@@ -408,7 +415,13 @@ const chainModuleOnce = () => (chainModule ??= loadChainModule());
 async function makeEntries(assets, index, scene, technical, resources, { base, target, focusPart }, { signal } = {}) {
   // Its weld and edges return weldEdgeChains' chains and EdgesGeometry's positions exactly, faster.
   rustChains = await chainModuleOnce();
-  const weld = rustChains?.weld;
+  if (signal?.aborted) throw new DOMException("Stage build cancelled", "AbortError");
+  const weld = rustChains ? (positions, tolerance) => {
+    if (rustChains) {
+      try { return rustChains.weld(positions, tolerance); } catch { dropRustChains(); }
+    }
+    return weldEdgeChains(positions, tolerance);
+  } : null;
   // Phase marks for the browser's performance timeline; they cost nothing when nobody reads them.
   performance.mark?.("fielddeck:meshes-start");
   let sliceStart = performance.now();
