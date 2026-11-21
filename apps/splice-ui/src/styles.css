@@ -2856,3 +2856,8 @@ details.bench-objective summary { font-size: .75rem; font-weight: 600; letter-sp
 .brand strong { white-space: nowrap; font-size: .95rem; }
 .project-objective.muted { color: var(--muted); }
 .change-failed-row { display: block; }
+.change-policy-id { font-size: .85rem; }
+.change-quote { margin: 0 0 .5rem; font-size: .9rem; color: var(--muted); }
+.change-quote-label { margin: 0; font-weight: 600; }
+.change-quote ul { margin: .1rem 0 0; padding-left: 1.2rem; }
+.change-inputs { margin: 0 0 .5rem; padding-left: 1.2rem; font-size: .875rem; color: var(--muted); }

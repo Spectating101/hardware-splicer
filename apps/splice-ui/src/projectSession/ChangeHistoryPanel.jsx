@@ -21,14 +21,22 @@ function RevisionLink({ projectId, revision, onOpenRevision }) {
   }}>revision {revision}</a>;
 }
 
-function Outcome({ outcome }) {
-  if (!outcome) return <p><strong>Native outcome · not run.</strong> No saved revision applied this candidate.</p>;
-  const unit = outcome.unit ? ` ${outcome.unit}` : "";
-  const verdict = outcome.met === true ? "meets the target" : outcome.met === false ? "misses the target" : "unknown";
-  return <p className={outcome.met === true ? undefined : "change-failed"}>
-    <strong>Native outcome:</strong> {shown(outcome.fact)} = {shown(outcome.native_value)}{unit} against{" "}
-    {shown(outcome.operator)} {shown(outcome.required)}{unit} · {verdict} (modeled, not measured)
-  </p>;
+const OPPOSITE = { ">=": "<", ">": "≤", "<=": ">", "<": "≥", "==": "≠" };
+const SYMBOL = { ">=": "≥", "<=": "≤", "==": "=", ">": ">", "<": "<" };
+const factName = (fact) => keyLabel(String(fact || "").replace(/^(metric|requirement)\./, ""));
+
+// "Work runtime, lower estimate 3.166 h < 4 h": why a target failed, from the review's own row.
+function missedTarget(target) {
+  const { label, unit } = factName(target.fact);
+  return `${label} ${formatValue(target.actual, unit)} ${OPPOSITE[target.operator] || "vs"} ${formatValue(target.value, unit)}`;
+}
+
+function outcomeText(outcome) {
+  if (!outcome) return { text: "native outcome · not run", met: null };
+  const { label, unit } = factName(outcome.fact);
+  const verdict = outcome.met === true ? "meets the target" : outcome.met === false ? "misses the target" : "result unknown";
+  return { text: `native outcome: ${label} ${formatValue(outcome.native_value, unit)} against ${SYMBOL[outcome.operator] || shown(outcome.operator)} ${formatValue(outcome.required, unit)}, ${verdict} (modeled, not measured)`,
+    met: outcome.met };
 }
 
 // "Pi current at work load · 1 → 0.697 A", from the shared label map.
@@ -50,7 +58,7 @@ function RawValues({ change }) {
   const rows = [
     ...Object.entries(change.requirement_changes || {}).map(([key, row]) => [key, row]),
     ...(change.candidates || []).flatMap((candidate) => [[`${candidate.id}.input`, candidate.input],
-      [`${candidate.id}.numbers`, candidate.numbers]]),
+      [`${candidate.id}.numbers`, candidate.numbers], [`${candidate.id}.native_outcome`, candidate.native_outcome]]),
   ];
   if (!rows.length) return null;
   return <details className="bench-raw"><summary>Machine keys and raw values</summary>
@@ -59,36 +67,53 @@ function RawValues({ change }) {
   </details>;
 }
 
+// Formula inputs in words; "before" is the adjusted input's own earlier value.
+function candidateInputs(candidate) {
+  return Object.entries(candidate.numbers || {}).map(([key, number]) => {
+    if (key === "before") return `${keyLabel(candidate.input).label}, before · ${formatValue(number, keyLabel(candidate.input).unit)}`;
+    return `${keyLabel(key).label} · ${formatValue(number, keyLabel(key).unit)}`;
+  });
+}
+
 function Change({ change, projectId, onOpenRevision }) {
   const applied = change.applied_revision;
   const failed = applied ? applied.checks.filter((check) => !check.passed).map((check) => failureText(check, change.base_checks)) : [];
+  const missed = (change.targets || []).filter((target) => target.passed === false && target.fact);
+  const candidates = change.candidates || [];
+  const outcomes = candidates.map((candidate) => outcomeText(candidate.native_outcome));
   return <li className="change-entry" data-testid="change-entry">
-    <p className="change-policy"><span className="change-decision">{change.policy_decision}</span>{" "}
-      Policy Lab <code>{change.policy_id}</code> {change.policy_version} on revision {change.base_revision}</p>
-    {change.unmet?.length > 0 && <ul className="change-unmet">{change.unmet.map((row) =>
-      <li key={row.id}>{shown(row.explanation, row.id)}</li>)}</ul>}
+    <p className="change-policy" data-testid="change-decision">
+      Policy Lab decision on revision {change.base_revision}: <span className="change-decision">{change.policy_decision}</span>
+      {missed.length > 0 && <> ({missed.map(missedTarget).join("; ")})</>}
+      {candidates.length > 0 && <> · proposed modelled candidate {candidates.map((candidate) => <code key={candidate.id}>{candidate.id}</code>)}</>}
+    </p>
+    <p className="muted change-policy-id">Policy <code>{change.policy_id}</code> {change.policy_version}</p>
+    {change.unmet?.length > 0 && <div className="change-quote"><p className="change-quote-label">Policy Lab says:</p>
+      <ul>{change.unmet.map((row) => <li key={row.id}><q>{shown(row.explanation, row.id)}</q></li>)}</ul></div>}
     <dl className="change-facts">
       <div><dt>Proposal</dt><dd><ul>{Object.entries(change.requirement_changes || {}).map(([name, row]) =>
         <li key={name}>{changeText(name, row.before, row.after)}</li>)}</ul>
         {!Object.keys(change.requirement_changes || {}).length && "No requirement change stated."}</dd></div>
-      <div><dt>Applied as</dt><dd>{applied ? <>
-        <RevisionLink projectId={projectId} revision={applied.revision} onOpenRevision={onOpenRevision} />
-        {applied.requirements_met ? " · every modeled check passed" : failed.length
+      <div><dt>Applied by HS</dt><dd data-testid="change-applied">{applied ? <>
+        as <RevisionLink projectId={projectId} revision={applied.revision} onOpenRevision={onOpenRevision} />
+        {outcomes.map((outcome, index) => <span key={index} className={outcome.met === true ? undefined : "change-failed"}> · {outcome.text}</span>)}
+        {applied.requirements_met ? <span> · every modeled check passed in revision {applied.revision}</span> : failed.length
           ? failed.map((row) => <span key={row.name} className="change-failed-row">
             <span className="change-failed">{row.name}: {row.label}</span>
             {row.detail && <span className="muted"> · {row.detail}</span>}</span>)
           : <span className="change-failed"> · requirements not met</span>}
+        <span className="change-failed-row muted">Record shows: HS change request <q>{shown(applied.change_request, "not recorded")}</q>
+          {" · "}review check: {shown(change.review_verification, "not recorded")}</span>
       </> : "Not applied to any saved revision."}</dd></div>
       <div><dt>Change packet</dt><dd>{change.change_evidence
         ? <>sha256 <code>{short(change.change_evidence.packet_sha256)}</code></>
         : "Not exported for this change."}</dd></div>
     </dl>
-    {change.candidates.map((candidate) => <div className="change-candidate" key={candidate.id} data-testid="change-candidate">
+    {candidates.map((candidate) => <div className="change-candidate" key={candidate.id} data-testid="change-candidate">
       <p><strong>Modelled candidate design change <code>{candidate.id}</code></strong></p>
       <p>{changeText(candidate.input, candidate.before, candidate.after)}</p>
       <p className="change-formula"><code>{shown(candidate.formula)}</code></p>
-      {candidate.numbers && <p className="muted">Inputs: {Object.entries(candidate.numbers).map(([key, number]) => `${key} ${number}`).join(" · ")}</p>}
-      <Outcome outcome={candidate.native_outcome} />
+      {candidate.numbers && <ul className="change-inputs">{candidateInputs(candidate).map((text) => <li key={text}>{text}</li>)}</ul>}
       <p>Physical means of reaching this value: <strong>{candidate.physical_means}</strong></p>
     </div>)}
     <RawValues change={change} />
