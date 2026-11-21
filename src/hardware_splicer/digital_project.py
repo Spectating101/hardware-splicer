@@ -117,6 +117,20 @@ def runtime_for_case(case_id=cases.DEFAULT_CASE):
         native_python(), substitution=case_id == 'fielddeck-5')
 
 
+def prewarm_runtimes():
+    """Run the runtime probes once, so the first study request does not wait seconds on them.
+
+    The probes start an interpreter and import the CAD stack; their answers are cached per process.
+    """
+    interpreter = native_python()
+    for probe in (lambda: _runtime(interpreter), lambda: _device_runtime(interpreter),
+                  lambda: _device_runtime(interpreter, substitution=True)):
+        try:
+            probe()
+        except Exception:  # a failed probe is answered again, synchronously, on first use
+            pass
+
+
 def artifact_names(case_id=cases.DEFAULT_CASE, *, case=None):
     return ARTIFACTS if case_id == cases.DEFAULT_CASE else (case or cases.registered(case_id)).artifacts
 
