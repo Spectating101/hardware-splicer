@@ -45,7 +45,7 @@ def ui_api_calls() -> list[tuple[str, str, str]]:
 
     calls = []
     for source in sorted(UI_SRC.rglob("*")):
-        if source.suffix not in {".js", ".jsx"} or ".test." in source.name:
+        if source.suffix not in {".js", ".jsx", ".ts", ".tsx"} or ".test." in source.name:
             continue
         text = source.read_text(encoding="utf-8")
         for match in LITERAL.finditer(text):
