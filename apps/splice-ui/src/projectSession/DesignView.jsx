@@ -75,7 +75,7 @@ function GeometryRecords({ manifest }) {
   </div>;
 }
 
-export default function DesignView({ projectId, caseId, revision, onOpenScene, onManifest, onStatus }) {
+export default function DesignView({ projectId, caseId, revision, onOpenScene, onManifest, onStatus, holdStage = false }) {
   const [state, setState] = useState({ status: "loading" });
   useEffect(() => { onManifest?.(state.status === "linked" ? state.manifest : null); }, [state, onManifest]);
   useEffect(() => {
@@ -123,7 +123,7 @@ export default function DesignView({ projectId, caseId, revision, onOpenScene, o
         Open full screen</button>}
     </div>
     {drawable ? <Suspense fallback={<p className="muted">Loading 3D scene…</p>}>
-      <FieldDeckScene projectId={manifest.project_id} manifest={manifest} embedded />
+      <FieldDeckScene projectId={manifest.project_id} manifest={manifest} embedded holdStage={holdStage} />
     </Suspense> : <GeometryRecords manifest={manifest} />}
   </div>;
 }

@@ -346,11 +346,22 @@ function Annotations({ labels, selection, endpoints, pins, faceView, base, targe
 
 // The scene draws whichever project's manifest it is given: two revisions get Compare and the
 // change legend, a single revision groups parts by shape source, and nothing here names a project.
-export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel = "Back", embedded = false }) {
+// holdStage: an embedding page asks the scene to wait before building its stage. Building the stage
+// is seconds of main-thread geometry work, so the bench lets its evidence column render first.
+export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel = "Back", embedded = false, holdStage = false }) {
   const host = useRef(null);
   const stage = useRef(null);
   const current = useRef(null);
   const [assets, setAssets] = useState(null);
+  // Released one frame after holdStage clears, so whatever the page just rendered is painted
+  // before the stage's long synchronous build starts.
+  const [stageReleased, setStageReleased] = useState(!holdStage);
+  useEffect(() => {
+    if (holdStage) { setStageReleased(false); return undefined; }
+    let timer;
+    const frame = requestAnimationFrame(() => { timer = setTimeout(() => setStageReleased(true), 0); });
+    return () => { cancelAnimationFrame(frame); clearTimeout(timer); };
+  }, [holdStage]);
   const { compare = null, focus = null, tour = [] } = manifest;
   const revisions = useMemo(() => sceneRevisions(manifest), [manifest]);
   const revisionIds = useMemo(() => revisions.map(([id]) => id), [revisions]);
@@ -555,7 +566,7 @@ export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel 
   current.current = { view, reduced, finishIntro, select };
 
   useLayoutEffect(() => {
-    if (!assets) return undefined;
+    if (!assets || !stageReleased) return undefined;
     const available = Object.keys(assets).filter((rev) => assets[rev].gltf && assets[rev].sidecar);
     let runtime;
     if (available.length) {
@@ -592,7 +603,7 @@ export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel 
       stage.current = null;
       runtime?.dispose();
     };
-  }, [assets, index, sidecars, comparisonAvailable, base, target, focusPart]);
+  }, [assets, index, sidecars, comparisonAvailable, base, target, focusPart, stageReleased]);
 
   useLayoutEffect(() => {
     stage.current?.update({
@@ -679,7 +690,7 @@ export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel 
 
   const playing = view.hero !== null;
   const modelVisible = rendered && [...linked].some((key) => key.startsWith(`${revision}:`));
-  const loading = !assets || linked.size > 0 && !rendered;
+  const loading = !assets || !stageReleased || linked.size > 0 && !rendered;
   const errors = [...(assets ? Object.values(assets).map((revision) => revision.error).filter(Boolean) : []),
     ...(stageError ? [stageError] : [])];
   const canChoose = ([mode]) => {
