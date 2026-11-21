@@ -24,13 +24,15 @@ def _age(path: Path, seconds: int = 3600) -> None:
 
 def _count_reads(monkeypatch):
     reads = []
-    original = Path.read_bytes
+    original = os.read
 
-    def counting(self):
-        reads.append(self)
-        return original(self)
+    def counting(fd, n):
+        data = original(fd, n)
+        if data:
+            reads.append(fd)
+        return data
 
-    monkeypatch.setattr(Path, "read_bytes", counting)
+    monkeypatch.setattr(file_digest.os, "read", counting)
     return reads
 
 
@@ -88,3 +90,38 @@ def test_racy_files_are_never_remembered(tmp_path, monkeypatch):
 def test_missing_file_raises_oserror(tmp_path):
     with pytest.raises(OSError):
         file_digest.sha256_file(tmp_path / "missing.bin")
+
+
+def test_the_racy_window_counts_from_when_the_read_started(tmp_path, monkeypatch):
+    # A file changed just before the read began is not remembered, however long the hash then takes.
+    target = tmp_path / "a.bin"
+    target.write_bytes(b"one")
+    real = file_digest.time.time_ns
+    calls = []
+
+    def clock():
+        calls.append(1)
+        return real() + (0 if len(calls) == 1 else 60_000_000_000)
+
+    monkeypatch.setattr(file_digest.time, "time_ns", clock)
+    reads = _count_reads(monkeypatch)
+    file_digest.sha256_file(target)
+    file_digest.sha256_file(target)
+    assert len(reads) == 2
+
+
+def test_a_retargeted_symlink_hashes_the_new_target(tmp_path, monkeypatch):
+    monkeypatch.setattr(file_digest, "RACY_WINDOW_NS", 0)
+    first, second, link = tmp_path / "first.bin", tmp_path / "second.bin", tmp_path / "link.bin"
+    first.write_bytes(b"one")
+    second.write_bytes(b"two")
+    link.symlink_to(first)
+    assert file_digest.sha256_file(link) == hashlib.sha256(b"one").hexdigest()
+    link.unlink()
+    link.symlink_to(second)
+    assert file_digest.sha256_file(link) == hashlib.sha256(b"two").hexdigest()
+
+
+def test_a_directory_raises_oserror(tmp_path):
+    with pytest.raises(OSError):
+        file_digest.sha256_file(tmp_path)
