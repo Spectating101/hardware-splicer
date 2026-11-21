@@ -90,14 +90,28 @@ def _runtime(interpreter):
             'or set HARDWARE_SPLICER_DIGITAL_PYTHON to a Python with that extra. Saved studies remain viewable.'}
 
 
-# One probe at a time: a request that arrives while the startup prewarm is probing waits for that
-# answer (then cached) instead of starting a second interpreter.
-_probe_lock = threading.Lock()
+# One lock per probe: a request that needs a probe the startup prewarm is running waits for that
+# answer (then cached) instead of starting a second interpreter, while a probe that already has an
+# answer, or a different probe, is never held up behind a slow one.
+_probe_locks: dict[tuple, threading.Lock] = {}
+_probe_locks_guard = threading.Lock()
+
+
+def _probe_lock(*key) -> threading.Lock:
+    with _probe_locks_guard:
+        return _probe_locks.setdefault(key, threading.Lock())
 
 
 def runtime():
-    with _probe_lock:
-        return _runtime(native_python())
+    interpreter = native_python()
+    with _probe_lock('drone', interpreter):
+        return _runtime(interpreter)
+
+
+def _device_probe(interpreter, substitution):
+    # Always pass substitution by keyword, so every caller shares one lru_cache entry per answer.
+    with _probe_lock('device', interpreter, bool(substitution)):
+        return _device_runtime(interpreter, substitution=bool(substitution))
 
 
 @lru_cache(maxsize=4)
@@ -122,8 +136,7 @@ def runtime_for_case(case_id=cases.DEFAULT_CASE):
     cases.validate_case_id(case_id)
     if case_id == cases.DEFAULT_CASE:
         return runtime()
-    with _probe_lock:
-        return _device_runtime(native_python(), substitution=case_id == 'fielddeck-5')
+    return _device_probe(native_python(), case_id == 'fielddeck-5')
 
 
 def prewarm_runtimes():
@@ -132,11 +145,10 @@ def prewarm_runtimes():
     The probes start an interpreter and import the CAD stack; their answers are cached per process.
     """
     interpreter = native_python()
-    for probe in (lambda: _runtime(interpreter), lambda: _device_runtime(interpreter),
-                  lambda: _device_runtime(interpreter, substitution=True)):
+    # The same entry points requests use, so the answers land in the cache entries they read.
+    for probe in (runtime, lambda: _device_probe(interpreter, False), lambda: _device_probe(interpreter, True)):
         try:
-            with _probe_lock:
-                probe()
+            probe()
         except Exception:  # a failed probe is answered again, synchronously, on first use
             pass
 
