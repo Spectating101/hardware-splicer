@@ -2911,3 +2911,10 @@ details.bench-objective summary { font-size: .75rem; font-weight: 600; letter-sp
   .design-view-provenance details { margin-bottom: .4rem; }
   .design-view-source > button { min-height: 44px; padding: 0 .75rem; font-size: .875rem; }
 }
+
+/* Same-name projects: the newest stays a full row; older copies fold under a quiet disclosure. */
+.project-group > button, .project-group details > button { width: 100%; }
+.project-group details { border-top: 1px solid var(--line); }
+.project-group summary { padding: .6rem .5rem; min-height: 2.75rem; display: flex; align-items: center; font-size: .875rem; color: var(--muted); cursor: pointer; }
+.project-group summary:hover, .project-group summary:focus-visible { color: var(--text); background: var(--surface-2); }
+.project-group details > button { padding-left: 1.25rem; }

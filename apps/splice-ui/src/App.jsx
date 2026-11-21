@@ -101,15 +101,49 @@ function formatSavedAt(value) {
   return `Saved ${date.toLocaleString()}`;
 }
 
-function ProjectsHome({ projects, listError, loading, online, onStart, onLibrary, onOpen, onRetry }) {
+const savedTime = (project) => {
+  const time = Date.parse(project.saved_at || project.created_at || "");
+  return Number.isNaN(time) ? -Infinity : time;
+};
+
+// Newer first; unknown save times sort last and keep their list order.
+const newerFirst = (a, b) => (b > a) - (b < a);
+
+// Same-name projects, ordered by their newest member; each group's newest first.
+export function groupProjectsByName(projects) {
+  const groups = new Map();
+  for (const project of projects) {
+    const name = formatProjectName(project.name);
+    const key = name.toLowerCase();
+    if (!groups.has(key)) groups.set(key, { key, name, members: [] });
+    groups.get(key).members.push(project);
+  }
+  return [...groups.values()].map(({ key, name, members }) => {
+    const ordered = members.slice().sort((a, b) => newerFirst(savedTime(a), savedTime(b)));
+    return { key, name, latest: ordered[0], older: ordered.slice(1), newest: savedTime(ordered[0]) };
+  }).sort((a, b) => newerFirst(a.newest, b.newest));
+}
+
+export function ProjectsHome({ projects, listError, loading, online, onStart, onLibrary, onOpen, onRetry }) {
   const [query, setQuery] = useState("");
   const needle = query.trim().toLowerCase();
   const matches = projects.filter((project) => `${formatProjectName(project.name)} ${project.objective || ""}`.toLowerCase().includes(needle));
-  // Names repeat (the same idea started twice); the id tail tells the projects apart without guessing.
-  const nameCounts = projects.reduce((counts, project) => {
-    const key = formatProjectName(project.name).toLowerCase();
-    return counts.set(key, (counts.get(key) || 0) + 1);
-  }, new Map());
+  // Names repeat (the same idea started twice). Projects sharing a name group under the most recently
+  // saved one; the older copies fold beneath it, and the id tail tells them apart without guessing.
+  const groups = groupProjectsByName(matches);
+  const row = (project, repeated) => {
+    const name = formatProjectName(project.name);
+    const objective = project.objective && project.objective.toLowerCase() !== name.toLowerCase() ? project.objective : "";
+    const created = formatDate(project.created_at);
+    return <button type="button" key={project.project_id} data-project-id={project.project_id} onClick={() => onOpen(project.project_id)} disabled={!online}>
+      <span className="project-row-main"><strong>{name}{repeated && <code className="project-id"> · {project.project_id.slice(0, 8)}</code>}</strong>
+        {objective ? <span className="project-objective">{objective}</span>
+          : !project.objective && <span className="project-objective muted">Objective · not recorded</span>}
+        <small>{formatSavedAt(project.saved_at)}{created ? ` · created ${created}` : ""}</small></span>
+      {project.current_stage && <span className="project-stage">{project.current_stage}</span>}
+      {project.latest_revision != null && <span className="project-rev">Rev {project.latest_revision}</span>}
+    </button>;
+  };
   return <div className="projects-home">
     <header className="projects-heading">
       <div><h1>Projects</h1><p className="muted">Start with a build idea, adapt a reference design, or pick up where you left off.</p></div>
@@ -127,20 +161,14 @@ function ProjectsHome({ projects, listError, loading, online, onStart, onLibrary
       {!online && <p role="status">{loading ? "Connecting to the engineering backend…" : "The engineering backend is offline."}</p>}
       {listError && <p role="alert">{listError} <button type="button" onClick={onRetry}>Retry project list</button></p>}
       {matches.length > 0 ? <div className="project-rows">
-        {matches.map((project) => {
-          const name = formatProjectName(project.name);
-          const repeated = nameCounts.get(name.toLowerCase()) > 1;
-          const objective = project.objective && project.objective.toLowerCase() !== name.toLowerCase() ? project.objective : "";
-          const created = formatDate(project.created_at);
-          return <button type="button" key={project.project_id} data-project-id={project.project_id} onClick={() => onOpen(project.project_id)} disabled={!online}>
-            <span className="project-row-main"><strong>{name}{repeated && <code className="project-id"> · {project.project_id.slice(0, 8)}</code>}</strong>
-              {objective ? <span className="project-objective">{objective}</span>
-                : !project.objective && <span className="project-objective muted">Objective · not recorded</span>}
-              <small>{formatSavedAt(project.saved_at)}{created ? ` · created ${created}` : ""}</small></span>
-            {project.current_stage && <span className="project-stage">{project.current_stage}</span>}
-            {project.latest_revision != null && <span className="project-rev">Rev {project.latest_revision}</span>}
-          </button>;
-        })}
+        {groups.map(({ key, name, latest, older }) => older.length === 0 ? row(latest, false)
+          : <div className="project-group" key={key} data-testid="project-group">
+            {row(latest, true)}
+            <details>
+              <summary>{older.length} more named “{name}”</summary>
+              {older.map((project) => row(project, true))}
+            </details>
+          </div>)}
       </div> : online && !listError && <p className="muted">{loading ? "Loading saved projects…" : projects.length
         ? "No projects match this name." : "Your first saved project will appear here."}</p>}
     </section>
