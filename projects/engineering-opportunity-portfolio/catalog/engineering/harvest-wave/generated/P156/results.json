@@ -1,0 +1,19 @@
+{
+  "pilot": "Taiwan packhouse training, pear-sized 8 mm plunger and inert foam coupons",
+  "metrics": {
+    "probe_diameter_mm": 8,
+    "force_replay_max_error_n": 0.1515,
+    "candidate": {
+      "max_travel_error_mm": 0.3065,
+      "reference_load_levels": 3,
+      "model_foam_peak_span_n": 1.071,
+      "model_foam_repeats": 10
+    },
+    "flexible-control": {
+      "max_travel_error_mm": 0.8387,
+      "reference_load_levels": 3,
+      "model_foam_peak_span_n": 1.046,
+      "model_foam_repeats": 10
+    }
+  }
+}

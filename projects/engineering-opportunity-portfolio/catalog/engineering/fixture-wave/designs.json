@@ -1,0 +1,8 @@
+{
+  "P022": {"pitch":32,"bore_d":8,"pin_d":4.94,"shelf_drill_d":5,"land":37,"splice_error":0,"bad":{"splice_error":1.05}},
+  "P024": {"widths":[22,45,70],"bottom_component_z":5,"pcb_z":14,"bed_z":6,"base_z":3,"jaw_t":6,"slot":1.95,"pcb_t":1.6,"preload":2.5,"bad":{"bed_z":11}},
+  "P033": {"tip_radius":0.25,"radial_error":0.4,"z_error":0.13,"working_stroke":[0.65,1.35],"nominal_stroke":1.04,"key_x":24,"open_lead":"","bad":{"open_lead":"TP12"}},
+  "P034": {"plate":[140,95],"host":[[10,12],[130,12],[10,83],[130,83]],"board":[90,50],"clamp_left":18,"clamp_right":121,"clamp_y":39,"screw_d":6,"nozzle_d":12,"approach_z":15,"top_z":6,"clamp_z":9,"bad":{"clamp_right":111}},
+  "P048": {"board":[70,45],"stencil":[110,88],"apertures":[[8,10],[60,8],[13,35],[62,37]],"hinge_offset_y":0,"angular_error":0.04,"xy_play":0.03,"lift_pivot":18,"bad":{"hinge_offset_y":0.23}},
+  "P216": {"plate":[66,46],"dowels":[[19,20],[51,20]],"pin_d":[4,4],"seat_d":[4.12,4.15],"tip_offset":70,"lock_enter":5,"lock_lift":7,"locked_overlap":3.2,"bad":{"seat_d":[4.6,4.15]}}
+}

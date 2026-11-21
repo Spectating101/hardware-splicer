@@ -564,7 +564,7 @@ def create_app(*, ui_dist: str | Path | None = None) -> FastAPI:
         status = headless_status()
         return {
             "ok": bool(status["ok"]),
-            "demo_ready": bool(status["demo_ready"]),
+            "headless_ready": bool(status["headless_ready"]),
             "version": __version__,
             "app_roots": {name: {"available": bool(row["is_dir"])}
                           for name, row in status["app_roots"].items()},

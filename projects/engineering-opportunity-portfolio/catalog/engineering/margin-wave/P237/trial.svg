@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="335mm" height="214mm" viewBox="0 0 335 214">
+  <title>Matched tapered book backing cheeks</title>
+  <style>text{font:4px sans-serif;fill:#18323a} .part,.dim,.test{fill:none;stroke:#22424a;stroke-width:.4}.part{fill:#dfebeb;fill-opacity:.4}.dim{stroke:#13746a}.test{stroke:#a54b25;stroke-dasharray:2 1}</style>
+  <polygon id="cheek-0" class="part" points="20.000000,79.000000 21.487896,72.000000 54.000000,72.000000 54.000000,153.000000 20.000000,153.000000" />
+  <line id="bevel-0" class="dim" x1="20" y1="79" x2="21.487896" y2="72" />
+  <rect id="jaw-0" class="test" x="25" y="102" width="32" height="34" />
+  <text x="20" y="58">Left cheek, bevel 12°</text>
+  <rect id="blank-0" class="part" x="20" y="17" width="290" height="8" />
+  <line id="tip-line-0" class="dim" x1="20" y1="16" x2="310" y2="16" />
+  <polygon id="cheek-1" class="part" points="133.000000,79.000000 134.487896,72.000000 167.000000,72.000000 167.000000,153.000000 133.000000,153.000000" />
+  <line id="bevel-1" class="dim" x1="133" y1="79" x2="134.487896" y2="72" />
+  <rect id="jaw-1" class="test" x="138" y="102" width="32" height="34" />
+  <text x="133" y="58">Right cheek, bevel 12°</text>
+  <rect id="blank-1" class="part" x="20" y="29" width="290" height="8" />
+  <line id="tip-line-1" class="dim" x1="20" y1="28" x2="310" y2="28" />
+  <rect id="signature" class="test" x="213" y="92" width="71" height="41" />
+  <rect id="seated-cheek-left" class="part" x="193" y="101" width="20" height="32" />
+  <rect id="seated-cheek-right" class="part" x="284" y="101" width="20" height="32" />
+  <line id="finished-shoulder-check" class="dim" x1="213" y1="92" x2="284" y2="92" />
+  <text x="18" y="174">Jaw blanks 290 long; active rebate depth 7; assumed jaw backing 32 thick</text>
+  <text x="18" y="185">Cut a matched pair from one straight board. Mirror both bevels when installing.</text>
+  <text x="18" y="196">Compare dry shoulders with a gauge before working a glued text block.</text>
+</svg>

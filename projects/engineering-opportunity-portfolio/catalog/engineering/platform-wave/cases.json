@@ -1,0 +1,4 @@
+{
+  "P031":{"hull_displaced_cm3":[1370,1430],"mass_g":[1630,1710],"effective_submerged_tether_load_g":[15,35],"freshwater_g_cm3":[0.996,1.0],"foam_dim_error_mm":0.5,"foam_pair_mm":[220,40,25],"old_foam_pair_mm":[160,35,16],"assumed_down_thrust_equivalent_g":420,"revised_foam_mass_included_in_vehicle_mass":true},
+  "P049":{"station_x_mm":200,"old_station_x_mm":425,"lift_mm":35,"position_limit_mm":0.5,"orientation_limit_deg":1.0,"home_error_degrees":1.5}
+}

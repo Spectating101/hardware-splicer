@@ -1,0 +1,17 @@
+{
+  "pilot": "School water demonstration, rigid inert beads and removable screened cup",
+  "metrics": {
+    "candidate": {
+      "inert_beads": 100,
+      "worst_aperture_um": 220,
+      "model_retained_pct": 97.0,
+      "approximate_clean_open_area_to_mouth_ratio": 1.88
+    },
+    "coarse-control": {
+      "inert_beads": 100,
+      "worst_aperture_um": 320,
+      "model_retained_pct": 34.0,
+      "approximate_clean_open_area_to_mouth_ratio": 2.56
+    }
+  }
+}

@@ -45,7 +45,7 @@ class ServiceStartError(RuntimeError):
 
 
 def validate_app_roots() -> None:
-    missing = [str(path) for path in (CIRCUIT_ROOT, MECHA_ROOT, SPLICER3D_ROOT) if not path.exists()]
+    missing = [str(path) for path in (CIRCUIT_ROOT, MECHA_ROOT, SPLICER3D_ROOT) if not path.is_dir()]
     if missing:
         raise FileNotFoundError(f"Missing Hardware-Splicer app roots: {', '.join(missing)}")
 
@@ -188,38 +188,27 @@ def _python_import_ok(python: Path, module: str) -> bool:
         return False
 
 
-def _app_roots() -> Dict[str, Path]:
-    return {
+def headless_status() -> dict[str, Any]:
+    """Check the backend runtime and source roots without starting tool processes."""
+    roots = {
         "root": ROOT,
         "circuit_ai": CIRCUIT_ROOT,
         "mecha_splicer": MECHA_ROOT,
         "splicer3d": SPLICER3D_ROOT,
     }
-
-
-def headless_status() -> Dict[str, Any]:
-    """Readiness for serving the API, without starting any process.
-
-    ``/health`` uses this: lookups on PATH and the import system only, so it stays
-    in-process and fast. ``runtime_status`` adds the slower interpreter probes for
-    ``hs-doctor``.
-    """
-
     app_roots = {
         name: {"path": str(path), "exists": path.exists(), "is_dir": path.is_dir()}
-        for name, path in _app_roots().items()
+        for name, path in roots.items()
     }
     dependencies = {
         "fastapi": importlib.util.find_spec("fastapi") is not None,
         "uvicorn": importlib.util.find_spec("uvicorn") is not None,
-        "node": shutil.which("node") is not None,
     }
-    demo_ready = all(dependencies.values())
+    headless_ready = all(dependencies.values()) and all(row["is_dir"] for row in app_roots.values())
     testing_mode = testing_mode_enabled()
-    roots_ok = all(row["exists"] for row in app_roots.values())
     return {
-        "ok": roots_ok and demo_ready and not testing_mode,
-        "demo_ready": demo_ready,
+        "ok": headless_ready and not testing_mode,
+        "headless_ready": headless_ready,
         "testing_mode": testing_mode,
         "app_roots": app_roots,
         "dependencies": dependencies,
@@ -239,14 +228,14 @@ def client_status(status: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def runtime_status(*, splicer_url: str | None = None) -> Dict[str, object]:
-    headless = headless_status()
-    app_roots = headless["app_roots"]
+    status = headless_status()
     dependencies = {
-        **headless["dependencies"],
+        **status["dependencies"],
         "pillow": importlib.util.find_spec("PIL") is not None,
         "pytest": importlib.util.find_spec("pytest") is not None,
         "cadquery": importlib.util.find_spec("cadquery") is not None,
         "ngspice": shutil.which("ngspice") is not None,
+        "node": shutil.which("node") is not None,
         "npm": shutil.which("npm") is not None,
         "kicad_cli": shutil.which("kicad-cli") is not None,
     }
@@ -261,23 +250,21 @@ def runtime_status(*, splicer_url: str | None = None) -> Dict[str, object]:
         "uvicorn": _python_import_ok(splicer_python, "uvicorn"),
         "cadquery": _python_import_ok(splicer_python, "cadquery"),
     }
-    demo_ready = headless["demo_ready"]
-    testing_mode = headless["testing_mode"]
-    status: Dict[str, object] = {
-        "ok": headless["ok"],
+    required_for_demo = ("fastapi", "uvicorn", "node")
+    demo_ready = all(dependencies.get(key) for key in required_for_demo)
+    status = {
+        **status,
         "demo_ready": demo_ready,
         "fab_export_ready": bool(dependencies.get("kicad_cli")),
-        "testing_mode": testing_mode,
         "testing_mode_blocker": (
             "HARDWARE_SPLICER_TESTING_MODE relaxes fabrication gates — unset for production."
-            if testing_mode
+            if status["testing_mode"]
             else None
         ),
         "python": sys.executable,
         "python_version": platform.python_version(),
         "splicer3d_python": str(splicer_python),
         "splicer3d_local_venv": SPLICER3D_VENV_PYTHON.exists(),
-        "app_roots": app_roots,
         "dependencies": dependencies,
         "splicer3d_dependencies": splicer_dependencies,
     }

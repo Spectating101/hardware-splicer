@@ -1,0 +1,17 @@
+{
+  "pilot": "Taiwan spinach grower, nominal 2 inch Paperpot chain on a prepared row",
+  "metrics": {
+    "candidate": {
+      "plugs_examined": 50,
+      "clearance_gate_misses": 0,
+      "worst_clearance_mm": 2.977,
+      "worst_modeled_depth_error_mm": 6.0
+    },
+    "narrow-control": {
+      "plugs_examined": 50,
+      "clearance_gate_misses": 50,
+      "worst_clearance_mm": -7.023,
+      "worst_modeled_depth_error_mm": 6.0
+    }
+  }
+}

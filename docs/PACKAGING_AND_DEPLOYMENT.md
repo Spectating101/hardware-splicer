@@ -4,27 +4,49 @@
 
 ## Current headless backend
 
-Keep the source checkout with the deployment. It contains the registered study
-inputs, including CAD reference files, licenses, verification scripts and device
-profiles. Install the Python package into a dedicated environment from that checkout.
+The engine loads CAD reference files, licenses, verification scripts and device
+profiles relative to its source tree. Keep the tree in place and install the
+package in editable mode. To build an operator archive from a Git checkout, run
+the following command with Git and zstd installed.
+
+```bash
+bundle=$(bash scripts/package_headless_backend.sh HEAD)
+mkdir -p "$HOME/opt/hardware-splicer"
+tar -xf "$bundle" -C "$HOME/opt/hardware-splicer"
+cd "$HOME/opt/hardware-splicer/$(basename "$bundle" .tar.zst)"
+```
+
+The archive uses the selected commit. It includes the engine, projects, examples,
+test fixtures and offline component datasheets. The full repository also contains
+historical UI review captures, external assessment agent-run traces, and two saved
+Circuit-AI evaluation runs (`live_model_probe` and `real_browsed_case`).
+
+Install the HTTP service and CLI from the extracted directory or the checkout.
 
 ```bash
 python3 -m venv .venv
-.venv/bin/python -m pip install -r requirements-splice-v1.txt -e '.[digital,backend-mcp,keyboard-splice]'
+.venv/bin/python -m pip install -r requirements-splice-v1.txt -e .
 .venv/bin/python -m pip check
 .venv/bin/hs-doctor
 .venv/bin/hs-digital cases
 ```
 
-The `digital` extra provides the native cyberdeck and plotter runtime. The
-`drone-sim` extra adds PyBullet for the HS-3G study. Where the pinned PyBullet
-version requires a source build, `HARDWARE_SPLICER_DIGITAL_PYTHON` can point to a
-prepared native environment. PCB compilation uses `kicad-cli` and the Node-based
-graph compiler. Install its dependencies with
-`npm --prefix apps/circuit-ai/circuit-ai-frontend ci` when deploying that capability.
-The native SPI workshop verifier also needs KiCad's `pcbnew` Python bindings.
-Run `scripts/hs_workshop_operator.py` with the host Python that can import them.
-The canonical MCP gateway runs locally over stdio with `.venv/bin/hs-backend-mcp`.
+Install extras for the jobs that will run on this host.
+
+| Capability | Install or host tool |
+| --- | --- |
+| Native cyberdeck and plotter studies | `.venv/bin/python -m pip install -e '.[digital]'` |
+| HS-3G native drone simulation | `.venv/bin/python -m pip install -e '.[drone-sim]'` |
+| Keyboard copper-island solver | `.venv/bin/python -m pip install -e '.[keyboard-splice]'` |
+| Canonical MCP gateway over stdio | `.venv/bin/python -m pip install -e '.[backend-mcp]'`, then `.venv/bin/hs-backend-mcp` |
+| KiCad DRC and fabrication exports | Install `kicad-cli` 9+ on the host. |
+| Native SPI workshop verification | Run `scripts/hs_workshop_operator.py` with a host Python that imports KiCad's `pcbnew`. |
+
+Set `HARDWARE_SPLICER_DIGITAL_PYTHON` to a prepared native interpreter when
+running CAD or PyBullet jobs in a separate environment. The Python PCB compiler
+uses the checked-in recipes and footprints. To regenerate those files after
+editing the TypeScript catalog, run `npm --prefix apps/circuit-ai/circuit-ai-frontend ci`
+followed by `make export-engine-pcb-data export-catalog-recipes`.
 
 For the optional HTTP process, give it a persistent state directory owned by the
 service account. Use one job worker process per SQLite database. Set
@@ -171,7 +193,7 @@ bash scripts/install_splice_v1.sh
 - `requirements-splice-v1.txt` (pinned core)  
 - `pip install -e .` (engine + API entrypoints)  
 - `pip install -e ".[mcp]"` when `INSTALL_MCP=1` (default)  
-- **npm install** only in `apps/circuit-ai/circuit-ai-frontend` (KiCad graph compiler — **required for compile**)  
+- Set `INSTALL_CATALOG_TOOLS=1` to install the legacy frontend tools and regenerate catalog data.
 
 **Developers / CI** (pytest for `verify-splice-v1`):
 
@@ -188,8 +210,8 @@ INSTALL_DEV=1 bash scripts/install_splice_v1.sh
 **Prerequisites (document, don’t bundle):**
 
 - Python 3.12+  
-- Node 18+  
-- `kicad-cli` 9+ on PATH  
+- Node 18+ and npm for frontend development and catalog regeneration
+- `kicad-cli` 9+ for KiCad checks and fabrication exports
 
 ---
 
@@ -255,9 +277,9 @@ GitHub Actions already runs verify; optional `deploy/Dockerfile.ci` for reproduc
 ```text
 Python 3.12
 FastAPI/uvicorn
-Repo src/ + examples/ + apps/circuit-ai/circuit-ai-frontend/node_modules (for compile)
+Editable package and source tree from the operator archive
 Writable volume: HARDWARE_SPLICER_TMP_ROOT
-Host: kicad-cli, node
+Optional host tool for KiCad checks and fabrication exports: kicad-cli
 ```
 
 ---
