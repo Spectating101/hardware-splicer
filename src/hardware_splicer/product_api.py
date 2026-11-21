@@ -32,6 +32,7 @@ from .document_evidence_api import create_document_evidence_router
 from .electrical_design_api import create_electrical_design_router
 from .electrical_interchange_api import create_electrical_interchange_router
 from .engineering_action_api import create_engineering_action_router
+from .change_history_api import create_change_history_router
 from .engineering_assurance_api import create_engineering_assurance_router
 from .engineering_api import create_engineering_router
 from .engineering_execution_anchored_api import (
@@ -165,6 +166,7 @@ def create_product_app(
     app.include_router(create_project_pre_fabrication_plan_router(resolved_store))
     app.include_router(create_project_physical_validation_router(resolved_store))
     app.include_router(create_engineering_assurance_router(resolved_store))
+    app.include_router(create_change_history_router(resolved_store))
     app.include_router(create_ai_project_orchestrator_router(resolved_store))
     app.include_router(create_dual_agent_cleanroom_router(resolved_store))
     app.include_router(create_ai_project_tool_executor_router(resolved_store))

@@ -9,7 +9,134 @@
  * 5. conservative legacy fallback from donor-bound resolved modules
  */
 
-function pickEvidenceIntegrations(session = {}) {
+export type EvidenceState =
+  | "not_applicable"
+  | "missing"
+  | "verified"
+  | "bench_required"
+  | "blocked"
+  | "partial";
+
+export type EvidenceTone = "neutral" | "fail" | "warn";
+
+export type TscircuitReadinessState = "ready" | "waiting";
+export type PlatformioReadinessState = "ready" | "blocked";
+export type KibotReadinessState = "ready" | "waiting";
+export type BackendReadinessState = "ready" | "waiting" | "blocked";
+export type InterfaceCompileStatus = "ready" | "blocked";
+
+export interface ResolvedModuleRow {
+  source?: string | null;
+  board_id?: string | null;
+  donor_block_id?: string | null;
+  module_id?: string | null;
+  instance_id?: string | null;
+  role?: string | null;
+  interface_status?: string | null;
+  connector_refs?: string[] | null;
+  reference_equivalents?: unknown[] | null;
+}
+
+export interface EvidenceContact {
+  contact_id?: string;
+  connector_ref?: string;
+  label?: string;
+  pin_number?: string;
+  side?: string;
+}
+
+export interface EvidenceInterfaceContract {
+  interface_id?: string;
+  virtual_module_id?: string;
+  board_id?: string;
+  block_id?: string;
+  functional_role?: string;
+  status?: string;
+  contacts?: EvidenceContact[];
+  signals?: unknown[];
+  reference_equivalents?: unknown[];
+  unresolved_fields?: string[];
+  firmware_authorized?: boolean;
+}
+
+export interface EvidenceInterface {
+  schema_version?: string;
+  interface_contract?: EvidenceInterfaceContract;
+  resolved_module?: ResolvedModuleRow;
+  compile_status?: InterfaceCompileStatus | (string & {});
+  blockers?: string[];
+  bench_recipe?: unknown;
+  legacy_fallback?: boolean;
+}
+
+export interface EvidenceAuthority {
+  firmware_authorized?: boolean | null;
+  power_authorized?: boolean | null;
+  claim_boundary?: string | null;
+}
+
+export interface EvidenceIntegrations {
+  authority?: EvidenceAuthority | null;
+  interfaces?: EvidenceInterface[] | null;
+}
+
+export interface SalvagePackageInput {
+  evidence_integrations?: EvidenceIntegrations | null;
+  resolved_modules?: ResolvedModuleRow[] | null;
+}
+
+export interface EvidenceSessionInput {
+  mode?: string | null;
+  buildDir?: string | null;
+  displayResult?: {
+    salvage_package?: SalvagePackageInput | null;
+    evidence_integrations?: EvidenceIntegrations | null;
+  } | null;
+  composeResult?: {
+    salvage_package?: SalvagePackageInput | null;
+  } | null;
+  benchSession?: {
+    evidence_integrations?: EvidenceIntegrations | null;
+    power_on_authorized?: boolean | null;
+  } | null;
+  projectPackage?: {
+    evidence_integrations?: EvidenceIntegrations | null;
+  } | null;
+  intake?: {
+    evidence_integrations?: EvidenceIntegrations | null;
+  } | null;
+}
+
+export interface BackendReadinessEntry<S extends BackendReadinessState = BackendReadinessState> {
+  state: S;
+  detail: string;
+}
+
+export interface EvidenceBackendReadiness {
+  tscircuit: BackendReadinessEntry<TscircuitReadinessState>;
+  platformio: BackendReadinessEntry<PlatformioReadinessState>;
+  kibot: BackendReadinessEntry<KibotReadinessState>;
+}
+
+export interface EvidenceTruth {
+  applicable: boolean;
+  state: EvidenceState;
+  label: string;
+  detail: string;
+  authority: EvidenceAuthority;
+  integrations: EvidenceIntegrations | null;
+  interfaces: EvidenceInterface[];
+  interfaceCount: number;
+  unresolvedInterfaces: EvidenceInterface[];
+  unresolvedFields: string[];
+  unresolvedFieldCount: number;
+  firmwareAuthorized: boolean;
+  powerAuthorized: boolean;
+  claimBoundary: string;
+  backendReadiness: EvidenceBackendReadiness;
+}
+
+function pickEvidenceIntegrations(session: EvidenceSessionInput = {}): EvidenceIntegrations | null {
   const result = session.displayResult || {};
   const salvage = result.salvage_package || session.composeResult?.salvage_package || {};
   return (
@@ -22,12 +149,12 @@ function pickEvidenceIntegrations(session = {}) {
   );
 }
 
-function legacyInterfaces(session = {}) {
+function legacyInterfaces(session: EvidenceSessionInput = {}): EvidenceInterface[] {
   const result = session.displayResult || {};
   const salvage = result.salvage_package || session.composeResult?.salvage_package || {};
   return (salvage.resolved_modules || [])
     .filter((row) => String(row?.source || "").includes("donor"))
-    .map((row, index) => ({
+    .map((row, index): EvidenceInterface => ({
       schema_version: "hardware_splicer.integration_stack.legacy_fallback.v1",
       interface_contract: {
         interface_id: `legacy:${row.board_id || "donor"}:${row.donor_block_id || index + 1}`,
@@ -54,16 +181,16 @@ function legacyInterfaces(session = {}) {
     }));
 }
 
-function normalizedInterfaces(integrations, session) {
+function normalizedInterfaces(integrations: EvidenceIntegrations | null, session: EvidenceSessionInput): EvidenceInterface[] {
   if (integrations?.interfaces?.length) return integrations.interfaces;
   return legacyInterfaces(session);
 }
 
-function unique(values) {
+function unique(values: string[]): string[] {
   return [...new Set(values.filter(Boolean))];
 }
 
-export function deriveEvidenceTruth(session = {}) {
+export function deriveEvidenceTruth(session: EvidenceSessionInput = {}): EvidenceTruth {
   const integrations = pickEvidenceIntegrations(session);
   const interfaces = normalizedInterfaces(integrations, session);
   const authority = integrations?.authority || {};
@@ -84,7 +211,7 @@ export function deriveEvidenceTruth(session = {}) {
     authority.power_authorized === true || session.benchSession?.power_on_authorized === true,
   );
 
-  let state = "not_applicable";
+  let state: EvidenceState = "not_applicable";
   let label = "Evidence not required";
   let detail = "Greenfield designs use design and bench evidence without a donor interface contract.";
   if (applicable) {
@@ -152,7 +279,7 @@ export function deriveEvidenceTruth(session = {}) {
   };
 }
 
-export function evidenceTone(state) {
+export function evidenceTone(state: EvidenceState): EvidenceTone {
   // Accepted evidence is an authorization record, not an approval: it stays neutral, never green.
   if (state === "verified") return "neutral";
   if (state === "blocked" || state === "missing") return "fail";

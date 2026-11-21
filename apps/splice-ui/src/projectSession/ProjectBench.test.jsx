@@ -10,6 +10,7 @@ vi.mock("../api.js", () => ({
   fetchScenes: vi.fn(async () => []), fetchSceneManifest: vi.fn(), fetchSceneRecords: vi.fn(async () => ({ records: [] })),
 }));
 vi.mock("./digitalStudyApi.js", () => ({
+  fetchChangeDossier: vi.fn(async () => ({ change_dossier: { changes: [], cite_editions: [], cite_linked: false, head_revision: 1 } })),
   fetchEngineeringPackages: vi.fn(async () => ({ packages: [] })), fetchEvidenceDelta: vi.fn(),
   fetchEngineeringRevisionDiff: vi.fn(), fetchDigitalCompare: vi.fn(),
   engineeringPackageUrl: (project, id) => `/packages/${project}/${id}`,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { describeTransition, invalidationReason } from "./checkTransition.js";
+import { describeTransition, invalidationReason } from "./checkTransition";
 
 const r = (passed, actual, limit, unit = "h") => ({ passed, actual, limit, unit });
 

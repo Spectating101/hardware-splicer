@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ACTIONS, createEmptySession, projectSessionReducer } from "./projectSession.js";
-import { deriveProjectTruth } from "./deriveProjectTruth.js";
+import { deriveProjectTruth } from "./deriveProjectTruth";
 
 const MISMATCH = {
   status: "mismatch",

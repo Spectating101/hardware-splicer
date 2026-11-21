@@ -1,0 +1,262 @@
+{
+  "authority_level": "modeled",
+  "candidate_design_changes": [],
+  "candidate_policy_review": {
+    "decision": "BLOCKED",
+    "policy_id": "portable-runtime-4h",
+    "unmet_targets": [
+      "engineering.work_runtime",
+      "work-runtime"
+    ]
+  },
+  "case_id": "fielddeck-5",
+  "changed_dependencies": [
+    {
+      "after": 4.0,
+      "before": 2.5,
+      "dependency_id": "requirement:minimum_work_runtime_h"
+    }
+  ],
+  "checks": [
+    {
+      "actual": 3.166,
+      "check": "work_runtime",
+      "earlier_result": {
+        "actual": 3.166,
+        "limit": 2.5,
+        "result": "pass (modeled)",
+        "revision": 1,
+        "run_id": "09a597a3bd07423bad8cdba4cca99098",
+        "unit": "h"
+      },
+      "earlier_status": "stale (revision 1 result no longer counts)",
+      "limit": 4.0,
+      "result": "FAIL",
+      "revision": 2,
+      "run_id": "597107a7c64a4a1bbad809b63d211543",
+      "unit": "h"
+    },
+    {
+      "actual": 0.48,
+      "check": "ordinary_source_margin",
+      "earlier_result": {
+        "actual": 0.48,
+        "limit": 0.3,
+        "result": "pass (modeled)",
+        "revision": 1,
+        "run_id": "09a597a3bd07423bad8cdba4cca99098",
+        "unit": "A"
+      },
+      "earlier_status": "retained (inputs unchanged, rerun matches)",
+      "limit": 0.3,
+      "result": "pass (modeled)",
+      "revision": 2,
+      "run_id": "597107a7c64a4a1bbad809b63d211543",
+      "unit": "A"
+    },
+    {
+      "actual": 0.08,
+      "check": "high_keyboard_supply_limit",
+      "earlier_result": {
+        "actual": 0.08,
+        "limit": 0,
+        "result": "pass (modeled)",
+        "revision": 1,
+        "run_id": "09a597a3bd07423bad8cdba4cca99098",
+        "unit": "A"
+      },
+      "earlier_status": "retained (inputs unchanged, rerun matches)",
+      "limit": 0,
+      "result": "pass (modeled)",
+      "revision": 2,
+      "run_id": "597107a7c64a4a1bbad809b63d211543",
+      "unit": "A"
+    }
+  ],
+  "decision": {
+    "question": "Should revision 2 replace revision 1 under policy portable-runtime-4h 1.0.0?",
+    "standing": "Not decided by this dossier. Revision 2 has 1 failing and 0 untested modeled check(s) and no physical evidence."
+  },
+  "declared_by_hs": {
+    "base": {
+      "seal_sha256": "97086c9925f694c1037a1c341105a65b49b1b4bd287d8584a6389caa96f6937c",
+      "snapshot_sha256": "ec875bac0319d010404ea903b87566bbf47c7d3c421ba05d18dc30a59bea879a"
+    },
+    "candidate": {
+      "seal_sha256": "33dc96f410b578f103a0aea49efb2fd4c762245d921067aff2fc3ab9325f365d",
+      "snapshot_sha256": "4278906014bea41049345b204215cb01abdb0c8ae78b52c68d7d51cb9dcc6a67"
+    },
+    "meaning": "Snapshot and seal hashes declared by HS; Cite has no covered file to verify them."
+  },
+  "edition": {
+    "bound_to": {
+      "files": {
+        "base_export": "76d039ef0ac6ed4caed5c4c3a2069fb9e2f90404d9bc473629f4c4da13bb4435",
+        "base_review": "aa435840af09a331002c5cd1bab06cb80515869362f9214ac17281ad03193a3a",
+        "base_review_replay": "5b1f125d154f47c273624c627fd241f20de7934953d4eec89feb72b659e7d7fd",
+        "candidate_export": "d1a5fa318d4013f11b534eb02634b7c4a6a675a3d7d307724a2758063ddd595d",
+        "candidate_review": "40db9c451262c1aa2af578dfe7eb4ca9e5aae2b3fadd3309a7e4608c7486c79b",
+        "candidate_review_replay": "c61be06794111dd6e812396ad7a115f356f3b3437e8db06c52f0f14fa0b792cb",
+        "proposal": "a790892955e158792b85c82fe2e5b7c1d6f73cacf76c45f09500a6d86c767592"
+      },
+      "package_sha256": "d4652acd9d8e95f7766ba9834d906bf8b10b8c0527c5a101947a70ae1dd16e07",
+      "packet_sha256": "b639398c1ce60b9095381032905ba5af0b27f1763ad87ddedbe9307599881bd0",
+      "revision": 2,
+      "run_id": "597107a7c64a4a1bbad809b63d211543"
+    },
+    "edition_id": "2075bf9f3479df23dbd9448074e1444e2f3300590cbc31cf6036b39b20c65f8d",
+    "status_at_issue": "current"
+  },
+  "not_linked": [],
+  "not_tested": [
+    "No physical build, bench measurement, power-on or field operation was performed for either revision.",
+    "Modeled runtime and current values are calculations from declared assumptions, not observed behaviour."
+  ],
+  "objective": {
+    "base_requirements": {
+      "keyboard_current_a": 0.1,
+      "minimum_supply_margin_a": 0.3,
+      "minimum_work_runtime_h": 2.5,
+      "pi_work_current_a": 1.0
+    },
+    "candidate_requirements": {
+      "keyboard_current_a": 0.1,
+      "minimum_supply_margin_a": 0.3,
+      "minimum_work_runtime_h": 4.0,
+      "pi_work_current_a": 1.0
+    },
+    "change_request": "Apply Policy Lab portable-runtime-4h proposal",
+    "statement": "Declared design requirements of the saved study; HS stores no free-text objective for a registered digital case."
+  },
+  "physical_authority_granted": false,
+  "project_id": "digital-996558719b13454fb1724bef8f218093",
+  "proposal": {
+    "applied_as_revision": 2,
+    "candidate_design_changes": [],
+    "policy_decision": "BLOCKED",
+    "policy_id": "portable-runtime-4h",
+    "policy_review_sha256": "aa435840af09a331002c5cd1bab06cb80515869362f9214ac17281ad03193a3a",
+    "policy_version": "1.0.0",
+    "requirement_changes": {
+      "minimum_work_runtime_h": {
+        "after": 4.0,
+        "before": 2.5
+      }
+    },
+    "revision_requirements": {
+      "minimum_work_runtime_h": 4
+    },
+    "unmet_targets": [
+      {
+        "actual": 3.166,
+        "fact": "metric.work_runtime_lower_h",
+        "reason": "TARGET_NOT_MET",
+        "required": ">= 4 h",
+        "target": "work-runtime"
+      }
+    ]
+  },
+  "receiver_checks": [
+    "every covered file's bytes match its recorded SHA-256",
+    "base and candidate exports match the packet's project, revision, run, package hash, requirements, requirements_met and checks",
+    "each Policy Lab review has a verify receipt naming its exact bytes",
+    "the proposal shown (policy, decision, unmet targets, requirement changes) is read from the covered files",
+    "the Policy Lab review binds the exact base export bytes",
+    "the HS proposal binds that review, and the candidate carries its resolved requirements",
+    "every failing candidate check from the export is listed as unresolved",
+    "each applied modelled candidate matches its review row, and its native outcome matches the candidate export"
+  ],
+  "revisions": {
+    "base": {
+      "package_sha256": "f505c76f745da1d771d72cd3496b3059b1a955ebe06025d1abcca33f6ffcfcd7",
+      "requirements_met": true,
+      "revision": 1,
+      "run_id": "09a597a3bd07423bad8cdba4cca99098"
+    },
+    "candidate": {
+      "change_request": "Apply Policy Lab portable-runtime-4h proposal",
+      "package_sha256": "d4652acd9d8e95f7766ba9834d906bf8b10b8c0527c5a101947a70ae1dd16e07",
+      "parent_revision": 1,
+      "requirements_met": false,
+      "revision": 2,
+      "run_id": "597107a7c64a4a1bbad809b63d211543"
+    }
+  },
+  "schema": "cite_refinery.engineering_change_dossier.v1",
+  "sources": {
+    "base_export": {
+      "bytes": 26423,
+      "path": "r1-export.json",
+      "schema": "hardware_splicer.policy_evidence.v1",
+      "sha256": "76d039ef0ac6ed4caed5c4c3a2069fb9e2f90404d9bc473629f4c4da13bb4435"
+    },
+    "base_review": {
+      "bytes": 52940,
+      "path": "r1-review/review.json",
+      "schema": "policylab.hardware_policy_review.v1",
+      "sha256": "aa435840af09a331002c5cd1bab06cb80515869362f9214ac17281ad03193a3a"
+    },
+    "base_review_replay": {
+      "bytes": 427,
+      "path": "r1-review/replay.json",
+      "schema": "policylab.hardware_policy_verification.v1",
+      "sha256": "5b1f125d154f47c273624c627fd241f20de7934953d4eec89feb72b659e7d7fd"
+    },
+    "candidate_export": {
+      "bytes": 26504,
+      "path": "r2-export.json",
+      "schema": "hardware_splicer.policy_evidence.v1",
+      "sha256": "d1a5fa318d4013f11b534eb02634b7c4a6a675a3d7d307724a2758063ddd595d"
+    },
+    "candidate_review": {
+      "bytes": 53411,
+      "path": "r2-review/review.json",
+      "schema": "policylab.hardware_policy_review.v1",
+      "sha256": "40db9c451262c1aa2af578dfe7eb4ca9e5aae2b3fadd3309a7e4608c7486c79b"
+    },
+    "candidate_review_replay": {
+      "bytes": 427,
+      "path": "r2-review/replay.json",
+      "schema": "policylab.hardware_policy_verification.v1",
+      "sha256": "c61be06794111dd6e812396ad7a115f356f3b3437e8db06c52f0f14fa0b792cb"
+    },
+    "proposal": {
+      "bytes": 1113,
+      "path": "proposal.json",
+      "schema": "hardware_splicer.policy_feedback_proposal.v1",
+      "sha256": "a790892955e158792b85c82fe2e5b7c1d6f73cacf76c45f09500a6d86c767592"
+    }
+  },
+  "unresolved": [
+    {
+      "actual": 3.166,
+      "check": "work_runtime",
+      "kind": "failing_check",
+      "limit": 4.0,
+      "revision": 2,
+      "run_id": "597107a7c64a4a1bbad809b63d211543",
+      "transition": "regressed",
+      "unit": "h"
+    },
+    {
+      "actual": 3.166,
+      "fact": "HS engineering check",
+      "kind": "policy_target_unmet",
+      "policy_id": "portable-runtime-4h",
+      "reason": "ENGINEERING_CONSTRAINT_FAILED",
+      "required": "HS limit 4 h",
+      "revision": 2,
+      "target": "engineering.work_runtime"
+    },
+    {
+      "actual": 3.166,
+      "fact": "metric.work_runtime_lower_h",
+      "kind": "policy_target_unmet",
+      "policy_id": "portable-runtime-4h",
+      "reason": "TARGET_NOT_MET",
+      "required": ">= 4 h",
+      "revision": 2,
+      "target": "work-runtime"
+    }
+  ]
+}

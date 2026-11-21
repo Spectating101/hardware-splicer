@@ -76,13 +76,13 @@ describe("fielddeck chain jobs", () => {
     expect(removed).toEqual(mainThread.removed(edges));
   });
 
-  it("answers through the worker's own message handler with the main-thread result", async () => {
+  it("answers through the worker's own message handler with the main-thread result (JavaScript path when the module cannot load)", async () => {
     const posted = [];
     globalThis.self = { postMessage: (message, transfer) => posted.push({ message, transfer }) };
     await import("./fielddeckChains.worker.js");
     const edges = [0, 0, 0, 10, 0, 0, 10, 0, 0, 10, 10, 0, 10, 10, 0, 0, 10, 0];
     const paired = [0, 0, 0, 10, 0, 0];
-    globalThis.self.onmessage({ data: { id: 7, jobs: [{ kind: "overlay", edges: Float64Array.from(edges), paired: Float64Array.from(paired) }] } });
+    await globalThis.self.onmessage({ data: { id: 7, jobs: [{ kind: "overlay", edges: Float64Array.from(edges), paired: Float64Array.from(paired) }] } });
     expect(posted[0].message.id).toBe(7);
     expect(decodeChains(posted[0].message.results[0])).toEqual(mainThread.overlay(edges, paired));
     expect(posted[0].transfer.length).toBe(2);

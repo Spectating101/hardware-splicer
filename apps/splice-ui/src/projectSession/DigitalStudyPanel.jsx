@@ -5,8 +5,8 @@ import {
 import ProjectBench from "./ProjectBench.jsx";
 import { SavedDisplayComparison } from "./FieldDeckDisplayComparison.jsx";
 import { fieldLabel, formatValue, keyLabel } from "./digitalStudyLabels.js";
-import { describeTransition } from "./checkTransition.js";
-import { revisionNoteText } from "./statusLanguage.js";
+import { describeTransition } from "./checkTransition";
+import { revisionNoteText } from "./statusLanguage";
 import "./digitalStudy.css";
 
 const isPending = (status) => status === "queued" || status === "running";
@@ -242,7 +242,7 @@ export default function DigitalStudyPanel({ session, onProjectReload, onToast, o
 
   return (
     <ProjectBench session={session} study={selected} onToast={onToast} onReference={onReference} references={referenceLinks}
-      caseId={summary.case_id} latestRevision={data.study.revision} onOpenScene={onOpenScene}
+      caseId={summary.case_id} latestRevision={data.study.revision} onOpenScene={onOpenScene} onOpenRevision={chooseRevision}
       studyPackages={[data.history.find((entry) => entry.revision === selected.parent_revision), selected]
         .filter((entry) => entry?.artifacts?.["STUDY.zip"]).map((entry) => ({
           label: `Digital study package (STUDY.zip) · revision ${entry.revision}`,

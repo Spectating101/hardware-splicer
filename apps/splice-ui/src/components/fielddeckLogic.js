@@ -284,10 +284,11 @@ const isSmallCircle = (points, maxRadius) => {
 
 // Change colour belongs on the outer silhouette and on boundary loops that enclose more than 15%
 // of the part's bounds, after a 1e-4 mm weld. Vent slots, small cutouts and hole rims stay in ink,
-// and chains under 8 mm are dropped. `extents` is the part's bounding-box size [x, y, z].
-export function diffAccentChains(positions, extents, { minLength = 8, minShare = 0.15, rimRadius = 6 } = {}) {
+// and chains under 8 mm are dropped. `extents` is the part's bounding-box size [x, y, z]. `weld` is
+// weldEdgeChains or the Rust module's identical weld.
+export function diffAccentChains(positions, extents, { minLength = 8, minShare = 0.15, rimRadius = 6, weld = weldEdgeChains } = {}) {
   const [major, minor] = extents.slice().sort((a, b) => b - a);
-  return weldEdgeChains(positions, 0.0001).filter((points) => {
+  return weld(positions, 0.0001).filter((points) => {
     const length = chainLength(points);
     if (length < minLength || isSmallCircle(points, rimRadius)) return false;
     const size = [0, 1, 2].map((axis) => Math.max(...points.map((point) => point[axis]))

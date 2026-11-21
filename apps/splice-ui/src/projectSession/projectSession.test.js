@@ -7,7 +7,7 @@ import {
   projectSessionReducer,
   sessionHasPackage,
 } from "./projectSession.js";
-import { designReady } from "./stageAvailability.js";
+import { designReady } from "./stageAvailability";
 
 describe("projectSessionReducer", () => {
   it("START_PROJECT opens Intake with a new identity and Design locked", () => {
