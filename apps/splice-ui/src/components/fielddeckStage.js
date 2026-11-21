@@ -234,7 +234,12 @@ function stylePart(entry, compare, weight, ghost, accent, emphasis, focus = null
   accents.forEach((line) => { line.visible = !ghost && !veiled && accent > 0; });
 }
 
+// Set once the Rust chain module has loaded: its edges() matches three's EdgesGeometry bit for bit.
+let rustChains = null;
+
 function edgePositions(geometry, threshold) {
+  const fast = rustChains?.edges(geometry, threshold);
+  if (fast) return fast;
   const edges = new THREE.EdgesGeometry(geometry, threshold);
   const positions = edges.getAttribute("position").array;
   edges.dispose();
@@ -401,8 +406,9 @@ let chainModule = null;
 const chainModuleOnce = () => (chainModule ??= loadChainModule());
 
 async function makeEntries(assets, index, scene, technical, resources, { base, target, focusPart }, { signal } = {}) {
-  // Its weld returns weldEdgeChains' chains exactly, in a fraction of the time.
-  const weld = (await chainModuleOnce())?.weld;
+  // Its weld and edges return weldEdgeChains' chains and EdgesGeometry's positions exactly, faster.
+  rustChains = await chainModuleOnce();
+  const weld = rustChains?.weld;
   // Phase marks for the browser's performance timeline; they cost nothing when nobody reads them.
   performance.mark?.("fielddeck:meshes-start");
   let sliceStart = performance.now();
