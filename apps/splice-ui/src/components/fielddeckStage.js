@@ -1134,6 +1134,78 @@ function createComposer(renderer, scene, technical, camera) {
         composer.render();
       },
       dispose: () => composer.dispose(),
+      // Each pass compiles its shader programs the first time it renders. Rendering the passes
+      // one task at a time, into the composer's own buffers, spreads that cost over several short
+      // tasks instead of one long first frame. The output is discarded; nothing here is drawn.
+      async warmUp(yieldFn, signal) {
+        const triangle = new THREE.BufferGeometry();
+        triangle.setAttribute("position", new THREE.Float32BufferAttribute([-1, -1, 0, 3, -1, 0, -1, 3, 0], 3));
+        triangle.setAttribute("uv", new THREE.Float32BufferAttribute([0, 0, 2, 0, 0, 2], 2));
+        // A pass's materials, including those of passes nested in its effects (SMAA's edge and
+        // weight passes): a shallow walk that skips scenes, targets, textures and the renderer.
+        const materialsOf = (root) => {
+          const found = new Set();
+          const seen = new Set();
+          const visit = (value, depth) => {
+            if (!value || typeof value !== "object" || seen.has(value) || depth > 3) return;
+            seen.add(value);
+            if (value.isMaterial) { found.add(value); return; }
+            if (value.isObject3D && !value.material) return;
+            if (value.isTexture || value.isRenderTarget || value.isWebGLRenderTarget || value.isWebGLRenderer
+              || value.isBufferGeometry || value.isCamera) return;
+            if (value.material?.isMaterial) found.add(value.material);
+            if (value.fullscreenMaterial?.isMaterial) found.add(value.fullscreenMaterial);
+            for (const child of Array.isArray(value) ? value : Object.values(value)) visit(child, depth + 1);
+          };
+          visit(root, 0);
+          return [...found];
+        };
+        for (const pass of composer.passes) {
+          await yieldFn();
+          if (signal?.aborted) break;
+          // Where KHR_parallel_shader_compile exists, compile the pass's own materials off the main
+          // thread first, into the same kind of target the pass draws to.
+          if (pass.scene?.isScene && pass.camera && renderer.compileAsync) {
+            // A scene pass draws its scene's materials into its own buffer; compile that variant
+            // (linear output into a half-float target), not the on-screen one.
+            const previous = renderer.getRenderTarget();
+            try {
+              renderer.setRenderTarget(pass.renderToScreen ? null : pass.target ?? composer.inputBuffer);
+              await renderer.compileAsync(pass.scene, pass.camera);
+            } catch {
+              // Best effort.
+            } finally {
+              renderer.setRenderTarget(previous);
+            }
+          }
+          const materials = materialsOf(pass);
+          if (materials.length && renderer.compileAsync) {
+            const scratch = new THREE.Scene();
+            for (const material of materials) {
+              const mesh = new THREE.Mesh(triangle, material);
+              mesh.frustumCulled = false;
+              scratch.add(mesh);
+            }
+            const previous = renderer.getRenderTarget();
+            try {
+              renderer.setRenderTarget(pass.renderToScreen ? null : composer.outputBuffer);
+              await renderer.compileAsync(scratch, camera);
+            } catch {
+              // Best effort, as below.
+            } finally {
+              renderer.setRenderTarget(previous);
+            }
+          }
+          await yieldFn();
+          if (signal?.aborted) break;
+          try {
+            pass.render(renderer, composer.inputBuffer, composer.outputBuffer, 0, false);
+          } catch {
+            // Best effort: anything not warmed here compiles on the first real frame instead.
+          }
+        }
+        triangle.dispose();
+      },
     };
   } catch (error) {
     // A pass that failed initialization may not yet belong to the composer.
@@ -1899,7 +1971,25 @@ export async function createFielddeckStage(host, assets, index, callbacks, scene
   // Compile the scene's shader programs before the first frame. Where the browser offers
   // KHR_parallel_shader_compile this happens off the main thread; elsewhere it costs what the first
   // frame would have, in a task of its own.
-  await yieldToMain();
+  // Without the extension, compiling ahead only moves the same blocking work and adds warm-up
+  // renders, so a software renderer keeps the original first-frame compile.
+  const parallelCompile = Boolean(renderer.getContext?.()?.getExtension?.("KHR_parallel_shader_compile"));
+  host.dataset.parallelCompile = String(parallelCompile);
+  try {
+    await yieldToMain();
+    if (parallelCompile && !signal?.aborted && renderer.compileAsync) {
+      await renderer.compileAsync(scene, camera);
+      await renderer.compileAsync(technical, camera);
+    }
+    if (parallelCompile && !signal?.aborted && composer?.warmUp) {
+      // At the size the first frame will use, so no pass rebuilds its targets and recompiles then.
+      composer.setSize(Math.max(1, host.clientWidth), Math.max(1, host.clientHeight));
+      await composer.warmUp(yieldToMain, signal);
+    }
+  } catch (error) {
+    // Compilation errors surface again, with detail, on the first render.
+    host.dataset.precompile = String(error?.message ?? error);
+  }
   if (signal?.aborted) {
     environment.dispose();
     composer?.dispose();
