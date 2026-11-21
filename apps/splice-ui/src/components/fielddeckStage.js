@@ -62,13 +62,19 @@ async function request(url, type, signal) {
 }
 
 // Loads every drawable revision a project's scene manifest lists, through the generic scene routes.
-export async function loadFielddeck(projectId, revisionIds, signal, title = projectId) {
+// beforeParse, when given, is awaited between download and GLB parse: the bytes arrive early, and
+// the parse (seconds of main-thread work on a large model) waits until the page allows it.
+export async function loadFielddeck(projectId, revisionIds, signal, title = projectId, { beforeParse = null } = {}) {
   const loader = new GLTFLoader();
   const revisions = await Promise.all(revisionIds.map(async (revision) => {
     const url = sceneRevisionUrl(projectId, revision);
     const [sidecar, model] = await Promise.allSettled([
       request(`${url}/parts`, "json", signal),
-      request(`${url}/model`, "arrayBuffer", signal).then((bytes) => loader.parseAsync(bytes, url)),
+      request(`${url}/model`, "arrayBuffer", signal).then(async (bytes) => {
+        if (beforeParse) await beforeParse;
+        if (signal?.aborted) throw new Error("aborted");
+        return loader.parseAsync(bytes, url);
+      }),
     ]);
     return [revision, {
       sidecar: sidecar.value,

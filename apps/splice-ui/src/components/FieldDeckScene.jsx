@@ -356,6 +356,12 @@ export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel 
   // Released one frame after holdStage clears, so whatever the page just rendered is painted
   // before the stage's long synchronous build starts.
   const [stageReleased, setStageReleased] = useState(!holdStage);
+  const release = useRef(null);
+  if (!release.current) {
+    let resolve;
+    release.current = { promise: new Promise((done) => { resolve = done; }), resolve };
+  }
+  useEffect(() => { if (stageReleased) release.current.resolve(); }, [stageReleased]);
   useEffect(() => {
     if (holdStage) { setStageReleased(false); return undefined; }
     let timer;
@@ -410,7 +416,8 @@ export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel 
     const controller = new AbortController();
     let loaded;
     setAssets(null);
-    loadFielddeck(projectId, revisionKey.split("\u0000"), controller.signal, manifest.title).then((result) => {
+    loadFielddeck(projectId, revisionKey.split("\u0000"), controller.signal, manifest.title,
+      { beforeParse: release.current.promise }).then((result) => {
       if (controller.signal.aborted) disposeFielddeck(result);
       else {
         loaded = result;

@@ -743,7 +743,8 @@ describe("Fielddeck evidence UI", () => {
       revisions: [{ id: "v1", label: "v1", glb: "plotter.glb", parts: "parts.json" }],
       compare: null, focus: null, tour: [],
     }} />);
-    expect(stageMock.load).toHaveBeenCalledWith("ender3-penplotter-digital", ["v1"], expect.anything(), "Virtual Ender-3 pen plotter");
+    expect(stageMock.load).toHaveBeenCalledWith("ender3-penplotter-digital", ["v1"], expect.anything(), "Virtual Ender-3 pen plotter",
+      { beforeParse: expect.any(Promise) });
     const tree = within(screen.getByRole("complementary", { name: "Part tree" }));
     expect(await tree.findByRole("button", { name: "Pen adapter" })).toBeVisible();
     expect(tree.getAllByRole("region").map((group) => group.getAttribute("aria-label"))).toEqual([
