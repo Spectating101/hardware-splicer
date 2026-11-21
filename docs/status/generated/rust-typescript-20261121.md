@@ -75,3 +75,39 @@ One known residual remains. If span starts are NaN, the sort comparator is incon
 - Full Python suite on the merged tip before these UI commits: 4,669 passed, 0 failed.
 - UI-serving tests after these commits: 25 passed.
 - impeccable detect: 0 findings on the project bench and on Projects, at 390×844 and 1440×900.
+
+## Follow-up (22 November 2026): picked by payoff, not by coverage
+
+The owner asked for only the highest-return changes, not a wholesale conversion.
+
+### Server: the request the 3D model waits on
+
+The scene could not start until `GET /v1/projects/{id}/digital` returned. Profiling showed two costs:
+
+- **Re-hashing on every read.** Every read re-hashed about 700 sealed study files, taking 0.76–0.9 s. `file_digest.py` now remembers each file's SHA-256 under its path, device, inode, size, mtime and ctime. Any write, truncate or replace re-hashes, and, as in git's racy-index rule, a file changed within 2 s of hashing is never remembered. The integrity check itself is unchanged.
+- **A cold runtime probe on the first request.** The first request after a restart started an interpreter to import the CAD stack, taking 2–3 s. The probe now runs in a background thread at startup. A request that arrives mid-probe waits for that answer rather than starting a second one.
+
+| Measure | Before | After |
+|---|---:|---:|
+| `/digital`, repeat request | 0.76 s | 0.12–0.17 s |
+| `change-dossier`, repeat request | 0.78 s | 0.11–0.29 s |
+| First `/digital`, 15 s after startup | 6.7 s | 0.32–0.84 s |
+| Scene build starts (page time) | ~1.4 s | 0.58–0.75 s |
+| Model fully drawn | 2.4–3.1 s | 1.6–2.6 s |
+
+These timings come from a fresh server, with four loads after 15 s of warm-up and nothing else running on the machine.
+
+### TypeScript, where a mistake changes what the screen claims
+
+- **`projectPersistence` (save, conflict, revision, reopen baseline).** Typed by hand. Its save states must equal `PERSISTENCE_STATUS`'s keys exactly. Adding or removing a state there fails `npm run typecheck`, and both directions were tested.
+- **The eight API client modules.** Gemini 4 Neon converted them, and each function's response is typed to the fields the UI reads. Backend status fields are open unions, because the backend may send values the UI does not know. Compiled with esbuild, seven files are byte-identical to the originals and `api` differs only in line wrapping.
+- **Left as JavaScript on purpose.** The display components, where types catch little that the tests do not.
+- **Python route test.** `tests/test_served_app_routes.py` now scans `.ts`/`.tsx` too. Without that it found no API calls once the clients moved, and it now finds 82 calls in 9 files.
+
+### Verification
+
+- Full Python suite on the server fixes: 4,679 passed, 0 failed.
+- Digital, change-dossier and serving tests on the final tip: all pass, including the route-scan fix.
+- vitest: 257 passed.
+- tsc: clean.
+- vite build: ok.
