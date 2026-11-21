@@ -45,6 +45,62 @@ pub fn hypot(values: &[f64]) -> f64 {
     sum.sqrt() * max
 }
 
+/// A Map/string key with JavaScript number identity: `${n}` and SameValueZero treat -0 as 0 and
+/// every NaN as one value; all other doubles are distinct.
+#[inline]
+fn js_key(n: f64) -> u64 {
+    if n == 0.0 {
+        0
+    } else if n.is_nan() {
+        0x7ff8_0000_0000_0000
+    } else {
+        n.to_bits()
+    }
+}
+
+/// `Math.min`: NaN if either is NaN, and -0 below +0.
+#[inline]
+fn js_min(a: f64, b: f64) -> f64 {
+    if a.is_nan() || b.is_nan() {
+        f64::NAN
+    } else if a == b {
+        if a.is_sign_negative() { a } else { b }
+    } else if a < b {
+        a
+    } else {
+        b
+    }
+}
+
+/// `Math.max`: NaN if either is NaN, and +0 above -0.
+#[inline]
+fn js_max(a: f64, b: f64) -> f64 {
+    if a.is_nan() || b.is_nan() {
+        f64::NAN
+    } else if a == b {
+        if a.is_sign_negative() { b } else { a }
+    } else if a > b {
+        a
+    } else {
+        b
+    }
+}
+
+/// The values `for (let j = lo; j <= hi; j++)` visits: none when either end is NaN. A range a
+/// double cannot step through (|j| ≥ 2^53) would never end in JavaScript; it stops here.
+fn js_int_range(lo: f64, hi: f64) -> impl Iterator<Item = f64> {
+    let mut j = lo;
+    std::iter::from_fn(move || {
+        if !(j <= hi) {
+            return None;
+        }
+        let current = j;
+        let next = j + 1.0;
+        j = if next == j { f64::NAN } else { next };
+        Some(current)
+    })
+}
+
 #[inline]
 fn difference(a: &Point, b: &Point) -> Point {
     [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
@@ -76,24 +132,25 @@ fn chain_length(points: &[Point]) -> f64 {
 
 /// `weldEdgeChains(positions, tolerance)`: segment pairs → chains of welded points.
 pub fn weld_edge_chains(positions: &[f64], tolerance: f64) -> Vec<Chain> {
-    let mut cells: HashMap<(i64, i64, i64), Vec<usize>> = HashMap::new();
+    // Keys are `${x},${y},${z}` of double cell coordinates, so they stay doubles here too.
+    let mut cells: HashMap<(u64, u64, u64), Vec<usize>> = HashMap::new();
     let mut points: Vec<Point> = Vec::new();
     // Neighbours keep insertion order, as a JavaScript Map does: (vertex, edge).
     let mut neighbors: Vec<Vec<(usize, usize)>> = Vec::new();
     let mut used: Vec<bool> = Vec::new();
 
     let vertex_for = |point: Point,
-                          cells: &mut HashMap<(i64, i64, i64), Vec<usize>>,
+                          cells: &mut HashMap<(u64, u64, u64), Vec<usize>>,
                           points: &mut Vec<Point>,
                           neighbors: &mut Vec<Vec<(usize, usize)>>|
      -> usize {
-        let x = (point[0] / tolerance).floor() as i64;
-        let y = (point[1] / tolerance).floor() as i64;
-        let z = (point[2] / tolerance).floor() as i64;
-        for dx in -1..=1 {
-            for dy in -1..=1 {
-                for dz in -1..=1 {
-                    if let Some(cell) = cells.get(&(x + dx, y + dy, z + dz)) {
+        let x = (point[0] / tolerance).floor();
+        let y = (point[1] / tolerance).floor();
+        let z = (point[2] / tolerance).floor();
+        for dx in [-1.0, 0.0, 1.0] {
+            for dy in [-1.0, 0.0, 1.0] {
+                for dz in [-1.0, 0.0, 1.0] {
+                    if let Some(cell) = cells.get(&(js_key(x + dx), js_key(y + dy), js_key(z + dz))) {
                         for &vertex in cell {
                             if length(&difference(&points[vertex], &point)) <= tolerance {
                                 return vertex;
@@ -106,7 +163,7 @@ pub fn weld_edge_chains(positions: &[f64], tolerance: f64) -> Vec<Chain> {
         let vertex = points.len();
         points.push(point);
         neighbors.push(Vec::new());
-        cells.entry((x, y, z)).or_default().push(vertex);
+        cells.entry((js_key(x), js_key(y), js_key(z))).or_default().push(vertex);
         vertex
     };
 
@@ -177,8 +234,9 @@ pub fn simplify_edge_chain(points: &[Point], tolerance: f64) -> Chain {
         let mut split = from;
         for i in (from + 1)..to {
             let offset = difference(&points[i], &points[from]);
-            let t = if squared != 0.0 {
-                (dot(&offset, &axis) / squared).max(0.0).min(1.0)
+            // `squared ? Math.min(1, Math.max(0, …)) : 0`: 0 and NaN are both falsy.
+            let t = if squared != 0.0 && !squared.is_nan() {
+                js_min(1.0, js_max(0.0, dot(&offset, &axis) / squared))
             } else {
                 0.0
             };
@@ -217,7 +275,7 @@ pub fn simplify_edge_chain(points: &[Point], tolerance: f64) -> Chain {
 
 struct Coincidence<'a> {
     positions: &'a [f64],
-    bins: HashMap<i64, Vec<usize>>,
+    bins: HashMap<u64, Vec<usize>>,
     epsilon: f64,
     seen: Vec<u32>,
     stamp: u32,
@@ -225,25 +283,25 @@ struct Coincidence<'a> {
 }
 
 #[inline]
-fn bin(x: f64) -> i64 {
-    (x / 5.0).floor() as i64
+fn bin(x: f64) -> f64 {
+    (x / 5.0).floor()
 }
 
 impl<'a> Coincidence<'a> {
     fn new(positions: &'a [f64], tolerance: f64) -> Self {
-        let mut bins: HashMap<i64, Vec<usize>> = HashMap::new();
+        let mut bins: HashMap<u64, Vec<usize>> = HashMap::new();
         let mut i = 0;
         while i + 6 <= positions.len() {
             let (ax, bx) = (positions[i], positions[i + 3]);
-            for j in bin(ax.min(bx) - tolerance)..=bin(ax.max(bx) + tolerance) {
-                bins.entry(j).or_default().push(i);
+            for j in js_int_range(bin(js_min(ax, bx) - tolerance), bin(js_max(ax, bx) + tolerance)) {
+                bins.entry(js_key(j)).or_default().push(i);
             }
             i += 6;
         }
         Coincidence {
             positions,
             bins,
-            epsilon: tolerance.min(0.0001),
+            epsilon: js_min(tolerance, 0.0001),
             seen: vec![0; positions.len() / 6 + 1],
             stamp: 0,
             spans: Vec::new(),
@@ -265,8 +323,8 @@ impl<'a> Coincidence<'a> {
         }
         self.spans.clear();
         let epsilon = self.epsilon;
-        for j in bin(a[0].min(b[0]))..=bin(a[0].max(b[0])) {
-            let Some(edges) = self.bins.get(&j) else { continue };
+        for j in js_int_range(bin(js_min(a[0], b[0])), bin(js_max(a[0], b[0]))) {
+            let Some(edges) = self.bins.get(&js_key(j)) else { continue };
             for &e in edges {
                 let slot = e / 6;
                 if self.seen[slot] == self.stamp {
@@ -277,7 +335,7 @@ impl<'a> Coincidence<'a> {
                 let o1 = difference(&point_at(self.positions, e + 3), a);
                 let start = dot(&o0, &direction);
                 let end = dot(&o1, &direction);
-                if start.max(end) < 0.0 || start.min(end) > size {
+                if js_max(start, end) < 0.0 || js_min(start, end) > size {
                     continue;
                 }
                 let off = |v: &Point, s: f64| {
@@ -286,17 +344,18 @@ impl<'a> Coincidence<'a> {
                 if off(&o0, start) > epsilon || off(&o1, end) > epsilon {
                     continue;
                 }
-                self.spans.push((start.min(end), start.max(end)));
+                self.spans.push((js_min(start, end), js_max(start, end)));
             }
         }
-        // Stable sort by start, as Array.prototype.sort is.
+        // Stable sort by start, as Array.prototype.sort is; a NaN comparison counts as equal, as
+        // a NaN comparator result does in JavaScript.
         self.spans.sort_by(|x, y| x.0.partial_cmp(&y.0).unwrap_or(std::cmp::Ordering::Equal));
         let mut covered = 0.0_f64;
         for &(start, end) in &self.spans {
             if start > covered + epsilon {
                 break;
             }
-            covered = covered.max(end);
+            covered = js_max(covered, end);
             if covered >= size - epsilon {
                 return true;
             }
@@ -391,7 +450,7 @@ fn round_js(x: f64) -> f64 {
 /// caller in JavaScript so the cosine is V8's. Returns segment pairs as float32, in three's order.
 pub fn edges_geometry(positions: &[f32], index: Option<&[u32]>, threshold_dot: f64) -> Vec<f32> {
     const PRECISION: f64 = 10_000.0;
-    type Hash = (i64, i64, i64);
+    type Hash = (u64, u64, u64);
     struct Edge {
         index0: usize,
         index1: usize,
@@ -401,11 +460,7 @@ pub fn edges_geometry(positions: &[f32], index: Option<&[u32]>, threshold_dot: f
         [positions[i * 3] as f64, positions[i * 3 + 1] as f64, positions[i * 3 + 2] as f64]
     };
     let hash = |v: &Point| -> Hash {
-        (
-            round_js(v[0] * PRECISION) as i64,
-            round_js(v[1] * PRECISION) as i64,
-            round_js(v[2] * PRECISION) as i64,
-        )
+        (js_key(round_js(v[0] * PRECISION)), js_key(round_js(v[1] * PRECISION)), js_key(round_js(v[2] * PRECISION)))
     };
     let count = match index {
         Some(index) => index.len(),
@@ -472,17 +527,18 @@ pub fn edges_geometry(positions: &[f32], index: Option<&[u32]>, threshold_dot: f
 
 #[no_mangle]
 pub extern "C" fn fd_alloc(len: usize) -> *mut f64 {
-    let mut buffer = Vec::<f64>::with_capacity(len.max(1));
-    let ptr = buffer.as_mut_ptr();
-    std::mem::forget(buffer);
-    ptr
+    // A boxed slice has exactly this length, so fd_free can rebuild it without guessing capacity.
+    Box::into_raw(vec![0.0_f64; len.max(1)].into_boxed_slice()) as *mut f64
 }
 
 /// # Safety
 /// `ptr` and `len` must come from one `fd_alloc` call.
 #[no_mangle]
 pub unsafe extern "C" fn fd_free(ptr: *mut f64, len: usize) {
-    drop(Vec::from_raw_parts(ptr, 0, len.max(1)));
+    if ptr.is_null() {
+        return;
+    }
+    drop(Box::from_raw(std::ptr::slice_from_raw_parts_mut(ptr, len.max(1))));
 }
 
 #[repr(C)]
@@ -558,17 +614,17 @@ pub unsafe extern "C" fn fd_free_result(result: *mut JobResult) {
 /// Byte buffers for the float32 and index inputs of `fd_edges`, 8-byte aligned.
 #[no_mangle]
 pub extern "C" fn fd_alloc_bytes(len: usize) -> *mut u8 {
-    let mut buffer = Vec::<u64>::with_capacity(len.div_ceil(8).max(1));
-    let ptr = buffer.as_mut_ptr() as *mut u8;
-    std::mem::forget(buffer);
-    ptr
+    Box::into_raw(vec![0_u64; len.div_ceil(8).max(1)].into_boxed_slice()) as *mut u8
 }
 
 /// # Safety
 /// `ptr` and `len` must come from one `fd_alloc_bytes` call.
 #[no_mangle]
 pub unsafe extern "C" fn fd_free_bytes(ptr: *mut u8, len: usize) {
-    drop(Vec::from_raw_parts(ptr as *mut u64, 0, len.div_ceil(8).max(1)));
+    if ptr.is_null() {
+        return;
+    }
+    drop(Box::from_raw(std::ptr::slice_from_raw_parts_mut(ptr as *mut u64, len.div_ceil(8).max(1))));
 }
 
 #[repr(C)]
@@ -577,7 +633,8 @@ pub struct EdgesResult {
     points_len: usize,
 }
 
-/// `new EdgesGeometry(geometry, angle)` positions. `index_len` 0 means a non-indexed geometry.
+/// `new EdgesGeometry(geometry, angle)` positions. `has_index` 0 means a non-indexed geometry; an
+/// indexed geometry with an empty index has no triangles, as in three.
 ///
 /// # Safety
 /// The pointers must address `positions_len` f32 and `index_len` u32 initialised values, and every
@@ -588,10 +645,15 @@ pub unsafe extern "C" fn fd_edges(
     positions_len: usize,
     index_ptr: *const u32,
     index_len: usize,
+    has_index: u32,
     threshold_dot: f64,
 ) -> *mut EdgesResult {
     let positions = if positions_len == 0 { &[][..] } else { std::slice::from_raw_parts(positions_ptr, positions_len) };
-    let index = if index_len == 0 { None } else { Some(std::slice::from_raw_parts(index_ptr, index_len)) };
+    let index = match (has_index, index_len) {
+        (0, _) => None,
+        (_, 0) => Some(&[][..]),
+        _ => Some(std::slice::from_raw_parts(index_ptr, index_len)),
+    };
     let vertex_count = positions.len() / 3;
     if index.is_some_and(|ids| ids.iter().any(|&id| id as usize >= vertex_count)) {
         return std::ptr::null_mut();
@@ -683,6 +745,30 @@ mod tests {
         assert_eq!(round_js(2.5), 3.0);
         assert_eq!(round_js(0.49999999999999994), 0.0);
         assert_eq!(round_js(-0.4), -0.0);
+    }
+
+    #[test]
+    fn min_max_follow_javascript() {
+        assert!(js_min(f64::NAN, 0.0).is_nan());
+        assert!(js_max(0.0, f64::NAN).is_nan());
+        assert!(js_min(0.0, -0.0).is_sign_negative());
+        assert!(js_max(-0.0, 0.0).is_sign_positive());
+        assert_eq!(js_int_range(f64::NAN, 3.0).count(), 0);
+        assert_eq!(js_int_range(-1.0, 1.0).collect::<Vec<_>>(), vec![-1.0, 0.0, 1.0]);
+        assert_eq!(js_int_range(1e300, 1e300).count(), 1);
+        assert_eq!(js_key(-0.0), js_key(0.0));
+        assert_eq!(js_key(f64::NAN), js_key(-f64::NAN));
+    }
+
+    #[test]
+    fn huge_and_nan_coordinates_do_not_overflow() {
+        let chains = weld_edge_chains(&[1e16, 0.0, 0.0, 1e16 + 10.0, 0.0, 0.0], 0.0001);
+        assert_eq!(chains.len(), 1);
+        let chains = weld_edge_chains(&[f64::NAN, 0.0, 0.0, 1.0, 0.0, 0.0], 0.01);
+        assert_eq!(chains.len(), 1);
+        let edges = edges_geometry(&[1e16, 0.0, 0.0, 2e16, 0.0, 0.0, 1e16, 1e16, 0.0], None, 0.5);
+        assert_eq!(edges.len(), 18);
+        assert!(edges_geometry(&[0.0; 9], Some(&[]), 0.5).is_empty());
     }
 
     #[test]

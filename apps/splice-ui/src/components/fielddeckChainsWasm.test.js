@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { decodeChains, runChainJob } from "./fielddeckChains.js";
+import { decodeChains, encodeChains, runChainJob } from "./fielddeckChains.js";
 import { loadChainModule } from "./fielddeckChainsWasm.js";
 
 const here = (path) => new URL(path, import.meta.url);
@@ -101,5 +101,58 @@ describe("Rust EdgesGeometry", () => {
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute("position", new THREE.BufferAttribute(new Int16Array(9), 3, true));
     expect(wasm.edges(geometry, 1)).toBeNull();
+  });
+});
+
+// Reproducers from the Gemini 4 Neon review of the port (21 November 2026): each one diverged from
+// the JavaScript before the fix. The module must now agree with the JavaScript on all of them.
+describe("JavaScript number semantics at the edges", () => {
+  const N = NaN;
+  const jobs = [
+    { name: "NaN x in the other revision", kind: "diff", edges: [0, 0, 0, 0.00005, 0, 0, 0.00005, 0, 0, 10, 0, 0], paired: [N, 0, 0, 0, 0, 0] },
+    { name: "NaN z poisons coverage", kind: "diff", edges: [0, 0, 0, 10, 0, 0], paired: [0, 0, 0, 10, 0, N, 0, 0, 0, 10, 0, 0] },
+    // (1e155 coordinates would reach simplify too, but the JavaScript then walks ~1e154 bins.)
+    { name: "NaN point inside a simplified run", kind: "overlay", edges: [0, 0, 0, 5, N, 0, 5, N, 0, 10, 0, 0, 10, 0, 0, 20, 1, 0], paired: [] },
+    { name: "coordinates past 2^63 cells", kind: "diff", edges: [1e16, 0, 0, 1e16 + 10, 0, 0], paired: [] },
+    { name: "partial segment", kind: "diff", edges: [0, 0, 0, 10, 0], paired: [] },
+    { name: "partial paired segment", kind: "diff", edges: [0, 0, 0, 10, 0, 0], paired: [0, 0, 0, 10] },
+  ];
+  for (const job of jobs) {
+    it(`chain job: ${job.name}`, async () => {
+      const wasm = await loadChainModule(wasmBytes());
+      // Compared through the worker's transfer encoding, which is what the JavaScript path sends.
+      expect(decodeChains(wasm.runEncoded(job))).toEqual(decodeChains(encodeChains(runChainJob(job))));
+    });
+  }
+
+  it("weld at the change-accent tolerance with huge, NaN and partial input", async () => {
+    const { weldEdgeChains } = await import("./fielddeckLogic.js");
+    const wasm = await loadChainModule(wasmBytes());
+    for (const positions of [[1e16, 0, 0, 1e16 + 10, 0, 0], [N, 0, 0, 1, 0, 0], [0, 0, 0, 10, 0]]) {
+      expect(wasm.weld(positions, 0.0001)).toEqual(weldEdgeChains(positions, 0.0001));
+    }
+  });
+
+  it("EdgesGeometry: empty index, huge and NaN coordinates, partial triangles, bad indices", async () => {
+    const THREE = await import("three");
+    const wasm = await loadChainModule(wasmBytes());
+    const geometry = (positions, index) => {
+      const g = new THREE.BufferGeometry();
+      g.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+      if (index) g.setIndex(index);
+      return g;
+    };
+    const same = (g) => {
+      const expected = new THREE.EdgesGeometry(g, 1).getAttribute("position").array;
+      const got = wasm.edges(g, 1) ?? expected; // null means three's own path draws it
+      expect(got.length).toBe(expected.length);
+      expect(Array.from(got).every((value, i) => Object.is(value, expected[i]))).toBe(true);
+    };
+    same(geometry([0, 0, 0, 1, 0, 0, 0, 1, 0], []));
+    same(geometry([1e16, 0, 0, 2e16, 0, 0, 1e16, 1e16, 0]));
+    same(geometry([N, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0]));
+    same(geometry([0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0]));
+    same(geometry([0, 0, 0, 1, 0, 0, 0, 1, 0], [0, 1, 7]));
+    expect(wasm.edges(geometry([0, 0, 0, 1, 0, 0, 0, 1, 0], [0, 1, 7]), 1)).toBeNull();
   });
 });
