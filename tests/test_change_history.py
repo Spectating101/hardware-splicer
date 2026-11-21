@@ -42,6 +42,7 @@ def test_changes_are_rebound_to_their_applying_revisions(recorded):
     assert view['head_revision'] == 3 and view['physical_authority_granted'] is False
     first, second = view['changes']
     assert first['policy_decision'] == 'BLOCKED' and first['base_revision'] == 1
+    assert [(t['id'], t['passed']) for t in first['targets']] == [('work-runtime', False)]
     assert first['requirement_changes'] == {'minimum_work_runtime_h': {'before': 2.5, 'after': 3.5}}
     # The target-only revision stays visibly failed.
     assert first['applied_revision']['revision'] == 2 and first['applied_revision']['requirements_met'] is False

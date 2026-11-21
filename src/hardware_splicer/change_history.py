@@ -197,6 +197,7 @@ def change_dossier(store: ProjectStore, project_id: str) -> dict[str, Any]:
             "recorded_at": row["recorded_at"], "proposal_sha256": row["proposal_sha256"],
             "policy_id": review["policy_id"], "policy_version": review["policy_version"],
             "policy_decision": review["decision"], "unmet": review["unmet"],
+            "targets": review["target_results"],
             "base_revision": proposal["base_revision"],
             "base_checks": _checks(revisions[proposal["base_revision"]]["summary"])
             if proposal["base_revision"] in revisions else None,
