@@ -892,16 +892,28 @@ describe("Fielddeck evidence UI", () => {
     await waitFor(() => expect(stageMock.create.mock.calls.length).toBeGreaterThan(created));
   });
 
-  it("folds the details panel to its title and reopens it when a part is selected", async () => {
+  it("starts the details dock folded under 1600 px, opens it on selection, and folds it on request", async () => {
     render(<FieldDeckScene {...FIELDDECK} />);
     const toggle = await screen.findByRole("button", { name: "Details" });
-    expect(toggle).toHaveAttribute("aria-expanded", "true");
-    fireEvent.click(toggle);
+    expect(window.innerWidth).toBeLessThan(1600);
     expect(toggle).toHaveAttribute("aria-expanded", "false");
     expect(document.getElementById("fd-inspector-content")).not.toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "DSI FFC" }));
     expect(toggle).toHaveAttribute("aria-expanded", "true");
     expect(document.getElementById("fd-inspector-content")).toBeVisible();
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("starts the details dock open on wide screens", async () => {
+    const width = window.innerWidth;
+    window.innerWidth = 1700;
+    try {
+      render(<FieldDeckScene {...FIELDDECK} />);
+      expect(await screen.findByRole("button", { name: "Details" })).toHaveAttribute("aria-expanded", "true");
+    } finally {
+      window.innerWidth = width;
+    }
   });
 
   it("numbers each question once across revisions and keeps the project total and names the count in the visible mode", async () => {
