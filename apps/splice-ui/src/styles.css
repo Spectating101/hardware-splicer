@@ -22,6 +22,8 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
+  font-size: 16px;
+  line-height: 1.45;
 }
 
 p,
@@ -67,7 +69,7 @@ code,
 .app-shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: 212px 1fr;
 }
 
 .sidebar {
@@ -620,7 +622,7 @@ button.ghost.large {
 
 .hint {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .choice-grid,
@@ -2830,3 +2832,33 @@ details.bench-objective summary { font-size: .75rem; font-weight: 600; letter-sp
 .project-rev { font-variant-numeric: tabular-nums; font-size: .875rem; }
 .brand strong { white-space: nowrap; font-size: .95rem; }
 .project-objective.muted { color: var(--muted); }
+
+/* Study run: a sized action that names the revision it creates. */
+.digital-change form .digital-run { justify-self: start; min-width: 240px; max-width: 280px; }
+
+/* Intake: the progress line reads at body size; Back and Continue sit inside the form card. */
+.wizard-progress p { font-size: 1rem; }
+.wizard-progress-count { color: var(--text); }
+.wizard-progress-next { font-size: .875rem; color: var(--muted); }
+.wizard-body .wizard-footer { margin: 1.25rem -20px -18px; padding: 14px 20px; border-top: 1px solid var(--line); background: var(--surface-2); border-radius: 0 0 14px 14px; }
+
+/* Scene provenance: one line of what it is, the path behind a disclosure. */
+.design-view-provenance { min-width: 0; flex: 1; }
+.design-view-provenance p { margin: 0 0 .35rem; font-size: .9375rem; }
+.design-view-provenance details { margin-bottom: .6rem; font-size: .875rem; }
+.design-view-provenance summary { color: var(--muted); cursor: pointer; }
+.design-view-provenance code { overflow-wrap: anywhere; }
+
+/* Secondary content text at the 14 px floor; chrome labels may stay smaller. */
+.bench-rows p, .bench-facts, .digital-compare td:last-child small, .project-rows small, .bench-history,
+.design-records .mono, .design-records code { font-size: .875rem; }
+.bench-untested { font-weight: 600; color: var(--text); }
+.digital-field-pair small { font-size: .875rem; }
+/* Phone header: one 56 px bar, brand mark and name on one line. */
+@media (max-width: 960px) {
+  .sidebar { padding: 10px 16px; }
+  .brand-mark { width: 36px; height: 36px; border-radius: 9px; }
+  .brand span { display: none; }
+  .mobile-nav-toggle { min-height: 36px; padding: 0 12px; }
+}
+.brand-mark { flex-shrink: 0; }
