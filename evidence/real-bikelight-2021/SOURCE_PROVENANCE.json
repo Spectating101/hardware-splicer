@@ -1,0 +1,29 @@
+{
+  "source": "https://gathering.tweakers.net/forum/list_messages/2082384",
+  "owner_post_date": "2021-07-26",
+  "model_visible_source": false,
+  "images": [
+    {
+      "file": "owner_photo_1.jpg",
+      "sha256": "cae6c5e665585129719bcf8b01d89aea0a060c090e1f18a858694f58dcfc2f49",
+      "bytes": 616702
+    },
+    {
+      "file": "owner_photo_2.jpg",
+      "sha256": "5c0d44849d44a29eca83228297185a3152c2aaa054cb78f35e0ea23cce572b84",
+      "bytes": 685553
+    },
+    {
+      "file": "owner_photo_3.jpg",
+      "sha256": "9e67c4fd7236601d5dc3496462b2cfdd308ba11dd77ed352614c175f14ec81f8",
+      "bytes": 63472
+    }
+  ],
+  "mission_sha256": "f91acc11c4b497764a697cc0cb1682697711d41303a955688a03bc4d2cd44a3c",
+  "owner_data_rephrased": true,
+  "owner_proposed_diagnosis_and_subsequent_comments_withheld": true,
+  "label": "Real public observations and real public images; no user-owned hardware was physically inspected",
+  "photo_bytes_redistributed": false,
+  "owner_later_followup_url": "https://gathering.tweakers.net/forum/list_messages/2082384",
+  "owner_later_observation": "D1 replaced and questionable solder reflowed; latching fault persisted"
+}
