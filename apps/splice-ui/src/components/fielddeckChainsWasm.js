@@ -70,5 +70,38 @@ function chainRunner(x) {
       x.fd_free(ptr, count);
     }
   }
-  return { runEncoded, weld };
+  const putBytes = (typed) => {
+    const ptr = x.fd_alloc_bytes(typed.byteLength);
+    if (typed.byteLength) new Uint8Array(x.memory.buffer, ptr, typed.byteLength).set(new Uint8Array(typed.buffer, typed.byteOffset, typed.byteLength));
+    return [ptr, typed.byteLength];
+  };
+  /**
+   * The positions `new THREE.EdgesGeometry(geometry, thresholdAngle)` would hold, as a
+   * Float32Array, or null for a layout the port does not cover (interleaved, normalised or
+   * non-float32 positions), which the caller then draws with three's own EdgesGeometry.
+   */
+  function edges(geometry, thresholdAngle = 1) {
+    const position = geometry.getAttribute("position");
+    const index = geometry.getIndex();
+    if (!position || position.isInterleavedBufferAttribute || position.normalized || position.itemSize !== 3
+      || !(position.array instanceof Float32Array) || position.array.length !== position.count * 3) return null;
+    const ids = index ? (index.array instanceof Uint32Array ? index.array : Uint32Array.from(index.array)) : null;
+    if (ids && ids.length !== index.count) return null;
+    const [positions, positionBytes] = putBytes(position.array);
+    const [indices, indexBytes] = ids ? putBytes(ids) : [0, 0];
+    try {
+      // The cosine stays in JavaScript, so it is V8's, exactly as three computes it.
+      const result = x.fd_edges(positions, position.array.length, indices, ids ? ids.length : 0,
+        Math.cos((Math.PI / 180) * thresholdAngle));
+      if (!result) return null;
+      const header = new Uint32Array(x.memory.buffer, result, 2);
+      const points = new Float32Array(x.memory.buffer, header[0], header[1]).slice();
+      x.fd_free_edges(result);
+      return points;
+    } finally {
+      x.fd_free_bytes(positions, positionBytes);
+      if (ids) x.fd_free_bytes(indices, indexBytes);
+    }
+  }
+  return { runEncoded, weld, edges };
 }

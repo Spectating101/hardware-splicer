@@ -67,3 +67,39 @@ describe("Rust weld", () => {
     expect(wasm.weld([], 0.01)).toEqual([]);
   });
 });
+
+describe("Rust EdgesGeometry", () => {
+  it("returns three's EdgesGeometry positions bit for bit, indexed and not, across angles", async () => {
+    const THREE = await import("three");
+    const wasm = await loadChainModule(wasmBytes());
+    const shapes = [
+      new THREE.BoxGeometry(10, 4, 2, 2, 1, 1),
+      new THREE.CylinderGeometry(3, 3, 8, 24, 2),
+      new THREE.TorusGeometry(5, 1.2, 12, 32),
+      new THREE.IcosahedronGeometry(4, 1),
+    ];
+    shapes.forEach((shape) => shape.rotateX(0.3).rotateY(-1.1).translate(12.5, -3.25, 0.125));
+    let compared = 0;
+    for (const shape of shapes) {
+      for (const geometry of [shape, shape.index ? shape.toNonIndexed() : shape]) {
+        for (const angle of [1, 32, 40, 60]) {
+          const expected = new THREE.EdgesGeometry(geometry, angle).getAttribute("position").array;
+          const got = wasm.edges(geometry, angle);
+          expect(got).toBeInstanceOf(Float32Array);
+          expect(got.length).toBe(expected.length);
+          expect(got.every((value, i) => Object.is(value, expected[i]))).toBe(true);
+          compared += 1;
+        }
+      }
+    }
+    expect(compared).toBe(32);
+  });
+
+  it("declines layouts it does not cover, so three draws them", async () => {
+    const THREE = await import("three");
+    const wasm = await loadChainModule(wasmBytes());
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.BufferAttribute(new Int16Array(9), 3, true));
+    expect(wasm.edges(geometry, 1)).toBeNull();
+  });
+});

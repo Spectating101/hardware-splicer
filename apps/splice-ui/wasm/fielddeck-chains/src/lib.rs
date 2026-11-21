@@ -375,6 +375,96 @@ pub fn run_job(kind: u32, edges: &[f64], paired: &[f64]) -> Option<Vec<Chain>> {
     Some(cull_isolated_chains(culled, 2.0, 0.01))
 }
 
+/// V8's `Math.round`: round half towards +∞ (ceil, then step back when that overshoots by more than ½).
+#[inline]
+fn round_js(x: f64) -> f64 {
+    let up = x.ceil();
+    if up - 0.5 > x {
+        up - 1.0
+    } else {
+        up
+    }
+}
+
+/// three.js `EdgesGeometry(geometry, thresholdAngle)` (r187) for a float32 position attribute with
+/// an optional index. `threshold_dot` is `Math.cos(DEG2RAD * thresholdAngle)`, computed by the
+/// caller in JavaScript so the cosine is V8's. Returns segment pairs as float32, in three's order.
+pub fn edges_geometry(positions: &[f32], index: Option<&[u32]>, threshold_dot: f64) -> Vec<f32> {
+    const PRECISION: f64 = 10_000.0;
+    type Hash = (i64, i64, i64);
+    struct Edge {
+        index0: usize,
+        index1: usize,
+        normal: Point,
+    }
+    let vertex = |i: usize| -> Point {
+        [positions[i * 3] as f64, positions[i * 3 + 1] as f64, positions[i * 3 + 2] as f64]
+    };
+    let hash = |v: &Point| -> Hash {
+        (
+            round_js(v[0] * PRECISION) as i64,
+            round_js(v[1] * PRECISION) as i64,
+            round_js(v[2] * PRECISION) as i64,
+        )
+    };
+    let count = match index {
+        Some(index) => index.len(),
+        None => positions.len() / 3,
+    };
+    // An insertion-ordered map, as three's Map: key → slot in `entries`; a matched edge becomes None.
+    let mut slots: HashMap<(Hash, Hash), usize> = HashMap::new();
+    let mut entries: Vec<Option<Edge>> = Vec::new();
+    let mut vertices: Vec<f32> = Vec::new();
+    let mut i = 0;
+    while i + 3 <= count {
+        let ids = match index {
+            Some(index) => [index[i] as usize, index[i + 1] as usize, index[i + 2] as usize],
+            None => [i, i + 1, i + 2],
+        };
+        i += 3;
+        let tri = [vertex(ids[0]), vertex(ids[1]), vertex(ids[2])];
+        // Triangle.getNormal: (c - b) × (a - b), normalised by 1 / sqrt(lengthSq).
+        let t = difference(&tri[2], &tri[1]);
+        let u = difference(&tri[0], &tri[1]);
+        let mut normal = [t[1] * u[2] - t[2] * u[1], t[2] * u[0] - t[0] * u[2], t[0] * u[1] - t[1] * u[0]];
+        let length_sq = normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2];
+        if length_sq > 0.0 {
+            let scale = 1.0 / length_sq.sqrt();
+            normal = [normal[0] * scale, normal[1] * scale, normal[2] * scale];
+        } else {
+            normal = [0.0, 0.0, 0.0];
+        }
+        let hashes = [hash(&tri[0]), hash(&tri[1]), hash(&tri[2])];
+        if hashes[0] == hashes[1] || hashes[1] == hashes[2] || hashes[2] == hashes[0] {
+            continue;
+        }
+        for j in 0..3 {
+            let next = (j + 1) % 3;
+            let forward = (hashes[j], hashes[next]);
+            let reverse = (hashes[next], hashes[j]);
+            let sibling = slots.get(&reverse).copied().filter(|&slot| entries[slot].is_some());
+            if let Some(slot) = sibling {
+                let other = entries[slot].as_ref().map(|e| e.normal).unwrap_or([0.0; 3]);
+                if normal[0] * other[0] + normal[1] * other[1] + normal[2] * other[2] <= threshold_dot {
+                    for p in [&tri[j], &tri[next]] {
+                        vertices.extend([p[0] as f32, p[1] as f32, p[2] as f32]);
+                    }
+                }
+                entries[slot] = None;
+            } else if !slots.contains_key(&forward) {
+                slots.insert(forward, entries.len());
+                entries.push(Some(Edge { index0: ids[j], index1: ids[next], normal }));
+            }
+        }
+    }
+    for edge in entries.iter().flatten() {
+        for id in [edge.index0, edge.index1] {
+            vertices.extend_from_slice(&positions[id * 3..id * 3 + 3]);
+        }
+    }
+    vertices
+}
+
 // ---- WebAssembly interface: plain exports, no bindings generator. -------------------------------
 // The caller allocates f64 buffers with `fd_alloc`, runs a job, reads the result header
 // [points_ptr, points_len, sizes_ptr, sizes_len] (points as x,y,z f64; sizes as i32 points per
@@ -465,6 +555,64 @@ pub unsafe extern "C" fn fd_free_result(result: *mut JobResult) {
     drop(Box::from_raw(std::ptr::slice_from_raw_parts_mut(result.sizes_ptr, result.sizes_len)));
 }
 
+/// Byte buffers for the float32 and index inputs of `fd_edges`, 8-byte aligned.
+#[no_mangle]
+pub extern "C" fn fd_alloc_bytes(len: usize) -> *mut u8 {
+    let mut buffer = Vec::<u64>::with_capacity(len.div_ceil(8).max(1));
+    let ptr = buffer.as_mut_ptr() as *mut u8;
+    std::mem::forget(buffer);
+    ptr
+}
+
+/// # Safety
+/// `ptr` and `len` must come from one `fd_alloc_bytes` call.
+#[no_mangle]
+pub unsafe extern "C" fn fd_free_bytes(ptr: *mut u8, len: usize) {
+    drop(Vec::from_raw_parts(ptr as *mut u64, 0, len.div_ceil(8).max(1)));
+}
+
+#[repr(C)]
+pub struct EdgesResult {
+    points_ptr: *mut f32,
+    points_len: usize,
+}
+
+/// `new EdgesGeometry(geometry, angle)` positions. `index_len` 0 means a non-indexed geometry.
+///
+/// # Safety
+/// The pointers must address `positions_len` f32 and `index_len` u32 initialised values, and every
+/// index must address a vertex inside `positions`.
+#[no_mangle]
+pub unsafe extern "C" fn fd_edges(
+    positions_ptr: *const f32,
+    positions_len: usize,
+    index_ptr: *const u32,
+    index_len: usize,
+    threshold_dot: f64,
+) -> *mut EdgesResult {
+    let positions = if positions_len == 0 { &[][..] } else { std::slice::from_raw_parts(positions_ptr, positions_len) };
+    let index = if index_len == 0 { None } else { Some(std::slice::from_raw_parts(index_ptr, index_len)) };
+    let vertex_count = positions.len() / 3;
+    if index.is_some_and(|ids| ids.iter().any(|&id| id as usize >= vertex_count)) {
+        return std::ptr::null_mut();
+    }
+    let mut points = edges_geometry(positions, index, threshold_dot).into_boxed_slice();
+    let result = Box::new(EdgesResult { points_ptr: points.as_mut_ptr(), points_len: points.len() });
+    std::mem::forget(points);
+    Box::into_raw(result)
+}
+
+/// # Safety
+/// `result` must come from `fd_edges` and be freed once.
+#[no_mangle]
+pub unsafe extern "C" fn fd_free_edges(result: *mut EdgesResult) {
+    if result.is_null() {
+        return;
+    }
+    let result = Box::from_raw(result);
+    drop(Box::from_raw(std::ptr::slice_from_raw_parts_mut(result.points_ptr, result.points_len)));
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -505,6 +653,36 @@ mod tests {
         let chains = weld_edge_chains(&new, 0.01);
         let left = cull_coincident_chains(&chains, &old, 0.15, false);
         assert_eq!(left, vec![vec![[10.0, 0.0, 0.0], [10.0, 3.0, 0.0]]]);
+    }
+
+    #[test]
+    fn a_cube_has_twelve_feature_edges() {
+        // Two triangles per face, non-indexed; coplanar diagonals are culled at 1°.
+        let c = |x: f32, y: f32, z: f32| [x, y, z];
+        let quads = [
+            [c(0., 0., 0.), c(1., 0., 0.), c(1., 1., 0.), c(0., 1., 0.)],
+            [c(0., 0., 1.), c(0., 1., 1.), c(1., 1., 1.), c(1., 0., 1.)],
+            [c(0., 0., 0.), c(0., 0., 1.), c(1., 0., 1.), c(1., 0., 0.)],
+            [c(0., 1., 0.), c(1., 1., 0.), c(1., 1., 1.), c(0., 1., 1.)],
+            [c(0., 0., 0.), c(0., 1., 0.), c(0., 1., 1.), c(0., 0., 1.)],
+            [c(1., 0., 0.), c(1., 0., 1.), c(1., 1., 1.), c(1., 1., 0.)],
+        ];
+        let mut positions = Vec::new();
+        for q in quads {
+            for v in [q[0], q[2], q[1], q[0], q[3], q[2]] {
+                positions.extend(v);
+            }
+        }
+        let edges = edges_geometry(&positions, None, (1.0_f64).to_radians().cos());
+        assert_eq!(edges.len(), 12 * 6);
+    }
+
+    #[test]
+    fn js_rounding_goes_half_up() {
+        assert_eq!(round_js(-2.5), -2.0);
+        assert_eq!(round_js(2.5), 3.0);
+        assert_eq!(round_js(0.49999999999999994), 0.0);
+        assert_eq!(round_js(-0.4), -0.0);
     }
 
     #[test]
