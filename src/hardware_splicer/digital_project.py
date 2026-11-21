@@ -16,6 +16,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import threading
 import uuid
 import zipfile
 from functools import lru_cache
@@ -89,8 +90,14 @@ def _runtime(interpreter):
             'or set HARDWARE_SPLICER_DIGITAL_PYTHON to a Python with that extra. Saved studies remain viewable.'}
 
 
+# One probe at a time: a request that arrives while the startup prewarm is probing waits for that
+# answer (then cached) instead of starting a second interpreter.
+_probe_lock = threading.Lock()
+
+
 def runtime():
-    return _runtime(native_python())
+    with _probe_lock:
+        return _runtime(native_python())
 
 
 @lru_cache(maxsize=4)
@@ -113,8 +120,10 @@ def _device_runtime(interpreter, *, substitution=False):
 
 def runtime_for_case(case_id=cases.DEFAULT_CASE):
     cases.validate_case_id(case_id)
-    return runtime() if case_id == cases.DEFAULT_CASE else _device_runtime(
-        native_python(), substitution=case_id == 'fielddeck-5')
+    if case_id == cases.DEFAULT_CASE:
+        return runtime()
+    with _probe_lock:
+        return _device_runtime(native_python(), substitution=case_id == 'fielddeck-5')
 
 
 def prewarm_runtimes():
@@ -126,7 +135,8 @@ def prewarm_runtimes():
     for probe in (lambda: _runtime(interpreter), lambda: _device_runtime(interpreter),
                   lambda: _device_runtime(interpreter, substitution=True)):
         try:
-            probe()
+            with _probe_lock:
+                probe()
         except Exception:  # a failed probe is answered again, synchronously, on first use
             pass
 

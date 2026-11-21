@@ -46,3 +46,35 @@ def test_prewarm_fills_the_probe_caches(monkeypatch):
     finally:
         digital_project._runtime.cache_clear()
         digital_project._device_runtime.cache_clear()
+
+
+def test_a_request_during_the_prewarm_waits_for_it_instead_of_probing_again(monkeypatch):
+    import threading
+    import time
+
+    runs = []
+    started = threading.Event()
+
+    class Done:
+        returncode = 0
+
+    def slow_run(argv, **kwargs):
+        runs.append(argv)
+        started.set()
+        time.sleep(0.2)
+        return Done()
+
+    monkeypatch.setattr(digital_project.subprocess, "run", slow_run)
+    digital_project._runtime.cache_clear()
+    digital_project._device_runtime.cache_clear()
+    try:
+        prewarm = threading.Thread(target=digital_project.prewarm_runtimes)
+        prewarm.start()
+        assert started.wait(5)
+        answer = digital_project.runtime_for_case("fielddeck-5")  # arrives mid-prewarm
+        prewarm.join(5)
+        assert answer["available"] is True
+        assert len(runs) == 3  # the three prewarm probes, nothing extra
+    finally:
+        digital_project._runtime.cache_clear()
+        digital_project._device_runtime.cache_clear()
