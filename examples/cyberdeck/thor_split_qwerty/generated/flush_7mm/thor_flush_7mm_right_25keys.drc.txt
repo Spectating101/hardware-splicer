@@ -1,0 +1,10 @@
+** Drc report for thor_flush_7mm_right_25keys.kicad_pcb **
+** Created on 2026-11-09T22:36:41+0800 **
+
+** Found 0 DRC violations **
+
+** Found 0 unconnected pads **
+
+** Found 0 Footprint errors **
+
+** End of Report **
