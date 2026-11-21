@@ -6,6 +6,7 @@ import ProjectBench from "./ProjectBench.jsx";
 import { SavedDisplayComparison } from "./FieldDeckDisplayComparison.jsx";
 import { fieldLabel, formatValue, keyLabel } from "./digitalStudyLabels.js";
 import { describeTransition } from "./checkTransition.js";
+import { revisionNoteText } from "./statusLanguage.js";
 import "./digitalStudy.css";
 
 const isPending = (status) => status === "queued" || status === "running";
@@ -228,8 +229,8 @@ export default function DigitalStudyPanel({ session, onProjectReload, onToast, o
   const unknownLinkedRevision = Number.isInteger(routeRevision) && !data.history.some((row) => row.revision === routeRevision);
 
   const referenceLinks = <><h3>Saved artifacts</h3>{!Object.keys(selected.artifacts).length && <p>unknown</p>}<div className="digital-downloads">
-    {(registered ? [["STUDY.zip", "Complete digital package"], [bom, "Bill of materials (CSV)"]] : [
-      ["STUDY.zip", "Complete digital package"], ["VIEWER.html", "Open standalone 3D viewer"],
+    {(registered ? [["STUDY.zip", "Full digital package (STUDY.zip)"], [bom, "Bill of materials (CSV)"]] : [
+      ["STUDY.zip", "Full digital package (STUDY.zip)"], ["VIEWER.html", "Open standalone 3D viewer"],
       ["HS3G_B_ASSEMBLY.step", "Editable STEP"], ["HS3G_B_ASSEMBLY.glb", "3D GLB"],
       ["nominal.csv", "Nominal telemetry CSV"], ["mass_plus_5g.csv", "+5 g uncertainty CSV"],
       ["motor_failure.csv", "Motor failure CSV"], ["verification.json", "Verification receipt"],
@@ -250,7 +251,7 @@ export default function DigitalStudyPanel({ session, onProjectReload, onToast, o
       evidenceExtra={summary.case_id === "fielddeck-5" ? <SavedDisplayComparison key={selected.run_id} study={selected} /> : null}>
     <div className="digital-workshop" data-testid="digital-study">
       {unknownLinkedRevision && <p role="status">This link asks for revision {routeRevision}, which this project has not saved. Showing the latest saved revision, {data.study.revision}.</p>}
-      {selected.change_request && <p>{selected.change_request}</p>}
+      {selected.change_request && <p title={selected.change_request}>{revisionNoteText(selected.change_request)}</p>}
       <h3 className="digital-revisions-title">Project revisions</h3>
       <div className="digital-mode" role="group" aria-label="Project revisions">
         <button className="secondary" type="button" aria-pressed={!comparing} onClick={() => setCompareMode(false)}>One revision</button>
@@ -260,10 +261,10 @@ export default function DigitalStudyPanel({ session, onProjectReload, onToast, o
       <div className="digital-controls">
         <label>View revision<select value={selected.revision} onChange={(event) => chooseRevision(Number(event.target.value))}>
           {data.history.map((entry) => <option key={entry.revision} value={entry.revision}>
-            {entry.revision} · {entry.change_request}</option>)}
+            {entry.revision} · {revisionNoteText(entry.change_request)}</option>)}
         </select></label>
         {comparing && <label>Compare with<select value={previous.revision} onChange={(event) => setCompareRevision(Number(event.target.value))}>
-          {saved.filter((entry) => entry.revision !== selected.revision).map((entry) => <option key={entry.revision} value={entry.revision}>Revision {entry.revision} · {entry.change_request}</option>)}
+          {saved.filter((entry) => entry.revision !== selected.revision).map((entry) => <option key={entry.revision} value={entry.revision}>Revision {entry.revision} · {revisionNoteText(entry.change_request)}</option>)}
         </select></label>}
         <button type="button" className="secondary" onClick={() => { setError(""); setRefresh((v) => v + 1); reloadRef.current?.(projectId); }}>Reload saved project</button>
       </div>
@@ -299,8 +300,9 @@ export default function DigitalStudyPanel({ session, onProjectReload, onToast, o
             </div>
             <p className="muted small">1× applies a [0.12, −0.08, 0] N gust for 2 seconds. This is an assumed force, not wind speed.</p></>}
             {older ? <p>Viewing history. <button type="button" className="ghost" onClick={() => chooseRevision(data.study.revision)}>Return to latest revision to run</button></p> : null}
-            <button type="submit" className="primary" disabled={pending || submitting || older || !data.runtime.available}>
-              {pending ? "Simulation running…" : submitting ? "Starting simulation…" : "Run and save new revision"}</button>
+            {/* Says what it creates: the next saved revision number, from the backend's latest. */}
+            <button type="submit" className="primary digital-run" disabled={pending || submitting || older || !data.runtime.available}>
+              {pending ? "Simulation running…" : submitting ? "Starting simulation…" : `Run study and save revision ${data.study.revision + 1}`}</button>
           </form>
           {!data.runtime.available ? <p role="status">{data.runtime.setup_hint}</p> : null}
           <div aria-live="polite" className="digital-job-status">
