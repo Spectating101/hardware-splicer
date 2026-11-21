@@ -40,41 +40,56 @@ def test_prewarm_fills_the_probe_caches(monkeypatch):
     try:
         digital_project.prewarm_runtimes()
         assert len(runs) == 3
-        digital_project.runtime_for_case("fielddeck-5")
+        for case_id in ("fielddeck-5", "fielddeck-7", "ender3-penplotter"):
+            digital_project.runtime_for_case(case_id)
         digital_project.runtime()
-        assert len(runs) == 3  # answered from the cache, no new interpreter
+        assert len(runs) == 3  # every case is answered from a prewarmed entry, no new interpreter
     finally:
         digital_project._runtime.cache_clear()
         digital_project._device_runtime.cache_clear()
 
 
-def test_a_request_during_the_prewarm_waits_for_it_instead_of_probing_again(monkeypatch):
+def test_a_request_waits_for_its_own_running_probe_but_not_for_others(monkeypatch):
     import threading
-    import time
 
     runs = []
-    started = threading.Event()
+    release = threading.Event()
+    device_started = threading.Event()
 
     class Done:
         returncode = 0
 
-    def slow_run(argv, **kwargs):
-        runs.append(argv)
-        started.set()
-        time.sleep(0.2)
+    def run(argv, **kwargs):
+        runs.append(argv[-1])
+        if "pydantic" in argv[-1]:  # the fielddeck-5 probe: held until released
+            device_started.set()
+            assert release.wait(5)
         return Done()
 
-    monkeypatch.setattr(digital_project.subprocess, "run", slow_run)
+    monkeypatch.setattr(digital_project.subprocess, "run", run)
     digital_project._runtime.cache_clear()
     digital_project._device_runtime.cache_clear()
     try:
-        prewarm = threading.Thread(target=digital_project.prewarm_runtimes)
-        prewarm.start()
-        assert started.wait(5)
-        answer = digital_project.runtime_for_case("fielddeck-5")  # arrives mid-prewarm
-        prewarm.join(5)
-        assert answer["available"] is True
-        assert len(runs) == 3  # the three prewarm probes, nothing extra
+        digital_project.runtime()  # drone probe answered and cached
+        probing = threading.Thread(target=digital_project.runtime_for_case, args=("fielddeck-5",))
+        probing.start()
+        assert device_started.wait(5)
+
+        # A cached answer and a different probe are not held behind the running one.
+        assert digital_project.runtime()["available"] is True
+        assert digital_project.runtime_for_case("fielddeck-7")["available"] is True
+
+        # The same probe waits for the running one instead of starting a second interpreter.
+        waiting = threading.Thread(target=digital_project.runtime_for_case, args=("fielddeck-5",))
+        waiting.start()
+        waiting.join(0.3)
+        assert waiting.is_alive()
+        release.set()
+        probing.join(5)
+        waiting.join(5)
+        assert sum("pydantic" in imports for imports in runs) == 1
+        assert len(runs) == 3  # drone, fielddeck-5, fielddeck-7: nothing duplicated
     finally:
+        release.set()
         digital_project._runtime.cache_clear()
         digital_project._device_runtime.cache_clear()
