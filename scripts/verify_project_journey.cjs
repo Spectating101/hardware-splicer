@@ -299,21 +299,24 @@ async function main() {
     await phone.close();
 
     // 8b. Evidence before the scene: on a warm server the evidence column must render within
-    // EVIDENCE_BUDGET_MS of navigation, even while the 3D stage builds. Times come from an in-page
-    // 20 ms poll, which also only runs when the main thread is free.
+    // EVIDENCE_BUDGET_MS of navigation, even while the 3D stage builds. A MutationObserver sees the
+    // commit as it happens; the time recorded is the next animation frame, i.e. when it is painted.
     const EVIDENCE_BUDGET_MS = 3000;
     for (const [label, id] of [["Fielddeck", fielddeckId], ["plotter", plotterId], ["drone", droneId]]) {
       const timed = await context.newPage();
       await timed.addInitScript(() => {
         window.__evidenceAt = null;
-        const timer = setInterval(() => {
+        let seen = false;
+        const observer = new MutationObserver(() => {
           const ev = document.querySelector("#bench-evidence");
           const link = ev?.querySelector("[data-testid=evidence-delta], .bench-link-state");
-          const blockers = ev?.querySelector(".bench-blockers")?.innerText || "";
-          if (link && !/Checking evidence/.test(ev.innerText) && !/Blockers\s*unknown\s*$/.test(blockers)) {
-            window.__evidenceAt = performance.now(); clearInterval(timer);
-          }
-        }, 20);
+          const blockers = ev?.querySelector(".bench-blockers")?.textContent || "";
+          if (seen || !link || /Checking evidence/.test(ev.textContent) || /Blockers\s*unknown\s*$/.test(blockers)) return;
+          seen = true;
+          observer.disconnect();
+          requestAnimationFrame(() => { window.__evidenceAt = performance.now(); });
+        });
+        observer.observe(document, { subtree: true, childList: true, characterData: true });
       });
       await timed.goto(`${BASE}/projects/${encodeURIComponent(id)}`, { waitUntil: "commit" });
       await timed.waitForFunction(() => window.__evidenceAt !== null, undefined, { timeout: 60000, polling: 200 });
