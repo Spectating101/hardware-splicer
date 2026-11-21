@@ -310,8 +310,8 @@ async function main() {
         const observer = new MutationObserver(() => {
           const ev = document.querySelector("#bench-evidence");
           const link = ev?.querySelector("[data-testid=evidence-delta], .bench-link-state");
-          const blockers = ev?.querySelector(".bench-blockers")?.textContent || "";
-          if (seen || !link || /Checking evidence/.test(ev.textContent) || /Blockers\s*unknown\s*$/.test(blockers)) return;
+          const blockersKnown = ev?.querySelector('.bench-blockers[data-blockers-state="known"]');
+          if (seen || !link || /Checking evidence/.test(ev.textContent) || !blockersKnown) return;
           seen = true;
           observer.disconnect();
           requestAnimationFrame(() => { window.__evidenceAt = performance.now(); });

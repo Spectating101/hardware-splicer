@@ -60,7 +60,7 @@ describe("Project bench truth", () => {
     expect(await screen.findByText("Design view · not linked")).toBeInTheDocument();
     expect(document.querySelector("iframe, .digital-render")).toBeNull();
     const evidence = screen.getByRole("region", { name: "Evidence" });
-    expect(await within(evidence).findByText(/The backend returned no blockers for this revision. Revision 4/)).toBeInTheDocument();
+    expect(await within(evidence).findByText(/Backend blockers · none returned \(not the same as passing\) · no checks run · revision 4/)).toBeInTheDocument();
     expect(within(evidence).queryByText(/ready|build-ready|verified/i)).toBeNull();
     expect(screen.queryByText(/Agent proposals/)).toBeNull();
     expect(screen.getByText("References").closest("details")).not.toHaveAttribute("open");
@@ -301,8 +301,25 @@ describe("Revision summary", () => {
     render(<ProjectBench session={session} />);
     const strip = await screen.findByTestId("revision-summary");
     expect(strip.compareDocumentPosition(screen.getByRole("heading", { name: "Evidence" })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    expect(strip).toHaveTextContent("Proven (modeled)");
+    expect(strip).toHaveTextContent("Model checks passed");
+    expect(strip).not.toHaveTextContent(/proven/i);
     expect(strip).toHaveTextContent("Next action");
     expect(strip).not.toHaveTextContent(/ready|all checks passed/i);
+  });
+});
+
+describe("Status language", () => {
+  it("states model passes with physical fit untested in the same cell, and pairs no-blockers with the check state", async () => {
+    const study = { revision: 2, run_id: "run-2", artifacts: {}, summary: { constraints: [
+      { id: "ordinary_source_margin", passed: true, actual: .48, limit: .3, unit: "A" },
+      { id: "work_runtime", passed: false, actual: 3.166, limit: 3.5, unit: "h" },
+    ] } };
+    api.fetchProjectAssurance.mockResolvedValue({ revision: 2, assurance: { claims: [], outputs: [] } });
+    render(<ProjectBench session={session} study={study} />);
+    const strip = await screen.findByTestId("revision-summary");
+    const passed = within(strip).getByText("Model checks passed").closest("div");
+    expect(passed).toHaveTextContent("1 in the study model · physical fit not tested");
+    const blockers = await screen.findByText(/^Backend blockers · none returned/, { selector: ".bench-blockers p" });
+    expect(blockers).toHaveTextContent("none returned (not the same as passing) · 1 of 2 model checks failed");
   });
 });
