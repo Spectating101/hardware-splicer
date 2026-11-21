@@ -18,21 +18,174 @@
 
 import { sessionHasBuild, sessionHasPackage, STAGES } from "./projectSession.js";
 
-function pick(...values) {
+export type StageId = "intake" | "design" | "verify" | "bench" | "package";
+
+export type DesignState =
+  | "not_compiled"
+  | "unknown"
+  | "drc_errors"
+  | "drc_clean"
+  | "request_mismatch";
+
+export type CopperState =
+  | "not_available"
+  | "preview_only"
+  | "review_required"
+  | "fab_candidate";
+
+export type BenchState =
+  | "not_started"
+  | "physical_authorized"
+  | "simulated_pass"
+  | "gates_open"
+  | "authorization_pending";
+
+export type PackageState = "generated" | "missing";
+
+export type OverallState =
+  | "needs_design"
+  | "needs_verification"
+  | "power_on_blocked"
+  | "review_required"
+  | "authorized";
+
+export type BenchEvidenceKind = "physical" | "simulated";
+
+export interface BenchSessionInput {
+  evidence_kind?: BenchEvidenceKind | null;
+  physical_capture?: boolean | null;
+  capture_provenance?: string | null;
+  instrument_capture?: boolean | null;
+  validated_physical_capture?: boolean | null;
+  open_gate_count?: number | string | null;
+  open_gates?: readonly unknown[] | null;
+  critical_open_count?: number | string | null;
+  power_on_authorized?: boolean | null;
+  simulated?: boolean | null;
+  source?: string | null;
+}
+
+export interface PackageGatesInput {
+  evidence_kind?: BenchEvidenceKind | null;
+  physical_capture?: boolean | null;
+  capture_provenance?: string | null;
+  instrument_capture?: boolean | null;
+  validated_physical_capture?: boolean | null;
+  kicad_drc_errors?: number | string | null;
+  kicad_drc_warnings?: number | string | null;
+  compile_ok?: boolean | null;
+  copper_tier?: string | null;
+  open_gate_count?: number | string | null;
+  critical_open_count?: number | string | null;
+  power_on_authorized?: boolean | null;
+  simulated?: boolean | null;
+}
+
+export interface DesignQualityInput {
+  kicad_drc_errors?: number | string | null;
+  drc_errors?: number | string | null;
+  kicad_drc_warnings?: number | string | null;
+  drc_warnings?: number | string | null;
+  copper_tier?: string | null;
+}
+
+export interface AgentLoopInput {
+  final_kicad_drc_errors?: number | string | null;
+  copper_tier?: string | null;
+}
+
+export interface RequestFidelityMissingPart {
+  module_id?: string;
+  names?: readonly string[] | null;
+  requested?: number;
+  in_design?: number;
+}
+
+export interface RequestFidelityInput {
+  status?: string | null;
+  missing_parts?: readonly RequestFidelityMissingPart[] | null;
+}
+
+export interface ProjectPackageInput {
+  gates?: PackageGatesInput | null;
+  build_dir?: string | null;
+}
+
+export interface ProjectTruthSessionInput {
+  intakeComplete?: boolean;
+  buildDir?: string | null;
+  projectPackage?: ProjectPackageInput | null;
+  designQuality?: DesignQualityInput | null;
+  agentLoop?: AgentLoopInput | null;
+  benchSession?: BenchSessionInput | null;
+  displayResult?: {
+    design_quality?: DesignQualityInput | null;
+    bench_session?: BenchSessionInput | null;
+    design_quality_gate?: {
+      request_fidelity?: RequestFidelityInput | null;
+    } | null;
+  } | null;
+  composeResult?: {
+    agent_loop?: AgentLoopInput | null;
+  } | null;
+}
+
+export interface ProjectNextAction {
+  label: string;
+  stage: StageId;
+}
+
+export interface ProjectTruth {
+  design: {
+    state: DesignState;
+    errors: number | null;
+    warnings: number | null;
+    detail: string;
+    label: string;
+  };
+  copper: {
+    state: CopperState;
+    label: string;
+    detail: string;
+    tier: string | null;
+  };
+  bench: {
+    state: BenchState;
+    openGateCount: number;
+    criticalOpenCount: number;
+    powerOnAuthorized: boolean;
+    simulated: boolean;
+    physical: boolean;
+    label: string;
+  };
+  package: {
+    state: PackageState;
+  };
+  overall: {
+    state: OverallState;
+    headline: string;
+    nextAction: ProjectNextAction;
+  };
+}
+
+function pick<T>(...values: ReadonlyArray<T | null | undefined | "">): T | null {
   for (const value of values) {
     if (value !== undefined && value !== null && value !== "") return value;
   }
   return null;
 }
 
-function numOrNull(value) {
+function numOrNull(value: unknown): number | null {
   if (value === undefined || value === null || value === "") return null;
   const n = Number(value);
   return Number.isFinite(n) ? n : null;
 }
 
 /** Affirmative physical provenance only — never infer from simulated===false. */
-export function hasAffirmativePhysicalEvidence(bench, gates = {}) {
+export function hasAffirmativePhysicalEvidence(
+  bench: BenchSessionInput | null | undefined,
+  gates: PackageGatesInput | null | undefined = {},
+): boolean {
   if (!bench && !gates) return false;
   const kind = pick(bench?.evidence_kind, gates?.evidence_kind);
   if (kind === "physical") return true;
@@ -50,7 +203,7 @@ export function hasAffirmativePhysicalEvidence(bench, gates = {}) {
   return false;
 }
 
-export function deriveProjectTruth(session = {}) {
+export function deriveProjectTruth(session: ProjectTruthSessionInput = {}): ProjectTruth {
   const pkg = session.projectPackage || {};
   const gates = pkg.gates || {};
   const dq = session.designQuality || session.displayResult?.design_quality || {};
@@ -62,7 +215,7 @@ export function deriveProjectTruth(session = {}) {
   );
   const warnings = numOrNull(pick(dq.kicad_drc_warnings, dq.drc_warnings, gates.kicad_drc_warnings));
 
-  let designState = "not_compiled";
+  let designState: DesignState = "not_compiled";
   if (!sessionHasBuild(session)) {
     designState = "not_compiled";
   } else if (errors == null && gates.compile_ok !== true && gates.compile_ok !== false) {
@@ -81,7 +234,7 @@ export function deriveProjectTruth(session = {}) {
   const requestMismatch = sessionHasBuild(session) && fidelity?.status === "mismatch";
   if (requestMismatch) designState = "request_mismatch";
   const requestDetail = requestMismatch
-    ? (fidelity.missing_parts || [])
+    ? (fidelity!.missing_parts || [])
         .map(
           (row) =>
             `Design leaves out requested part ${row.module_id}: requested ${row.requested}, design has ${row.in_design} (${(row.names || []).join(", ")}).`,
@@ -90,7 +243,7 @@ export function deriveProjectTruth(session = {}) {
     : "";
 
   const copperTier = pick(dq.copper_tier, gates.copper_tier, agent.copper_tier);
-  let copperState = "not_available";
+  let copperState: CopperState = "not_available";
   let copperLabel = "Copper not assessed";
   let copperDetail = "";
   if (copperTier) {
@@ -128,7 +281,7 @@ export function deriveProjectTruth(session = {}) {
   );
   const physical = hasAffirmativePhysicalEvidence(bench, gates);
 
-  let benchState = "not_started";
+  let benchState: BenchState = "not_started";
   if (!bench && openGateCount == null && !sessionHasBuild(session)) {
     benchState = "not_started";
   } else if (powerOnAuthorized && physical && !simulated) {
@@ -148,11 +301,11 @@ export function deriveProjectTruth(session = {}) {
     }
   }
 
-  const packageState = sessionHasPackage(session) ? "generated" : "missing";
+  const packageState: PackageState = sessionHasPackage(session) ? "generated" : "missing";
 
-  let overallState = "needs_design";
+  let overallState: OverallState = "needs_design";
   let headline = "Complete Intake, then design the board";
-  let nextAction = { label: "Continue Intake", stage: STAGES.intake };
+  let nextAction: ProjectNextAction = { label: "Continue Intake", stage: STAGES.intake };
 
   if (!session.intakeComplete) {
     overallState = "needs_design";

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { VIEWS } from "../nav.js";
-import { pathForRoute } from "../router.js";
-import { describeTransition } from "./checkTransition.js";
+import { pathForRoute } from "../router";
+import { describeTransition } from "./checkTransition";
 import { fetchChangeDossier } from "./digitalStudyApi.js";
 import { formatValue, keyLabel } from "./digitalStudyLabels.js";
 

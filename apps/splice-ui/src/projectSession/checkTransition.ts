@@ -2,9 +2,46 @@
 // one-word transition. A result that flipped because the limit moved, with the measured value
 // unchanged, is a changed requirement, not a regression of the design.
 
+export type DerivedTransitionKind =
+  | "newly-fails-requirement"
+  | "regressed"
+  | "newly-fails"
+  | "newly-passes-requirement"
+  | "improved"
+  | "newly-passes"
+  | "unchanged"
+  | "changed";
+
+export type TransitionKind = DerivedTransitionKind | "unknown";
+
+export type InvalidationReasonKind =
+  | "changed_dependency"
+  | "rerun_result_differs"
+  | "check_absent_in_candidate";
+
+export type CheckValue = number | string | boolean | null | undefined;
+
+export interface CheckResultInput {
+  passed?: boolean | null;
+  actual?: CheckValue;
+  limit?: CheckValue;
+  unit?: string | null;
+}
+
+export interface TransitionDescription<K extends string = TransitionKind> {
+  kind: K;
+  label: string;
+  detail: string;
+}
+
+export interface InvalidationReasonInput {
+  kind?: InvalidationReasonKind;
+  ids?: readonly string[] | null;
+}
+
 const EPSILON = 1e-9;
-const same = (a, b) => typeof a === "number" && typeof b === "number" ? Math.abs(a - b) <= EPSILON * Math.max(1, Math.abs(a)) : a === b;
-const fmt = (value, unit) => value === undefined || value === null ? "unknown" : `${value}${unit ? ` ${unit}` : ""}`;
+const same = (a: CheckValue, b: CheckValue): boolean => typeof a === "number" && typeof b === "number" ? Math.abs(a - b) <= EPSILON * Math.max(1, Math.abs(a)) : a === b;
+const fmt = (value: CheckValue, unit: string): string => value === undefined || value === null ? "unknown" : `${value}${unit ? ` ${unit}` : ""}`;
 
 /**
  * @param before check result in the earlier revision ({ passed, actual, limit, unit }) or null
@@ -12,7 +49,11 @@ const fmt = (value, unit) => value === undefined || value === null ? "unknown" :
  * @param fallback the backend's transition word, used only when the data cannot say more
  * @returns {{ kind: string, label: string, detail: string }}
  */
-export function describeTransition(before, after, fallback = "unknown") {
+export function describeTransition<F extends string = "unknown">(
+  before: CheckResultInput | null | undefined,
+  after: CheckResultInput | null | undefined,
+  fallback: F = "unknown" as F,
+): TransitionDescription<DerivedTransitionKind | F> {
   if (!before || !after) {
     return { kind: fallback, label: !after ? "Not run in the later revision" : !before ? "Not run in the earlier revision" : fallback, detail: "" };
   }
@@ -50,7 +91,7 @@ export function describeTransition(before, after, fallback = "unknown") {
 }
 
 /** Why the backend invalidated a revision's evidence, in words. */
-export function invalidationReason(reasons = []) {
+export function invalidationReason(reasons: readonly InvalidationReasonInput[] = []): string {
   const parts = reasons.flatMap((reason) => {
     if (reason.kind === "changed_dependency") {
       const ids = reason.ids || [];

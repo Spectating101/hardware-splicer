@@ -5,8 +5,8 @@ import {
 import ProjectBench from "./ProjectBench.jsx";
 import { SavedDisplayComparison } from "./FieldDeckDisplayComparison.jsx";
 import { fieldLabel, formatValue, keyLabel } from "./digitalStudyLabels.js";
-import { describeTransition } from "./checkTransition.js";
-import { revisionNoteText } from "./statusLanguage.js";
+import { describeTransition } from "./checkTransition";
+import { revisionNoteText } from "./statusLanguage";
 import "./digitalStudy.css";
 
 const isPending = (status) => status === "queued" || status === "running";

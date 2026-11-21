@@ -22,7 +22,7 @@ import InterfaceLabPanel from "./components/InterfaceLabPanel.jsx";
 import NewProject from "./projectSession/NewProject.jsx";
 import { useSpliceJob } from "./hooks/useSpliceJob.js";
 import { ADVANCED_VIEWS, VIEWS, isAdvancedView } from "./nav.js";
-import { canGoBackInApp, useRoute } from "./router.js";
+import { canGoBackInApp, useRoute } from "./router";
 import ProjectWorkspace from "./projectSession/ProjectWorkspace.jsx";
 import { createDigitalProject } from "./projectSession/digitalStudyApi.js";
 import { useProjectPersistence } from "./projectSession/projectPersistence.js";

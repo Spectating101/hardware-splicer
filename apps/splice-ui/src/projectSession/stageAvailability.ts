@@ -1,33 +1,82 @@
 /** Stage availability for the project workspace (UI gating only). */
 
 import { STAGES, STAGE_ORDER, sessionHasBuild, sessionHasPackage } from "./projectSession.js";
-import { deriveProjectTruth } from "./deriveProjectTruth.js";
+import { deriveProjectTruth, type ProjectTruthSessionInput, type StageId } from "./deriveProjectTruth";
 import { derivePackageHandoff } from "./packageHandoff.js";
 
-export function intakeReady(session) {
+export type { StageId };
+
+export type StageLabel = "Intake" | "Design" | "Verify" | "Bench" | "Package";
+
+export type PackageHandoffKind = "job_bundle" | "build_package" | "local_only";
+
+export interface PackageHandoff {
+  kind: PackageHandoffKind;
+  url: string | null;
+  available: boolean;
+  explanation: string;
+}
+
+export interface StageSessionInput extends ProjectTruthSessionInput {
+  projectId?: string | null;
+  currentStage?: StageId | null;
+  activeJobId?: string | null;
+  packageHandoff?: Partial<PackageHandoff> | null;
+}
+
+export interface StageTab {
+  id: StageId;
+  label: StageLabel;
+  available: boolean;
+  complete: boolean;
+  blockedReason: string | null;
+  highlight: boolean;
+}
+
+export interface StageNavigationAction {
+  label: string;
+  stage: StageId;
+  enabled: boolean;
+  primary: true;
+  isDownload?: undefined;
+  handoff?: undefined;
+}
+
+export interface StageDownloadAction {
+  label: string;
+  stage: null;
+  enabled: boolean;
+  primary: true;
+  isDownload: true;
+  handoff: PackageHandoff;
+}
+
+export type NextStageAction = StageNavigationAction | StageDownloadAction;
+
+export function intakeReady(session?: StageSessionInput | null): boolean {
   return Boolean(session?.projectId);
 }
 
-export function designReady(session) {
+export function designReady(session?: StageSessionInput | null): boolean {
   if (!session?.projectId) return false;
   if (!session.intakeComplete) return false;
   // Non-editable recent builds still open Design to show a bounded explanation
   return true;
 }
 
-export function verifyReady(session) {
+export function verifyReady(session?: StageSessionInput | null): boolean {
   return sessionHasBuild(session);
 }
 
-export function benchReady(session) {
+export function benchReady(session?: StageSessionInput | null): boolean {
   return sessionHasBuild(session);
 }
 
-export function packageReady(session) {
+export function packageReady(session?: StageSessionInput | null): boolean {
   return sessionHasPackage(session);
 }
 
-const CHECKERS = {
+const CHECKERS: Record<StageId, (session?: StageSessionInput | null) => boolean> = {
   [STAGES.intake]: intakeReady,
   [STAGES.design]: designReady,
   [STAGES.verify]: verifyReady,
@@ -35,12 +84,18 @@ const CHECKERS = {
   [STAGES.package]: packageReady,
 };
 
-export function stageIsAvailable(session, stageId) {
+export function stageIsAvailable(
+  session: StageSessionInput | null | undefined,
+  stageId: StageId,
+): boolean {
   const check = CHECKERS[stageId];
   return check ? check(session) : false;
 }
 
-export function stageIsComplete(session, stageId) {
+export function stageIsComplete(
+  session: StageSessionInput | undefined,
+  stageId: StageId,
+): boolean {
   switch (stageId) {
     case STAGES.intake:
       return Boolean(session?.intakeComplete);
@@ -59,7 +114,10 @@ export function stageIsComplete(session, stageId) {
   }
 }
 
-export function stageBlockReason(session, stageId) {
+export function stageBlockReason(
+  session: StageSessionInput | null | undefined,
+  stageId: StageId,
+): string | null {
   if (stageIsAvailable(session, stageId)) return null;
   switch (stageId) {
     case STAGES.intake:
@@ -78,7 +136,7 @@ export function stageBlockReason(session, stageId) {
   }
 }
 
-export function buildStageTabs(session) {
+export function buildStageTabs(session?: StageSessionInput): StageTab[] {
   return STAGE_ORDER.map((id) => ({
     id,
     label: ({
@@ -87,7 +145,7 @@ export function buildStageTabs(session) {
       [STAGES.verify]: "Verify",
       [STAGES.bench]: "Bench",
       [STAGES.package]: "Package",
-    })[id],
+    } as const)[id],
     available: stageIsAvailable(session, id),
     complete: stageIsComplete(session, id),
     blockedReason: stageBlockReason(session, id),
@@ -95,7 +153,7 @@ export function buildStageTabs(session) {
   }));
 }
 
-export function nextStageAction(session) {
+export function nextStageAction(session?: StageSessionInput): NextStageAction | null {
   const truth = deriveProjectTruth(session);
   const stage = session?.currentStage || STAGES.intake;
   if (stage === STAGES.intake) {

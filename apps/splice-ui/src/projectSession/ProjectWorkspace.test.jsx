@@ -9,7 +9,7 @@ import {
   createEmptySession,
   projectSessionReducer,
 } from "./projectSession.js";
-import { deriveProjectTruth } from "./deriveProjectTruth.js";
+import { deriveProjectTruth } from "./deriveProjectTruth";
 
 vi.mock("../components/DesignStudioPanel.jsx", () => ({
   default: function MockStudio({ initialPhrase, initialNodes, onOpenProject, showIntakeEmptyState }) {

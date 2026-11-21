@@ -6,9 +6,9 @@ import {
   assessMachineRelease, digitalArtifactUrl, engineeringPackageUrl, fetchEngineeringPackages, fetchEngineeringRevisionDiff, fetchEvidenceDelta,
   fetchMaterialAssessment, fetchPartSubstitution, fetchProjectAssurance, fetchProjectMaterials,
 } from "./digitalStudyApi.js";
-import { describeTransition, invalidationReason } from "./checkTransition.js";
+import { describeTransition, invalidationReason } from "./checkTransition";
 import { factText, formatValue, keyLabel } from "./digitalStudyLabels.js";
-import { blockerStatus } from "./statusLanguage.js";
+import { blockerStatus } from "./statusLanguage";
 
 // Missing information stays missing. In particular, known facts never confer authority.
 const value = (item, fallback = "unknown") => item === undefined || item === null || item === ""
