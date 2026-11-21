@@ -298,6 +298,31 @@ async function main() {
     shots.push(path.relative(ROOT, path.join(OUT, "16-phone-fielddeck-bench.jpg")));
     await phone.close();
 
+    // 8b. Evidence before the scene: on a warm server the evidence column must render within
+    // EVIDENCE_BUDGET_MS of navigation, even while the 3D stage builds. Times come from an in-page
+    // 20 ms poll, which also only runs when the main thread is free.
+    const EVIDENCE_BUDGET_MS = 3000;
+    for (const [label, id] of [["Fielddeck", fielddeckId], ["plotter", plotterId], ["drone", droneId]]) {
+      const timed = await context.newPage();
+      await timed.addInitScript(() => {
+        window.__evidenceAt = null;
+        const timer = setInterval(() => {
+          const ev = document.querySelector("#bench-evidence");
+          const link = ev?.querySelector("[data-testid=evidence-delta], .bench-link-state");
+          const blockers = ev?.querySelector(".bench-blockers")?.innerText || "";
+          if (link && !/Checking evidence/.test(ev.innerText) && !/Blockers\s*unknown\s*$/.test(blockers)) {
+            window.__evidenceAt = performance.now(); clearInterval(timer);
+          }
+        }, 20);
+      });
+      await timed.goto(`${BASE}/projects/${encodeURIComponent(id)}`, { waitUntil: "commit" });
+      await timed.waitForFunction(() => window.__evidenceAt !== null, undefined, { timeout: 60000, polling: 200 });
+      const at = Math.round(await timed.evaluate(() => window.__evidenceAt));
+      console.log(`evidence column on the ${label} bench rendered at ${at} ms`);
+      if (at > EVIDENCE_BUDGET_MS) problems.push(`${label} evidence column took ${at} ms (budget ${EVIDENCE_BUDGET_MS} ms)`);
+      await timed.close();
+    }
+
     // 9. URL routing: deep link, reload, revision link, Back/Forward, unknown ids.
     await page.goto(`${BASE}/projects/${encodeURIComponent(fielddeckId)}`, { waitUntil: "networkidle" });
     await page.getByTestId("digital-study").waitFor({ timeout: 30000 });
