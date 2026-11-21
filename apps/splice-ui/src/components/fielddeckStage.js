@@ -17,6 +17,7 @@ import {
 import { N8AOPostPass } from "n8ao";
 import { sceneRevisionUrl } from "../api.js";
 import { runChainJobs } from "./fielddeckChains.js";
+import { loadChainModule } from "./fielddeckChainsWasm.js";
 import {
   bracketPath, chooseTier, CREASE_INK, DIMMED_VENDOR, pairMovedFeatures, closedEdgeLoops, cullIsolatedChains, totalChainLength, classifyPart, convexHull, cullCoincidentChains, DEFAULT_EXPLODE, diffAccentChains,
   DIFF_COLORS, explodeGroupOffsets, FIELDDECK_NARROW, footprintDeltaPair, ghostDeltaKey,
@@ -395,7 +396,13 @@ function yieldToMain() {
   return new Promise((resolve) => setTimeout(resolve, 0));
 }
 
+// The Rust chain module, loaded once per page; null where WebAssembly is unavailable.
+let chainModule = null;
+const chainModuleOnce = () => (chainModule ??= loadChainModule());
+
 async function makeEntries(assets, index, scene, technical, resources, { base, target, focusPart }, { signal } = {}) {
+  // Its weld returns weldEdgeChains' chains exactly, in a fraction of the time.
+  const weld = (await chainModuleOnce())?.weld;
   // Phase marks for the browser's performance timeline; they cost nothing when nobody reads them.
   performance.mark?.("fielddeck:meshes-start");
   let sliceStart = performance.now();
@@ -559,7 +566,7 @@ async function makeEntries(assets, index, scene, technical, resources, { base, t
         // outline is kept as the fallback when nothing measurable differs.
         if (entry.row.delta === "changed") {
           entry.outlineAccent = (entry.outlineAccent ?? []).concat(diffAccentChains(edgePositions(geometry, 60),
-            geometry.boundingBox.getSize(new THREE.Vector3()).toArray()));
+            geometry.boundingBox.getSize(new THREE.Vector3()).toArray(), weld ? { weld } : {}));
         }
         const chains = entry.row.delta === "added" ? ghostOutlineLoops(positions, { maxChains: 1 }) : [];
         if (chains.length) {
