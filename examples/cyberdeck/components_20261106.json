@@ -1,0 +1,113 @@
+{
+  "snapshot_date": "2026-11-06",
+  "currency": "TWD",
+  "status": "sourced components, NO acquisition / NO bench test / availability must be confirmed",
+  "display": {
+    "model": "Waveshare ESP32-S3-Touch-LCD-4.3 (specific touch variant; NOT 4.3B or 4.3C)",
+    "official": "https://docs.waveshare.com/ESP32-S3-Touch-LCD-4.3",
+    "vendor_dimensions_mm": [
+      106.1,
+      67.8
+    ],
+    "known_screen_px": [
+      800,
+      480
+    ],
+    "mcu": "ESP32-S3-WROOM-1-N16R8",
+    "wifi": "2.4GHz 802.11b/g/n",
+    "storage": "16MB flash / 8MB PSRAM",
+    "i2c_gpio": {
+      "sda": 8,
+      "scl": 9
+    },
+    "i2c_shared_peripherals": "touch controller and CH422G I/O expander on same I2C bus",
+    "battery_interface": "Single-cell 3.7V PH2.0, CS8501 charge manager built in",
+    "battery_charging_mA_spec": 580,
+    "nominal_5v_current_mA_spec": 450,
+    "local_ask_twd": 1250,
+    "seller": "https://www.icshop.com.tw/en/products/368031700131",
+    "seller_stock": "sold_out_when_checked",
+    "critical_unknowns": [
+      "5V output/source at I2C HY2.0 4P port",
+      "mount-hole coordinates and full Z envelope",
+      "USB-C external cutout orientation",
+      "cable bend radius",
+      "individual revision schematic"
+    ]
+  },
+  "keyboard": {
+    "model": "M5Stack CardKB v1.1 U035-B",
+    "official": "https://docs.m5stack.switch-science.com/en/unit/Unit_CardKB_v1.1",
+    "dimensions_mm": [
+      88,
+      54,
+      5
+    ],
+    "power_V": 5,
+    "i2c_address_hex": "0x5F",
+    "key_count": 50,
+    "local_ask_twd": 339,
+    "seller": "https://www.icshop.com.tw/zh-hant/products/388350300011",
+    "seller_stock": "sold_out_when_checked",
+    "alternate_dist_seller": "https://www.digikey.tw/zh/products/detail/m5stack-technology-co-ltd/U035-B/16679766",
+    "alternate_single_unit_ask_twd": 288,
+    "unknown": [
+      "ctrl key semantics vs Fn third mode",
+      "I2C 5V pull-up voltage",
+      "mechanical mounts and actual keycap thickness",
+      "key matrix debounce in full terminal loop"
+    ]
+  },
+  "other_budget_assumptions": [
+    {
+      "item": "2-channel bidirectional I2C shifter",
+      "assumed_twd": 55,
+      "verified_sku": false
+    },
+    {
+      "item": "harness and connectors",
+      "assumed_twd": 95,
+      "verified_sku": false
+    },
+    {
+      "item": "2mm steel hinge pin and retention hardware",
+      "assumed_twd": 45,
+      "verified_sku": false
+    },
+    {
+      "item": "FDM printed PETG shells",
+      "assumed_twd": 110,
+      "verified_sku": false
+    },
+    {
+      "item": "USB-C external supply / cable",
+      "assumed_twd": 100,
+      "verified_sku": false
+    }
+  ],
+  "firmware_reuse": {
+    "project": "0015/PocketSSH",
+    "source": "https://github.com/0015/PocketSSH",
+    "license": "MIT as shown in public repository",
+    "target_original": "T-Deck Plus 320x240",
+    "our_target": "Waveshare ESP32-S3 800x480 + CardKB @0x5F",
+    "cannot_flash_original_binary": true,
+    "critical_security_defect": "PocketSSH README explicitly says NO SSH host-key verification; must implement pinned host key verification before using the Optiplex credentials",
+    "port_work_needed": [
+      "Waveshare display/touch board support",
+      "I2C keyboard @0x5F and special control keys",
+      "80x~25 terminal grid with actual measured font",
+      "host key pinning and robust reboot/reconnect",
+      "credential handling without committing secrets"
+    ],
+    "pocketssh_flashed": false
+  },
+  "physical_proof": {
+    "parts_purchased": false,
+    "board_powered": false,
+    "keyboard_wired": false,
+    "ssh_authenticated": false,
+    "hinge_printed": false,
+    "physical_dimensions_measured": false
+  }
+}

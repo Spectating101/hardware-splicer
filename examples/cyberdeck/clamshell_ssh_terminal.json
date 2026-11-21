@@ -1,0 +1,32 @@
+{
+  "project_name": "HS-POCKET-SSH-CLAMSHELL-S1",
+  "mode": "prototype",
+  "process": "fdm",
+  "clamshell_terminal": {
+    "name": "Pocket SSH terminal 4.3in LCD + CardKB",
+    "case_w_mm": 120,
+    "case_d_mm": 85,
+    "base_h_mm": 14,
+    "lid_h_mm": 14,
+    "closed_gap_mm": 1.6,
+    "wall_mm": 2.2,
+    "floor_mm": 2,
+    "clearance_mm": 0.7,
+    "display_board_w_mm": 106.1,
+    "display_board_d_mm": 67.8,
+    "keyboard_w_mm": 88,
+    "keyboard_d_mm": 54,
+    "keyboard_module_nominal_t_mm": 5,
+    "hinge_outer_d_mm": 8,
+    "hinge_pin_d_mm": 2,
+    "pin_radial_clearance_mm": 0.35,
+    "hinge_y_offset_mm": 1.2,
+    "knuckle_end_margin_mm": 5,
+    "knuckle_outer_length_mm": 23,
+    "knuckle_axial_gap_mm": 7.0,
+    "cable_slot_w_mm": 5.2,
+    "cable_slot_h_mm": 3.6,
+    "preview_open_angle_deg": -135
+  },
+  "notes": "Vendor outer planform only. Shell trays and interleaved hinge pin are CAD candidates, not proven printable fit. No keyboard/board mounts or cutouts for USB or battery: exact ports/heights must be measured. No hardware purchased, connected or flashed."
+}

@@ -1,0 +1,144 @@
+{
+  "schema_version": "hardware_splicer.circuit_synthesis.v1",
+  "candidate_id": "level_shift_candidate",
+  "selected_parts": [
+    {
+      "id": "logic_translation",
+      "type": "level_shifter",
+      "low_v": 3.3,
+      "high_v": 5.0,
+      "channel_count": 2
+    }
+  ],
+  "selected_modules": [
+    "usb-power-5v",
+    "esp32-devkit",
+    "level-shifter-4ch"
+  ],
+  "generated_topology": [
+    {
+      "operator_id": "logic_level_translation",
+      "operator_type": "level_shifter",
+      "inputs": [
+        "low_voltage_logic",
+        "high_voltage_logic",
+        "shared_ground"
+      ],
+      "outputs": [
+        "translated_logic_bus"
+      ],
+      "required_part_types": [
+        "level_shifter",
+        "controller",
+        "peripheral"
+      ],
+      "required_ports": [
+        "LV",
+        "HV",
+        "GND",
+        "LVx",
+        "HVx"
+      ],
+      "constraints": [],
+      "missing_evidence_conditions": [],
+      "verification_gates": [],
+      "notes": "Level shifting candidate; verify rail references and channel mapping before power-on.",
+      "metadata": {
+        "module_id": "level-shifter-4ch",
+        "controller_module": "esp32-devkit",
+        "peer_module": "",
+        "low_v": 3.3,
+        "high_v": 5.0,
+        "channel_count": 2
+      }
+    }
+  ],
+  "assumptions": [
+    "Candidate is ready for human review only; channel mapping and rail references must be bench-checked."
+  ],
+  "missing_evidence": [],
+  "constraints": [
+    {
+      "constraint_id": "logic_voltage_mismatch_detected",
+      "type": "logic_level",
+      "target": "interface",
+      "requirement": "Logic-voltage mismatch is explicit and needs translation.",
+      "severity": "blocker",
+      "status": "pass",
+      "value": {
+        "low_v": 3.3,
+        "high_v": 5.0
+      },
+      "unit": "",
+      "notes": "",
+      "metadata": {}
+    },
+    {
+      "constraint_id": "level_shifter_module",
+      "type": "logic_level",
+      "target": "level-shifter-4ch",
+      "requirement": "Known level-shifter module is available.",
+      "severity": "blocker",
+      "status": "pass",
+      "value": null,
+      "unit": "",
+      "notes": "",
+      "metadata": {}
+    },
+    {
+      "constraint_id": "level_shifter_channel_count",
+      "type": "evidence_required",
+      "target": "level-shifter-4ch",
+      "requirement": "4-channel level shifter covers required channels.",
+      "severity": "blocker",
+      "status": "pass",
+      "value": {
+        "required_channels": 2,
+        "available_channels": 4
+      },
+      "unit": "",
+      "notes": "",
+      "metadata": {}
+    }
+  ],
+  "verification_gates": [
+    {
+      "gate_id": "level_shifter_rail_reference",
+      "gate_type": "dmm_voltage",
+      "critical": true,
+      "prompt": "Measure LV, HV, and GND references before connecting signal channels.",
+      "expected_low_v": 3.3,
+      "expected_high_v": 5.0,
+      "status": "open"
+    },
+    {
+      "gate_id": "level_shifter_channel_mapping",
+      "gate_type": "continuity_logic_probe",
+      "critical": true,
+      "prompt": "Verify each LVx/HVx channel mapping and idle level before attaching the peripheral.",
+      "required_channels": 2,
+      "status": "open"
+    }
+  ],
+  "recommended_build_path": {
+    "build_id": "generic_low_voltage_build",
+    "compose_mode": "module_graph_candidate",
+    "module_ids": [
+      "usb-power-5v",
+      "esp32-devkit",
+      "level-shifter-4ch"
+    ],
+    "can_compile_with_existing_auto_wire": true,
+    "notes": [
+      "Use compose_dispatch only after blocked constraints are resolved.",
+      "This candidate is topology planning, not certified schematic synthesis."
+    ]
+  },
+  "result": "ready_for_review",
+  "notes": "Bounded logic-level translation topology plan.",
+  "metadata": {
+    "goal": "ESP32-S3 3.3V I2C to external 5V CardKB keyboard; SCL/SDA",
+    "controller": "esp32-devkit",
+    "peer": ""
+  }
+}

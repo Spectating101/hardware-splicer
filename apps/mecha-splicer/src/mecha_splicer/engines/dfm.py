@@ -9,6 +9,7 @@ from ..spec import (
     AssemblySpec,
     BeltReductionSpec,
     BracketSpec,
+    ClamshellTerminalSpec,
     EnclosureSpec,
     GripperSpec,
     LeadScrewAxisSpec,
@@ -39,6 +40,7 @@ def check_project(spec: ProjectSpec) -> list[DfmIssue]:
     if (
         spec.enclosure is None
         and spec.bracket is None
+        and spec.clamshell_terminal is None
         and spec.servo_mount is None
         and spec.linear_axis is None
         and spec.leadscrew_axis is None
@@ -60,6 +62,8 @@ def check_project(spec: ProjectSpec) -> list[DfmIssue]:
         issues.extend(check_enclosure(spec.enclosure, process=spec.process, mode=spec.mode))
     if spec.bracket is not None:
         issues.extend(check_bracket(spec.bracket, process=spec.process, mode=spec.mode))
+    if spec.clamshell_terminal is not None:
+        issues.extend(check_clamshell_terminal(spec.clamshell_terminal, process=spec.process))
     if spec.servo_mount is not None:
         issues.extend(check_servo_mount(spec.servo_mount, process=spec.process, mode=spec.mode))
     if spec.linear_axis is not None:
@@ -120,6 +124,20 @@ def check_enclosure(enc: EnclosureSpec, *, process: str, mode: str) -> list[DfmI
         if enc.standoff_od_mm < enc.standoff_hole_d_mm + 2.0:
             issues.append(DfmIssue("warn", "standoff_od_mm is small relative to hole; standoff may crack."))
 
+    return issues
+
+
+def check_clamshell_terminal(p: ClamshellTerminalSpec, *, process: str) -> list[DfmIssue]:
+    issues: list[DfmIssue] = []
+    if p.wall_mm < _min_wall_mm(process):
+        issues.append(DfmIssue("block", "Shell wall below FDM minimum"))
+    if p.closed_gap_mm < 1.5:
+        issues.append(DfmIssue("warn", "Closed gap may pinch keys and cable"))
+    if (p.case_w_mm-p.display_board_w_mm)/2 < 5:
+        issues.append(DfmIssue("warn", "Display planform leaves narrow side rails"))
+    issues.append(DfmIssue("warn", "NOT FIT-VERIFIED: board Z, screw mounts, USB access, lid retention, hinge life/cable bend, battery"))
+    issues.append(DfmIssue("warn", "NOT ELECTRICALLY VERIFIED: CardKB 5V I2C to ESP32 3.3V; level shift, pull-ups and shared I2C bus"))
+    issues.append(DfmIssue("warn", "NOT FUNCTIONALLY VERIFIED: SSH host key, Ctrl/Esc, terminal rendering, reconnect"))
     return issues
 
 
