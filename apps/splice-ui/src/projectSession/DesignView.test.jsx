@@ -66,8 +66,12 @@ it("shows the unavailable geometry as records, with no stage or placeholder", as
     status: "read", data: { device: "Holybro X500 V2 frame", cad_kernel_available: false, licensing_review_completed: false } }] });
   const { container } = render(<DesignView projectId="drone-build" revision={1} />);
   expect(await screen.findByRole("heading", {
-    name: "Frame geometry unavailable · downloaded_and_hash_identified_not_geometrically_validated",
+    name: "Frame geometry unavailable · File downloaded and hash checked · geometry not validated",
   })).toBeInTheDocument();
+  // The backend's raw state stays one disclosure away, verbatim.
+  const source = screen.getByText("Source details").closest("details");
+  expect(source).not.toHaveAttribute("open");
+  expect(within(source).getByText("downloaded_and_hash_identified_not_geometrically_validated", { selector: "code" })).toBeInTheDocument();
   expect(screen.getByText("e7cc")).toBeInTheDocument();
   expect(screen.getByRole("link", { name: "Manufacturer 3D CAD File: x500v2-frame.step" })).toBeInTheDocument();
   expect(screen.getByText("Import source STEP into a working CAD kernel.")).toBeInTheDocument();

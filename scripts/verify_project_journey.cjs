@@ -250,7 +250,8 @@ async function main() {
     await openProject(droneId);
     await page.locator("[data-design-state=records]").waitFor({ timeout: 30000 });
     if (await page.locator(".fd-stage, canvas").count()) problems.push("Drone bench drew a 3D stage");
-    await page.getByText("CAD kernel available", { exact: true }).first().waitFor();
+    // The open question reads in words; the raw record sits behind Source details.
+    await page.locator(".design-record-list strong", { hasText: "CAD kernel available" }).first().waitFor();
     await shot("14-drone-bench-records");
     await page.getByTestId("bench-package").scrollIntoViewIfNeeded();
     await shot("15-drone-package-next-action");
@@ -310,8 +311,8 @@ async function main() {
         const observer = new MutationObserver(() => {
           const ev = document.querySelector("#bench-evidence");
           const link = ev?.querySelector("[data-testid=evidence-delta], .bench-link-state");
-          const blockers = ev?.querySelector(".bench-blockers")?.textContent || "";
-          if (seen || !link || /Checking evidence/.test(ev.textContent) || /Blockers\s*unknown\s*$/.test(blockers)) return;
+          const blockersKnown = ev?.querySelector('.bench-blockers[data-blockers-state="known"]');
+          if (seen || !link || /Checking evidence/.test(ev.textContent) || !blockersKnown) return;
           seen = true;
           observer.disconnect();
           requestAnimationFrame(() => { window.__evidenceAt = performance.now(); });

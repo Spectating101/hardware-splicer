@@ -119,8 +119,8 @@
 }
 .fd-scene [hidden] { display: none; }
 /* Side panels stay narrow and fold away; the canvas keeps the flexible centre. */
-.fd-tree { left: 12px; width: min(220px, 24%); }
-.fd-inspector { right: 12px; width: min(280px, 28%); }
+.fd-tree { left: 12px; width: min(200px, 22%); }
+.fd-inspector { right: 12px; width: min(240px, 26%); }
 .fd-inspector[data-collapsed] { width: auto; }
 .fd-panel-toggle {
   width: 100%;

@@ -8,6 +8,7 @@ import {
 } from "./digitalStudyApi.js";
 import { describeTransition, invalidationReason } from "./checkTransition.js";
 import { factText, formatValue, keyLabel } from "./digitalStudyLabels.js";
+import { blockerStatus } from "./statusLanguage.js";
 
 // Missing information stays missing. In particular, known facts never confer authority.
 const value = (item, fallback = "unknown") => item === undefined || item === null || item === ""
@@ -200,14 +201,16 @@ function RevisionSummary({ summary, blockers, blockersKnown, studied }) {
   const { proven, failed, unknown, next } = summary;
   return <section className="bench-summary" aria-label="Revision summary" data-testid="revision-summary">
     <dl className="bench-summary-counts">
-      <div data-state="proven"><dt>Proven (modeled)</dt>
-        <dd><a href="#bench-evidence">{proven.length}</a> {studied ? `study check${proven.length === 1 ? "" : "s"} passed in the model, not tested` : "no modeled checks for this revision"}</dd></div>
+      <div data-state="proven"><dt>Model checks passed</dt>
+        <dd><a href="#bench-evidence">{proven.length}</a> {studied ? <>in the study model · <strong className="bench-untested">physical fit not tested</strong></>
+          : "no model checks ran for this revision"}</dd></div>
       <div data-state="unknown"><dt>Unknown</dt>
         <dd><a href={`#${unknown[0]?.section || "bench-evidence"}`}>{unknown.length}</a> {unknown.length ? unknown.map((row) => row.text.split(" · ")[0]).join(", ") : "none listed"}</dd></div>
       <div data-state="failed" data-count={failed.length}><dt>Failed</dt>
         <dd><a href="#bench-evidence">{failed.length}</a> {failed.length ? failed.map((row) => keyLabel(row.label || row.id).label).join(", ") : studied ? "no failing study checks" : "no checks run"}</dd></div>
       <div data-state="blockers"><dt>Backend blockers</dt>
-        <dd>{blockersKnown ? (blockers.length ? <><a href="#bench-evidence">{blockers.length}</a> returned</> : "none returned (not the same as passing)") : "unknown"}</dd></div>
+        <dd>{blockersKnown ? (blockers.length ? <><a href="#bench-evidence">{blockers.length}</a> returned</>
+          : <>none returned (not the same as passing){studied ? "" : " · no checks run"}</>) : "unknown · no answer from the backend"}</dd></div>
     </dl>
     <p className="bench-summary-next" data-missing={next.missing || undefined}>
       <strong>Next action</strong> <span>{next.text}</span> <small>· {next.source}</small> <a href={`#${next.section}`}>Details</a>
@@ -268,8 +271,7 @@ function PackagePanel({ projectId, revision, latestRevision, studyPackages, obje
         {next.length ? <ol className="bench-next">{next.map((row, index) => <li key={index}>{row.text} <small className="muted">· {row.source}</small></li>)}</ol>
           // Same next action as the summary at the top, so the two never disagree.
           : summaryNext ? <p>{summaryNext.text} <small className="muted">· {summaryNext.source}</small></p>
-            : blockersKnown ? <p>Next action · unknown. The backend returned no blockers and no next action for revision {revision}.</p>
-              : <p>Next action · unknown</p>}
+            : <p>Next action · unknown. {blockerStatus({ blockersKnown, count: blockers.length, checks: null })} for revision {revision}.</p>}
       </div>
     </div>
   </section>;
@@ -353,7 +355,8 @@ export default function ProjectBench({ session, study, children, references, evi
   const requirements = study?.summary?.requirements || session.constraints;
   const objective = session.goal || session.intake?.goal || "";
   // A failed study check is the backend's own result for this revision; it is listed, never re-judged.
-  const failedChecks = (study?.summary?.constraints || []).filter((row) => row.passed === false);
+  const studyChecks = study?.summary?.constraints || [];
+  const failedChecks = studyChecks.filter((row) => row.passed === false);
   const olderRevision = Boolean(study && latest && revision !== latest);
   const partsKnown = Boolean(units.length || parts.length || materials?.inventory?.lots?.length || materials?.requirements?.length);
   const sceneNext = sceneManifest?.geometry_status === "unavailable" ? splitGeometryNote(sceneManifest.geometry_note).next : "";
@@ -439,11 +442,10 @@ export default function ProjectBench({ session, study, children, references, evi
         {evidenceExtra}
         <ChangeHistoryPanel projectId={session.projectId} latestRevision={latest} onOpenRevision={onOpenRevision} />
         <ProjectReviewPanel projectId={session.projectId} currentRevision={session.snapshotRevision} onToast={onToast} disclosure />
-        <div className="bench-blockers"><h3>Blockers</h3>
+        <div className="bench-blockers" data-blockers-state={blockersKnown ? "known" : "unknown"}><h3>Blockers</h3>
           {blockers.length ? <ul>{blockerText.map((text, index) => <li key={index}>{text}</li>)}</ul>
-            : blockersKnown ? <p>The backend returned no blockers for this revision. Revision {revision}.
-              {failedChecks.length > 0 && ` ${failedChecks.length} study check${failedChecks.length === 1 ? "" : "s"} failed in this revision; see the checks above and Next action.`}</p>
-              : <p>unknown</p>}
+            : <p>{blockerStatus({ blockersKnown, count: 0, checks: study ? { run: studyChecks.length, failed: failedChecks.length } : null })} · revision {revision}.
+              {failedChecks.length > 0 && " See the failing checks above and Next action."}</p>}
         </div>
       </section>
     </div>
@@ -453,7 +455,7 @@ export default function ProjectBench({ session, study, children, references, evi
     <details className="bench-references"><summary>References</summary>
       {references || <p>Reference artifacts: unknown</p>}
       {onReference && <div className="hero-actions">
-        <button className="secondary" onClick={() => onReference("reference")}>Complete CAD assembly</button>
+        <button className="secondary" onClick={() => onReference("reference")}>Full CAD assembly reference</button>
         <button className="secondary" onClick={() => onReference("sortcell")}>Sorting workcell</button>
       </div>}
     </details>

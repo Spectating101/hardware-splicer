@@ -184,7 +184,7 @@ function AdvancedHub({ onExamples, onLab, onOpenScene }) {
       <div className="advanced-grid">
         <button type="button" className="fixture-card" onClick={onExamples} data-testid="advanced-examples">
           <strong>Examples</strong>
-          <span>Proven manifest intakes — same engine path as production.</span>
+          <span>Recorded manifest intakes · built through the same engine path as production; each build is checked again.</span>
         </button>
         <button type="button" className="fixture-card" onClick={onLab} data-testid="advanced-lab">
           <strong>Interface Lab</strong>
@@ -366,8 +366,8 @@ export default function App() {
     loadBootstrap();
     setToast(
       spliceJob.jobKind === "compose"
-        ? "AI compose complete — review Verify, then Bench and Package"
-        : "Build complete — review Verify, then close bench gates",
+        ? "Compose job finished · results not yet checked: review Verify, then Bench and Package"
+        : "Build job finished · results not yet checked: review Verify, then close bench gates",
     );
   }, [spliceJob.result, spliceJob.jobKind, spliceJob.job?.job_id, loadBootstrap]);
 
@@ -807,7 +807,7 @@ export default function App() {
               onBuild={startBuild} building={spliceJob.active} buildError={spliceJob.error} stageLabel={spliceJob.stageLabel} />
             <section className="card"><h2>Explore reference projects</h2><div className="hero-actions">
               <button className="secondary" data-testid="nav-sortcell" onClick={() => setView(VIEWS.sortcell)}>Sorting workcell</button>
-              <button className="secondary" data-testid="nav-complete-assembly" onClick={() => setView(VIEWS.reference)}>Complete CAD assembly</button>
+              <button className="secondary" data-testid="nav-complete-assembly" onClick={() => setView(VIEWS.reference)}>Full CAD assembly reference</button>
               <button className="secondary" data-testid="nav-product-explorer" onClick={() => setView(VIEWS.showcase)}>Product explorer</button>
               <button className="secondary" onClick={() => setView(VIEWS.example)}>Example projects</button>
               <button className="secondary" onClick={handleQuickDemo} disabled={!health?.ok}>Quick demo</button>
@@ -886,7 +886,7 @@ export default function App() {
                   </button>
                 </div>
                 <h2>Example projects</h2>
-                <p className="muted">Proven manifest intakes — same engine path as production.</p>
+                <p className="muted">Recorded manifest intakes · built through the same engine path as production; each build is checked again.</p>
                 <div className="example-grid">
                   {examples.map((row) => (
                     <button

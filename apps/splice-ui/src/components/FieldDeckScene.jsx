@@ -390,7 +390,8 @@ export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel 
   const [stageError, setStageError] = useState("");
   const [view, setView] = useState(() => ({ ...INITIAL, mode: target }));
   const [desktopTreeOpen, setDesktopTreeOpen] = useState(true);
-  const [desktopInspectorOpen, setDesktopInspectorOpen] = useState(true);
+  // Under 1600 px the details dock starts folded, so the model keeps the stage until a part is chosen.
+  const [desktopInspectorOpen, setDesktopInspectorOpen] = useState(() => (globalThis.innerWidth ?? 1600) >= 1600);
   const [blockersOnly, setBlockersOnly] = useState(false);
   const [narrow, setNarrow] = useState(() => window.matchMedia(FIELDDECK_NARROW).matches);
   const [keyOpen, setKeyOpen] = useState(false);

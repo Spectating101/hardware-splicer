@@ -634,8 +634,8 @@ export default function ProjectWizard({
         )}
 
         {(clarifyError || visionError) && <p className="error">{clarifyError || visionError}</p>}
-      </div>
 
+      {/* Back and Continue belong to the form they act on. */}
       <div className="wizard-footer">
         {stepIndex > 0 && (
           <button type="button" className="ghost" onClick={goBack} disabled={building || clarifyLoading}>
@@ -666,6 +666,7 @@ export default function ProjectWizard({
                 : "Build salvage project"}
           </button>
         )}
+      </div>
       </div>
     </div>
   );

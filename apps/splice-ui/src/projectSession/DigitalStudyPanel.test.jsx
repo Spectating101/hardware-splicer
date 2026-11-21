@@ -69,7 +69,7 @@ describe("Saved digital requirement revisions", () => {
       return { job_id: "native-run", status: "succeeded" };
     });
     render(<DigitalStudyPanel session={session} onProjectReload={reload} />);
-    fireEvent.click(await screen.findByRole("button", { name: "Run and save new revision" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Run study and save revision 2" }));
     await waitFor(() => expect(submitDigitalRun).toHaveBeenCalledWith("digital-test", expect.objectContaining({
       base_revision: 1, change_request: "Add 10 g of payload", requirements: { gust_scale: 1, max_mass_g: 250 },
     })));
@@ -97,7 +97,7 @@ describe("Saved digital requirement revisions", () => {
     // The mass rose against the same limit, so this one really is a regression.
     expect(within(compared).getByRole("row", { name: /Regressed: measured value worsened/ })).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("View revision"), { target: { value: "1" } });
-    expect(screen.getByRole("button", { name: "Run and save new revision" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /^Run study and save revision \d+$/ })).toBeDisabled();
     expect(screen.getByText("Viewing history.")).toBeInTheDocument();
     expect(screen.getByTitle("Selected design 3D assembly revision 1")).toHaveAttribute("src", "/revision-1/VIEWER.html?embed=1");
   });
@@ -108,7 +108,7 @@ describe("Saved digital requirement revisions", () => {
     render(<DigitalStudyPanel session={session} />);
     expect(await screen.findByRole("alert")).toHaveTextContent("Independent verification failed");
     expect(screen.getByTitle("Selected design 3D assembly revision 1")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Run and save new revision" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: /^Run study and save revision \d+$/ })).toBeEnabled();
   });
 });
 
@@ -133,7 +133,7 @@ it("uses the registered device's inputs, measurements and nested artifacts", asy
   fireEvent.click(screen.getByText("References", { selector: "summary" }));
   expect(screen.getByRole("link", { name: "Bill of materials (CSV)" })).toHaveAttribute("href", "/files/bom");
   fireEvent.change(width, { target: { value: "120" } });
-  fireEvent.click(screen.getByRole("button", { name: "Run and save new revision" }));
+  fireEvent.click(screen.getByRole("button", { name: /^Run study and save revision \d+$/ }));
   await waitFor(() => expect(submitDigitalRun).toHaveBeenCalledWith(session.projectId, expect.objectContaining({
     requirements: { drawing_width_mm: 120 }, change_request: "", base_revision: 1,
   })));
