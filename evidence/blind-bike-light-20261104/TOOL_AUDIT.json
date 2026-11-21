@@ -1,0 +1,261 @@
+{
+  "case_id": "blind-bike-light-20261104",
+  "operator": "Codex GPT-6 Sol (medium)",
+  "source_code_access_given_to_operator": false,
+  "expected_answer_provided": false,
+  "web_access_enabled": false,
+  "number_of_completed_HS_tool_calls": 35,
+  "operations": [
+    {
+      "tool": "hs_backend_status",
+      "operation": null,
+      "http_status": null,
+      "backend_ok": null,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_list_operations",
+      "operation": null,
+      "http_status": null,
+      "backend_ok": null,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_list_operations",
+      "operation": null,
+      "http_status": null,
+      "backend_ok": null,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_list_operations",
+      "operation": null,
+      "http_status": null,
+      "backend_ok": null,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_list_operations",
+      "operation": null,
+      "http_status": null,
+      "backend_ok": null,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_list_operations",
+      "operation": null,
+      "http_status": null,
+      "backend_ok": null,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_list_operations",
+      "operation": null,
+      "http_status": null,
+      "backend_ok": null,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_list_operations",
+      "operation": null,
+      "http_status": null,
+      "backend_ok": null,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_list_operations",
+      "operation": null,
+      "http_status": null,
+      "backend_ok": null,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_list_operations",
+      "operation": null,
+      "http_status": null,
+      "backend_ok": null,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_list_operations",
+      "operation": null,
+      "http_status": null,
+      "backend_ok": null,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_list_operations",
+      "operation": null,
+      "http_status": null,
+      "backend_ok": null,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_list_operations",
+      "operation": null,
+      "http_status": null,
+      "backend_ok": null,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_list_operations",
+      "operation": null,
+      "http_status": null,
+      "backend_ok": null,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_list_operations",
+      "operation": null,
+      "http_status": null,
+      "backend_ok": null,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_task_manifest",
+      "operation": null,
+      "http_status": null,
+      "backend_ok": null,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_call",
+      "operation": "load_project_v1_projects__project_id__get",
+      "http_status": 404,
+      "backend_ok": false,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_call",
+      "operation": "save_project_snapshot_v1_projects__project_id__snapshot_put",
+      "http_status": 200,
+      "backend_ok": true,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_call",
+      "operation": "save_pre_fabrication_plan_v1_projects__project_id__engineering_pre_fabrication_plan_post",
+      "http_status": 422,
+      "backend_ok": false,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_call",
+      "operation": "save_pre_fabrication_plan_v1_projects__project_id__engineering_pre_fabrication_plan_post",
+      "http_status": 200,
+      "backend_ok": true,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_call",
+      "operation": "load_project_v1_projects__project_id__get",
+      "http_status": 200,
+      "backend_ok": true,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_call",
+      "operation": "get_assurance_v1_projects__project_id__engineering_assurance_get",
+      "http_status": 200,
+      "backend_ok": true,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_call",
+      "operation": "create_package_v1_projects__project_id__engineering_packages_post",
+      "http_status": 200,
+      "backend_ok": true,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_list_operations",
+      "operation": null,
+      "http_status": null,
+      "backend_ok": null,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_list_operations",
+      "operation": null,
+      "http_status": null,
+      "backend_ok": null,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_call",
+      "operation": "load_project_v1_projects__project_id__get",
+      "http_status": 200,
+      "backend_ok": true,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_call",
+      "operation": "list_packages_v1_projects__project_id__engineering_packages_get",
+      "http_status": 200,
+      "backend_ok": true,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_call",
+      "operation": "get_assurance_v1_projects__project_id__engineering_assurance_get",
+      "http_status": 200,
+      "backend_ok": true,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_describe_operation",
+      "operation": "download_package_v1_projects__project_id__engineering_packages__package_id__download_get",
+      "http_status": null,
+      "backend_ok": null,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_call",
+      "operation": "download_package_v1_projects__project_id__engineering_packages__package_id__download_get",
+      "http_status": 200,
+      "backend_ok": true,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_list_operations",
+      "operation": null,
+      "http_status": null,
+      "backend_ok": null,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_list_operations",
+      "operation": null,
+      "http_status": null,
+      "backend_ok": null,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_list_operations",
+      "operation": null,
+      "http_status": null,
+      "backend_ok": null,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_list_operations",
+      "operation": null,
+      "http_status": null,
+      "backend_ok": null,
+      "status": "completed"
+    },
+    {
+      "tool": "hs_backend_list_operations",
+      "operation": null,
+      "http_status": null,
+      "backend_ok": null,
+      "status": "completed"
+    }
+  ],
+  "final_revision": 3,
+  "saved_plan_actions": 9,
+  "backend_zip_name": "engineering-package-r00000002-106c0c402d9d664b.zip",
+  "backend_zip_sha256": "3ff6eabe3f7ed84218d0a2cb68b3679f3a67af12801b15866bf402438f2a7979",
+  "schema_422_corrected": true,
+  "physical_repair_proven": false
+}
