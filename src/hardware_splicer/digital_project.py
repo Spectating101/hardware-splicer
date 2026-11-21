@@ -6,7 +6,6 @@ Client snapshots cannot supply filesystem paths or substitute result claims.
 """
 from __future__ import annotations
 
-import hashlib
 import importlib.util
 import json
 import os
@@ -24,6 +23,7 @@ from functools import lru_cache
 from .project_store import CorruptProject, ProjectNotFound, RevisionConflict, validate_project_id
 from . import digital_cases as cases
 from .state_paths import repo_root
+from .file_digest import sha256_file
 
 CASE = repo_root() / 'examples/drone_proving_ground/digital'
 DESIGN = CASE.parent / 'revision_b/reference'
@@ -46,7 +46,8 @@ def requirement_tools():
 
 
 def digest(path):
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    # Same check every read; bytes are re-read only when the file changed (see file_digest).
+    return sha256_file(path)
 
 
 def read_json(path):

@@ -7,7 +7,6 @@ Only these repository-owned inputs are copied into an execution workspace.
 from __future__ import annotations
 
 from dataclasses import dataclass, replace
-import hashlib
 import json
 import math
 from pathlib import Path, PurePosixPath
@@ -16,6 +15,7 @@ import shutil
 
 from .project_store import CorruptProject
 from .state_paths import repo_root
+from .file_digest import sha256_file
 
 DEFAULT_CASE = 'hs3g-b'
 ROOT = repo_root()
@@ -367,7 +367,8 @@ def safe_file(directory, name):
 
 
 def sha(path):
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    # Same check every read; bytes are re-read only when the file changed (see file_digest).
+    return sha256_file(path)
 
 
 def read(path):
