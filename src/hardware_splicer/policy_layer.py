@@ -20,6 +20,7 @@ from typing import Any, Mapping
 
 from . import digital_project as digital
 from .digital_cases import DEFAULT_CASE, validate_case_id
+from .state_paths import repo_root
 from .project_store import RevisionConflict, validate_project_id
 
 EVIDENCE_SCHEMA = "hardware_splicer.policy_evidence.v1"
@@ -173,7 +174,7 @@ def numeric_facts(study: Mapping[str, Any]) -> tuple[list[dict], list[str]]:
 
 
 def _exporter_source() -> dict:
-    root = Path(__file__).resolve().parents[2]
+    root = repo_root()
     commit, dirty = None, None
     try:
         commit_run = subprocess.run(["git", "-C", str(root), "rev-parse", "HEAD"],
