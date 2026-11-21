@@ -25,7 +25,7 @@ import { ADVANCED_VIEWS, VIEWS, isAdvancedView } from "./nav.js";
 import { canGoBackInApp, useRoute } from "./router";
 import ProjectWorkspace from "./projectSession/ProjectWorkspace.jsx";
 import { createDigitalProject } from "./projectSession/digitalStudyApi.js";
-import { useProjectPersistence } from "./projectSession/projectPersistence.js";
+import { useProjectPersistence } from "./projectSession/projectPersistence";
 import {
   ACTIONS,
   STAGES,

@@ -9,6 +9,100 @@ import {
   sessionIsPersistable,
 } from "./projectSession.js";
 
+// ---- Types: the parts of the project API and session this module reads or writes. ----------
+
+/** The save states this module dispatches; a project is never "ready" or "approved" here. */
+export type PersistenceStatus = "idle" | "saving" | "saved" | "restored" | "conflict" | "failed";
+
+// PERSISTENCE_STATUS (JavaScript) must list exactly these states: an added, removed or renamed key
+// makes this line a type error. Its values equal its keys, so the narrowing below is sound.
+type SameKeys<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
+const statusKeysMatch: SameKeys<keyof typeof PERSISTENCE_STATUS, PersistenceStatus> = true;
+void statusKeysMatch;
+const STATUS = PERSISTENCE_STATUS as { readonly [K in PersistenceStatus]: K };
+
+/** An API failure: Error plus the HTTP status, the backend's error type and the parsed body. */
+export interface RequestError extends Error {
+  status: number;
+  type: string;
+  body: unknown;
+}
+
+/** A saved project as the API returns it (`body.project`). */
+export interface ProjectEnvelope {
+  project_id?: string;
+  revision?: number;
+  saved_at?: string;
+  snapshot?: Record<string, unknown> & { machineProject?: unknown };
+  recovery?: { used?: boolean };
+  [key: string]: unknown;
+}
+
+/** One row of `GET /v1/projects`. */
+export interface ProjectListRow {
+  project_id: string;
+  name?: string;
+  mode?: string;
+  current_stage?: string | null;
+  latest_revision?: number | null;
+  saved_at?: string | null;
+  created_at?: string | null;
+  archived?: boolean;
+  recovered?: boolean;
+  objective?: string | null;
+  [key: string]: unknown;
+}
+
+export interface ProjectListBody { projects?: ProjectListRow[] }
+export interface ProjectBody { project?: ProjectEnvelope }
+
+/** The session fields this module reads. */
+export interface PersistedSession {
+  projectId?: string | null;
+  projectName?: string;
+  mode?: string;
+  intake?: unknown;
+  machineProject?: unknown;
+  sessionOrigin?: string;
+  snapshotRevision?: number | string | null;
+  [key: string]: unknown;
+}
+
+export type PersistenceAction =
+  | { type: typeof ACTIONS.SET_PERSISTENCE; status: PersistenceStatus; error?: string; revision?: number; savedAt?: string }
+  | { type: typeof ACTIONS.SET_MACHINE_PROJECT; machineProject: unknown; derived: boolean }
+  | {
+      type: typeof ACTIONS.RESTORE_PROJECT_SNAPSHOT; projectId: string; snapshot: Record<string, unknown>;
+      revision?: number; savedAt?: string; recovered: boolean;
+    };
+
+export interface ProjectPersistenceOptions {
+  session: PersistedSession | null | undefined;
+  dispatch: (action: PersistenceAction) => void;
+  enabled?: boolean;
+  debounceMs?: number;
+}
+
+export interface ProjectPersistence {
+  listLoading: boolean;
+  historicalProjectId: string | null;
+  projects: ProjectListRow[];
+  listError: string | null;
+  machineSeedError: string | null;
+  refreshProjects: () => Promise<ProjectListRow[]>;
+  openProject: (projectId: string, options?: { revision?: number | null }) => Promise<ProjectEnvelope>;
+  duplicateProject: (projectId: string, targetProjectId: string) => Promise<ProjectEnvelope | undefined>;
+  archiveProject: (projectId: string, archived?: boolean) => Promise<ProjectEnvelope | undefined>;
+  removeProject: (projectId: string) => Promise<unknown>;
+}
+
+const isRequestError = (error: unknown): error is RequestError =>
+  error instanceof Error && typeof (error as Partial<RequestError>).status === "number";
+const messageOf = (error: unknown): string => (error instanceof Error ? error.message : String(error));
+const statusOf = (error: unknown): number | undefined => (isRequestError(error) ? error.status : undefined);
+
+// ---- API ---------------------------------------------------------------------------------------
+
 const API_BASE =
   import.meta.env.VITE_API_BASE !== undefined
     ? import.meta.env.VITE_API_BASE
@@ -16,31 +110,33 @@ const API_BASE =
       ? "/api"
       : "";
 
-async function parseJson(res) {
+interface ErrorDetail { message?: string; type?: string; error?: { message?: string; type?: string } }
+
+async function parseJson<T>(res: Response): Promise<T> {
   const body = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const detail = body?.detail;
+    const detail = (body as { detail?: string | ErrorDetail } | null)?.detail;
     const error = new Error(
       typeof detail === "string"
         ? detail
         : detail?.message || detail?.error?.message || res.statusText || `Request failed (${res.status})`,
-    );
+    ) as RequestError;
     error.status = res.status;
-    error.type = detail?.type || detail?.error?.type || "request_failed";
+    error.type = (typeof detail === "object" && (detail?.type || detail?.error?.type)) || "request_failed";
     error.body = body;
     throw error;
   }
-  return body;
+  return body as T;
 }
 
-export async function listPersistentProjects({ includeArchived = false } = {}) {
+export async function listPersistentProjects({ includeArchived = false }: { includeArchived?: boolean } = {}): Promise<ProjectListBody> {
   const params = new URLSearchParams();
   if (includeArchived) params.set("include_archived", "true");
   const suffix = params.toString() ? `?${params.toString()}` : "";
   return parseJson(await fetch(`${API_BASE}/v1/projects${suffix}`));
 }
 
-export async function loadPersistentProject(projectId, { revision = null } = {}) {
+export async function loadPersistentProject(projectId: string, { revision = null }: { revision?: number | null } = {}): Promise<ProjectBody> {
   const params = new URLSearchParams();
   if (revision !== null && revision !== undefined) params.set("revision", String(revision));
   const suffix = params.toString() ? `?${params.toString()}` : "";
@@ -50,10 +146,10 @@ export async function loadPersistentProject(projectId, { revision = null } = {})
 }
 
 export async function savePersistentProject(
-  projectId,
-  snapshot,
-  { expectedRevision = null, metadata = {} } = {},
-) {
+  projectId: string,
+  snapshot: unknown,
+  { expectedRevision = null, metadata = {} }: { expectedRevision?: number | null; metadata?: Record<string, unknown> } = {},
+): Promise<ProjectBody> {
   return parseJson(
     await fetch(`${API_BASE}/v1/projects/${encodeURIComponent(projectId)}/snapshot`, {
       method: "PUT",
@@ -67,7 +163,7 @@ export async function savePersistentProject(
   );
 }
 
-export async function seedMachineProjectFromIntake(intake) {
+export async function seedMachineProjectFromIntake(intake: unknown): Promise<{ project?: unknown }> {
   return parseJson(
     await fetch(`${API_BASE}/v1/machine-projects/from-intake`, {
       method: "POST",
@@ -77,7 +173,7 @@ export async function seedMachineProjectFromIntake(intake) {
   );
 }
 
-export async function duplicatePersistentProject(projectId, targetProjectId) {
+export async function duplicatePersistentProject(projectId: string, targetProjectId: string): Promise<ProjectBody> {
   return parseJson(
     await fetch(`${API_BASE}/v1/projects/${encodeURIComponent(projectId)}/duplicate`, {
       method: "POST",
@@ -87,7 +183,7 @@ export async function duplicatePersistentProject(projectId, targetProjectId) {
   );
 }
 
-export async function archivePersistentProject(projectId, archived = true) {
+export async function archivePersistentProject(projectId: string, archived = true): Promise<ProjectBody> {
   return parseJson(
     await fetch(`${API_BASE}/v1/projects/${encodeURIComponent(projectId)}/archive`, {
       method: "PATCH",
@@ -97,7 +193,7 @@ export async function archivePersistentProject(projectId, archived = true) {
   );
 }
 
-export async function deletePersistentProject(projectId) {
+export async function deletePersistentProject(projectId: string): Promise<unknown> {
   return parseJson(
     await fetch(`${API_BASE}/v1/projects/${encodeURIComponent(projectId)}`, {
       method: "DELETE",
@@ -105,26 +201,28 @@ export async function deletePersistentProject(projectId) {
   );
 }
 
-export function useProjectPersistence({ session, dispatch, enabled = true, debounceMs = 700 }) {
-  const [projects, setProjects] = useState([]);
+// ---- Hook --------------------------------------------------------------------------------------
+
+export function useProjectPersistence({ session, dispatch, enabled = true, debounceMs = 700 }: ProjectPersistenceOptions): ProjectPersistence {
+  const [projects, setProjects] = useState<ProjectListRow[]>([]);
   const [firstListLoaded, setFirstListLoaded] = useState(false);
-  const [listError, setListError] = useState(null);
-  const [machineSeedError, setMachineSeedError] = useState(null);
-  const timerRef = useRef(null);
-  const scheduledProjectRef = useRef(null);
-  const pendingSerializedRef = useRef(null);
-  const savedSerializedRef = useRef(null);
-  const machineSeedRef = useRef(null);
-  const activeProjectRef = useRef(session?.projectId || null);
+  const [listError, setListError] = useState<string | null>(null);
+  const [machineSeedError, setMachineSeedError] = useState<string | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scheduledProjectRef = useRef<string | null>(null);
+  const pendingSerializedRef = useRef<string | null>(null);
+  const savedSerializedRef = useRef<string | null>(null);
+  const machineSeedRef = useRef<string | null>(null);
+  const activeProjectRef = useRef<string | null>(session?.projectId || null);
   // A project opened at an explicit revision is read-only: saving an older one would fork history.
-  const historicalProjectRef = useRef(null);
-  const [historicalProjectId, setHistoricalProjectId] = useState(null);
+  const historicalProjectRef = useRef<string | null>(null);
+  const [historicalProjectId, setHistoricalProjectId] = useState<string | null>(null);
 
   useEffect(() => {
     activeProjectRef.current = session?.projectId || null;
   }, [session?.projectId]);
 
-  const refreshProjects = useCallback(async () => {
+  const refreshProjects = useCallback(async (): Promise<ProjectListRow[]> => {
     if (!enabled) return [];
     try {
       const body = await listPersistentProjects();
@@ -133,7 +231,7 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
       setListError(null);
       return next;
     } catch (error) {
-      setListError(error.message);
+      setListError(messageOf(error));
       return [];
     } finally {
       setFirstListLoaded(true);
@@ -148,11 +246,12 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
     if (!enabled || !session?.projectId || !session?.intake || session?.machineProject) {
       return undefined;
     }
-    let seedKey;
+    const projectId = session.projectId;
+    let seedKey: string;
     try {
-      seedKey = `${session.projectId}:${JSON.stringify(session.intake)}`;
+      seedKey = `${projectId}:${JSON.stringify(session.intake)}`;
     } catch (error) {
-      setMachineSeedError(`Machine intake is not serializable: ${error.message}`);
+      setMachineSeedError(`Machine intake is not serializable: ${messageOf(error)}`);
       return undefined;
     }
     if (machineSeedRef.current === seedKey) return undefined;
@@ -165,7 +264,7 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
     const unedited = reopened && baseline === canonicalJson(projectSnapshot(session));
     seedMachineProjectFromIntake(session.intake)
       .then((body) => {
-        if (cancelled || activeProjectRef.current !== session.projectId) return;
+        if (cancelled || activeProjectRef.current !== projectId) return;
         const machineProject = body.project || null;
         if (unedited && savedSerializedRef.current === baseline) {
           savedSerializedRef.current = canonicalJson(projectSnapshot({ ...session, machineProject }));
@@ -177,10 +276,10 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
         });
         setMachineSeedError(null);
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         if (cancelled) return;
         machineSeedRef.current = null;
-        setMachineSeedError(error.message);
+        setMachineSeedError(messageOf(error));
       });
     return () => {
       cancelled = true;
@@ -199,18 +298,18 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
       timerRef.current = null;
       pendingSerializedRef.current = null;
     }
-    if (!enabled || session?.mode === "digital" || !sessionIsPersistable(session)) return undefined;
+    if (!enabled || session?.mode === "digital" || !sessionIsPersistable(session) || !session?.projectId) return undefined;
     if (historicalProjectRef.current && historicalProjectRef.current === session.projectId) return undefined;
 
     const snapshot = projectSnapshot(session);
-    let serialized;
+    let serialized: string;
     try {
       serialized = canonicalJson(snapshot);
     } catch (error) {
       dispatch({
         type: ACTIONS.SET_PERSISTENCE,
-        status: PERSISTENCE_STATUS.failed,
-        error: `Project state is not serializable: ${error.message}`,
+        status: STATUS.failed,
+        error: `Project state is not serializable: ${messageOf(error)}`,
       });
       return undefined;
     }
@@ -225,11 +324,11 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
     pendingSerializedRef.current = serialized;
     scheduledProjectRef.current = session.projectId;
     if (timerRef.current) clearTimeout(timerRef.current);
+    const projectId = session.projectId;
     timerRef.current = setTimeout(async () => {
       timerRef.current = null;
-      const projectId = session.projectId;
       const expectedRevision = Number(session.snapshotRevision || 0);
-      dispatch({ type: ACTIONS.SET_PERSISTENCE, status: PERSISTENCE_STATUS.saving });
+      dispatch({ type: ACTIONS.SET_PERSISTENCE, status: STATUS.saving });
       try {
         const body = await savePersistentProject(projectId, snapshot, {
           expectedRevision,
@@ -239,11 +338,11 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
           },
         });
         if (activeProjectRef.current !== projectId) return;
-        const envelope = body.project || {};
+        const envelope: ProjectEnvelope = body.project || {};
         savedSerializedRef.current = serialized;
         dispatch({
           type: ACTIONS.SET_PERSISTENCE,
-          status: PERSISTENCE_STATUS.saved,
+          status: STATUS.saved,
           revision: envelope.revision,
           savedAt: envelope.saved_at,
         });
@@ -253,10 +352,10 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
         dispatch({
           type: ACTIONS.SET_PERSISTENCE,
           status:
-            error.status === 409
-              ? PERSISTENCE_STATUS.conflict
-              : PERSISTENCE_STATUS.failed,
-          error: error.message,
+            statusOf(error) === 409
+              ? STATUS.conflict
+              : STATUS.failed,
+          error: messageOf(error),
         });
       } finally {
         if (pendingSerializedRef.current === serialized) {
@@ -268,11 +367,11 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
   }, [debounceMs, dispatch, enabled, refreshProjects, session]);
 
   const openProject = useCallback(
-    async (projectId, { revision = null } = {}) => {
-      dispatch({ type: ACTIONS.SET_PERSISTENCE, status: PERSISTENCE_STATUS.saving });
+    async (projectId: string, { revision = null }: { revision?: number | null } = {}): Promise<ProjectEnvelope> => {
+      dispatch({ type: ACTIONS.SET_PERSISTENCE, status: STATUS.saving });
       try {
         const body = await loadPersistentProject(projectId, { revision });
-        const envelope = body.project || {};
+        const envelope: ProjectEnvelope = body.project || {};
         const snapshot = envelope.snapshot || {};
         const recovery = envelope.recovery || {};
         // Compare future saves with the snapshot as the session will hold it, so loading
@@ -300,10 +399,10 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
         dispatch({
           type: ACTIONS.SET_PERSISTENCE,
           status:
-            error.status === 409
-              ? PERSISTENCE_STATUS.conflict
-              : PERSISTENCE_STATUS.failed,
-          error: error.message,
+            statusOf(error) === 409
+              ? STATUS.conflict
+              : STATUS.failed,
+          error: messageOf(error),
         });
         throw error;
       }
@@ -312,7 +411,7 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
   );
 
   const duplicateProject = useCallback(
-    async (projectId, targetProjectId) => {
+    async (projectId: string, targetProjectId: string) => {
       const body = await duplicatePersistentProject(projectId, targetProjectId);
       await refreshProjects();
       return body.project;
@@ -321,7 +420,7 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
   );
 
   const archiveProject = useCallback(
-    async (projectId, archived = true) => {
+    async (projectId: string, archived = true) => {
       const body = await archivePersistentProject(projectId, archived);
       await refreshProjects();
       return body.project;
@@ -330,7 +429,7 @@ export function useProjectPersistence({ session, dispatch, enabled = true, debou
   );
 
   const removeProject = useCallback(
-    async (projectId) => {
+    async (projectId: string) => {
       const body = await deletePersistentProject(projectId);
       await refreshProjects();
       return body;

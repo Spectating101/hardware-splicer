@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { seedMachineProjectFromIntake } from "./projectPersistence.js";
+import { seedMachineProjectFromIntake } from "./projectPersistence";
 
 function response(body, { ok = true, status = 200, statusText = "OK" } = {}) {
   return {
