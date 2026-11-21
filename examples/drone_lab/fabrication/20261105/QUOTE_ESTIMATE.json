@@ -1,0 +1,31 @@
+{
+  "provider": "3DEX 三德列印",
+  "url": "https://3dex.tw/quote/",
+  "date": "2026-11-05",
+  "quote_method": "real site browser-side automatic quote; never submitted",
+  "design": [
+    "aerial_frame.stl",
+    "battery_cradle.stl"
+  ],
+  "process": "FDM",
+  "material": "PETG",
+  "color": "超淺灰",
+  "infill_percent": 50,
+  "wall_mm_default": 1.2,
+  "nominal_tolerance_mm_default": 0.2,
+  "postprocessing": "none",
+  "quantity_each": 1,
+  "frame_NTD_ex_tax": 327,
+  "cradle_NTD_ex_tax": 174,
+  "subtotal_NTD_ex_tax": 501,
+  "vat_NTD": 25,
+  "total_NTD_quoted": 526,
+  "shipping_selection": "postal registered mail",
+  "site_stated_production_days_estimate": 2,
+  "vendor_submission": false,
+  "invoice": false,
+  "payment": false,
+  "production": false,
+  "image_evidence": "3dex_quote_petg_50pct.png",
+  "caveat": "Quote subject to fabricator manual review, delivery and checkout confirmation"
+}

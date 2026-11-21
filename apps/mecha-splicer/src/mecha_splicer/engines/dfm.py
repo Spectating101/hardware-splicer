@@ -8,6 +8,8 @@ import math
 from ..spec import (
     AssemblySpec,
     BeltReductionSpec,
+    AerialFrameSpec,
+    MountingPlateSpec,
     BracketSpec,
     EnclosureSpec,
     GripperSpec,
@@ -38,6 +40,8 @@ def check_project(spec: ProjectSpec) -> list[DfmIssue]:
 
     if (
         spec.enclosure is None
+        and spec.aerial_frame is None
+        and spec.mounting_plate is None
         and spec.bracket is None
         and spec.servo_mount is None
         and spec.linear_axis is None
@@ -58,6 +62,10 @@ def check_project(spec: ProjectSpec) -> list[DfmIssue]:
 
     if spec.enclosure is not None:
         issues.extend(check_enclosure(spec.enclosure, process=spec.process, mode=spec.mode))
+    if spec.aerial_frame is not None:
+        issues.extend(check_aerial_frame(spec.aerial_frame, process=spec.process))
+    if spec.mounting_plate is not None:
+        issues.extend(check_mounting_plate(spec.mounting_plate, process=spec.process))
     if spec.bracket is not None:
         issues.extend(check_bracket(spec.bracket, process=spec.process, mode=spec.mode))
     if spec.servo_mount is not None:
@@ -411,4 +419,61 @@ def check_assembly(a: AssemblySpec, *, mode: str) -> list[DfmIssue]:
             issues.append(DfmIssue("block", "Assembly instance missing module name."))
     if mode == "professional":
         issues.append(DfmIssue("info", "Assembly is a placement aid; verify clearances and fastener access in your real build."))
+    return issues
+
+
+def check_mounting_plate(mp: MountingPlateSpec, *, process: str) -> list[DfmIssue]:
+    """Reject plate geometry that cuts through mounting holes or outer walls."""
+    issues = []
+    if mp.t_mm < _min_wall_mm(process):
+        issues.append(DfmIssue("warn", "Mounting plate is thin for FDM printing."))
+    for dimension, pitch in ((mp.w_mm, mp.pitch_x_mm), (mp.d_mm, mp.pitch_y_mm)):
+        rim = (dimension - pitch - mp.hole_d_mm) / 2
+        if rim < 1.5:
+            issues.append(DfmIssue("block", "Less than 1.5 mm outside rim after drill clearance."))
+    if (mp.window_w_mm == 0) != (mp.window_d_mm == 0):
+        issues.append(DfmIssue("block", "Both aperture dimensions must be positive or both zero."))
+    if mp.window_w_mm and mp.window_d_mm:
+        if mp.window_w_mm > mp.w_mm or mp.window_d_mm > mp.d_mm:
+            issues.append(DfmIssue("block", "Central aperture exceeds mounting plate."))
+        for aperture, pitch in ((mp.window_w_mm, mp.pitch_x_mm), (mp.window_d_mm, mp.pitch_y_mm)):
+            if (pitch - aperture - mp.hole_d_mm) / 2 < 1.5:
+                issues.append(DfmIssue("block", "Central aperture overlaps mounting-hole material."))
+    return issues
+
+
+def check_aerial_frame(a: AerialFrameSpec, *, process: str) -> list[DfmIssue]:
+    """Check direct physical geometry constraints, not a generic CI count."""
+    from math import sqrt
+    issues: list[DfmIssue] = []
+    inner_r = a.prop_diameter_mm/2 + a.prop_radial_clearance_mm
+    outer_r = inner_r + a.duct_wall_mm
+    adjacent = a.wheelbase_mm / sqrt(2)
+    if adjacent - 2*outer_r < 2:
+        issues.append(DfmIssue("block", "Adjacent duct walls require >=2mm clearance."))
+    if a.prop_radial_clearance_mm < .6:
+        issues.append(DfmIssue("block", "Propeller radial clearance is below 0.6mm."))
+    if a.duct_wall_mm < 1.0:
+        issues.append(DfmIssue("block", "Full-height printed duct wall below 1.0mm."))
+    if a.duct_height_mm < 13:
+        issues.append(DfmIssue("block", "Propeller guard lower than expected motor/propeller plane."))
+    if a.plate_thickness_mm < 1.8 or a.strut_width_mm < 2.0:
+        issues.append(DfmIssue("block", "Tinywhoop base plate/struts below prototype minimum."))
+    if (a.motor_bolt_pcd_mm + a.motor_bolt_hole_d_mm + 2.0) > a.motor_plate_diameter_mm:
+        issues.append(DfmIssue("block", "Motor bolt holes too close to mounting pad rim."))
+    if a.motor_wire_hole_d_mm/2 + a.motor_bolt_hole_d_mm/2 >= a.motor_bolt_pcd_mm/2 - .2:
+        issues.append(DfmIssue("block", "Motor central cable bore intersects bolt holes."))
+    if a.fc_boss_diameter_mm < a.fc_mount_hole_d_mm + 3.0:
+        issues.append(DfmIssue("block", "Flight-controller screw boss has inadequate rim."))
+    motor_x = a.wheelbase_mm/(2*sqrt(2))
+    fc_r = a.fc_mount_pitch_mm / sqrt(2)
+    near_motor_from_fc = sqrt((motor_x-fc_r)**2+motor_x**2)
+    if near_motor_from_fc - a.fc_boss_diameter_mm/2 - outer_r < 1:
+        issues.append(DfmIssue("block", "Rotated 26mm FC mounting bosses interfere with prop ducts."))
+    if a.battery_cradle_wall_mm < 1.0:
+        issues.append(DfmIssue("block", "Battery channel wall below 1mm."))
+    if a.battery_w_mm + 2*a.battery_cradle_wall_mm > a.fc_mount_pitch_mm + 4:
+        issues.append(DfmIssue("block", "Battery channel too wide for center crossbar zone."))
+    if a.battery_clearance_mm < 0.3:
+        issues.append(DfmIssue("warn", "Battery fit tolerance under 0.3mm; verify real cells."))
     return issues
