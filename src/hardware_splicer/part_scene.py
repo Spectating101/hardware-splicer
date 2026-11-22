@@ -577,6 +577,25 @@ def _project_part_records(glb, project):
     return bom, evidence
 
 
+def _basis_rules(project):
+    """Optional geometry-basis.json: how faithful each part's shape is, as the project documents it.
+
+    {"source": "<where the project states this>", "rules": [{"match": "<regex on node name>",
+    "basis": "custom|vendor_step|envelope|proxy|unknown"}]}. The first matching rule wins; a node no
+    rule matches keeps the basis the GLB itself declares, or unknown.
+    """
+    path = project / "geometry-basis.json"
+    if not path.is_file():
+        return []
+    document = json.loads(path.read_text(encoding="utf-8"))
+    rules = []
+    for rule in document.get("rules", []) if isinstance(document, dict) else []:
+        basis = rule.get("basis") if isinstance(rule, dict) else None
+        if basis in {"custom", "vendor_step", "envelope", "proxy", "unknown"} and isinstance(rule.get("match"), str):
+            rules.append((re.compile(rule["match"]), basis))
+    return rules
+
+
 def build_parts_sidecar_for(glb_path, project_dir, revision_id, *, glb_native_units=None) -> dict:
     """Read one GLB without inferring a comparison or engineering evidence."""
     project = Path(project_dir).resolve()
@@ -591,6 +610,7 @@ def build_parts_sidecar_for(glb_path, project_dir, revision_id, *, glb_native_un
     nodes = _glb_nodes(doc, binary)
     bom, evidence = _project_part_records(glb, project)
     custom = {path.stem for path in (project / "exports").glob("*.step") if path.is_file()}
+    basis_rules = _basis_rules(project)
     extents = _bounds(point for _, _, bounds, _, _ in nodes.values()
                       if bounds for point in (bounds[:3], bounds[3:]))
     centre = _centre(extents) if extents else [0, 0, 0]
@@ -606,7 +626,10 @@ def build_parts_sidecar_for(glb_path, project_dir, revision_id, *, glb_native_un
         used_ids.add(part_id)
         kind = extras.get("geometry_basis") or extras.get("basis") or extras.get("kind")
         basis = _BASIS.get(kind, "unknown") if isinstance(kind, str) else "unknown"
-        if name in custom:
+        ruled = next((value for pattern, value in basis_rules if pattern.fullmatch(name or "")), None)
+        if ruled:
+            basis = ruled
+        elif name in custom:
             basis = "custom"
         elif basis == "unknown" and name.upper().startswith("REFERENCE_ENVELOPE"):
             # The author named this node as a reference envelope, not real part geometry.
