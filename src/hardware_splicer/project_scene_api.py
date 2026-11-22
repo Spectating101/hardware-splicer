@@ -200,3 +200,96 @@ def get_scene_fit(project_id: str, revision: str) -> dict:
     glb = _scene_asset_path(project_id, revision, "glb")
     parts = _scene_asset_path(project_id, revision, "parts")
     return {"project_id": project_id, "revision": revision, **scene_fit_report(glb, parts)}
+
+
+# ---- Evidence records and live KiCad checks ---------------------------------------------------
+
+@project_scene_router.get(f"{_SCENES}/{{project_id}}/evidence")
+def get_scene_evidence(project_id: str) -> dict:
+    """The evidence records a scene manifest lists (strategy, simulation, receipts, tool runs, BOM)."""
+    from .scene_evidence import scene_evidence
+
+    manifest = _manifest(project_id)
+    if manifest is None:
+        raise HTTPException(404, "Scene project not found")
+    return {"project_id": project_id, "records": scene_evidence(_repo_root(), manifest)}
+
+
+def _revision_file(project_id: str, revision: str, field: str) -> Path | None:
+    from .scene_evidence import EvidenceError, resolve
+
+    manifest = _manifest(project_id)
+    entry = next((row for row in manifest["revisions"] if row["id"] == revision), None) if manifest else None
+    if entry is None:
+        raise HTTPException(404, "Scene revision not found")
+    if not entry.get(field):
+        return None
+    try:
+        return resolve(_repo_root(), entry[field])
+    except EvidenceError:
+        raise HTTPException(404, "Scene board file not found") from None
+
+
+def _kicad_report(kind: str, path: Path, out: Path) -> dict | None:
+    argv = (["kicad-cli", "pcb", "drc", "--format", "json", "--severity-all", "--schematic-parity"] if kind == "drc"
+            else ["kicad-cli", "sch", "erc", "--format", "json", "--severity-all"])
+    try:
+        subprocess.run([*argv, "-o", str(out), str(path)], capture_output=True, timeout=300, check=False,
+                       env={key: value for key, value in os.environ.items() if key in {"PATH", "HOME", "LANG", "LC_ALL"}})
+        return json.loads(out.read_text(encoding="utf-8"))
+    except (OSError, subprocess.TimeoutExpired, ValueError):
+        return None
+
+
+@project_scene_router.get(f"{_SCENES}/{{project_id}}/{{revision}}/kicad")
+def get_scene_kicad_checks(project_id: str, revision: str) -> dict:
+    """KiCad's own DRC and ERC on the revision's board and schematic, each violation traced to parts."""
+    import tempfile
+
+    from .file_digest import sha256_file
+    from .scene_evidence import summarise_kicad
+    from .state_paths import state_dir
+
+    board = _revision_file(project_id, revision, "board")
+    schematic = _revision_file(project_id, revision, "schematic")
+    if board is None:
+        raise HTTPException(404, "This scene revision has no KiCad board")
+    key = "-".join(sha256_file(path)[:24] for path in (board, schematic) if path)
+    cache = state_dir() / "scene-kicad" / f"{key}.json"
+    with _fit_lock(f"kicad-{key}"):
+        if cache.is_file():
+            try:
+                raw = json.loads(cache.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                raw = None
+        else:
+            raw = None
+        if raw is None:
+            with tempfile.TemporaryDirectory(prefix="hs-kicad-") as work:
+                raw = {"drc": _kicad_report("drc", board, Path(work) / "drc.json"),
+                       "erc": _kicad_report("erc", schematic, Path(work) / "erc.json") if schematic else None}
+            if raw["drc"] is None:
+                raise HTTPException(503, "KiCad checks unavailable: kicad-cli could not check this board.")
+            cache.parent.mkdir(parents=True, exist_ok=True)
+            cache.write_text(json.dumps(raw), encoding="utf-8")
+    project = _repo_root() / "projects" / project_id
+    footprints = []
+    bom_path = project / "BOM.json"
+    if bom_path.is_file():
+        try:
+            footprints = [{"ref": item["id"], "bbox": item["bbox_kicad_mm"]}
+                          for item in json.loads(bom_path.read_text(encoding="utf-8")).get("items", [])
+                          if item.get("bbox_kicad_mm")]
+        except (OSError, ValueError, KeyError):
+            footprints = []
+    summary = summarise_kicad(raw["drc"], raw["erc"], footprints)
+    # Reference designators → this revision's part ids, so the workspace can select them.
+    parts = {}
+    parts_path = _scene_asset_path(project_id, revision, "parts")
+    for part in json.loads(parts_path.read_text(encoding="utf-8")).get("parts", []):
+        parts[part.get("node_name")] = part.get("part_id")
+    for report in (summary["drc"], summary["erc"]):
+        for row in (report or {}).get("violations", []):
+            row["part_ids"] = sorted({parts[ref] for ref in row["parts"] if ref in parts})
+    return {"project_id": project_id, "revision": revision, "board": board.name,
+            "schematic": schematic.name if schematic else None, **summary}
