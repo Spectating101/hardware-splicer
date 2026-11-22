@@ -1,6 +1,10 @@
 """Read-only manifests and assets for project scenes."""
 
 import json
+import logging
+import os
+import subprocess
+import threading
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
@@ -49,7 +53,7 @@ def _manifest(project_id: str) -> dict | None:
     return None
 
 
-def _scene_asset(project_id: str, revision: str, asset: str, *, legacy: bool = False) -> FileResponse:
+def _scene_asset_path(project_id: str, revision: str, asset: str, *, legacy: bool = False) -> Path:
     manifest = _manifest(project_id)
     entry = next((row for row in manifest["revisions"] if row["id"] == revision), None) if manifest else None
     if entry is None or (legacy and revision not in {"7", "5"}):
@@ -63,6 +67,11 @@ def _scene_asset(project_id: str, revision: str, asset: str, *, legacy: bool = F
         path = _confined_path(project, str(Path(relative).relative_to(prefix)))
     if path is None or not path.is_file():
         raise HTTPException(404, "Fielddeck scene asset not found" if legacy else "Scene asset not found")
+    return path
+
+
+def _scene_asset(project_id: str, revision: str, asset: str, *, legacy: bool = False) -> FileResponse:
+    path = _scene_asset_path(project_id, revision, asset, legacy=legacy)
     return FileResponse(path, media_type="model/gltf-binary" if asset == "glb" else "application/json")
 
 
@@ -138,3 +147,56 @@ def get_scene_records(project_id: str) -> dict:
             continue
         records.append({"label": source.get("label"), "path": relative, "status": "read", "data": data})
     return {"project_id": project_id, "records": records}
+
+
+# ---- Measured fit -----------------------------------------------------------------------------
+# The scene's own CAD model, measured: part-to-part interference and clearance, and overall size.
+# scene_fit.py runs in the native CAD interpreter (it needs trimesh, scipy and manifold3d); the
+# report is cached under the model's and sidecar's hashes, so each revision is measured once.
+_fit_locks: dict[str, threading.Lock] = {}
+_fit_guard = threading.Lock()
+
+
+def _fit_lock(key: str) -> threading.Lock:
+    with _fit_guard:
+        return _fit_locks.setdefault(key, threading.Lock())
+
+
+def scene_fit_report(glb: Path, parts: Path) -> dict:
+    from . import scene_fit
+    from .digital_project import native_python
+    from .file_digest import sha256_file
+    from .state_paths import state_dir
+
+    key = f"{sha256_file(glb)[:24]}-{sha256_file(parts)[:24]}-{scene_fit.VERSION}"
+    cache = state_dir() / "scene-fit" / f"{key}.json"
+    with _fit_lock(key):
+        if cache.is_file():
+            try:
+                return json.loads(cache.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                pass
+        try:
+            done = subprocess.run(
+                [native_python(), "-I", scene_fit.__file__, "--glb", str(glb), "--parts", str(parts)],
+                capture_output=True, text=True, timeout=600, check=False,
+                env={key_: value for key_, value in os.environ.items() if key_ in {"PATH", "HOME", "LANG", "LC_ALL"}})
+            report = json.loads(done.stdout) if done.returncode == 0 else None
+        except (OSError, subprocess.TimeoutExpired, ValueError):
+            report = None
+        if report is None:
+            logging.getLogger(__name__).warning("scene fit failed for %s", glb.name, exc_info=False)
+            raise HTTPException(503, "Fit measurement unavailable: the CAD runtime could not measure this model.")
+        cache.parent.mkdir(parents=True, exist_ok=True)
+        tmp = cache.with_suffix(".tmp")
+        tmp.write_text(json.dumps(report, sort_keys=True), encoding="utf-8")
+        os.replace(tmp, cache)
+        return report
+
+
+@project_scene_router.get(f"{_SCENES}/{{project_id}}/{{revision}}/fit")
+def get_scene_fit(project_id: str, revision: str) -> dict:
+    """Measured interference, clearance and size of one scene revision's CAD model."""
+    glb = _scene_asset_path(project_id, revision, "glb")
+    parts = _scene_asset_path(project_id, revision, "parts")
+    return {"project_id": project_id, "revision": revision, **scene_fit_report(glb, parts)}
