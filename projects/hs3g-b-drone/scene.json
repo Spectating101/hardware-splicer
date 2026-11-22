@@ -2,8 +2,10 @@
   "schema": "hardware_splicer.scene_manifest.v1",
   "project_id": "hs3g-b-drone",
   "title": "HS-3G-B drone",
-  "subtitle": "137 mm frame · digital study assembly",
-  "registered_cases": ["hs3g-b"],
+  "subtitle": "137 mm frame \u00b7 digital study assembly",
+  "registered_cases": [
+    "hs3g-b"
+  ],
   "revisions": [
     {
       "id": "b",
@@ -19,7 +21,20 @@
   "geometry_status": "available",
   "geometry_note": "Native frame plus representative components and blades; not vendor-detailed CAD. Copied from examples/drone_proving_ground/digital/reference/HS3G_B_ASSEMBLY.glb.",
   "sources": [
-    {"label": "Digital study README", "path": "projects/hs3g-b-drone/geometry-basis.json"},
-    {"label": "Study model record", "href": "examples/drone_proving_ground/digital/reference/model.json"}
+    {
+      "label": "Digital study README",
+      "path": "projects/hs3g-b-drone/geometry-basis.json"
+    },
+    {
+      "label": "Study model record",
+      "href": "examples/drone_proving_ground/digital/reference/model.json"
+    }
+  ],
+  "evidence": [
+    {
+      "kind": "simulation",
+      "label": "Flight simulation verification",
+      "path": "examples/drone_proving_ground/digital/reference/verification.json"
+    }
   ]
 }

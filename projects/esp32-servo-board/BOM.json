@@ -5,67 +5,145 @@
     {
       "id": "C1",
       "name": "C1 \u00b7 10uF",
-      "footprint": "Capacitor_SMD:C_0603_1608Metric"
+      "footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "bbox_kicad_mm": [
+        25.75,
+        37.4,
+        28.25,
+        38.6
+      ]
     },
     {
       "id": "C2",
       "name": "C2 \u00b7 10uF",
-      "footprint": "Capacitor_SMD:C_0603_1608Metric"
+      "footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "bbox_kicad_mm": [
+        28.75,
+        37.4,
+        31.25,
+        38.6
+      ]
     },
     {
       "id": "J1",
       "name": "J1 \u00b7 USB",
-      "footprint": "Connector_USB:USB_Micro-B"
+      "footprint": "Connector_USB:USB_Micro-B",
+      "bbox_kicad_mm": [
+        2.94,
+        20.55,
+        9.06,
+        29.45
+      ]
     },
     {
       "id": "J2",
       "name": "J2 \u00b7 SENSOR_PORT",
-      "footprint": "Connector_JST:JST_SH_SM04B"
+      "footprint": "Connector_JST:JST_SH_SM04B",
+      "bbox_kicad_mm": [
+        69.94,
+        8.94,
+        74.06,
+        15.06
+      ]
     },
     {
       "id": "J3",
       "name": "J3 \u00b7 SERVO_PORT",
-      "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x04"
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x04",
+      "bbox_kicad_mm": [
+        70.54,
+        22.74,
+        73.46,
+        33.26
+      ]
     },
     {
       "id": "J4",
       "name": "J4 \u00b7 SERVO_5V_IN",
-      "footprint": "Connector_JST:JST_XH_B02B"
+      "footprint": "Connector_JST:JST_XH_B02B",
+      "bbox_kicad_mm": [
+        67.94,
+        40.74,
+        76.06,
+        45.26
+      ]
     },
     {
       "id": "MH1",
       "name": "MH1 \u00b7 M2",
-      "footprint": "MountingHole:MountingHole_2.2mm_M2"
+      "footprint": "MountingHole:MountingHole_2.2mm_M2",
+      "bbox_kicad_mm": [
+        3.8,
+        3.8,
+        8.2,
+        8.2
+      ]
     },
     {
       "id": "MH2",
       "name": "MH2 \u00b7 M2",
-      "footprint": "MountingHole:MountingHole_2.2mm_M2"
+      "footprint": "MountingHole:MountingHole_2.2mm_M2",
+      "bbox_kicad_mm": [
+        71.8,
+        41.8,
+        76.2,
+        46.2
+      ]
     },
     {
       "id": "R1",
       "name": "R1 \u00b7 10K",
-      "footprint": "Resistor_SMD:R_0603_1608Metric"
+      "footprint": "Resistor_SMD:R_0603_1608Metric",
+      "bbox_kicad_mm": [
+        35.75,
+        11.4,
+        38.25,
+        12.6
+      ]
     },
     {
       "id": "R2",
       "name": "R2 \u00b7 10K",
-      "footprint": "Resistor_SMD:R_0603_1608Metric"
+      "footprint": "Resistor_SMD:R_0603_1608Metric",
+      "bbox_kicad_mm": [
+        35.75,
+        14.4,
+        38.25,
+        15.6
+      ]
     },
     {
       "id": "U1",
       "name": "U1 \u00b7 ESP32-WROOM-32",
-      "footprint": "RF_Module:ESP32-WROOM-32"
+      "footprint": "RF_Module:ESP32-WROOM-32",
+      "bbox_kicad_mm": [
+        37.8,
+        11.44,
+        58.2,
+        34.07
+      ]
     },
     {
       "id": "U2",
       "name": "U2 \u00b7 CP2102",
-      "footprint": "Package_QFN:QFN-28"
+      "footprint": "Package_QFN:QFN-28",
+      "bbox_kicad_mm": [
+        18.1,
+        21.1,
+        25.9,
+        28.66
+      ]
     },
     {
       "id": "U3",
       "name": "U3 \u00b7 3V3",
-      "footprint": "Package_TO_SOT_SMD:SOT-223"
+      "footprint": "Package_TO_SOT_SMD:SOT-223",
+      "bbox_kicad_mm": [
+        16.34,
+        34.3,
+        23.66,
+        41.6
+      ]
     }
   ]
 }

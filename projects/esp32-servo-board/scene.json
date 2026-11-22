@@ -2,7 +2,7 @@
   "schema": "hardware_splicer.scene_manifest.v1",
   "project_id": "esp32-servo-board",
   "title": "ESP32 servo controller board",
-  "subtitle": "KiCad board · footprint envelopes",
+  "subtitle": "KiCad board \u00b7 footprint envelopes",
   "registered_cases": [],
   "revisions": [
     {
@@ -10,7 +10,8 @@
       "label": "Board A",
       "glb": "projects/esp32-servo-board/cad/main_ctrl_esp32_servo.glb",
       "parts": "projects/esp32-servo-board/parts.json",
-      "glb_native_units": "mm"
+      "glb_native_units": "mm",
+      "board": "examples/main_ctrl_esp32_servo.kicad_pcb"
     }
   ],
   "compare": null,
@@ -19,7 +20,13 @@
   "geometry_status": "available",
   "geometry_note": "Board outline from Edge.Cuts; each footprint is a box over its pads and graphics with an assumed height (footprint-heights.json). Component 3D models are not attached.",
   "sources": [
-    {"label": "KiCad board", "href": "examples/main_ctrl_esp32_servo.kicad_pcb"},
-    {"label": "Footprint heights (assumed)", "path": "projects/esp32-servo-board/footprint-heights.json"}
+    {
+      "label": "KiCad board",
+      "href": "examples/main_ctrl_esp32_servo.kicad_pcb"
+    },
+    {
+      "label": "Footprint heights (assumed)",
+      "path": "projects/esp32-servo-board/footprint-heights.json"
+    }
   ]
 }

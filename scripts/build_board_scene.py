@@ -90,10 +90,12 @@ def main() -> int:
         name = footprint.GetFPIDAsString()
         height, why = assumed_height(name, value, reference)
         heights[reference] = {"height_mm": height, "state": "assumed", "why": why, "footprint": name}
-        bom.append({"id": reference, "name": f"{reference} · {value}", "footprint": name})
+        box = footprint.GetBoundingBox(False, False)
+        # KiCad coordinates (mm, Y down), so a DRC/ERC position can be traced to its footprint.
+        bom.append({"id": reference, "name": f"{reference} · {value}", "footprint": name,
+                    "bbox_kicad_mm": [round(pcbnew.ToMM(v), 4) for v in (box.GetLeft(), box.GetTop(), box.GetRight(), box.GetBottom())]})
         if height <= 0:
             continue
-        box = footprint.GetBoundingBox(False, False)
         x0, x1 = pcbnew.ToMM(box.GetLeft()), pcbnew.ToMM(box.GetRight())
         y0, y1 = -pcbnew.ToMM(box.GetBottom()), -pcbnew.ToMM(box.GetTop())
         bottom = footprint.IsFlipped()
