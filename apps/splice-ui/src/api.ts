@@ -785,6 +785,40 @@ export async function fetchSceneManifest(projectId: string, signal?: AbortSignal
   return parseJson<SceneManifest>(res);
 }
 
+/** One pair of parts the fit engine measured: overlapping, touching, tight or near. */
+export interface SceneFitPair {
+  a: string;
+  b: string;
+  kind: "overlap" | "touching" | "tight" | "near";
+  basis: [string, string];
+  stand_in: boolean;
+  gap_mm: number;
+  precision_mm: number;
+  overlap_mm3: number | null;
+  overlap_computed: boolean;
+}
+
+/** GET /v1/scenes/{id}/{revision}/fit: the CAD model measured, never a physical result. */
+export interface SceneFit {
+  project_id: string;
+  revision: string;
+  schema: string;
+  version: string;
+  basis: string;
+  size_mm: [number, number, number] | null;
+  parts_measured: number;
+  parts_unmatched: string[];
+  pairs: SceneFitPair[];
+  counts: Record<string, number>;
+  not_computed: { what: string; parts: string[]; why: string }[];
+  method: Record<string, unknown>;
+}
+
+export async function fetchSceneFit(projectId: string, revision: string, signal?: AbortSignal): Promise<SceneFit> {
+  const res = await fetch(`${sceneRevisionUrl(projectId, revision)}/fit`, { signal });
+  return parseJson<SceneFit>(res);
+}
+
 export async function fetchHealth(): Promise<HealthResponse> {
   const res = await fetch(`${API_BASE}/health`);
   return parseJson<HealthResponse>(res);

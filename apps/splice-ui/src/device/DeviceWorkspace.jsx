@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
-import { fetchSceneManifest } from "../api";
+import { fetchSceneFit, fetchSceneManifest } from "../api";
 import { BASIS_LABELS, openQuestions } from "../components/fielddeckLogic.js";
-import { deviceFindings, findTargets, shortLabel, STATES } from "./deviceFindings.js";
+import { deviceFindings, findTargets, fitFindings, shortLabel, STATES } from "./deviceFindings.js";
 import "./device.css";
 
 const FieldDeckScene = lazy(() => import("../components/FieldDeckScene.jsx"));
@@ -101,6 +101,7 @@ export default function DeviceWorkspace({ sceneId, onExit }) {
   const [active, setActive] = useState(null);
   const [selected, setSelected] = useState(null);
   const [query, setQuery] = useState("");
+  const [fit, setFit] = useState({ state: "idle", report: null, error: "" });
 
   useEffect(() => {
     const controller = new AbortController();
@@ -112,9 +113,26 @@ export default function DeviceWorkspace({ sceneId, onExit }) {
   }, [sceneId]);
 
   const labelOf = (rev) => data?.revisions?.find(([id]) => id === rev)?.[1] ?? rev;
-  const findings = useMemo(() => (data?.sidecars ? deviceFindings({
-    sidecars: data.sidecars, compare: data.compare, focusPart: data.focusPart, faceFit: data.faceFit, labelOf,
-  }) : []), [data?.sidecars, data?.compare, data?.focusPart, data?.faceFit, data?.revisions]);
+  const fitRevision = data?.compare?.target ?? data?.revisions?.at(-1)?.[0] ?? null;
+  // The model as measured by the server's fit engine: computed once per model, then cached there.
+  useEffect(() => {
+    if (!fitRevision) return undefined;
+    const controller = new AbortController();
+    setFit({ state: "loading", report: null, error: "" });
+    fetchSceneFit(sceneId, fitRevision, controller.signal)
+      .then((report) => { if (!controller.signal.aborted) setFit({ state: "ready", report, error: "" }); })
+      .catch((cause) => { if (!controller.signal.aborted) setFit({ state: "error", report: null, error: cause.message }); });
+    return () => controller.abort();
+  }, [sceneId, fitRevision]);
+  const findings = useMemo(() => {
+    if (!data?.sidecars) return [];
+    const recorded = deviceFindings({
+      sidecars: data.sidecars, compare: data.compare, focusPart: data.focusPart, faceFit: data.faceFit, labelOf,
+    });
+    const measured = fitFindings(fit.report, { sidecar: data.sidecars[fitRevision], revision: fitRevision, labelOf });
+    const chosen = recorded.filter((group) => group.id === "chosen");
+    return [...chosen, ...measured, ...recorded.filter((group) => group.id !== "chosen")];
+  }, [data?.sidecars, data?.compare, data?.focusPart, data?.faceFit, data?.revisions, fit.report, fitRevision]);
   // The stage numbers open questions in this order; a finding shows the numbers of its own reasons.
   const pinNumbers = useMemo(() => {
     if (!data?.sidecars || !data?.index) return new Map();
@@ -178,6 +196,8 @@ export default function DeviceWorkspace({ sceneId, onExit }) {
           )) : <li className="dv-none">No part or connection matches “{query}”.</li>}
         </ul>}
         {!data?.sidecars && !error && <p className="dv-none">Reading the device records…</p>}
+        {fit.state === "loading" && <p className="dv-none" role="status">Measuring the CAD model: part-to-part clearances and collisions. The first measurement of a model takes a few seconds.</p>}
+        {fit.state === "error" && <p className="dv-none" role="status">Measured fit unavailable: {fit.error}</p>}
         {findings.map((group) => (
           <div key={group.id} className="dv-group">
             <h2>{group.title}</h2>

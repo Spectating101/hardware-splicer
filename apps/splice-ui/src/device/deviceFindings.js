@@ -5,6 +5,7 @@
 import { coverHeadline, coverDetail } from "../components/fielddeckLogic.js";
 
 export const STATES = {
+  clash: "collides in CAD",
   computed: "computed from CAD",
   recorded: "recorded",
   open: "open",
@@ -22,7 +23,10 @@ function partLabel(sidecar, partId) {
 // Sidecar labels carry the full product line ("Nano 10000mAh 30W bank, Black Stone; ..."); the
 // finding names the thing, and the full label stays in the part card.
 export function shortLabel(label = "") {
-  const head = label.split(/[;,(]/)[0].trim();
+  // Generated node names ("REFERENCE_ENVELOPE_central_base") read as words, marked as envelopes.
+  const envelope = /^REFERENCE_ENVELOPE_/i.test(label);
+  const text = envelope ? `${label.replace(/^REFERENCE_ENVELOPE_/i, "").replace(/_/g, " ")} (reference envelope)` : label;
+  const head = envelope ? text : text.split(/[;,(]/)[0].trim();
   return head.length > 48 ? `${head.slice(0, 46).trimEnd()}…` : head;
 }
 
@@ -177,4 +181,114 @@ export function findTargets(index, revision, query) {
     .filter(({ rank }) => rank >= 0)
     .sort((a, b) => a.rank - b.rank || a.label.localeCompare(b.label))
     .slice(0, 8);
+}
+
+const mm = (value) => `${Number(value).toFixed(value < 10 ? 2 : 1)} mm`;
+
+// The measured fit (GET /fit) as questions. Gaps are upper bounds from surface sampling, so a gap
+// reads "at most"; a pair involving an envelope or unknown shape is a stand-in result.
+export function fitFindings(fit, { sidecar, revision, labelOf = (rev) => rev } = {}) {
+  if (!fit) return [];
+  const name = (partId) => partLabel(sidecar, partId);
+  const key = (partId) => `${revision}:part:${partId}`;
+  const pairView = (row) => ({ mode: revision, selected: key(row.a), also: [key(row.b)], explode: 0 });
+  const items = [];
+  if (fit.size_mm) {
+    items.push({
+      id: "fit:size",
+      question: "How big is the assembled device?",
+      answer: `${fit.size_mm.map((value) => Number(value).toFixed(1)).join(" × ")} mm overall, as modelled in the ${labelOf(revision)} revision.`,
+      state: "computed",
+      basis: `bounding size of ${fit.parts_measured} measured parts`,
+      view: { mode: revision, selected: null, explode: 0 },
+    });
+  }
+  const overlaps = fit.pairs.filter((row) => row.kind === "overlap");
+  const real = overlaps.filter((row) => !row.stand_in);
+  const standIn = overlaps.filter((row) => row.stand_in);
+  const open = fit.not_computed.flatMap((row) => row.what === "overlap volume" ? row.parts : []);
+  if (real.length) {
+    for (const row of real) {
+      items.push({
+        id: `fit:clash:${row.a}:${row.b}`,
+        question: `Do ${name(row.a)} and ${name(row.b)} collide?`,
+        answer: `Yes in the CAD model: they overlap by ${Number(row.overlap_mm3).toFixed(1)} mm³.`,
+        state: "clash",
+        basis: "exact intersection volume of the two solids",
+        view: pairView(row),
+      });
+    }
+  } else {
+    items.push({
+      id: "fit:no-clash",
+      question: "Do any real parts collide?",
+      answer: `No overlap between solid parts with real geometry in the CAD model${open.length ? `; ${open.map(name).join(", ")} ${open.length === 1 ? "is an open mesh" : "are open meshes"}, so ${open.length === 1 ? "its" : "their"} overlap was not computed` : ""}.`,
+      state: open.length ? "unknown" : "computed",
+      basis: "exact intersection volume of every nearby pair of solids",
+      view: { mode: revision, selected: null, explode: 0 },
+    });
+  }
+  if (standIn.length) {
+    items.push({
+      id: "fit:stand-in-overlaps",
+      question: "Do the rough stand-in shapes overlap?",
+      answer: `${plural(standIn.length, "pair")} of envelope or unknown shapes overlap (largest ${Number(Math.max(...standIn.map((row) => row.overlap_mm3))).toFixed(0)} mm³). That says the shapes are not known well enough, not that real parts collide.`,
+      detail: standIn.slice(0, 6).map((row) => `${name(row.a)} ↔ ${name(row.b)} · ${Number(row.overlap_mm3).toFixed(0)} mm³`),
+      state: "unknown",
+      basis: "intersection volume of stand-in shapes",
+      view: pairView(standIn[0]),
+    });
+  }
+  // Tight gaps between real shapes, grouped by measured value: a run of identical gaps is usually
+  // one designed seam. Tight pairs that involve a stand-in shape go into one item of their own.
+  const tightAll = fit.pairs.filter((row) => row.kind === "tight");
+  const tightStandIn = tightAll.filter((row) => row.stand_in);
+  const tight = tightStandIn.length > 3 ? tightAll.filter((row) => !row.stand_in) : tightAll;
+  if (tightStandIn.length > 3) {
+    const closest = tightStandIn[0];
+    items.push({
+      id: "fit:tight-stand-in",
+      question: "Which close pairs involve rough stand-in shapes?",
+      answer: `${plural(tightStandIn.length, "pair")} under 1 mm apart where at least one part is an envelope or unknown shape (closest at most ${closest.gap_mm.toFixed(2)} mm). Real part shapes are needed before these are fit results.`,
+      detail: tightStandIn.slice(0, 6).map((row) => `${name(row.a)} ↔ ${name(row.b)} · ${row.gap_mm.toFixed(2)} mm`).concat(tightStandIn.length > 6 ? [`and ${tightStandIn.length - 6} more`] : []),
+      state: "unknown",
+      basis: "minimum gap between a part's surface samples and the other part's triangles",
+      view: pairView(closest),
+    });
+  }
+  const groups = new Map();
+  for (const row of tight) {
+    const value = row.gap_mm.toFixed(2);
+    if (!groups.has(value)) groups.set(value, []);
+    groups.get(value).push(row);
+  }
+  for (const [value, rows] of [...groups.entries()].sort((a, b) => Number(a[0]) - Number(b[0]))) {
+    const standInOnly = rows.every((row) => row.stand_in);
+    const first = rows[0];
+    items.push({
+      id: `fit:tight:${value}`,
+      question: rows.length === 1 ? `How close are ${name(first.a)} and ${name(first.b)}?`
+        : `Which parts sit ${value} mm apart?`,
+      answer: rows.length === 1
+        ? `At most ${value} mm apart in the CAD model${first.stand_in ? ", measured on a stand-in shape" : ""}.`
+        : `${plural(rows.length, "pair")} at most ${value} mm apart${rows.length > 2 ? ", a repeated gap that is usually a designed seam" : ""}${standInOnly ? "; all involve stand-in shapes" : ""}.`,
+      detail: rows.slice(0, 6).map((row) => `${name(row.a)} ↔ ${name(row.b)}`).concat(rows.length > 6 ? [`and ${rows.length - 6} more`] : []),
+      state: standInOnly ? "unknown" : "computed",
+      basis: `minimum gap between surface samples (true gap between ${mm(Math.max(0, first.gap_mm - first.precision_mm))} and ${mm(first.gap_mm)})`,
+      view: pairView(first),
+    });
+  }
+  const touching = fit.pairs.filter((row) => row.kind === "touching");
+  if (touching.length) {
+    items.push({
+      id: "fit:touching",
+      question: "Which parts touch?",
+      answer: `${plural(touching.length, "pair")} of surfaces meet without measurable overlap: stacked, seated or fastened parts.`,
+      detail: touching.slice(0, 6).map((row) => `${name(row.a)} ↔ ${name(row.b)}`).concat(touching.length > 6 ? [`and ${touching.length - 6} more`] : []),
+      state: "computed",
+      basis: "surface samples closer than 0.05 mm with no overlap volume",
+      view: pairView(touching[0]),
+    });
+  }
+  return [{ id: "measured", title: "Measured from the CAD model", items }];
 }

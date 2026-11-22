@@ -483,7 +483,9 @@ export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel 
   const otherQuestions = otherRevision ? selectionQuestions.filter((question) => !ownQuestions.includes(question)) : [];
   const treeOpen = narrow ? sheet === "parts" || sheet === "blockers" : desktopTreeOpen;
   const inspectorOpen = !narrow || sheet === "details";
-  const selectedKeys = useMemo(() => selectedPartKeys(index, selection), [index, selection]);
+  // A host can add parts to the selection (a clash names two parts); only keys the index knows count.
+  const selectedKeys = useMemo(() => [...new Set([...selectedPartKeys(index, selection),
+    ...(view.also ?? []).filter((key) => index.byKey.has(key))])], [index, selection, view.also]);
   const oldKey = ghostDeltaKey(index, view.mode, selection, sceneCompare);
   const treeEndpoints = selection?.link ? [["A", selection.link.from_part_id], ["B", selection.link.to_part_id]]
     .map(([letter, id]) => [letter, index.byPart.get(`${selection.revision}:${id}`)?.key]) : [];
@@ -589,6 +591,7 @@ export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel 
       mode: next.mode ?? old.mode,
       explode: typeof next.explode === "number" ? next.explode : old.explode,
       selected: next.selected ?? null,
+      also: Array.isArray(next.also) ? next.also : [],
       focus: Boolean(next.selected),
       faceView: Boolean(next.faceView),
     }));
