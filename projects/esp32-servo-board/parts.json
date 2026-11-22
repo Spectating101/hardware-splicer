@@ -1,0 +1,231 @@
+{
+  "schema_version": "hardware_splicer.parts_sidecar.v1",
+  "revision": "a",
+  "units": "mm",
+  "glb_native_units": "mm",
+  "glb_scale_to_mm": 1,
+  "glb_source": "cad/main_ctrl_esp32_servo.glb",
+  "glb_sha256": "64e1bce55a5b4618c9ceb91e7dc67398beaecec12a2eb1aa21a8d01aa116bee7",
+  "parts": [
+    {
+      "node_name": "board",
+      "node_index": 1,
+      "part_id": "board",
+      "label": "board",
+      "geometry_basis": "custom",
+      "bom_line": null,
+      "no_bom_line": true,
+      "group": "board",
+      "explode_vector_mm": [
+        0.0,
+        0.0,
+        -4.25
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "6a9a67888c2a2e51fb85190201304885aca09156a4ae705911f7d66dd4bd6bfa",
+      "evidence": []
+    },
+    {
+      "node_name": "C1",
+      "node_index": 2,
+      "part_id": "c1",
+      "label": "C1 \u00b7 10uF",
+      "geometry_basis": "envelope",
+      "bom_line": "C1",
+      "no_bom_line": false,
+      "group": "c1",
+      "explode_vector_mm": [
+        -13.0,
+        -13.0,
+        -3.0
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "f4ceaa1ff5583a9b6efc849feac5de3da929aeebae7f0e9cd9450f9694f644c3",
+      "evidence": []
+    },
+    {
+      "node_name": "C2",
+      "node_index": 3,
+      "part_id": "c2",
+      "label": "C2 \u00b7 10uF",
+      "geometry_basis": "envelope",
+      "bom_line": "C2",
+      "no_bom_line": false,
+      "group": "c2",
+      "explode_vector_mm": [
+        -10.0,
+        -13.0,
+        -3.0
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "fabd1bb4fbce27e5f8b5cbe8f25a0d30e95ae8365d39c15d222910a561242bf0",
+      "evidence": []
+    },
+    {
+      "node_name": "J1",
+      "node_index": 4,
+      "part_id": "j1",
+      "label": "J1 \u00b7 USB",
+      "geometry_basis": "envelope",
+      "bom_line": "J1",
+      "no_bom_line": false,
+      "group": "j1",
+      "explode_vector_mm": [
+        -34.0,
+        0.0,
+        -1.8
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "5b36a67431f6d007aacb22216f7f1d79c21752417d35a3640b09de0674616f64",
+      "evidence": []
+    },
+    {
+      "node_name": "J2",
+      "node_index": 5,
+      "part_id": "j2",
+      "label": "J2 \u00b7 SENSOR_PORT",
+      "geometry_basis": "envelope",
+      "bom_line": "J2",
+      "no_bom_line": false,
+      "group": "j2",
+      "explode_vector_mm": [
+        32.0,
+        13.0,
+        0.8
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "f5de28fbf9b9cb7b9dea9fa55716482512035438966f3ac01cf45c75803829f9",
+      "evidence": []
+    },
+    {
+      "node_name": "J3",
+      "node_index": 6,
+      "part_id": "j3",
+      "label": "J3 \u00b7 SERVO_PORT",
+      "geometry_basis": "envelope",
+      "bom_line": "J3",
+      "no_bom_line": false,
+      "group": "j3",
+      "explode_vector_mm": [
+        32.0,
+        -2.999999,
+        0.8
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "63a9df9f5aa7f17099a44caade554cb66b061d791978109bf244038f6d3c7e43",
+      "evidence": []
+    },
+    {
+      "node_name": "J4",
+      "node_index": 7,
+      "part_id": "j4",
+      "label": "J4 \u00b7 SERVO_5V_IN",
+      "geometry_basis": "envelope",
+      "bom_line": "J4",
+      "no_bom_line": false,
+      "group": "j4",
+      "explode_vector_mm": [
+        32.0,
+        -18.0,
+        0.8
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "07956223845f6feb0ec05cb3d4b24dda0ef456a0599f28af51d7e44883403fde",
+      "evidence": []
+    },
+    {
+      "node_name": "R1",
+      "node_index": 8,
+      "part_id": "r1",
+      "label": "R1 \u00b7 10K",
+      "geometry_basis": "envelope",
+      "bom_line": "R1",
+      "no_bom_line": false,
+      "group": "r1",
+      "explode_vector_mm": [
+        -3.0,
+        13.0,
+        -3.0
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "640f81ad4beca2786f09f49002b85c3160f719cb1b5f3639a4423ae1ee9af5c4",
+      "evidence": []
+    },
+    {
+      "node_name": "R2",
+      "node_index": 9,
+      "part_id": "r2",
+      "label": "R2 \u00b7 10K",
+      "geometry_basis": "envelope",
+      "bom_line": "R2",
+      "no_bom_line": false,
+      "group": "r2",
+      "explode_vector_mm": [
+        -3.0,
+        10.0,
+        -3.0
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "1b9acd958efd088c0147003862c62001a4a75b648628a39fdf9f4aa4c6da4c2b",
+      "evidence": []
+    },
+    {
+      "node_name": "U1",
+      "node_index": 10,
+      "part_id": "u1",
+      "label": "U1 \u00b7 ESP32-WROOM-32",
+      "geometry_basis": "envelope",
+      "bom_line": "U1",
+      "no_bom_line": false,
+      "group": "u1",
+      "explode_vector_mm": [
+        8.0,
+        2.245,
+        -1.85
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "69ebe2e515f3b06e27d28052753576f4f1169e987757fc32ea9c58a08baa83a6",
+      "evidence": []
+    },
+    {
+      "node_name": "U2",
+      "node_index": 11,
+      "part_id": "u2",
+      "label": "U2 \u00b7 CP2102",
+      "geometry_basis": "envelope",
+      "bom_line": "U2",
+      "no_bom_line": false,
+      "group": "u2",
+      "explode_vector_mm": [
+        -18.0,
+        0.12,
+        -2.55
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "2e2dddfa72590f06121412627d8b6c95f9ef5e32d94bd1518c7d9146da4346d4",
+      "evidence": []
+    },
+    {
+      "node_name": "U3",
+      "node_index": 12,
+      "part_id": "u3",
+      "label": "U3 \u00b7 3V3",
+      "geometry_basis": "envelope",
+      "bom_line": "U3",
+      "no_bom_line": false,
+      "group": "u3",
+      "explode_vector_mm": [
+        -20.0,
+        -12.949999,
+        -2.55
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "a98a8a726c9b30f4bab2ccd5d2ec45d7dc3904bc5d3a5e9894b44b635885a6f1",
+      "evidence": []
+    }
+  ],
+  "interfaces": [],
+  "blockers": [],
+  "alternates": [],
+  "missing_inputs": []
+}

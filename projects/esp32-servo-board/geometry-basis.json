@@ -1,0 +1,15 @@
+{
+  "source": "examples/main_ctrl_esp32_servo.kicad_pcb read with KiCad pcbnew 9.0.2",
+  "rules": [
+    {
+      "match": "board",
+      "basis": "custom",
+      "why": "the board outline from Edge.Cuts at its design thickness"
+    },
+    {
+      "match": ".+",
+      "basis": "envelope",
+      "why": "footprint box with an assumed height"
+    }
+  ]
+}

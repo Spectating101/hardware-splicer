@@ -1,0 +1,25 @@
+{
+  "schema": "hardware_splicer.scene_manifest.v1",
+  "project_id": "spi-flash-adapter-board",
+  "title": "SPI flash adapter v1",
+  "subtitle": "KiCad board · footprint envelopes",
+  "registered_cases": [],
+  "revisions": [
+    {
+      "id": "a",
+      "label": "Board A",
+      "glb": "projects/spi-flash-adapter-board/cad/spi_flash_adapter_v1.glb",
+      "parts": "projects/spi-flash-adapter-board/parts.json",
+      "glb_native_units": "mm"
+    }
+  ],
+  "compare": null,
+  "focus": null,
+  "tour": [],
+  "geometry_status": "available",
+  "geometry_note": "Board outline from Edge.Cuts; each footprint is a box over its pads and graphics with an assumed height (footprint-heights.json). Component 3D models are not attached.",
+  "sources": [
+    {"label": "KiCad board", "href": "examples/spi_flash_adapter_v1.kicad_pcb"},
+    {"label": "Footprint heights (assumed)", "path": "projects/spi-flash-adapter-board/footprint-heights.json"}
+  ]
+}

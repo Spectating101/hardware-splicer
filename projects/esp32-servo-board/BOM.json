@@ -1,0 +1,71 @@
+{
+  "source_board": "examples/main_ctrl_esp32_servo.kicad_pcb",
+  "source_sha256": "dc5773fc56e36ae76822f3023ce1c93a42487177a795bd24eba05990d63afd74",
+  "items": [
+    {
+      "id": "C1",
+      "name": "C1 \u00b7 10uF",
+      "footprint": "Capacitor_SMD:C_0603_1608Metric"
+    },
+    {
+      "id": "C2",
+      "name": "C2 \u00b7 10uF",
+      "footprint": "Capacitor_SMD:C_0603_1608Metric"
+    },
+    {
+      "id": "J1",
+      "name": "J1 \u00b7 USB",
+      "footprint": "Connector_USB:USB_Micro-B"
+    },
+    {
+      "id": "J2",
+      "name": "J2 \u00b7 SENSOR_PORT",
+      "footprint": "Connector_JST:JST_SH_SM04B"
+    },
+    {
+      "id": "J3",
+      "name": "J3 \u00b7 SERVO_PORT",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x04"
+    },
+    {
+      "id": "J4",
+      "name": "J4 \u00b7 SERVO_5V_IN",
+      "footprint": "Connector_JST:JST_XH_B02B"
+    },
+    {
+      "id": "MH1",
+      "name": "MH1 \u00b7 M2",
+      "footprint": "MountingHole:MountingHole_2.2mm_M2"
+    },
+    {
+      "id": "MH2",
+      "name": "MH2 \u00b7 M2",
+      "footprint": "MountingHole:MountingHole_2.2mm_M2"
+    },
+    {
+      "id": "R1",
+      "name": "R1 \u00b7 10K",
+      "footprint": "Resistor_SMD:R_0603_1608Metric"
+    },
+    {
+      "id": "R2",
+      "name": "R2 \u00b7 10K",
+      "footprint": "Resistor_SMD:R_0603_1608Metric"
+    },
+    {
+      "id": "U1",
+      "name": "U1 \u00b7 ESP32-WROOM-32",
+      "footprint": "RF_Module:ESP32-WROOM-32"
+    },
+    {
+      "id": "U2",
+      "name": "U2 \u00b7 CP2102",
+      "footprint": "Package_QFN:QFN-28"
+    },
+    {
+      "id": "U3",
+      "name": "U3 \u00b7 3V3",
+      "footprint": "Package_TO_SOT_SMD:SOT-223"
+    }
+  ]
+}

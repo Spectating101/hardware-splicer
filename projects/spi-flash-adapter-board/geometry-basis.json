@@ -1,0 +1,15 @@
+{
+  "source": "hardware/reference_designs/spi_flash_adapter_v1/spi_flash_adapter_v1.kicad_pcb read with KiCad pcbnew 9.0.2",
+  "rules": [
+    {
+      "match": "board",
+      "basis": "custom",
+      "why": "the board outline from Edge.Cuts at its design thickness"
+    },
+    {
+      "match": ".+",
+      "basis": "envelope",
+      "why": "footprint box with an assumed height"
+    }
+  ]
+}

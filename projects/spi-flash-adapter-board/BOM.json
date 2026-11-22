@@ -1,0 +1,206 @@
+{
+  "source_board": "hardware/reference_designs/spi_flash_adapter_v1/spi_flash_adapter_v1.kicad_pcb",
+  "source_sha256": "86c0e72840b058b5dc4b56a820e560b306b2f624724a818e092fd1d003fdefbd",
+  "items": [
+    {
+      "id": "C1",
+      "name": "C1 \u00b7 1uF 10V X7R",
+      "footprint": "Capacitor_SMD:C_0603_1608Metric"
+    },
+    {
+      "id": "C2",
+      "name": "C2 \u00b7 4.7uF 6.3V X5R",
+      "footprint": "Capacitor_SMD:C_0603_1608Metric"
+    },
+    {
+      "id": "C3",
+      "name": "C3 \u00b7 100nF 16V X7R",
+      "footprint": "Capacitor_SMD:C_0603_1608Metric"
+    },
+    {
+      "id": "C4",
+      "name": "C4 \u00b7 100nF 16V X7R",
+      "footprint": "Capacitor_SMD:C_0603_1608Metric"
+    },
+    {
+      "id": "C5",
+      "name": "C5 \u00b7 100nF 16V X7R",
+      "footprint": "Capacitor_SMD:C_0603_1608Metric"
+    },
+    {
+      "id": "C6",
+      "name": "C6 \u00b7 1uF 10V X7R",
+      "footprint": "Capacitor_SMD:C_0603_1608Metric"
+    },
+    {
+      "id": "H1",
+      "name": "H1 \u00b7 M3",
+      "footprint": "MountingHole:MountingHole_3.2mm_M3"
+    },
+    {
+      "id": "H2",
+      "name": "H2 \u00b7 M3",
+      "footprint": "MountingHole:MountingHole_3.2mm_M3"
+    },
+    {
+      "id": "H3",
+      "name": "H3 \u00b7 M3",
+      "footprint": "MountingHole:MountingHole_3.2mm_M3"
+    },
+    {
+      "id": "H4",
+      "name": "H4 \u00b7 M3",
+      "footprint": "MountingHole:MountingHole_3.2mm_M3"
+    },
+    {
+      "id": "J1",
+      "name": "J1 \u00b7 HOST_SPI_1x06",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical"
+    },
+    {
+      "id": "JP1",
+      "name": "JP1 \u00b7 ENABLE_AFTER_RAIL_CHECK",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
+    },
+    {
+      "id": "R1",
+      "name": "R1 \u00b7 0R",
+      "footprint": "Resistor_SMD:R_0603_1608Metric"
+    },
+    {
+      "id": "R2",
+      "name": "R2 \u00b7 10k",
+      "footprint": "Resistor_SMD:R_0603_1608Metric"
+    },
+    {
+      "id": "R3",
+      "name": "R3 \u00b7 10k",
+      "footprint": "Resistor_SMD:R_0603_1608Metric"
+    },
+    {
+      "id": "R4",
+      "name": "R4 \u00b7 0R",
+      "footprint": "Resistor_SMD:R_0603_1608Metric"
+    },
+    {
+      "id": "R5",
+      "name": "R5 \u00b7 10k",
+      "footprint": "Resistor_SMD:R_0603_1608Metric"
+    },
+    {
+      "id": "R6",
+      "name": "R6 \u00b7 10k",
+      "footprint": "Resistor_SMD:R_0603_1608Metric"
+    },
+    {
+      "id": "R7",
+      "name": "R7 \u00b7 10k",
+      "footprint": "Resistor_SMD:R_0603_1608Metric"
+    },
+    {
+      "id": "TP1",
+      "name": "TP1 \u00b7 HOST_3V3",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    {
+      "id": "TP10",
+      "name": "TP10 \u00b7 DUT_CS_N",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    {
+      "id": "TP11",
+      "name": "TP11 \u00b7 HOST_MISO",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    {
+      "id": "TP12",
+      "name": "TP12 \u00b7 DUT_MISO",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    {
+      "id": "TP13",
+      "name": "TP13 \u00b7 DUT_IO2_WP_N",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    {
+      "id": "TP14",
+      "name": "TP14 \u00b7 DUT_IO3_HOLD_N",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    {
+      "id": "TP15",
+      "name": "TP15 \u00b7 DUT_1V8",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    {
+      "id": "TP16",
+      "name": "TP16 \u00b7 TRANSLATOR_OE",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    {
+      "id": "TP17",
+      "name": "TP17 \u00b7 GND",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    {
+      "id": "TP18",
+      "name": "TP18 \u00b7 GND",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    {
+      "id": "TP2",
+      "name": "TP2 \u00b7 3V3",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    {
+      "id": "TP3",
+      "name": "TP3 \u00b7 1V8",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    {
+      "id": "TP4",
+      "name": "TP4 \u00b7 GND",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    {
+      "id": "TP5",
+      "name": "TP5 \u00b7 HOST_SCLK",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    {
+      "id": "TP6",
+      "name": "TP6 \u00b7 DUT_SCLK",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    {
+      "id": "TP7",
+      "name": "TP7 \u00b7 HOST_MOSI",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    {
+      "id": "TP8",
+      "name": "TP8 \u00b7 DUT_MOSI",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    {
+      "id": "TP9",
+      "name": "TP9 \u00b7 HOST_CS_N",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    {
+      "id": "U1",
+      "name": "U1 \u00b7 TXU0304PWR",
+      "footprint": "Package_SO:TSSOP-14_4.4x5mm_P0.65mm"
+    },
+    {
+      "id": "U2",
+      "name": "U2 \u00b7 W25Q128JWSIQ",
+      "footprint": "Package_SO:SOIC-8_5.3x5.3mm_P1.27mm"
+    },
+    {
+      "id": "U3",
+      "name": "U3 \u00b7 TLV75518PDBVR",
+      "footprint": "Package_TO_SOT_SMD:SOT-23-5"
+    }
+  ]
+}
