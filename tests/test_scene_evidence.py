@@ -91,7 +91,7 @@ def test_kicad_route_maps_violations_to_part_ids_and_caches(client, monkeypatch)
         calls.append(argv)
         out = Path(argv[argv.index("-o") + 1])
         out.write_text(json.dumps({"kicad_version": "9.0.2", "violations": [
-            {"type": "clearance", "severity": "error", "description": "Clearance violation",
+            {"type": "shorting_items", "severity": "error", "description": "Items shorting two nets (nets GND and VBUS)",
              "items": [{"description": "Pad 2 [GND] of U2 on F.Cu", "pos": {"x": 1, "y": 1}}]}],
             "unconnected_items": [], "schematic_parity": []}))
         return subprocess.CompletedProcess(argv, 0, "", "")
@@ -100,7 +100,10 @@ def test_kicad_route_maps_violations_to_part_ids_and_caches(client, monkeypatch)
     first = client.get("/v1/scenes/esp32-servo-board/a/kicad").json()
     second = client.get("/v1/scenes/esp32-servo-board/a/kicad").json()
     assert first == second and len(calls) == 1
-    assert first["drc"]["violations"][0]["part_ids"] == ["u2"]
+    row = first["drc"]["violations"][0]
+    assert row["part_ids"] == ["u2"] and row["nets"] == ["GND", "VBUS"]
+    # Both nets' copper is in the board scene, so the short can show on the model.
+    assert row["net_ids"] == ["net-gnd", "net-vbus"]
     assert client.get("/v1/scenes/hs3g-b-drone/b/kicad").status_code == 404
 
 

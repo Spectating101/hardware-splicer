@@ -212,6 +212,11 @@ def _violations(report: dict, key: str, footprints: list[dict]) -> list[dict]:
         text = " ".join(str(item.get("description") or "") for item in items)
         named = set(_OF_REF.findall(text))
         located = {ref for item in items if (ref := _at(footprints, item.get("pos")))}
+        # Nets the violation involves: "(nets GND and VBUS)" and each item's "[NET]".
+        nets = set(re.findall(r"\[([^\]]+)\]", text))
+        pair = re.search(r"nets? (\S+) and (\S+?)\)", str(violation.get("description") or ""))
+        if pair:
+            nets |= {pair.group(1), pair.group(2)}
         rows.append({
             "type": violation.get("type"), "severity": violation.get("severity"),
             "description": violation.get("description"),
@@ -220,6 +225,7 @@ def _violations(report: dict, key: str, footprints: list[dict]) -> list[dict]:
             # Parts the violation names, then parts whose footprint its items sit in or next to.
             "parts": sorted(named | located),
             "parts_named": sorted(named),
+            "nets": sorted(nets),
         })
     return rows
 

@@ -291,5 +291,6 @@ def get_scene_kicad_checks(project_id: str, revision: str) -> dict:
     for report in (summary["drc"], summary["erc"]):
         for row in (report or {}).get("violations", []):
             row["part_ids"] = sorted({parts[ref] for ref in row["parts"] if ref in parts})
+            row["net_ids"] = sorted({parts[f"net:{net}"] for net in row.get("nets", []) if f"net:{net}" in parts})
     return {"project_id": project_id, "revision": revision, "board": board.name,
             "schematic": schematic.name if schematic else None, **summary}
