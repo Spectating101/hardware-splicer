@@ -1,0 +1,212 @@
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { fetchSceneManifest } from "../api";
+import { BASIS_LABELS, openQuestions } from "../components/fielddeckLogic.js";
+import { deviceFindings, findTargets, shortLabel, STATES } from "./deviceFindings.js";
+import "./device.css";
+
+const FieldDeckScene = lazy(() => import("../components/FieldDeckScene.jsx"));
+
+const OVERVIEW = { selected: null, explode: 0.6, faceView: false };
+
+// The same numbers the amber pins carry on the model.
+function PinNumbers({ numbers }) {
+  if (!numbers?.length) return null;
+  return <span className="dv-pins" aria-label={`Marked on the model as ${numbers.join(", ")}`}>
+    {numbers.map((number) => <span key={number} className="dv-pin" aria-hidden="true">{number}</span>)}
+  </span>;
+}
+
+function StateWord({ state }) {
+  return <span className="dv-state" data-state={state}>{STATES[state] ?? state}</span>;
+}
+
+function Source({ basis }) {
+  if (!basis) return null;
+  return /^https?:\/\//.test(basis)
+    ? <a href={basis} target="_blank" rel="noreferrer">{new URL(basis).hostname}</a>
+    : <span>{basis}</span>;
+}
+
+function SelectionCard({ row, index, sidecars, findings, onShow, onSelect }) {
+  if (!row) return null;
+  const scene = sidecars?.[row.revision];
+  const related = findings.filter((item) => item.view.selected === row.key);
+  if (row.link) {
+    const { link } = row;
+    const end = (id) => index.byPart.get(`${row.revision}:${id}`);
+    return (
+      <aside className="dv-card" aria-label="Selected connection" data-stage-edge="right">
+        <p className="dv-card-kind">Connection</p>
+        <h2>{link.label}</h2>
+        <p className="dv-ends">
+          {[link.from_part_id, link.to_part_id].map((id, i) => (
+            <span key={id}>{i ? " → " : ""}<button type="button" className="dv-link" onClick={() => onSelect(end(id)?.key)}>
+              {shortLabel(end(id)?.part.label ?? id)}</button></span>
+          ))}
+        </p>
+        <dl className="dv-facts">
+          <div><dt>Ends in model</dt><dd>{link.endpoints_present ? "both" : "not both"}</dd></div>
+          <div><dt>Open checks</dt><dd>{link.open_checks.length || "none recorded"}</dd></div>
+          <div><dt>Hardware</dt><dd>not tested</dd></div>
+        </dl>
+        {link.open_checks.length > 0 && <ul className="dv-checks">{link.open_checks.map((check) => <li key={check}>{check.replace(/_/g, " ")}</li>)}</ul>}
+        {link.source && <p className="dv-source">Source · <Source basis={link.source} /></p>}
+      </aside>
+    );
+  }
+  const { part } = row;
+  const links = (scene?.interfaces ?? []).filter((link) => [link.from_part_id, link.to_part_id].includes(part.part_id));
+  const evidence = (part.evidence ?? []).filter((record) => record.field !== "mesh_bounds_mm");
+  return (
+    <aside className="dv-card" aria-label="Selected part" data-stage-edge="right">
+      <p className="dv-card-kind">Part{row.delta && row.delta !== "unchanged" ? ` · ${row.delta}` : ""}</p>
+      <h2>{shortLabel(part.label)}</h2>
+      {part.label !== shortLabel(part.label) && <p className="dv-full-label">{part.label}</p>}
+      <dl className="dv-facts">
+        <div><dt>Shape from</dt><dd>{BASIS_LABELS[part.geometry_basis] ?? "Unknown"}</dd></div>
+        <div><dt>BOM line</dt><dd>{part.bom_line ?? "not on the BOM"}</dd></div>
+        <div><dt>Hardware</dt><dd>not tested</dd></div>
+      </dl>
+      {evidence.length > 0 && <table className="dv-evidence">
+        <thead><tr><th scope="col">Record</th><th scope="col">Value</th><th scope="col">Basis</th></tr></thead>
+        <tbody>{evidence.slice(0, 8).map((record, i) => (
+          <tr key={`${record.field}-${i}`}>
+            <th scope="row">{record.field.replace(/_/g, " ")}</th>
+            <td className="dv-num">{record.value == null ? "—" : Array.isArray(record.value) ? record.value.join(" × ") : String(record.value)}</td>
+            <td>{record.state}</td>
+          </tr>
+        ))}</tbody>
+      </table>}
+      {links.length > 0 && <div className="dv-related">
+        <h3>Connections</h3>
+        {links.map((link) => (
+          <button key={link.interface_id} type="button" className="dv-link" onClick={() => onSelect(`${row.revision}:link:${link.interface_id}`)}>
+            {link.label}{link.open_checks.length ? ` · ${link.open_checks.length} open` : ""}
+          </button>
+        ))}
+      </div>}
+      {related.length > 0 && <div className="dv-related">
+        <h3>Questions about it</h3>
+        {related.map((item) => <button key={item.id} type="button" className="dv-link" onClick={() => onShow(item)}>{item.question}</button>)}
+      </div>}
+    </aside>
+  );
+}
+
+export default function DeviceWorkspace({ sceneId, onExit }) {
+  const [manifest, setManifest] = useState(null);
+  const [error, setError] = useState("");
+  const [data, setData] = useState(null);
+  const [command, setCommand] = useState(null);
+  const [active, setActive] = useState(null);
+  const [selected, setSelected] = useState(null);
+  const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setManifest(null); setError("");
+    fetchSceneManifest(sceneId, controller.signal)
+      .then((body) => { if (!controller.signal.aborted) setManifest(body); })
+      .catch((cause) => { if (!controller.signal.aborted) setError(cause.message); });
+    return () => controller.abort();
+  }, [sceneId]);
+
+  const labelOf = (rev) => data?.revisions?.find(([id]) => id === rev)?.[1] ?? rev;
+  const findings = useMemo(() => (data?.sidecars ? deviceFindings({
+    sidecars: data.sidecars, compare: data.compare, focusPart: data.focusPart, faceFit: data.faceFit, labelOf,
+  }) : []), [data?.sidecars, data?.compare, data?.focusPart, data?.faceFit, data?.revisions]);
+  // The stage numbers open questions in this order; a finding shows the numbers of its own reasons.
+  const pinNumbers = useMemo(() => {
+    if (!data?.sidecars || !data?.index) return new Map();
+    const order = data.compare ? [data.compare.target, data.compare.base] : Object.keys(data.sidecars);
+    const byReason = new Map();
+    for (const { reason, number } of openQuestions(data.sidecars, data.index, order)) {
+      if (!byReason.has(reason)) byReason.set(reason, number);
+    }
+    return byReason;
+  }, [data?.sidecars, data?.index, data?.compare]);
+  const numbersFor = (item) => [...new Set((item.reasons ?? []).map((reason) => pinNumbers.get(reason)).filter(Boolean))];
+  const items = findings.flatMap((group) => group.items);
+  const activeItem = items.find((item) => item.id === active) ?? null;
+  const target = data?.compare?.target ?? data?.revisions?.at(-1)?.[0];
+  const matches = data?.index && target ? findTargets(data.index, target, query) : [];
+  const selectedRow = data?.index?.byKey.get(selected) ?? null;
+  const openCount = items.filter((item) => item.state === "open" || item.state === "unknown").length;
+
+  function show(item) {
+    setActive(item.id);
+    setCommand({ ...item.view });
+  }
+  function select(key) {
+    if (!key) return;
+    setActive(null);
+    setCommand({ mode: target, selected: key, explode: 0.45, faceView: false });
+  }
+  function overview() {
+    setActive(null);
+    setCommand({ ...OVERVIEW, mode: data?.compare ? "compare" : target });
+  }
+
+  return (
+    <div className="dv" data-testid="device-workspace">
+      <div className="dv-stage">
+        {manifest && <Suspense fallback={<p className="dv-loading">Loading the 3D device…</p>}>
+          <FieldDeckScene projectId={sceneId} manifest={manifest} chrome="none" command={command}
+            onSelectionChange={setSelected} onReady={setData} />
+        </Suspense>}
+        {error && <p className="dv-loading" role="alert">Device model unavailable: {error}</p>}
+      </div>
+
+      <header className="dv-head" data-stage-edge="top">
+        {onExit && <button type="button" className="dv-back" onClick={onExit} aria-label="Back">←</button>}
+        <div>
+          <h1>{manifest?.title ?? "Device"}</h1>
+          <p>{manifest?.subtitle}{data?.compare ? ` · compared with the ${labelOf(data.compare.base)} revision` : ""}</p>
+        </div>
+        <p className="dv-truth">Physical fit <strong>not tested on hardware</strong> · {openCount} open or unknown</p>
+      </header>
+
+      <section className="dv-questions" aria-label="Questions about this device" data-stage-edge="left">
+        <label className="dv-find">
+          <span>Find a part or connection</span>
+          <input type="search" value={query} placeholder="dsi, bank, display…" onChange={(event) => setQuery(event.target.value)} />
+        </label>
+        {query && <ul className="dv-matches" aria-label="Matches">
+          {matches.length ? matches.map((match) => (
+            <li key={match.key}><button type="button" onClick={() => { select(match.key); setQuery(""); }}>
+              {match.label}<small>{match.kind}</small></button></li>
+          )) : <li className="dv-none">No part or connection matches “{query}”.</li>}
+        </ul>}
+        {!data?.sidecars && !error && <p className="dv-none">Reading the device records…</p>}
+        {findings.map((group) => (
+          <div key={group.id} className="dv-group">
+            <h2>{group.title}</h2>
+            <ol>
+              {group.items.map((item) => (
+                <li key={item.id} data-active={item.id === active}>
+                  <button type="button" className="dv-question" aria-pressed={item.id === active} onClick={() => show(item)}>
+                    <span className="dv-q"><PinNumbers numbers={numbersFor(item)} />{item.question}</span>
+                    <span className="dv-a">{item.answer}</span>
+                    <StateWord state={item.state} />
+                  </button>
+                  {item.id === active && (item.detail?.length > 0 || item.basis) && <div className="dv-detail">
+                    {item.detail?.length > 0 && <ul>{item.detail.map((line) => <li key={line}>{line}</li>)}</ul>}
+                    {item.basis && <p>Basis · <Source basis={item.basis} /></p>}
+                  </div>}
+                </li>
+              ))}
+            </ol>
+          </div>
+        ))}
+      </section>
+
+      {activeItem && <div className="dv-lens" role="status" data-stage-edge="top">
+        <span>Showing</span> <strong>{activeItem.question}</strong>
+        <button type="button" onClick={overview}>Back to whole device</button>
+      </div>}
+
+      {!activeItem?.view.faceView && <SelectionCard row={selectedRow} index={data?.index} sidecars={data?.sidecars} findings={items}
+        onShow={show} onSelect={select} />}
+    </div>
+  );
+}

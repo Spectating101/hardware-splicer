@@ -13,7 +13,7 @@ export type StaticView =
   | "lab"
   | "preview";
 
-export type View = StaticView | "workspace" | "fielddeck" | "not-found";
+export type View = StaticView | "workspace" | "fielddeck" | "device" | "not-found";
 
 export interface LocationLike {
   pathname?: string;
@@ -35,12 +35,17 @@ export interface FieldDeckRoute {
   sceneId?: string | null;
 }
 
+export interface DeviceRoute {
+  view: "device";
+  sceneId?: string | null;
+}
+
 export interface NotFoundRoute {
   view: "not-found";
   path?: string | null;
 }
 
-export type Route = StaticRoute | WorkspaceRoute | FieldDeckRoute | NotFoundRoute;
+export type Route = StaticRoute | WorkspaceRoute | FieldDeckRoute | DeviceRoute | NotFoundRoute;
 
 export interface NavigateOptions {
   replace?: boolean;
@@ -58,6 +63,7 @@ export type NavigateFn = (next: Route, options?: NavigateOptions) => void;
  *   /library[/<reference>]     design library and its reference projects
  *   /advanced[/<tool>]         developer tools
  *   /scenes/<id>               a scene manifest opened full screen
+ *   /devices/<id>              the device workspace for a scene: questions compose the model
  */
 const STATIC: ReadonlyArray<readonly [string, StaticView]> = [
   ["/", VIEWS.home],
@@ -102,6 +108,11 @@ export function parseLocation({ pathname = "/", search = "" }: LocationLike = {}
     const sceneId = decode(scene[1]);
     if (sceneId) return { view: VIEWS.fielddeck, sceneId };
   }
+  const device = /^\/devices\/([^/]+)$/.exec(path);
+  if (device) {
+    const sceneId = decode(device[1]);
+    if (sceneId) return { view: VIEWS.device, sceneId };
+  }
   return { view: VIEWS.notFound, path: pathname };
 }
 
@@ -113,6 +124,7 @@ export function pathForRoute(route: Route): string | null {
     return `/projects/${encodeURIComponent(route.projectId)}${rev}`;
   }
   if (route.view === VIEWS.fielddeck) return route.sceneId ? `/scenes/${encodeURIComponent(route.sceneId)}` : null;
+  if (route.view === VIEWS.device) return route.sceneId ? `/devices/${encodeURIComponent(route.sceneId)}` : null;
   if (route.view === VIEWS.notFound) return route.path || null;
   return PATH_OF.get(route.view) ?? "/";
 }

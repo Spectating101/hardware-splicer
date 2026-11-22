@@ -2918,3 +2918,5 @@ details.bench-objective summary { font-size: .75rem; font-weight: 600; letter-sp
 .project-group summary { padding: .6rem .5rem; min-height: 2.75rem; display: flex; align-items: center; font-size: .875rem; color: var(--muted); cursor: pointer; }
 .project-group summary:hover, .project-group summary:focus-visible { color: var(--text); background: var(--surface-2); }
 .project-group details > button { padding-left: 1.25rem; }
+
+.design-view-open { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }

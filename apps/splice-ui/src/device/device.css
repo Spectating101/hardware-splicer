@@ -1,0 +1,184 @@
+/* Device workspace: the assembled device fills the screen; questions about it sit on the left, the
+   selected part or connection on the right. Same ground and ink as the 3D stage, so the panels read
+   as part of the bench, not a page around it. Amber is reserved for open questions, as on the stage. */
+.dv {
+  --bg-0: #0b0d10;
+  --panel: rgba(16, 19, 24, 0.92);
+  --panel-solid: #12161c;
+  --line: #262b33;
+  --line-2: #343a44;
+  --text: #e6e8eb;
+  --text-2: #a3a9b2;
+  --text-3: #7f8690;
+  --focus: #f2efe7;
+  --open: #f5a524;
+  --computed: #9ec5e8;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  height: 100svh;
+  overflow: hidden;
+  background: var(--bg-0);
+  color: var(--text);
+  font: 400 14px/1.45 "IBM Plex Sans", system-ui, sans-serif;
+  color-scheme: dark;
+}
+.dv ::selection { background: #3a4656; color: var(--text); }
+.dv :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.dv button { font: inherit; color: inherit; cursor: pointer; }
+.dv a { color: var(--text); text-underline-offset: 3px; text-decoration-color: var(--line-2); }
+.dv a:hover { text-decoration-color: var(--text-2); }
+
+.dv-stage { position: absolute; inset: 0; }
+.dv-stage .fd-scene { height: 100%; }
+.dv-loading { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--text-2); }
+
+/* Panels */
+.dv-head, .dv-questions, .dv-card, .dv-lens {
+  position: absolute;
+  z-index: 3;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.dv-head {
+  top: 12px; left: 12px; right: 12px;
+  display: flex; align-items: center; gap: 14px;
+  padding: 10px 14px;
+}
+.dv-head h1 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.005em; }
+.dv-head p { margin: 0; color: var(--text-2); font-size: 13px; }
+.dv-head > div { min-width: 0; }
+.dv-back {
+  width: 32px; height: 32px; flex: none;
+  border: 1px solid var(--line-2); border-radius: 4px; background: transparent;
+}
+.dv-back:hover { border-color: var(--text-2); }
+.dv-truth { margin-left: auto !important; white-space: nowrap; }
+.dv-truth strong { color: var(--open); font-weight: 600; }
+
+.dv-questions {
+  top: 74px; left: 12px; bottom: 12px;
+  width: min(400px, 34vw);
+  overflow: auto;
+  padding: 14px 0 8px;
+  scrollbar-color: var(--line-2) transparent;
+  scrollbar-width: thin;
+}
+.dv-find { display: grid; gap: 6px; padding: 0 14px 12px; color: var(--text-2); font-size: 12px; }
+.dv-find input {
+  height: 36px; padding: 0 10px;
+  border: 1px solid var(--line-2); border-radius: 4px;
+  background: var(--panel-solid); color: var(--text); font: inherit; font-size: 14px;
+}
+.dv-find input::placeholder { color: var(--text-3); }
+.dv-matches { list-style: none; margin: 0 14px 12px; padding: 4px 0; border: 1px solid var(--line); border-radius: 4px; }
+.dv-matches button {
+  display: flex; justify-content: space-between; gap: 12px; width: 100%;
+  padding: 7px 10px; border: 0; background: transparent; text-align: left;
+}
+.dv-matches button:hover, .dv-matches button:focus-visible { background: #1b2028; }
+.dv-matches small { color: var(--text-3); font-family: var(--mono); font-size: 11px; }
+.dv-none { margin: 0; padding: 6px 14px; color: var(--text-2); }
+
+.dv-group h2 {
+  margin: 14px 14px 6px;
+  font-size: 12px; font-weight: 600; color: var(--text-2);
+  letter-spacing: 0.02em;
+}
+.dv-group ol { list-style: none; margin: 0; padding: 0; }
+.dv-group li { border-top: 1px solid var(--line); }
+.dv-question {
+  display: grid; gap: 3px; width: 100%;
+  padding: 10px 14px; border: 0; background: transparent; text-align: left;
+}
+.dv-question:hover { background: #171b22; }
+.dv-question[aria-pressed="true"] { background: #1e242e; }
+.dv-question[aria-pressed="true"] .dv-q { color: var(--focus); }
+.dv-q { font-weight: 600; font-size: 14px; }
+.dv-a { color: var(--text-2); font-size: 13px; }
+.dv-state {
+  justify-self: start; margin-top: 2px;
+  font-family: var(--mono); font-size: 11px; color: var(--text-2);
+  padding: 1px 6px; border: 1px solid var(--line-2); border-radius: 3px;
+}
+.dv-state[data-state="open"] { color: var(--open); border-color: rgba(245, 165, 36, 0.45); }
+.dv-state[data-state="unknown"] { border-style: dashed; }
+.dv-state[data-state="computed"] { color: var(--computed); border-color: rgba(158, 197, 232, 0.35); }
+.dv-detail { padding: 0 14px 12px 26px; color: var(--text-2); font-size: 13px; }
+.dv-detail ul { margin: 0 0 6px; padding-left: 16px; }
+.dv-detail li { border: 0; margin: 2px 0; }
+.dv-detail p { margin: 0; font-size: 12px; overflow-wrap: anywhere; }
+
+/* The question currently composing the model: top centre, clear of the stage's own measurement text. */
+.dv-lens {
+  left: 50%; top: 74px; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 10px;
+  max-width: min(720px, 46vw);
+  padding: 8px 8px 8px 14px;
+}
+.dv-lens span { color: var(--text-2); font-size: 12px; }
+.dv-lens strong { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dv-lens button {
+  flex: none; height: 32px; padding: 0 12px;
+  border: 1px solid var(--line-2); border-radius: 4px; background: var(--panel-solid);
+}
+.dv-lens button:hover { border-color: var(--text-2); }
+
+/* Selected part or connection */
+.dv-card {
+  top: 74px; right: 12px;
+  width: min(360px, 30vw);
+  max-height: calc(100% - 86px);
+  overflow: auto;
+  padding: 14px;
+  scrollbar-width: thin;
+}
+.dv-card h2 { margin: 2px 0 4px; font-size: 16px; font-weight: 600; }
+.dv-card h3 { margin: 14px 0 6px; font-size: 12px; font-weight: 600; color: var(--text-2); }
+.dv-card-kind { margin: 0; color: var(--text-3); font-size: 12px; }
+.dv-full-label { margin: 0 0 8px; color: var(--text-2); font-size: 12px; }
+.dv-ends { margin: 0 0 8px; }
+.dv-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 10px 0; }
+.dv-facts div { padding: 8px; border: 1px solid var(--line); border-radius: 4px; }
+.dv-facts dt { color: var(--text-3); font-size: 11px; }
+.dv-facts dd { margin: 2px 0 0; font-size: 13px; }
+.dv-checks { margin: 6px 0; padding-left: 18px; color: var(--text-2); font-size: 13px; }
+.dv-source { margin: 10px 0 0; color: var(--text-3); font-size: 12px; overflow-wrap: anywhere; }
+.dv-evidence { width: 100%; border-collapse: collapse; font-size: 12px; }
+.dv-evidence th, .dv-evidence td { padding: 5px 4px; border-top: 1px solid var(--line); text-align: left; vertical-align: top; }
+.dv-evidence thead th { color: var(--text-3); font-weight: 500; border-top: 0; }
+.dv-evidence tbody th { font-weight: 500; color: var(--text-2); }
+.dv-num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.dv-related { display: grid; gap: 2px; }
+.dv-link {
+  padding: 5px 0; border: 0; background: transparent; text-align: left;
+  color: var(--text); text-decoration: underline; text-decoration-color: var(--line-2); text-underline-offset: 3px;
+}
+.dv-link:hover { text-decoration-color: var(--text-2); }
+
+/* Narrow screens: the model on top, the questions below it. */
+@media (width < 900px) {
+  .dv { height: auto; min-height: 100svh; overflow: visible; display: flex; flex-direction: column; }
+  .dv-head { order: -1; }
+  .dv-stage { position: relative; height: 58svh; }
+  .dv-stage .fd-stage { height: 58svh; }
+  .dv-head { position: relative; top: 0; left: 0; right: 0; margin: 8px; flex-wrap: wrap; }
+  .dv-truth { margin-left: 0 !important; white-space: normal; }
+  .dv-questions, .dv-card { position: relative; top: auto; left: auto; right: auto; bottom: auto; width: auto; max-height: none; margin: 8px; }
+  .dv-lens { position: fixed; max-width: calc(100vw - 24px); }
+  .dv-question { min-height: 44px; }
+}
+
+.dv-pins { display: inline-flex; gap: 3px; margin-right: 6px; vertical-align: 1px; }
+.dv-pin {
+  display: inline-grid; place-items: center;
+  min-width: 18px; height: 18px; padding: 0 4px;
+  border: 1.5px solid var(--open); border-radius: 9px;
+  color: var(--open); font: 600 11px/1 var(--mono);
+}
