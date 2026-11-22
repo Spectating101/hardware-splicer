@@ -167,6 +167,22 @@ def _stages(
     return stages
 
 
+def _attached_board_drc(board_design_files: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
+    """KiCad DRC on every attached ``.kicad_pcb``; netlists and other files are not boards."""
+    import tempfile
+
+    from .pcb.kicad_cli_drc import run_kicad_cli_drc
+
+    reports: Dict[str, Dict[str, Any]] = {}
+    for board_id, meta in board_design_files.items():
+        path = str(_dict(meta).get("path") or "")
+        if not path.lower().endswith(".kicad_pcb"):
+            continue
+        with tempfile.TemporaryDirectory(prefix="hs-board-drc-") as out_dir:
+            reports[str(board_id)] = run_kicad_cli_drc(path, out_dir=out_dir)
+    return reports
+
+
 def _electrical_status(body: Dict[str, Any], engineering: Dict[str, Any]) -> Dict[str, Any]:
     machine = _dict(body.get("machine"))
     boards = _list_dicts(machine.get("boards"))
@@ -225,12 +241,27 @@ def _electrical_status(body: Dict[str, Any], engineering: Dict[str, Any]) -> Dic
             release_blockers.append("Circuit release needs artifact_uris or equivalent Circuit-AI evidence references.")
         release_ready = bool(circuit_release and not release_blockers)
 
+    # A KiCad board attached as design evidence must pass KiCad's own DRC before any release
+    # path counts it, whatever else was attached. Netlist compiles and power-tree solves do not
+    # see copper, so a board with shorts would otherwise reach release (pan-tilt, 2026-11-23).
+    board_drc = _attached_board_drc(board_design_files)
+    for board_id, report in board_drc.items():
+        if report.get("skipped"):
+            release_blockers.append(f"KiCad DRC was not run on attached board {board_id}: {report.get('reason') or 'skipped'}.")
+        elif not report.get("pass"):
+            release_blockers.append(
+                f"Attached board {board_id} fails KiCad DRC: {int(report.get('report_errors') or report.get('errors') or 0)} error(s).")
+    if any(report.get("skipped") or not report.get("pass") for report in board_drc.values()):
+        release_ready = False
+
     return {
         "authorized_for_integration": bool(boards) and not blockers,
         "release_ready": release_ready,
         "release_blockers": release_blockers,
         "board_count": len(boards),
         "board_design_file_count": len(board_design_files),
+        "board_drc": {board_id: {key: report.get(key) for key in ("pass", "skipped", "reason", "report_errors", "warnings", "kicad_version")}
+                      for board_id, report in board_drc.items()},
         "circuit_authority_level": circuit_authority.get("current_authority_level"),
         "readiness": readiness or "unknown",
         "blockers": _dedupe_strings(blockers),
