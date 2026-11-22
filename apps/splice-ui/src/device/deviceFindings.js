@@ -93,8 +93,10 @@ export function deviceFindings({ sidecars, compare, focusPart, faceFit, labelOf 
     fits.push({
       id: "face-fit",
       question: `Does the ${partLabel(scene, focusPart)} sit in the faceplate opening?`,
-      answer: sides ? coverHeadline(sides).replace(/ · computed$/, "") : "Measuring the opening from the CAD model…",
-      detail: sides ? [coverDetail(sides), faceFit.aperture, faceFit.seam].filter(Boolean) : [],
+      answer: sides ? `CAD estimate: ${coverHeadline(sides).replace(/ · computed$/, "")}. Physical fit not tested.` : "Measuring the opening from the CAD model…",
+      detail: sides ? ["Stack-up, lug alignment and active-area exposure are not checked by this projection.",
+        coverDetail(sides), faceFit.aperture, faceFit.seam].filter(Boolean) : [],
+      next: "Print the faceplate and check the display's stack-up and lug alignment against these CAD numbers.",
       state: sides ? "computed" : "unknown",
       basis: "projected CAD section; physical fit not tested",
       view: { mode: target, selected: key(focusPart), faceView: true, explode: 0 },
@@ -115,7 +117,8 @@ export function deviceFindings({ sidecars, compare, focusPart, faceFit, labelOf 
       answer: `${names.join(", ")}: modelled as outer envelopes or unknown shapes, so clearances around them are not a real fit.`,
       state: "unknown",
       basis: "geometry basis recorded per part",
-      view: { mode: target, selected: key(rough[0].part_id), explode: 0.6 },
+      next: "Attach manufacturer CAD (STEP) or measured dimensions for these parts, then re-measure the fit.",
+      view: { mode: target, selected: key(rough[0].part_id), explode: 0.6, also: rough.slice(1, 40).map((part) => key(part.part_id)) },
     });
   }
   for (const blocker of scene.blockers) {
@@ -127,6 +130,7 @@ export function deviceFindings({ sidecars, compare, focusPart, faceFit, labelOf 
       state: "open",
       basis: blocker.source ?? null,
       reasons: [blocker.reason],
+      next: `Resolve before relying on the fit: ${blocker.reason}.`,
       view: { mode: target, selected: key(blocker.part_id), explode: 0.45 },
     });
   }
@@ -143,8 +147,27 @@ export function deviceFindings({ sidecars, compare, focusPart, faceFit, labelOf 
       state: "open",
       basis: blocker.source ?? null,
       reasons: [blocker.reason],
+      next: routing ? "Model the cable paths (or measure them on the printed case) and re-check for interference."
+        : "Needs a physical or datasheet answer; record it against this connection.",
       view: link ? { mode: target, selected: linkKey(link.interface_id), explode: 0.45 } : { mode: target, selected: null, explode: 0.6 },
     });
+  }
+
+  // Open questions recorded only on the earlier revision: listed too, so every numbered pin has a row.
+  if (base && sidecars[base]) {
+    const current = new Set(scene.blockers.map((row) => row.reason).concat(scene.interfaces.flatMap((row) => row.open_checks)));
+    for (const blocker of sidecars[base].blockers) {
+      if (current.has(blocker.reason)) continue;
+      fits.push({
+        id: `blocker:${base}:${blocker.part_id ?? "device"}:${blocker.reason}`,
+        question: `${blocker.part_id ? partLabel(sidecars[base], blocker.part_id) : "Assembly"} (${labelOf(base)} revision)`,
+        answer: `${blocker.reason.charAt(0).toUpperCase()}${blocker.reason.slice(1)}.`,
+        state: "open",
+        basis: blocker.source ?? null,
+        reasons: [blocker.reason],
+        view: { mode: "compare", selected: blocker.part_id ? `${base}:part:${blocker.part_id}` : null, explode: 0.6 },
+      });
+    }
   }
 
   // --- How it connects -----------------------------------------------------------------------
@@ -158,6 +181,7 @@ export function deviceFindings({ sidecars, compare, focusPart, faceFit, labelOf 
     state: link.open_checks.length ? "open" : "recorded",
     basis: link.source ?? null,
     reasons: link.open_checks,
+    next: link.open_checks.length ? `First open check: ${words(link.open_checks[0])}.` : null,
     view: { mode: target, selected: linkKey(link.interface_id), explode: 0.45 },
   }));
 
@@ -195,6 +219,11 @@ export function fitFindings(fit, { sidecar, revision, labelOf = (rev) => rev } =
   const name = (partId) => partLabel(sidecar, partId);
   const key = (partId) => `${revision}:part:${partId}`;
   const pairView = (row) => ({ mode: revision, selected: key(row.a), also: [key(row.b)], explode: 0 });
+  // Every part in a group of pairs, so the whole set shows on the model (capped for legibility).
+  const groupView = (rows) => {
+    const ids = [...new Set(rows.flatMap((row) => [row.a, row.b]))].slice(0, 40);
+    return { mode: revision, selected: key(ids[0]), also: ids.slice(1).map(key), explode: 0 };
+  };
   const items = [];
   if (fit.size_mm) {
     items.push({
@@ -216,6 +245,7 @@ export function fitFindings(fit, { sidecar, revision, labelOf = (rev) => rev } =
         id: `fit:clash:${row.a}:${row.b}`,
         question: `Do ${name(row.a)} and ${name(row.b)} collide?`,
         answer: `Yes in the CAD model: they overlap by ${Number(row.overlap_mm3).toFixed(1)} mm³.`,
+        next: "Move or resize one of the two parts in CAD and re-measure.",
         state: "clash",
         basis: "exact intersection volume of the two solids",
         view: pairView(row),
@@ -239,7 +269,8 @@ export function fitFindings(fit, { sidecar, revision, labelOf = (rev) => rev } =
       detail: standIn.slice(0, 6).map((row) => `${name(row.a)} ↔ ${name(row.b)} · ${Number(row.overlap_mm3).toFixed(0)} mm³`),
       state: "unknown",
       basis: "intersection volume of stand-in shapes",
-      view: pairView(standIn[0]),
+      next: "Replace the stand-in shapes with real part CAD, then re-measure.",
+      view: groupView(standIn),
     });
   }
   // Tight gaps between real shapes, grouped by measured value: a run of identical gaps is usually
@@ -256,7 +287,8 @@ export function fitFindings(fit, { sidecar, revision, labelOf = (rev) => rev } =
       detail: tightStandIn.slice(0, 6).map((row) => `${name(row.a)} ↔ ${name(row.b)} · ${row.gap_mm.toFixed(2)} mm`).concat(tightStandIn.length > 6 ? [`and ${tightStandIn.length - 6} more`] : []),
       state: "unknown",
       basis: "minimum gap between a part's surface samples and the other part's triangles",
-      view: pairView(closest),
+      next: "Attach real component heights or 3D models, then re-measure these pairs.",
+      view: groupView(tightStandIn),
     });
   }
   const groups = new Map();
@@ -274,11 +306,12 @@ export function fitFindings(fit, { sidecar, revision, labelOf = (rev) => rev } =
         : `Which parts sit ${value} mm apart?`,
       answer: rows.length === 1
         ? `At most ${value} mm apart in the CAD model${first.stand_in ? ", measured on a stand-in shape" : ""}.`
-        : `${plural(rows.length, "pair")} at most ${value} mm apart${rows.length > 2 ? ", a repeated gap that is usually a designed seam" : ""}${standInOnly ? "; all involve stand-in shapes" : ""}.`,
+        : `${plural(rows.length, "pair")} at most ${value} mm apart${rows.length > 2 ? ", a repeated gap: possibly a designed seam (intent not recorded)" : ""}${standInOnly ? "; all involve stand-in shapes" : ""}.`,
       detail: rows.slice(0, 6).map((row) => `${name(row.a)} ↔ ${name(row.b)}`).concat(rows.length > 6 ? [`and ${rows.length - 6} more`] : []),
       state: standInOnly ? "unknown" : "computed",
       basis: `minimum gap between surface samples (true gap between ${mm(Math.max(0, first.gap_mm - first.precision_mm))} and ${mm(first.gap_mm)})`,
-      view: pairView(first),
+      next: rows.length > 2 ? "Record whether this gap is intended (a seam) or should be closed." : "Check this clearance against print tolerance and assembly order.",
+      view: rows.length > 1 ? groupView(rows) : pairView(first),
     });
   }
   const touching = fit.pairs.filter((row) => row.kind === "touching");
@@ -290,7 +323,7 @@ export function fitFindings(fit, { sidecar, revision, labelOf = (rev) => rev } =
       detail: touching.slice(0, 6).map((row) => `${name(row.a)} ↔ ${name(row.b)}`).concat(touching.length > 6 ? [`and ${touching.length - 6} more`] : []),
       state: "computed",
       basis: "surface samples closer than 0.05 mm with no overlap volume",
-      view: pairView(touching[0]),
+      view: groupView(touching),
     });
   }
   return [{ id: "measured", title: "Measured from the CAD model", items }];
@@ -305,6 +338,15 @@ const KICAD_TYPES = {
 const kicadType = (type) => KICAD_TYPES[type] ?? `${words(type).charAt(0).toUpperCase()}${words(type).slice(1)}`;
 
 // KiCad's own DRC/ERC on the board, each violation traced to the parts it touches.
+const KICAD_NEXT = {
+  shorting_items: "Fix the routing so the two nets no longer share copper, then re-run DRC.",
+  unconnected_items: "Route the missing connections (or confirm they are intentionally open), then re-run DRC.",
+  clearance: "Move or narrow the copper to meet the board's clearance rule, then re-run DRC.",
+  tracks_crossing: "Re-route the crossing tracks on separate layers or around each other.",
+  hole_clearance: "Move copper or the hole to meet the hole clearance rule.",
+  solder_mask_bridge: "Check pad spacing and solder mask expansion; bridges usually follow from the shorts.",
+};
+
 export function kicadFindings(report, { revision } = {}) {
   if (!report) return [];
   const key = (partId) => `${revision}:part:${partId}`;
@@ -338,6 +380,8 @@ export function kicadFindings(report, { revision } = {}) {
       const errorsHere = rows.filter((row) => row.severity === "error").length;
       const parts = [...new Set(rows.flatMap((row) => row.part_ids ?? []))];
       const first = rows.find((row) => row.part_ids?.length) ?? rows[0];
+      // Parts and the copper of the nets involved, so a short shows both nets on the board.
+      const highlight = [...new Set([...(first?.part_ids ?? []), ...(first?.net_ids ?? [])])];
       items.push({
         id: `kicad:${name}:${type}`,
         question: `${kicadType(type)} (${title})`,
@@ -346,8 +390,9 @@ export function kicadFindings(report, { revision } = {}) {
           .concat(rows.length > 6 ? [`and ${rows.length - 6} more`] : []),
         state: errorsHere ? "failing" : "open",
         basis: `${version} ${title}; parts traced from the violation's items and positions`,
-        view: first?.part_ids?.length
-          ? { mode: revision, selected: key(first.part_ids[0]), also: first.part_ids.slice(1).map(key), explode: 0 }
+        next: KICAD_NEXT[type] ?? null,
+        view: highlight.length
+          ? { mode: revision, selected: key(highlight[0]), also: highlight.slice(1).map(key), explode: 0 }
           : { mode: revision, selected: null, explode: 0 },
       });
     }
@@ -441,15 +486,19 @@ export function evidenceFindings(records, { revision, partIds = new Set() } = {}
     }
     if (record.kind === "tool_run") {
       const tool = record.tools[0];
+      // Most severe first; info rows go last so real warnings are read before inventory notes.
+      const rank = { error: 0, warning: 1, warn: 1, note: 2, info: 3 };
+      const ordered = [...record.findings].sort((a, b) => (rank[a.severity] ?? 1.5) - (rank[b.severity] ?? 1.5));
       const warnings = record.findings.filter((row) => row.severity && row.severity !== "info").length;
-      const firstWithParts = record.findings.find((row) => row.parts.some((ref) => partIds.has(ref.toLowerCase())));
+      const firstWithParts = ordered.find((row) => row.parts.some((ref) => partIds.has(ref.toLowerCase())));
       const keys = firstWithParts ? firstWithParts.parts.map((ref) => ref.toLowerCase()).filter((id) => partIds.has(id)) : [];
       if (tool) {
         add("tools", "External tools", {
           id: `tool:${tool.repository}`,
           question: `What did ${tool.repository.split("/").pop()} find?`,
           answer: `${tool.repository} at ${String(tool.commit_sha).slice(0, 7)} (${tool.license}) ran on this design: ${plural(record.findings.length, "finding")}, ${warnings} above info.`,
-          detail: record.findings.slice(0, 8).map((row) => `${row.severity}: ${row.message}`),
+          detail: ordered.slice(0, 8).map((row) => `${row.severity}: ${row.message}`)
+            .concat(ordered.length > 8 ? [`and ${ordered.length - 8} more`] : []),
           state: "recorded",
           basis: `${source}; commit-pinned, licence-checked run`,
           view: keys.length ? { mode: revision, selected: `${revision}:part:${keys[0]}`, also: keys.slice(1).map((id) => `${revision}:part:${id}`), explode: 0 } : overview,

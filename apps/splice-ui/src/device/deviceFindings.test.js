@@ -36,7 +36,7 @@ describe("device findings from the Fielddeck records", () => {
   it("answers the display fit from the CAD measurement and opens face view", () => {
     const face = all.find((item) => item.id === "face-fit");
     expect(face.state).toBe("computed");
-    expect(face.answer).toBe("Glass edge clear of faceplate on L/R/B · min clear 1.25 mm (L/R)");
+    expect(face.answer).toBe("CAD estimate: Glass edge clear of faceplate on L/R/B · min clear 1.25 mm (L/R). Physical fit not tested.");
     expect(face.view).toMatchObject({ faceView: true, selected: "5:part:display" });
     const pending = deviceFindings({ sidecars, compare, focusPart: "display", faceFit: null })
       .flatMap((group) => group.items).find((item) => item.id === "face-fit");

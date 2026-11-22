@@ -27,7 +27,9 @@ describe("measured fit findings", () => {
     expect(seated).toMatchObject({ kind: "touching", gap_mm: 0 });
     const touching = all.find((item) => item.id === "fit:touching");
     expect(touching.view).toMatchObject({ explode: 0 });
-    expect(touching.view.also).toHaveLength(1);
+    // The whole set of touching pairs is highlighted, not only the first pair.
+    const touchingParts = new Set(fit.pairs.filter((row) => row.kind === "touching").flatMap((row) => [row.a, row.b]));
+    expect(touching.view.also.length + 1).toBe(Math.min(40, touchingParts.size));
   });
 
   it("SPI flash board: a footprint seated on the board is touching, not a tight gap", () => {
@@ -42,7 +44,7 @@ describe("measured fit findings", () => {
   it("Fielddeck 7-inch: a repeated gap is grouped as one seam, not twenty alarms", () => {
     const all = items(fixture("fielddeck-7"), "projects/cyberdeck-real-trial-20261020/digital_v1/cad/parts.json", "7");
     const seam = all.find((item) => item.id === "fit:tight:0.30");
-    expect(seam.answer).toMatch(/pairs at most 0\.30 mm apart, a repeated gap that is usually a designed seam/);
+    expect(seam.answer).toMatch(/pairs at most 0\.30 mm apart, a repeated gap: possibly a designed seam \(intent not recorded\)/);
     expect(seam.detail.at(-1)).toMatch(/^and \d+ more$/);
   });
 

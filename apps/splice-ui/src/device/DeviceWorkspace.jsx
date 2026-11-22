@@ -178,6 +178,20 @@ export default function DeviceWorkspace({ sceneId, onExit }) {
   const matches = data?.index && target ? findTargets(data.index, target, query) : [];
   const selectedRow = data?.index?.byKey.get(selected) ?? null;
   const openCount = items.filter((item) => item.state === "open" || item.state === "unknown").length;
+  const failingCount = items.filter((item) => item.state === "failing" || item.state === "clash").length;
+  // Search hint from this device's own parts, not a fixed example.
+  const hint = useMemo(() => {
+    const parts = Object.values(data?.sidecars ?? {})[0]?.parts ?? [];
+    const names = parts.filter((part) => part.geometry_basis !== "copper" && part.part_id !== "world")
+      .map((part) => String(part.label ?? part.part_id).split(" · ")[0]).filter((name) => name.length <= 14);
+    return names.length ? `${names.slice(0, 3).join(", ")}…` : "a part or reference…";
+  }, [data]);
+  const recipe = activeItem?.view ? [
+    activeItem.view.mode === "compare" ? "comparing revisions" : `revision ${labelOf(activeItem.view.mode)}`,
+    activeItem.view.faceView ? "face view" : null,
+    activeItem.view.selected ? `${1 + (activeItem.view.also?.length ?? 0)} highlighted` : "whole device",
+    activeItem.view.explode ? "exploded" : null,
+  ].filter(Boolean).join(" · ") : "";
 
   function show(item) {
     setActive(item.id);
@@ -213,13 +227,13 @@ export default function DeviceWorkspace({ sceneId, onExit }) {
           <h1>{manifest?.title ?? "Device"}</h1>
           <p>{manifest?.subtitle}{data?.compare ? ` · compared with the ${labelOf(data.compare.base)} revision` : ""}</p>
         </div>
-        <p className="dv-truth">Physical fit <strong>not tested on hardware</strong> · {openCount} open or unknown</p>
+        <p className="dv-truth">Physical fit <strong>not tested on hardware</strong> {failingCount > 0 && <> · <strong className="dv-failing">{failingCount} failing {failingCount === 1 ? "check" : "checks"}</strong></>} · {openCount} open or unknown</p>
       </header>
 
       <section className="dv-questions" aria-label="Questions about this device" data-stage-edge="left">
         <label className="dv-find">
           <span>Find a part or connection</span>
-          <input type="search" value={query} placeholder="dsi, bank, display…" onChange={(event) => setQuery(event.target.value)} />
+          <input type="search" value={query} placeholder={hint} onChange={(event) => setQuery(event.target.value)} />
         </label>
         {query && <ul className="dv-matches" aria-label="Matches">
           {matches.length ? matches.map((match) => (
@@ -243,7 +257,8 @@ export default function DeviceWorkspace({ sceneId, onExit }) {
                     <span className="dv-a">{item.answer}</span>
                     <StateWord state={item.state} />
                   </button>
-                  {item.id === active && (item.detail?.length > 0 || item.basis) && <div className="dv-detail">
+                  {item.id === active && (item.detail?.length > 0 || item.basis || item.next) && <div className="dv-detail">
+                    {item.next && <p className="dv-next"><span>Next</span> {item.next}</p>}
                     {item.detail?.length > 0 && <ul>{item.detail.map((line) => <li key={line}>{line}</li>)}</ul>}
                     {item.basis && <p>Basis · <Source basis={item.basis} /></p>}
                   </div>}
@@ -256,6 +271,7 @@ export default function DeviceWorkspace({ sceneId, onExit }) {
 
       {activeItem && <div className="dv-lens" role="status" data-stage-edge="top">
         <span>Showing</span> <strong>{activeItem.question}</strong>
+        {recipe && <small className="dv-recipe">{recipe}</small>}
         <button type="button" onClick={overview}>Back to whole device</button>
       </div>}
 
