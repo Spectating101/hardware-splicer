@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
-import { fetchSceneFit, fetchSceneManifest } from "../api";
+import { fetchSceneEvidence, fetchSceneFit, fetchSceneKicad, fetchSceneManifest } from "../api";
 import { BASIS_LABELS, openQuestions } from "../components/fielddeckLogic.js";
-import { deviceFindings, findTargets, fitFindings, shortLabel, STATES } from "./deviceFindings.js";
+import { deviceFindings, evidenceFindings, findTargets, fitFindings, kicadFindings, shortLabel, STATES } from "./deviceFindings.js";
 import "./device.css";
 
 const FieldDeckScene = lazy(() => import("../components/FieldDeckScene.jsx"));
@@ -102,6 +102,8 @@ export default function DeviceWorkspace({ sceneId, onExit }) {
   const [selected, setSelected] = useState(null);
   const [query, setQuery] = useState("");
   const [fit, setFit] = useState({ state: "idle", report: null, error: "" });
+  const [evidence, setEvidence] = useState(null);
+  const [kicad, setKicad] = useState({ state: "idle", report: null, error: "" });
 
   useEffect(() => {
     const controller = new AbortController();
@@ -113,7 +115,28 @@ export default function DeviceWorkspace({ sceneId, onExit }) {
   }, [sceneId]);
 
   const labelOf = (rev) => data?.revisions?.find(([id]) => id === rev)?.[1] ?? rev;
+  const drawable = manifest?.geometry_status === "available";
   const fitRevision = data?.compare?.target ?? data?.revisions?.at(-1)?.[0] ?? null;
+  const shownRevision = fitRevision ?? manifest?.compare?.target ?? manifest?.revisions?.at(-1)?.id ?? null;
+  const boardRevision = manifest?.revisions?.find((row) => row.id === shownRevision && row.board) ? shownRevision : null;
+  useEffect(() => {
+    const controller = new AbortController();
+    setEvidence(null);
+    fetchSceneEvidence(sceneId, controller.signal)
+      .then((body) => { if (!controller.signal.aborted) setEvidence(body.records); })
+      .catch(() => { if (!controller.signal.aborted) setEvidence([]); });
+    return () => controller.abort();
+  }, [sceneId]);
+  // KiCad's own DRC/ERC, for a revision that names its board files.
+  useEffect(() => {
+    if (!boardRevision) return undefined;
+    const controller = new AbortController();
+    setKicad({ state: "loading", report: null, error: "" });
+    fetchSceneKicad(sceneId, boardRevision, controller.signal)
+      .then((report) => { if (!controller.signal.aborted) setKicad({ state: "ready", report, error: "" }); })
+      .catch((cause) => { if (!controller.signal.aborted) setKicad({ state: "error", report: null, error: cause.message }); });
+    return () => controller.abort();
+  }, [sceneId, boardRevision]);
   // The model as measured by the server's fit engine: computed once per model, then cached there.
   useEffect(() => {
     if (!fitRevision) return undefined;
@@ -125,14 +148,19 @@ export default function DeviceWorkspace({ sceneId, onExit }) {
     return () => controller.abort();
   }, [sceneId, fitRevision]);
   const findings = useMemo(() => {
-    if (!data?.sidecars) return [];
-    const recorded = deviceFindings({
+    const recorded = data?.sidecars ? deviceFindings({
       sidecars: data.sidecars, compare: data.compare, focusPart: data.focusPart, faceFit: data.faceFit, labelOf,
-    });
-    const measured = fitFindings(fit.report, { sidecar: data.sidecars[fitRevision], revision: fitRevision, labelOf });
-    const chosen = recorded.filter((group) => group.id === "chosen");
-    return [...chosen, ...measured, ...recorded.filter((group) => group.id !== "chosen")];
-  }, [data?.sidecars, data?.compare, data?.focusPart, data?.faceFit, data?.revisions, fit.report, fitRevision]);
+    }) : [];
+    const measured = data?.sidecars ? fitFindings(fit.report, { sidecar: data.sidecars[fitRevision], revision: fitRevision, labelOf }) : [];
+    const partIds = new Set((data?.sidecars?.[fitRevision]?.parts ?? []).map((part) => part.part_id));
+    const records = evidenceFindings(evidence, { revision: shownRevision, partIds });
+    const checks = kicadFindings(kicad.report, { revision: shownRevision });
+    // One "What was chosen" group: the scene's own records first, then any strategy record.
+    const chosen = [...recorded, ...records].filter((group) => group.id === "chosen");
+    const chosenGroup = chosen.length ? [{ id: "chosen", title: "What was chosen", items: chosen.flatMap((group) => group.items) }] : [];
+    const rest = (groups) => groups.filter((group) => group.id !== "chosen");
+    return [...chosenGroup, ...checks, ...measured, ...rest(records), ...rest(recorded)];
+  }, [data?.sidecars, data?.compare, data?.focusPart, data?.faceFit, data?.revisions, fit.report, fitRevision, evidence, kicad.report, shownRevision]);
   // The stage numbers open questions in this order; a finding shows the numbers of its own reasons.
   const pinNumbers = useMemo(() => {
     if (!data?.sidecars || !data?.index) return new Map();
@@ -168,7 +196,11 @@ export default function DeviceWorkspace({ sceneId, onExit }) {
   return (
     <div className="dv" data-testid="device-workspace">
       <div className="dv-stage">
-        {manifest && <Suspense fallback={<p className="dv-loading">Loading the 3D device…</p>}>
+        {manifest && !drawable && <p className="dv-loading dv-no-model">
+          No 3D model for this project{manifest.geometry_note ? `: ${manifest.geometry_note.split("\n")[0].replace(/_/g, " ")}.` : "."}
+          {manifest.geometry_note?.includes("\n") && <><br />{manifest.geometry_note.split("\n").slice(1).join(" ")}</>}
+        </p>}
+        {manifest && drawable && <Suspense fallback={<p className="dv-loading">Loading the 3D device…</p>}>
           <FieldDeckScene projectId={sceneId} manifest={manifest} chrome="none" command={command}
             onSelectionChange={setSelected} onReady={setData} />
         </Suspense>}
@@ -195,7 +227,9 @@ export default function DeviceWorkspace({ sceneId, onExit }) {
               {match.label}<small>{match.kind}</small></button></li>
           )) : <li className="dv-none">No part or connection matches “{query}”.</li>}
         </ul>}
-        {!data?.sidecars && !error && <p className="dv-none">Reading the device records…</p>}
+        {drawable && !data?.sidecars && !error && <p className="dv-none">Reading the device records…</p>}
+        {kicad.state === "loading" && <p className="dv-none" role="status">Running KiCad's DRC and ERC on the board files…</p>}
+        {kicad.state === "error" && <p className="dv-none" role="status">KiCad checks unavailable: {kicad.error}</p>}
         {fit.state === "loading" && <p className="dv-none" role="status">Measuring the CAD model: part-to-part clearances and collisions. The first measurement of a model takes a few seconds.</p>}
         {fit.state === "error" && <p className="dv-none" role="status">Measured fit unavailable: {fit.error}</p>}
         {findings.map((group) => (

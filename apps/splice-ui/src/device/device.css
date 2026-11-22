@@ -1,3 +1,8 @@
+/* The device route is full bleed even when no 3D model (and so no scene stylesheet) is loaded. */
+.app-shell.fielddeck-shell { grid-template-columns: 1fr; }
+.fielddeck-shell .sidebar { display: none; }
+.fielddeck-shell .content { display: flex; flex: 1; padding: 0; }
+
 /* Device workspace: the assembled device fills the screen; questions about it sit on the left, the
    selected part or connection on the right. Same ground and ink as the 3D stage, so the panels read
    as part of the bench, not a page around it. Amber is reserved for open questions, as on the stage. */
@@ -182,3 +187,5 @@
   border: 1.5px solid var(--open); border-radius: 9px;
   color: var(--open); font: 600 11px/1 var(--mono);
 }
+.dv-no-model { padding: 0 max(440px, 36vw) 0 max(440px, 36vw); text-align: center; line-height: 1.5; }
+@media (width < 900px) { .dv-no-model { position: relative; padding: 24px 16px; } }

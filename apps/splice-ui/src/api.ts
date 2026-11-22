@@ -819,6 +819,50 @@ export async function fetchSceneFit(projectId: string, revision: string, signal?
   return parseJson<SceneFit>(res);
 }
 
+/** GET /v1/scenes/{id}/evidence: the records a scene lists, normalised by kind. */
+export interface SceneEvidence {
+  project_id: string;
+  records: ({ kind: string; label: string; source: string; sha256?: string; error?: string } & Record<string, unknown>)[];
+}
+
+export async function fetchSceneEvidence(projectId: string, signal?: AbortSignal): Promise<SceneEvidence> {
+  const res = await fetch(`${API_BASE}/v1/scenes/${encodeURIComponent(projectId)}/evidence`, { signal });
+  return parseJson<SceneEvidence>(res);
+}
+
+/** One KiCad DRC/ERC violation, traced to the parts it touches. */
+export interface KicadViolation {
+  group: string;
+  type: string | null;
+  severity: string | null;
+  description: string | null;
+  items: string[];
+  parts: string[];
+  part_ids: string[];
+}
+
+export interface KicadReport {
+  kicad_version: string | null;
+  counts: Record<string, number>;
+  total: number;
+  violations: KicadViolation[];
+}
+
+/** GET /v1/scenes/{id}/{revision}/kicad: KiCad's own checks on the revision's board files. */
+export interface SceneKicadChecks {
+  project_id: string;
+  revision: string;
+  board: string;
+  schematic: string | null;
+  drc: KicadReport | null;
+  erc: KicadReport | null;
+}
+
+export async function fetchSceneKicad(projectId: string, revision: string, signal?: AbortSignal): Promise<SceneKicadChecks> {
+  const res = await fetch(`${sceneRevisionUrl(projectId, revision)}/kicad`, { signal });
+  return parseJson<SceneKicadChecks>(res);
+}
+
 export async function fetchHealth(): Promise<HealthResponse> {
   const res = await fetch(`${API_BASE}/health`);
   return parseJson<HealthResponse>(res);

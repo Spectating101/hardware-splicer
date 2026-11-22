@@ -6,6 +6,9 @@ import { coverHeadline, coverDetail } from "../components/fielddeckLogic.js";
 
 export const STATES = {
   clash: "collides in CAD",
+  failing: "fails KiCad checks",
+  checked: "checked by KiCad",
+  simulated: "simulated",
   computed: "computed from CAD",
   recorded: "recorded",
   open: "open",
@@ -291,4 +294,188 @@ export function fitFindings(fit, { sidecar, revision, labelOf = (rev) => rev } =
     });
   }
   return [{ id: "measured", title: "Measured from the CAD model", items }];
+}
+
+const money = (value) => `$${Number(value).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const KICAD_TYPES = {
+  shorting_items: "Shorts between nets", unconnected_items: "Unconnected items", clearance: "Clearance violations",
+  tracks_crossing: "Crossing tracks", solder_mask_bridge: "Solder-mask bridges", hole_clearance: "Hole clearance",
+  schematic_parity: "Board and schematic disagree",
+};
+const kicadType = (type) => KICAD_TYPES[type] ?? `${words(type).charAt(0).toUpperCase()}${words(type).slice(1)}`;
+
+// KiCad's own DRC/ERC on the board, each violation traced to the parts it touches.
+export function kicadFindings(report, { revision } = {}) {
+  if (!report) return [];
+  const key = (partId) => `${revision}:part:${partId}`;
+  const items = [];
+  for (const [name, title] of [["drc", "DRC"], ["erc", "ERC"]]) {
+    const result = report[name];
+    if (!result) continue;
+    const errors = result.counts.error ?? 0;
+    const warnings = result.counts.warning ?? 0;
+    const version = result.kicad_version ? `KiCad ${result.kicad_version}` : "KiCad";
+    items.push({
+      id: `kicad:${name}`,
+      question: `Does the ${name === "drc" ? "board" : "schematic"} pass KiCad's ${title}?`,
+      answer: result.total === 0
+        ? `${version} reports no ${title} violations. A CAD check, not physical proof.`
+        : `No: ${plural(errors, "error")} and ${plural(warnings, "warning")} from ${version}.`,
+      state: result.total === 0 ? "checked" : errors ? "failing" : "open",
+      basis: `kicad-cli ${name === "drc" ? "pcb drc" : "sch erc"} on ${name === "drc" ? report.board : report.schematic}`,
+      view: { mode: revision, selected: null, explode: 0 },
+    });
+    const byType = new Map();
+    for (const row of result.violations) {
+      const type = row.group === "unconnected_items" ? "unconnected_items" : row.type;
+      if (!byType.has(type)) byType.set(type, []);
+      byType.get(type).push(row);
+    }
+    const order = ["shorting_items", "unconnected_items", "clearance", "tracks_crossing", "hole_clearance", "solder_mask_bridge"];
+    const types = [...byType.keys()].sort((a, b) => (order.indexOf(a) + 1 || 99) - (order.indexOf(b) + 1 || 99));
+    for (const type of types) {
+      const rows = byType.get(type);
+      const errorsHere = rows.filter((row) => row.severity === "error").length;
+      const parts = [...new Set(rows.flatMap((row) => row.part_ids ?? []))];
+      const first = rows.find((row) => row.part_ids?.length) ?? rows[0];
+      items.push({
+        id: `kicad:${name}:${type}`,
+        question: `${kicadType(type)} (${title})`,
+        answer: `${plural(rows.length, "violation")}${errorsHere ? `, ${errorsHere} of them errors` : ", warnings"}${parts.length ? `, at ${parts.slice(0, 8).map((id) => id.toUpperCase()).join(", ")}${parts.length > 8 ? "…" : ""}` : ""}.`,
+        detail: rows.slice(0, 6).map((row) => `${row.description}${row.part_ids?.length ? ` · ${row.part_ids.map((id) => id.toUpperCase()).join(", ")}` : ""}`)
+          .concat(rows.length > 6 ? [`and ${rows.length - 6} more`] : []),
+        state: errorsHere ? "failing" : "open",
+        basis: `${version} ${title}; parts traced from the violation's items and positions`,
+        view: first?.part_ids?.length
+          ? { mode: revision, selected: key(first.part_ids[0]), also: first.part_ids.slice(1).map(key), explode: 0 }
+          : { mode: revision, selected: null, explode: 0 },
+      });
+    }
+  }
+  return items.length ? [{ id: "kicad", title: "Electrical checks (KiCad)", items }] : [];
+}
+
+// Strategy, simulation, receipts, external tool runs and cost, from the scene's evidence records.
+export function evidenceFindings(records, { revision, partIds = new Set() } = {}) {
+  const groups = new Map();
+  const add = (group, title, item) => {
+    if (!groups.has(group)) groups.set(group, { id: group, title, items: [] });
+    groups.get(group).items.push(item);
+  };
+  const overview = { mode: revision, selected: null, explode: 0.6 };
+  for (const record of records ?? []) {
+    const source = record.source;
+    if (record.error) {
+      add("records", "Records", { id: `record:${source}`, question: record.label, answer: `Not readable: ${record.error}.`, state: "unknown", basis: source, view: overview });
+      continue;
+    }
+    if (record.kind === "strategy") {
+      for (const option of record.options) {
+        const chosen = Object.entries(record.decision).filter(([, value]) => value === option.id).map(([role]) => words(role).replace(/^selected for /, ""));
+        add("chosen", "What was chosen", {
+          id: `strategy:${option.id}`,
+          question: `Option: ${option.label}`,
+          answer: `${option.known_usd == null ? "No verified cost" : `${money(option.known_usd)} known`}${option.cost_complete ? "" : `, incomplete: ${option.missing.length} item${option.missing.length === 1 ? "" : "s"} not costed`}.${chosen.length ? ` Chosen as the ${chosen.join(" and ")}.` : ""}`,
+          detail: [option.risk && `Risk: ${option.risk}`, option.engineering_status && `Engineering: ${words(option.engineering_status)}`,
+            option.procurement_status && `Procurement: ${words(option.procurement_status)}`,
+            option.missing.length && `Missing: ${option.missing.join(", ")}`].filter(Boolean),
+          state: "recorded",
+          basis: option.cost_basis ?? source,
+          view: overview,
+        });
+      }
+      if (record.decision.rationale) {
+        add("chosen", "What was chosen", {
+          id: "strategy:decision",
+          question: "Why that strategy?",
+          answer: record.decision.rationale,
+          detail: [`Procurement approved: ${record.decision.procurement_approved ? "yes" : "no"}`,
+            record.constraints?.physical_build_authorized === false ? "Physical build: not authorized" : null].filter(Boolean),
+          state: "recorded", basis: source, view: overview,
+        });
+      }
+    }
+    if (record.kind === "simulation") {
+      const accepted = record.scenarios.filter((row) => row.accepted).length;
+      const describe = (row) => {
+        const m = row.metrics;
+        const bits = [];
+        if (m.seconds != null) bits.push(`${m.seconds} s`);
+        if (m.hover_error_m != null) bits.push(`hover error ${(m.hover_error_m * 100).toFixed(1)} cm`);
+        if (m.gust_recovery_error_m != null) bits.push(`gust recovery ${(m.gust_recovery_error_m * 100).toFixed(1)} cm`);
+        if (m.landing_speed_m_s != null) bits.push(`landing ${m.landing_speed_m_s.toFixed(2)} m/s`);
+        if (m.peak_current_a_est != null) bits.push(`peak current ${m.peak_current_a_est.toFixed(1)} A (estimated)`);
+        if (m.fault_detected) bits.push("fault detected");
+        return `${words(row.id)}: expected ${words(row.expected)}; ${row.accepted ? "behaved as expected" : "did not"} · ${bits.join(", ")}`;
+      };
+      add("simulated", "Simulated", {
+        id: "simulation:missions",
+        question: "Does it fly its missions in simulation?",
+        answer: `${accepted} of ${record.scenarios.length} scenarios behaved as expected in the simulation, including a motor failure that was detected. Not a physical flight; flight is not authorized.`,
+        detail: record.scenarios.map(describe),
+        state: "simulated",
+        basis: source,
+        view: { mode: revision, selected: null, explode: 0 },
+      });
+      if (record.scope_limits.length) {
+        add("simulated", "Simulated", {
+          id: "simulation:limits",
+          question: "What does the simulation leave out?",
+          answer: record.scope_limits[0],
+          detail: record.scope_limits.slice(1),
+          state: "recorded", basis: source, view: overview,
+        });
+      }
+    }
+    if (record.kind === "design_receipt") {
+      const checks = Object.entries(record.checks);
+      const nonzero = checks.filter(([, value]) => value);
+      add("receipt", "Verification receipt", {
+        id: "receipt:checks",
+        question: "What did the design verification check?",
+        answer: `${checks.length} checks recorded (${nonzero.length ? `${nonzero.length} with issues` : "none with issues"}) by KiCad ${record.toolchain?.kicad_cli ?? ""}. Physical correctness: ${words(record.authority.physical_correctness ?? "unproven").toLowerCase()}; fabrication and power-on not authorized.`,
+        detail: [...checks.map(([name, value]) => `${words(name)}: ${value}`), ...record.nonclaims],
+        state: nonzero.length ? "open" : "checked",
+        basis: source, view: overview,
+      });
+    }
+    if (record.kind === "tool_run") {
+      const tool = record.tools[0];
+      const warnings = record.findings.filter((row) => row.severity && row.severity !== "info").length;
+      const firstWithParts = record.findings.find((row) => row.parts.some((ref) => partIds.has(ref.toLowerCase())));
+      const keys = firstWithParts ? firstWithParts.parts.map((ref) => ref.toLowerCase()).filter((id) => partIds.has(id)) : [];
+      if (tool) {
+        add("tools", "External tools", {
+          id: `tool:${tool.repository}`,
+          question: `What did ${tool.repository.split("/").pop()} find?`,
+          answer: `${tool.repository} at ${String(tool.commit_sha).slice(0, 7)} (${tool.license}) ran on this design: ${plural(record.findings.length, "finding")}, ${warnings} above info.`,
+          detail: record.findings.slice(0, 8).map((row) => `${row.severity}: ${row.message}`),
+          state: "recorded",
+          basis: `${source}; commit-pinned, licence-checked run`,
+          view: keys.length ? { mode: revision, selected: `${revision}:part:${keys[0]}`, also: keys.slice(1).map((id) => `${revision}:part:${id}`), explode: 0 } : overview,
+        });
+      }
+      for (const row of record.not_run) {
+        add("tools", "External tools", {
+          id: `tool:not-run:${row.repository}`,
+          question: `Why was ${row.repository.split("/").pop()} not run?`,
+          answer: `${row.repository} was discovered but not executed: ${row.reason?.toLowerCase() ?? "no reviewed adapter"}.`,
+          state: "recorded", basis: source, view: overview,
+        });
+      }
+    }
+    if (record.kind === "bom_csv") {
+      const priced = record.lines.filter((row) => row.line_usd != null).sort((a, b) => b.line_usd - a.line_usd);
+      add("cost", "Cost", {
+        id: `bom:${source}`,
+        question: `What does it cost? (${record.label})`,
+        answer: `${money(record.known_total_usd)} known across ${plural(priced.length, "priced line")}${record.unpriced.length ? `; ${plural(record.unpriced.length, "line")} unpriced, so the true total is higher` : ""}.`,
+        detail: [...Object.entries(record.by_basis).map(([basis, value]) => `${basis}: ${money(value)}`),
+          ...priced.slice(0, 5).map((row) => `${row.name} · ${money(row.line_usd)}`)],
+        state: "recorded",
+        basis: source, view: overview,
+      });
+    }
+  }
+  return [...groups.values()];
 }
