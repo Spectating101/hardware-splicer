@@ -348,7 +348,12 @@ function Annotations({ labels, selection, endpoints, pins, faceView, base, targe
 // change legend, a single revision groups parts by shape source, and nothing here names a project.
 // holdStage: an embedding page asks the scene to wait before building its stage. Building the stage
 // is seconds of main-thread geometry work, so the bench lets its evidence column render first.
-export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel = "Back", embedded = false, holdStage = false }) {
+// chrome="none" draws only the model and its on-model marks (labels, pins, measurements); a host
+// such as the device workspace then drives the view through `command` ({ mode, selected,
+// explode, faceView }) and hears picks through onSelectionChange and data through onReady.
+export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel = "Back", embedded = false, holdStage = false,
+  chrome = "full", command = null, onSelectionChange = null, onReady = null }) {
+  const bare = chrome === "none";
   const host = useRef(null);
   const stage = useRef(null);
   const current = useRef(null);
@@ -576,6 +581,24 @@ export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel 
   }
   current.current = { view, reduced, finishIntro, select };
 
+  const commandRef = useRef(command);
+  function applyCommand(next) {
+    setExplodeMotion(null);
+    setView((old) => ({
+      ...old, hero: null, touring: false, cue: null, blockers: true,
+      mode: next.mode ?? old.mode,
+      explode: typeof next.explode === "number" ? next.explode : old.explode,
+      selected: next.selected ?? null,
+      focus: Boolean(next.selected),
+      faceView: Boolean(next.faceView),
+    }));
+  }
+  useEffect(() => {
+    commandRef.current = command;
+    if (command && bare) applyCommand(command);
+  }, [command]);
+  useEffect(() => { onSelectionChange?.(view.selected ?? null); }, [view.selected]);
+
   useEffect(() => {
     if (!assets || !stageReleased) return undefined;
     const available = Object.keys(assets).filter((rev) => assets[rev].gltf && assets[rev].sidecar);
@@ -585,7 +608,11 @@ export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel 
     function settle() {
       const hasRevision = (rev) => [...(runtime?.linked ?? [])].some((key) => key.startsWith(`${rev}:`));
       const canPlay = comparisonAvailable && hasRevision(base) && hasRevision(target);
-      if (canPlay && !introSeen && !current.current.reduced) {
+      if (bare) {
+        // The host decides what is shown; its latest command wins over any default view.
+        setView({ ...INITIAL, mode: comparisonAvailable && hasRevision(base) ? "compare" : target });
+        if (commandRef.current) applyCommand(commandRef.current);
+      } else if (canPlay && !introSeen && !current.current.reduced) {
         introSeen = true;
         setView({ ...INITIAL, mode: "compare", hero: performance.now(), blockers: false });
       } else if (canPlay) {
@@ -720,6 +747,11 @@ export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel 
   const loading = !assets || !stageReleased || !built || linked.size > 0 && !rendered;
   const errors = [...(assets ? Object.values(assets).map((revision) => revision.error).filter(Boolean) : []),
     ...(stageError ? [stageError] : [])];
+  // The host builds its own views from the same records the stage draws.
+  useEffect(() => {
+    onReady?.({ index, sidecars, faceFit, compare: sceneCompare, focusPart, modelVisible, loading, errors,
+      revisions, linked: built ? linked : null });
+  }, [index, sidecars, faceFit, sceneCompare, focusPart, modelVisible, loading, errors.join("|"), built, linked]);
   const canChoose = ([mode]) => {
     if (mode === "compare") return comparisonAvailable && (comparisonRenderable || !rendered);
     return Boolean(sidecars[mode]);
@@ -776,11 +808,11 @@ export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel 
   };
 
   return (
-    <section className={`fd-scene fielddeck-route${embedded ? " is-embedded" : ""}`} aria-labelledby="fd-title"
+    <section className={`fd-scene fielddeck-route${embedded ? " is-embedded" : ""}${bare ? " is-bare" : ""}`} aria-labelledby="fd-title"
       data-testid="fielddeck-scene" data-scene-project={projectId} data-scene-revisions={revisions.length}
       data-scene-status={playing ? "hero" : modelVisible ? "settled" : loading ? "loading" : "unavailable"}>
       <div className="fd-stage" data-has-selection={Boolean(selection)} ref={host} tabIndex={0} aria-label={`${manifest.title} stage`}>
-        <header className="fd-header">
+        {!bare && <header className="fd-header">
           <div>
             {onExit && <button className="fd-exit" type="button" aria-label={exitLabel} title={exitLabel} onClick={onExit}>←</button>}
             <h1 id="fd-title">{manifest.title}</h1>
@@ -799,9 +831,9 @@ export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel 
               {inViewCount === allQuestions.length ? `tracked question${allQuestions.length === 1 ? "" : "s"}`
                 : `tracked · ${inViewCount} in ${labelOf(view.mode)} view`}</>}
           </button>
-        </header>
+        </header>}
 
-        <aside className="fd-tree fd-panel" id="fd-tree" aria-label="Part tree" hidden={narrow && !treeOpen}>
+        {!bare && <aside className="fd-tree fd-panel" id="fd-tree" aria-label="Part tree" hidden={narrow && !treeOpen}>
           {!narrow && <h2><button type="button" aria-expanded={treeOpen} aria-controls="fd-tree-content"
             onClick={() => { setDesktopTreeOpen(!treeOpen); setBlockersOnly(false); }}>Assembly</button></h2>}
           {/* The phone tree opens from the toolbar; the heading stays so the part groups keep their outline level. */}
@@ -811,23 +843,23 @@ export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel 
               questions={questions} blockersOnly={filtered} counts={view.mode === "compare" ? sidecars[target]?.revision_diff?.counts : null}
               total={allQuestions.length} viewName={`${labelOf(view.mode)} view`} bySource={!comparisonEnabled} />
           </div>
-        </aside>
-        <Inspector row={selection} index={index} questions={ownQuestions} open={inspectorOpen} compare={sceneCompare}
+        </aside>}
+        {!bare && <Inspector row={selection} index={index} questions={ownQuestions} open={inspectorOpen} compare={sceneCompare}
           collapsed={!narrow && !desktopInspectorOpen} onToggle={narrow ? null : () => setDesktopInspectorOpen(!desktopInspectorOpen)}
           other={otherQuestions.length ? { revision: otherRevision, label: labelOf(otherRevision), questions: otherQuestions } : null}
           meshStats={meshStats} footprint={view.mode === "compare" && selection?.part?.part_id === focusPart && faceFit?.footprint
-            ? { base, label: labelOf(base), value: faceFit.footprint } : null} />
+            ? { base, label: labelOf(base), value: faceFit.footprint } : null} />}
 
         {!modelVisible && <div className="fd-stage-message" role="status">
           {loading ? `Loading ${manifest.title} models…` : errors.join(" ") || `${manifest.title} model unavailable.`}
         </div>}
         {modelVisible && errors.length > 0 && <p className="fd-stage-warning" role="status">{errors.join(" ")}</p>}
-        {playing && <button className="fd-skip" type="button" onClick={finishIntro}>Skip intro</button>}
+        {playing && !bare && <button className="fd-skip" type="button" onClick={finishIntro}>Skip intro</button>}
 
         <Annotations labels={labels} selection={view.faceView ? null : selection} endpoints={endpoints}
           pins={pins} faceView={view.faceView} base={base} target={target} onSelect={select}
           glbSources={glbSources} faceFit={faceFit} mode={view.mode} viewingArea={viewingArea} labelOf={labelOf} />
-        <div className="fd-bottom">
+        {!bare && <div className="fd-bottom">
           {assets && (
             <div className="fd-controls" data-intro={playing}>
               <div className="fd-modes" role="group" aria-label="Revision">
@@ -872,11 +904,11 @@ export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel 
               </div>
             </div>
           )}
-        </div>
-        {narrow && faceAvailable && <button className="fd-face-pill" type="button" title={focus.label} onClick={toggleFace}>
+        </div>}
+        {!bare && narrow && faceAvailable && <button className="fd-face-pill" type="button" title={focus.label} onClick={toggleFace}>
           {view.faceView ? "Back to 3D" : "Face view"}
         </button>}
-        <div className="fd-legend" id="fd-legend" aria-label="Material legend" hidden={narrow && !keyOpen}>
+        {!bare && <div className="fd-legend" id="fd-legend" aria-label="Material legend" hidden={narrow && !keyOpen}>
           {[["Shape source", BASIS_LABELS], ...(comparisonEnabled ? [["Change", DIFF_LABELS]] : [])].map(([label, kinds]) => (
             <div key={label} role="group" aria-label={label}>
               <strong>{label}</strong>
@@ -888,8 +920,8 @@ export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel 
                 ))}
             </div>
           ))}
-        </div>
-        <div className="fd-sheet" hidden={!narrow}>
+        </div>}
+        {!bare && <div className="fd-sheet" hidden={!narrow}>
           <div className="fd-peek" ref={peek} data-has-more={peekMore > 0}>
             <strong>{nameOf(selection) ?? "Select a part or interface"}</strong>
             {selection && <span className="fd-status">{statusOf(selection)}</span>}
@@ -910,7 +942,7 @@ export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel 
                 onClick={() => setSheet((old) => toggleFielddeckSheet(old, id))}>{label}</button>
             ))}
           </div>
-        </div>
+        </div>}
       </div>
     </section>
   );

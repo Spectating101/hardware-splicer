@@ -2068,7 +2068,12 @@ export async function createFielddeckStage(host, assets, index, callbacks, scene
     ".fd-header", ".fd-bottom", ".fd-tree", ".fd-inspector", ".fd-sheet", ".fd-legend", ".fd-options",
   ]
     .map((selector) => host.querySelector(selector));
-  const panels = [header, bottomChrome, tree, inspector, sheet, legend, options];
+  // In bare mode (a host page draws its own panels) the scene chrome is absent: every panel is
+  // optional, and the host marks its panels with data-stage-edge="left|right|top|bottom" so the
+  // model frames in the space between them and labels stay clear of them.
+  const panels = [header, bottomChrome, tree, inspector, sheet, legend, options].filter(Boolean);
+  const hostEdges = (side) => [...document.querySelectorAll(side ? `[data-stage-edge="${side}"]` : "[data-stage-edge]")]
+    .filter((element) => element.getClientRects().length);
   const mobileView = window.matchMedia(FIELDDECK_NARROW);
   function invalidate() {
     if (frame === null) frame = requestAnimationFrame(animate);
@@ -2084,13 +2089,17 @@ export async function createFielddeckStage(host, assets, index, callbacks, scene
     const phone = mobileView.matches;
     const { left: originX, top: originY } = host.getBoundingClientRect();
     const nextCanvasTop = canvas.offsetTop;
-    const upper = Math.max(nextCanvasTop, header.getBoundingClientRect().bottom - originY,
-      phone ? bottomChrome.getBoundingClientRect().bottom - originY : 0);
-    const lowerPanels = phone ? [sheet, tree, inspector, legend] : [bottomChrome, legend];
+    const box = (element) => element.getBoundingClientRect();
+    const upper = Math.max(nextCanvasTop, header ? box(header).bottom - originY : 0,
+      phone && bottomChrome ? box(bottomChrome).bottom - originY : 0,
+      ...hostEdges("top").map((element) => box(element).bottom - originY));
+    const lowerPanels = (phone ? [sheet, tree, inspector, legend] : [bottomChrome, legend]).filter(Boolean);
     const lower = Math.min(nextHeight + nextCanvasTop, ...lowerPanels.filter((panel) => panel.getClientRects().length)
-      .map((panel) => panel.getBoundingClientRect().top - originY));
-    const left = phone ? 0 : Math.max(0, tree.getBoundingClientRect().right - originX);
-    const right = phone ? nextWidth : Math.min(nextWidth, inspector.getBoundingClientRect().left - originX);
+      .map((panel) => box(panel).top - originY), ...hostEdges("bottom").map((element) => box(element).top - originY));
+    const left = phone ? 0 : Math.max(0, tree ? box(tree).right - originX : 0,
+      ...hostEdges("left").map((element) => box(element).right - originX));
+    const right = phone ? nextWidth : Math.min(nextWidth, inspector ? box(inspector).left - originX : nextWidth,
+      ...hostEdges("right").map((element) => box(element).left - originX));
     const nextFrameHeight = Math.max(1, lower - upper);
     const nextFrameWidth = Math.max(1, right - left);
     const nextFrameCenter = (upper + lower) / 2 - nextCanvasTop;
@@ -2667,7 +2676,7 @@ export async function createFielddeckStage(host, assets, index, callbacks, scene
       pickable = pick;
       opaque = block;
       const placeLabels = layoutDirty || resized || config !== lastConfig || !dirty || now - lastLayout > 60;
-      layoutAnnotations(host, camera, entries, width, height, canvasTop, panels, placeLabels, displayOpacity, !cameraMove,
+      layoutAnnotations(host, camera, entries, width, height, canvasTop, [...panels, ...hostEdges()], placeLabels, displayOpacity, !cameraMove,
         sceneConfig, grid.visible ? gridLabelPoint() : null,
         faceView ? { mode, fit: faceFit, compact: mobile, sources: glbSources } : null);
       if (placeLabels) lastLayout = now;
