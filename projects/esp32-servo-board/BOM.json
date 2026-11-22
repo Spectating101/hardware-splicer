@@ -144,6 +144,66 @@
         23.66,
         41.6
       ]
+    },
+    {
+      "id": "net:(no net)",
+      "name": "Net (no net) \u00b7 copper"
+    },
+    {
+      "id": "net:+3V3",
+      "name": "Net +3V3 \u00b7 copper"
+    },
+    {
+      "id": "net:EN",
+      "name": "Net EN \u00b7 copper"
+    },
+    {
+      "id": "net:GND",
+      "name": "Net GND \u00b7 copper"
+    },
+    {
+      "id": "net:GPIO0",
+      "name": "Net GPIO0 \u00b7 copper"
+    },
+    {
+      "id": "net:SCL",
+      "name": "Net SCL \u00b7 copper"
+    },
+    {
+      "id": "net:SDA",
+      "name": "Net SDA \u00b7 copper"
+    },
+    {
+      "id": "net:SERVO_5V",
+      "name": "Net SERVO_5V \u00b7 copper"
+    },
+    {
+      "id": "net:SERVO_PWM_PAN",
+      "name": "Net SERVO_PWM_PAN \u00b7 copper"
+    },
+    {
+      "id": "net:SERVO_PWM_TILT",
+      "name": "Net SERVO_PWM_TILT \u00b7 copper"
+    },
+    {
+      "id": "net:UART_RX",
+      "name": "Net UART_RX \u00b7 copper"
+    },
+    {
+      "id": "net:UART_TX",
+      "name": "Net UART_TX \u00b7 copper"
+    },
+    {
+      "id": "net:USB_D+",
+      "name": "Net USB_D+ \u00b7 copper"
+    },
+    {
+      "id": "net:USB_D-",
+      "name": "Net USB_D- \u00b7 copper"
+    },
+    {
+      "id": "net:VBUS",
+      "name": "Net VBUS \u00b7 copper"
     }
   ]
 }

@@ -67,6 +67,91 @@ def board_mesh(board, pcbnew, trimesh, numpy):
     return slab, thickness
 
 
+COPPER_MM = 0.035  # 1 oz copper, drawn on the board surface
+
+
+def copper_meshes(board, pcbnew, trimesh, numpy, thickness):
+    """Real copper per net: tracks and arcs as strips, vias as barrels, pads as their outline shapes,
+    filled zones from their fill polygons. Returns {net name: [mesh, ...]}. Copper sits on the board
+    surface (top side above, bottom side below) so it is visible from either side."""
+    import manifold3d
+
+    nets: dict[str, list] = {}
+    top, bottom = pcbnew.F_Cu, pcbnew.B_Cu
+
+    def z_for(layer):
+        return (thickness, thickness + COPPER_MM) if layer == top else (-COPPER_MM, 0.0)
+
+    def add(net, mesh):
+        nets.setdefault(net or "(no net)", []).append(mesh)
+
+    def xy(point):
+        return pcbnew.ToMM(point.x), -pcbnew.ToMM(point.y)
+
+    def strip(a, b, width, layer, net):
+        (x0, y0), (x1, y1) = xy(a), xy(b)
+        length = float(numpy.hypot(x1 - x0, y1 - y0))
+        z0, z1 = z_for(layer)
+        box = trimesh.creation.box(extents=[length + width, width, z1 - z0])
+        angle = float(numpy.arctan2(y1 - y0, x1 - x0))
+        box.apply_transform(trimesh.transformations.rotation_matrix(angle, [0, 0, 1]))
+        box.apply_translation([(x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2])
+        add(net, box)
+
+    for item in board.GetTracks():
+        net = item.GetNetname()
+        via = item.GetClass() == "PCB_VIA"
+        width = pcbnew.ToMM(item.GetWidth(top) if via else item.GetWidth())
+        if via:
+            x, y = xy(item.GetPosition())
+            barrel = trimesh.creation.cylinder(radius=width / 2, height=thickness + 2 * COPPER_MM, sections=16)
+            barrel.apply_translation([x, y, thickness / 2])
+            add(net, barrel)
+        elif item.GetClass() == "PCB_ARC":
+            start, mid, end = item.GetStart(), item.GetMid(), item.GetEnd()
+            strip(start, mid, width, item.GetLayer(), net)
+            strip(mid, end, width, item.GetLayer(), net)
+        elif item.GetLayer() in (top, bottom):
+            strip(item.GetStart(), item.GetEnd(), width, item.GetLayer(), net)
+
+    for footprint in board.GetFootprints():
+        for pad in footprint.Pads():
+            sx, sy = pcbnew.ToMM(pad.GetSize().x), pcbnew.ToMM(pad.GetSize().y)
+            x, y = xy(pad.GetPosition())
+            angle = numpy.radians(pad.GetOrientationDegrees())
+            for layer in (top, bottom):
+                if not pad.IsOnLayer(layer):
+                    continue
+                z0, z1 = z_for(layer)
+                if pad.GetShape() == pcbnew.PAD_SHAPE_CIRCLE:
+                    shape = trimesh.creation.cylinder(radius=sx / 2, height=z1 - z0, sections=24)
+                else:
+                    shape = trimesh.creation.box(extents=[sx, sy, z1 - z0])
+                shape.apply_transform(trimesh.transformations.rotation_matrix(angle, [0, 0, 1]))
+                shape.apply_translation([x, y, (z0 + z1) / 2])
+                add(pad.GetNetname(), shape)
+
+    for zone in board.Zones():
+        if zone.GetIsRuleArea():
+            continue
+        for layer in (top, bottom):
+            if not zone.IsOnLayer(layer) or not zone.HasFilledPolysForLayer(layer):
+                continue
+            fill = zone.GetFilledPolysList(layer)
+            rings = []
+            for index in range(fill.OutlineCount()):
+                for chain in [fill.Outline(index)] + [fill.Hole(index, h) for h in range(fill.HoleCount(index))]:
+                    rings.append([[pcbnew.ToMM(chain.CPoint(i).x), -pcbnew.ToMM(chain.CPoint(i).y)]
+                                  for i in range(chain.PointCount())])
+            if not rings:
+                continue
+            z0, z1 = z_for(layer)
+            solid = manifold3d.Manifold.extrude(manifold3d.CrossSection(rings, manifold3d.FillRule.EvenOdd),
+                                                z1 - z0).translate([0, 0, z0]).to_mesh()
+            add(zone.GetNetname(), trimesh.Trimesh(numpy.asarray(solid.vert_properties)[:, :3], numpy.asarray(solid.tri_verts)))
+    return nets
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("board", type=Path)
@@ -83,6 +168,11 @@ def main() -> int:
     slab, thickness = board_mesh(board, pcbnew, trimesh, numpy)
     scene = trimesh.Scene()
     scene.add_geometry(slab, node_name="board", geom_name="board")
+    # One copper node per net, named "net:<net>", so a DRC short can highlight both nets' copper.
+    copper = copper_meshes(board, pcbnew, trimesh, numpy, thickness)
+    for net in sorted(copper):
+        merged = trimesh.util.concatenate(copper[net])
+        scene.add_geometry(merged, node_name=f"net:{net}", geom_name=f"net:{net}")
     bom, heights = [], {}
     for footprint in sorted(board.GetFootprints(), key=lambda fp: fp.GetReference()):
         reference = footprint.GetReference()
@@ -104,6 +194,8 @@ def main() -> int:
         body.apply_translation([(x0 + x1) / 2, (y0 + y1) / 2, z0 + height / 2])
         scene.add_geometry(body, node_name=reference, geom_name=reference)
 
+    # Nets are labelled too, so their copper reads "Net GND · copper" in the workspace.
+    bom.extend({"id": f"net:{net}", "name": f"Net {net} · copper"} for net in sorted(copper))
     glb = project / "cad" / f"{args.board.stem}.glb"
     glb.write_bytes(scene.export(file_type="glb"))
     source = hashlib.sha256(args.board.read_bytes()).hexdigest()
@@ -116,8 +208,9 @@ def main() -> int:
     (project / "geometry-basis.json").write_text(json.dumps({
         "source": f"{args.board.as_posix()} read with KiCad pcbnew {pcbnew.Version()}",
         "rules": [{"match": "board", "basis": "custom", "why": "the board outline from Edge.Cuts at its design thickness"},
+                  {"match": "net:.*", "basis": "copper", "why": "the net's tracks, vias, pads and zone fills from the board file"},
                   {"match": ".+", "basis": "envelope", "why": "footprint box with an assumed height"}]}, indent=2) + "\n")
-    print(json.dumps({"glb": glb.as_posix(), "footprints": len(bom), "board_thickness_mm": thickness}))
+    print(json.dumps({"glb": glb.as_posix(), "footprints": len(bom), "nets": len(copper), "board_thickness_mm": thickness}))
     return 0
 
 

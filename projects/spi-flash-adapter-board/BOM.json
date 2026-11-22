@@ -441,6 +441,86 @@
         127.075,
         69.725
       ]
+    },
+    {
+      "id": "net:(no net)",
+      "name": "Net (no net) \u00b7 copper"
+    },
+    {
+      "id": "net:/1V8",
+      "name": "Net /1V8 \u00b7 copper"
+    },
+    {
+      "id": "net:/3V3",
+      "name": "Net /3V3 \u00b7 copper"
+    },
+    {
+      "id": "net:/DUT_1V8",
+      "name": "Net /DUT_1V8 \u00b7 copper"
+    },
+    {
+      "id": "net:/DUT_CS_N",
+      "name": "Net /DUT_CS_N \u00b7 copper"
+    },
+    {
+      "id": "net:/DUT_IO2_WP_N",
+      "name": "Net /DUT_IO2_WP_N \u00b7 copper"
+    },
+    {
+      "id": "net:/DUT_IO3_HOLD_N",
+      "name": "Net /DUT_IO3_HOLD_N \u00b7 copper"
+    },
+    {
+      "id": "net:/DUT_MISO",
+      "name": "Net /DUT_MISO \u00b7 copper"
+    },
+    {
+      "id": "net:/DUT_MOSI",
+      "name": "Net /DUT_MOSI \u00b7 copper"
+    },
+    {
+      "id": "net:/DUT_SCLK",
+      "name": "Net /DUT_SCLK \u00b7 copper"
+    },
+    {
+      "id": "net:/GND",
+      "name": "Net /GND \u00b7 copper"
+    },
+    {
+      "id": "net:/HOST_3V3",
+      "name": "Net /HOST_3V3 \u00b7 copper"
+    },
+    {
+      "id": "net:/HOST_CS_N",
+      "name": "Net /HOST_CS_N \u00b7 copper"
+    },
+    {
+      "id": "net:/HOST_MISO",
+      "name": "Net /HOST_MISO \u00b7 copper"
+    },
+    {
+      "id": "net:/HOST_MOSI",
+      "name": "Net /HOST_MOSI \u00b7 copper"
+    },
+    {
+      "id": "net:/HOST_SCLK",
+      "name": "Net /HOST_SCLK \u00b7 copper"
+    },
+    {
+      "id": "net:/TRANSLATOR_OE",
+      "name": "Net /TRANSLATOR_OE \u00b7 copper"
+    },
+    {
+      "id": "net:unconnected-(U1-NC-Pad6)",
+      "name": "Net unconnected-(U1-NC-Pad6) \u00b7 copper"
+    },
+    {
+      "id": "net:unconnected-(U1-NC-Pad9)",
+      "name": "Net unconnected-(U1-NC-Pad9) \u00b7 copper"
+    },
+    {
+      "id": "net:unconnected-(U3-NC-Pad4)",
+      "name": "Net unconnected-(U3-NC-Pad4) \u00b7 copper"
     }
   ]
 }

@@ -33,7 +33,7 @@ import sys
 from itertools import combinations
 from pathlib import Path
 
-VERSION = "scene-fit.v4"
+VERSION = "scene-fit.v5"
 NEAR_MM = 2.0          # pairs whose bounding boxes are farther apart than this are clear
 TIGHT_MM = 1.0         # a measured gap under this is reported as tight
 TOUCH_MM = 0.05        # below this, surfaces meet
@@ -161,7 +161,8 @@ def analyse(glb: Path, parts_path: Path, near: float = NEAR_MM) -> dict:
     for node in scene.graph.nodes_geometry:
         transform, name = scene.graph[node]
         part = by_node.get(node)
-        if not part or part.get("part_id") == "world":
+        # Copper is checked by KiCad's DRC, which knows nets and clearances; the fit engine measures bodies.
+        if not part or part.get("part_id") == "world" or part.get("geometry_basis") == "copper":
             continue
         mesh = scene.geometry[name].copy()
         # Exporters often store each triangle's corners separately (flat shading), which reads as

@@ -7,6 +7,11 @@
       "why": "the board outline from Edge.Cuts at its design thickness"
     },
     {
+      "match": "net:.*",
+      "basis": "copper",
+      "why": "the net's tracks, vias, pads and zone fills from the board file"
+    },
+    {
       "match": ".+",
       "basis": "envelope",
       "why": "footprint box with an assumed height"

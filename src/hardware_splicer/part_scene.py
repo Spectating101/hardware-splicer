@@ -20,7 +20,7 @@ _STATUS = "docs/status/generated/fielddeck-display-swap-20261118.json"
 _DISPLAY7 = "touch_display_2_manufacturer"
 _DISPLAY5 = "touch_display_2_5inch_sc1975"
 _BASIS = {
-    "custom": "custom", "manufacturer_step": "vendor_step", "vendor_step": "vendor_step",
+    "custom": "custom", "manufacturer_step": "vendor_step", "vendor_step": "vendor_step", "copper": "copper",
     "purchased_envelope": "envelope", "envelope": "envelope", "proxy": "proxy",
 }
 _COMPONENT_BYTES = {5120: 1, 5121: 1, 5122: 2, 5123: 2, 5125: 4, 5126: 4}
@@ -591,7 +591,7 @@ def _basis_rules(project):
     rules = []
     for rule in document.get("rules", []) if isinstance(document, dict) else []:
         basis = rule.get("basis") if isinstance(rule, dict) else None
-        if basis in {"custom", "vendor_step", "envelope", "proxy", "unknown"} and isinstance(rule.get("match"), str):
+        if basis in {"custom", "vendor_step", "envelope", "proxy", "unknown", "copper"} and isinstance(rule.get("match"), str):
             rules.append((re.compile(rule["match"]), basis))
     return rules
 
