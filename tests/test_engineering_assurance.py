@@ -136,6 +136,8 @@ def test_assurance_projects_claims_outputs_reviews_and_dependencies() -> None:
         "output_count": 5,
         "blocking_conflict_count": 0,
         "blocker_count": 1,
+        "check_count": 0,
+        "failed_check_count": 0,
         "reference_issue_count": 0,
         "unreviewed_claim_count": 1,
         "unconsumed_claim_count": 0,

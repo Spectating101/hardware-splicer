@@ -1,0 +1,68 @@
+{
+  "id": "psp3000_umd_repair",
+  "kind": "repair",
+  "device": "Sony PSP-3000 UMD read failure",
+  "task": "Produce a realistic repair triage and disassembly plan for a PSP-3000 that does not read discs; compare media, switch, connector and drive faults before recommending paid replacement.",
+  "intake": {
+    "project_name": "PSP-3000 UMD drive no-read repair",
+    "goal": "Diagnose a PSP-3000 that cannot read known UMD discs; identify repair versus replacement using UMD drive access, power disconnected inspection, ribbon cables and interlocks. Plan safe documented disassembly and reassembly.",
+    "mode": "repair",
+    "available_parts": [
+      {
+        "name": "Sony PSP-3000 with unreadable UMD",
+        "type": "electronic_device",
+        "quantity": 1
+      },
+      {
+        "name": "candidate PSP 2000/3000 UMD drive",
+        "type": "replacement_module",
+        "quantity": 1
+      },
+      {
+        "name": "Phillips precision screwdriver and plastic spudger",
+        "type": "tool",
+        "quantity": 1
+      }
+    ],
+    "constraints": {
+      "power_on_tests_allowed": false,
+      "battery_removable": true,
+      "drive_failure_confirmed": false,
+      "device_revision": "PSP-3000, subrevision unknown"
+    }
+  },
+  "sources": [
+    {
+      "source_id": "ifixit_psp_umd",
+      "source_type": "manual",
+      "uri": "https://www.ifixit.com/Guide/PSP+300x+UMD+Drive+Replacement/1586",
+      "revision": "guide-1586-reviewed-2026-10-20",
+      "claims": [
+        "PSP-300x UMD replacement requires battery removal, front case, screen/ribbon and drive access",
+        "UMD mechanism replacement is substantially invasive"
+      ]
+    },
+    {
+      "source_id": "ifixit_psp_part",
+      "source_type": "manual",
+      "uri": "https://www.ifixit.com/products/sony-psp-2000-3000-umd-drive",
+      "revision": "reviewed-2026-10-20",
+      "claims": [
+        "UMD drive replacement part listed compatible with PSP 2000 and PSP 300x variants"
+      ]
+    }
+  ],
+  "deliverables": [
+    "fault hypotheses and non-invasive discrimination",
+    "correct battery/ribbon/connector safety sequence",
+    "replacement vs salvage route",
+    "time and cost ledger with unknowns",
+    "post-repair acceptance checks"
+  ],
+  "acceptance": [
+    "No laser drive open-powered test",
+    "Do not claim UMD drive is definitely faulty",
+    "Cite revision-specific repair guidance"
+  ],
+  "approved_catalog_build_ids": []
+}

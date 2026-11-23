@@ -1,4 +1,4 @@
-.PHONY: setup setup-cadquery cleanup test doctor demo smoke test test-apps benchmark-backend audit-functional-delivery plant-qwen-pipeline score-intake-tiers verify verify-catalog verify-engine verify-netlist-engine verify-fab verify-casefiles verify-tier-c verify-geometry verify-splice verify-vibe-enabot-endgame verify-money-paths verify-mechatronics-paths verify-mechatronics-golden audit-mechatronics-confidence prepare-physical-closed-loop verify-physical-closed-loop salvage-demo splice-demo test-golden-intakes refresh-demo-data explore explore-all run-mcp export-catalog-build-ids splice-ui-install splice-ui-dev splice-ui-build splice-ui-serve verify-splice-v1 test-splice-product-v1 verify-product-v1 verify-ui-interface-smoke launch-prep-v1.1 release-verify-v1.1 verify-install-smoke verify-product-live-smoke verify-product-internal
+.PHONY: setup setup-cadquery cleanup test doctor demo smoke test test-apps benchmark-backend audit-functional-delivery plant-qwen-pipeline score-intake-tiers verify verify-catalog verify-engine verify-netlist-engine verify-fab verify-casefiles verify-tier-c verify-geometry verify-splice verify-vibe-enabot-endgame verify-money-paths verify-mechatronics-paths verify-mechatronics-golden audit-mechatronics-confidence prepare-physical-closed-loop verify-physical-closed-loop salvage-demo splice-demo test-golden-intakes refresh-demo-data explore explore-all run-mcp export-catalog-build-ids splice-ui-install splice-ui-dev splice-ui-build splice-ui-serve ui-package serve verify-splice-v1 test-splice-product-v1 verify-product-v1 verify-ui-interface-smoke launch-prep-v1.1 release-verify-v1.1 verify-install-smoke verify-product-live-smoke verify-product-internal
 
 ROOT_DIR := $(abspath .)
 PYTHON ?= $(if $(wildcard $(ROOT_DIR)/.venv/bin/python),$(ROOT_DIR)/.venv/bin/python,python3)
@@ -24,6 +24,14 @@ smoke:
 
 test:
 	PYTHONPATH=src HARDWARE_SPLICER_SKIP_VISION_LIVE=1 $(PYTHON) -m pytest -q
+
+.PHONY: verify-headless-backend
+verify-headless-backend:
+	HARDWARE_SPLICER_AUTOROUTE=0 PYTHONPATH=src $(PYTHON) -m pytest -q \
+		tests/test_product_make_targets.py tests/test_digital_engine.py tests/test_digital_registered_cases.py \
+		tests/test_project_part_substitutions.py tests/test_project_materials.py tests/test_project_wiring.py \
+		tests/test_github_signal_pipeline.py tests/test_robot_model_import.py \
+		tests/test_sort_workcell_source.py tests/test_so102_drives.py tests/test_mcp_backend_gateway.py
 
 explore:
 	PYTHONPATH=src HARDWARE_SPLICER_SKIP_VISION_LIVE=1 $(PYTHON) scripts/exploration_test.py
@@ -201,9 +209,21 @@ splice-ui-dev: splice-ui-install
 splice-ui-build: splice-ui-install
 	cd apps/splice-ui && npm test && npm run build
 
-# Build UI + serve the canonical product API and static frontend on one port.
+# The one served app: hs-serve runs hardware_splicer.product_api:app (API, project
+# scenes and the built UI) on one port. HS_SERVE_ARGS passes --port, --host, etc.
+HS_SERVE = PYTHONPATH=src $(PYTHON) -c "from hardware_splicer.cli_entry import main_serve; main_serve()"
+
+serve:
+	$(HS_SERVE) --ui $(HS_SERVE_ARGS)
+
+# Build the UI and stage it as package data (src/hardware_splicer/ui_dist + manifest.json).
+ui-package:
+	cd apps/splice-ui && npm ci && npm run build
+	$(PYTHON) scripts/package_ui.py
+
+# Build UI + serve it with the canonical app on one port.
 splice-ui-serve: splice-ui-build
-	HARDWARE_SPLICER_SERVE_UI=1 PYTHONPATH=src $(PYTHON) -m uvicorn hardware_splicer.product_api:app --host 127.0.0.1 --port 8787
+	$(HS_SERVE) --ui $(HS_SERVE_ARGS)
 
 verify: cleanup doctor verify-catalog test test-golden-intakes benchmark-backend audit-functional-delivery score-intake-tiers verify-splice smoke
 	@echo "Hardware-Splicer verify: all checks passed"

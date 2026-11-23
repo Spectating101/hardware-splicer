@@ -42,7 +42,7 @@ def test_candidate_authority_identifies_review_limited_protection() -> None:
     assert authority["next_authority_gap"] == "Close compile/fabrication/bench gates before stronger readiness claims."
 
 
-def test_compiled_synthesis_reports_physical_support_authority(tmp_path: Path) -> None:
+def test_compiled_synthesis_reports_physical_support_authority(tmp_path: Path, assume_clean_kicad_erc: None) -> None:
     result = synthesize_circuit(_analog_intent(), out_dir=tmp_path, export_gerber=False)
     authority = result["topology_authority"]
 

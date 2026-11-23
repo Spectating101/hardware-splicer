@@ -1,8 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-vi.mock("./api.js", () => ({
+vi.mock("./api", () => ({
+  fetchScenes: vi.fn(async () => []), fetchSceneManifest: vi.fn(), fetchSceneRecords: vi.fn(async () => ({ records: [] })),
   fetchHealth: vi.fn(async () => ({
     ok: true,
     version: "1.1.0",
@@ -59,8 +60,10 @@ vi.mock("./components/PipelineVisual.jsx", () => ({
 }));
 
 vi.mock("./components/ProjectWizard.jsx", () => ({
-  default: function MockWizard() {
-    return <div data-testid="mock-home-intake">Project intake</div>;
+  default: function MockWizard({ onCompleteIntake }) {
+    return <div data-testid="mock-home-intake">Project intake<button onClick={() => onCompleteIntake({
+      intake: { goal: "A pen plotter", project_name: "Plotter" },
+    })}>Submit goal</button></div>;
   },
 }));
 
@@ -70,18 +73,84 @@ import { isAdvancedView, VIEWS } from "./nav.js";
 describe("App navigation integration", () => {
   beforeEach(() => {
     cleanup();
+    window.history.replaceState(null, "", "/");
+    vi.stubGlobal("fetch", vi.fn(async (url, options = {}) => {
+      let body = { projects: [], cases: [], assessments: [], reviews: [], revisions: [] };
+      if (String(url).endsWith("/health")) body = { ok: true };
+      if (options.method === "PUT") body = { project: { revision: 1, saved_at: "2026-11-18" } };
+      if (String(url).includes("/engineering/assurance")) body = { revision: 1, assurance: { claims: [], outputs: [] } };
+      return { ok: true, json: async () => body };
+    }));
   });
 
   afterEach(() => {
     cleanup();
+    vi.unstubAllGlobals();
   });
 
-  it("Home → Start project → Intake appears", async () => {
+  it("Home → New project shows all three entry choices and the goal intake", async () => {
     render(<App />);
     await waitFor(() => expect(screen.getByTestId("home-start-project")).toBeEnabled());
     await userEvent.click(screen.getByTestId("home-start-project"));
     expect(await screen.findByTestId("stage-intake")).toBeInTheDocument();
     expect(screen.getByText(/Project intake/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Start from a goal" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Start from parts you have" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Start from a reference study" })).toBeInTheDocument();
+  });
+
+  it("does not create or persist a project when opening, editing, switching or cancelling New project", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await waitFor(() => expect(screen.getByTestId("home-start-project")).toBeEnabled());
+    await user.click(screen.getByTestId("home-start-project"));
+    await user.click(screen.getByRole("button", { name: "Start from parts you have" }));
+    await user.type(screen.getByLabelText("Name"), "Salvaged motor");
+    await user.click(screen.getByRole("button", { name: "Start from a reference study" }));
+    await user.click(screen.getByRole("button", { name: "Cancel", exact: true }));
+    await user.click(screen.getByTestId("home-start-project"));
+    // The autosave debounce is 700 ms: opening twice must never write Intake R1.
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    expect(fetch.mock.calls.filter(([, options]) => options?.method && options.method !== "GET")).toEqual([]);
+    await user.click(screen.getByRole("button", { name: "Submit goal" }));
+    expect(await screen.findByTestId("project-bench")).toBeInTheDocument();
+    await waitFor(() => expect(fetch.mock.calls.some(([url, options]) =>
+      String(url).endsWith("/snapshot") && options?.method === "PUT")).toBe(true), { timeout: 2000 });
+  });
+
+  it("reports engine reachability in neutral terms, never as an approval colour", async () => {
+    render(<App />);
+    const status = screen.getByTestId("engine-status");
+    await waitFor(() => expect(status).toHaveTextContent("Connected"));
+    expect(status).toHaveClass("neutral");
+    expect(status).not.toHaveClass("ok");
+  });
+
+  it("opens on Projects and keeps the reference viewers in the design library", async () => {
+    render(<App />);
+    expect(screen.getByRole("heading", { name: "Projects" })).toBeInTheDocument();
+    expect(screen.queryByTestId("nav-sortcell")).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: "Browse design library" }));
+    expect(screen.getByRole("heading", { name: "Choose a design to study" })).toBeInTheDocument();
+    expect(screen.getByTestId("nav-complete-assembly")).toBeEnabled();
+    expect(screen.getByTestId("nav-sortcell")).toBeEnabled();
+    await userEvent.click(screen.getByRole("button", { name: "Projects", exact: true }));
+    expect(screen.getByRole("heading", { name: "Saved projects" })).toBeInTheDocument();
+  });
+
+  it.each([null, "invalid-date"])("uses UI fallbacks for missing project metadata with save time %s", async (savedAt) => {
+    fetch.mockResolvedValue({ ok: true, json: async () => ({ projects: [
+      { project_id: "untitled", saved_at: savedAt },
+    ] }) });
+    render(<App />);
+    const project = await screen.findByRole("button", { name: "Untitled project Objective · not recorded Not saved" });
+    expect(project).not.toHaveTextContent(/unknown|Rev/);
+    expect(project.querySelector(".project-stage")).toBeNull();
+    await userEvent.click(screen.getByTestId("nav-advanced"));
+    const savedProjects = screen.getByText("Saved projects", { selector: ".sidebar-label" }).parentElement;
+    const savedProject = within(savedProjects).getByRole("button", { name: "Untitled project" });
+    expect(savedProject).toHaveAttribute("title", "Not saved");
+    expect(savedProject).not.toHaveTextContent(/unknown|undefined|null/);
   });
 
   it("Interface Lab is reachable only through Advanced", async () => {
@@ -96,6 +165,18 @@ describe("App navigation integration", () => {
 
     await userEvent.click(screen.getByTestId("advanced-lab"));
     expect(await screen.findByTestId("interface-lab")).toBeInTheDocument();
+  });
+
+  it("shows a completed run neutrally with the result it returned, never as a success", async () => {
+    const api = await import("./api");
+    api.fetchJobs.mockResolvedValueOnce({ jobs: [{ job_id: "run-1", project_name: "Fielddeck 5 display revision", status: "succeeded",
+      options: { job_type: "digital_study", payload: { project_id: "digital-fd" } } }] });
+    api.fetchJobResult.mockResolvedValueOnce({ ok: true, result: { requirements_met: false, revision: 2 } });
+    render(<App />);
+    const status = await screen.findByText("Run completed · requirements not met", {}, { timeout: 5000 });
+    expect(status.closest("button")).toHaveClass("job-done");
+    expect(status.closest("button")).not.toHaveClass("job-ok");
+    expect(screen.queryByText(/succeeded|success/i)).toBeNull();
   });
 
   it("does not expose Design Studio as a Home front door", async () => {

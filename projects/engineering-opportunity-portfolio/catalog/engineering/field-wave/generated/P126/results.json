@@ -1,0 +1,9 @@
+{
+  "pilot": "Pingtung irrigation trial, one IRROMETER WATERMARK 200SS and colocated temperature probe",
+  "metrics": {
+    "resistor_temperature_corners": 30,
+    "worst_resistance_error_pct": 0.147,
+    "worst_fixed_temperature_control_bias_kpa": 11.028,
+    "omitted_invalid_electrical_rows": 3
+  }
+}

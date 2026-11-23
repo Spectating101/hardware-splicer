@@ -58,6 +58,15 @@ def _find_child(node: List[Any], name: str) -> Optional[List[Any]]:
     return None
 
 
+def _child_scalar(node: List[Any], name: str) -> Optional[str]:
+    child = _find_child(node, name)
+    if child is None:
+        return None
+    if len(child) != 2 or isinstance(child[1], list):
+        raise ValueError(f"KiCad {name} must contain one scalar value")
+    return str(child[1])
+
+
 def _module_id_from_fields(fields: List[Any]) -> Optional[str]:
     for field in fields:
         if not isinstance(field, list) or len(field) < 3 or field[0] != "fields":
@@ -107,12 +116,27 @@ def parse_kicad_netlist(text: str) -> CircuitNetlist:
         for net in nets_section[1:]:
             if not isinstance(net, list) or not net or net[0] != "net":
                 continue
-            code = str(net[1]) if len(net) > 1 else ""
-            name = str(net[2]) if len(net) > 2 else code
+            # Native exports use named children, not positional scalar fields.
+            # Keep older flat `(net 1 NAME (node REF PIN))` input supported.
+            code = _child_scalar(net, "code")
+            if code is None:
+                code = str(net[1]) if len(net) > 1 and not isinstance(net[1], list) else ""
+            name = _child_scalar(net, "name")
+            if name is None:
+                name = str(net[2]) if len(net) > 2 and not isinstance(net[2], list) else code
             pins: List[PinRef] = []
-            for node in net[3:]:
-                if isinstance(node, list) and len(node) >= 3 and node[0] == "node":
-                    pins.append(PinRef(component_ref=str(node[1]), pin=str(node[2])))
+            for node in net[1:]:
+                if not isinstance(node, list) or not node or node[0] != "node":
+                    continue
+                ref = _child_scalar(node, "ref")
+                pin = _child_scalar(node, "pin")
+                if ref is None and len(node) > 1 and not isinstance(node[1], list):
+                    ref = str(node[1])
+                if pin is None and len(node) > 2 and not isinstance(node[2], list):
+                    pin = str(node[2])
+                if not ref or not pin:
+                    raise ValueError("KiCad net node requires a component ref and pin")
+                pins.append(PinRef(component_ref=ref, pin=pin))
             nets.append(Net(name=name, pins=pins))
 
     return CircuitNetlist(source="kicad_netlist", components=components, nets=nets)

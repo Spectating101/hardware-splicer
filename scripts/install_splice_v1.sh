@@ -13,29 +13,28 @@ echo "==> Python venv: $VENV"
 if [[ ! -x "$PYTHON" ]]; then
   python3 -m venv "$VENV"
 fi
-"$PIP" install --upgrade pip wheel
-"$PIP" install -r "$ROOT/requirements-splice-v1.txt"
-"$PIP" install -e "$ROOT"
+extras=()
 if [[ "${INSTALL_MCP:-1}" == "1" ]]; then
-  "$PIP" install -e "$ROOT[mcp]"
+  extras+=(mcp)
 fi
 if [[ "${INSTALL_DEV:-0}" == "1" ]]; then
-  "$PIP" install -e "$ROOT[dev]"
+  extras+=(dev)
 fi
 if [[ "${INSTALL_CAD:-0}" == "1" ]]; then
-  "$PIP" install -e "$ROOT[cad]"
+  extras+=(cad)
 fi
+package="$ROOT"
+if (( ${#extras[@]} )); then
+  package="$ROOT[$(IFS=,; echo "${extras[*]}")]"
+fi
+"$PIP" install -r "$ROOT/requirements-splice-v1.txt" -e "$package"
 
-echo "==> KiCad build compiler (Node) — required for compile"
-if command -v npm >/dev/null 2>&1; then
-  (cd "$ROOT/apps/circuit-ai/circuit-ai-frontend" && npm install --silent)
-  if command -v make >/dev/null 2>&1; then
-    make -C "$ROOT" export-engine-pcb-data export-catalog-recipes
-  else
-    (cd "$ROOT" && node scripts/export_engine_pcb_data.cjs && node scripts/export_catalog_recipes.cjs)
-  fi
-else
-  echo "WARN: npm not found — KiCad graph compile will fail until Node 18+ is installed"
+# The Python board compiler reads the checked-in recipes and footprints.
+if [[ "${INSTALL_CATALOG_TOOLS:-0}" == "1" ]]; then
+  echo "==> Install the legacy frontend catalog tools and regenerate engine data"
+  npm --prefix "$ROOT/apps/circuit-ai/circuit-ai-frontend" ci
+  node scripts/export_engine_pcb_data.cjs
+  node scripts/export_catalog_recipes.cjs
 fi
 
 echo "==> Doctor"
@@ -47,4 +46,5 @@ echo "Done. Activate: source $VENV/bin/activate"
 echo "  hs-doctor | hs-serve --port 8787 | hs-mcp"
 echo "  make verify-splice-v1   # developers: INSTALL_DEV=1 before running tests"
 echo "  3D CAD (STEP/STL, hinge and print studies, full test suite): rerun with INSTALL_CAD=1"
-echo "Prerequisites: kicad-cli 9+, Node 18+ — see docs/SETUP.md"
+echo "  Frontend catalog maintenance: rerun with INSTALL_CATALOG_TOOLS=1 (Node and npm required)"
+echo "  Gerber export and KiCad checks require kicad-cli 9+; see docs/SETUP.md"

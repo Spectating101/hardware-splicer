@@ -119,10 +119,11 @@ def build_graph_to_netlist(graph: Mapping[str, Any], *, source: str = "build_gra
         components.append(
             ComponentInstance(
                 ref=ref,
-                value=str((spec or {}).get("label") or node.get("value") or module_id),
-                footprint=str((spec or {}).get("footprint") or node.get("footprint") or module_id),
-                module_id=module_id or None,
+                value=str(node.get("value") if node.get("netlistIdentity") else (spec or {}).get("label") or node.get("value") or module_id),
+                footprint=str(node.get("footprint") if node.get("netlistIdentity") else (spec or {}).get("footprint") or node.get("footprint") or module_id),
+                module_id=node.get("sourceModuleId") if node.get("netlistIdentity") else module_id or None,
                 metadata={
+                    **dict(node.get("sourceComponentMetadata") or {}),
                     "graph_node_id": node_id,
                     **(
                         {"support_component_id": node.get("supportComponentId")}
@@ -137,6 +138,19 @@ def build_graph_to_netlist(graph: Mapping[str, Any], *, source: str = "build_gra
 
     parent: Dict[str, str] = {}
     pin_keys: List[Tuple[str, str, str]] = []
+    source_names: Dict[frozenset[str], str] = {}
+    for net in graph.get("source_nets") or []:
+        members = []
+        for endpoint in net.get("pins") or []:
+            ref = ref_by_node.get(str(endpoint.get("nodeId") or ""))
+            pin = str(endpoint.get("pinId") or "")
+            if not ref or not pin:
+                raise ValueError("source net references an unknown node or empty pin")
+            key = f"{ref}.{pin}"
+            members.append(key)
+            parent.setdefault(key, key)
+            pin_keys.append((key, ref, pin))
+        source_names[frozenset(members)] = str(net.get("name") or "")
     for wire in wires:
         from_ep = wire.get("from") or {}
         to_ep = wire.get("to") or {}
@@ -179,20 +193,23 @@ def build_graph_to_netlist(graph: Mapping[str, Any], *, source: str = "build_gra
                 continue
             seen.add(k)
             unique.append(pin_ref)
+        declared = source_names.get(frozenset(pin.key() for pin in unique))
         inferred = _infer_net_name(unique, components_by_ref) if len(unique) >= 2 else None
         if len(unique) >= 2:
-            net_name = _unique_net_name(inferred or f"N{index}", used_names)
+            net_name = _unique_net_name(declared or inferred or f"N{index}", used_names)
             nets.append(Net(name=net_name, pins=unique))
         elif len(unique) == 1:
-            nets.append(Net(name=f"N{index}_singleton", pins=unique))
+            nets.append(Net(name=_unique_net_name(declared or f"N{index}_singleton", used_names), pins=unique))
 
     return CircuitNetlist(
         source=source,
         components=components,
         nets=nets,
         metadata={
+            **dict(graph.get("source_netlist_metadata") or {}),
             "node_count": len(nodes),
             "wire_count": len(wires),
+            **({"composition_request": dict(graph["composition_request"])} if isinstance(graph.get("composition_request"), Mapping) else {}),
             **(
                 {"terminal_semantics": dict(graph.get("terminal_semantics") or {})}
                 if isinstance(graph.get("terminal_semantics"), Mapping)
@@ -226,9 +243,22 @@ def netlist_to_build_graph(netlist: CircuitNetlist) -> BuildGraph:
     """Rebuild a module build graph from a netlist (module_id or footprint-based)."""
     ref_to_node: Dict[str, str] = {}
     nodes: List[Dict[str, Any]] = []
+    used_node_ids: Set[str] = set()
     pins_by_ref: Dict[str, List[str]] = {}
+    refs = [comp.ref for comp in netlist.components]
+    if any(not ref for ref in refs) or len(set(refs)) != len(refs):
+        raise ValueError("explicit netlist component references must be nonempty and unique")
+    if len({net.name for net in netlist.nets}) != len(netlist.nets):
+        raise ValueError("explicit netlist net names must be unique")
+    pin_membership: Dict[Tuple[str, str], str] = {}
     for net in netlist.nets:
         for pin in net.pins:
+            if pin.component_ref not in refs or not pin.pin:
+                raise ValueError("explicit netlist references an unknown component or empty pin")
+            key = (pin.component_ref, pin.pin)
+            if key in pin_membership and pin_membership[key] != net.name:
+                raise ValueError("explicit netlist pin belongs to multiple nets: " + pin.key())
+            pin_membership[key] = net.name
             pins_by_ref.setdefault(pin.component_ref, [])
             if pin.pin not in pins_by_ref[pin.component_ref]:
                 pins_by_ref[pin.component_ref].append(pin.pin)
@@ -236,6 +266,9 @@ def netlist_to_build_graph(netlist: CircuitNetlist) -> BuildGraph:
     for index, comp in enumerate(netlist.components):
         module_id = comp.module_id or comp.value or comp.ref
         node_id = str(comp.metadata.get("graph_node_id") or f"n{index + 1}")
+        if node_id in used_node_ids:
+            raise ValueError("explicit netlist component graph node IDs must be unique")
+        used_node_ids.add(node_id)
         ref_to_node[comp.ref] = node_id
         nodes.append(
             {
@@ -245,6 +278,9 @@ def netlist_to_build_graph(netlist: CircuitNetlist) -> BuildGraph:
                 "value": comp.value,
                 "footprint": comp.footprint,
                 "pinIds": pins_by_ref.get(comp.ref) or [],
+                "netlistIdentity": True,
+                "sourceModuleId": comp.module_id,
+                "sourceComponentMetadata": dict(comp.metadata),
                 **(
                     {"supportComponentId": comp.metadata.get("support_component_id")}
                     if comp.metadata.get("support_component_id")
@@ -284,7 +320,16 @@ def netlist_to_build_graph(netlist: CircuitNetlist) -> BuildGraph:
                 }
             )
 
-    graph: BuildGraph = {"nodes": nodes, "wires": wires}
+    graph: BuildGraph = {
+        "nodes": nodes, "wires": wires,
+        "source_netlist_metadata": dict(netlist.metadata),
+        "source_nets": [
+            {"name": net.name, "pins": [{"nodeId": ref_to_node[pin.component_ref], "pinId": pin.pin} for pin in net.pins]}
+            for net in netlist.nets
+        ],
+    }
+    if isinstance(netlist.metadata.get("composition_request"), Mapping):
+        graph["composition_request"] = dict(netlist.metadata["composition_request"])
     if isinstance(netlist.metadata.get("terminal_semantics"), Mapping):
         graph["terminal_semantics"] = dict(netlist.metadata.get("terminal_semantics") or {})
     if isinstance(netlist.metadata.get("topology_lowering"), Mapping):

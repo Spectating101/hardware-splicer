@@ -1,0 +1,125 @@
+{
+  "status": "proposed_layout_nominal_geometry_checks_passed",
+  "revision": "5c",
+  "based_on": "5",
+  "drop_mm": 11.6,
+  "tray_band_z_mm": [
+    26.3,
+    37.9
+  ],
+  "duct_band_z_mm": [
+    30.0,
+    41.6
+  ],
+  "power_bank_min_mm": [
+    217.0,
+    171.0,
+    4.0
+  ],
+  "power_bank_size_mm": [
+    52.3,
+    104.0,
+    26.0
+  ],
+  "measured": {
+    "5": {
+      "size_mm": [
+        310.0,
+        285.7,
+        72.0
+      ],
+      "case_height_mm": 64.0,
+      "overlaps": [],
+      "printable_volume_mm3": {
+        "display_spacer_1": 146.1,
+        "display_spacer_2": 146.1,
+        "display_spacer_3": 146.1,
+        "display_spacer_4": 146.1,
+        "face_front_left": 11450.6,
+        "face_front_right": 11450.6,
+        "face_rear_left": 48602.0,
+        "face_rear_right": 51752.1,
+        "fan_duct": 8401.9,
+        "fan_guard": 2212.8,
+        "foot_1": 1206.4,
+        "foot_2": 1206.4,
+        "foot_3": 1206.4,
+        "foot_4": 1206.4,
+        "seam_plate_1": 2303.5,
+        "seam_plate_2": 2303.5,
+        "seam_plate_3": 2303.5,
+        "seam_plate_4": 2303.5,
+        "seam_plate_5": 2303.5,
+        "seam_plate_6": 2303.5,
+        "tray_front_left": 140909.6,
+        "tray_front_right": 136764.0,
+        "tray_rear_left": 133235.9,
+        "tray_rear_right": 133361.1
+      },
+      "printable_volume_total_mm3": 697371.6
+    },
+    "5c": {
+      "size_mm": [
+        310.0,
+        285.7,
+        60.4
+      ],
+      "case_height_mm": 52.4,
+      "overlaps": [],
+      "printable_volume_mm3": {
+        "display_spacer_1": 146.1,
+        "display_spacer_2": 146.1,
+        "display_spacer_3": 146.1,
+        "display_spacer_4": 146.1,
+        "face_front_left": 11450.6,
+        "face_front_right": 11450.6,
+        "face_rear_left": 48602.0,
+        "face_rear_right": 51752.1,
+        "fan_duct": 5443.9,
+        "fan_guard": 2212.8,
+        "foot_1": 1206.4,
+        "foot_2": 1206.4,
+        "foot_3": 1206.4,
+        "foot_4": 1206.4,
+        "seam_plate_1": 2303.5,
+        "seam_plate_2": 2303.5,
+        "seam_plate_3": 2303.5,
+        "seam_plate_4": 2303.5,
+        "seam_plate_5": 2303.5,
+        "seam_plate_6": 2303.5,
+        "tray_front_left": 120514.4,
+        "tray_front_right": 120514.4,
+        "tray_rear_left": 118615.8,
+        "tray_rear_right": 123253.9
+      },
+      "printable_volume_total_mm3": 633041.5
+    }
+  },
+  "physical_fit_verified": false,
+  "blockers": [
+    {
+      "reason": "power bank port, button and cable access from the rear-right bay not checked",
+      "part_id": "power-bank-nominal-envelope"
+    },
+    {
+      "reason": "heat from the bank beside the Pi and fan intake not checked",
+      "part_id": "power-bank-nominal-envelope"
+    },
+    {
+      "reason": "centre of mass moved rearward with the bank; stability on the feet not checked",
+      "part_id": "power-bank-nominal-envelope"
+    },
+    {
+      "reason": "printed bank nest and strap retention in the new position untested",
+      "part_id": "tray-rear-right"
+    },
+    {
+      "reason": "keyboard and fan cable lengths for the lowered layout not checked",
+      "part_id": "keyboard-nominal-envelope"
+    }
+  ],
+  "sources": {
+    "build_sha256": "7a018abd4c5b887d20d0efd2ae9d1edbaccf73a7e718068060a034d037e8aca5",
+    "glb_sha256": "23fba8793cbc604f7d0c1c8217e496ce22684cc23f865e634eacf12c80b9ce5f"
+  }
+}

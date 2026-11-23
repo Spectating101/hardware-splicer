@@ -15,6 +15,7 @@ try{
  const errors=[];page.on('pageerror',e=>errors.push(String(e)));
  await page.addInitScript(()=>{window.__CAPTURE=true;});
  await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});
+ await page.getByTestId('nav-library').click();
  await page.getByTestId('nav-sortcell').click();
  await page.getByTestId('sorting-workcell').waitFor({state:'visible',timeout:25000});
  const frame=page.frameLocator('iframe[title="SORTCELL S1 original OpenArm CAD Teardown workcell"]');

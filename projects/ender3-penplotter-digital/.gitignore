@@ -1,0 +1,9 @@
+sources/01 MAIN ASM Ender_3.STEP
+sources/e_plate_drawing.png
+sources/vendor_assembly.glb
+__pycache__/
+*.pyc
+.cache/
+tmp/
+ENDER3_PENPLOTTER_DIGITAL.zip
+ENDER3_PENPLOTTER_DIGITAL.zip.sha256

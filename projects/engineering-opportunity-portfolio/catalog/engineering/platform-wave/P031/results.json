@@ -1,0 +1,6 @@
+{
+  "cases": 64,
+  "minimum_upward_reserve_g": 42.6629,
+  "worst_small_float_reserve_g": -210.5771,
+  "minimum_down_authority_g": 179.5573
+}

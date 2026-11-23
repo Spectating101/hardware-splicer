@@ -1,0 +1,163 @@
+{
+  "board": "spi_flash_adapter_v1.kicad_pcb",
+  "board_sha256": "86c0e72840b058b5dc4b56a820e560b306b2f624724a818e092fd1d003fdefbd",
+  "frame": "component side up; lower-left board corner is (0,0); mm",
+  "width": 90.0,
+  "height": 50.0,
+  "points": [
+    {
+      "ref": "H1",
+      "net": "",
+      "x": 4.0,
+      "y": 46.0,
+      "diameter": 3.2
+    },
+    {
+      "ref": "H2",
+      "net": "",
+      "x": 86.0,
+      "y": 46.0,
+      "diameter": 3.2
+    },
+    {
+      "ref": "H3",
+      "net": "",
+      "x": 4.0,
+      "y": 4.0,
+      "diameter": 3.2
+    },
+    {
+      "ref": "H4",
+      "net": "",
+      "x": 86.0,
+      "y": 4.0,
+      "diameter": 3.2
+    },
+    {
+      "ref": "TP1",
+      "net": "/HOST_3V3",
+      "x": 10.0,
+      "y": 45.0,
+      "diameter": 1.5
+    },
+    {
+      "ref": "TP2",
+      "net": "/3V3",
+      "x": 16.0,
+      "y": 45.0,
+      "diameter": 1.5
+    },
+    {
+      "ref": "TP3",
+      "net": "/1V8",
+      "x": 35.0,
+      "y": 45.0,
+      "diameter": 1.5
+    },
+    {
+      "ref": "TP4",
+      "net": "/GND",
+      "x": 43.0,
+      "y": 45.0,
+      "diameter": 1.5
+    },
+    {
+      "ref": "TP5",
+      "net": "/HOST_SCLK",
+      "x": 18.0,
+      "y": 26.0,
+      "diameter": 1.5
+    },
+    {
+      "ref": "TP6",
+      "net": "/DUT_SCLK",
+      "x": 55.0,
+      "y": 30.0,
+      "diameter": 1.5
+    },
+    {
+      "ref": "TP7",
+      "net": "/HOST_MOSI",
+      "x": 23.0,
+      "y": 20.0,
+      "diameter": 1.5
+    },
+    {
+      "ref": "TP8",
+      "net": "/DUT_MOSI",
+      "x": 60.0,
+      "y": 28.0,
+      "diameter": 1.5
+    },
+    {
+      "ref": "TP9",
+      "net": "/HOST_CS_N",
+      "x": 18.0,
+      "y": 14.0,
+      "diameter": 1.5
+    },
+    {
+      "ref": "TP10",
+      "net": "/DUT_CS_N",
+      "x": 55.0,
+      "y": 16.0,
+      "diameter": 1.5
+    },
+    {
+      "ref": "TP11",
+      "net": "/HOST_MISO",
+      "x": 28.0,
+      "y": 9.0,
+      "diameter": 1.5
+    },
+    {
+      "ref": "TP12",
+      "net": "/DUT_MISO",
+      "x": 60.0,
+      "y": 12.0,
+      "diameter": 1.5
+    },
+    {
+      "ref": "TP13",
+      "net": "/DUT_IO2_WP_N",
+      "x": 72.0,
+      "y": 12.0,
+      "diameter": 1.5
+    },
+    {
+      "ref": "TP14",
+      "net": "/DUT_IO3_HOLD_N",
+      "x": 81.0,
+      "y": 14.0,
+      "diameter": 1.5
+    },
+    {
+      "ref": "TP15",
+      "net": "/DUT_1V8",
+      "x": 43.0,
+      "y": 36.0,
+      "diameter": 1.5
+    },
+    {
+      "ref": "TP16",
+      "net": "/TRANSLATOR_OE",
+      "x": 55.0,
+      "y": 9.0,
+      "diameter": 1.5
+    },
+    {
+      "ref": "TP17",
+      "net": "/GND",
+      "x": 46.0,
+      "y": 17.0,
+      "diameter": 1.5
+    },
+    {
+      "ref": "TP18",
+      "net": "/GND",
+      "x": 75.0,
+      "y": 9.0,
+      "diameter": 1.5
+    }
+  ]
+}

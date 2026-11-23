@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="182mm" height="146mm" viewBox="0 0 182 146">
+  <title>P196 baseline | full-size study patterns</title>
+  <rect id="scale" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x="8" y="8" width="20" height="10" />
+  <text id="scale-label" data-operation="engrave" fill="#333333" stroke="none" stroke-width="0.17" x="9" y="14" font-size="2.6" font-family="sans-serif">20 × 10 mm</text>
+  <rect id="plate" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" x="9" y="55" width="92" height="77" />
+  <circle id="rod-0" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" cx="25" cy="118" r="7.8" />
+  <circle id="rod-1" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" cx="85" cy="118" r="7.8" />
+  <rect id="adjustment-slot" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" x="51.6" y="66.6" width="6.8" height="22.8" />
+  <circle id="optical-axis" data-operation="reference" fill="none" stroke="#2475a9" stroke-width="0.17" cx="55" cy="33" r="1" />
+  <polygon id="saddle-blank" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" points="111,58 138,85 165,58 165,104 111,104" />
+  <rect id="pad-cut-stock" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" x="117" y="117" width="38" height="12" />
+</svg>

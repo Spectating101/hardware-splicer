@@ -13,6 +13,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Callable, Dict, Mapping, Sequence
 
+from .ai_project_action_inputs import ACTION_INPUT_HINT, ACTION_INPUT_MODELS, validate_action_inputs
 from .ai_project_orchestrator import (
     AI_PROJECT_ACTION_SCHEMA,
     ALLOWED_AI_ACTION_TYPES,
@@ -259,6 +260,7 @@ def build_ai_conversation_prompt(
         f"- additional_proposals: array of at most {int(max_proposals)} objects with the same action fields\n"
         "- answer_kind: one of technical_answer, decision_briefing, clarification_request\n\n"
         f"Allowed action types: {', '.join(ALLOWED_AI_ACTION_TYPES)}.\n"
+        f"{ACTION_INPUT_HINT}\n"
         f"Allowed evidence kinds: {', '.join(ALLOWED_EVIDENCE_KINDS)}.\n"
         "Never emit raw file content, secrets, shell commands, arbitrary URLs, device actions, "
         "fabrication orders, flashing, power-on, motion, operational, or release authority.\n\n"
@@ -313,7 +315,14 @@ def _parse_turn_action(
     rationale = _bounded_text(row.get("rationale"), limit=8_000).strip()
     if not title or not rationale:
         raise InvalidAIProjectResponse("conversation action requires title and rationale")
-    inputs = _sanitize_value(_mapping(row.get("inputs")))
+    try:
+        inputs = (
+            validate_action_inputs(action_type, _mapping(row.get("inputs")))
+            if action_type in ACTION_INPUT_MODELS
+            else _sanitize_value(_mapping(row.get("inputs")))
+        )
+    except (TypeError, ValueError) as exc:
+        raise InvalidAIProjectResponse(f"conversation action inputs: {exc}") from exc
     _validate_no_authority_elevation(inputs, path="conversation_action.inputs")
     source_ids = _string_list(row.get("source_ids"), limit=32)
     unknown_sources = sorted(set(source_ids) - known_source_ids)

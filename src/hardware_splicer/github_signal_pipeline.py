@@ -11,7 +11,6 @@ network from the tool sandbox, or authorization to fabricate are supported.
 """
 from __future__ import annotations
 
-import hashlib
 import json
 import os
 import re
@@ -20,6 +19,8 @@ import subprocess
 from collections import Counter
 from pathlib import Path
 from typing import Any, Mapping
+
+from .file_integrity import sha256_file
 
 SCHEMA = "hardware_splicer.github_signal_capability.v1"
 # Digest, not a mutable tag. Pull explicitly before execution; do not allow
@@ -58,14 +59,6 @@ ADAPTERS = {
 
 class SignalEvaluationError(ValueError):
     """Fail-closed candidate admission or adapter errors."""
-
-
-def sha256_file(path: Path) -> str:
-    h = hashlib.sha256()
-    with path.open("rb") as f:
-        for part in iter(lambda: f.read(1024 * 1024), b""):
-            h.update(part)
-    return h.hexdigest()
 
 
 def normalize_feed(feed: Mapping[str, Any]) -> list[dict[str, Any]]:

@@ -1,0 +1,8 @@
+{
+ "P082":{"span":520,"section_width":25,"section_height":35,"wall":2,"modulus_n_mm2":69000,"rail_force_n":20,"bad":{"section_height":16}},
+ "P220":{"ball_d":55,"button_span":52,"button_d":22,"shell":[150,115],"access_d":65,"deadband":0.35,"gain":9,"bad":{"deadband":0.1}},
+ "P237":{"length":290,"cheek_width":34,"height":74,"recess":7,"angles":[12,12],"stock_t":32,"stripe":4,"bad":{"angles":[12,17]}},
+ "P243":{"curve_radii":[36,80],"offset":3,"roller_span":10,"wheel_d":6,"bad":{"roller_span":18}},
+ "P266":{"basket_d":58,"body_d":70,"aperture_d":59,"spout_offset":22,"spout_r":4.5,"spout_depth":28,"cup_floor":36,"feet":[96,68],"target_force":110,"eccentricity":14,"bad":{"aperture_d":48}},
+ "P270":{"roll_widths":[22,34,41],"roll_od":78,"core_id":25,"axle_d":14,"separator_gap":3,"release_x":65,"bad":{"release_x":130}}
+}

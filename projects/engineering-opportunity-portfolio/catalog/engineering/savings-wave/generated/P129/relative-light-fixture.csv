@@ -1,0 +1,7 @@
+mode,sensor_a,sensor_b,sensor_c
+dark-cal,11,29,49
+flat-cal,463,536,610
+uniform-150,150,178,216
+uniform-400,371,433,501
+uniform-1000,913,1041,1175
+screens,915,694,397

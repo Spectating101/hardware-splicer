@@ -28,7 +28,7 @@ Install KiCad from [kicad.org](https://www.kicad.org/download/) and ensure `kica
 ```bash
 git clone https://github.com/Spectating101/hardware-splicer.git
 cd hardware-splicer
-git checkout v1.0.1    # or main for latest
+git checkout <release-tag>    # the release you deploy, or main for latest
 bash scripts/install_splice_v1.sh
 source .venv/bin/activate
 hs-doctor
@@ -71,7 +71,7 @@ hs-serve --host 127.0.0.1 --port 8787
 curl -s http://127.0.0.1:8787/health | jq .
 ```
 
-**MCP** (Cursor / Claude Desktop): see [`MCP.md`](MCP.md) and `mcp/hardware-splicer.mcp.json`.
+**MCP** (Cursor / Claude Desktop): see [`MCP.md`](reference/MCP.md) and `mcp/hardware-splicer.mcp.json`.
 
 **OpenAPI:** http://127.0.0.1:8787/docs
 

@@ -12,7 +12,7 @@ import {
   useReactFlow,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { composeAgentLoop, fetchDesignQuality, fetchModuleCatalog } from "../api.js";
+import { composeAgentLoop, fetchDesignQuality, fetchModuleCatalog } from "../api";
 import ModuleLibrary from "../studio/ModuleLibrary.jsx";
 import ModuleNode from "../studio/ModuleNode.jsx";
 import StudioDrcPanel from "../studio/StudioDrcPanel.jsx";

@@ -1,0 +1,207 @@
+{
+  "schema_version": "hardware_splicer.robotics_external_comparison.v1",
+  "baseline_commit": "8dd70e84",
+  "sortcell": {
+    "sources": {
+      "fabrication_authorized": false,
+      "files": {
+        "hs_product_studio.js": {
+          "bytes": 5518,
+          "sha256": "52ce02a88d7aa8970386b1c312a28b2c907ae5763246c811c1a86bc0912ac046"
+        },
+        "main.js": {
+          "bytes": 18176,
+          "sha256": "bbde4daf3510f59d99137886f14312ec2499a36a8e7788448c0a51609775185d"
+        },
+        "robot.glb": {
+          "bytes": 30168664,
+          "sha256": "767baf3450d758da2cfc14173d669e1ad5e49407d40a2007c88bdaf6ea156e65"
+        },
+        "robot_metadata.json": {
+          "bytes": 281009,
+          "sha256": "8785708507a17a0fea8023b5d2de3a16719c047907a57001eb37b6a085bcb58c"
+        }
+      },
+      "geometry_authored_by_hs": false,
+      "machine_vision_executed": false,
+      "metadata_matches_mesh_nodes": true,
+      "openarm_component_count": 542,
+      "pick_and_place_physically_verified": false,
+      "product_id": "sortcell_s1_openarm",
+      "schema_version": "hardware_splicer.sortcell_source_receipt.v1",
+      "source_cad": "https://github.com/Utsav92/openarm-3d-cad-assembly",
+      "source_cad_commit": "0c0852bd76ee7026f97875d6eac789d189a0012a",
+      "task_animation_physical_kinematics_verified": false,
+      "teardown_engine": "https://github.com/elvarofficial/teardown",
+      "teardown_engine_commit": "a91262ac1109051e014662d42ecb0b7bc1f113b1"
+    },
+    "source_motion_sha256": "feb2d78e9127a7889b97f7ad12d3ef5b52a10adbc78899dfed53d258a522433f",
+    "official_motion_model": {
+      "repository": "https://github.com/enactic/openarm_description",
+      "commit": "2e27c793e10aa2045e7eb597b9b9b9dc08fb0a08",
+      "path": "assets/robot/openarm_v1.0/urdf/example/v1.urdf",
+      "sha256": "763d8e0280479cd4d9868e977c9c01416b9f83c8899c95b918446c0cfaf32f11",
+      "original_document_unchanged": true,
+      "engine_import_mesh_references_suppressed": true,
+      "link_origins_axes_and_joint_limits_preserved": true
+    },
+    "workcell_targets_with_reach_demonstrated": 0,
+    "workcell_target_count": 4,
+    "registered_to_workcell": false,
+    "browser": {
+      "rendered_phases": [
+        "01 / FEED",
+        "02 / INSPECT",
+        "03 / GRASP",
+        "04 / TRANSFER",
+        "05 / SORT"
+      ],
+      "part_explosion_operable": true,
+      "phase_navigation_operable": true,
+      "evidence_sha256": "4dcc4241beb319c1eaa6730576ae0cb8449ac2a7596a0616c41ee63e5bb0f09e",
+      "delivered_bundle_html_sha256": "1c91994b9b681a47bddc439ad37d777e845310eaa021f121e2cfa97ef7cf8718",
+      "physical_motion_verified": false
+    },
+    "changed_metadata_rejected": true
+  },
+  "sources": {
+    "openamr": {
+      "repository": "openAMRobot/openamr-platform-hw",
+      "commit": "8ed2b06a46115abe2dffadbf0d902ae731d278d1",
+      "files": [
+        {
+          "path": "LICENSE",
+          "sha256": "eeecc593866fa1c3b80189c7e3dc0ceb77740557fa92f81771f891cc54c579cb"
+        },
+        {
+          "path": "mechanical/cad/Full_assembly_STEP/MMP.00.00.00.000_full_assembly.STEP.zip",
+          "sha256": "c547de1f48af0fea27bc619bf35ab744a2846fce3bfea6d078b1b467eee07619"
+        },
+        {
+          "path": "manufacturing/bom/components-bom.md",
+          "sha256": "602344d6994315714fe901786078cf1dfce1a95c5a6bd74d6e59458272ecb33a"
+        },
+        {
+          "path": "manufacturing/bom/mechanical-bom.md",
+          "sha256": "078fa900ec65404ab00a01e2523e06c47e18d3777b467a5c4110d95173c96cef"
+        },
+        {
+          "path": "electrical/wiring/diagrams/wiring-harness.svg",
+          "sha256": "f77ff87a7bcffcf410a708f9d96d84c0d275431a172f12046c8fed65e9704dfc"
+        },
+        {
+          "path": "electrical/wiring/wiring-pinout.md",
+          "sha256": "823df6c98e7b7f7cd22c6731bf3b1144c56483ea329d26a710e795461a38c201"
+        }
+      ]
+    },
+    "pathon": {
+      "repository": "PathOn-AI/PathOnRoboticsOSS",
+      "commit": "20940773bc2e6c83fea869580d53380ab1573795",
+      "files": [
+        {
+          "path": "LICENSE",
+          "sha256": "9d95e3f4a4ff51054f41069faa9ed80e8435091be7e0da59634647be317ebc68"
+        },
+        {
+          "path": "hardware/LICENSE",
+          "sha256": "ee27fced20316afad4bd15a35061de63ab5de3a43d135f75924f6434cb764d7c"
+        },
+        {
+          "path": "hardware/robots/so101_6dof_wrist/software/robot_assets/so101_PathonAI_6dof_symmetric_gripper.urdf",
+          "sha256": "0106b3787a88c706e5c65db6a54a36e5e7cd90477d12d4f4d151c8d99e8af456"
+        },
+        {
+          "path": "hardware/robots/so101_6dof_wrist/software/robot_assets/LICENSE-APACHE-2.0",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+        },
+        {
+          "path": "hardware/robots/so101_6dof_wrist/README.md",
+          "sha256": "13787762df364b44a21d724ba0381b9cfb2692aa41bda8033a281a340123cd62"
+        }
+      ]
+    },
+    "teardown": {
+      "repository": "elvarofficial/teardown",
+      "commit": "a91262ac1109051e014662d42ecb0b7bc1f113b1",
+      "files": [
+        {
+          "path": "LICENSE",
+          "sha256": "489451d9c7bd0c07b21c7f094f24d290d52c757bf71fc988ec880aa673fb3820"
+        },
+        {
+          "path": "SKILL.md",
+          "sha256": "9395e463e8ff733c4cadafe8dafeceb72fd462a2a1fc89a58c17d3b756b5929b"
+        }
+      ]
+    }
+  },
+  "reference_models": {
+    "pathon": {
+      "name": "so101_PathOnAI_6dof_symmetric_gripper",
+      "source_sha256": "sha256:0106b3787a88c706e5c65db6a54a36e5e7cd90477d12d4f4d151c8d99e8af456",
+      "links": 9,
+      "joints": 8,
+      "declared_actuator_records": 8,
+      "joint_types": {
+        "revolute": 6,
+        "prismatic": 2
+      }
+    },
+    "so102": {
+      "name": "so_arm_102_pre_for_urdf_v5",
+      "source_sha256": "sha256:7ffcddec6eb9b54122bc9b8d612051464a6ba1a8580a53d5770f422e56fe5b63",
+      "links": 8,
+      "joints": 7,
+      "declared_actuator_records": 0,
+      "joint_types": {
+        "revolute": 5,
+        "prismatic": 2
+      }
+    }
+  },
+  "openamrobot": {
+    "cad_readback": {
+      "step_sha256": "217b1aae5c3ac2eb9ddbc308cd5589e3d73350f9b04132e86c407d9d6f80b91a",
+      "source_uncompressed_bytes": 139001651,
+      "cadquery": "2.8.0",
+      "native_solid_count": 2924,
+      "world_bounds_mm": [
+        -399.952,
+        -2.0,
+        -302.57,
+        417.6,
+        302.67,
+        291.0
+      ],
+      "scope": "Native full assembly readback. Individual CAD solids can be subfeatures or repeated instances.",
+      "parts_and_bom_join_verified": false,
+      "physical_validation_performed": false
+    },
+    "source_scope_gap": {
+      "published_wiring_driver": "ZBLD C20-120L2R",
+      "mechanical_bom_motor_mount_driver": "ZLAC8015D",
+      "verdict": "Different published configurations require an explicit build revision before joining the CAD, wiring and BOM."
+    }
+  },
+  "robotics_catalog": {
+    "feed": "examples/github_signals/robotics_candidates_20261118.json",
+    "sha256": "88f0acd68797197e288830511d58034bce85df6a840ee91ca5178d591d4ae03b",
+    "discovery_only_count": 5
+  },
+  "targeted_tests": {
+    "passed": 64,
+    "junit_sha256": "ee3e34fe62b851a9bb16019963ef7749c3857c1fc1298974b944d2a179922683"
+  },
+  "external_backend": {
+    "status": "release_hold",
+    "outstanding": [
+      "Reference robot workflow with revision-bound CAD, wiring or schematic, and exact BOM joins",
+      "Authenticated project and artifact ownership for separate outside users",
+      "Native job isolation, input and resource limits under external traffic",
+      "Hosted deployment validation and independent user acceptance"
+    ],
+    "outside_user_acceptance_verified": false,
+    "physical_validation_performed": false
+  }
+}

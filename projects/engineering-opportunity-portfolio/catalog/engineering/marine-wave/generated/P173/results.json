@@ -1,0 +1,19 @@
+{
+  "pilot": "Small enclosure reference blank with purchased vacuum rig, synthetic dry bench",
+  "metrics": {
+    "reference-blank": {
+      "levels": 3,
+      "max_corrected_drift_kpa": 0.054,
+      "max_uncorrected_drift_kpa": 0.34,
+      "accuracy_allowance_kpa": 0.16,
+      "guaranteed_least_drift_kpa": 0
+    },
+    "leak-control": {
+      "levels": 3,
+      "max_corrected_drift_kpa": 0.469,
+      "max_uncorrected_drift_kpa": 0.76,
+      "accuracy_allowance_kpa": 0.16,
+      "guaranteed_least_drift_kpa": 0.293
+    }
+  }
+}

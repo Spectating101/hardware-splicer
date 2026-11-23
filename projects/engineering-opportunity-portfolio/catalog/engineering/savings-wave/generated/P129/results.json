@@ -1,0 +1,15 @@
+{
+  "pilot": "Level three-channel canopy relative light bar, two neutral-density surrogates",
+  "metrics": {
+    "calibrated": {
+      "uniform_levels": 3,
+      "worst_uniform_spread_pct": 4.55,
+      "screen_order_preserved": true
+    },
+    "raw-control": {
+      "uniform_levels": 3,
+      "worst_uniform_spread_pct": 36.4,
+      "screen_order_preserved": true
+    }
+  }
+}

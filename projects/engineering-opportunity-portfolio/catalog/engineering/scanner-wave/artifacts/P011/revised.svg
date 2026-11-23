@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="220mm" height="285mm" viewBox="0 0 220 285">
+  <title>P011 revised · full-size proof coupon</title>
+  <rect id="scale" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="10" y="6" width="20" height="10" />
+  <rect id="host-window-coupon" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="20" y="24" width="112" height="198" />
+  <rect id="preserve-calibration-zone" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="20" y="24" width="112" height="24" />
+  <rect id="carrier" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="24" y="56" width="102" height="111" />
+  <circle id="disc-outer-reference" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" cx="75" cy="110" r="32.5" />
+  <circle id="spindle-bore" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="75" cy="110" r="3.2" />
+  <rect id="target-frame" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="69.7" y="81.9" width="10.6" height="8.2" />
+  <rect id="optical-window" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="69.075" y="81.25" width="11.85" height="9.5" />
+  <line id="index-0" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x1="75" y1="78.5" x2="75" y2="76" />
+  <line id="index-1" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x1="87.812204" y1="81.223318" x2="88.829046" y2="78.939454" />
+  <line id="index-2" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x1="98.409062" y1="88.922386" x2="100.266924" y2="87.249559" />
+  <line id="index-3" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x1="104.95828" y1="100.265965" x2="107.335922" y2="99.493422" />
+  <line id="index-4" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x1="106.32744" y1="113.292647" x2="108.813744" y2="113.553968" />
+  <line id="index-5" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x1="102.2798" y1="125.75" x2="104.444864" y2="127" />
+  <line id="index-6" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x1="93.515235" y1="135.484035" x2="94.984699" y2="137.506578" />
+  <line id="index-7" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x1="81.549218" y1="140.811649" x2="82.068997" y2="143.257018" />
+  <line id="index-8" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x1="68.450782" y1="140.811649" x2="67.931003" y2="143.257018" />
+  <line id="index-9" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x1="56.484765" y1="135.484035" x2="55.015301" y2="137.506578" />
+  <line id="index-10" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x1="47.7202" y1="125.75" x2="45.555136" y2="127" />
+  <line id="index-11" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x1="43.67256" y1="113.292647" x2="41.186256" y2="113.553968" />
+  <line id="index-12" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x1="45.04172" y1="100.265965" x2="42.664078" y2="99.493422" />
+  <line id="index-13" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x1="51.590938" y1="88.922386" x2="49.733076" y2="87.249559" />
+  <line id="index-14" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x1="62.187796" y1="81.223318" x2="61.170954" y2="78.939454" />
+  <rect id="index-shoe" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="156" y="84" width="20" height="16" />
+  <rect id="index-shoe-slot" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="164.78" y="90" width="2.44" height="4" />
+  <circle id="index-tip" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" cx="75" cy="139.5" r="1" />
+</svg>

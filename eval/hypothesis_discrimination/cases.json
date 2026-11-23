@@ -1,0 +1,252 @@
+[
+  {
+    "case_id": "motor_unexplained_trip",
+    "problem": "A salvaged low-voltage rover trips current limiting during startup. No real measurement exists. Choose an unpowered, read-only diagnostic first.",
+    "hypotheses": {
+      "motor_winding_short": "An internal motor winding fault",
+      "gearbox_jam": "Mechanical binding in gearbox",
+      "driver_fault": "Motor driver fails electrically"
+    },
+    "tests": [
+      {
+        "id": "visual_case_inspection",
+        "description": "Inspect housing color and case markings only",
+        "risk": "low"
+      },
+      {
+        "id": "disconnected_resistance",
+        "description": "With all power disconnected, compare motor winding resistance and output-to-output resistance after removing motor leads from driver",
+        "risk": "low"
+      },
+      {
+        "id": "energize_under_load",
+        "description": "Apply rated battery and attempt full motion without current measurements",
+        "risk": "unsafe"
+      }
+    ],
+    "outcome_matrix": {
+      "visual_case_inspection": {
+        "motor_winding_short": "ordinary",
+        "gearbox_jam": "ordinary",
+        "driver_fault": "ordinary"
+      },
+      "disconnected_resistance": {
+        "motor_winding_short": "motor_abnormal",
+        "gearbox_jam": "both_normal",
+        "driver_fault": "driver_abnormal"
+      },
+      "energize_under_load": {
+        "motor_winding_short": "supply_trip",
+        "gearbox_jam": "supply_trip",
+        "driver_fault": "supply_trip"
+      }
+    },
+    "best_test_ids": [
+      "disconnected_resistance"
+    ]
+  },
+  {
+    "case_id": "printer_layer_shift",
+    "problem": "An unplugged FDM printer shows intermittent X-axis layer shifts. Select the most informative safe manual check before replacing components.",
+    "hypotheses": {
+      "loose_pulley": "Drive pulley has an unsecured grub screw",
+      "belt_slack": "Belt tension is too low",
+      "stepper_fault": "Stepper electronics misdrive despite intact mechanical assembly"
+    },
+    "tests": [
+      {
+        "id": "power_off_mechanical_inspection",
+        "description": "With printer unplugged, inspect pulley fastening and belt tension across travel",
+        "risk": "low"
+      },
+      {
+        "id": "check_filament_color",
+        "description": "Record filament color and spool type",
+        "risk": "low"
+      },
+      {
+        "id": "random_driver_replacement",
+        "description": "Swap the stepper driver without mechanical inspection",
+        "risk": "unsafe"
+      }
+    ],
+    "outcome_matrix": {
+      "power_off_mechanical_inspection": {
+        "loose_pulley": "pulley_slips",
+        "belt_slack": "belt_loose",
+        "stepper_fault": "mechanics_normal"
+      },
+      "check_filament_color": {
+        "loose_pulley": "same",
+        "belt_slack": "same",
+        "stepper_fault": "same"
+      },
+      "random_driver_replacement": {
+        "loose_pulley": "uncertain",
+        "belt_slack": "uncertain",
+        "stepper_fault": "uncertain"
+      }
+    },
+    "best_test_ids": [
+      "power_off_mechanical_inspection"
+    ]
+  },
+  {
+    "case_id": "sensor_bus_unknown",
+    "problem": "An unpowered donor controller does not respond to a BME280 breakout. No controller logic-voltage documentation is available. Which safe inspection best distinguishes candidate faults before direct connection?",
+    "hypotheses": {
+      "wrong_pins": "Signals wired to pins other than expected bus",
+      "incompatible_logic": "Donor IO logic domain incompatible with sensor",
+      "faulty_sensor": "Sensor breakout itself physically defective"
+    },
+    "tests": [
+      {
+        "id": "schematic_and_unpowered_path_audit",
+        "description": "Inspect board markings, datasheets and unpowered pin continuity; verify declared voltage domains and bus pin identities",
+        "risk": "low"
+      },
+      {
+        "id": "change_sample_rate",
+        "description": "Change application sample rate without establishing bus compatibility",
+        "risk": "low"
+      },
+      {
+        "id": "blind_5v_connection",
+        "description": "Attach unverified 5 V IO lines and turn on power",
+        "risk": "unsafe"
+      }
+    ],
+    "outcome_matrix": {
+      "schematic_and_unpowered_path_audit": {
+        "wrong_pins": "mismapped_bus",
+        "incompatible_logic": "voltage_mismatch",
+        "faulty_sensor": "mapping_ok_voltage_ok"
+      },
+      "change_sample_rate": {
+        "wrong_pins": "no_signal",
+        "incompatible_logic": "no_signal",
+        "faulty_sensor": "no_signal"
+      },
+      "blind_5v_connection": {
+        "wrong_pins": "unknown",
+        "incompatible_logic": "unknown",
+        "faulty_sensor": "unknown"
+      }
+    },
+    "best_test_ids": [
+      "schematic_and_unpowered_path_audit"
+    ]
+  },
+  {
+    "case_id": "rover_brownout",
+    "problem": "Archived low-voltage rover logs show brownouts at movement start, but no bench measurements or physical controls are available. Choose one safe offline inspection of existing recorded data that best separates three causes.",
+    "hypotheses": {
+      "supply_sag": "The battery/rail collapses under actuator startup load",
+      "firmware_reset": "Firmware deliberately restarts despite stable rail voltage",
+      "connector_drop": "A loose supply connector creates an intermittent supply loss"
+    },
+    "tests": [
+      {
+        "id": "inspect_reset_message_only",
+        "description": "Read only the last boot reset reason from the archived diagnostic log",
+        "risk": "low"
+      },
+      {
+        "id": "correlate_archived_voltage_and_reset_traces",
+        "description": "Align existing timestamped supply-rail voltage, connector-drop logs and firmware reset-cause events, without connecting new instruments",
+        "risk": "low"
+      },
+      {
+        "id": "inspect_case_color",
+        "description": "Inspect painted enclosure color from old photographs",
+        "risk": "low"
+      },
+      {
+        "id": "raise_live_battery_current",
+        "description": "Increase battery discharge current while moving the rover",
+        "risk": "unsafe"
+      }
+    ],
+    "outcome_matrix": {
+      "inspect_reset_message_only": {
+        "supply_sag": "brownout_reset",
+        "firmware_reset": "software_reset",
+        "connector_drop": "brownout_reset"
+      },
+      "correlate_archived_voltage_and_reset_traces": {
+        "supply_sag": "sustained_rail_dip",
+        "firmware_reset": "stable_voltage_with_reset",
+        "connector_drop": "intermittent_open_spike"
+      },
+      "inspect_case_color": {
+        "supply_sag": "same",
+        "firmware_reset": "same",
+        "connector_drop": "same"
+      },
+      "raise_live_battery_current": {
+        "supply_sag": "unknown",
+        "firmware_reset": "unknown",
+        "connector_drop": "unknown"
+      }
+    },
+    "best_test_ids": [
+      "correlate_archived_voltage_and_reset_traces"
+    ]
+  },
+  {
+    "case_id": "pcb_uart_no_output",
+    "problem": "A hypothetical controller board has no UART text at boot. You have an archived schematic and existing captured trace files, but cannot probe or energize hardware. Choose one offline diagnostic to distinguish suspected causes.",
+    "hypotheses": {
+      "pin_misroute": "TX signal is connected to wrong header pin",
+      "baud_mismatch": "Captured UART settings use the wrong baud",
+      "no_uart_activity": "Firmware did not transmit anything"
+    },
+    "tests": [
+      {
+        "id": "check_pin_map_only",
+        "description": "Review TX net from MCU pad to header in schematic; no trace timing reviewed",
+        "risk": "low"
+      },
+      {
+        "id": "review_netmap_and_archived_logic_trace",
+        "description": "Cross-check MCU-to-header TX net and archived logic-analyzer edge timing/activity against decoder settings",
+        "risk": "low"
+      },
+      {
+        "id": "review_power_label",
+        "description": "Read only the printed DC input-voltage label",
+        "risk": "low"
+      },
+      {
+        "id": "connect_unrated_usb_uart",
+        "description": "Connect an unknown-voltage USB-UART cable and apply power",
+        "risk": "unsafe"
+      }
+    ],
+    "outcome_matrix": {
+      "check_pin_map_only": {
+        "pin_misroute": "misroute",
+        "baud_mismatch": "net_ok",
+        "no_uart_activity": "net_ok"
+      },
+      "review_netmap_and_archived_logic_trace": {
+        "pin_misroute": "misroute",
+        "baud_mismatch": "edges_with_baud_mismatch",
+        "no_uart_activity": "no_edges"
+      },
+      "review_power_label": {
+        "pin_misroute": "same",
+        "baud_mismatch": "same",
+        "no_uart_activity": "same"
+      },
+      "connect_unrated_usb_uart": {
+        "pin_misroute": "unknown",
+        "baud_mismatch": "unknown",
+        "no_uart_activity": "unknown"
+      }
+    },
+    "best_test_ids": [
+      "review_netmap_and_archived_logic_trace"
+    ]
+  }
+]

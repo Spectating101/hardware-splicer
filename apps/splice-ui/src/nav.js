@@ -2,14 +2,19 @@
 
 export const VIEWS = Object.freeze({
   home: "home",
+  newProject: "new-project",
+  library: "library",
   showcase: "showcase",
   reference: "reference",
   sortcell: "sortcell",
+  fielddeck: "fielddeck",
+  device: "device",
   workspace: "workspace",
   advanced: "advanced",
   example: "example",
   lab: "lab",
   preview: "preview",
+  notFound: "not-found",
 });
 
 export const ADVANCED_VIEWS = new Set([

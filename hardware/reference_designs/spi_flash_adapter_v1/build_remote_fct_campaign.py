@@ -9,6 +9,7 @@ import io
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -155,10 +156,18 @@ def build_gauntlet_state(packet: dict[str, object], handoff: dict[str, object]) 
 def build_campaign() -> bytes:
     with tempfile.TemporaryDirectory(prefix="hs-spi-remote-fct-") as temporary:
         temp = Path(temporary)
+        # Both native builders overwrite verification.json with the installed
+        # toolchain's receipt. Keep those outputs away from the retained source
+        # fingerprint used by workshop/checkpoint evidence, even on failure.
+        source = temp / "source"
+        shutil.copytree(
+            HERE, source,
+            ignore=shutil.ignore_patterns("out", "__pycache__", "*.pyc"),
+        )
         review_zip_path = temp / "design-review.zip"
-        run(KICAD_PYTHON, "build_package.py", "--output", str(review_zip_path))
+        run(KICAD_PYTHON, "build_package.py", "--output", str(review_zip_path), cwd=source)
         report_dir = temp / "native-reports"
-        run(KICAD_PYTHON, "verify_design.py", "--report-dir", str(report_dir))
+        run(KICAD_PYTHON, "verify_design.py", "--report-dir", str(report_dir), cwd=source)
 
         payloads: dict[str, bytes] = {}
         with zipfile.ZipFile(review_zip_path) as review:
@@ -224,8 +233,8 @@ def build_campaign() -> bytes:
 
         source_packet_bytes = SOURCE_PACKET.read_bytes()
         source_packet = json.loads(source_packet_bytes)
-        verification = json.loads((HERE / "verification.json").read_text())
-        design_manifest = json.loads((HERE / "design_manifest.json").read_text())
+        verification = json.loads((source / "verification.json").read_text())
+        design_manifest = json.loads((source / "design_manifest.json").read_text())
         candidate_snapshot = {
             "schema_version": "hardware_splicer.spi_reference_candidate.v1",
             "name": "SPI Flash Adapter v1 physical candidate",

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { fetchBuildFileContent, fetchDesignQuality, listBuildFiles } from "../api.js";
+import { fetchBuildFileContent, fetchDesignQuality, listBuildFiles } from "../api";
 import {
   compileTruthHeadline,
   copperTierLabel,

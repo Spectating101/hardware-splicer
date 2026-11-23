@@ -28,7 +28,7 @@ Public A + prerelease stay as infrastructure only.
 | Real-bench golden fixture | **PASS** — fixture migrated to two-stage contract; `make verify-splice-real-bench` |
 | Design-partner invites | **PAUSED** until `PHYSICAL_BENCH_EVIDENCE.json` is operator-closed |
 
-**Assessment:** [`FUNCTIONAL_ASSESSMENT_2026-07-18.md`](FUNCTIONAL_ASSESSMENT_2026-07-18.md) (includes value audit)  
+**Assessment:** [`FUNCTIONAL_ASSESSMENT_2026-07-18.md`](archive/audits-and-results/FUNCTIONAL_ASSESSMENT_2026-07-18.md) (includes value audit)  
 **Spec:** [`superpowers/specs/2026-07-18-mechatronics-engine-design.md`](superpowers/specs/2026-07-18-mechatronics-engine-design.md)
 
 ## Money-path scoreboard
