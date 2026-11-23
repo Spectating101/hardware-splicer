@@ -20,9 +20,9 @@ SYMBOLS = Path("/usr/share/kicad/symbols")
 
 # Net each pin function must carry on this design (pin names from KiCad's symbol library).
 ESP32 = {"GND": "GND", "VDD": "+3V3", "EN": "EN", "IO0": "GPIO0", "RXD0/IO3": "UART_TX", "TXD0/IO1": "UART_RX"}
-# VREGIN on VBUS is the bus-powered configuration. Open question, not tested here: VDD shares the
-# +3V3 rail with the AMS1117 output (two regulators on one rail); confirm against the datasheet.
-CP2102 = {"GND": "GND", "D+": "USB_D+", "D-": "USB_D-", "VBUS": "VBUS", "VREGIN": "VBUS", "TXD": "UART_TX", "RXD": "UART_RX"}
+# VDD is fed by the board's AMS1117, so VREGIN must sit on the same 3.3 V net (regulator not used);
+# on 5 V it would put the chip's own regulator in parallel with the AMS1117.
+CP2102 = {"GND": "GND", "D+": "USB_D+", "D-": "USB_D-", "VBUS": "VBUS", "VREGIN": "+3V3", "VDD": "+3V3", "TXD": "UART_TX", "RXD": "UART_RX"}
 
 
 def _symbol_pins(library: str, symbol: str) -> dict[str, str]:

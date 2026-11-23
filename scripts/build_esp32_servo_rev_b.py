@@ -19,6 +19,7 @@ Run with a Python that imports pcbnew:
   python3 scripts/build_esp32_servo_rev_b.py UNROUTED.kicad_pcb
   (route it with HS's routing engine, FreeRouting 2.1.0)
   python3 scripts/build_esp32_servo_rev_b.py pour ROUTED.kicad_pcb OUT.kicad_pcb
+  (then, while KiCad DRC reports track_dangling: ... clean OUT.kicad_pcb DRC.json)
 """
 
 from __future__ import annotations
@@ -36,8 +37,10 @@ PARTS = {
         "28": "SERVO_PWM_TILT", "30": "SDA", "31": "SCL", "34": "UART_TX", "35": "UART_RX",
         "38": "GND", "39": "GND"}),
     # CP2102: TXD (26) drives the ESP32's RXD0 (net UART_TX); RXD (25) takes its TXD0 (net UART_RX).
+    # VDD comes from the board's AMS1117, so the chip's own regulator is bypassed: VREGIN (7) is tied
+    # to the same 3.3 V net (CP2102N datasheet, regulator-not-used configuration; CP2102/9 likewise).
     "U2": ("Package_DFN_QFN", "QFN-28-1EP_5x5mm_P0.5mm_EP3.35x3.35mm", "CP2102", (17.0, 20.0), 0, {
-        "3": "GND", "4": "USB_D+", "5": "USB_D-", "6": "+3V3", "7": "VBUS", "8": "VBUS",
+        "3": "GND", "4": "USB_D+", "5": "USB_D-", "6": "+3V3", "7": "+3V3", "8": "VBUS",
         "25": "UART_RX", "26": "UART_TX", "29": "GND"}),
     "U3": ("Package_TO_SOT_SMD", "SOT-223-3_TabPin2", "AMS1117-3.3", (17.0, 38.0), 0, {
         "1": "GND", "2": "+3V3", "3": "VBUS"}),
@@ -52,6 +55,7 @@ PARTS = {
     "C1": ("Capacitor_SMD", "C_0603_1608Metric", "10uF", (10.0, 38.0), 90, {"1": "VBUS", "2": "GND"}),
     "C2": ("Capacitor_SMD", "C_0603_1608Metric", "10uF", (25.0, 38.0), 90, {"1": "+3V3", "2": "GND"}),
     "C3": ("Capacitor_SMD", "C_0603_1608Metric", "1uF", (36.0, 30.0), 90, {"1": "EN", "2": "GND"}),
+    "C4": ("Capacitor_SMD", "C_0603_1608Metric", "100nF", (17.0, 26.0), 0, {"1": "+3V3", "2": "GND"}),
     "R1": ("Resistor_SMD", "R_0603_1608Metric", "10K", (36.0, 25.0), 90, {"1": "+3V3", "2": "EN"}),
     "R2": ("Resistor_SMD", "R_0603_1608Metric", "10K", (40.0, 25.0), 90, {"1": "+3V3", "2": "GPIO0"}),
     "SW1": ("Button_Switch_SMD", "SW_SPST_TL3342", "BOOT", (44.0, 43.0), 0, {"1": "GPIO0", "2": "GND"}),
@@ -139,9 +143,29 @@ def write_project(pcb: str) -> None:
     Path(pcb).with_suffix(".kicad_pro").write_text(json.dumps(rules, indent=2) + "\n")
 
 
+def remove_dangling(pcb: str, drc_json: str) -> int:
+    """Delete track stubs KiCad DRC reports as dangling (left by the router), then refill the pour."""
+    import json
+
+    board = pcbnew.LoadBoard(pcb)
+    report = json.loads(open(drc_json, encoding="utf-8").read())
+    uuids = {item["uuid"] for row in report["violations"] if row["type"] == "track_dangling" for item in row["items"]}
+    removed = 0
+    for track in list(board.GetTracks()):
+        if track.m_Uuid.AsString() in uuids:
+            board.Remove(track)
+            removed += 1
+    pcbnew.ZONE_FILLER(board).Fill(board.Zones())
+    board.Save(pcb)
+    return removed
+
+
 if __name__ == "__main__":
-    if sys.argv[1] == "pour":  # pour IN_ROUTED OUT
+    if sys.argv[1] == "clean":  # clean PCB DRC_JSON
+        print(remove_dangling(sys.argv[2], sys.argv[3]))
+    elif sys.argv[1] == "pour":  # pour IN_ROUTED OUT
         pour_ground(sys.argv[2], sys.argv[3])
         write_project(sys.argv[3])
     else:
         build(sys.argv[1])
+
