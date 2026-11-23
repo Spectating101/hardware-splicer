@@ -1,0 +1,627 @@
+{
+  "backend_surfaces": [
+    "Python SDK",
+    "installed hs-wiring CLI",
+    "canonical HTTP API over actual loopback network",
+    "OpenAPI-discovered MCP dispatch including binary ZIP"
+  ],
+  "broader_build_from_parts_objective_complete": false,
+  "combined_root_coverage": {
+    "coverage_spans_multiple_invocations": true,
+    "note": "The complete invocation has 4,399 passes and seven skips. Four initially skipped profile checks passed separately; this is not one invocation with only three skips.",
+    "remaining_skip_reasons": {
+      "tests.test_donor_board_vision_live_optional::test_live_donor_board_vision_smoke": "set HARDWARE_SPLICER_RUN_VISION_LIVE=1 to run live donor vision",
+      "tests.test_vision_gemini::test_gemini_live_smoke_optional": "set HARDWARE_SPLICER_GEMINI_LIVE_TEST=1 to run live Gemini smoke test",
+      "tests.test_vision_live_optional::test_live_vision_returns_structured_report": "set HARDWARE_SPLICER_RUN_VISION_LIVE=1 to run live vision"
+    },
+    "remaining_unexecuted": 3,
+    "unique_passed": 4403
+  },
+  "complete_root_suite": {
+    "errors": 0,
+    "failures": 0,
+    "passed": 4399,
+    "path": ".cache/hardware-splicer/wiring-20261117/full.xml",
+    "seconds": 1250.39,
+    "sha256": "aa97962e6fae026d0ad0558b307428633271935268cbe65a2cdaac5425064909",
+    "skip_reasons": {
+      "tests.test_device_fault_matrix_benchmark::test_adapter_lane_catches_a_seeded_adapter_bug_that_the_core_lane_cannot_see": "pinned vendor libraries not available (set HS_VENDOR_LIBS to a PlatformIO libdeps directory)",
+      "tests.test_donor_board_vision_live_optional::test_live_donor_board_vision_smoke": "set HARDWARE_SPLICER_RUN_VISION_LIVE=1 to run live donor vision",
+      "tests.test_integrations::test_freerouting_pipeline_routes_sensor_logger": "java + freerouting jar required",
+      "tests.test_lookup_integration::test_live_ifixit_still_answers_in_the_shape_we_read": "set HS_LIVE_NET=1 to call iFixit for real",
+      "tests.test_routing_engine::test_real_jar_routes_tiny_two_net_board": "HARDWARE_SPLICER_FREEROUTING_JAR is not configured",
+      "tests.test_vision_gemini::test_gemini_live_smoke_optional": "set HARDWARE_SPLICER_GEMINI_LIVE_TEST=1 to run live Gemini smoke test",
+      "tests.test_vision_live_optional::test_live_vision_returns_structured_report": "set HARDWARE_SPLICER_RUN_VISION_LIVE=1 to run live vision"
+    },
+    "skipped": 7,
+    "tests": 4406
+  },
+  "cyberdeck_complete": false,
+  "date": "2026-11-17",
+  "development_cache_correction": {
+    "reason": "Own development-only assessments created before the committed LF CSV format; strict replay correctly rejected the older exported bytes. Preserved unchanged outside the active wiring collection; no prior user records or design revisions moved.",
+    "records": [
+      {
+        "archive": "/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.cache/hardware-splicer/wiring-20261117/precommit-prototypes/wiring-838b5e9d25ebe3936279bbd17198a079.json",
+        "assessment_id": "wiring-838b5e9d25ebe3936279bbd17198a079",
+        "sha256": "bfcf62f3be61de0c9989969302d9bc9ee349cc8ef3a432dc94363a9b92c0b005",
+        "source": "/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.cache/hardware-splicer/materials-integration-20261117/drone-projects/digital-6878c5d15c7d4e5d9ce0bed22d0b3a4e/wiring_assessments/wiring-838b5e9d25ebe3936279bbd17198a079.json"
+      },
+      {
+        "archive": "/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.cache/hardware-splicer/wiring-20261117/precommit-prototypes/wiring-9dd12005692a60e461c5175d12c951bc.json",
+        "assessment_id": "wiring-9dd12005692a60e461c5175d12c951bc",
+        "sha256": "f0b7fb5716507e46ed1ea85ff4c405d08527bc15d52344480c7dcf85af199c2a",
+        "source": "/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.cache/hardware-splicer/materials-integration-20261117/drone-projects/digital-6878c5d15c7d4e5d9ce0bed22d0b3a4e/wiring_assessments/wiring-9dd12005692a60e461c5175d12c951bc.json"
+      }
+    ]
+  },
+  "drone_acceptance": {
+    "assessment_id": "wiring-4b5aafb10e10bb45a6e172c3dcbbd81c",
+    "bundle_files": [
+      "ASSESSMENT.json",
+      "CUT_LIST.csv",
+      "HARNESS.svg",
+      "HARNESS.wireviz",
+      "NATIVE_BOM.tsv",
+      "README.txt"
+    ],
+    "bundle_path": ".cache/hardware-splicer/wiring-20261117/hs3g-b-receiver-review-wiring-4b5aafb10e10bb45a6e172c3dcbbd81c.zip",
+    "bundle_sha256": "b68b6d033808c846685df67f2c356e6cf1844c4a388bbf8e4e539b4dd6a900cb",
+    "example_inputs_sha256": {
+      "examples/drone_proving_ground/revision_b/reference/WIRING.csv": "5f8199be462c9b602594277430a3c0a530bc8bff4351a185b18be9a35d44ef93",
+      "examples/drone_proving_ground/revision_b/reference/firmware/src/main/target/SPEEDYBEEF405MINI/target.h": "5dbbb37d22527e6b3bddda458f2b6eaac4c878d0038f562231af790220fe6684",
+      "examples/wiring/hs3g_b_receiver.json": "d6508e9647c84a9320bffa481456aa5d8a933af32605a109244f89c8bf859a0a"
+    },
+    "existing_design_and_study_unchanged": true,
+    "export_sha256": {
+      "hs3g-b-receiver-wiring-2026-11-17.csv": "8ae3166b9346cd654385e4d2fcc32fffde0f2b6533143122dd92760052ff5ea7",
+      "hs3g-b-receiver-wiring-2026-11-17.svg": "799cec56ee3da0c69bf2fa4facc6dd8a4456bbcc9bf67763ba4d0f2a4543af67"
+    },
+    "installed_cli_outside_checkout_with_empty_pythonpath": true,
+    "manufacturer_pinout_and_electrical_ratings_verified": false,
+    "material_assessment_id": "materials-13a72c08b88f096df7f78151495ae4a6",
+    "native_version": "WireViz 0.4.1",
+    "new_material_requirement_is_unresolved_and_not_an_exact_purchase_item": true,
+    "project_id": "digital-6878c5d15c7d4e5d9ce0bed22d0b3a4e",
+    "project_root": "/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.cache/hardware-splicer/materials-integration-20261117/drone-projects",
+    "report": {
+      "authority": "declared_contract_checks_only",
+      "complete_device_compatibility_verified": false,
+      "construction_ready": false,
+      "harness_materials": [
+        {
+          "assessed_material_shortage": "1",
+          "material_id": "receiver",
+          "quantity": "1",
+          "unit": "ea"
+        },
+        {
+          "assessed_material_shortage": "0.40",
+          "material_id": "receiver_conductors",
+          "quantity": "0.40",
+          "unit": "m"
+        },
+        {
+          "assessed_material_shortage": "1",
+          "material_id": "stack",
+          "quantity": "1",
+          "unit": "ea"
+        }
+      ],
+      "issues": [
+        {
+          "code": "material_assessment_has_open_issues",
+          "material_id": "stack",
+          "material_issues": [
+            "Selected controller is discontinued in retained manufacturer evidence; a current source or compatible replacement needs confirmation."
+          ],
+          "severity": "unresolved",
+          "target": "flight_controller"
+        },
+        {
+          "code": "material_assessment_has_open_issues",
+          "material_id": "receiver_conductors",
+          "material_issues": [
+            "Conductor identity, gauge, insulation and ampacity need selection.",
+            "The 0.10 m cut length per wire is a provisional design allowance, not routed or measured."
+          ],
+          "severity": "unresolved",
+          "target": "fc_tx_to_receiver_rx"
+        },
+        {
+          "code": "material_assessment_has_open_issues",
+          "material_id": "receiver_conductors",
+          "material_issues": [
+            "Conductor identity, gauge, insulation and ampacity need selection.",
+            "The 0.10 m cut length per wire is a provisional design allowance, not routed or measured."
+          ],
+          "severity": "unresolved",
+          "target": "receiver_tx_to_fc_rx"
+        },
+        {
+          "code": "material_assessment_has_open_issues",
+          "material_id": "receiver_conductors",
+          "material_issues": [
+            "Conductor identity, gauge, insulation and ampacity need selection.",
+            "The 0.10 m cut length per wire is a provisional design allowance, not routed or measured."
+          ],
+          "severity": "unresolved",
+          "target": "receiver_supply"
+        },
+        {
+          "code": "material_assessment_has_open_issues",
+          "material_id": "receiver_conductors",
+          "material_issues": [
+            "Conductor identity, gauge, insulation and ampacity need selection.",
+            "The 0.10 m cut length per wire is a provisional design allowance, not routed or measured."
+          ],
+          "severity": "unresolved",
+          "target": "receiver_ground"
+        },
+        {
+          "code": "contract_source_unbound",
+          "severity": "unresolved",
+          "target": "flight_controller"
+        },
+        {
+          "code": "contract_source_unbound",
+          "severity": "unresolved",
+          "target": "receiver"
+        },
+        {
+          "code": "contract_source_unbound",
+          "severity": "unresolved",
+          "target": "fc_tx_to_receiver_rx"
+        },
+        {
+          "code": "contract_source_unbound",
+          "severity": "unresolved",
+          "target": "receiver_tx_to_fc_rx"
+        },
+        {
+          "code": "contract_source_unbound",
+          "severity": "unresolved",
+          "target": "receiver_supply"
+        },
+        {
+          "code": "contract_source_unbound",
+          "severity": "unresolved",
+          "target": "receiver_ground"
+        },
+        {
+          "code": "power_current_limit_missing",
+          "severity": "unresolved",
+          "target": "net-1"
+        },
+        {
+          "code": "supply_voltage_missing",
+          "severity": "unresolved",
+          "target": "net-1"
+        },
+        {
+          "code": "wire_gauge_missing",
+          "severity": "unresolved",
+          "target": "receiver_supply"
+        },
+        {
+          "code": "return_current_unknown",
+          "severity": "unresolved",
+          "target": "net-2"
+        },
+        {
+          "code": "wire_gauge_missing",
+          "severity": "unresolved",
+          "target": "receiver_ground"
+        },
+        {
+          "code": "logic_high_limits_missing",
+          "severity": "unresolved",
+          "target": "net-3"
+        },
+        {
+          "code": "logic_low_limits_missing",
+          "severity": "unresolved",
+          "target": "net-3"
+        },
+        {
+          "code": "signal_loading_and_timing_not_assessed",
+          "severity": "unresolved",
+          "target": "net-3"
+        },
+        {
+          "code": "wire_gauge_missing",
+          "severity": "unresolved",
+          "target": "fc_tx_to_receiver_rx"
+        },
+        {
+          "code": "logic_high_limits_missing",
+          "severity": "unresolved",
+          "target": "net-4"
+        },
+        {
+          "code": "logic_low_limits_missing",
+          "severity": "unresolved",
+          "target": "net-4"
+        },
+        {
+          "code": "signal_loading_and_timing_not_assessed",
+          "severity": "unresolved",
+          "target": "net-4"
+        },
+        {
+          "code": "wire_gauge_missing",
+          "severity": "unresolved",
+          "target": "receiver_tx_to_fc_rx"
+        }
+      ],
+      "limitations": [
+        "Retained source bytes bind declarations; they do not establish manufacturer authenticity or physical measurements.",
+        "Lengths, pin viewing orientation, terminations and ratings require their own source review; routing, fit and voltage drop are not verified.",
+        "Ampacity is supplied explicitly, never inferred from AWG. Each conductor is conservatively checked against the entire net demand.",
+        "Signal loading, timing, protocol behavior, shared regulator budgets, transients, fuses and complete device coverage are not assessed."
+      ],
+      "nets": [
+        {
+          "declared_current_a": null,
+          "net_id": "net-1",
+          "pins": [
+            "flight_controller.5V",
+            "receiver.5V"
+          ],
+          "roles": [
+            "power_in",
+            "power_out"
+          ],
+          "status": "unresolved",
+          "wire_ids": [
+            "receiver_supply"
+          ]
+        },
+        {
+          "declared_current_a": null,
+          "net_id": "net-2",
+          "pins": [
+            "flight_controller.G",
+            "receiver.G"
+          ],
+          "roles": [
+            "ground"
+          ],
+          "status": "unresolved",
+          "wire_ids": [
+            "receiver_ground"
+          ]
+        },
+        {
+          "declared_current_a": null,
+          "net_id": "net-3",
+          "pins": [
+            "flight_controller.T1",
+            "receiver.RX"
+          ],
+          "roles": [
+            "signal_in",
+            "signal_out"
+          ],
+          "status": "unresolved",
+          "wire_ids": [
+            "fc_tx_to_receiver_rx"
+          ]
+        },
+        {
+          "declared_current_a": null,
+          "net_id": "net-4",
+          "pins": [
+            "flight_controller.R1",
+            "receiver.TX"
+          ],
+          "roles": [
+            "signal_in",
+            "signal_out"
+          ],
+          "status": "unresolved",
+          "wire_ids": [
+            "receiver_tx_to_fc_rx"
+          ]
+        }
+      ],
+      "physical_authority_granted": false,
+      "schema_version": "hardware_splicer.harness_check.v1",
+      "status": "unresolved",
+      "summary": {
+        "blocked_count": 0,
+        "endpoint_count": 2,
+        "net_count": 4,
+        "unresolved_count": 24,
+        "wire_count": 4
+      }
+    },
+    "source_checks": [
+      {
+        "status": "unbound_declaration",
+        "target": "flight_controller"
+      },
+      {
+        "status": "unbound_declaration",
+        "target": "receiver"
+      },
+      {
+        "status": "unbound_declaration",
+        "target": "fc_tx_to_receiver_rx"
+      },
+      {
+        "status": "unbound_declaration",
+        "target": "receiver_tx_to_fc_rx"
+      },
+      {
+        "status": "unbound_declaration",
+        "target": "receiver_supply"
+      },
+      {
+        "status": "unbound_declaration",
+        "target": "receiver_ground"
+      }
+    ],
+    "source_material_count": 19,
+    "source_revision": 1,
+    "source_snapshot_sha256": "90a442f0a660c0472b8386c598c0c1d7327f9433b9472eaecd5a6b0ff31ca38b",
+    "user_inventory": "declared_empty",
+    "wire_lengths_are_provisional": true
+  },
+  "evidence_sha256": {
+    ".cache/hardware-splicer/wiring-20261117/drone-proof.json": "9e3e08fa0c6fdeb5779644d0ca6c1b04f19171583727f8ea4e37a720d7464256",
+    ".cache/hardware-splicer/wiring-20261117/full.log": "fa0ff50242f409aa13321c67db98b4fe01d6c000da29dedce3c1fa43c835c947",
+    ".cache/hardware-splicer/wiring-20261117/full.xml": "aa97962e6fae026d0ad0558b307428633271935268cbe65a2cdaac5425064909",
+    ".cache/hardware-splicer/wiring-20261117/http-proof.json": "c53884e03e0bbcfc3c17094bba15bbd72a535bc2be727892dc435b0ec6fe0f1a",
+    ".cache/hardware-splicer/wiring-20261117/native-followup.log": "63836f7f91f3cd2b35f0ba6fca52d0d3b89ca51fae8fe17b38ec05d8f8b4b9d1",
+    ".cache/hardware-splicer/wiring-20261117/native-followup.xml": "e9a2caf84995f0ad5b5462dc15799e1170f1959fead4e17bcfc668948a87f5c0",
+    ".cache/hardware-splicer/wiring-20261117/new-feature.xml": "9f34f03fea62412617ad5eb9b685675c07bc239bdc34d639d8c4b713da1a2ab5",
+    ".cache/hardware-splicer/wiring-20261117/prototype-archive.json": "5f789a7d9b082ca320868d4a437ea1083bcd7792efa4aaf5a660569fb3f46608",
+    ".cache/hardware-splicer/wiring-20261117/run_drone_acceptance.py": "b73adeaa8f1da21a4a26509f63eea58f38f5ec8d2009f1c17c791c69e1db3fbb",
+    ".cache/hardware-splicer/wiring-20261117/run_http_acceptance.py": "408e88ea6f4b200ad3aa55fbe14d4a83c8bc5fb8f5b38c1bd45689d3b2038f76",
+    ".cache/hardware-splicer/wiring-20261117/run_native_followup.py": "42005a35ef29fbb97e66669cd84258f7c004cc371bf1684155f51865c3a2579b",
+    ".cache/hardware-splicer/wiring-20261117/visual/harness.png": "4b2193cc07b69aab56b9d73e06bd9efd8bb9fcb6a601fdae38fadc8adc9a2c59",
+    ".cache/hardware-splicer/wiring-20261117/visual/harness.svg": "799cec56ee3da0c69bf2fa4facc6dd8a4456bbcc9bf67763ba4d0f2a4543af67"
+  },
+  "execution": {
+    "blas_threads": 1,
+    "cpu_affinity": [
+      0,
+      3
+    ],
+    "display": "",
+    "followup_profiles": {
+      "HARDWARE_SPLICER_FREEROUTING_JAR": "/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.cache/hardware-splicer/extended-verification-20261116/freerouting-2.1.0.jar",
+      "HARDWARE_SPLICER_RUN_FREEROUTING": "1",
+      "HS_LIVE_NET": "1",
+      "HS_VENDOR_LIBS": "/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.cache/hardware-splicer/device-application/device-application-euadmriv/project/.pio/libdeps/application",
+      "jar_sha256": "2c07d58f75dac03782664081e7a58b41c25400d871a9fcf166a2ea6fe60d5def",
+      "java": "OpenJDK 21.0.12.1",
+      "runner_sha256": "42005a35ef29fbb97e66669cd84258f7c004cc371bf1684155f51865c3a2579b"
+    },
+    "native_profiles_in_complete_run": [
+      "CadQuery",
+      "PyBullet",
+      "KiCad pcbnew",
+      "WireViz 0.4.1 / Graphviz"
+    ],
+    "profile_runner": ".cache/hardware-splicer/extended-verification-20261116/run_native_profile.py",
+    "profile_runner_sha256": "1e5f41fe5028f814555d5c41c1b1b357c1fc49311cee361dd04851519935de94",
+    "provider_environment": {
+      "HARDWARE_SPLICER_OFFLINE_LLM": "1",
+      "HARDWARE_SPLICER_OFFLINE_SALVAGE": "1",
+      "HARDWARE_SPLICER_OFFLINE_VISION": "1",
+      "HARDWARE_SPLICER_SKIP_VISION_LIVE": "1",
+      "QWEN_DISABLED": "1"
+    },
+    "remote_cluster_status": "Three remote workers SSH-unreachable; explicitly reported, bounded local execution used.",
+    "remote_cluster_used": false,
+    "root_pytest_args": [
+      "-q",
+      "--tb=short",
+      "--basetemp=.cache/hardware-splicer/wiring-20261117/full-tmp",
+      "--junitxml=.cache/hardware-splicer/wiring-20261117/full.xml"
+    ],
+    "root_python": "/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.cache/hardware-splicer/digital-native-venv/bin/python",
+    "test_workers": 1,
+    "wayland_display": ""
+  },
+  "external_tool": {
+    "existing_inventree_bridge_review": "https://github.com/inventree/inventree-wireviz/blob/67ee4c3bb5dd4b76d22e1180787dff8c568babe7/README.md",
+    "install": "Separate ignored local environment; no core runtime dependency or vendoring.",
+    "installed_dependencies": {
+      "PyYAML": "6.0.3",
+      "click": "8.5.1",
+      "graphviz": "0.21",
+      "pillow": "13.0.0",
+      "wireviz": "0.4.1"
+    },
+    "invocation": "wireviz -f st <HS-generated-file>",
+    "license": "GPL-3.0",
+    "name": "WireViz",
+    "release_url": "https://pypi.org/project/wireviz/0.4.1/",
+    "remote_inventory_upload_or_bom_mutation": false,
+    "source_review_commit": "5f961acd4c1ddfa509b0eb02ef4bfed7a510b7c7",
+    "source_url": "https://github.com/wireviz/WireViz",
+    "version": "0.4.1"
+  },
+  "final_feature_suite": {
+    "errors": 0,
+    "failures": 0,
+    "passed": 43,
+    "path": ".cache/hardware-splicer/wiring-20261117/new-feature.xml",
+    "seconds": 8.802,
+    "sha256": "9f34f03fea62412617ad5eb9b685675c07bc239bdc34d639d8c4b713da1a2ab5",
+    "skip_reasons": {},
+    "skipped": 0,
+    "tests": 43
+  },
+  "frontend_changed": false,
+  "github_mutations_performed": false,
+  "http_acceptance": {
+    "actual_loopback_http": true,
+    "assessment_id": "wiring-c9048abf6a9ecff3bf066d17469ed789",
+    "binary_zip_contents_match": true,
+    "bundle_sha256": "89d64c77b8d7775e9eaaef0f71261b960d7ed846b86b7298dbc941310ee89243",
+    "native_version": "WireViz 0.4.1",
+    "port": 60691,
+    "project_id": "digital-6878c5d15c7d4e5d9ce0bed22d0b3a4e",
+    "project_snapshot_unchanged": true,
+    "readback_matches": true,
+    "server_stopped_after_proof": true,
+    "source_revision": 1,
+    "status": "unresolved",
+    "summary": {
+      "blocked_count": 0,
+      "endpoint_count": 2,
+      "net_count": 4,
+      "unresolved_count": 24,
+      "wire_count": 4
+    }
+  },
+  "manual_review": {
+    "complete_harness_or_device_verified": false,
+    "date": "2026-11-17",
+    "method": "Human/agent visual inspection of rendered manufacturer PDF pages and retained INAV target sources. These notes do not automatically register or authenticate contracts in the existing digital project.",
+    "physical_authority_granted": false,
+    "schema_version": "hardware_splicer.wiring_example_source_notes.v1",
+    "sources": [
+      {
+        "facts_used": [
+          "The component-side diagram has USB-C on the right. UART1 pads are labelled T1 and R1 at the lower edge near the DJI connections.",
+          "A separate 5V pad is directly above T1, and a G pad is directly above R1. The nearby lower-row 9V pad is not selected for this receiver.",
+          "The product page and manual layout label the 5V regulator as 2A; this is a shared rail nameplate, not a measured per-pad current guarantee."
+        ],
+        "manual_page_1_based": 7,
+        "manual_sha256": "d35df7611ca9f4ca0e8016b7853ec30616db05966fd6234c17cdbb2d36edc1ab",
+        "manual_url": "https://store-fhxxhuiq8q.mybigcommerce.com/product_images/img_SpeedyBee_F405_Mini_BLS_35A/SpeedyBee-f405-mini-stack-Manual-en.pdf",
+        "manufacturer": "SpeedyBee",
+        "qualification": "The illustrated ELRS default uses UART2; the retained HS configuration assigns UART1 to the receiver and UART2 to GPS. No firmware allocation was changed. Physical board matching, voltage tolerances and total shared-rail demand are unresolved.",
+        "url": "https://www.speedybee.com/speedybee-f405-mini-bls-35a-20x20-stack/"
+      },
+      {
+        "facts_used": [
+          "The TOP drawing has U.FL upper left and LED upper right; its lower pads run RX, TX, 5V, G from left to right.",
+          "The manual specifies nominal 5V input and CRSF."
+        ],
+        "manual_page_1_based": 1,
+        "manual_sha256": "37329d09053d99d0638b5a9b4f5520df0a9d50133cb963c8aef61768b0dea328",
+        "manual_url": "https://cdn.shopify.com/s/files/1/0609/8324/7079/files/RP1_User_Manual.pdf?v=1722923320",
+        "manufacturer": "RadioMaster",
+        "qualification": "The drawing labels its PCB RP1 V1.2, while the selected product is sold as RP1 V2. Physical revision matching, receiver maximum current, logic levels and input-voltage tolerance are unconfirmed. Nominal 5V was not converted into a guaranteed operating range.",
+        "url": "https://radiomasterrc.com/products/rp1-expresslrs-2-4ghz-nano-receiver"
+      },
+      {
+        "path": "examples/drone_proving_ground/revision_b/reference/WIRING.csv",
+        "purpose": "Existing RX UART1 / GPS UART2 allocation and TX-to-RX crossing."
+      },
+      {
+        "path": "examples/drone_proving_ground/revision_b/reference/firmware/src/main/target/SPEEDYBEEF405MINI/target.h",
+        "purpose": "Retained upstream INAV hardware target; no new firmware image, build or flashing."
+      }
+    ],
+    "wire_length_basis": "Provisional design allowance, not CAD-routed or measured.",
+    "wire_length_m_each": "0.10"
+  },
+  "native_profile_followup": {
+    "errors": 0,
+    "failures": 0,
+    "passed": 4,
+    "path": ".cache/hardware-splicer/wiring-20261117/native-followup.xml",
+    "seconds": 24.102,
+    "sha256": "e9a2caf84995f0ad5b5462dc15799e1170f1959fead4e17bcfc668948a87f5c0",
+    "skip_reasons": {},
+    "skipped": 0,
+    "tests": 4
+  },
+  "native_render_visual_review": {
+    "inspected": true,
+    "path": ".cache/hardware-splicer/wiring-20261117/visual/harness.png",
+    "png_and_svg_generated_together": true,
+    "status_visible": "DIGITAL REVIEW: unresolved",
+    "svg_matched_published_export": true
+  },
+  "new_cases_in_complete_suite": [
+    "tests.test_project_wiring::test_source_bound_power_harness_preserves_revision_and_exports_exact_pins",
+    "tests.test_project_wiring::test_incompatible_materials_and_power_cannot_pass[overvoltage-supply_voltage_outside_load_range]",
+    "tests.test_project_wiring::test_incompatible_materials_and_power_cannot_pass[undervoltage-supply_voltage_outside_load_range]",
+    "tests.test_project_wiring::test_incompatible_materials_and_power_cannot_pass[overcurrent-supply_current_exceeded]",
+    "tests.test_project_wiring::test_incompatible_materials_and_power_cannot_pass[thin_wire-wire_current_exceeded]",
+    "tests.test_project_wiring::test_incompatible_materials_and_power_cannot_pass[weak_insulation-wire_insulation_voltage_exceeded]",
+    "tests.test_project_wiring::test_incompatible_materials_and_power_cannot_pass[swapped_power_ground-incompatible_pin_roles]",
+    "tests.test_project_wiring::test_incompatible_materials_and_power_cannot_pass[unidentified_part-contract_material_identity_mismatch]",
+    "tests.test_project_wiring::test_shared_supply_and_return_currents_are_aggregated_across_branches",
+    "tests.test_project_wiring::test_joined_power_outputs_are_rejected",
+    "tests.test_project_wiring::test_signals_and_power_cannot_use_different_ground_reference_nets",
+    "tests.test_project_wiring::test_missing_donor_pinout_ground_or_ratings_remain_unresolved",
+    "tests.test_project_wiring::test_digital_high_and_low_limits_are_checked_separately_and_not_complete_protocol_proof",
+    "tests.test_project_wiring::test_signal_drivers_and_signal_id_mismatches_are_detected",
+    "tests.test_project_wiring::test_cannot_exceed_assessed_material_quantities_or_invent_unit_conversions",
+    "tests.test_project_wiring::test_invalid_numeric_contracts_are_rejected[True]",
+    "tests.test_project_wiring::test_invalid_numeric_contracts_are_rejected[NaN]",
+    "tests.test_project_wiring::test_invalid_numeric_contracts_are_rejected[Infinity]",
+    "tests.test_project_wiring::test_invalid_numeric_contracts_are_rejected[-1]",
+    "tests.test_project_wiring::test_invalid_numeric_contracts_are_rejected[0.0000001]",
+    "tests.test_project_wiring::test_ambiguous_or_impossible_topology_is_rejected",
+    "tests.test_project_wiring::test_registered_source_binding_cannot_claim_different_bytes_or_contract[hash]",
+    "tests.test_project_wiring::test_registered_source_binding_cannot_claim_different_bytes_or_contract[source_id]",
+    "tests.test_project_wiring::test_registered_source_binding_cannot_claim_different_bytes_or_contract[pointer]",
+    "tests.test_project_wiring::test_registered_source_binding_cannot_claim_different_bytes_or_contract[contract]",
+    "tests.test_project_wiring::test_blob_modification_and_derived_report_or_cut_list_tampering_are_rejected",
+    "tests.test_project_wiring::test_history_is_readable_after_revision_change_and_cannot_cross_projects",
+    "tests.test_project_wiring::test_materials_from_previous_revision_are_rejected",
+    "tests.test_project_wiring::test_render_is_explicit_and_missing_native_tools_leave_no_assessment",
+    "tests.test_project_wiring::test_native_svg_active_or_external_content_is_rejected[<script>alert(1)</script>]",
+    "tests.test_project_wiring::test_native_svg_active_or_external_content_is_rejected[<image href=\"https://example.com/remote.png\"/>]",
+    "tests.test_project_wiring::test_native_svg_active_or_external_content_is_rejected[<g onload=\"alert(1)\"/>]",
+    "tests.test_project_wiring::test_native_svg_active_or_external_content_is_rejected[<a href=\"javascript:alert(1)\"><text>click</text></a>]",
+    "tests.test_project_wiring::test_native_svg_active_or_external_content_is_rejected[<path style=\"fill:url(https://example.com/a)\"/>]",
+    "tests.test_project_wiring::test_user_text_cannot_inject_wireviz_images_links_or_spreadsheet_formulas",
+    "tests.test_project_wiring::test_canonical_http_assessment_history_and_downloads",
+    "tests.test_project_wiring::test_sdk_and_cli_work_without_a_server_and_export_an_immutable_package",
+    "tests.test_project_wiring::test_mcp_discovers_and_dispatches_the_same_wiring_assessment_and_binary_export",
+    "tests.test_project_wiring::test_existing_digital_study_is_unchanged_by_unbound_wiring_assessment",
+    "tests.test_project_wiring::test_optional_real_wireviz_render_and_native_bom",
+    "tests.test_project_wiring::test_optional_native_render_preserves_nonstandard_physical_pin_ids[01]",
+    "tests.test_project_wiring::test_optional_native_render_preserves_nonstandard_physical_pin_ids[1-2]",
+    "tests.test_project_wiring::test_optional_native_render_preserves_nonstandard_physical_pin_ids[A1]"
+  ],
+  "physical_work_performed": false,
+  "preserved_local_work_changed_or_committed": false,
+  "preserved_local_work_sha256": {
+    "src/hardware_splicer/kicad_registered_source_check.py": "9591b4ff9baec9426beb8b8e2de15293839fc080a51590120edde782a7191fb3",
+    "src/hardware_splicer/stored_source_parser.py": "afabeaa10c97ced6acad8721cc2eee4a91179c13340cea074b09f201bdc97539",
+    "tests/test_kicad_registered_source_check.py": "c3f8fccf1b42a2ce9adc8cbdb00fedf96b8fc1333c86d0386478405ae0fe5b60"
+  },
+  "reference_followup": "Manufacturer manual pad-label/view clarifications updated only the example and review artifacts; the installed CLI and real HTTP acceptance were rerun on those inputs.",
+  "reference_sha256": {
+    "docs/status/generated/hs3g-b-receiver-wiring-2026-11-17.csv": "8ae3166b9346cd654385e4d2fcc32fffde0f2b6533143122dd92760052ff5ea7",
+    "docs/status/generated/hs3g-b-receiver-wiring-2026-11-17.svg": "799cec56ee3da0c69bf2fa4facc6dd8a4456bbcc9bf67763ba4d0f2a4543af67",
+    "examples/wiring/hs3g_b_receiver.json": "d6508e9647c84a9320bffa481456aa5d8a933af32605a109244f89c8bf859a0a",
+    "examples/wiring/hs3g_b_receiver_sources.json": "f693b854711b9e98f6d414bf2769d3790c6421ce42299ad796684d7b6e7dec64"
+  },
+  "remaining_limits": [
+    "Receiver draft has 24 explicit unresolved issues.",
+    "Manual facts are unbound declarations in the unchanged digital source snapshot.",
+    "Supply tolerances, receiver current, signal loading/timing, exact wire, physical board matching, routing/length and terminations unresolved.",
+    "Shared regulator budgets across output pins, transients, voltage drop and complete-device compatibility are not assessed.",
+    "New registered wiring evidence needs a digital-project attachment workflow compatible with its frozen source snapshot; the current example stays unbound.",
+    "Current sourcing and discontinued-controller replacement remain open."
+  ],
+  "runtime_code_unchanged_during_full_suite": true,
+  "runtime_implementation_commit": "b7b8df7a99771aeceba3361c9698b54187ba3487",
+  "runtime_sha256": {
+    "pyproject.toml": "293723e27890e14d3773aec3b642dee02ce3775918a5cb38351e4e007608f26b",
+    "src/hardware_splicer/integrations/oss_catalog.py": "349ebeabf12f3cf58531a968774938cf930c944e76b8633c87c9d7d8063dbece",
+    "src/hardware_splicer/integrations/wireviz.py": "c037137a11e176ea291f5e9ad1bd9a769d81213c8146a918ad515a29fdd3c728",
+    "src/hardware_splicer/product_api.py": "450d439bb1680712be093db46ee71a22421ac11445ef0290c9459258dac92149",
+    "src/hardware_splicer/project_wiring.py": "0925050d787519adbb71642c058783900ba4bfac6caa8b05286f55ee69d6ccdc",
+    "src/hardware_splicer/project_wiring_api.py": "3681f99abdec44aec82d7c3c80aaa8260d09d9f25da2c36faf6c65be35b5daee",
+    "src/hardware_splicer/sdk.py": "26140310e59d07678f118d434ff4874d579870fe32dec0d51b2b29b3a458bc36",
+    "src/hardware_splicer/wiring_cli.py": "4c10ca033548b5fdd53755c08941865eafd13e219ff323a79f14d0428721bcec",
+    "src/hardware_splicer/wiring_harness.py": "1fd46da0863098637f16808771da6a5970d21aa7ac304ac72ce98e08e1c8993b",
+    "tests/test_project_wiring.py": "ad25b9eee6b729a476c496da04d9eee4f321c3161c23c6976c4b5131c63dfdec"
+  },
+  "schema_version": "hardware_splicer.wiring_backend_verification.v1",
+  "student_services_integrated": false
+}

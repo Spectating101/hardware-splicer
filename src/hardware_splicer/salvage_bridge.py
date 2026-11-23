@@ -20,6 +20,7 @@ from .module_resolution_truth import (
     resolve_inventory_identity,
 )
 from .integrations.build_id_hints import keyword_build_id, reconcile_build_pick_with_provenance
+from .design_quality import assess_goal_coverage
 from .salvage_intelligence import analyze_salvage_gaps, build_bringup_card
 from .salvage_bom_estimate import build_salvage_bom_estimate
 from .firmware_scaffold import generate_firmware_from_salvage
@@ -485,6 +486,7 @@ def build_intake_salvage_package(
         "graph_input": graph_input,
         "recommended_build_id": build_id or None,
         "build_selection": build_selection,
+        "goal_coverage": assess_goal_coverage(build_selection, build_id=build_id, graph_mode=graph_mode),
         "legacy_planner_architecture_authority": (
             "compatibility_only" if offline else "not_executed"
         ),

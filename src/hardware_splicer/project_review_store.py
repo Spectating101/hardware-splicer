@@ -18,7 +18,7 @@ from typing import Any, Dict, Mapping
 
 from .machine_project import MachineProject
 from .machine_project_diff import diff_machine_projects
-from .project_store import ProjectNotFound, ProjectStore, RevisionConflict, validate_project_id
+from .project_store import CorruptProject, ProjectNotFound, ProjectStore, RevisionConflict, validate_project_id
 
 PROJECT_REVIEW_SCHEMA = "hardware_splicer.project_review.v1"
 PROJECT_REVIEW_EVENT_SCHEMA = "hardware_splicer.project_review_event.v1"
@@ -400,6 +400,7 @@ class ProjectReviewStore:
         try:
             existing = self.project_store.load(project_id, revision=expected_revision)
         except ProjectNotFound:
+            self._validate_candidate_artifacts(project_id, review_id)
             latest = self.project_store.load_latest_with_recovery(project_id)
             if int(latest["revision"]) != base_revision:
                 raise RevisionConflict(
@@ -426,6 +427,22 @@ class ProjectReviewStore:
             )
         self._complete_acceptance(project_id, review_id, review, intent)
         return self.get(project_id, review_id)
+
+    def _validate_candidate_artifacts(self, project_id: str, review_id: str) -> None:
+        # Candidate reviews may also be accepted through the general review API.
+        # Keep the same source-byte guard on both paths, including retries.
+        from .project_candidates import CandidateError, validate_candidate_review_artifacts
+
+        try:
+            validate_candidate_review_artifacts(self.project_store, project_id, review_id)
+        except CandidateError as exc:
+            raise ReviewConflict(str(exc)) from exc
+        from .project_part_substitutions import validate_substitution_review
+        try:
+            proposal = _read_json(self._review_dir(project_id, review_id) / 'proposal.json')
+            validate_substitution_review(self.project_store, project_id, proposal)
+        except (ValueError, ProjectNotFound, CorruptProject) as exc:
+            raise ReviewConflict(str(exc)) from exc
 
     def decide(
         self,
@@ -473,6 +490,7 @@ class ProjectReviewStore:
             )
             return self.get(project_id, review_id)
 
+        self._validate_candidate_artifacts(project_id, review_id)
         latest = self.project_store.load_latest_with_recovery(project_id)
         base_revision = int(review["base_revision"])
         if int(latest["revision"]) != base_revision:

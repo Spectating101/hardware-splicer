@@ -1,4 +1,9 @@
-"""Canonical product API composition.
+"""Canonical product API composition: the one app ``hs-serve`` runs.
+
+``create_product_app`` builds on the engine app from :mod:`hardware_splicer.api`
+(health, jobs, examples, vision, splice and the project scene routes), adds every
+product router, and serves the built UI behind them, so the UI's legacy and product
+calls all land on one server.
 
 The core engine factory remains in :mod:`hardware_splicer.api`; this module mounts
 product-level routers that own durable workspace state, canonical machine and
@@ -9,6 +14,8 @@ evidence, semantic bounded-planner selection, and source-blind dual-agent evalua
 """
 
 from __future__ import annotations
+
+from pathlib import Path
 
 from fastapi import FastAPI
 
@@ -25,6 +32,7 @@ from .document_evidence_api import create_document_evidence_router
 from .electrical_design_api import create_electrical_design_router
 from .electrical_interchange_api import create_electrical_interchange_router
 from .engineering_action_api import create_engineering_action_router
+from .change_history_api import create_change_history_router
 from .engineering_assurance_api import create_engineering_assurance_router
 from .engineering_api import create_engineering_router
 from .engineering_execution_anchored_api import (
@@ -32,11 +40,13 @@ from .engineering_execution_anchored_api import (
     create_engineering_execution_router,
 )
 from .engineering_package_api import create_engineering_package_router
+from .engineering_project_source_bundle_api import create_project_source_bundle_router
 from .engineering_package_download_api import create_engineering_package_download_router
 from .engineering_revision_api import create_engineering_revision_router
 from .engineering_review_api import create_engineering_review_router
 from .engineering_review_identity_api import create_engineering_review_identity_router
 from .engineering_source_ingestion_api import create_engineering_source_ingestion_router
+from .source_project_editing_api import create_source_project_editing_router
 from .engineering_source_multipart_api import create_engineering_source_multipart_router
 from .engineering_source_role_api import create_engineering_source_role_router
 from .engineering_status_api import create_engineering_status_router
@@ -58,6 +68,8 @@ from .parts_lookup_api import create_parts_lookup_router
 from .project_assembly_api import create_project_assembly_router
 from .project_model3d_api import create_project_model3d_router
 from .project_parts_api import create_project_parts_router
+from .project_materials_api import create_project_materials_router
+from .project_wiring_api import create_project_wiring_router
 from .project_findings_api import create_project_findings_router
 from .project_compatibility import CompatibleProjectStore
 from .project_engineering_plan_api import create_project_engineering_plan_router
@@ -107,12 +119,17 @@ def _include_anchored_execution_surface(app: FastAPI, store: ProjectStore) -> No
     )
 
 
-def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
+def create_product_app(
+    project_store: ProjectStore | None = None, *, ui_dist: str | Path | None = None
+) -> FastAPI:
     """Build the canonical user-facing API with all product route families."""
 
     resolved_store = install_at_save_retention(project_store or CompatibleProjectStore())
-    app = create_engine_app()
+    app = create_engine_app(ui_dist=ui_dist)
     app.state.project_store = resolved_store
+    app.state.job_backend.project_store = resolved_store
+    from .digital_project_api import create_digital_project_router
+    app.include_router(create_digital_project_router(resolved_store, app.state.job_backend))
     app.include_router(create_project_router(resolved_store))
     app.include_router(create_project_artifact_router(resolved_store))
     app.include_router(create_project_model3d_router(resolved_store))
@@ -121,6 +138,10 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_donor_router())
     app.include_router(create_parts_lookup_router())
     app.include_router(create_project_parts_router(resolved_store))
+    from .project_part_substitutions_api import create_project_part_substitutions_router
+    app.include_router(create_project_part_substitutions_router(resolved_store))
+    app.include_router(create_project_materials_router(resolved_store))
+    app.include_router(create_project_wiring_router(resolved_store))
     app.include_router(create_project_candidates_router(resolved_store))
     app.include_router(create_project_review_packet_router(resolved_store))
     app.include_router(create_project_thread_router(ProjectThreadStore(resolved_store)))
@@ -136,16 +157,19 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_semantic_circuit_router())
     app.include_router(create_engineering_router(resolved_store))
     app.include_router(create_engineering_source_ingestion_router(resolved_store))
+    app.include_router(create_source_project_editing_router(resolved_store))
     app.include_router(create_engineering_source_multipart_router(resolved_store))
     app.include_router(create_source_upload_session_router(resolved_store))
     app.include_router(create_source_storage_operations_router(resolved_store))
     app.include_router(create_stored_source_parser_router(resolved_store))
+    app.include_router(create_project_source_bundle_router(resolved_store))
     app.include_router(create_document_evidence_router(resolved_store))
     app.include_router(create_engineering_source_role_router(resolved_store))
     app.include_router(create_project_engineering_plan_router(resolved_store))
     app.include_router(create_project_pre_fabrication_plan_router(resolved_store))
     app.include_router(create_project_physical_validation_router(resolved_store))
     app.include_router(create_engineering_assurance_router(resolved_store))
+    app.include_router(create_change_history_router(resolved_store))
     app.include_router(create_ai_project_orchestrator_router(resolved_store))
     app.include_router(create_dual_agent_cleanroom_router(resolved_store))
     app.include_router(create_ai_project_tool_executor_router(resolved_store))
@@ -166,6 +190,11 @@ def create_product_app(project_store: ProjectStore | None = None) -> FastAPI:
     app.include_router(create_source_conflict_router())
     app.include_router(create_engineering_review_router())
     app.include_router(create_engineering_review_identity_router())
+    # The engine mounts the optional SPA before these product routes. Keep its
+    # catch-all last so real GET endpoints (including digital assets) can match.
+    spa_fallbacks = [route for route in app.router.routes if getattr(route, 'name', '') == 'splice_ui_spa']
+    if spa_fallbacks:
+        app.router.routes = [route for route in app.router.routes if route not in spa_fallbacks] + spa_fallbacks
     return app
 
 

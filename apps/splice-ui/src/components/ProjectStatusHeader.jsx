@@ -1,5 +1,5 @@
-import { deriveEvidenceTruth, evidenceTone } from "../projectSession/deriveEvidenceTruth.js";
-import { deriveProjectTruth } from "../projectSession/deriveProjectTruth.js";
+import { deriveEvidenceTruth, evidenceTone } from "../projectSession/deriveEvidenceTruth";
+import { deriveProjectTruth } from "../projectSession/deriveProjectTruth";
 import { derivePackageHandoff } from "../projectSession/packageHandoff.js";
 import { STAGE_LABELS } from "../projectSession/projectSession.js";
 
@@ -34,7 +34,11 @@ export default function ProjectStatusHeader({ session, onShare }) {
             Evidence: {evidence.label}
           </span>
         )}
-        <span className={`status-chip status-chip--${chipTone(truth.design.state)}`} data-testid="chip-drc">
+        <span
+          className={`status-chip status-chip--${chipTone(truth.design.state)}`}
+          data-testid="chip-drc"
+          title={truth.design.detail || undefined}
+        >
           {truth.design.label}
         </span>
         {truth.copper.state !== "not_available" && (
@@ -73,7 +77,7 @@ export default function ProjectStatusHeader({ session, onShare }) {
 
 function chipTone(designState) {
   if (designState === "drc_clean") return "ok";
-  if (designState === "drc_errors") return "fail";
+  if (designState === "drc_errors" || designState === "request_mismatch") return "fail";
   return "neutral";
 }
 

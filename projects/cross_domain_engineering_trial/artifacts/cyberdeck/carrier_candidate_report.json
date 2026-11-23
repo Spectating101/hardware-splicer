@@ -1,0 +1,44 @@
+{
+  "status": "generated_valid_solid_candidate",
+  "source_board_step_sha256": "sha256:6fd36ad56fcc0a5bd68abc48e687fd3de80da84a6b83ad7d9f7d6246f88a61a6",
+  "cad_kernel": "CadQuery/OpenCascade",
+  "board_bbox_mm": {
+    "x": 90.9,
+    "y": 61.3,
+    "thickness": 1.51
+  },
+  "carrier_outer_mm": {
+    "x": 97.9,
+    "y": 68.3,
+    "z": 7.5
+  },
+  "pcb_to_envelope_xy_clearance_mm": 1.25,
+  "wall_mm": 2.25,
+  "floor_mm": 2.5,
+  "rim_height_mm": 5.0,
+  "carrier_volume_mm3": 20354.675,
+  "validated_single_solid": true,
+  "source_board_components_omitted": true,
+  "mounting_holes_provided": false,
+  "retention_compatibility_verified": false,
+  "enclosure_clearance_verified": false,
+  "functional_part_fit_verified": false,
+  "printer_material_selected": false,
+  "build_authorized": false,
+  "generated_artifacts": [
+    {
+      "name": "pcb_envelope_carrier_candidate.step",
+      "sha256": "sha256:4eb72c577ab043e8b2e12c8bd640f9be9cc3b8336cff3648c12044b51c8d4f05",
+      "size_bytes": 29418
+    },
+    {
+      "name": "pcb_envelope_carrier_candidate.stl",
+      "sha256": "sha256:80362e1046c6376df43c874069f51011d7f8b4ab62344204f7376a5bc1d79c6b",
+      "size_bytes": 1484
+    }
+  ],
+  "registered_board_sha256": "sha256:ddf94ad6fdaee46a52022b20da8678cebd34cec4f4db817d090cd0e45119f042",
+  "registered_project_sha256": "sha256:de1e2a03e7b4f305b54a163f49fc25fd8d7c72199c5d2a6e97e6ccc696adbcf3",
+  "manufacturer_footprints_physically_checked": false,
+  "model_created_by": "HS bounded CadQuery board-envelope operation"
+}

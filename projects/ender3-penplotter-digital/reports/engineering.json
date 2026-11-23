@@ -1,0 +1,165 @@
+{
+  "case_id": "ender3-penplotter",
+  "requirements": {
+    "drawing_width_mm": 100.0,
+    "drawing_height_mm": 80.0,
+    "pen_diameter_mm": 10.0,
+    "pen_lift_mm": 3.0
+  },
+  "metrics": {
+    "mount_pitch_mm": 14.0,
+    "mount_boss_front_mm": 7.0,
+    "mount_bolt_engagement_mm": 4.0,
+    "mount_interference_mm3": 0.0,
+    "adapter_volume_mm3": 26756.596159163615,
+    "cap_volume_mm3": 8787.816474612377,
+    "printed_mass_g_at_1_27_g_cm3": 82.39919346411585,
+    "plate_to_adapter_airgap_mm": 4.5,
+    "pen_tip_to_clamp_mm": 30.0,
+    "beam_proxy_deflection_mm_at_2N": 0.05095031836970898,
+    "clamp_open_gap_mm": 0.4,
+    "clamp_screw_tip_to_plate_mm": 2.4,
+    "pen_lift_mm": 3.0,
+    "pen_diameter_mm": 10.0,
+    "drawing_width_mm": 100.0,
+    "drawing_height_mm": 80.0,
+    "parking_plate_volume_mm3": 29336.842062378215,
+    "parking_tnut_profile_interference_mm3": 0.0,
+    "parking_radiator_hole_pitch_mm": 14.0,
+    "draw_length_mm": 771.8085921943645,
+    "travel_length_mm": 560.2469361579608,
+    "ideal_feed_time_s": 124.39320602733439,
+    "segment_count": 305,
+    "stroke_count": 12,
+    "pen_center_bed_margin_mm": 71.5,
+    "fixture_bed_clearance_mm": 29.0,
+    "controller_travel_margin_mm": 70.30000000000001,
+    "non_drawing_XY_without_lift": 0,
+    "minimum_commanded_Z_mm": 0.0,
+    "maximum_commanded_Z_mm": 3.0
+  },
+  "constraints": [
+    {
+      "id": "manufacturer_mount_pitch",
+      "passed": true,
+      "actual": 14.0,
+      "limit": 14.0,
+      "unit": "mm",
+      "basis": "PDF + STEP measured cylinder axes"
+    },
+    {
+      "id": "donor_interference",
+      "passed": true,
+      "actual": 0.0,
+      "limit": 0.001,
+      "unit": "mm3",
+      "basis": "Exact OpenCascade intersection with unmodified manufacturer E plate"
+    },
+    {
+      "id": "bolt_engagement",
+      "passed": true,
+      "actual": 4.0,
+      "limit": 3.0,
+      "unit": "mm",
+      "basis": "New M3x10: 10 mm minus 6 mm printed web"
+    },
+    {
+      "id": "beam_proxy",
+      "passed": true,
+      "actual": 0.05095031836970898,
+      "limit": 0.3,
+      "unit": "mm",
+      "basis": "2N, E=1400MPa assumed printed polymer, 40x6 web, L42.55; excludes layer/creep/clamp failure"
+    },
+    {
+      "id": "bed_limited_drawing_width",
+      "passed": true,
+      "actual": 100.0,
+      "limit": 140.0,
+      "unit": "mm",
+      "basis": "Centered drawing inside 180 mm paper; physical calibration not performed"
+    },
+    {
+      "id": "bed_limited_drawing_height",
+      "passed": true,
+      "actual": 80.0,
+      "limit": 140.0,
+      "unit": "mm",
+      "basis": "Centered drawing inside 180 mm paper"
+    },
+    {
+      "id": "parking_tnut_profile_fit",
+      "passed": true,
+      "actual": 0.0,
+      "limit": 0.001,
+      "unit": "mm3",
+      "basis": "Actual manufacturer M4 T nut rotated90deg, translated w=-3.5 inside actual2020 profile; no thread/torque validation"
+    },
+    {
+      "id": "parking_hotend_clearance",
+      "passed": true,
+      "actual": 270.2,
+      "limit": 200.0,
+      "unit": "mm",
+      "basis": "Parked nozzle273.2mm above paper minus maximum pen lift; representative layout only"
+    },
+    {
+      "id": "motion_pen_tip_on_bed",
+      "passed": true,
+      "actual": 71.5,
+      "limit": 0.0,
+      "unit": "mm",
+      "basis": "Affine segment endpoints bound all linear XY positions"
+    },
+    {
+      "id": "motion_fixture_vertical_clearance",
+      "passed": true,
+      "actual": 29.0,
+      "limit": 2.0,
+      "unit": "mm",
+      "basis": "Measured fixture lower face30mm above tip minus assumed1mm tape; excludes frame/wires"
+    },
+    {
+      "id": "motion_controller_travel",
+      "passed": true,
+      "actual": 70.30000000000001,
+      "limit": 0.0,
+      "unit": "mm",
+      "basis": "Manufacturer Configuration.h 0..235mm XY, compensated tip offset"
+    },
+    {
+      "id": "motion_pen_up_travel",
+      "passed": true,
+      "actual": 0.0,
+      "limit": 0.0,
+      "unit": "segments",
+      "basis": "Every XY travel move must stay at requested lift"
+    },
+    {
+      "id": "motion_pen_lift_clearance",
+      "passed": true,
+      "actual": 2.0,
+      "limit": 1.0,
+      "unit": "mm",
+      "basis": "Assumed tape height <=1mm; uncertainty is not physical validation"
+    },
+    {
+      "id": "motion_Z_travel",
+      "passed": true,
+      "actual": 3.0,
+      "limit": 3.0,
+      "unit": "mm",
+      "basis": "Every commanded segment endpoint lies within paper Z0 and requested lift"
+    }
+  ],
+  "requirements_met": true,
+  "physical_validation_performed": false,
+  "donor_inventory_kind": "virtual_reference_manufacturer_donor",
+  "owned_inventory_count": 0,
+  "layout_geometry": "Unmodified detailed manufacturer E plate plus new adapter; all other donor components are explicitly named reference envelopes",
+  "limitations": [
+    "No physical fit, clamp holding, print strength, plot accuracy, homing or electrical validation.",
+    "Envelopes are representative layout, not a complete manufacturer collision model.",
+    "Sample G-code is digital simulation input, not an authorized hardware job."
+  ]
+}

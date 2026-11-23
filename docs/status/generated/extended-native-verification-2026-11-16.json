@@ -1,0 +1,467 @@
+{
+  "schema": "hardware_splicer.extended_native_verification.v1",
+  "branch": "integration/github-features-20261116",
+  "complete_native_run_source_head": "35d469fafaa6b5aff906ed6de34948fddbfc56ac",
+  "verified_followup_source_head": "71ee7de80a94500068a507526ba1b4027ff1f390",
+  "full_native_run": {
+    "tests": 4240,
+    "failed": 3,
+    "errors": 0,
+    "skipped": 3,
+    "seconds": 1124.025,
+    "junit_path": ".cache/hardware-splicer/extended-verification-20261116/full-native-results.xml",
+    "junit_sha256": "e0bcc3de93adf84120891700be444a6a548028f880abf16452c64bf58d6ce85d",
+    "failed_tests": [
+      {
+        "test": "tests.test_build_compiler::test_plant_watering_intake_emits_build_artifacts",
+        "details": "tests/test_build_compiler.py:168: in test_plant_watering_intake_emits_build_artifacts\n    assert result.get(\"ok\") is True\nE   AssertionError: assert False is True\nE    +  where False = <built-in method get of dict object at 0x7f83889eb8c0>('ok')\nE    +    where <built-in method get of dict object at 0x7f83889eb8c0> = {'artifacts': {'authority_upgrade_plan': '/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/...tent': 'prototype', 'interconnect_count': 0, ...}, ...}, 'generated_at': '2026-11-16T09:26:35.839745+00:00', ...}, ...}.get"
+      },
+      {
+        "test": "tests.test_frontier_operator_script_entrypoints::test_frontier_script_help_uses_installed_hardware_splicer_package[adjudicate_astra_raw_document_run.py]",
+        "details": "tests/test_frontier_operator_script_entrypoints.py:35: in test_frontier_script_help_uses_installed_hardware_splicer_package\n    assert completed.returncode == 0, combined\nE   AssertionError: Traceback (most recent call last):\nE       File \"/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/scripts/adjudicate_astra_raw_document_run.py\", line 23, in <module>\nE         from hardware_splicer.codex_astra_raw_document_adjudication import (  # noqa: E402\nE         ...<3 lines>...\nE         )\nE       File \"/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/src/hardware_splicer/codex_astra_raw_document_adjudication.py\", line 12, in <module>\nE         from .document_evidence import (\nE         ...<5 lines>...\nE         )\nE       File \"/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/src/hardware_splicer/document_evidence.py\", line 17, in <module>\nE         import pypdf\nE     ModuleNotFoundError: No module named 'pypdf'\nE     \nE   assert 1 == 0\nE    +  where 1 = CompletedProcess(args=['/tmp/hs-function-cad-venv/bin/python', '/home/phyrexian/Downloads/llm_automation/project_portf...licer/document_evidence.py\", line 17, in <module>\\n    import pypdf\\nModuleNotFoundError: No module named \\'pypdf\\'\\n').returncode"
+      },
+      {
+        "test": "tests.test_project_intake::test_project_intake_runs_to_control_safety_package",
+        "details": "tests/test_project_intake.py:91: in test_project_intake_runs_to_control_safety_package\n    assert result[\"ok\"] is True\nE   assert False is True"
+      }
+    ],
+    "skip_reasons": {
+      "tests.test_donor_board_vision_live_optional::test_live_donor_board_vision_smoke": "set HARDWARE_SPLICER_RUN_VISION_LIVE=1 to run live donor vision",
+      "tests.test_vision_gemini::test_gemini_live_smoke_optional": "set HARDWARE_SPLICER_GEMINI_LIVE_TEST=1 to run live Gemini smoke test",
+      "tests.test_vision_live_optional::test_live_vision_returns_structured_report": "set HARDWARE_SPLICER_RUN_VISION_LIVE=1 to run live vision"
+    }
+  },
+  "followup_all_affected_files": {
+    "tests": 105,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 160.331,
+    "junit_path": ".cache/hardware-splicer/extended-verification-20261116/followup-results.xml",
+    "junit_sha256": "9ccb1ebce6e9648f5952872450898368aa1f2d821d235fb528355a517ad1326a",
+    "failed_tests": [],
+    "skip_reasons": {}
+  },
+  "verification_strategy": "Complete native-enabled root run, then all affected scenario/intake/compiler/scoring/goal/guidance/source-benchmark and CLI test files on the final source. A second complete clean root rerun was not performed after the scope refinement. Counts below describe unique cases across the complete run and focused rechecks, not one green full invocation.",
+  "unique_verified_case_outcomes": {
+    "passed": 4238,
+    "failed": 0,
+    "skipped": 3
+  },
+  "unique_case_count": 4241,
+  "all_failures_from_complete_run_passed_in_followup": true,
+  "prior_default_skip_count": 32,
+  "prior_skips_now_passed": [
+    "tests.test_ai_project_real_source_execution::test_real_registered_project_model_action_runs_erc",
+    "tests.test_device_fault_matrix_benchmark::test_adapter_lane_catches_a_seeded_adapter_bug_that_the_core_lane_cannot_see",
+    "tests.test_drone_proving_ground::test_drone_frame_step_and_stl_are_generated",
+    "tests.test_drone_proving_ground::test_drone_frame_step_reimports_as_one_solid_with_cad_volume",
+    "tests.test_drone_proving_ground::test_drone_frame_stl_is_watertight_and_matches_cad_volume[regenerated]",
+    "tests.test_drone_proving_ground::test_drone_readme_and_results_match_a_fresh_regeneration",
+    "tests.test_drone_proving_ground::test_drone_frame_junctions_are_filleted",
+    "tests.test_drone_proving_ground::test_drone_check_passes_on_committed_copy_and_writes_nothing",
+    "tests.test_drone_proving_ground::test_drone_check_fails_on_hand_edited_results",
+    "tests.test_engineering_project_source_bundle::test_actual_source_bundle_works_when_available",
+    "tests.test_engineering_reference_bom_audit::test_real_dinodeck_source_when_present",
+    "tests.test_integrations::test_freerouting_pipeline_routes_sensor_logger",
+    "tests.test_lookup_integration::test_live_ifixit_still_answers_in_the_shape_we_read",
+    "tests.test_multidomain_real_engineering::test_read_repair_steps_from_real_psp_manual_not_double_count",
+    "tests.test_multidomain_real_engineering::test_real_scad_donor_frame_arm_has_measurements_without_assembly_claim",
+    "tests.test_multidomain_real_engineering::test_actual_cyberdeck_board_cad_generation_creates_step_and_stl",
+    "tests.test_project_intake::test_project_intake_evidence_pack_closes_scoped_production_package",
+    "tests.test_project_intake::test_project_intake_extracts_notes_into_production_evidence",
+    "tests.test_robot_arm_kinematics::test_pybullet_blind_lane_runs_fk_ik_and_unreachable_probe",
+    "tests.test_robot_arm_kinematics::test_mutation_can_be_kinematically_valid_while_actuator_identity_stays_unresolved",
+    "tests.test_routing_engine::test_real_jar_routes_tiny_two_net_board",
+    "tests.test_scenario_runner::test_rover_scenario_generates_claimable_project_authority",
+    "tests.test_scenario_runner::test_closed_pan_tilt_scenario_closes_project_authority_with_3d_path",
+    "tests.test_scenario_runner::test_scenario_run_api_returns_project_authority",
+    "tests.test_scoring_regression::test_plant_release_briefs_hit_nine_of_nine_gates[examples/intakes/plant_watering_evidence_pack.json-9]",
+    "tests.test_scoring_regression::test_plant_release_briefs_hit_nine_of_nine_gates[examples/intakes/plant_watering_tier5_brief.json-9]",
+    "tests.test_spi_checkpoint.SpiCheckpointUnitTests::test_report_hash_input_cannot_be_partial",
+    "tests.test_workshop_operator::test_verifier_nonzero_even_if_generating_green_receipt_is_refused",
+    "tests.test_workshop_operator::test_real_spi_reference_verification_replays_with_original_identity"
+  ],
+  "prior_skips_still_unverified": [
+    "tests.test_donor_board_vision_live_optional::test_live_donor_board_vision_smoke",
+    "tests.test_vision_gemini::test_gemini_live_smoke_optional",
+    "tests.test_vision_live_optional::test_live_vision_returns_structured_report"
+  ],
+  "corrections": [
+    {
+      "commit": "35d469fa",
+      "finding": "Production-ready project packet contradicted failing KiCad ERC and a rejected circuit gate. Project production promotion and dashboard now honor the current receipts and stored gate; stale positive summaries cannot override failures. Both Java routing entry points force headless mode. Positive evidence-closure tests explicitly use the existing clean-ERC fixture rather than treating the real catalog schematic as valid."
+    },
+    {
+      "commit": "71ee7de8",
+      "finding": "Complete run caught two planning regressions from the first gate fix. Unfinished circuits retain scoped planning packages, expose electrical failures in checks and next actions, and cannot promote into production-ready packages. Rejected projects no longer advertise bench-ready/released capabilities."
+    },
+    {
+      "environment": "Added pypdf==6.18.1 to the reused CAD environment; CLI child processes cannot inherit site.addsitedir calls made only in the parent pytest process."
+    }
+  ],
+  "runtime": {
+    "python": "3.13.5",
+    "interpreter": "/tmp/hs-function-cad-venv/bin/python",
+    "pytest": "8.4.2",
+    "cadquery": "2.6.1",
+    "trimesh": "4.12.2",
+    "pybullet": "3.2.7",
+    "pypdf": "6.18.1 (installed after complete native run, before follow-up)",
+    "numpy": "2.5.4",
+    "kicad_cli": "9.0.2",
+    "native_bindings": "/usr/lib/python3/dist-packages/pcbnew.py",
+    "root_dependency_fallback": "/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.venv/lib/python3.13/site-packages",
+    "cpu_affinity": [
+      0,
+      3
+    ],
+    "blas_threads": 1,
+    "display": "empty DISPLAY and WAYLAND_DISPLAY",
+    "remote_workers": "unavailable: three SSH failures, only local machine healthy",
+    "runner_source": "import site, sys\nfrom pathlib import Path\nroot=Path(__file__).resolve().parents[3]\nsite.addsitedir(str(root/\".venv/lib/python3.13/site-packages\"))\nsys.path.insert(0, str(root))\nsys.path.insert(0, str(root/\"src\"))\nimport pytest\nraise SystemExit(pytest.main(sys.argv[1:]))\n",
+    "subtests_note": "Pytest 8 executes unittest.subTest blocks without the three extra JUnit case entries reported by the prior root Pytest 9 run."
+  },
+  "opt_in_profiles": {
+    "HS_LIVE_NET": "1 (iFixit read-only integration)",
+    "HS_VENDOR_LIBS": "/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.cache/hardware-splicer/device-application/device-application-euadmriv/project/.pio/libdeps/application",
+    "HARDWARE_SPLICER_RUN_FREEROUTING": "1 (headless native checks only)",
+    "HARDWARE_SPLICER_FREEROUTING_JAR": "/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.cache/hardware-splicer/extended-verification-20261116/freerouting-2.1.0.jar",
+    "vision_live_in_complete_run": false
+  },
+  "provider_gaps": {
+    "qwen": "Neither QWEN_API_KEY nor DASHSCOPE_API_KEY configured; two live tests remain unverified.",
+    "gemini": "Separately attempted live smoke reached Google and failed HTTP 400 / API_KEY_INVALID. No successful live vision result is claimed."
+  },
+  "separate_source_and_live_attempt": {
+    "tests": 20,
+    "failed": 1,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 11.958,
+    "junit_path": ".cache/hardware-splicer/extended-verification-20261116/source-live-results.xml",
+    "junit_sha256": "9bf9d3a12765f43c7ec5866e2fa2c3c9276a52c7dee5d6b56907fef359c096bb",
+    "failed_tests": [
+      {
+        "test": "tests.test_vision_gemini::test_gemini_live_smoke_optional",
+        "details": "tests/test_vision_gemini.py:132: in test_gemini_live_smoke_optional\n    raise VisionAssistantError(report[\"errors\"][0][\"message\"])\nE   hardware_splicer.vision_evidence_assistant.VisionAssistantError: Gemini vision request failed with HTTP 400: {\nE     \"error\": {\nE       \"code\": 400,\nE       \"message\": \"API key not valid. Please pass a valid API key.\",\nE       \"status\": \"INVALID_ARGUMENT\",\nE       \"details\": [\nE         {\nE           \"@type\": \"type.googleapis.com/google.rpc.ErrorInfo\",\nE           \"reason\": \"API_KEY_INVALID\",\nE           \"domain\": \"googleapis.com\",\nE           \"metadata\": {\nE             \"service\": \"generativelanguage.googleapis.com\"\nE           }\nE         },\nE         {\nE           \"@type\": \"type.googleapis.com/google.rpc.LocalizedMessage\",\nE           \"locale\": \"en-US\",\nE           \"message\": \"API key not valid. Please pass a valid API key.\"\nE         }\nE       ]\nE     }\nE   }"
+      }
+    ],
+    "skip_reasons": {}
+  },
+  "headless_check": {
+    "tests": 7,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 12.568,
+    "junit_path": ".cache/hardware-splicer/extended-verification-20261116/routing-headless-results.xml",
+    "junit_sha256": "557537733d8cc3713e7b0643440a1c1a721b924b0a6abeb21e8651be690c8d6b",
+    "failed_tests": [],
+    "skip_reasons": {}
+  },
+  "vendor_host_check": {
+    "tests": 1,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 16.177,
+    "junit_path": ".cache/hardware-splicer/extended-verification-20261116/vendor-results.xml",
+    "junit_sha256": "5aabe55d9feccf1e688a99382150a20bb0669dcfcafb180ce647d9983d37c03c",
+    "failed_tests": [],
+    "skip_reasons": {}
+  },
+  "initial_enabled_cad_profile": {
+    "tests": 69,
+    "failed": 4,
+    "errors": 0,
+    "skipped": 0,
+    "seconds": 107.684,
+    "junit_path": ".cache/hardware-splicer/extended-verification-20261116/native-results.xml",
+    "junit_sha256": "78e4351e19ad9d160351a1277e9b52fe2a2cde27db6a6e613d284c8c23d67ce4",
+    "failed_tests": [
+      {
+        "test": "tests.test_scoring_regression::test_plant_release_briefs_hit_nine_of_nine_gates[examples/intakes/plant_watering_evidence_pack.json-9]",
+        "details": "tests/test_scoring_regression.py:36: in test_plant_release_briefs_hit_nine_of_nine_gates\n    assert int(card.get(\"gates_passed\") or 0) >= expected_gates\nE   AssertionError: assert 8 >= 9\nE    +  where 8 = int((8))\nE    +    where 8 = <built-in method get of dict object at 0x7f4af538b7c0>('gates_passed')\nE    +      where <built-in method get of dict object at 0x7f4af538b7c0> = {'authority_score': 1.0, 'evidence_gap_ids': ['circuit_release'], 'functional_delivery_grade': 'A', 'functional_delivery_score': 90.9, ...}.get"
+      },
+      {
+        "test": "tests.test_scoring_regression::test_plant_release_briefs_hit_nine_of_nine_gates[examples/intakes/plant_watering_tier5_brief.json-9]",
+        "details": "tests/test_scoring_regression.py:36: in test_plant_release_briefs_hit_nine_of_nine_gates\n    assert int(card.get(\"gates_passed\") or 0) >= expected_gates\nE   AssertionError: assert 8 >= 9\nE    +  where 8 = int((8))\nE    +    where 8 = <built-in method get of dict object at 0x7f4af542c880>('gates_passed')\nE    +      where <built-in method get of dict object at 0x7f4af542c880> = {'authority_score': 1.0, 'evidence_gap_ids': ['circuit_release'], 'functional_delivery_grade': 'A', 'functional_delivery_score': 90.9, ...}.get"
+      },
+      {
+        "test": "tests.test_project_intake::test_project_intake_evidence_pack_closes_scoped_production_package",
+        "details": "tests/test_project_intake.py:289: in test_project_intake_evidence_pack_closes_scoped_production_package\n    assert metrics[\"production_ready\"] is True\nE   assert False is True"
+      },
+      {
+        "test": "tests.test_project_intake::test_project_intake_extracts_notes_into_production_evidence",
+        "details": "tests/test_project_intake.py:321: in test_project_intake_extracts_notes_into_production_evidence\n    assert result[\"production_release_metrics\"][\"production_ready\"] is True\nE   assert False is True"
+      }
+    ],
+    "skip_reasons": {}
+  },
+  "public_source_fixtures": [
+    {
+      "url": "https://raw.githubusercontent.com/sector07-dev/RPI_DEV/ebdfcffac2f03c01222ed851d44bf75bde5b10ad/RPI%20DEV%20PCB%20Files.zip",
+      "archive_git_blob": "1b6dae7a4ace4cc0728053a8b1c2df89c2889e97",
+      "member": "RPI Dev/RPI_Dev_1/RPI_Dev_1.kicad_pcb",
+      "path": "/tmp/hs-capability-trial-20261020/reference/extracted/RPI_Dev_1.kicad_pcb",
+      "bytes": 222472,
+      "sha256": "ddf94ad6fdaee46a52022b20da8678cebd34cec4f4db817d090cd0e45119f042"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/sector07-dev/RPI_DEV/ebdfcffac2f03c01222ed851d44bf75bde5b10ad/RPI%20DEV%20PCB%20Files.zip",
+      "archive_git_blob": "1b6dae7a4ace4cc0728053a8b1c2df89c2889e97",
+      "member": "RPI Dev/RPI_Dev_1/RPI_Dev_1.kicad_pro",
+      "path": "/tmp/hs-capability-trial-20261020/reference/extracted/RPI_Dev_1.kicad_pro",
+      "bytes": 15504,
+      "sha256": "de1e2a03e7b4f305b54a163f49fc25fd8d7c72199c5d2a6e97e6ccc696adbcf3"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/sector07-dev/RPI_DEV/ebdfcffac2f03c01222ed851d44bf75bde5b10ad/RPI%20DEV%20PCB%20Files.zip",
+      "archive_git_blob": "1b6dae7a4ace4cc0728053a8b1c2df89c2889e97",
+      "member": "RPI Dev/RPI_Dev_1/RPI_Dev_1.kicad_sch",
+      "path": "/tmp/hs-capability-trial-20261020/reference/extracted/RPI_Dev_1.kicad_sch",
+      "bytes": 151410,
+      "sha256": "2e26a451bd7d4821f4fde3f76af84eb7df749dc7683392f86c1a799008137280"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/sector07-dev/RPI_DEV/ebdfcffac2f03c01222ed851d44bf75bde5b10ad/3D%20Print%20Files.zip",
+      "archive_git_blob": "fc26024490260d7fbc181546e7872210cc8d1b83",
+      "member": "Front Case.stl",
+      "path": "/tmp/hs-capability-trial-20261020/reference/extracted/Front Case.stl",
+      "bytes": 259084,
+      "sha256": "b1d2861245bdf8e5b7e67f90a2862c6ffccf48aee8ffeeef2dbff86a5d1da041"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/therebelrobot/dinodeck-2026/7762e2f744ad2ed3f9672baf75acf5efdf866666/docs/BOM.md",
+      "path": "/tmp/hs-real-cyberdeck-replay-20261020/reference-options/dinodeck-2026/docs/BOM.md",
+      "bytes": 4330,
+      "sha256": "7ee60bc36bc34c494a08925ae006a28f3f87a3b8a2ae968d2b56a47af3a0b494"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/colgecen/DroneSkeleton/15d139b215cb46b375fe3fae3e5f9d65baa01097/arm.scad",
+      "path": "/tmp/hs_drone_reference_scan/DroneSkeleton/arm.scad",
+      "bytes": 5923731,
+      "sha256": "afb358ed551c06fb9560cae9e372353f13cf96e91acc1cc68d167216a7528761"
+    },
+    {
+      "url": "https://www.ifixit.com/Guide/PSP+300x+UMD+Drive+Replacement/1586",
+      "path": "/tmp/hs-real-repair-psp/umd-replacement.html",
+      "bytes": 671572,
+      "sha256": "226f3f914c0e975f1ac4c1167085b559c8fb0b160fb6596711121572493ed75a"
+    }
+  ],
+  "manufacturer_archives": [
+    {
+      "source": "motor",
+      "url": "https://www.ligpower.com/product/f1404-kv3800-fpv-motor.html",
+      "bytes": 291297,
+      "sha256": "03be9e098ee12fa77bd14d70b6b8ceadd0e684602295e4c32014e0f782668a04"
+    },
+    {
+      "source": "battery",
+      "url": "https://chinahobbyline.com/products/cnhl-ministar-series-650mah-14-8v-4s-70c-lipo-battery-with-xt30-plug",
+      "fetch_error": "HTTP Error 429: Too Many Requests"
+    },
+    {
+      "source": "cutter",
+      "url": "https://sendcutsend.com/materials/carbon-fiber/",
+      "bytes": 410878,
+      "sha256": "348e73c02e8ac361b940afa2374e932b006186f01b1d5ca89d17045eb6007cc6"
+    }
+  ],
+  "engineering_constraints": {
+    "source_head": "35d469fafaa6b5aff906ed6de34948fddbfc56ac",
+    "regeneration_from_previous_combined_verification": "/tmp/hs-integrated-hs3g-package-20261116",
+    "results_sha256": "1287d50a25a3796ab14339b1ae49d40f5d14132144bee927cac397b85aee5151",
+    "failed_checks": [
+      "battery_continuous_covers_full_throttle",
+      "cutter_rules_met_everywhere"
+    ],
+    "modeled_auw_g": 221.99,
+    "modeled_max_current_a": 77.9,
+    "nameplate_pack_continuous_current_a": 45.5,
+    "motor_pad_hole_mm": 2.2,
+    "cutter_minimum_hole_mm": 3.2,
+    "motor_pad_minimum_web_mm": 1.4,
+    "cutter_minimum_web_mm": 6.0,
+    "physical_verification_performed": false,
+    "manufacturer_rechecks": [
+      {
+        "url": "https://www.ligpower.com/product/f1404-kv3800-fpv-motor.html",
+        "supports": "HQ3x3x3 / KV3800 bench table: 19.40 A per motor at full throttle, 10.98 A at 70%; nominal motor dimensions and mass match retained inputs"
+      },
+      {
+        "url": "https://chinahobbyline.com/products/cnhl-ministar-series-650mah-14-8v-4s-70c-lipo-battery-with-xt30-plug",
+        "supports": "650 mAh / 70C continuous / 140C burst / nominal 87 g; computed continuous current = 0.650 * 70 = 45.5 A; maker lists dimensional variation of 1-5 mm and weight variation of +/-5 g",
+        "retrieval": "verified through web tool; direct archive request rate limited (HTTP 429)"
+      },
+      {
+        "url": "https://sendcutsend.com/materials/carbon-fiber/",
+        "supports": "3.00 mm stock; recommended minimum hole about 0.125 in and minimum web 2x thickness"
+      }
+    ]
+  },
+  "original_local_work_sha256": {
+    "src/hardware_splicer/stored_source_parser.py": "afabeaa10c97ced6acad8721cc2eee4a91179c13340cea074b09f201bdc97539",
+    "src/hardware_splicer/kicad_registered_source_check.py": "9591b4ff9baec9426beb8b8e2de15293839fc080a51590120edde782a7191fb3",
+    "tests/test_kicad_registered_source_check.py": "c3f8fccf1b42a2ce9adc8cbdb00fedf96b8fc1333c86d0386478405ae0fe5b60"
+  },
+  "original_local_work_preserved": true,
+  "github_mutations_performed": false,
+  "physical_testing_performed": false,
+  "log_sha256": {
+    ".cache/hardware-splicer/extended-verification-20261116/actual-plant.log": "ff5f0b2ed8a1ab5b7413b4b04f8094e1a579867fb054802e3b164ee06e906e37",
+    ".cache/hardware-splicer/extended-verification-20261116/circuit-gate.log": "1dcad9afc5fb469538c08ce754f90f2f7719aca523eb1a769a32850ae686a98d",
+    ".cache/hardware-splicer/extended-verification-20261116/cli-help-native.log": "12437bd79ef9d6556e2c1aa9319445e6e6f0be765ed3fbf8199834538345147c",
+    ".cache/hardware-splicer/extended-verification-20261116/final-actual-plant.log": "7ae3e8cf9cf56a90404af7d2fda4c4fe2ad252cf87cc407cbc23eb7434669ac0",
+    ".cache/hardware-splicer/extended-verification-20261116/followup.log": "990772ef3c4f6bbab39459673d4dddb2a075b00298e59a7955a99dcd84d8b5e8",
+    ".cache/hardware-splicer/extended-verification-20261116/freerouting-download.log": "9be0947c8c9f307557c51428fcb54924c105465aef17c29f639cdd48f9307622",
+    ".cache/hardware-splicer/extended-verification-20261116/full-native-setup-error.log": "5eeb3372f47bc11bdcdfded9c310aad4fc77b0abe22ae86a3d265fe905c2e028",
+    ".cache/hardware-splicer/extended-verification-20261116/full-native.log": "6a54c11e276bbc2d96c779b8dc910c10035beceb9ad4aafa0101b672b39c2335",
+    ".cache/hardware-splicer/extended-verification-20261116/native.log": "bffc549375023f126a7fe1673e8201ac1cc226f2cbdce5a7bb702353e87a2520",
+    ".cache/hardware-splicer/extended-verification-20261116/routing-headless.log": "16bf7380c3e38c280570381fa5775e333da7da57332db79cfebc322982a2700f",
+    ".cache/hardware-splicer/extended-verification-20261116/routing.log": "adf91b1dcb3c74f0af9b7a728539fb5d7d27a1e71ddfb9cee5e9756ebb961e2c",
+    ".cache/hardware-splicer/extended-verification-20261116/source-live.log": "3f510d0157a673e1d848a11350620fb8146dd40772e0ebe1b803fd637eb0ac26",
+    ".cache/hardware-splicer/extended-verification-20261116/vendor.log": "a0884e6a8afce08053cea366094322e34dc3717b6b22fd3d97425de972ac34d5"
+  },
+  "final_real_kicad_replay": {
+    "source_head": "71ee7de80a94500068a507526ba1b4027ff1f390",
+    "results": {
+      "production": {
+        "ok": false,
+        "compile_ok": true,
+        "claimable": false,
+        "project_authority_level": "field_validated_project_package",
+        "release_decision": "evidence_required_before_project_claim",
+        "build_ready": false,
+        "hardware_splicer_release": false,
+        "blockers": [
+          "Compiled circuit is not build ready: KiCad ERC failed with 4 error(s)."
+        ],
+        "next_actions": [
+          "Compiled circuit is not build ready: KiCad ERC failed with 4 error(s)."
+        ],
+        "native_erc_errors": 4,
+        "native_drc_errors": 0,
+        "production_ready": false,
+        "gates_passed": 8,
+        "gates_total": 9,
+        "evidence_gap_ids": [
+          "circuit_release"
+        ],
+        "can": [
+          "Compile one unified project artifact bundle from circuit, mechanism, robotics, and packaging inputs.",
+          "Show a single project authority dashboard instead of separate subsystem fragments.",
+          "Use deterministic margins for current, runtime, drive speed, traction, servo load, and safety gates.",
+          "Present current project state as `field_validated_project_package` with explicit missing evidence."
+        ],
+        "native_erc_findings": [
+          {
+            "type": "power_pin_not_driven",
+            "description": "Input Power pin not driven by any Output Power pins",
+            "items": [
+              "Symbol U1 Pin GND [GND, Power input, Line]"
+            ]
+          },
+          {
+            "type": "pin_not_driven",
+            "description": "Input pin not driven by any Output pins",
+            "items": [
+              "Symbol U2 Pin GPIO34 [GPIO34, Input, Line]"
+            ]
+          },
+          {
+            "type": "pin_not_connected",
+            "description": "Pin not connected",
+            "items": [
+              "Symbol U5 Pin VOUT- [VOUT-, Power input, Line]"
+            ]
+          },
+          {
+            "type": "pin_not_connected",
+            "description": "Pin not connected",
+            "items": [
+              "Symbol U5 Pin VOUT+ [VOUT+, Power output, Line]"
+            ]
+          }
+        ],
+        "receipt_sha256": "7f4e1e6399139eff131bd815ebc0f4e31045c82102dbb10620e83c8455fe8b76"
+      },
+      "planning": {
+        "ok": true,
+        "compile_ok": true,
+        "claimable": true,
+        "project_authority_level": "control_safety_project_package",
+        "release_decision": "authorized_scoped_project_package",
+        "build_ready": false,
+        "hardware_splicer_release": false,
+        "blockers": [],
+        "next_actions": [
+          "Compiled circuit is not build ready: KiCad ERC failed with 4 error(s).",
+          "robotics simulation: Simulation cannot clear release while integration gap is open: Layer not closed: circuit_release_ready.",
+          "robotics simulation: Simulation cannot clear release while integration gap is open: enclosure: No bench evidence was matched to this primitive.",
+          "robotics simulation: Simulation cannot clear release while integration gap is open: bracket: No bench evidence was matched to this primitive.",
+          "robotics simulation: Simulation cannot clear release while integration gap is open: assembly: No bench evidence was matched to this primitive.",
+          "robotics simulation: Simulation cannot clear release while integration gap is open: Run controlled robotics bench tests: first motion, load/current, stall/limit, cycle, and thermal observations.",
+          "robotics simulation: Simulation cannot clear release while integration gap is open: Record at least three passing controlled motion/load/current/cycle checks.",
+          "robotics simulation: Simulation cannot clear release while integration gap is open: Attach bench artifacts, logs, photos, or videos.",
+          "robotics simulation: Simulation cannot clear release while integration gap is open: Prepare first-motion bench protocol with current limit and emergency stop.",
+          "robotics simulation: Simulation cannot clear release while integration gap is open: Run integrated bench evidence across circuit power, actuation motion, and packaging fit.",
+          "robotics simulation: Simulation cannot clear release while integration gap is open: Record at least three passing integrated electrical, motion, packaging, thermal, or cycle checks.",
+          "robotics simulation: Simulation cannot clear release while integration gap is open: Attach integrated bench artifacts, logs, photos, or videos."
+        ],
+        "native_erc_errors": 4,
+        "native_drc_errors": 0,
+        "production_ready": false,
+        "gates_passed": 3,
+        "gates_total": 9,
+        "evidence_gap_ids": [
+          "circuit_release",
+          "mechanical_release",
+          "robotics_actuation_release",
+          "integrated_bench",
+          "field_validation",
+          "release_review"
+        ],
+        "can": [
+          "Compile one unified project artifact bundle from circuit, mechanism, robotics, and packaging inputs.",
+          "Show a single project authority dashboard instead of separate subsystem fragments.",
+          "Claim scoped project package readiness for the declared scenario boundary."
+        ],
+        "native_erc_findings": [
+          {
+            "type": "power_pin_not_driven",
+            "description": "Input Power pin not driven by any Output Power pins",
+            "items": [
+              "Symbol U1 Pin GND [GND, Power input, Line]"
+            ]
+          },
+          {
+            "type": "pin_not_driven",
+            "description": "Input pin not driven by any Output pins",
+            "items": [
+              "Symbol U2 Pin GPIO34 [GPIO34, Input, Line]"
+            ]
+          },
+          {
+            "type": "pin_not_connected",
+            "description": "Pin not connected",
+            "items": [
+              "Symbol U5 Pin VOUT- [VOUT-, Power input, Line]"
+            ]
+          },
+          {
+            "type": "pin_not_connected",
+            "description": "Pin not connected",
+            "items": [
+              "Symbol U5 Pin VOUT+ [VOUT+, Power output, Line]"
+            ]
+          }
+        ],
+        "receipt_sha256": "e31dd04a8842378345d5d0f3e9c4869f4730ba79f223bf9d922b4488a0ca47d5"
+      }
+    },
+    "physical_testing_performed": false
+  }
+}

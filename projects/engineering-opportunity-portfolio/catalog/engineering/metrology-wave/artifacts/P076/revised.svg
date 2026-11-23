@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="230mm" height="200mm" viewBox="0 0 230 200">
+  <title>P076 revised · full-size proof coupon</title>
+  <rect id="scale" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="10" y="6" width="20" height="10" />
+  <rect id="machined-block-top" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="25" y="30" width="70" height="55" />
+  <rect id="stock-relief" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="30.2" y="36.4" width="56.8" height="40.6" />
+  <rect id="top-wall-section" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="122" y="54" width="54" height="3.15" />
+  <circle id="contact-stylus" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" cx="155" cy="101" r="1.5" />
+  <rect id="isolated-connector" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="128" y="132" width="27" height="17" />
+  <circle id="orientation-key" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" cx="135" cy="139" r="2.2" />
+</svg>

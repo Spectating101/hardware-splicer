@@ -93,7 +93,7 @@ Successful binary responses use `media_type` `model/gltf-binary`,
 
 ## Related
 
-- [`ARTIFACT_RETENTION.md`](ARTIFACT_RETENTION.md) — retained bytes this view reads
+- [`ARTIFACT_RETENTION.md`](reference/ARTIFACT_RETENTION.md) — retained bytes this view reads
 - [`MACHINE_PROJECT_SPINE.md`](MACHINE_PROJECT_SPINE.md) — revisions are immutable
 - `src/hardware_splicer/model3d.py`
 - `src/hardware_splicer/project_model3d_api.py`

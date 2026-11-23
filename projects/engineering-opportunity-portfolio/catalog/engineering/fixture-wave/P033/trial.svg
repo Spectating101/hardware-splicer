@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="235mm" height="200mm" viewBox="0 0 235 200">
+  <title>SPI adapter spring probe and keyed cassette</title>
+  <style>text{font:4px sans-serif; fill:#21363c} .part,.cut,.limit{fill:none;stroke:#293c44;stroke-width:.35}.part{fill:#ddeaea;fill-opacity:.4}.cut{stroke:#006454}.limit{stroke:#ab492b;stroke-dasharray:2 1}</style>
+  <rect id="carrier" class="part" x="12" y="11" width="117" height="76" />
+  <rect id="pcb" class="part" x="19" y="17" width="90.0" height="50.0" />
+  <rect id="key" class="cut" x="24" y="72" width="10" height="8" />
+  <rect id="key-window" class="limit" x="23.8" y="71.8" width="10.4" height="8.4" />
+  <rect id="reverse-key" class="limit" x="121" y="72" width="10" height="8" />
+  <circle id="pad-TP1" class="part" cx="29.0" cy="22.0" r="0.75" />
+  <circle id="tip-TP1" class="cut" cx="29.0" cy="22.0" r="0.25" />
+  <text x="30.1" y="20.9">TP1</text>
+  <circle id="pad-TP2" class="part" cx="35.0" cy="22.0" r="0.75" />
+  <circle id="tip-TP2" class="cut" cx="35.0" cy="22.0" r="0.25" />
+  <text x="36.1" y="20.9">TP2</text>
+  <circle id="pad-TP3" class="part" cx="54.0" cy="22.0" r="0.75" />
+  <circle id="tip-TP3" class="cut" cx="54.0" cy="22.0" r="0.25" />
+  <text x="55.1" y="20.9">TP3</text>
+  <circle id="pad-TP4" class="part" cx="62.0" cy="22.0" r="0.75" />
+  <circle id="tip-TP4" class="cut" cx="62.0" cy="22.0" r="0.25" />
+  <text x="63.1" y="20.9">TP4</text>
+  <circle id="pad-TP5" class="part" cx="37.0" cy="41.0" r="0.75" />
+  <circle id="tip-TP5" class="cut" cx="37.0" cy="41.0" r="0.25" />
+  <text x="38.1" y="39.9">TP5</text>
+  <circle id="pad-TP6" class="part" cx="74.0" cy="37.0" r="0.75" />
+  <circle id="tip-TP6" class="cut" cx="74.0" cy="37.0" r="0.25" />
+  <text x="75.1" y="35.9">TP6</text>
+  <circle id="pad-TP7" class="part" cx="42.0" cy="47.0" r="0.75" />
+  <circle id="tip-TP7" class="cut" cx="42.0" cy="47.0" r="0.25" />
+  <text x="43.1" y="45.9">TP7</text>
+  <circle id="pad-TP8" class="part" cx="79.0" cy="39.0" r="0.75" />
+  <circle id="tip-TP8" class="cut" cx="79.0" cy="39.0" r="0.25" />
+  <text x="80.1" y="37.9">TP8</text>
+  <circle id="pad-TP9" class="part" cx="37.0" cy="53.0" r="0.75" />
+  <circle id="tip-TP9" class="cut" cx="37.0" cy="53.0" r="0.25" />
+  <text x="38.1" y="51.9">TP9</text>
+  <circle id="pad-TP10" class="part" cx="74.0" cy="51.0" r="0.75" />
+  <circle id="tip-TP10" class="cut" cx="74.0" cy="51.0" r="0.25" />
+  <text x="75.1" y="49.9">TP10</text>
+  <circle id="pad-TP11" class="part" cx="47.0" cy="58.0" r="0.75" />
+  <circle id="tip-TP11" class="cut" cx="47.0" cy="58.0" r="0.25" />
+  <text x="48.1" y="56.9">TP11</text>
+  <circle id="pad-TP12" class="part" cx="79.0" cy="55.0" r="0.75" />
+  <circle id="tip-TP12" class="cut" cx="79.0" cy="55.0" r="0.25" />
+  <text x="80.1" y="53.9">TP12</text>
+  <circle id="pad-TP13" class="part" cx="91.0" cy="55.0" r="0.75" />
+  <circle id="tip-TP13" class="cut" cx="91.0" cy="55.0" r="0.25" />
+  <text x="92.1" y="53.9">TP13</text>
+  <circle id="pad-TP14" class="part" cx="100.0" cy="53.0" r="0.75" />
+  <circle id="tip-TP14" class="cut" cx="100.0" cy="53.0" r="0.25" />
+  <text x="101.1" y="51.9">TP14</text>
+  <circle id="pad-TP15" class="part" cx="62.0" cy="31.0" r="0.75" />
+  <circle id="tip-TP15" class="cut" cx="62.0" cy="31.0" r="0.25" />
+  <text x="63.1" y="29.9">TP15</text>
+  <circle id="pad-TP16" class="part" cx="74.0" cy="58.0" r="0.75" />
+  <circle id="tip-TP16" class="cut" cx="74.0" cy="58.0" r="0.25" />
+  <text x="75.1" y="56.9">TP16</text>
+  <circle id="pad-TP17" class="part" cx="65.0" cy="50.0" r="0.75" />
+  <circle id="tip-TP17" class="cut" cx="65.0" cy="50.0" r="0.25" />
+  <text x="66.1" y="48.9">TP17</text>
+  <circle id="pad-TP18" class="part" cx="94.0" cy="58.0" r="0.75" />
+  <circle id="tip-TP18" class="cut" cx="94.0" cy="58.0" r="0.25" />
+  <text x="95.1" y="56.9">TP18</text>
+  <circle id="mount-0" class="cut" cx="23.0" cy="21.0" r="1.6" />
+  <circle id="mount-1" class="cut" cx="105.0" cy="21.0" r="1.6" />
+  <circle id="mount-2" class="cut" cx="23.0" cy="63.0" r="1.6" />
+  <circle id="mount-3" class="cut" cx="105.0" cy="63.0" r="1.6" />
+  <rect id="section-guide" class="part" x="18" y="113" width="116" height="8" />
+  <rect id="section-board" class="cut" x="19" y="140" width="90" height="1.6" />
+  <line id="unloaded-tip" class="limit" x1="28" y1="121" x2="28" y2="141.04" />
+  <line id="hard-stop" class="limit" x1="15" y1="121" x2="15" y2="140" />
+  <text x="18" y="158">Install replaceable board-side cassette with a positive orientation tab.</text>
+  <text x="18" y="169">Probe tips Ø0.50. Working travel and radial error are bench assumptions.</text>
+  <text x="18" y="179">Connect each probe lead by name. Test grounds as a connected group.</text>
+</svg>

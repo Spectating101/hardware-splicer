@@ -1,0 +1,3288 @@
+{
+  "schema": "hs.keyboard-multi-path-cut-recovery.v1",
+  "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+  "attempted_strategies": 12,
+  "unique_proposed_paths": 10,
+  "selected_strategy": "left-reuse",
+  "selected_route": {
+    "schema": "hs.keyboard-stepped-cut-solver.v1",
+    "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+    "method": "deterministic monotone-grid DP + exact Shapely buffered path collision replay",
+    "cut_points_mm": [
+      [
+        135.5725,
+        18.975
+      ],
+      [
+        135.5725,
+        19.9688
+      ],
+      [
+        135.5725,
+        20.9625
+      ],
+      [
+        135.5725,
+        21.9563
+      ],
+      [
+        136.5669,
+        22.95
+      ],
+      [
+        136.5669,
+        23.9438
+      ],
+      [
+        135.5725,
+        24.9375
+      ],
+      [
+        135.5725,
+        25.9313
+      ],
+      [
+        133.5836,
+        26.925
+      ],
+      [
+        133.5836,
+        27.9188
+      ],
+      [
+        133.5836,
+        28.9125
+      ],
+      [
+        133.5836,
+        29.9062
+      ],
+      [
+        132.5892,
+        30.9
+      ],
+      [
+        130.6003,
+        31.8938
+      ],
+      [
+        130.6003,
+        32.8875
+      ],
+      [
+        130.6003,
+        33.8813
+      ],
+      [
+        130.6003,
+        34.875
+      ],
+      [
+        130.6003,
+        35.8688
+      ],
+      [
+        130.6003,
+        36.8625
+      ],
+      [
+        130.6003,
+        37.8563
+      ],
+      [
+        129.6059,
+        38.85
+      ],
+      [
+        127.617,
+        39.8438
+      ],
+      [
+        126.6226,
+        40.8375
+      ],
+      [
+        126.6226,
+        41.8312
+      ],
+      [
+        126.6226,
+        42.825
+      ],
+      [
+        126.6226,
+        43.8188
+      ],
+      [
+        125.6281,
+        44.8125
+      ],
+      [
+        123.6393,
+        45.8063
+      ],
+      [
+        123.6393,
+        46.8
+      ],
+      [
+        123.6393,
+        47.7938
+      ],
+      [
+        123.6393,
+        48.7875
+      ],
+      [
+        123.6393,
+        49.7812
+      ],
+      [
+        125.6281,
+        50.775
+      ],
+      [
+        126.6226,
+        51.7688
+      ],
+      [
+        126.6226,
+        52.7625
+      ],
+      [
+        126.6226,
+        53.7563
+      ],
+      [
+        126.6226,
+        54.75
+      ],
+      [
+        128.6114,
+        55.7438
+      ],
+      [
+        130.6003,
+        56.7375
+      ],
+      [
+        131.5947,
+        57.7313
+      ],
+      [
+        131.5947,
+        58.725
+      ],
+      [
+        131.5947,
+        59.7188
+      ],
+      [
+        131.5947,
+        60.7125
+      ],
+      [
+        131.5947,
+        61.7063
+      ],
+      [
+        131.5947,
+        62.7
+      ],
+      [
+        130.6003,
+        63.6938
+      ],
+      [
+        128.6114,
+        64.6875
+      ],
+      [
+        128.6114,
+        65.6813
+      ],
+      [
+        128.6114,
+        66.675
+      ],
+      [
+        128.6114,
+        67.6688
+      ],
+      [
+        128.6114,
+        68.6625
+      ],
+      [
+        130.6003,
+        69.6562
+      ],
+      [
+        131.5947,
+        70.65
+      ],
+      [
+        131.5947,
+        71.6438
+      ],
+      [
+        131.5947,
+        72.6375
+      ],
+      [
+        131.5947,
+        73.6312
+      ],
+      [
+        132.5892,
+        74.625
+      ],
+      [
+        134.578,
+        75.6188
+      ],
+      [
+        135.5725,
+        76.6125
+      ],
+      [
+        135.5725,
+        77.6063
+      ],
+      [
+        135.5725,
+        78.6
+      ],
+      [
+        135.5725,
+        79.5938
+      ],
+      [
+        136.5669,
+        80.5875
+      ],
+      [
+        138.5558,
+        81.5813
+      ],
+      [
+        138.5558,
+        82.575
+      ],
+      [
+        138.5558,
+        83.5687
+      ],
+      [
+        139.5502,
+        84.5625
+      ],
+      [
+        139.5502,
+        85.5563
+      ],
+      [
+        139.5502,
+        86.55
+      ],
+      [
+        140.5447,
+        87.5438
+      ],
+      [
+        141.5391,
+        88.5375
+      ],
+      [
+        140.5447,
+        89.5312
+      ],
+      [
+        139.5502,
+        90.525
+      ],
+      [
+        139.5502,
+        91.5188
+      ],
+      [
+        140.5447,
+        92.5125
+      ],
+      [
+        142.5335,
+        93.5062
+      ],
+      [
+        142.5335,
+        94.5
+      ],
+      [
+        142.5335,
+        95.4938
+      ],
+      [
+        142.5335,
+        96.4875
+      ],
+      [
+        140.5447,
+        97.4813
+      ],
+      [
+        140.5447,
+        98.475
+      ],
+      [
+        140.5447,
+        99.4688
+      ],
+      [
+        140.5447,
+        100.4625
+      ],
+      [
+        140.5447,
+        101.4563
+      ],
+      [
+        140.5447,
+        102.45
+      ],
+      [
+        140.5447,
+        103.4437
+      ],
+      [
+        140.5447,
+        104.4375
+      ],
+      [
+        140.5447,
+        105.4313
+      ],
+      [
+        140.5447,
+        106.425
+      ],
+      [
+        140.5447,
+        107.4188
+      ],
+      [
+        140.5447,
+        108.4125
+      ],
+      [
+        140.5447,
+        109.4062
+      ],
+      [
+        140.5447,
+        110.4
+      ],
+      [
+        140.5447,
+        111.3938
+      ],
+      [
+        140.5447,
+        112.3875
+      ],
+      [
+        140.5447,
+        113.3812
+      ],
+      [
+        140.5447,
+        114.375
+      ]
+    ],
+    "cut_path_type": "stepped_polyline",
+    "kerf_mm": 1.0,
+    "grid_step_mm": 1.0,
+    "max_lateral_step_mm": 3.0,
+    "objective_score": 29041.07,
+    "search_parameters": {
+      "x_fraction_min": 0.3,
+      "x_fraction_max": 0.7,
+      "target_fraction": 0.42,
+      "switch_penalty": 300.0,
+      "pad_penalty": 20000.0
+    },
+    "switch_candidates_left": 25,
+    "switch_candidates_right": 37,
+    "nominal_path_length_mm": 119.214,
+    "collision_counts": {
+      "pads": 0,
+      "vias": 0,
+      "switches": 5,
+      "critical": 0
+    },
+    "affected_nets": [
+      "/C10",
+      "/C11",
+      "/C12",
+      "/C13",
+      "/C5",
+      "/C6",
+      "/C7",
+      "/C8",
+      "/C9",
+      "/R0",
+      "/R1",
+      "/R2",
+      "/R3",
+      "/R4",
+      "Net-(D35-Pad2)"
+    ],
+    "affected_net_count": 15,
+    "source_geometry_issues": [],
+    "modeled_clear_of_listed_components": false,
+    "source_footprints_may_have_alternative_layouts": true,
+    "physical_cut_authorized": false,
+    "release": "PROPOSED_CUT_ONLY_NOT_VERIFIED",
+    "blockers": [
+      "Actual installed switches, PCB stackup, case, plate and mounting keepouts not verified",
+      "Pads modeled with conservative circles; nonrectangular pads and tilted footprints approximate",
+      "Original PCB is a design reference, not a registered physical donor",
+      "No mechanical or fabrication authority; physical cutting prohibited until independently reviewed",
+      "Proposed path intersects recorded copper pads, vias, switches or critical components"
+    ],
+    "payload_sha256": "d13f03bc91b0faec7c4d353bf2cbac682082e7c53a8a2d6595055db519d95d36"
+  },
+  "selected_consequence": {
+    "schema": "hs.keyboard-cut-donor-consequence.v1",
+    "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+    "cut_path_sha256": "d13f03bc91b0faec7c4d353bf2cbac682082e7c53a8a2d6595055db519d95d36",
+    "total_reference_switch_candidates": 62,
+    "sacrificed_switches": [
+      {
+        "ref": "K15",
+        "x": 133.35,
+        "y": 47.625,
+        "value": "T",
+        "source_footprint": "footprints:CHERRY_PCB_100H"
+      },
+      {
+        "ref": "K25",
+        "x": 138.1125,
+        "y": 66.675,
+        "value": "G",
+        "source_footprint": "footprints:CHERRY_PCB_100H"
+      },
+      {
+        "ref": "K36",
+        "x": 147.6375,
+        "y": 85.725,
+        "value": "B",
+        "source_footprint": "footprints:CHERRY_PCB_100H"
+      },
+      {
+        "ref": "K[0]5",
+        "x": 123.825,
+        "y": 28.575,
+        "value": "5",
+        "source_footprint": "footprints:CHERRY_PCB_100H"
+      },
+      {
+        "ref": "K[0]6",
+        "x": 142.875,
+        "y": 28.575,
+        "value": "6",
+        "source_footprint": "footprints:CHERRY_PCB_100H"
+      }
+    ],
+    "sacrificed_key_count": 5,
+    "remaining_switches": 57,
+    "remaining_left": 24,
+    "remaining_right": 33,
+    "remaining_split_balance_pass": true,
+    "structural_or_electrically_unqualified_pad_hits": [],
+    "nonplated_holes_inside_sacrificed_switches": [],
+    "live_electrical_pad_hits": [],
+    "via_hits": [],
+    "critical_device_hits": [],
+    "reference_layout_assembly_verified": false,
+    "source_donor_physical_identity_verified": false,
+    "manufacturing_authority": false,
+    "nominally_salvageable_except_sacrificed_switches": true
+  },
+  "candidate_summaries": [
+    {
+      "strategy": "center-reuse",
+      "status": "PROPOSED_NOT_PHYSICALLY_AUTHORIZED",
+      "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+      "cut_path_sha256": "604d287724956e0b214a2c9974bc3913d767a5506b5f71875d725b6556a45cae",
+      "candidate_losses": 5,
+      "retained_keys": 57,
+      "remaining_left": 24,
+      "remaining_right": 33,
+      "balance_pass": true,
+      "live_pad_hits": 0,
+      "via_hits": 0,
+      "unknown_mechanical_hits": 0,
+      "clean_of_essential_components_in_model": true
+    },
+    {
+      "strategy": "center-protect-keys",
+      "status": "PROPOSED_NOT_PHYSICALLY_AUTHORIZED",
+      "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+      "cut_path_sha256": "7c40d58a6f3d3dc5b7e614fbfe0a4182c33b9b5c2d14c984b54c70a53ce83521",
+      "candidate_losses": 0,
+      "retained_keys": 62,
+      "remaining_left": 29,
+      "remaining_right": 33,
+      "balance_pass": true,
+      "live_pad_hits": 7,
+      "via_hits": 0,
+      "unknown_mechanical_hits": 1,
+      "clean_of_essential_components_in_model": false
+    },
+    {
+      "strategy": "left-reuse",
+      "status": "PROPOSED_NOT_PHYSICALLY_AUTHORIZED",
+      "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+      "cut_path_sha256": "d13f03bc91b0faec7c4d353bf2cbac682082e7c53a8a2d6595055db519d95d36",
+      "candidate_losses": 5,
+      "retained_keys": 57,
+      "remaining_left": 24,
+      "remaining_right": 33,
+      "balance_pass": true,
+      "live_pad_hits": 0,
+      "via_hits": 0,
+      "unknown_mechanical_hits": 0,
+      "clean_of_essential_components_in_model": true
+    },
+    {
+      "strategy": "left-protect-keys",
+      "status": "PROPOSED_NOT_PHYSICALLY_AUTHORIZED",
+      "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+      "cut_path_sha256": "08db5bde52ef7e2426ddb901c4e622ff4c14a125fcfe7c6ad0649445966ba466",
+      "candidate_losses": 5,
+      "retained_keys": 57,
+      "remaining_left": 24,
+      "remaining_right": 33,
+      "balance_pass": true,
+      "live_pad_hits": 1,
+      "via_hits": 0,
+      "unknown_mechanical_hits": 0,
+      "clean_of_essential_components_in_model": false
+    },
+    {
+      "strategy": "right-protect-keys",
+      "status": "PROPOSED_NOT_PHYSICALLY_AUTHORIZED",
+      "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+      "cut_path_sha256": "93074621c6c82adab9177c72dc500661f5a91e8297568655e1551b54ec7b3ee7",
+      "candidate_losses": 7,
+      "retained_keys": 55,
+      "remaining_left": 31,
+      "remaining_right": 24,
+      "balance_pass": true,
+      "live_pad_hits": 3,
+      "via_hits": 0,
+      "unknown_mechanical_hits": 0,
+      "clean_of_essential_components_in_model": false
+    },
+    {
+      "strategy": "extended-center",
+      "status": "PROPOSED_NOT_PHYSICALLY_AUTHORIZED",
+      "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+      "cut_path_sha256": "f5568e8ae724e1b04b439b4064ec97b6a82a43418833a9a3454248687adc7efa",
+      "candidate_losses": 6,
+      "retained_keys": 56,
+      "remaining_left": 38,
+      "remaining_right": 18,
+      "balance_pass": true,
+      "live_pad_hits": 1,
+      "via_hits": 0,
+      "unknown_mechanical_hits": 0,
+      "clean_of_essential_components_in_model": false
+    },
+    {
+      "strategy": "extended-right",
+      "status": "PROPOSED_NOT_PHYSICALLY_AUTHORIZED",
+      "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+      "cut_path_sha256": "66de4d8f24f2c7312109e940a6cfb5dc1310480aea1ea1981024535e0879c304",
+      "candidate_losses": 6,
+      "retained_keys": 56,
+      "remaining_left": 38,
+      "remaining_right": 18,
+      "balance_pass": true,
+      "live_pad_hits": 1,
+      "via_hits": 0,
+      "unknown_mechanical_hits": 0,
+      "clean_of_essential_components_in_model": false
+    },
+    {
+      "strategy": "extended-protect-keys",
+      "status": "PROPOSED_NOT_PHYSICALLY_AUTHORIZED",
+      "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+      "cut_path_sha256": "d5ecb872237f02fb18c2b95b867f4f238045e7f37f77c4fd9acaaf4cb00d1411",
+      "candidate_losses": 0,
+      "retained_keys": 62,
+      "remaining_left": 39,
+      "remaining_right": 23,
+      "balance_pass": true,
+      "live_pad_hits": 8,
+      "via_hits": 0,
+      "unknown_mechanical_hits": 0,
+      "clean_of_essential_components_in_model": false
+    },
+    {
+      "strategy": "wide-center",
+      "status": "PROPOSED_NOT_PHYSICALLY_AUTHORIZED",
+      "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+      "cut_path_sha256": "b65ac9b7a923d401faaeb0b3c9d5c6b3257a51697b91a32e3a8e0a6aa648fcfa",
+      "candidate_losses": 6,
+      "retained_keys": 56,
+      "remaining_left": 16,
+      "remaining_right": 40,
+      "balance_pass": false,
+      "live_pad_hits": 1,
+      "via_hits": 0,
+      "unknown_mechanical_hits": 0,
+      "clean_of_essential_components_in_model": false
+    },
+    {
+      "strategy": "wide-protect-keys",
+      "status": "PROPOSED_NOT_PHYSICALLY_AUTHORIZED",
+      "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+      "cut_path_sha256": "bd67403d03b5781690b10916e3dbc8d22b4f0981e2a4fc1e823c24fcc4436440",
+      "candidate_losses": 0,
+      "retained_keys": 62,
+      "remaining_left": 55,
+      "remaining_right": 7,
+      "balance_pass": false,
+      "live_pad_hits": 5,
+      "via_hits": 0,
+      "unknown_mechanical_hits": 0,
+      "clean_of_essential_components_in_model": false
+    }
+  ],
+  "ranked_candidate_proposals": [
+    {
+      "strategy": "left-reuse",
+      "route": {
+        "schema": "hs.keyboard-stepped-cut-solver.v1",
+        "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+        "method": "deterministic monotone-grid DP + exact Shapely buffered path collision replay",
+        "cut_points_mm": [
+          [
+            135.5725,
+            18.975
+          ],
+          [
+            135.5725,
+            19.9688
+          ],
+          [
+            135.5725,
+            20.9625
+          ],
+          [
+            135.5725,
+            21.9563
+          ],
+          [
+            136.5669,
+            22.95
+          ],
+          [
+            136.5669,
+            23.9438
+          ],
+          [
+            135.5725,
+            24.9375
+          ],
+          [
+            135.5725,
+            25.9313
+          ],
+          [
+            133.5836,
+            26.925
+          ],
+          [
+            133.5836,
+            27.9188
+          ],
+          [
+            133.5836,
+            28.9125
+          ],
+          [
+            133.5836,
+            29.9062
+          ],
+          [
+            132.5892,
+            30.9
+          ],
+          [
+            130.6003,
+            31.8938
+          ],
+          [
+            130.6003,
+            32.8875
+          ],
+          [
+            130.6003,
+            33.8813
+          ],
+          [
+            130.6003,
+            34.875
+          ],
+          [
+            130.6003,
+            35.8688
+          ],
+          [
+            130.6003,
+            36.8625
+          ],
+          [
+            130.6003,
+            37.8563
+          ],
+          [
+            129.6059,
+            38.85
+          ],
+          [
+            127.617,
+            39.8438
+          ],
+          [
+            126.6226,
+            40.8375
+          ],
+          [
+            126.6226,
+            41.8312
+          ],
+          [
+            126.6226,
+            42.825
+          ],
+          [
+            126.6226,
+            43.8188
+          ],
+          [
+            125.6281,
+            44.8125
+          ],
+          [
+            123.6393,
+            45.8063
+          ],
+          [
+            123.6393,
+            46.8
+          ],
+          [
+            123.6393,
+            47.7938
+          ],
+          [
+            123.6393,
+            48.7875
+          ],
+          [
+            123.6393,
+            49.7812
+          ],
+          [
+            125.6281,
+            50.775
+          ],
+          [
+            126.6226,
+            51.7688
+          ],
+          [
+            126.6226,
+            52.7625
+          ],
+          [
+            126.6226,
+            53.7563
+          ],
+          [
+            126.6226,
+            54.75
+          ],
+          [
+            128.6114,
+            55.7438
+          ],
+          [
+            130.6003,
+            56.7375
+          ],
+          [
+            131.5947,
+            57.7313
+          ],
+          [
+            131.5947,
+            58.725
+          ],
+          [
+            131.5947,
+            59.7188
+          ],
+          [
+            131.5947,
+            60.7125
+          ],
+          [
+            131.5947,
+            61.7063
+          ],
+          [
+            131.5947,
+            62.7
+          ],
+          [
+            130.6003,
+            63.6938
+          ],
+          [
+            128.6114,
+            64.6875
+          ],
+          [
+            128.6114,
+            65.6813
+          ],
+          [
+            128.6114,
+            66.675
+          ],
+          [
+            128.6114,
+            67.6688
+          ],
+          [
+            128.6114,
+            68.6625
+          ],
+          [
+            130.6003,
+            69.6562
+          ],
+          [
+            131.5947,
+            70.65
+          ],
+          [
+            131.5947,
+            71.6438
+          ],
+          [
+            131.5947,
+            72.6375
+          ],
+          [
+            131.5947,
+            73.6312
+          ],
+          [
+            132.5892,
+            74.625
+          ],
+          [
+            134.578,
+            75.6188
+          ],
+          [
+            135.5725,
+            76.6125
+          ],
+          [
+            135.5725,
+            77.6063
+          ],
+          [
+            135.5725,
+            78.6
+          ],
+          [
+            135.5725,
+            79.5938
+          ],
+          [
+            136.5669,
+            80.5875
+          ],
+          [
+            138.5558,
+            81.5813
+          ],
+          [
+            138.5558,
+            82.575
+          ],
+          [
+            138.5558,
+            83.5687
+          ],
+          [
+            139.5502,
+            84.5625
+          ],
+          [
+            139.5502,
+            85.5563
+          ],
+          [
+            139.5502,
+            86.55
+          ],
+          [
+            140.5447,
+            87.5438
+          ],
+          [
+            141.5391,
+            88.5375
+          ],
+          [
+            140.5447,
+            89.5312
+          ],
+          [
+            139.5502,
+            90.525
+          ],
+          [
+            139.5502,
+            91.5188
+          ],
+          [
+            140.5447,
+            92.5125
+          ],
+          [
+            142.5335,
+            93.5062
+          ],
+          [
+            142.5335,
+            94.5
+          ],
+          [
+            142.5335,
+            95.4938
+          ],
+          [
+            142.5335,
+            96.4875
+          ],
+          [
+            140.5447,
+            97.4813
+          ],
+          [
+            140.5447,
+            98.475
+          ],
+          [
+            140.5447,
+            99.4688
+          ],
+          [
+            140.5447,
+            100.4625
+          ],
+          [
+            140.5447,
+            101.4563
+          ],
+          [
+            140.5447,
+            102.45
+          ],
+          [
+            140.5447,
+            103.4437
+          ],
+          [
+            140.5447,
+            104.4375
+          ],
+          [
+            140.5447,
+            105.4313
+          ],
+          [
+            140.5447,
+            106.425
+          ],
+          [
+            140.5447,
+            107.4188
+          ],
+          [
+            140.5447,
+            108.4125
+          ],
+          [
+            140.5447,
+            109.4062
+          ],
+          [
+            140.5447,
+            110.4
+          ],
+          [
+            140.5447,
+            111.3938
+          ],
+          [
+            140.5447,
+            112.3875
+          ],
+          [
+            140.5447,
+            113.3812
+          ],
+          [
+            140.5447,
+            114.375
+          ]
+        ],
+        "cut_path_type": "stepped_polyline",
+        "kerf_mm": 1.0,
+        "grid_step_mm": 1.0,
+        "max_lateral_step_mm": 3.0,
+        "objective_score": 29041.07,
+        "search_parameters": {
+          "x_fraction_min": 0.3,
+          "x_fraction_max": 0.7,
+          "target_fraction": 0.42,
+          "switch_penalty": 300.0,
+          "pad_penalty": 20000.0
+        },
+        "switch_candidates_left": 25,
+        "switch_candidates_right": 37,
+        "nominal_path_length_mm": 119.214,
+        "collision_counts": {
+          "pads": 0,
+          "vias": 0,
+          "switches": 5,
+          "critical": 0
+        },
+        "affected_nets": [
+          "/C10",
+          "/C11",
+          "/C12",
+          "/C13",
+          "/C5",
+          "/C6",
+          "/C7",
+          "/C8",
+          "/C9",
+          "/R0",
+          "/R1",
+          "/R2",
+          "/R3",
+          "/R4",
+          "Net-(D35-Pad2)"
+        ],
+        "affected_net_count": 15,
+        "source_geometry_issues": [],
+        "modeled_clear_of_listed_components": false,
+        "source_footprints_may_have_alternative_layouts": true,
+        "physical_cut_authorized": false,
+        "release": "PROPOSED_CUT_ONLY_NOT_VERIFIED",
+        "blockers": [
+          "Actual installed switches, PCB stackup, case, plate and mounting keepouts not verified",
+          "Pads modeled with conservative circles; nonrectangular pads and tilted footprints approximate",
+          "Original PCB is a design reference, not a registered physical donor",
+          "No mechanical or fabrication authority; physical cutting prohibited until independently reviewed",
+          "Proposed path intersects recorded copper pads, vias, switches or critical components"
+        ],
+        "payload_sha256": "d13f03bc91b0faec7c4d353bf2cbac682082e7c53a8a2d6595055db519d95d36"
+      },
+      "consequence": {
+        "schema": "hs.keyboard-cut-donor-consequence.v1",
+        "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+        "cut_path_sha256": "d13f03bc91b0faec7c4d353bf2cbac682082e7c53a8a2d6595055db519d95d36",
+        "total_reference_switch_candidates": 62,
+        "sacrificed_switches": [
+          {
+            "ref": "K15",
+            "x": 133.35,
+            "y": 47.625,
+            "value": "T",
+            "source_footprint": "footprints:CHERRY_PCB_100H"
+          },
+          {
+            "ref": "K25",
+            "x": 138.1125,
+            "y": 66.675,
+            "value": "G",
+            "source_footprint": "footprints:CHERRY_PCB_100H"
+          },
+          {
+            "ref": "K36",
+            "x": 147.6375,
+            "y": 85.725,
+            "value": "B",
+            "source_footprint": "footprints:CHERRY_PCB_100H"
+          },
+          {
+            "ref": "K[0]5",
+            "x": 123.825,
+            "y": 28.575,
+            "value": "5",
+            "source_footprint": "footprints:CHERRY_PCB_100H"
+          },
+          {
+            "ref": "K[0]6",
+            "x": 142.875,
+            "y": 28.575,
+            "value": "6",
+            "source_footprint": "footprints:CHERRY_PCB_100H"
+          }
+        ],
+        "sacrificed_key_count": 5,
+        "remaining_switches": 57,
+        "remaining_left": 24,
+        "remaining_right": 33,
+        "remaining_split_balance_pass": true,
+        "structural_or_electrically_unqualified_pad_hits": [],
+        "nonplated_holes_inside_sacrificed_switches": [],
+        "live_electrical_pad_hits": [],
+        "via_hits": [],
+        "critical_device_hits": [],
+        "reference_layout_assembly_verified": false,
+        "source_donor_physical_identity_verified": false,
+        "manufacturing_authority": false,
+        "nominally_salvageable_except_sacrificed_switches": true
+      },
+      "rank": [
+        0,
+        0,
+        0,
+        0,
+        5,
+        0,
+        119.214
+      ]
+    },
+    {
+      "strategy": "center-reuse",
+      "route": {
+        "schema": "hs.keyboard-stepped-cut-solver.v1",
+        "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+        "method": "deterministic monotone-grid DP + exact Shapely buffered path collision replay",
+        "cut_points_mm": [
+          [
+            135.5725,
+            18.975
+          ],
+          [
+            135.5725,
+            19.9688
+          ],
+          [
+            135.5725,
+            20.9625
+          ],
+          [
+            135.5725,
+            21.9563
+          ],
+          [
+            136.5669,
+            22.95
+          ],
+          [
+            136.5669,
+            23.9438
+          ],
+          [
+            135.5725,
+            24.9375
+          ],
+          [
+            135.5725,
+            25.9313
+          ],
+          [
+            133.5836,
+            26.925
+          ],
+          [
+            133.5836,
+            27.9188
+          ],
+          [
+            133.5836,
+            28.9125
+          ],
+          [
+            133.5836,
+            29.9062
+          ],
+          [
+            132.5892,
+            30.9
+          ],
+          [
+            130.6003,
+            31.8938
+          ],
+          [
+            130.6003,
+            32.8875
+          ],
+          [
+            130.6003,
+            33.8813
+          ],
+          [
+            130.6003,
+            34.875
+          ],
+          [
+            130.6003,
+            35.8688
+          ],
+          [
+            130.6003,
+            36.8625
+          ],
+          [
+            130.6003,
+            37.8563
+          ],
+          [
+            129.6059,
+            38.85
+          ],
+          [
+            127.617,
+            39.8438
+          ],
+          [
+            126.6226,
+            40.8375
+          ],
+          [
+            126.6226,
+            41.8312
+          ],
+          [
+            126.6226,
+            42.825
+          ],
+          [
+            126.6226,
+            43.8188
+          ],
+          [
+            125.6281,
+            44.8125
+          ],
+          [
+            123.6393,
+            45.8063
+          ],
+          [
+            123.6393,
+            46.8
+          ],
+          [
+            123.6393,
+            47.7938
+          ],
+          [
+            123.6393,
+            48.7875
+          ],
+          [
+            123.6393,
+            49.7812
+          ],
+          [
+            125.6281,
+            50.775
+          ],
+          [
+            126.6226,
+            51.7688
+          ],
+          [
+            126.6226,
+            52.7625
+          ],
+          [
+            126.6226,
+            53.7563
+          ],
+          [
+            126.6226,
+            54.75
+          ],
+          [
+            128.6114,
+            55.7438
+          ],
+          [
+            130.6003,
+            56.7375
+          ],
+          [
+            131.5947,
+            57.7313
+          ],
+          [
+            131.5947,
+            58.725
+          ],
+          [
+            131.5947,
+            59.7188
+          ],
+          [
+            131.5947,
+            60.7125
+          ],
+          [
+            131.5947,
+            61.7063
+          ],
+          [
+            131.5947,
+            62.7
+          ],
+          [
+            130.6003,
+            63.6938
+          ],
+          [
+            128.6114,
+            64.6875
+          ],
+          [
+            128.6114,
+            65.6813
+          ],
+          [
+            128.6114,
+            66.675
+          ],
+          [
+            128.6114,
+            67.6688
+          ],
+          [
+            128.6114,
+            68.6625
+          ],
+          [
+            130.6003,
+            69.6562
+          ],
+          [
+            131.5947,
+            70.65
+          ],
+          [
+            131.5947,
+            71.6438
+          ],
+          [
+            131.5947,
+            72.6375
+          ],
+          [
+            131.5947,
+            73.6312
+          ],
+          [
+            132.5892,
+            74.625
+          ],
+          [
+            134.578,
+            75.6188
+          ],
+          [
+            135.5725,
+            76.6125
+          ],
+          [
+            135.5725,
+            77.6063
+          ],
+          [
+            135.5725,
+            78.6
+          ],
+          [
+            135.5725,
+            79.5938
+          ],
+          [
+            136.5669,
+            80.5875
+          ],
+          [
+            138.5558,
+            81.5813
+          ],
+          [
+            138.5558,
+            82.575
+          ],
+          [
+            138.5558,
+            83.5687
+          ],
+          [
+            139.5502,
+            84.5625
+          ],
+          [
+            139.5502,
+            85.5563
+          ],
+          [
+            140.5447,
+            86.55
+          ],
+          [
+            140.5447,
+            87.5438
+          ],
+          [
+            141.5391,
+            88.5375
+          ],
+          [
+            141.5391,
+            89.5312
+          ],
+          [
+            139.5502,
+            90.525
+          ],
+          [
+            139.5502,
+            91.5188
+          ],
+          [
+            140.5447,
+            92.5125
+          ],
+          [
+            142.5335,
+            93.5062
+          ],
+          [
+            142.5335,
+            94.5
+          ],
+          [
+            142.5335,
+            95.4938
+          ],
+          [
+            142.5335,
+            96.4875
+          ],
+          [
+            142.5335,
+            97.4813
+          ],
+          [
+            142.5335,
+            98.475
+          ],
+          [
+            141.5391,
+            99.4688
+          ],
+          [
+            141.5391,
+            100.4625
+          ],
+          [
+            140.5447,
+            101.4563
+          ],
+          [
+            140.5447,
+            102.45
+          ],
+          [
+            140.5447,
+            103.4437
+          ],
+          [
+            140.5447,
+            104.4375
+          ],
+          [
+            140.5447,
+            105.4313
+          ],
+          [
+            140.5447,
+            106.425
+          ],
+          [
+            140.5447,
+            107.4188
+          ],
+          [
+            140.5447,
+            108.4125
+          ],
+          [
+            140.5447,
+            109.4062
+          ],
+          [
+            140.5447,
+            110.4
+          ],
+          [
+            140.5447,
+            111.3938
+          ],
+          [
+            140.5447,
+            112.3875
+          ],
+          [
+            140.5447,
+            113.3812
+          ],
+          [
+            140.5447,
+            114.375
+          ]
+        ],
+        "cut_path_type": "stepped_polyline",
+        "kerf_mm": 1.0,
+        "grid_step_mm": 1.0,
+        "max_lateral_step_mm": 3.0,
+        "objective_score": 29125.478,
+        "search_parameters": {
+          "x_fraction_min": 0.3,
+          "x_fraction_max": 0.7,
+          "target_fraction": 0.5,
+          "switch_penalty": 300.0,
+          "pad_penalty": 20000.0
+        },
+        "switch_candidates_left": 25,
+        "switch_candidates_right": 37,
+        "nominal_path_length_mm": 119.214,
+        "collision_counts": {
+          "pads": 1,
+          "vias": 0,
+          "switches": 5,
+          "critical": 0
+        },
+        "affected_nets": [
+          "/C10",
+          "/C11",
+          "/C12",
+          "/C13",
+          "/C5",
+          "/C6",
+          "/C7",
+          "/C8",
+          "/C9",
+          "/R0",
+          "/R1",
+          "/R2",
+          "/R3",
+          "/R4",
+          "Net-(D35-Pad2)"
+        ],
+        "affected_net_count": 15,
+        "source_geometry_issues": [],
+        "modeled_clear_of_listed_components": false,
+        "source_footprints_may_have_alternative_layouts": true,
+        "physical_cut_authorized": false,
+        "release": "PROPOSED_CUT_ONLY_NOT_VERIFIED",
+        "blockers": [
+          "Actual installed switches, PCB stackup, case, plate and mounting keepouts not verified",
+          "Pads modeled with conservative circles; nonrectangular pads and tilted footprints approximate",
+          "Original PCB is a design reference, not a registered physical donor",
+          "No mechanical or fabrication authority; physical cutting prohibited until independently reviewed",
+          "Proposed path intersects recorded copper pads, vias, switches or critical components"
+        ],
+        "payload_sha256": "604d287724956e0b214a2c9974bc3913d767a5506b5f71875d725b6556a45cae"
+      },
+      "consequence": {
+        "schema": "hs.keyboard-cut-donor-consequence.v1",
+        "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+        "cut_path_sha256": "604d287724956e0b214a2c9974bc3913d767a5506b5f71875d725b6556a45cae",
+        "total_reference_switch_candidates": 62,
+        "sacrificed_switches": [
+          {
+            "ref": "K15",
+            "x": 133.35,
+            "y": 47.625,
+            "value": "T",
+            "source_footprint": "footprints:CHERRY_PCB_100H"
+          },
+          {
+            "ref": "K25",
+            "x": 138.1125,
+            "y": 66.675,
+            "value": "G",
+            "source_footprint": "footprints:CHERRY_PCB_100H"
+          },
+          {
+            "ref": "K36",
+            "x": 147.6375,
+            "y": 85.725,
+            "value": "B",
+            "source_footprint": "footprints:CHERRY_PCB_100H"
+          },
+          {
+            "ref": "K[0]5",
+            "x": 123.825,
+            "y": 28.575,
+            "value": "5",
+            "source_footprint": "footprints:CHERRY_PCB_100H"
+          },
+          {
+            "ref": "K[0]6",
+            "x": 142.875,
+            "y": 28.575,
+            "value": "6",
+            "source_footprint": "footprints:CHERRY_PCB_100H"
+          }
+        ],
+        "sacrificed_key_count": 5,
+        "remaining_switches": 57,
+        "remaining_left": 24,
+        "remaining_right": 33,
+        "remaining_split_balance_pass": true,
+        "structural_or_electrically_unqualified_pad_hits": [],
+        "nonplated_holes_inside_sacrificed_switches": [
+          {
+            "ref": "K36",
+            "pad": "",
+            "net": "",
+            "pad_attribute": 3
+          }
+        ],
+        "live_electrical_pad_hits": [],
+        "via_hits": [],
+        "critical_device_hits": [],
+        "reference_layout_assembly_verified": false,
+        "source_donor_physical_identity_verified": false,
+        "manufacturing_authority": false,
+        "nominally_salvageable_except_sacrificed_switches": true
+      },
+      "rank": [
+        0,
+        0,
+        0,
+        0,
+        5,
+        1,
+        119.214
+      ]
+    },
+    {
+      "strategy": "left-protect-keys",
+      "route": {
+        "schema": "hs.keyboard-stepped-cut-solver.v1",
+        "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+        "method": "deterministic monotone-grid DP + exact Shapely buffered path collision replay",
+        "cut_points_mm": [
+          [
+            135.5725,
+            18.975
+          ],
+          [
+            135.5725,
+            19.9688
+          ],
+          [
+            135.5725,
+            20.9625
+          ],
+          [
+            135.5725,
+            21.9563
+          ],
+          [
+            136.5669,
+            22.95
+          ],
+          [
+            136.5669,
+            23.9438
+          ],
+          [
+            135.5725,
+            24.9375
+          ],
+          [
+            135.5725,
+            25.9313
+          ],
+          [
+            133.5836,
+            26.925
+          ],
+          [
+            133.5836,
+            27.9188
+          ],
+          [
+            133.5836,
+            28.9125
+          ],
+          [
+            133.5836,
+            29.9062
+          ],
+          [
+            133.5836,
+            30.9
+          ],
+          [
+            132.5892,
+            31.8938
+          ],
+          [
+            130.6003,
+            32.8875
+          ],
+          [
+            130.6003,
+            33.8813
+          ],
+          [
+            130.6003,
+            34.875
+          ],
+          [
+            130.6003,
+            35.8688
+          ],
+          [
+            130.6003,
+            36.8625
+          ],
+          [
+            130.6003,
+            37.8563
+          ],
+          [
+            129.6059,
+            38.85
+          ],
+          [
+            127.617,
+            39.8438
+          ],
+          [
+            126.6226,
+            40.8375
+          ],
+          [
+            126.6226,
+            41.8312
+          ],
+          [
+            126.6226,
+            42.825
+          ],
+          [
+            126.6226,
+            43.8188
+          ],
+          [
+            125.6281,
+            44.8125
+          ],
+          [
+            123.6393,
+            45.8063
+          ],
+          [
+            123.6393,
+            46.8
+          ],
+          [
+            123.6393,
+            47.7938
+          ],
+          [
+            123.6393,
+            48.7875
+          ],
+          [
+            123.6393,
+            49.7812
+          ],
+          [
+            125.6281,
+            50.775
+          ],
+          [
+            126.6226,
+            51.7688
+          ],
+          [
+            126.6226,
+            52.7625
+          ],
+          [
+            126.6226,
+            53.7563
+          ],
+          [
+            126.6226,
+            54.75
+          ],
+          [
+            128.6114,
+            55.7438
+          ],
+          [
+            130.6003,
+            56.7375
+          ],
+          [
+            131.5947,
+            57.7313
+          ],
+          [
+            131.5947,
+            58.725
+          ],
+          [
+            131.5947,
+            59.7188
+          ],
+          [
+            131.5947,
+            60.7125
+          ],
+          [
+            131.5947,
+            61.7063
+          ],
+          [
+            131.5947,
+            62.7
+          ],
+          [
+            130.6003,
+            63.6938
+          ],
+          [
+            128.6114,
+            64.6875
+          ],
+          [
+            128.6114,
+            65.6813
+          ],
+          [
+            128.6114,
+            66.675
+          ],
+          [
+            128.6114,
+            67.6688
+          ],
+          [
+            128.6114,
+            68.6625
+          ],
+          [
+            130.6003,
+            69.6562
+          ],
+          [
+            131.5947,
+            70.65
+          ],
+          [
+            131.5947,
+            71.6438
+          ],
+          [
+            131.5947,
+            72.6375
+          ],
+          [
+            131.5947,
+            73.6312
+          ],
+          [
+            132.5892,
+            74.625
+          ],
+          [
+            134.578,
+            75.6188
+          ],
+          [
+            135.5725,
+            76.6125
+          ],
+          [
+            135.5725,
+            77.6063
+          ],
+          [
+            135.5725,
+            78.6
+          ],
+          [
+            135.5725,
+            79.5938
+          ],
+          [
+            136.5669,
+            80.5875
+          ],
+          [
+            138.5558,
+            81.5813
+          ],
+          [
+            138.5558,
+            82.575
+          ],
+          [
+            138.5558,
+            83.5687
+          ],
+          [
+            139.5502,
+            84.5625
+          ],
+          [
+            139.5502,
+            85.5563
+          ],
+          [
+            139.5502,
+            86.55
+          ],
+          [
+            140.5447,
+            87.5438
+          ],
+          [
+            141.5391,
+            88.5375
+          ],
+          [
+            140.5447,
+            89.5312
+          ],
+          [
+            139.5502,
+            90.525
+          ],
+          [
+            139.5502,
+            91.5188
+          ],
+          [
+            140.5447,
+            92.5125
+          ],
+          [
+            142.5335,
+            93.5062
+          ],
+          [
+            142.5335,
+            94.5
+          ],
+          [
+            142.5335,
+            95.4938
+          ],
+          [
+            142.5335,
+            96.4875
+          ],
+          [
+            140.5447,
+            97.4813
+          ],
+          [
+            140.5447,
+            98.475
+          ],
+          [
+            140.5447,
+            99.4688
+          ],
+          [
+            140.5447,
+            100.4625
+          ],
+          [
+            140.5447,
+            101.4563
+          ],
+          [
+            140.5447,
+            102.45
+          ],
+          [
+            140.5447,
+            103.4437
+          ],
+          [
+            140.5447,
+            104.4375
+          ],
+          [
+            140.5447,
+            105.4313
+          ],
+          [
+            140.5447,
+            106.425
+          ],
+          [
+            140.5447,
+            107.4188
+          ],
+          [
+            140.5447,
+            108.4125
+          ],
+          [
+            140.5447,
+            109.4062
+          ],
+          [
+            140.5447,
+            110.4
+          ],
+          [
+            140.5447,
+            111.3938
+          ],
+          [
+            140.5447,
+            112.3875
+          ],
+          [
+            140.5447,
+            113.3812
+          ],
+          [
+            140.5447,
+            114.375
+          ]
+        ],
+        "cut_path_type": "stepped_polyline",
+        "kerf_mm": 1.0,
+        "grid_step_mm": 1.0,
+        "max_lateral_step_mm": 3.0,
+        "objective_score": 460040.951,
+        "search_parameters": {
+          "x_fraction_min": 0.3,
+          "x_fraction_max": 0.7,
+          "target_fraction": 0.42,
+          "switch_penalty": 15000.0,
+          "pad_penalty": 20000.0
+        },
+        "switch_candidates_left": 25,
+        "switch_candidates_right": 37,
+        "nominal_path_length_mm": 119.214,
+        "collision_counts": {
+          "pads": 1,
+          "vias": 0,
+          "switches": 5,
+          "critical": 0
+        },
+        "affected_nets": [
+          "/C10",
+          "/C11",
+          "/C12",
+          "/C13",
+          "/C5",
+          "/C6",
+          "/C7",
+          "/C8",
+          "/C9",
+          "/R0",
+          "/R1",
+          "/R2",
+          "/R3",
+          "/R4",
+          "Net-(D35-Pad2)"
+        ],
+        "affected_net_count": 15,
+        "source_geometry_issues": [],
+        "modeled_clear_of_listed_components": false,
+        "source_footprints_may_have_alternative_layouts": true,
+        "physical_cut_authorized": false,
+        "release": "PROPOSED_CUT_ONLY_NOT_VERIFIED",
+        "blockers": [
+          "Actual installed switches, PCB stackup, case, plate and mounting keepouts not verified",
+          "Pads modeled with conservative circles; nonrectangular pads and tilted footprints approximate",
+          "Original PCB is a design reference, not a registered physical donor",
+          "No mechanical or fabrication authority; physical cutting prohibited until independently reviewed",
+          "Proposed path intersects recorded copper pads, vias, switches or critical components"
+        ],
+        "payload_sha256": "08db5bde52ef7e2426ddb901c4e622ff4c14a125fcfe7c6ad0649445966ba466"
+      },
+      "consequence": {
+        "schema": "hs.keyboard-cut-donor-consequence.v1",
+        "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+        "cut_path_sha256": "08db5bde52ef7e2426ddb901c4e622ff4c14a125fcfe7c6ad0649445966ba466",
+        "total_reference_switch_candidates": 62,
+        "sacrificed_switches": [
+          {
+            "ref": "K15",
+            "x": 133.35,
+            "y": 47.625,
+            "value": "T",
+            "source_footprint": "footprints:CHERRY_PCB_100H"
+          },
+          {
+            "ref": "K25",
+            "x": 138.1125,
+            "y": 66.675,
+            "value": "G",
+            "source_footprint": "footprints:CHERRY_PCB_100H"
+          },
+          {
+            "ref": "K36",
+            "x": 147.6375,
+            "y": 85.725,
+            "value": "B",
+            "source_footprint": "footprints:CHERRY_PCB_100H"
+          },
+          {
+            "ref": "K[0]5",
+            "x": 123.825,
+            "y": 28.575,
+            "value": "5",
+            "source_footprint": "footprints:CHERRY_PCB_100H"
+          },
+          {
+            "ref": "K[0]6",
+            "x": 142.875,
+            "y": 28.575,
+            "value": "6",
+            "source_footprint": "footprints:CHERRY_PCB_100H"
+          }
+        ],
+        "sacrificed_key_count": 5,
+        "remaining_switches": 57,
+        "remaining_left": 24,
+        "remaining_right": 33,
+        "remaining_split_balance_pass": true,
+        "structural_or_electrically_unqualified_pad_hits": [],
+        "nonplated_holes_inside_sacrificed_switches": [],
+        "live_electrical_pad_hits": [
+          {
+            "ref": "D[0]5",
+            "pad": "1",
+            "net": "/R0",
+            "pad_attribute": 0
+          }
+        ],
+        "via_hits": [],
+        "critical_device_hits": [],
+        "reference_layout_assembly_verified": false,
+        "source_donor_physical_identity_verified": false,
+        "manufacturing_authority": false,
+        "nominally_salvageable_except_sacrificed_switches": false
+      },
+      "rank": [
+        0,
+        0,
+        1,
+        0,
+        5,
+        0,
+        119.214
+      ]
+    },
+    {
+      "strategy": "extended-right",
+      "route": {
+        "schema": "hs.keyboard-stepped-cut-solver.v1",
+        "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+        "method": "deterministic monotone-grid DP + exact Shapely buffered path collision replay",
+        "cut_points_mm": [
+          [
+            206.8047,
+            18.975
+          ],
+          [
+            206.8047,
+            19.9688
+          ],
+          [
+            206.8047,
+            20.9625
+          ],
+          [
+            206.8047,
+            21.9563
+          ],
+          [
+            206.8047,
+            22.95
+          ],
+          [
+            206.8047,
+            23.9438
+          ],
+          [
+            206.8047,
+            24.9375
+          ],
+          [
+            207.802,
+            25.9313
+          ],
+          [
+            209.7966,
+            26.925
+          ],
+          [
+            209.7966,
+            27.9188
+          ],
+          [
+            209.7966,
+            28.9125
+          ],
+          [
+            209.7966,
+            29.9062
+          ],
+          [
+            209.7966,
+            30.9
+          ],
+          [
+            211.7913,
+            31.8938
+          ],
+          [
+            212.7886,
+            32.8875
+          ],
+          [
+            212.7886,
+            33.8813
+          ],
+          [
+            211.7913,
+            34.875
+          ],
+          [
+            211.7913,
+            35.8688
+          ],
+          [
+            209.7966,
+            36.8625
+          ],
+          [
+            207.802,
+            37.8563
+          ],
+          [
+            205.8073,
+            38.85
+          ],
+          [
+            203.8127,
+            39.8438
+          ],
+          [
+            202.8153,
+            40.8375
+          ],
+          [
+            202.8153,
+            41.8312
+          ],
+          [
+            202.8153,
+            42.825
+          ],
+          [
+            202.8153,
+            43.8188
+          ],
+          [
+            201.818,
+            44.8125
+          ],
+          [
+            199.8234,
+            45.8063
+          ],
+          [
+            199.8234,
+            46.8
+          ],
+          [
+            199.8234,
+            47.7938
+          ],
+          [
+            199.8234,
+            48.7875
+          ],
+          [
+            199.8234,
+            49.7812
+          ],
+          [
+            197.8287,
+            50.775
+          ],
+          [
+            196.8314,
+            51.7688
+          ],
+          [
+            196.8314,
+            52.7625
+          ],
+          [
+            196.8314,
+            53.7563
+          ],
+          [
+            196.8314,
+            54.75
+          ],
+          [
+            195.8341,
+            55.7438
+          ],
+          [
+            193.8394,
+            56.7375
+          ],
+          [
+            191.8448,
+            57.7313
+          ],
+          [
+            189.8501,
+            58.725
+          ],
+          [
+            188.8528,
+            59.7188
+          ],
+          [
+            188.8528,
+            60.7125
+          ],
+          [
+            188.8528,
+            61.7063
+          ],
+          [
+            188.8528,
+            62.7
+          ],
+          [
+            187.8555,
+            63.6938
+          ],
+          [
+            185.8608,
+            64.6875
+          ],
+          [
+            185.8608,
+            65.6813
+          ],
+          [
+            185.8608,
+            66.675
+          ],
+          [
+            185.8608,
+            67.6688
+          ],
+          [
+            185.8608,
+            68.6625
+          ],
+          [
+            187.8555,
+            69.6562
+          ],
+          [
+            188.8528,
+            70.65
+          ],
+          [
+            188.8528,
+            71.6438
+          ],
+          [
+            188.8528,
+            72.6375
+          ],
+          [
+            188.8528,
+            73.6312
+          ],
+          [
+            189.8501,
+            74.625
+          ],
+          [
+            190.8474,
+            75.6188
+          ],
+          [
+            190.8474,
+            76.6125
+          ],
+          [
+            190.8474,
+            77.6063
+          ],
+          [
+            191.8448,
+            78.6
+          ],
+          [
+            192.8421,
+            79.5938
+          ],
+          [
+            193.8394,
+            80.5875
+          ],
+          [
+            194.8367,
+            81.5813
+          ],
+          [
+            194.8367,
+            82.575
+          ],
+          [
+            194.8367,
+            83.5687
+          ],
+          [
+            194.8367,
+            84.5625
+          ],
+          [
+            194.8367,
+            85.5563
+          ],
+          [
+            195.8341,
+            86.55
+          ],
+          [
+            197.8287,
+            87.5438
+          ],
+          [
+            197.8287,
+            88.5375
+          ],
+          [
+            197.8287,
+            89.5312
+          ],
+          [
+            196.8314,
+            90.525
+          ],
+          [
+            194.8367,
+            91.5188
+          ],
+          [
+            192.8421,
+            92.5125
+          ],
+          [
+            190.8474,
+            93.5062
+          ],
+          [
+            190.8474,
+            94.5
+          ],
+          [
+            190.8474,
+            95.4938
+          ],
+          [
+            190.8474,
+            96.4875
+          ],
+          [
+            190.8474,
+            97.4813
+          ],
+          [
+            190.8474,
+            98.475
+          ],
+          [
+            190.8474,
+            99.4688
+          ],
+          [
+            190.8474,
+            100.4625
+          ],
+          [
+            190.8474,
+            101.4563
+          ],
+          [
+            190.8474,
+            102.45
+          ],
+          [
+            190.8474,
+            103.4437
+          ],
+          [
+            190.8474,
+            104.4375
+          ],
+          [
+            190.8474,
+            105.4313
+          ],
+          [
+            190.8474,
+            106.425
+          ],
+          [
+            190.8474,
+            107.4188
+          ],
+          [
+            190.8474,
+            108.4125
+          ],
+          [
+            190.8474,
+            109.4062
+          ],
+          [
+            190.8474,
+            110.4
+          ],
+          [
+            190.8474,
+            111.3938
+          ],
+          [
+            190.8474,
+            112.3875
+          ],
+          [
+            190.8474,
+            113.3812
+          ],
+          [
+            190.8474,
+            114.375
+          ]
+        ],
+        "cut_path_type": "stepped_polyline",
+        "kerf_mm": 1.0,
+        "grid_step_mm": 1.0,
+        "max_lateral_step_mm": 3.0,
+        "objective_score": 54847.592,
+        "search_parameters": {
+          "x_fraction_min": 0.2,
+          "x_fraction_max": 0.8,
+          "target_fraction": 0.6,
+          "switch_penalty": 1200.0,
+          "pad_penalty": 20000.0
+        },
+        "switch_candidates_left": 40,
+        "switch_candidates_right": 22,
+        "nominal_path_length_mm": 123.845,
+        "collision_counts": {
+          "pads": 1,
+          "vias": 0,
+          "switches": 6,
+          "critical": 0
+        },
+        "affected_nets": [
+          "/C10",
+          "/C11",
+          "/C12",
+          "/C13",
+          "/C8",
+          "/C9",
+          "/R0",
+          "/R1",
+          "/R2",
+          "/R3",
+          "/R4",
+          "Net-(D38-Pad2)",
+          "Net-(D[0]9-Pad2)"
+        ],
+        "affected_net_count": 13,
+        "source_geometry_issues": [],
+        "modeled_clear_of_listed_components": false,
+        "source_footprints_may_have_alternative_layouts": true,
+        "physical_cut_authorized": false,
+        "release": "PROPOSED_CUT_ONLY_NOT_VERIFIED",
+        "blockers": [
+          "Actual installed switches, PCB stackup, case, plate and mounting keepouts not verified",
+          "Pads modeled with conservative circles; nonrectangular pads and tilted footprints approximate",
+          "Original PCB is a design reference, not a registered physical donor",
+          "No mechanical or fabrication authority; physical cutting prohibited until independently reviewed",
+          "Proposed path intersects recorded copper pads, vias, switches or critical components"
+        ],
+        "payload_sha256": "66de4d8f24f2c7312109e940a6cfb5dc1310480aea1ea1981024535e0879c304"
+      },
+      "consequence": {
+        "schema": "hs.keyboard-cut-donor-consequence.v1",
+        "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+        "cut_path_sha256": "66de4d8f24f2c7312109e940a6cfb5dc1310480aea1ea1981024535e0879c304",
+        "total_reference_switch_candidates": 62,
+        "sacrificed_switches": [
+          {
+            "ref": "K18",
+            "x": 190.5,
+            "y": 47.625,
+            "value": "I",
+            "source_footprint": "footprints:CHERRY_PCB_100H"
+          },
+          {
+            "ref": "K19",
+            "x": 209.55,
+            "y": 47.625,
+            "value": "O",
+            "source_footprint": "footprints:CHERRY_PCB_100H"
+          },
+          {
+            "ref": "K28",
+            "x": 195.2625,
+            "y": 66.675,
+            "value": "K",
+            "source_footprint": "footprints:CHERRY_PCB_100H"
+          },
+          {
+            "ref": "K39",
+            "x": 204.7875,
+            "y": 85.725,
+            "value": ",",
+            "source_footprint": "footprints:CHERRY_PCB_100H"
+          },
+          {
+            "ref": "K[0]9",
+            "x": 200.025,
+            "y": 28.575,
+            "value": "9",
+            "source_footprint": "footprints:CHERRY_PCB_100H"
+          },
+          {
+            "ref": "K[A]0",
+            "x": 219.075,
+            "y": 28.575,
+            "value": "0",
+            "source_footprint": "footprints:CHERRY_PCB_100H"
+          }
+        ],
+        "sacrificed_key_count": 6,
+        "remaining_switches": 56,
+        "remaining_left": 38,
+        "remaining_right": 18,
+        "remaining_split_balance_pass": true,
+        "structural_or_electrically_unqualified_pad_hits": [],
+        "nonplated_holes_inside_sacrificed_switches": [],
+        "live_electrical_pad_hits": [
+          {
+            "ref": "D38",
+            "pad": "1",
+            "net": "/R3",
+            "pad_attribute": 0
+          }
+        ],
+        "via_hits": [],
+        "critical_device_hits": [],
+        "reference_layout_assembly_verified": false,
+        "source_donor_physical_identity_verified": false,
+        "manufacturing_authority": false,
+        "nominally_salvageable_except_sacrificed_switches": false
+      },
+      "rank": [
+        0,
+        0,
+        1,
+        0,
+        6,
+        0,
+        123.845
+      ]
+    },
+    {
+      "strategy": "extended-center",
+      "route": {
+        "schema": "hs.keyboard-stepped-cut-solver.v1",
+        "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+        "method": "deterministic monotone-grid DP + exact Shapely buffered path collision replay",
+        "cut_points_mm": [
+          [
+            206.8047,
+            18.975
+          ],
+          [
+            206.8047,
+            19.9688
+          ],
+          [
+            206.8047,
+            20.9625
+          ],
+          [
+            206.8047,
+            21.9563
+          ],
+          [
+            206.8047,
+            22.95
+          ],
+          [
+            206.8047,
+            23.9438
+          ],
+          [
+            206.8047,
+            24.9375
+          ],
+          [
+            207.802,
+            25.9313
+          ],
+          [
+            209.7966,
+            26.925
+          ],
+          [
+            209.7966,
+            27.9188
+          ],
+          [
+            209.7966,
+            28.9125
+          ],
+          [
+            209.7966,
+            29.9062
+          ],
+          [
+            209.7966,
+            30.9
+          ],
+          [
+            211.7913,
+            31.8938
+          ],
+          [
+            212.7886,
+            32.8875
+          ],
+          [
+            212.7886,
+            33.8813
+          ],
+          [
+            211.7913,
+            34.875
+          ],
+          [
+            211.7913,
+            35.8688
+          ],
+          [
+            209.7966,
+            36.8625
+          ],
+          [
+            207.802,
+            37.8563
+          ],
+          [
+            205.8073,
+            38.85
+          ],
+          [
+            203.8127,
+            39.8438
+          ],
+          [
+            202.8153,
+            40.8375
+          ],
+          [
+            202.8153,
+            41.8312
+          ],
+          [
+            202.8153,
+            42.825
+          ],
+          [
+            202.8153,
+            43.8188
+          ],
+          [
+            201.818,
+            44.8125
+          ],
+          [
+            199.8234,
+            45.8063
+          ],
+          [
+            199.8234,
+            46.8
+          ],
+          [
+            199.8234,
+            47.7938
+          ],
+          [
+            199.8234,
+            48.7875
+          ],
+          [
+            199.8234,
+            49.7812
+          ],
+          [
+            197.8287,
+            50.775
+          ],
+          [
+            196.8314,
+            51.7688
+          ],
+          [
+            196.8314,
+            52.7625
+          ],
+          [
+            196.8314,
+            53.7563
+          ],
+          [
+            196.8314,
+            54.75
+          ],
+          [
+            195.8341,
+            55.7438
+          ],
+          [
+            193.8394,
+            56.7375
+          ],
+          [
+            191.8448,
+            57.7313
+          ],
+          [
+            189.8501,
+            58.725
+          ],
+          [
+            188.8528,
+            59.7188
+          ],
+          [
+            188.8528,
+            60.7125
+          ],
+          [
+            188.8528,
+            61.7063
+          ],
+          [
+            188.8528,
+            62.7
+          ],
+          [
+            187.8555,
+            63.6938
+          ],
+          [
+            185.8608,
+            64.6875
+          ],
+          [
+            185.8608,
+            65.6813
+          ],
+          [
+            185.8608,
+            66.675
+          ],
+          [
+            185.8608,
+            67.6688
+          ],
+          [
+            185.8608,
+            68.6625
+          ],
+          [
+            187.8555,
+            69.6562
+          ],
+          [
+            188.8528,
+            70.65
+          ],
+          [
+            188.8528,
+            71.6438
+          ],
+          [
+            188.8528,
+            72.6375
+          ],
+          [
+            188.8528,
+            73.6312
+          ],
+          [
+            188.8528,
+            74.625
+          ],
+          [
+            188.8528,
+            75.6188
+          ],
+          [
+            188.8528,
+            76.6125
+          ],
+          [
+            190.8474,
+            77.6063
+          ],
+          [
+            191.8448,
+            78.6
+          ],
+          [
+            192.8421,
+            79.5938
+          ],
+          [
+            193.8394,
+            80.5875
+          ],
+          [
+            194.8367,
+            81.5813
+          ],
+          [
+            194.8367,
+            82.575
+          ],
+          [
+            194.8367,
+            83.5687
+          ],
+          [
+            194.8367,
+            84.5625
+          ],
+          [
+            194.8367,
+            85.5563
+          ],
+          [
+            195.8341,
+            86.55
+          ],
+          [
+            197.8287,
+            87.5438
+          ],
+          [
+            197.8287,
+            88.5375
+          ],
+          [
+            197.8287,
+            89.5312
+          ],
+          [
+            196.8314,
+            90.525
+          ],
+          [
+            194.8367,
+            91.5188
+          ],
+          [
+            192.8421,
+            92.5125
+          ],
+          [
+            190.8474,
+            93.5062
+          ],
+          [
+            188.8528,
+            94.5
+          ],
+          [
+            186.8581,
+            95.4938
+          ],
+          [
+            184.8635,
+            96.4875
+          ],
+          [
+            182.8688,
+            97.4813
+          ],
+          [
+            180.8742,
+            98.475
+          ],
+          [
+            178.8795,
+            99.4688
+          ],
+          [
+            176.8849,
+            100.4625
+          ],
+          [
+            174.8902,
+            101.4563
+          ],
+          [
+            172.8956,
+            102.45
+          ],
+          [
+            170.9009,
+            103.4437
+          ],
+          [
+            168.9063,
+            104.4375
+          ],
+          [
+            168.9063,
+            105.4313
+          ],
+          [
+            168.9063,
+            106.425
+          ],
+          [
+            168.9063,
+            107.4188
+          ],
+          [
+            168.9063,
+            108.4125
+          ],
+          [
+            168.9063,
+            109.4062
+          ],
+          [
+            168.9063,
+            110.4
+          ],
+          [
+            168.9063,
+            111.3938
+          ],
+          [
+            168.9063,
+            112.3875
+          ],
+          [
+            168.9063,
+            113.3812
+          ],
+          [
+            168.9063,
+            114.375
+          ]
+        ],
+        "cut_path_type": "stepped_polyline",
+        "kerf_mm": 1.0,
+        "grid_step_mm": 1.0,
+        "max_lateral_step_mm": 3.0,
+        "objective_score": 54949.599,
+        "search_parameters": {
+          "x_fraction_min": 0.2,
+          "x_fraction_max": 0.8,
+          "target_fraction": 0.5,
+          "switch_penalty": 1200.0,
+          "pad_penalty": 20000.0
+        },
+        "switch_candidates_left": 40,
+        "switch_candidates_right": 22,
+        "nominal_path_length_mm": 137.834,
+        "collision_counts": {
+          "pads": 1,
+          "vias": 0,
+          "switches": 6,
+          "critical": 0
+        },
+        "affected_nets": [
+          "/C10",
+          "/C11",
+          "/C12",
+          "/C13",
+          "/C8",
+          "/C9",
+          "/R0",
+          "/R1",
+          "/R2",
+          "/R3",
+          "/R4",
+          "Net-(D38-Pad2)",
+          "Net-(D[0]9-Pad2)"
+        ],
+        "affected_net_count": 13,
+        "source_geometry_issues": [],
+        "modeled_clear_of_listed_components": false,
+        "source_footprints_may_have_alternative_layouts": true,
+        "physical_cut_authorized": false,
+        "release": "PROPOSED_CUT_ONLY_NOT_VERIFIED",
+        "blockers": [
+          "Actual installed switches, PCB stackup, case, plate and mounting keepouts not verified",
+          "Pads modeled with conservative circles; nonrectangular pads and tilted footprints approximate",
+          "Original PCB is a design reference, not a registered physical donor",
+          "No mechanical or fabrication authority; physical cutting prohibited until independently reviewed",
+          "Proposed path intersects recorded copper pads, vias, switches or critical components"
+        ],
+        "payload_sha256": "f5568e8ae724e1b04b439b4064ec97b6a82a43418833a9a3454248687adc7efa"
+      },
+      "consequence": {
+        "schema": "hs.keyboard-cut-donor-consequence.v1",
+        "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+        "cut_path_sha256": "f5568e8ae724e1b04b439b4064ec97b6a82a43418833a9a3454248687adc7efa",
+        "total_reference_switch_candidates": 62,
+        "sacrificed_switches": [
+          {
+            "ref": "K18",
+            "x": 190.5,
+            "y": 47.625,
+            "value": "I",
+            "source_footprint": "footprints:CHERRY_PCB_100H"
+          },
+          {
+            "ref": "K19",
+            "x": 209.55,
+            "y": 47.625,
+            "value": "O",
+            "source_footprint": "footprints:CHERRY_PCB_100H"
+          },
+          {
+            "ref": "K28",
+            "x": 195.2625,
+            "y": 66.675,
+            "value": "K",
+            "source_footprint": "footprints:CHERRY_PCB_100H"
+          },
+          {
+            "ref": "K39",
+            "x": 204.7875,
+            "y": 85.725,
+            "value": ",",
+            "source_footprint": "footprints:CHERRY_PCB_100H"
+          },
+          {
+            "ref": "K[0]9",
+            "x": 200.025,
+            "y": 28.575,
+            "value": "9",
+            "source_footprint": "footprints:CHERRY_PCB_100H"
+          },
+          {
+            "ref": "K[A]0",
+            "x": 219.075,
+            "y": 28.575,
+            "value": "0",
+            "source_footprint": "footprints:CHERRY_PCB_100H"
+          }
+        ],
+        "sacrificed_key_count": 6,
+        "remaining_switches": 56,
+        "remaining_left": 38,
+        "remaining_right": 18,
+        "remaining_split_balance_pass": true,
+        "structural_or_electrically_unqualified_pad_hits": [],
+        "nonplated_holes_inside_sacrificed_switches": [],
+        "live_electrical_pad_hits": [
+          {
+            "ref": "D38",
+            "pad": "1",
+            "net": "/R3",
+            "pad_attribute": 0
+          }
+        ],
+        "via_hits": [],
+        "critical_device_hits": [],
+        "reference_layout_assembly_verified": false,
+        "source_donor_physical_identity_verified": false,
+        "manufacturing_authority": false,
+        "nominally_salvageable_except_sacrificed_switches": false
+      },
+      "rank": [
+        0,
+        0,
+        1,
+        0,
+        6,
+        0,
+        137.834
+      ]
+    }
+  ],
+  "any_remaining-key-balanced_route": true,
+  "any_nominally_essential-component-clear_route": true,
+  "physically_tested": false,
+  "fabrication_authorized": false,
+  "release": "BLOCKED_RESEARCH_ROUTE_ONLY"
+}

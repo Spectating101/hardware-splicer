@@ -1,0 +1,11 @@
+{
+  "exports/device_render.png": "75b494c5484b1b1eeca55b5a5b8d289e678e774c6b1fc7798d39a3cb92739ae3",
+  "exports/hotend_parking_plate.step": "67946e4012319e35e0916b4e4fe23c258c5f85b50be9d843faa8aa3c6a6cba67",
+  "exports/hotend_parking_plate.stl": "98e6228836ab62512ce49eb5fb015677a0a0b671dd606c636a8d55965b457dd9",
+  "exports/pen_adapter.step": "dde1a3b97e7b26df4c21f5e1b15db5d8ea68824c3c30096d9a7c593bec3f13a0",
+  "exports/pen_adapter.stl": "137b267a462c087abc4e141bc0d76ea19f165eb8a48402a3b28123ee0c1f2cc8",
+  "exports/pen_clamp.step": "21b4c069f3f04a8d906ecbe4f7206af1e7b12aa7df1cf22545a92c6c87e83095",
+  "exports/pen_clamp.stl": "d7be450acbbb687e6e251cf8e7b7d6ff226950895e96b833dfb857dcf0cf1f45",
+  "exports/plotter.glb": "38fa947b0c118e392391d81cc5b5bb426e291a2a9fccd0352adcb62cf50a9a84",
+  "exports/plotter.step": "79b2a5a665e0b19d344d52a429f444a4a6aabd7fae52dce074162d47eb7d6339"
+}

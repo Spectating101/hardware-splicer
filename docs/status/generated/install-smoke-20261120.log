@@ -1,0 +1,105 @@
+# install smoke 2026-11-20 (paths replaced with <scratch>, <checkout>, <home>)
+## build
+<scratch>/build-final.log:Successfully built hardware_splicer-1.1.0.tar.gz and hardware_splicer-1.1.0-py3-none-any.whl
+✓ 283 modules transformed.
+✓ built in 3.23s
+## sha256
+75337aefa88f6f19c4a578d3953bcbf9c340efb5bfd0b4df19a0e7796559d858  dist/hardware_splicer-1.1.0-py3-none-any.whl
+eb9ed8b2d63bb11a11d730e1fe1b94dae036cc94d276d8b0bd3962a9568f5cb4  dist/hardware_splicer-1.1.0.tar.gz
+## hs-doctor --repo-root <checkout> (summary)
+{
+ "ok": true,
+ "demo_ready": true,
+ "dependencies": {
+  "fastapi": true,
+  "uvicorn": true,
+  "pillow": true,
+  "pytest": false,
+  "cadquery": false,
+  "ngspice": true,
+  "node": true,
+  "npm": true,
+  "kicad_cli": true
+ },
+ "app_roots_exist": {
+  "root": true,
+  "circuit_ai": true,
+  "mecha_splicer": true,
+  "splicer3d": true
+ },
+ "install": {
+  "mode": "installed",
+  "repo_root": "<checkout>",
+  "repo_root_configured": true,
+  "projects_available": true,
+  "ui_build": "<scratch>/venv/lib/python3.13/site-packages/hardware_splicer/ui_dist",
+  "state_dir": "<scratch>/state",
+  "scratch_dir": "<scratch>/tmp"
+ }
+}
+## hs-doctor without checkout (summary)
+{
+ "ok": false,
+ "app_roots_exist": {
+  "root": true,
+  "circuit_ai": false,
+  "mecha_splicer": false,
+  "splicer3d": false
+ },
+ "install": {
+  "mode": "installed",
+  "repo_root": "<scratch>/venv/lib/python3.13",
+  "repo_root_configured": false,
+  "projects_available": false,
+  "ui_build": "<scratch>/venv/lib/python3.13/site-packages/hardware_splicer/ui_dist",
+  "state_dir": "<home>/.local/state/hardware-splicer",
+  "scratch_dir": "<home>/.cache/hardware-splicer"
+ }
+}
+## journey (installed wheel, --repo-root)
+Seeding: creating the Fielddeck 5 study (about a minute)…
+Seeding: running a Fielddeck requirement change (minimum work runtime 3.5 h)…
+captured <scratch>/journey/01-projects-home.jpg
+captured <scratch>/journey/02-new-project-goal.jpg
+captured <scratch>/journey/03-bench-from-goal.jpg
+captured <scratch>/journey/04-new-project-parts.jpg
+captured <scratch>/journey/05-bench-from-parts.jpg
+captured <scratch>/journey/06-new-project-reference.jpg
+captured <scratch>/journey/07-fielddeck-bench.jpg
+captured <scratch>/journey/08-fielddeck-scene-compare.jpg
+captured <scratch>/journey/09-fielddeck-face-view.jpg
+captured <scratch>/journey/10-fielddeck-revision-compare.jpg
+captured <scratch>/journey/11-fielddeck-package-next-action.jpg
+captured <scratch>/journey/12-fielddeck-evidence.jpg
+captured <scratch>/journey/13-plotter-bench.jpg
+captured <scratch>/journey/14-drone-bench-records.jpg
+captured <scratch>/journey/15-drone-package-next-action.jpg
+captured <scratch>/journey/16-phone-fielddeck-bench.jpg
+Journey passed with no console errors, failed requests or overflow.
+## journey (hardened systemd-run instance)
+Seeding: creating the Fielddeck 5 study (about a minute)…
+Seeding: running a Fielddeck requirement change (minimum work runtime 3.5 h)…
+captured <scratch>/journey-hardened/01-projects-home.jpg
+captured <scratch>/journey-hardened/02-new-project-goal.jpg
+captured <scratch>/journey-hardened/03-bench-from-goal.jpg
+captured <scratch>/journey-hardened/04-new-project-parts.jpg
+captured <scratch>/journey-hardened/05-bench-from-parts.jpg
+captured <scratch>/journey-hardened/06-new-project-reference.jpg
+captured <scratch>/journey-hardened/07-fielddeck-bench.jpg
+captured <scratch>/journey-hardened/08-fielddeck-scene-compare.jpg
+captured <scratch>/journey-hardened/09-fielddeck-face-view.jpg
+captured <scratch>/journey-hardened/10-fielddeck-revision-compare.jpg
+captured <scratch>/journey-hardened/11-fielddeck-package-next-action.jpg
+captured <scratch>/journey-hardened/12-fielddeck-evidence.jpg
+captured <scratch>/journey-hardened/13-plotter-bench.jpg
+captured <scratch>/journey-hardened/14-drone-bench-records.jpg
+captured <scratch>/journey-hardened/15-drone-package-next-action.jpg
+captured <scratch>/journey-hardened/16-phone-fielddeck-bench.jpg
+Journey passed with no console errors, failed requests or overflow.
+## persistence
+before: [('14ca9fd4-c716-4c90-a1d5-729e64a77600', None), ('83d5b50f-818b-4d83-93c3-37d549388d07', None), ('digital-14a7fe7d6a584bbc82d59ba8b5fb7dff', None), ('digital-32c00f5ca74e4f01b07061183c2210e2', None), ('drone-build', None), ('persist-smoke', None)]
+after: [('14ca9fd4-c716-4c90-a1d5-729e64a77600', None), ('83d5b50f-818b-4d83-93c3-37d549388d07', None), ('digital-14a7fe7d6a584bbc82d59ba8b5fb7dff', None), ('digital-32c00f5ca74e4f01b07061183c2210e2', None), ('drone-build', None), ('persist-smoke', None)]
+## no-checkout server
+tracebacks: 0
+## focused pytest
+248 passed, 16 skipped, 9 warnings in 217.34s (0:03:37)

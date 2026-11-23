@@ -1,0 +1,13 @@
+{
+  "pilot": "Chiayi vegetable nursery, 24-site leek tray coupon",
+  "metrics": {
+    "candidate": {
+      "measured_positions": 24,
+      "worst_modeled_depth_error_mm": 1.28
+    },
+    "control": {
+      "measured_positions": 24,
+      "worst_modeled_depth_error_mm": 4.521
+    }
+  }
+}

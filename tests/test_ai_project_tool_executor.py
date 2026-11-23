@@ -227,7 +227,7 @@ def test_unaccepted_and_nonallowlisted_actions_are_refused(tmp_path: Path) -> No
             compose_callable=lambda **_: {"ok": True},
         )
 
-    accepted_session, unsupported_action = _session("run_drc", status="accepted")
+    accepted_session, unsupported_action = _session("generate_netlist_candidate", status="accepted")
     with pytest.raises(AIActionNotExecutable):
         execute_ai_project_action_preview(
             store,

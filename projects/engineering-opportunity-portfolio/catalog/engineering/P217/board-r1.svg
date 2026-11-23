@@ -1,0 +1,59 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 2160 1620">
+  <style>rect{fill:#e7f1ed;stroke:#244e45;stroke-width:3}g[data-selected] rect{fill:#f8cb68}text{font:60px sans-serif;fill:#18372e;text-anchor:middle;dominant-baseline:middle;pointer-events:none}</style>
+  <g role="button" aria-label="Yes">
+    <rect id="target-r1c1" x="110" y="160" width="440" height="340" rx="0" />
+    <text x="330.000000" y="330.000000">Yes</text>
+  </g>
+  <g role="button" aria-label="No">
+    <rect id="target-r1c2" x="610" y="160" width="440" height="340" rx="0" />
+    <text x="830.000000" y="330.000000">No</text>
+  </g>
+  <g role="button" aria-label="Help">
+    <rect id="target-r1c3" x="1110" y="160" width="440" height="340" rx="0" />
+    <text x="1330.000000" y="330.000000">Help</text>
+  </g>
+  <g role="button" aria-label="Stop">
+    <rect id="target-r1c4" x="1610" y="160" width="440" height="340" rx="0" />
+    <text x="1830.000000" y="330.000000">Stop</text>
+  </g>
+  <g role="button" aria-label="More">
+    <rect id="target-r2c1" x="110" y="640" width="440" height="340" rx="0" />
+    <text x="330.000000" y="810.000000">More</text>
+  </g>
+  <g role="button" aria-label="Less">
+    <rect id="target-r2c2" x="610" y="640" width="440" height="340" rx="0" />
+    <text x="830.000000" y="810.000000">Less</text>
+  </g>
+  <g role="button" aria-label="Wait">
+    <rect id="target-r2c3" x="1110" y="640" width="440" height="340" rx="0" />
+    <text x="1330.000000" y="810.000000">Wait</text>
+  </g>
+  <g role="button" aria-label="Again">
+    <rect id="target-r2c4" x="1610" y="640" width="440" height="340" rx="0" />
+    <text x="1830.000000" y="810.000000">Again</text>
+  </g>
+  <g role="button" aria-label="Left">
+    <rect id="target-r3c1" x="110" y="1120" width="440" height="340" rx="0" />
+    <text x="330.000000" y="1290.000000">Left</text>
+  </g>
+  <g role="button" aria-label="Right">
+    <rect id="target-r3c2" x="610" y="1120" width="440" height="340" rx="0" />
+    <text x="830.000000" y="1290.000000">Right</text>
+  </g>
+  <g role="button" aria-label="Start">
+    <rect id="target-r3c3" x="1110" y="1120" width="440" height="340" rx="0" />
+    <text x="1330.000000" y="1290.000000">Start</text>
+  </g>
+  <g role="button" aria-label="Done">
+    <rect id="target-r3c4" x="1610" y="1120" width="440" height="340" rx="0" />
+    <text x="1830.000000" y="1290.000000">Done</text>
+  </g>
+  <script>
+document.documentElement.addEventListener('click', function (event) {
+  const cell = event.target.closest('g[role="button"]');
+  if (!cell) return;
+  document.querySelector('[data-selected]')?.removeAttribute('data-selected');
+  cell.setAttribute('data-selected', '');
+});</script>
+</svg>

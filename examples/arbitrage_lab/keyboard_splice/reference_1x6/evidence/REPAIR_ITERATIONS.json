@@ -1,0 +1,30 @@
+{
+  "schema": "hs.keyboard-copper-repair-loop.v1",
+  "source_sha256": "9b8dda6a2dbb5bd4c433151e24252592820e3e79ef9596ff7448cc89bbbdb2a2",
+  "cut_path_sha256": "47eaa1e3f29ba50917d2581e8a203bd1c0e4be5299a5a8208f8845df9efbe216",
+  "selected_strategy": "pad_only",
+  "iterations": [
+    {
+      "strategy": "pad_only",
+      "source_sha256": "9b8dda6a2dbb5bd4c433151e24252592820e3e79ef9596ff7448cc89bbbdb2a2",
+      "topology_sha256": "cde922aa725fc08181484dbe32b36dca596922edce722e17c3ea733da7038439",
+      "bridge_channels": 4,
+      "strict_unconnected_groups": 0,
+      "unconnected_required_groups": 0,
+      "isolated_terminal_free_remnants": 0,
+      "damaged_electrical_pads": 0,
+      "preexisting_source_terminal_net_gaps": 0,
+      "contact_kinds": {
+        "existing_pad": 8
+      },
+      "required_graph_connected_in_model": true
+    }
+  ],
+  "total_iterations": 1,
+  "required_graph_connected_in_model": true,
+  "unresolved_source_baseline_terminal_net_gaps": 0,
+  "verified_original_keyboard_firmware_function": false,
+  "physical_authority_granted": false,
+  "fabrication_release": "BLOCKED_REFERENCE_ONLY",
+  "result": "MODELED_POSTCUT_REQUIRED_GRAPH_RESTORED_WITH_REMNANT_ISOLATION"
+}

@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="230mm" height="270mm" viewBox="0 0 230 270">
+  <title>P099 baseline · full-size proof coupon</title>
+  <rect id="scale" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="10" y="6" width="20" height="10" />
+  <rect id="upright-blank" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="25" y="40" width="60" height="150" />
+  <circle id="guide-0" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="55" cy="60" r="5.15" />
+  <circle id="guide-1" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="55" cy="88" r="5.15" />
+  <circle id="rod-gauge" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" cx="143" cy="67" r="5" />
+  <rect id="collar-blank" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="121" y="49" width="44" height="36" />
+  <circle id="iron-bore" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="143" cy="67" r="10" />
+  <line id="tip-throw" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x1="98" y1="166" x2="98" y2="205" />
+  <line id="depth-travel" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x1="113" y1="166" x2="113" y2="169.42" />
+  <rect id="base-plate-blank" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="108" y="213" width="98" height="36" />
+  <circle id="base-mount-120" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="120" cy="231" r="3.2" />
+  <circle id="base-mount-194" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="194" cy="231" r="3.2" />
+</svg>

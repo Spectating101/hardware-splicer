@@ -1,0 +1,152 @@
+{
+  "source": "KiCad official demo PIC programmer,tag9.0.2; local pinned GPL fixture",
+  "source_sha256": "470e9b32954f3c92e1c74c5b4c29934adf28b6fd60f504803942466163da99d9",
+  "operation_path": "Production candidate REST router -> retained source edit -> native KiCad checks -> candidate download -> independent pcbnew readback",
+  "ops": [
+    {
+      "op": "move",
+      "ref": "C1",
+      "x_mm": 109.64,
+      "y_mm": 80.037
+    },
+    {
+      "op": "rotate",
+      "ref": "C2",
+      "degrees": 27
+    }
+  ],
+  "candidate_id": "cand-5df01782fa4b",
+  "native_footprint_count": 63,
+  "before_selected": {
+    "C1": {
+      "xy_mm": [
+        110.49,
+        78.867
+      ],
+      "deg": 180.0,
+      "pads": [
+        [
+          "1",
+          "VCC"
+        ],
+        [
+          "2",
+          "GND"
+        ]
+      ]
+    },
+    "C2": {
+      "xy_mm": [
+        84.582,
+        90.17
+      ],
+      "deg": 0.0,
+      "pads": [
+        [
+          "1",
+          "Net-(D1-K)"
+        ],
+        [
+          "2",
+          "GND"
+        ]
+      ]
+    }
+  },
+  "after_selected": {
+    "C1": {
+      "xy_mm": [
+        109.64,
+        80.037
+      ],
+      "deg": 180.0,
+      "pads": [
+        [
+          "1",
+          "VCC"
+        ],
+        [
+          "2",
+          "GND"
+        ]
+      ]
+    },
+    "C2": {
+      "xy_mm": [
+        84.582,
+        90.17
+      ],
+      "deg": 27.0,
+      "pads": [
+        [
+          "1",
+          "Net-(D1-K)"
+        ],
+        [
+          "2",
+          "GND"
+        ]
+      ]
+    }
+  },
+  "all_original_pad_numbers_and_nets_preserved": true,
+  "all_existing_copper_coordinates_unchanged": true,
+  "unrelated_footprints_unchanged": true,
+  "source_bytes_unchanged": true,
+  "saved_project_revision_unchanged": true,
+  "invalid_reference_http_status": 422,
+  "diff_summary": {
+    "added": 0,
+    "removed": 0,
+    "changed": 2,
+    "unchanged": 439
+  },
+  "native_checks": {
+    "engine": "kicad-cli",
+    "available": true,
+    "version": "9.0.2",
+    "ran": true,
+    "reason": null,
+    "before": {
+      "errors": 8,
+      "warnings": 67,
+      "total": 75,
+      "by_type": {
+        "hole_clearance": 4,
+        "silk_edge_clearance": 4,
+        "lib_footprint_issues": 63,
+        "starved_thermal": 4
+      }
+    },
+    "after": {
+      "errors": 13,
+      "warnings": 72,
+      "total": 85,
+      "by_type": {
+        "clearance": 2,
+        "hole_clearance": 5,
+        "courtyards_overlap": 1,
+        "silk_edge_clearance": 4,
+        "lib_footprint_issues": 63,
+        "starved_thermal": 4,
+        "silk_over_copper": 2,
+        "solder_mask_bridge": 1,
+        "silk_overlap": 3
+      }
+    },
+    "new_violations": 10
+  },
+  "review_status": "pending",
+  "limits": [
+    "Moving a footprint does not reroute its old copper.",
+    "Candidate native checks use isolated board text without donor .kicad_pro/.kicad_dru rules.",
+    "Probe starts from a retained build artifact; source-upload-to-edit continuity is not established."
+  ],
+  "physical_validation_performed": false,
+  "native_copper_item_count": 376,
+  "native_copper_item_types": {
+    "PCB_TRACK": 370,
+    "PCB_VIA": 6
+  },
+  "all_copper_item_widths_and_nets_unchanged": true
+}
