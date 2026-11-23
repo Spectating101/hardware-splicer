@@ -458,6 +458,6 @@ Call `hs_engine_doctor` before long compile loops.
 2. [`BLUEPRINT_POSITIONING_AND_FUNDING.md`](../strategy/BLUEPRINT_POSITIONING_AND_FUNDING.md) — **why HS is not dead vs Blueprint; Taiwan funding + competition plan**
 3. [`AGENT_HANDOFF.md`](../../AGENT_HANDOFF.md) — how to drive it
 4. [`SPLICE_PRODUCT.md`](../../SPLICE_PRODUCT.md) — product tiers and roadmap
-5. [`ENGINE_DONE.md`](../plans/ENGINE_DONE.md) — compile engine completion gates
+5. [`ENGINE_DONE.md`](../../ENGINE_DONE.md) — compile engine completion gates
 6. [`CIRCUIT_SYNTHESIS_LAYER_PLAN.md`](../plans/CIRCUIT_SYNTHESIS_LAYER_PLAN.md) — synthesis planners + status
 7. May baseline: [`HANDOFF_CIRCUIT_AI_HARDWARE_SPLICER_2026-05-24.md`](../../../apps/circuit-ai/docs/HANDOFF_CIRCUIT_AI_HARDWARE_SPLICER_2026-05-24.md)

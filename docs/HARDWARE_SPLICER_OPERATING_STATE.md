@@ -107,7 +107,7 @@ This satisfies the frontend-closure reopen trigger "source-bound native competit
 ### Delivered so far (2026-10-06)
 
 - **Edit operations** (`kicad_edit.py`): deterministic move, rotate, set property, set flag, add label, set track width and delete over retained bytes.
-- **Candidate proposals** (`project_candidates.py`, [`CANDIDATE_PROPOSALS.md`](archive/plans/CANDIDATE_PROPOSALS.md)): an edit or an autoroute becomes a pending staged review with a structural diff and optional DRC/ERC counts.
+- **Candidate proposals** (`project_candidates.py`, [`CANDIDATE_PROPOSALS.md`](reference/CANDIDATE_PROPOSALS.md)): an edit or an autoroute becomes a pending staged review with a structural diff and optional DRC/ERC counts.
 - **Routing** (`routing_engine.py`, [`ROUTING_ENGINE.md`](reference/ROUTING_ENGINE.md)): FreeRouting through KiCad's pcbnew, behind a capability probe and a copper-only result guard.
 - **Parts** (`parts_intel.py`, [`PARTS_INTELLIGENCE.md`](reference/PARTS_INTELLIGENCE.md)): the BOM from the design's own properties; enrichment is opt-in and carries source and as-of.
 - **3D** (`model3d.py`, [`MODEL3D.md`](MODEL3D.md)): a GLB of the retained PCB, cached by hash.

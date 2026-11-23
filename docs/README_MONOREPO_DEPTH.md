@@ -10,7 +10,7 @@
 
 The production-facing entry is `scripts/hardware_splicer.py` and the `hardware_splicer` Python package under `src/hardware_splicer/`.
 
-Engine completion gates: [`ENGINE_DONE.md`](archive/plans/ENGINE_DONE.md)
+Engine completion gates: [`ENGINE_DONE.md`](ENGINE_DONE.md)
 
 ---
 

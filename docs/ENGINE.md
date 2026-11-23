@@ -1,6 +1,6 @@
 # Hardware-Splicer engine
 
-**Target, gates, and Flux comparison:** [ENGINE_DONE.md](./archive/plans/ENGINE_DONE.md) (canonical).
+**Target, gates, and Flux comparison:** [ENGINE_DONE.md](./ENGINE_DONE.md) (canonical).
 
 **Production path:** `scripts/hardware_splicer.py` → `src/hardware_splicer/`.  
 Browser `/build` is a demo client until Phase 1 gate **1.5** is PASS.
@@ -81,12 +81,12 @@ PYTHONPATH=src python3 scripts/hardware_splicer.py splice-build \
 | Phase | Status |
 |-------|--------|
 | 0 Bootstrap compiler | Mostly done |
-| 1 Bootstrap hardening | In progress — see [ENGINE_DONE.md §7](./archive/plans/ENGINE_DONE.md#7-phase-1-gates--bootstrap-hardening) |
+| 1 Bootstrap hardening | In progress — see [ENGINE_DONE.md §7](./ENGINE_DONE.md#7-phase-1-gates--bootstrap-hardening) |
 | 2 General IR | **Done** — netlist IR, lowering, KiCad import |
 | 3 General compile | **Done** — ERC, placement, cosmetic copper, DRC; 18 netlist fixtures |
 | 4 Frontend | Blocked on gate **1.5** (TS compile fork) |
 
-Detail and per-gate PASS/OPEN: [ENGINE_DONE.md](./archive/plans/ENGINE_DONE.md).
+Detail and per-gate PASS/OPEN: [ENGINE_DONE.md](./ENGINE_DONE.md).
 
 ### General engine verify
 

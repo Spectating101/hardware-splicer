@@ -127,7 +127,7 @@ Use for **placement** after routing path works, not before.
 
 **SKiDL fit:** NL → SKiDL codegen → `generate_netlist(tool=KICAD9)` → existing import path. Faster than growing module-picker forever for **arbitrary** designs.
 
-**Already planned:** `docs/archive/plans/ENGINE_DONE.md` gate 2.5 (NL → IR). SKiDL is a shortcut for codegen, not a replacement for our IR.
+**Already planned:** `docs/ENGINE_DONE.md` gate 2.5 (NL → IR). SKiDL is a shortcut for codegen, not a replacement for our IR.
 
 ---
 
@@ -287,4 +287,4 @@ You already have Circuit.AI `/build` (ReactFlow + Three.js). For Flux parity **v
 - jlcsearch: https://github.com/tscircuit/jlcsearch
 - KiCad dev docs: https://dev-docs.kicad.org/
 - EDA MCP (KiCad 9 tools): https://conare.ai/marketplace/mcp/eda-mcp
-- Internal: `docs/archive/strategy/FLUX_TARGET.md`, `docs/archive/plans/ENGINE_DONE.md`
+- Internal: `docs/archive/strategy/FLUX_TARGET.md`, `docs/ENGINE_DONE.md`

@@ -1,7 +1,7 @@
 # Raw-document Astra experiment
 
 Status: historical v1 protocol. The failed live result is published in
-`external_assessment/proof/2026-09-13-RAW-DOCUMENT-V1-RESULT.md`; the immutable
+`../../external_assessment/proof/2026-09-13-RAW-DOCUMENT-V1-RESULT.md`; the immutable
 pre-run implementation remains tagged `astra-raw-document-v1-prerun-20260913`.
 
 ## Research question

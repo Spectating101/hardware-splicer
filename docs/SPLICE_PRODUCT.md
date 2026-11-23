@@ -234,7 +234,7 @@ python3 scripts/hardware_splicer.py splice-build \
 python3 scripts/verify_splice_demos.py --json --out /tmp/hs_splice_verify
 ```
 
-Docs: [`DEMO_SPLICE.md`](archive/demos/DEMO_SPLICE.md) (walkthrough) · [`FLUX_TARGET.md`](archive/strategy/FLUX_TARGET.md) (long-term engine bar) · [`ENGINE_DONE.md`](archive/plans/ENGINE_DONE.md) (CI gates)
+Docs: [`DEMO_SPLICE.md`](archive/demos/DEMO_SPLICE.md) (walkthrough) · [`FLUX_TARGET.md`](archive/strategy/FLUX_TARGET.md) (long-term engine bar) · [`ENGINE_DONE.md`](ENGINE_DONE.md) (CI gates)
 
 ---
 

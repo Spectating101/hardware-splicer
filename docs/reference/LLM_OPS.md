@@ -2,7 +2,7 @@
 
 Reference for text + vision LLM usage in Hardware-Splicer: quota, caching, providers, benchmarks, and what is / is not solved.
 
-Cross-project model picking guide: [`../../../docs/DASHSCOPE_MODEL_GUIDE.md`](../../../docs/DASHSCOPE_MODEL_GUIDE.md) (llm_automation repo).
+Cross-project model picking guide: [`../../../docs/DASHSCOPE_MODEL_GUIDE.md`](../../../../docs/DASHSCOPE_MODEL_GUIDE.md) (llm_automation repo).
 
 ---
 

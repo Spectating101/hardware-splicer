@@ -12,7 +12,7 @@
 | # | Artifact | Path |
 |---|----------|------|
 | 1 | One-liner + offer | [`OFFER_SPLICE_BENCH_KIT_v1.md`](OFFER_SPLICE_BENCH_KIT_v1.md) |
-| 2 | What shipped | [`../RELEASE_NOTES_v1.1.0.md`](releases/RELEASE_NOTES_v1.1.0.md) + [`RELEASE_v1.1.md`](RELEASE_v1.1.md) |
+| 2 | What shipped | [`releases/RELEASE_NOTES_v1.1.0.md`](releases/RELEASE_NOTES_v1.1.0.md) + [`RELEASE_v1.1.md`](RELEASE_v1.1.md) |
 | 3 | Demo script | [`DEMO_5_MIN_UI.md`](DEMO_5_MIN_UI.md) |
 | 4 | Sample sprint zip | `releases/sample-splice-sprint-robot-repair-cafe.zip` |
 | 5 | Honesty / cold exit | [`COLD_INTERNAL_EXIT.md`](COLD_INTERNAL_EXIT.md) (what is / isn’t claimed) |

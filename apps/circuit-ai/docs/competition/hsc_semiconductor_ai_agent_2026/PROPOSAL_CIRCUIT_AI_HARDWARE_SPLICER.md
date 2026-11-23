@@ -1,8 +1,8 @@
 # Proposal: Circuit.AI Hardware Splicer
 
 > **June 2026 update:** The canonical competition package lives at the repo root:
-> [`docs/archive/strategy/COMPETITION_PROPOSAL.md`](../../../../../../docs/COMPETITION_PROPOSAL.md) (full proposal) and
-> [`docs/archive/handoffs/COMPETITION_HANDOFF.md`](../../../../../../docs/COMPETITION_HANDOFF.md) (5-minute judge path).
+> [`docs/archive/strategy/COMPETITION_PROPOSAL.md`](../../../../../docs/archive/strategy/COMPETITION_PROPOSAL.md) (full proposal) and
+> [`docs/archive/handoffs/COMPETITION_HANDOFF.md`](../../../../../docs/archive/handoffs/COMPETITION_HANDOFF.md) (5-minute judge path).
 > Agent entry: [`docs/AGENT_HANDOFF.md`](../../../../../../docs/AGENT_HANDOFF.md).
 > This file retains the Circuit-AI authority-casefile thread; the **splice spine** (donor → carrier → bench) is now the primary competition demo.
 

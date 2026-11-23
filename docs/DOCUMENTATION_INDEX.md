@@ -6,7 +6,7 @@
 
 1. [`MACHINE_PROJECT_SPINE.md`](MACHINE_PROJECT_SPINE.md) · [`INTEGRATION_STACK.md`](INTEGRATION_STACK.md) — architecture and authority invariants  
 2. [`PROGRESSION_STATUS.md`](PROGRESSION_STATUS.md) — what is shipped right now  
-3. [`ENGINE_DONE.md`](archive/plans/ENGINE_DONE.md) — engine completion / terms  
+3. [`ENGINE_DONE.md`](ENGINE_DONE.md) — engine completion / terms  
 4. [`SPLICE_PRODUCT.md`](SPLICE_PRODUCT.md) — splice product tiers  
 5. [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) — how to run (agents)  
 6. Everything else  
@@ -85,7 +85,7 @@ kept as record, not as current truth — when they disagree with
 
 | Read | Why |
 |------|-----|
-| [`ENGINE_DONE.md`](archive/plans/ENGINE_DONE.md) | Phases, PASS/OPEN, terms |
+| [`ENGINE_DONE.md`](ENGINE_DONE.md) | Phases, PASS/OPEN, terms |
 | [`ENGINE.md`](ENGINE.md) | Pipeline map |
 | [`CIRCUIT_SYNTHESIS_LAYER_PLAN.md`](archive/plans/CIRCUIT_SYNTHESIS_LAYER_PLAN.md) | Synthesis planners |
 | [`CIRCUIT_LOGIC_AUDIT.md`](archive/audits-and-results/CIRCUIT_LOGIC_AUDIT.md) | Logic / lowering audit |
@@ -170,7 +170,7 @@ kept as record, not as current truth — when they disagree with
 
 | Doc | Role |
 |-----|------|
-| [`ENGINE_DONE.md`](archive/plans/ENGINE_DONE.md) | **Canonical engine gates** |
+| [`ENGINE_DONE.md`](ENGINE_DONE.md) | **Canonical engine gates** |
 | [`ENGINE.md`](ENGINE.md) | Pipeline diagram |
 | [`MACHINE_PROJECT_SPINE.md`](MACHINE_PROJECT_SPINE.md) | **Canonical project model**, durable revisions, staged review |
 | [`INTEGRATION_STACK.md`](INTEGRATION_STACK.md) | **Evidence-first external boundary**, donor virtual modules |

@@ -185,7 +185,7 @@ Expose our engine separately via existing `make run-mcp` (`hardware_splicer.mcp_
 
 ## References
 
-- Internal gates: [ENGINE_DONE.md](../plans/ENGINE_DONE.md)
+- Internal gates: [ENGINE_DONE.md](../../ENGINE_DONE.md)
 - Flux bar: [FLUX_TARGET.md](./FLUX_TARGET.md)
 - LLM ops: [LLM_OPS.md](../../reference/LLM_OPS.md)
 - Launch verify: [LAUNCH_PLAN.md](./LAUNCH_PLAN.md)
