@@ -715,6 +715,10 @@ def main(argv: list[str] | None = None) -> int:
               f"max_displacement_m={result['analysis']['max_displacement_m']:.6g} "
               f"max_von_mises_pa={result['analysis']['max_von_mises_pa']:.6g} "
               "(screening only)")
+    if (args.mesh_study_mm is not None or args.local_study_mm is not None) and result.get("sensitivity_blockers"):
+        # The report is saved, but the convergence gate did not pass: do not let a pipeline
+        # read this run as a usable result.
+        return 2
     return 0
 
 
