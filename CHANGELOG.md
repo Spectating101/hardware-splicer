@@ -26,7 +26,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/). Versioning foll
 - Phase 2 kickoff: `POST /v1/compose/bench-loop` and MCP `hs_compose_bench_loop` (compose + simulated/real bench closure)
 - `src/hardware_splicer/bench_loop.py` — shared bench closure for compose and splice golden loops
 - GitHub issue template: **External dry-run blocker** + `docs/EXTERNAL_DRY_RUN_ISSUE_GUIDE.md`
-- `docs/BENCH_LOOP_AGENT.md` — agent bench loop path
+- `docs/reference/BENCH_LOOP_AGENT.md` — agent bench loop path
 - Quickstart verify step 5: salvage compose+bench (simulated)
 
 ### Changed
@@ -74,7 +74,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/). Versioning foll
 ### Changed
 
 - `scripts/agent_quickstart_verify.sh` — catalog assert `count` ≥ 50
-- `docs/PRODUCT_SCALE_PLAN.md` — Phase 1 catalog milestone marked complete
+- `docs/archive/strategy/PRODUCT_SCALE_PLAN.md` — Phase 1 catalog milestone marked complete
 
 ---
 
@@ -96,9 +96,9 @@ Format based on [Keep a Changelog](https://keepachangelog.com/). Versioning foll
 
 ### Added
 
-- `docs/PRODUCT_SCALE_PLAN.md` — phased product scale plan (Phase 0–3)
+- `docs/archive/strategy/PRODUCT_SCALE_PLAN.md` — phased product scale plan (Phase 0–3)
 - `docs/AGENT_QUICKSTART.md` — 15-minute agent path (3 curls + 3 MCP tools)
-- `docs/AGENT_BUILD_DIR_POLICY.md` — MCP `hs_design_quality` build_dir rules
+- `docs/reference/AGENT_BUILD_DIR_POLICY.md` — MCP `hs_design_quality` build_dir rules
 - Phrase-only `POST /v1/compose/agent-loop` test coverage
 
 ### Changed
@@ -131,7 +131,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/). Versioning foll
 
 ### Documentation
 
-- Stable release notes: `RELEASE_NOTES_v1.1.0.md`
+- Stable release notes: `docs/releases/RELEASE_NOTES_v1.1.0.md`
 - Supersedes v1.1.0-alpha tags for production deploy references
 
 ---
@@ -182,7 +182,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/). Versioning foll
 ### Documentation
 
 - Professional packaging polish release — no engine behavior change required for upgrade from 1.0.0
-- Internal: [`docs/COMPETITIVE_PACKAGING_STRATEGY.md`](docs/COMPETITIVE_PACKAGING_STRATEGY.md) — competitor map and completion priorities
+- Internal: [`docs/archive/strategy/COMPETITIVE_PACKAGING_STRATEGY.md`](docs/archive/strategy/COMPETITIVE_PACKAGING_STRATEGY.md) — competitor map and completion priorities
 
 ---
 
@@ -196,7 +196,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/). Versioning foll
 - CI job `splice-v1`: `make verify-splice-v1` + UI build
 - Release notes, deploy stub, funding/deploy playbooks
 
-See [`RELEASE_NOTES_v1.0.md`](RELEASE_NOTES_v1.0.md) for full v1.0.0 scope.
+See [`docs/releases/RELEASE_NOTES_v1.0.md`](docs/releases/RELEASE_NOTES_v1.0.md) for full v1.0.0 scope.
 
 [1.1.0]: https://github.com/Spectating101/hardware-splicer/releases/tag/v1.1.0
 [1.0.2]: https://github.com/Spectating101/hardware-splicer/releases/tag/v1.0.2

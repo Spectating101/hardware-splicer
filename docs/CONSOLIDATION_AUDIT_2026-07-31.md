@@ -20,7 +20,7 @@ and pushed.
 ## Monorepo consolidation is complete
 
 `apps/circuit-ai` and `apps/3d-splicer` were folded in from standalone repos
-(see [`GIT_MIGRATION.md`](GIT_MIGRATION.md)). That consolidation was verified,
+(see [`GIT_MIGRATION.md`](archive/plans/GIT_MIGRATION.md)). That consolidation was verified,
 not assumed:
 
 - The final state of each standalone repo is **fully present** in this repo.

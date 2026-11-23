@@ -32,7 +32,7 @@ Do not point pilot customers at `make setup` full monorepo unless they are engin
 
 | App | Docs |
 |-----|------|
-| Splice UI | [`splice-ui/README.md`](splice-ui/README.md) · [`../docs/UI_V1.md`](../docs/UI_V1.md) |
+| Splice UI | [`splice-ui/README.md`](splice-ui/README.md) · [`../docs/UI_V1.md`](../docs/reference/UI_V1.md) |
 | Circuit-AI | [`circuit-ai/docs/README.md`](circuit-ai/docs/README.md) |
 | Mecha-splicer | [`mecha-splicer/docs/`](mecha-splicer/docs/) |
 
