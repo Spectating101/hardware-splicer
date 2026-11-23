@@ -56,7 +56,9 @@ function Source({ basis }) {
 function SelectionCard({ row, index, sidecars, findings, onShow, onSelect }) {
   if (!row) return null;
   const scene = sidecars?.[row.revision];
-  const related = findings.filter((item) => item.view.selected === row.key);
+  // One link per question: the same question can be raised by more than one record.
+  const related = findings.filter((item, index, all) => item.view.selected === row.key
+    && all.findIndex((other) => other.view.selected === row.key && other.question === item.question) === index);
   if (row.link) {
     const { link } = row;
     const end = (id) => index.byPart.get(`${row.revision}:${id}`);
