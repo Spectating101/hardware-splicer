@@ -84,6 +84,63 @@ GROUND_ESCAPES = {
 }
 
 
+# Legend limits from JLCPCB's published rigid-PCB capabilities
+# (https://jlcpcb.com/capabilities/pcb-capabilities, read 2026-11-15):
+# stroke >= 0.15 mm, text height >= 1.0 mm, pad-to-silk >= 0.15 mm.
+SILK_MIN_STROKE_MM = 0.15
+SILK_TEXT_MM = 1.0
+# KiCad's TestPoint_Pad_D1.5mm draws a 0.95 mm circle. With a 0.15 mm stroke
+# that leaves 0.125 mm to the 0.75 mm pad; 1.00 mm leaves 0.175 mm.
+TESTPOINT_SILK_RADIUS_MM = 1.0
+# Board labels, placed clear of each other, the mounting holes and footprint
+# legend at the 1.0 mm text size.
+BOARD_LABELS = (
+    ("HS SPI FLASH ADAPTER v1 REV 0.2", (145, 108)),
+    ("MODELED - NOT POWER AUTHORIZED", (145, 105.25)),
+    ("J1: 3V3 GND CLK MOSI CS# MISO", (117.5, 103.2)),
+    ("JP1 OPEN AT POWER UP/DOWN", (172, 103.8)),
+    ("ENABLE AFTER RAIL CHECK + CS HIGH", (162, 62)),
+)
+# References that would touch a neighbour's widened legend at the library position.
+REFERENCE_POSITIONS = {"R6": (161, 86.43), "TP17": (142.7, 93)}
+
+
+def apply_silkscreen_rules(board: pcbnew.BOARD) -> None:
+    """Size and place the legend. Touches F.Silkscreen only: no copper, drill or outline."""
+    minimum = MM(SILK_MIN_STROKE_MM)
+    for footprint in board.GetFootprints():
+        for item in footprint.GraphicalItems():
+            if item.GetLayer() != pcbnew.F_SilkS or not isinstance(item, pcbnew.PCB_SHAPE):
+                continue
+            library_width = item.GetWidth()
+            if library_width < minimum:
+                item.SetWidth(minimum)
+            if footprint.GetReference().startswith("TP") and item.GetShape() == pcbnew.SHAPE_T_CIRCLE:
+                # Keep the reference as far from the larger, wider circle as the library had it.
+                growth = MM(TESTPOINT_SILK_RADIUS_MM) + item.GetWidth() // 2 - item.GetRadius() - library_width // 2
+                item.SetRadius(MM(TESTPOINT_SILK_RADIUS_MM))
+                reference = footprint.Reference()
+                reference.SetPosition(reference.GetPosition() - pcbnew.VECTOR2I(0, growth))
+    for reference, position in REFERENCE_POSITIONS.items():
+        board.FindFootprintByReference(reference).Reference().SetPosition(point(*position))
+    existing = {item.GetText(): item for item in board.GetDrawings()
+                if isinstance(item, pcbnew.PCB_TEXT) and item.GetLayer() == pcbnew.F_SilkS}
+    for value, position in BOARD_LABELS:
+        item = existing.pop(value, None)
+        if item is None:
+            item = pcbnew.PCB_TEXT(board)
+            item.SetText(value)
+            item.SetLayer(pcbnew.F_SilkS)
+            board.Add(item)
+        item.SetPosition(point(*position))
+        item.SetTextHeight(MM(SILK_TEXT_MM))
+        item.SetTextWidth(MM(SILK_TEXT_MM))
+        item.SetTextThickness(MM(SILK_MIN_STROKE_MM))
+        item.SetHorizJustify(pcbnew.GR_TEXT_H_ALIGN_CENTER)
+    if existing:
+        raise RuntimeError(f"unexpected board legend text: {sorted(existing)}")
+
+
 def add_ground_reference(board: pcbnew.BOARD) -> None:
     ground = board.FindNet("/GND")
     for (reference, number), position in GROUND_ESCAPES.items():
@@ -223,22 +280,7 @@ def build_board(netlist: Path) -> pcbnew.BOARD:
         edge.SetWidth(MM(0.05))
         board.Add(edge)
 
-    for value, pos, size in (
-        ("HS SPI FLASH ADAPTER v1 REV 0.2", (145, 108), 1.0),
-        ("MODELED - NOT POWER AUTHORIZED", (145, 105), 0.9),
-        ("J1: 3V3 GND CLK MOSI CS# MISO", (116, 107), 0.8),
-        ("JP1 OPEN AT POWER UP/DOWN", (168, 104), 0.8),
-        ("ENABLE AFTER RAIL CHECK + CS HIGH", (160, 62), 0.8),
-    ):
-        item = pcbnew.PCB_TEXT(board)
-        item.SetText(value)
-        item.SetPosition(point(*pos))
-        item.SetLayer(pcbnew.F_SilkS)
-        item.SetTextHeight(MM(size))
-        item.SetTextWidth(MM(size))
-        item.SetTextThickness(MM(0.15))
-        item.SetHorizJustify(pcbnew.GR_TEXT_H_ALIGN_CENTER)
-        board.Add(item)
+    apply_silkscreen_rules(board)
 
     add_ground_reference(board)
     return board
@@ -247,7 +289,20 @@ def build_board(netlist: Path) -> pcbnew.BOARD:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, default=OUTPUT)
+    parser.add_argument(
+        "--restyle-silkscreen",
+        type=Path,
+        metavar="BOARD",
+        help="apply the legend rules to an existing routed board in place, without rerouting",
+    )
     args = parser.parse_args()
+
+    if args.restyle_silkscreen:
+        board = pcbnew.LoadBoard(str(args.restyle_silkscreen))
+        apply_silkscreen_rules(board)
+        pcbnew.SaveBoard(str(args.restyle_silkscreen), board)
+        print(args.restyle_silkscreen)
+        return
 
     with tempfile.TemporaryDirectory(prefix="hs-spi-netlist-") as temporary:
         netlist = Path(temporary) / "spi_flash_adapter_v1.xml"

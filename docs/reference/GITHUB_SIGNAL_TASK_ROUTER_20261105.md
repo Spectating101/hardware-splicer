@@ -33,6 +33,9 @@ See evidence/github_signals/workshop_task_router_20261105/README.md.
   diff** showing a known, fixture-only F.SilkS label change. The baseline was
   byte-identical to the actual HS source design. The amended design is NOT a
   production HS revision.
+  (That size is the 2026-11-05 capture. The stored evidence was regenerated on
+  2026-11-15 after the board's silkscreen changed and is 92,043 bytes; see the
+  evidence README.)
 - Both outputs pass a digest check and are registered as optional,
   project-used specialist capabilities in HS's canonical report.
 - akcli runs in bwrap or an explicitly selected, reviewed Python container.
