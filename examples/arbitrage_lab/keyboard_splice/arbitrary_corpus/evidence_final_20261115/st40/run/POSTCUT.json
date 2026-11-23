@@ -1,0 +1,670 @@
+{
+  "schema": "hs.keyboard-postcut-copper-islands.v1",
+  "source_sha256": "cf1427e4dc9ba7c6fcd6038defa56626babeb27c3a4b239e22903cb20586ea04",
+  "cut_x_mm": 142.532,
+  "cut_path_sha256": "bf1d14e284536ea979073c34ce09181027966733ced703639768e6b1c1e1790d",
+  "cut_path_kind": "stepped_polyline",
+  "kerf_mm": 1.0,
+  "model_basis": "KiCad tracks/pads/vias and explicit filled copper zone polygons; unsupported pad shapes remain blocked",
+  "repair_mode": "adaptive_functional",
+  "trace_exposure_requires_mask_removal_and_strain_relief": true,
+  "conductive_zones_imported": 0,
+  "rule_areas_ignored_for_connectivity": 0,
+  "qualified_for_build": false,
+  "target_net_count": 8,
+  "model_pre_cut_island_count": 64,
+  "model_post_cut_island_count": 72,
+  "split_pre_cut_components": 8,
+  "candidate_graph_edges": 0,
+  "unanchored_split_components": 8,
+  "model_replay_remaining_split_components": 8,
+  "model_replay_remaining_required_components": 8,
+  "model_replay_achieved_required_restoration": false,
+  "planned_inert_track_remnants": 0,
+  "damaged_electrical_pad_count": 0,
+  "damaged_electrical_pads": [],
+  "preexisting_unconnected_terminal_net_count": 8,
+  "preexisting_unconnected_terminal_nets": {
+    "row1": 13,
+    "row3": 13,
+    "colI": 2,
+    "row0": 13,
+    "row2": 13,
+    "colJ": 2,
+    "colK": 2,
+    "colL": 2
+  },
+  "model_replay_achieved_full_restoration": false,
+  "issues": [
+    "OVAL_PAD_APPROXIMATION"
+  ],
+  "sections": [
+    {
+      "net": "colI",
+      "precut_track_only_component": 307,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 1,
+      "islands": [
+        {
+          "model_island_id": "colI::pre307::post306",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 15,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "MX21",
+              "pad": "1",
+              "x": 148.59,
+              "y": 16.51,
+              "net": "colI",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "MX33",
+              "pad": "1",
+              "x": 148.59,
+              "y": 35.56,
+              "net": "colI",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "MX45",
+              "pad": "1",
+              "x": 148.59,
+              "y": 54.61,
+              "net": "colI",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "MX9",
+              "pad": "1",
+              "x": 148.59,
+              "y": -2.54,
+              "net": "colI",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "MX21",
+              "pad": "1",
+              "x": 148.59,
+              "y": 16.51,
+              "layer": "F.Cu",
+              "net": "colI",
+              "source_geometry_id": "pad:298:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "MX33",
+              "pad": "1",
+              "x": 148.59,
+              "y": 35.56,
+              "layer": "F.Cu",
+              "net": "colI",
+              "source_geometry_id": "pad:30:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "MX45",
+              "pad": "1",
+              "x": 148.59,
+              "y": 54.61,
+              "layer": "F.Cu",
+              "net": "colI",
+              "source_geometry_id": "pad:388:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "MX9",
+              "pad": "1",
+              "x": 148.59,
+              "y": -2.54,
+              "layer": "F.Cu",
+              "net": "colI",
+              "source_geometry_id": "pad:248:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "colI::pre307::post307",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 5,
+          "intact_solder_pad_candidates": [],
+          "source_copper_contact_candidates": [],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "colJ",
+      "precut_track_only_component": 313,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 1,
+      "islands": [
+        {
+          "model_island_id": "colJ::pre313::post316",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 3,
+          "intact_solder_pad_candidates": [],
+          "source_copper_contact_candidates": [],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "colJ::pre313::post321",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 14,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "MX10",
+              "pad": "1",
+              "x": 167.64,
+              "y": -2.54,
+              "net": "colJ",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "MX22",
+              "pad": "1",
+              "x": 167.64,
+              "y": 16.51,
+              "net": "colJ",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "MX34",
+              "pad": "1",
+              "x": 167.64,
+              "y": 35.56,
+              "net": "colJ",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "MX46",
+              "pad": "1",
+              "x": 167.64,
+              "y": 54.61,
+              "net": "colJ",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "MX10",
+              "pad": "1",
+              "x": 167.64,
+              "y": -2.54,
+              "layer": "F.Cu",
+              "net": "colJ",
+              "source_geometry_id": "pad:253:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "MX22",
+              "pad": "1",
+              "x": 167.64,
+              "y": 16.51,
+              "layer": "F.Cu",
+              "net": "colJ",
+              "source_geometry_id": "pad:303:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "MX34",
+              "pad": "1",
+              "x": 167.64,
+              "y": 35.56,
+              "layer": "F.Cu",
+              "net": "colJ",
+              "source_geometry_id": "pad:338:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "MX46",
+              "pad": "1",
+              "x": 167.64,
+              "y": 54.61,
+              "layer": "F.Cu",
+              "net": "colJ",
+              "source_geometry_id": "pad:393:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "colK",
+      "precut_track_only_component": 321,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 1,
+      "islands": [
+        {
+          "model_island_id": "colK::pre321::post323",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 15,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "MX11",
+              "pad": "1",
+              "x": 186.69,
+              "y": -2.54,
+              "net": "colK",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "MX23",
+              "pad": "1",
+              "x": 186.69,
+              "y": 16.51,
+              "net": "colK",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "MX35",
+              "pad": "1",
+              "x": 186.69,
+              "y": 35.56,
+              "net": "colK",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "MX47",
+              "pad": "1",
+              "x": 186.69,
+              "y": 54.61,
+              "net": "colK",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "MX11",
+              "pad": "1",
+              "x": 186.69,
+              "y": -2.54,
+              "layer": "F.Cu",
+              "net": "colK",
+              "source_geometry_id": "pad:258:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "MX23",
+              "pad": "1",
+              "x": 186.69,
+              "y": 16.51,
+              "layer": "F.Cu",
+              "net": "colK",
+              "source_geometry_id": "pad:308:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "MX35",
+              "pad": "1",
+              "x": 186.69,
+              "y": 35.56,
+              "layer": "F.Cu",
+              "net": "colK",
+              "source_geometry_id": "pad:343:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "MX47",
+              "pad": "1",
+              "x": 186.69,
+              "y": 54.61,
+              "layer": "F.Cu",
+              "net": "colK",
+              "source_geometry_id": "pad:398:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "colK::pre321::post327",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 6,
+          "intact_solder_pad_candidates": [],
+          "source_copper_contact_candidates": [],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "colL",
+      "precut_track_only_component": 329,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 1,
+      "islands": [
+        {
+          "model_island_id": "colL::pre329::post336",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 5,
+          "intact_solder_pad_candidates": [],
+          "source_copper_contact_candidates": [],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "colL::pre329::post340",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 18,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "MX12",
+              "pad": "1",
+              "x": 205.74,
+              "y": -2.54,
+              "net": "colL",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "MX24",
+              "pad": "1",
+              "x": 205.74,
+              "y": 16.51,
+              "net": "colL",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "MX36",
+              "pad": "1",
+              "x": 205.74,
+              "y": 35.56,
+              "net": "colL",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "MX48",
+              "pad": "1",
+              "x": 205.74,
+              "y": 54.61,
+              "net": "colL",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "contact_type": "existing_pad",
+              "ref": "MX12",
+              "pad": "1",
+              "x": 205.74,
+              "y": -2.54,
+              "layer": "F.Cu",
+              "net": "colL",
+              "source_geometry_id": "pad:263:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "MX24",
+              "pad": "1",
+              "x": 205.74,
+              "y": 16.51,
+              "layer": "F.Cu",
+              "net": "colL",
+              "source_geometry_id": "pad:313:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "MX36",
+              "pad": "1",
+              "x": 205.74,
+              "y": 35.56,
+              "layer": "F.Cu",
+              "net": "colL",
+              "source_geometry_id": "pad:422:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            },
+            {
+              "contact_type": "existing_pad",
+              "ref": "MX48",
+              "pad": "1",
+              "x": 205.74,
+              "y": 54.61,
+              "layer": "F.Cu",
+              "net": "colL",
+              "source_geometry_id": "pad:403:F.Cu",
+              "exposure_length_mm": null,
+              "conductor_width_mm": null,
+              "physical_access_verified": false,
+              "inspection": "Confirm exact populated component and solderability"
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "row0",
+      "precut_track_only_component": 77,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 2,
+      "islands": [
+        {
+          "model_island_id": "row0::pre77::post46",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 22,
+          "intact_solder_pad_candidates": [],
+          "source_copper_contact_candidates": [],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "row0::pre77::post78",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 63,
+          "intact_solder_pad_candidates": [],
+          "source_copper_contact_candidates": [],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "row1",
+      "precut_track_only_component": 82,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 2,
+      "islands": [
+        {
+          "model_island_id": "row1::pre82::post110",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 25,
+          "intact_solder_pad_candidates": [],
+          "source_copper_contact_candidates": [],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "row1::pre82::post147",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 67,
+          "intact_solder_pad_candidates": [],
+          "source_copper_contact_candidates": [],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "row2",
+      "precut_track_only_component": 183,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 2,
+      "islands": [
+        {
+          "model_island_id": "row2::pre183::post185",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 47,
+          "intact_solder_pad_candidates": [],
+          "source_copper_contact_candidates": [],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "row2::pre183::post197",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 20,
+          "intact_solder_pad_candidates": [],
+          "source_copper_contact_candidates": [],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "row3",
+      "precut_track_only_component": 238,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 2,
+      "islands": [
+        {
+          "model_island_id": "row3::pre238::post241",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 52,
+          "intact_solder_pad_candidates": [],
+          "source_copper_contact_candidates": [],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "row3::pre238::post275",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 18,
+          "intact_solder_pad_candidates": [],
+          "source_copper_contact_candidates": [],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    }
+  ],
+  "bridge_edges": [],
+  "release": "BLOCKED_REFERENCE_TOPOLOGY_ONLY",
+  "payload_sha256": "e9e0ec339c3a534093eb50f4825d455afc65b4bab17eb9d5a0b3a1387bfcc889"
+}

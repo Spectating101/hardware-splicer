@@ -1,0 +1,72 @@
+{
+  "schema_version": "hardware_splicer.source_workflow_connection.v1",
+  "date": "2026-11-18",
+  "baseline_commit": "322e12c2",
+  "scope": "Backend-only digital native source editing and flexible circuit input preservation.",
+  "user_outcome": "A supplied native KiCad board can be retained, edited through bounded SDK/API/AI actions, reviewed, rechecked at the exact edited revision, and exported with its original project/rule bytes.",
+  "connected_workflow": [
+    "Upload native source files into a project with content hashes.",
+    "Select one project stem and promote exact registered bytes into retained editable artifacts.",
+    "Propose bounded native edits without recompiling supplied geometry.",
+    "Run native before/after checks with the retained same-stem .kicad_pro/.kicad_dru files.",
+    "Review a stable pending proposal; acceptance validates primary and companion hashes.",
+    "Run DRC/ERC against the selected retained edited or historical revision.",
+    "Download a deterministic native ZIP with preserved rules and a hash manifest."
+  ],
+  "ai_connection": {
+    "new_actions": [
+      "promote_registered_sources",
+      "propose_kicad_edit"
+    ],
+    "compose_inputs_preserved": [
+      "netlist",
+      "canvas_nodes",
+      "canvas_wires",
+      "resolved_modules",
+      "splice_plan",
+      "build_id"
+    ],
+    "native_edit_receipt": "Immutable action/source-bound receipt; execution does not advance and stale the candidate review.",
+    "checks": "run_drc/run_erc prefer the exact pinned retained design; inspect_registered_sources retains original-upload semantics."
+  },
+  "native_proof": {
+    "footprints_preserved": 63,
+    "copper_items_preserved": 376,
+    "source_ref_pad_net_identity_preserved": true,
+    "original_revision_bytes_unchanged": true,
+    "native_check_version": "9.0.2",
+    "check_scope": "retained_project_and_custom_rules",
+    "new_violations_from_deliberate_edits": 10,
+    "edited_sha256": "sha256:a226ffd1a6f5b15d84e364d38f35d5e63a692383347a3db17d0ede5c17eb2fe3",
+    "checked_edited_revision_after_acceptance": true,
+    "digital_review_acceptance_is_not_rule_clearance_or_physical_approval": true
+  },
+  "downstream_changes": "Inherited passed/running canonical verifications become blocked; mechanical fit, wiring, materials, firmware, 3D and manufacturing outputs are marked for recheck.",
+  "generic_compiler": "Preserves explicit references, pad IDs and named/singleton nets. Unknown module IDs remain visible failures; synthetic physical package geometry is labeled logical preview and blocks fabrication.",
+  "test_results": {
+    "collected": 4513,
+    "passed": 4509,
+    "optional_live_skipped": 4,
+    "unresolved_failures": 0,
+    "uncovered_tests": 0
+  },
+  "remaining_limits": [
+    "Moving a footprint does not reconnect or reroute its old copper automatically.",
+    "This native import path does not close hierarchical schematic or external library dependencies.",
+    "Unknown physical packages require exact source geometry and electrical contracts before fabrication.",
+    "Downstream enclosure, firmware and material changes require explicit engineering/rechecks; source edits do not regenerate them automatically.",
+    "No owned hardware, physical test, procurement or operational approval is represented."
+  ],
+  "preexisting_work_preserved": {
+    "src/hardware_splicer/stored_source_parser.py": "afabeaa10c97ced6acad8721cc2eee4a91179c13340cea074b09f201bdc97539",
+    "src/hardware_splicer/kicad_registered_source_check.py": "9591b4ff9baec9426beb8b8e2de15293839fc080a51590120edde782a7191fb3",
+    "tests/test_kicad_registered_source_check.py": "c3f8fccf1b42a2ce9adc8cbdb00fedf96b8fc1333c86d0386478405ae0fe5b60"
+  },
+  "evidence": {
+    "native": "source-workflow-connection-20261118/native-proof.json",
+    "generic": "source-workflow-connection-20261118/generic-fidelity-after.json",
+    "verification": "source-workflow-connection-20261118/verification.json"
+  },
+  "physical_authority_granted": false,
+  "manufacturing_approved": false
+}

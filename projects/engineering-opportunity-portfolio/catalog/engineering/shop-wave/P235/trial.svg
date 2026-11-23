@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="334mm" height="285mm" viewBox="0 0 334 285">
+  <title>P235 trial shop drawing, millimetres</title>
+  <style>text{font:4px sans-serif;fill:#162930} .heading{font:bold 5px sans-serif}.part,.bore,.guide,.limit{fill:none;stroke:#223842;stroke-width:.38}.bore{stroke:#00645c}.guide{stroke:#964314;stroke-dasharray:2 1}.limit{stroke:#a1384e;stroke-dasharray:1 1}.part{fill:#e6eef0;fill-opacity:.28}</style>
+  <g data-view="side" transform="translate(12 5)">
+    <text x="0" y="4" class="heading">Fixed jaw elevation and clear tool stroke</text>
+    <g transform="translate(0 10)">
+      <rect id="jaw-face" class="part" x="0" y="26" width="310" height="75" />
+      <rect id="spine" class="guide" x="32.5" y="10" width="245" height="16" />
+      <line id="tool-envelope" class="limit" x1="32.5" y1="20" x2="277.5" y2="20" />
+      <circle id="rod-0" class="bore" cx="18" cy="63.5" r="5.4" />
+      <circle id="rod-1" class="bore" cx="292" cy="63.5" r="5.4" />
+    </g>
+    <text x="0" y="120">Jaw 310 × 75; shaft holes Ø10.8; book length 245</text>
+  </g>
+  <g data-view="section" transform="translate(12 146)">
+    <text x="0" y="4" class="heading">Cross-section of opposing jaws and exposed spine</text>
+    <g transform="translate(0 10)">
+      <polygon id="fixed-jaw" class="part" points="0,26 24,26 24,101 0,101" />
+      <polygon id="travel-jaw" class="part" points="60,26 84,26 84,101 60,101" />
+      <rect id="block" class="part" x="24" y="10" width="36" height="50" />
+    </g>
+    <text x="0" y="118">Jaw thickness 24; book block 36; spine projection 16</text>
+  </g>
+</svg>

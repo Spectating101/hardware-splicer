@@ -1,0 +1,38 @@
+{
+  "schema_version": "hardware_splicer.github_signal_two_task_proof.v1",
+  "date": "2026-11-05",
+  "tool_selector": "rules_v1_not_an_llm",
+  "real_hs_design": "hardware/reference_designs/spi_flash_adapter_v1/",
+  "hs_product_board_baseline_byte_identical": true,
+  "controlled_fixture_only": true,
+  "changes": "F.SilkS annotation only; no PCB routing, footprint, BOM, or electrical redesign",
+  "source_board_original_sha256": "86c0e72840b058b5dc4b56a820e560b306b2f624724a818e092fd1d003fdefbd",
+  "fixture_sha_a": "460c147f5ccd1736060ca397642877625720e5a2",
+  "fixture_sha_b": "552f7adfaeadde7b2e41d00fa4344989c3457c64",
+  "tasks": [
+    {
+      "objective": "Inspect the existing SPI schematic for layout and electrical review issues",
+      "selected": "tipoLi5890/akcli",
+      "output": "review/akcli_schematic_findings.json",
+      "evidence_sha256": "42819f4b5302f170bd9dc7cd964279bc694b449fa1b2e5ba57e0ad9e4bed1f2f",
+      "finding_count": 27,
+      "execution": "native bwrap networkless"
+    },
+    {
+      "objective": "Compare the historical PCB revisions visually",
+      "selected": "0x12net/kdif",
+      "output": "diff/HS_SIGNAL_KDIF_REVISIONS.html",
+      "evidence_sha256": "16e9fed55618a70c46a3c7f979f04376271a0e9b0c0b49e2d485864adc447202",
+      "output_bytes": 92459,
+      "execution": "native official KiCad Docker digest networkless"
+    }
+  ],
+  "physical_authority": false,
+  "actual_physical_repair": false,
+  "multi_device_distributed_execution": false,
+  "live_github_signals_subscription": false,
+  "open_source_adapters": [
+    "tipoLi5890/akcli",
+    "0x12net/kdif"
+  ]
+}

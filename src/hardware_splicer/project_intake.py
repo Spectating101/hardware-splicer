@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping
 
 from .build_compiler import compile_catalog_build, resolve_build_id
-from .design_quality import build_design_quality_gate
+from .design_quality import apply_goal_coverage, build_design_quality_gate
 from .firmware_coverage import assess_firmware_coverage
 from .request_fidelity import assess_request_fidelity
 from .fabrication_inspection import inspect_fabrication_package
@@ -18,6 +18,7 @@ from .compile_casefile import write_compile_casefile
 from .scratch_pipeline import compile_scratch_build
 from .scenario_runner import run_hardware_scenario
 from .vision_evidence_assistant import enrich_intake_with_vision_assistance
+from .state_paths import repo_root
 
 
 SCHEMA_VERSION = "hardware_splicer.project_intake.v1"
@@ -34,7 +35,7 @@ PROJECT_LEVELS = [
     "production_ready_project_package",
 ]
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = repo_root()
 
 
 def _resolve_intake_fixture_refs(value: Any) -> Any:
@@ -308,6 +309,11 @@ def splice_and_build_from_intake(
             splice_plan=graph_input if isinstance(graph_input, dict) else None,
             resolved_modules=resolved_modules if isinstance(resolved_modules, list) else None,
         )
+    apply_goal_coverage(
+        compile_result.design_quality,
+        salvage_package.get("goal_coverage"),
+        quality_file=compile_result.design_quality_file,
+    )
     fidelity = assess_request_fidelity(
         plan.get("normalized_parts") or [], _read_build_graph(compile_result.build_graph_file)
     )
@@ -1009,6 +1015,7 @@ def _compile_spec(
             "resolved_modules": salvage.get("resolved_modules") or [],
             "module_overrides": salvage.get("module_overrides") or {},
             "splice_verdict": salvage.get("verdict"),
+            "goal_coverage": salvage.get("goal_coverage"),
         }
         if salvage.get("splice_plan"):
             spec["build_compilation"]["splice_plan"] = salvage["splice_plan"]

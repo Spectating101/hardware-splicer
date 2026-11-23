@@ -9,9 +9,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Mapping
 
-from .design_quality import build_design_quality_gate
-from .project_intake import splice_and_build_from_intake
-
 SCHEMA_VERSION = "hardware_splicer.salvage_bringup.v1"
 
 
@@ -22,6 +19,9 @@ def run_salvage_bringup(
     export_gerber: bool = False,
 ) -> Dict[str, Any]:
     """Junk-drawer intake → splice + compile → SALVAGE_BRINGUP_REPORT.json."""
+    from .design_quality import build_design_quality_gate
+    from .project_intake import splice_and_build_from_intake
+
     out_path = Path(out_dir)
     out_path.mkdir(parents=True, exist_ok=True)
     t0 = time.time()

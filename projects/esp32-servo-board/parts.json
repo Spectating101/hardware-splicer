@@ -1,0 +1,501 @@
+{
+  "schema_version": "hardware_splicer.parts_sidecar.v1",
+  "revision": "a",
+  "units": "mm",
+  "glb_native_units": "mm",
+  "glb_scale_to_mm": 1,
+  "glb_source": "cad/main_ctrl_esp32_servo.glb",
+  "glb_sha256": "16c534e548426055af08ca5b42c01dd03d3f15a74e2e31e3b8802944c6f9d752",
+  "parts": [
+    {
+      "node_name": "board",
+      "node_index": 1,
+      "part_id": "board",
+      "label": "board",
+      "geometry_basis": "custom",
+      "bom_line": null,
+      "no_bom_line": true,
+      "group": "board",
+      "explode_vector_mm": [
+        0.0,
+        0.0,
+        -4.2325
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "6a9a67888c2a2e51fb85190201304885aca09156a4ae705911f7d66dd4bd6bfa",
+      "evidence": []
+    },
+    {
+      "node_name": "net:(no net)",
+      "node_index": 2,
+      "part_id": "net-no-net",
+      "label": "Net (no net) \u00b7 copper",
+      "geometry_basis": "copper",
+      "bom_line": "net:(no net)",
+      "no_bom_line": false,
+      "group": "net-no-net",
+      "explode_vector_mm": [
+        -36.6,
+        0.65,
+        -3.415
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "b5488038b85abc385cbd114efc2453e1d8bf4f51f654bbdf7e2af9af8697cb1a",
+      "evidence": []
+    },
+    {
+      "node_name": "net:+3V3",
+      "node_index": 3,
+      "part_id": "net-3v3",
+      "label": "Net +3V3 \u00b7 copper",
+      "geometry_basis": "copper",
+      "bom_line": "net:+3V3",
+      "no_bom_line": false,
+      "group": "net-3v3",
+      "explode_vector_mm": [
+        4.649999,
+        -1.174999,
+        -3.415
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "8380dfb3598be77ff1a30ba8e5ae31d1a32e7ff07f1d24ef09e812cf9478e24b",
+      "evidence": []
+    },
+    {
+      "node_name": "net:EN",
+      "node_index": 4,
+      "part_id": "net-en",
+      "label": "Net EN \u00b7 copper",
+      "geometry_basis": "copper",
+      "bom_line": "net:EN",
+      "no_bom_line": false,
+      "group": "net-en",
+      "explode_vector_mm": [
+        -2.273384,
+        10.5125,
+        -3.415
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "4edf16a25a28a3c8d690490c79bb9684efdd01678d68044f02d3940872534c53",
+      "evidence": []
+    },
+    {
+      "node_name": "net:GND",
+      "node_index": 5,
+      "part_id": "net-gnd",
+      "label": "Net GND \u00b7 copper",
+      "geometry_basis": "copper",
+      "bom_line": "net:GND",
+      "no_bom_line": false,
+      "group": "net-gnd",
+      "explode_vector_mm": [
+        -0.337502,
+        -0.0,
+        -4.2325
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "259e0dc3f795c7d7ea33a6e6ae469ae7d2f07891424b81875d8b3679ce729b0c",
+      "evidence": []
+    },
+    {
+      "node_name": "net:GPIO0",
+      "node_index": 6,
+      "part_id": "net-gpio0",
+      "label": "Net GPIO0 \u00b7 copper",
+      "geometry_basis": "copper",
+      "bom_line": "net:GPIO0",
+      "no_bom_line": false,
+      "group": "net-gpio0",
+      "explode_vector_mm": [
+        7.137836,
+        8.5125,
+        -3.415
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "d4e1e871a1482f9b9a65b2fc35aaabfb5619b814e6b17912fbb8a04090129a21",
+      "evidence": []
+    },
+    {
+      "node_name": "net:SCL",
+      "node_index": 7,
+      "part_id": "net-scl",
+      "label": "Net SCL \u00b7 copper",
+      "geometry_basis": "copper",
+      "bom_line": "net:SCL",
+      "no_bom_line": false,
+      "group": "net-scl",
+      "explode_vector_mm": [
+        23.899998,
+        7.095668,
+        -3.415
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "e9f8467142b595c9413aa25d4a9b24f69f065b9cbffe5c114f306f7b0a82b7e7",
+      "evidence": []
+    },
+    {
+      "node_name": "net:SDA",
+      "node_index": 8,
+      "part_id": "net-sda",
+      "label": "Net SDA \u00b7 copper",
+      "geometry_basis": "copper",
+      "bom_line": "net:SDA",
+      "no_bom_line": false,
+      "group": "net-sda",
+      "explode_vector_mm": [
+        23.899998,
+        8.095668,
+        -3.415
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "917adc3a3839f3ca968b0e54a7cf759cd606f653127aa360acf8910e0536285c",
+      "evidence": []
+    },
+    {
+      "node_name": "net:SERVO_5V",
+      "node_index": 9,
+      "part_id": "net-servo-5v",
+      "label": "Net SERVO_5V \u00b7 copper",
+      "geometry_basis": "copper",
+      "bom_line": "net:SERVO_5V",
+      "no_bom_line": false,
+      "group": "net-servo-5v",
+      "explode_vector_mm": [
+        31.349998,
+        -10.090001,
+        -4.2325
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "c774de0273a20b5c4b6a4a960e6d8532d108d3662107edd9a7cf62fdda592fd6",
+      "evidence": []
+    },
+    {
+      "node_name": "net:SERVO_PWM_PAN",
+      "node_index": 10,
+      "part_id": "net-servo-pwm-pan",
+      "label": "Net SERVO_PWM_PAN \u00b7 copper",
+      "geometry_basis": "copper",
+      "bom_line": "net:SERVO_PWM_PAN",
+      "no_bom_line": false,
+      "group": "net-servo-pwm-pan",
+      "explode_vector_mm": [
+        24.724998,
+        0.514088,
+        -4.2325
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "924c1eb84b1da0a1f52320c8f23890591c42b68559e30f90195effb890516a5b",
+      "evidence": []
+    },
+    {
+      "node_name": "net:SERVO_PWM_TILT",
+      "node_index": 11,
+      "part_id": "net-servo-pwm-tilt",
+      "label": "Net SERVO_PWM_TILT \u00b7 copper",
+      "geometry_basis": "copper",
+      "bom_line": "net:SERVO_PWM_TILT",
+      "no_bom_line": false,
+      "group": "net-servo-pwm-tilt",
+      "explode_vector_mm": [
+        24.724998,
+        -1.25693,
+        -4.2325
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "cd25d5e4519070999277c5e308b3b35930597f4e88c9e1e18a6861bdb5257f9a",
+      "evidence": []
+    },
+    {
+      "node_name": "net:UART_RX",
+      "node_index": 12,
+      "part_id": "net-uart-rx",
+      "label": "Net UART_RX \u00b7 copper",
+      "geometry_basis": "copper",
+      "bom_line": "net:UART_RX",
+      "no_bom_line": false,
+      "group": "net-uart-rx",
+      "explode_vector_mm": [
+        1.55,
+        -1.3125,
+        -3.415
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "007238d8fbbbfb4013ff86e18e8020be8d5629e72ff853d21356b70960068f82",
+      "evidence": []
+    },
+    {
+      "node_name": "net:UART_TX",
+      "node_index": 13,
+      "part_id": "net-uart-tx",
+      "label": "Net UART_TX \u00b7 copper",
+      "geometry_basis": "copper",
+      "bom_line": "net:UART_TX",
+      "no_bom_line": false,
+      "group": "net-uart-tx",
+      "explode_vector_mm": [
+        1.55,
+        -1.212501,
+        -3.415
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "75b9dd161d152d0b57f8aff96cac5a24da7ade39e3cdc66365250206f95ecbea",
+      "evidence": []
+    },
+    {
+      "node_name": "net:USB_D+",
+      "node_index": 14,
+      "part_id": "net-usb-d",
+      "label": "Net USB_D+ \u00b7 copper",
+      "geometry_basis": "copper",
+      "bom_line": "net:USB_D+",
+      "no_bom_line": false,
+      "group": "net-usb-d",
+      "explode_vector_mm": [
+        -28.8875,
+        0.0,
+        -3.415
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "5a541cfa4f3b3957c4c0afd95edd9467bf8729daa2a37f663207f0fe4df2946e",
+      "evidence": []
+    },
+    {
+      "node_name": "net:USB_D-",
+      "node_index": 15,
+      "part_id": "net-usb-d-15",
+      "label": "Net USB_D- \u00b7 copper",
+      "geometry_basis": "copper",
+      "bom_line": "net:USB_D-",
+      "no_bom_line": false,
+      "group": "net-usb-d-15",
+      "explode_vector_mm": [
+        -28.8875,
+        -0.641163,
+        -3.415
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "9349eaadcf7338f52696c2d7734aff70859807882b03db57f821804576372b27",
+      "evidence": []
+    },
+    {
+      "node_name": "net:VBUS",
+      "node_index": 16,
+      "part_id": "net-vbus",
+      "label": "Net VBUS \u00b7 copper",
+      "geometry_basis": "copper",
+      "bom_line": "net:VBUS",
+      "no_bom_line": false,
+      "group": "net-vbus",
+      "explode_vector_mm": [
+        -25.1125,
+        -4.787499,
+        -3.415
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "c94632bf17c9ceb8b624e3ca4a31428df38316f7b88c156fe9cd75532a4a61ad",
+      "evidence": []
+    },
+    {
+      "node_name": "C1",
+      "node_index": 17,
+      "part_id": "c1",
+      "label": "C1 \u00b7 10uF",
+      "geometry_basis": "envelope",
+      "bom_line": "C1",
+      "no_bom_line": false,
+      "group": "c1",
+      "explode_vector_mm": [
+        -13.0,
+        -13.0,
+        -2.9825
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "f4ceaa1ff5583a9b6efc849feac5de3da929aeebae7f0e9cd9450f9694f644c3",
+      "evidence": []
+    },
+    {
+      "node_name": "C2",
+      "node_index": 18,
+      "part_id": "c2",
+      "label": "C2 \u00b7 10uF",
+      "geometry_basis": "envelope",
+      "bom_line": "C2",
+      "no_bom_line": false,
+      "group": "c2",
+      "explode_vector_mm": [
+        -10.0,
+        -13.0,
+        -2.9825
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "fabd1bb4fbce27e5f8b5cbe8f25a0d30e95ae8365d39c15d222910a561242bf0",
+      "evidence": []
+    },
+    {
+      "node_name": "J1",
+      "node_index": 19,
+      "part_id": "j1",
+      "label": "J1 \u00b7 USB",
+      "geometry_basis": "envelope",
+      "bom_line": "J1",
+      "no_bom_line": false,
+      "group": "j1",
+      "explode_vector_mm": [
+        -34.0,
+        0.0,
+        -1.7825
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "5b36a67431f6d007aacb22216f7f1d79c21752417d35a3640b09de0674616f64",
+      "evidence": []
+    },
+    {
+      "node_name": "J2",
+      "node_index": 20,
+      "part_id": "j2",
+      "label": "J2 \u00b7 SENSOR_PORT",
+      "geometry_basis": "envelope",
+      "bom_line": "J2",
+      "no_bom_line": false,
+      "group": "j2",
+      "explode_vector_mm": [
+        32.0,
+        13.0,
+        0.8175
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "f5de28fbf9b9cb7b9dea9fa55716482512035438966f3ac01cf45c75803829f9",
+      "evidence": []
+    },
+    {
+      "node_name": "J3",
+      "node_index": 21,
+      "part_id": "j3",
+      "label": "J3 \u00b7 SERVO_PORT",
+      "geometry_basis": "envelope",
+      "bom_line": "J3",
+      "no_bom_line": false,
+      "group": "j3",
+      "explode_vector_mm": [
+        32.0,
+        -2.999999,
+        0.8175
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "63a9df9f5aa7f17099a44caade554cb66b061d791978109bf244038f6d3c7e43",
+      "evidence": []
+    },
+    {
+      "node_name": "J4",
+      "node_index": 22,
+      "part_id": "j4",
+      "label": "J4 \u00b7 SERVO_5V_IN",
+      "geometry_basis": "envelope",
+      "bom_line": "J4",
+      "no_bom_line": false,
+      "group": "j4",
+      "explode_vector_mm": [
+        32.0,
+        -18.0,
+        0.8175
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "07956223845f6feb0ec05cb3d4b24dda0ef456a0599f28af51d7e44883403fde",
+      "evidence": []
+    },
+    {
+      "node_name": "R1",
+      "node_index": 23,
+      "part_id": "r1",
+      "label": "R1 \u00b7 10K",
+      "geometry_basis": "envelope",
+      "bom_line": "R1",
+      "no_bom_line": false,
+      "group": "r1",
+      "explode_vector_mm": [
+        -3.0,
+        13.0,
+        -2.9825
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "640f81ad4beca2786f09f49002b85c3160f719cb1b5f3639a4423ae1ee9af5c4",
+      "evidence": []
+    },
+    {
+      "node_name": "R2",
+      "node_index": 24,
+      "part_id": "r2",
+      "label": "R2 \u00b7 10K",
+      "geometry_basis": "envelope",
+      "bom_line": "R2",
+      "no_bom_line": false,
+      "group": "r2",
+      "explode_vector_mm": [
+        -3.0,
+        10.0,
+        -2.9825
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "1b9acd958efd088c0147003862c62001a4a75b648628a39fdf9f4aa4c6da4c2b",
+      "evidence": []
+    },
+    {
+      "node_name": "U1",
+      "node_index": 25,
+      "part_id": "u1",
+      "label": "U1 \u00b7 ESP32-WROOM-32",
+      "geometry_basis": "envelope",
+      "bom_line": "U1",
+      "no_bom_line": false,
+      "group": "u1",
+      "explode_vector_mm": [
+        8.0,
+        2.245,
+        -1.8325
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "69ebe2e515f3b06e27d28052753576f4f1169e987757fc32ea9c58a08baa83a6",
+      "evidence": []
+    },
+    {
+      "node_name": "U2",
+      "node_index": 26,
+      "part_id": "u2",
+      "label": "U2 \u00b7 CP2102",
+      "geometry_basis": "envelope",
+      "bom_line": "U2",
+      "no_bom_line": false,
+      "group": "u2",
+      "explode_vector_mm": [
+        -18.0,
+        0.12,
+        -2.5325
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "2e2dddfa72590f06121412627d8b6c95f9ef5e32d94bd1518c7d9146da4346d4",
+      "evidence": []
+    },
+    {
+      "node_name": "U3",
+      "node_index": 27,
+      "part_id": "u3",
+      "label": "U3 \u00b7 3V3",
+      "geometry_basis": "envelope",
+      "bom_line": "U3",
+      "no_bom_line": false,
+      "group": "u3",
+      "explode_vector_mm": [
+        -20.0,
+        -12.949999,
+        -2.5325
+      ],
+      "explode_derived": true,
+      "geometry_sha256": "a98a8a726c9b30f4bab2ccd5d2ec45d7dc3904bc5d3a5e9894b44b635885a6f1",
+      "evidence": []
+    }
+  ],
+  "interfaces": [],
+  "blockers": [],
+  "alternates": [],
+  "missing_inputs": []
+}

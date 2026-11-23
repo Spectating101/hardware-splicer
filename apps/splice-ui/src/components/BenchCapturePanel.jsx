@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { benchCaptureTemplate } from "../api.js";
+import { benchCaptureTemplate } from "../api";
 import { GateBadge, StatusPill } from "./ProjectPanels.jsx";
 
 const PASS_STATUSES = new Set(["pass", "passed", "ok", "verified", "closed"]);

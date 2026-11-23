@@ -1,0 +1,252 @@
+{
+  "schema_version": "hardware_splicer.real_device_work_package.v1",
+  "project_id": "psp3000_umd_repair",
+  "device": "Sony PSP-3000 UMD read failure",
+  "project_kind": "repair",
+  "catalog_routing": {
+    "candidate": "usb_fume_extractor",
+    "status": "blocked_no_compatible_catalog_build"
+  },
+  "source_leads": [
+    {
+      "source_id": "ifixit_psp_umd",
+      "uri": "https://www.ifixit.com/Guide/PSP+300x+UMD+Drive+Replacement/1586",
+      "verified_full_document": false,
+      "content_hash": null
+    },
+    {
+      "source_id": "ifixit_psp_part",
+      "uri": "https://www.ifixit.com/products/sony-psp-2000-3000-umd-drive",
+      "verified_full_document": false,
+      "content_hash": null
+    }
+  ],
+  "requirements": [
+    {
+      "id": "req-01",
+      "requirement": "fault hypotheses and non-invasive discrimination",
+      "status": "unverified",
+      "evidence_refs": [],
+      "verification_required": true
+    },
+    {
+      "id": "req-02",
+      "requirement": "correct battery/ribbon/connector safety sequence",
+      "status": "unverified",
+      "evidence_refs": [],
+      "verification_required": true
+    },
+    {
+      "id": "req-03",
+      "requirement": "replacement vs salvage route",
+      "status": "unverified",
+      "evidence_refs": [],
+      "verification_required": true
+    },
+    {
+      "id": "req-04",
+      "requirement": "time and cost ledger with unknowns",
+      "status": "unverified",
+      "evidence_refs": [],
+      "verification_required": true
+    },
+    {
+      "id": "req-05",
+      "requirement": "post-repair acceptance checks",
+      "status": "unverified",
+      "evidence_refs": [],
+      "verification_required": true
+    }
+  ],
+  "work_steps": [
+    {
+      "id": "step-01",
+      "instruction": "1. Freeze the current state in the repair record: PSP-3000 identification, subrevision evidence, symptom description, known disc history, prior repairs, visible damage, and authorization limits.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-02",
+      "instruction": "2. Externally inspect the UMD door, disc path, spindle opening, and visible mechanism with the device unpowered.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-03",
+      "instruction": "3. Remove external power and remove the battery before any case opening; keep the battery disconnected throughout inspection.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-04",
+      "instruction": "4. Photograph the exterior, screw locations, cable routing, screen/ribbon connections, UMD drive flex, connector latch, and switch linkage before removal.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-05",
+      "instruction": "5. Follow the supplied PSP-300x repair guidance through front-case and screen/ribbon access only as far as necessary to inspect the drive.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-06",
+      "instruction": "6. Inspect the drive flex and both connector interfaces for tears, contamination, corrosion, lifted contacts, damaged latch parts, or poor seating; document findings before reseating.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-07",
+      "instruction": "7. Inspect the UMD switch actuator and drive mechanics for obstruction, broken guides, displaced springs, or cracked mounts; do not bypass the switch.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-08",
+      "instruction": "8. Stop and route to salvage if the fault is limited to a recoverable connector, flex seating issue, contamination, or mechanical obstruction and the repair can be completed without unverified parts.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-09",
+      "instruction": "9. Route to replacement evaluation only if evidence implicates the drive and an exact compatible part is verified; otherwise retain the original drive and defer purchase.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-10",
+      "instruction": "10. Reassemble in reverse order with all ribbons fully latched and the battery remaining isolated until the enclosure and drive are secured.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-11",
+      "instruction": "11. Perform only the acceptance checks permitted by the owner and safety constraints; no open-powered laser or drive test is allowed.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    }
+  ],
+  "critical_unknowns": [
+    {
+      "id": "gap-01",
+      "description": "Exact PSP-3000 subrevision and whether its drive interfaces match the cited PSP 2000/300x replacement listing.",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-02",
+      "description": "Whether the failure affects all discs or only one disc, and whether any prior controlled symptom observation exists.",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-03",
+      "description": "Whether the disc is recognized, spins, fails to spin, makes abnormal noises, or produces an error.",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-04",
+      "description": "Condition and alignment of the UMD lid switch and actuator.",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-05",
+      "description": "Condition of the UMD flex ribbon, connector contacts, connector latch, and mainboard-side interface.",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-06",
+      "description": "Presence of contamination, foreign objects, cracked guides, spindle damage, or mechanical binding.",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-07",
+      "description": "Whether the optical pickup, spindle motor, drive controller, or mainboard circuitry is actually faulty; drive failure is not confirmed.",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-08",
+      "description": "Availability of an exact-match replacement drive, return option, donor unit, and qualified repair labor.",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-09",
+      "description": "Permitted post-repair power and media testing; the current constraint explicitly disallows power-on tests.",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-10",
+      "description": "Repair time, labor rate, parts price, shipping, return cost, and budget limit.",
+      "status": "open",
+      "resolution_evidence": null
+    }
+  ],
+  "acceptance_gates": [
+    {
+      "id": "gate-01",
+      "criterion": "No laser drive open-powered test",
+      "status": "not_accepted",
+      "evidence_refs": []
+    },
+    {
+      "id": "gate-02",
+      "criterion": "Do not claim UMD drive is definitely faulty",
+      "status": "not_accepted",
+      "evidence_refs": []
+    },
+    {
+      "id": "gate-03",
+      "criterion": "Cite revision-specific repair guidance",
+      "status": "not_accepted",
+      "evidence_refs": []
+    }
+  ],
+  "required_parts": [
+    {
+      "requirement": "A replacement UMD drive is only a candidate: the supplied product claim lists compatibility with PSP 2000 and PSP 300x variants, but exact PSP-3000 subrevision compatibility remains unverified.",
+      "verified_part_number": null,
+      "vendor": null,
+      "price": null,
+      "compatibility_verified": false
+    },
+    {
+      "requirement": "Use the device's existing drive flex and connector only after visual inspection confirms matching geometry, intact contacts, and a functional locking mechanism; no substitute flex or connector is authorized without exact verification.",
+      "verified_part_number": null,
+      "vendor": null,
+      "price": null,
+      "compatibility_verified": false
+    },
+    {
+      "requirement": "Use a known-good, undamaged UMD only if a later approved powered diagnostic permits it; no disc-based conclusion can be made under the current no-power-test constraint.",
+      "verified_part_number": null,
+      "vendor": null,
+      "price": null,
+      "compatibility_verified": false
+    },
+    {
+      "requirement": "Required repair conditions: removable battery isolated before opening, documented screw and cable locations, ESD-aware handling, suitable precision drivers, nonmetallic inspection tools where practical, and no powered laser or open-drive test.",
+      "verified_part_number": null,
+      "vendor": null,
+      "price": null,
+      "compatibility_verified": false
+    },
+    {
+      "requirement": "Do not select a replacement drive by appearance alone; verify exact model, connector arrangement, mechanical geometry, and subrevision fit against the device and the supplier's return policy.",
+      "verified_part_number": null,
+      "vendor": null,
+      "price": null,
+      "compatibility_verified": false
+    }
+  ],
+  "engineering_readiness": "blocked",
+  "physical_validation_performed": false,
+  "source_documents_verified": false,
+  "build_or_repair_completed": false
+}

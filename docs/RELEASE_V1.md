@@ -25,7 +25,7 @@ v1.0 is **done** when all of these are true:
 | 6 | **Install story** — stranger can run from README in &lt;30 min | peer or past-you follows `docs/SETUP.md` |
 | 7 | **Four surfaces documented** | CLI + MCP + HTTP + **splice-ui** with copy-paste commands |
 | 8 | **Git tag** | `v1.0.0` on `main` | ✅ |
-| 9 | **Release notes** | `RELEASE_NOTES_v1.0.md` — what’s in / out | ✅ |
+| 9 | **Release notes** | `docs/releases/RELEASE_NOTES_v1.0.md` — what’s in / out | ✅ |
 | 10 | **Deployment artifact** | `install_splice_v1.sh` + `requirements-splice-v1.txt` | ✅ |
 | 11 | **GitHub CI (splice bar)** | `splice-v1` job in `.github/workflows/hardware-splicer.yml` | ✅ |
 
@@ -49,7 +49,7 @@ scripts/hardware_splicer.py    # CLI entry
 examples/splice/manifest.json  # supported splice cases
 examples/intakes/splice_*.json # golden intakes
 docs/AGENT_HANDOFF.md          # operator manual
-docs/DEMO_SPLICE.md            # human walkthrough
+docs/archive/demos/DEMO_SPLICE.md            # human walkthrough
 mcp/hardware-splicer.mcp.json  # MCP config sample
 ```
 
@@ -92,7 +92,7 @@ PYTHONPATH=src python scripts/hardware_splicer.py serve --port 8787
 **Finish tasks:**
 
 - [ ] Pin `requirements.txt` versions tested on release
-- [ ] `RELEASE_NOTES_v1.0.md`
+- [ ] `docs/releases/RELEASE_NOTES_v1.0.md`
 - [ ] GitHub Release with asset: golden demo output zip (optional)
 - [ ] README “Quick start” ≤ 10 commands
 
@@ -125,7 +125,7 @@ docker compose up api   # FastAPI on :8787
 
 **Finish tasks:**
 
-- [ ] `docs/MCP.md` complete tool list (already mostly done)
+- [ ] `docs/reference/MCP.md` complete tool list (already mostly done)
 - [ ] `mcp/hardware-splicer.mcp.json` tested in Cursor
 - [ ] One-page “install MCP” in README
 
@@ -150,7 +150,7 @@ docker compose up api   # FastAPI on :8787
 
 - [ ] Add `src/hardware_splicer/__version__ = "1.0.0"`
 - [ ] `sdk_info()` reports version
-- [ ] Write `RELEASE_NOTES_v1.0.md`
+- [ ] Write `docs/releases/RELEASE_NOTES_v1.0.md`
 - [ ] Trim README to v1.0 story (splice + gates + agent); move rest to docs/
 - [ ] Optional: 3–5 min release video (screen recording)
 
@@ -196,7 +196,7 @@ docker compose up api   # FastAPI on :8787
 
 No guilt for stopping after v1.0. A tagged, deployable, CI-green agent compiler **is** a finished project.
 
-**Commercial assessment:** [`MONETIZATION_AND_PRODUCT_ASSESSMENT.md`](MONETIZATION_AND_PRODUCT_ASSESSMENT.md) — buyers, models, pricing hypotheses, risks, fill-in workbook.  
+**Commercial assessment:** [`MONETIZATION_AND_PRODUCT_ASSESSMENT.md`](archive/strategy/MONETIZATION_AND_PRODUCT_ASSESSMENT.md) — buyers, models, pricing hypotheses, risks, fill-in workbook.  
 **Documentation map:** [`DOCUMENTATION_INDEX.md`](DOCUMENTATION_INDEX.md) — all repo docs, gaps, canonical order.
 
 ---
@@ -207,8 +207,8 @@ No guilt for stopping after v1.0. A tagged, deployable, CI-green agent compiler 
 |-----|------|
 | [`SPLICE_PRODUCT.md`](SPLICE_PRODUCT.md) | S0–S5 tiers — v1.0 = **S2+S3 proven** |
 | [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) | Runbook |
-| [`LAUNCH_PLAN.md`](LAUNCH_PLAN.md) | Engine phases A–C (already met) |
-| [`BLUEPRINT_POSITIONING_AND_FUNDING.md`](BLUEPRINT_POSITIONING_AND_FUNDING.md) | Strategy after competition |
+| [`LAUNCH_PLAN.md`](archive/strategy/LAUNCH_PLAN.md) | Engine phases A–C (already met) |
+| [`BLUEPRINT_POSITIONING_AND_FUNDING.md`](archive/strategy/BLUEPRINT_POSITIONING_AND_FUNDING.md) | Strategy after competition |
 | [`SETUP.md`](SETUP.md) | Install |
 
 ---

@@ -1,0 +1,14 @@
+{
+  "pilot": "Taiwan farm-pond training tank, horizontal one-litre bottle and messenger",
+  "metrics": {
+    "nominal_chamber_ml": 999.85,
+    "candidate": {
+      "corners": 4,
+      "max_retrieved_bad_pct": 5.09
+    },
+    "control": {
+      "corners": 4,
+      "max_retrieved_bad_pct": 44.87
+    }
+  }
+}

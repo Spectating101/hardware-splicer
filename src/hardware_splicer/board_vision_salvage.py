@@ -10,12 +10,13 @@ import re
 import tempfile
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, MutableMapping, Sequence, Tuple
+from .state_paths import repo_root
 
 SCHEMA_VERSION = "hardware_splicer.donor_board_vision_report.v1"
 FUNCTIONAL_SALVAGE_SCHEMA = "functional_salvage.v1"
 BOARD_EVIDENCE_SCHEMA = "board_evidence.v1"
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = repo_root()
 CIRCUIT_AI_ROOT = REPO_ROOT / "apps" / "circuit-ai"
 
 _IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".bmp", ".tif", ".tiff", ".heic"}

@@ -1,0 +1,13 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="240mm" height="260mm" viewBox="0 0 240 260">
+  <title>P202 baseline · full-size proof coupon</title>
+  <rect id="scale" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="10" y="6" width="20" height="10" />
+  <circle id="brake-disc" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="62" cy="78" r="32" />
+  <circle id="brake-contact" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" cx="62" cy="78" r="13.7" />
+  <circle id="through-bore" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="62" cy="78" r="6.1" />
+  <rect id="lever-blank" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="116" y="127" width="65" height="22" />
+  <circle id="lever-axis" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="126" cy="138" r="6.1" />
+  <circle id="handle-center" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="171" cy="138" r="4.2" />
+  <circle id="roll-low" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" cx="77" cy="185" r="24" />
+  <circle id="roll-high" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" cx="77" cy="185" r="47" />
+</svg>

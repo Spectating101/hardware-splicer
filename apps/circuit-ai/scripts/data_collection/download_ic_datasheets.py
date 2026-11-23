@@ -7,6 +7,7 @@ Downloads datasheets for top 50 most common ICs.
 
 import sys
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import requests
@@ -124,26 +125,27 @@ class DatasheetDownloader:
 
         output_file = self.output_dir / f"{name}_{manufacturer}.pdf"
 
-        if output_file.exists():
-            logger.info(f"✅ Already have: {name}")
-            return True
-
-        logger.info(f"⬇️  Downloading: {name} ({manufacturer})")
-        logger.info(f"   URL: {url}")
-
+        tmp_path = None
         try:
+            if output_file.exists():
+                with output_file.open('rb') as cached:
+                    if cached.read(5) == b'%PDF-':
+                        logger.info(f"✅ Already have: {name}")
+                        return True
+
+            logger.info(f"⬇️  Downloading: {name} ({manufacturer})")
+            logger.info(f"   URL: {url}")
             response = requests.get(url, timeout=30, allow_redirects=True)
             response.raise_for_status()
 
-            # Some URLs might be HTML pages, not direct PDFs
-            content_type = response.headers.get('content-type', '')
-
-            if 'pdf' not in content_type.lower() and not url.endswith('.pdf'):
-                logger.warning(f"   ⚠️  Not a direct PDF link, skipping: {name}")
+            if not response.content.startswith(b'%PDF-'):
+                logger.warning(f"   ⚠️  Download did not return a PDF: {name}")
                 return False
 
-            with open(output_file, 'wb') as f:
-                f.write(response.content)
+            with NamedTemporaryFile(dir=self.output_dir, delete=False) as tmp:
+                tmp_path = Path(tmp.name)
+                tmp.write(response.content)
+            tmp_path.replace(output_file)
 
             file_size = output_file.stat().st_size / 1024 / 1024  # MB
             logger.info(f"   ✅ Downloaded: {name} ({file_size:.1f} MB)")
@@ -152,9 +154,10 @@ class DatasheetDownloader:
 
         except Exception as e:
             logger.error(f"   ❌ Failed: {e}")
-            if output_file.exists():
-                output_file.unlink()
             return False
+        finally:
+            if tmp_path is not None:
+                tmp_path.unlink(missing_ok=True)
 
     def download_all(self):
         """Download all datasheets."""

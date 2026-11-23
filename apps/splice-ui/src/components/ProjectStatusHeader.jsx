@@ -1,5 +1,5 @@
-import { deriveEvidenceTruth, evidenceTone } from "../projectSession/deriveEvidenceTruth.js";
-import { deriveProjectTruth } from "../projectSession/deriveProjectTruth.js";
+import { deriveEvidenceTruth, evidenceTone } from "../projectSession/deriveEvidenceTruth";
+import { deriveProjectTruth } from "../projectSession/deriveProjectTruth";
 import { derivePackageHandoff } from "../projectSession/packageHandoff.js";
 import { STAGE_LABELS } from "../projectSession/projectSession.js";
 

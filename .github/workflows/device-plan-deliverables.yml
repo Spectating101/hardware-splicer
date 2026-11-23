@@ -45,7 +45,9 @@ permissions:
 jobs:
   browser:
     name: Device and evidence browser checks (${{ matrix.backend }})
-    runs-on: ubuntu-latest
+    # Playwright 1.55.0 does not provide Chromium for ubuntu26.04 runners.
+    # Lock this *browser* job to a supported LTS image, not the engineering toolchain jobs.
+    runs-on: ubuntu-24.04
     timeout-minutes: 35
     strategy:
       fail-fast: false

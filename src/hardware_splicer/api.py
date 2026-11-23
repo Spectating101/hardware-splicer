@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
+import hashlib
 import json
+import logging
 import os
 import re
+import threading
 import uuid
 from dataclasses import replace
 from pathlib import Path
@@ -28,6 +31,7 @@ from .build_files import (
     resolve_build_dir,
 )
 from .build_files_security import assert_file_size
+from .state_paths import repo_root
 from .integrations.kibot_reference import fab_output_manifest
 from .pcb.kicad_cli_views import export_human_views
 from .integrations.oss_catalog import integration_catalog
@@ -56,7 +60,7 @@ from .splice_bench import bench_status, submit_bench_measurements
 from .robotics_actuation import build_robotics_actuation_packet
 from .robotics_platform_authority import build_robotics_platform_authority
 from .robotics_simulation import build_robotics_simulation_packet
-from .runtime import ServiceStartError, runtime_status
+from .runtime import ServiceStartError, client_status, headless_status, runtime_status
 from .scenario_runner import run_hardware_scenario, scenario_to_compile_spec
 from .schemas import HardwareCompileSpec
 from .validation import raise_for_validation_errors, validate_compile_spec, validation_errors
@@ -436,7 +440,9 @@ def _netlist_fixture_description(row: Dict[str, Any]) -> str:
 
 
 def _api_output_root() -> Path:
-    return Path(os.getenv("HARDWARE_SPLICER_OUTPUT_ROOT", "/tmp/hardware_splicer_api")).resolve()
+    from .state_paths import output_root
+
+    return output_root().resolve()
 
 
 def _allow_arbitrary_out_dir() -> bool:
@@ -497,12 +503,35 @@ def _error(status_code: int, error_type: str, message: str, *, request_id: str |
     return HTTPException(status_code=status_code, detail={"error": payload})
 
 
-def create_app() -> FastAPI:
+def _start_runtime_prewarm() -> threading.Thread | None:
+    """Probe the digital study runtimes in the background at startup (off with
+    HARDWARE_SPLICER_PREWARM_RUNTIME=0). Until a probe finishes, a request still runs it itself."""
+    if os.environ.get("HARDWARE_SPLICER_PREWARM_RUNTIME", "1").strip().lower() in {"0", "false", "no", "off"}:
+        return None
+
+    def prewarm() -> None:
+        try:
+            from .digital_project import prewarm_runtimes
+
+            prewarm_runtimes()
+        except Exception:  # pragma: no cover - startup must never fail on a probe
+            logging.getLogger(__name__).debug("digital runtime prewarm failed", exc_info=True)
+
+    thread = threading.Thread(target=prewarm, name="hs-runtime-prewarm", daemon=True)
+    thread.start()
+    return thread
+
+
+def create_app(*, ui_dist: str | Path | None = None) -> FastAPI:
     job_backend = JobBackend.from_env()
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
+        if app.state.ui_error:
+            raise RuntimeError(app.state.ui_error)
         try:
+            job_backend.start()
+            _start_runtime_prewarm()
             yield
         finally:
             job_backend.stop()
@@ -537,17 +566,22 @@ def create_app() -> FastAPI:
         from ._version import __version__
         from .integrations.llm_policy import llm_policy_summary
 
-        status = runtime_status()
+        # Clients get states, never filesystem paths; hs-doctor and the startup log
+        # carry the paths. No subprocess runs here.
+        status = headless_status()
         return {
-            "ok": bool(status.get("ok")),
+            "ok": bool(status["ok"]),
+            "headless_ready": bool(status["headless_ready"]),
             "version": __version__,
-            "app_roots": status.get("app_roots"),
+            "app_roots": {name: {"available": bool(row["is_dir"])}
+                          for name, row in status["app_roots"].items()},
             "llm_policy": llm_policy_summary(),
+            "ui": app.state.ui,
         }
 
     @app.get("/v1/examples/splice-intakes")
     def splice_intake_examples() -> Dict[str, Any]:
-        root = Path(__file__).resolve().parents[2] / "examples" / "intakes"
+        root = repo_root() / "examples" / "intakes"
         examples: List[Dict[str, Any]] = []
         for path in sorted(root.glob("splice_*.json")):
             try:
@@ -568,7 +602,7 @@ def create_app() -> FastAPI:
 
     @app.get("/v1/examples/donor-fixtures")
     def donor_fixture_examples() -> Dict[str, Any]:
-        root = Path(__file__).resolve().parents[2] / "examples" / "fixtures"
+        root = repo_root() / "examples" / "fixtures"
         fixtures: List[Dict[str, Any]] = []
         for path in sorted(root.glob("splice_donor_*.json")):
             try:
@@ -598,7 +632,7 @@ def create_app() -> FastAPI:
 
     @app.get("/v1/examples/netlist-fixtures")
     def netlist_fixture_catalog() -> Dict[str, Any]:
-        manifest = Path(__file__).resolve().parents[2] / "examples" / "netlist_fixtures" / "manifest.json"
+        manifest = repo_root() / "examples" / "netlist_fixtures" / "manifest.json"
         if not manifest.is_file():
             return {"ok": True, "fixtures": []}
         data = json.loads(manifest.read_text(encoding="utf-8"))
@@ -619,13 +653,15 @@ def create_app() -> FastAPI:
         from .integrations.circuit_json_adapter import netlist_to_circuit_json
         from .netlist.ir import CircuitNetlist
 
-        manifest = Path(__file__).resolve().parents[2] / "examples" / "netlist_fixtures" / "manifest.json"
+        manifest = repo_root() / "examples" / "netlist_fixtures" / "manifest.json"
+        if not manifest.is_file():
+            raise _error(404, "fixture_not_found", f"Unknown netlist fixture: {fixture_id}")
         data = json.loads(manifest.read_text(encoding="utf-8"))
         row = next((f for f in data.get("fixtures") or [] if f.get("id") == fixture_id), None)
         if not row:
             raise _error(404, "fixture_not_found", f"Unknown netlist fixture: {fixture_id}")
         rel = str(row.get("path") or "")
-        path = Path(__file__).resolve().parents[2] / "examples" / "netlist_fixtures" / rel
+        path = repo_root() / "examples" / "netlist_fixtures" / rel
         if not path.is_file():
             raise _error(404, "fixture_file_missing", f"Fixture file missing: {rel}")
         if row.get("type") == "kicad_netlist":
@@ -890,7 +926,7 @@ def create_app() -> FastAPI:
 
     @app.get("/v1/status")
     def status() -> Dict[str, Any]:
-        return {**runtime_status(), "jobs": job_backend.store.stats()}
+        return {**client_status(runtime_status()), "jobs": job_backend.store.stats()}
 
     @app.post("/v1/validate")
     def validate_spec(request: ValidateRequest) -> Dict[str, Any]:
@@ -1866,40 +1902,123 @@ def create_app() -> FastAPI:
         job = job_backend.store.get_job(job_id)
         return {"ok": True, "job": job.to_dict(include_result=False) if job else None}
 
-    _maybe_mount_splice_ui(app)
+    from .project_scene_api import project_scene_router
+
+    app.include_router(project_scene_router)
+    _maybe_mount_splice_ui(app, ui_dist=ui_dist)
     return app
 
 
-def _maybe_mount_splice_ui(app: FastAPI) -> None:
+UI_MODES_ON = {"1", "true", "yes", "on"}
+
+
+def ui_dist_candidates(ui_dist: str | Path | None = None) -> list[Path]:
+    """UI build locations in lookup order: explicit, environment, packaged, checkout."""
+
+    package = Path(__file__).resolve().parent
+    raw = [
+        ui_dist,
+        os.environ.get("HARDWARE_SPLICER_UI_DIST", "").strip() or None,
+        package / "ui_dist",
+        repo_root() / "apps" / "splice-ui" / "dist",
+    ]
+    return [Path(item).expanduser().resolve() for item in raw if item not in (None, "")]
+
+
+def _ui_dist_source(dist: Path, ui_dist: str | Path | None = None) -> str:
+    """Name where the served build came from without revealing its path."""
+
+    explicit, environment, packaged, checkout = (
+        Path(item).expanduser().resolve() if item not in (None, "") else None
+        for item in (ui_dist, os.environ.get("HARDWARE_SPLICER_UI_DIST", "").strip() or None,
+                     Path(__file__).resolve().parent / "ui_dist", repo_root() / "apps" / "splice-ui" / "dist")
+    )
+    if dist == explicit:
+        return "argument"
+    if dist == environment:
+        return "environment"
+    if dist == packaged:
+        return "packaged"
+    return "checkout" if dist == checkout else "other"
+
+
+def _resolve_ui_dist(ui_dist: str | Path | None = None) -> Path:
+    candidates = ui_dist_candidates(ui_dist)
+    for directory in candidates:
+        if (directory / "index.html").is_file():
+            return directory
+    raise RuntimeError(
+        "UI serving requested, but no index.html was found. Tried: "
+        + ", ".join(str(directory / "index.html") for directory in candidates)
+        + ". Run make ui-package (or make splice-ui-build) or set HARDWARE_SPLICER_UI_DIST / --ui-dist."
+    )
+
+
+def _maybe_mount_splice_ui(app: FastAPI, *, ui_dist: str | Path | None = None) -> None:
+    """Serve the built UI when HARDWARE_SPLICER_SERVE_UI asks for it.
+
+    ``1``/``true``/``yes``/``on`` require a build and fail startup without one;
+    ``auto`` serves a build when one is found; anything else leaves the UI off.
+    """
+
+    # /health returns app.state.ui; the directory stays server-side in app.state.ui_dist.
+    app.state.ui = {"served": False, "source": None, "index_sha256": None}
+    app.state.ui_dist = None
+    app.state.ui_error = None
     flag = os.environ.get("HARDWARE_SPLICER_SERVE_UI", "").strip().lower()
-    if flag not in {"1", "true", "yes", "on"}:
+    if flag not in UI_MODES_ON and flag != "auto":
         return
-
-    ui_dist = Path(__file__).resolve().parents[2] / "apps" / "splice-ui" / "dist"
-    index_path = ui_dist / "index.html"
-    if not index_path.is_file():
+    try:
+        dist = _resolve_ui_dist(ui_dist)
+    except RuntimeError as exc:
+        if flag != "auto":
+            app.state.ui_error = str(exc)
         return
+    index_path = dist / "index.html"
+    app.state.ui = {
+        "served": True,
+        "source": _ui_dist_source(dist, ui_dist),
+        "index_sha256": hashlib.sha256(index_path.read_bytes()).hexdigest(),
+    }
+    app.state.ui_dist = str(dist)
+    logging.getLogger("uvicorn.error").info("Serving the UI build from %s", dist)
 
-    assets_dir = ui_dist / "assets"
+    assets_dir = dist / "assets"
     if assets_dir.is_dir():
         from fastapi.staticfiles import StaticFiles
 
-        app.mount("/assets", StaticFiles(directory=assets_dir), name="splice-ui-assets")
+        class CachedAssets(StaticFiles):
+            async def get_response(self, path: str, scope):
+                response = await super().get_response(path, scope)
+                if response.status_code in {200, 304} and re.search(
+                    r"[-.][A-Za-z0-9_-]{8,}\.", Path(path).name
+                ):
+                    response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+                return response
 
-    reserved = ("v1", "health", "openapi.json", "docs", "redoc")
+        app.mount("/assets", CachedAssets(directory=assets_dir), name="splice-ui-assets")
+
+    reserved = ("api", "v1", "health", "openapi.json", "docs", "redoc", "assets")
+
+    def index_response() -> FileResponse:
+        return FileResponse(index_path, headers={"Cache-Control": "no-cache"})
 
     @app.get("/", include_in_schema=False)
     def splice_ui_root() -> FileResponse:
-        return FileResponse(index_path)
+        return index_response()
 
     @app.get("/{spa_path:path}", include_in_schema=False)
     def splice_ui_spa(spa_path: str) -> FileResponse:
         if spa_path.split("/", 1)[0] in reserved:
             raise HTTPException(status_code=404, detail="Not found")
-        candidate = ui_dist / spa_path
+        candidate = (dist / spa_path).resolve()
+        if not candidate.is_relative_to(dist):
+            raise HTTPException(status_code=404, detail="Not found")
         if candidate.is_file():
+            if candidate == index_path:
+                return index_response()
             return FileResponse(candidate)
-        return FileResponse(index_path)
+        return index_response()
 
 
 app = create_app()

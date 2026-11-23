@@ -104,3 +104,17 @@ def test_store_keeps_build_directory_as_reference_only(tmp_path: Path) -> None:
     body = json.loads(revision.read_text(encoding="utf-8"))
     assert body["snapshot"]["buildDir"] == str(external)
     assert not list((tmp_path / "store").rglob("large.bin"))
+
+
+def test_list_projects_reports_objective_and_created_time(tmp_path: Path) -> None:
+    store = ProjectStore(tmp_path)
+    store.save("plotter-a", {"projectName": "Plotter", "goal": "  Plot   A4 pages  "}, expected_revision=0)
+    store.save("plotter-a", {"projectName": "Plotter", "goal": "Plot A3 pages"}, expected_revision=1)
+    store.save("plotter-b", {"projectName": "Plotter", "intake": {"goal": "Reuse two NEMA17 steppers"}}, expected_revision=0)
+    store.save("no-goal", {"projectName": "Bare"}, expected_revision=0)
+    rows = {row["project_id"]: row for row in store.list_projects()}
+    assert rows["plotter-a"]["objective"] == "Plot A3 pages"
+    assert rows["plotter-b"]["objective"] == "Reuse two NEMA17 steppers"
+    assert rows["no-goal"]["objective"] == ""
+    # Created stays at the first save while saved_at follows the latest revision.
+    assert rows["plotter-a"]["created_at"] and rows["plotter-a"]["created_at"] <= rows["plotter-a"]["saved_at"]

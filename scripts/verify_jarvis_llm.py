@@ -32,6 +32,7 @@ def main() -> int:
         "USB-powered ESP32 wifi temperature logger with DHT22 on GPIO4",
         out_dir=out_root / "open_dht_logger",
         export_gerber=False,
+        allow_llm_first=True,
     )
     q1 = r1.get("design_quality") or {}
     j1 = r1.get("jarvis") or {}

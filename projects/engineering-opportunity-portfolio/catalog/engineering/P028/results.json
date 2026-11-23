@@ -1,0 +1,65 @@
+{
+  "controller": {
+    "case_expectations": {
+      "bouncing": "pass",
+      "duplicate-in-place": "inconclusive_sequence",
+      "gap": "inconclusive_length",
+      "intermittent": "missed_close",
+      "latches": "missed_open",
+      "late-press": "missed_close",
+      "lost-command": "inconclusive_command",
+      "misordered": "inconclusive_sequence",
+      "reset": "inconclusive_reset",
+      "reset-with-contact-fault": "inconclusive_reset",
+      "stuck-open": "missed_close",
+      "three-ms-spike": "pass",
+      "truncated": "inconclusive_length",
+      "welded": "closed_at_home"
+    },
+    "classifications": {
+      "closed_at_home": 32,
+      "inconclusive_command": 32,
+      "inconclusive_length": 64,
+      "inconclusive_reset": 64,
+      "inconclusive_sequence": 64,
+      "missed_close": 96,
+      "missed_open": 32,
+      "pass": 64
+    },
+    "commanded_cycles_per_trace": 1,
+    "duration_ms_per_cycle": 280,
+    "independent_replay_sequence": [
+      "pass",
+      "inconclusive_reset",
+      "inconclusive_length",
+      "missed_close",
+      "pass",
+      "inconclusive_length"
+    ],
+    "seeds_per_case": 32
+  },
+  "holders": {
+    "B3F-1000": {
+      "button_aperture_mm": 4.9,
+      "locating_boss_holes": 0,
+      "minimum_nominal_web_mm": 2.4,
+      "passes_envelope": true,
+      "rejected_initial_gap_mm": -0.074,
+      "terminal_holes": 4,
+      "washer_to_body_gap_mm": 4.22,
+      "worst_radial_gap_mm": 0.195,
+      "worst_retaining_land_mm": 0.22
+    },
+    "B3F-4000": {
+      "button_aperture_mm": 8.5,
+      "locating_boss_holes": 2,
+      "minimum_nominal_web_mm": 2.4,
+      "passes_envelope": true,
+      "rejected_initial_gap_mm": -0.074,
+      "terminal_holes": 4,
+      "washer_to_body_gap_mm": 1.22,
+      "worst_radial_gap_mm": 0.195,
+      "worst_retaining_land_mm": 1.42
+    }
+  }
+}

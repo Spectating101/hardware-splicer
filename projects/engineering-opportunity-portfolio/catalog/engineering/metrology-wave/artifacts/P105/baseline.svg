@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="220mm" height="260mm" viewBox="0 0 220 260">
+  <title>P105 baseline · full-size proof coupon</title>
+  <rect id="scale" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="10" y="6" width="20" height="10" />
+  <rect id="stand-foot" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="19" y="35" width="150" height="31" />
+  <rect id="stand-cheek-0" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="19" y="85" width="63" height="88" />
+  <rect id="stand-cheek-1" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="96" y="85" width="63" height="88" />
+  <circle id="seat-0" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="51" cy="108" r="5.1" />
+  <circle id="seat-1" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="128" cy="108" r="5.1" />
+  <circle id="arbor" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="56" cy="212" r="2.5" />
+  <circle id="friction-contact-radius" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" cx="56" cy="212" r="10" />
+  <rect id="wheel-envelope" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="114" y="161" width="74" height="74" />
+  <line id="imbalance-arm" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x1="151" y1="198" x2="188" y2="198" />
+  <polygon id="cone-section" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" points="101,224 123,216 123,236 101,228" />
+</svg>

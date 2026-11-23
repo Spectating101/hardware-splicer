@@ -1,0 +1,120 @@
+{
+  "schema_version": "hardware_splicer.so102_follower_drives.v1",
+  "project": "Robonine SO-ARM102 follower",
+  "source_revision": "43252799d077e7f9971d7c695fd59f31413aa9b6",
+  "sources": {
+    "bom": {
+      "url": "https://github.com/roboninecom/SO-ARM102/blob/43252799d077e7f9971d7c695fd59f31413aa9b6/docs/bom.md",
+      "sha256": "f598d19e82d4a6c5e46dfbf8532ef96a26864b97502ea23b0c0c8f9d7e97c8e9"
+    },
+    "assembly": {
+      "url": "https://github.com/roboninecom/SO-ARM102/blob/43252799d077e7f9971d7c695fd59f31413aa9b6/docs/assembly-guide.md",
+      "sha256": "ef872fdb2d6aa76dead01399b3649673862d1f00f7c83254b62c048e8b1c948a"
+    },
+    "printing": {
+      "url": "https://github.com/roboninecom/SO-ARM102/blob/43252799d077e7f9971d7c695fd59f31413aa9b6/docs/printing.md",
+      "sha256": "465fdab6f423d535756bff61c7a282a64ab025e2228d1c7e6ed3e98b11da126e"
+    },
+    "mount_step": {
+      "url": "https://github.com/roboninecom/SO-ARM102/blob/43252799d077e7f9971d7c695fd59f31413aa9b6/models/step/common/SO102.02.070%20Bottom%20arm.STEP",
+      "sha256": "efd21745accfefe30de56252ff63537ae3ef8b33137f8003c813b4fac57d8520"
+    },
+    "urdf": {
+      "url": "https://github.com/roboninecom/SO-ARM102/blob/43252799d077e7f9971d7c695fd59f31413aa9b6/simulation/urdf/so_arm_102.urdf",
+      "sha256": "7ffcddec6eb9b54122bc9b8d612051464a6ba1a8580a53d5770f422e56fe5b63"
+    },
+    "cad_export": {
+      "url": "https://github.com/roboninecom/SO-ARM102/blob/43252799d077e7f9971d7c695fd59f31413aa9b6/simulation/urdf/export_metadata.json",
+      "sha256": "23fa85e38094b55b471a61a2adc4512330c9ac7f980296638712b1fdf309af79"
+    }
+  },
+  "attribution": {
+    "upstream": "roboninecom/SO-ARM102",
+    "source_licenses": "https://github.com/roboninecom/SO-ARM102/blob/43252799d077e7f9971d7c695fd59f31413aa9b6/LICENSING.md",
+    "adaptation": "HS selected two follower joints, summarized documentation and measured the lower-arm STEP."
+  },
+  "drives": {
+    "shoulder": {
+      "joint_name": "Shoulder lift",
+      "bus_id": 2,
+      "mpn": "ST-3250-C002",
+      "mpn_as_printed": "ST-3250-С002",
+      "manufacturer": "Feetech",
+      "long_cable_bus_ids": [
+        1,
+        2
+      ],
+      "long_cable_minimum_mm": 220,
+      "motor_body_link": "link2_1",
+      "simulation_joint": {
+        "name": "link1_to_link2",
+        "type": "revolute",
+        "parent": "link1_1",
+        "child": "link2_1",
+        "travel_rad": [
+          -2.32128790515,
+          1.58824961931
+        ]
+      }
+    },
+    "elbow": {
+      "joint_name": "Elbow flex",
+      "bus_id": 3,
+      "mpn": "ST-3250-C002",
+      "mpn_as_printed": "ST-3250-С002",
+      "manufacturer": "Feetech",
+      "long_cable_bus_ids": [
+        3,
+        4
+      ],
+      "long_cable_minimum_mm": 220,
+      "motor_body_link": "link2_1",
+      "simulation_joint": {
+        "name": "link2_to_link3",
+        "type": "revolute",
+        "parent": "link2_1",
+        "child": "link3_1",
+        "travel_rad": [
+          -1.57079632679,
+          2.67035375555
+        ]
+      }
+    }
+  },
+  "supplier_offers_from_bom": [
+    "https://www.aliexpress.us/item/3256811995148799.html",
+    "https://www.alibaba.com/product-detail/Feetech-STS3250-12V-50kg-Servo-High_1601711893549.html"
+  ],
+  "wiring": {
+    "supply_nominal_v": 12,
+    "protocol": "Feetech TTL serial bus",
+    "controller": "Waveshare Bus Servo Adapter"
+  },
+  "mount": {
+    "part_number": "SO102.02.070",
+    "material": "PET-CF",
+    "step_solid_count": 1,
+    "step_bounding_box_mm": [
+      113.0,
+      34.0,
+      20.0
+    ],
+    "assembly_step": 6,
+    "scope": "Shared by shoulder and elbow in one follower arm",
+    "step_quantities": {
+      "lower_arm_print": 2,
+      "M2x6_screw": 16,
+      "short_cable": 2,
+      "long_cable": 1
+    },
+    "servo_horns": "One on each side of each servo"
+  },
+  "joint_mapping_basis": "HS maps the assembly IDs to the second and third revolute joints in kinematic chain order. Motor body links come from the CAD export.",
+  "open_questions": [
+    "Donor mounting-hole coordinates and horn spline fit",
+    "Connector contact numbering and polarity",
+    "Current margin with all follower loads operating",
+    "Continuous torque and thermal margin for the intended load",
+    "Condition and calibration of the individual servo"
+  ]
+}

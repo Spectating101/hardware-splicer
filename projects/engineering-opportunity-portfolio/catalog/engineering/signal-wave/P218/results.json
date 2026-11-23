@@ -1,0 +1,5 @@
+{
+  "worst_ideal_force_N": 0.695,
+  "original_worst_N": 1.8533,
+  "assumptions": "Rigid face, symmetric mounting and constant bias torque; no flex, friction variation or measured accessibility."
+}

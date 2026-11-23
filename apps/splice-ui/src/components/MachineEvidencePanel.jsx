@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 
 import { PERSISTENCE_STATUS, projectSnapshot } from "../projectSession/projectSession.js";
-import { stageMachineProjectReview } from "../projectSession/machineAuthoringApi.js";
-import { recordMachineEvidence } from "../projectSession/machineEvidenceApi.js";
+import { stageMachineProjectReview } from "../projectSession/machineAuthoringApi";
+import { recordMachineEvidence } from "../projectSession/machineEvidenceApi";
 import BenchCaptureImportPanel from "./BenchCaptureImportPanel.jsx";
 import "./MachineEvidencePanel.css";
 

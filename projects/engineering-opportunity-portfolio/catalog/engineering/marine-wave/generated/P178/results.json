@@ -1,0 +1,15 @@
+{
+  "pilot": "Workshop tank inspection target, USB camera BR-100126 as reference optical core",
+  "metrics": {
+    "1080p": {
+      "clear_aperture_margin_mm": 0.87,
+      "span_mm": 350.87,
+      "average_pixels_per_feature": 16.42
+    },
+    "low-resolution-control": {
+      "clear_aperture_margin_mm": 0.87,
+      "span_mm": 350.87,
+      "average_pixels_per_feature": 5.47
+    }
+  }
+}

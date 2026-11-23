@@ -1,0 +1,29 @@
+{
+  "metadata": {
+    "source": "assistant_engineered_cyberdeck_continuation"
+  },
+  "project_id": "hs-flex-cyberdeck",
+  "revision": 1,
+  "saved_at": "2026-11-17T14:24:47.151794+00:00",
+  "schema_version": "hardware_splicer.project_snapshot.v1",
+  "snapshot": {
+    "constraints": {
+      "frontend_deferred": true,
+      "no_parts_owned": true,
+      "no_user_budget_confirmed": true,
+      "scope": "digital CAD and first-order calculations only"
+    },
+    "designMethod": "Assistant-directed part research and CadQuery authoring; existing HS source ingestion, CAD reading and materials reconciliation used below.",
+    "engineeringSources": [],
+    "goal": "Self-contained Linux field terminal: 7-inch touch display, wired keyboard, rear USB and Ethernet, offline documentation, SSH, commercial USB-C power bank and realizable enclosure.",
+    "mode": "digital_only",
+    "physicalBuildVerified": false,
+    "projectName": "Fielddeck 7 — continuation of the October cyberdeck objective",
+    "recovery": {
+      "old_revisions_recreated": false,
+      "old_store": "/tmp/hs-cross-domain-20261021/store/hs-flex-cyberdeck",
+      "old_store_available": false,
+      "original_trial": "../README.md"
+    }
+  }
+}

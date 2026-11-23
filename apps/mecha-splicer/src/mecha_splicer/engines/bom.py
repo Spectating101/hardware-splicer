@@ -5,6 +5,8 @@ from typing import Literal
 
 from ..spec import (
     BeltReductionSpec,
+    AerialFrameSpec,
+    MountingPlateSpec,
     BracketSpec,
     EnclosureSpec,
     GripperSpec,
@@ -64,6 +66,31 @@ def build_bom(spec: ProjectSpec) -> list[BomLine]:
             )
         )
         lines.append(BomLine("hardware", "rubber feet", "self-adhesive", 4, "reduces desk rattle", sku="rubber_feet_20"))
+
+    if spec.aerial_frame:
+        a = spec.aerial_frame
+        lines.extend([
+            BomLine("frame", "HS native one-piece guarded quadrotor",
+                    f"{a.wheelbase_mm}mm wheelbase; {a.prop_diameter_mm}mm prop guards",
+                    1, "native frame source aerial_frame.scad; untested fabrication candidate"),
+            BomLine("printed_structure", "HS battery cradle",
+                    f"nominal battery {a.battery_w_mm}x{a.battery_h_mm}x{a.battery_l_mm}mm",
+                    1, "battery dimensions preliminary; actual packs must be measured"),
+            BomLine("mounts", "3-hole motor mounting screw locations",
+                    f"3x M1.4 6.6mm PCD per motor", 4,
+                    "physical screw lengths and motor direction remain unverified"),
+            BomLine("mounts", "rotated 45-degree flight controller holes",
+                    f"{a.fc_mount_pitch_mm}mm hole-square pitch", 1,
+                    "holes at cardinal axes, verify chosen FC and grommets"),
+        ])
+    if spec.mounting_plate:
+        mp = spec.mounting_plate
+        lines.append(BomLine(
+            "printed_fixture", "parametric 4-hole mounting plate",
+            f"{mp.w_mm}x{mp.d_mm}x{mp.t_mm}mm, {mp.pitch_x_mm}x{mp.pitch_y_mm} pitch, "
+            f"{mp.hole_d_mm}mm drill",
+            1, "dimension/fit-check bench fixture; not cleared for flight"
+        ))
 
     if spec.bracket:
         lines.extend(_bom_for_bracket(spec.bracket))

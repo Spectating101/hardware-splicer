@@ -1,0 +1,15 @@
+{
+  "schema": "hs.source-bound-relocated-keys-kicad-check.v1",
+  "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+  "cut_path_sha256": "d13f03bc91b0faec7c4d353bf2cbac682082e7c53a8a2d6595055db519d95d36",
+  "remount_pcb_sha256": "c2425c79a591a6b521d524537cef9dc7a8ea5c1aee30bc23ef5f16a82ef7c2fd",
+  "relocated_key_count": 5,
+  "reference_original_keys_accounted": 62,
+  "native_kicad_drc_exit": 0,
+  "drc_violations": 0,
+  "unconnected_items": 0,
+  "geometry_model_verified": true,
+  "original_keyboard_source_drc_certified": false,
+  "physical_authority_granted": false,
+  "fabrication_release": "BLOCKED_RELOCATION_PREVIEW_ONLY"
+}

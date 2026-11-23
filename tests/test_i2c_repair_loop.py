@@ -71,7 +71,9 @@ def test_a_patch_may_only_set_the_address_field_on_a_node_never_change_what_a_pa
         apply_graph_patch(graph, {"remove_wires": [], "add_wires": [], "set_node_fields": {"n2": {"moduleId": "sg90"}}})
 
 
-def test_an_agent_submitting_the_repaired_design_through_the_canvas_path_gets_a_clean_verdict(tmp_path) -> None:
+def test_an_agent_submitting_the_repaired_design_through_the_canvas_path_gets_a_clean_verdict(
+    tmp_path, assume_clean_kicad_erc
+) -> None:
     graph = compose_build_graph_from_module_ids(TWO_SENSORS, auto_repair=False)["graph"]
     broken = compile_canvas_build(out_dir=str(tmp_path / "broken"), nodes=graph["nodes"], wires=graph["wires"], export_gerber=False)
     assert broken.compile_result.design_quality["electrical_safety_pass"] is False

@@ -1,0 +1,332 @@
+{
+  "winder": {
+    "mission": "Evaluate a small automatic bobbin winder from its published electronics and traverse parts before committing any hardware budget.",
+    "checked_software_through": "HS canonical project source bundle API",
+    "source_records": [
+      {
+        "name": "Winder_V1.kicad_pcb",
+        "source_repository_or_vendor": "https://raw.githubusercontent.com/AnotherBuildCorner/Pickup_Winder/7f5a0f13920a55afa7951eee5f7ddf7652018ea6/PCB/Winder_V1.kicad_pcb",
+        "sha256": "sha256:688713955bc41a936b74b3cfb67868d2aa68fb3de993e1dff8dfa9cfb04acef0",
+        "source_id": "upload-688713955bc41a936b74",
+        "size_bytes": 123835
+      },
+      {
+        "name": "Winder_V1.kicad_sch",
+        "source_repository_or_vendor": "https://raw.githubusercontent.com/AnotherBuildCorner/Pickup_Winder/7f5a0f13920a55afa7951eee5f7ddf7652018ea6/PCB/Winder_V1.kicad_sch",
+        "sha256": "sha256:fdeaf79af610702754bcf3bd0f961ad6fc084af68cc03b1c48f4c3c92e48216f",
+        "source_id": "upload-fdeaf79af610702754bc",
+        "size_bytes": 108463
+      },
+      {
+        "name": "Winder_V1.kicad_pro",
+        "source_repository_or_vendor": "https://raw.githubusercontent.com/AnotherBuildCorner/Pickup_Winder/7f5a0f13920a55afa7951eee5f7ddf7652018ea6/PCB/Winder_V1.kicad_pro",
+        "sha256": "sha256:5eb0d99dd83b2c0c91cc01b08015b00e7153b33e3e8b1adb057b0387ee63cad9",
+        "source_id": "upload-5eb0d99dd83b2c0c91cc",
+        "size_bytes": 12317
+      },
+      {
+        "name": "Cradle.stl",
+        "source_repository_or_vendor": "https://raw.githubusercontent.com/AnotherBuildCorner/Pickup_Winder/7f5a0f13920a55afa7951eee5f7ddf7652018ea6/3D%20Meshes/Cradle.stl",
+        "sha256": "sha256:04158c35ab8e9530dc741e0b8e16a400720174e174c2ffb13c816af36954ab9d",
+        "source_id": "upload-04158c35ab8e9530dc74",
+        "size_bytes": 226584
+      },
+      {
+        "name": "Slide.stl",
+        "source_repository_or_vendor": "https://raw.githubusercontent.com/AnotherBuildCorner/Pickup_Winder/7f5a0f13920a55afa7951eee5f7ddf7652018ea6/3D%20Meshes/Slide.stl",
+        "sha256": "sha256:d307b1f9d2a29136cc204610bdae72f3d2eb05e22a1e06f61e479f3062f17905",
+        "source_id": "upload-d307b1f9d2a29136cc20",
+        "size_bytes": 120284
+      }
+    ],
+    "physical_object_inspected": false,
+    "status": "analyzed_with_findings",
+    "geometry": {
+      "Cradle.stl": {
+        "status": "parsed_raw_bounds",
+        "triangle_count": 4530,
+        "axis_min": [
+          -4.0,
+          -8.9282,
+          -0.00264
+        ],
+        "axis_max": [
+          20.0,
+          10.0,
+          35.0
+        ],
+        "axis_span": [
+          24.0,
+          18.9282,
+          35.00264
+        ],
+        "units": "unresolved_STL_has_no_unit_metadata",
+        "fit_verified": false,
+        "watertightness_verified": false
+      },
+      "Slide.stl": {
+        "status": "parsed_raw_bounds",
+        "triangle_count": 2404,
+        "axis_min": [
+          -6.59808,
+          -15.85047,
+          -1.5
+        ],
+        "axis_max": [
+          22.59808,
+          -2.0,
+          55.0
+        ],
+        "axis_span": [
+          29.19615,
+          13.85047,
+          56.5
+        ],
+        "units": "unresolved_STL_has_no_unit_metadata",
+        "fit_verified": false,
+        "watertightness_verified": false
+      }
+    },
+    "software_checks": {
+      "erc": {
+        "status": "findings_present",
+        "check_executed": true,
+        "exit_code": 5,
+        "rule_finding_count": 65,
+        "rule_findings_by_type": {
+          "footprint_link_issues": 1,
+          "lib_symbol_issues": 42,
+          "multiple_net_names": 1,
+          "pin_not_connected": 15,
+          "pin_not_driven": 1,
+          "power_pin_not_driven": 5
+        },
+        "report_sha256": "sha256:131296e741417afdbfbea77ffe4954ad673c1038fec62c9589ea148d1c96b188",
+        "manufacturer_or_local_library_issues_possible": true,
+        "manufacturing_approved": false
+      },
+      "drc": {
+        "status": "findings_present",
+        "check_executed": true,
+        "exit_code": 5,
+        "rule_finding_count": 22,
+        "rule_findings_by_type": {
+          "lib_footprint_issues": 1,
+          "lib_footprint_mismatch": 14,
+          "silk_edge_clearance": 4,
+          "track_dangling": 3
+        },
+        "report_sha256": "sha256:8199213ca11fa7e03933a5c31ce81263f1fd020449ec1dd206d6efe7c3e28507",
+        "manufacturer_or_local_library_issues_possible": true,
+        "manufacturing_approved": false
+      }
+    },
+    "manufacturing_approved": false,
+    "schematic_netlist": {
+      "status": "exported_project_netlist",
+      "net_count": 42,
+      "component_count": 16
+    },
+    "carrier": {
+      "status": "generated_valid_solid_candidate",
+      "source_board_step_sha256": "sha256:dc9529947c5d00d52921de9fd950a6b3fd69d9bda684a94068ab564296d6a1c2",
+      "cad_kernel": "CadQuery/OpenCascade",
+      "board_bbox_mm": {
+        "x": 72.644,
+        "y": 51.816,
+        "thickness": 1.51
+      },
+      "carrier_outer_mm": {
+        "x": 79.644,
+        "y": 58.816,
+        "z": 7.5
+      },
+      "pcb_to_envelope_xy_clearance_mm": 1.25,
+      "wall_mm": 2.25,
+      "floor_mm": 2.5,
+      "rim_height_mm": 5.0,
+      "carrier_volume_mm3": 14724.955,
+      "validated_single_solid": true,
+      "source_board_components_omitted": true,
+      "mounting_holes_provided": false,
+      "retention_compatibility_verified": false,
+      "enclosure_clearance_verified": false,
+      "functional_part_fit_verified": false,
+      "printer_material_selected": false,
+      "build_authorized": false,
+      "generated_artifacts": [
+        {
+          "name": "pcb_envelope_carrier_candidate.step",
+          "sha256": "sha256:4b7ad311c9a0a0b2795cfbe9b6d719ed9a781c521c4f0509d7d62860c81eaff7",
+          "size_bytes": 30230
+        },
+        {
+          "name": "pcb_envelope_carrier_candidate.stl",
+          "sha256": "sha256:eb2a65d2274da1928b2e926cccb7127ebcf07f3f280b3801905473d9475bb63b",
+          "size_bytes": 1484
+        }
+      ],
+      "registered_board_sha256": "sha256:688713955bc41a936b74b3cfb67868d2aa68fb3de993e1dff8dfa9cfb04acef0",
+      "registered_project_sha256": "sha256:5eb0d99dd83b2c0c91cc01b08015b00e7153b33e3e8b1adb057b0387ee63cad9",
+      "manufacturer_footprints_physically_checked": false,
+      "model_created_by": "HS bounded CadQuery board-envelope operation"
+    }
+  },
+  "switch": {
+    "mission": "Identify the common tester body and interchangeable holders for small pushbuttons using the published source geometry.",
+    "checked_software_through": "HS canonical project source bundle API",
+    "source_records": [
+      {
+        "name": "keyswitch-tester.stl",
+        "source_repository_or_vendor": "https://raw.githubusercontent.com/jes/keyswitch-tester/ba032b45514b56965481bef0bb89d095ef08a03b/keyswitch-tester.stl",
+        "sha256": "sha256:e60ba7aab2c118c32f28780a1f1ff780430741243457731ad1872f1ac0fde782",
+        "source_id": "upload-e60ba7aab2c118c32f28",
+        "size_bytes": 56184
+      },
+      {
+        "name": "servohorn.stl",
+        "source_repository_or_vendor": "https://raw.githubusercontent.com/jes/keyswitch-tester/ba032b45514b56965481bef0bb89d095ef08a03b/servohorn.stl",
+        "sha256": "sha256:1e16b74ed5674339baef17726be349163e0ef8b8b4c33f487d8caa401623795b",
+        "source_id": "upload-1e16b74ed5674339baef",
+        "size_bytes": 77384
+      },
+      {
+        "name": "cherry-holder.stl",
+        "source_repository_or_vendor": "https://raw.githubusercontent.com/jes/keyswitch-tester/ba032b45514b56965481bef0bb89d095ef08a03b/cherry-holder.stl",
+        "sha256": "sha256:b893a3ffa44df436db739747b9f9f0903f90714b26c25493562b93ed2cad2bb2",
+        "source_id": "upload-b893a3ffa44df436db73",
+        "size_bytes": 58384
+      },
+      {
+        "name": "6mm-microswitch-holder.stl",
+        "source_repository_or_vendor": "https://raw.githubusercontent.com/jes/keyswitch-tester/ba032b45514b56965481bef0bb89d095ef08a03b/6mm-microswitch-holder.stl",
+        "sha256": "sha256:bd853e1897bc859c5f8f21ccbb1094a8c9b0400656ac624e7b9656d6090d6ece",
+        "source_id": "upload-bd853e1897bc859c5f8f",
+        "size_bytes": 41084
+      },
+      {
+        "name": "blank-holder.stl",
+        "source_repository_or_vendor": "https://raw.githubusercontent.com/jes/keyswitch-tester/ba032b45514b56965481bef0bb89d095ef08a03b/blank-holder.stl",
+        "sha256": "sha256:9a4a6e636b2448a9ae89607d82b771aa43f1508775caf7b1616ddcc2460a69e9",
+        "source_id": "upload-9a4a6e636b2448a9ae89",
+        "size_bytes": 64884
+      }
+    ],
+    "physical_object_inspected": false,
+    "status": "analyzed_non_electrical_sources",
+    "geometry": {
+      "keyswitch-tester.stl": {
+        "status": "parsed_raw_bounds",
+        "triangle_count": 1122,
+        "axis_min": [
+          -33.0,
+          -15.0,
+          -0.0
+        ],
+        "axis_max": [
+          40.0,
+          24.0,
+          52.0
+        ],
+        "axis_span": [
+          73.0,
+          39.0,
+          52.0
+        ],
+        "units": "unresolved_STL_has_no_unit_metadata",
+        "fit_verified": false,
+        "watertightness_verified": false
+      },
+      "servohorn.stl": {
+        "status": "parsed_raw_bounds",
+        "triangle_count": 1546,
+        "axis_min": [
+          -30.5,
+          -9.0,
+          0.0
+        ],
+        "axis_max": [
+          4.5,
+          4.5,
+          4.5
+        ],
+        "axis_span": [
+          35.0,
+          13.5,
+          4.5
+        ],
+        "units": "unresolved_STL_has_no_unit_metadata",
+        "fit_verified": false,
+        "watertightness_verified": false
+      },
+      "cherry-holder.stl": {
+        "status": "parsed_raw_bounds",
+        "triangle_count": 1166,
+        "axis_min": [
+          -53.0,
+          -15.0,
+          15.0
+        ],
+        "axis_max": [
+          -33.0,
+          15.0,
+          40.0
+        ],
+        "axis_span": [
+          20.0,
+          30.0,
+          25.0
+        ],
+        "units": "unresolved_STL_has_no_unit_metadata",
+        "fit_verified": false,
+        "watertightness_verified": false
+      },
+      "6mm-microswitch-holder.stl": {
+        "status": "parsed_raw_bounds",
+        "triangle_count": 820,
+        "axis_min": [
+          -53.0,
+          -15.0,
+          16.0
+        ],
+        "axis_max": [
+          -33.0,
+          15.0,
+          40.0
+        ],
+        "axis_span": [
+          20.0,
+          30.0,
+          24.0
+        ],
+        "units": "unresolved_STL_has_no_unit_metadata",
+        "fit_verified": false,
+        "watertightness_verified": false
+      },
+      "blank-holder.stl": {
+        "status": "parsed_raw_bounds",
+        "triangle_count": 1296,
+        "axis_min": [
+          -53.0,
+          -15.0,
+          0.0
+        ],
+        "axis_max": [
+          -33.0,
+          15.0,
+          40.0
+        ],
+        "axis_span": [
+          20.0,
+          30.0,
+          40.0
+        ],
+        "units": "unresolved_STL_has_no_unit_metadata",
+        "fit_verified": false,
+        "watertightness_verified": false
+      }
+    },
+    "software_checks": {},
+    "manufacturing_approved": false
+  }
+}

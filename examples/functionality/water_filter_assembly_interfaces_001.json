@@ -1,0 +1,254 @@
+{
+  "schema_version": "hardware_splicer.nonpotable_filter_assembly_interfaces.v1",
+  "project_id": "water_filter_nonpotable_bench_001",
+  "reference_parts": {
+    "housing": "158007",
+    "cartridge": "155014-43"
+  },
+  "authority": "DOCUMENTARY_ASSEMBLY_INVESTIGATION_ONLY",
+  "manufacturer_references": [
+    {
+      "id": "traditional_pdf_2018",
+      "publisher": "Pentair",
+      "document": "Traditional Slim Line Series",
+      "revision": "310050 REV F JE18",
+      "url": "https://www.pentair.com/content/dam/extranet/web/nam/pentek/spec-sheets/310050-pentek-traditional-slimline-spec-sheet.pdf",
+      "evidence_kind": "manufacturer_family_accessories_and_bosses",
+      "original_pdf_sha256": null
+    },
+    {
+      "id": "traditional_pdf_2025",
+      "publisher": "Pentair",
+      "document": "Traditional Slim Line Series",
+      "revision": "310050 JL25",
+      "url": "https://www.pentair.com/content/dam/extranet/nam/filtration/pentek/residential/spec-sheets/english/310050-pentek-slim-line-spec-sheet.pdf",
+      "evidence_kind": "manufacturer_housing_spec_and_installation_guidance",
+      "original_pdf_sha256": null
+    },
+    {
+      "id": "pentair_traditional_current",
+      "publisher": "Pentair",
+      "document": "Traditional Slim Line Series product family",
+      "url": "https://www.pentair.com/en-us/home-water-treatment/filter-housings/traditional-slim-line-series.html",
+      "evidence_kind": "manufacturer_current_series_listing_and_mounting_bosses",
+      "original_pdf_sha256": null
+    }
+  ],
+  "accessories": [
+    {
+      "id": "BRACKET_CANDIDATE",
+      "manufacturer": "Pentair",
+      "part_number": "244047",
+      "name": "Slim Line zinc-plated bracket kit",
+      "listed_by_manufacturer": true,
+      "source_id": "traditional_pdf_2018",
+      "sku_specific_fit_confirmed": false,
+      "drill_template_verified": false,
+      "weight_load_rating_verified": false,
+      "approval": "CANDIDATE_ONLY"
+    },
+    {
+      "id": "WRENCH_CANDIDATE",
+      "manufacturer": "Pentair",
+      "part_number": "150539",
+      "name": "SW-1A Slim Line housing wrench",
+      "listed_by_manufacturer": true,
+      "source_id": "traditional_pdf_2018",
+      "sku_specific_fit_confirmed": false,
+      "required_swing_clearance_measured": false,
+      "approval": "CANDIDATE_ONLY"
+    },
+    {
+      "id": "ORING_CANDIDATE",
+      "manufacturer": "Pentair",
+      "part_number": "151121",
+      "name": "EPDM size #237 Slim Line replacement O-ring",
+      "listed_by_manufacturer": true,
+      "source_id": "traditional_pdf_2018",
+      "sku_specific_fit_confirmed": false,
+      "seal_groove_measured": false,
+      "approval": "CANDIDATE_ONLY"
+    }
+  ],
+  "interfaces": [
+    {
+      "id": "IF_CARTRIDGE_SUMP",
+      "from": "155014-43",
+      "to": "158007",
+      "interface": "nominal_10in_double_open_end_seat",
+      "functional_requirements": [
+        "REQ_PARTICLE",
+        "REQ_BYPASS",
+        "REQ_SERVICE"
+      ],
+      "unknown_fields": [
+        "sump_internal_diameter_mm",
+        "media_end_face_sealing_position_mm",
+        "compressed_gasket_geometry_mm",
+        "complete_cartridge_seat_fit"
+      ],
+      "verification": "Measure purchased SKU dimensions and dry fit against manufacturer-approved cartridge seating, inspect bypass flow path"
+    },
+    {
+      "id": "IF_CAP_BRACKET",
+      "from": "158007",
+      "to": "244047",
+      "interface": "four_cap_mounting_bosses_to_bracket",
+      "functional_requirements": [
+        "REQ_LEAK",
+        "REQ_SERVICE"
+      ],
+      "known_mounting_boss_count": 4,
+      "unknown_fields": [
+        "boss_center_spacing_mm",
+        "boss_thread_specification",
+        "bracket_hole_pitch_mm",
+        "rated_mount_load_newton",
+        "clearance_for_sump_release_mm"
+      ],
+      "verification": "Request manufacturer drawing for exact 158007 and bracket, then compare to measured parts; do not drill to guessed pitch"
+    },
+    {
+      "id": "IF_PORT_FITTINGS",
+      "from": "158007",
+      "to": "UNSELECTED_NPT_CONNECTORS",
+      "interface": "female_3_8in_NPT_inlet_outlet",
+      "functional_requirements": [
+        "REQ_FLOW",
+        "REQ_LEAK"
+      ],
+      "unknown_fields": [
+        "actual_male_fitting_part_numbers",
+        "fitting_pressure_rating_psi",
+        "fitting_material_compatibility",
+        "seal_method_and_installation_torque",
+        "tube_outer_diameter_mm"
+      ],
+      "verification": "Select manufacturer-rated NPT adapters and tubing; review fitting/thread/material compatibility and perform supervised leak check"
+    },
+    {
+      "id": "IF_SUMP_WRENCH",
+      "from": "158007",
+      "to": "150539",
+      "interface": "sump_service_hand_tool",
+      "functional_requirements": [
+        "REQ_SERVICE"
+      ],
+      "unknown_fields": [
+        "wrench_sku_specific_engagement",
+        "wrench_swing_radius_mm",
+        "minimum_sump_removal_clearance_mm",
+        "service_access_geometry"
+      ],
+      "verification": "Obtain exact manufacturer service instructions and measure dry unpowered service sweep; 150mm generated corridor remains an assumption"
+    },
+    {
+      "id": "IF_ORING_SUMP",
+      "from": "158007",
+      "to": "151121",
+      "interface": "replaceable_cap_sump_seal",
+      "functional_requirements": [
+        "REQ_LEAK",
+        "REQ_BYPASS"
+      ],
+      "unknown_fields": [
+        "exact_oring_revision_approval",
+        "measured_seal_groove_geometry",
+        "assembly_lubrication_procedure",
+        "actual_leak_qualification"
+      ],
+      "verification": "Confirm housing SKU seal parts list, inspect purchased seal and verify manufacturer-approved lubrication/maintenance and pressure protocol"
+    },
+    {
+      "id": "IF_INSTRUMENTS",
+      "from": "158007",
+      "to": "UNSELECTED_PRESSURE_TAPS",
+      "interface": "independently_isolated_inlet_outlet_pressure_sensing",
+      "functional_requirements": [
+        "REQ_MONITOR",
+        "REQ_FLOW"
+      ],
+      "unknown_fields": [
+        "source_feed_pressure_psi",
+        "rated_taps_and_instruments",
+        "instrument_range_and_accuracy",
+        "calibration_reference",
+        "pressure_drop_at_0_5_lpm"
+      ],
+      "verification": "Select rated pressure taps and calibrate to independent references; measure actual pressure drop at the functional flow target"
+    }
+  ],
+  "service_envelope": {
+    "housing_max_height_mm": 308,
+    "illustrative_below_access_mm": 150,
+    "vertical_reserved_total_mm": 458,
+    "design_clearance_authority": "ILLUSTRATIVE_USER_ALLOCATION_NOT_MANUFACTURER_INSTALLATION_CLEARANCE",
+    "manufacturer_sku_specific_minimum_below_clearance_mm": null,
+    "housing_boss_pitch_mm": null,
+    "wrenched_service_sweep_radius_mm": null,
+    "fit_verified": false
+  },
+  "hydraulics": {
+    "target_flow_l_min": 0.5,
+    "manufacturer_reference_flow_us_gpm": 5,
+    "cartridge_reference_deltap_psi": 0.2,
+    "housing_reference_deltap_psi": 2,
+    "actual_design_flow_pressure_drop_psi": null,
+    "inflow_pressure_psi": null,
+    "actual_wet_test_executed": false,
+    "process_model_executed": false
+  },
+  "certification_review": {
+    "source_id": "traditional_pdf_2018",
+    "housing_158007_listed_in_reviewed_nsf_ansi_42_material_structural_sku_list": false,
+    "product_certification_conclusion": "NOT_ESTABLISHED_BY_REVIEWED_2018_MANUFACTURER_LIST",
+    "certification_for_selected_housing_currently_verified": false,
+    "certification_for_assembled_unit_verified": false,
+    "water_quality_performance_certified": false
+  },
+  "required_evidence_roles": [
+    {
+      "id": "E_DIMENSIONS",
+      "scope": "purchased exact cartridge/housing fit",
+      "status": "NOT_COLLECTED"
+    },
+    {
+      "id": "E_BRACKET",
+      "scope": "vendor bracket/cap boss compatibility and load",
+      "status": "NOT_COLLECTED"
+    },
+    {
+      "id": "E_SERVICE",
+      "scope": "wrench operating room and sump removal",
+      "status": "NOT_COLLECTED"
+    },
+    {
+      "id": "E_RATINGS",
+      "scope": "fittings/tube/seals and safe operating pressure",
+      "status": "NOT_COLLECTED"
+    },
+    {
+      "id": "E_HYDRAULIC",
+      "scope": "measured low-flow pressure drop and flow performance",
+      "status": "NOT_COLLECTED"
+    },
+    {
+      "id": "E_WATER_QUALITY",
+      "scope": "controlled paired non-potable particle challenge measurements",
+      "status": "NOT_COLLECTED"
+    },
+    {
+      "id": "E_COMPLIANCE",
+      "scope": "SKU-specific certification and assembly compliance",
+      "status": "NOT_COLLECTED"
+    }
+  ],
+  "physical_authority": {
+    "purchase": false,
+    "drill": false,
+    "build": false,
+    "pressure_test": false,
+    "operate": false,
+    "drink": false
+  }
+}

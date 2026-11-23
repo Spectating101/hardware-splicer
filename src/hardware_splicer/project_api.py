@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+
 from typing import Any, Dict
 
 from fastapi import APIRouter, HTTPException, Query, status
@@ -53,6 +55,9 @@ class ProjectReviewDecisionRequest(BaseModel):
     note: str = ""
 
 
+_logger = logging.getLogger(__name__)
+
+
 def _project_error(exc: Exception) -> HTTPException:
     if isinstance(exc, (InvalidProjectId, InvalidReviewId)):
         return HTTPException(
@@ -85,9 +90,11 @@ def _project_error(exc: Exception) -> HTTPException:
             detail={"type": "artifact_integrity_error", "message": str(exc)},
         )
     if isinstance(exc, CorruptProject):
+        # The store's message names on-disk paths; log it, never return it.
+        _logger.error("corrupt project data: %s", exc)
         return HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail={"type": "corrupt_project", "message": str(exc)},
+            detail={"type": "corrupt_project", "message": "Stored project data is unreadable or inconsistent. Details are in the server log."},
         )
     if isinstance(exc, (ValueError, TypeError)):
         return HTTPException(
@@ -117,6 +124,14 @@ def create_project_router(store: ProjectStore | None = None) -> APIRouter:
         # Full-snapshot write: client-supplied engineeringFindings are stored
         # as given. The findings projection validates ledger rows on read.
         try:
+            if request.snapshot.get('mode') == 'digital':
+                raise ValueError('Digital revisions are saved by completed simulation jobs. Use the digital study workflow.')
+            try:
+                current = project_store.load(project_id)
+            except ProjectNotFound:
+                current = None
+            if current and current['snapshot'].get('mode') == 'digital':
+                raise ValueError('Digital revisions are saved by completed simulation jobs. Use the digital study workflow.')
             envelope = project_store.save(
                 project_id,
                 request.snapshot,
@@ -208,7 +223,11 @@ def create_project_router(store: ProjectStore | None = None) -> APIRouter:
     @router.post("/{project_id}/duplicate", status_code=status.HTTP_201_CREATED)
     def duplicate_project(project_id: str, request: ProjectDuplicateRequest) -> Dict[str, Any]:
         try:
-            envelope = project_store.duplicate(project_id, request.target_project_id)
+            if project_store.load(project_id)['snapshot'].get('mode') == 'digital':
+                from .digital_project import duplicate_project as duplicate_digital
+                envelope = duplicate_digital(project_store, project_id, request.target_project_id)
+            else:
+                envelope = project_store.duplicate(project_id, request.target_project_id)
         except Exception as exc:
             raise _project_error(exc) from exc
         retention = retention_after_save(

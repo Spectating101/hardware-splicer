@@ -40,7 +40,7 @@ Automated: `scripts/agent_quickstart_verify.sh`
 
 | Claim | Why not |
 |-------|---------|
-| On-board café measurement of *this* donor | Needs physical DMM/PSU — [`REAL_BENCH_OPERATOR.md`](REAL_BENCH_OPERATOR.md) |
+| On-board café measurement of *this* donor | Needs physical DMM/PSU — [`REAL_BENCH_OPERATOR.md`](reference/REAL_BENCH_OPERATOR.md) |
 | `copper_tier: autorouted` / default fab-ready | Autoroute opt-in; maintainer track; default stays preview |
 | Stranger zero-help dry-run filed | Process ready; not required for cold exit |
 | Design Studio ECAD parity | Agent-loop wired; deeper UX is Phase 2 |
