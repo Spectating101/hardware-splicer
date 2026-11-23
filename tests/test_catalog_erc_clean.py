@@ -1,0 +1,147 @@
+"""Catalog schematics run through the real kicad-cli ERC (never stubbed)."""
+
+from __future__ import annotations
+
+import json
+import shutil
+from pathlib import Path
+
+import pytest
+
+from hardware_splicer.build_compiler import CATALOG_BUILD_IDS, compile_catalog_build
+from hardware_splicer.integrations.schematic_export import write_schematic_for_netlist
+from hardware_splicer.netlist.lower import build_graph_to_netlist
+from hardware_splicer.pcb.kicad_cli_erc import run_kicad_cli_erc
+from hardware_splicer.plan_to_graph import splice_plan_to_build_graph
+
+pytestmark = pytest.mark.skipif(not shutil.which("kicad-cli"), reason="kicad-cli required")
+
+# Builds whose recipe still leaves a pin the module data says must be wired. Each entry is the
+# exact remaining ERC finding; fixing the recipe (and its TypeScript mirror and footprint pads)
+# must remove the entry, not loosen the test. Currently every catalog build is clean.
+KNOWN_REMAINING_ERC_ERRORS: dict[str, set[tuple[str, str]]] = {}
+
+
+def _schematic_erc(build_id: str, tmp_path: Path) -> dict:
+    graph, effective_id, _notes, _warnings = splice_plan_to_build_graph(
+        {"target": {"recommended_build_id": build_id}}
+    )
+    netlist = build_graph_to_netlist(graph)
+    sch = tmp_path / f"{build_id}.kicad_sch"
+    write_schematic_for_netlist(netlist, sch, title=build_id, build_id=effective_id or build_id)
+    return run_kicad_cli_erc(sch, out_dir=tmp_path / "erc")
+
+
+def assert_erc_executed_and_clean(report: dict) -> None:
+    """A real ERC run: kicad-cli executed, wrote a report, and found nothing at error level.
+
+    An empty error set alone is not evidence: a crashed, skipped or missing run reports
+    pass=False/errors=1 with no violations.
+    """
+
+    assert report.get("skipped") is False, report
+    assert not report.get("reason"), report
+    assert report.get("report_path"), report
+    assert report.get("pass") is True, report
+    assert report.get("errors") == 0, report
+    assert _errors(report) == set(), report["violations"]
+
+
+def _errors(report: dict) -> set[tuple[str, str]]:
+    found: set[tuple[str, str]] = set()
+    for violation in report["violations"]:
+        if str(violation.get("severity")).lower() != "error":
+            continue
+        for item in violation.get("items") or []:
+            desc = str(item.get("description") or "")
+            pin = desc.split(" [", 1)[0].split("Symbol ", 1)[-1]
+            pin = " ".join(pin.split()[1:]) if pin.startswith("U") else pin
+            found.add((str(violation.get("type")), pin))
+    return found
+
+
+@pytest.mark.parametrize("build_id", CATALOG_BUILD_IDS)
+def test_catalog_schematic_real_erc_has_only_the_documented_errors(build_id: str, tmp_path: Path) -> None:
+    report = _schematic_erc(build_id, tmp_path)
+    if build_id in KNOWN_REMAINING_ERC_ERRORS:
+        assert report.get("skipped") is False and report.get("report_path"), report
+        assert _errors(report) == KNOWN_REMAINING_ERC_ERRORS[build_id]
+        assert report["pass"] is False
+    else:
+        assert_erc_executed_and_clean(report)
+
+
+@pytest.mark.parametrize("build_id", ["robot_drive_base", "usb_fume_extractor", "bench_power_adapter"])
+def test_compiled_representative_builds_are_build_ready_under_real_erc(build_id: str, tmp_path: Path) -> None:
+    result = compile_catalog_build(build_id, tmp_path, export_gerber=False)
+    quality = result.design_quality
+    assert quality.get("kicad_erc_skipped") is False, quality.get("kicad_erc_reason")
+    assert quality.get("kicad_erc_pass") is True, quality.get("kicad_erc_errors")
+    assert quality.get("kicad_erc_errors") == 0
+    assert quality.get("build_ready") is True
+    report = json.loads(
+        (tmp_path / "build_compilation" / "KICAD_ERC.json").read_text(encoding="utf-8")
+    )
+    assert not [v for v in report.get("violations", []) if v.get("severity") == "error"]
+
+
+def test_generic_resistors_in_a_netlist_are_connected_under_real_erc(tmp_path: Path) -> None:
+    from hardware_splicer.netlist.ir import CircuitNetlist, ComponentInstance, Net, PinRef
+
+    netlist = CircuitNetlist(
+        components=[
+            ComponentInstance(ref="J1", module_id="usb-power-5v"),
+            ComponentInstance(ref="U1", module_id="esp32-devkit"),
+            ComponentInstance(ref="U2", module_id="bme280"),
+            ComponentInstance(ref="R1", module_id="resistor-4_7k"),
+            ComponentInstance(ref="R2", module_id="resistor-4_7k"),
+        ],
+        nets=[
+            Net("GND", [PinRef("J1", "GND"), PinRef("U1", "GND"), PinRef("U2", "GND")]),
+            Net("+5V", [PinRef("J1", "V+"), PinRef("U1", "VIN")]),
+            Net("+3V3", [PinRef("U1", "3V3"), PinRef("U2", "VCC"), PinRef("R1", "2"), PinRef("R2", "2")]),
+            Net("SDA", [PinRef("U1", "GPIO21"), PinRef("U2", "SDA"), PinRef("R1", "1")]),
+            Net("SCL", [PinRef("U1", "GPIO22"), PinRef("U2", "SCL"), PinRef("R2", "1")]),
+        ],
+    )
+    sch = tmp_path / "pullups.kicad_sch"
+    write_schematic_for_netlist(netlist, sch)
+    report = run_kicad_cli_erc(sch, out_dir=tmp_path / "erc")
+    assert_erc_executed_and_clean(report)
+
+
+@pytest.mark.parametrize(
+    "bad_run",
+    [
+        {"pass": False, "skipped": False, "reason": "kicad-cli erc failed", "errors": 1, "warnings": 0, "violations": []},
+        {"pass": None, "skipped": True, "reason": "kicad-cli not on PATH", "errors": 0, "warnings": 0, "violations": []},
+        {"pass": False, "skipped": True, "reason": "missing_schematic", "errors": 1, "warnings": 0, "violations": []},
+        {"pass": False, "skipped": False, "reason": "no erc report written", "errors": 1, "warnings": 0, "violations": []},
+    ],
+)
+def test_a_failed_skipped_or_missing_erc_run_is_not_accepted_as_clean(bad_run: dict) -> None:
+    # The old check, _errors(report) == set(), accepts every one of these.
+    assert _errors(bad_run) == set()
+    with pytest.raises(AssertionError):
+        assert_erc_executed_and_clean(bad_run)
+
+
+def test_a_normal_dht11_circuit_passes_real_erc(tmp_path: Path) -> None:
+    from hardware_splicer.netlist.ir import CircuitNetlist, ComponentInstance, Net, PinRef
+
+    netlist = CircuitNetlist(
+        components=[
+            ComponentInstance(ref="J1", module_id="usb-power-5v"),
+            ComponentInstance(ref="U1", module_id="esp32-devkit"),
+            ComponentInstance(ref="U2", module_id="dht11"),
+        ],
+        nets=[
+            Net("GND", [PinRef("J1", "GND"), PinRef("U1", "GND"), PinRef("U2", "GND")]),
+            Net("+5V", [PinRef("J1", "V+"), PinRef("U1", "VIN")]),
+            Net("+3V3", [PinRef("U1", "3V3"), PinRef("U2", "VCC")]),
+            Net("DATA", [PinRef("U1", "GPIO4"), PinRef("U2", "DATA")]),
+        ],
+    )
+    sch = tmp_path / "dht11.kicad_sch"
+    write_schematic_for_netlist(netlist, sch)
+    assert_erc_executed_and_clean(run_kicad_cli_erc(sch, out_dir=tmp_path / "erc"))
