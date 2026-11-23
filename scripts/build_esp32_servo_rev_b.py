@@ -292,6 +292,33 @@ def widen(pcb: str, nets: tuple[str, ...] = ("VBUS", "+3V3"), width_mm: float = 
     Path(record).unlink(missing_ok=True)
 
 
+def settle(pcb: str) -> None:
+    """Last word on track widths: a widened power track (unlocked, so not hand-routed) still in a DRC
+    error goes back to the router's 0.2 mm; any other unlocked track in one (the router's geometry
+    occasionally rounds a hair under clearance) is trimmed by 0.02 mm, never below the spec's 0.15 mm.
+    The zones refill after each round (one process per round)."""
+    for _ in range(4):
+        flagged = sorted({item["uuid"] for row in drc(pcb)["violations"] if row["severity"] == "error"
+                          for item in row["items"] if item["description"].startswith("Track")})
+        if not flagged:
+            return
+        _step("narrow", pcb, ",".join(flagged))
+
+
+def narrow(pcb: str, uuids: str) -> None:
+    pcbnew = _pcbnew()
+    board = pcbnew.LoadBoard(pcb)
+    for track in board.GetTracks():
+        if track.m_Uuid.AsString() not in uuids.split(",") or track.IsLocked() or track.GetClass() != "PCB_TRACK":
+            continue
+        if track.GetNetname() in ("VBUS", "+3V3") and track.GetWidth() > pcbnew.FromMM(0.2):
+            track.SetWidth(pcbnew.FromMM(0.2))
+        elif track.GetWidth() - pcbnew.FromMM(0.02) >= pcbnew.FromMM(0.15):
+            track.SetWidth(track.GetWidth() - pcbnew.FromMM(0.02))
+    pcbnew.ZONE_FILLER(board).Fill(board.Zones())
+    board.Save(pcb)
+
+
 def widen_apply(pcb: str, nets: str, width_mm: str, record: str) -> None:
     pcbnew = _pcbnew()
     board = pcbnew.LoadBoard(pcb)
@@ -575,6 +602,7 @@ def build_all(out: str) -> dict:
     _step("stitchplanes", out)
     stitched = stitch_ground(out)
     removed = remove_dangling(out)
+    settle(out)
     report = drc(out)
     summary = {"route": stats, "ground_stitch_vias": stitched, "dangling_removed": removed,
                "drc_errors": sum(1 for row in report["violations"] if row["severity"] == "error"),
@@ -592,6 +620,7 @@ if __name__ == "__main__":
         "ground": lambda: set_ground_pads(args[0], args[1] == "on"),
         "widenapply": lambda: widen_apply(*args),
         "widenrevert": lambda: widen_revert(*args),
+        "narrow": lambda: narrow(*args),
         "pour": lambda: pour_ground(args[0]),
         "stitchplanes": lambda: stitch_planes(args[0]),
         "stranded": lambda: stranded_pads(args[0]),
