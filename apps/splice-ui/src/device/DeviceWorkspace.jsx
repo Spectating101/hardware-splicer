@@ -1,8 +1,34 @@
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
-import { fetchSceneEvidence, fetchSceneFit, fetchSceneKicad, fetchSceneManifest } from "../api";
+import { fetchSceneDecisions, fetchSceneEvidence, fetchSceneFit, fetchSceneKicad, fetchSceneManifest, postSceneDecision } from "../api";
 import { BASIS_LABELS, openQuestions } from "../components/fielddeckLogic.js";
 import { deviceFindings, evidenceFindings, findTargets, fitFindings, kicadFindings, shortLabel, STATES } from "./deviceFindings.js";
+import { EvidenceCanvas } from "./EvidenceCanvas.jsx";
 import "./device.css";
+
+// The owner's call on a finding. Recorded next to it; never changes the finding's state.
+const DECISIONS = [
+  ["ask_agent", "Ask the agent to resolve"],
+  ["needs_bench_test", "Needs a bench test"],
+  ["accept_risk", "Accept the risk"],
+  ["waive", "Waive"],
+];
+const DECIDABLE = new Set(["open", "unknown", "failing", "clash", "simulated"]);
+
+function DecisionBar({ item, decision, onDecide }) {
+  if (!DECIDABLE.has(item.state)) return null;
+  const label = (kind) => DECISIONS.find(([id]) => id === kind)?.[1] ?? kind;
+  return (
+    <div className="dv-decide">
+      {decision && <p className="dv-decided">Your call: <strong>{label(decision.decision)}</strong>
+        <small> · {decision.at.slice(0, 16).replace("T", " ")} UTC{decision.decision === "ask_agent" ? " · queued for the agent" : ""}</small></p>}
+      <div className="dv-decide-row" role="group" aria-label="Your call on this finding">
+        {DECISIONS.map(([id, text]) => (
+          <button key={id} type="button" aria-pressed={decision?.decision === id} onClick={() => onDecide(item.id, id)}>{text}</button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 const FieldDeckScene = lazy(() => import("../components/FieldDeckScene.jsx"));
 
@@ -104,6 +130,26 @@ export default function DeviceWorkspace({ sceneId, onExit }) {
   const [fit, setFit] = useState({ state: "idle", report: null, error: "" });
   const [evidence, setEvidence] = useState(null);
   const [kicad, setKicad] = useState({ state: "idle", report: null, error: "" });
+  const [decisions, setDecisions] = useState({});
+  const [canvasHidden, setCanvasHidden] = useState(false);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    setDecisions({});
+    fetchSceneDecisions(sceneId, controller.signal)
+      .then((rows) => { if (!controller.signal.aborted) setDecisions(rows); })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [sceneId]);
+
+  async function decide(findingId, kind) {
+    try {
+      const row = await postSceneDecision(sceneId, findingId, kind);
+      setDecisions((current) => ({ ...current, [findingId]: row }));
+    } catch {
+      setDecisions((current) => current);
+    }
+  }
 
   useEffect(() => {
     const controller = new AbortController();
@@ -195,6 +241,7 @@ export default function DeviceWorkspace({ sceneId, onExit }) {
 
   function show(item) {
     setActive(item.id);
+    setCanvasHidden(false);
     setCommand({ ...item.view });
   }
   function select(key) {
@@ -261,6 +308,7 @@ export default function DeviceWorkspace({ sceneId, onExit }) {
                     {item.next && <p className="dv-next"><span>Next</span> {item.next}</p>}
                     {item.detail?.length > 0 && <ul>{item.detail.map((line) => <li key={line}>{line}</li>)}</ul>}
                     {item.basis && <p>Basis · <Source basis={item.basis} /></p>}
+                    <DecisionBar item={item} decision={decisions[item.id]} onDecide={decide} />
                   </div>}
                 </li>
               ))}
@@ -275,7 +323,11 @@ export default function DeviceWorkspace({ sceneId, onExit }) {
         <button type="button" onClick={overview}>Back to whole device</button>
       </div>}
 
-      {!activeItem?.view.faceView && <SelectionCard row={selectedRow} index={data?.index} sidecars={data?.sidecars} findings={items}
+      {activeItem?.canvas && !canvasHidden && <div className="dv-canvas-host" data-wide={!drawable || undefined}>
+        <EvidenceCanvas canvas={activeItem.canvas} onClose={() => setCanvasHidden(true)} />
+      </div>}
+
+      {!activeItem?.view.faceView && !(activeItem?.canvas && !canvasHidden) && <SelectionCard row={selectedRow} index={data?.index} sidecars={data?.sidecars} findings={items}
         onShow={show} onSelect={select} />}
     </div>
   );

@@ -427,6 +427,7 @@ export function evidenceFindings(records, { revision, partIds = new Set() } = {}
           state: "recorded",
           basis: option.cost_basis ?? source,
           view: overview,
+          canvas: { kind: "strategy", record, focus: option.id },
         });
       }
       if (record.decision.rationale) {
@@ -437,6 +438,7 @@ export function evidenceFindings(records, { revision, partIds = new Set() } = {}
           detail: [`Procurement approved: ${record.decision.procurement_approved ? "yes" : "no"}`,
             record.constraints?.physical_build_authorized === false ? "Physical build: not authorized" : null].filter(Boolean),
           state: "recorded", basis: source, view: overview,
+          canvas: { kind: "strategy", record, focus: null },
         });
       }
     }
@@ -456,11 +458,12 @@ export function evidenceFindings(records, { revision, partIds = new Set() } = {}
       add("simulated", "Simulated", {
         id: "simulation:missions",
         question: "Does it fly its missions in simulation?",
-        answer: `${accepted} of ${record.scenarios.length} scenarios behaved as expected in the simulation, including a motor failure that was detected. Not a physical flight; flight is not authorized.`,
+        answer: `${accepted} of ${record.scenarios.length} scenarios behaved as expected in the simulation${record.scenarios.some((row) => row.motor_failure && row.metrics.fault_detected) ? ", including a motor failure that was detected" : ""}. Not a physical flight${record.authorization?.flight_authorized === false ? "; flight is not authorized" : ""}.`,
         detail: record.scenarios.map(describe),
         state: "simulated",
         basis: source,
         view: { mode: revision, selected: null, explode: 0 },
+        canvas: { kind: "simulation", record },
       });
       if (record.scope_limits.length) {
         add("simulated", "Simulated", {

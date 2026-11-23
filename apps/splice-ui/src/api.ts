@@ -863,6 +863,29 @@ export async function fetchSceneKicad(projectId: string, revision: string, signa
   return parseJson<SceneKicadChecks>(res);
 }
 
+export type SceneDecisionKind = "needs_bench_test" | "accept_risk" | "waive" | "ask_agent";
+
+export interface SceneDecision {
+  finding_id: string;
+  decision: SceneDecisionKind;
+  note: string;
+  at: string;
+}
+
+export async function fetchSceneDecisions(projectId: string, signal?: AbortSignal): Promise<Record<string, SceneDecision>> {
+  const res = await fetch(`${API_BASE}/v1/scenes/${encodeURIComponent(projectId)}/decisions`, { signal });
+  return (await parseJson<{ decisions: Record<string, SceneDecision> }>(res)).decisions;
+}
+
+export async function postSceneDecision(projectId: string, findingId: string, decision: SceneDecisionKind, note = ""): Promise<SceneDecision> {
+  const res = await fetch(`${API_BASE}/v1/scenes/${encodeURIComponent(projectId)}/decisions`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ finding_id: findingId, decision, note }),
+  });
+  return parseJson<SceneDecision>(res);
+}
+
 export async function fetchHealth(): Promise<HealthResponse> {
   const res = await fetch(`${API_BASE}/health`);
   return parseJson<HealthResponse>(res);

@@ -196,3 +196,49 @@
 }
 .dv-no-model { padding: 0 max(440px, 36vw) 0 max(440px, 36vw); text-align: center; line-height: 1.5; }
 @media (width < 900px) { .dv-no-model { position: relative; padding: 24px 16px; } }
+
+/* The record a non-geometric question is about, in its own form. */
+.dv-canvas-host {
+  position: absolute; top: 132px; right: 12px; bottom: 12px;
+  width: min(760px, 52vw); display: flex; flex-direction: column; pointer-events: none;
+}
+.dv-canvas-host[data-wide] { left: min(424px, 36vw); width: auto; }
+.dv-canvas {
+  position: relative; pointer-events: auto; max-height: 100%; overflow: auto;
+  padding: 18px 20px 16px; border: 1px solid var(--line); border-radius: 6px;
+  background: var(--panel); backdrop-filter: blur(6px);
+}
+.dv-canvas h2 { margin: 0 32px 6px 0; font-size: 16px; font-weight: 600; }
+.dv-canvas-lede { margin: 0 0 14px; color: var(--text-2); font-size: 14px; line-height: 1.45; }
+.dv-canvas-scroll { overflow-x: auto; }
+.dv-matrix { width: 100%; border-collapse: collapse; font-size: 13px; line-height: 1.4; }
+.dv-matrix th, .dv-matrix td { padding: 8px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.dv-matrix thead th { color: var(--text-2); font-size: 12px; font-weight: 600; text-transform: none; letter-spacing: 0; }
+.dv-matrix tbody th { color: var(--text-2); font-weight: 500; white-space: nowrap; }
+.dv-matrix td { font-variant-numeric: tabular-nums; }
+.dv-matrix [data-focus] { background: rgba(242, 239, 231, 0.06); }
+.dv-matrix thead th[data-chosen] { color: var(--text); }
+.dv-canvas-note { margin: 12px 0 0; color: var(--text-3); font-size: 12px; }
+.dv-canvas-limits { margin-top: 12px; color: var(--text-2); font-size: 13px; }
+.dv-canvas-limits summary { cursor: pointer; }
+.dv-canvas-limits ul { margin: 8px 0 0; padding-left: 18px; }
+.dv-canvas-close {
+  position: absolute; top: 10px; right: 10px; width: 28px; height: 28px;
+  border: 1px solid var(--line-2); border-radius: 4px; background: var(--panel-solid); color: var(--text-2);
+}
+.dv-visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* The owner's call on a finding */
+.dv-decide { margin-top: 10px; }
+.dv-decided { margin: 0 0 6px !important; color: var(--text); font-size: 13px !important; }
+.dv-decided small { color: var(--text-3); }
+.dv-decide-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.dv-decide-row button {
+  height: 28px; padding: 0 10px; border: 1px solid var(--line-2); border-radius: 4px;
+  background: var(--panel-solid); color: var(--text-2); font-size: 12px;
+}
+.dv-decide-row button:hover { border-color: var(--text-2); color: var(--text); }
+.dv-decide-row button[aria-pressed="true"] { border-color: var(--focus); color: var(--text); }
+@media (max-width: 760px) {
+  .dv-canvas-host, .dv-canvas-host[data-wide] { position: static; width: auto; padding: 0 12px 12px; }
+}
