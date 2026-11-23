@@ -218,7 +218,7 @@ def default_templates() -> List[MintTemplate]:
                     "plate_h_mm": 80.0,
                     "plate_t_mm": 6.0,
                     "clearance_mm": 0.4,
-                    "include_idler": true,
+                    "include_idler": True,
                     "idler_offset_mm": 18.0
                 },
                 "notes": "Prototype-grade reduction stage. Use real pulleys/belt; iterate plate thickness and mounting to match your loads.",
