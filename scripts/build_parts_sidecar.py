@@ -34,8 +34,8 @@ def main():
     parser.add_argument("--out", type=Path)
     args = parser.parse_args()
     if args.manifest is None:
-        if args.out is None or args.revision not in {"7", "5"}:
-            parser.error("The legacy mode requires --revision {7,5} and --out")
+        if args.out is None or args.revision not in {"7", "5", "5c"}:
+            parser.error("The legacy mode requires --revision {7,5,5c} and --out")
         sidecar = build_parts_sidecar(args.project_dir or ROOT / "projects" / FIELDDECK, args.revision)
         target = args.out / "parts.json"
     else:
