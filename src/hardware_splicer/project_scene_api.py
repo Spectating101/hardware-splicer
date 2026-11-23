@@ -294,3 +294,62 @@ def get_scene_kicad_checks(project_id: str, revision: str) -> dict:
             row["net_ids"] = sorted({parts[f"net:{net}"] for net in row.get("nets", []) if f"net:{net}" in parts})
     return {"project_id": project_id, "revision": revision, "board": board.name,
             "schematic": schematic.name if schematic else None, **summary}
+
+
+# ---- Owner decisions on findings ---------------------------------------------------------------
+# The owner's call on a finding (the agent drives; the owner reviews and decides). A decision is a
+# record next to the finding; it never changes the finding's state, and "accept risk" or "waive"
+# never reads as passed. "ask_agent" queues the finding for the agent, which reads this log.
+
+DECISIONS = {"needs_bench_test", "accept_risk", "waive", "ask_agent"}
+_decision_lock = threading.Lock()
+
+
+def _decision_log(project_id: str) -> Path:
+    from .state_paths import state_dir
+
+    return state_dir() / "scene-decisions" / f"{project_id}.jsonl"
+
+
+def _latest_decisions(project_id: str) -> dict:
+    log = _decision_log(project_id)
+    latest: dict = {}
+    if log.is_file():
+        for line in log.read_text(encoding="utf-8").splitlines():
+            try:
+                row = json.loads(line)
+            except ValueError:
+                continue
+            if isinstance(row, dict) and isinstance(row.get("finding_id"), str):
+                latest[row["finding_id"]] = row
+    return latest
+
+
+@project_scene_router.get(f"{_SCENES}/{{project_id}}/decisions")
+def get_scene_decisions(project_id: str) -> dict:
+    if _manifest(project_id) is None:
+        raise HTTPException(status_code=404, detail="Scene not found")
+    return {"decisions": _latest_decisions(project_id)}
+
+
+@project_scene_router.post(f"{_SCENES}/{{project_id}}/decisions")
+def post_scene_decision(project_id: str, body: dict) -> dict:
+    import datetime
+
+    if _manifest(project_id) is None:
+        raise HTTPException(status_code=404, detail="Scene not found")
+    finding_id, decision, note = body.get("finding_id"), body.get("decision"), body.get("note") or ""
+    if not isinstance(finding_id, str) or not 0 < len(finding_id) <= 300:
+        raise HTTPException(status_code=422, detail="finding_id must be a short string")
+    if decision not in DECISIONS:
+        raise HTTPException(status_code=422, detail=f"decision must be one of {sorted(DECISIONS)}")
+    if not isinstance(note, str) or len(note) > 1000:
+        raise HTTPException(status_code=422, detail="note must be text under 1000 characters")
+    row = {"finding_id": finding_id, "decision": decision, "note": note.strip(),
+           "at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")}
+    log = _decision_log(project_id)
+    with _decision_lock:
+        log.parent.mkdir(parents=True, exist_ok=True)
+        with log.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(row) + "\n")
+    return row

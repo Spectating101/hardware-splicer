@@ -113,3 +113,16 @@ def test_kicad_route_on_the_real_esp32_board(client):
     assert body["drc"]["counts"].get("error", 0) > 0
     shorts = [row for row in body["drc"]["violations"] if row["type"] == "shorting_items"]
     assert shorts and all(row["part_ids"] for row in shorts)
+
+
+def test_owner_decisions_are_logged_latest_wins_and_validated(client):
+    assert client.get("/v1/scenes/esp32-servo-board/decisions").json() == {"decisions": {}}
+    first = client.post("/v1/scenes/esp32-servo-board/decisions", json={"finding_id": "kicad:drc:shorting_items", "decision": "ask_agent"})
+    assert first.status_code == 200 and first.json()["decision"] == "ask_agent"
+    client.post("/v1/scenes/esp32-servo-board/decisions", json={"finding_id": "kicad:drc:shorting_items", "decision": "needs_bench_test", "note": " after reroute "})
+    latest = client.get("/v1/scenes/esp32-servo-board/decisions").json()["decisions"]["kicad:drc:shorting_items"]
+    assert latest["decision"] == "needs_bench_test" and latest["note"] == "after reroute"
+    # No decision can read as a pass.
+    assert client.post("/v1/scenes/esp32-servo-board/decisions", json={"finding_id": "x", "decision": "passed"}).status_code == 422
+    assert client.post("/v1/scenes/esp32-servo-board/decisions", json={"finding_id": "", "decision": "waive"}).status_code == 422
+    assert client.post("/v1/scenes/no-such/decisions", json={"finding_id": "x", "decision": "waive"}).status_code == 404
