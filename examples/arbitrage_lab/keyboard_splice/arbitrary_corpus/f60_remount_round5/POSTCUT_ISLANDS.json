@@ -1,0 +1,2967 @@
+{
+  "schema": "hs.keyboard-postcut-copper-islands.v1",
+  "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+  "cut_x_mm": 105.745,
+  "cut_path_sha256": "d13f03bc91b0faec7c4d353bf2cbac682082e7c53a8a2d6595055db519d95d36",
+  "cut_path_kind": "stepped_polyline",
+  "kerf_mm": 1.0,
+  "model_basis": "KiCad tracks/pads/vias and explicit filled copper zone polygons; unsupported pad shapes remain blocked",
+  "repair_mode": "pad_only",
+  "trace_exposure_requires_mask_removal_and_strain_relief": false,
+  "conductive_zones_imported": 2,
+  "rule_areas_ignored_for_connectivity": 0,
+  "qualified_for_build": false,
+  "target_net_count": 15,
+  "model_pre_cut_island_count": 15,
+  "model_post_cut_island_count": 32,
+  "split_pre_cut_components": 15,
+  "candidate_graph_edges": 17,
+  "unanchored_split_components": 0,
+  "model_replay_remaining_split_components": 0,
+  "model_replay_remaining_required_components": 0,
+  "model_replay_achieved_required_restoration": true,
+  "planned_inert_track_remnants": 0,
+  "damaged_electrical_pad_count": 0,
+  "damaged_electrical_pads": [],
+  "preexisting_unconnected_terminal_net_count": 0,
+  "preexisting_unconnected_terminal_nets": {},
+  "model_replay_achieved_full_restoration": true,
+  "issues": [
+    "SOURCE_IMPORT_WARNINGS"
+  ],
+  "sections": [
+    {
+      "net": "/C10",
+      "precut_track_only_component": 222,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/C10::pre222::post234",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 31,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "K[A]4",
+              "pad": "2",
+              "x": 217.64625,
+              "y": 102.235,
+              "net": "/C10",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K[A]0",
+              "pad": "2",
+              "x": 215.265,
+              "y": 26.035,
+              "net": "/C10",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K[A]3",
+              "pad": "2",
+              "x": 220.0275,
+              "y": 83.185,
+              "net": "/C10",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K[A]1",
+              "pad": "2",
+              "x": 224.79,
+              "y": 45.085,
+              "net": "/C10",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "K[A]4",
+              "pad": "2",
+              "x": 217.64625,
+              "y": 102.235,
+              "net": "/C10",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "K[A]0",
+              "pad": "2",
+              "x": 215.265,
+              "y": 26.035,
+              "net": "/C10",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "K[A]3",
+              "pad": "2",
+              "x": 220.0275,
+              "y": 83.185,
+              "net": "/C10",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "K[A]1",
+              "pad": "2",
+              "x": 224.79,
+              "y": 45.085,
+              "net": "/C10",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/C10::pre222::post239",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 3,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "U1",
+              "pad": "13",
+              "x": 137.795,
+              "y": 97.31375,
+              "net": "/C10",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "U1",
+              "pad": "13",
+              "x": 137.795,
+              "y": 97.31375,
+              "net": "/C10",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "/C11",
+      "precut_track_only_component": 245,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/C11::pre245::post253",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 4,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "U1",
+              "pad": "17",
+              "x": 137.795,
+              "y": 107.47375,
+              "net": "/C11",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "U1",
+              "pad": "17",
+              "x": 137.795,
+              "y": 107.47375,
+              "net": "/C11",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/C11::pre245::post258",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 34,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "K[B]0",
+              "pad": "2",
+              "x": 234.315,
+              "y": 26.035,
+              "net": "/C11",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K[B]3",
+              "pad": "2",
+              "x": 239.0775,
+              "y": 83.185,
+              "net": "/C11",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K[B]4",
+              "pad": "2",
+              "x": 241.45875,
+              "y": 102.235,
+              "net": "/C11",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K[B]1",
+              "pad": "2",
+              "x": 243.84,
+              "y": 45.085,
+              "net": "/C11",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "K[B]0",
+              "pad": "2",
+              "x": 234.315,
+              "y": 26.035,
+              "net": "/C11",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "K[B]3",
+              "pad": "2",
+              "x": 239.0775,
+              "y": 83.185,
+              "net": "/C11",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "K[B]4",
+              "pad": "2",
+              "x": 241.45875,
+              "y": 102.235,
+              "net": "/C11",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "K[B]1",
+              "pad": "2",
+              "x": 243.84,
+              "y": 45.085,
+              "net": "/C11",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "/C12",
+      "precut_track_only_component": 275,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/C12::pre275::post280",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 4,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "U1",
+              "pad": "18",
+              "x": 137.795,
+              "y": 110.01375,
+              "net": "/C12",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "U1",
+              "pad": "18",
+              "x": 137.795,
+              "y": 110.01375,
+              "net": "/C12",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/C12::pre275::post289",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 33,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "K[C]0",
+              "pad": "2",
+              "x": 253.365,
+              "y": 26.035,
+              "net": "/C12",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K[C]4",
+              "pad": "2",
+              "x": 265.27125,
+              "y": 102.235,
+              "net": "/C12",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K[C]3",
+              "pad": "2",
+              "x": 274.79625,
+              "y": 83.185,
+              "net": "/C12",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K[C]1",
+              "pad": "2",
+              "x": 262.89,
+              "y": 45.085,
+              "net": "/C12",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "K[C]0",
+              "pad": "2",
+              "x": 253.365,
+              "y": 26.035,
+              "net": "/C12",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "K[C]4",
+              "pad": "2",
+              "x": 265.27125,
+              "y": 102.235,
+              "net": "/C12",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "K[C]3",
+              "pad": "2",
+              "x": 274.79625,
+              "y": 83.185,
+              "net": "/C12",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "K[C]1",
+              "pad": "2",
+              "x": 262.89,
+              "y": 45.085,
+              "net": "/C12",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "/C13",
+      "precut_track_only_component": 286,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/C13::pre286::post301",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 26,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "K[D]0",
+              "pad": "2",
+              "x": 281.94,
+              "y": 26.035,
+              "net": "/C13",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K[D]4",
+              "pad": "2",
+              "x": 289.08375,
+              "y": 102.235,
+              "net": "/C13",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K[D]2",
+              "pad": "2",
+              "x": 290.35375,
+              "y": 60.96,
+              "net": "/C13",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "K[D]0",
+              "pad": "2",
+              "x": 281.94,
+              "y": 26.035,
+              "net": "/C13",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "K[D]4",
+              "pad": "2",
+              "x": 289.08375,
+              "y": 102.235,
+              "net": "/C13",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "K[D]2",
+              "pad": "2",
+              "x": 290.35375,
+              "y": 60.96,
+              "net": "/C13",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/C13::pre286::post304",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 5,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "U1",
+              "pad": "19",
+              "x": 135.255,
+              "y": 110.01375,
+              "net": "/C13",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "U1",
+              "pad": "19",
+              "x": 135.255,
+              "y": 110.01375,
+              "net": "/C13",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "/C5",
+      "precut_track_only_component": 82,
+      "postcut_track_only_island_count": 3,
+      "required_island_count": 3,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 2,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/C5::pre82::post86",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 11,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "K35",
+              "pad": "2",
+              "x": 124.7775,
+              "y": 83.185,
+              "net": "/C5",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "U1",
+              "pad": "3",
+              "x": 114.935,
+              "y": 94.77375,
+              "net": "/C5",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "K35",
+              "pad": "2",
+              "x": 124.7775,
+              "y": 83.185,
+              "net": "/C5",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "U1",
+              "pad": "3",
+              "x": 114.935,
+              "y": 94.77375,
+              "net": "/C5",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/C5::pre82::post90",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 10,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "K15",
+              "pad": "2",
+              "x": 129.54,
+              "y": 45.085,
+              "net": "/C5",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K25",
+              "pad": "2",
+              "x": 134.3025,
+              "y": 64.135,
+              "net": "/C5",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "K15",
+              "pad": "2",
+              "x": 129.54,
+              "y": 45.085,
+              "net": "/C5",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "K25",
+              "pad": "2",
+              "x": 134.3025,
+              "y": 64.135,
+              "net": "/C5",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/C5::pre82::post99",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 6,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "K[0]5",
+              "pad": "2",
+              "x": 120.015,
+              "y": 26.035,
+              "net": "/C5",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "K[0]5",
+              "pad": "2",
+              "x": 120.015,
+              "y": 26.035,
+              "net": "/C5",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "/C6",
+      "precut_track_only_component": 118,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/C6::pre118::post125",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 5,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "U1",
+              "pad": "5",
+              "x": 120.015,
+              "y": 94.77375,
+              "net": "/C6",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "U1",
+              "pad": "5",
+              "x": 120.015,
+              "y": 94.77375,
+              "net": "/C6",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/C6::pre118::post126",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 25,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "K[0]6",
+              "pad": "2",
+              "x": 139.065,
+              "y": 26.035,
+              "net": "/C6",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K36",
+              "pad": "2",
+              "x": 143.8275,
+              "y": 83.185,
+              "net": "/C6",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K46",
+              "pad": "2",
+              "x": 146.20875,
+              "y": 102.235,
+              "net": "/C6",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K16",
+              "pad": "2",
+              "x": 148.59,
+              "y": 45.085,
+              "net": "/C6",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "K[0]6",
+              "pad": "2",
+              "x": 139.065,
+              "y": 26.035,
+              "net": "/C6",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "K36",
+              "pad": "2",
+              "x": 143.8275,
+              "y": 83.185,
+              "net": "/C6",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "K46",
+              "pad": "2",
+              "x": 146.20875,
+              "y": 102.235,
+              "net": "/C6",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "K16",
+              "pad": "2",
+              "x": 148.59,
+              "y": 45.085,
+              "net": "/C6",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "/C7",
+      "precut_track_only_component": 171,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/C7::pre171::post180",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 5,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "U1",
+              "pad": "6",
+              "x": 122.555,
+              "y": 94.77375,
+              "net": "/C7",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "U1",
+              "pad": "6",
+              "x": 122.555,
+              "y": 94.77375,
+              "net": "/C7",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/C7::pre171::post182",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 24,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "K[0]7",
+              "pad": "2",
+              "x": 158.115,
+              "y": 26.035,
+              "net": "/C7",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K37",
+              "pad": "2",
+              "x": 162.8775,
+              "y": 83.185,
+              "net": "/C7",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K17",
+              "pad": "2",
+              "x": 167.64,
+              "y": 45.085,
+              "net": "/C7",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K27",
+              "pad": "2",
+              "x": 172.4025,
+              "y": 64.135,
+              "net": "/C7",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "K[0]7",
+              "pad": "2",
+              "x": 158.115,
+              "y": 26.035,
+              "net": "/C7",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "K37",
+              "pad": "2",
+              "x": 162.8775,
+              "y": 83.185,
+              "net": "/C7",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "K17",
+              "pad": "2",
+              "x": 167.64,
+              "y": 45.085,
+              "net": "/C7",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "K27",
+              "pad": "2",
+              "x": 172.4025,
+              "y": 64.135,
+              "net": "/C7",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "/C8",
+      "precut_track_only_component": 187,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/C8::pre187::post199",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 23,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "K[0]8",
+              "pad": "2",
+              "x": 177.165,
+              "y": 26.035,
+              "net": "/C8",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K38",
+              "pad": "2",
+              "x": 181.9275,
+              "y": 83.185,
+              "net": "/C8",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K18",
+              "pad": "2",
+              "x": 186.69,
+              "y": 45.085,
+              "net": "/C8",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K28",
+              "pad": "2",
+              "x": 191.4525,
+              "y": 64.135,
+              "net": "/C8",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "K[0]8",
+              "pad": "2",
+              "x": 177.165,
+              "y": 26.035,
+              "net": "/C8",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "K38",
+              "pad": "2",
+              "x": 181.9275,
+              "y": 83.185,
+              "net": "/C8",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "K18",
+              "pad": "2",
+              "x": 186.69,
+              "y": 45.085,
+              "net": "/C8",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "K28",
+              "pad": "2",
+              "x": 191.4525,
+              "y": 64.135,
+              "net": "/C8",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/C8::pre187::post202",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 9,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "U1",
+              "pad": "8",
+              "x": 127.635,
+              "y": 94.77375,
+              "net": "/C8",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "U1",
+              "pad": "8",
+              "x": 127.635,
+              "y": 94.77375,
+              "net": "/C8",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "/C9",
+      "precut_track_only_component": 204,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/C9::pre204::post216",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 26,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "K[0]9",
+              "pad": "2",
+              "x": 196.215,
+              "y": 26.035,
+              "net": "/C9",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K39",
+              "pad": "2",
+              "x": 200.9775,
+              "y": 83.185,
+              "net": "/C9",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K19",
+              "pad": "2",
+              "x": 205.74,
+              "y": 45.085,
+              "net": "/C9",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "K29",
+              "pad": "2",
+              "x": 210.5025,
+              "y": 64.135,
+              "net": "/C9",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "K[0]9",
+              "pad": "2",
+              "x": 196.215,
+              "y": 26.035,
+              "net": "/C9",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "K39",
+              "pad": "2",
+              "x": 200.9775,
+              "y": 83.185,
+              "net": "/C9",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "K19",
+              "pad": "2",
+              "x": 205.74,
+              "y": 45.085,
+              "net": "/C9",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "K29",
+              "pad": "2",
+              "x": 210.5025,
+              "y": 64.135,
+              "net": "/C9",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/C9::pre204::post220",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 3,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "U1",
+              "pad": "12",
+              "x": 137.795,
+              "y": 94.77375,
+              "net": "/C9",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "U1",
+              "pad": "12",
+              "x": 137.795,
+              "y": 94.77375,
+              "net": "/C9",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "/R0",
+      "precut_track_only_component": 148,
+      "postcut_track_only_island_count": 3,
+      "required_island_count": 3,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 2,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/R0::pre148::post143",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 5,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "U1",
+              "pad": "7",
+              "x": 125.095,
+              "y": 94.77375,
+              "net": "/R0",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "U1",
+              "pad": "7",
+              "x": 125.095,
+              "y": 94.77375,
+              "net": "/R0",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/R0::pre148::post153",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 18,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "D[0]4",
+              "pad": "1",
+              "x": 114.3,
+              "y": 33.655,
+              "net": "/R0",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D[0]3",
+              "pad": "1",
+              "x": 95.25,
+              "y": 33.655,
+              "net": "/R0",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D[0]2",
+              "pad": "1",
+              "x": 76.2,
+              "y": 33.655,
+              "net": "/R0",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D[0]1",
+              "pad": "1",
+              "x": 57.15,
+              "y": 33.655,
+              "net": "/R0",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "D[0]4",
+              "pad": "1",
+              "x": 114.3,
+              "y": 33.655,
+              "net": "/R0",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "D[0]3",
+              "pad": "1",
+              "x": 95.25,
+              "y": 33.655,
+              "net": "/R0",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "D[0]2",
+              "pad": "1",
+              "x": 76.2,
+              "y": 33.655,
+              "net": "/R0",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "D[0]1",
+              "pad": "1",
+              "x": 57.15,
+              "y": 33.655,
+              "net": "/R0",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/R0::pre148::post157",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 48,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "D[0]5",
+              "pad": "1",
+              "x": 133.35,
+              "y": 33.655,
+              "net": "/R0",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D[0]6",
+              "pad": "1",
+              "x": 152.4,
+              "y": 33.655,
+              "net": "/R0",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D[0]7",
+              "pad": "1",
+              "x": 171.45,
+              "y": 33.655,
+              "net": "/R0",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D[0]8",
+              "pad": "1",
+              "x": 190.5,
+              "y": 33.655,
+              "net": "/R0",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "D[0]5",
+              "pad": "1",
+              "x": 133.35,
+              "y": 33.655,
+              "net": "/R0",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "D[0]6",
+              "pad": "1",
+              "x": 152.4,
+              "y": 33.655,
+              "net": "/R0",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "D[0]7",
+              "pad": "1",
+              "x": 171.45,
+              "y": 33.655,
+              "net": "/R0",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "D[0]8",
+              "pad": "1",
+              "x": 190.5,
+              "y": 33.655,
+              "net": "/R0",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "/R1",
+      "precut_track_only_component": 103,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/R1::pre103::post104",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 33,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "D14",
+              "pad": "1",
+              "x": 123.825,
+              "y": 52.705,
+              "net": "/R1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D13",
+              "pad": "1",
+              "x": 104.775,
+              "y": 52.705,
+              "net": "/R1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "U1",
+              "pad": "4",
+              "x": 117.475,
+              "y": 94.77375,
+              "net": "/R1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D12",
+              "pad": "1",
+              "x": 85.725,
+              "y": 52.705,
+              "net": "/R1",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "D14",
+              "pad": "1",
+              "x": 123.825,
+              "y": 52.705,
+              "net": "/R1",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "D13",
+              "pad": "1",
+              "x": 104.775,
+              "y": 52.705,
+              "net": "/R1",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "U1",
+              "pad": "4",
+              "x": 117.475,
+              "y": 94.77375,
+              "net": "/R1",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "D12",
+              "pad": "1",
+              "x": 85.725,
+              "y": 52.705,
+              "net": "/R1",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/R1::pre103::post109",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 24,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "D15",
+              "pad": "1",
+              "x": 142.875,
+              "y": 52.705,
+              "net": "/R1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D16",
+              "pad": "1",
+              "x": 161.925,
+              "y": 52.705,
+              "net": "/R1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D17",
+              "pad": "1",
+              "x": 180.975,
+              "y": 52.705,
+              "net": "/R1",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D18",
+              "pad": "1",
+              "x": 200.025,
+              "y": 52.705,
+              "net": "/R1",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "D15",
+              "pad": "1",
+              "x": 142.875,
+              "y": 52.705,
+              "net": "/R1",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "D16",
+              "pad": "1",
+              "x": 161.925,
+              "y": 52.705,
+              "net": "/R1",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "D17",
+              "pad": "1",
+              "x": 180.975,
+              "y": 52.705,
+              "net": "/R1",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "D18",
+              "pad": "1",
+              "x": 200.025,
+              "y": 52.705,
+              "net": "/R1",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "/R2",
+      "precut_track_only_component": 54,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/R2::pre54::post57",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 26,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "D24",
+              "pad": "1",
+              "x": 128.5875,
+              "y": 71.755,
+              "net": "/R2",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D23",
+              "pad": "1",
+              "x": 109.5375,
+              "y": 71.755,
+              "net": "/R2",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "U1",
+              "pad": "2",
+              "x": 112.395,
+              "y": 94.77375,
+              "net": "/R2",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D22",
+              "pad": "1",
+              "x": 90.4875,
+              "y": 71.755,
+              "net": "/R2",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "D24",
+              "pad": "1",
+              "x": 128.5875,
+              "y": 71.755,
+              "net": "/R2",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "D23",
+              "pad": "1",
+              "x": 109.5375,
+              "y": 71.755,
+              "net": "/R2",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "U1",
+              "pad": "2",
+              "x": 112.395,
+              "y": 94.77375,
+              "net": "/R2",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "D22",
+              "pad": "1",
+              "x": 90.4875,
+              "y": 71.755,
+              "net": "/R2",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/R2::pre54::post64",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 37,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "D25",
+              "pad": "1",
+              "x": 152.7175,
+              "y": 76.2,
+              "net": "/R2",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D26",
+              "pad": "1",
+              "x": 166.6875,
+              "y": 71.755,
+              "net": "/R2",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D27",
+              "pad": "1",
+              "x": 185.7375,
+              "y": 71.755,
+              "net": "/R2",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D28",
+              "pad": "1",
+              "x": 204.7875,
+              "y": 71.755,
+              "net": "/R2",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "D25",
+              "pad": "1",
+              "x": 152.7175,
+              "y": 76.2,
+              "net": "/R2",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "D26",
+              "pad": "1",
+              "x": 166.6875,
+              "y": 71.755,
+              "net": "/R2",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "D27",
+              "pad": "1",
+              "x": 185.7375,
+              "y": 71.755,
+              "net": "/R2",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "D28",
+              "pad": "1",
+              "x": 204.7875,
+              "y": 71.755,
+              "net": "/R2",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "/R3",
+      "precut_track_only_component": 27,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/R3::pre27::post29",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 31,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "D35",
+              "pad": "1",
+              "x": 138.1125,
+              "y": 88.42375,
+              "net": "/R3",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "U1",
+              "pad": "22",
+              "x": 127.635,
+              "y": 110.01375,
+              "net": "/R3",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D34",
+              "pad": "1",
+              "x": 119.0625,
+              "y": 88.42375,
+              "net": "/R3",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D33",
+              "pad": "1",
+              "x": 100.0125,
+              "y": 88.42375,
+              "net": "/R3",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "D35",
+              "pad": "1",
+              "x": 138.1125,
+              "y": 88.42375,
+              "net": "/R3",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "U1",
+              "pad": "22",
+              "x": 127.635,
+              "y": 110.01375,
+              "net": "/R3",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "D34",
+              "pad": "1",
+              "x": 119.0625,
+              "y": 88.42375,
+              "net": "/R3",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "D33",
+              "pad": "1",
+              "x": 100.0125,
+              "y": 88.42375,
+              "net": "/R3",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/R3::pre27::post34",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 23,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "D36",
+              "pad": "1",
+              "x": 157.1625,
+              "y": 88.42375,
+              "net": "/R3",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D37",
+              "pad": "1",
+              "x": 176.2125,
+              "y": 88.42375,
+              "net": "/R3",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D38",
+              "pad": "1",
+              "x": 195.2625,
+              "y": 88.42375,
+              "net": "/R3",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D39",
+              "pad": "1",
+              "x": 214.3125,
+              "y": 88.42375,
+              "net": "/R3",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "D36",
+              "pad": "1",
+              "x": 157.1625,
+              "y": 88.42375,
+              "net": "/R3",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "D37",
+              "pad": "1",
+              "x": 176.2125,
+              "y": 88.42375,
+              "net": "/R3",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "D38",
+              "pad": "1",
+              "x": 195.2625,
+              "y": 88.42375,
+              "net": "/R3",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "D39",
+              "pad": "1",
+              "x": 214.3125,
+              "y": 88.42375,
+              "net": "/R3",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "/R4",
+      "precut_track_only_component": 17,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "/R4::pre17::post6",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 19,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "U1",
+              "pad": "28",
+              "x": 112.395,
+              "y": 110.01375,
+              "net": "/R4",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D42",
+              "pad": "1",
+              "x": 88.10625,
+              "y": 109.855,
+              "net": "/R4",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D41",
+              "pad": "1",
+              "x": 64.29375,
+              "y": 109.855,
+              "net": "/R4",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D40",
+              "pad": "1",
+              "x": 40.48125,
+              "y": 109.855,
+              "net": "/R4",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "U1",
+              "pad": "28",
+              "x": 112.395,
+              "y": 110.01375,
+              "net": "/R4",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "D42",
+              "pad": "1",
+              "x": 88.10625,
+              "y": 109.855,
+              "net": "/R4",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "D41",
+              "pad": "1",
+              "x": 64.29375,
+              "y": 109.855,
+              "net": "/R4",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "D40",
+              "pad": "1",
+              "x": 40.48125,
+              "y": 109.855,
+              "net": "/R4",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "/R4::pre17::post19",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 23,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "D46",
+              "pad": "1",
+              "x": 159.54375,
+              "y": 109.855,
+              "net": "/R4",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D[A]4",
+              "pad": "1",
+              "x": 230.98125,
+              "y": 109.855,
+              "net": "/R4",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D[B]4",
+              "pad": "1",
+              "x": 254.79375,
+              "y": 109.855,
+              "net": "/R4",
+              "layer": "F.Cu"
+            },
+            {
+              "ref": "D[C]4",
+              "pad": "1",
+              "x": 278.60625,
+              "y": 109.855,
+              "net": "/R4",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "D46",
+              "pad": "1",
+              "x": 159.54375,
+              "y": 109.855,
+              "net": "/R4",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "D[A]4",
+              "pad": "1",
+              "x": 230.98125,
+              "y": 109.855,
+              "net": "/R4",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "D[B]4",
+              "pad": "1",
+              "x": 254.79375,
+              "y": 109.855,
+              "net": "/R4",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            },
+            {
+              "ref": "D[C]4",
+              "pad": "1",
+              "x": 278.60625,
+              "y": 109.855,
+              "net": "/R4",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    },
+    {
+      "net": "Net-(D35-Pad2)",
+      "precut_track_only_component": 0,
+      "postcut_track_only_island_count": 2,
+      "required_island_count": 2,
+      "planned_inert_track_remnants": 0,
+      "candidate_graph_edges_needed": 1,
+      "unanchored_islands": 0,
+      "islands": [
+        {
+          "model_island_id": "Net-(D35-Pad2)::pre0::post0",
+          "sides": [
+            "left"
+          ],
+          "copper_fragment_count": 5,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "K35",
+              "pad": "1",
+              "x": 131.1275,
+              "y": 80.645,
+              "net": "Net-(D35-Pad2)",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "K35",
+              "pad": "1",
+              "x": 131.1275,
+              "y": 80.645,
+              "net": "Net-(D35-Pad2)",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        },
+        {
+          "model_island_id": "Net-(D35-Pad2)::pre0::post2",
+          "sides": [
+            "right"
+          ],
+          "copper_fragment_count": 3,
+          "intact_solder_pad_candidates": [
+            {
+              "ref": "D35",
+              "pad": "2",
+              "x": 138.1125,
+              "y": 78.26375,
+              "net": "Net-(D35-Pad2)",
+              "layer": "F.Cu"
+            }
+          ],
+          "source_copper_contact_candidates": [
+            {
+              "ref": "D35",
+              "pad": "2",
+              "x": 138.1125,
+              "y": 78.26375,
+              "net": "Net-(D35-Pad2)",
+              "layer": "F.Cu",
+              "contact_type": "existing_pad",
+              "physical_access_verified": false
+            }
+          ],
+          "inert_track_remnant_plan": null,
+          "restoration_required": true
+        }
+      ]
+    }
+  ],
+  "bridge_edges": [
+    {
+      "net": "/C10",
+      "from_island": "/C10::pre222::post234",
+      "to_island": "/C10::pre222::post239",
+      "from_candidate_contact": {
+        "ref": "K[A]4",
+        "pad": "2",
+        "x": 217.64625,
+        "y": 102.235,
+        "net": "/C10",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_contact": {
+        "ref": "U1",
+        "pad": "13",
+        "x": 137.795,
+        "y": 97.31375,
+        "net": "/C10",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "from_candidate_pad": {
+        "ref": "K[A]4",
+        "pad": "2",
+        "x": 217.64625,
+        "y": 102.235,
+        "net": "/C10",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_pad": {
+        "ref": "U1",
+        "pad": "13",
+        "x": 137.795,
+        "y": 97.31375,
+        "net": "/C10",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/C11",
+      "from_island": "/C11::pre245::post253",
+      "to_island": "/C11::pre245::post258",
+      "from_candidate_contact": {
+        "ref": "U1",
+        "pad": "17",
+        "x": 137.795,
+        "y": 107.47375,
+        "net": "/C11",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_contact": {
+        "ref": "K[B]0",
+        "pad": "2",
+        "x": 234.315,
+        "y": 26.035,
+        "net": "/C11",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "from_candidate_pad": {
+        "ref": "U1",
+        "pad": "17",
+        "x": 137.795,
+        "y": 107.47375,
+        "net": "/C11",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_pad": {
+        "ref": "K[B]0",
+        "pad": "2",
+        "x": 234.315,
+        "y": 26.035,
+        "net": "/C11",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/C12",
+      "from_island": "/C12::pre275::post280",
+      "to_island": "/C12::pre275::post289",
+      "from_candidate_contact": {
+        "ref": "U1",
+        "pad": "18",
+        "x": 137.795,
+        "y": 110.01375,
+        "net": "/C12",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_contact": {
+        "ref": "K[C]0",
+        "pad": "2",
+        "x": 253.365,
+        "y": 26.035,
+        "net": "/C12",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "from_candidate_pad": {
+        "ref": "U1",
+        "pad": "18",
+        "x": 137.795,
+        "y": 110.01375,
+        "net": "/C12",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_pad": {
+        "ref": "K[C]0",
+        "pad": "2",
+        "x": 253.365,
+        "y": 26.035,
+        "net": "/C12",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/C13",
+      "from_island": "/C13::pre286::post301",
+      "to_island": "/C13::pre286::post304",
+      "from_candidate_contact": {
+        "ref": "K[D]0",
+        "pad": "2",
+        "x": 281.94,
+        "y": 26.035,
+        "net": "/C13",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_contact": {
+        "ref": "U1",
+        "pad": "19",
+        "x": 135.255,
+        "y": 110.01375,
+        "net": "/C13",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "from_candidate_pad": {
+        "ref": "K[D]0",
+        "pad": "2",
+        "x": 281.94,
+        "y": 26.035,
+        "net": "/C13",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_pad": {
+        "ref": "U1",
+        "pad": "19",
+        "x": 135.255,
+        "y": 110.01375,
+        "net": "/C13",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/C5",
+      "from_island": "/C5::pre82::post86",
+      "to_island": "/C5::pre82::post90",
+      "from_candidate_contact": {
+        "ref": "K35",
+        "pad": "2",
+        "x": 124.7775,
+        "y": 83.185,
+        "net": "/C5",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_contact": {
+        "ref": "K15",
+        "pad": "2",
+        "x": 129.54,
+        "y": 45.085,
+        "net": "/C5",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "from_candidate_pad": {
+        "ref": "K35",
+        "pad": "2",
+        "x": 124.7775,
+        "y": 83.185,
+        "net": "/C5",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_pad": {
+        "ref": "K15",
+        "pad": "2",
+        "x": 129.54,
+        "y": 45.085,
+        "net": "/C5",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/C5",
+      "from_island": "/C5::pre82::post86",
+      "to_island": "/C5::pre82::post99",
+      "from_candidate_contact": {
+        "ref": "K35",
+        "pad": "2",
+        "x": 124.7775,
+        "y": 83.185,
+        "net": "/C5",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_contact": {
+        "ref": "K[0]5",
+        "pad": "2",
+        "x": 120.015,
+        "y": 26.035,
+        "net": "/C5",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "from_candidate_pad": {
+        "ref": "K35",
+        "pad": "2",
+        "x": 124.7775,
+        "y": 83.185,
+        "net": "/C5",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_pad": {
+        "ref": "K[0]5",
+        "pad": "2",
+        "x": 120.015,
+        "y": 26.035,
+        "net": "/C5",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/C6",
+      "from_island": "/C6::pre118::post125",
+      "to_island": "/C6::pre118::post126",
+      "from_candidate_contact": {
+        "ref": "U1",
+        "pad": "5",
+        "x": 120.015,
+        "y": 94.77375,
+        "net": "/C6",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_contact": {
+        "ref": "K[0]6",
+        "pad": "2",
+        "x": 139.065,
+        "y": 26.035,
+        "net": "/C6",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "from_candidate_pad": {
+        "ref": "U1",
+        "pad": "5",
+        "x": 120.015,
+        "y": 94.77375,
+        "net": "/C6",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_pad": {
+        "ref": "K[0]6",
+        "pad": "2",
+        "x": 139.065,
+        "y": 26.035,
+        "net": "/C6",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/C7",
+      "from_island": "/C7::pre171::post180",
+      "to_island": "/C7::pre171::post182",
+      "from_candidate_contact": {
+        "ref": "U1",
+        "pad": "6",
+        "x": 122.555,
+        "y": 94.77375,
+        "net": "/C7",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_contact": {
+        "ref": "K[0]7",
+        "pad": "2",
+        "x": 158.115,
+        "y": 26.035,
+        "net": "/C7",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "from_candidate_pad": {
+        "ref": "U1",
+        "pad": "6",
+        "x": 122.555,
+        "y": 94.77375,
+        "net": "/C7",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_pad": {
+        "ref": "K[0]7",
+        "pad": "2",
+        "x": 158.115,
+        "y": 26.035,
+        "net": "/C7",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/C8",
+      "from_island": "/C8::pre187::post199",
+      "to_island": "/C8::pre187::post202",
+      "from_candidate_contact": {
+        "ref": "K[0]8",
+        "pad": "2",
+        "x": 177.165,
+        "y": 26.035,
+        "net": "/C8",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_contact": {
+        "ref": "U1",
+        "pad": "8",
+        "x": 127.635,
+        "y": 94.77375,
+        "net": "/C8",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "from_candidate_pad": {
+        "ref": "K[0]8",
+        "pad": "2",
+        "x": 177.165,
+        "y": 26.035,
+        "net": "/C8",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_pad": {
+        "ref": "U1",
+        "pad": "8",
+        "x": 127.635,
+        "y": 94.77375,
+        "net": "/C8",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/C9",
+      "from_island": "/C9::pre204::post216",
+      "to_island": "/C9::pre204::post220",
+      "from_candidate_contact": {
+        "ref": "K[0]9",
+        "pad": "2",
+        "x": 196.215,
+        "y": 26.035,
+        "net": "/C9",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_contact": {
+        "ref": "U1",
+        "pad": "12",
+        "x": 137.795,
+        "y": 94.77375,
+        "net": "/C9",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "from_candidate_pad": {
+        "ref": "K[0]9",
+        "pad": "2",
+        "x": 196.215,
+        "y": 26.035,
+        "net": "/C9",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_pad": {
+        "ref": "U1",
+        "pad": "12",
+        "x": 137.795,
+        "y": 94.77375,
+        "net": "/C9",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/R0",
+      "from_island": "/R0::pre148::post143",
+      "to_island": "/R0::pre148::post153",
+      "from_candidate_contact": {
+        "ref": "U1",
+        "pad": "7",
+        "x": 125.095,
+        "y": 94.77375,
+        "net": "/R0",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_contact": {
+        "ref": "D[0]4",
+        "pad": "1",
+        "x": 114.3,
+        "y": 33.655,
+        "net": "/R0",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "from_candidate_pad": {
+        "ref": "U1",
+        "pad": "7",
+        "x": 125.095,
+        "y": 94.77375,
+        "net": "/R0",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_pad": {
+        "ref": "D[0]4",
+        "pad": "1",
+        "x": 114.3,
+        "y": 33.655,
+        "net": "/R0",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/R0",
+      "from_island": "/R0::pre148::post143",
+      "to_island": "/R0::pre148::post157",
+      "from_candidate_contact": {
+        "ref": "U1",
+        "pad": "7",
+        "x": 125.095,
+        "y": 94.77375,
+        "net": "/R0",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_contact": {
+        "ref": "D[0]5",
+        "pad": "1",
+        "x": 133.35,
+        "y": 33.655,
+        "net": "/R0",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "from_candidate_pad": {
+        "ref": "U1",
+        "pad": "7",
+        "x": 125.095,
+        "y": 94.77375,
+        "net": "/R0",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_pad": {
+        "ref": "D[0]5",
+        "pad": "1",
+        "x": 133.35,
+        "y": 33.655,
+        "net": "/R0",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/R1",
+      "from_island": "/R1::pre103::post104",
+      "to_island": "/R1::pre103::post109",
+      "from_candidate_contact": {
+        "ref": "D14",
+        "pad": "1",
+        "x": 123.825,
+        "y": 52.705,
+        "net": "/R1",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_contact": {
+        "ref": "D15",
+        "pad": "1",
+        "x": 142.875,
+        "y": 52.705,
+        "net": "/R1",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "from_candidate_pad": {
+        "ref": "D14",
+        "pad": "1",
+        "x": 123.825,
+        "y": 52.705,
+        "net": "/R1",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_pad": {
+        "ref": "D15",
+        "pad": "1",
+        "x": 142.875,
+        "y": 52.705,
+        "net": "/R1",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/R2",
+      "from_island": "/R2::pre54::post57",
+      "to_island": "/R2::pre54::post64",
+      "from_candidate_contact": {
+        "ref": "D24",
+        "pad": "1",
+        "x": 128.5875,
+        "y": 71.755,
+        "net": "/R2",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_contact": {
+        "ref": "D25",
+        "pad": "1",
+        "x": 152.7175,
+        "y": 76.2,
+        "net": "/R2",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "from_candidate_pad": {
+        "ref": "D24",
+        "pad": "1",
+        "x": 128.5875,
+        "y": 71.755,
+        "net": "/R2",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_pad": {
+        "ref": "D25",
+        "pad": "1",
+        "x": 152.7175,
+        "y": 76.2,
+        "net": "/R2",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/R3",
+      "from_island": "/R3::pre27::post29",
+      "to_island": "/R3::pre27::post34",
+      "from_candidate_contact": {
+        "ref": "D35",
+        "pad": "1",
+        "x": 138.1125,
+        "y": 88.42375,
+        "net": "/R3",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_contact": {
+        "ref": "D36",
+        "pad": "1",
+        "x": 157.1625,
+        "y": 88.42375,
+        "net": "/R3",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "from_candidate_pad": {
+        "ref": "D35",
+        "pad": "1",
+        "x": 138.1125,
+        "y": 88.42375,
+        "net": "/R3",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_pad": {
+        "ref": "D36",
+        "pad": "1",
+        "x": 157.1625,
+        "y": 88.42375,
+        "net": "/R3",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "/R4",
+      "from_island": "/R4::pre17::post6",
+      "to_island": "/R4::pre17::post19",
+      "from_candidate_contact": {
+        "ref": "U1",
+        "pad": "28",
+        "x": 112.395,
+        "y": 110.01375,
+        "net": "/R4",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_contact": {
+        "ref": "D46",
+        "pad": "1",
+        "x": 159.54375,
+        "y": 109.855,
+        "net": "/R4",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "from_candidate_pad": {
+        "ref": "U1",
+        "pad": "28",
+        "x": 112.395,
+        "y": 110.01375,
+        "net": "/R4",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_pad": {
+        "ref": "D46",
+        "pad": "1",
+        "x": 159.54375,
+        "y": 109.855,
+        "net": "/R4",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    },
+    {
+      "net": "Net-(D35-Pad2)",
+      "from_island": "Net-(D35-Pad2)::pre0::post0",
+      "to_island": "Net-(D35-Pad2)::pre0::post2",
+      "from_candidate_contact": {
+        "ref": "K35",
+        "pad": "1",
+        "x": 131.1275,
+        "y": 80.645,
+        "net": "Net-(D35-Pad2)",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_contact": {
+        "ref": "D35",
+        "pad": "2",
+        "x": 138.1125,
+        "y": 78.26375,
+        "net": "Net-(D35-Pad2)",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "from_candidate_pad": {
+        "ref": "K35",
+        "pad": "1",
+        "x": 131.1275,
+        "y": 80.645,
+        "net": "Net-(D35-Pad2)",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "to_candidate_pad": {
+        "ref": "D35",
+        "pad": "2",
+        "x": 138.1125,
+        "y": 78.26375,
+        "net": "Net-(D35-Pad2)",
+        "layer": "F.Cu",
+        "contact_type": "existing_pad",
+        "physical_access_verified": false
+      },
+      "status": "PROPOSED_MODEL_ONLY_NOT_A_WIRING_AUTHORIZATION"
+    }
+  ],
+  "release": "BLOCKED_REFERENCE_TOPOLOGY_ONLY",
+  "payload_sha256": "6d86e27afeb820b6a8523f3b4e479b6a77240ef03dc7e53f4fba87c8c6f261c7"
+}

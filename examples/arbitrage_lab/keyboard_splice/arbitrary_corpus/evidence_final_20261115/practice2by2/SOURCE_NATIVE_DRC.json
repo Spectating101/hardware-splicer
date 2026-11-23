@@ -1,0 +1,457 @@
+{
+    "$schema": "https://schemas.kicad.org/drc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-11-15T15:32:38+0800",
+    "kicad_version": "9.0.2",
+    "schematic_parity": [],
+    "source": "practice2by2.kicad_pcb",
+    "unconnected_items": [],
+    "violations": [
+        {
+            "description": "Annular width (board setup constraints min annular width 0.1000 mm; actual 0.0000 mm)",
+            "items": [
+                {
+                    "description": "PTH pad 2 [Net-(D4-Pad2)] of MX4",
+                    "pos": {
+                        "x": 163.69475,
+                        "y": 82.78075
+                    },
+                    "uuid": "8c6a821f-8e19-48f3-8f44-9b340f7689bc"
+                }
+            ],
+            "severity": "error",
+            "type": "annular_width"
+        },
+        {
+            "description": "Annular width (board setup constraints min annular width 0.1000 mm; actual 0.0000 mm)",
+            "items": [
+                {
+                    "description": "PTH pad 2 [Net-(D3-Pad2)] of MX3",
+                    "pos": {
+                        "x": 144.64475,
+                        "y": 82.78075
+                    },
+                    "uuid": "6441b183-b8f2-458f-a23d-60e2b1f66dd6"
+                }
+            ],
+            "severity": "error",
+            "type": "annular_width"
+        },
+        {
+            "description": "Annular width (board setup constraints min annular width 0.1000 mm; actual 0.0000 mm)",
+            "items": [
+                {
+                    "description": "PTH pad 2 [Net-(D2-Pad2)] of MX2",
+                    "pos": {
+                        "x": 163.69475,
+                        "y": 63.73075
+                    },
+                    "uuid": "c41b3c8b-634e-435a-b582-96b83bbd4032"
+                }
+            ],
+            "severity": "error",
+            "type": "annular_width"
+        },
+        {
+            "description": "Annular width (board setup constraints min annular width 0.1000 mm; actual 0.0000 mm)",
+            "items": [
+                {
+                    "description": "PTH pad 2 [Net-(D1-Pad2)] of MX1",
+                    "pos": {
+                        "x": 144.64475,
+                        "y": 63.73075
+                    },
+                    "uuid": "4fb02e58-160a-4a39-9f22-d0c75e82ee72"
+                }
+            ],
+            "severity": "error",
+            "type": "annular_width"
+        },
+        {
+            "description": "Board edge clearance violation (board setup constraints edge clearance 0.5000 mm; actual 0.3879 mm)",
+            "items": [
+                {
+                    "description": "Arc of J1 on Edge.Cuts",
+                    "pos": {
+                        "x": 106.769,
+                        "y": 60.323
+                    },
+                    "uuid": "c0a9769e-cc6e-4c4c-9232-bd82084ab804"
+                },
+                {
+                    "description": "Track [unconnected-(J1-Pad6)] on B.Cu, length 2.1390 mm",
+                    "pos": {
+                        "x": 106.619,
+                        "y": 61.7325
+                    },
+                    "uuid": "993a4385-128e-461c-916e-6f0f894f2368"
+                }
+            ],
+            "severity": "error",
+            "type": "copper_edge_clearance"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Segment on Edge.Cuts",
+                    "pos": {
+                        "x": 99.21875,
+                        "y": 58.7375
+                    },
+                    "uuid": "a372327e-358e-42e2-997f-4bf3ad31741a"
+                },
+                {
+                    "description": "Segment of J1 on B.Silkscreen",
+                    "pos": {
+                        "x": 100.524,
+                        "y": 58.998
+                    },
+                    "uuid": "64169e0c-5ed9-4557-9a0c-f897e81e2e94"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Silkscreen clipped by board edge",
+            "items": [
+                {
+                    "description": "Segment on Edge.Cuts",
+                    "pos": {
+                        "x": 168.275,
+                        "y": 58.70575
+                    },
+                    "uuid": "1cd9cd9c-953c-4427-bae5-edb555245bad"
+                },
+                {
+                    "description": "Segment of J1 on B.Silkscreen",
+                    "pos": {
+                        "x": 108.264,
+                        "y": 58.998
+                    },
+                    "uuid": "64cfac08-5cc3-4f57-af02-931ead26eb9d"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_edge_clearance"
+        },
+        {
+            "description": "Drilled hole too close to other hole (board setup constraints min 0.2495 mm; actual 0.0000 mm)",
+            "items": [
+                {
+                    "description": "PTH pad 2 [Net-(D4-Pad2)] of MX4",
+                    "pos": {
+                        "x": 163.73475,
+                        "y": 82.20075
+                    },
+                    "uuid": "45008225-f50f-4d6b-b508-6730a9408caf"
+                },
+                {
+                    "description": "PTH pad 2 [Net-(D4-Pad2)] of MX4",
+                    "pos": {
+                        "x": 163.69475,
+                        "y": 82.78075
+                    },
+                    "uuid": "8c6a821f-8e19-48f3-8f44-9b340f7689bc"
+                }
+            ],
+            "severity": "warning",
+            "type": "hole_to_hole"
+        },
+        {
+            "description": "Drilled hole too close to other hole (board setup constraints min 0.2495 mm; actual 0.0000 mm)",
+            "items": [
+                {
+                    "description": "PTH pad 2 [Net-(D3-Pad2)] of MX3",
+                    "pos": {
+                        "x": 144.68475,
+                        "y": 82.20075
+                    },
+                    "uuid": "31e08896-1992-4725-96d9-9d2728bca7a3"
+                },
+                {
+                    "description": "PTH pad 2 [Net-(D3-Pad2)] of MX3",
+                    "pos": {
+                        "x": 144.64475,
+                        "y": 82.78075
+                    },
+                    "uuid": "6441b183-b8f2-458f-a23d-60e2b1f66dd6"
+                }
+            ],
+            "severity": "warning",
+            "type": "hole_to_hole"
+        },
+        {
+            "description": "Drilled hole too close to other hole (board setup constraints min 0.2495 mm; actual 0.0000 mm)",
+            "items": [
+                {
+                    "description": "PTH pad 2 [Net-(D2-Pad2)] of MX2",
+                    "pos": {
+                        "x": 163.73475,
+                        "y": 63.15075
+                    },
+                    "uuid": "9340c285-5767-42d5-8b6d-63fe2a40ddf3"
+                },
+                {
+                    "description": "PTH pad 2 [Net-(D2-Pad2)] of MX2",
+                    "pos": {
+                        "x": 163.69475,
+                        "y": 63.73075
+                    },
+                    "uuid": "c41b3c8b-634e-435a-b582-96b83bbd4032"
+                }
+            ],
+            "severity": "warning",
+            "type": "hole_to_hole"
+        },
+        {
+            "description": "Drilled hole too close to other hole (board setup constraints min 0.2495 mm; actual 0.0000 mm)",
+            "items": [
+                {
+                    "description": "PTH pad 2 [Net-(D1-Pad2)] of MX1",
+                    "pos": {
+                        "x": 144.64475,
+                        "y": 63.73075
+                    },
+                    "uuid": "4fb02e58-160a-4a39-9f22-d0c75e82ee72"
+                },
+                {
+                    "description": "PTH pad 2 [Net-(D1-Pad2)] of MX1",
+                    "pos": {
+                        "x": 144.68475,
+                        "y": 63.15075
+                    },
+                    "uuid": "ef8fe2ac-6a7f-4682-9418-b801a1b10a3b"
+                }
+            ],
+            "severity": "warning",
+            "type": "hole_to_hole"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX4",
+                    "pos": {
+                        "x": 161.19475,
+                        "y": 87.28075
+                    },
+                    "uuid": "6475547d-3216-45a4-a15c-48314f1dd0f9"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX3",
+                    "pos": {
+                        "x": 142.14475,
+                        "y": 87.28075
+                    },
+                    "uuid": "bfc0aadc-38cf-466e-a642-68fdc3138c78"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX2",
+                    "pos": {
+                        "x": 161.19475,
+                        "y": 68.23075
+                    },
+                    "uuid": "ce83728b-bebd-48c2-8734-b6a50d837931"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'MX_Alps_Hybrid'.",
+            "items": [
+                {
+                    "description": "Footprint MX1",
+                    "pos": {
+                        "x": 142.14475,
+                        "y": 68.23075
+                    },
+                    "uuid": "e615f7aa-337e-474d-9615-2ad82b1c44ca"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "Footprint 'D_SOD-123' does not match copy in library 'Diode_SMD'.",
+            "items": [
+                {
+                    "description": "Footprint D1",
+                    "pos": {
+                        "x": 150.08225,
+                        "y": 68.23075
+                    },
+                    "uuid": "202557b3-1d57-491a-8c53-22fb6f02d7ed"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'TQFP-44_10x10mm_P0.8mm' does not match copy in library 'Package_QFP'.",
+            "items": [
+                {
+                    "description": "Footprint U1",
+                    "pos": {
+                        "x": 115.15725,
+                        "y": 84.10575
+                    },
+                    "uuid": "23285c5a-7b12-49c4-b32b-ecfe8278cf8e"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'D_SOD-123' does not match copy in library 'Diode_SMD'.",
+            "items": [
+                {
+                    "description": "Footprint D4",
+                    "pos": {
+                        "x": 169.13225,
+                        "y": 87.28075
+                    },
+                    "uuid": "8197234b-d466-4dd0-b29a-d8c861bfb7ac"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "The current configuration does not include the footprint library 'Random-keyboard-parts'.",
+            "items": [
+                {
+                    "description": "Footprint SW1",
+                    "pos": {
+                        "x": 125.476,
+                        "y": 63.46825
+                    },
+                    "uuid": "8ca3e20d-bcc7-4c5e-9deb-562dfed9fecb"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_issues"
+        },
+        {
+            "description": "Footprint 'D_SOD-123' does not match copy in library 'Diode_SMD'.",
+            "items": [
+                {
+                    "description": "Footprint D2",
+                    "pos": {
+                        "x": 169.13225,
+                        "y": 68.23075
+                    },
+                    "uuid": "91c9312f-49bd-43e5-9ab5-9233b64d7f4a"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'D_SOD-123' does not match copy in library 'Diode_SMD'.",
+            "items": [
+                {
+                    "description": "Footprint D3",
+                    "pos": {
+                        "x": 150.08225,
+                        "y": 87.28075
+                    },
+                    "uuid": "ac99f243-aa8f-4496-82dd-cd58dae79415"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'Fuse_1206_3216Metric' does not match copy in library 'Fuse'.",
+            "items": [
+                {
+                    "description": "Footprint F1",
+                    "pos": {
+                        "x": 112.141,
+                        "y": 71.758
+                    },
+                    "uuid": "bf1f6226-2275-4b86-9c1d-d63e3a6430dd"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'Crystal_SMD_3225-4Pin_3.2x2.5mm' does not match copy in library 'Crystal'.",
+            "items": [
+                {
+                    "description": "Footprint Y1",
+                    "pos": {
+                        "x": 128.751,
+                        "y": 86.15825
+                    },
+                    "uuid": "c97c8102-2bf1-4ea4-9aa9-15a404c92447"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Footprint 'USB_Micro-AB_Molex_47590-0001' does not match copy in library 'Connector_USB'.",
+            "items": [
+                {
+                    "description": "Footprint J1",
+                    "pos": {
+                        "x": 104.394,
+                        "y": 60.198
+                    },
+                    "uuid": "e283a52c-71d7-44a0-b9f3-a990201e43cd"
+                }
+            ],
+            "severity": "warning",
+            "type": "lib_footprint_mismatch"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of SW1 on B.Silkscreen",
+                    "pos": {
+                        "x": 128.076,
+                        "y": 60.86825
+                    },
+                    "uuid": "c5eb1e4c-ce83-470e-8f32-e20ff1f886a3"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        },
+        {
+            "description": "Silkscreen clipped by solder mask",
+            "items": [
+                {
+                    "description": "Segment of SW1 on B.Silkscreen",
+                    "pos": {
+                        "x": 122.876,
+                        "y": 66.06825
+                    },
+                    "uuid": "ec31c074-17b2-48e1-ab01-071acad3fa04"
+                }
+            ],
+            "severity": "warning",
+            "type": "silk_over_copper"
+        }
+    ]
+}

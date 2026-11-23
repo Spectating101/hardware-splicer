@@ -1,0 +1,148 @@
+{
+  "schema": "hardware_splicer.real_project_assessment.v1",
+  "project_id": "psp3000_umd_repair",
+  "source_uris": [
+    "https://www.ifixit.com/Guide/PSP+300x+UMD+Drive+Replacement/1586",
+    "https://www.ifixit.com/products/sony-psp-2000-3000-umd-drive"
+  ],
+  "hs_raw_plan": {
+    "archetype": "airflow_controller",
+    "recommended_build_id": "usb_fume_extractor",
+    "architecture_status": "legacy_compatibility",
+    "missing_info": [
+      "controller choice",
+      "actuator model/current",
+      "runtime target",
+      "budget limit",
+      "measured dimensions",
+      "mechanical simulation",
+      "bench evidence",
+      "reviewed release scope",
+      "Resolve robot topology field candidate-joint-1.limits: Joint limits require design or measurement evidence.",
+      "Resolve robot topology field candidate-joint-2.limits: Joint limits require design or measurement evidence.",
+      "Resolve robot topology field candidate-actuator-1.source_part_id: Topology requires an actuator role, but no declared structured actuator part is bound to this slot.",
+      "Resolve robot topology field candidate-actuator-2.source_part_id: Topology requires an actuator role, but no declared structured actuator part is bound to this slot.",
+      "Resolve robot topology field topology-8ea0750e9b2e.robot_genre: Native robot topology could not be resolved.",
+      "Provide analysis input for analysis-runtime: battery_energy_wh or battery_voltage_v + battery_capacity_ah, continuous or average load power",
+      "Provide analysis input for analysis-current-margin: supply_current_limit_a, peak_current_a or per-load peak/stall current",
+      "Provide analysis input for analysis-payload-margin: payload_mass_kg, payload_limit_kg",
+      "Provide analysis input for analysis-static-stability: support_width_mm or wheel_track_mm, combined_cg_height_mm",
+      "Provide analysis input for analysis-actuator-torque: payload_mass_kg, payload_lever_arm_m, actuator_continuous_torque_nm",
+      "Provide analysis input for analysis-dimensional-envelope: candidate_width_mm, maximum_width_mm",
+      "Provide analysis input for analysis-thermal: estimated_power_loss_w, thermal_resistance_c_per_w, ambient_temperature_c, maximum_component_temperature_c",
+      "Resolve change-impact field baseline_revision: A modification, repair, or field evolution requires a pinned baseline revision."
+    ]
+  },
+  "operator_casefile": {
+    "catalog_verdict": "reject",
+    "project_type": "PSP-3000 UMD read-failure repair triage with safe, unpowered inspection planning",
+    "functional_subsystems": [
+      "UMD media and disc seating",
+      "UMD lid and disc-present switch",
+      "UMD drive mechanical loading and spindle mechanism",
+      "Optical pickup and laser assembly",
+      "UMD drive flex ribbon and board-side connector",
+      "Mainboard power, control, and drive-interface circuitry",
+      "Battery and removable-power isolation",
+      "Front case, screen, and internal access layers"
+    ],
+    "decision_tree": [
+      {
+        "next_action": "Reject the HS catalog recommendation of a usb_fume_extractor.",
+        "purpose": "The proposed airflow-controller demo is unrelated to PSP UMD diagnosis, has no stated role in the device, and lacks controller, actuator, runtime, dimensional, mechanical, and electrical evidence."
+      },
+      {
+        "next_action": "Record the exact PSP-3000 subrevision, visible damage, prior repair history, disc behavior, and whether the failure is intermittent before purchasing parts.",
+        "purpose": "Subrevision and failure-history evidence are missing; the supplied compatibility claim covers PSP 2000 and PSP 300x variants but does not establish exact compatibility for this unit."
+      },
+      {
+        "next_action": "Perform only external, unpowered inspection: inspect the UMD door, spindle area visible through the opening, foreign material, cracked plastic, bent guides, and disc-label or hub damage.",
+        "purpose": "Separate obvious media, contamination, and mechanical obstruction hypotheses without applying power."
+      },
+      {
+        "next_action": "Compare the reported symptom against controlled observations already available, such as whether the disc is recognized, spins, makes abnormal noises, or fails only with one disc; do not create new powered observations under the stated constraint.",
+        "purpose": "Rank media, switch, connector, mechanical, optical, and board hypotheses without treating the drive as confirmed faulty."
+      },
+      {
+        "next_action": "If disassembly is authorized, shut down completely, disconnect external power, remove the removable battery first, and keep the battery isolated before opening the case.",
+        "purpose": "Reduce short-circuit and accidental-power risks before accessing the drive; the supplied repair guidance identifies battery removal as part of UMD replacement."
+      },
+      {
+        "next_action": "Document screw locations and cable routing, then remove the front case and screen/ribbon access layers only as needed to reach the UMD drive; release ribbon connectors by their locking mechanisms rather than pulling on cables.",
+        "purpose": "The supplied iFixit PSP-300x claim states that replacement requires front-case, screen/ribbon, and drive access and is substantially invasive."
+      },
+      {
+        "next_action": "Inspect and photograph the UMD drive ribbon, connector contacts, latch, seating, corrosion, torn flex, and board-side damage before disturbing them; reseat only if the connector and flex are visibly intact.",
+        "purpose": "Distinguish connector or flex faults from a drive fault while preserving evidence and avoiding unnecessary replacement."
+      },
+      {
+        "next_action": "Inspect the lid/switch actuator and mechanical linkage for misalignment or breakage without bypassing the switch or applying power.",
+        "purpose": "A lid-detection fault can mimic a drive or media failure; an open-powered laser or drive test is prohibited."
+      },
+      {
+        "next_action": "Do not authorize a paid UMD-drive replacement until media, lid-switch, connector/flex, and obvious mechanical causes have been assessed and exact part compatibility is verified.",
+        "purpose": "The supplied claims do not confirm that this specific PSP-3000 subrevision has a failed drive or that a particular replacement listing is exact."
+      }
+    ],
+    "compatible_parts_or_requirements": [
+      "A replacement UMD drive is only a candidate: the supplied product claim lists compatibility with PSP 2000 and PSP 300x variants, but exact PSP-3000 subrevision compatibility remains unverified.",
+      "Use the device's existing drive flex and connector only after visual inspection confirms matching geometry, intact contacts, and a functional locking mechanism; no substitute flex or connector is authorized without exact verification.",
+      "Use a known-good, undamaged UMD only if a later approved powered diagnostic permits it; no disc-based conclusion can be made under the current no-power-test constraint.",
+      "Required repair conditions: removable battery isolated before opening, documented screw and cable locations, ESD-aware handling, suitable precision drivers, nonmetallic inspection tools where practical, and no powered laser or open-drive test.",
+      "Do not select a replacement drive by appearance alone; verify exact model, connector arrangement, mechanical geometry, and subrevision fit against the device and the supplier's return policy."
+    ],
+    "build_or_repair_sequence": [
+      "1. Freeze the current state in the repair record: PSP-3000 identification, subrevision evidence, symptom description, known disc history, prior repairs, visible damage, and authorization limits.",
+      "2. Externally inspect the UMD door, disc path, spindle opening, and visible mechanism with the device unpowered.",
+      "3. Remove external power and remove the battery before any case opening; keep the battery disconnected throughout inspection.",
+      "4. Photograph the exterior, screw locations, cable routing, screen/ribbon connections, UMD drive flex, connector latch, and switch linkage before removal.",
+      "5. Follow the supplied PSP-300x repair guidance through front-case and screen/ribbon access only as far as necessary to inspect the drive.",
+      "6. Inspect the drive flex and both connector interfaces for tears, contamination, corrosion, lifted contacts, damaged latch parts, or poor seating; document findings before reseating.",
+      "7. Inspect the UMD switch actuator and drive mechanics for obstruction, broken guides, displaced springs, or cracked mounts; do not bypass the switch.",
+      "8. Stop and route to salvage if the fault is limited to a recoverable connector, flex seating issue, contamination, or mechanical obstruction and the repair can be completed without unverified parts.",
+      "9. Route to replacement evaluation only if evidence implicates the drive and an exact compatible part is verified; otherwise retain the original drive and defer purchase.",
+      "10. Reassemble in reverse order with all ribbons fully latched and the battery remaining isolated until the enclosure and drive are secured.",
+      "11. Perform only the acceptance checks permitted by the owner and safety constraints; no open-powered laser or drive test is allowed."
+    ],
+    "critical_technical_unknowns": [
+      "Exact PSP-3000 subrevision and whether its drive interfaces match the cited PSP 2000/300x replacement listing.",
+      "Whether the failure affects all discs or only one disc, and whether any prior controlled symptom observation exists.",
+      "Whether the disc is recognized, spins, fails to spin, makes abnormal noises, or produces an error.",
+      "Condition and alignment of the UMD lid switch and actuator.",
+      "Condition of the UMD flex ribbon, connector contacts, connector latch, and mainboard-side interface.",
+      "Presence of contamination, foreign objects, cracked guides, spindle damage, or mechanical binding.",
+      "Whether the optical pickup, spindle motor, drive controller, or mainboard circuitry is actually faulty; drive failure is not confirmed.",
+      "Availability of an exact-match replacement drive, return option, donor unit, and qualified repair labor.",
+      "Permitted post-repair power and media testing; the current constraint explicitly disallows power-on tests.",
+      "Repair time, labor rate, parts price, shipping, return cost, and budget limit."
+    ],
+    "validation_plan": [
+      "Verify that the repair record identifies the PSP-3000 subrevision and preserves before-disassembly photographs and observations.",
+      "Verify that the battery was removed before case opening and that no powered inspection occurred with the drive exposed.",
+      "Verify that the drive flex and connector latch are intact, correctly seated, and free of documented contamination or damage.",
+      "Verify that the UMD switch linkage and visible mechanical path are correctly positioned and unobstructed.",
+      "If power testing later becomes authorized, test only after complete reassembly and use a known-good disc plus the reported disc; record recognition, spin-up, read stability, unusual noise, and repeatability.",
+      "Reject any validation procedure requiring an open-powered laser or drive test.",
+      "Acceptance cannot be declared until an approved post-repair functional test is defined; under the current no-power constraint, only unpowered inspection results can be recorded."
+    ],
+    "deliverable_gaps": [
+      "No exact PSP-3000 subrevision identification.",
+      "No symptom-level evidence distinguishing media, switch, connector, mechanical, optical, or board faults.",
+      "No authorized post-repair powered acceptance procedure.",
+      "No verified exact replacement part number or supplier evidence for this unit.",
+      "No time and cost figures; labor, parts, shipping, tools, donor availability, and budget are unknown.",
+      "No confirmed baseline revision or prior repair state.",
+      "The supplied HS catalog metadata is for a robot/airflow-controller concept and is irrelevant to this PSP repair."
+    ],
+    "completion_state": "blocked",
+    "physical_validation_claimed": false
+  },
+  "physical_build_completed": false,
+  "independent_design_verification_completed": false,
+  "catalog_compatibility_gate": {
+    "recommended_build_id": "usb_fume_extractor",
+    "explicitly_approved_for_project": false,
+    "status": "unverified_mismatch",
+    "rationale": "Device project does not explicitly approve this catalog build. LLM confidence cannot substitute for device compatibility evidence."
+  }
+}

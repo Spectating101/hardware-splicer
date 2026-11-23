@@ -201,3 +201,57 @@ def test_pre_fab_request_cannot_supply_engineering_findings(tmp_path) -> None:
     assert response.status_code == 422
     assert store.load("adapter")["revision"] == 1
     assert store.load("adapter")["snapshot"][ENGINEERING_FINDINGS_KEY] == [_LEDGER_ENTRY]
+
+
+def test_pre_fab_missing_evidence_projects_to_blockers_without_changing_truth(tmp_path) -> None:
+    client, store = _client(tmp_path)
+    request = _request()
+    request["assessment"]["blockers"] = [
+        "  Battery voltage at PCB not measured  ",
+        "Battery voltage at PCB not measured",
+        "Transistor pinout unknown",
+    ]
+    response = client.post(
+        "/v1/projects/adapter/engineering/pre-fabrication-plan",
+        json=request,
+    )
+    assert response.status_code == 200, response.text
+    blockers = response.json()["engineering_blockers"]
+    assert blockers == [
+        "Exact pinout is unresolved.",
+        "pre_fabrication_missing_evidence: Battery voltage at PCB not measured",
+        "pre_fabrication_missing_evidence: Transistor pinout unknown",
+    ]
+    state = store.load("adapter")["snapshot"]
+    assert state["engineeringBlockers"] == blockers
+    assert state["preFabricationPlan"]["physical_correctness"] == "UNPROVEN"
+    assert state["engineering_readiness"]["fabrication_ready"] is False
+    assert state[ENGINEERING_FINDINGS_KEY] == [_LEDGER_ENTRY]
+
+
+def test_pre_fab_replan_replaces_only_its_own_missing_evidence(tmp_path) -> None:
+    client, store = _client(tmp_path)
+    first = _request()
+    first["assessment"]["blockers"] = ["Battery not measured", "Pinout unknown"]
+    r = client.post("/v1/projects/adapter/engineering/pre-fabrication-plan", json=first)
+    assert r.status_code == 200, r.text
+
+    second = _request()
+    second["expected_revision"] = 2
+    second["assessment"]["blockers"] = ["Pinout unknown"]
+    r2 = client.post("/v1/projects/adapter/engineering/pre-fabrication-plan", json=second)
+    assert r2.status_code == 200, r2.text
+    assert store.load("adapter")["snapshot"]["engineeringBlockers"] == [
+        "Exact pinout is unresolved.",
+        "pre_fabrication_missing_evidence: Pinout unknown",
+    ]
+
+
+def test_pre_fab_rejects_malformed_assessment_blockers(tmp_path) -> None:
+    client, store = _client(tmp_path)
+    request = _request()
+    request["assessment"]["blockers"] = [{"measurement": "voltage"}]
+    r = client.post("/v1/projects/adapter/engineering/pre-fabrication-plan", json=request)
+    assert r.status_code == 422, r.text
+    assert "list of strings" in r.json()["detail"]["message"]
+    assert store.load("adapter")["revision"] == 1

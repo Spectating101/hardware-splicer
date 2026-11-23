@@ -6,15 +6,15 @@ import {
   checkElectricalDesign,
   editElectricalDesign,
   projectElectricalDesign,
-} from "../projectSession/electricalDesignApi.js";
-import { stageMachineProjectReview } from "../projectSession/machineAuthoringApi.js";
+} from "../projectSession/electricalDesignApi";
+import { stageMachineProjectReview } from "../projectSession/machineAuthoringApi";
 
-vi.mock("../projectSession/electricalDesignApi.js", () => ({
+vi.mock("../projectSession/electricalDesignApi", () => ({
   checkElectricalDesign: vi.fn(),
   editElectricalDesign: vi.fn(),
   projectElectricalDesign: vi.fn(),
 }));
-vi.mock("../projectSession/machineAuthoringApi.js", () => ({
+vi.mock("../projectSession/machineAuthoringApi", () => ({
   stageMachineProjectReview: vi.fn(),
 }));
 

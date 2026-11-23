@@ -1,0 +1,879 @@
+{
+  "device_name": "Fielddeck 7",
+  "parts": [
+    {
+      "name": "touch_display_2_manufacturer",
+      "kind": "manufacturer_step",
+      "notes": "Raspberry Pi MIT reference; approximate vendor geometry, not physical metrology.",
+      "solids": 5,
+      "volume_mm3": 29460.849,
+      "bounds_mm": [
+        60.34,
+        149.88,
+        47.04,
+        249.66,
+        270.12,
+        62.0
+      ],
+      "printable": false
+    },
+    {
+      "name": "keyboard_nominal_envelope",
+      "kind": "purchased_envelope",
+      "notes": "Adafruit 1736 published 285 x 123 x 22 mm.",
+      "solids": 1,
+      "volume_mm3": 771210.0,
+      "bounds_mm": [
+        12.5,
+        16.5,
+        40.0,
+        297.5,
+        139.5,
+        62.0
+      ],
+      "printable": false
+    },
+    {
+      "name": "power_bank_nominal_envelope",
+      "kind": "purchased_envelope",
+      "notes": "Anker A1259; buttons/ports are not inferred from the envelope.",
+      "solids": 1,
+      "volume_mm3": 140615.731,
+      "bounds_mm": [
+        16.0,
+        25.0,
+        4.0,
+        68.3,
+        129.0,
+        30.0
+      ],
+      "printable": false
+    },
+    {
+      "name": "pi4_board_envelope",
+      "kind": "purchased_envelope",
+      "notes": "Board outline and mounting pattern from manufacturer; not a detailed electrical model.",
+      "solids": 1,
+      "volume_mm3": 7565.626,
+      "bounds_mm": [
+        4.0,
+        198.0,
+        7.0,
+        60.0,
+        283.0,
+        8.6
+      ],
+      "printable": false
+    },
+    {
+      "name": "pi4_usb_a_lower",
+      "kind": "purchased_envelope",
+      "notes": "Conservative connector proxy; exact plug/cable dimensions remain separate keep-outs.",
+      "solids": 1,
+      "volume_mm3": 4488.0,
+      "bounds_mm": [
+        45.3,
+        267.0,
+        8.6,
+        60.3,
+        285.7,
+        24.6
+      ],
+      "printable": false
+    },
+    {
+      "name": "pi4_usb_a_upper",
+      "kind": "purchased_envelope",
+      "notes": "Conservative connector proxy; exact plug/cable dimensions remain separate keep-outs.",
+      "solids": 1,
+      "volume_mm3": 4488.0,
+      "bounds_mm": [
+        27.3,
+        267.0,
+        8.6,
+        42.3,
+        285.7,
+        24.6
+      ],
+      "printable": false
+    },
+    {
+      "name": "pi4_ethernet",
+      "kind": "purchased_envelope",
+      "notes": "Conservative connector proxy; exact plug/cable dimensions remain separate keep-outs.",
+      "solids": 1,
+      "volume_mm3": 4903.2,
+      "bounds_mm": [
+        6.0,
+        263.0,
+        8.6,
+        22.0,
+        285.7,
+        22.1
+      ],
+      "printable": false
+    },
+    {
+      "name": "pi4_gpio",
+      "kind": "purchased_envelope",
+      "notes": "Conservative connector proxy; exact plug/cable dimensions remain separate keep-outs.",
+      "solids": 1,
+      "volume_mm3": 2167.5,
+      "bounds_mm": [
+        4.5,
+        205.0,
+        8.6,
+        9.5,
+        256.0,
+        17.1
+      ],
+      "printable": false
+    },
+    {
+      "name": "pi4_usb_c",
+      "kind": "purchased_envelope",
+      "notes": "Conservative connector proxy; exact plug/cable dimensions remain separate keep-outs.",
+      "solids": 1,
+      "volume_mm3": 216.0,
+      "bounds_mm": [
+        54.0,
+        205.5,
+        8.6,
+        62.0,
+        214.5,
+        11.6
+      ],
+      "printable": false
+    },
+    {
+      "name": "pi4_dsi",
+      "kind": "purchased_envelope",
+      "notes": "Conservative connector proxy; exact plug/cable dimensions remain separate keep-outs.",
+      "solids": 1,
+      "volume_mm3": 352.0,
+      "bounds_mm": [
+        26.0,
+        198.3,
+        8.6,
+        42.0,
+        202.3,
+        14.1
+      ],
+      "printable": false
+    },
+    {
+      "name": "pi4_microsd",
+      "kind": "purchased_envelope",
+      "notes": "Conservative connector proxy; exact plug/cable dimensions remain separate keep-outs.",
+      "solids": 1,
+      "volume_mm3": 448.0,
+      "bounds_mm": [
+        24.0,
+        198.0,
+        5.0,
+        40.0,
+        212.0,
+        7.0
+      ],
+      "printable": false
+    },
+    {
+      "name": "pi4_soc_envelope",
+      "kind": "purchased_envelope",
+      "notes": "",
+      "solids": 1,
+      "volume_mm3": 866.4,
+      "bounds_mm": [
+        23.0,
+        221.0,
+        8.6,
+        42.0,
+        240.0,
+        11.0
+      ],
+      "printable": false
+    },
+    {
+      "name": "fan_envelope",
+      "kind": "purchased_envelope",
+      "notes": "Noctua NF-A4x10 5V PWM, 40 x 40 x 10; rotor details omitted.",
+      "solids": 2,
+      "volume_mm3": 8138.479,
+      "bounds_mm": [
+        12.0,
+        210.5,
+        51.0,
+        52.0,
+        250.5,
+        61.0
+      ],
+      "printable": false
+    },
+    {
+      "name": "seam_plate_1",
+      "kind": "custom",
+      "notes": "M3 x 10 with nuts above plate; heads below floor.",
+      "solids": 1,
+      "volume_mm3": 2303.49,
+      "bounds_mm": [
+        135.0,
+        25.0,
+        3.0,
+        175.0,
+        45.0,
+        6.0
+      ],
+      "printable": true,
+      "print_dimensions_mm": [
+        40.0,
+        20.0,
+        3.0
+      ],
+      "step_sha256": "cd26090c66996d5eeecb2c8f3790301d310b8ecae5df842740a46e2bdec3b737",
+      "stl_sha256": "e6a32d28036e98e26cdb7d35b9294fe0360d34a4dec43745c07d465c42c23fe6"
+    },
+    {
+      "name": "seam_plate_2",
+      "kind": "custom",
+      "notes": "M3 x 10 with nuts above plate; heads below floor.",
+      "solids": 1,
+      "volume_mm3": 2303.49,
+      "bounds_mm": [
+        135.0,
+        100.0,
+        3.0,
+        175.0,
+        120.0,
+        6.0
+      ],
+      "printable": true,
+      "print_dimensions_mm": [
+        40.0,
+        20.0,
+        3.0
+      ],
+      "step_sha256": "19455d4977adca93c8000f5e729e1875094bf352f3fde4adcb80b970e25d55d0",
+      "stl_sha256": "e6a32d28036e98e26cdb7d35b9294fe0360d34a4dec43745c07d465c42c23fe6"
+    },
+    {
+      "name": "seam_plate_3",
+      "kind": "custom",
+      "notes": "M3 x 10 with nuts above plate; heads below floor.",
+      "solids": 1,
+      "volume_mm3": 2303.49,
+      "bounds_mm": [
+        135.0,
+        175.0,
+        3.0,
+        175.0,
+        195.0,
+        6.0
+      ],
+      "printable": true,
+      "print_dimensions_mm": [
+        40.0,
+        20.0,
+        3.0
+      ],
+      "step_sha256": "1cc0c118de033e906a2d597ef7459219228e1c8291285940e0a443f39b27ecff",
+      "stl_sha256": "e6a32d28036e98e26cdb7d35b9294fe0360d34a4dec43745c07d465c42c23fe6"
+    },
+    {
+      "name": "seam_plate_4",
+      "kind": "custom",
+      "notes": "M3 x 10 with nuts above plate; heads below floor.",
+      "solids": 1,
+      "volume_mm3": 2303.49,
+      "bounds_mm": [
+        135.0,
+        250.0,
+        3.0,
+        175.0,
+        270.0,
+        6.0
+      ],
+      "printable": true,
+      "print_dimensions_mm": [
+        40.0,
+        20.0,
+        3.0
+      ],
+      "step_sha256": "93eb61f4e9affa3faec66fd23e2a8c30557fc7e4a725bada1b155e2566f0f7ac",
+      "stl_sha256": "e6a32d28036e98e26cdb7d35b9294fe0360d34a4dec43745c07d465c42c23fe6"
+    },
+    {
+      "name": "seam_plate_5",
+      "kind": "custom",
+      "notes": "M3 x 10 with nuts above plate; heads below floor.",
+      "solids": 1,
+      "volume_mm3": 2303.49,
+      "bounds_mm": [
+        80.0,
+        120.0,
+        3.0,
+        100.0,
+        160.0,
+        6.0
+      ],
+      "printable": true,
+      "print_dimensions_mm": [
+        20.0,
+        40.0,
+        3.0
+      ],
+      "step_sha256": "c70faa1da966ab1cdfc5b3aa58f0129712e6fe210f35962e6292a743e93bfbb6",
+      "stl_sha256": "533161fdb334469ea9bc19c6dfccaf2a9b13f4a7ef87206c7332295575b387b3"
+    },
+    {
+      "name": "seam_plate_6",
+      "kind": "custom",
+      "notes": "M3 x 10 with nuts above plate; heads below floor.",
+      "solids": 1,
+      "volume_mm3": 2303.49,
+      "bounds_mm": [
+        235.0,
+        120.0,
+        3.0,
+        255.0,
+        160.0,
+        6.0
+      ],
+      "printable": true,
+      "print_dimensions_mm": [
+        20.0,
+        40.0,
+        3.0
+      ],
+      "step_sha256": "cce2f76057babd469f6ff56a980686f3abbb85f82903b7ea7c6e010cbaf5c869",
+      "stl_sha256": "533161fdb334469ea9bc19c6dfccaf2a9b13f4a7ef87206c7332295575b387b3"
+    },
+    {
+      "name": "tray_front_left",
+      "kind": "custom",
+      "notes": "Print floor down; nut pockets and underside tool access included.",
+      "solids": 1,
+      "volume_mm3": 140909.632,
+      "bounds_mm": [
+        0.0,
+        0.0,
+        0.0,
+        154.85,
+        139.85,
+        61.0
+      ],
+      "printable": true,
+      "print_dimensions_mm": [
+        154.85,
+        139.85,
+        61.0
+      ],
+      "step_sha256": "28b55d82e5def520b99bc7113f6f9be6397c805b91eb9964a47885ae65bb059b",
+      "stl_sha256": "b210b3dcc1d28feaa4b37b01e7bf3fea724feffea9b126c9d81449cf3da51be3"
+    },
+    {
+      "name": "face_front_left",
+      "kind": "custom",
+      "notes": "Flat underside on bed. Screen lip captures inactive bezel only.",
+      "solids": 1,
+      "volume_mm3": 11450.566,
+      "bounds_mm": [
+        0.0,
+        0.0,
+        61.0,
+        154.85,
+        139.85,
+        64.0
+      ],
+      "printable": true,
+      "print_dimensions_mm": [
+        154.85,
+        139.85,
+        3.0
+      ],
+      "step_sha256": "94fd4671c1b45c63e953e94f1468bbd944f8d10aff5f24d5abea3cb5c74f55ab",
+      "stl_sha256": "28f330e32f1408bbbb6a0c977242eacd23338a9d22c6744e05b27e246480aa65"
+    },
+    {
+      "name": "tray_front_right",
+      "kind": "custom",
+      "notes": "Print floor down; nut pockets and underside tool access included.",
+      "solids": 1,
+      "volume_mm3": 136764.032,
+      "bounds_mm": [
+        155.15,
+        0.0,
+        0.0,
+        310.0,
+        139.85,
+        61.0
+      ],
+      "printable": true,
+      "print_dimensions_mm": [
+        154.85,
+        139.85,
+        61.0
+      ],
+      "step_sha256": "daadbb4bc83eba3771f853110965ffffc524c4a826f8b01666d500021a8aa928",
+      "stl_sha256": "c659884ad33cec5c8bcf61665af3fe9534d4497fea5dd55d3f2bb91d8693645f"
+    },
+    {
+      "name": "face_front_right",
+      "kind": "custom",
+      "notes": "Flat underside on bed. Screen lip captures inactive bezel only.",
+      "solids": 1,
+      "volume_mm3": 11450.566,
+      "bounds_mm": [
+        155.15,
+        0.0,
+        61.0,
+        310.0,
+        139.85,
+        64.0
+      ],
+      "printable": true,
+      "print_dimensions_mm": [
+        154.85,
+        139.85,
+        3.0
+      ],
+      "step_sha256": "65084427113400870d53c48b2c79528df28289b62b3e5ad1e0feea7ba2b89624",
+      "stl_sha256": "32e7954edae763a0cfc007837a865055945457ef6214b2276faadb75cadd46cc"
+    },
+    {
+      "name": "tray_rear_left",
+      "kind": "custom",
+      "notes": "Print floor down; nut pockets and underside tool access included.",
+      "solids": 1,
+      "volume_mm3": 133784.82,
+      "bounds_mm": [
+        0.0,
+        140.15,
+        0.0,
+        154.85,
+        285.0,
+        61.0
+      ],
+      "printable": true,
+      "print_dimensions_mm": [
+        154.85,
+        144.85,
+        61.0
+      ],
+      "step_sha256": "6bba313a6d93b6cb309ca2650279315e0219bdb457c6fb6664457cb54691bfe7",
+      "stl_sha256": "94690741e3226308bd413cc231cab1287da0dd8843813eb8b69748d686fced8a"
+    },
+    {
+      "name": "face_rear_left",
+      "kind": "custom",
+      "notes": "Flat underside on bed. Screen lip captures inactive bezel only.",
+      "solids": 1,
+      "volume_mm3": 30771.933,
+      "bounds_mm": [
+        0.0,
+        140.15,
+        61.0,
+        154.85,
+        285.0,
+        64.0
+      ],
+      "printable": true,
+      "print_dimensions_mm": [
+        154.85,
+        144.85,
+        3.0
+      ],
+      "step_sha256": "54ab0c68c03ca239f7244edfabea8f8105a2a4d809eee1196c7dc39ae2cdad82",
+      "stl_sha256": "60c51629b6a870a8638a0ba2992d11e68720962eb04f5e19c660d456ccef1123"
+    },
+    {
+      "name": "tray_rear_right",
+      "kind": "custom",
+      "notes": "Print floor down; nut pockets and underside tool access included.",
+      "solids": 1,
+      "volume_mm3": 133909.974,
+      "bounds_mm": [
+        155.15,
+        140.15,
+        0.0,
+        310.0,
+        285.0,
+        61.0
+      ],
+      "printable": true,
+      "print_dimensions_mm": [
+        154.85,
+        144.85,
+        61.0
+      ],
+      "step_sha256": "f22443ceb0bc80b61bb034dc6bdd414275b99376ac18338117572550f55253d1",
+      "stl_sha256": "6dc6dac8764a7c1d5dc66589f67f40ff7b3468b25ed512180dc41598448ce045"
+    },
+    {
+      "name": "face_rear_right",
+      "kind": "custom",
+      "notes": "Flat underside on bed. Screen lip captures inactive bezel only.",
+      "solids": 1,
+      "volume_mm3": 33922.071,
+      "bounds_mm": [
+        155.15,
+        140.15,
+        61.0,
+        310.0,
+        285.0,
+        64.0
+      ],
+      "printable": true,
+      "print_dimensions_mm": [
+        154.85,
+        144.85,
+        3.0
+      ],
+      "step_sha256": "29e6cfb7b113996e976a938bd4844868ce9b94d117314491fde8ecdbd8912ad9",
+      "stl_sha256": "806dd8e3701496edd1ff9b8068940fca972c253fe63bb4e4e97b9b3b2866aea6"
+    },
+    {
+      "name": "fan_guard",
+      "kind": "custom",
+      "notes": "M3 x 25 screws clamp guard, face, fan and 2 mm duct flange; nuts below flange.",
+      "solids": 1,
+      "volume_mm3": 2212.833,
+      "bounds_mm": [
+        10.0,
+        208.5,
+        64.0,
+        54.0,
+        252.5,
+        66.0
+      ],
+      "printable": true,
+      "print_dimensions_mm": [
+        44.0,
+        44.0,
+        2.0
+      ],
+      "step_sha256": "00196c825551819a95af1b74d082a4dd8ab1871811b530c6d83dff52ac8e053c",
+      "stl_sha256": "9142c924d5c462ee493e0f18e3205dd382dd65b7d4879d5d8a6b5871536dc55c"
+    },
+    {
+      "name": "fan_duct",
+      "kind": "custom",
+      "notes": "2 mm flange bolted below fan, 0.5 mm sleeve clearance; preassemble with rear-left face, no PCB contact.",
+      "solids": 1,
+      "volume_mm3": 8401.908,
+      "bounds_mm": [
+        10.0,
+        208.5,
+        25.0,
+        54.0,
+        252.5,
+        53.0
+      ],
+      "printable": true,
+      "print_dimensions_mm": [
+        44.0,
+        44.0,
+        28.0
+      ],
+      "step_sha256": "f43a911db30bb16117aea68d1706aa5762131df741f6004d61fac3b2f42a33bd",
+      "stl_sha256": "b94ad7519be910e4f87043c2513b7a159206c49ffe98476cc2469135186a2856"
+    },
+    {
+      "name": "foot_1",
+      "kind": "custom",
+      "notes": "Adhesive transfer tape to floor; clears seam screw heads by 3 mm.",
+      "solids": 1,
+      "volume_mm3": 1206.372,
+      "bounds_mm": [
+        8.0,
+        8.0,
+        -6.0,
+        24.0,
+        24.0,
+        0.0
+      ],
+      "printable": true,
+      "print_dimensions_mm": [
+        16.0,
+        16.0,
+        6.0
+      ],
+      "step_sha256": "734dca82c415000ce02311d9bd684f7d0e390b2a91a0fad086e69d564c526e7e",
+      "stl_sha256": "54bb09479b3519c30aabf9ab13b333f16d5fe84d2a5af64327d3acf531574eef"
+    },
+    {
+      "name": "foot_2",
+      "kind": "custom",
+      "notes": "Adhesive transfer tape to floor; clears seam screw heads by 3 mm.",
+      "solids": 1,
+      "volume_mm3": 1206.372,
+      "bounds_mm": [
+        286.0,
+        8.0,
+        -6.0,
+        302.0,
+        24.0,
+        0.0
+      ],
+      "printable": true,
+      "print_dimensions_mm": [
+        16.0,
+        16.0,
+        6.0
+      ],
+      "step_sha256": "c0e241e32b095391ac850f5206309d7db2634f45990ac4b1d162edb459a2708e",
+      "stl_sha256": "54bb09479b3519c30aabf9ab13b333f16d5fe84d2a5af64327d3acf531574eef"
+    },
+    {
+      "name": "foot_3",
+      "kind": "custom",
+      "notes": "Adhesive transfer tape to floor; clears seam screw heads by 3 mm.",
+      "solids": 1,
+      "volume_mm3": 1206.372,
+      "bounds_mm": [
+        8.0,
+        261.0,
+        -6.0,
+        24.0,
+        277.0,
+        0.0
+      ],
+      "printable": true,
+      "print_dimensions_mm": [
+        16.0,
+        16.0,
+        6.0
+      ],
+      "step_sha256": "077d42a710a8e90313e8922d917212ef0707da964bbdaa82f4870187eea2ee03",
+      "stl_sha256": "54bb09479b3519c30aabf9ab13b333f16d5fe84d2a5af64327d3acf531574eef"
+    },
+    {
+      "name": "foot_4",
+      "kind": "custom",
+      "notes": "Adhesive transfer tape to floor; clears seam screw heads by 3 mm.",
+      "solids": 1,
+      "volume_mm3": 1206.372,
+      "bounds_mm": [
+        286.0,
+        261.0,
+        -6.0,
+        302.0,
+        277.0,
+        0.0
+      ],
+      "printable": true,
+      "print_dimensions_mm": [
+        16.0,
+        16.0,
+        6.0
+      ],
+      "step_sha256": "e78eb5f5f19bbc0ee93de39212559bf6e06e1591b4b5a1155947a9a54c67b92a",
+      "stl_sha256": "54bb09479b3519c30aabf9ab13b333f16d5fe84d2a5af64327d3acf531574eef"
+    }
+  ],
+  "collision_findings": [],
+  "display_case_mount_centres_mm": [
+    [
+      225.0,
+      174.645
+    ],
+    [
+      85.0,
+      174.645
+    ],
+    [
+      225.0,
+      245.355
+    ],
+    [
+      85.0,
+      245.355
+    ]
+  ],
+  "pi_mount_centres_mm": [
+    [
+      56.5,
+      201.5
+    ],
+    [
+      56.5,
+      259.5
+    ],
+    [
+      7.5,
+      201.5
+    ],
+    [
+      7.5,
+      259.5
+    ]
+  ],
+  "top_fastener_centres_mm": [
+    [
+      7,
+      7
+    ],
+    [
+      147,
+      7
+    ],
+    [
+      163,
+      7
+    ],
+    [
+      303,
+      7
+    ],
+    [
+      7,
+      146.5
+    ],
+    [
+      140,
+      146.5
+    ],
+    [
+      170,
+      146.5
+    ],
+    [
+      303,
+      146.5
+    ],
+    [
+      78,
+      278
+    ],
+    [
+      147,
+      278
+    ],
+    [
+      163,
+      278
+    ],
+    [
+      303,
+      278
+    ]
+  ],
+  "seam_fastener_centres_mm": [
+    [
+      147,
+      30
+    ],
+    [
+      147,
+      40
+    ],
+    [
+      163,
+      30
+    ],
+    [
+      163,
+      40
+    ],
+    [
+      147,
+      105
+    ],
+    [
+      147,
+      115
+    ],
+    [
+      163,
+      105
+    ],
+    [
+      163,
+      115
+    ],
+    [
+      147,
+      180
+    ],
+    [
+      147,
+      190
+    ],
+    [
+      163,
+      180
+    ],
+    [
+      163,
+      190
+    ],
+    [
+      147,
+      255
+    ],
+    [
+      147,
+      265
+    ],
+    [
+      163,
+      255
+    ],
+    [
+      163,
+      265
+    ],
+    [
+      85,
+      132
+    ],
+    [
+      85,
+      148
+    ],
+    [
+      95,
+      132
+    ],
+    [
+      95,
+      148
+    ],
+    [
+      240,
+      132
+    ],
+    [
+      240,
+      148
+    ],
+    [
+      250,
+      132
+    ],
+    [
+      250,
+      148
+    ]
+  ],
+  "manufacturer_display_step_used": true,
+  "physical_fit_verified": false,
+  "source_spec_sha256": "0883100a6ae3accd11c70fd731cc98bf46646b878ab5ce37a086b386bb73e192",
+  "source_author_sha256": "000480690a347006001ba026098183597caf6275860a24c69dd06c8cc7e4119c",
+  "source_vendor_step_sha256": "8a977a4d6a6fdd1253b9f69274d41bc308eff57b3268ccdbf4214f5dacda1a57",
+  "face_nut_pockets": {
+    "insertion": "side_loaded_before_faces",
+    "pocket_bottom_z_mm": 56.6,
+    "pocket_top_z_mm": 59.2,
+    "roof_thickness_mm": 1.8
+  },
+  "fan_mount_stack_mm": {
+    "guard": 2,
+    "face": 3,
+    "fan": 10,
+    "duct_flange": 2,
+    "nut": 2.4,
+    "screw_under_head_length": 25,
+    "tip_beyond_nut": 5.6
+  },
+  "fastener_model_scope": "Nominal head, nut, shank and tool envelopes checked independently by verify_device.py; threads and flexible cables are not complete solid models."
+}

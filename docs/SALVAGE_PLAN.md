@@ -99,7 +99,7 @@ ordinary workshop practice; this report supplies no discharge resistor value, wa
 
 ## Stated limits
 
-- This endpoint needs the board's file. For a physical board without one, use [typed donor capture](DONOR_CAPTURE.md) at `/engineering/donor`.
+- This endpoint needs the board's file. For a physical board without one, use [typed donor capture](reference/DONOR_CAPTURE.md) at `/engineering/donor`.
 - A chip is named only as far as the file names it (its part number). Otherwise the verdict is "read the marking", never a guess.
 - Whether a part still works is unknown until it is tested. A capacitor is never called good.
 

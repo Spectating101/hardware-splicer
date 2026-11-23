@@ -1,0 +1,111 @@
+name: HS Original OpenArm Viewer Integration
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/complete-assembly-visual-reference.yml"
+      - "scripts/vendor_upstream_openarm_viewer_001.py"
+      - "scripts/import_upstream_robot_project_001.py"
+      - "scripts/verify_upstream_openarm_browser_001.mjs"
+      - "apps/splice-ui/src/App.jsx"
+      - "apps/splice-ui/src/nav.js"
+      - "apps/splice-ui/src/components/DetailedAssemblyReference*"
+  workflow_dispatch:
+jobs:
+  original-upstream-cad-viewer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      OPENARM_REV: 0c0852bd76ee7026f97875d6eac789d189a0012a
+      ORIGINAL: .cache/original-openarm
+      PUBLIC: apps/splice-ui/public/reference-assemblies/openarm
+      EVIDENCE: .cache/openarm-integration-evidence
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fetch exactly the original upstream viewer, two CAD models and libraries
+        run: |
+          mkdir -p "$ORIGINAL" "$EVIDENCE"
+          base="https://raw.githubusercontent.com/Utsav92/openarm-3d-cad-assembly/$OPENARM_REV"
+          for file in \
+            index.html README.md \
+            libs/three.min.js libs/GLTFLoader.js libs/OrbitControls.js \
+            libs/DRACOLoader.js libs/tailwind.min.js \
+            models/metadata.js models/follower_metadata.json \
+            models/leader_metadata.json \
+            models/openarm_follower.glb models/openarm_leader.glb
+          do
+            mkdir -p "$ORIGINAL/$(dirname "$file")"
+            curl -fLsS --retry 3 --retry-delay 2 "$base/$file" -o "$ORIGINAL/$file"
+          done
+          curl -fLsS --retry 3 \
+            https://raw.githubusercontent.com/enactic/openarm_hardware/main/LICENSE.txt \
+            -o "$ORIGINAL/CERN-OHL-S-2.0-LICENSE.txt"
+          test "$(stat -c%s "$ORIGINAL/models/openarm_follower.glb")" -gt 20000000
+          test "$(stat -c%s "$ORIGINAL/models/openarm_leader.glb")" -gt 20000000
+      - name: Package original code and geometry byte-for-byte, with attribution and hashes
+        run: |
+          python scripts/vendor_upstream_openarm_viewer_001.py \
+            --source "$ORIGINAL" --destination "$PUBLIC"
+          cmp "$ORIGINAL/index.html" "$PUBLIC/index.html"
+          cmp "$ORIGINAL/libs/three.min.js" "$PUBLIC/libs/three.min.js"
+          cmp "$ORIGINAL/models/openarm_follower.glb" "$PUBLIC/models/openarm_follower.glb"
+          cmp "$ORIGINAL/models/openarm_leader.glb" "$PUBLIC/models/openarm_leader.glb"
+      - name: Import official upstream robot description with EXISTING HS engineering libraries
+        run: |
+          mkdir -p .cache/openarm-source
+          python -m pip install 'pydantic>=2,<3'
+          curl -fLsS --retry 3 --retry-delay 2 \
+            https://raw.githubusercontent.com/enactic/openarm_description/2e27c793e10aa2045e7eb597b9b9b9dc08fb0a08/assets/robot/openarm_v1.0/urdf/example/v1.urdf \
+            -o .cache/openarm-source/openarm_v10.urdf
+          PYTHONPATH=src python -m scripts.import_upstream_robot_project_001 \
+            --urdf .cache/openarm-source/openarm_v10.urdf \
+            --upstream-viewer "$PUBLIC" \
+            --output "$PUBLIC/engineering"
+          python -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p["hs_native_projection"]["mechanical_components"]>20 and p["reconciliation"]["same_assembly_topology_joined"] is False' \
+            "$PUBLIC/engineering/OPENARM_SOURCE_LINEAGE.json"
+      - name: Build existing HS React frontend without replacing upstream implementation
+        run: |
+          npm --prefix apps/splice-ui ci --no-audit --no-fund
+          npm --prefix apps/splice-ui run test -- src/components/DetailedAssemblyReference.test.jsx src/App.integration.test.jsx
+          npm --prefix apps/splice-ui run build
+          test -s apps/splice-ui/dist/reference-assemblies/openarm/index.html
+          test -s apps/splice-ui/dist/reference-assemblies/openarm/models/openarm_leader.glb
+          test -s apps/splice-ui/dist/reference-assemblies/openarm/engineering/OPENARM_MACHINE_PROJECT.json
+          test -s apps/splice-ui/dist/reference-assemblies/openarm/engineering/OPENARM_SOURCE_LINEAGE.json
+      - name: Install one off-the-shelf Chromium browser driver for smoke inspection
+        run: |
+          mkdir -p .cache/hs-browser
+          printf '{"private":true,"name":"hs-upstream-browser-check","version":"1.0.0"}\n' > .cache/hs-browser/package.json
+          npm --prefix .cache/hs-browser install --no-save --no-audit --no-fund playwright@1.58.0
+          node .cache/hs-browser/node_modules/playwright/cli.js install --with-deps chromium
+      - name: Use the original viewer's controls inside HS and capture real 542/516 CAD
+        run: |
+          npm --prefix apps/splice-ui run preview -- --host 127.0.0.1 --port 4173 \
+            > "$EVIDENCE/frontend.log" 2>&1 &
+          node scripts/verify_upstream_openarm_browser_001.mjs \
+            .cache/hs-browser http://127.0.0.1:4173/ "$EVIDENCE"
+          test -s "$EVIDENCE/UPSTREAM_BROWSER_PROOF.json"
+      - name: Preserve the original-source integration review and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-original-upstream-viewer-evidence-001
+          path: |
+            .cache/openarm-integration-evidence/
+            apps/splice-ui/public/reference-assemblies/openarm/manifest.json
+            apps/splice-ui/public/reference-assemblies/openarm/ATTRIBUTION.md
+          retention-days: 30
+          if-no-files-found: warn
+      - name: Publish the working HS UI containing original upstream viewer
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hs-react-original-upstream-cad-viewer-001
+          path: apps/splice-ui/dist/
+          retention-days: 30
+          if-no-files-found: error

@@ -1,0 +1,9 @@
+sources/*.html
+sources/*.pdf
+sources/*.png
+sources/*.jpg
+sources/*.zip
+sources/display_cylinders.json
+__pycache__/
+FIELDDECK_7_DIGITAL.zip
+FIELDDECK_7_DIGITAL.zip.sha256

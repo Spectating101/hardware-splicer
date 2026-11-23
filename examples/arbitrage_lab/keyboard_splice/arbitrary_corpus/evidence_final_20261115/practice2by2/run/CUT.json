@@ -1,0 +1,272 @@
+{
+  "schema": "hs.keyboard-cut-splice-screen.v1",
+  "source_file_sha256": "47f827a002c7de3be1a14aef81cbad1846ea1524730579beff1ddb7fb3f95525",
+  "source_label": "practice2by2.kicad_pcb",
+  "source_design_only": true,
+  "physical_donor_exists": false,
+  "analysis_tool": "Native KiCad pcbnew geometry extraction + HS bounded geometry screen",
+  "config": {
+    "kerf_mm": 1.0,
+    "pad_clearance_mm": 1.0,
+    "switch_keepout_mm": 8.0,
+    "min_key_side_fraction": 0.3,
+    "scan_fraction_min": 0.3,
+    "scan_fraction_max": 0.7,
+    "scan_step_mm": 1.0
+  },
+  "board": {
+    "outline_bbox_mm": {
+      "x_min": 96.7875,
+      "x_max": 170.738,
+      "y_min": 58.65575,
+      "y_max": 96.8875
+    },
+    "zone_count": 1
+  },
+  "counts": {
+    "tracks": 191,
+    "pads": 134,
+    "via_count": 15,
+    "switch_footprint_candidates": 4
+  },
+  "scanned_straight_seams": 30,
+  "passing_seams": 0,
+  "midpoint": {
+    "x_mm": 133.763,
+    "track_segments_touched": 4,
+    "distinct_nets_touched": 4,
+    "net_categories": {
+      "other_unknown_do_not_discard": 4
+    },
+    "matrix_nets_touched": [],
+    "pads_at_risk": 0,
+    "vias_at_risk": 1,
+    "switch_centers_at_risk": 2,
+    "switch_candidates_left": 0,
+    "switch_candidates_right": 4,
+    "key_balance_pass": false,
+    "valid_straight_seam": false,
+    "all_intersected_nets": [
+      "/COL 0",
+      "/COL 1",
+      "/ROW 0",
+      "/ROW 1"
+    ]
+  },
+  "best_scanned_straight_seam": {
+    "x_mm": 147.973,
+    "track_segments_touched": 7,
+    "distinct_nets_touched": 5,
+    "net_categories": {
+      "other_unknown_do_not_discard": 5
+    },
+    "matrix_nets_touched": [],
+    "pads_at_risk": 2,
+    "vias_at_risk": 0,
+    "switch_centers_at_risk": 2,
+    "switch_candidates_left": 2,
+    "switch_candidates_right": 2,
+    "key_balance_pass": true,
+    "valid_straight_seam": false,
+    "all_intersected_nets": [
+      "/COL 1",
+      "/ROW 0",
+      "/ROW 1",
+      "Net-(D1-Pad2)",
+      "Net-(D3-Pad2)"
+    ],
+    "harness_candidates": [
+      {
+        "net": "/COL 1",
+        "function_class": "other_unknown_do_not_discard",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "U1",
+          "pad": "19",
+          "x": 120.85725,
+          "y": 85.70575,
+          "layer": "F.Cu",
+          "net": "/COL 1"
+        },
+        "right_candidate_pad": {
+          "ref": "MX4",
+          "pad": "1",
+          "x": 157.38475,
+          "y": 84.74075,
+          "layer": "F.Cu",
+          "net": "/COL 1"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "/ROW 0",
+        "function_class": "other_unknown_do_not_discard",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "U1",
+          "pad": "20",
+          "x": 120.85725,
+          "y": 86.50575,
+          "layer": "F.Cu",
+          "net": "/ROW 0"
+        },
+        "right_candidate_pad": {
+          "ref": "D1",
+          "pad": "1",
+          "x": 150.08225,
+          "y": 69.88075,
+          "layer": "F.Cu",
+          "net": "/ROW 0"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "/ROW 1",
+        "function_class": "other_unknown_do_not_discard",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "U1",
+          "pad": "21",
+          "x": 120.85725,
+          "y": 87.30575,
+          "layer": "F.Cu",
+          "net": "/ROW 1"
+        },
+        "right_candidate_pad": {
+          "ref": "D3",
+          "pad": "1",
+          "x": 150.08225,
+          "y": 88.93075,
+          "layer": "F.Cu",
+          "net": "/ROW 1"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "Net-(D1-Pad2)",
+        "function_class": "other_unknown_do_not_discard",
+        "crossed_segments": 2,
+        "left_candidate_pad": {
+          "ref": "MX1",
+          "pad": "2",
+          "x": 144.68475,
+          "y": 63.15075,
+          "layer": "F.Cu",
+          "net": "Net-(D1-Pad2)"
+        },
+        "right_candidate_pad": {
+          "ref": "D1",
+          "pad": "2",
+          "x": 150.08225,
+          "y": 66.58075,
+          "layer": "F.Cu",
+          "net": "Net-(D1-Pad2)"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "Net-(D3-Pad2)",
+        "function_class": "other_unknown_do_not_discard",
+        "crossed_segments": 2,
+        "left_candidate_pad": {
+          "ref": "MX3",
+          "pad": "2",
+          "x": 144.68475,
+          "y": 82.20075,
+          "layer": "F.Cu",
+          "net": "Net-(D3-Pad2)"
+        },
+        "right_candidate_pad": {
+          "ref": "D3",
+          "pad": "2",
+          "x": 150.08225,
+          "y": 85.63075,
+          "layer": "F.Cu",
+          "net": "Net-(D3-Pad2)"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      }
+    ]
+  },
+  "requested_seam": null,
+  "release": "BLOCKED_REFERENCE_ONLY",
+  "next_action": "Identify one exact-model salvaged keyboard; obtain both PCB images and unpowered continuity; identify controller/optional circuits; design stepped cut and interposer based on real measurements",
+  "blockers": [
+    "NO SAFE STRAIGHT SEAM found under conservative footprint/pad/via keepout",
+    "No evidence that a physical donor PCB matches this reference PCB revision",
+    "Copper planes, actual connected paths, and multi-crossing net topology are not proven by segment intersections",
+    "Cut-edge tolerances, component/plate keepouts and case/fastener clearances need physical registration",
+    "Candidate pad locations are not checked for solderability or post-cut continuity",
+    "Firmware matrix behavior, original controller, USB, ESD and safety require a physical test",
+    "No authority to cut, solder, fabricate or sell hardware from this design scan",
+    "1 copper zone objects need fill/return-path validation after cutting",
+    "Stepped cut is only a modeled path; component destruction and actual populated donor layout unverified",
+    "Modeled electrical islands are partial track/pad/via evidence, not validated post-cut conductivity"
+  ],
+  "stepped_path_summary": {
+    "payload_sha256": "16556371a6488cd09152c6b2f196ea405d731a26728955cbb4527c19f9aba86d",
+    "nominal_path_length_mm": 39.052,
+    "collision_counts": {
+      "pads": 0,
+      "vias": 1,
+      "switches": 1,
+      "critical": 0
+    },
+    "affected_net_count": 4,
+    "source_geometry_issues": [
+      "OVAL_PAD_APPROXIMATION",
+      "ZONE_BOUNDARY_RECONSTRUCTED_WITH_GEOMETRY_REPAIR"
+    ],
+    "release": "PROPOSED_CUT_ONLY_NOT_VERIFIED",
+    "physical_cut_authorized": false
+  },
+  "repair_loop_summary": {
+    "selected_strategy": "adaptive_functional",
+    "total_iterations": 3,
+    "required_graph_connected_in_model": false,
+    "unresolved_source_baseline_terminal_net_gaps": 4,
+    "physical_authority_granted": false,
+    "result": "POSTCUT_REQUIRED_GRAPH_STILL_DISCONNECTED"
+  },
+  "postcut_topology_summary": {
+    "model_pre_cut_island_count": 12,
+    "model_post_cut_island_count": 16,
+    "split_pre_cut_components": 4,
+    "candidate_graph_edges": 2,
+    "unanchored_split_components": 2,
+    "model_replay_remaining_split_components": 2,
+    "model_replay_remaining_required_components": 1,
+    "model_replay_achieved_required_restoration": false,
+    "planned_inert_track_remnants": 1,
+    "damaged_electrical_pad_count": 0,
+    "preexisting_unconnected_terminal_net_count": 4,
+    "repair_mode": "adaptive_functional",
+    "model_replay_achieved_full_restoration": false,
+    "issues": [
+      "OVAL_PAD_APPROXIMATION",
+      "ZONE_BOUNDARY_RECONSTRUCTED_WITH_GEOMETRY_REPAIR"
+    ],
+    "release": "BLOCKED_REFERENCE_TOPOLOGY_ONLY",
+    "payload_sha256": "efbef1e0e1156181734c7dc4acd32867a7d1e77bfd91dd12eaebbfdd031d1a0e"
+  },
+  "canonical_machine_release": {
+    "requested": "build_ready",
+    "achieved": "design_ready",
+    "allowed": false,
+    "blocker_codes": [
+      "unresolved_interface",
+      "safety_not_closed",
+      "verification_not_passed",
+      "release_state_not_reached"
+    ]
+  },
+  "interposer_preview_summary": {
+    "channels": 2,
+    "pcb_sha256": "3c5332fcdc6f1c0de41845740d12e17a18f3b60c3df397c68a8c71804637e756",
+    "native_drc_errors": 0,
+    "native_drc_warnings": 0,
+    "native_unconnected_items": 0,
+    "native_design_checks_passed": true,
+    "fabrication_release": "BLOCKED_PREVIEW_ONLY"
+  }
+}

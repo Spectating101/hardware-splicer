@@ -11,7 +11,7 @@ this is the fuller account of the authority model behind it.
 > **AI proposes → deterministic systems constrain → bench evidence decides → human authorizes.**
 
 Bounded Astra projects can now cross into the audited bench workflow through a
-revision/hash-bound [project physical-validation packet](docs/PROJECT_PHYSICAL_VALIDATION.md).
+revision/hash-bound [project physical-validation packet](reference/PROJECT_PHYSICAL_VALIDATION.md).
 Real captures persist into the same canonical project history; simulated or public-web
 captures, stale candidates, and out-of-order powered tests fail closed.
 

@@ -9,7 +9,7 @@ import {
   createEmptySession,
   projectSessionReducer,
 } from "./projectSession.js";
-import { deriveProjectTruth } from "./deriveProjectTruth.js";
+import { deriveProjectTruth } from "./deriveProjectTruth";
 
 vi.mock("../components/DesignStudioPanel.jsx", () => ({
   default: function MockStudio({ initialPhrase, initialNodes, onOpenProject, showIntakeEmptyState }) {
@@ -72,7 +72,8 @@ vi.mock("../components/ProjectWizard.jsx", () => ({
   },
 }));
 
-vi.mock("../api.js", () => ({
+vi.mock("../api", () => ({
+  fetchScenes: vi.fn(async () => []), fetchSceneManifest: vi.fn(), fetchSceneRecords: vi.fn(async () => ({ records: [] })),
   jobBundleUrl: (id) => `/bundle/${id}`,
   buildPackageArchiveUrl: (dir) => `/archive?build_dir=${encodeURIComponent(dir)}`,
 }));
@@ -133,7 +134,9 @@ describe("ProjectWorkspace continuity + polish", () => {
     let state = projectSessionReducer(createEmptySession(), { type: ACTIONS.START_PROJECT });
 
     render(<Harness initial={state} />);
-    expect(screen.getByTestId("project-status-header")).toBeInTheDocument();
+    await user.click(screen.getByText("Project tools", { selector: "summary" }));
+    expect(screen.getByTestId("project-bench")).toBeInTheDocument();
+    expect(await screen.findByText("Design view · not linked")).toBeInTheDocument();
     expect(screen.getByTestId("stage-tab-design")).toBeDisabled();
     expect(screen.getByTestId("stage-tab-verify")).toBeDisabled();
 
@@ -163,6 +166,7 @@ describe("ProjectWorkspace continuity + polish", () => {
     state = { ...state, activeJobId: "job_stale" };
 
     render(<Harness initial={state} />);
+    await user.click(screen.getByText("Project tools", { selector: "summary" }));
     expect(screen.getByTestId("download-bundle")).toBeInTheDocument();
 
     await user.click(screen.getByTestId("studio-open-project"));
@@ -171,10 +175,7 @@ describe("ProjectWorkspace continuity + polish", () => {
     expect(screen.getByTestId("download-bundle")).toBeInTheDocument();
     expect(screen.getByTestId("download-bundle").getAttribute("href")).toContain("/archive?");
     expect(screen.getByTestId("copper-honesty")).toHaveTextContent(/not.*fabrication-ready/i);
-    expect(screen.getByTestId("chip-stage")).toHaveTextContent(/Verify/i);
-    expect(screen.getByTestId("project-readiness-panel")).toBeInTheDocument();
-    expect(screen.getByTestId("chip-drc")).toHaveTextContent(/DRC clean/i);
-    expect(screen.getByTestId("ready-design")).toHaveTextContent(/DRC clean/i);
+    expect(screen.queryByTestId("project-readiness-panel")).not.toBeInTheDocument();
 
     await user.click(screen.getByTestId("stage-tab-package"));
     expect(screen.getByTestId("package-download")).toBeInTheDocument();
@@ -184,7 +185,7 @@ describe("ProjectWorkspace continuity + polish", () => {
     expect(screen.getByTestId("stage-design")).toBeInTheDocument();
     expect(screen.getByTestId("studio-phrase")).toHaveTextContent("carrier board");
     expect(screen.getByTestId("studio-node-count")).toHaveTextContent("2");
-    expect(screen.getByTestId("project-status-name")).toHaveTextContent("carrier board");
+    expect(screen.getByRole("heading", { name: "carrier board", level: 1 })).toBeInTheDocument();
   });
 
   it("async job packages keep job_bundle download", async () => {
@@ -206,6 +207,7 @@ describe("ProjectWorkspace continuity + polish", () => {
     });
 
     render(<Harness initial={state} />);
+    await user.click(screen.getByText("Project tools", { selector: "summary" }));
     expect(screen.getByTestId("download-bundle").getAttribute("href")).toBe("/bundle/job_async");
     await user.click(screen.getByTestId("stage-tab-package"));
     expect(screen.getByTestId("package-download").getAttribute("href")).toBe("/bundle/job_async");
@@ -243,9 +245,9 @@ describe("ProjectWorkspace continuity + polish", () => {
     expect(truth.copper.state).toBe("preview_only");
 
     render(<Harness initial={state} />);
-    expect(screen.getByTestId("project-status-name")).toHaveTextContent("Project B");
-    expect(screen.getByTestId("chip-evidence")).toHaveTextContent(/Simulated/i);
-    expect(screen.getByTestId("project-readiness-panel")).toBeInTheDocument();
+    await user.click(screen.getByText("Project tools", { selector: "summary" }));
+    expect(screen.getByRole("heading", { name: "Project B", level: 1 })).toBeInTheDocument();
+    expect(screen.queryByTestId("project-readiness-panel")).not.toBeInTheDocument();
     expect(screen.queryByTestId("readiness-hero")).not.toBeInTheDocument();
     expect(screen.queryByTestId("project-summary-bar")).not.toBeInTheDocument();
 
@@ -277,6 +279,7 @@ describe("ProjectWorkspace continuity + polish", () => {
     });
 
     render(<Harness initial={state} />);
+    await user.click(screen.getByText("Project tools", { selector: "summary" }));
     await user.click(screen.getByTestId("stage-tab-design"));
     expect(screen.getByTestId("mock-studio")).toBeInTheDocument();
     expect(screen.getByTestId("studio-node-count")).toHaveTextContent("2");

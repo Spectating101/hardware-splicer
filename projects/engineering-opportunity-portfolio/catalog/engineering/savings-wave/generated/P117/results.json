@@ -1,0 +1,17 @@
+{
+  "pilot": "400 mm narrow raised-bed broadfork, removable straight handles",
+  "metrics": {
+    "candidate": {
+      "tolerance_corners": 4,
+      "worst_model_root_stress_mpa": 72.222
+    },
+    "thin-control": {
+      "tolerance_corners": 4,
+      "worst_model_root_stress_mpa": 174.143
+    },
+    "catalog_cost_sensitivity": {
+      "remaining_first_unit_headroom_ntd": 118.35,
+      "first_unit_margin_after_scenario_ntd": -31.65
+    }
+  }
+}

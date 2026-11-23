@@ -1,8 +1,8 @@
 import { useState } from "react";
 
 import { PERSISTENCE_STATUS, projectSnapshot } from "../projectSession/projectSession.js";
-import { stageMachineProjectReview } from "../projectSession/machineAuthoringApi.js";
-import { projectBenchCaptureEvidence } from "../projectSession/benchCaptureEvidenceApi.js";
+import { stageMachineProjectReview } from "../projectSession/machineAuthoringApi";
+import { projectBenchCaptureEvidence } from "../projectSession/benchCaptureEvidenceApi";
 import "./BenchCaptureImportPanel.css";
 
 function parseObject(value, label) {

@@ -1,0 +1,34 @@
+write_operations_before_cut,journal_recovery,in_place_control
+0,alpha sample,alpha sample
+1,alpha sample,lost
+2,alpha sample,lost
+3,alpha sample,lost
+4,alpha sample,lost
+5,alpha sample,lost
+6,alpha sample,lost
+7,alpha sample,lost
+8,alpha sample,lost
+9,alpha sample,lost
+10,alpha sample,lost
+11,alpha sample,lost
+12,alpha sample,lost
+13,alpha sample,lost
+14,alpha sample,lost
+15,alpha sample,lost
+16,alpha sample,lost
+17,alpha sample,lost
+18,alpha sample,lost
+19,alpha sample,lost
+20,alpha sample,lost
+21,alpha sample,lost
+22,alpha sample,lost
+23,alpha sample,lost
+24,alpha sample,lost
+25,alpha sample,lost
+26,alpha sample,lost
+27,alpha sample,lost
+28,alpha sample,lost
+29,alpha sample,lost
+30,alpha sample,lost
+31,alpha sample,lost
+32,replacement audio sample,replacement audio sample

@@ -1,0 +1,416 @@
+{
+  "parts": [
+    {
+      "part_id": "board@west.17",
+      "name": "DECLARED SIMULATION FIXTURE: compute",
+      "manufacturer": "Fictional test declarations; not a product vendor",
+      "mpn": "SIM-COMPUTE",
+      "functions": [
+        "compute"
+      ],
+      "dimensions_mm": [
+        70,
+        50,
+        18
+      ],
+      "position_mm": [
+        30,
+        30,
+        10
+      ],
+      "mount": {
+        "holes_mm": [
+          [
+            4,
+            4
+          ],
+          [
+            66,
+            4
+          ],
+          [
+            4,
+            46
+          ],
+          [
+            66,
+            46
+          ]
+        ],
+        "hole_diameter_mm": 2.7,
+        "plane_z_mm": 0,
+        "fastener": "M2.5 declared fixture"
+      },
+      "ports": [
+        {
+          "port_id": "dc",
+          "kind": "power",
+          "direction": "input",
+          "connector": "SIM-DC-2",
+          "pin_functions": {
+            "1": "V+",
+            "2": "GND"
+          },
+          "voltage_range_v": [
+            4.75,
+            5.25
+          ],
+          "current_a": 1.1
+        },
+        {
+          "port_id": "picture",
+          "kind": "signal",
+          "direction": "output",
+          "connector": "SIM-VIDEO-3",
+          "pin_functions": {
+            "A": "CLOCK",
+            "B": "DATA",
+            "C": "GND"
+          },
+          "protocol": "fixture-video-v1",
+          "voltage_range_v": [
+            0,
+            3.3
+          ]
+        },
+        {
+          "port_id": "keys",
+          "kind": "signal",
+          "direction": "input",
+          "connector": "SIM-KEYS-3",
+          "pin_functions": {
+            "1": "DATA",
+            "2": "CLOCK",
+            "3": "GND"
+          },
+          "protocol": "fixture-keyboard-v1",
+          "voltage_range_v": [
+            0,
+            3.6
+          ]
+        }
+      ]
+    },
+    {
+      "part_id": "panel/east.42",
+      "name": "DECLARED SIMULATION FIXTURE: display",
+      "manufacturer": "Fictional test declarations; not a product vendor",
+      "mpn": "SIM-DISPLAY",
+      "functions": [
+        "display"
+      ],
+      "dimensions_mm": [
+        150,
+        90,
+        12
+      ],
+      "position_mm": [
+        30,
+        105,
+        20
+      ],
+      "mount": {
+        "holes_mm": [
+          [
+            4,
+            4
+          ],
+          [
+            146,
+            4
+          ],
+          [
+            4,
+            86
+          ],
+          [
+            146,
+            86
+          ]
+        ],
+        "hole_diameter_mm": 2.7,
+        "plane_z_mm": 0,
+        "fastener": "M2.5 declared fixture"
+      },
+      "ports": [
+        {
+          "port_id": "dc",
+          "kind": "power",
+          "direction": "input",
+          "connector": "SIM-DC-2",
+          "pin_functions": {
+            "1": "V+",
+            "2": "GND"
+          },
+          "voltage_range_v": [
+            4.75,
+            5.25
+          ],
+          "current_a": 0.6
+        },
+        {
+          "port_id": "picture",
+          "kind": "signal",
+          "direction": "input",
+          "connector": "SIM-VIDEO-3",
+          "pin_functions": {
+            "A": "CLOCK",
+            "B": "DATA",
+            "C": "GND"
+          },
+          "protocol": "fixture-video-v1",
+          "voltage_range_v": [
+            0,
+            3.6
+          ]
+        }
+      ]
+    },
+    {
+      "part_id": "input-pad#aux",
+      "name": "DECLARED SIMULATION FIXTURE: keyboard",
+      "manufacturer": "Fictional test declarations; not a product vendor",
+      "mpn": "SIM-KEYBOARD",
+      "functions": [
+        "keyboard"
+      ],
+      "dimensions_mm": [
+        235,
+        70,
+        15
+      ],
+      "position_mm": [
+        15,
+        200,
+        12
+      ],
+      "mount": {
+        "holes_mm": [
+          [
+            4,
+            4
+          ],
+          [
+            231,
+            4
+          ],
+          [
+            4,
+            66
+          ],
+          [
+            231,
+            66
+          ]
+        ],
+        "hole_diameter_mm": 2.7,
+        "plane_z_mm": 0,
+        "fastener": "M2.5 declared fixture"
+      },
+      "ports": [
+        {
+          "port_id": "dc",
+          "kind": "power",
+          "direction": "input",
+          "connector": "SIM-DC-2",
+          "pin_functions": {
+            "1": "V+",
+            "2": "GND"
+          },
+          "voltage_range_v": [
+            4.75,
+            5.25
+          ],
+          "current_a": 0.15
+        },
+        {
+          "port_id": "keys",
+          "kind": "signal",
+          "direction": "output",
+          "connector": "SIM-KEYS-3",
+          "pin_functions": {
+            "1": "DATA",
+            "2": "CLOCK",
+            "3": "GND"
+          },
+          "protocol": "fixture-keyboard-v1",
+          "voltage_range_v": [
+            0,
+            3.3
+          ]
+        }
+      ]
+    },
+    {
+      "part_id": "energy-store:alpha",
+      "name": "DECLARED SIMULATION FIXTURE: regulated power",
+      "manufacturer": "Fictional test declarations; not a product vendor",
+      "mpn": "SIM-REGULATED-POWER",
+      "functions": [
+        "regulated power"
+      ],
+      "dimensions_mm": [
+        90,
+        40,
+        25
+      ],
+      "position_mm": [
+        150,
+        30,
+        8
+      ],
+      "mount": {
+        "holes_mm": [
+          [
+            4,
+            4
+          ],
+          [
+            86,
+            4
+          ],
+          [
+            4,
+            36
+          ],
+          [
+            86,
+            36
+          ]
+        ],
+        "hole_diameter_mm": 2.7,
+        "plane_z_mm": 0,
+        "fastener": "M2.5 declared fixture"
+      },
+      "ports": [
+        {
+          "port_id": "dc",
+          "kind": "power",
+          "direction": "output",
+          "connector": "SIM-DC-2",
+          "pin_functions": {
+            "1": "V+",
+            "2": "GND"
+          },
+          "voltage_range_v": [
+            4.9,
+            5.1
+          ],
+          "current_a": 3
+        }
+      ],
+      "energy_wh": 30,
+      "usable_fraction": 0.8,
+      "shared_output_limit_a": 3
+    }
+  ],
+  "connections": [
+    {
+      "connection_id": "rail-to-board@west.17",
+      "from": {
+        "part_id": "energy-store:alpha",
+        "port_id": "dc"
+      },
+      "to": {
+        "part_id": "board@west.17",
+        "port_id": "dc"
+      }
+    },
+    {
+      "connection_id": "rail-to-panel/east.42",
+      "from": {
+        "part_id": "energy-store:alpha",
+        "port_id": "dc"
+      },
+      "to": {
+        "part_id": "panel/east.42",
+        "port_id": "dc"
+      }
+    },
+    {
+      "connection_id": "rail-to-input-pad#aux",
+      "from": {
+        "part_id": "energy-store:alpha",
+        "port_id": "dc"
+      },
+      "to": {
+        "part_id": "input-pad#aux",
+        "port_id": "dc"
+      }
+    },
+    {
+      "connection_id": "picture-link",
+      "from": {
+        "part_id": "board@west.17",
+        "port_id": "picture"
+      },
+      "to": {
+        "part_id": "panel/east.42",
+        "port_id": "picture"
+      }
+    },
+    {
+      "connection_id": "keyboard-link",
+      "from": {
+        "part_id": "input-pad#aux",
+        "port_id": "keys"
+      },
+      "to": {
+        "part_id": "board@west.17",
+        "port_id": "keys"
+      }
+    }
+  ],
+  "enclosure": {
+    "minimum_mm": [
+      0,
+      0,
+      0
+    ],
+    "maximum_mm": [
+      280,
+      290,
+      60
+    ]
+  },
+  "scenarios": [
+    {
+      "scenario_id": "declared-normal",
+      "current_overrides": []
+    },
+    {
+      "scenario_id": "declared-compute-peak",
+      "current_overrides": [
+        {
+          "part_id": "board@west.17",
+          "port_id": "dc",
+          "current_a": 1.5
+        }
+      ]
+    }
+  ],
+  "mount_adapter": {
+    "thickness_mm": 3,
+    "edge_margin_mm": 6
+  },
+  "replace_part_id": "panel/east.42",
+  "candidate": {
+    "part_id": "unidentified-donor.0001",
+    "name": "UNIDENTIFIED VIRTUAL DONOR: dimensions, pinout, protocol and ratings absent",
+    "functions": [
+      "display"
+    ],
+    "ports": [
+      {
+        "port_id": "dc",
+        "kind": "power",
+        "direction": "unknown"
+      },
+      {
+        "port_id": "picture",
+        "kind": "signal",
+        "direction": "unknown"
+      }
+    ]
+  }
+}

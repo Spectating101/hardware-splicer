@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="210mm" height="190mm" viewBox="0 0 210 190">
+  <title>P077 baseline · full-size proof coupon</title>
+  <rect id="scale" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="10" y="6" width="20" height="10" />
+  <circle id="puck-body" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="56" cy="65" r="27" />
+  <circle id="contact-target" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="56" cy="65" r="13" />
+  <circle id="bed-fastener-48" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="40" cy="48" r="2.55" />
+  <circle id="bed-fastener-82" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="40" cy="82" r="2.55" />
+  <rect id="bed-foot-section" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="104" y="118" width="56" height="9" />
+  <line id="uncompressed" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x1="105" y1="73" x2="158" y2="73" />
+  <line id="nominal-trigger" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x1="105" y1="73.36" x2="158" y2="73.36" />
+  <line id="bottom-of-stroke" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x1="105" y1="74.35" x2="158" y2="74.35" />
+  <rect id="spring-pocket-section" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="108" y="138" width="48" height="1.35" />
+</svg>

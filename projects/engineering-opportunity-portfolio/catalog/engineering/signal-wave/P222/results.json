@@ -1,0 +1,6 @@
+{
+  "interruption_boundaries": 33,
+  "second_slot_preserved": true,
+  "completed_rewrite_and_reopen_cycles": 20,
+  "bad_crc_recovered_prior_message": true
+}

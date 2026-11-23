@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping
 
 from .compiler import compile_hardware_bundle
+from .design_quality import build_design_quality_gate
 from .functional_delivery import build_functional_delivery_score
 from .production_release_metrics import build_production_release_metrics
 from .robotics_platform_authority import LEVELS as ROBOTICS_PLATFORM_LEVELS
@@ -154,6 +155,11 @@ def build_project_authority_packet(
     simulation = _to_dict(result.robotics_simulation or {}, "robotics_simulation")
     platform = _to_dict(result.robotics_platform_authority or {}, "robotics_platform_authority")
     mechatronics = _to_dict(result.mechatronics_authority or {}, "mechatronics_authority")
+    engineering = _to_dict(result.engineering or {}, "engineering")
+    build_compilation = _to_dict(engineering.get("build_compilation") or {}, "build_compilation")
+    design_quality = _to_dict(build_compilation.get("design_quality") or {}, "design_quality")
+    design_quality_gate = _to_dict(build_compilation.get("design_quality_gate") or {}, "design_quality_gate")
+    has_build_quality = bool(design_quality.get("build_id") or design_quality.get("build_graph_compiled") or design_quality_gate)
 
     artifact_status = _artifact_status(result, acceptance)
     source_blockers = _source_blockers(mechanical, actuation, simulation, platform, mechatronics)
@@ -169,6 +175,28 @@ def build_project_authority_packet(
         platform=platform,
         mechatronics=mechatronics,
     )
+    circuit_build_ready = False
+    if has_build_quality:
+        # Successful bundle generation and permissive scenario acceptance cannot
+        # override a failed circuit check. Re-evaluate raw receipts as well as the
+        # stored gate so a stale positive summary cannot authorize the package.
+        current_gate = build_design_quality_gate(design_quality, engineering=engineering)
+        circuit_build_ready = bool(current_gate["build_ready"]) and (
+            not design_quality_gate or bool(design_quality_gate.get("build_ready"))
+        )
+        circuit_blockers = _dedupe_strings(
+            _string_list(current_gate.get("blockers")) + _string_list(design_quality_gate.get("blockers"))
+        )
+        _check(
+            checks,
+            "circuit_build_ready",
+            circuit_build_ready,
+            "Compiled circuit passed its build readiness gate.",
+            "Compiled circuit is not build ready: " + "; ".join(circuit_blockers or ["build readiness was not established"]),
+            blocking=bool(platform.get("production_authorized"))
+            and bool(mechatronics.get("production_authorized"))
+            and bool(simulation.get("simulation_ready")),
+        )
     blocking_checks = [row for row in checks if row["severity"] == "block" and not row["passed"]]
     claimable = bool(result.ok) and not blocking_checks
     project_level = _project_level(result.ok, claimable, simulation, platform, mechatronics)
@@ -181,11 +209,11 @@ def build_project_authority_packet(
     next_actions = _next_actions(blockers, simulation, platform, mechatronics, mechanical, actuation)
     if source_blockers_are_next_actions:
         next_actions = _dedupe_strings(source_blockers + next_actions)[:12]
-
-    engineering = _to_dict(result.engineering or {}, "engineering")
-    build_compilation = _to_dict(engineering.get("build_compilation") or {}, "build_compilation")
-    design_quality = _to_dict(build_compilation.get("design_quality") or {}, "design_quality")
-    design_quality_gate = _to_dict(build_compilation.get("design_quality_gate") or {}, "design_quality_gate")
+    if has_build_quality and not circuit_build_ready:
+        # A planning package can remain useful while its circuit is unfinished.
+        # Keep that limitation visible even when it does not veto the planning scope.
+        circuit_message = next(row["message"] for row in checks if row["id"] == "circuit_build_ready")
+        next_actions = _dedupe_strings([circuit_message] + next_actions)[:12]
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -202,10 +230,10 @@ def build_project_authority_packet(
             "compile_ok": bool(result.ok),
             "simulation_ready": bool(simulation.get("simulation_ready")),
             "robotics_project_release": bool(platform.get("production_authorized")),
-            "hardware_splicer_release": bool(mechatronics.get("production_authorized")),
+            "hardware_splicer_release": bool(mechatronics.get("production_authorized")) and (not has_build_quality or circuit_build_ready),
             "blocking_findings": len(blockers),
             "required_artifacts_present": artifact_status["required_present"],
-            "build_ready": bool(design_quality.get("build_ready")),
+            "build_ready": circuit_build_ready,
             "drc_pass": bool(design_quality.get("drc_pass")),
             "gerber_ready": bool(design_quality.get("gerber_ready")),
             "design_quality_score": design_quality_gate.get("design_quality_score"),
@@ -505,9 +533,9 @@ def _capabilities(
     ]
     if simulation.get("simulation_ready"):
         capabilities.append("Use deterministic margins for current, runtime, drive speed, traction, servo load, and safety gates.")
-    if _level_at_least(str(platform.get("current_authority_level") or ""), "simulation_bench_authority", ROBOTICS_PLATFORM_LEVELS):
+    if claimable and _level_at_least(str(platform.get("current_authority_level") or ""), "simulation_bench_authority", ROBOTICS_PLATFORM_LEVELS):
         capabilities.append("Defend a bench-ready robotics/mechatronics project claim with traceable evidence.")
-    if bool(mechatronics.get("production_authorized")):
+    if claimable and bool(mechatronics.get("production_authorized")):
         capabilities.append("Defend scoped Hardware-Splicer release across circuit, mechanism, packaging, and integrated bench evidence.")
     if claimable:
         capabilities.append("Claim scoped project package readiness for the declared scenario boundary.")
@@ -535,12 +563,12 @@ def _next_actions(
     return _dedupe_strings([row for row in actions if row])[:12]
 
 
-def _check(checks: List[Dict[str, Any]], check_id: str, passed: bool, pass_message: str, fail_message: str) -> None:
+def _check(checks: List[Dict[str, Any]], check_id: str, passed: bool, pass_message: str, fail_message: str, *, blocking: bool = True) -> None:
     checks.append(
         {
             "id": check_id,
             "passed": bool(passed),
-            "severity": "info" if passed else "block",
+            "severity": "info" if passed else ("block" if blocking else "warn"),
             "message": pass_message if passed else fail_message,
         }
     )

@@ -1,0 +1,322 @@
+{
+  "schema_version": "hardware_splicer.function_technology_options.v1",
+  "project_id": "water_filter_nonpotable_bench_001",
+  "catalog_status": "DESIGN_HYPOTHESES_NOT_VENDOR_RATED",
+  "selection_policy": {
+    "objective": "Shortlist a mechanism for independent non-potable bench design study; never claim 70% turbidity reduction from a nominal media category",
+    "tie_break": "fewest_added_active_or_complex_subsystems_then_fewest_unresolved_assumptions_then_id",
+    "outcome_authority": "PROVISIONAL_STUDY_ONLY"
+  },
+  "options": [
+    {
+      "id": "passive_replaceable_depth_media",
+      "name": "Passive replaceable depth-media cartridge",
+      "mechanism": {
+        "category": "particulate_separation",
+        "physical_principle": "Depth-based capture of defined suspended-particle challenge",
+        "substantiation": "process_hypothesis_only"
+      },
+      "requirement_coverage": [
+        {
+          "requirement_id": "REQ_FLOW",
+          "proposed_solution": "Size rated passive wetted flow path once inlet head is established",
+          "evidence_status": "unverified_hypothesis"
+        },
+        {
+          "requirement_id": "REQ_PARTICLE",
+          "proposed_solution": "Test specified media and particle challenge before claiming reduction",
+          "evidence_status": "unverified_hypothesis"
+        },
+        {
+          "requirement_id": "REQ_LEAK",
+          "proposed_solution": "Seal and pressure-test a rated wetted vessel",
+          "evidence_status": "unverified_hypothesis"
+        },
+        {
+          "requirement_id": "REQ_BYPASS",
+          "proposed_solution": "Provide a continuous seal isolating inlet from outlet",
+          "evidence_status": "unverified_hypothesis"
+        },
+        {
+          "requirement_id": "REQ_SERVICE",
+          "proposed_solution": "Use a replaceable element within separated wet containment",
+          "evidence_status": "unverified_hypothesis"
+        },
+        {
+          "requirement_id": "REQ_MONITOR",
+          "proposed_solution": "Add calibrated inlet/outlet pressure taps in an isolated instrument path",
+          "evidence_status": "unverified_hypothesis"
+        },
+        {
+          "requirement_id": "REQ_NONPOTABLE",
+          "proposed_solution": "Prominently label non-potable use and prohibit ingestion",
+          "evidence_status": "unverified_hypothesis"
+        }
+      ],
+      "declared_incompatibilities": [],
+      "additional_systems": [],
+      "assumptions": [
+        {
+          "id": "A_HEAD",
+          "parameter": "available inlet pressure/head at desired flow",
+          "validation": "Measure inlet pressure and pressure drop at 0.5 L/min for clean and fouled test media",
+          "evidence_status": "not_collected"
+        },
+        {
+          "id": "A_MEDIA",
+          "parameter": "chosen actual media and its particle challenge characteristics",
+          "validation": "Review manufacturer application data, then controlled paired turbidity tests",
+          "evidence_status": "not_collected"
+        },
+        {
+          "id": "A_SEAL",
+          "parameter": "wetted housing and filter bypass seal integrity",
+          "validation": "Choose rated materials and conduct supervised leak and tracer challenge",
+          "evidence_status": "not_collected"
+        },
+        {
+          "id": "A_SENSING",
+          "parameter": "measurement point range and instrument isolation",
+          "validation": "Compare pressure instruments against traceable calibrated references",
+          "evidence_status": "not_collected"
+        }
+      ],
+      "assembly_concept": {
+        "SUB_MEDIA": "Replaceable rated depth-media cartridge, unselected",
+        "SUB_INLET": "Gravity/supervised low-pressure wet inlet, pressure unknown",
+        "SUB_OUTLET": "Separated outlet with bypass seal, dimensions unknown",
+        "SUB_SENSOR": "Two calibrated differential pressure taps, instrument unselected",
+        "SUB_SERVICE": "Dry-side access and wet cartridge replacement, geometry unselected"
+      },
+      "new_health_or_potable_claim": false,
+      "validated_treatment_performance": false
+    },
+    {
+      "id": "active_membrane_cartridge",
+      "name": "Pump-assisted membrane cartridge",
+      "mechanism": {
+        "category": "particulate_separation",
+        "physical_principle": "Pressure-driven membrane separation of an appropriately characterized particle challenge",
+        "substantiation": "process_hypothesis_only"
+      },
+      "requirement_coverage": [
+        {
+          "requirement_id": "REQ_FLOW",
+          "proposed_solution": "Size rated passive wetted flow path once inlet head is established",
+          "evidence_status": "unverified_hypothesis"
+        },
+        {
+          "requirement_id": "REQ_PARTICLE",
+          "proposed_solution": "Test specified media and particle challenge before claiming reduction",
+          "evidence_status": "unverified_hypothesis"
+        },
+        {
+          "requirement_id": "REQ_LEAK",
+          "proposed_solution": "Seal and pressure-test a rated wetted vessel",
+          "evidence_status": "unverified_hypothesis"
+        },
+        {
+          "requirement_id": "REQ_BYPASS",
+          "proposed_solution": "Provide a continuous seal isolating inlet from outlet",
+          "evidence_status": "unverified_hypothesis"
+        },
+        {
+          "requirement_id": "REQ_SERVICE",
+          "proposed_solution": "Use a replaceable element within separated wet containment",
+          "evidence_status": "unverified_hypothesis"
+        },
+        {
+          "requirement_id": "REQ_MONITOR",
+          "proposed_solution": "Add calibrated inlet/outlet pressure taps in an isolated instrument path",
+          "evidence_status": "unverified_hypothesis"
+        },
+        {
+          "requirement_id": "REQ_NONPOTABLE",
+          "proposed_solution": "Prominently label non-potable use and prohibit ingestion",
+          "evidence_status": "unverified_hypothesis"
+        }
+      ],
+      "declared_incompatibilities": [],
+      "additional_systems": [
+        {
+          "id": "SUB_PUMP",
+          "domain": "mechanical",
+          "purpose": "Generate and control pressure with pump, seals and instrumentation"
+        },
+        {
+          "id": "SUB_POWER",
+          "domain": "electrical",
+          "purpose": "Power pump with current, fault and wet/dry segregation constraints"
+        },
+        {
+          "id": "SUB_CONTROL",
+          "domain": "firmware",
+          "purpose": "Prevent dry-run and manage pressure-limit shutdown, independent physical testing required"
+        }
+      ],
+      "assumptions": [
+        {
+          "id": "A_PRESSURE",
+          "parameter": "required transmembrane pressure and allowable housing limits",
+          "validation": "Obtain characterized module curves and verify rated wet housing pressure",
+          "evidence_status": "not_collected"
+        },
+        {
+          "id": "A_FOUL",
+          "parameter": "particle loading and fouling/lifetime behavior",
+          "validation": "Repeated clean/fouled media pressure-flow challenge under supervised bench protocol",
+          "evidence_status": "not_collected"
+        },
+        {
+          "id": "A_POWER",
+          "parameter": "pump input power, current, fault and leak safety",
+          "validation": "Measure actual motor/controller currents and verify safe shutdown",
+          "evidence_status": "not_collected"
+        },
+        {
+          "id": "A_MEDIA",
+          "parameter": "selected membrane material, pore rating and compatibility",
+          "validation": "Review exact datasheet and independently perform treatment challenge",
+          "evidence_status": "not_collected"
+        },
+        {
+          "id": "A_SENSING",
+          "parameter": "calibration and isolation of pressure observables",
+          "validation": "Bench calibrate and qualify sensor wet interface",
+          "evidence_status": "not_collected"
+        }
+      ],
+      "assembly_concept": {
+        "SUB_MEDIA": "Identified membrane cartridge needed; no product selected",
+        "SUB_INLET": "Pump-fed inlet with pressure control; pump not selected",
+        "SUB_OUTLET": "Retentate/waste and treated stream handling must be designed",
+        "SUB_SENSOR": "Calibrated pressure and flow instrumentation required",
+        "SUB_SERVICE": "Replaceable membrane assembly with supervised maintenance"
+      },
+      "new_health_or_potable_claim": false,
+      "validated_treatment_performance": false
+    },
+    {
+      "id": "coarse_strainer_only",
+      "name": "Coarse mesh strainer alone",
+      "mechanism": {
+        "category": "coarse_screening",
+        "physical_principle": "Retain particles larger than selected mesh aperture",
+        "substantiation": "process_hypothesis_only"
+      },
+      "requirement_coverage": [
+        {
+          "requirement_id": "REQ_FLOW",
+          "proposed_solution": "Size mesh/open area for flow and pressure",
+          "evidence_status": "unverified_hypothesis"
+        },
+        {
+          "requirement_id": "REQ_LEAK",
+          "proposed_solution": "Seal and pressure-test a rated wetted vessel",
+          "evidence_status": "unverified_hypothesis"
+        },
+        {
+          "requirement_id": "REQ_BYPASS",
+          "proposed_solution": "Provide a continuous seal isolating inlet from outlet",
+          "evidence_status": "unverified_hypothesis"
+        },
+        {
+          "requirement_id": "REQ_SERVICE",
+          "proposed_solution": "Use a replaceable element within separated wet containment",
+          "evidence_status": "unverified_hypothesis"
+        },
+        {
+          "requirement_id": "REQ_MONITOR",
+          "proposed_solution": "Add calibrated inlet/outlet pressure taps in an isolated instrument path",
+          "evidence_status": "unverified_hypothesis"
+        },
+        {
+          "requirement_id": "REQ_NONPOTABLE",
+          "proposed_solution": "Prominently label non-potable use and prohibit ingestion",
+          "evidence_status": "unverified_hypothesis"
+        }
+      ],
+      "declared_incompatibilities": [
+        {
+          "requirement_id": "REQ_PARTICLE",
+          "reason": "This standalone coarse-strainer proposal has no justified mechanism for the specified turbidity-removal challenge and supplies no particle-size/media evidence"
+        }
+      ],
+      "additional_systems": [],
+      "assumptions": [
+        {
+          "id": "A_MESH",
+          "parameter": "aperture and particle distribution",
+          "validation": "Measure challenge size distribution and select screen aperture",
+          "evidence_status": "not_collected"
+        }
+      ],
+      "assembly_concept": {
+        "SUB_MEDIA": "Coarse screen only; does not address complete treatment target"
+      },
+      "new_health_or_potable_claim": false,
+      "validated_treatment_performance": false
+    },
+    {
+      "id": "carbon_adsorption_only",
+      "name": "Granular activated carbon adsorption alone",
+      "mechanism": {
+        "category": "adsorption",
+        "physical_principle": "Adsorption of relevant dissolved constituents for a separately qualified target",
+        "substantiation": "process_hypothesis_only"
+      },
+      "requirement_coverage": [
+        {
+          "requirement_id": "REQ_FLOW",
+          "proposed_solution": "Size rated passive wetted flow path once inlet head is established",
+          "evidence_status": "unverified_hypothesis"
+        },
+        {
+          "requirement_id": "REQ_LEAK",
+          "proposed_solution": "Seal and pressure-test a rated wetted vessel",
+          "evidence_status": "unverified_hypothesis"
+        },
+        {
+          "requirement_id": "REQ_BYPASS",
+          "proposed_solution": "Provide a continuous seal isolating inlet from outlet",
+          "evidence_status": "unverified_hypothesis"
+        },
+        {
+          "requirement_id": "REQ_SERVICE",
+          "proposed_solution": "Use a replaceable element within separated wet containment",
+          "evidence_status": "unverified_hypothesis"
+        },
+        {
+          "requirement_id": "REQ_MONITOR",
+          "proposed_solution": "Add calibrated inlet/outlet pressure taps in an isolated instrument path",
+          "evidence_status": "unverified_hypothesis"
+        },
+        {
+          "requirement_id": "REQ_NONPOTABLE",
+          "proposed_solution": "Prominently label non-potable use and prohibit ingestion",
+          "evidence_status": "unverified_hypothesis"
+        }
+      ],
+      "declared_incompatibilities": [
+        {
+          "requirement_id": "REQ_PARTICLE",
+          "reason": "This adsorption-only candidate targets an unspecified dissolved constituent rather than the defined suspended-particle turbidity challenge"
+        }
+      ],
+      "additional_systems": [],
+      "assumptions": [
+        {
+          "id": "A_TARGET",
+          "parameter": "which dissolved compounds if any need adsorption",
+          "validation": "Identify analyte and develop a separate evidence-backed treatment specification",
+          "evidence_status": "not_collected"
+        }
+      ],
+      "assembly_concept": {
+        "SUB_MEDIA": "Adsorption media unspecified; not a substitute for particle challenge testing"
+      },
+      "new_health_or_potable_claim": false,
+      "validated_treatment_performance": false
+    }
+  ]
+}

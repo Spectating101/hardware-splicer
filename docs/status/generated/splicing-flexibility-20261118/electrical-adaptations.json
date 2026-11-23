@@ -1,0 +1,588 @@
+{
+  "esp32-sensor": {
+    "requested_modules": [
+      "usb-power-5v",
+      "esp32-devkit",
+      "bme280"
+    ],
+    "actual_modules": [
+      "usb-power-5v",
+      "esp32-devkit",
+      "bme280"
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "nodeId": "n1",
+          "pinId": "V+"
+        },
+        "to": {
+          "nodeId": "n2",
+          "pinId": "VIN"
+        }
+      },
+      {
+        "id": "w2",
+        "from": {
+          "nodeId": "n1",
+          "pinId": "GND"
+        },
+        "to": {
+          "nodeId": "n2",
+          "pinId": "GND"
+        }
+      },
+      {
+        "id": "w3",
+        "from": {
+          "nodeId": "n2",
+          "pinId": "GND"
+        },
+        "to": {
+          "nodeId": "n3",
+          "pinId": "GND"
+        }
+      },
+      {
+        "id": "w4",
+        "from": {
+          "nodeId": "n2",
+          "pinId": "3V3"
+        },
+        "to": {
+          "nodeId": "n3",
+          "pinId": "VCC"
+        }
+      },
+      {
+        "id": "w5",
+        "from": {
+          "nodeId": "n2",
+          "pinId": "GPIO21"
+        },
+        "to": {
+          "nodeId": "n3",
+          "pinId": "SDA"
+        }
+      },
+      {
+        "id": "w6",
+        "from": {
+          "nodeId": "n2",
+          "pinId": "GPIO22"
+        },
+        "to": {
+          "nodeId": "n3",
+          "pinId": "SCL"
+        }
+      }
+    ],
+    "warnings": [],
+    "erc": {
+      "pass": true,
+      "errors": 0,
+      "warnings": 0,
+      "violations": []
+    }
+  },
+  "pico-adaptation": {
+    "requested_modules": [
+      "usb-power-5v",
+      "rpi-pico",
+      "bme280"
+    ],
+    "actual_modules": [
+      "usb-power-5v",
+      "rpi-pico",
+      "bme280"
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "nodeId": "n1",
+          "pinId": "V+"
+        },
+        "to": {
+          "nodeId": "n2",
+          "pinId": "VBUS"
+        }
+      },
+      {
+        "id": "w2",
+        "from": {
+          "nodeId": "n1",
+          "pinId": "GND"
+        },
+        "to": {
+          "nodeId": "n2",
+          "pinId": "GND"
+        }
+      },
+      {
+        "id": "w3",
+        "from": {
+          "nodeId": "n2",
+          "pinId": "GND"
+        },
+        "to": {
+          "nodeId": "n3",
+          "pinId": "GND"
+        }
+      },
+      {
+        "id": "w4",
+        "from": {
+          "nodeId": "n2",
+          "pinId": "3V3"
+        },
+        "to": {
+          "nodeId": "n3",
+          "pinId": "VCC"
+        }
+      },
+      {
+        "id": "w5",
+        "from": {
+          "nodeId": "n2",
+          "pinId": "GP4"
+        },
+        "to": {
+          "nodeId": "n3",
+          "pinId": "SDA"
+        }
+      },
+      {
+        "id": "w6",
+        "from": {
+          "nodeId": "n2",
+          "pinId": "GP5"
+        },
+        "to": {
+          "nodeId": "n3",
+          "pinId": "SCL"
+        }
+      }
+    ],
+    "warnings": [],
+    "erc": {
+      "pass": true,
+      "errors": 0,
+      "warnings": 0,
+      "violations": []
+    }
+  },
+  "direct-5v-echo": {
+    "requested_modules": [
+      "usb-power-5v",
+      "esp32-devkit",
+      "hc-sr04"
+    ],
+    "actual_modules": [
+      "usb-power-5v",
+      "esp32-devkit",
+      "hc-sr04"
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "nodeId": "n1",
+          "pinId": "V+"
+        },
+        "to": {
+          "nodeId": "n2",
+          "pinId": "VIN"
+        }
+      },
+      {
+        "id": "w2",
+        "from": {
+          "nodeId": "n1",
+          "pinId": "GND"
+        },
+        "to": {
+          "nodeId": "n2",
+          "pinId": "GND"
+        }
+      },
+      {
+        "id": "w3",
+        "from": {
+          "nodeId": "n2",
+          "pinId": "GND"
+        },
+        "to": {
+          "nodeId": "n3",
+          "pinId": "GND"
+        }
+      },
+      {
+        "id": "w4",
+        "from": {
+          "nodeId": "n1",
+          "pinId": "V+"
+        },
+        "to": {
+          "nodeId": "n3",
+          "pinId": "VCC"
+        }
+      },
+      {
+        "id": "w5",
+        "from": {
+          "nodeId": "n2",
+          "pinId": "GPIO15"
+        },
+        "to": {
+          "nodeId": "n3",
+          "pinId": "TRIG"
+        }
+      },
+      {
+        "id": "w6",
+        "from": {
+          "nodeId": "n2",
+          "pinId": "GPIO16"
+        },
+        "to": {
+          "nodeId": "n3",
+          "pinId": "ECHO"
+        }
+      }
+    ],
+    "warnings": [],
+    "erc": {
+      "pass": false,
+      "errors": 2,
+      "warnings": 0,
+      "violations": [
+        {
+          "rule": "erc-voltage-mismatch",
+          "severity": "error",
+          "net": "N3",
+          "message": "Net N3 directly mixes fixed logic/power voltages: [3.3, 5.0]. Explicit translation or tolerance evidence is required."
+        },
+        {
+          "rule": "erc-voltage-mismatch",
+          "severity": "error",
+          "net": "N4",
+          "message": "Net N4 directly mixes fixed logic/power voltages: [3.3, 5.0]. Explicit translation or tolerance evidence is required."
+        }
+      ]
+    }
+  },
+  "explicit-level-shifter": {
+    "requested_modules": [
+      "usb-power-5v",
+      "esp32-devkit",
+      "hc-sr04",
+      "level-shifter-4ch"
+    ],
+    "actual_modules": [
+      "usb-power-5v",
+      "esp32-devkit",
+      "hc-sr04",
+      "level-shifter-4ch"
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "nodeId": "n1",
+          "pinId": "V+"
+        },
+        "to": {
+          "nodeId": "n2",
+          "pinId": "VIN"
+        }
+      },
+      {
+        "id": "w2",
+        "from": {
+          "nodeId": "n1",
+          "pinId": "GND"
+        },
+        "to": {
+          "nodeId": "n2",
+          "pinId": "GND"
+        }
+      },
+      {
+        "id": "w3",
+        "from": {
+          "nodeId": "n1",
+          "pinId": "V+"
+        },
+        "to": {
+          "nodeId": "n4",
+          "pinId": "HV"
+        }
+      },
+      {
+        "id": "w4",
+        "from": {
+          "nodeId": "n1",
+          "pinId": "GND"
+        },
+        "to": {
+          "nodeId": "n4",
+          "pinId": "GND"
+        }
+      },
+      {
+        "id": "w5",
+        "from": {
+          "nodeId": "n2",
+          "pinId": "3V3"
+        },
+        "to": {
+          "nodeId": "n4",
+          "pinId": "LV"
+        }
+      },
+      {
+        "id": "w6",
+        "from": {
+          "nodeId": "n2",
+          "pinId": "GND"
+        },
+        "to": {
+          "nodeId": "n4",
+          "pinId": "GND"
+        }
+      },
+      {
+        "id": "w7",
+        "from": {
+          "nodeId": "n2",
+          "pinId": "GND"
+        },
+        "to": {
+          "nodeId": "n3",
+          "pinId": "GND"
+        }
+      },
+      {
+        "id": "w8",
+        "from": {
+          "nodeId": "n1",
+          "pinId": "V+"
+        },
+        "to": {
+          "nodeId": "n3",
+          "pinId": "VCC"
+        }
+      },
+      {
+        "id": "w9",
+        "from": {
+          "nodeId": "n2",
+          "pinId": "GPIO15"
+        },
+        "to": {
+          "nodeId": "n4",
+          "pinId": "LV1"
+        }
+      },
+      {
+        "id": "w10",
+        "from": {
+          "nodeId": "n4",
+          "pinId": "HV1"
+        },
+        "to": {
+          "nodeId": "n3",
+          "pinId": "TRIG"
+        }
+      },
+      {
+        "id": "w11",
+        "from": {
+          "nodeId": "n3",
+          "pinId": "ECHO"
+        },
+        "to": {
+          "nodeId": "n4",
+          "pinId": "HV2"
+        }
+      },
+      {
+        "id": "w12",
+        "from": {
+          "nodeId": "n4",
+          "pinId": "LV2"
+        },
+        "to": {
+          "nodeId": "n2",
+          "pinId": "GPIO16"
+        }
+      }
+    ],
+    "warnings": [],
+    "erc": {
+      "pass": true,
+      "errors": 0,
+      "warnings": 0,
+      "violations": []
+    }
+  },
+  "unknown-donor-id": {
+    "requested_modules": [
+      "usb-power-5v",
+      "esp32-devkit",
+      "unidentified-donor-driver"
+    ],
+    "actual_modules": [
+      "usb-power-5v",
+      "esp32-devkit"
+    ],
+    "wires": [
+      {
+        "id": "w1",
+        "from": {
+          "nodeId": "n1",
+          "pinId": "V+"
+        },
+        "to": {
+          "nodeId": "n2",
+          "pinId": "VIN"
+        }
+      },
+      {
+        "id": "w2",
+        "from": {
+          "nodeId": "n1",
+          "pinId": "GND"
+        },
+        "to": {
+          "nodeId": "n2",
+          "pinId": "GND"
+        }
+      }
+    ],
+    "warnings": [],
+    "erc": {
+      "pass": true,
+      "errors": 0,
+      "warnings": 0,
+      "violations": []
+    }
+  },
+  "arbitrary-donor": {
+    "identity": [
+      {
+        "mpn": null,
+        "manufacturer": null,
+        "typed": "XY7?",
+        "source": "typed"
+      },
+      {
+        "mpn": null,
+        "manufacturer": null,
+        "typed": null,
+        "source": "typed"
+      }
+    ],
+    "pad_counts": [
+      0,
+      0
+    ],
+    "outline_basis": [
+      "the size you gave it (typed, or drawn over your photo)",
+      "the size you gave it (typed, or drawn over your photo)"
+    ],
+    "contract_status": "partial",
+    "firmware_authorized": false,
+    "unresolved_fields": [
+      "signals",
+      "interface_complete"
+    ],
+    "identity_rows": [
+      {
+        "schema_version": "hardware_splicer.module_resolution_truth.v1",
+        "part_name": "Observed drive island",
+        "instance_id": "unknown-drive-island",
+        "module_id": null,
+        "role": "misc",
+        "source": "donor_functional_salvage_external",
+        "identity_status": "external_unresolved",
+        "external_capability_only": true,
+        "donor_block_id": "unknown-drive-island",
+        "donor_block_name": "Observed drive island",
+        "board_id": "unidentified-board-91x47",
+        "function_type": "motor driver",
+        "capabilities": [
+          "h-bridge"
+        ],
+        "connector_refs": [
+          "J_DRIVE"
+        ],
+        "extractability": {},
+        "confidence": 0.0,
+        "authority_effect": "none"
+      }
+    ]
+  },
+  "interchange": {
+    "changed_component_names": [
+      "AUDIT_NEW_RESISTOR",
+      "J1",
+      "LED1"
+    ],
+    "authority": "proposed",
+    "first_source_pin": {
+      "pin_id": "electrical:source-port:source_port_0",
+      "component_id": "electrical:source-component:source_component_0",
+      "number": "1",
+      "name": "VBUS",
+      "electrical_type": "passive",
+      "required": false,
+      "net_id": "electrical:source-net:source_net_0",
+      "voltage_min_v": null,
+      "voltage_max_v": null,
+      "max_current_a": null,
+      "unresolved_fields": [],
+      "authority": "proposed",
+      "metadata": {
+        "identity": {
+          "canonical_pin_id": "electrical:source-port:source_port_0",
+          "source_port_id": "source_port_0",
+          "source_component_id": "source_component_0",
+          "kicad_reference": "J1",
+          "kicad_pin": "1",
+          "pin_key": "J1.1"
+        },
+        "port_hints": [
+          "VBUS",
+          "pin1",
+          "1"
+        ],
+        "authority_ceiling": "proposed"
+      }
+    },
+    "ambiguity": [
+      {
+        "kind": "ambiguous_source_port",
+        "pin_key": "J1.1",
+        "source_port_ids": [
+          "source_port_0",
+          "fresh_duplicate"
+        ]
+      }
+    ],
+    "erc_issues": [
+      {
+        "code": "power_without_source",
+        "message": "power net 'electrical:source-net:source_net_0' has no power-output source",
+        "severity": "error",
+        "object_id": "electrical:source-net:source_net_0",
+        "related_ids": [
+          "electrical:source-port:source_port_0",
+          "electrical:source-port:source_port_2"
+        ]
+      }
+    ]
+  }
+}

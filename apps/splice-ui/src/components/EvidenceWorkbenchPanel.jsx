@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { deriveEvidenceTruth, evidenceTone } from "../projectSession/deriveEvidenceTruth.js";
+import { deriveEvidenceTruth, evidenceTone } from "../projectSession/deriveEvidenceTruth";
 import "./EvidenceWorkbenchPanel.css";
 
 function titleCase(value) {

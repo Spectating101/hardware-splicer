@@ -109,6 +109,7 @@ def test_compile_bridge_rechecks_authoritative_contract_after_planner_local_over
 def test_synthesize_circuit_compiles_with_physically_compatible_5v_control(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
+    assume_clean_kicad_erc: None,
 ) -> None:
     # Only the missing carrier current rating is supplied to the planner. Logic-level
     # compatibility remains real structured truth: Arduino 5 V drive satisfies the

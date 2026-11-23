@@ -28,4 +28,4 @@ Unit tests: `tests/test_public_web_bench.py` — 4 passed.
 ## Claims boundary
 
 Real instrument displays from public photos ≠ café measurement of the current donor board.
-Operator path for *this* board remains `docs/REAL_BENCH_OPERATOR.md`.
+Operator path for *this* board remains `docs/reference/REAL_BENCH_OPERATOR.md`.

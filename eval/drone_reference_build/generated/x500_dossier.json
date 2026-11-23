@@ -1,0 +1,301 @@
+{
+  "schema_version": "hardware_splicer.x500_assembly_dossier.v1",
+  "project": "Holybro X500 V2 + Pixhawk 6C reference reproduction",
+  "sources": [
+    {
+      "uri": "https://docs.px4.io/main/en/frames_multicopter/holybro_x500v2_pixhawk6c",
+      "sha256": "f6759d026ea9dfec459e1b0ff63f370915d4bd6f813e57602977602d06d48b36",
+      "bytes": 1079956,
+      "content_type": "text/html",
+      "authority": "published_assembly_reference_not_verified_hardware"
+    }
+  ],
+  "bill_of_materials": [
+    {
+      "id": "frame",
+      "part": "X500 V2 frame kit SKU30120",
+      "quantity": 1,
+      "supply": "kit",
+      "verified_order": false
+    },
+    {
+      "id": "fc",
+      "part": "Pixhawk 6C flight controller",
+      "quantity": 1,
+      "supply": "PX4 development kit option",
+      "verified_order": false
+    },
+    {
+      "id": "power",
+      "part": "Power module PM02 V3 or kit-specified compatible revision",
+      "quantity": 1,
+      "supply": "variant dependent",
+      "verified_order": false
+    },
+    {
+      "id": "motors",
+      "part": "Holybro 2216 KV920 motors",
+      "quantity": 4,
+      "supply": "ARF or development kit",
+      "verified_order": false
+    },
+    {
+      "id": "esc",
+      "part": "BLHeli S 20 A ESC rated for 4S",
+      "quantity": 4,
+      "supply": "ARF or development kit",
+      "verified_order": false
+    },
+    {
+      "id": "props",
+      "part": "1045 propellers with correct rotational handedness and retainers",
+      "quantity": 6,
+      "supply": "ARF or development kit",
+      "verified_order": false
+    },
+    {
+      "id": "pdb",
+      "part": "X500 V2 power distribution board with battery and ESC connectors",
+      "quantity": 1,
+      "supply": "ARF or development kit",
+      "verified_order": false
+    },
+    {
+      "id": "gps",
+      "part": "Kit-specified M10 GPS",
+      "quantity": 1,
+      "supply": "PX4 development kit option",
+      "verified_order": false
+    },
+    {
+      "id": "telemetry",
+      "part": "SiK telemetry radio matched to regional frequency",
+      "quantity": 1,
+      "supply": "PX4 development kit option",
+      "verified_order": false
+    },
+    {
+      "id": "battery",
+      "part": "4S 3000\u20135000 mAh 20C+ LiPo with confirmed XT60 interface",
+      "quantity": 1,
+      "supply": "purchase separately, NOT included",
+      "verified_order": false
+    },
+    {
+      "id": "rc",
+      "part": "Compatible RC transmitter and receiver for planned flight mode",
+      "quantity": 1,
+      "supply": "purchase separately or document approved alternate",
+      "verified_order": false
+    }
+  ],
+  "source_assembly_sections": [
+    {
+      "source_section": "Payload and Battery Holder",
+      "domain": "frame",
+      "listed_step_count": 5,
+      "reference_url": "https://docs.px4.io/main/en/frames_multicopter/holybro_x500v2_pixhawk6c"
+    },
+    {
+      "source_section": "Power Module",
+      "domain": "power",
+      "listed_step_count": 3,
+      "reference_url": "https://docs.px4.io/main/en/frames_multicopter/holybro_x500v2_pixhawk6c"
+    },
+    {
+      "source_section": "Landing Gear",
+      "domain": "frame",
+      "listed_step_count": 2,
+      "reference_url": "https://docs.px4.io/main/en/frames_multicopter/holybro_x500v2_pixhawk6c"
+    },
+    {
+      "source_section": "Power",
+      "domain": "power",
+      "listed_step_count": 0,
+      "reference_url": "https://docs.px4.io/main/en/frames_multicopter/holybro_x500v2_pixhawk6c"
+    },
+    {
+      "source_section": "Arms",
+      "domain": "frame",
+      "listed_step_count": 5,
+      "reference_url": "https://docs.px4.io/main/en/frames_multicopter/holybro_x500v2_pixhawk6c"
+    },
+    {
+      "source_section": "Propellers",
+      "domain": "propellers",
+      "listed_step_count": 4,
+      "reference_url": "https://docs.px4.io/main/en/frames_multicopter/holybro_x500v2_pixhawk6c"
+    },
+    {
+      "source_section": "GPS",
+      "domain": "control",
+      "listed_step_count": 2,
+      "reference_url": "https://docs.px4.io/main/en/frames_multicopter/holybro_x500v2_pixhawk6c"
+    },
+    {
+      "source_section": "Pixhawk 6C",
+      "domain": "control",
+      "listed_step_count": 3,
+      "reference_url": "https://docs.px4.io/main/en/frames_multicopter/holybro_x500v2_pixhawk6c"
+    },
+    {
+      "source_section": "Install/Configure PX4",
+      "domain": "px4",
+      "listed_step_count": 12,
+      "reference_url": "https://docs.px4.io/main/en/frames_multicopter/holybro_x500v2_pixhawk6c"
+    },
+    {
+      "source_section": "Tuning",
+      "domain": "release",
+      "listed_step_count": 0,
+      "reference_url": "https://docs.px4.io/main/en/frames_multicopter/holybro_x500v2_pixhawk6c"
+    }
+  ],
+  "assembly_stages": [
+    {
+      "id": "identify",
+      "task": "Inventory kit, hardware variants, connector types, fasteners and exact manual revision",
+      "required_evidence": "Photos of labels, board revisions, complete parts inventory"
+    },
+    {
+      "id": "frame",
+      "task": "Build frame, landing gear, battery/payload rail and vibration-isolated flight controller mount per X500 V2 guide",
+      "required_evidence": "Dimension/mount verification and mechanical inspection"
+    },
+    {
+      "id": "power",
+      "task": "Document PDB, ESC branch conductors and battery-to-power-module-to-POWER port separately; do not apply battery directly to regulated FC POWER port",
+      "required_evidence": "Connector pin map, polarity and rail-voltage design review"
+    },
+    {
+      "id": "control",
+      "task": "Map the four ESC signal/ground leads, GPS, telemetry and RC to the exact Pixhawk 6C ports",
+      "required_evidence": "Port map and cable continuity review"
+    },
+    {
+      "id": "px4",
+      "task": "Select documented X500 V2 airframe in QGroundControl; verify actuator/output assignments",
+      "required_evidence": "Offline configuration manifest, parameter snapshot and reviewer signoff"
+    },
+    {
+      "id": "bench",
+      "task": "Plan separately authorized, propeller-removed bench verification for power, sensors, ESC channels and failsafes",
+      "required_evidence": "Independent powered-test procedure and physical supervisor approval"
+    },
+    {
+      "id": "release",
+      "task": "Retain a hold until hardware measurements, local flight permissions and trained operator review are complete",
+      "required_evidence": "Physical validation, mechanical/electrical acceptance, aviation compliance"
+    }
+  ],
+  "interfaces": [
+    {
+      "from": "battery",
+      "to": "power",
+      "role": "battery to selected power module / regulated-controller supply",
+      "evidence_status": "reference_only",
+      "must_check": "physical battery plug, power-module input rating, polarity and battery branch"
+    },
+    {
+      "from": "battery",
+      "to": "pdb",
+      "role": "main propulsion energy distribution",
+      "evidence_status": "reference_only",
+      "must_check": "exact battery/PDB connector mating and polarity; compare kit wire harness"
+    },
+    {
+      "from": "power",
+      "to": "fc",
+      "role": "regulated flight controller POWER connection",
+      "evidence_status": "reference_only",
+      "must_check": "exact PM02 module output voltage/pin map and Pixhawk POWER connector; never direct battery"
+    },
+    {
+      "from": "pdb",
+      "to": "esc",
+      "role": "four ESC high-current supplies",
+      "evidence_status": "reference_only",
+      "must_check": "each ESC supply voltage/current rating and connectors"
+    },
+    {
+      "from": "esc",
+      "to": "motors",
+      "role": "four independent brushless propulsion channels",
+      "evidence_status": "reference_only",
+      "must_check": "motor phase terminals, connector types and manufacturer pairing"
+    },
+    {
+      "from": "fc",
+      "to": "esc",
+      "role": "four PX4 actuator command lines",
+      "evidence_status": "reference_only",
+      "must_check": "output pin assignment and ground reference against selected Pixhawk revision"
+    },
+    {
+      "from": "gps",
+      "to": "fc",
+      "role": "GPS and compass link",
+      "evidence_status": "reference_only",
+      "must_check": "board/port/cable voltage and pinout"
+    },
+    {
+      "from": "rc",
+      "to": "fc",
+      "role": "operator control link",
+      "evidence_status": "unresolved",
+      "must_check": "transmitter-receiver protocol, port and regional compliance"
+    },
+    {
+      "from": "telemetry",
+      "to": "fc",
+      "role": "ground-station radio telemetry",
+      "evidence_status": "unresolved",
+      "must_check": "radio variant and allowed local frequency"
+    }
+  ],
+  "verification_gates": [
+    {
+      "id": "kit_identity",
+      "status": "hold",
+      "detail": "Exact manufacturer kit SKU and hardware revisions not observed"
+    },
+    {
+      "id": "source_verification",
+      "status": "reference_captured",
+      "detail": "PX4 assembly HTML captured with SHA256; manufacturer BOM pages not frozen"
+    },
+    {
+      "id": "connector_mating",
+      "status": "hold",
+      "detail": "ESC/motor and battery/PDB connectors not matched to actual inventory"
+    },
+    {
+      "id": "controller_regulator",
+      "status": "hold",
+      "detail": "Power module output voltage, connector pinout and regulator ratings unverified"
+    },
+    {
+      "id": "propulsion_performance",
+      "status": "hold",
+      "detail": "Exact thrust/current, AUW, battery discharge and runtime margins remain uncalculated"
+    },
+    {
+      "id": "physical_fit",
+      "status": "hold",
+      "detail": "Frame dimensions and actual component mounting not independently measured"
+    },
+    {
+      "id": "software",
+      "status": "hold",
+      "detail": "PX4 SITL, firmware, parameters and output map not exercised in this run"
+    },
+    {
+      "id": "physical_release",
+      "status": "hold",
+      "detail": "No powered testing, physical assembly or flight authorization"
+    }
+  ],
+  "build_status": "blocked_not_assembled",
+  "physical_testing_performed": false,
+  "flight_authorized": false
+}

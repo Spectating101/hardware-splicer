@@ -1,0 +1,32 @@
+{
+  "board": {
+    "file": "board.kicad_pcb",
+    "url": "https://raw.githubusercontent.com/davidphilipbarr/Sweep/8ba72a256d627567660ecc0b6f51bb18fa8badb5/Sweep%20v2.2/sweepv2.kicad_pcb",
+    "sha256": "efb6f443e0062d38ddb2a0fcf4d05a032eb11ac84d0fb6adff2244dc1b580bb3"
+  },
+  "Choc V1": {
+    "file": "SW_Kailh_Choc_V1_1.00u.kicad_mod",
+    "url": "https://raw.githubusercontent.com/kiswitch/kiswitch/aefcf65038d48d2666ff14530d482be3c350fa6e/library/footprints/Switch_Keyboard_Kailh.pretty/SW_Kailh_Choc_V1_1.00u.kicad_mod",
+    "sha256": "2b854ba07790e876b92b8743e662faa351c32a33d415e0affc8bc19d21d67f9c"
+  },
+  "Choc V2": {
+    "file": "SW_Kailh_Choc_V2_1.00u.kicad_mod",
+    "url": "https://raw.githubusercontent.com/kiswitch/kiswitch/aefcf65038d48d2666ff14530d482be3c350fa6e/library/footprints/Switch_Keyboard_Kailh.pretty/SW_Kailh_Choc_V2_1.00u.kicad_mod",
+    "sha256": "ed370ededecc00045a194e3d7970e3e519ac0136b94384673a47762374cd853b"
+  },
+  "Choc Mini": {
+    "file": "SW_Kailh_Choc_Mini_1.00u.kicad_mod",
+    "url": "https://raw.githubusercontent.com/kiswitch/kiswitch/aefcf65038d48d2666ff14530d482be3c350fa6e/library/footprints/Switch_Keyboard_Kailh.pretty/SW_Kailh_Choc_Mini_1.00u.kicad_mod",
+    "sha256": "b3a2a03dc9d0da48dfe2cda7ca98eba0de92a68f3d520152632fbc350861dc04"
+  },
+  "Cherry MX": {
+    "file": "SW_Cherry_MX_PCB_1.00u.kicad_mod",
+    "url": "https://raw.githubusercontent.com/kiswitch/kiswitch/aefcf65038d48d2666ff14530d482be3c350fa6e/library/footprints/Switch_Keyboard_Cherry_MX.pretty/SW_Cherry_MX_PCB_1.00u.kicad_mod",
+    "sha256": "c9d882b19d779ea08bee0bc1e443296b0eefde243efb2631d42ceb2401e40545"
+  },
+  "Alps / Matias": {
+    "file": "SW_Alps_Matias_1.00u.kicad_mod",
+    "url": "https://raw.githubusercontent.com/kiswitch/kiswitch/aefcf65038d48d2666ff14530d482be3c350fa6e/library/footprints/Switch_Keyboard_Alps_Matias.pretty/SW_Alps_Matias_1.00u.kicad_mod",
+    "sha256": "dc51937bfa743b9b896d3ab44b5a4efec88a44da04c1ad30198b8eaea3d0f5d1"
+  }
+}

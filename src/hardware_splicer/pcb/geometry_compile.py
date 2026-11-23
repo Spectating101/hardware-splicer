@@ -11,6 +11,7 @@ from typing import Any, Dict, List, Mapping, Optional
 from ..catalog import CATALOG_BUILD_IDS
 from ..compile_casefile import write_compile_casefile
 from ..integrations.freerouting_bridge import run_freerouting_pipeline, summarize_freerouting_for_quality
+from ..netlist.quality_flags import apply_compile_input_fidelity
 from .build_to_geometry import build_graph_to_geometry
 from .drc import run_drc
 from .geometry_hygiene import clean_preview_geometry
@@ -158,6 +159,8 @@ def compile_graph_to_artifacts(
         ],
         "drc_violations": drc.get("violations") or [],
         "geometry_hygiene": geometry.get("geometry_hygiene") or {},
+        "geometry_fidelity": geometry.get("geometry_fidelity") or {},
+        **({"composition_request": dict(graph["composition_request"])} if graph.get("composition_request") else {}),
         "supported_build_ids": CATALOG_BUILD_IDS,
         "geometry_engine": "python_pcb_stack",
         "copper_preview_mode": "single_layer"
@@ -171,6 +174,12 @@ def compile_graph_to_artifacts(
         **summarize_for_quality(kicad_drc),
         **summarize_freerouting_for_quality(freerouting_report),
     }
+    quality = apply_compile_input_fidelity(quality)
+    fidelity_warnings = (quality.get("geometry_fidelity") or {}).get("fabrication_blockers") or []
+    quality["warnings"] = list(dict.fromkeys([*quality["warnings"], *fidelity_warnings, *quality.get("input_fidelity_blockers", [])]))
+    if (quality["geometry_fidelity"] or {}).get("component_contracts_verified") is False:
+        quality["electrical_safety_scope"] = "known_catalog_rules_only"
+        quality["warnings"].append("Unfamiliar component electrical contracts are unassessed; a generic ERC pass does not establish their voltage, current or pin-role compatibility.")
 
     quality_path.write_text(json.dumps(quality, indent=2), encoding="utf-8")
 
@@ -185,7 +194,7 @@ def compile_graph_to_artifacts(
         )
 
     return {
-        "ok": build_ready,
+        "ok": bool(quality["build_ready"]),
         "buildId": resolved_build_id,
         "outDir": str(out),
         "paths": {

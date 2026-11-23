@@ -1,7 +1,7 @@
 const STAGES = [
   { id: "queued", label: "Queued" },
   { id: "running", label: "Compiling KiCad carrier" },
-  { id: "succeeded", label: "Complete" },
+  { id: "succeeded", label: "Job finished · results still to review" },
 ];
 
 function formatElapsed(seconds) {

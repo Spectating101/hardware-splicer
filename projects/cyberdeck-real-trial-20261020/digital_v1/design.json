@@ -1,0 +1,224 @@
+{
+  "project_id": "hs-real-cyberdeck-20261020",
+  "device_name": "Fielddeck 7",
+  "objective": "A self-contained Linux field terminal for offline manuals, SSH, serial console and work with USB-connected electronics.",
+  "scope": "Digital engineering prototype; no purchase, fabrication, flashing or physical operation.",
+  "architecture": "Raspberry Pi 4B 2GB, official 7-inch Touch Display 2 in landscape, wired USB keyboard, removable commercial USB-C power bank, USB-powered fan, modular printed enclosure. No custom PCB or bare-cell battery pack.",
+  "case_mm": {
+    "width": 310,
+    "depth": 285,
+    "height": 64,
+    "floor": 3,
+    "wall": 3,
+    "lid": 3,
+    "split_x": 155,
+    "split_y": 140,
+    "seam_gap": 0.3
+  },
+  "display": {
+    "manufacturer": "Raspberry Pi",
+    "mpn": "SC1635",
+    "centre_xy": [
+      155,
+      210
+    ],
+    "front_z": 62,
+    "aperture_mm": [
+      184.32,
+      115.24
+    ],
+    "native_front_z": 5.02,
+    "native_centre_y": 2.935
+  },
+  "pi": {
+    "manufacturer": "Raspberry Pi",
+    "mpn": "SC0193",
+    "ram_gb": 2,
+    "board_mm": [
+      85,
+      56,
+      1.6
+    ],
+    "rotation_deg": 90,
+    "origin_xy": [
+      60,
+      198
+    ],
+    "pcb_bottom_z": 7,
+    "holes_local_xy": [
+      [
+        3.5,
+        3.5
+      ],
+      [
+        61.5,
+        3.5
+      ],
+      [
+        3.5,
+        52.5
+      ],
+      [
+        61.5,
+        52.5
+      ]
+    ],
+    "connector_model": "Nominal component envelopes from official mechanical drawing; no vendor Pi STEP is claimed."
+  },
+  "keyboard": {
+    "manufacturer": "Adafruit",
+    "mpn": "1736",
+    "dimensions_mm": [
+      285,
+      123,
+      22
+    ],
+    "centre_xy": [
+      155,
+      78
+    ],
+    "top_z": 62,
+    "geometry_basis": "Published outer dimensions; keys and cable-exit drawing are representative, not scanned vendor geometry."
+  },
+  "power_bank": {
+    "manufacturer": "Anker",
+    "mpn": "A1259",
+    "dimensions_mm": [
+      104,
+      52.3,
+      26
+    ],
+    "world_min": [
+      16,
+      25,
+      4
+    ],
+    "world_rotation_deg": 90,
+    "rated_5v_current_a": 3,
+    "capacity_mah": 10000,
+    "geometry_basis": "Published external dimensions; 1 mm nest allowance and open/removable retention avoid relying on unpublished port/button locations."
+  },
+  "fan": {
+    "manufacturer": "Noctua",
+    "mpn": "NF-A4x10 5V PWM",
+    "dimensions_mm": [
+      40,
+      40,
+      10
+    ],
+    "centre_xy": [
+      32,
+      230.5
+    ],
+    "bottom_z": 51,
+    "mount_pitch_mm": 32,
+    "power_method": "Supplied NA-AC7 USB adapter, full-speed; no GPIO PWM circuit."
+  },
+  "print": {
+    "material": "Prusament PETG Jet Black 1kg, 1.75mm",
+    "density_g_cm3": 1.27,
+    "layer_mm": 0.2,
+    "perimeters": 4,
+    "top_bottom_layers": 8,
+    "infill_fraction": 0.3,
+    "bed_mm": [
+      220,
+      220
+    ],
+    "physical_tolerance_compensation_verified": false
+  },
+  "engineering_assumptions": {
+    "pi_current_a": {
+      "light": 0.65,
+      "work": 1.0,
+      "stress": 1.75,
+      "basis": "Design scenarios, informed by the manufacturer's older approximate 0.6 A idle / 1.25 A stress measurements. They are not guaranteed maxima for current 1.8 GHz boards."
+    },
+    "display_w": {
+      "published": 2.4,
+      "allocated": 3.0
+    },
+    "keyboard_current_a": {
+      "normal_allocation": 0.1,
+      "usb2_high_power_sensitivity": 0.5,
+      "basis": "USB descriptor/current is not published for this keyboard; 0.1 A is an operating assumption, not a manufacturer rating."
+    },
+    "fan_current_a": 0.07,
+    "power_bank_cell_voltage_v": 3.6,
+    "conversion_efficiency_range": [
+      0.75,
+      0.9
+    ],
+    "usable_capacity_fraction_range": [
+      0.85,
+      1.0
+    ],
+    "petg_elastic_modulus_mpa": 1500,
+    "petg_design_allowable_mpa": 10,
+    "drop_or_physical_thermal_validation": false,
+    "supply_voltage_v": 5,
+    "pi_usb_aggregate_limit_a": 1.2,
+    "panel_mass_kg": 0.35,
+    "lateral_acceleration_g": 2.0,
+    "post_outer_diameter_mm": 10.0,
+    "post_tool_shaft_diameter_mm": 6.0,
+    "post_length_mm": 49.54,
+    "post_count": 4,
+    "fan_free_air_m3_h": 8.9,
+    "delivered_airflow_fractions": [
+      0.05,
+      0.1,
+      0.2,
+      0.4
+    ],
+    "air_density_kg_m3": 1.2,
+    "air_specific_heat_j_kg_k": 1005,
+    "power_conductor_resistance_ohm_m": 0.0535,
+    "contact_loop_resistance_ohm": [
+      0,
+      0.05,
+      0.1
+    ],
+    "gpio_extension_length_m": 0.3,
+    "gpio_conductor_resistance_ohm_m": 0.213,
+    "display_support": {
+      "outer_diameter_mm": 10,
+      "tool_bore_diameter_mm": 6,
+      "cantilever_length_mm": 49.54,
+      "panel_mass_kg": 0.35,
+      "lateral_acceleration_g": 2,
+      "post_count": 4
+    },
+    "cooling": {
+      "fan_free_air_m3_h": 8.9,
+      "delivered_flow_fraction": [
+        0.05,
+        0.1,
+        0.2,
+        0.4
+      ],
+      "air_density_kg_m3": 1.2,
+      "air_specific_heat_j_kg_k": 1005,
+      "basis": "Sensitivity only; real fan/system operating point and CPU junction temperature are unknown."
+    },
+    "power_cable": {
+      "length_m": 0.5,
+      "conductor_resistance_ohm_m": 0.0535,
+      "contact_resistance_range_ohm": [
+        0,
+        0.05,
+        0.1
+      ],
+      "basis": "22 AWG copper at20C; contact resistance swept, nominal bank voltage only."
+    }
+  },
+  "engineering_requirements": {
+    "minimum_work_runtime_h": 2.5,
+    "minimum_supply_margin_a": 0.3,
+    "maximum_case_width_mm": 320,
+    "maximum_case_depth_mm": 300,
+    "maximum_case_height_mm": 75,
+    "printer_bed_x_mm": 220,
+    "printer_bed_y_mm": 220
+  }
+}

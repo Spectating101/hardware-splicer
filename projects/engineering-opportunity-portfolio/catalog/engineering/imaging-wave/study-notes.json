@@ -1,0 +1,79 @@
+{
+ "P008": {
+  "finding":"Narrowing the two guide strips from 36.20 to 35.55 mm reduces worst lateral play from 1.55 to 0.90 mm while retaining 0.30 mm insertion clearance.",
+  "method":"Apply the same worst-case gap, film width and mask registration bounds to the independently measured cuts in both revisions. The coupon assumes a 35.8 × 23.8 mm exposed frame and the nearest perforation edge 13.75 mm from the strip centerline. The horizontal move is operator-registered to ±0.35 mm. The carrier follows the same broad camera-copy workflow as the existing 6×6 carrier P010. This narrow strip has its own rail spacing, edge perforations, feed direction, and failure case.",
+  "physical":"Measure actual developed 135 stock, frame and perforations. Reload 20 times, inspect the first and last negatives for scratching and edge crops, and measure film curl and focus against a chosen light source.",
+  "source":"Nikon grounds the approximate 36 × 24 mm frame format. Kodak documents still-film products in 135 and 35 mm. Width range, registration, and perforation clearance use modeled bounds. [Nikon FX and DX formats](https://www.nikonusa.com/learn-and-explore/c/products-and-innovation/the-dx-and-fx-formats) · [Kodak TRI-X](https://www.kodak.com/en/still-film/product/professional/tri-x-400-film/)",
+  "use":"The two loose guide strips are drawn at assembly spacing. Cut the base, lid and strips and dry-stack them around a gauge before positioning the rails. The reference hole pattern only registers the two mask plates."
+ },
+ "P017": {
+  "finding":"Absolute targets close the full 36-shot revolution, and 380 ms programmed dwell exceeds the modeled settling budget by 20 ms.",
+  "method":"A synthetic drive has 2,048 effective integer steps per full deck revolution. Replay starts at zero, takes 36 pre-settled captures, then commands home without a final duplicate picture. Compare the emitted dial tick coordinates to the independent CSV replay and the ideal 10° interval. The 280 ms settling time plus 80 ms camera guard are planning inputs.",
+  "physical":"On the selected motor, gearbox and controller, measure actual steps per revolution, backlash, load settling and indexing with an encoder or optical target. Check trigger isolation, repeatability and shutter delay over three loaded revolutions.",
+  "source":"The drive and trigger are synthetic integration inputs. The catalog’s retail turntable is a comparator. This control trial can run without the separate P018 extension deck.",
+  "use":"Use the dial as a printable angle scale and the CSV as an absolute position and hold schedule. Its dry-run command semantics are position, wait, then capture when the capture field is 1. The synthetic drive uses positive motion and assumes no missed steps."
+ },
+ "P018": {
+  "finding":"Restricting the payload center of mass to a 60 mm circle increases the worst static tip margin to 13.46 mm.",
+  "method":"The 260 mm deck is a synthetic four-foot host coupon. Centered base and deck masses of 1.20 and 0.45 kg support a 0.80 kg payload. A 6 N horizontal disturbance acts at 180 mm above the base and along the most unfavorable projected edge. The secondary drive pin is offset, and its centers must match on the deck and hub.",
+  "physical":"Measure the donor’s foot or contact perimeter, masses, key tolerances, fastener engagement, motor torque and loaded deflection. Verify tip resistance, deck runout and slip with agreed load and inertia.",
+  "source":"The catalog’s retail turntable is a comparator. The four support points, drive pins and dimensions are synthetic host geometry.",
+  "use":"The red outlines specify the disk, separate hub and mounting cuts. The engraved circle marks the permitted payload center-of-mass zone. Blue circles locate synthetic support contacts."
+ },
+ "P019": {
+  "finding":"The two-stage side pack stows with 86 mm clearance between sides while retaining 184 mm open side depth.",
+  "method":"The 270 × 190 mm floor and 190 mm tall panels use 3 mm modeled stock. Two full-depth leaves overlap in the stowed plan by 102 mm including 2 mm displacement per side. Two 90 mm leaves per side and a 4 mm paid-out hinge gap reduce folded projection. Fold each outer leaf back against its inner leaf before closing the opposed packs. The P020 larger box shares the enclosure concept and tests a separate support problem.",
+  "physical":"Prototype all fold sequences with real hinge tape and diffuser stack. Inspect LED wiring through the hinges and perform a powered heat, flicker and illuminance-uniformity check.",
+  "source":"The retail box in the catalog is a market reference. Panel dimensions, hinge allowance and folded projection model are synthetic.",
+  "use":"Cut floor, back, top and the pair of side packs. The scored line marks near-edge hinge location, and the gap between side leaves is a pattern spacing for a flexible bridge. Fit diffuser and illumination to the completed frame after checking temperature limits."
+ },
+ "P020": {
+  "finding":"Orienting a 28 × 24 mm rectangular lintel on edge reduces modeled sag from 28.85 mm to 0.26 mm over 610 mm.",
+  "method":"The large folding-box concept uses a separate removable lintel coupon. Evaluate a simply supported rectangular member with a 4.5 GPa lower-bound elastic modulus, uniform load 0.021 N/mm including lintel self mass, and 610 mm span. The load integrates to 12.81 N and includes 7.85 N for a 0.8 kg distributed panel assembly. The compact P019 model tests folding panel footprints. This model tests vertical elastic bending across a larger opening.",
+  "physical":"Measure actual stiffness with material and grain orientation, validate the bearing seats and anti-tip support, then hang the fixture and confirm span, sag, heat and light uniformity.",
+  "source":"The commercial comparison points to a retail larger photo box. The span, lintel section, reference load and modulus are synthetic.",
+  "use":"The long profile defines length and width. The two gauges give rectangular cross-section orientation and thickness. Bearing station marks locate the support centers. The gauge sheet contains the lintel coupon for testing the span."
+ },
+ "P195": {
+  "finding":"A 44 mm hood shades the modeled overhead ray while leaving 0.44 mm horizontal and 0.46 mm vertical sight margin.",
+  "method":"The 134.112 × 86.106 mm vendor body envelope and 110.02 × 61.88 mm active display are modeled as centered. Trace 12° horizontal and 7° vertical sight angles through the opening and a 60° incident overhead ray. Budget 1.2 mm on each edge for screen position, frame register and placement. The resulting gaze margins are narrow.",
+  "physical":"Measure screen offsets and actual bezel attachment lands. Where bezel is narrow, mock up external hook-and-loop tabs, then check connector and button access, touch gestures, fold clearance and glare.",
+  "source":"SmallHD publishes the Indie 5 body and active dimensions. Aperture shape, three removable panels, active-center assumption and angular requirements are trial inputs. [SmallHD Indie 5 specifications](https://smallhd.com/products/indie-5)",
+  "use":"Cut a frame and three hood panels. The blue outlines identify body and display reference. The frame can use external webbing tabs once their mounting position has been measured."
+ },
+ "P196": {
+  "finding":"Extending the apex travel gives 2.30 mm reserve at the large lens and 2.71 mm at the small lens.",
+  "method":"Place a model lens of Ø54–80 mm in the measured 90° V profile with 2 mm pad thickness normal to the contact faces. Apply ±0.3 mm optical datum error. The rod bores and adjustment slot are measured in the exported front view. The travel calculation allows a 6.8 mm reserved diameter at the slot ends.",
+  "physical":"Check rod variation and binding, pad compression and slip, the selected lens’s static barrel band and the support bracket under lens load. Verify the bracket and clamp fasteners before attaching a camera.",
+  "source":"ARRI documents Ø15 rods, 60 mm spacing and optical axis 85 mm above rods for 15 mm LWS. The trial lens family uses synthetic diameters. [ARRI 15 mm LWS rod standards](https://www.arri.com/resource/blob/223008/8d532860d449105bf9578451daef50c8/5-7-0-rod-standards-15mm-lws-light-weight-support--data.pdf)",
+  "use":"The slot plate and saddle blank define a front-view fit coupon. Spacer thickness, adjustable fastener and clamp hardware depend on fabrication and the host rail assembly."
+ },
+ "P199": {
+  "finding":"Raising and widening the front opening restores 3.20 mm of predicted clearance in the 24 mm full-frame bundle.",
+  "method":"In a first-order rectilinear model, combine field slopes from the 36 × 24 mm sensor with a 7 mm front-pupil envelope and 0.8 mm placement error. Measure the three opening profiles and relative axial stations from SVG. Baseline front height clips the extreme vertical ray. Oversize the filter stage enough to keep physical support land for a nominal filter blank.",
+  "physical":"Measure the chosen lens entrance pupil and its travel with zoom, focus and stabilization. On the real system verify edge illumination, flare, filter retention and the moved top flag at its full useful travel.",
+  "source":"Nikon documents the 24 mm FX lens and the format. The pupil, axial stations, registration bound and filter footprint are trial inputs. [Nikon 24 mm reference lens](https://www.nikonusa.com/p/nikkor-24mm-f28/1416/overview) · [Nikon FX and DX formats](https://www.nikonusa.com/learn-and-explore/c/products-and-innovation/the-dx-and-fx-formats)",
+  "use":"The separate frame blanks and apertures define rear, filter and front planes. The filter envelope is drawn as a reference. Position frames with measured spacers using the axial marks. The flag template needs a verified hinge and stop."
+ },
+ "P200": {
+  "finding":"Doubling the optical channel to 18 mm narrows the predicted hard cutoff to 27.17° while leaving 64.42% clear frontal area.",
+  "method":"Model 45 staggered hexagonal holes in an 88 × 44 mm synthetic head aperture. Measure actual exported polygon area, maximum chord, web and edge clearance. From a straight channel of given depth, the geometric cutoff in the least restrictive orientation is arctan(maximum chord/depth). This geometric cutoff assumes straight opaque walls and an unobstructed opening.",
+  "physical":"Measure the flash head and select heat-tolerant stock. Check plate registration, clip retention, peak temperature after repeated flashes and actual beam falloff on a target.",
+  "source":"Head size and stack geometry are synthetic. The catalog lists multiple accessory comparators.",
+  "use":"Repeat the full-size hexagonal plate for the specified stack count. The lower coupon checks overall depth. Inspect kerf and alignment before cutting the whole set. Fit the clip to the measured flash housing."
+ },
+ "P203": {
+  "finding":"The layout increases bilingual fields to 4 mm nominal text size and adds 1.2 mm of nominal hinge clearance.",
+  "method":"Verify four English and Traditional Chinese field names and their minimum editable text and writing heights. Check full-size pivot position, jaw ligament and nominal jaw-tip opening from a 55° rotation about the pivot datum. The side-clearance gauge specifies the spacer stack needed to avoid jaw-on-board rubbing.",
+  "physical":"Check actual font rendering and completed marks on the selected board stock. Check legibility at the planned camera distance, dry erase persistence, jaw rub, hinge strength and audio sync over 100 cycles.",
+  "source":"Board geometry, 55° rotation, font size and wipe-clean surface target are synthetic.",
+  "use":"Cut the board and floating jaw, drill the two indicated pivot holes and set axial spacing to the revised gauge. The UTF-8 engraving text uses a fallback family. Pick a Traditional Chinese font that covers all labels and outline the glyphs before engraving."
+ },
+ "P205": {
+  "finding":"A 170 × 132 mm beam splitter covers the modeled cue and camera-ray bundles and retains at least 3.47 mm at the tightest edge.",
+  "method":"A 45° plane reflects a 140 × 64 mm landscape display positioned 50 mm below the optical axis. Trace reflected screen corners to a side and elevation eye box of ±220 mm at 1.4 m. Independently intersect a synthetic camera cone at half angles 19° vertical and 29° horizontal with the same plane. The larger splitter follows an intermediate 118 mm length that still clipped the modeled vertical cue rays.",
+  "physical":"Check the chosen phone case, mirror panel, coating, polarization, legibility, double images, matte-shroud flare and actual lens exit angle. Proof-load the selected camera and tray mounts during assembly validation.",
+  "source":"The cue tablet, phone envelope, pupil geometry and viewing distance are synthetic. The product listing carries a commercial comparator.",
+  "use":"The full-size glass and phone tray are patterns drawn separately. The reference section establishes the splitter angle and vertical drop. The model covers ideal rays. The shroud and camera interface depend on the chosen hardware."
+ }
+}

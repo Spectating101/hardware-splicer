@@ -1,0 +1,42 @@
+{
+  "release": "9.1.0",
+  "repository": "iNavFlight/inav",
+  "source_commit": "e519b69b02e27c8bdc03b4a0889f1baaae211a54",
+  "target": "SPEEDYBEEF405MINI",
+  "binary": {
+    "url": "https://github.com/iNavFlight/inav/releases/download/9.1.0/inav_9.1.0_SPEEDYBEEF405MINI.hex",
+    "sha256": "110e34d2324f4b9bf4f6aad3d6040ca39bcb1a9c3f3519ed8f1865551f71862a"
+  },
+  "sources": [
+    {
+      "path": "src/main/flight/mixer.c",
+      "url": "https://raw.githubusercontent.com/iNavFlight/inav/e519b69b02e27c8bdc03b4a0889f1baaae211a54/src/main/flight/mixer.c",
+      "sha256": "f46cdfe5f1901413322cc1873c78e4eba9e2f1f5937a96e03b7a4891b000cd70"
+    },
+    {
+      "path": "src/main/fc/settings.yaml",
+      "url": "https://raw.githubusercontent.com/iNavFlight/inav/e519b69b02e27c8bdc03b4a0889f1baaae211a54/src/main/fc/settings.yaml",
+      "sha256": "5094b7b39049160023345eeefcf17628a02a983b2edea6108d9858d31049d0ce"
+    },
+    {
+      "path": "src/main/target/SPEEDYBEEF405MINI/target.h",
+      "url": "https://raw.githubusercontent.com/iNavFlight/inav/e519b69b02e27c8bdc03b4a0889f1baaae211a54/src/main/target/SPEEDYBEEF405MINI/target.h",
+      "sha256": "5dbbb37d22527e6b3bddda458f2b6eaac4c878d0038f562231af790220fe6684"
+    },
+    {
+      "path": "src/main/target/SPEEDYBEEF405MINI/target.c",
+      "url": "https://raw.githubusercontent.com/iNavFlight/inav/e519b69b02e27c8bdc03b4a0889f1baaae211a54/src/main/target/SPEEDYBEEF405MINI/target.c",
+      "sha256": "caa0d82ab840d52b00122890ba1a43782f325ae171189ba9b2a6fdcd58212d91"
+    },
+    {
+      "path": "src/main/io/serial.h",
+      "url": "https://raw.githubusercontent.com/iNavFlight/inav/e519b69b02e27c8bdc03b4a0889f1baaae211a54/src/main/io/serial.h",
+      "sha256": "2140c3e9b188cce95cf6fdb3367d43b3ec4a787e731c131e62159b84d0752b65"
+    },
+    {
+      "path": "LICENSE",
+      "url": "https://raw.githubusercontent.com/iNavFlight/inav/e519b69b02e27c8bdc03b4a0889f1baaae211a54/LICENSE",
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+    }
+  ]
+}

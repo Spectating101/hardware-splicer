@@ -1,0 +1,114 @@
+{
+  "build_options": [
+    {
+      "name": "Inspection light and motion fixture",
+      "sources": [
+        "Flatbed scanner",
+        "USB desk lamp",
+        "USB webcam"
+      ]
+    },
+    {
+      "name": "Printer/scanner motion stage",
+      "sources": [
+        "Flatbed scanner",
+        "USB webcam"
+      ]
+    },
+    {
+      "name": "Indicator light or small task lamp",
+      "sources": [
+        "USB desk lamp",
+        "USB webcam"
+      ]
+    },
+    {
+      "name": "Low-voltage motor/load test jig",
+      "sources": [
+        "Flatbed scanner",
+        "USB desk lamp",
+        "USB webcam"
+      ]
+    },
+    {
+      "name": "Camera/IR light or sensor mount",
+      "sources": [
+        "USB desk lamp",
+        "USB webcam"
+      ]
+    }
+  ],
+  "inputs": {
+    "fictional_offer": {
+      "expected_capabilities": [
+        "controller"
+      ],
+      "expected_parts": [
+        "esp32"
+      ],
+      "id": "sample-1",
+      "labor_usd": 1.5,
+      "price_usd": 6,
+      "shipping_usd": 2,
+      "title": "Uninspected USB controller offer"
+    },
+    "pile": [
+      {
+        "available_parts": [
+          "carriage",
+          "belt",
+          "rail"
+        ],
+        "title": "Flatbed scanner"
+      },
+      {
+        "available_parts": [
+          "LED bar",
+          "bracket"
+        ],
+        "title": "USB desk lamp"
+      },
+      {
+        "available_parts": [
+          "USB camera module"
+        ],
+        "title": "USB webcam"
+      }
+    ]
+  },
+  "physical_units_received": 0,
+  "successive_imports_of_same_offer": [
+    {
+      "adjusted_margin_estimates_usd": [
+        14.9
+      ],
+      "decision": {
+        "action": "execute_top_opportunity",
+        "confidence": 0.52,
+        "next_step": "verify listing photos and seller reliability",
+        "reason": "Acquire Uninspected USB controller offer for parts/builds"
+      },
+      "records": 1,
+      "reported_inventory_usd": 6.0,
+      "status_counts": {
+        "not_purchased": 1
+      }
+    },
+    {
+      "adjusted_margin_estimates_usd": [
+        14.9
+      ],
+      "decision": {
+        "action": "execute_top_opportunity",
+        "confidence": 0.6,
+        "next_step": "verify listing photos and seller reliability",
+        "reason": "Acquire Uninspected USB controller offer for parts/builds"
+      },
+      "records": 2,
+      "reported_inventory_usd": 12.0,
+      "status_counts": {
+        "not_purchased": 2
+      }
+    }
+  ]
+}
