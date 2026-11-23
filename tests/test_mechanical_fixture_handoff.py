@@ -74,6 +74,7 @@ def test_unverified_source_geometry_cannot_claim_mounting_holes():
 
 def test_real_cad_adhoc_geometry_and_revision_receipt(tmp_path):
     pytest.importorskip("cadquery")  # builds real CAD geometry
+    pytest.importorskip("trimesh")
     original=b"fixture source only; no holes"
     src=tmp_path/"original.ref"
     src.write_bytes(original)
@@ -106,6 +107,7 @@ def test_real_cad_adhoc_geometry_and_revision_receipt(tmp_path):
 
 def test_verified_original_eagle_holes_choose_standoffs(tmp_path):
     pytest.importorskip("cadquery")  # builds real CAD geometry
+    pytest.importorskip("trimesh")
     xml = b'''<eagle><drawing><board><libraries><library name="L"><packages><package name="M"><hole x="0" y="0" drill="2.5"/></package></packages></library></libraries><elements>
     <element name="H1" library="L" package="M" x="2" y="2"/><element name="H2" library="L" package="M" x="18" y="2"/>
     <element name="H3" library="L" package="M" x="2" y="18"/><element name="H4" library="L" package="M" x="18" y="18"/>
