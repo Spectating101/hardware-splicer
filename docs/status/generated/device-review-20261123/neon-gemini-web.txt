@@ -1,0 +1,127 @@
+1. Verdict
+
+- Visual craft: 6/10 — The restrained dark drafting aesthetic and crisp 2D CAD projection in 02 are strong, but low-contrast monochrome status badges, faint wireframes on beige PCBs, overlapping callouts, and a 70%-empty canvas in 07 drag down legibility.
+
+- Engineering usefulness: 5/10 — It surfaces mechanical uncertainty honestly in 01–03, yet fails real engineering inspection on PCBs (05, 08), seams (04), simulations (06), and trade studies (07), and offers no visible way to act on findings.
+
+- Against references: It does not yet hold up against InteractiveHtmlBom or pcbview/Altium 365 for electronics (no copper, pads, nets, or schematic) or AllSpice DRCY / GitHub Agent HQ for review workflows (no comments, disposition, or agent tasking). It does beat typical CAD AI companions on epistemic clarity for mechanical fit (02).
+
+2. Ten Most Important Concrete Problems (Ranked)
+
+1. PCBs lack copper, pads, nets, and schematic views (05, 08).
+
+- Seen: Bare beige slabs with faint dashed footprint envelopes; 05 reports 14 net shorts (`GND`/`VBUS`, `USB_D+`/`USB_D-`) but only brackets `U2 · CP2102`.
+
+- Why it matters: An engineer cannot diagnose shorts or schematic findings from bounding boxes.
+
+- Fix: Render a 2D KiCad copper/pads/silkscreen view (and a 50/50 schematic split for schematic checks like `akcli`), highlighting shorted net segments in bright red (`2px`) with clickable DRC markers zooming straight to the fault.
+
+2. No visible decision, review, or agent-steering controls (01–08; inferred from static captures).
+
+- Seen: Purely read-only cards with no buttons to accept, block, comment, upload vendor CAD, or dispatch the agent.
+
+- Why it matters: The brief's user is a technical owner deciding what happens next, not a passive reader.
+
+- Fix: Add a persistent `48px` action footer inside the active question/inspector (`Ask agent to resolve`, `Accept / Waive`, `Log physical test`, `Add note`) that writes back to the API.
+
+3. Severity inversion buries 21 findings under `info` noise (08).
+
+- Seen: `What did akcli find?` states `27 findings, 21 above info`, yet prints six `info` bullets and two `note` bullets first, pushing all 21 warnings/errors off-screen, while highlighting `1V8` rail parts from an `info` bullet.
+
+- Why it matters: Real defects are hidden behind boilerplate.
+
+- Fix: Sort strictly `error → warning → note → info`, collapse `info` behind a toggle (`Show 6 info`), and auto-highlight parts from the highest-severity findings.
+
+4. Non-CAD questions fail to compose domain-native views (06, 07).
+
+- Seen: Selecting `Does it fly its missions in simulation?` (06) leaves a static 3D drone; selecting `Why that strategy?` (07) leaves ~70% of the screen blank around five lines of grey text while cramming four options into the `410px` rail.
+
+- Why it matters: The main canvas becomes dead space whenever the question isn't geometric.
+
+- Fix: Replace the canvas per question type: a 3-scenario pass/margin/telemetry summary + motor-failure plot for 06, and a full-width build/buy/salvage comparison matrix detailing costed vs. uncosted BOM lines for 07.
+
+5. Seam question hides the 16 pairs and actual gap geometry (04).
+
+- Seen: `Which parts sit 0.30 mm apart?` reports 16 pairs, yet the canvas only labels `Face Front Left` and `Face Front Right` with faint corner brackets and zero seam highlighting.
+
+- Why it matters: You cannot verify whether all 16 pairs are intentional seams or an accidental pinch.
+
+- Fix: Highlight all 16 contact seams in `2px` cyan/amber lines directly on the mesh, dim unrelated parts to `20%` opacity, and provide a clickable 16-pair list in the left/right panel that focuses the camera on each pair.
+
+6. Broken top-right status math and wrong domain header (05, 07, 08).
+
+- Seen: 07 displays `0 open or unknown` despite 4–11 uncosted items per option and an unvalidated STEP file; 05 displays `Physical fit not tested on hardware` while hiding 92 KiCad DRC errors.
+
+- Why it matters: Contradicts the workspace's core truthfulness guarantee and misleads a fast scan.
+
+- Fix: Compute open/unknown counts across all check types (costing, CAD validation, DRC, fit) and tailor header copy to the active failure domain (e.g., `Electrical DRC failing · 92 errors` in 05; `Costs & CAD incomplete · 32 uncosted items` in 07).
+
+7. Monochrome badges flatten fatal errors into neutral records (01–08).
+
+- Seen: `fails KiCad checks` (05) uses nearly the same muted grey-bordered monospace box as `recorded` and `computed from CAD`.
+
+- Why it matters: Fatal blockers do not pop out during triage.
+
+- Fix: Use a 4-tier semantic badge palette without adding green "passed" states: red border/dot (`#EF4444`) for `fails`, amber (`#F59E0B`) for `open`/`unknown`, cool blue (`#38BDF8`) for `computed`/`simulated`, neutral slate (`#64748B`) for `recorded`.
+
+8. Hardcoded Fielddeck search placeholder leaks into every project (05–08).
+
+- Seen: `Find a part or connection` reads `dsi, bank, display...` on an ESP32 PCB, two drones, and an SPI flash board.
+
+- Why it matters: Erodes trust in workspace hygiene and hides useful query syntax.
+
+- Fix: Generate placeholders dynamically from each project's top parts or nets (e.g., `U2, VBUS, SERVO_5V...` in 05).
+
+9. Floating right inspector overlaps the model and wastes `340px` on empty fields (03, 04, 05, 08).
+
+- Seen: In 03, the floating card crowds `5-inch display` and pushes `Pi4 GPIO` beneath its lower edge; in 04, 05, 08, it repeats the active question and shows `physical fit: -` instead of part-specific findings.
+
+- Why it matters: Obscures the geometry it is meant to explain without adding actionable detail.
+
+- Fix: Dock it as a collapsible `320px` right column (recentering the viewport), and display the specific findings, shorted nets, or clearances belonging to the selected part.
+
+10. Missing 3D visual legend, orphaned pin numbers, and needlessly truncated view pill (01, 02).
+
+- Seen: 01 shows pins `12` and `13` (not visible in the rail) plus dashed red, cyan, and translucent grey parts with no legend; 02 truncates `Showing Does the Raspberry Pi Touch Display 2 sit in the faceplate ope...` despite `300px+` of empty bar space.
+
+- Fix: Add a compact bottom-right swatch legend (e.g., `Removed`, `Added`, `Envelope`), widen the `Showing` pill to `max-width: 680px`, and surface or filter matching pin cards when clicking any canvas badge.
+
+3. Does "Questions Compose the View" Actually Work?
+
+Only in 02 (and partially in 01/03). In 02, picking the faceplate question genuinely swaps the 3D scene for a bespoke 2D orthographic section with computed lips and seam callouts—that proves the thesis. Comparing 01, 03, and 04 (inferred from camera and explode states), questions do adjust explode and focus slightly. Everywhere else (04–08), it reads as a text list parked beside a mostly passive 3D viewer.
+
+To make composition unmistakable:
+
+- Add a compact view-recipe strip under the `Showing` pill declaring what the question composed (e.g., `Mode: 2D section · Rev: 5-inch · 2 parts isolated` or `Mode: PCB copper · Filter: Net shorts · 7 parts`).
+
+- Dim non-participating geometry to `15–20%` opacity and use dedicated renderers (2D PCB/schematic, simulation charts, strategy table) whenever 3D isn't the right answer.
+
+- Keep camera/explode transitions visibly animated (inferred absent or subtle) with a one-click reset.
+
+4. Honesty Check
+
+- Looks proven when unverified:
+
+- 07's `0 open or unknown` is outright false given uncosted BOM lines and unvalidated CAD.
+
+- 02's hero typography (`Faceplate covers glass edge · min lip 12.98 mm`) visually reads like a fit approval, dwarfing the critical caveat beneath it (`Active area exposure · unknown`—with only `1.3 mm/side` nominal margin between the `114.0 mm` aperture and `111.4 mm` viewing area). Make the unknown caveat the same visual tier as the lip number.
+
+- 06's `3 of 3 scenarios behaved as expected` over a clean 3D drone hides simulation fidelity, disturbance bounds, and safety margins.
+
+- Over-cautious / hides real results:
+
+- Repeating identical `not tested on hardware` / `not authorized` disclaimers across every header and card (01–08) creates banner blindness. In 08, clean KiCad DRC (`11 checks recorded (none with issues)`) is muffled by boilerplate while 21 real `akcli` warnings sit buried below `info` rows. Reserve loud warnings for concrete blockers; keep global bench-status terse.
+
+5. What Is Strong and Must Be Kept
+
+- Bespoke 2D CAD projection with explicit negative knowledge (02): Mixing computed CAD contours with datasheet specs and explicitly stating `Rear pocket clearance · not derivable from the XY projection` is rare and high-value.
+
+- Honest stand-in geometry (01, 04, 06): Rendering rough envelopes as dashed wireframes and separating real-geometry collisions from stand-in overlaps prevents classic CAD false confidence.
+
+- Ghost-overlay revision diffs (01): Showing `7-inch display · removed` as a red dashed outline over the 5-inch assembly communicates mechanical delta instantly.
+
+- Artifact provenance (`Basis · ...`): Pointing directly to `.glb`, `calculations.json`, and KiCad versions builds real engineering auditability.
+
+6. Single Highest-Leverage Change
+
+Pair every question with its native primary-evidence canvas and an explicit owner decision bar. Today the workspace only reports caveats—and often in the wrong medium (bare 3D boxes for DRC shorts, an empty screen for a cost strategy). Rendering the true engineering artifact for each question (2D copper/nets, seam list, simulation plots, cost matrix) alongside concrete disposition buttons (`Assign agent to fix`, `Accept seam`, `Needs bench test`) turns Hardware Splicer from a passive report viewer into an actual engineering decision cockpit.

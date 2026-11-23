@@ -1,6 +1,10 @@
 """Read-only manifests and assets for project scenes."""
 
 import json
+import logging
+import os
+import subprocess
+import threading
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
@@ -49,7 +53,7 @@ def _manifest(project_id: str) -> dict | None:
     return None
 
 
-def _scene_asset(project_id: str, revision: str, asset: str, *, legacy: bool = False) -> FileResponse:
+def _scene_asset_path(project_id: str, revision: str, asset: str, *, legacy: bool = False) -> Path:
     manifest = _manifest(project_id)
     entry = next((row for row in manifest["revisions"] if row["id"] == revision), None) if manifest else None
     if entry is None or (legacy and revision not in {"7", "5"}):
@@ -63,6 +67,11 @@ def _scene_asset(project_id: str, revision: str, asset: str, *, legacy: bool = F
         path = _confined_path(project, str(Path(relative).relative_to(prefix)))
     if path is None or not path.is_file():
         raise HTTPException(404, "Fielddeck scene asset not found" if legacy else "Scene asset not found")
+    return path
+
+
+def _scene_asset(project_id: str, revision: str, asset: str, *, legacy: bool = False) -> FileResponse:
+    path = _scene_asset_path(project_id, revision, asset, legacy=legacy)
     return FileResponse(path, media_type="model/gltf-binary" if asset == "glb" else "application/json")
 
 
@@ -138,3 +147,209 @@ def get_scene_records(project_id: str) -> dict:
             continue
         records.append({"label": source.get("label"), "path": relative, "status": "read", "data": data})
     return {"project_id": project_id, "records": records}
+
+
+# ---- Measured fit -----------------------------------------------------------------------------
+# The scene's own CAD model, measured: part-to-part interference and clearance, and overall size.
+# scene_fit.py runs in the native CAD interpreter (it needs trimesh, scipy and manifold3d); the
+# report is cached under the model's and sidecar's hashes, so each revision is measured once.
+_fit_locks: dict[str, threading.Lock] = {}
+_fit_guard = threading.Lock()
+
+
+def _fit_lock(key: str) -> threading.Lock:
+    with _fit_guard:
+        return _fit_locks.setdefault(key, threading.Lock())
+
+
+def scene_fit_report(glb: Path, parts: Path) -> dict:
+    from . import scene_fit
+    from .digital_project import native_python
+    from .file_digest import sha256_file
+    from .state_paths import state_dir
+
+    key = f"{sha256_file(glb)[:24]}-{sha256_file(parts)[:24]}-{scene_fit.VERSION}"
+    cache = state_dir() / "scene-fit" / f"{key}.json"
+    with _fit_lock(key):
+        if cache.is_file():
+            try:
+                return json.loads(cache.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                pass
+        try:
+            done = subprocess.run(
+                [native_python(), "-I", scene_fit.__file__, "--glb", str(glb), "--parts", str(parts)],
+                capture_output=True, text=True, timeout=600, check=False,
+                env={key_: value for key_, value in os.environ.items() if key_ in {"PATH", "HOME", "LANG", "LC_ALL"}})
+            report = json.loads(done.stdout) if done.returncode == 0 else None
+        except (OSError, subprocess.TimeoutExpired, ValueError):
+            report = None
+        if report is None:
+            logging.getLogger(__name__).warning("scene fit failed for %s", glb.name, exc_info=False)
+            raise HTTPException(503, "Fit measurement unavailable: the CAD runtime could not measure this model.")
+        cache.parent.mkdir(parents=True, exist_ok=True)
+        tmp = cache.with_suffix(".tmp")
+        tmp.write_text(json.dumps(report, sort_keys=True), encoding="utf-8")
+        os.replace(tmp, cache)
+        return report
+
+
+@project_scene_router.get(f"{_SCENES}/{{project_id}}/{{revision}}/fit")
+def get_scene_fit(project_id: str, revision: str) -> dict:
+    """Measured interference, clearance and size of one scene revision's CAD model."""
+    glb = _scene_asset_path(project_id, revision, "glb")
+    parts = _scene_asset_path(project_id, revision, "parts")
+    return {"project_id": project_id, "revision": revision, **scene_fit_report(glb, parts)}
+
+
+# ---- Evidence records and live KiCad checks ---------------------------------------------------
+
+@project_scene_router.get(f"{_SCENES}/{{project_id}}/evidence")
+def get_scene_evidence(project_id: str) -> dict:
+    """The evidence records a scene manifest lists (strategy, simulation, receipts, tool runs, BOM)."""
+    from .scene_evidence import scene_evidence
+
+    manifest = _manifest(project_id)
+    if manifest is None:
+        raise HTTPException(404, "Scene project not found")
+    return {"project_id": project_id, "records": scene_evidence(_repo_root(), manifest)}
+
+
+def _revision_file(project_id: str, revision: str, field: str) -> Path | None:
+    from .scene_evidence import EvidenceError, resolve
+
+    manifest = _manifest(project_id)
+    entry = next((row for row in manifest["revisions"] if row["id"] == revision), None) if manifest else None
+    if entry is None:
+        raise HTTPException(404, "Scene revision not found")
+    if not entry.get(field):
+        return None
+    try:
+        return resolve(_repo_root(), entry[field])
+    except EvidenceError:
+        raise HTTPException(404, "Scene board file not found") from None
+
+
+def _kicad_report(kind: str, path: Path, out: Path) -> dict | None:
+    argv = (["kicad-cli", "pcb", "drc", "--format", "json", "--severity-all", "--schematic-parity"] if kind == "drc"
+            else ["kicad-cli", "sch", "erc", "--format", "json", "--severity-all"])
+    try:
+        subprocess.run([*argv, "-o", str(out), str(path)], capture_output=True, timeout=300, check=False,
+                       env={key: value for key, value in os.environ.items() if key in {"PATH", "HOME", "LANG", "LC_ALL"}})
+        return json.loads(out.read_text(encoding="utf-8"))
+    except (OSError, subprocess.TimeoutExpired, ValueError):
+        return None
+
+
+@project_scene_router.get(f"{_SCENES}/{{project_id}}/{{revision}}/kicad")
+def get_scene_kicad_checks(project_id: str, revision: str) -> dict:
+    """KiCad's own DRC and ERC on the revision's board and schematic, each violation traced to parts."""
+    import tempfile
+
+    from .file_digest import sha256_file
+    from .scene_evidence import summarise_kicad
+    from .state_paths import state_dir
+
+    board = _revision_file(project_id, revision, "board")
+    schematic = _revision_file(project_id, revision, "schematic")
+    if board is None:
+        raise HTTPException(404, "This scene revision has no KiCad board")
+    key = "-".join(sha256_file(path)[:24] for path in (board, schematic) if path)
+    cache = state_dir() / "scene-kicad" / f"{key}.json"
+    with _fit_lock(f"kicad-{key}"):
+        if cache.is_file():
+            try:
+                raw = json.loads(cache.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                raw = None
+        else:
+            raw = None
+        if raw is None:
+            with tempfile.TemporaryDirectory(prefix="hs-kicad-") as work:
+                raw = {"drc": _kicad_report("drc", board, Path(work) / "drc.json"),
+                       "erc": _kicad_report("erc", schematic, Path(work) / "erc.json") if schematic else None}
+            if raw["drc"] is None:
+                raise HTTPException(503, "KiCad checks unavailable: kicad-cli could not check this board.")
+            cache.parent.mkdir(parents=True, exist_ok=True)
+            cache.write_text(json.dumps(raw), encoding="utf-8")
+    project = _repo_root() / "projects" / project_id
+    footprints = []
+    bom_path = project / "BOM.json"
+    if bom_path.is_file():
+        try:
+            footprints = [{"ref": item["id"], "bbox": item["bbox_kicad_mm"]}
+                          for item in json.loads(bom_path.read_text(encoding="utf-8")).get("items", [])
+                          if item.get("bbox_kicad_mm")]
+        except (OSError, ValueError, KeyError):
+            footprints = []
+    summary = summarise_kicad(raw["drc"], raw["erc"], footprints)
+    # Reference designators → this revision's part ids, so the workspace can select them.
+    parts = {}
+    parts_path = _scene_asset_path(project_id, revision, "parts")
+    for part in json.loads(parts_path.read_text(encoding="utf-8")).get("parts", []):
+        parts[part.get("node_name")] = part.get("part_id")
+    for report in (summary["drc"], summary["erc"]):
+        for row in (report or {}).get("violations", []):
+            row["part_ids"] = sorted({parts[ref] for ref in row["parts"] if ref in parts})
+            row["net_ids"] = sorted({parts[f"net:{net}"] for net in row.get("nets", []) if f"net:{net}" in parts})
+    return {"project_id": project_id, "revision": revision, "board": board.name,
+            "schematic": schematic.name if schematic else None, **summary}
+
+
+# ---- Owner decisions on findings ---------------------------------------------------------------
+# The owner's call on a finding (the agent drives; the owner reviews and decides). A decision is a
+# record next to the finding; it never changes the finding's state, and "accept risk" or "waive"
+# never reads as passed. "ask_agent" queues the finding for the agent, which reads this log.
+
+DECISIONS = {"needs_bench_test", "accept_risk", "waive", "ask_agent"}
+_decision_lock = threading.Lock()
+
+
+def _decision_log(project_id: str) -> Path:
+    from .state_paths import state_dir
+
+    return state_dir() / "scene-decisions" / f"{project_id}.jsonl"
+
+
+def _latest_decisions(project_id: str) -> dict:
+    log = _decision_log(project_id)
+    latest: dict = {}
+    if log.is_file():
+        for line in log.read_text(encoding="utf-8").splitlines():
+            try:
+                row = json.loads(line)
+            except ValueError:
+                continue
+            if isinstance(row, dict) and isinstance(row.get("finding_id"), str):
+                latest[row["finding_id"]] = row
+    return latest
+
+
+@project_scene_router.get(f"{_SCENES}/{{project_id}}/decisions")
+def get_scene_decisions(project_id: str) -> dict:
+    if _manifest(project_id) is None:
+        raise HTTPException(status_code=404, detail="Scene not found")
+    return {"decisions": _latest_decisions(project_id)}
+
+
+@project_scene_router.post(f"{_SCENES}/{{project_id}}/decisions")
+def post_scene_decision(project_id: str, body: dict) -> dict:
+    import datetime
+
+    if _manifest(project_id) is None:
+        raise HTTPException(status_code=404, detail="Scene not found")
+    finding_id, decision, note = body.get("finding_id"), body.get("decision"), body.get("note") or ""
+    if not isinstance(finding_id, str) or not 0 < len(finding_id) <= 300:
+        raise HTTPException(status_code=422, detail="finding_id must be a short string")
+    if decision not in DECISIONS:
+        raise HTTPException(status_code=422, detail=f"decision must be one of {sorted(DECISIONS)}")
+    if not isinstance(note, str) or len(note) > 1000:
+        raise HTTPException(status_code=422, detail="note must be text under 1000 characters")
+    row = {"finding_id": finding_id, "decision": decision, "note": note.strip(),
+           "at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")}
+    log = _decision_log(project_id)
+    with _decision_lock:
+        log.parent.mkdir(parents=True, exist_ok=True)
+        with log.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(row) + "\n")
+    return row

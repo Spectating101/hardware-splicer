@@ -5,6 +5,7 @@ export const BASIS_LABELS = {
   measured: "Measured",
   envelope: "Envelope",
   proxy: "Proxy",
+  copper: "Copper (KiCad)",
   unknown: "Unknown",
 };
 
@@ -34,6 +35,8 @@ const MATERIALS = {
   measured: { color: 0xe4e2dc, roughness: 0.74, threshold: 32, creaseOpacity: 1 },
   envelope: { color: 0xa5aeb5, fillOpacity: 0.06, pattern: [6, 4] },
   proxy: { color: 0xa6a098, roughness: 0.88, threshold: 32, hatch: { angle: 45, spacing: 8, contrast: 0.1 } },
+  // Tracks, pads and fills read as copper against the board, without metal reflections.
+  copper: { color: 0xc8874f, dimmed: 0x8a6a50, roughness: 0.55, threshold: 32, creaseOpacity: 0.2 },
   unknown: { color: null, edgeColor: 0x9097a0, pattern: [3, 2] },
 };
 

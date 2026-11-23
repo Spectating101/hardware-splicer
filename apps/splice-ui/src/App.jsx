@@ -36,6 +36,7 @@ import {
 } from "./projectSession/projectSession.js";
 
 const FieldDeckScene = lazy(() => import("./components/FieldDeckScene.jsx"));
+const DeviceWorkspace = lazy(() => import("./device/DeviceWorkspace.jsx"));
 
 function Toast({ message, onDismiss }) {
   useEffect(() => {
@@ -652,7 +653,7 @@ export default function App() {
   const advancedActive = isAdvancedView(view);
 
   return (
-    <div className={`app-shell${view === VIEWS.fielddeck ? " fielddeck-shell" : ""}${sidebarCollapsed ? " sidebar-collapsed" : ""}`} data-testid="app-shell">
+    <div className={`app-shell${view === VIEWS.fielddeck || view === VIEWS.device ? " fielddeck-shell" : ""}${sidebarCollapsed ? " sidebar-collapsed" : ""}`} data-testid="app-shell">
       <BuildOverlay
         active={spliceJob.active}
         status={spliceJob.job?.status}
@@ -855,6 +856,10 @@ export default function App() {
               <p>{sceneError.status === 404 ? <>No scene manifest has the id <code>{route.sceneId}</code>.</> : sceneError.message}</p>
             </RouteMessage>
             : <section className="card" aria-busy="true"><p role="status">Opening scene <code>{route.sceneId}</code>…</p></section>)}
+
+          {view === VIEWS.device && route.sceneId && (
+            <Suspense fallback={null}><DeviceWorkspace sceneId={route.sceneId} onExit={exitScene} /></Suspense>
+          )}
 
           {view === VIEWS.notFound && <RouteMessage title="Page not found" onHome={() => navigate({ view: VIEWS.home })}>
             <p>Nothing in Hardware Splicer lives at <code>{route.path}</code>.</p>

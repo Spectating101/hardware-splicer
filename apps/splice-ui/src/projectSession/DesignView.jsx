@@ -133,8 +133,11 @@ export default function DesignView({ projectId, caseId, revision, onOpenScene, o
           <p className="muted"><code>projects/{manifest.project_id}/scene.json</code> · linked by {via}</p>
         </details>
       </div>
-      {drawable && onOpenScene && <button type="button" className="ghost" onClick={() => onOpenScene({ projectId: manifest.project_id, manifest })}>
-        Open full screen</button>}
+      {drawable && <div className="design-view-open">
+        <a className="button-link" href={`/devices/${encodeURIComponent(manifest.project_id)}`}>Open device view</a>
+        {onOpenScene && <button type="button" className="ghost" onClick={() => onOpenScene({ projectId: manifest.project_id, manifest })}>
+          Open full screen</button>}
+      </div>}
     </div>
     {drawable ? <Suspense fallback={<p className="muted">Loading 3D scene…</p>}>
       <FieldDeckScene projectId={manifest.project_id} manifest={manifest} embedded holdStage={holdStage} />

@@ -8,6 +8,7 @@ export const VIEWS = Object.freeze({
   reference: "reference",
   sortcell: "sortcell",
   fielddeck: "fielddeck",
+  device: "device",
   workspace: "workspace",
   advanced: "advanced",
   example: "example",

@@ -2,7 +2,7 @@
   "schema": "hardware_splicer.scene_manifest.v1",
   "project_id": "cyberdeck-real-trial-20261020",
   "title": "Fielddeck display swap",
-  "subtitle": "7-inch → 5-inch",
+  "subtitle": "7-inch \u2192 5-inch",
   "registered_cases": [
     "fielddeck-7",
     "fielddeck-5"
@@ -59,6 +59,13 @@
     {
       "label": "Display swap evidence",
       "path": "docs/status/generated/fielddeck-display-swap-20261118.json"
+    }
+  ],
+  "evidence": [
+    {
+      "kind": "bom_csv",
+      "label": "Bill of materials (7-inch revision)",
+      "path": "projects/cyberdeck-real-trial-20261020/digital_v1/BOM.csv"
     }
   ]
 }

@@ -1,0 +1,747 @@
+{
+  "basis": "CAD model, including envelope and unknown-shape stand-ins; physical fit not tested",
+  "counts": {
+    "near": 6,
+    "overlap": 0,
+    "overlap_real": 0,
+    "overlap_stand_in": 0,
+    "tight": 9,
+    "touching": 36
+  },
+  "glb_sha256": "3ea140642c6fc9b9fdb0fe29e617dcc46f5224759fba6979c6a0468205dc5f38",
+  "method": {
+    "clearance": "minimum distance between surface samples about 0.35 mm apart",
+    "interference": "exact intersection volume of closed meshes (manifold3d)",
+    "near_mm": 2.0,
+    "overlap_mm3": 0.5,
+    "tight_mm": 1.0,
+    "touch_mm": 0.05
+  },
+  "not_computed": [],
+  "pairs": [
+    {
+      "a": "u1",
+      "b": "c4",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.12,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "u1",
+      "b": "c3",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.32,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "u2",
+      "b": "c5",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.32,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "u3",
+      "b": "c2",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.42,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tp18",
+      "b": "tp13",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.636,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "r7",
+      "b": "jp1",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.7,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "u3",
+      "b": "c1",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.92,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "u1",
+      "b": "tp17",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.95,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tp8",
+      "b": "r6",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.97,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tp16",
+      "b": "r7",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 1.22,
+      "kind": "near",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "r3",
+      "b": "c5",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 1.541,
+      "kind": "near",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tp2",
+      "b": "c1",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 1.72,
+      "kind": "near",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "u2",
+      "b": "c6",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 1.82,
+      "kind": "near",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tp17",
+      "b": "jp1",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 1.93,
+      "kind": "near",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tp12",
+      "b": "r2",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 1.97,
+      "kind": "near",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "c1",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "c2",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "c3",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "c4",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "c5",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "c6",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "j1",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "jp1",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "r1",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "r2",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "r3",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "r4",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "r5",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "r6",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "r7",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tp1",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tp10",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tp11",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tp12",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tp13",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tp14",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tp15",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tp16",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tp17",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tp18",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tp2",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tp3",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tp4",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tp5",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tp6",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tp7",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tp8",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tp9",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "u1",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "u2",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "u3",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    }
+  ],
+  "parts_measured": 37,
+  "parts_sha256": "b0365a4073a9cc89d61a5dfb399523ce6d330783cba6275959737cf311a22f3a",
+  "parts_unmatched": [],
+  "schema": "hardware_splicer.scene_fit.v1",
+  "size_mm": [
+    90.0,
+    50.0,
+    10.1
+  ],
+  "version": "scene-fit.v4"
+}

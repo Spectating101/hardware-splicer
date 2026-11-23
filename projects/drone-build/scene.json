@@ -27,5 +27,12 @@
       "label": "geometry-source.json",
       "path": "projects/drone-build/geometry-source.json"
     }
+  ],
+  "evidence": [
+    {
+      "kind": "strategy",
+      "label": "Build, buy or salvage decision",
+      "path": "projects/drone-build/engineering_decision.json"
+    }
   ]
 }
