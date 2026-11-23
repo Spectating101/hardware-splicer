@@ -296,6 +296,30 @@ def plan_project_from_intake_truthful(
     body = deepcopy(dict(intake or {}))
     compatibility_mode = offline_salvage_enabled()
 
+    # Real-device projects must not be silently converted into unrelated demo
+    # architectures. An explicit (possibly empty) allowlist is a hard boundary,
+    # not a model suggestion. This opt-in leaves historical demo fixtures intact.
+    if "approved_catalog_build_ids" in body:
+        approved = body["approved_catalog_build_ids"]
+        if not isinstance(approved, list) or any(
+            not isinstance(item, str) or item not in CATALOG_BUILD_IDS for item in approved
+        ):
+            raise ValueError("approved_catalog_build_ids must be a list of catalog build IDs")
+        declared = _explicit_build_id(body)
+        if declared is not None and declared in approved:
+            result = _model_first_plan(body, None)
+            result["catalog_routing"] = {"status": "explicitly_approved", "approved_build_ids": approved}
+            return result
+        if declared is not None and declared not in approved:
+            raise ValueError("explicit build not in approved_catalog_build_ids")
+        result = _model_first_plan(body, {
+            "status": "unresolved", "build_id": None, "source": "unresolved",
+            "reasoning": "No project-approved catalog architecture. Preserve device-specific requirements instead of mapping to unrelated demo builds.",
+            "unresolved_questions": ["Select a device-specific architecture supported by verified engineering sources."],
+        })
+        result["catalog_routing"] = {"status": "no_approved_candidate", "approved_build_ids": approved}
+        return result
+
     if compatibility_mode:
         if legacy_planner is None:
             from .project_intake import plan_project_from_intake

@@ -22,10 +22,10 @@ This dump currently keeps three apps as separate runtimes:
 - `SPLICER_ENDPOINT`: primary 3D-Splicer endpoint for Circuit-AI's direct client, default `/v1/splice`.
 - `SPLICER_SCRIPT_ENDPOINT`: optional script-only fallback endpoint. If unset, `/v1/splice` maps to `/v1/splice/script` and `/generate` maps to `/generate/script`.
 - `SPLICER_TIMEOUT_S`: timeout for Circuit-AI direct HTTP calls to 3D-Splicer, default `30`.
-- `HARDWARE_SPLICER_OUTPUT_ROOT`: API output root, default `/tmp/hardware_splicer_api`.
+- `HARDWARE_SPLICER_OUTPUT_ROOT`: API output root, default `$HARDWARE_SPLICER_STATE_DIR/api`.
 - `HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR`: set to `1` only for trusted local development if the API should write outside `HARDWARE_SPLICER_OUTPUT_ROOT`.
 - `HARDWARE_SPLICER_MAX_BOARD_FILE_BYTES`: maximum board design file size accepted by top-level spec validation, default `52428800`.
-- `HARDWARE_SPLICER_STATE_DIR`: root for persistent API state, default `/tmp/hardware_splicer_state`.
+- `HARDWARE_SPLICER_STATE_DIR`: root for persistent API state, default `.cache/hardware-splicer/state` in a source checkout, else `$XDG_STATE_HOME/hardware-splicer` or `~/.local/state/hardware-splicer` (see [SETUP.md](SETUP.md#where-server-state-lives)).
 - `HARDWARE_SPLICER_JOB_DB`: SQLite job database path, default `$HARDWARE_SPLICER_STATE_DIR/jobs.sqlite3`.
 - `HARDWARE_SPLICER_JOB_WORKERS`: in-process async compile workers, default `1`.
 - `HARDWARE_SPLICER_JOB_POLL_INTERVAL_S`: worker polling interval, default `0.2`.

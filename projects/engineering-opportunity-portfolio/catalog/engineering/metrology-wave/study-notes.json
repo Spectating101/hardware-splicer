@@ -1,0 +1,72 @@
+{
+ "P076":{
+  "finding":"Adding explicit side-stylus compensation cuts worst modeled XYZ origin error from 1.528 mm to 0.029 mm across three stock setups.",
+  "method":"Replay three axes at each of three synthetic stock positions. Read X and Y shoulder offsets and Z top thickness from separate SVG profiles. Use a Ø3 mm spherical side-contact stylus, flat Z end and signed face directions of −X, −Y and +Z. The revised side rows explicitly include the 1.5 mm radius. The replay adds 0.015 mm face uncertainty after comparing reconstructed origins.",
+  "source":"The insulation, dimensions, end geometry and signed touch readings are trial inputs. The named comparator in the catalog is a commercial example of three-face work coordinate location.",
+  "use":"The plan and wall section define a conductive blank and its stock relief. The connector block defines a mechanical key witness. Use the CSV as an offline data example with a dummy fixture and agreed station datums.",
+  "physical":"Measure each face, verify isolation and wiring continuity with a meter, and log repeatability across three independently loaded stock coupons. Establish machine input compatibility, coordinate polarity and probe recovery separately."
+ },
+ "P077":{
+  "finding":"Increasing nominal spring travel from 1.35 to 2.05 mm gives the delayed-stop model 0.54 mm of remaining stroke.",
+  "method":"Measure the uncompressed, trigger and bottom-of-stroke lines in the released section. Take away 0.10 mm stroke and 0.03 mm trigger allowances. Model travel after trigger as constant-speed delay plus constant-deceleration travel. The synthetic test uses 6 mm/s, 110 ms delay and 50 mm/s² deceleration. The result measures a geometric reserve against that case.",
+  "source":"SainSmart documents a commercial spring-backed CNC tool setter. Travel, response time, trip tolerance, body fit and controller behavior are synthetic inputs for the coupon. [SainSmart tool setter example](https://www.sainsmart.com/products/wireless-z-axis-probe-tool-setter)",
+  "use":"The drawings show the base outline, contact diameter and bed mounting profiles as a fit coupon. The section locates the trigger and bottom of stroke for hand measurement.",
+  "physical":"Measure spring rate, breakaway, stop displacement and triggering repeatability with a dial indicator and dummy load. Measure the coupled controller's worst response and stopping distance on the chosen machine before approval."
+ },
+ "P078":{
+  "finding":"Reversing a 176 mm twin-indicator bar reduces synthetic spindle-tilt inference error from 0.0270° to 0.00163°.",
+  "method":"Emit three bench readings at a known 0.04° tilt. Each pair uses two fixed individual zero offsets and independent small per-orientation reading perturbations. The baseline accepts the original differential directly. The revision swaps bar positions and takes half the difference between forward and reversed reading differentials, preserving tilt and rejecting fixed offset.",
+  "source":"Edge Technology documents two-indicator spindle tramming and 180° calibration reversal. This bar geometry and the error values are synthetic. The modeled tilt is a trial input. [Edge Technology Pro Tram manual](https://www.edgetechnologyproducts.com/product_images/product_manual/pro_tram/pro_tram_manual.html)",
+  "use":"Cut the beam and gauge feet and measure the indicator span between bores. The CSV contains fabricated readings for practicing the reversal arithmetic on a known reference.",
+  "physical":"Check the paired gauges individually against a reference, compare seating when reinserted, and measure bar flex, surface error and repeatability on a stable flat reference."
+ },
+ "P086":{
+  "finding":"Transferring actual stock thickness minus actual kerf cuts worst modeled slot error from 3.36 to 0.10 mm across three blade cases.",
+  "method":"The test coupons pair 6.35, 12.70 and 19.05 mm stock with modeled 1.45, 2.40 and 3.28 mm kerfs. Use measured distances from the emitted gauge, stock and blade lines. Restored slot width is transfer distance plus kerf. Charge 0.04 mm lock repeatability against the worst case and check the available stop travel separately.",
+  "source":"Bridge City documents an adjustable kerf compensator as a commercial example. The transferred fixture travel, synthetic kerfs and clamp tolerances are trial inputs. [Bridge City Kerfmakers](https://bridgecitytools.com/products/km-2v2-kerfmaker-pro)",
+  "use":"Cut the body profile and two stop-block coupons. Transfer the two offsets to witness marks on a test coupon and compare between passes. Use the blue lines as dimensional trial references.",
+  "physical":"Measure actual kerf for each blade and substrate, transfer offsets to scrap layout coupons, then compare repeatability and width before applying the gauge to a job."
+ },
+ "P099":{
+  "finding":"An 82 mm guide span and 3.21 mm depth-stop setting bring worst modeled center error to 0.173 mm and depth error to 0.09 mm.",
+  "method":"Evaluate two Ø10.30 mm guides around a Ø10 mm rod with opposing diametral-clearance offsets and 39 mm of tool overhang. Add 0.03 mm axis-location error and verify tilt, center drift and stop depth. Apply ±0.08 mm combined depth allowance to a 3.20 mm target.",
+  "source":"Adafruit publishes a guided heat-set insert rig with editable CAD. The synthetic rod, stop and holder in this drawing are original trial dimensions. [Adafruit Heat Set Insert Rig](https://learn.adafruit.com/heat-set-rig/)",
+  "use":"Use the neutral guide, collar and base profiles for mechanical alignment and fabrication planning. Fit the real iron and insert in a cold clearance check before material testing.",
+  "physical":"Measure collar and rod fit, stop compliance, perpendicularity, nose and hold temperature. Verify insert depth, pull-out and eccentricity on the actual polymer and insert series."
+ },
+ "P105":{
+  "finding":"Reducing the effective bearing drag radius from 10 mm to 3 mm lowers modeled detection threshold from 1.33 g to 0.44 g at 37 mm radius.",
+  "method":"Calculate maximum opposing torque from a 0.046 N equivalent breakaway force acting at the drawn effective radius plus 2.2 g·mm assumed fixture imbalance. Compare that with a known 0.8 g trial mass at 37 mm offset. Red profiles give the stand and cone section, and reference circles locate the effective radius and test mass arm.",
+  "source":"HUDY documents a low-friction supported wheel adapter and optional RC wheel size interfaces. The paired cones, footprint and drag inputs here are synthetic. [HUDY Universal Tire Balancing Station](https://www.hudy.net/xhudy/products/proddesc.php?prod_id=344)",
+  "use":"Cut the stand foot and cheeks. Use the cone section for a prototype centering arbor. The blue friction-radius circle is an engineering datum for choosing the actual bearing arrangement.",
+  "physical":"Measure unloaded breakaway torque, fit and concentricity on the actual wheels. Apply traceable test masses, then repeat after re-clamping the cones and reversing the wheel."
+ },
+ "P106":{
+  "finding":"Widening the foot adjustment range and matching pad heights leaves 6 mm of radial travel reserve and 1.72 mm modeled detection of a known dish shim.",
+  "method":"Compare both radial slots to the 280 and 320 mm test rim-contact radii. Model the reverse-side axial change as twice a synthetic 0.95 mm dish shim. Charge the full drawn pad-height difference plus 0.05 mm hub-tip uncertainty as a conservative reversal error bound.",
+  "source":"Park Tool documents the two rim contacts and hub locknut tip used on both sides of a wheel. The two radii, slot geometry and test budget here are a limited trial set. [Park Tool wheel dishing procedure](https://www.parktool.com/en-int/blog/repair-help/wheel-dishing-centering)",
+  "use":"Use the full-size arch profile, paired radial slots and removable pad sections. Align the center tip on the measured hub datum with a clean reference rim.",
+  "physical":"Measure real rim contact heights and hub offsets, then reverse on a flat reference and shimmed rim to check gauge bias, deflection, repeatability and seating."
+ },
+ "P107":{
+  "finding":"Reducing diametral clearance from 0.32 mm to 0.06 mm limits its modeled projection at the rim to 0.563 mm.",
+  "method":"Fit a Ø10 mm reference spindle in two seats separated by 32 mm. Bound shaft tilt with opposing radial clearance and project to a 300 mm radius. Replay four orthogonal indicator samples with deliberately perturbed values. Recover the two signed offset components by subtracting opposed reads. Combine measured recovery error with the worst clearance bound.",
+  "source":"Park Tool documents a four-position rim comparison method. The synthetic seat, shaft support and known error vector here define a bench acceptance problem. [Park Tool DAG-2.2 instructions](https://www.parktool.com/assets/doc/product/DAG-2.2_instructions.pdf)",
+  "use":"Use the arm and slotted indicator plate as layout patterns. The CSV exercises reading offsets around a known test fixture. A threaded reference insert needs its own drawing from the measured sacrificial fixture.",
+  "physical":"Measure threaded adapter fit, seat play, arm deflection and repeatability on an expendable hanger reference with a measured tilt. Check the wheel datum before interpreting indicator readings."
+ },
+ "P110":{
+  "finding":"Spacing rail contacts 170 mm apart reduces modeled layout drift at 600 mm from 2.22 to 1.06 mm.",
+  "method":"Extract the contact pad centers, gauge profile clearances and index holes at 0° and ±45°. Convert the worst rail clearance angle and lock-play angle to a combined layout deviation at the panel end. The unmeasured rail coupon is a 7.18 mm groove with a 7 mm key and 0.06 mm detent-play allowance.",
+  "source":"Festool publishes an FS-WA setting range of −60° to +60°. This study uses a synthetic guide profile and tests a smaller indexed range. [Festool FS-WA](https://www.festoolusa.com/accessories/guide-rail-system/guide-systems/stops-and-attachments/577040---fs-wa)",
+  "use":"Use the fence and pivot patterns for static layout, with the scored pads against a measured rail profile. Confirm angles against an independent square and protractor.",
+  "physical":"Measure the named rail and contact play, then check layout repeatability at all three detents under equivalent hand loading on a stationary coupon."
+ },
+ "P245":{
+  "finding":"A 647.70 mm scale matches all 24 modeled fret centers and leaves 0.895 mm minimum crown clearance and 4.83 mm minimum contact land.",
+  "method":"Generate equal-tempered center positions from the nut and parse the released notch profile independently. A 2.65 mm fret crown and 0.18 mm transfer error are charged against every 4.80 mm notch. The 628.65 mm baseline scale misses the high-fret position by up to 14.29 mm. Measure the contact land left by subtracting successive notch bounds.",
+  "source":"Fender gives 25.5 inches as a standard Stratocaster scale. The trial uses that exact inch conversion and a synthetic 24-fret neck, crown width and registration allowance. StewMac documents measuring fret positions from the nut datum. [Fender scale specification](https://www.fender.com/products/standard-stratocaster-1) · [StewMac fret position calculator](https://www.stewmac.com/fret-calculator/)",
+  "use":"Cut the 1:1 profile from a blank with machining allowance, then finish and measure the contact lands using the nut mark as the scale datum. The contact profile extends over the intended fretboard span.",
+  "physical":"Verify actual scale and fret centers at the neck, then measure straightness on a reference, recount contact lands and recheck stress relief and thermal distortion after machining."
+ }
+}

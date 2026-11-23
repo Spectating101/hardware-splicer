@@ -1,0 +1,15 @@
+{
+  "pilot": "Two purchased 3 W low-voltage sealed heads for a 0.5 m tank card",
+  "metrics": {
+    "candidate": {
+      "card_checks": 9,
+      "lowest_model_lux": 659.9,
+      "steady_case_temperature_c": 41.5
+    },
+    "thermal-control": {
+      "card_checks": 9,
+      "lowest_model_lux": 659.9,
+      "steady_case_temperature_c": 61.5
+    }
+  }
+}

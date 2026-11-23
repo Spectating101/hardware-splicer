@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="730mm" height="225mm" viewBox="0 0 730 225">
+  <title>P106 revised · full-size proof coupon</title>
+  <rect id="scale" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="10" y="6" width="20" height="10" />
+  <rect id="arch-blank" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="32" y="54" width="666" height="36" />
+  <rect id="foot-slot-0" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="39" y="68" width="57" height="8" />
+  <rect id="foot-slot-1" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="634" y="68" width="57" height="8" />
+  <rect id="hub-stem-slot" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="360.5" y="60" width="9" height="24" />
+  <line id="wheel-rim-span-0" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x1="85" y1="112" x2="645" y2="112" />
+  <line id="wheel-rim-span-1" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x1="45" y1="125" x2="685" y2="125" />
+  <rect id="left-pad-section" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="87" y="161" width="28" height="12" />
+  <rect id="right-pad-section" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="126" y="161" width="28" height="12.13" />
+  <rect id="rim-surface-thickness-gauge" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="215" y="161" width="12" height="8" />
+</svg>

@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="158mm" height="171mm" viewBox="0 0 158 171">
+  <title>P203 baseline | full-size study patterns</title>
+  <rect id="scale" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x="8" y="8" width="20" height="10" />
+  <text id="scale-label" data-operation="engrave" fill="#333333" stroke="none" stroke-width="0.17" x="9" y="14" font-size="2.6" font-family="sans-serif">20 × 10 mm</text>
+  <rect id="slate-board" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" x="12" y="27" width="130" height="86" />
+  <rect id="fixed-jaw" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x="12" y="27" width="130" height="14" />
+  <rect id="swing-jaw" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" x="12" y="127" width="130" height="14" />
+  <circle id="fixed-pivot" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" cx="20" cy="34" r="1.7" />
+  <circle id="swing-pivot" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" cx="20" cy="134" r="1.7" />
+  <circle id="pivot-axis" data-operation="reference" fill="none" stroke="#2475a9" stroke-width="0.17" cx="20" cy="157" r="0.5" />
+  <line id="jaw-gap-gauge" data-operation="reference" fill="none" stroke="#2475a9" stroke-width="0.17" x1="33" y1="157" x2="33" y2="157" />
+  <text id="label-0" data-operation="engrave" fill="#333333" stroke="none" stroke-width="0.17" x="17" y="53" font-size="2.5" font-family="sans-serif">SCENE 場次</text>
+  <rect id="write-0" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x="17" y="55" width="57" height="17" />
+  <text id="label-1" data-operation="engrave" fill="#333333" stroke="none" stroke-width="0.17" x="79" y="53" font-size="2.5" font-family="sans-serif">TAKE 次數</text>
+  <rect id="write-1" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x="79" y="55" width="57" height="17" />
+  <text id="label-2" data-operation="engrave" fill="#333333" stroke="none" stroke-width="0.17" x="17" y="85" font-size="2.5" font-family="sans-serif">SHOT 鏡號</text>
+  <rect id="write-2" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x="17" y="87" width="57" height="17" />
+  <text id="label-3" data-operation="engrave" fill="#333333" stroke="none" stroke-width="0.17" x="79" y="85" font-size="2.5" font-family="sans-serif">DATE 日期</text>
+  <rect id="write-3" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x="79" y="87" width="57" height="17" />
+</svg>

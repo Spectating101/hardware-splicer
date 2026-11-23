@@ -51,6 +51,9 @@ export function createEmptySession(overrides = {}) {
     projectName: o.projectName || "",
     goal: o.goal || "",
     mode: o.mode || "greenfield",
+    digitalStudy: o.digitalStudy || null,
+    ...(o.partAssembly ? { partAssembly: o.partAssembly } : {}),
+    ...(o.partSubstitution ? { partSubstitution: o.partSubstitution } : {}),
     intake: o.intake || null,
     constraints: o.constraints || null,
     graph: o.graph || emptyGraph(),
@@ -158,10 +161,11 @@ export function projectSessionReducer(state, action) {
       };
 
     case ACTIONS.SET_MACHINE_PROJECT:
+      // A model derived from a reopened project's own intake is not an edit.
       return {
         ...state,
         machineProject: action.machineProject || null,
-        dirty: true,
+        dirty: action.derived ? state.dirty : true,
       };
 
     case ACTIONS.START_PROJECT:
@@ -246,6 +250,8 @@ export function projectSessionReducer(state, action) {
         phrase: action.phrase ?? state.graph.phrase,
         composeMode: action.composeMode ?? state.graph.composeMode,
       };
+      // The design panel reports its graph on mount; an unchanged graph is not an edit.
+      if (canonicalJson(graph) === canonicalJson(state.graph)) return state;
       return {
         ...state,
         graph,
@@ -456,6 +462,19 @@ export function projectSnapshot(session) {
     ...snapshot
   } = session;
   return snapshot;
+}
+
+/**
+ * Order-independent JSON for comparing snapshots. The backend stores snapshots with sorted keys
+ * while the session builds them in its own order, so plain JSON.stringify never matches.
+ */
+export function canonicalJson(value) {
+  if (Array.isArray(value)) return `[${value.map((item) => canonicalJson(item ?? null)).join(",")}]`;
+  if (value && typeof value === "object") {
+    return `{${Object.keys(value).sort().filter((key) => value[key] !== undefined)
+      .map((key) => `${JSON.stringify(key)}:${canonicalJson(value[key])}`).join(",")}}`;
+  }
+  return JSON.stringify(value) ?? "null";
 }
 
 export function canReturnToDesign(session) {

@@ -1,0 +1,12 @@
+{
+"P076":{"face_offsets_mm":[5.2,6.4,3.15],"face_sign":[-1,-1,1],"stylus_r_mm":1.5,"job_origins_mm":[[50.42,65.42,11.6],[82.65,23.18,18.12],[9.31,80.69,15.19]],"event_error_mm":[[0.012,-0.009,0.011],[-0.013,0.008,-0.014],[0.014,0.012,0.002]],"face_tolerance_mm":0.015,"baseline":{"radius_comp":false},"revised":{"radius_comp":true}},
+"P077":{"trip_mm":0.36,"stroke_error_mm":0.1,"trip_error_mm":0.03,"sim_speed_mm_s":6,"sim_delay_s":0.11,"sim_decel_mm_s2":50,"baseline":{"travel_mm":1.35},"revised":{"travel_mm":2.05}},
+"P078":{"span_mm":176,"test_tilt_deg":0.04,"zero_bias_mm":[0.02,0.10],"events_mm":[[0.002,0.005],[-0.001,0.002],[0.001,-0.004]],"reversed_events_mm":[[0.003,-0.004],[-0.002,0.003],[0.004,-0.002]],"baseline":{"reverse":false},"revised":{"reverse":true}},
+"P086":{"samples":[[6.35,1.45,0.05],[12.70,2.4,-0.06],[19.05,3.28,0.04]],"lock_error_mm":0.04,"baseline":{"compensation":false},"revised":{"compensation":true}},
+"P099":{"tip_arm_mm":39,"desired_depth_mm":3.2,"depth_error_mm":0.08,"fixed_axis_error_mm":0.03,"baseline":{"guide_span_mm":28,"depth_stop_mm":3.42},"revised":{"guide_span_mm":82,"depth_stop_mm":3.21}},
+"P105":{"test_weight_arm_mm":37,"test_weight_g":0.8,"breakaway_force_n":0.046,"arbor_fixture_bias_gmm":2.2,"baseline":{"friction_r_mm":10},"revised":{"friction_r_mm":3}},
+"P106":{"wheel_radii_mm":[280,320],"rim_face_width_mm":12,"test_shim_dish_mm":0.95,"hub_tip_error_mm":0.05,"baseline":{"slot_mm":[263,298],"pad_heights_mm":[12.0,12.9]},"revised":{"slot_mm":[269,326],"pad_heights_mm":[12.0,12.13]}},
+"P107":{"seat_distance_mm":32,"fixture_rim_r_mm":300,"indicator_zero_mm":10.0,"known_components_mm":[2.5,-1.8],"sample_error_mm":[0.04,-0.02,0.03,0.03],"baseline":{"bore_mm":10.32},"revised":{"bore_mm":10.06}},
+"P110":{"index_radius_mm":85,"lock_play_mm":0.06,"key_width_mm":7,"groove_mm":7.18,"panel_end_dist_mm":600,"baseline":{"contacts_mm":60},"revised":{"contacts_mm":170}},
+"P245":{"frets":24,"target_scale_mm":647.7,"fret_crown_width_mm":2.65,"registration_error_mm":0.18,"notch_mm":4.8,"relief_mm":3.8,"baseline":{"scale_mm":628.65},"revised":{"scale_mm":647.7}}
+}

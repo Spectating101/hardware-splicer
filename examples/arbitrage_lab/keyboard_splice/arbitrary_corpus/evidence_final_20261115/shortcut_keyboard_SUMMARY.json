@@ -1,0 +1,47 @@
+{
+  "schema": "hs.arbitrary-keyboard-real-reference.v1",
+  "case_id": "shortcut_keyboard",
+  "repository": "bhoppe-dev/Shortcut_Keyboard",
+  "reference_path": "01_Shortcut_Keyboard_PCB/shortcut_keyboard.kicad_pcb",
+  "source_url": "https://raw.githubusercontent.com/bhoppe-dev/Shortcut_Keyboard/main/01_Shortcut_Keyboard_PCB/shortcut_keyboard.kicad_pcb",
+  "expected_source_sha256": "1234e0dead1c058cb5230fec302a0e44dcdb63f1e104b79a760c7dff0e899718",
+  "physical_donor_present": false,
+  "engine_uses_hand_written_wiring_map": false,
+  "actual_sha256": "1234e0dead1c058cb5230fec302a0e44dcdb63f1e104b79a760c7dff0e899718",
+  "intake": {
+    "schema": "hs.arbitrary-keyboard-intake.v1",
+    "reference_source_sha256": "1234e0dead1c058cb5230fec302a0e44dcdb63f1e104b79a760c7dff0e899718",
+    "reference_source_filename": "shortcut_keyboard.kicad_pcb",
+    "source_kind": "EXTERNAL_KICAD_REFERENCE_NOT_PHYSICAL_JUNK",
+    "copper_layers": 4,
+    "footprints": 74,
+    "key_switch_candidates": 8,
+    "switch_detection_methods": {
+      "known_keyboard_footprint": 8
+    },
+    "routed_track_count": 371,
+    "plated_via_count": 103,
+    "routed_conductive_zone_count": 11,
+    "unfilled_conductive_zone_names": [],
+    "source_warnings": [],
+    "eligible_for_bounded_virtual_reconstruction": false,
+    "blocker_codes": [
+      "UNSUPPORTED_LAYER_STACK"
+    ],
+    "claimed_physical_donor_present": false,
+    "physical_authority_granted": false
+  },
+  "status": "SOURCE_TRIAGE_REJECTED",
+  "verdict": {
+    "schema": "hs.arbitrary-keyboard-benchmark-verdict.v1",
+    "status": "SOURCE_REJECTED_BEFORE_MODEL",
+    "gates": {},
+    "strict_reference_digital_pass": false,
+    "source_sha256": "1234e0dead1c058cb5230fec302a0e44dcdb63f1e104b79a760c7dff0e899718",
+    "actual_discarded_keyboard_tested": false,
+    "arbitrary_unphotographed_junk_supported": false,
+    "real_keyboard_function_verified": false,
+    "physical_release": "BLOCKED_NOT_TESTED",
+    "build_ready": false
+  }
+}

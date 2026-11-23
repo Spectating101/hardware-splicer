@@ -1,0 +1,14 @@
+{
+  "pilot": "Stationary Taiwan pond platform, 20 cm freshwater Secchi disk and 5 m line",
+  "metrics": {
+    "ideal_storage_capacity_mm": 14514,
+    "candidate": {
+      "marks_checked": 50,
+      "worst_loaded_mark_error_mm": 12.0
+    },
+    "control": {
+      "marks_checked": 50,
+      "worst_loaded_mark_error_mm": 52.0
+    }
+  }
+}

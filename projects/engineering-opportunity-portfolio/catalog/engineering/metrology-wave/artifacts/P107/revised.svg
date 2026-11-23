@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="400mm" height="215mm" viewBox="0 0 400 215">
+  <title>P107 revised · full-size proof coupon</title>
+  <rect id="scale" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="10" y="6" width="20" height="10" />
+  <rect id="swing-arm-blank" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="19" y="31" width="334" height="27" />
+  <circle id="spindle" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="34" cy="44" r="5" />
+  <rect id="indicator-travel-slot" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="283" y="40" width="60" height="8" />
+  <circle id="support-seat-0" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="35" cy="93" r="5.03" />
+  <circle id="support-seat-1" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="35" cy="126" r="5.03" />
+  <circle id="shaft-gauge" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" cx="93" cy="93" r="5" />
+  <rect id="separation-gauge" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="118" y="82" width="32" height="21" />
+  <line id="rim-direction-0" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x1="45" y1="173" x2="67" y2="173" />
+  <line id="rim-direction-1" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x1="45" y1="173" x2="45" y2="151" />
+  <line id="rim-direction-2" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x1="45" y1="173" x2="23" y2="173" />
+  <line id="rim-direction-3" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x1="45" y1="173" x2="45" y2="195" />
+</svg>

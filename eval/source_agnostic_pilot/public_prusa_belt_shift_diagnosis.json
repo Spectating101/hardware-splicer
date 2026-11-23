@@ -1,0 +1,46 @@
+{
+  "scenario_id": "public_prusa_belt_shift_diagnosis",
+  "mode": "repair",
+  "expected_archetype": "generic_mechatronics",
+  "challenge": {
+    "expected_conflict_count": 0,
+    "donor_reuse_required": false,
+    "identity_continuity_required": true,
+    "description": "Troubleshoot mechanical layer shift without claiming a known physical root cause"
+  },
+  "engineering_sources": [
+    {
+      "source_id": "prusa_belt_tension",
+      "source_type": "vendor_guide",
+      "uri": "https://help.prusa3d.com/glossary/belt-tension_1597",
+      "version": "web-2026-10-20",
+      "authority_ceiling": "declared",
+      "claims": [
+        "Loose belts can cause layer shifting or ghosting",
+        "Belt tension should be checked against model-specific method"
+      ]
+    }
+  ],
+  "intake": {
+    "project_name": "public_prusa_belt_shift_diagnosis",
+    "goal": "Investigate layer shifts on an FDM printer with unknown model and no direct measurements. Compare belt tension, pulley slippage, movement obstructions and step loss; propose discrimination tests and avoid asserting a verified fix.",
+    "available_parts": [
+      {
+        "name": "FDM printer with intermittent layer shift",
+        "type": "mechanical_structure",
+        "quantity": 1
+      },
+      {
+        "name": "hex tools",
+        "type": "tool",
+        "quantity": 1
+      }
+    ],
+    "constraints": {
+      "printer_model": "unknown",
+      "observed_layer_shift": true,
+      "measured_belt_tension": "unknown",
+      "power_on_tests_allowed": false
+    }
+  }
+}

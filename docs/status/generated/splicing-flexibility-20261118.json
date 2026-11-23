@@ -1,0 +1,108 @@
+{
+  "schema": "hardware_splicer.splicing_flexibility_audit.v1",
+  "date": "2026-11-18",
+  "scope": "Existing HS ability to modify supplied sources and connections beyond authored device cases.",
+  "method": "Read production entrypoints and run fresh changed-input probes; native board and helper-board readback; explicitly separate logical plans from native artifacts.",
+  "physical_validation_performed": false,
+  "conclusion": "Reusable board-editing, module rewiring, source-bound wiring checks and specialized keyboard reconstruction exist. Generality is limited by lossy lowering, disconnected source/edit stores, specialized geometry and incomplete cross-domain revision execution.",
+  "observed_capabilities": [
+    {
+      "user_change": "Move and rotate components in a supplied published board",
+      "execution": "Production candidate REST API on KiCad9.0.2 PIC programmer demo, independent native pcbnew readback.",
+      "observed": "Two requested component changes retained all63 footprints,370 straight tracks,6 vias, original pad/net mappings and unrelated geometry. Native DRC reported10 additional violations; candidate stayed pending and original saved revision remained unchanged.",
+      "limit": "Existing copper is not rerouted by footprint movement; checks run without donor project-rule sidecars."
+    },
+    {
+      "user_change": "Replace a catalog ESP32 controller with Pico",
+      "observed": "Generated BME280 I2C connections changed GPIO21/GPIO22 to GP4/GP5 and retained six wires.",
+      "limit": "Known catalog modules; bounded ERC, no compiled firmware or physical behavior established."
+    },
+    {
+      "user_change": "Adapt a 5V sensor to a 3.3V controller",
+      "observed": "Direct wiring produced two voltage errors. An explicitly supplied level-shifter module generated12 wires via LV/HV interfaces and passed bounded ERC.",
+      "limit": "This proves execution of an explicitly specified adaptation; it does not prove autonomous discovery of the right adapter."
+    },
+    {
+      "user_change": "Re-pin custom donor/load wiring with new identifiers",
+      "observed": "Fresh declared3.3V harness contract accepted, cut list and review exports produced;12V source and excess-current substitutions blocked; changed source contract without matching retained bytes rejected.",
+      "limit": "Synthetic declared interface contracts used for flexibility probes; measurements and actual donor identity remain required."
+    },
+    {
+      "user_change": "Change a keyboard cut and selected key",
+      "observed": "Explicit helper inputs cutX107mm and SW4 produced source-bound MX daughterboard/interposer with original ROW_0/COL_3 mappings and clean native DRC. Forged live-pad cut and cross-net bridge rejected.",
+      "limit": "Two-layer/switch-board specialization; cut halves simulated as islands; add-on PCBs emitted. Destination is fixed24mm-pitch MX row; CLI --x only assesses requested cut while repair chooses scanned/automatic route."
+    }
+  ],
+  "material_gaps": [
+    {
+      "gap": "Fresh netlist compilation can lose exact package and electrical identity",
+      "evidence": "Unfamiliar QFN/SOIC/keyed-package requests yielded the same generic through-hole local pad layout; source reference/pad/net labels replaced. Bodies, placement and copper can still differ. No fallback warning appeared in geometry output.",
+      "scope": "Observed production lowering/geometry generation; final native compilation/readiness not evaluated."
+    },
+    {
+      "gap": "Uploaded source inspection is not automatically editable-source promotion",
+      "evidence": "Upload writes engineeringSources; candidate editing reads retained artifacts from a build-directory pin. No general promotion bridge found."
+    },
+    {
+      "gap": "Unknown catalog IDs may be omitted",
+      "evidence": "Direct auto-wire helper filtered unknown donor ID without warning.",
+      "scope": "Direct helper probe; downstream request-fidelity logic may reject the mismatch."
+    },
+    {
+      "gap": "Circuit import does not automatically establish arbitrary electrical ratings",
+      "evidence": "Custom voltage-limit fields did not populate canonical contract fields in the fresh projection probe."
+    },
+    {
+      "gap": "Mechanical authoring remains bounded",
+      "evidence": "STEP inspection and declared clearance/fastener checks are broader than source editing. Carrier generation is a fixed rectangular envelope without mounting holes; MultiCAD authoring supports boxes/cylinders."
+    },
+    {
+      "gap": "Whole-project changes do not propagate through all artifacts",
+      "evidence": "AI project compose action forwards a narrower input set than compose_dispatch supports and does not expose generic native/electrical candidate edits. No complete connector-move -> copper/wiring/enclosure/firmware regeneration loop found."
+    }
+  ],
+  "fix_completed": {
+    "problem": "Native curved copper was silently replaced by its endpoint chord in keyboard cut/topology extraction, allowing a missed real cut intersection.",
+    "change": "Reject unsupported PCB_ARC before endpoint conversion; generic KiCad import/edit paths remain separate.",
+    "native_regression": "Derived actual PCB_ARC with midpoint5mm off its endpoint chord is explicitly rejected; no usable extraction emitted.",
+    "affected_domain_test_command": "rtk proxy env OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 taskset -c0,3 .venv/bin/python -m pytest -q tests/test_keyboard_splice*.py",
+    "affected_domain_tests": {
+      "passed": 122,
+      "failures": 0,
+      "log_sha256": "a499373f4b8f9f80d8e2450fcae73d4e610feafee6b975f055c556690bed8610"
+    }
+  },
+  "next_engine_work_priorities": [
+    "Promote uploaded native source bundles into editable candidates with original geometry, identities and rule sidecars.",
+    "Resolve exact component footprints or clearly label/block logical-only synthetic geometry.",
+    "Connect existing edits and compatibility checks into one project revision workflow.",
+    "Track dependencies so connector/power/mechanical changes regenerate or invalidate affected outputs."
+  ],
+  "source_sha256": {
+    "kicad_edit.py": "e60df0597ee36ecdafb5ef65af339a5fe9496ea5b31104686566726b7efb5802",
+    "project_candidates.py": "1285cfe35bc4568deef2d9cc2f116b6c4eb50220f2bd5c227f0dc5cdef025817",
+    "artifact_retention.py": "641ec067df75337a6ccd884c0d8afd48e88bccc2c112d357814d9292de9a5492",
+    "engineering_source_ingestion_api.py": "31c000b6b11a20491a58f6f0c20ff5fb5dca364abbe859c0fd72e45d159e6a3b",
+    "compose_dispatch.py": "7bc84ab93de807aea8fd4a68af63b31d540528de08496964300745b577e9d337",
+    "pcb/build_to_geometry.py": "df37f8642d544c380f1d80b5957df41a13bd0d26939ccb92cdb773ff7f15a30e",
+    "pcb/module_registry.py": "84aad06435d5199decf249676a0bcf801b99342b355fdb9754de5359985ce8d6",
+    "electrical_interchange.py": "22fd97fd7078332a65757700d9479aff360bd3e40bd26cd8a6e896c3db49b203",
+    "auto_wire.py": "c3765c903b4bc910e03a581ef696edf8ead0f113fb1b1ce69d77d06ad1ecdfcb",
+    "project_wiring.py": "0925050d787519adbb71642c058783900ba4bfac6caa8b05286f55ee69d6ccdc",
+    "mechanical_fit.py": "762ef220e2b14e6072c4edc0008954018a555cc10e70526b460a23d07ee5bcca",
+    "engineering_cad_carrier.py": "191a0a4508b176cbf9c7d3b7044ca18c8b774c4db29d91395487e6a8e4a6e335",
+    "tool_workers/pcb_carrier_worker.py": "a62087ba3bc3bec5dfab6ea989a2c3ab715e4a3f8d6dd916f28d6e819b1cea9d",
+    "ai_project_tool_executor.py": "c3fe29e6d57fd92bf582a196755d5e33cf31e68998419fabd22a56d4128f7b3d",
+    "_pcbnew_helpers/keyboard_splice_extract.py": "a77f50d078f4b9d5e3a73823c3265aa28aecee59fb8f38111683b77b647f46e2"
+  },
+  "evidence_sha256": {
+    "native-board-edit.json": "544393fb339cdf6847b1a2f5d2781d203cf4cebcceb7fc0553fd93b08002b097",
+    "keyboard-splice.json": "7e1d402b30f52d1a2880fdecfe9355e3cbeea1e337fa7a088dfeb71f63106004",
+    "curved-copper-before.json": "f52563a93735b9b0738cb3b0eaac79d8b978957709522e737958485f615718b0",
+    "curved-copper-rejection.json": "46d32fe75913cccfd8d8ef4e86484904e3bc216951faf5e52d907a9b278a6732",
+    "unfamiliar-footprints.json": "7ffd7c145c9b17c4139c05c3998b49cf704e3ded03e379ab4c3519bd529881ae",
+    "electrical-adaptations.json": "5f04a599bfb784c6d2c800f30841c146167a94f3d475521d10bb0aa5981f2c28",
+    "wiring-contracts.json": "ad84f9d8ab24e7f4538ce5e13ddca683ea90bc7030bf81ece11f5b86017b1909",
+    "electrical-audit.json": "0b7de66bf56fcd86efbf702b7a5e794d90df5dfe27e035aa5ec7d1550f6d9080"
+  }
+}

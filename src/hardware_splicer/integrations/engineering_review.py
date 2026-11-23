@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
 from ..build_files import resolve_build_dir
+from ..state_paths import repo_root
 
 ADAPTER_ID = "kicad-happy"
 ADAPTER_NAME = "kicad-happy"
@@ -161,7 +162,7 @@ def _candidate_roots(explicit_root: str | Path | None = None) -> Iterable[Path]:
         yield Path(configured).expanduser()
         return
 
-    repository_root = Path(__file__).resolve().parents[3]
+    repository_root = repo_root()
     yield repository_root / "external" / "kicad-happy"
     yield Path.home() / ".local" / "share" / "hardware-splicer" / "adapters" / "kicad-happy"
 

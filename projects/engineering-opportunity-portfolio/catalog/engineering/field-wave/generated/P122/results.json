@@ -1,0 +1,15 @@
+{
+  "pilot": "Yunlin drip-filter wash station, two matched gauges over a zero-flow common bench tee",
+  "metrics": {
+    "candidate": {
+      "corners": 20,
+      "worst_simulated_pair_bar": 0.02,
+      "conservative_error_budget_bar": 0.0349
+    },
+    "control": {
+      "corners": 20,
+      "worst_simulated_pair_bar": 0.08,
+      "conservative_error_budget_bar": 0.0949
+    }
+  }
+}

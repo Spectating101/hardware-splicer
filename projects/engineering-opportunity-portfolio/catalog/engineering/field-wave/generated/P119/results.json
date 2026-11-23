@@ -1,0 +1,17 @@
+{
+  "pilot": "Changhua seeder repair bench, one optical gate on an opaque surrogate chute",
+  "metrics": {
+    "spaced": {
+      "truth": 100,
+      "detected": 100,
+      "true_timestamps": 100,
+      "false_events": 0
+    },
+    "close-pair-control": {
+      "truth": 100,
+      "detected": 50,
+      "true_timestamps": 50,
+      "false_events": 0
+    }
+  }
+}

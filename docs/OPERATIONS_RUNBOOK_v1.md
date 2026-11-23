@@ -28,10 +28,11 @@ KiCad **must** run on the same machine as compile. There is no remote KiCad work
 |----------|---------|---------|
 | `PYTHONPATH` | — | Set to `src` if not using pip install |
 | `HARDWARE_SPLICER_TMP_ROOT` | system temp | Build output directory |
-| `HARDWARE_SPLICER_STATE_DIR` | `/tmp/hardware_splicer_state` | Job DB parent |
+| `HARDWARE_SPLICER_STATE_DIR` | checkout `.cache/hardware-splicer/state`, installed `~/.local/state/hardware-splicer` | Job DB, outputs and projects parent |
 | `HARDWARE_SPLICER_JOB_DB` | under state dir | SQLite path override |
 | `HARDWARE_SPLICER_JOB_WORKERS` | `1` | In-process job workers |
-| `HARDWARE_SPLICER_SERVE_UI` | off | `1` = serve `apps/splice-ui/dist` at `/` |
+| `HARDWARE_SPLICER_SERVE_UI` | off (`hs-serve`: `auto`) | `1` require the UI build, `auto` serve it when found; see SETUP.md "Run the app" |
+| `HARDWARE_SPLICER_UI_DIST` | — | UI build directory override |
 | `HARDWARE_SPLICER_AUTOROUTE` | `0` | Keep `0` for honest v1 demos |
 | `HARDWARE_SPLICER_DRC_FIX_LOOP` | `1` | DRC retry loop in CI/prod |
 
@@ -47,7 +48,7 @@ Full list: [`INTEGRATION.md`](INTEGRATION.md).
 source .venv/bin/activate
 make splice-ui-serve
 # or
-HARDWARE_SPLICER_SERVE_UI=1 hs-serve --host 127.0.0.1 --port 8787
+hs-serve --ui --host 127.0.0.1 --port 8787
 ```
 
 **systemd:** copy [`../deploy/systemd/hardware-splicer.service.example`](../deploy/systemd/hardware-splicer.service.example), adjust paths, then:
@@ -108,7 +109,7 @@ v1 does not auto-prune old builds. Schedule cron cleanup for dirs older than N d
 cd /opt/hardware-splicer
 sudo systemctl stop hardware-splicer
 git fetch
-git checkout v1.0.1   # or new tag
+git checkout <release-tag>   # the release you deploy
 bash scripts/install_splice_v1.sh
 make splice-ui-build    # if serving UI
 hs-doctor
@@ -126,7 +127,7 @@ Read `CHANGELOG.md` and release notes for breaking API changes (rare in v1.0.x).
 | KiCad missing after OS update | Reinstall KiCad; verify `kicad-cli` on PATH |
 | Stuck job `running` | Restart service; check job store; cancel via API if needed |
 | Disk full | Clean `HARDWARE_SPLICER_TMP_ROOT`; expand volume |
-| UI 404 on `/` | Run `make splice-ui-build`; set `HARDWARE_SPLICER_SERVE_UI=1` |
+| UI 404 on `/` | Run `make splice-ui-build`; start with `hs-serve --ui`; check `ui` in `/health` |
 | DRC failures | Expected for bad intake — inspect `COMPILE_CASEFILE.json` |
 
 ---
@@ -138,8 +139,8 @@ Do **not** bind `0.0.0.0` without a reverse proxy.
 Use [`../deploy/nginx/splice-agent.conf.example`](../deploy/nginx/splice-agent.conf.example):
 
 - TLS termination
-- API key header check
-- Rate limit (optional)
+- Basic auth for browsers or a listed `X-API-Key` for scripts, on every path
+- Rate limit; unbuffered project event stream
 
 ---
 

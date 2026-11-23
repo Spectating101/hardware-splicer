@@ -1,0 +1,221 @@
+{
+  "assessment": {
+    "blocked": [],
+    "candidate_assurance_status": "blocked",
+    "changed_dependencies": [
+      {
+        "after": 3.5,
+        "before": 2.5,
+        "dependency_id": "requirement:minimum_work_runtime_h"
+      }
+    ],
+    "failing": [
+      {
+        "actual": 3.166,
+        "limit": 3.5,
+        "node_id": "check:work_runtime",
+        "passed": false,
+        "revision": 2,
+        "run_id": "a087b9b7c6124441aa4b8cbecd0c6150",
+        "summary": "work_runtime",
+        "transition": "regressed",
+        "unit": "h"
+      }
+    ],
+    "packages": {
+      "after": {
+        "name": "STUDY.zip",
+        "path": "/v1/projects/digital-b1d527732db94a519a1cf19b37a4b866/digital/revisions/2/artifacts/STUDY.zip",
+        "revision": 2,
+        "run_id": "a087b9b7c6124441aa4b8cbecd0c6150",
+        "sha256": "b216cebf7a36c40a867f481278294a26e7444012efd800232d3b1dd54f42c3a3"
+      },
+      "before": {
+        "name": "STUDY.zip",
+        "path": "/v1/projects/digital-b1d527732db94a519a1cf19b37a4b866/digital/revisions/1/artifacts/STUDY.zip",
+        "revision": 1,
+        "run_id": "77caa81a5a91429d991c3706a00e12c8",
+        "sha256": "cf3e28dfe865b8c346699f78dfc7a63b0a86a14549355b1245e83dbe50c1bfb3"
+      }
+    },
+    "retained": [
+      {
+        "check": "check:ordinary_source_margin",
+        "counts_for_candidate": true,
+        "declaration": "declared_for_evaluator",
+        "from_revision": 1,
+        "reasons": [
+          {
+            "ids": [
+              "requirement:keyboard_current_a",
+              "requirement:minimum_supply_margin_a",
+              "requirement:pi_work_current_a",
+              "study-case",
+              "study-sources"
+            ],
+            "kind": "all_declared_dependencies_unchanged"
+          }
+        ],
+        "rerun": {
+          "actual": 0.48,
+          "limit": 0.3,
+          "passed": true,
+          "revision": 2,
+          "run_id": "a087b9b7c6124441aa4b8cbecd0c6150",
+          "unit": "A"
+        },
+        "result": {
+          "actual": 0.48,
+          "limit": 0.3,
+          "passed": true,
+          "unit": "A"
+        },
+        "run_id": "77caa81a5a91429d991c3706a00e12c8"
+      },
+      {
+        "check": "check:high_keyboard_supply_limit",
+        "counts_for_candidate": true,
+        "declaration": "declared_for_evaluator",
+        "from_revision": 1,
+        "reasons": [
+          {
+            "ids": [
+              "study-case",
+              "study-sources"
+            ],
+            "kind": "all_declared_dependencies_unchanged"
+          }
+        ],
+        "rerun": {
+          "actual": 0.08,
+          "limit": 0,
+          "passed": true,
+          "revision": 2,
+          "run_id": "a087b9b7c6124441aa4b8cbecd0c6150",
+          "unit": "A"
+        },
+        "result": {
+          "actual": 0.08,
+          "limit": 0,
+          "passed": true,
+          "unit": "A"
+        },
+        "run_id": "77caa81a5a91429d991c3706a00e12c8"
+      }
+    ],
+    "stale": [
+      {
+        "check": "check:work_runtime",
+        "counts_for_candidate": false,
+        "declaration": "declared_for_evaluator",
+        "from_revision": 1,
+        "reasons": [
+          {
+            "ids": [
+              "requirement:minimum_work_runtime_h"
+            ],
+            "kind": "changed_dependency"
+          }
+        ],
+        "rerun": {
+          "actual": 3.166,
+          "limit": 3.5,
+          "passed": false,
+          "revision": 2,
+          "run_id": "a087b9b7c6124441aa4b8cbecd0c6150",
+          "unit": "h"
+        },
+        "result": {
+          "actual": 3.166,
+          "limit": 2.5,
+          "passed": true,
+          "unit": "h"
+        },
+        "run_id": "77caa81a5a91429d991c3706a00e12c8"
+      }
+    ],
+    "stale_counted_as_passing": false
+  },
+  "base_revision_unchanged": true,
+  "case_id": "fielddeck-5",
+  "change": {
+    "after": 3.5,
+    "before": 2.5,
+    "job_id": "4a233141589257afb99dea2509208240",
+    "requirement": "minimum_work_runtime_h"
+  },
+  "input": {
+    "checks": [
+      {
+        "actual": 3.166,
+        "id": "work_runtime",
+        "limit": 2.5,
+        "passed": true,
+        "unit": "h"
+      },
+      {
+        "actual": 0.48,
+        "id": "ordinary_source_margin",
+        "limit": 0.3,
+        "passed": true,
+        "unit": "A"
+      },
+      {
+        "actual": 0.08,
+        "id": "high_keyboard_supply_limit",
+        "limit": 0,
+        "passed": true,
+        "unit": "A"
+      }
+    ],
+    "package_sha256": "cf3e28dfe865b8c346699f78dfc7a63b0a86a14549355b1245e83dbe50c1bfb3",
+    "requirements": {
+      "keyboard_current_a": 0.1,
+      "minimum_supply_margin_a": 0.3,
+      "minimum_work_runtime_h": 2.5,
+      "pi_work_current_a": 1.0
+    },
+    "revision": 1,
+    "run_id": "77caa81a5a91429d991c3706a00e12c8",
+    "seal_sha256": "8e3dc57c458398018e90c1da34feec44027fa66fe59690b21b9915449c93f19e",
+    "snapshot_sha256": "cbee939f482f47a428a02e56298436841873b40c0786bd2c8b9a23e5796d2645"
+  },
+  "physical_authority_granted": false,
+  "problems": [],
+  "project_id": "digital-b1d527732db94a519a1cf19b37a4b866",
+  "ready": false,
+  "rerun_scope": "The whole Fielddeck 5 study (its registered native stages) was rerun; no other project or study.",
+  "revision": {
+    "change_request": "Raise the work-runtime target from 2.5 h to 3.5 h",
+    "checks": [
+      {
+        "actual": 3.166,
+        "id": "work_runtime",
+        "limit": 3.5,
+        "passed": false,
+        "unit": "h"
+      },
+      {
+        "actual": 0.48,
+        "id": "ordinary_source_margin",
+        "limit": 0.3,
+        "passed": true,
+        "unit": "A"
+      },
+      {
+        "actual": 0.08,
+        "id": "high_keyboard_supply_limit",
+        "limit": 0,
+        "passed": true,
+        "unit": "A"
+      }
+    ],
+    "package_sha256": "b216cebf7a36c40a867f481278294a26e7444012efd800232d3b1dd54f42c3a3",
+    "parent_revision": 1,
+    "requirements_met": false,
+    "revision": 2,
+    "run_id": "a087b9b7c6124441aa4b8cbecd0c6150",
+    "seal_sha256": "bac6807f88ee21afb8a2d2e9c2d5ebbbec10f9d8e96725c0a2f0b650939ec06a",
+    "snapshot_sha256": "61620cd1af86cea91158d1f1b9972b7fc1514d1b48945d4676827412353f5578"
+  }
+}

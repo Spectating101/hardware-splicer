@@ -1,0 +1,80 @@
+{
+  "case_id": "ender3-penplotter",
+  "requirements": {
+    "drawing_width_mm": 100.0,
+    "drawing_height_mm": 80.0,
+    "pen_diameter_mm": 10.0,
+    "pen_lift_mm": 3.0
+  },
+  "requirements_met": true,
+  "physical_validation_performed": false,
+  "constraints": [
+    {
+      "id": "pen_tip_on_bed",
+      "passed": true,
+      "actual": 71.5,
+      "limit": 0.0,
+      "unit": "mm",
+      "basis": "Affine segment endpoints bound all linear XY positions"
+    },
+    {
+      "id": "fixture_vertical_clearance",
+      "passed": true,
+      "actual": 29.0,
+      "limit": 2.0,
+      "unit": "mm",
+      "basis": "Measured fixture lower face30mm above tip minus assumed1mm tape; excludes frame/wires"
+    },
+    {
+      "id": "controller_travel",
+      "passed": true,
+      "actual": 70.30000000000001,
+      "limit": 0.0,
+      "unit": "mm",
+      "basis": "Manufacturer Configuration.h 0..235mm XY, compensated tip offset"
+    },
+    {
+      "id": "pen_up_travel",
+      "passed": true,
+      "actual": 0.0,
+      "limit": 0.0,
+      "unit": "segments",
+      "basis": "Every XY travel move must stay at requested lift"
+    },
+    {
+      "id": "pen_lift_clearance",
+      "passed": true,
+      "actual": 2.0,
+      "limit": 1.0,
+      "unit": "mm",
+      "basis": "Assumed tape height <=1mm; uncertainty is not physical validation"
+    },
+    {
+      "id": "Z_travel",
+      "passed": true,
+      "actual": 3.0,
+      "limit": 3.0,
+      "unit": "mm",
+      "basis": "Every commanded segment endpoint lies within paper Z0 and requested lift"
+    }
+  ],
+  "metrics": {
+    "draw_length_mm": 771.8085921943645,
+    "travel_length_mm": 560.2469361579608,
+    "ideal_feed_time_s": 124.39320602733439,
+    "segment_count": 305,
+    "stroke_count": 12,
+    "pen_center_bed_margin_mm": 71.5,
+    "fixture_bed_clearance_mm": 29.0,
+    "controller_travel_margin_mm": 70.30000000000001,
+    "pen_lift_mm": 3.0,
+    "non_drawing_XY_without_lift": 0,
+    "minimum_commanded_Z_mm": 0.0,
+    "maximum_commanded_Z_mm": 3.0
+  },
+  "limitations": [
+    "Initial position and pen-paper datum are assumed; homing is excluded.",
+    "Ideal feed time excludes acceleration, controller buffering, backlash and settling.",
+    "Bed and fixture corridor checks exclude wiring, rollers, machine frame and human handling."
+  ]
+}

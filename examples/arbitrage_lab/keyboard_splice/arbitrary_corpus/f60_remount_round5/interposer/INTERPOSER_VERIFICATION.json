@@ -1,0 +1,15 @@
+{
+  "schema": "hs.keyboard-interposer-native-drc.v1",
+  "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+  "topology_sha256": "6d86e27afeb820b6a8523f3b4e479b6a77240ef03dc7e53f4fba87c8c6f261c7",
+  "pcb_sha256": "80b371d08b3978d9cd492e5bb2ba045785a5055b062442a718c1a567086e43f0",
+  "pcb_filename": "reference_bridge_interposer.kicad_pcb",
+  "channel_count": 17,
+  "native_kicad_exit": 0,
+  "native_drc_errors": 0,
+  "native_drc_warnings": 0,
+  "native_unconnected_items": 0,
+  "native_design_checks_passed": true,
+  "physical_authority_granted": false,
+  "fabrication_release": "BLOCKED_PREVIEW_ONLY"
+}

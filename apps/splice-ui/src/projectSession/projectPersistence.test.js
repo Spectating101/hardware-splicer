@@ -6,7 +6,7 @@ import {
   listPersistentProjects,
   loadPersistentProject,
   savePersistentProject,
-} from "./projectPersistence.js";
+} from "./projectPersistence";
 
 function jsonResponse(body, { ok = true, status = 200, statusText = "OK" } = {}) {
   return {

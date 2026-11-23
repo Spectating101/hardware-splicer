@@ -1,0 +1,18 @@
+[
+  {
+    "script": "setup.sh",
+    "sha256": "b4ea5a11c76e46f32fba768e157a53a271080deb3f86e8b2a561036f17f659f9",
+    "bash_syntax_checked": true,
+    "default_plan_exit_code": 0,
+    "plan_output": "Fielddeck 7: Raspberry Pi OS 64-bit Desktop (Trixie)\nPackages: tmux git curl wget python3 python3-venv minicom picocom openssh-client openssh-server man-db manpages less nano htop usbutils\nOn the Pi, use --apply to install. Configure SSH keys and landscape orientation through Imager / Control Centre.\n",
+    "hardware_execution_performed": false
+  },
+  {
+    "script": "healthcheck.sh",
+    "sha256": "0d54729e2183ecd4c4b30710b4a65dc02b5cbcaee62773a7f846ca0cef250528",
+    "bash_syntax_checked": true,
+    "default_plan_exit_code": 0,
+    "plan_output": "Future Pi checks: model, OS, kernel, USB devices, DSI status, temperature, throttling and network addresses.\nUse --capture on the Pi; this plan does not test hardware.\n",
+    "hardware_execution_performed": false
+  }
+]

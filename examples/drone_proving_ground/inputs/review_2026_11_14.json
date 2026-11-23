@@ -1,0 +1,35 @@
+{
+  "schema": "hs.drone_proving_ground.review.v1",
+  "source": "Independent pre-purchase review of this package at commit b8889414, dated 2026-11-14, with its own recompute script. The values below are what that commit stated; the corrected values are recomputed by build_hs3g_package.py.",
+  "was": {
+    "stack_mass_g": 13.5,
+    "carbon_density_g_cm3": 1.55,
+    "flash_mb": 16,
+    "uarts_usable": 5,
+    "uarts_spare": 2,
+    "stack_price_usd": 59.99,
+    "camera_price_usd": 17.9,
+    "auw_g": 203.87,
+    "payload_allowance_g": 30.4,
+    "tw_full": 5.91,
+    "tw_limited": 5.08,
+    "hover_time_min": 8.0,
+    "bom_total_usd": 336.98,
+    "arm_f1_hz": 320.0,
+    "arm_f1_low_hz": 272.0,
+    "cutter_thicknesses": "only 1.0 and 1.6 mm",
+    "smallest_web_mm": 0.65,
+    "motor_patterns": "9 mm and 12 mm bolt circles on every pad",
+    "gps": "Matek M10Q-5883",
+    "strap": "20 mm slots ending at y = +-10 mm, on the stack screw centres; pack drawn lengthwise over both slots",
+    "hardware_g": 6.0,
+    "motor_screw": "M2x6, plate thickness not considered",
+    "stack_screws": "not listed"
+  },
+  "reviewer_estimates": {
+    "auw_g": 209.0,
+    "payload_allowance_g": 26.0,
+    "arm_f1_bias_hz": 178.0,
+    "arm_bias_e_gpa": 17.0
+  }
+}

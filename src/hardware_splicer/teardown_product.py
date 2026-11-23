@@ -7,6 +7,7 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
+from .state_paths import repo_root
 from .multicad_toolchain import validate_manifest, check_native_outputs, canonical, digest, require
 
 SCHEMA = "hardware_splicer.teardown_interactive_product.v1"
@@ -65,7 +66,7 @@ def export(multicad: Path, output: Path) -> dict:
             "refusing to overwrite an existing Teardown machine")
     machine = out / "machine"
     machine.mkdir(parents=True, exist_ok=True)
-    source = Path(__file__).resolve().parents[2] / "assets/teardown/hs_machine_main.js"
+    source = repo_root() / "assets/teardown/hs_machine_main.js"
     require(source.is_file(), "HS Teardown source adapter absent")
     template = source.read_text()
     token = "__HS_TEARDOWN_MODEL_JSON__"

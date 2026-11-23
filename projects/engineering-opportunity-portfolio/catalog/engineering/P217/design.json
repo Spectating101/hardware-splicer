@@ -1,0 +1,28 @@
+{
+  "device": "Apple iPad (9th generation), bare, landscape, Home button on the right",
+  "device_size_mm": [250.6, 174.1, 7.5],
+  "active_pixels": [2160, 1620],
+  "pixel_density_ppi": 264,
+  "source": "https://support.apple.com/en-us/111898",
+  "edge_margin_mm": [9, 8],
+  "locator_clearance_per_side_mm": 0.4,
+  "aperture_inset_mm": 3.2,
+  "corner_radius_mm": 2,
+  "allowance_mm": {
+    "display_center": 0.45,
+    "screw_translation": 0.30,
+    "cut_per_edge": 0.20
+  },
+  "yaw_deg": 0.15,
+  "minimum_aperture_mm": 20,
+  "minimum_web_mm": 5,
+  "minimum_edge_swipe_mm": 5,
+  "swipe_nominal_mm": 7.5,
+  "layout": {
+    "columns_x_px": [110, 610, 1110, 1610],
+    "rows_y_px": [160, 640, 1120],
+    "target_size_px": [440, 340],
+    "labels": ["Yes", "No", "Help", "Stop", "More", "Less", "Wait", "Again", "Left", "Right", "Start", "Done"]
+  },
+  "revision_2": {"cell": "r2c2", "shift_x_px": 56, "width_change_px": -56}
+}

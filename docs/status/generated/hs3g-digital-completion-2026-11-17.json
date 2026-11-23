@@ -1,0 +1,472 @@
+{
+  "schema": "hardware_splicer.hs3g_digital_completion.v1",
+  "date": "2026-11-17",
+  "source_head": "7827cb9c7ea888a3bf6f11d2849e2e9cd704ad6b",
+  "branch": "integration/github-features-20261116",
+  "requested_objective": "Simulation and 3D representative only; user has no parts and explicitly excluded physical work.",
+  "digital_objective_complete": true,
+  "physical_work_requested": false,
+  "open_actions": [],
+  "deliverable": "examples/drone_proving_ground/digital/reference",
+  "viewer": "examples/drone_proving_ground/digital/reference/VIEWER.html",
+  "archive": "examples/drone_proving_ground/digital/HS3G_B_DIGITAL.zip",
+  "archive_sha256": "44dd10f6d31a791e188aaad29603adb85679fa445b3e7a4f1d5ac3772ee698e3",
+  "archive_bytes": 5826902,
+  "artifact_count": 20,
+  "independent_digital_check_count": 95,
+  "recording_framing": {
+    "accepted": true,
+    "header_bottom_px": 47,
+    "margin_px": 8,
+    "max_xy_px": [
+      459.12674614942773,
+      296.06849701085656
+    ],
+    "min_xy_px": [
+      136.38032226654127,
+      60.33158345882683
+    ]
+  },
+  "reference_verification_sha256": "9cc38c3d9bfe494994bca8e6fb35299dc907bc2c2d580c6d1fc7def02823510b",
+  "representation": {
+    "revision": "HS-3G-B",
+    "native_frame": true,
+    "assembly_parts": 32,
+    "mass_g": 234.9,
+    "cad_units": "STEP millimetres; GLB/dynamics metres",
+    "centre_of_mass_m": [
+      2.1285504228173523e-06,
+      -4.993884604823921e-11,
+      -0.001223325185316631
+    ],
+    "inertia_tensor_kg_m2": [
+      [
+        0.00022835905838985182,
+        3.0862338229028664e-14,
+        5.044297428396367e-06
+      ],
+      [
+        3.0862338229028664e-14,
+        0.00021793282115856427,
+        2.639749822998901e-13
+      ],
+      [
+        5.044297428396367e-06,
+        2.639749822998901e-13,
+        0.0003066966961678959
+      ]
+    ],
+    "omitted_inertia_cross_term_relative_max": 0.023146111731037616,
+    "scope": "Native frame plus representative components and propeller blades; not vendor-detailed CAD."
+  },
+  "simulation": {
+    "engine": "PyBullet DIRECT, 240 Hz native rigid-body integration",
+    "controller": "Simulation position PID / SO(3) attitude PD, 60 Hz",
+    "total_physics_rows": 16320,
+    "total_seconds_simulated": 68.0,
+    "scenarios": [
+      {
+        "accepted": true,
+        "checks": {
+          "controlled_ground_contact": true,
+          "finite_state": true,
+          "gust_recovery_error_m": true,
+          "hover_error_m": true,
+          "landing_speed_m_s": true,
+          "max_tracking_tilt_deg": true,
+          "native_force_balance": true,
+          "position_velocity_consistency": true,
+          "timebase": true,
+          "tracking_rms_m": true,
+          "yaw_tracking": true
+        },
+        "metrics": {
+          "consumed_mah_est": 20.439417161734806,
+          "fault_detected": false,
+          "final_position_m": [
+            -0.01313422286933502,
+            0.008435790856408979,
+            0.033262139493817414
+          ],
+          "force_balance_rms_m_s2": 1.4065561081657125e-15,
+          "gust_recovery_error_m": 0.04001556424009155,
+          "hover_error_m": 0.011562468474567864,
+          "landed_contact": true,
+          "landing_speed_m_s": 0.11659125272444161,
+          "max_rpm": 15519.219907397937,
+          "max_tracking_tilt_deg": 4.53086516568853,
+          "peak_current_a_est": 3.0922431793603975,
+          "position_velocity_rms_m_s": 4.400928988770165e-15,
+          "rows": 6720,
+          "seconds": 28.0,
+          "tracking_rms_m": 0.05675998083029617,
+          "yaw_error_at_hold_deg": 0.00024351102552849953
+        },
+        "scenario": {
+          "expected": "controlled_landing",
+          "extra_mass_g": 0.0,
+          "id": "nominal",
+          "motor_failure": null
+        }
+      },
+      {
+        "accepted": true,
+        "checks": {
+          "controlled_ground_contact": true,
+          "finite_state": true,
+          "gust_recovery_error_m": true,
+          "hover_error_m": true,
+          "landing_speed_m_s": true,
+          "max_tracking_tilt_deg": true,
+          "native_force_balance": true,
+          "position_velocity_consistency": true,
+          "timebase": true,
+          "tracking_rms_m": true,
+          "yaw_tracking": true
+        },
+        "metrics": {
+          "consumed_mah_est": 21.024891473903697,
+          "fault_detected": false,
+          "final_position_m": [
+            -0.013195933198319371,
+            0.0084815910111634,
+            0.03326213953377131
+          ],
+          "force_balance_rms_m_s2": 1.4098980856693355e-15,
+          "gust_recovery_error_m": 0.04025798463744165,
+          "hover_error_m": 0.007488030195550651,
+          "landed_contact": true,
+          "landing_speed_m_s": 0.11831814868332485,
+          "max_rpm": 15689.18548117276,
+          "max_tracking_tilt_deg": 4.502905281040545,
+          "peak_current_a_est": 3.192832409787435,
+          "position_velocity_rms_m_s": 4.424622047732452e-15,
+          "rows": 6720,
+          "seconds": 28.0,
+          "tracking_rms_m": 0.0570975494391757,
+          "yaw_error_at_hold_deg": 0.0002580662330671778
+        },
+        "scenario": {
+          "expected": "controlled_landing",
+          "extra_mass_g": 5.0,
+          "id": "mass_plus_5g",
+          "motor_failure": null
+        }
+      },
+      {
+        "accepted": true,
+        "checks": {
+          "failure_reached_ground": true,
+          "finite_state": true,
+          "injected_motor_stopped": true,
+          "loss_of_control_observed": true,
+          "native_force_balance": true,
+          "position_velocity_consistency": true,
+          "timebase": true
+        },
+        "metrics": {
+          "consumed_mah_est": 6.6894251804334575,
+          "fault_detected": true,
+          "final_position_m": [
+            0.38250640122304486,
+            0.23794948977559705,
+            0.03326443808955244
+          ],
+          "force_balance_rms_m_s2": 3.223993288582877e-15,
+          "gust_recovery_error_m": null,
+          "hover_error_m": 0.011562468474567864,
+          "landed_contact": true,
+          "landing_speed_m_s": null,
+          "max_rpm": 14572.703530509534,
+          "max_tracking_tilt_deg": 170.73049481232906,
+          "peak_current_a_est": 3.0922431793603975,
+          "position_velocity_rms_m_s": 4.131687934414493e-15,
+          "rows": 2880,
+          "seconds": 12.0,
+          "tracking_rms_m": 0.4469566929315131
+        },
+        "scenario": {
+          "duration_s": 12,
+          "expected": "loss_of_control_detected",
+          "extra_mass_g": 0.0,
+          "id": "motor_failure",
+          "motor_failure": {
+            "at_s": 8.0,
+            "index": 0
+          }
+        }
+      }
+    ],
+    "gravity_oracle": {
+      "accepted": true,
+      "actual_vz_m_s": -2.451662499999998,
+      "actual_z_m": 0.6884345572916669,
+      "api_version": 202010061,
+      "engine": "PyBullet DIRECT",
+      "expected_vz_m_s": -2.4516625,
+      "expected_z_m": 0.6884345572916666,
+      "steps": 60,
+      "zero_motor_thrust": true
+    },
+    "scope_limits": [
+      "Parameterized representative, not a physically calibrated digital twin.",
+      "Native CAD frame; simplified component, propeller and collision geometry.",
+      "Motor thrust uses the retained maker table; behavior below its first row is quadratic extrapolation. These low-throttle missions operate below that first measured bench row.",
+      "Motor lag, yaw drag, linear drag and controller gains are declared assumptions.",
+      "Ideal full-state feedback; no sensor noise, GNSS/RF link, INAV SITL, flexible-frame, CFD or battery-chemistry simulation.",
+      "Controller is a simulation position PID with SO(3) attitude PD, not a deployable INAV flight profile.",
+      "No purchasing, machining, firmware flashing, physical motors or flight are part of the requested digital completion."
+    ]
+  },
+  "operator_result": {
+    "artifacts_sha256": {
+      "candidate/BOM.csv": "f7f28a1c05e590e8cb87b3b5809fa5450f15d4745a16174f07a97dfd277c3ac1",
+      "candidate/POST_DRILL_COORDINATES.csv": "dd74b3577dda882ef42845fdc82b2d561f98080705697e330a2a64bacfab7ad0",
+      "candidate/digital/SIMULATION.json": "bd2e828f553c99cbd6010815b3a6733b7d2b640b4272453b6b0edbc2638740ec",
+      "candidate/digital/VIEWER.html": "8208c8c873df913318951614d7b333f2a17f5af0f543522be392fd740f2a27ea",
+      "candidate/digital/model.json": "81d8db97b46ae6a9edab5885f7ba929a51f07e6cd4d40cb0d282a39b77a53a75",
+      "candidate/digital/verification.json": "46a45d9c972373fbc22b2c09c9fa61d322c2ed33f44880e6fb1aa1133ad07d66",
+      "candidate/results.json": "28c0653e1a7dedaf5be7d86c13a4610dcdf9388427d0abc307753920610066f8",
+      "candidate/verification.json": "f6de4b50e321b9742d0cc50fbbde235737e34415862f46d48ee599b69beadea1"
+    },
+    "canonical_machine_release": {
+      "achieved": "build_ready",
+      "allowed": false,
+      "blockers": [
+        {
+          "code": "safety_not_closed",
+          "message": "safety requirement 'req-physical' is not closed by passing verification"
+        },
+        {
+          "code": "release_state_not_reached",
+          "message": "requested operationally_authorized, but evidence supports only build_ready"
+        }
+      ],
+      "physical_measurements_count": 0,
+      "requested": "operationally_authorized",
+      "software_evidence_count": 1,
+      "verification_states": {
+        "verify-physical": "planned",
+        "verify-software": "passed"
+      }
+    },
+    "case_id": "hs3g_drone_digital",
+    "chosen_route": "native_drone_digital_simulation",
+    "completion_scope": "Digital 3D representation and parameterized simulation; physical completion not requested.",
+    "digital_objective_complete": true,
+    "engineering_acceptance": true,
+    "execute_requested": true,
+    "fabrication_authorized": false,
+    "objective": "Complete the HS-3G-B digital assembly, offline 3D viewer and native flight simulation",
+    "open_actions": [],
+    "physical_validation": false,
+    "physical_work_requested": false,
+    "power_on_authorized": false,
+    "real_repair_confirmed": false,
+    "registered_source": "examples/drone_proving_ground",
+    "schema_version": "hardware_splicer.workshop_operator.v1",
+    "scope_limits": [
+      "Parameterized representative, not a physically calibrated digital twin.",
+      "Native CAD frame; simplified component, propeller and collision geometry.",
+      "Motor thrust uses the retained maker table; behavior below its first row is quadratic extrapolation. These low-throttle missions operate below that first measured bench row.",
+      "Motor lag, yaw drag, linear drag and controller gains are declared assumptions.",
+      "Ideal full-state feedback; no sensor noise, GNSS/RF link, INAV SITL, flexible-frame, CFD or battery-chemistry simulation.",
+      "Controller is a simulation position PID with SO(3) attitude PD, not a deployable INAV flight profile.",
+      "No purchasing, machining, firmware flashing, physical motors or flight are part of the requested digital completion."
+    ],
+    "source_sha256": "1edca1ce30fe46065d80de1729d0f517735b67e906bc1e8192a1887acc2fe77f",
+    "status": "verified_digital_simulation_complete",
+    "trace": [
+      {
+        "details": "Reuse the existing drone project, frame engine, mass model and maker data; preserve GPS and FPV.",
+        "existing_engine": "HS-3G source-backed revision inputs",
+        "stage": "selection",
+        "state": "passed"
+      },
+      {
+        "details": "Measured bounded frame candidates; retained the first design satisfying the fixed constraints.",
+        "existing_engine": "CadQuery + HS mass/clearance/propulsion engines",
+        "returncode": 0,
+        "stage": "design_iteration",
+        "state": "passed",
+        "stderr": "",
+        "stdout": "{\n  \"revision\": \"HS-3G-B\",\n  \"auw_g\": 234.9,\n  \"checks\": {\n    \"nominal_mass_reserve\": true,\n    \"battery_uncertainty_reserve\": true,\n    \"battery_continuous_at_design_current\": true,\n    \"connector_at_design_current\": true,\n    \"esc_at_design_current\": true,\n    \"tw_at_249g\": true,\n    \"prop_radial_clearance\": true,\n    \"prop_adjacent_gap\": true,\n    \"prop_vertical_clearance\": true,\n    \"strap_wraps_pack\": true,\n    \"strap_clears_stack\": true,\n    \"strap_length\": true,\n    \"arm_roots_filleted\": true,\n    \"motor_pattern\": true,\n    \"cutter_blank_rules\": true\n  }\n}\n"
+      },
+      {
+        "details": "Separate verifier reread produced artifacts and bound its result to their hashes; physical work remains unverified.",
+        "existing_engine": "STEP reimport + DXF/STL inspection + pinned firmware/HEX checks",
+        "failed_checks": [],
+        "returncode": 0,
+        "source_unchanged": true,
+        "stage": "independent_acceptance",
+        "state": "passed",
+        "stderr": "",
+        "stdout": "{\n  \"engineering_acceptance\": true,\n  \"failed_checks\": []\n}\n"
+      },
+      {
+        "details": "Operate the same drone model through takeoff, path tracking, yaw, gust, landing and a stopped-motor case.",
+        "existing_engine": "Native STEP + representative assembly + PyBullet DIRECT",
+        "returncode": 0,
+        "stage": "digital_model_and_simulation",
+        "state": "passed",
+        "stderr": "/tmp/hs-function-cad-venv/lib/python3.13/site-packages/cadquery/utils.py:39: FutureWarning: save will be removed in the next release.\n  warn(f\"{f.__name__} will be removed in the next release.\", FutureWarning)\npybullet build time: Mar  1 2026 17:56:37\n",
+        "stdout": "{\"scenario\": \"nominal\", \"accepted\": true, \"metrics\": {\"tracking_rms_m\": 0.05675998083029617, \"hover_error_m\": 0.011562468474567864, \"gust_recovery_error_m\": 0.04001556424009155, \"max_tracking_tilt_deg\": 4.53086516568853, \"landing_speed_m_s\": 0.11659125272444161, \"force_balance_rms_m_s2\": 1.4065561081657125e-15, \"position_velocity_rms_m_s\": 4.400928988770165e-15, \"max_rpm\": 15519.219907397937, \"peak_current_a_est\": 3.0922431793603975, \"consumed_mah_est\": 20.439417161734806, \"final_position_m\": [-0.01313422286933502, 0.008435790856408979, 0.033262139493817414], \"landed_contact\": true, \"fault_detected\": false, \"rows\": 6720, \"seconds\": 28.0, \"yaw_error_at_hold_deg\": 0.00024351102552849953}}\n{\"scenario\": \"mass_plus_5g\", \"accepted\": true, \"metrics\": {\"tracking_rms_m\": 0.0570975494391757, \"hover_error_m\": 0.007488030195550651, \"gust_recovery_error_m\": 0.04025798463744165, \"max_tracking_tilt_deg\": 4.502905281040545, \"landing_speed_m_s\": 0.11831814868332485, \"force_balance_rms_m_s2\": 1.4098980856693355e-15, \"position_velocity_rms_m_s\": 4.424622047732452e-15, \"max_rpm\": 15689.18548117276, \"peak_current_a_est\": 3.192832409787435, \"consumed_mah_est\": 21.024891473903697, \"final_position_m\": [-0.013195933198319371, 0.0084815910111634, 0.03326213953377131], \"landed_contact\": true, \"fault_detected\": false, \"rows\": 6720, \"seconds\": 28.0, \"yaw_error_at_hold_deg\": 0.0002580662330671778}}\n{\"scenario\": \"motor_failure\", \"accepted\": true, \"metrics\": {\"tracking_rms_m\": 0.4469566929315131, \"hover_error_m\": 0.011562468474567864, \"gust_recovery_error_m\": null, \"max_tracking_tilt_deg\": 170.73049481232906, \"landing_speed_m_s\": null, \"force_balance_rms_m_s2\": 3.223993288582877e-15, \"position_velocity_rms_m_s\": 4.131687934414493e-15, \"max_rpm\": 14572.703530509534, \"peak_current_a_est\": 3.0922431793603975, \"consumed_mah_est\": 6.6894251804334575, \"final_position_m\": [0.38250640122304486, 0.23794948977559705, 0.03326443808955244], \"landed_contact\": true, \"fault_detected\": true, \"rows\": 2880, \"seconds\": 12.0}}\n"
+      },
+      {
+        "details": "Digital completion is bound to actual artifacts; physical work is outside this requested objective.",
+        "existing_engine": "CAD/GLB reimport + full telemetry reconstruction + native gravity oracle",
+        "failed_checks": [],
+        "returncode": 0,
+        "source_unchanged": true,
+        "stage": "digital_independent_acceptance",
+        "state": "passed",
+        "stderr": "pybullet build time: Mar  1 2026 17:56:37\n",
+        "stdout": "{\"digital_objective_complete\": true, \"failed_checks\": []}\n"
+      }
+    ]
+  },
+  "operator_result_path": ".cache/hardware-splicer/drone-digital-20261117/operator-corrected/HS_OPERATOR_RESULT.json",
+  "operator_result_sha256": "5aa2743b70b46f34bfb63faaa6d8d1f6eb4e27b225c69a5180d14e5ce7a77c15",
+  "focused_native_tests": {
+    "tests": 61,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 61,
+    "seconds": 41.878,
+    "junit_path": ".cache/hardware-splicer/drone-digital-20261117/focused-native.xml",
+    "junit_sha256": "75f456120f917c25ca54ff8e581ebda14d10d0ae8c82235e587682d4e6e1c9a1",
+    "failed_tests": [],
+    "skip_reasons": {}
+  },
+  "complete_native_root_suite": {
+    "tests": 4263,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 3,
+    "passed": 4260,
+    "seconds": 1588.489,
+    "junit_path": ".cache/hardware-splicer/drone-digital-20261117/full-native.xml",
+    "junit_sha256": "c2512be175c99644c856540e333fd67fad32da5d13750c374e46f609d5995056",
+    "failed_tests": [],
+    "skip_reasons": {
+      "tests.test_donor_board_vision_live_optional::test_live_donor_board_vision_smoke": "set HARDWARE_SPLICER_RUN_VISION_LIVE=1 to run live donor vision",
+      "tests.test_vision_gemini::test_gemini_live_smoke_optional": "set HARDWARE_SPLICER_GEMINI_LIVE_TEST=1 to run live Gemini smoke test",
+      "tests.test_vision_live_optional::test_live_vision_returns_structured_report": "set HARDWARE_SPLICER_RUN_VISION_LIVE=1 to run live vision"
+    }
+  },
+  "full_native_log": ".cache/hardware-splicer/drone-digital-20261117/full-native.log",
+  "full_native_log_sha256": "81bab3e6defdbbb07d8d5d7f667ab7de78c7810ddb4999a877fa8d06339aa06b",
+  "runtime": {
+    "python": "3.13.5",
+    "pytest": "8.4.2",
+    "numpy": "2.5.4",
+    "pybullet": "3.2.7",
+    "cadquery": "2.6.1",
+    "trimesh": "4.12.2",
+    "matplotlib": "3.10.8",
+    "pillow": "13.0.0",
+    "pypdf": "6.18.1",
+    "ezdxf": "1.4.5",
+    "PyYAML": "6.0.3"
+  },
+  "full_profile": {
+    "HS_LIVE_NET": "1",
+    "HS_VENDOR_LIBS": "/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.cache/hardware-splicer/device-application/device-application-euadmriv/project/.pio/libdeps/application",
+    "HARDWARE_SPLICER_RUN_FREEROUTING": "1",
+    "HARDWARE_SPLICER_FREEROUTING_JAR": "/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.cache/hardware-splicer/extended-verification-20261116/freerouting-2.1.0.jar",
+    "DISPLAY": "",
+    "WAYLAND_DISPLAY": "",
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "cpu_affinity": [
+      0,
+      3
+    ],
+    "workers": 1
+  },
+  "runner": ".cache/hardware-splicer/extended-verification-20261116/run_native_profile.py",
+  "cluster_health": "Below minimum: local worker healthy; all three remote SSH probes failed. Used one local worker, CPU 0 and 3, single-threaded BLAS.",
+  "standalone_archive_run": {
+    "result": ".cache/hardware-splicer/drone-digital-20261117/standalone-run-final/SIMULATION.json",
+    "result_sha256": "18c5b345f06e123d840439d39dd79e2caee6f1aab1db08260529ffa0076090a9",
+    "simulation_acceptance": true,
+    "scenario_count": 3,
+    "environment": "Existing native interpreter; PYTHONPATH emptied, working directory inside the unpacked ZIP. No repo or CAD builder imported.",
+    "fresh_dependency_install_tested": false
+  },
+  "browser_checks": {
+    "desktop_webgl": true,
+    "mobile_width_390_no_overflow": true,
+    "play_advances": true,
+    "scrub_changes_state": true,
+    "motor_failure_m1_zero_rpm": true,
+    "explode_and_labels": true,
+    "external_resource_requests": [],
+    "tested_client_javascript_and_geometry_match_final": true
+  },
+  "direct_file_check": {
+    "file_url": "file:///home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/examples/drone_proving_ground/digital/reference/VIEWER.html",
+    "viewer_sha256": "48f2712ab09c50b1248424451e0cbc7e53300c4a94dd5a32d40cde1f4f612ed2",
+    "chrome_returncode": 0,
+    "native_webgl_canvas": true,
+    "no_visible_error": true,
+    "rendered_motor_readouts": true
+  },
+  "direct_file_screenshot": {
+    "path": ".cache/hardware-splicer/drone-digital-20261117/viewer-direct-file.png",
+    "sha256": "2b669eb66cf2a5d27a825662272ef3a343772ae058eb292646815eb94164c129",
+    "visually_inspected": true
+  },
+  "browser_preview_images": {
+    "viewer-exploded-qa.png": "e87113e5752ad9c8efe26fcbdd76b8e55ab6b5fd9088535045cacb29a2aa4fc9",
+    "viewer-mobile-qa.png": "dcece1881f10727b5ae8f4891def7ded4135cab0032b246a8ba5335aaa8ef0c7"
+  },
+  "visual_qa": {
+    "assembly_and_exploded": true,
+    "telemetry_plot": true,
+    "direct_file_workshop": true,
+    "flight_recording_frames_checked_s": [
+      0,
+      5,
+      10,
+      17,
+      23,
+      27.5
+    ],
+    "corrected_flight_contact_sheet_sha256": "6c2065a49b567835ef8a23892951a2a68ea729b7452ebc4add5c9f60b52d871c"
+  },
+  "github_recheck": {
+    "main_head": "38dbad2b759a9313b81a5b10bfde7f20d64f308c",
+    "main_unchanged_since_prior_integration": true,
+    "updated_keyboard_pr": 342,
+    "updated_keyboard_head": "70a1e8decd059b386b0e672ba395eff60e895d36",
+    "already_integrated_keyboard_head": "f2310b96fb42c1bd140bcd89c6a1791f9e501a70",
+    "keyboard_disposition": "Not imported into this digital-drone completion: unrelated draft changes are outside the clarified objective.",
+    "remote_mutations_performed": false
+  },
+  "remaining_provider_skips": "Three pre-existing live-vision checks, outside this offline digital deliverable. Prior verification found missing Qwen keys and an invalid Gemini key; no successful live vision is claimed.",
+  "unchanged_app_suites": "No app source edits; prior Mecha 32, 3D 15 and UI 82/build results remain recorded in full-suite-verification-2026-11-16.json.",
+  "original_local_work_sha256": {
+    "src/hardware_splicer/stored_source_parser.py": "afabeaa10c97ced6acad8721cc2eee4a91179c13340cea074b09f201bdc97539",
+    "src/hardware_splicer/kicad_registered_source_check.py": "9591b4ff9baec9426beb8b8e2de15293839fc080a51590120edde782a7191fb3",
+    "tests/test_kicad_registered_source_check.py": "c3f8fccf1b42a2ce9adc8cbdb00fedf96b8fc1333c86d0386478405ae0fe5b60"
+  },
+  "original_local_work_unchanged": true,
+  "physical_validation": false,
+  "fabrication_authorized": false,
+  "power_on_authorized": false,
+  "flight_authorized": false,
+  "completion_basis": "Concrete digital artifacts, native physics execution, independent reconstruction, portable runtime and working offline 3D UI. No physical steps are required by the user objective.",
+  "preliminary_run_interrupted": {
+    "reason": "Visual review found the recording header cropped the aircraft. Corrected the camera contract, added projected-aircraft framing acceptance and a regression, rebuilt and reverified all deliverables, then restarted the complete root suite on final source. No complete-run claim is made for the interrupted run.",
+    "log": ".cache/hardware-splicer/drone-digital-20261117/full-native.log.pre-framing"
+  },
+  "preview_image": {
+    "path": "docs/status/generated/hs3g-digital-workshop-2026-11-17.png",
+    "sha256": "2b669eb66cf2a5d27a825662272ef3a343772ae058eb292646815eb94164c129"
+  },
+  "post_test_cleanup": "Removed only __pycache__/hs3g_sim.cpython-313.pyc created by the packaged-runtime test. No tracked deliverable bytes changed."
+}

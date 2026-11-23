@@ -1,0 +1,246 @@
+{
+  "note": "Footprint boxes cover each footprint's pads and graphics in X/Y; heights are assumptions until the component's 3D model or datasheet height is attached.",
+  "board_thickness_mm": 1.6,
+  "heights": {
+    "C1": {
+      "height_mm": 0.9,
+      "state": "assumed",
+      "why": "typical chip component height",
+      "footprint": "Capacitor_SMD:C_0603_1608Metric"
+    },
+    "C2": {
+      "height_mm": 0.9,
+      "state": "assumed",
+      "why": "typical chip component height",
+      "footprint": "Capacitor_SMD:C_0603_1608Metric"
+    },
+    "C3": {
+      "height_mm": 0.9,
+      "state": "assumed",
+      "why": "typical chip component height",
+      "footprint": "Capacitor_SMD:C_0603_1608Metric"
+    },
+    "C4": {
+      "height_mm": 0.9,
+      "state": "assumed",
+      "why": "typical chip component height",
+      "footprint": "Capacitor_SMD:C_0603_1608Metric"
+    },
+    "C5": {
+      "height_mm": 0.9,
+      "state": "assumed",
+      "why": "typical chip component height",
+      "footprint": "Capacitor_SMD:C_0603_1608Metric"
+    },
+    "C6": {
+      "height_mm": 0.9,
+      "state": "assumed",
+      "why": "typical chip component height",
+      "footprint": "Capacitor_SMD:C_0603_1608Metric"
+    },
+    "H1": {
+      "height_mm": 0.0,
+      "state": "assumed",
+      "why": "a hole, no body",
+      "footprint": "MountingHole:MountingHole_3.2mm_M3"
+    },
+    "H2": {
+      "height_mm": 0.0,
+      "state": "assumed",
+      "why": "a hole, no body",
+      "footprint": "MountingHole:MountingHole_3.2mm_M3"
+    },
+    "H3": {
+      "height_mm": 0.0,
+      "state": "assumed",
+      "why": "a hole, no body",
+      "footprint": "MountingHole:MountingHole_3.2mm_M3"
+    },
+    "H4": {
+      "height_mm": 0.0,
+      "state": "assumed",
+      "why": "a hole, no body",
+      "footprint": "MountingHole:MountingHole_3.2mm_M3"
+    },
+    "J1": {
+      "height_mm": 8.5,
+      "state": "assumed",
+      "why": "typical 2.54 mm pin header height",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x06_P2.54mm_Vertical"
+    },
+    "JP1": {
+      "height_mm": 8.5,
+      "state": "assumed",
+      "why": "typical 2.54 mm pin header height",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
+    },
+    "R1": {
+      "height_mm": 0.9,
+      "state": "assumed",
+      "why": "typical chip component height",
+      "footprint": "Resistor_SMD:R_0603_1608Metric"
+    },
+    "R2": {
+      "height_mm": 0.9,
+      "state": "assumed",
+      "why": "typical chip component height",
+      "footprint": "Resistor_SMD:R_0603_1608Metric"
+    },
+    "R3": {
+      "height_mm": 0.9,
+      "state": "assumed",
+      "why": "typical chip component height",
+      "footprint": "Resistor_SMD:R_0603_1608Metric"
+    },
+    "R4": {
+      "height_mm": 0.9,
+      "state": "assumed",
+      "why": "typical chip component height",
+      "footprint": "Resistor_SMD:R_0603_1608Metric"
+    },
+    "R5": {
+      "height_mm": 0.9,
+      "state": "assumed",
+      "why": "typical chip component height",
+      "footprint": "Resistor_SMD:R_0603_1608Metric"
+    },
+    "R6": {
+      "height_mm": 0.9,
+      "state": "assumed",
+      "why": "typical chip component height",
+      "footprint": "Resistor_SMD:R_0603_1608Metric"
+    },
+    "R7": {
+      "height_mm": 0.9,
+      "state": "assumed",
+      "why": "typical chip component height",
+      "footprint": "Resistor_SMD:R_0603_1608Metric"
+    },
+    "TP1": {
+      "height_mm": 2.0,
+      "state": "assumed",
+      "why": "no footprint family matched; a generic 2 mm body",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    "TP10": {
+      "height_mm": 2.0,
+      "state": "assumed",
+      "why": "no footprint family matched; a generic 2 mm body",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    "TP11": {
+      "height_mm": 2.0,
+      "state": "assumed",
+      "why": "no footprint family matched; a generic 2 mm body",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    "TP12": {
+      "height_mm": 2.0,
+      "state": "assumed",
+      "why": "no footprint family matched; a generic 2 mm body",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    "TP13": {
+      "height_mm": 2.0,
+      "state": "assumed",
+      "why": "no footprint family matched; a generic 2 mm body",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    "TP14": {
+      "height_mm": 2.0,
+      "state": "assumed",
+      "why": "no footprint family matched; a generic 2 mm body",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    "TP15": {
+      "height_mm": 2.0,
+      "state": "assumed",
+      "why": "no footprint family matched; a generic 2 mm body",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    "TP16": {
+      "height_mm": 0.9,
+      "state": "assumed",
+      "why": "typical chip component height",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    "TP17": {
+      "height_mm": 2.0,
+      "state": "assumed",
+      "why": "no footprint family matched; a generic 2 mm body",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    "TP18": {
+      "height_mm": 2.0,
+      "state": "assumed",
+      "why": "no footprint family matched; a generic 2 mm body",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    "TP2": {
+      "height_mm": 2.0,
+      "state": "assumed",
+      "why": "no footprint family matched; a generic 2 mm body",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    "TP3": {
+      "height_mm": 2.0,
+      "state": "assumed",
+      "why": "no footprint family matched; a generic 2 mm body",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    "TP4": {
+      "height_mm": 2.0,
+      "state": "assumed",
+      "why": "no footprint family matched; a generic 2 mm body",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    "TP5": {
+      "height_mm": 2.0,
+      "state": "assumed",
+      "why": "no footprint family matched; a generic 2 mm body",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    "TP6": {
+      "height_mm": 2.0,
+      "state": "assumed",
+      "why": "no footprint family matched; a generic 2 mm body",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    "TP7": {
+      "height_mm": 2.0,
+      "state": "assumed",
+      "why": "no footprint family matched; a generic 2 mm body",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    "TP8": {
+      "height_mm": 2.0,
+      "state": "assumed",
+      "why": "no footprint family matched; a generic 2 mm body",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    "TP9": {
+      "height_mm": 2.0,
+      "state": "assumed",
+      "why": "no footprint family matched; a generic 2 mm body",
+      "footprint": "TestPoint:TestPoint_Pad_D1.5mm"
+    },
+    "U1": {
+      "height_mm": 1.8,
+      "state": "assumed",
+      "why": "typical IC package height",
+      "footprint": "Package_SO:TSSOP-14_4.4x5mm_P0.65mm"
+    },
+    "U2": {
+      "height_mm": 1.8,
+      "state": "assumed",
+      "why": "typical IC package height",
+      "footprint": "Package_SO:SOIC-8_5.3x5.3mm_P1.27mm"
+    },
+    "U3": {
+      "height_mm": 1.8,
+      "state": "assumed",
+      "why": "typical IC package height",
+      "footprint": "Package_TO_SOT_SMD:SOT-23-5"
+    }
+  }
+}

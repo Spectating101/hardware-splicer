@@ -1,0 +1,208 @@
+{
+  "artifact_sha256": {
+    "ASSEMBLY_ENVELOPES.step": "2f5e3141f5a9fc3def459471d6f04f8ecab8e4b4e239fff294a3cef977e49370",
+    "BOM.csv": "f7f28a1c05e590e8cb87b3b5809fa5450f15d4745a16174f07a97dfd277c3ac1",
+    "POST_DRILL_1_TO_1.svg": "901e40832ecdabf0187a189b53decdc91c7fe11be3446880a260506a822cf7c8",
+    "POST_DRILL_COORDINATES.csv": "dd74b3577dda882ef42845fdc82b2d561f98080705697e330a2a64bacfab7ad0",
+    "README.md": "be03091bd98600f61f45f0013d6b3fd352045800cb8f384b2e30e616db1eea80",
+    "WIRING.csv": "5f8199be462c9b602594277430a3c0a530bc8bff4351a185b18be9a35d44ef93",
+    "cutter_blanks/hs3g_bottom_plate.dxf": "c96efa7519cceb0e65012fe14a7987a40f11e2678dc6c31535ebe5682e86d438",
+    "cutter_blanks/hs3g_bottom_plate.step": "1ef08f945d4eb1ddec840480f74a124611a75c7fa2af8c3cba48667af32d5064",
+    "cutter_blanks/hs3g_bottom_plate.stl": "c96ae696c61c18ebd7ab1fc851fc924f0748e5e5771e054d1c0370f3ac2b05f2",
+    "cutter_blanks/hs3g_top_plate.dxf": "abc2f48ff7baacb73c4b3d7a9caa2ee0dfd58969523fcc42de801f70c08777f1",
+    "cutter_blanks/hs3g_top_plate.step": "e07d99c958b6a427837c87ef10f602ace39a95dc9d7c85e03780e5f92464a0e7",
+    "cutter_blanks/hs3g_top_plate.stl": "b5b4e7eb2b6a598e3b6b52a315903478d7152e5adf06e5f9d1f43d2c48a85a56",
+    "finished_geometry/hs3g_bottom_plate.dxf": "9ffa6da7d7dd8209b72cf9de5caf77814cb5520010f83825fdb093d5b5fd7532",
+    "finished_geometry/hs3g_bottom_plate.step": "bad0a97902ab2af3408ae5d4b4d0da26fccbef8e74dc31598edb400e56e3196e",
+    "finished_geometry/hs3g_bottom_plate.stl": "55023c68eac5d73c42f536fb1ecf8e9558191b371646b349c3e87e30bf98b3be",
+    "finished_geometry/hs3g_top_plate.dxf": "dd7bc90b5cc250c85fe4186650d71cd9ab02df332f6ca753e42ea9c4a2863185",
+    "finished_geometry/hs3g_top_plate.step": "6b848b362530c87c734b8ed98beb3d4692ded4b5c83d10c8e11c72dca7e807be",
+    "finished_geometry/hs3g_top_plate.stl": "b5b4e7eb2b6a598e3b6b52a315903478d7152e5adf06e5f9d1f43d2c48a85a56",
+    "firmware/LICENSE": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+    "firmware/REVIEW_ONLY.cli": "e9d3b329308f0df1a0bd90396428e73736583ad15e17da9efd88f7fc7befb8ce",
+    "firmware/evidence.json": "22f5ba952f9fbcc47cf5b8ba8be7b63083eb8a644fc1de1dc36838934e70e124",
+    "firmware/inav_9.1.0_SPEEDYBEEF405MINI.hex": "110e34d2324f4b9bf4f6aad3d6040ca39bcb1a9c3f3519ed8f1865551f71862a",
+    "firmware/src/main/fc/settings.yaml": "5094b7b39049160023345eeefcf17628a02a983b2edea6108d9858d31049d0ce",
+    "firmware/src/main/flight/mixer.c": "f46cdfe5f1901413322cc1873c78e4eba9e2f1f5937a96e03b7a4891b000cd70",
+    "firmware/src/main/io/serial.h": "2140c3e9b188cce95cf6fdb3367d43b3ec4a787e731c131e62159b84d0752b65",
+    "firmware/src/main/target/SPEEDYBEEF405MINI/target.c": "caa0d82ab840d52b00122890ba1a43782f325ae171189ba9b2a6fdcd58212d91",
+    "firmware/src/main/target/SPEEDYBEEF405MINI/target.h": "5dbbb37d22527e6b3bddda458f2b6eaac4c878d0038f562231af790220fe6684",
+    "results.json": "28c0653e1a7dedaf5be7d86c13a4610dcdf9388427d0abc307753920610066f8"
+  },
+  "checks": {
+    "bom_csv_matches_model": true,
+    "cli_matches_declared_component_contract": true,
+    "cli_settings_exist_and_are_in_range": true,
+    "configured_frame_dimensions": true,
+    "correct_board_target": true,
+    "cut_blank_dfm": true,
+    "cutter_blanks_bottom_plate_mesh": true,
+    "cutter_blanks_motor_hole_count": true,
+    "cutter_blanks_top_plate_mesh": true,
+    "derived_model_receipt": true,
+    "finished_geometry_bottom_plate_mesh": true,
+    "finished_geometry_motor_hole_count": true,
+    "finished_geometry_top_plate_mesh": true,
+    "firmware_hash_LICENSE": true,
+    "firmware_hash_inav_9.1.0_SPEEDYBEEF405MINI.hex": true,
+    "firmware_hash_src/main/fc/settings.yaml": true,
+    "firmware_hash_src/main/flight/mixer.c": true,
+    "firmware_hash_src/main/io/serial.h": true,
+    "firmware_hash_src/main/target/SPEEDYBEEF405MINI/target.c": true,
+    "firmware_hash_src/main/target/SPEEDYBEEF405MINI/target.h": true,
+    "measured_geometry_receipt": true,
+    "model_arm_roots_filleted": true,
+    "model_battery_continuous_at_design_current": true,
+    "model_battery_uncertainty_reserve": true,
+    "model_connector_at_design_current": true,
+    "model_esc_at_design_current": true,
+    "model_motor_pattern": true,
+    "model_nominal_mass_reserve": true,
+    "model_prop_adjacent_gap": true,
+    "model_prop_radial_clearance": true,
+    "model_prop_vertical_clearance": true,
+    "model_strap_clears_stack": true,
+    "model_strap_length": true,
+    "model_strap_wraps_pack": true,
+    "model_tw_at_249g": true,
+    "motor_mount_pattern": true,
+    "native_solids": true,
+    "no_physical_authority": true,
+    "official_hex_records": true,
+    "only_post_drill_material_removed": true,
+    "partial_configuration_is_review_only": true,
+    "post_drill_coordinates": true,
+    "receiver_and_gps_uart_sources": true,
+    "source_identity": true
+  },
+  "configuration_complete": false,
+  "cutter_blank_dfm": {
+    "bottom_plate": {
+      "holes_below_rule": [],
+      "min_hole_rule_mm": 3.2,
+      "min_web_rule_mm": 4.02,
+      "smallest_hole_by_feature_mm": {
+        "motor_centre_hole": 4.0,
+        "stack_hole": 3.2,
+        "standoff_hole": 3.2,
+        "strap_slot": 3.2
+      },
+      "smallest_web_by_pair_mm": {
+        "motor_centre_hole-motor_centre_hole": 92.874,
+        "motor_centre_hole-outline": 7.5,
+        "motor_centre_hole-stack_hole": 50.758,
+        "motor_centre_hole-standoff_hole": 41.16,
+        "motor_centre_hole-strap_slot": 49.241,
+        "stack_hole-outline": 8.4,
+        "stack_hole-stack_hole": 16.8,
+        "stack_hole-standoff_hole": 12.3,
+        "stack_hole-strap_slot": 8.514,
+        "standoff_hole-outline": 4.4,
+        "standoff_hole-standoff_hole": 16.8,
+        "standoff_hole-strap_slot": 5.013,
+        "strap_slot-outline": 9.9,
+        "strap_slot-strap_slot": 36.8
+      },
+      "smallest_web_mm": 4.4,
+      "thickness_mm": 2.01,
+      "webs_below_rule": []
+    },
+    "top_plate": {
+      "holes_below_rule": [],
+      "min_hole_rule_mm": 3.2,
+      "min_web_rule_mm": 2.04,
+      "smallest_hole_by_feature_mm": {
+        "standoff_hole": 3.2
+      },
+      "smallest_web_by_pair_mm": {
+        "standoff_hole-outline": 2.4,
+        "standoff_hole-standoff_hole": 16.8
+      },
+      "smallest_web_mm": 2.4,
+      "thickness_mm": 1.02,
+      "webs_below_rule": []
+    }
+  },
+  "engineering_acceptance": true,
+  "fabrication_authorized": false,
+  "failed_checks": [],
+  "firmware_compiled_by_hs": false,
+  "firmware_flashed": false,
+  "flight_authorized": false,
+  "native_measurements": {
+    "adjacent_motor_spacing_mm": [
+      96.874,
+      96.874,
+      96.874,
+      96.874
+    ],
+    "bottom_bbox_mm": [
+      115.874,
+      115.874,
+      2.01
+    ],
+    "bottom_centroid_mm": [
+      0.0,
+      0.0,
+      1.005
+    ],
+    "bottom_is_valid": true,
+    "bottom_sharp_concave_corners": 0,
+    "bottom_solids": 1,
+    "bottom_volume_mm3": 9372.012,
+    "diagonal_motor_spacing_mm": [
+      137.0,
+      137.0
+    ],
+    "m3_hole_count_bottom": 12,
+    "motor_bolt_pcd_counts": {
+      "9": 16
+    },
+    "motor_centres_mm": [
+      [
+        -48.437,
+        -48.437
+      ],
+      [
+        48.437,
+        -48.437
+      ],
+      [
+        48.437,
+        48.437
+      ],
+      [
+        -48.437,
+        48.437
+      ]
+    ],
+    "motor_count": 4,
+    "top_bbox_mm": [
+      61.0,
+      28.0,
+      1.02
+    ],
+    "top_centroid_mm": [
+      -0.0,
+      -0.0,
+      0.51
+    ],
+    "top_is_valid": true,
+    "top_solids": 1,
+    "top_volume_mm3": 1701.467
+  },
+  "open_actions": [
+    "Confirm exact controller stock and delivery; the maker marks this stack discontinued.",
+    "Get a composite shop quote for both cut blanks and the separately specified 16-hole drilling operation; qualify drilling quality and frame stiffness.",
+    "Measure actual motor mounting, M2 thread depth, propeller boss and battery envelope; verify the 200 mm strap and weigh the complete aircraft.",
+    "Complete receiver/GPS/VTX setup, motor ordering, compass/accelerometer calibration, failsafe and current-sensor calibration before supervised bench work.",
+    "Measure current/sag and connector/lead/motor temperatures under controlled load. Manufacturer C-ratings and voltage scaling assumptions are not bench measurements.",
+    "Review arm resonance using measured vibration data; the beam model does not qualify the thinner laminate or drilled motor pads."
+  ],
+  "post_drill_removed_volume_mm3": 122.251,
+  "power_on_authorized": false,
+  "purchase_ready": false,
+  "revision": "HS-3G-B",
+  "schema": "hardware_splicer.hs3g_revision_verification.v1",
+  "scope": "CAD geometry, cut-blank process screen, declared component model, source-checked partial configuration and official firmware identity"
+}

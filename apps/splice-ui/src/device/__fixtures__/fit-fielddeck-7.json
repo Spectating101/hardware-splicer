@@ -1,0 +1,923 @@
+{
+  "basis": "CAD model, including envelope and unknown-shape stand-ins; physical fit not tested",
+  "counts": {
+    "near": 4,
+    "overlap": 0,
+    "overlap_real": 0,
+    "overlap_stand_in": 0,
+    "tight": 24,
+    "touching": 35
+  },
+  "glb_sha256": "2544900053a25302391d1b286dd62c4f5e1e117181674db4512cd79a632628e1",
+  "method": {
+    "clearance": "minimum distance between surface samples about 0.35 mm apart",
+    "interference": "exact intersection volume of closed meshes (manifold3d)",
+    "near_mm": 2.0,
+    "overlap_mm3": 0.5,
+    "tight_mm": 1.0,
+    "touch_mm": 0.05
+  },
+  "not_computed": [
+    {
+      "parts": [
+        "display"
+      ],
+      "what": "overlap volume",
+      "why": "open mesh (not a closed solid), so it has no volume"
+    }
+  ],
+  "pairs": [
+    {
+      "a": "face-front-left",
+      "b": "keyboard-nominal-envelope",
+      "basis": [
+        "custom",
+        "envelope"
+      ],
+      "gap_mm": 0.169,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "face-front-right",
+      "b": "keyboard-nominal-envelope",
+      "basis": [
+        "custom",
+        "envelope"
+      ],
+      "gap_mm": 0.169,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "face-front-right",
+      "b": "face-front-left",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.3,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "face-front-right",
+      "b": "tray-front-left",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.3,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "face-rear-left",
+      "b": "display",
+      "basis": [
+        "custom",
+        "vendor_step"
+      ],
+      "gap_mm": 0.3,
+      "kind": "tight",
+      "overlap_computed": false,
+      "overlap_mm3": null,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "face-rear-left",
+      "b": "face-front-left",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.3,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "face-rear-left",
+      "b": "tray-front-left",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.3,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "face-rear-right",
+      "b": "display",
+      "basis": [
+        "custom",
+        "vendor_step"
+      ],
+      "gap_mm": 0.3,
+      "kind": "tight",
+      "overlap_computed": false,
+      "overlap_mm3": null,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "face-rear-right",
+      "b": "face-front-right",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.3,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "face-rear-right",
+      "b": "face-rear-left",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.3,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "face-rear-right",
+      "b": "tray-front-right",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.3,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "face-rear-right",
+      "b": "tray-rear-left",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.3,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "tray-front-right",
+      "b": "face-front-left",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.3,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "tray-front-right",
+      "b": "tray-front-left",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.3,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "tray-rear-left",
+      "b": "face-front-left",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.3,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "tray-rear-left",
+      "b": "tray-front-left",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.3,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "tray-rear-right",
+      "b": "face-front-right",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.3,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "tray-rear-right",
+      "b": "face-rear-left",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.3,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "tray-rear-right",
+      "b": "tray-front-right",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.3,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "tray-rear-right",
+      "b": "tray-rear-left",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.3,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "tray-rear-left",
+      "b": "tray-front-right",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.424,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "tray-rear-right",
+      "b": "tray-front-left",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.424,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "face-rear-left",
+      "b": "keyboard-nominal-envelope",
+      "basis": [
+        "custom",
+        "envelope"
+      ],
+      "gap_mm": 0.65,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "face-rear-right",
+      "b": "keyboard-nominal-envelope",
+      "basis": [
+        "custom",
+        "envelope"
+      ],
+      "gap_mm": 0.65,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tray-rear-left",
+      "b": "pi4-gpio",
+      "basis": [
+        "custom",
+        "envelope"
+      ],
+      "gap_mm": 1.5,
+      "kind": "near",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "pi4-microsd",
+      "b": "pi4-dsi",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 1.6,
+      "kind": "near",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tray-rear-left",
+      "b": "pi4-ethernet",
+      "basis": [
+        "custom",
+        "envelope"
+      ],
+      "gap_mm": 1.6,
+      "kind": "near",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tray-rear-left",
+      "b": "pi4-usb-c",
+      "basis": [
+        "custom",
+        "envelope"
+      ],
+      "gap_mm": 1.677,
+      "kind": "near",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "face-front-left",
+      "b": "tray-front-left",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": -0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "face-front-right",
+      "b": "tray-front-right",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "face-rear-left",
+      "b": "fan-envelope",
+      "basis": [
+        "custom",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": -0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "face-rear-left",
+      "b": "tray-rear-left",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": -0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "face-rear-right",
+      "b": "tray-rear-right",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "fan-duct",
+      "b": "fan-envelope",
+      "basis": [
+        "custom",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": -0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "fan-guard",
+      "b": "face-rear-left",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "foot-1",
+      "b": "tray-front-left",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "foot-2",
+      "b": "tray-front-right",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "foot-3",
+      "b": "tray-rear-left",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "foot-4",
+      "b": "tray-rear-right",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "pi4-dsi",
+      "b": "pi4-board-envelope",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "pi4-ethernet",
+      "b": "pi4-board-envelope",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "pi4-gpio",
+      "b": "pi4-board-envelope",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "pi4-microsd",
+      "b": "pi4-board-envelope",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "pi4-soc-envelope",
+      "b": "pi4-board-envelope",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "pi4-usb-a-lower",
+      "b": "pi4-board-envelope",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "pi4-usb-a-upper",
+      "b": "pi4-board-envelope",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "pi4-usb-c",
+      "b": "pi4-board-envelope",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tray-front-left",
+      "b": "power-bank-nominal-envelope",
+      "basis": [
+        "custom",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tray-front-left",
+      "b": "seam-plate-1",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "tray-front-left",
+      "b": "seam-plate-2",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": -0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "tray-front-left",
+      "b": "seam-plate-5",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": -0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "tray-front-right",
+      "b": "seam-plate-1",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": -0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "tray-front-right",
+      "b": "seam-plate-2",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "tray-front-right",
+      "b": "seam-plate-6",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": -0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "tray-rear-left",
+      "b": "display",
+      "basis": [
+        "custom",
+        "vendor_step"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": false,
+      "overlap_mm3": null,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "tray-rear-left",
+      "b": "pi4-board-envelope",
+      "basis": [
+        "custom",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": -0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "tray-rear-left",
+      "b": "seam-plate-3",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": -0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "tray-rear-left",
+      "b": "seam-plate-4",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "tray-rear-left",
+      "b": "seam-plate-5",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "tray-rear-right",
+      "b": "display",
+      "basis": [
+        "custom",
+        "vendor_step"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": false,
+      "overlap_mm3": null,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "tray-rear-right",
+      "b": "seam-plate-3",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "tray-rear-right",
+      "b": "seam-plate-4",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "tray-rear-right",
+      "b": "seam-plate-6",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": -0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    }
+  ],
+  "parts_measured": 33,
+  "parts_sha256": "13fdd5a7296025d314ad6edce9c0c85aa161025ec5003a73037e078afdbbd502",
+  "parts_unmatched": [],
+  "schema": "hardware_splicer.scene_fit.v1",
+  "size_mm": [
+    310.0,
+    285.7,
+    72.0
+  ],
+  "version": "scene-fit.v4"
+}

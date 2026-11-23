@@ -1,0 +1,182 @@
+# GitHub features integrated November 16 2026
+
+This integration brings useful GitHub functionality into the active checkout while preserving the existing engineering mission and local work. It starts from `445a8945`, includes current remote main `38dbad2b`, and combines the reviewed branches below. GitHub's main branch and PR states are unchanged.
+
+The active checkout uses local branch `integration/github-features-20261116`. The previous `test/source-evidence-handoff-20261020` branch remains available at its original commit.
+
+## Features now available
+
+| Capability | Imported work | Where to use it |
+| --- | --- | --- |
+| Discover, evaluate and dispatch native engineering tools | Main's #280–#284: GitHub signal discovery, capability selection, durable remote jobs, worker inventory and admission | [Task router](GITHUB_SIGNAL_TASK_ROUTER_20261105.md), [remote workshop](HS_REMOTE_WORKSHOP_CONTROLLER_20261105.md), [worker pool](HS_WORKER_POOL_ADMISSION_20261105.md) |
+| Compare construction strategies and preserve requested functionality | #337 consolidation, including #217, #230/#231, #235, #276, #278 and #291 | [Microdrone reference](SYSTEM_EXAMPLE_MICRODRONE_001.md), [drone lab](../examples/drone_lab/README.md), [build versus buy](../examples/arbitrage_lab/build_vs_buy/README.md) |
+| Generate and inspect the HS-3G drone design | #338: source inputs, CAD generator, mass/propulsion/cost calculations and package checks | [HS-3G package](../examples/drone_proving_ground/README.md) |
+| Advance the same drone through a native design iteration | Local follow-up: sourced lower-current powertrain, bounded CAD search, cut/post-drill handoff and independent artifact verification | [HS-3G-B workflow](../examples/drone_proving_ground/revision_b/README.md), operator case `hs3g_drone_revision_b` |
+| Complete the drone as a digital-only 3D representative and simulation | Local follow-up: native assembly, offline orbit/explode/replay viewer, parameterized PyBullet missions and standalone runtime | [Digital workshop](../examples/drone_proving_ground/digital/README.md), operator case `hs3g_drone_digital` |
+| Execute one bounded native engineering work order and recover interrupted KiCad stages | #315/#343 plus the source-custody repair | `scripts/hs_workshop_operator.py`, `scripts/hs_spi_checkpoint.py` |
+| Reconstruct a source-backed keyboard PCB after a virtual cut | #342: KiCad extraction, copper islands, cut search, repair loop, bridge/remount boards, firmware/source and matrix checks | [Keyboard reconstruction](../examples/arbitrage_lab/keyboard_splice/README.md), `scripts/hs_keyboard_splice_probe.py` |
+| Report build readiness against the actual goal, requested parts and KiCad results | Isolated #346 commits, without importing the unrelated repair/hinge stack | Existing intake, SDK and MCP entry points; both goal coverage and requested-part gates are retained |
+| Keep optional dependencies optional | #339 plus the MCP collection repair | CAD tests skip explicitly without the CAD extra; SDK/REST checks still run without MCP |
+
+The new `keyboard-splice` extra and the existing `cad` extra are both retained in `pyproject.toml`. Shapely 2.2.0 is installed in this checkout's existing virtualenv, enabling the new copper-island solver. Native KiCad remains a separate interpreter/toolchain; CAD regeneration was also exercised in the existing CAD environment.
+
+The original branch's 27 unique commits, broader engineering charter, source bundles, Copilot opt-in integration, and cross-domain engineering work are preserved. The three original uncommitted files are preserved byte for byte.
+
+## Integration decisions
+
+The goal-coverage cherry-pick conflicted with #217's requested-part check in `project_intake.py`. The combined implementation applies goal coverage and then passes the requested-part comparison into the same design-quality gate. A new end-to-end regression proves that an unrelated scaffold and a missing requested servo are both reported.
+
+The keyboard branch and the consolidation branch added different optional dependency groups at the same location. Both groups are retained.
+
+The native operator pilot was actually rerun after integration. Its source digest changed to `9d00c1842d1e66970567bd64e919443fd35acdc6ee85136137f4c1155bc55c78`; its fresh native verification receipt remains `6fa005f1d3544275997c8588af277277a67bef6c8d30c1c4da2eab356982596b`. The committed pilot now describes the combined source rather than inheriting a stale success.
+
+## Validation of the combined checkout
+
+| Check | Result |
+| --- | --- |
+| Request fidelity, remote dispatch/worker inventory, microdrone reference, proxy process and pricing tests | 81 passed |
+| Goal coverage, requested-part coexistence, KiCad trust and MCP defaults | 36 passed |
+| Keyboard feature tests | 121 passed |
+| Tool discovery/router, multi-CAD, product ecosystem, function selection and related feature tests | 126 passed |
+| Native SPI capability/reference, workshop, checkpoint and source-custody tests | 66 passed, 3 native-binding skips in the project virtualenv |
+| Existing source-bundle, cross-domain, drone and Copilot tests | 29 passed, 6 optional skips |
+| Intake, SDK, scratch compiler, JARVIS, fabrication planning and scoring regression | 97 passed, 4 optional skips |
+| HS-3G tests in the native CAD environment | 24 passed |
+| Splice UI tests | 82 passed |
+| Splice UI production build | Passed |
+
+These were the initial focused test batches, with overlapping coverage. The subsequent full verification below runs the complete root Python suite. Remote workers were unavailable, so both full runs used one local test worker, two CPU cores and single-threaded BLAS settings.
+
+### Full suite verification
+
+The complete rerun on source commit `c54d10fb5bb165ed5bfe6dd4c7dcb91c827eaf00`, including the three preserved local files, passed: **4,202 passed, 32 skipped, zero failures**, plus **three passing subtests**, in 927.66 seconds. The separate Mecha-Splicer and 3D-Splicer suites passed **32** and **15** tests respectively. Optional skips cover unavailable CAD/native bindings, external fixtures, live providers and configured toolchains.
+
+The first full run exposed five failures: three manifestations of a cleanroom evidence-ID regression, one stale executor fixture, and one native KiCad DRC timeout. The cleanroom guard now rejects unresolved references retained by source-alias normalization, with regressions for requirements, candidates and actions. The provenance negative fixture now uses an actually unimplemented tool; ERC is an implemented executor. The timeout case passed in isolation and in the complete rerun, with a fresh zero-error DRC report. Its independent ERC errors still block build and fabrication readiness; the timeout policy and readiness checks are unchanged.
+
+Both runs, exact source revisions, skipped-test reasons, fixes and log hashes are preserved in the [full-suite verification receipt](status/generated/full-suite-verification-2026-11-16.json). Local JUnit reports and logs are under `.cache/hardware-splicer/full-suite-20261116/`. Generated artifacts changed by the Mecha tests were restored; the original three local files retain their starting SHA-256 hashes.
+
+A real native SPI operator run passes its engineering checks while reporting `verified_design_only_physical_blocked`. An interrupted checkpoint run reuses three completed stages and executes the remaining two; its verification receipt is byte-identical to the uninterrupted five-stage run. A fresh controlled six-key keyboard reconstruction connects its required modeled copper groups, passes all 64 ideal switch combinations, and generates a four-channel native interposer with zero DRC errors or open connections. The overall keyboard verdict remains `BLOCKED_REFERENCE_ONLY`. Real CAD regeneration also produces the HS-3G STEP/STL package; its battery-current and cutter-rule checks remain blocking.
+
+The three MCP proxy failures described in the earlier catchup were caused by subprocesses resolving the other editable checkout. They pass here with `PYTHONPATH=src`, which points both pytest and its subprocesses at the combined source.
+
+Exact imported refs and native outcomes are recorded in the [integration receipt](status/generated/github-feature-integration-2026-11-16.json).
+
+### Extended native verification
+
+The complete native run at `35d469fa` exercised **4,240 root cases**: **4,234 passed, three failed, three skipped**, in 1,124.13 seconds. The failures were the two planning regressions described below and the CAD environment's missing `pypdf` dependency in a CLI child process. After the scope refinement at `71ee7de8` and installing the same `pypdf==6.18.1` used by the root environment, **all 105 affected tests passed** in 160.34 seconds. All three failures passed in that follow-up. Across the full run and rechecks, 4,238 unique cases passed and three live-vision cases remain unverified; this is combined coverage, not a second single green full invocation. **29 of the prior 32 skipped cases were exercised successfully.**
+
+The extended verification uses the existing CAD environment with CadQuery, trimesh, PyBullet and native KiCad bindings, plus the root environment's remaining dependencies. Pinned third-party files and the existing pinned vendor-library cache were restored before running the complete root suite. The exact environment, source revisions, hashes, test outcomes and remaining skips are recorded in the [extended verification receipt](status/generated/extended-native-verification-2026-11-16.json).
+
+Enabling the CAD profile first exposed four plant-watering tests that expected all nine production gates to pass despite real KiCad ERC failures. More seriously, the overall project packet still claimed production readiness while its circuit gate and production metrics rejected the same build. Commit `35d469fa` makes production claims and the release dashboard honor both the current circuit receipts and the stored gate. The complete run caught an overreach in that first fix: two planning-only tests also lost their scoped claims. The follow-up confines the veto to production promotion, keeps unfinished designs usable for planning, and exposes circuit failures in their checks and next actions. A rejected project also stops advertising bench-ready or released capabilities. Seven regressions cover native failures, a stale positive summary, goal mismatch, requested-part omissions, clean/scenario-only paths, the saved intake packet, and preservation of planning scope.
+
+Positive evidence-extraction and scoring tests explicitly assume a clean ERC receipt, using the existing `assume_clean_kicad_erc` fixture. They prove the downstream positive path, not that the example circuit is electrically valid. An independent run with real KiCad 9.0.2 still finds four errors: an undriven ground supply, an undriven GPIO34 input, and unconnected MOSFET-module VOUT+ and VOUT- pins. It now reports `claimable=false`, `build_ready=false`, and `production_ready=false`, with eight of nine production gates passing. Artifact creation remains separate from readiness.
+
+Both Java routing entry points now force headless mode. The bounded native checks passed without a display; no further routing feature work was added.
+
+The public-source tests use the original RPI_DEV archive at `ebdfcffac2f03c01222ed851d44bf75bde5b10ad`, dinodeck BOM at `7762e2f744ad2ed3f9672baf75acf5efdf866666`, DroneSkeleton arm at `15d139b215cb46b375fe3fae3e5f9d65baa01097`, and the iFixit PSP 300x UMD replacement guide. Archive Git blob identities and individual file SHA-256 hashes are retained in the receipt. Real ERC/DRC findings from the source projects remain findings, rather than being presented as approvals. The vendor-host lane catches its seeded adapter fault against the pinned Adafruit libraries and a modeled bus; it does not test silicon or physical wiring.
+
+The live Gemini smoke test reached the provider but failed with `API_KEY_INVALID`; no successful live vision result is claimed. The two Qwen live tests lack configured keys. These service gaps are distinct from deterministic software regression coverage.
+
+The HS-3G source recheck preserves its engineering blockers. Its modeled full-throttle demand is 77.9 A versus the pack's nominal 45.5 A continuous rating, derived from 650 mAh and 70C. The manufacturer bench table and battery rating support that mismatch. The nominal 70% bench-command limit is not a verified installed-flight-controller setting. The cutter's guidance also still rejects the bottom plate's 2.2 mm motor holes and 1.4 mm minimum web against about 3.2 mm holes and 6 mm web for 3 mm stock. See the [motor table](https://www.ligpower.com/product/f1404-kv3800-fpv-motor.html), [battery specifications](https://chinahobbyline.com/products/cnhl-ministar-series-650mah-14-8v-4s-70c-lipo-battery-with-xt30-plug), and [cutter guidelines](https://sendcutsend.com/materials/carbon-fiber/). No physical measurements, fabrication or flight occurred.
+
+### HS-3G-B candidate delivery
+
+Commits `19bce248` and `11b9efe4` advance the same GPS/analog-FPV drone through the existing workshop operator. The [candidate package](../examples/drone_proving_ground/revision_b/reference/README.md) contains editable STEP/STL/DXF, component placement envelopes, a 1:1 drill sheet and coordinates, BOM, wiring guidance, a partial review-only configuration, and a hash-checked official INAV firmware image with pinned upstream evidence and licence. The original HS-3G package remains the baseline.
+
+The bounded CAD search rejects 135 mm for 2.38 mm prop clearance, then selects 137 mm with 3.34 mm clearance and modeled takeoff mass **234.90 g**. Nominal mass reserve is 15.10 g; a named +5 g battery uncertainty leaves 10.10 g for other unmodeled mass. The revised motor/prop/battery combination gives 25.8 A in the maker bench table, or **31.24 A** with the explicit voltage sensitivity and 20% design factor. These declared-model checks pass without relying on a throttle cap. Cutter blanks omit the sixteen small motor holes; finished geometry and the separate drilling handoff retain that distinction. The drilling process and thinner frame remain physically unqualified.
+
+A fresh registered operator run stages the retained source, generates the package and passes **44 independent artifact checks**, including STEP reimport, DXF/STL inspection, cut-blank screening, model/BOM reconciliation and pinned firmware validation. **All 48 focused native tests pass**, including unchanged baseline regeneration and rejection of tampered BOM, cutter geometry and firmware. The complete native root suite on final code commit `11b9efe41f471a48783e085d32b91ddfb10fca28`, with the three preserved local files, passes in one invocation: **4,247 passed, three skipped, zero failures**, in 1,037.66 seconds. CAD, KiCad, pinned vendor-library, public-source and headless routing regression profiles were enabled. The skips are the three previously identified live-vision provider gaps. This is a new complete green root invocation, superseding the combined-coverage limitation of the preceding extended run.
+
+The [delivery receipt](status/generated/hs3g-revision-b-2026-11-16.json) binds the source revision, operator result, committed package hashes, test reports and preserved local work. All three original local files still match their starting SHA-256 values. The drill sheet was visually checked in a real headless browser. The BOM subtotal is a labelled US$346.91 snapshot/allowance, not a checkout quote; retained cutting costs are explicitly distinguished from refreshed part prices. A commercial GPS BNF can still cost less under the retained build-versus-buy comparison.
+
+Engineering acceptance is limited to the digital scope. The controller is discontinued at the maker, and the dealer stock lead has not been confirmed for delivery. Shop acceptance, separate drilling qualification, actual component measurements, complete configuration/calibration, current/temperature measurements and frame vibration evidence remain open. Purchase readiness, fabrication, power and flight permissions remain false; no hardware was built or flashed. These changes are committed locally and have not been pushed to GitHub.
+
+### Digital-only completion — November 17
+
+The user clarified that they have no parts and want simulation and a 3D representative only. That digital objective is now complete. Physical purchasing, fabrication, calibration and bench work are outside its completion criteria.
+
+Open the [offline 3D workshop](../examples/drone_proving_ground/digital/reference/VIEWER.html), inspect the [browser preview](status/generated/hs3g-digital-workshop-2026-11-17.png), or download the [self-contained ZIP](../examples/drone_proving_ground/digital/HS3G_B_DIGITAL.zip). The 32-part assembly retains the native HS-3G-B frame and represents its motors, props, battery, electronics, GPS and camera. STEP and GLB exports, an exploded view, native camera images, flight animation and telemetry plots are included. The viewer supports orbit, zoom, explosion, scenario selection, playback and scrubbing, with no server, network resource or API key required.
+
+This uses the same 137 mm, modeled 234.90 g HS-3G-B rather than substituting the legacy Crazyflie demonstration. PyBullet integrates per-rotor forces, yaw torque, gravity, declared drag, a gust and ground contact at 240 Hz. Three runs produce **68 simulated seconds and 16,320 physics records**: a normal takeoff/square/yaw/gust/landing mission, a +5 g payload sensitivity run, and a stopped-motor case with detected loss of control and descent. The latter is an expected failure response, not a claim of fault-tolerant flight. The ZIP includes `RERUN.py`, the solver and all model inputs; the unpacked package successfully reran all three scenarios with `PYTHONPATH` empty and no repository imports.
+
+The representative model uses ideal state feedback and declared motor-lag, drag and controller assumptions. These low-throttle missions operate below the first sourced bench-table row, so their thrust/current behavior is extrapolated. It does not execute INAV firmware or model frame flexibility, CFD, sensors/RF, battery chemistry or thermal performance. These are explicit model limits, rather than uncompleted physical tasks.
+
+The registered operator stages the source, regenerates and verifies revision B, builds the digital assembly, runs the physics, and starts a separate artifact verifier. All **95 digital checks** pass, including STEP/GLB reimport, mass/inertia reconciliation, full CSV reconstruction, force/acceleration and position/velocity consistency, viewer/log identity and a native zero-thrust gravity comparison. Visual review caught and corrected a camera target that let the recording header crop the aircraft; projected-envelope acceptance and a regression now keep the drone fully visible. The correction leaves all three physics logs byte-identical. The resulting operator status is `verified_digital_simulation_complete`, with `digital_objective_complete=true`, `physical_work_requested=false` and no open digital actions. The separate canonical physical release remains closed.
+
+All **61 focused native tests** pass. The complete native root suite on final code commit `7827cb9c7ea888a3bf6f11d2849e2e9cd704ad6b`, including the three preserved local work files, passes in one invocation: **4,260 passed, three skipped, zero failures**, in 1,588.59 seconds. The skips are the pre-existing live-vision provider gaps, outside this offline deliverable. Browser controls, desktop/mobile layout and direct-file WebGL opening were exercised; the final recording, exploded assembly and plots were visually inspected. The [completion receipt](status/generated/hs3g-digital-completion-2026-11-17.json) records source/artifact/archive/test hashes, the actual operator replay, scope and remaining provider limits. The original three local files remain byte-identical and uncommitted.
+
+GitHub main remained at `38dbad2b` when rechecked. The keyboard draft has newer unrelated work beyond the previously integrated head; it was not pulled into this digital-drone completion. These changes are committed locally; no remote push, PR or merge was performed.
+
+## Saved digital requirement revisions — 2026-11-17
+
+Implementation commit `0886eb0f` connects the digital drone to the existing project store, background jobs and app workspace. **Start digital design** creates a saved baseline. Payload changes rebuild the native assembly, assigned mass, centre of mass and inertia, then run the three PyBullet cases and independent artifact verification. The app compares metrics and 3D models, reopens history and exposes each revision's verified downloads. Payload requests are bounded and explicit; gust force and mass limits have separate controls. Physical work remains outside this workflow.
+
+The browser exercise retained four revisions: baseline **234.9 g / passed**, payload **244.9 g / passed**, overweight **264.9 g / requirements not met**, and a repaired requirement set **244.9 g / passed**. Each completed computation has its own artifacts; earlier revisions remained unchanged. The overweight computation was saved with both mass-limit failures, and its downloaded ZIP reran successfully in a minimal environment without CAD or repository imports, returning the expected failed-requirements status. Desktop and phone layouts, WebGL, visible payload geometry, job recovery after restart, and reopening all four revisions were checked. The [workflow guide](../examples/drone_proving_ground/digital/README.md) documents the supported scope and setup.
+
+The complete root invocation on this implementation finished with **4,286 passed, seven skipped, zero failures**, in 1,368.51 seconds. Four skips came from the system `pcbnew` extension being outside the rebuilt native environment; exposing that installed extension allowed **all four native follow-up checks to pass** in a separate invocation. Thus **4,290 unique root tests passed across the full run and follow-up**, with only three opt-in live-vision tests unexecuted. This is not a claim that one invocation had only three skips. The final UI suite has **86 passing tests**, and its production build passes with the existing bundle warnings.
+
+An initial full attempt was interrupted after missing CLI subprocess dependencies and an older plant-build test's unstated clean-ERC assumption. The native environment now includes the project dependencies; the artifact-delivery test uses the existing explicit clean-ERC fixture. Real KiCad still reports the plant schematic's four ERC errors, and the production ERC veto remains enabled. The build/guard tests passed separately before the complete rerun. No router feature changes were made.
+
+The regenerated baseline now includes **22 files and 106 independent checks**, plus the ZIP and standalone requirements evaluator. The earlier digital-completion receipt above remains historical evidence for its pinned source commit; the [new completion record](status/generated/digital-project-completion-2026-11-17.json) records the current source, archive, tests, four-revision exercise, native follow-up and screenshots. The three original local work files remain byte-identical and uncommitted. All changes remain local; no GitHub push, PR or merge was performed.
+
+### Backend engine completion — November 17
+
+The user has deferred app and frontend work. Commit `406d2142` adds a shared `DigitalStudyEngine`, exposed through the Python SDK and installed `hs-digital` CLI. It creates projects, resolves bounded requirements, submits and executes saved revisions, compares results, audits evidence, and exports verified packages without starting an HTTP server or browser. The HTTP adapter delegates to these same backend rules. No frontend files were changed in this pass; the earlier frontend work remains separate from this verification.
+
+Job claims now have durable random attempt identities. Late completion, failure or publication from a superseded attempt cannot overwrite a retry, including when wall-clock timestamps are identical. Existing databases migrate additively. Separate producer and worker processes share the queue, project-scoped workers leave other tasks queued, and opening an engine for inspection does not recover or stop another worker.
+
+The native headless acceptance test creates three saved revisions: the **234.9 g** baseline, a passing **244.9 g** study with **10 g** of payload, and the same model rejected by a tightened **240 g** limit. The last computation succeeds as a job while returning failed engineering requirements and CLI exit code **2**. Backend comparison identifies both regressed mass checks. Native audit preserves the original receipt, failed designs remain auditable and exportable, and earlier revisions remain unchanged. The installed CLI and SDK were also exercised from `/tmp` with `PYTHONPATH` empty.
+
+The complete root suite on `406d2142`, including the three preserved local files, passes in one invocation: **4,317 passed, three skipped, zero failures**, in **1,351.92 seconds**. Native CAD, physics, KiCad, vendor-library, public-source and headless routing profiles were enabled. The only skips are the three opt-in live-vision tests; all **27** new backend regression cases passed. No frontend build or browser testing was needed for this backend change.
+
+The [backend verification receipt](status/generated/headless-backend-completion-2026-11-17.json) records source and test hashes, exact skip reasons, attempt identities, comparison results, artifact audit and export. The [engine guide](ENGINE.md#headless-digital-engineering) documents Python and CLI usage. HS-3G-B remains a bounded registered digital proving case; this step does not establish arbitrary hardware redesign or physical validation. The original three local files remain byte-identical and uncommitted. Changes remain local; no GitHub push, PR or merge was performed.
+
+### Practical materials and inventory integration — November 17
+
+The first follow-up to the broader GitHub research adds a read-only InvenTree REST connector and a shared material-reconciliation service. Python, `hs-materials` and the canonical HTTP/MCP surface can assess declared materials or import a selected direct InvenTree assembly BOM, identities, stock and supplier references. An assessment is bound to the existing project revision and source snapshot; it does not advance the design revision or invalidate the digital drone's saved studies.
+
+An independent local upstream server at `inventree/InvenTree@8f8502d0d9e0cebb726430746e39327c51845a8a` (1.8.0 dev, API 581) was started from a clean pinned checkout and isolated dependency environment. The real canonical HS import route used a fixture user with 116 view permissions and no superuser access. Four required motors and three healthy motors produce a shortage of one; 100 damaged, 20 unchecked and 1,000 cached supplier units do not count as usable owned stock. Readback and CSV export pass, the design snapshot is unchanged, and no token is stored in the assessment. The temporary server was stopped.
+
+This execution caught a real upstream representation difference: standard statuses also populate `status_custom_key` with their numeric value. The adapter distinguishes these built-in values from custom states. It deducts reported allocations, checks condition/expiry/units and explicit identity conflicts, shares stock across repeated requirements, consumes complete pagination and retains unresolved BOM adjustments and nested assemblies. Old, future-dated or simulated captures cannot claim owned-stock coverage.
+
+The installed CLI also assessed the existing HS-3G-B digital baseline from `/tmp` with `PYTHONPATH` empty and no inventory declared. The [materials CSV](status/generated/hs3g-b-materials-2026-11-17.csv) has 18 lines: 15 purchase lines, two frame parts to make, and one wiring allowance requiring an exact identity/item list. Four lines retain unresolved issues. The source BOM's spare battery/prop packs are included; this is a materials-and-spares list. It provides no new live supplier quote or physical qualification.
+
+The complete root suite on implementation `443a8fb4` passes in one invocation: **4,360 passed, three skipped, zero failures**, in **1,484.15 seconds**. CAD, physics, KiCad, pinned vendor-library, public-source and headless routing profiles were enabled. All 43 new material/inventory regression cases passed; the only skips are the three existing opt-in live-vision tests. The [integration receipt](status/generated/inventree-materials-integration-2026-11-17.json) binds the source, full-suite log, native upstream execution, CSV, retained source inputs and preserved local work.
+
+The [engine guide](ENGINE.md#exact-materials-and-inventree-inventory) documents the interface and limits. The broader build-from-parts objective remains open: choosing the inventory BOM does not establish device-goal coverage, interface compatibility or complete current sourcing. No frontend changes, purchases, physical work or GitHub mutations were made in this integration.
+
+### Material-bound wiring and WireViz integration — November 17
+
+Implementation `b7b8df7a` adds a shared harness assessment exposed through the Python SDK, installed `hs-wiring` CLI and canonical HTTP/MCP API. The same-revision material assessment supplies exact identities, units and quantities. Explicit endpoint/pin and wire contracts generate a cut list and WireViz-compatible document; the optional separate WireViz CLI produces a native SVG and BOM. Its existing InvenTree plugin was reviewed; HS adds no server plugin, upload or remote BOM mutation.
+
+The electrical checks examine entire connected nets: incompatible pin roles, multiple outputs, supply voltage ranges, aggregated load current, conservative conductor/return-current limits, separate digital high/low limits and shared ground references. Unknown pinouts, source bindings, ratings and signal loading/timing remain unresolved. Optional source bindings reread same-project registered JSON bytes, verify their hash and compare the selected contract. This binds declarations to sources without authenticating their authors or establishing physical compatibility. Historical assessments verify their source/material/report/export lineage when reopened.
+
+The installed CLI ran from outside the checkout with `PYTHONPATH` empty against the existing digital drone. Its [four-conductor receiver draft](../examples/wiring/README.md) preserves the retained UART1 receiver / UART2 GPS allocation and adds a separate provisional 0.40 m conductor requirement while keeping the previous wiring allowance open. Actual WireViz 0.4.1 produced the [native diagram](status/generated/hs3g-b-receiver-wiring-2026-11-17.svg), [cut list](status/generated/hs3g-b-receiver-wiring-2026-11-17.csv) and verified ZIP. The existing design revision and study remained identical.
+
+Follow-up visual inspection of the manufacturer PDFs clarified the actual pad labels and viewing orientation: UART1 is T1/R1 near the DJI connections, with separate 5V/G pads directly above them and a nearby 9V pad that is not selected. The RP1 manual identifies RX/TX/5V/G in its top view, but pictured PCB revision matching remains open. The [source notes](../examples/wiring/hs3g_b_receiver_sources.json) retain the document hashes and extraction limits. No nominal voltage was converted into a guaranteed tolerance range, and no conductor ampacity was inferred from AWG.
+
+The resulting receiver assessment is **unresolved**, with 24 open issues. Manual declarations are not registered into the original digital snapshot and stay flagged as unbound. Receiver current, voltage tolerances, logic levels, exact wire, physical revision matching, routing/cut length and terminations remain unverified. This is a partial wiring review on the same project, not a completed aircraft harness or a completed cyberdeck. The [engine guide](ENGINE.md#project-wiring-and-harness-review) defines the API and supported scope. Frontend and student-service integrations remain deferred.
+
+The complete root invocation on `b7b8df7a` finished with **4,399 passed, seven skipped, zero failures**, in **1,250.54 seconds**. Four skipped vendor-library/public-reference/headless-routing checks then passed with their retained profiles enabled, in **24.11 seconds**. This establishes **4,403 unique passing root tests across the complete run and follow-up**, with only three opt-in live-vision checks unexecuted; it is not a single invocation with only three skips. All 43 new wiring regressions passed in the complete run and in their final focused run. Runtime code stayed unchanged throughout verification; subsequent changes clarify reference data and documentation only.
+
+A real loopback HTTP server also assessed the final receiver draft through the canonical API, invoked native WireViz, reopened the saved record, listed history and delivered a matching binary ZIP. It was stopped afterward. The [verification receipt](status/generated/wiring-backend-verification-2026-11-17.json) records exact source/artifact/test hashes, profile follow-up, manual review, CLI/MCP/HTTP evidence and preservation of the three original local work files. It also records archiving two own pre-commit development drafts whose earlier CSV format correctly failed strict history replay; their bytes were preserved separately. All work remains digital and local, with no GitHub mutation.
+
+## Useful starting commands
+
+From the repository root:
+
+```bash
+PYTHONPATH=src .venv/bin/python scripts/hs_workshop_operator.py --list
+PYTHONPATH=src .venv/bin/python scripts/hs_keyboard_splice_probe.py --help
+/usr/bin/python3 scripts/hs_spi_checkpoint.py --help
+```
+
+Use the native KiCad interpreter for actual SPI execution. Use an environment with the `cad` extra for HS-3G regeneration. Model providers and remote dispatch still require their explicit configuration and approval paths.
+
+For the completed digital workshop, open its HTML directly or install `.[drone-sim]` and run the registered `hs3g_drone_digital` case as shown in its README. Its simulation and viewer do not require model providers or physical parts.
+
+## Work deliberately left separate
+
+The #318–#336 repair-investigation and hinge chain requires integration together with #344/#345's truth corrections; it was not pulled indirectly through #346's base branch. The #340/#347 fabrication stack changes the SPI reference board and order package, so it remains separate from this source-preserving integration. U1 placement and the frozen-release relationship still need resolution there.
+
+No physical cut, fabrication, power-on, flight or production release is established by these software integrations.

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { deriveEvidenceTruth } from "./deriveEvidenceTruth.js";
+import { deriveEvidenceTruth } from "./deriveEvidenceTruth";
 
 function evidenceSession(overrides = {}) {
   return {
