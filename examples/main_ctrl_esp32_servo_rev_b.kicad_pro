@@ -1,0 +1,14 @@
+{
+  "board": {
+    "design_settings": {
+      "rules": {
+        "min_through_hole_diameter": 0.2,
+        "min_via_annular_width": 0.1
+      }
+    }
+  },
+  "meta": {
+    "filename": "main_ctrl_esp32_servo_rev_b.kicad_pro",
+    "version": 1
+  }
+}
