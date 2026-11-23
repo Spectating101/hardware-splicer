@@ -26,9 +26,9 @@ def max_kicad_content_bytes() -> int:
 
 def output_roots() -> list[Path]:
     roots: list[Path] = []
-    primary = os.getenv("HARDWARE_SPLICER_OUTPUT_ROOT", "/tmp/hardware_splicer_api").strip()
-    if primary:
-        roots.append(Path(primary).expanduser().resolve())
+    from .state_paths import output_root
+
+    roots.append(output_root().expanduser().resolve())
     extra = os.getenv("HARDWARE_SPLICER_BUILD_FILE_ROOTS", "").strip()
     if extra:
         for part in extra.split(os.pathsep):
@@ -58,7 +58,7 @@ def assert_build_dir_allowed(root: Path) -> None:
     for base in allowed:
         if resolved == base or base in resolved.parents:
             return
-    primary = allowed[0] if allowed else Path("/tmp/hardware_splicer_api")
+    primary = allowed[0]
     raise ValueError(
         f"build_dir must be under HARDWARE_SPLICER_OUTPUT_ROOT ({primary}); "
         "set HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR=1 for trusted local development"

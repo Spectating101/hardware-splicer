@@ -10,9 +10,10 @@ from typing import Any, Dict, List, Mapping
 from .bench_capture_bridge import submit_bench_capture, sync_bench_session_template
 from .project_intake import splice_and_build_from_intake
 from .splice_bench import bench_status, open_bench_session, submit_bench_measurements
+from .state_paths import repo_root
 
 SCHEMA = "hardware_splicer.splice_golden_real.v2"
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = repo_root()
 GOLDEN_DIR = REPO_ROOT / "tests" / "data" / "golden"
 DEFAULT_PHOTO = GOLDEN_DIR / "rc_toy_motor_board.jpg"
 DEFAULT_CAPTURE = GOLDEN_DIR / "rc_motor_manual_bench_capture.v1.json"

@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { downloadBuildArtifact } from "../api.js";
+import { downloadBuildArtifact } from "../api";
 import {
   fetchEngineeringReviewStatus,
   runEngineeringReview,
-} from "../engineeringReviewApi.js";
+} from "../engineeringReviewApi";
 import "./EngineeringReviewPanel.css";
 
 const STATUS_LABELS = {

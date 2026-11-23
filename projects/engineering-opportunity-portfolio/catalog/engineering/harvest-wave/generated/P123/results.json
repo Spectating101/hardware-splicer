@@ -1,0 +1,19 @@
+{
+  "pilot": "Taiwan greenhouse eight 30\u201340 m driplines with a common gravity drain",
+  "metrics": {
+    "progressive": {
+      "all_open_rows": 8,
+      "min_all_open_lateral_m_s": 0.355,
+      "min_all_open_header_m_s": 0.376,
+      "min_isolated_lateral_m_s": 0.535,
+      "model_all_open_flow_lpm": 26.08
+    },
+    "uniform-bore-control": {
+      "all_open_rows": 8,
+      "min_all_open_lateral_m_s": 0.183,
+      "min_all_open_header_m_s": 0.194,
+      "min_isolated_lateral_m_s": 0.517,
+      "model_all_open_flow_lpm": 17.25
+    }
+  }
+}

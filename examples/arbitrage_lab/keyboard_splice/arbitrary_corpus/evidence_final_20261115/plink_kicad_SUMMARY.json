@@ -1,0 +1,15 @@
+{
+  "schema": "hs.arbitrary-keyboard-real-reference.v1",
+  "case_id": "plink_kicad",
+  "repository": "Logan-Fouts/Plink",
+  "reference_path": "hardware/plink_kicad/plink_kicad.kicad_pcb",
+  "source_url": "https://raw.githubusercontent.com/Logan-Fouts/Plink/master/hardware/plink_kicad/plink_kicad.kicad_pcb",
+  "expected_source_sha256": "3f342a51a596b808f348295f2cc35cf35bea36ec51d907eb31a7e6fbb81127c9",
+  "physical_donor_present": false,
+  "engine_uses_hand_written_wiring_map": false,
+  "actual_sha256": "3f342a51a596b808f348295f2cc35cf35bea36ec51d907eb31a7e6fbb81127c9",
+  "status": "UNSUPPORTED_KICAD_SOURCE_FORMAT_OR_NATIVE_IMPORT",
+  "native_parser_exit": 1,
+  "native_parser_timeout": false,
+  "parser_error": "Failed to open PCB with this KiCad version\n"
+}

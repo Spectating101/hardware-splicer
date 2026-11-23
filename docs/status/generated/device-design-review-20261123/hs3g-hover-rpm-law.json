@@ -1,0 +1,16 @@
+{
+ "mass_g": 234.9,
+ "hover_thrust_per_motor_g": 58.7,
+ "lowest_measured_row": {
+  "throttle_pct": 50.0,
+  "thrust_g": 101.14,
+  "rpm": 18626.0
+ },
+ "thrust_per_rpm2_spread_pct": 3.7,
+ "fitted_thrust_exponent": 2.06,
+ "fitted_power_exponent": 2.78,
+ "hover_rpm_estimate": 14370,
+ "hover_rpm_fraction_of_lowest_measured": 0.77,
+ "hover_power_per_motor_w": 12.0,
+ "hover_current_total_a_at_measured_voltage": 2.85
+}

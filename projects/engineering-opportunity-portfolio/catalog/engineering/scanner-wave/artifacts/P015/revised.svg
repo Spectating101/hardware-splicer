@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="220mm" height="285mm" viewBox="0 0 220 285">
+  <title>P015 revised · full-size proof coupon</title>
+  <rect id="scale" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="10" y="6" width="20" height="10" />
+  <rect id="host-window-coupon" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="20" y="24" width="112" height="198" />
+  <rect id="preserve-calibration-zone" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="20" y="24" width="112" height="30" />
+  <rect id="carrier" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="29" y="62" width="96" height="102" />
+  <rect id="media-ref" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="37" y="103" width="80" height="16" />
+  <rect id="sample-0" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="40" y="104.6" width="17" height="12.8" />
+  <rect id="window-0" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="39.425" y="103.95" width="18.15" height="14.1" />
+  <rect id="sample-1" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="59" y="104.6" width="17" height="12.8" />
+  <rect id="window-1" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="58.425" y="103.95" width="18.15" height="14.1" />
+  <rect id="sample-2" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="78" y="104.6" width="17" height="12.8" />
+  <rect id="window-2" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="77.425" y="103.95" width="18.15" height="14.1" />
+  <rect id="sample-3" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="97" y="104.6" width="17" height="12.8" />
+  <rect id="window-3" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="96.425" y="103.95" width="18.15" height="14.1" />
+  <rect id="rail-upper" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="139" y="97" width="80" height="2.5" />
+  <rect id="rail-lower" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="139" y="121" width="80" height="2.5" />
+</svg>

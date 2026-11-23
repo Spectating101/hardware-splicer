@@ -1,0 +1,17 @@
+{
+  "pilot": "Straight reference flume, synthetic dry-start pulse replay for a spot-velocity wand",
+  "metrics": {
+    "calibrated": {
+      "active_speed_points": 3,
+      "stalled_replays": 9,
+      "max_error_m_s": 0.014,
+      "largest_replicate_span_m_s": 0.028
+    },
+    "zero-offset-control": {
+      "active_speed_points": 3,
+      "stalled_replays": 9,
+      "max_error_m_s": 0.154,
+      "largest_replicate_span_m_s": 0.028
+    }
+  }
+}

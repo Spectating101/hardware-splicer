@@ -1,0 +1,952 @@
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  BASIS_LABELS, DEFAULT_EXPLODE, DIFF_LABELS, FIELDDECK_NARROW,
+  changeSummary, classifyPart, oldRevisionCaption, evidenceCells, formatEvidenceSource, indexFielddeck, rowsForMode, selectedPartKeys,
+  countClippedItems, evidenceLabel, ghostDeltaKey, openQuestions, shortPartName, toggleFielddeckSheet,
+  coverDetail, coverHeadline, formatEvidenceValue,
+} from "./fielddeckLogic.js";
+import { createFielddeckStage, disposeFielddeck, loadFielddeck } from "./fielddeckStage.js";
+import { sceneRevisions } from "./sceneRevisions.js";
+import "./fielddeckScene.css";
+
+const INITIAL = {
+  mode: null, explode: DEFAULT_EXPLODE, selected: null, stop: 0, cue: null,
+  hero: null, question: null, faceView: false, blockers: true, touring: false,
+};
+const EVIDENCE_STATES = new Set(["datasheet", "assumed", "computed", "unknown"]);
+let introSeen = false;
+
+function EvidenceSource({ source: { href, label } }) {
+  return href ? <a href={href} title={href} target="_blank" rel="noreferrer">{label}</a> : label;
+}
+
+function hasNumericValue({ value, state }) {
+  return state !== "unknown" && (typeof value === "number"
+    || Array.isArray(value) && value.some((item) => typeof item === "number"));
+}
+
+export function EvidenceRows({ evidence, change, footprint }) {
+  return (
+    <dl className="fd-evidence" aria-label="Evidence">
+      {change && <div className="fd-evidence-row fd-change-summary" data-inspector-item>
+        <dt>{change.title}</dt>
+        {change.bounds && <>
+          <dd className="fd-evidence-state">computed</dd>
+          <dd className="fd-evidence-value" data-numeric="true">{change.bounds}</dd>
+        </>}
+      </div>}
+      {footprint && <div className="fd-evidence-row" data-inspector-item>
+        <dt>CAD footprint vs {footprint.label ?? footprint.base}</dt>
+        <dd className="fd-evidence-state">computed</dd>
+        <dd className="fd-evidence-value" data-numeric="true">{footprint.value}</dd>
+        <dd className="fd-evidence-source">Both revisions&apos; display GLB bounds</dd>
+      </div>}
+      {change?.mesh && <div className="fd-evidence-row" data-inspector-item>
+        <dt>Mesh volume and area</dt>
+        <dd className="fd-evidence-state">computed</dd>
+        <dd className="fd-evidence-value" data-numeric="true">{change.mesh}</dd>
+        <dd className="fd-evidence-source">Both revisions&apos; GLB meshes</dd>
+      </div>}
+      {evidence.map((row, i) => {
+        const [field, value, state, source] = evidenceCells(row);
+        const label = evidenceLabel(field);
+        const unknownMethod = !row.method || row.method === "unknown";
+        const unknown = value === "unknown" && state === "unknown" && source.label === "unknown" && unknownMethod;
+        return (
+          <div key={`${field}:${i}`} className="fd-evidence-row" data-inspector-item title={field}>
+            <dt>{label}</dt>
+            <dd className="fd-evidence-state">{unknown ? "Unknown" : state}</dd>
+            {!unknown && <>
+              <dd className="fd-evidence-value" data-numeric={hasNumericValue(row)}>{value}</dd>
+              <dd className="fd-evidence-source"><EvidenceSource source={source} /></dd>
+            </>}
+          </div>
+        );
+      })}
+    </dl>
+  );
+}
+
+function nameOf(row) {
+  return row?.part ? shortPartName(row.part, row.revision) : row?.link?.label;
+}
+
+function statusOf(row) {
+  const fit = row.part?.evidence.find(({ field }) => field === "physical_fit")?.state;
+  const state = EVIDENCE_STATES.has(fit) ? fit : "unknown";
+  return `Physical fit · ${state.charAt(0).toUpperCase() + state.slice(1)}`;
+}
+
+function Endpoints({ row: { link, revision }, index }) {
+  return (
+    <dl className="fd-endpoints">
+      {[["A", link.from_part_id], ["B", link.to_part_id]].map(([letter, id]) => (
+        <div key={letter} data-inspector-item>
+          <dt>{letter}</dt><dd>{index.byPart.get(`${revision}:${id}`)?.part.label ?? id ?? "Unknown endpoint"}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+function questionText(reason) {
+  if (/^[a-z]+(?:_[a-z]+)+$/.test(reason)) return evidenceLabel(reason);
+  return reason.charAt(0).toUpperCase() + reason.slice(1);
+}
+
+function QuestionNumber({ number }) {
+  return <span className="fd-question-numbers">{number}</span>;
+}
+
+function Inspector({ row, index, questions, open, compare, meshStats, footprint, other = null, collapsed = false, onToggle = null }) {
+  const comparing = Boolean(compare);
+  const scroll = useRef(null);
+  const [more, setMore] = useState(0);
+  useLayoutEffect(() => {
+    const panel = scroll.current;
+    if (!open) return;
+    panel.scrollTop = 0;
+    const update = () => {
+      const overflowing = panel.scrollHeight - panel.scrollTop > panel.clientHeight + 1;
+      const { bottom } = panel.getBoundingClientRect();
+      if (!overflowing) {
+        setMore(0);
+        return;
+      }
+      setMore([...panel.querySelectorAll("[data-inspector-item]")].filter(
+        (item) => item.getBoundingClientRect().bottom > bottom,
+      ).length);
+    };
+    update();
+    panel.addEventListener("scroll", update);
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(update);
+    observer?.observe(panel);
+    return () => {
+      panel.removeEventListener("scroll", update);
+      observer?.disconnect();
+    };
+  }, [row, questions, open]);
+
+  const { part, link, revision } = row ?? {};
+  return (
+    <aside className="fd-inspector fd-panel" id="fd-inspector" aria-label="Selection details" hidden={!open} data-collapsed={collapsed || undefined}>
+      {/* Desktop: the panel folds to its title so the canvas can take the width. */}
+      {onToggle && <button type="button" className="fd-panel-toggle" aria-expanded={!collapsed} aria-controls="fd-inspector-content"
+        onClick={onToggle}>Details</button>}
+      <div className="fd-inspector-scroll" id="fd-inspector-content" ref={scroll} tabIndex={0} hidden={collapsed}>
+        {!row ? <p className="fd-empty">Select a part or interface to inspect its evidence.</p> : <>
+          <h2>{part?.label ?? link.label}</h2>
+          <p className="fd-status">{statusOf(row)}</p>
+          {part && <p className="fd-status" data-inspector-item>
+            {BASIS_LABELS[classifyPart(part).basis]}
+            {comparing && <> · {DIFF_LABELS[row.delta]?.toLowerCase() ?? "change unknown"}</>}
+          </p>}
+          {questions.length > 0 && <>
+            <h3>Open questions</h3>
+            <ul className="fd-checks">
+              {questions.map(({ reason, number, scope }) => (
+                <li data-inspector-item key={number}>
+                  <span className="fd-question-scope"><QuestionNumber number={number} /> · {scope}</span>
+                  <span>{questionText(reason)}</span>
+                </li>
+              ))}
+            </ul>
+          </>}
+          {other && <details className="fd-other-revision" data-inspector-item>
+            <summary>Other revision ({other.label}) · {other.questions.length}</summary>
+            <ul className="fd-checks">
+              {other.questions.map(({ reason, number }) => (
+                <li key={number}><span className="fd-question-scope"><QuestionNumber number={number} /></span>
+                  <span>{questionText(reason)}</span></li>
+              ))}
+            </ul>
+          </details>}
+          {link ? <>
+            <h3>Endpoint components</h3>
+            <Endpoints row={row} index={index} />
+            <p className="fd-status" data-inspector-item>Routing unknown</p>
+            {link.source && <div data-inspector-item><EvidenceSource source={formatEvidenceSource(link.source)} /></div>}
+          </> : <>
+            <h3>Evidence</h3>
+            <EvidenceRows change={changeSummary(index, row, compare, meshStats)} footprint={footprint}
+              evidence={part.evidence.filter(({ field }) => field !== "physical_fit")} />
+          </>}
+        </>}
+      </div>
+      {open && !collapsed && more > 0 && <div className="fd-inspector-more"><span>{more} more</span></div>}
+    </aside>
+  );
+}
+
+function PartTree({ rows, view, questions, counts, blockersOnly, endpoints, linked, onSelect, total = questions.length, viewName = "", bySource = false }) {
+  const [unchangedOpen, setUnchangedOpen] = useState(false);
+  const tree = useRef(null);
+  const [more, setMore] = useState(0);
+  const endpointFor = (key) => endpoints.find(([, endpointKey]) => endpointKey === key)?.[0];
+  // A single revision has nothing to diff against, so its parts group by shape source instead.
+  const groups = bySource
+    ? Object.entries(BASIS_LABELS).map(([kind, label]) => ({
+      kind, label, items: rows.filter(({ part }) => part && classifyPart(part).basis === kind),
+    })).filter(({ items }) => items.length)
+    : Object.entries(DIFF_LABELS).map(([kind, label]) => ({
+      kind, label, items: rows.filter(({ part, delta }) => part && (delta ?? "unchanged") === kind),
+    }));
+  groups.push(
+    { kind: "interface", label: "Interfaces", items: rows.filter(({ link }) => link) },
+    { kind: "blocker", label: "Blockers", items: questions },
+  );
+
+  useLayoutEffect(() => {
+    const panel = tree.current;
+    const active = panel.querySelector('[data-active-question="true"]')
+      ?? panel.querySelector('[aria-pressed="true"]');
+    if (active) {
+      const rect = active.getBoundingClientRect();
+      const bounds = panel.getBoundingClientRect();
+      if (rect.top < bounds.top) panel.scrollTop -= bounds.top - rect.top;
+      if (rect.bottom > bounds.bottom) panel.scrollTop += rect.bottom - bounds.bottom;
+    }
+    const update = () => {
+      const { top, bottom } = panel.getBoundingClientRect();
+      const items = [...panel.querySelectorAll(blockersOnly ? '[aria-label="Blockers"] li' : "li")]
+        .filter((item) => item.getClientRects().length)
+        .map((item) => item.getBoundingClientRect());
+      setMore(panel.scrollHeight <= panel.clientHeight + 1 ? 0
+        : countClippedItems(items, { top, bottom }));
+    };
+    update();
+    panel.addEventListener("scroll", update);
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(update);
+    observer?.observe(panel);
+    return () => {
+      panel.removeEventListener("scroll", update);
+      observer?.disconnect();
+    };
+  }, [view.selected, view.question, rows, blockersOnly, unchangedOpen, linked]);
+
+  const rowButton = (row, kind) => (
+    <li key={row.number ?? row.key}>
+      <button type="button" aria-pressed={!row.number && row.key === view.selected}
+        data-linked={row.number ? row.number === view.question : Boolean(endpointFor(row.key))}
+        data-endpoint-row={!row.number ? endpointFor(row.key) : undefined}
+        data-active-question={row.number ? row.number === view.question : undefined}
+        data-row={row.key} data-kind={kind} onClick={() => onSelect(row.key, row.number)}>
+        {row.number ? <QuestionNumber number={row.number} />
+          : endpointFor(row.key) ? <span className="fd-endpoint" aria-hidden="true">{endpointFor(row.key)}</span>
+          : <span className="fd-swatch" aria-hidden="true" />}
+        <span className="fd-tree-label">{row.reason ? questionText(row.reason) : nameOf(row)}</span>
+        {row.part && linked && !linked.has(row.key) && <small>Not linked</small>}
+      </button>
+    </li>
+  );
+  const selected = blockersOnly && rows.find(({ key }) => key === view.selected);
+  return (
+    <>
+      <div className="fd-tree-scroll" ref={tree}>
+        {selected && <div className="fd-tree-group"><ul>
+          {rowButton(selected, selected.delta ?? "interface")}
+          {rows.filter(({ key }) => endpointFor(key)).map((row) => rowButton(row, row.delta ?? "unchanged"))}
+        </ul></div>}
+        {groups.filter(({ kind }) => !blockersOnly || kind === "blocker").map(({ kind, label, items }) => {
+          // Blockers count the project total; a filtered view names its own count beside it.
+          const count = kind === "blocker"
+            ? total === questions.length ? total : `${total} tracked · ${questions.length} in ${viewName}`
+            : counts?.[kind] ?? items.length;
+          const collapsed = kind === "unchanged" && !unchangedOpen;
+          const shown = collapsed ? items.filter(({ key }) => key === view.selected || endpointFor(key)) : items;
+          const heading = <>{label} <span className="fd-count">{kind === "unchanged" ? `(${count})` : count}</span></>;
+          return (
+            <section className="fd-tree-group" aria-label={label} key={kind}>
+              <h3>{kind === "unchanged" ? (
+                <button type="button" aria-expanded={unchangedOpen} aria-controls="fd-unchanged"
+                  onClick={() => setUnchangedOpen(!unchangedOpen)}>{heading}</button>
+              ) : heading}</h3>
+              <ul id={kind === "unchanged" ? "fd-unchanged" : undefined} hidden={collapsed && !shown.length}>
+                {shown.map((row) => rowButton(row, kind))}
+              </ul>
+            </section>
+          );
+        })}
+      </div>
+      {more > 0 && <div className="fd-inspector-more"><span>{more} more</span></div>}
+    </>
+  );
+}
+
+// Face view caption. A faceplate covering the glass edge is a bezel lip; an XY projection cannot
+// establish interference, so physical fit stays unknown and every line names its source.
+function FaceStrip({ fit, mode, base, target, glbSources, viewingArea, labelOf = (rev) => rev }) {
+  const sources = [target, ...(mode === "compare" ? [base] : [])].map((rev) => glbSources[rev] ?? `${labelOf(rev)} GLB`);
+  return (
+    <div className="fd-footprint" data-footprint="">
+      <div className="fd-fit-primary">Physical fit · Unknown (stack-up and lug alignment unverified)</div>
+      <div className="fd-fit-gap" data-fit-headline="">{fit ? coverHeadline(fit.sides) : "Faceplate cover of glass edge · ? · not derivable"}</div>
+      {fit && <div className="fd-fit-line" data-fit-detail="">{coverDetail(fit.sides)}</div>}
+      {fit && <div className="fd-fit-line">{fit.aperture}</div>}
+      {viewingArea && <div className="fd-fit-line fd-fit-secondary">
+        Viewing area {viewingArea.value} · datasheet{" "}
+        {viewingArea.source.href ? <a href={viewingArea.source.href}>{viewingArea.source.label}</a> : viewingArea.source.label}
+        {" "}· position relative to glass not given
+      </div>}
+      <div className="fd-fit-line fd-fit-unknown">Active area exposure · unknown</div>
+      <div className="fd-fit-line fd-fit-unknown">Rear pocket clearance · not derivable from the XY projection</div>
+      <div className="fd-fit-source fd-fit-secondary" data-footprint-source="">
+        Contours, section and spacer centroids computed from {sources.join(" and ")} · spacer hole axes unverified
+      </div>
+    </div>
+  );
+}
+
+function Annotations({ labels, selection, endpoints, pins, faceView, base, target, onSelect, glbSources = {}, faceFit, mode, viewingArea, labelOf }) {
+  return (
+    <div className="fd-annotations" aria-label="Scene callouts">
+      <svg className="fd-leaders" aria-hidden="true">
+        {labels.map(({ key, delta }, i) => (
+          <g key={key} data-kind={delta} data-leader={i}><path /><circle r="1.5" /></g>
+        ))}
+        <path className="fd-pin-leaders" data-pin-leaders="" />
+        <path className="fd-pin-ticks" data-pin-ticks="" />
+        <path className="fd-ghost-marks" data-ghost-marks="" />
+        <g className="fd-ghost-links" data-ghost-links="" />
+        <path className="fd-pairing-leader" data-pairing-leader="" />
+        {faceView && <g className="fd-face-drawing" data-face-drawing="" />}
+        {selection?.part && <>
+          <path className="fd-bracket-halo" data-bracket={selection.key} />
+          <path className="fd-bracket" data-bracket={selection.key} />
+        </>}
+      </svg>
+      {faceView && <FaceStrip fit={faceFit} mode={mode} base={base} target={target} glbSources={glbSources} viewingArea={viewingArea} labelOf={labelOf} />}
+      {labels.map((row) => <span className="fd-label" key={row.key} data-anchor={row.key}
+        data-endpoint-label={row.endpoint}>{row.caption ?? nameOf(row)}
+        {row.detail && <small className="fd-label-detail">{row.detail}</small>}</span>)}
+      {endpoints.map(([letter, key]) => key && (
+        <div className="fd-pin-position" key={letter} data-pin-anchor={key} data-endpoint-pin={letter}>
+          <span className="fd-endpoint" aria-label={`Endpoint ${letter}`}>{letter}</span>
+        </div>
+      ))}
+      {pins.map(({ key, anchor, reason, number, dimmed, route, revisionTag }) => (
+        <div className="fd-pin-position" key={number} data-pin-anchor={anchor} data-dimmed={dimmed}
+          data-interface-question={route || undefined}>
+          <button className="fd-pin" type="button" data-question-number={number}
+            aria-label={`Open question ${number}${revisionTag ? `, ${revisionTag}` : ""}`}
+            title={revisionTag ? `${questionText(reason)} · ${revisionTag}` : questionText(reason)}
+            onClick={() => onSelect(key, number)}><span>{number}</span></button>
+        </div>
+      ))}
+      {!faceView && <span className="fd-label fd-pairing-chip" data-pairing-chip="" />}
+      {!faceView && <span className="fd-grid-label" data-grid-label="">Grid 10 mm</span>}
+      {endpoints.length > 0 && (
+        <div className="fd-route-position" data-route-label="">
+          <span className="fd-label">Routing unknown</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// The scene draws whichever project's manifest it is given: two revisions get Compare and the
+// change legend, a single revision groups parts by shape source, and nothing here names a project.
+// holdStage: an embedding page asks the scene to wait before building its stage. Building the stage
+// is seconds of main-thread geometry work, so the bench lets its evidence column render first.
+// chrome="none" draws only the model and its on-model marks (labels, pins, measurements); a host
+// such as the device workspace then drives the view through `command` ({ mode, selected,
+// explode, faceView }) and hears picks through onSelectionChange and data through onReady.
+export default function FieldDeckScene({ projectId, manifest, onExit, exitLabel = "Back", embedded = false, holdStage = false,
+  chrome = "full", command = null, onSelectionChange = null, onReady = null }) {
+  const bare = chrome === "none";
+  const host = useRef(null);
+  const stage = useRef(null);
+  const current = useRef(null);
+  const [assets, setAssets] = useState(null);
+  // Released one frame after holdStage clears, so whatever the page just rendered is painted
+  // before the stage's long synchronous build starts.
+  const [stageReleased, setStageReleased] = useState(!holdStage);
+  // False until the stage for the current assets has been built (or failed): the scene reads as
+  // loading, never as unavailable, while it builds.
+  const [built, setBuilt] = useState(false);
+  const release = useRef(null);
+  if (!release.current) {
+    let resolve;
+    release.current = { promise: new Promise((done) => { resolve = done; }), resolve };
+  }
+  useEffect(() => { if (stageReleased) release.current.resolve(); }, [stageReleased]);
+  useEffect(() => {
+    if (holdStage) { setStageReleased(false); return undefined; }
+    let timer;
+    const frame = requestAnimationFrame(() => { timer = setTimeout(() => setStageReleased(true), 0); });
+    return () => { cancelAnimationFrame(frame); clearTimeout(timer); };
+  }, [holdStage]);
+  const { compare = null, focus = null, tour = [] } = manifest;
+  const revisions = useMemo(() => sceneRevisions(manifest), [manifest]);
+  const revisionIds = useMemo(() => revisions.map(([id]) => id), [revisions]);
+  const revisionKey = revisionIds.join("\u0000");
+  const labelOf = (rev) => revisions.find(([id]) => id === rev)?.[1] ?? rev;
+  const comparisonEnabled = Boolean(compare) && revisionIds.length > 1;
+  const { base, target } = comparisonEnabled ? compare
+    : { base: revisionIds[0], target: revisionIds.at(-1) };
+  const modes = comparisonEnabled ? [...revisions, ["compare", "Compare"]] : revisions;
+  const focusPart = focus?.part_id;
+  const [linked, setLinked] = useState(new Set());
+  const [meshStats, setMeshStats] = useState(null);
+  const [ghostLengths, setGhostLengths] = useState(null);
+  const [ghostMoves, setGhostMoves] = useState(null);
+  const [faceFit, setFaceFit] = useState(null);
+  const [rendered, setRendered] = useState(false);
+  const [stageError, setStageError] = useState("");
+  const [view, setView] = useState(() => ({ ...INITIAL, mode: target }));
+  const [desktopTreeOpen, setDesktopTreeOpen] = useState(true);
+  // Under 1600 px the details dock starts folded, so the model keeps the stage until a part is chosen.
+  const [desktopInspectorOpen, setDesktopInspectorOpen] = useState(() => (globalThis.innerWidth ?? 1600) >= 1600);
+  const [blockersOnly, setBlockersOnly] = useState(false);
+  const [narrow, setNarrow] = useState(() => window.matchMedia(FIELDDECK_NARROW).matches);
+  const [keyOpen, setKeyOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [sheet, setSheet] = useState(null);
+  const peek = useRef(null);
+  const [peekMore, setPeekMore] = useState(0);
+  const [explodeMotion, setExplodeMotion] = useState(null);
+  const [reduced, setReduced] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const change = () => setReduced(media.matches);
+    media.addEventListener("change", change);
+    return () => media.removeEventListener("change", change);
+  }, []);
+
+  useEffect(() => {
+    const media = window.matchMedia(FIELDDECK_NARROW);
+    const change = () => setNarrow(media.matches);
+    media.addEventListener("change", change);
+    return () => media.removeEventListener("change", change);
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    let loaded;
+    setAssets(null);
+    loadFielddeck(projectId, revisionKey.split("\u0000"), controller.signal, manifest.title,
+      { beforeParse: release.current.promise }).then((result) => {
+      if (controller.signal.aborted) disposeFielddeck(result);
+      else {
+        loaded = result;
+        setAssets(result);
+      }
+    });
+    return () => {
+      controller.abort();
+      if (loaded) disposeFielddeck(loaded);
+    };
+  }, [projectId, revisionKey, manifest.title]);
+
+  const sidecars = useMemo(() => Object.fromEntries(revisionKey.split("\u0000")
+    .map((rev) => [rev, assets?.[rev]?.sidecar])), [assets, revisionKey]);
+  const questionOrder = useMemo(() => comparisonEnabled ? [target, base] : revisionKey.split("\u0000"),
+    [comparisonEnabled, target, base, revisionKey]);
+  const glbSources = useMemo(() => Object.fromEntries(Object.entries(sidecars)
+    .filter(([, sidecar]) => sidecar?.glb_source).map(([rev, sidecar]) => [rev, sidecar.glb_source.split("/").at(-1)])),
+  [sidecars]);
+  const sceneCompare = useMemo(() => comparisonEnabled ? { base, target } : null,
+    [base, target, comparisonEnabled]);
+  const index = useMemo(() => indexFielddeck(sidecars, sceneCompare), [sidecars, sceneCompare]);
+  const rows = useMemo(() => rowsForMode(index, view.mode, sceneCompare), [index, view.mode, sceneCompare]);
+  const selection = index.byKey.get(view.selected);
+  const revision = view.mode === "compare" ? target : view.mode;
+  const allQuestions = useMemo(() => openQuestions(sidecars, index, questionOrder), [sidecars, index, questionOrder]);
+  const displayedKeys = useMemo(() => new Set(rows.map(({ key }) => key)), [rows]);
+  const questions = useMemo(() => allQuestions.flatMap(({ keys, ...question }) => {
+    const matching = [...keys].filter((key) => view.mode === "compare" || key.startsWith(`${revision}:`));
+    if (!matching.length) return [];
+    // An older revision's check can still be inspected from its visible counterpart.
+    const visible = matching.filter((key) => displayedKeys.has(key));
+    const fallback = view.mode === "compare" ? matching[0].replace(`${base}:`, `${target}:`) : matching[0];
+    const key = visible[0] ?? (displayedKeys.has(fallback) ? fallback : matching[0]);
+    return [{ ...question, key }];
+  }), [allQuestions, displayedKeys, revision, view.mode, base, target]);
+  const selectionQuestions = useMemo(() => {
+    if (!selection) return [];
+    const keys = selection.part
+      ? [target, base].map((rev) => index.byPart.get(`${rev}:${selection.part.part_id}`)?.key)
+      : view.mode === "compare" ? [selection.key, selection.key.replace(`${target}:`, `${base}:`)] : [selection.key];
+    return allQuestions.flatMap((question) => !keys.some((key) => question.keys.has(key)) ? [] : [{
+      ...question,
+      scope: question.keys.has(selection.key) ? nameOf(selection)
+        : `${labelOf([...question.keys][0].split(":")[0])} revision`,
+    }]);
+  }, [allQuestions, index, selection, view.mode, base, target]);
+  const inViewCount = questions.length;
+  // Outside Compare, a selected part's questions from the other revision sit in their own group.
+  const otherRevision = !comparisonEnabled || view.mode === "compare" ? null : view.mode === base ? target : base;
+  const ownQuestions = otherRevision
+    ? selectionQuestions.filter((question) => [...question.keys].some((key) => key.startsWith(`${view.mode}:`)))
+    : selectionQuestions;
+  const otherQuestions = otherRevision ? selectionQuestions.filter((question) => !ownQuestions.includes(question)) : [];
+  const treeOpen = narrow ? sheet === "parts" || sheet === "blockers" : desktopTreeOpen;
+  const inspectorOpen = !narrow || sheet === "details";
+  // A host can add parts to the selection (a clash names two parts); only keys the index knows count.
+  const selectedKeys = useMemo(() => [...new Set([...selectedPartKeys(index, selection),
+    ...(view.also ?? []).filter((key) => index.byKey.has(key))])], [index, selection, view.also]);
+  const oldKey = ghostDeltaKey(index, view.mode, selection, sceneCompare);
+  const treeEndpoints = selection?.link ? [["A", selection.link.from_part_id], ["B", selection.link.to_part_id]]
+    .map(([letter, id]) => [letter, index.byPart.get(`${selection.revision}:${id}`)?.key]) : [];
+  const endpoints = view.faceView ? [] : treeEndpoints;
+  const labels = view.faceView || narrow && selection?.link ? [] : rows.flatMap((row) => {
+    if (!row.part || !linked.has(row.key)
+      || !(selection ? selectedKeys.includes(row.key) : row.part.part_id === focusPart)) return [];
+    const endpoint = endpoints.find(([, key]) => key === row.key)?.[0];
+    const caption = row.delta === "removed" && view.mode === "compare" ? `${nameOf(row)} · removed` : undefined;
+    // The old revision shares the selected part's label as a sub-line instead of a second callout.
+    // It says "dashed" only when more than 20 mm of old-revision chains are actually drawn.
+    const detail = oldKey && linked.has(oldKey) && row.key === selection?.key
+      ? oldRevisionCaption(ghostLengths?.get(oldKey) ?? 0, meshStats?.get(oldKey), meshStats?.get(row.key), ghostMoves?.get(oldKey) ?? 0)
+      : undefined;
+    return [{ ...row, endpoint, caption, detail }];
+  });
+  const pins = [];
+  if (view.blockers && view.faceView) {
+    // Face view pins anchor to a display outline that is drawn in this mode only.
+    const drawn = (key) => view.mode === "compare" || key.startsWith(`${view.mode}:`);
+    for (const question of allQuestions) {
+      const anchors = [...question.keys].filter((key) => index.byKey.get(key)?.part?.part_id === focusPart
+        && linked.has(key) && drawn(key));
+      if (anchors.length) pins.push({ ...question, key: index.byPart.get(`${revision}:${focusPart}`)?.key ?? anchors[0], anchor: anchors[0] });
+    }
+  } else if (view.blockers) {
+    if (selection?.link) {
+      for (const question of selectionQuestions) pins.push({ ...question, key: selection.key, route: true, dimmed: false });
+    }
+    for (const question of questions) {
+      const { key } = question;
+      // On a phone, an interface selection hides the pins that are not part of it.
+      if (narrow && selection?.link) continue;
+      // The older revision is named on the pin's tooltip and in the Inspector, never as a chip that
+      // would sit on the newer part.
+      const revisionTag = view.mode === "compare" && key.startsWith(`${base}:`) ? `${labelOf(base)} revision` : undefined;
+      if (linked.has(key) && displayedKeys.has(key)) pins.push({ ...question, anchor: key, dimmed: Boolean(selection?.link), revisionTag });
+    }
+  }
+  const comparisonAvailable = comparisonEnabled && sidecars[target]?.revision_diff?.status === "available";
+  const comparisonRenderable = comparisonAvailable
+    && [base, target].every((rev) => [...linked].some((key) => key.startsWith(`${rev}:`)));
+  const areaEvidence = index.byPart.get(`${target}:${focusPart}`)?.part?.evidence
+    ?.find(({ field }) => field === "landscape_viewing_area_mm");
+  const viewingArea = areaEvidence?.value != null ? {
+    value: formatEvidenceValue({ ...areaEvidence, state: "datasheet" }), source: formatEvidenceSource(areaEvidence.source),
+  } : null;
+  const faceAvailable = comparisonRenderable && focusPart
+    && [base, target].every((rev) => linked.has(index.byPart.get(`${rev}:${focusPart}`)?.key));
+
+  useLayoutEffect(() => {
+    const panel = peek.current;
+    if (!narrow || !selection?.link) {
+      setPeekMore(0);
+      return;
+    }
+    panel.scrollTop = 0;
+    const update = () => {
+      const { top, bottom } = panel.getBoundingClientRect();
+      const nodes = [...panel.querySelectorAll("[data-peek-question]")];
+      const items = nodes.map((item) => item.getBoundingClientRect());
+      const clipped = countClippedItems(items, { top: -Infinity, bottom });
+      const limit = clipped ? bottom - 24 : bottom;
+      // Show whole rows only: a row cut by the sheet edge is hidden and counted as more.
+      nodes.forEach((node, i) => {
+        node.dataset.clipped = String(items[i].top < top - 1 || items[i].bottom > limit + 1);
+      });
+      setPeekMore(clipped ? countClippedItems(items, { top: -Infinity, bottom: limit }) : 0);
+    };
+    update();
+    panel.addEventListener("scroll", update);
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(update);
+    observer?.observe(panel);
+    return () => {
+      panel.removeEventListener("scroll", update);
+      observer?.disconnect();
+    };
+  }, [narrow, selection, selectionQuestions]);
+
+  function finishIntro() {
+    setView((old) => ({
+      ...old, mode: "compare", explode: DEFAULT_EXPLODE, hero: null, blockers: true, focus: false,
+      selected: index.byPart.get(`${target}:${focusPart}`)?.key ?? null,
+    }));
+  }
+
+  function select(key, question = null) {
+    setView((old) => ({
+      ...old, selected: key, question, cue: null, hero: null, touring: false, blockers: true,
+      // A selection the user makes puts Compare into focus; the intro's default selection does not.
+      focus: Boolean(key),
+      faceView: old.faceView && !index.byKey.get(key)?.link,
+    }));
+    if (key) setDesktopInspectorOpen(true);
+  }
+  current.current = { view, reduced, finishIntro, select };
+
+  const commandRef = useRef(command);
+  function applyCommand(next) {
+    setExplodeMotion(null);
+    setView((old) => ({
+      ...old, hero: null, touring: false, cue: null, blockers: true,
+      mode: next.mode ?? old.mode,
+      explode: typeof next.explode === "number" ? next.explode : old.explode,
+      selected: next.selected ?? null,
+      also: Array.isArray(next.also) ? next.also : [],
+      focus: Boolean(next.selected),
+      faceView: Boolean(next.faceView),
+    }));
+  }
+  useEffect(() => {
+    commandRef.current = command;
+    if (command && bare) applyCommand(command);
+  }, [command]);
+  useEffect(() => { onSelectionChange?.(view.selected ?? null); }, [view.selected]);
+
+  useEffect(() => {
+    if (!assets || !stageReleased) return undefined;
+    const available = Object.keys(assets).filter((rev) => assets[rev].gltf && assets[rev].sidecar);
+    const controller = new AbortController();
+    let runtime;
+    let cancelled = false;
+    function settle() {
+      const hasRevision = (rev) => [...(runtime?.linked ?? [])].some((key) => key.startsWith(`${rev}:`));
+      const canPlay = comparisonAvailable && hasRevision(base) && hasRevision(target);
+      if (bare) {
+        // The host decides what is shown; its latest command wins over any default view.
+        setView({ ...INITIAL, mode: comparisonAvailable && hasRevision(base) ? "compare" : target });
+        if (commandRef.current) applyCommand(commandRef.current);
+      } else if (canPlay && !introSeen && !current.current.reduced) {
+        introSeen = true;
+        setView({ ...INITIAL, mode: "compare", hero: performance.now(), blockers: false });
+      } else if (canPlay) {
+        introSeen = true;
+        current.current.finishIntro();
+      } else {
+        const mode = hasRevision(target) || !hasRevision(base) && sidecars[target] ? target : base;
+        setView({ ...INITIAL, mode, selected: index.byPart.get(`${mode}:${focusPart}`)?.key ?? null });
+      }
+    }
+    if (!available.length) {
+      setBuilt(true);
+      settle();
+      return undefined;
+    }
+    // The stage is built asynchronously (sliced, with its edge work in a worker); until it is
+    // ready the scene shows its loading message and the page stays responsive.
+    setBuilt(false);
+    Promise.resolve().then(() => createFielddeckStage(host.current, assets, index, {
+      onFrame: () => setRendered(true),
+      onPick: (key) => {
+        if (current.current.view.hero === null && key) current.current.select(key);
+      },
+    }, { base, target, focusPart }, { signal: controller.signal })).then((built) => {
+      if (cancelled) { built?.dispose(); return; }
+      runtime = built;
+      stage.current = runtime;
+      setLinked(runtime.linked);
+      setMeshStats(runtime.meshStats ?? null);
+      setGhostLengths(runtime.ghostLengths ?? null);
+      setGhostMoves(runtime.ghostMoves ?? null);
+      setFaceFit(runtime.faceFit ?? null);
+      settle();
+    }, (error) => {
+      if (cancelled || error?.name === "AbortError") return;
+      setStageError(`3D stage unavailable (${error.message}).`);
+      settle();
+    }).finally(() => { if (!cancelled) setBuilt(true); });
+    return () => {
+      cancelled = true;
+      controller.abort();
+      stage.current = null;
+      runtime?.dispose();
+    };
+  }, [assets, index, sidecars, comparisonAvailable, base, target, focusPart, stageReleased]);
+
+  useLayoutEffect(() => {
+    stage.current?.update({
+      mode: view.mode, explode: view.explode, explodeMotion, heroStart: view.hero,
+      selectedKeys, cameraCue: view.cue, reduced, faceView: view.faceView,
+      ghostDeltaKey: oldKey, selectedKey: selection?.key, focusSelection: Boolean(view.focus),
+    });
+  }, [assets, view, selectedKeys, reduced, explodeMotion, treeOpen, inspectorOpen, narrow, blockersOnly, sheet, keyOpen, moreOpen, oldKey, selection]);
+
+  useEffect(() => {
+    if (view.hero == null) return undefined;
+    if (reduced) {
+      current.current.finishIntro();
+      return undefined;
+    }
+    const finish = () => current.current.finishIntro();
+    const timer = window.setTimeout(finish, Math.max(0, 1100 - (performance.now() - view.hero)));
+    window.addEventListener("pointerdown", finish, true);
+    window.addEventListener("wheel", finish, { capture: true, passive: true });
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("pointerdown", finish, true);
+      window.removeEventListener("wheel", finish, true);
+    };
+  }, [view.hero, reduced]);
+
+  function changeMode(mode) {
+    setView((old) => {
+      const active = index.byKey.get(old.selected);
+      const rev = mode === "compare" ? target : mode;
+      const key = active?.part ? index.byPart.get(`${rev}:${active.part.part_id}`)?.key
+        : active?.link ? `${rev}:link:${active.link.interface_id}` : null;
+      return { ...old, mode, question: null, selected: index.byKey.has(key) ? key : null, cue: null, touring: false, blockers: true };
+    });
+  }
+
+  function goTo(stopIndex, touring = false) {
+    const stop = tour[stopIndex];
+    if (!stop) return;
+    setMoreOpen(false);
+    setExplodeMotion(null);
+    setView((old) => {
+      const showCompare = comparisonAvailable && (comparisonRenderable || !rendered);
+      const mode = stop.revision === "compare" ? (showCompare ? "compare" : old.mode)
+        : (sidecars[stop.revision] ? stop.revision : old.mode);
+      const rev = mode === "compare" ? target : mode;
+      const selected = stop.select ? index.byPart.get(`${rev}:${stop.select}`)
+        ?? index.byKey.get(`${rev}:link:${stop.select}`)
+        ?? rowsForMode(index, mode, sceneCompare).find((row) => row.part?.part_id === stop.select)
+        : stop.diff && rowsForMode(index, mode, sceneCompare).find((row) => row.part && row.delta === stop.diff);
+      return {
+        ...old, mode, explode: stop.explode, hero: null,
+        stop: stopIndex, question: null, faceView: false, selected: selected?.key ?? null, touring,
+        cue: { stopIndex }, blockers: true, focus: Boolean(selected),
+      };
+    });
+  }
+
+  useEffect(() => {
+    if (!view.touring) return undefined;
+    const next = view.stop + 1;
+    const timer = window.setTimeout(() => {
+      if (next < tour.length) goTo(next, true);
+      else setView((old) => ({ ...old, touring: false }));
+    }, 6000);
+    return () => window.clearTimeout(timer);
+  }, [view.cue, view.touring, view.stop, rendered, index, comparisonAvailable, comparisonRenderable, tour, sceneCompare, sidecars, target]);
+
+  useEffect(() => {
+    if (!explodeMotion) return undefined;
+    const { from, to, start } = explodeMotion;
+    let frame;
+    function step(now) {
+      const progress = reduced ? 1 : Math.min(1, (now - start) / (to ? 1100 : 800));
+      const amount = to ? 1 - (1 - progress) ** 3
+        : progress < 0.5 ? 4 * progress ** 3 : 1 - (-2 * progress + 2) ** 3 / 2;
+      setView((old) => ({ ...old, explode: from + (to - from) * amount, cue: null }));
+      if (progress < 1) frame = requestAnimationFrame(step);
+      else setExplodeMotion(null);
+    }
+    frame = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frame);
+  }, [explodeMotion, reduced]);
+
+  const playing = view.hero !== null;
+  const modelVisible = rendered && [...linked].some((key) => key.startsWith(`${revision}:`));
+  const loading = !assets || !stageReleased || !built || linked.size > 0 && !rendered;
+  const errors = [...(assets ? Object.values(assets).map((revision) => revision.error).filter(Boolean) : []),
+    ...(stageError ? [stageError] : [])];
+  // The host builds its own views from the same records the stage draws.
+  useEffect(() => {
+    onReady?.({ index, sidecars, faceFit, compare: sceneCompare, focusPart, modelVisible, loading, errors,
+      revisions, linked: built ? linked : null });
+  }, [index, sidecars, faceFit, sceneCompare, focusPart, modelVisible, loading, errors.join("|"), built, linked]);
+  const canChoose = ([mode]) => {
+    if (mode === "compare") return comparisonAvailable && (comparisonRenderable || !rendered);
+    return Boolean(sidecars[mode]);
+  };
+
+  function onKeyDown(event) {
+    if (playing) current.current.finishIntro();
+    if (event.key === "Escape") {
+      setKeyOpen(false);
+      setMoreOpen(false);
+      // Escape returns to the unselected overview once the intro has finished.
+      if (!playing && !keyOpen && !moreOpen && !view.faceView) {
+        setView((old) => ({ ...old, selected: null, question: null, cue: null, touring: false }));
+      }
+    }
+    if (playing || !assets || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey
+      || event.target.matches?.("input, textarea, select, [contenteditable=true]")) return;
+    if (["ArrowLeft", "ArrowRight", "j", "k"].includes(event.key)) {
+      event.preventDefault();
+      goTo(view.stop + (["ArrowRight", "j"].includes(event.key) ? 1 : -1));
+    }
+  }
+  current.current.onKeyDown = onKeyDown;
+  useEffect(() => {
+    const handleKey = (event) => current.current.onKeyDown(event);
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, []);
+
+  const filtered = narrow ? sheet === "blockers" : blockersOnly;
+
+  function toggleBlockers() {
+    if (narrow) setSheet((old) => toggleFielddeckSheet(old, "blockers"));
+    else {
+      setBlockersOnly(!filtered);
+      setDesktopTreeOpen(true);
+    }
+  }
+
+  const offsetLabel = view.explode > 0 ? `Presentation offset · ${Math.round(view.explode * 100)}%` : null;
+  // Face view draws at explode 0; Back to 3D returns the presentation offset that was live before.
+  const toggleFace = () => {
+    setExplodeMotion(null);
+    setView((old) => (old.faceView
+      ? { ...old, faceView: false, touring: false, explode: old.faceExplode ?? old.explode, faceExplode: undefined }
+      // Face view is about the display: an interface or empty selection gives way to it, so the
+      // phone sheet shows the display rather than a cable.
+      : {
+        ...old, faceView: true, touring: false, faceExplode: old.explode,
+        selected: index.byKey.get(old.selected)?.part ? old.selected
+          : index.byPart.get(`${old.mode === "compare" ? target : old.mode}:${focusPart}`)?.key ?? old.selected,
+      }));
+    setMoreOpen(false);
+  };
+
+  return (
+    <section className={`fd-scene fielddeck-route${embedded ? " is-embedded" : ""}${bare ? " is-bare" : ""}`} aria-labelledby="fd-title"
+      data-testid="fielddeck-scene" data-scene-project={projectId} data-scene-revisions={revisions.length}
+      data-scene-status={playing ? "hero" : modelVisible ? "settled" : loading ? "loading" : "unavailable"}>
+      <div className="fd-stage" data-has-selection={Boolean(selection)} ref={host} tabIndex={0} aria-label={`${manifest.title} stage`}>
+        {!bare && <header className="fd-header">
+          <div>
+            {onExit && <button className="fd-exit" type="button" aria-label={exitLabel} title={exitLabel} onClick={onExit}>←</button>}
+            <h1 id="fd-title">{manifest.title}</h1>
+            {!narrow && <span className="fd-revision">{manifest.subtitle}</span>}
+          </div>
+          <button className="fd-validation" type="button" aria-pressed={filtered} aria-controls="fd-tree"
+            onClick={toggleBlockers}>
+            {/* The count is project state: always the total, with the filtered view named beside it. */}
+            {/* The count is of questions someone recorded, not of what fit validation would find, so
+                zero never reads as proof: the unknown leads and the count says "tracked". */}
+            {narrow ? <>
+              <span className="fd-fit-unknown">Physical fit unknown</span>
+              <span><span className="fd-count">{allQuestions.length}</span> {inViewCount === allQuestions.length
+                ? "tracked" : `tracked · ${inViewCount} in view`}</span>
+            </> : <><span className="fd-fit-unknown">Physical fit unknown</span> · not tested · <span className="fd-count">{allQuestions.length}</span>{" "}
+              {inViewCount === allQuestions.length ? `tracked question${allQuestions.length === 1 ? "" : "s"}`
+                : `tracked · ${inViewCount} in ${labelOf(view.mode)} view`}</>}
+          </button>
+        </header>}
+
+        {!bare && <aside className="fd-tree fd-panel" id="fd-tree" aria-label="Part tree" hidden={narrow && !treeOpen}>
+          {!narrow && <h2><button type="button" aria-expanded={treeOpen} aria-controls="fd-tree-content"
+            onClick={() => { setDesktopTreeOpen(!treeOpen); setBlockersOnly(false); }}>Assembly</button></h2>}
+          {/* The phone tree opens from the toolbar; the heading stays so the part groups keep their outline level. */}
+          {narrow && <h2 className="visually-hidden">Assembly</h2>}
+          <div className="fd-panel-content" id="fd-tree-content" hidden={!treeOpen}>
+            <PartTree rows={rows} view={view} endpoints={treeEndpoints} linked={built ? linked : null} onSelect={select}
+              questions={questions} blockersOnly={filtered} counts={view.mode === "compare" ? sidecars[target]?.revision_diff?.counts : null}
+              total={allQuestions.length} viewName={`${labelOf(view.mode)} view`} bySource={!comparisonEnabled} />
+          </div>
+        </aside>}
+        {!bare && <Inspector row={selection} index={index} questions={ownQuestions} open={inspectorOpen} compare={sceneCompare}
+          collapsed={!narrow && !desktopInspectorOpen} onToggle={narrow ? null : () => setDesktopInspectorOpen(!desktopInspectorOpen)}
+          other={otherQuestions.length ? { revision: otherRevision, label: labelOf(otherRevision), questions: otherQuestions } : null}
+          meshStats={meshStats} footprint={view.mode === "compare" && selection?.part?.part_id === focusPart && faceFit?.footprint
+            ? { base, label: labelOf(base), value: faceFit.footprint } : null} />}
+
+        {!modelVisible && <div className="fd-stage-message" role="status">
+          {loading ? `Loading ${manifest.title} models…` : errors.join(" ") || `${manifest.title} model unavailable.`}
+        </div>}
+        {modelVisible && errors.length > 0 && <p className="fd-stage-warning" role="status">{errors.join(" ")}</p>}
+        {playing && !bare && <button className="fd-skip" type="button" onClick={finishIntro}>Skip intro</button>}
+
+        <Annotations labels={labels} selection={view.faceView ? null : selection} endpoints={endpoints}
+          pins={pins} faceView={view.faceView} base={base} target={target} onSelect={select}
+          glbSources={glbSources} faceFit={faceFit} mode={view.mode} viewingArea={viewingArea} labelOf={labelOf} />
+        {!bare && <div className="fd-bottom">
+          {assets && (
+            <div className="fd-controls" data-intro={playing}>
+              <div className="fd-modes" role="group" aria-label="Revision">
+                {modes.filter(canChoose).map(([mode, label]) => (
+                  <button key={mode} type="button"
+                    aria-pressed={view.mode === mode} onClick={() => changeMode(mode)}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+              {narrow && <button className="fd-more" type="button" aria-expanded={moreOpen}
+                aria-controls="fd-options" onClick={() => setMoreOpen(!moreOpen)}>More</button>}
+              <div className="fd-options" id="fd-options" hidden={narrow && !moreOpen}>
+                {(modelVisible || playing) && <div className="fd-explode">
+                  <label htmlFor="fd-explode">{offsetLabel ?? "Explode"}</label>
+                  <input id="fd-explode" aria-label="Explode" type="range" min="0" max="1" step="0.01" value={view.explode}
+                    onChange={(event) => {
+                      setExplodeMotion(null);
+                      setView((old) => ({ ...old, explode: Number(event.target.value), cue: null, touring: false, blockers: true }));
+                    }} />
+                  {!offsetLabel && <output htmlFor="fd-explode">0%</output>}
+                  {!narrow && <button type="button" onClick={() => {
+                    setView((old) => ({ ...old, touring: false, blockers: true }));
+                    setExplodeMotion({ from: view.explode, to: view.explode > 0 ? 0 : 1, start: performance.now() });
+                  }}>{view.explode > 0 ? "Collapse" : "Explode view"}</button>}
+                </div>}
+                {faceAvailable && <button type="button" title={focus.label} onClick={toggleFace}>
+                  {view.faceView ? "Back to 3D" : "Face view"}
+                </button>}
+                {narrow && <button type="button" aria-expanded={keyOpen} aria-controls="fd-legend"
+                  onClick={() => setKeyOpen(!keyOpen)}>Key</button>}
+                {tour.length > 0 && <div className="fd-tour" role="group" aria-label="Tour">
+                  <button type="button" disabled={!view.stop} onClick={() => goTo(view.stop - 1)}
+                    aria-label="Previous stop">←</button>
+                  <strong>{(tour[view.stop] ?? tour[0]).label}</strong>
+                  <button type="button" disabled={view.stop === tour.length - 1} onClick={() => goTo(view.stop + 1)}
+                    aria-label="Next stop">→</button>
+                  <button type="button" onClick={() => view.touring
+                    ? setView((old) => ({ ...old, touring: false }))
+                    : goTo(0, !reduced)}>{view.touring ? "Pause tour" : "Start tour"}</button>
+                </div>}
+              </div>
+            </div>
+          )}
+        </div>}
+        {!bare && narrow && faceAvailable && <button className="fd-face-pill" type="button" title={focus.label} onClick={toggleFace}>
+          {view.faceView ? "Back to 3D" : "Face view"}
+        </button>}
+        {!bare && <div className="fd-legend" id="fd-legend" aria-label="Material legend" hidden={narrow && !keyOpen}>
+          {[["Shape source", BASIS_LABELS], ...(comparisonEnabled ? [["Change", DIFF_LABELS]] : [])].map(([label, kinds]) => (
+            <div key={label} role="group" aria-label={label}>
+              <strong>{label}</strong>
+              {Object.entries(kinds)
+                .filter(([kind]) => !["donor_cad", "measured"].includes(kind)
+                  || rows.some(({ key, part }) => linked.has(key) && part && classifyPart(part).basis === kind))
+                .map(([kind, text]) => (
+                  <span key={kind} data-kind={kind}><i className="fd-swatch" aria-hidden="true" />{text}</span>
+                ))}
+            </div>
+          ))}
+        </div>}
+        {!bare && <div className="fd-sheet" hidden={!narrow}>
+          <div className="fd-peek" ref={peek} data-has-more={peekMore > 0}>
+            <strong>{nameOf(selection) ?? "Select a part or interface"}</strong>
+            {selection && <span className="fd-status">{statusOf(selection)}</span>}
+            {selection?.link && <Endpoints row={selection} index={index} />}
+            {(selection?.link ? selectionQuestions : ownQuestions.slice(0, 1)).map(({ number, reason, scope }) => (
+              <span key={number} data-peek-question="">
+                <QuestionNumber number={number} /> {questionText(reason)}
+                {!selection?.link && scope !== nameOf(selection) && <small className="fd-revision-tag">{scope}</small>}
+              </span>
+            ))}
+            <div className="fd-peek-spacer" aria-hidden="true" />
+          </div>
+          {peekMore > 0 && <div className="fd-inspector-more fd-peek-more"><span>+{peekMore} more</span></div>}
+          <div className="fd-sheets" role="group" aria-label="Scene panels">
+            {[["details", "Inspector"], ["parts", "Parts"], ["blockers", "Blockers"]].map(([id, label]) => (
+              <button key={id} type="button" aria-expanded={sheet === id}
+                aria-controls={id === "details" ? "fd-inspector" : "fd-tree"}
+                onClick={() => setSheet((old) => toggleFielddeckSheet(old, id))}>{label}</button>
+            ))}
+          </div>
+        </div>}
+      </div>
+    </section>
+  );
+}

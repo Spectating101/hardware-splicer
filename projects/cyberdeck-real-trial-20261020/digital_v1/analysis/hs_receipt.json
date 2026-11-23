@@ -1,0 +1,48 @@
+{
+  "project_id": "hs-flex-cyberdeck",
+  "revision": 27,
+  "transport": "in-process FastAPI TestClient invoking production routers; no mocked engineering responses",
+  "source_receipts": [
+    {
+      "operation": "source_ingestion",
+      "file": "sources/touch_display2_7inch.step",
+      "http_status": 201,
+      "registered": false,
+      "revision": 20,
+      "source_id": "upload-8a977a4d6a6fdd1253b9",
+      "content_hash": "sha256:8a977a4d6a6fdd1253b9f69274d41bc308eff57b3268ccdbf4214f5dacda1a57"
+    },
+    {
+      "operation": "source_ingestion",
+      "file": "cad/FIELDDECK_7.step",
+      "http_status": 201,
+      "registered": true,
+      "revision": 22,
+      "source_id": "upload-a3a26a05db6e0086c38d",
+      "content_hash": "sha256:a3a26a05db6e0086c38dbfd09bafacecc198751763ba40060569c46f82187827"
+    },
+    {
+      "operation": "source_ingestion",
+      "file": "design.json",
+      "http_status": 201,
+      "registered": true,
+      "revision": 24,
+      "source_id": "upload-0883100a6ae3accd11c7",
+      "content_hash": "sha256:0883100a6ae3accd11c70fd731cc98bf46646b878ab5ce37a086b386bb73e192"
+    },
+    {
+      "operation": "source_ingestion",
+      "file": "bom.json",
+      "http_status": 201,
+      "registered": true,
+      "revision": 26,
+      "source_id": "upload-480a43aedbbb4bcd1b30",
+      "content_hash": "sha256:480a43aedbbb4bcd1b30ac6a7170a995c89b5bd92defe43fcb41c11ab4d47679"
+    }
+  ],
+  "materials_assessment_id": "materials-49216b16b3426ded6b574feb6e46ba8b",
+  "inventory_lots": 0,
+  "no_supplier_stock_treated_as_owned_inventory": true,
+  "native_hs_autonomous_device_design_claimed": false,
+  "physical_build_verified": false
+}

@@ -1,0 +1,14 @@
+{
+  "calibrated_error_pct": {
+    "smooth": -0.18672916666665484,
+    "mat": -0.5910833333333199,
+    "jointed": -1.2131666666666652
+  },
+  "calibration_input": "assumed rolling circumference",
+  "geometric_wheel_error_pct": {
+    "smooth": 0.8137082536964657,
+    "mat": 0.40530120872979136,
+    "jointed": -0.2230173219881726
+  },
+  "high_slip_error_pct": -3.514874999999984
+}

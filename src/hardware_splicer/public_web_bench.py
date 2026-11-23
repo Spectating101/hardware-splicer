@@ -16,10 +16,11 @@ from typing import Any, Dict, List, Mapping, Sequence
 from .bench_capture_bridge import submit_bench_capture, sync_bench_session_template
 from .board_vision_salvage import _analyze_board_image_path
 from .splice_bench import bench_status, open_bench_session
+from .state_paths import repo_root
 
 SCHEMA_VERSION = "hardware_splicer.public_web_bench.v1"
 BENCH_CAPTURE_SCHEMA = "bench_topology_capture.v1"
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = repo_root()
 PUBLIC_BENCH_DIR = REPO_ROOT / "tests" / "data" / "golden" / "public_bench"
 PINNED_READINGS = PUBLIC_BENCH_DIR / "meter_readings.json"
 REPORT_FILE = "PUBLIC_WEB_BENCH_REPORT.json"

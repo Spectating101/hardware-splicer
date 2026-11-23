@@ -1,0 +1,84 @@
+{
+  "note": "Footprint boxes cover each footprint's pads and graphics in X/Y; heights are assumptions until the component's 3D model or datasheet height is attached.",
+  "board_thickness_mm": 1.6,
+  "heights": {
+    "C1": {
+      "height_mm": 0.9,
+      "state": "assumed",
+      "why": "typical chip component height",
+      "footprint": "Capacitor_SMD:C_0603_1608Metric"
+    },
+    "C2": {
+      "height_mm": 0.9,
+      "state": "assumed",
+      "why": "typical chip component height",
+      "footprint": "Capacitor_SMD:C_0603_1608Metric"
+    },
+    "J1": {
+      "height_mm": 3.3,
+      "state": "assumed",
+      "why": "typical USB receptacle height",
+      "footprint": "Connector_USB:USB_Micro-B"
+    },
+    "J2": {
+      "height_mm": 8.5,
+      "state": "assumed",
+      "why": "typical 2.54 mm pin header height",
+      "footprint": "Connector_JST:JST_SH_SM04B"
+    },
+    "J3": {
+      "height_mm": 8.5,
+      "state": "assumed",
+      "why": "typical 2.54 mm pin header height",
+      "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x04"
+    },
+    "J4": {
+      "height_mm": 8.5,
+      "state": "assumed",
+      "why": "typical 2.54 mm pin header height",
+      "footprint": "Connector_JST:JST_XH_B02B"
+    },
+    "MH1": {
+      "height_mm": 0.0,
+      "state": "assumed",
+      "why": "a hole, no body",
+      "footprint": "MountingHole:MountingHole_2.2mm_M2"
+    },
+    "MH2": {
+      "height_mm": 0.0,
+      "state": "assumed",
+      "why": "a hole, no body",
+      "footprint": "MountingHole:MountingHole_2.2mm_M2"
+    },
+    "R1": {
+      "height_mm": 0.9,
+      "state": "assumed",
+      "why": "typical chip component height",
+      "footprint": "Resistor_SMD:R_0603_1608Metric"
+    },
+    "R2": {
+      "height_mm": 0.9,
+      "state": "assumed",
+      "why": "typical chip component height",
+      "footprint": "Resistor_SMD:R_0603_1608Metric"
+    },
+    "U1": {
+      "height_mm": 3.2,
+      "state": "assumed",
+      "why": "typical RF module height",
+      "footprint": "RF_Module:ESP32-WROOM-32"
+    },
+    "U2": {
+      "height_mm": 1.8,
+      "state": "assumed",
+      "why": "typical IC package height",
+      "footprint": "Package_QFN:QFN-28"
+    },
+    "U3": {
+      "height_mm": 1.8,
+      "state": "assumed",
+      "why": "typical IC package height",
+      "footprint": "Package_TO_SOT_SMD:SOT-223"
+    }
+  }
+}

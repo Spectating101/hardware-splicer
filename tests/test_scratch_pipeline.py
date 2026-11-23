@@ -92,7 +92,7 @@ def test_capability_fallback_auto_wires_when_recipe_missing(monkeypatch: pytest.
     assert any("auto-wired" in w for w in warnings)
 
 
-def test_compile_scratch_build_phrase(tmp_path: Path) -> None:
+def test_compile_scratch_build_phrase(tmp_path: Path, assume_clean_kicad_erc: None) -> None:
     result = compile_scratch_build(
         out_dir=str(tmp_path / "scratch"),
         goal="switch a lamp with a relay",
@@ -110,7 +110,7 @@ def test_prove_module_ids() -> None:
     assert proof["wires"] >= 3
 
 
-def test_splice_build_intake_scratch_brief(tmp_path: Path) -> None:
+def test_splice_build_intake_scratch_brief(tmp_path: Path, assume_clean_kicad_erc: None) -> None:
     intake = load_project_intake(ROOT / "examples" / "intakes" / "scratch_compose_brief.json")
     result = splice_and_build_from_intake(intake, out_dir=tmp_path, export_gerber=False)
     assert result.get("ok") is True

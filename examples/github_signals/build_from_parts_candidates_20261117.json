@@ -1,0 +1,148 @@
+{
+  "candidates": [
+    {
+      "commit_sha": "619eda7f777558a3e500dbad9cc2941712881495",
+      "intended_use": "reference",
+      "license_spdx_id": "MIT",
+      "repository": "atopile/atopile",
+      "research_role": "circuit_authoring"
+    },
+    {
+      "commit_sha": "35feca405fe7c7c17ff699950795a1fd75d65c4d",
+      "intended_use": "existing_interchange",
+      "license_spdx_id": "MIT",
+      "repository": "tscircuit/tscircuit",
+      "research_role": "circuit_authoring"
+    },
+    {
+      "commit_sha": "3aaff18c056de7cbe8f5b0a3e1e6e7e7895f544e",
+      "intended_use": "reference",
+      "license_spdx_id": "MIT",
+      "repository": "circuit-synth/circuit-synth",
+      "research_role": "circuit_authoring"
+    },
+    {
+      "commit_sha": "d00fc14aacd05e8bdf493189fd4c080b2da33d32",
+      "intended_use": "compare",
+      "license_spdx_id": "MIT",
+      "repository": "nimbalyst/nimbalyst-electronics",
+      "research_role": "closest_workflow_comparison"
+    },
+    {
+      "commit_sha": "008c5f815f506da863e06f4239361c87aa42c060",
+      "intended_use": "compare",
+      "license_spdx_id": "MIT",
+      "repository": "mfranzon/circuitiny",
+      "research_role": "closest_maker_workflow_comparison"
+    },
+    {
+      "commit_sha": "8f8502d0d9e0cebb726430746e39327c51845a8a",
+      "intended_use": "first_integration_review",
+      "license_spdx_id": "MIT",
+      "repository": "inventree/InvenTree",
+      "research_role": "inventory_and_procurement"
+    },
+    {
+      "commit_sha": "27fd8b3a9e3b67fe905c113fa85a453f0742325c",
+      "intended_use": "alternative_connector",
+      "license_spdx_id": "AGPL-3.0",
+      "repository": "Part-DB/Part-DB-server",
+      "research_role": "inventory_and_procurement"
+    },
+    {
+      "commit_sha": "b2d3d419802b5d35e0952475d15216645fc8dba2",
+      "intended_use": "second_integration_review",
+      "license_spdx_id": "MIT",
+      "repository": "hildogjr/KiCost",
+      "research_role": "bom_costing"
+    },
+    {
+      "commit_sha": "e64b141618efcd6f5b6ba9c46f7ada8232e9fed1",
+      "intended_use": "review_with_inventory",
+      "license_spdx_id": "GPL-3.0",
+      "repository": "sparkmicro/Ki-nTree",
+      "research_role": "part_identity_bridge"
+    },
+    {
+      "commit_sha": "5f961acd4c1ddfa509b0eb02ef4bfed7a510b7c7",
+      "intended_use": "third_integration_review",
+      "license_spdx_id": "GPL-3.0",
+      "repository": "wireviz/WireViz",
+      "research_role": "construction_handoff"
+    },
+    {
+      "commit_sha": "67ee4c3bb5dd4b76d22e1180787dff8c568babe7",
+      "intended_use": "reuse_existing_bridge",
+      "license_spdx_id": "MIT",
+      "repository": "inventree/inventree-wireviz",
+      "research_role": "inventory_harness_bridge"
+    },
+    {
+      "commit_sha": "a1c03c3052c2eb174e31b68cff73847a5b4669cf",
+      "intended_use": "reference_candidate",
+      "license_spdx_id": "MIT",
+      "repository": "penk/MainboardTerminal",
+      "research_role": "cyberdeck_reference"
+    },
+    {
+      "commit_sha": "9cb9c32a14060ed7b145196f1ef0f36c87e8b424",
+      "intended_use": "reference_candidate",
+      "license_spdx_id": "MIT",
+      "repository": "brickbots/HandiPi",
+      "research_role": "cyberdeck_reference"
+    },
+    {
+      "commit_sha": "5ab5baea43de92423225f3aca7047a5689bbb5b8",
+      "intended_use": "reference_candidate",
+      "license_spdx_id": "CERN-OHL-P-2.0",
+      "repository": "soulscircuit/pilet",
+      "research_role": "cyberdeck_reference"
+    },
+    {
+      "commit_sha": "9680262347b80efe2314673bf1f26eb955165fca",
+      "intended_use": "reference_candidate",
+      "license_spdx_id": "CC-BY-4.0",
+      "repository": "FrameworkComputer/Framework-Laptop-13",
+      "research_role": "documented_donor_modules"
+    },
+    {
+      "commit_sha": "0e11044fb316e179de029f9cdbf551bdfa171387",
+      "intended_use": "reference_only",
+      "license_spdx_id": "NOASSERTION",
+      "repository": "ClemensElflein/OpenMower",
+      "research_role": "salvage_system_reference"
+    },
+    {
+      "commit_sha": "a6814cc7b6953ca83145f166a89dcf234566078a",
+      "intended_use": "future_target_specific_review",
+      "license_spdx_id": "BSD-3-Clause",
+      "repository": "PX4/PX4-Autopilot",
+      "research_role": "flight_simulation_reference"
+    },
+    {
+      "commit_sha": "a42f84ae76f91f478f618468dee6af29b4dfc45c",
+      "intended_use": "future_target_specific_review",
+      "license_spdx_id": "GPL-3.0",
+      "repository": "ArduPilot/ardupilot",
+      "research_role": "flight_simulation_reference"
+    },
+    {
+      "commit_sha": "2126c328402fa77f8f6bf2114f052595f86f14aa",
+      "intended_use": "use_existing_approved_scope",
+      "license_spdx_id": "MIT",
+      "repository": "tipoLi5890/akcli",
+      "research_role": "existing_reviewed_specialist"
+    },
+    {
+      "commit_sha": "1de14f9bbfe37ef291b929c52532419d1a14f0e6",
+      "intended_use": "use_existing_approved_scope",
+      "license_spdx_id": "MIT",
+      "repository": "0x12net/kdif",
+      "research_role": "existing_reviewed_specialist"
+    }
+  ],
+  "collected_on": "2026-11-17",
+  "research_scope": "Practical build from sourced parts, inventory and documented donor modules; backend only.",
+  "schema_version": "hardware_splicer.github_signal_feed.v1",
+  "source": "github_repository_search"
+}

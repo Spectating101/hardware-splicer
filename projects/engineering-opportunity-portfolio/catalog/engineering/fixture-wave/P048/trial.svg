@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="205mm" height="202mm" viewBox="0 0 205 202" data-play-mm="0.03" data-angular-error-deg="0.04">
+  <title>Small PCB stencil frame with registration controls</title>
+  <style>text{font:4px sans-serif; fill:#21363c} .part,.cut,.limit{fill:none;stroke:#293c44;stroke-width:.35}.part{fill:#ddeaea;fill-opacity:.4}.cut{stroke:#006454}.limit{stroke:#ab492b;stroke-dasharray:2 1}</style>
+  <rect id="foil" class="part" x="9" y="16" width="110" height="88" />
+  <rect id="coupon" class="part" x="21" y="28" width="70" height="45" />
+  <line id="hinge" class="limit" x1="9" y1="10" x2="119" y2="10" />
+  <circle id="pivot" class="cut" cx="56.0" cy="50.5" r="0.6" />
+  <circle id="pad-0" class="cut" cx="29" cy="38" r="0.75" />
+  <circle id="opening-0" class="limit" cx="29" cy="38" r="0.65" />
+  <circle id="pad-1" class="cut" cx="81" cy="36" r="0.75" />
+  <circle id="opening-1" class="limit" cx="81" cy="36" r="0.65" />
+  <circle id="pad-2" class="cut" cx="34" cy="63" r="0.75" />
+  <circle id="opening-2" class="limit" cx="34" cy="63" r="0.65" />
+  <circle id="pad-3" class="cut" cx="83" cy="65" r="0.75" />
+  <circle id="opening-3" class="limit" cx="83" cy="65" r="0.65" />
+  <rect id="left-guide" class="cut" x="18" y="31" width="3" height="39" />
+  <rect id="lower-guide" class="cut" x="25" y="73" width="62" height="3" />
+  <rect id="wipe-handle" class="part" x="118" y="76" width="8" height="24" />
+  <circle id="side-pivot" class="cut" cx="3" cy="144" r="1" />
+  <line id="board-face" class="part" x1="21" y1="144" x2="91" y2="144" />
+  <line id="closed-foil" class="cut" x1="3" y1="144" x2="101" y2="144" />
+  <line id="opened-foil" class="cut" x1="3" y1="144" x2="65.993186" y2="68.927645" />
+  <text x="9" y="161">Coupon 70 × 45; foil 110 × 88. Four witness apertures.</text>
+  <text x="9" y="172">Use two fixed edge datums and one spring fence. Align with fixture closed.</text>
+  <text x="9" y="183">Lift 50° for remove-and-wipe cycle. Transfer actual stencil artwork before use.</text>
+</svg>

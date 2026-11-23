@@ -37,8 +37,8 @@ def main() -> int:
 
     import sys
 
-    sys.path.insert(0, str(_repo_root()))
-    from src.mecha_splicer.runner import run  # type: ignore
+    sys.path.insert(0, str(_repo_root() / "src"))
+    from mecha_splicer.runner import run
 
     sim_fidelity = "high" if bool(args.high_fidelity) else args.simulation_fidelity
 

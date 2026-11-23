@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="265mm" height="232mm" viewBox="0 0 265 232">
+  <title>Raised-line teaching layout with separate symbol key</title>
+  <style>text{font:4px sans-serif;fill:#103341} .part,.tool,.test{stroke:#2a4148;stroke-width:.35;fill:none}.part{fill:#dce9e9;fill-opacity:.45}.tool{stroke:#006557}.test{stroke:#aa4c22;stroke-dasharray:2 1}</style>
+  <rect id="base" class="part" x="9" y="7" width="215" height="150" />
+  <polyline id="route" class="tool" points="34.00000,89.00000 194.00000,89.00000 194.00000,49.00000 213.00000,49.00000" data-ridge-width="10" data-ridge-height="0.9" style="stroke-width:10" />
+  <circle id="landmark-0" class="tool" cx="38" cy="65" r="6" />
+  <circle id="legend-0" class="tool" cx="16" cy="171" r="6" />
+  <text x="27" y="172">Entry</text>
+  <polygon id="landmark-1" class="part" points="85.00000,38.00000 97.00000,38.00000 97.00000,50.00000 85.00000,50.00000" />
+  <polygon id="legend-1" class="part" points="10.00000,177.00000 22.00000,177.00000 22.00000,189.00000 10.00000,189.00000" />
+  <text x="27" y="184">Craft room</text>
+  <polygon id="landmark-2" class="part" points="152.00000,35.00000 158.00000,47.00000 146.00000,47.00000" />
+  <polygon id="legend-2" class="part" points="16.00000,189.00000 22.00000,201.00000 10.00000,201.00000" />
+  <text x="27" y="196">Reading room</text>
+  <polygon id="landmark-3" class="part" points="159.00000,119.00000 165.00000,125.00000 159.00000,131.00000 153.00000,125.00000" />
+  <polygon id="legend-3" class="part" points="16.00000,201.00000 22.00000,207.00000 16.00000,213.00000 10.00000,207.00000" />
+  <text x="27" y="208">Courtyard</text>
+  <polygon id="landmark-4" class="part" points="63.00000,117.00000 67.00000,117.00000 67.00000,121.00000 71.00000,121.00000 71.00000,125.00000 67.00000,125.00000 67.00000,129.00000 63.00000,129.00000 63.00000,125.00000 59.00000,125.00000 59.00000,121.00000 63.00000,121.00000" />
+  <polygon id="legend-4" class="part" points="14.00000,213.00000 18.00000,213.00000 18.00000,217.00000 22.00000,217.00000 22.00000,221.00000 18.00000,221.00000 18.00000,225.00000 14.00000,225.00000 14.00000,221.00000 10.00000,221.00000 10.00000,217.00000 14.00000,217.00000" />
+  <text x="27" y="220">Quiet room</text>
+  <text x="85" y="172">Synthetic desk teaching layout</text>
+  <text x="85" y="182">Ridge height and width are export parameters.</text>
+</svg>

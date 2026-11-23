@@ -1,0 +1,64 @@
+{
+  "scenario_id": "public_drv8833_donor_motion_repair",
+  "mode": "repair",
+  "expected_archetype": "rover",
+  "challenge": {
+    "expected_conflict_count": 1,
+    "donor_reuse_required": true,
+    "identity_continuity_required": true,
+    "description": "Motor replacement must respect actual current draw and driver limits; no virtual bench pass"
+  },
+  "engineering_sources": [
+    {
+      "source_id": "adafruit_drv8833_guide",
+      "source_type": "vendor_guide",
+      "uri": "https://learn.adafruit.com/adafruit-drv8833-dc-stepper-motor-driver-breakout-board?view=all",
+      "version": "web-2026-10-20",
+      "authority_ceiling": "declared",
+      "claims": [
+        "DRV8833 breakout drives DC motors or a stepper motor",
+        "Supply, wiring, and thermal limits require verification"
+      ]
+    }
+  ],
+  "declared_conflicts": [
+    {
+      "conflict_id": "motor_stall_current",
+      "claim_a": "Donor motor has no nameplate current specification",
+      "claim_b": "Driver requires motor current within safe rated limits"
+    }
+  ],
+  "intake": {
+    "project_name": "public_drv8833_donor_motion_repair",
+    "goal": "Reuse two salvaged DC motors and a DRV8833 breakout to rehabilitate a compact wheeled mechanism without assuming motor stall current is safe. Generate measurement-first approach.",
+    "salvage_mode": true,
+    "available_parts": [
+      {
+        "name": "two salvaged unlabelled DC motors",
+        "type": "dc_motor",
+        "quantity": 2
+      },
+      {
+        "name": "DRV8833 motor driver breakout",
+        "type": "motor_driver",
+        "quantity": 1
+      },
+      {
+        "name": "unknown donor control PCB",
+        "type": "microcontroller",
+        "quantity": 1
+      },
+      {
+        "name": "current limited bench supply",
+        "type": "instrument",
+        "quantity": 1
+      }
+    ],
+    "constraints": {
+      "motor_stall_current_a": "unknown",
+      "first_motion_current_limit_a": 0.5,
+      "operator_emergency_stop": true,
+      "physical_testing_available": false
+    }
+  }
+}

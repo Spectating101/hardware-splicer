@@ -1,0 +1,5 @@
+{
+  "settings": 1000,
+  "uncorrected_settings_outside_budget": 72,
+  "assumed_contact_change_each_ohm": 0.02
+}

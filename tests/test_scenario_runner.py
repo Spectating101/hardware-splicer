@@ -85,7 +85,10 @@ def test_bad_speed_scenario_blocks_unrealistic_project_claim(tmp_path):
     not (FULL_3D_RUNTIME and KICAD_RUNTIME),
     reason="closed pan/tilt STEP authority requires full 3D and KiCad runtimes",
 )
-def test_closed_pan_tilt_scenario_closes_project_authority_with_3d_path(tmp_path):
+def test_closed_pan_tilt_scenario_is_held_by_its_boards_kicad_drc(tmp_path):
+    # The pan/tilt controller board (examples/main_ctrl_esp32_servo.kicad_pcb) fails KiCad DRC with
+    # shorts between nets. Until it is re-routed, the scenario must not reach a production claim,
+    # while its 3D and STEP outputs are still produced and reviewable.
     scenario = load_hardware_scenario(PAN_TILT_SCENARIO)
 
     result = run_hardware_scenario(scenario, out_dir=tmp_path / "pan-tilt", start_splicer=True, request_id="scenario-pan-tilt")
@@ -97,16 +100,16 @@ def test_closed_pan_tilt_scenario_closes_project_authority_with_3d_path(tmp_path
     step_report = json.loads(Path(result["artifacts"]["kicad_step_assembly_report"]).read_text(encoding="utf-8"))
     step_placement = json.loads(Path(result["artifacts"]["kicad_step_placement"]).read_text(encoding="utf-8"))
 
+    mechatronics = Path(result["artifacts"]["mechatronics_authority"]).read_text(encoding="utf-8")
+
     assert result["compile_ok"] is True
-    assert result["ok"] is True
-    assert authority["claimable"] is True
-    assert authority["project_authority_level"] == "production_ready_project_package"
-    assert authority["dashboard"]["simulation_ready"] is True
-    assert authority["dashboard"]["robotics_project_release"] is True
-    assert authority["dashboard"]["hardware_splicer_release"] is True
-    assert authority["blockers"] == []
-    assert metrics["production_ready"] is True
-    assert metrics["gates_passed"] == metrics["gates_total"] == 9
+    assert result["ok"] is False
+    assert authority["claimable"] is False
+    assert authority["project_authority_level"] != "production_ready_project_package"
+    assert authority["dashboard"]["hardware_splicer_release"] is False
+    assert "fails KiCad DRC" in mechatronics
+    assert metrics["production_ready"] is False
+    assert metrics["gates_passed"] < metrics["gates_total"]
     assert Path(result["artifacts"]["splicer3d_script"]).exists()
     assert Path(result["artifacts"]["physical_assembly_preview"]).exists()
     assert Path(result["artifacts"]["kicad_step_assembly_model"]).exists()

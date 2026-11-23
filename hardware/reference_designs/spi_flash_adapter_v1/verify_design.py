@@ -121,7 +121,35 @@ def validate_ground_reference(board: pcbnew.BOARD, manifest: dict) -> dict:
     return {"ground_zones": len(zones), "ground_stitching_vias": len(vias), "filled_ground_area_mm2": areas, "nearest_ground_via_mm": escapes, "signal_routing_layers": ["F.Cu"]}
 
 
-def main(*, report_dir: Path | None = None) -> None:
+def main(
+    *,
+    report_dir: Path | None = None,
+    reused_native_report_hashes: dict[str, str] | None = None,
+) -> None:
+    """Verify the same source contract with live or authenticated staged KiCad reports.
+
+    The normal CLI continues executing native KiCad. Only the trusted local
+    checkpoint runner uses the explicit reuse API; it supplies exact hashes
+    of the five complete tool-produced files. A stale/partial/changed report
+    never becomes a green native-engineering receipt.
+    """
+    if reused_native_report_hashes is not None:
+        if report_dir is None:
+            raise ValueError("reused reports need an explicit existing directory")
+        required = {"netlist.xml", "erc.json", "erc.stdout.txt",
+                    "drc.json", "drc.stdout.txt"}
+        if set(reused_native_report_hashes) != required:
+            raise ValueError("reused native report manifest incomplete")
+        import re
+        for name in sorted(required):
+            p = report_dir / name
+            expected = reused_native_report_hashes[name]
+            if (not isinstance(expected, str)
+                    or not re.fullmatch(r"[a-f0-9]{64}", expected)
+                    or p.is_symlink() or not p.is_file()
+                    or p.stat().st_size > 2 * 1024 * 1024
+                    or sha256(p) != expected):
+                raise ValueError("reused native report identity mismatch: " + name)
     manifest = json.loads(MANIFEST.read_text())
     require(manifest["authority"] == AUTHORITY, "design authority boundary changed unexpectedly")
     require(not (HERE / "spi_flash_adapter_v1.kicad_dru").exists(), "additional custom DRC rules must be explicitly bound before use")
@@ -140,17 +168,24 @@ def main(*, report_dir: Path | None = None) -> None:
         erc_report = report_root / "erc.json"
         drc_report = report_root / "drc.json"
         netlist = report_root / "netlist.xml"
-        command("kicad-cli", "sch", "export", "netlist", str(SCHEMATIC), "--format", "kicadxml", "-o", str(netlist))
+        if reused_native_report_hashes is None:
+            command("kicad-cli", "sch", "export", "netlist", str(SCHEMATIC), "--format", "kicadxml", "-o", str(netlist))
         root = ET.parse(netlist).getroot()
         pin_nets = validate_topology(root)
         with (HERE / "BOM.csv").open() as source:
             validate_bom(root, list(csv.DictReader(source)))
         validate_board_parity(board, root, pin_nets)
-        erc_stdout = command("kicad-cli", "sch", "erc", str(SCHEMATIC), "-o", str(erc_report), "--format", "json", "--severity-all", "--exit-code-violations", allowed_returncodes=(0, 5))
-        (report_root / "erc.stdout.txt").write_text(erc_stdout, encoding="utf-8")
+        if reused_native_report_hashes is None:
+            erc_stdout = command("kicad-cli", "sch", "erc", str(SCHEMATIC), "-o", str(erc_report), "--format", "json", "--severity-all", "--exit-code-violations", allowed_returncodes=(0, 5))
+            (report_root / "erc.stdout.txt").write_text(erc_stdout, encoding="utf-8")
+        else:
+            erc_stdout = (report_root / "erc.stdout.txt").read_text(encoding="utf-8")
         validate_erc(json.loads(erc_report.read_text()), erc_stdout)
-        drc_stdout = command("kicad-cli", "pcb", "drc", str(BOARD), "-o", str(drc_report), "--format", "json", "--severity-all", "--schematic-parity", "--exit-code-violations", allowed_returncodes=(0, 5))
-        (report_root / "drc.stdout.txt").write_text(drc_stdout, encoding="utf-8")
+        if reused_native_report_hashes is None:
+            drc_stdout = command("kicad-cli", "pcb", "drc", str(BOARD), "-o", str(drc_report), "--format", "json", "--severity-all", "--schematic-parity", "--exit-code-violations", allowed_returncodes=(0, 5))
+            (report_root / "drc.stdout.txt").write_text(drc_stdout, encoding="utf-8")
+        else:
+            drc_stdout = (report_root / "drc.stdout.txt").read_text(encoding="utf-8")
         advisories = validate_drc(json.loads(drc_report.read_text()), drc_stdout, compatible_library_footprints(board))
     ground = validate_ground_reference(board, manifest)
     footprints = list(board.GetFootprints())

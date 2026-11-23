@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { clarifyIntent, donorBoardVision, visionEnrichIntake } from "../api.js";
+import { clarifyIntent, donorBoardVision, visionEnrichIntake } from "../api";
 import {
   INITIAL_WIZARD,
   PART_TYPES,
@@ -12,22 +12,19 @@ import {
 import { summarizeDonorVisionReport } from "../utils/aiVisionSummary.js";
 import CanvasComposeStep from "./CanvasComposeStep.jsx";
 
+// One progress line naming where you are; the full step list stays available to screen readers.
 function StepIndicator({ steps, currentId }) {
-  const currentIndex = steps.findIndex((row) => row.id === currentId);
+  const currentIndex = Math.max(0, steps.findIndex((row) => row.id === currentId));
+  const current = steps[currentIndex];
   return (
-    <ol className="wizard-steps">
-      {steps.map((step, index) => (
-        <li
-          key={step.id}
-          className={
-            index < currentIndex ? "done" : index === currentIndex ? "active" : ""
-          }
-        >
-          <span className="wizard-step-num">{index + 1}</span>
-          <span className="wizard-step-label">{step.label}</span>
-        </li>
-      ))}
-    </ol>
+    <div className="wizard-progress" data-testid="wizard-progress">
+      <p><span className="wizard-progress-count">Step {currentIndex + 1} of {steps.length}</span> <strong>{current?.label}</strong>
+        {steps[currentIndex + 1] && <span className="wizard-progress-next"> · next: {steps[currentIndex + 1].label}</span>}</p>
+      <div className="wizard-progress-track" role="progressbar" aria-label="Intake progress" aria-valuemin={1}
+        aria-valuemax={steps.length} aria-valuenow={currentIndex + 1} aria-valuetext={`Step ${currentIndex + 1} of ${steps.length}: ${current?.label}`}>
+        <span style={{ width: `${((currentIndex + 1) / steps.length) * 100}%` }} />
+      </div>
+    </div>
   );
 }
 
@@ -42,8 +39,9 @@ export default function ProjectWizard({
   buildError,
   stageLabel,
   embedded = false,
+  initialMode = INITIAL_WIZARD.mode,
 }) {
-  const [wizard, setWizard] = useState({ ...INITIAL_WIZARD });
+  const [wizard, setWizard] = useState({ ...INITIAL_WIZARD, mode: initialMode });
   const [stepId, setStepId] = useState("goal");
   const [clarifyLoading, setClarifyLoading] = useState(false);
   const [clarifyError, setClarifyError] = useState(null);
@@ -247,13 +245,14 @@ export default function ProjectWizard({
           <h2>{embedded ? "Project intake" : "Start a hardware project"}</h2>
           <p className="muted">
             {embedded
-              ? "Choose greenfield or salvage. This session stays in memory until you cancel or leave."
+              ? "Describe the goal and requirements for this project."
               : "Describe what you want — we’ll turn it into a splice plan and carrier board."}
           </p>
         </div>
-        <button type="button" className="ghost" onClick={onCancel}>
+        {/* Embedded in New project, whose header already holds the one Cancel. */}
+        {!embedded && <button type="button" className="ghost" onClick={onCancel}>
           Cancel
-        </button>
+        </button>}
       </div>
 
       <StepIndicator steps={steps} currentId={stepId} />
@@ -635,8 +634,8 @@ export default function ProjectWizard({
         )}
 
         {(clarifyError || visionError) && <p className="error">{clarifyError || visionError}</p>}
-      </div>
 
+      {/* Back and Continue belong to the form they act on. */}
       <div className="wizard-footer">
         {stepIndex > 0 && (
           <button type="button" className="ghost" onClick={goBack} disabled={building || clarifyLoading}>
@@ -667,6 +666,7 @@ export default function ProjectWizard({
                 : "Build salvage project"}
           </button>
         )}
+      </div>
       </div>
     </div>
   );

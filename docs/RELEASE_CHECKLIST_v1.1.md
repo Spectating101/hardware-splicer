@@ -48,7 +48,7 @@ On `make splice-ui-serve` build:
 
 ## Publish
 
-- [ ] `RELEASE_NOTES_v1.1.0.md` reviewed  
+- [ ] `docs/releases/RELEASE_NOTES_v1.1.0.md` reviewed  
 - [ ] GitHub Release `v1.1.0` created (stable, not prerelease)  
 - [ ] Sample zip attached if available  
 

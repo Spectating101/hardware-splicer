@@ -57,7 +57,7 @@ the gaps below.
 ## Lane 3 — a second part, generated from its descriptor
 
 The application logic is generic and the part-specific text is generated from a cited descriptor
-([DEVICE_PART_DESCRIPTORS.md](../DEVICE_PART_DESCRIPTORS.md)). The BME280 package, regenerated from its descriptor,
+([DEVICE_PART_DESCRIPTORS.md](../reference/DEVICE_PART_DESCRIPTORS.md)). The BME280 package, regenerated from its descriptor,
 produced output byte-identical to the committed baseline (all 15 scenarios, all 158 serial lines), and the
 refactor left every number above unchanged. The BH1750, a part with no ID register, was then generated and
 scored with the same detectors and no BH1750-specific scenario edits (one leftover BME280 literal in the generic

@@ -1,0 +1,7 @@
+{
+  "required_torque_Nm_including_factor": 0.3360935088,
+  "torque_margin_Nm": 0.04390649120000001,
+  "low_preload_55N_margin_Nm": -0.1160935088,
+  "max_board_gap_margin_mm": 0.4500000000000002,
+  "old_gap_margin_mm": -0.5499999999999998
+}

@@ -1,0 +1,23 @@
+Project digital-b1d527732db94a519a1cf19b37a4b866 (fielddeck-5)
+
+INPUT     revision 1 · run 77caa81a5a91429d991c3706a00e12c8
+          snapshot cbee939f482f47a4 · seal 8e3dc57c45839801 · STUDY.zip cf3e28dfe865b8c3
+          minimum_work_runtime_h = 2.5
+          work_runtime: pass 3.166 h vs limit 2.5 h
+          ordinary_source_margin: pass 0.48 A vs limit 0.3 A
+          high_keyboard_supply_limit: pass 0.08 A vs limit 0 A
+
+CHANGE    minimum_work_runtime_h 2.5 -> 3.5 · job 4a233141589257afb99dea2509208240
+REVISION  revision 2 (parent 1) · run a087b9b7c6124441aa4b8cbecd0c6150
+          snapshot 61620cd1af86cea9 · seal bac6807f88ee21af · STUDY.zip b216cebf7a36c40a
+          base revision unchanged: True
+
+ASSESSMENT
+  changed  requirement:minimum_work_runtime_h: 2.5 -> 3.5
+  STALE    check:work_runtime from revision 1 (run 77caa81a5a91): pass 3.166 h vs limit 2.5 h; rerun r2: FAIL 3.166 h vs limit 3.5 h
+  retained check:ordinary_source_margin from revision 1: inputs unchanged, rerun matches (pass 0.48 A vs limit 0.3 A)
+  retained check:high_keyboard_supply_limit from revision 1: inputs unchanged, rerun matches (pass 0.08 A vs limit 0 A)
+  FAILING  check:work_runtime in revision 2: FAIL 3.166 h vs limit 3.5 h (regressed, kept)
+  assurance status r2: blocked · requirements met: False
+  physical authority granted: False · ready: False
+  rerun scope: The whole Fielddeck 5 study (its registered native stages) was rerun; no other project or study.

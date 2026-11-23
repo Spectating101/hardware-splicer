@@ -1,0 +1,241 @@
+{
+  "schema": "hs.keyboard-source-bound-key-relocation.v1",
+  "source_sha256": "e0c605a421dec0e88264beb50f5c3ad58b37a0c20294703e6d8637c0f8613cd6",
+  "cut_path_sha256": "d13f03bc91b0faec7c4d353bf2cbac682082e7c53a8a2d6595055db519d95d36",
+  "reference_switch_candidates": 62,
+  "original_main_board_switches_retained": 57,
+  "key_switches_relocated": 5,
+  "total_original_switch_positions_accounted": 62,
+  "original_main_left": 24,
+  "original_main_right": 33,
+  "source_wiring_map": [
+    {
+      "original_ref": "K15",
+      "original_label": "T",
+      "original_footprint": "footprints:CHERRY_PCB_100H",
+      "source_pads": {
+        "1": {
+          "original_net": "Net-(D15-Pad2)",
+          "x_mm": 135.89,
+          "y_mm": 42.545,
+          "pad_attribute": 0
+        },
+        "2": {
+          "original_net": "/C5",
+          "x_mm": 129.54,
+          "y_mm": 45.085,
+          "pad_attribute": 0
+        }
+      },
+      "wire_map": [
+        {
+          "daughterboard_switch_ref": "SW1",
+          "daughterboard_switch_pad": "1",
+          "daughterboard_header_ref": "J1",
+          "daughterboard_header_pad": "1",
+          "new_pcb_net": "KEY01_CONTACT1",
+          "original_source_ref": "K15",
+          "original_source_pad": "1",
+          "original_source_net": "Net-(D15-Pad2)",
+          "source_wire_connection_verified": false
+        },
+        {
+          "daughterboard_switch_ref": "SW1",
+          "daughterboard_switch_pad": "2",
+          "daughterboard_header_ref": "J1",
+          "daughterboard_header_pad": "2",
+          "new_pcb_net": "KEY01_CONTACT2",
+          "original_source_ref": "K15",
+          "original_source_pad": "2",
+          "original_source_net": "/C5",
+          "source_wire_connection_verified": false
+        }
+      ]
+    },
+    {
+      "original_ref": "K25",
+      "original_label": "G",
+      "original_footprint": "footprints:CHERRY_PCB_100H",
+      "source_pads": {
+        "1": {
+          "original_net": "Net-(D25-Pad2)",
+          "x_mm": 140.6525,
+          "y_mm": 61.595,
+          "pad_attribute": 0
+        },
+        "2": {
+          "original_net": "/C5",
+          "x_mm": 134.3025,
+          "y_mm": 64.135,
+          "pad_attribute": 0
+        }
+      },
+      "wire_map": [
+        {
+          "daughterboard_switch_ref": "SW2",
+          "daughterboard_switch_pad": "1",
+          "daughterboard_header_ref": "J2",
+          "daughterboard_header_pad": "1",
+          "new_pcb_net": "KEY02_CONTACT1",
+          "original_source_ref": "K25",
+          "original_source_pad": "1",
+          "original_source_net": "Net-(D25-Pad2)",
+          "source_wire_connection_verified": false
+        },
+        {
+          "daughterboard_switch_ref": "SW2",
+          "daughterboard_switch_pad": "2",
+          "daughterboard_header_ref": "J2",
+          "daughterboard_header_pad": "2",
+          "new_pcb_net": "KEY02_CONTACT2",
+          "original_source_ref": "K25",
+          "original_source_pad": "2",
+          "original_source_net": "/C5",
+          "source_wire_connection_verified": false
+        }
+      ]
+    },
+    {
+      "original_ref": "K36",
+      "original_label": "B",
+      "original_footprint": "footprints:CHERRY_PCB_100H",
+      "source_pads": {
+        "1": {
+          "original_net": "Net-(D36-Pad2)",
+          "x_mm": 150.1775,
+          "y_mm": 80.645,
+          "pad_attribute": 0
+        },
+        "2": {
+          "original_net": "/C6",
+          "x_mm": 143.8275,
+          "y_mm": 83.185,
+          "pad_attribute": 0
+        }
+      },
+      "wire_map": [
+        {
+          "daughterboard_switch_ref": "SW3",
+          "daughterboard_switch_pad": "1",
+          "daughterboard_header_ref": "J3",
+          "daughterboard_header_pad": "1",
+          "new_pcb_net": "KEY03_CONTACT1",
+          "original_source_ref": "K36",
+          "original_source_pad": "1",
+          "original_source_net": "Net-(D36-Pad2)",
+          "source_wire_connection_verified": false
+        },
+        {
+          "daughterboard_switch_ref": "SW3",
+          "daughterboard_switch_pad": "2",
+          "daughterboard_header_ref": "J3",
+          "daughterboard_header_pad": "2",
+          "new_pcb_net": "KEY03_CONTACT2",
+          "original_source_ref": "K36",
+          "original_source_pad": "2",
+          "original_source_net": "/C6",
+          "source_wire_connection_verified": false
+        }
+      ]
+    },
+    {
+      "original_ref": "K[0]5",
+      "original_label": "5",
+      "original_footprint": "footprints:CHERRY_PCB_100H",
+      "source_pads": {
+        "1": {
+          "original_net": "Net-(D[0]5-Pad2)",
+          "x_mm": 126.365,
+          "y_mm": 23.495,
+          "pad_attribute": 0
+        },
+        "2": {
+          "original_net": "/C5",
+          "x_mm": 120.015,
+          "y_mm": 26.035,
+          "pad_attribute": 0
+        }
+      },
+      "wire_map": [
+        {
+          "daughterboard_switch_ref": "SW4",
+          "daughterboard_switch_pad": "1",
+          "daughterboard_header_ref": "J4",
+          "daughterboard_header_pad": "1",
+          "new_pcb_net": "KEY04_CONTACT1",
+          "original_source_ref": "K[0]5",
+          "original_source_pad": "1",
+          "original_source_net": "Net-(D[0]5-Pad2)",
+          "source_wire_connection_verified": false
+        },
+        {
+          "daughterboard_switch_ref": "SW4",
+          "daughterboard_switch_pad": "2",
+          "daughterboard_header_ref": "J4",
+          "daughterboard_header_pad": "2",
+          "new_pcb_net": "KEY04_CONTACT2",
+          "original_source_ref": "K[0]5",
+          "original_source_pad": "2",
+          "original_source_net": "/C5",
+          "source_wire_connection_verified": false
+        }
+      ]
+    },
+    {
+      "original_ref": "K[0]6",
+      "original_label": "6",
+      "original_footprint": "footprints:CHERRY_PCB_100H",
+      "source_pads": {
+        "1": {
+          "original_net": "Net-(D[0]6-Pad2)",
+          "x_mm": 145.415,
+          "y_mm": 23.495,
+          "pad_attribute": 0
+        },
+        "2": {
+          "original_net": "/C6",
+          "x_mm": 139.065,
+          "y_mm": 26.035,
+          "pad_attribute": 0
+        }
+      },
+      "wire_map": [
+        {
+          "daughterboard_switch_ref": "SW5",
+          "daughterboard_switch_pad": "1",
+          "daughterboard_header_ref": "J5",
+          "daughterboard_header_pad": "1",
+          "new_pcb_net": "KEY05_CONTACT1",
+          "original_source_ref": "K[0]6",
+          "original_source_pad": "1",
+          "original_source_net": "Net-(D[0]6-Pad2)",
+          "source_wire_connection_verified": false
+        },
+        {
+          "daughterboard_switch_ref": "SW5",
+          "daughterboard_switch_pad": "2",
+          "daughterboard_header_ref": "J5",
+          "daughterboard_header_pad": "2",
+          "new_pcb_net": "KEY05_CONTACT2",
+          "original_source_ref": "K[0]6",
+          "original_source_pad": "2",
+          "original_source_net": "/C6",
+          "source_wire_connection_verified": false
+        }
+      ]
+    }
+  ],
+  "independent_wire_endpoints": 10,
+  "key_pitch_mm": 24.0,
+  "board_width_mm": 140.0,
+  "board_height_mm": 62.0,
+  "physical_connector_mpn": null,
+  "reuse_original_switch_fit_verified": false,
+  "new_casing_and_keycap_accessibility_verified": false,
+  "donor_continuity_verified": false,
+  "firmware_remapping_required": null,
+  "firmware_layout_compatibility_verified": false,
+  "firmware_simulated_or_tested": false,
+  "physical_authority_granted": false,
+  "fabrication_release": "BLOCKED_RELOCATION_PREVIEW_ONLY"
+}

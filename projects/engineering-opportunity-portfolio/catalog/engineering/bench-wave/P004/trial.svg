@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="180mm" height="103mm" viewBox="0 0 180 103">
+  <title>OpenLog carrier and camera reference</title>
+  <style>text{font:4px sans-serif;fill:#103341} .part,.tool,.test{stroke:#2a4148;stroke-width:.35;fill:none}.part{fill:#dce9e9;fill-opacity:.45}.tool{stroke:#006557}.test{stroke:#aa4c22;stroke-dasharray:2 1}</style>
+  <rect id="carrier" class="part" x="6" y="9" width="45" height="49" />
+  <rect id="pcb" class="part" x="19" y="13" width="15.24" height="19.05" />
+  <rect id="pocket" class="tool" x="18.65" y="12.65" width="15.94" height="19.75" />
+  <rect id="header-keepout" class="test" x="19" y="29.05" width="15.24" height="3" />
+  <rect id="sd-service" class="test" x="19.76" y="1" width="11" height="12" />
+  <rect id="camera" class="test" x="7.0" y="5.5" width="36" height="35" />
+  <circle id="carrier-mount-0-0" class="tool" cx="10" cy="12" r="1.65" />
+  <circle id="carrier-mount-0-1" class="tool" cx="47" cy="12" r="1.65" />
+  <circle id="carrier-mount-1-0" class="tool" cx="10" cy="53" r="1.65" />
+  <circle id="carrier-mount-1-1" class="tool" cx="47" cy="53" r="1.65" />
+  <text x="63" y="16">DEV-13712 board outline 15.24 × 19.05</text>
+  <text x="63" y="24">Pocket allowance 0.35 each side</text>
+  <text x="63" y="32">SD service corridor 12</text>
+  <text x="63" y="40">Assumed camera field 36 × 35</text>
+  <text x="6" y="72">Raise on three insulating edge pads. Leave bottom socket and header clear.</text>
+  <text x="6" y="81">Set camera focus and field on a real sample before fixing the stand.</text>
+</svg>
