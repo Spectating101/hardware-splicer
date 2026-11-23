@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="208mm" height="202mm" viewBox="0 0 208 202">
+  <title>Transfer carrier for pick-and-place bench staging</title>
+  <style>text{font:4px sans-serif; fill:#21363c} .part,.cut,.limit{fill:none;stroke:#293c44;stroke-width:.35}.part{fill:#ddeaea;fill-opacity:.4}.cut{stroke:#006454}.limit{stroke:#ab492b;stroke-dasharray:2 1}</style>
+  <rect id="carrier" class="part" x="17" y="15" width="140" height="95" />
+  <circle id="mount-0" class="cut" cx="27" cy="27" r="3.0" />
+  <circle id="mount-1" class="cut" cx="147" cy="27" r="3.0" />
+  <circle id="mount-2" class="cut" cx="27" cy="98" r="3.0" />
+  <circle id="mount-3" class="cut" cx="147" cy="98" r="3.0" />
+  <rect id="board" class="part" x="42" y="37" width="90" height="50" />
+  <rect id="toe-0" class="part" x="27" y="54" width="16" height="22" />
+  <rect id="toe-1" class="part" x="120" y="54" width="16" height="22" />
+  <circle id="fiducial-0" class="cut" cx="53" cy="46" r="0.65" />
+  <circle id="fiducial-1" class="cut" cx="123" cy="79" r="0.65" />
+  <circle id="fiducial-2" class="cut" cx="55" cy="76" r="0.65" />
+  <circle id="nozzle-0" class="limit" cx="54" cy="61" r="6.0" />
+  <circle id="nozzle-1" class="limit" cx="100" cy="61" r="6.0" />
+  <circle id="nozzle-2" class="limit" cx="117" cy="64" r="6.0" />
+  <rect id="side-plate" class="part" x="17" y="145" width="140" height="4" />
+  <line id="side-board" class="cut" x1="42" y1="139" x2="132" y2="139" />
+  <line id="side-clamp" class="part" x1="30" y1="136" x2="44" y2="136" />
+  <line id="safe-traverse" class="limit" x1="28" y1="130" x2="144" y2="130" />
+  <text x="17" y="164">Plan 140 × 95. Trial 90 × 50 coupon and four transfer mounting holes.</text>
+  <text x="17" y="176">Use qualified adapter feet to match the actual stage datum and hole coordinates.</text>
+  <text x="17" y="187">Set placement Z and confirm overhead approach in a no-paste dry run.</text>
+</svg>

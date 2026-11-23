@@ -236,6 +236,7 @@ class FreeRoutingEngine:
                 raise RoutingError("DSN export failed")
             java_cmd = [
                 java,
+                "-Djava.awt.headless=true",
                 "-jar",
                 str(jar),
                 de_flag,

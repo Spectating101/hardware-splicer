@@ -56,7 +56,7 @@
 
 **Automated equivalent:** `bash scripts/agent_quickstart_verify.sh` (steps 1–5e; Qwen + live vision auto when `.env.local` present).
 
-**Operator real-bench (live DMM):** [`REAL_BENCH_OPERATOR.md`](REAL_BENCH_OPERATOR.md)
+**Operator real-bench (live DMM):** [`REAL_BENCH_OPERATOR.md`](reference/REAL_BENCH_OPERATOR.md)
 
 **Alien shortcut (from optiplex):** `bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.16`  
 **With Qwen + live vision on alien:** `HS_ALIEN_QWEN=1 bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.16`

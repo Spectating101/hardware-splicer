@@ -44,6 +44,8 @@ class ProjectSummary:
     saved_at: str
     archived: bool
     recovered: bool = False
+    objective: str = ""
+    created_at: str = ""
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -55,15 +57,25 @@ class ProjectSummary:
             "saved_at": self.saved_at,
             "archived": self.archived,
             "recovered": self.recovered,
+            "objective": self.objective,
+            "created_at": self.created_at,
         }
+
+
+def _objective(snapshot: Dict[str, Any]) -> str:
+    """The project's stated goal, as recorded; empty when none was recorded."""
+    intake = snapshot.get("intake") if isinstance(snapshot.get("intake"), dict) else {}
+    goal = snapshot.get("goal") or intake.get("goal") or ""
+    return " ".join(str(goal).split())[:200]
 
 
 def default_project_root() -> Path:
     configured = os.getenv("HARDWARE_SPLICER_PROJECT_ROOT")
     if configured:
         return Path(configured).expanduser().resolve()
-    output_root = Path(os.getenv("HARDWARE_SPLICER_OUTPUT_ROOT", "/tmp/hardware_splicer_api"))
-    return (output_root / "projects").expanduser().resolve()
+    from .state_paths import output_root
+
+    return (output_root() / "projects").expanduser().resolve()
 
 
 def validate_project_id(project_id: str) -> str:
@@ -91,7 +103,7 @@ def _read_json(path: Path) -> Dict[str, Any]:
     return value
 
 
-def _atomic_write_json(path: Path, value: Mapping[str, Any]) -> None:
+def _atomic_write_json(path: Path, value: Mapping[str, Any], *, exclusive: bool = False) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(value, indent=2, sort_keys=True, ensure_ascii=False) + "\n"
     fd, temp_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
@@ -101,7 +113,12 @@ def _atomic_write_json(path: Path, value: Mapping[str, Any]) -> None:
             handle.write(payload)
             handle.flush()
             os.fsync(handle.fileno())
-        os.replace(temp_path, path)
+        if exclusive:
+            # Publish complete immutable bytes only if no concurrent writer has
+            # claimed this revision. A preceding exists() check is not atomic.
+            os.link(temp_path, path)
+        else:
+            os.replace(temp_path, path)
     finally:
         temp_path.unlink(missing_ok=True)
 
@@ -181,9 +198,10 @@ class ProjectStore:
             "metadata": dict(metadata or {}),
         }
         revision_path = self._revision_path(safe_id, revision)
-        if revision_path.exists():
-            raise RevisionConflict(f"revision already exists: {safe_id}@{revision}")
-        _atomic_write_json(revision_path, envelope)
+        try:
+            _atomic_write_json(revision_path, envelope, exclusive=True)
+        except FileExistsError as exc:
+            raise RevisionConflict(f"revision already exists: {safe_id}@{revision}") from exc
 
         next_manifest = {
             "schema_version": PROJECT_STORE_SCHEMA,
@@ -359,6 +377,8 @@ class ProjectStore:
                         saved_at=str(latest.get("saved_at") or manifest.get("saved_at") or ""),
                         archived=archived,
                         recovered=bool(latest.get("recovery", {}).get("used")),
+                        objective=_objective(snapshot),
+                        created_at=str(manifest.get("created_at") or ""),
                     )
                 )
             except (ProjectStoreError, ValueError, OSError):

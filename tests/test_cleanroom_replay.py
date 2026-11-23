@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 
+import pytest
+
 from hardware_splicer.cleanroom_replay import ReplayCase, run_cleanroom_replay
 
 
@@ -166,3 +168,27 @@ def test_provider_failure_is_recorded_separately_from_contract_failure() -> None
     row = report["results"][0]
     assert row["failure_class"] == "provider_or_runtime"
     assert row["ok"] is False
+
+
+@pytest.mark.parametrize("family", ["requirements", "architecture_candidates", "actions"])
+def test_source_alias_normalization_cannot_hide_invented_evidence(family: str) -> None:
+    payload = _response()
+    payload["architecture_candidates"] = [
+        {
+            "id": "candidate-1", "title": "Inspect the interface",
+            "summary": "Resolve the interface evidence before choosing a design.",
+            "source_ids": ["src-a"],
+        }
+    ]
+    payload[family][0]["source_ids"] = ["invented-after-normalization"]
+
+    def fake_llm(prompt: str, **kwargs: object) -> dict:
+        return {"ok": True, "provider": "replay-test", "content": json.dumps(payload)}
+
+    report = run_cleanroom_replay(
+        [ReplayCase("normalized-evidence", "project-a", 1, _snapshot())],
+        llm_callable=fake_llm,
+    )
+    assert report["hard_failure_count"] == 1
+    assert report["results"][0]["failure_class"] == "cleanroom_contract"
+    assert "invented-after-normalization" in report["results"][0]["error"]

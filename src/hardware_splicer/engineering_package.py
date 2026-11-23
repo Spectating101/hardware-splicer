@@ -7,6 +7,7 @@ authority state. It never copies registered raw source bytes into the export.
 
 from __future__ import annotations
 
+import errno
 import hashlib
 import json
 import os
@@ -18,6 +19,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, Mapping, Sequence
 
 from .ai_project_orchestrator import _sanitize_value
+from .file_integrity import sha256_file
 from .project_store import ProjectStore, validate_project_id
 
 ENGINEERING_PACKAGE_SCHEMA = "hardware_splicer.engineering_package.v1"
@@ -74,18 +76,21 @@ def _strings(value: Any, *, limit: int = 4096) -> list[str]:
 def _clean(value: Any, *, depth: int = 0) -> Any:
     """Sanitize raw-content fields, secrets, binary values, and unbounded objects."""
 
-    value = _sanitize_value(value, depth=depth)
-    if isinstance(value, Mapping):
-        result: Dict[str, Any] = {}
-        for raw_key, raw_value in value.items():
-            key = str(raw_key)
-            if key.lower() in _SECRET_KEYS:
-                continue
-            result[key] = _clean(raw_value, depth=depth + 1)
-        return result
+    return _redact_secrets(_sanitize_value(value, depth=depth), depth)
+
+
+def _redact_secrets(value: Any, depth: int) -> Any:
+    if isinstance(value, dict):
+        return {
+            key: _redact_secrets(child, depth + 1)
+            for key, child in value.items()
+            if key.lower() not in _SECRET_KEYS
+        }
     if isinstance(value, list):
-        return [_clean(row, depth=depth + 1) for row in value]
-    return value
+        return [_redact_secrets(child, depth + 1) for child in value]
+    # The package applies the same depth limit to masked authority fields
+    # as to other scalar values. Container contents have already been bounded.
+    return _sanitize_value(value, depth=depth)
 
 
 def _canonical_json_bytes(value: Any) -> bytes:
@@ -615,9 +620,7 @@ def package_payloads(
 ) -> tuple[str, Dict[str, bytes], Dict[str, Any]]:
     """Build deterministic package file payloads without touching the filesystem."""
 
-    clean_snapshot = _clean(snapshot)
-    snapshot_bytes = _canonical_json_bytes(clean_snapshot)
-    snapshot_sha256 = _sha256(snapshot_bytes)
+    snapshot_sha256 = _sha256(_canonical_json_bytes(_clean(snapshot)))
     package_id = (
         f"engineering-package-r{int(source_revision):08d}-{snapshot_sha256[:16]}"
     )
@@ -770,22 +773,32 @@ def package_payloads(
     return package_id, payloads, manifest
 
 
-def _zip_bytes(payloads: Mapping[str, bytes]) -> bytes:
-    fd, temp_name = tempfile.mkstemp(prefix=".engineering-package.", suffix=".zip")
-    os.close(fd)
+def _persist_zip(path: Path, payloads: Mapping[str, bytes]) -> tuple[int, str]:
+    fd, temp_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
     temp_path = Path(temp_name)
     try:
-        with zipfile.ZipFile(temp_path, "w", compression=zipfile.ZIP_STORED) as archive:
-            for name, payload in sorted(payloads.items()):
-                info = zipfile.ZipInfo(
-                    filename=f"ENGINEERING_PACKAGE/{name}",
-                    date_time=(1980, 1, 1, 0, 0, 0),
-                )
-                info.create_system = 3
-                info.external_attr = 0o100644 << 16
-                info.compress_type = zipfile.ZIP_STORED
-                archive.writestr(info, payload)
-        return temp_path.read_bytes()
+        with os.fdopen(fd, "w+b") as handle:
+            with zipfile.ZipFile(handle, "w") as archive:
+                for name, payload in sorted(payloads.items()):
+                    info = zipfile.ZipInfo(
+                        filename=f"ENGINEERING_PACKAGE/{name}",
+                        date_time=(1980, 1, 1, 0, 0, 0),
+                    )
+                    info.create_system = 3
+                    info.external_attr = 0o100644 << 16
+                    info.compress_type = zipfile.ZIP_STORED
+                    archive.writestr(info, payload)
+            size = handle.tell()
+            handle.flush()
+            os.fsync(handle.fileno())
+            handle.seek(0)
+            digest = hashlib.file_digest(handle, "sha256").hexdigest()
+        if path.exists():
+            if path.stat().st_size != size or sha256_file(path) != digest:
+                raise InvalidEngineeringPackage(f"existing package ZIP does not match {path.stem}")
+        else:
+            os.replace(temp_path, path)
+        return size, digest
     finally:
         temp_path.unlink(missing_ok=True)
 
@@ -821,31 +834,35 @@ def build_engineering_package(
         raise InvalidEngineeringPackage("package output escapes package root")
 
     manifest_payload = payloads["MANIFEST.json"]
-    zip_payload = _zip_bytes(payloads)
+    manifest_sha256 = _sha256(manifest_payload)
     packages_dir.mkdir(parents=True, exist_ok=True)
 
-    if output_dir.exists():
-        existing_manifest = output_dir / "MANIFEST.json"
-        if not existing_manifest.is_file() or existing_manifest.read_bytes() != manifest_payload:
-            raise InvalidEngineeringPackage(
-                f"existing package directory does not match {package_id}"
-            )
-    else:
+    if not output_dir.exists():
         temp_dir = Path(
             tempfile.mkdtemp(prefix=f".{package_id}.", dir=packages_dir)
         )
         try:
             for name, payload in payloads.items():
                 _atomic_write_bytes(temp_dir / name, payload)
-            os.replace(temp_dir, output_dir)
+            try:
+                os.replace(temp_dir, output_dir)
+            except OSError as exc:
+                if exc.errno not in (errno.EEXIST, errno.ENOTEMPTY):
+                    raise
         finally:
             if temp_dir.exists():
                 shutil.rmtree(temp_dir, ignore_errors=True)
 
-    if zip_path.exists() and zip_path.read_bytes() != zip_payload:
-        raise InvalidEngineeringPackage(f"existing package ZIP does not match {package_id}")
-    if not zip_path.exists():
-        _atomic_write_bytes(zip_path, zip_payload)
+    existing_manifest = output_dir / "MANIFEST.json"
+    if (
+        not existing_manifest.is_file()
+        or existing_manifest.stat().st_size != len(manifest_payload)
+        or sha256_file(existing_manifest) != manifest_sha256
+    ):
+        raise InvalidEngineeringPackage(
+            f"existing package directory does not match {package_id}"
+        )
+    zip_size, zip_sha256 = _persist_zip(zip_path, payloads)
 
     relative_dir = output_dir.relative_to(project_dir).as_posix()
     relative_zip = zip_path.relative_to(project_dir).as_posix()
@@ -856,10 +873,10 @@ def build_engineering_package(
         "source_revision": int(source_revision),
         "source_saved_at": str(source_saved_at or ""),
         "snapshot_sha256": manifest["snapshot_sha256"],
-        "manifest_sha256": _sha256(manifest_payload),
+        "manifest_sha256": manifest_sha256,
         "manifest_size_bytes": len(manifest_payload),
-        "zip_sha256": _sha256(zip_payload),
-        "zip_size_bytes": len(zip_payload),
+        "zip_sha256": zip_sha256,
+        "zip_size_bytes": zip_size,
         "project_relative_directory": relative_dir,
         "project_relative_zip": relative_zip,
         "file_count": len(payloads),

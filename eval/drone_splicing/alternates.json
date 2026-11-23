@@ -1,0 +1,42 @@
+[
+  {
+    "id":"s500-frame-from-droneskeleton",
+    "replaces":"frame",
+    "origin_repo":"https://github.com/colgecen/DroneSkeleton",
+    "characteristics":{"assembly_source":"drone.scad","frame_family":"S500"},
+    "requirements":{"frame_family":["X500 V2"]},
+    "mandatory_interfaces":["pixhawk_mount_hole_spacing_mm","motor_mount_hole_spacing_mm","prop_clearance_mm","all_up_mass_limit_g"],
+    "evidence":{"assembly_source":{"source_locator":"DroneSkeleton/drone.scad"},"frame_family":{"source_locator":"DroneSkeleton/README.md"}},
+    "proposed_adaptation":["Produce dimensioned mounting plate or mechanical adapter from measured hole spacing","Re-run structural and propeller-clearance checks"]
+  },
+  {
+    "id":"stm32-custom-flight-controller",
+    "replaces":"fc",
+    "origin_repo":"https://github.com/IoT-App-Development-Company/DroneControllerUsing-STM32",
+    "characteristics":{"controller_family":"STM32F411"},
+    "requirements":{"controller_family":["Pixhawk 6C"]},
+    "mandatory_interfaces":["firmware_target","power_input_voltage_range_v","pwm_motor_outputs","gps_port_pinout","mount_hole_pattern"],
+    "evidence":{"controller_family":{"source_locator":"KiCad/DroneController.kicad_sch"}},
+    "proposed_adaptation":["Different flight-controller firmware and full configuration migration required","Resolve PCB ERC/DRC before considering fabrication"]
+  },
+  {
+    "id":"salvaged-unknown-esc",
+    "replaces":"esc",
+    "origin_repo":"user-supplied donor assembly, unverified",
+    "characteristics":{"channels":1},
+    "requirements":{"channels":1},
+    "mandatory_interfaces":["continuous_current_a","peak_current_a","battery_cell_support","motor_connector","signal_protocol","ground_reference"],
+    "evidence":{},
+    "proposed_adaptation":["Determine exact model and manufacturer ratings","Check four-unit count, command signal, phase connectors and thermal/current margins before fitting"]
+  },
+  {
+    "id":"known-document-only-propeller",
+    "replaces":"props",
+    "origin_repo":"hypothetical spare item with no physical provenance",
+    "characteristics":{"diameter_class":"1045"},
+    "requirements":{"diameter_class":"1045"},
+    "mandatory_interfaces":["shaft_mount","handedness","rpm_rating","motor_propeller_thrust_data"],
+    "evidence":{"diameter_class":{"source_locator":"unverified owner description"}},
+    "proposed_adaptation":["Verify actual blade manufacturer, mounting hardware, balance and motor thrust curve"]
+  }
+]

@@ -166,10 +166,107 @@ def _stages(
         + (["Attached mechanical structural screening does not authorize load-bearing release."]
            if mechanical.get("structural_release_blocked", False) else [])
         + ([] if electrical["release_ready"] else ["Circuit/electrical subsystem release is not closed."])
+        + list(electrical.get("drc_blockers") or [])
         + trace_gaps,
         "No remaining action for this scoped Hardware-Splicer release.",
     )
     return stages
+
+
+_MAX_ATTACHED_BOARDS = 16
+_BOARD_KINDS = {"pcb", "kicad_pcb", "board"}
+_DRC_CACHE: Dict[tuple, Dict[str, Any]] = {}
+
+
+def _resolve_board_path(raw: str) -> str:
+    """The compiler's resolution for a board path: as given if absolute, else the first existing of
+    the working directory, the repository root, and examples/ (unresolved paths stay as given and
+    fail DRC as missing)."""
+    from .state_paths import repo_root
+
+    path = Path(raw)
+    if path.is_absolute():
+        return str(path)
+    root = repo_root()
+    for candidate in (Path.cwd() / path, root / path, root / "examples" / path):
+        if candidate.is_file():
+            return str(candidate.resolve())
+    return raw
+
+
+def _attached_boards(board_design_files: Dict[str, Any], machine: Dict[str, Any]) -> List[tuple[str, str]]:
+    """Every attached KiCad board as (board key, path), however it was attached: a
+    ``board_design_files`` entry (object or bare path string) whose path ends in .kicad_pcb (any case)
+    or whose kind says it is a board, and ``machine.boards[].pcb_path``. A board entry without a
+    usable path is kept with an empty path, so it blocks as not checked instead of being skipped."""
+    rows: List[tuple[str, str]] = []
+    seen: Dict[str, int] = {}
+
+    def add(board_id: Any, raw: Any, kind: Any) -> None:
+        path = str(raw or "").strip()
+        is_board = path.lower().endswith(".kicad_pcb") or str(kind or "").strip().lower() in _BOARD_KINDS
+        if not is_board:
+            return
+        key = str(board_id)
+        seen[key] = seen.get(key, 0) + 1
+        if seen[key] > 1:
+            key = f"{key}#{seen[key]}"
+        rows.append((key, _resolve_board_path(path) if path else ""))
+
+    for board_id, meta in board_design_files.items():
+        if isinstance(meta, str):
+            add(board_id, meta, None)
+        else:
+            row = _dict(meta)
+            add(board_id, row.get("path"), row.get("kind"))
+    for index, board in enumerate(_list_dicts(machine.get("boards"))):
+        if board.get("pcb_path"):
+            add(board.get("board_id") or f"board_{index}", board.get("pcb_path"), "pcb")
+    return rows
+
+
+def _board_drc(path: str) -> Dict[str, Any]:
+    """KiCad DRC on one board, cached per file identity (path, size, modification time)."""
+    import tempfile
+
+    from .pcb.kicad_cli_drc import run_kicad_cli_drc
+
+    if not path:
+        return {"pass": False, "skipped": True, "reason": "no board file path given"}
+    try:
+        stat = Path(path).stat()
+        key = (str(Path(path).resolve()), stat.st_size, stat.st_mtime_ns)
+    except OSError:
+        key = None
+    if key and key in _DRC_CACHE:
+        return _DRC_CACHE[key]
+    with tempfile.TemporaryDirectory(prefix="hs-board-drc-") as out_dir:
+        report = run_kicad_cli_drc(path, out_dir=out_dir)
+    report = {k: v for k, v in report.items() if k not in ("stdout", "stderr", "report_path")}
+    if key and not report.get("skipped"):
+        _DRC_CACHE[key] = report
+    return report
+
+
+def _drc_blocker(board_id: str, report: Dict[str, Any]) -> str | None:
+    """Why an attached board cannot count toward release, or None when KiCad DRC is clean. Open
+    connections (KiCad's unconnected items) fail too: an unrouted board has no copper to short."""
+    if report.get("skipped"):
+        return f"KiCad DRC was not run on attached board {board_id}: {report.get('reason') or 'skipped'}."
+    errors = report.get("report_errors")
+    unconnected = len(report.get("unconnected_items") or [])
+    if report.get("pass") and not unconnected:
+        return None
+    if errors is None:  # kicad-cli did not produce a report it could parse
+        return f"KiCad DRC could not check attached board {board_id}: {report.get('reason') or 'no report'}."
+    parts = []
+    if errors:
+        parts.append(f"{int(errors)} error(s)")
+    if unconnected:
+        parts.append(f"{unconnected} unconnected item(s)")
+    if not parts:
+        parts.append(report.get("reason") or "kicad-cli reported a failure")
+    return f"Attached board {board_id} fails KiCad DRC: {', '.join(parts)}."
 
 
 def _electrical_status(body: Dict[str, Any], engineering: Dict[str, Any]) -> Dict[str, Any]:
@@ -230,12 +327,36 @@ def _electrical_status(body: Dict[str, Any], engineering: Dict[str, Any]) -> Dic
             release_blockers.append("Circuit release needs artifact_uris or equivalent Circuit-AI evidence references.")
         release_ready = bool(circuit_release and not release_blockers)
 
+    # A KiCad board attached as design evidence must pass KiCad's own DRC, with no open
+    # connections, before any release path counts it, whatever else was attached. Netlist compiles
+    # and power-tree solves do not see copper, so a board with shorts would otherwise reach release
+    # (pan-tilt, 2026-11-23). DRC runs only when the release would otherwise be ready.
+    attached = _attached_boards(board_design_files, machine)
+    board_drc: Dict[str, Dict[str, Any]] = {}
+    drc_blockers: List[str] = []
+    if attached and release_ready:
+        if len(attached) > _MAX_ATTACHED_BOARDS:
+            drc_blockers.append(f"{len(attached)} boards attached; KiCad DRC is run on at most {_MAX_ATTACHED_BOARDS} per check.")
+        else:
+            for board_id, path in attached:
+                board_drc[board_id] = _board_drc(path)
+                if (blocker := _drc_blocker(board_id, board_drc[board_id])):
+                    drc_blockers.append(blocker)
+    if drc_blockers:
+        release_ready = False
+        release_blockers.extend(drc_blockers)
+
     return {
         "authorized_for_integration": bool(boards) and not blockers,
         "release_ready": release_ready,
         "release_blockers": release_blockers,
         "board_count": len(boards),
         "board_design_file_count": len(board_design_files),
+        "board_drc": {board_id: {**{key: report.get(key) for key in ("pass", "skipped", "reason", "report_errors", "warnings", "kicad_version")},
+                                 "unconnected": len(report.get("unconnected_items") or [])}
+                      for board_id, report in board_drc.items()},
+        "boards_not_checked": [board_id for board_id, _ in attached if board_id not in board_drc],
+        "drc_blockers": drc_blockers,
         "circuit_authority_level": circuit_authority.get("current_authority_level"),
         "readiness": readiness or "unknown",
         "blockers": _dedupe_strings(blockers),
@@ -700,6 +821,7 @@ def _integration_gaps(
     if orphan_actuators:
         gaps.append("Some actuators are not mapped to a mechanism primitive: " + ", ".join(str(row.get("id") or row.get("type")) for row in orphan_actuators[:8]) + ".")
     gaps.extend(electrical.get("blockers") or [])
+    gaps.extend(electrical.get("drc_blockers") or [])
     gaps.extend(packaging.get("blockers") or [])
     gaps.extend(mechanical.get("next_engineering_actions") or [])
     gaps.extend(robotics.get("next_engineering_actions") or [])
@@ -851,7 +973,7 @@ def _next_engineering_actions(
     mechanical: Dict[str, Any],
     robotics: Dict[str, Any],
 ) -> List[str]:
-    actions: List[str] = []
+    actions: List[str] = list(electrical.get("drc_blockers") or [])
     for stage in stages:
         if stage.get("status") != "pass":
             actions.extend(str(item) for item in stage.get("blockers") or [])

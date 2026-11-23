@@ -1,0 +1,11 @@
+batch,truth_objects,accepted_singles,held_events,truth_objects_needing_recheck,naive_complete_count,naive_missed
+1,50,40,5,10,45,5
+2,50,40,5,10,45,5
+3,50,40,5,10,45,5
+4,50,40,5,10,45,5
+5,50,40,5,10,45,5
+6,50,40,5,10,45,5
+7,50,40,5,10,45,5
+8,50,40,5,10,45,5
+9,50,40,5,10,45,5
+10,50,40,5,10,45,5

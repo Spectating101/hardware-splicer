@@ -12,7 +12,7 @@
 | # | Artifact | Path |
 |---|----------|------|
 | 1 | One-liner + offer | [`OFFER_SPLICE_BENCH_KIT_v1.md`](OFFER_SPLICE_BENCH_KIT_v1.md) |
-| 2 | What shipped | [`../RELEASE_NOTES_v1.1.0.md`](../RELEASE_NOTES_v1.1.0.md) + [`RELEASE_v1.1.md`](RELEASE_v1.1.md) |
+| 2 | What shipped | [`releases/RELEASE_NOTES_v1.1.0.md`](releases/RELEASE_NOTES_v1.1.0.md) + [`RELEASE_v1.1.md`](RELEASE_v1.1.md) |
 | 3 | Demo script | [`DEMO_5_MIN_UI.md`](DEMO_5_MIN_UI.md) |
 | 4 | Sample sprint zip | `releases/sample-splice-sprint-robot-repair-cafe.zip` |
 | 5 | Honesty / cold exit | [`COLD_INTERNAL_EXIT.md`](COLD_INTERNAL_EXIT.md) (what is / isn’t claimed) |
@@ -24,7 +24,7 @@
 |---|----------|------|
 | 7 | Install evidence | `install_reports/INSTALL_REPORT_optiplex_cold_2026-07-10_alpha16.md` |
 | 8 | Second-machine evidence | `install_reports/INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-10_alpha16.md` |
-| 9 | Before/after case | [`COMPARISON_DEMO_CASE_robot_repair_cafe.md`](COMPARISON_DEMO_CASE_robot_repair_cafe.md) |
+| 9 | Before/after case | [`COMPARISON_DEMO_CASE_robot_repair_cafe.md`](archive/demos/COMPARISON_DEMO_CASE_robot_repair_cafe.md) |
 | 10 | Entry map | [`GITHUB_START_HERE.md`](GITHUB_START_HERE.md) |
 
 ## Optional (technical buyers)
@@ -47,7 +47,7 @@ cp docs/OFFER_SPLICE_BENCH_KIT_v1.md \
    docs/DEMO_5_MIN_UI.md \
    docs/COLD_INTERNAL_EXIT.md \
    docs/PROOF_PACK_CONTENTS.md \
-   RELEASE_NOTES_v1.1.0.md \
+   docs/releases/RELEASE_NOTES_v1.1.0.md \
    releases/sample-splice-sprint-robot-repair-cafe.zip \
    /tmp/hs-proof-pack/ && \
 cp docs/install_reports/INSTALL_REPORT_*alpha16*.md /tmp/hs-proof-pack/ 2>/dev/null || true && \

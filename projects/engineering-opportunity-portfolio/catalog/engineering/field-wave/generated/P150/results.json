@@ -1,0 +1,27 @@
+{
+  "pilot": "Sumatra small-lot grading bench, two round-hole screens and catch pan",
+  "metrics": {
+    "candidate": {
+      "openings": 450,
+      "min_web_mm": 2.55,
+      "systematic_error_mm": 0.0,
+      "unambiguous_g": [
+        75,
+        100,
+        75
+      ],
+      "ambiguous_g": 0
+    },
+    "control": {
+      "openings": 450,
+      "min_web_mm": 2.37,
+      "systematic_error_mm": 0.18,
+      "unambiguous_g": [
+        75,
+        100,
+        75
+      ],
+      "ambiguous_g": 0
+    }
+  }
+}

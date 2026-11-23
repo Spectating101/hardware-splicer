@@ -1,0 +1,22 @@
+{
+  "archive_sha256": "10e9bfa11ea058007904f18367d68a6e42604c355ab48aaaa535126b427e8d9d",
+  "checks": [
+    {
+      "name": "optimized_standalone_repack_unique_inventory",
+      "passed": true
+    },
+    {
+      "name": "extra_stale_CAD_rejected",
+      "passed": true
+    },
+    {
+      "name": "omitted_verification_inventory_item_rejected",
+      "passed": true
+    },
+    {
+      "name": "failed_geometry_verdict_rejected_under_optimization",
+      "passed": true
+    }
+  ],
+  "passed": true
+}

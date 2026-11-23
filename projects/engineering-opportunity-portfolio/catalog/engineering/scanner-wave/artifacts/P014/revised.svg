@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="220mm" height="285mm" viewBox="0 0 220 285">
+  <title>P014 revised · full-size proof coupon</title>
+  <rect id="scale" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="10" y="6" width="20" height="10" />
+  <rect id="host-window-coupon" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="20" y="24" width="112" height="198" />
+  <rect id="preserve-calibration-zone" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="20" y="24" width="112" height="24" />
+  <rect id="carrier" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="25" y="54" width="101" height="133" />
+  <rect id="media-ref" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="45" y="68" width="61" height="106" />
+  <rect id="scan-opening" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="46.75" y="87" width="57.5" height="68" />
+  <rect id="image-target" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x="47.5" y="93" width="56" height="56" />
+  <rect id="shim-section-0" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="146" y="60" width="32" height="0.95" />
+  <rect id="shim-section-1" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="146" y="73" width="32" height="1.2" />
+  <rect id="shim-section-2" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="146" y="86" width="32" height="1.45" />
+  <rect id="shim-footprint-46" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="41" y="162.5" width="10" height="15" />
+  <rect id="shim-footprint-105" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="100" y="162.5" width="10" height="15" />
+</svg>

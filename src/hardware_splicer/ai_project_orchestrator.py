@@ -17,6 +17,8 @@ from typing import Any, Callable, Dict, Mapping, Sequence
 
 from .integrations.llm_text_client import call_llm_chat
 
+from .ai_project_action_inputs import ACTION_INPUT_HINT, ACTION_INPUT_MODELS, validate_action_inputs
+
 AI_PROJECT_ORCHESTRATOR_SCHEMA = "hardware_splicer.ai_project_orchestrator.v1"
 AI_PROJECT_SESSION_SCHEMA = "hardware_splicer.ai_project_session.v1"
 AI_PROJECT_ACTION_SCHEMA = "hardware_splicer.ai_project_action.v1"
@@ -34,6 +36,10 @@ ALLOWED_AI_ACTION_TYPES = (
     "run_compose",
     "run_erc",
     "run_drc",
+    "inspect_registered_sources",
+    "generate_board_carrier_candidate",
+    "promote_registered_sources",
+    "propose_kicad_edit",
     "revise_candidate",
     "prepare_verification",
     "prepare_engineering_package",
@@ -169,6 +175,36 @@ def _parser_run_context(run: Mapping[str, Any]) -> Dict[str, Any]:
     }
 
 
+
+def _project_source_bundle_context(run: Mapping[str, Any]) -> Dict[str, Any]:
+    """Allow the operator to reason from checked component/net facts, not raw CAD."""
+    netlist = dict(run.get("netlist") or {})
+    return _sanitize_value({
+        "schema_version": run.get("schema_version"),
+        "project_context": run.get("project_context"),
+        "source_set_sha256": run.get("source_set_sha256"),
+        "source_hashes": {k: v.get("sha256") for k, v in (run.get("input_sources") or {}).items()},
+        "checks": {name: {
+            "status": check.get("status"),
+            "rule_finding_count": check.get("rule_finding_count"),
+            "rule_findings_by_type": check.get("rule_findings_by_type"),
+        } for name, check in (run.get("software_checks") or {}).items()},
+        "netlist": {
+            "status": netlist.get("status"), "component_count": netlist.get("component_count"),
+            "net_count": netlist.get("net_count"),
+            "components": (netlist.get("components") or [])[:64],
+            "nets": (netlist.get("nets") or [])[:64],
+            "component_ratings_validated": False,
+            "pinout_compatibility_verified": False,
+        },
+        "geometry": run.get("geometry") or {},
+        "repair_evidence": run.get("repair_evidence") or {},
+        "alternative_reference_bom_audit": run.get("alternative_reference_bom_audit"),
+        "source_limits": run.get("semantic_limitations") or [],
+        "design_or_physical_authority_raised": False,
+    })
+
+
 def build_ai_project_context(
     project_id: str,
     revision: int,
@@ -186,6 +222,10 @@ def build_ai_project_context(
     parser_runs = [
         _parser_run_context(row)
         for row in _rows(snapshot.get("engineeringSourceParserRuns"))
+    ]
+    source_bundles = [
+        _project_source_bundle_context(row)
+        for row in _rows(snapshot.get("engineeringSourceBundleRuns"))[-3:]
     ]
 
     selected_snapshot = {
@@ -207,6 +247,9 @@ def build_ai_project_context(
             "declared_conflicts",
             "source_conflicts",
             "rankedNextAction",
+            "partAssembly",
+            "partSubstitution",
+            "sourceRevisionImpact",
         )
         if snapshot.get(key) is not None
     }
@@ -218,8 +261,12 @@ def build_ai_project_context(
         "constraints": _sanitize_value(dict(constraints or {})),
         "project_summary": selected_snapshot,
         "registered_sources": sources,
+        "source_aliases": [{"alias": f"S{i+1}", "source_id": r.get("source_id"),
+                            "filename": (r.get("metadata") or {}).get("original_filename")}
+                           for i, r in enumerate(sources) if r.get("source_id")],
         "parsed_sources": parsed_sources,
         "parser_runs": parser_runs,
+        "project_source_bundle_checks": source_bundles,
         "context_policy": {
             "raw_registered_file_content_included": False,
             "source_authority_may_not_be_elevated": True,
@@ -235,6 +282,15 @@ def build_ai_project_context(
         },
     }
     encoded = _canonical_json(context)
+    if len(encoded) > _MAX_CONTEXT_CHARS:
+        context["project_source_bundle_checks"] = [
+            {"source_set_sha256": r.get("source_set_sha256"), "checks": r.get("checks"),
+             "netlist": {"component_count": (r.get("netlist") or {}).get("component_count"),
+                         "net_count": (r.get("netlist") or {}).get("net_count")}}
+            for r in source_bundles
+        ]
+        context["context_policy"]["bundle_details_omitted_for_context_bound"] = True
+        encoded = _canonical_json(context)
     if len(encoded) > _MAX_CONTEXT_CHARS:
         context["parser_runs"] = []
         context["context_policy"]["parser_runs_omitted_for_context_bound"] = True
@@ -271,8 +327,16 @@ def build_ai_project_prompt(context: Mapping[str, Any], *, max_actions: int) -> 
         "- architecture_candidates: array of at most 3 objects with id, title, summary, "
         "tradeoffs, assumptions, source_ids\n"
         f"- actions: array of at most {int(max_actions)} objects with action_type, title, "
-        "rationale, inputs, source_ids\n\n"
+        "rationale, inputs, source_ids\n"
+        "Source citations: use ONLY a valid source ID copied from registered_sources, "
+        "or use its short alias S1, S2, etc. from source_aliases in each source_ids array. "
+        "If no source supports a claim, use []. Never invent, truncate, or modify source identifiers. "
+        "IMPORTANT: action.inputs MUST always be a JSON object (use {} when unknown), "
+        "never a string, list, or prose. Each requirement and architecture candidate "
+        "must be a JSON object. Empty evidence source_ids must be [] rather than "
+        "invented document references.\n\n"
         f"Allowed action_type values: {action_types}.\n"
+        f"{ACTION_INPUT_HINT}\n"
         "Every action is a proposal only. Never emit shell commands, arbitrary URLs, secrets, "
         "raw file content, device operations, fabrication orders, flashing, power-on, or motion.\n\n"
         f"PROJECT_CONTEXT={_canonical_json(context)}"
@@ -391,7 +455,17 @@ def parse_ai_project_response(
             raise InvalidAIProjectResponse(
                 f"actions[{index}] requires title and rationale"
             )
-        inputs = _sanitize_value(dict(row.get("inputs") or {}))
+        raw_inputs = row.get("inputs")
+        if raw_inputs is not None and not isinstance(raw_inputs, Mapping):
+            raise InvalidAIProjectResponse(f"actions[{index}].inputs must be an object")
+        try:
+            inputs = (
+                validate_action_inputs(action_type, dict(raw_inputs or {}))
+                if action_type in ACTION_INPUT_MODELS
+                else _sanitize_value(dict(raw_inputs or {}))
+            )
+        except (TypeError, ValueError) as exc:
+            raise InvalidAIProjectResponse(f"actions[{index}].inputs: {exc}") from exc
         _validate_no_authority_elevation(inputs, path=f"actions[{index}].inputs")
         identity_seed = {
             "session_id": session_id,
@@ -487,6 +561,30 @@ def run_ai_project_orchestrator(
         project_revision=project_revision,
         max_actions=max_actions,
     )
+    # Canonical, deterministic alias translation — NOT fuzzy source ID repair.
+    valid_ids = {str(row.get("source_id") or "") for row in context["registered_sources"]}
+    aliases = {str(row["alias"]): str(row["source_id"])
+               for row in context.get("source_aliases") or []}
+    unknown_ids = set()
+    for family in ("requirements", "architecture_candidates", "actions"):
+        for item in parsed.get(family) or []:
+            if not isinstance(item, dict):
+                continue
+            original_identities = list(item.get("source_ids") or [])
+            canonical = []
+            unresolved = []
+            for identity in original_identities:
+                resolved = aliases.get(identity, identity)
+                if resolved not in valid_ids:
+                    unknown_ids.add(str(identity))
+                    unresolved.append(str(identity))
+                    continue
+                if resolved not in canonical:
+                    canonical.append(resolved)
+            item["source_ids"] = canonical
+            if unresolved:
+                item["unrecognized_source_ids"] = unresolved
+    parsed["unrecognized_source_references"] = sorted(unknown_ids)
     created_at = _utc_now()
     return {
         "schema_version": AI_PROJECT_SESSION_SCHEMA,

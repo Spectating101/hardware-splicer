@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="344mm" height="931mm" viewBox="0 0 344 931">
+  <title>P234 rejected shop drawing, millimetres</title>
+  <style>text{font:4px sans-serif;fill:#162930} .heading{font:bold 5px sans-serif}.part,.bore,.guide,.limit{fill:none;stroke:#223842;stroke-width:.38}.bore{stroke:#00645c}.guide{stroke:#964314;stroke-dasharray:2 1}.limit{stroke:#a1384e;stroke-dasharray:1 1}.part{fill:#e6eef0;fill-opacity:.28}</style>
+  <g data-view="plan" transform="translate(12 5)">
+    <text x="0" y="4" class="heading">Base plan and slotted rail blank</text>
+    <g transform="translate(0 10)">
+      <rect id="base" class="part" x="0" y="0" width="320" height="160" />
+      <rect id="post-foot-0" class="part" x="10" y="67.5" width="25" height="25" />
+      <circle id="post-bolt-0" class="bore" cx="22.5" cy="80" r="3.3" />
+      <rect id="post-foot-1" class="part" x="285" y="67.5" width="25" height="25" />
+      <circle id="post-bolt-1" class="bore" cx="297.5" cy="80" r="3.3" />
+      <rect id="rail-blank" class="part" x="10" y="175" width="300" height="30" />
+      <rect id="anchor-slot" class="bore" x="55" y="187.5" width="210" height="5" />
+    </g>
+    <text x="0" y="225">Base 320 × 160; anchor slot 210 × 5</text>
+  </g>
+  <g data-view="cords-0" transform="translate(12 253)">
+    <text x="0" y="4" class="heading">Elevation of cord setup 1</text>
+    <g transform="translate(0 10)">
+      <rect id="plinth-0" class="part" x="0" y="285" width="320" height="18" />
+      <rect id="post-0-0" class="part" x="10" y="0" width="25" height="285" />
+      <rect id="post-0-1" class="part" x="285" y="0" width="25" height="285" />
+      <rect id="top-bar-0" class="part" x="10" y="0" width="300" height="30" />
+      <rect id="book-0" class="limit" x="45" y="237" width="230" height="48" />
+      <circle id="key-0-0" class="bore" cx="72" cy="15" r="2.5" />
+      <circle id="washer-0-0" class="limit" cx="72" cy="15" r="8" />
+      <line id="cord-0-0" class="guide" x1="72" y1="30" x2="72" y2="285" />
+      <circle id="key-0-1" class="bore" cx="120" cy="15" r="2.5" />
+      <circle id="washer-0-1" class="limit" cx="120" cy="15" r="8" />
+      <line id="cord-0-1" class="guide" x1="120" y1="30" x2="120" y2="285" />
+      <circle id="key-0-2" class="bore" cx="168" cy="15" r="2.5" />
+      <circle id="washer-0-2" class="limit" cx="168" cy="15" r="8" />
+      <line id="cord-0-2" class="guide" x1="168" y1="30" x2="168" y2="285" />
+      <circle id="key-0-3" class="bore" cx="216" cy="15" r="2.5" />
+      <circle id="washer-0-3" class="limit" cx="216" cy="15" r="8" />
+      <line id="cord-0-3" class="guide" x1="216" y1="30" x2="216" y2="285" />
+      <circle id="key-0-4" class="bore" cx="248" cy="15" r="2.5" />
+      <circle id="washer-0-4" class="limit" cx="248" cy="15" r="8" />
+      <line id="cord-0-4" class="guide" x1="248" y1="30" x2="248" y2="285" />
+    </g>
+    <text x="0" y="318">Clear height below bar 255; book width 230; anchor x = [72, 120, 168, 216, 248]</text>
+  </g>
+  <g data-view="cords-1" transform="translate(12 592)">
+    <text x="0" y="4" class="heading">Elevation of cord setup 2</text>
+    <g transform="translate(0 10)">
+      <rect id="plinth-1" class="part" x="0" y="285" width="320" height="18" />
+      <rect id="post-1-0" class="part" x="10" y="0" width="25" height="285" />
+      <rect id="post-1-1" class="part" x="285" y="0" width="25" height="285" />
+      <rect id="top-bar-1" class="part" x="10" y="0" width="300" height="30" />
+      <rect id="book-1" class="limit" x="45" y="237" width="230" height="48" />
+      <circle id="key-1-0" class="bore" cx="95" cy="15" r="2.5" />
+      <circle id="washer-1-0" class="limit" cx="95" cy="15" r="8" />
+      <line id="cord-1-0" class="guide" x1="95" y1="30" x2="95" y2="285" />
+      <circle id="key-1-1" class="bore" cx="160" cy="15" r="2.5" />
+      <circle id="washer-1-1" class="limit" cx="160" cy="15" r="8" />
+      <line id="cord-1-1" class="guide" x1="160" y1="30" x2="160" y2="285" />
+      <circle id="key-1-2" class="bore" cx="225" cy="15" r="2.5" />
+      <circle id="washer-1-2" class="limit" cx="225" cy="15" r="8" />
+      <line id="cord-1-2" class="guide" x1="225" y1="30" x2="225" y2="285" />
+    </g>
+    <text x="0" y="318">Clear height below bar 255; book width 230; anchor x = [95, 160, 225]</text>
+  </g>
+</svg>

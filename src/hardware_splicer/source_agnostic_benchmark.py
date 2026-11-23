@@ -169,9 +169,17 @@ def evaluate_source_agnostic_scenario(
 
         planner = plan_project_from_intake
 
-    intake = _mapping(scenario.get("intake"))
+    intake = dict(_mapping(scenario.get("intake")))
     challenge = _mapping(scenario.get("challenge"))
     sources = _sequence(scenario.get("engineering_sources"))
+    conflicts = _sequence(scenario.get("declared_conflicts"))
+    # Source records and declared disagreements are *inputs*, not reference answers.
+    # Pass them to the planner; scoring still examines its output independently.
+    # Never quietly overwrite user-provided intake evidence.
+    if sources:
+        intake.setdefault("engineering_sources", sources)
+    if conflicts:
+        intake.setdefault("declared_conflicts", conflicts)
     mode = str(scenario.get("mode") or "").strip().lower()
     expected_archetype = str(scenario.get("expected_archetype") or "")
     plan = dict(planner(intake, skip_vision=True))
@@ -207,19 +215,26 @@ def evaluate_source_agnostic_scenario(
     )
 
     expected_conflicts = int(challenge.get("expected_conflict_count") or 0)
-    conflicts_visible = expected_conflicts == 0 or (
-        _contains_key(
-            plan,
-            {"conflict_id", "contradiction_id", "source_disagreement", "incompatible_claim"},
-        )
-        and _contains_key(
-            plan,
-            {"disposition", "selected_claim", "blocked_by_conflict", "resolution_status"},
+    conflict_rows = _sequence(plan.get("source_conflicts"))
+    if not conflict_rows:
+        conflict_rows = _sequence(_mapping(plan.get("reference_sources")).get("conflicts"))
+    # Merely exposing the field "disposition" does NOT resolve an engineering
+    # disagreement. The review must select/accept a variant and unblock it.
+    # Absent review, an explicit blocking conflict is the safe result.
+    resolved_dispositions = {"selected", "accepted_variant", "rejected"}
+    conflicts_resolved = expected_conflicts == 0 or (
+        len(conflict_rows) >= expected_conflicts
+        and all(
+            isinstance(row, Mapping)
+            and str(row.get("disposition") or "").lower() in resolved_dispositions
+            and row.get("blocking") is False
+            and bool(row.get("reason"))
+            for row in conflict_rows
         )
     )
     record(
         "conflict_resolution",
-        conflicts_visible,
+        conflicts_resolved,
         "source_conflicts_not_resolved",
         "conflict identity and explicit disposition",
     )
@@ -317,6 +332,8 @@ def evaluate_source_agnostic_scenario(
         "detected_archetype": plan.get("archetype"),
         "planning_confidence": plan.get("planning_confidence"),
         "engineering_source_count": len(sources),
+        "source_handoff_count": len(_sequence(intake.get("engineering_sources"))),
+        "declared_conflict_handoff_count": len(_sequence(intake.get("declared_conflicts"))),
         "source_retention_ratio": round(retention_ratio, 3),
         "score": score,
         "verdict": verdict,

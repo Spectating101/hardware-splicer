@@ -1,0 +1,352 @@
+{
+  "schema": "hardware_splicer.device_engineering_completion.v1",
+  "date": "2026-11-17",
+  "scope": "Backend and digital engineering for bounded registered device studies.",
+  "models_used": [
+    "gpt-6-astra (xhigh)",
+    "gpt-6.1-sol (ultra)"
+  ],
+  "physical_validation_performed": false,
+  "owned_inventory_lots": 0,
+  "frontend_changes": false,
+  "case_ids": [
+    "hs3g-b",
+    "fielddeck-7",
+    "ender3-penplotter"
+  ],
+  "practical_deliverables": {
+    "fielddeck-7": {
+      "description": "Sourced-module Linux cyberdeck; enclosure STEP/GLB,20 printable parts,connections,BOM and parameterized energy/current/structure sensitivity.",
+      "backend_proof": {
+        "project_id": "digital-4dd8e8afe5da4cfaae9488caad3f3666",
+        "baseline": {
+          "revision": 1,
+          "requirements": {
+            "keyboard_current_a": 0.1,
+            "maximum_case_depth_mm": 300.0,
+            "maximum_case_height_mm": 75.0,
+            "maximum_case_width_mm": 320.0,
+            "minimum_supply_margin_a": 0.3,
+            "minimum_work_runtime_h": 2.5,
+            "pi_work_current_a": 1.0,
+            "printer_bed_x_mm": 220.0,
+            "printer_bed_y_mm": 220.0
+          },
+          "metrics": {
+            "case_depth_mm": 285.0,
+            "case_height_mm": 64.0,
+            "case_width_mm": 310.0,
+            "minimum_supply_current_margin_a": 0.48,
+            "planning_cost_usd": 336.73,
+            "solid_petg_mass_g": 841.025,
+            "stress_current_margin_a": 0.48,
+            "work_runtime_lower_h": 2.781818,
+            "work_runtime_upper_h": 3.927273
+          },
+          "requirements_met": true
+        },
+        "revised": {
+          "revision": 2,
+          "requirements": {
+            "keyboard_current_a": 0.1,
+            "maximum_case_depth_mm": 300.0,
+            "maximum_case_height_mm": 75.0,
+            "maximum_case_width_mm": 320.0,
+            "minimum_supply_margin_a": 0.3,
+            "minimum_work_runtime_h": 3.0,
+            "pi_work_current_a": 1.8,
+            "printer_bed_x_mm": 100.0,
+            "printer_bed_y_mm": 220.0
+          },
+          "metrics": {
+            "case_depth_mm": 285.0,
+            "case_height_mm": 64.0,
+            "case_width_mm": 310.0,
+            "minimum_supply_current_margin_a": 0.48,
+            "planning_cost_usd": 336.73,
+            "solid_petg_mass_g": 841.025,
+            "stress_current_margin_a": 0.48,
+            "work_runtime_lower_h": 1.873469,
+            "work_runtime_upper_h": 2.644898
+          },
+          "requirements_met": false,
+          "failed_constraints": [
+            "work_runtime",
+            "print_bed_x"
+          ]
+        },
+        "native_audit": {
+          "requested": true,
+          "performed": true,
+          "passed": true,
+          "returncode": 0,
+          "engineering_acceptance": false
+        },
+        "baseline_unchanged": true,
+        "revision_zip_sha256": "7bf8b250d7aa5c1c7cc77950496473c7cd27bc3015ffc9771a39de75e960a1c8"
+      },
+      "restored_revision": {
+        "revision": 3,
+        "requirements_met": true,
+        "metrics": {
+          "case_depth_mm": 285.0,
+          "case_height_mm": 64.0,
+          "case_width_mm": 310.0,
+          "minimum_supply_current_margin_a": 0.48,
+          "planning_cost_usd": 336.73,
+          "solid_petg_mass_g": 841.025,
+          "stress_current_margin_a": 0.48,
+          "work_runtime_lower_h": 2.781818,
+          "work_runtime_upper_h": 3.927273
+        },
+        "native_audit": {
+          "engineering_acceptance": true,
+          "passed": true,
+          "performed": true,
+          "requested": true,
+          "returncode": 0
+        }
+      },
+      "real_defects_corrected": [
+        "Face nut pockets now have axial retaining roofs.",
+        "Fan/duct stack is bolted and preassembled outside the case.",
+        "Calculation values derive from declared battery/load/material assumptions.",
+        "Cooling sensitivity now records restricted-flow cases without claiming thermal acceptance."
+      ]
+    },
+    "ender3-penplotter": {
+      "description": "Original Ender-3 reference-donor conversion; three printable mounts, retained sensors,measured manufacturer interfaces and actual SVG-to-G-code trajectory replay.",
+      "backend_proof": {
+        "project_id": "digital-7bf2dd3f7f2a43e6912f5aeb31983f36",
+        "baseline": {
+          "revision": 1,
+          "requirements": {
+            "drawing_height_mm": 80.0,
+            "drawing_width_mm": 100.0,
+            "pen_diameter_mm": 10.0,
+            "pen_lift_mm": 3.0
+          },
+          "metrics": {
+            "adapter_volume_mm3": 26756.596159163615,
+            "beam_proxy_deflection_mm_at_2N": 0.05095031836970898,
+            "cap_volume_mm3": 8787.816474612377,
+            "clamp_open_gap_mm": 0.4,
+            "clamp_screw_tip_to_plate_mm": 2.4,
+            "controller_travel_margin_mm": 70.30000000000001,
+            "draw_length_mm": 771.8085921943645,
+            "drawing_height_mm": 80.0,
+            "drawing_width_mm": 100.0,
+            "fixture_bed_clearance_mm": 29.0,
+            "ideal_feed_time_s": 124.39320602733439,
+            "maximum_commanded_Z_mm": 3.0,
+            "minimum_commanded_Z_mm": 0.0,
+            "mount_bolt_engagement_mm": 4.0,
+            "mount_boss_front_mm": 7.0,
+            "mount_interference_mm3": 0.0,
+            "mount_pitch_mm": 14.0,
+            "non_drawing_XY_without_lift": 0,
+            "parking_plate_volume_mm3": 29336.842062378215,
+            "parking_radiator_hole_pitch_mm": 14.0,
+            "parking_tnut_profile_interference_mm3": 0.0,
+            "pen_center_bed_margin_mm": 71.5,
+            "pen_diameter_mm": 10.0,
+            "pen_lift_mm": 3.0,
+            "pen_tip_to_clamp_mm": 30.0,
+            "plate_to_adapter_airgap_mm": 4.5,
+            "printed_mass_g_at_1_27_g_cm3": 82.39919346411585,
+            "segment_count": 305,
+            "stroke_count": 12,
+            "travel_length_mm": 560.2469361579608
+          },
+          "requirements_met": true
+        },
+        "revised": {
+          "revision": 2,
+          "requirements": {
+            "drawing_height_mm": 140.0,
+            "drawing_width_mm": 140.0,
+            "pen_diameter_mm": 12.0,
+            "pen_lift_mm": 5.0
+          },
+          "metrics": {
+            "adapter_volume_mm3": 26373.321855425656,
+            "beam_proxy_deflection_mm_at_2N": 0.05095031836970898,
+            "cap_volume_mm3": 8404.542170874423,
+            "clamp_open_gap_mm": 0.4,
+            "clamp_screw_tip_to_plate_mm": 2.4,
+            "controller_travel_margin_mm": 49.30000000000001,
+            "draw_length_mm": 1181.2298046445685,
+            "drawing_height_mm": 140.0,
+            "drawing_width_mm": 140.0,
+            "fixture_bed_clearance_mm": 29.0,
+            "ideal_feed_time_s": 192.67684592576458,
+            "maximum_commanded_Z_mm": 5.0,
+            "minimum_commanded_Z_mm": 0.0,
+            "mount_bolt_engagement_mm": 4.0,
+            "mount_boss_front_mm": 7.0,
+            "mount_interference_mm3": 0.0,
+            "mount_pitch_mm": 14.0,
+            "non_drawing_XY_without_lift": 0,
+            "parking_plate_volume_mm3": 29336.842062378215,
+            "parking_radiator_hole_pitch_mm": 14.0,
+            "parking_tnut_profile_interference_mm3": 0.0,
+            "pen_center_bed_margin_mm": 51.8768,
+            "pen_diameter_mm": 12.0,
+            "pen_lift_mm": 5.0,
+            "pen_tip_to_clamp_mm": 30.0,
+            "plate_to_adapter_airgap_mm": 4.5,
+            "printed_mass_g_at_1_27_g_cm3": 81.42567673262144,
+            "segment_count": 305,
+            "stroke_count": 12,
+            "travel_length_mm": 851.0773092261543
+          },
+          "requirements_met": true,
+          "failed_constraints": []
+        },
+        "native_audit": {
+          "requested": true,
+          "performed": true,
+          "passed": true,
+          "returncode": 0,
+          "engineering_acceptance": true
+        },
+        "baseline_unchanged": true,
+        "revision_zip_sha256": "6adfe96fb38d007541bc13ca3e4f400a1bcdb16af1e4edda74765bded29fa2ab"
+      },
+      "upstream_commit": "88c7758cea9d0d00a54fdb238bedb3b33425f409",
+      "donor_owned": false,
+      "canonical_native_checks": 49,
+      "isolated_adversarial_checks": 6
+    }
+  },
+  "backend_properties": [
+    "Server-owned bounded cases and explicit numeric requirements.",
+    "Fresh isolated native stages for new cases,existing durable revision/job publication.",
+    "Failed goals remain saved,comparable,auditable and exportable.",
+    "Historical files,bounds and verifier definitions are frozen with each study.",
+    "Nested artifact paths reject symlink traversal.",
+    "Native verification assertions remain enabled under an optimized host."
+  ],
+  "verification": {
+    "final_core": {
+      "passed": 79,
+      "deselected_native_cases": 2
+    },
+    "native_regression": {
+      "passed": 15
+    },
+    "remaining_native_marker_cases": {
+      "passed": 6,
+      "deselected": 20
+    },
+    "native_complement": {
+      "passed": 36
+    },
+    "fielddeck_package_adversarial_audit": {
+      "archive_sha256": "10e9bfa11ea058007904f18367d68a6e42604c355ab48aaaa535126b427e8d9d",
+      "checks": [
+        {
+          "name": "optimized_standalone_repack_unique_inventory",
+          "passed": true
+        },
+        {
+          "name": "extra_stale_CAD_rejected",
+          "passed": true
+        },
+        {
+          "name": "omitted_verification_inventory_item_rejected",
+          "passed": true
+        },
+        {
+          "name": "failed_geometry_verdict_rejected_under_optimization",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    "http_parity": "device-engineering-20261117/http-parity.json",
+    "full_suite": {
+      "status": "running_in_four_batches",
+      "collected": 4437,
+      "previous_single_process": "Terminated with exit143 near completion; no completed-suite claim made from that run."
+    }
+  },
+  "limitations": [
+    "Registered authored families do not identify arbitrary junk or synthesize arbitrary devices.",
+    "Cyberdeck thermal performance,cables/connectors,physical fits and ARM boot remain untested.",
+    "Plotter pen force,printed strength,physical donor compatibility,homing,full-machine swept collisions and powered motion remain untested.",
+    "Planning prices and virtual donor materials do not establish owned or shipped stock."
+  ],
+  "source_sha256": {
+    "src/hardware_splicer/digital_cases.py": "34bfb3ac2840971956c46a0cb9500c77ceb979d631a8357586ad96c252e1ed7f",
+    "src/hardware_splicer/digital_engine.py": "2b997f6c8da227e019167c13eec9bee560e80d62484af874d1534dd246bc75fe",
+    "src/hardware_splicer/digital_engine_cli.py": "8cc06f88363003410d6810ecaf042c9ccebc64198a22c377fda13b2701fd9acb",
+    "src/hardware_splicer/digital_project.py": "44344f5ea17ea5dde2648d4cc21b9f0838138ecedbf7e01d51cb51eff7921350",
+    "src/hardware_splicer/digital_project_api.py": "84883b30a807c7efa7ab35fd37f31d72c042e58027c665f79702ad863eeb6aaf",
+    "projects/cyberdeck-real-trial-20261020/digital_v1/design.json": "0883100a6ae3accd11c70fd731cc98bf46646b878ab5ce37a086b386bb73e192",
+    "projects/cyberdeck-real-trial-20261020/digital_v1/bom.json": "480a43aedbbb4bcd1b30ac6a7170a995c89b5bd92defe43fcb41c11ab4d47679",
+    "projects/cyberdeck-real-trial-20261020/digital_v1/author_cad.py": "000480690a347006001ba026098183597caf6275860a24c69dd06c8cc7e4119c",
+    "projects/cyberdeck-real-trial-20261020/digital_v1/engineering.py": "1e8924b81567366ca692cebcec2061c38721c3829f230cabe864c96aa9983de5",
+    "projects/cyberdeck-real-trial-20261020/digital_v1/study_contract.py": "69d141f403e5399a63a6a0743545b741e5b79eae1deb0b4f0038f89a55504b9f",
+    "projects/cyberdeck-real-trial-20261020/digital_v1/verify_device.py": "325fdddfcb152fc8c2ac326e18e57a9175016d43dbfab271b8c6298bcfbc1f76",
+    "projects/cyberdeck-real-trial-20261020/digital_v1/render_device.py": "f492d5b1a8d7865a56af21c203a67e1e2993bc3c0a2c1b6d836185e5ba2127f5",
+    "projects/cyberdeck-real-trial-20261020/digital_v1/package_device.py": "7b3fd42232bd6789d9c3d2e79211152f89974583ef6a7f4f9430dec86e706eca",
+    "projects/ender3-penplotter-digital/scripts/common.py": "753dcc16b79181e21aa05a4c13c305da6c7451015a861911214330d753b75614",
+    "projects/ender3-penplotter-digital/scripts/build.py": "4f874a06cc7c9417104fb2c1ba5da18102da647f89b0deb77511bbac44a9e96d",
+    "projects/ender3-penplotter-digital/scripts/simulate.py": "bdf37e739f3f3c01636bb994e4a6e7fbc789ffae80b56227bf10293a30a90783",
+    "projects/ender3-penplotter-digital/scripts/verify.py": "379ab7c8e098353640668818b5b844dcab09a3148cb206efb409323a5d775d89"
+  },
+  "proof_files_sha256": {
+    "fielddeck-backend-proof.json": "406fb1acb754281a1cf65568eb7855d83d186c81d49c116793d807444d573d11",
+    "fielddeck-package-audit.json": "471e41730fb1bd1ab3422b40b5eba65d311545450ce642cae34566e2389da84a",
+    "fielddeck-restored-audit.json": "587b6a8daa6d3f72403e10643a4b76c759e3329332130803d2f5d11718a3c2da",
+    "fielddeck-restored-revision.json": "855a8b22ec0f175b1a7f2db4934d6cf6fab29d020ea2286e1b6e8553a1b57c6b",
+    "http-parity.json": "56728d5d0287b9773cc438dd0b5e8444ad2e022191ed01849055ba537a023009",
+    "plotter-backend-proof.json": "f4b557c3332a467d2741acd47e3d76ecaa1aa28b541691399dc879b63ec969a0"
+  },
+  "deliveries": {
+    "fielddeck-7": {
+      "workspace_path": "projects/cyberdeck-real-trial-20261020/digital_v1/FIELDDECK_7_DIGITAL.zip",
+      "bytes": 5239695,
+      "sha256": "10e9bfa11ea058007904f18367d68a6e42604c355ab48aaaa535126b427e8d9d",
+      "git_tracked": false
+    },
+    "ender3-penplotter": {
+      "workspace_path": "projects/ender3-penplotter-digital/ENDER3_PENPLOTTER_DIGITAL.zip",
+      "bytes": 1406825,
+      "sha256": "7790f1d31ec82898b803266000b54c01dd25bd4344fe344502fbda4219ac1e0e",
+      "git_tracked": false
+    }
+  },
+  "completion_status": "verification_in_progress",
+  "status": "digital_stage_complete",
+  "completed_local_date": "2026-11-18",
+  "timezone": "Asia/Taipei",
+  "test_results": "device-engineering-20261117/full-suite-results.json",
+  "unique_test_result": {
+    "passed": 4433,
+    "skipped_optional": 4,
+    "failures": 0
+  },
+  "proof_sha256": {
+    "fielddeck-backend-proof.json": "406fb1acb754281a1cf65568eb7855d83d186c81d49c116793d807444d573d11",
+    "fielddeck-package-audit.json": "471e41730fb1bd1ab3422b40b5eba65d311545450ce642cae34566e2389da84a",
+    "fielddeck-restored-audit.json": "587b6a8daa6d3f72403e10643a4b76c759e3329332130803d2f5d11718a3c2da",
+    "fielddeck-restored-revision.json": "855a8b22ec0f175b1a7f2db4934d6cf6fab29d020ea2286e1b6e8553a1b57c6b",
+    "full-suite-results.json": "3ae9d852ab2b440612ffa0086827179af750cb848a0aa2ac5cc5812460cc8a63",
+    "http-parity.json": "56728d5d0287b9773cc438dd0b5e8444ad2e022191ed01849055ba537a023009",
+    "plotter-backend-proof.json": "f4b557c3332a467d2741acd47e3d76ecaa1aa28b541691399dc879b63ec969a0"
+  },
+  "delivery_archives": {
+    "projects/cyberdeck-real-trial-20261020/digital_v1/FIELDDECK_7_DIGITAL.zip": {
+      "bytes": 5239695,
+      "sha256": "10e9bfa11ea058007904f18367d68a6e42604c355ab48aaaa535126b427e8d9d",
+      "git_tracked": false
+    },
+    "projects/ender3-penplotter-digital/ENDER3_PENPLOTTER_DIGITAL.zip": {
+      "bytes": 1406825,
+      "sha256": "7790f1d31ec82898b803266000b54c01dd25bd4344fe344502fbda4219ac1e0e",
+      "git_tracked": false
+    }
+  }
+}

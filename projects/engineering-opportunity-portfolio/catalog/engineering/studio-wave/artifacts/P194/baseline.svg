@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="230mm" height="250mm" viewBox="0 0 230 250">
+  <title>P194 baseline · full-size proof coupon</title>
+  <rect id="scale" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="10" y="6" width="20" height="10" />
+  <rect id="cage-mount" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="38" y="67.5" width="48" height="31" />
+  <circle id="cage-bore-0" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="48" cy="83" r="2.2" />
+  <circle id="cage-bore-1" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" cx="76" cy="83" r="2.2" />
+  <rect id="split-jaw-0" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="113.5" y="54.5" width="39" height="21" />
+  <rect id="split-jaw-1" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="113.5" y="93.5" width="39" height="21" />
+  <rect id="pad-0" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="117" y="60" width="32" height="10" />
+  <rect id="pad-1" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="117" y="99" width="32" height="10" />
+  <circle id="cable-guide" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" cx="82" cy="174" r="15" />
+  <line id="port-axis" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x1="45" y1="174" x2="82" y2="174" />
+  <rect id="jaw-opening-gauge" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="138" y="163" width="28" height="7" />
+  <rect id="pad-thickness-gauge" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="138" y="192" width="24" height="1.25" />
+</svg>

@@ -1,0 +1,495 @@
+{
+  "job": {
+    "attempt_id": "27166fdd0c674bd79c1180a26256c758",
+    "created_at": "2026-11-17T15:43:51.160178+00:00",
+    "finished_at": "2026-11-17T15:44:59.366824+00:00",
+    "job_id": "1180e2d6cd115f5fa7ca5e86490d4a03",
+    "links": {
+      "artifacts": "/v1/jobs/1180e2d6cd115f5fa7ca5e86490d4a03/artifacts",
+      "bundle": "/v1/jobs/1180e2d6cd115f5fa7ca5e86490d4a03/bundle",
+      "result": "/v1/jobs/1180e2d6cd115f5fa7ca5e86490d4a03/result",
+      "retry": "/v1/jobs/1180e2d6cd115f5fa7ca5e86490d4a03/retry",
+      "self": "/v1/jobs/1180e2d6cd115f5fa7ca5e86490d4a03"
+    },
+    "options": {
+      "job_type": "digital_study",
+      "payload": {
+        "base_revision": 2,
+        "case_id": "fielddeck-7",
+        "change_request": "Restore default workload and design goals",
+        "project_id": "digital-4dd8e8afe5da4cfaae9488caad3f3666",
+        "requirements": {
+          "keyboard_current_a": 0.1,
+          "maximum_case_depth_mm": 300.0,
+          "maximum_case_height_mm": 75.0,
+          "maximum_case_width_mm": 320.0,
+          "minimum_supply_margin_a": 0.3,
+          "minimum_work_runtime_h": 2.5,
+          "pi_work_current_a": 1.0,
+          "printer_bed_x_mm": 220.0,
+          "printer_bed_y_mm": 220.0
+        }
+      }
+    },
+    "output_dir": "/home/phyrexian/Downloads/llm_automation/project_portfolio/Hardware-Splicer/.cache/hardware-splicer/astra-registered-proof-20261117/projects/.digital-jobs/1180e2d6cd115f5fa7ca5e86490d4a03",
+    "project_name": "Fielddeck native backend proof",
+    "request_id": "digital:digital-4dd8e8afe5da4cfaae9488caad3f3666:0dfa8d26-d544-48c1-8b82-67040a119c5d",
+    "result": {
+      "artifact_integrity": true,
+      "project_id": "digital-4dd8e8afe5da4cfaae9488caad3f3666",
+      "requirements_met": true,
+      "revision": 3,
+      "run_id": "11b9dc9d61174416a26271819a18dcec"
+    },
+    "started_at": "2026-11-17T15:43:51.189234+00:00",
+    "status": "succeeded",
+    "updated_at": "2026-11-17T15:44:59.366824+00:00"
+  },
+  "ok": true,
+  "study": {
+    "artifact_manifest": {
+      "ASSEMBLY.md": {
+        "bytes": 8261,
+        "sha256": "d1c39725839065a79900209d14b7aa7978cdc5200b7c3163e17273710ca43f1b"
+      },
+      "BACKEND.md": {
+        "bytes": 1909,
+        "sha256": "74889eee47719f057d8a38ae6cb9ab6ff6995ff4b087059e7094c0a232ddc188"
+      },
+      "BOM.csv": {
+        "bytes": 5754,
+        "sha256": "046bd3d3fbbb41cef1810a0a0079e9249e98a2eacd6db11add60514a9ea47c8e"
+      },
+      "CONNECTIONS.md": {
+        "bytes": 4498,
+        "sha256": "ca0c5880a23af89deeee51cc968114f33bafb228064756b481b50903dfaea025"
+      },
+      "LICENSE_HS.txt": {
+        "bytes": 1102,
+        "sha256": "e243ac85fd7b0580eba9147640bd18047c3f4f799def65081f95b3a929518be6"
+      },
+      "README.md": {
+        "bytes": 8722,
+        "sha256": "c5551dc9d4e1d870a2a0cb69a4e896151b490190c26e63a95bed53473746f25a"
+      },
+      "STUDY.zip": {
+        "bytes": 2627794,
+        "sha256": "d2355d47239b1085526cabcc080d930b6caede920af05297291ecf9b916685c9"
+      },
+      "STUDY_README.md": {
+        "bytes": 2534,
+        "sha256": "d272598fe3370797a5382f96a1f6890d0354f759e07dfbf7db025c1dcb9f326f"
+      },
+      "analysis/calculations.json": {
+        "bytes": 7534,
+        "sha256": "02699e680a39fad5085f62e216df9a2f16869d7cf3dd197b8efea859ae7c9917"
+      },
+      "analysis/power_runtime.png": {
+        "bytes": 135608,
+        "sha256": "635b8187596384fd4e2a85a406deac167136cbd114f41e7165857a194c39f22c"
+      },
+      "analysis/verification.json": {
+        "bytes": 11279,
+        "sha256": "b5b23e469fc2b7991cff756f8d40469fcc0d67d7fb10761ca32373d40c689c21"
+      },
+      "author_cad.py": {
+        "bytes": 17615,
+        "sha256": "000480690a347006001ba026098183597caf6275860a24c69dd06c8cc7e4119c"
+      },
+      "bom.json": {
+        "bytes": 10799,
+        "sha256": "480a43aedbbb4bcd1b30ac6a7170a995c89b5bd92defe43fcb41c11ab4d47679"
+      },
+      "cad/FIELDDECK_7.glb": {
+        "bytes": 1019420,
+        "sha256": "2544900053a25302391d1b286dd62c4f5e1e117181674db4512cd79a632628e1"
+      },
+      "cad/FIELDDECK_7.step": {
+        "bytes": 4586011,
+        "sha256": "1a38132e1dba131d565536a3eb0d86911ee554c5b876a5693f2f09308e21998e"
+      },
+      "cad/geometry_report.json": {
+        "bytes": 19184,
+        "sha256": "c2f20f7a5311e6c6fa1e4ae81fc496cc6d1e9255b95a8b9669f7b4aa062cf290"
+      },
+      "cad/print/face_front_left.step": {
+        "bytes": 38778,
+        "sha256": "3bc5ee0b143c247da1dfca70af4b932b01d6967b20815abe2bdc898eb0455cd0"
+      },
+      "cad/print/face_front_left.stl": {
+        "bytes": 41884,
+        "sha256": "28f330e32f1408bbbb6a0c977242eacd23338a9d22c6744e05b27e246480aa65"
+      },
+      "cad/print/face_front_right.step": {
+        "bytes": 38930,
+        "sha256": "635039c686cf1f8d242cf1d613ef4055f8c37c9c26148c91584f42cc197ee375"
+      },
+      "cad/print/face_front_right.stl": {
+        "bytes": 41884,
+        "sha256": "32e7954edae763a0cfc007837a865055945457ef6214b2276faadb75cadd46cc"
+      },
+      "cad/print/face_rear_left.step": {
+        "bytes": 117112,
+        "sha256": "beadba0f0cef5f41629accbe300644fd974fba36f6b4b73470c5f143950953d7"
+      },
+      "cad/print/face_rear_left.stl": {
+        "bytes": 174084,
+        "sha256": "60c51629b6a870a8638a0ba2992d11e68720962eb04f5e19c660d456ccef1123"
+      },
+      "cad/print/face_rear_right.step": {
+        "bytes": 92443,
+        "sha256": "e39ebc59addb89cc533910ebf8731a12598cf8cbe202af5110559bff98e1d0b4"
+      },
+      "cad/print/face_rear_right.stl": {
+        "bytes": 89084,
+        "sha256": "806dd8e3701496edd1ff9b8068940fca972c253fe63bb4e4e97b9b3b2866aea6"
+      },
+      "cad/print/fan_duct.step": {
+        "bytes": 67507,
+        "sha256": "48f9416751926ec2a36c4ec5a334defb149a8849eabd57f2b525a7b12ca9b811"
+      },
+      "cad/print/fan_duct.stl": {
+        "bytes": 87284,
+        "sha256": "b94ad7519be910e4f87043c2513b7a159206c49ffe98476cc2469135186a2856"
+      },
+      "cad/print/fan_guard.step": {
+        "bytes": 118517,
+        "sha256": "2d05b846ea2cd568cb86d4e8bff6cd3d066068d49a8aef359bc0a5dacc8835be"
+      },
+      "cad/print/fan_guard.stl": {
+        "bytes": 87084,
+        "sha256": "9142c924d5c462ee493e0f18e3205dd382dd65b7d4879d5d8a6b5871536dc55c"
+      },
+      "cad/print/foot_1.step": {
+        "bytes": 5615,
+        "sha256": "62fabf76b4c2fdad4f5401872c2f8fe654035d4be84097868ca0fc71ae54e86a"
+      },
+      "cad/print/foot_1.stl": {
+        "bytes": 16684,
+        "sha256": "54bb09479b3519c30aabf9ab13b333f16d5fe84d2a5af64327d3acf531574eef"
+      },
+      "cad/print/foot_2.step": {
+        "bytes": 5615,
+        "sha256": "f68073994ec6392ff3d1f8fcd4bc380c3854623ea6ebfa15464987ee3b5f7575"
+      },
+      "cad/print/foot_2.stl": {
+        "bytes": 16684,
+        "sha256": "54bb09479b3519c30aabf9ab13b333f16d5fe84d2a5af64327d3acf531574eef"
+      },
+      "cad/print/foot_3.step": {
+        "bytes": 5615,
+        "sha256": "32229cbfca4602f378f02deb359c7a850365aa747ebc6ee8cfe654160cba32bf"
+      },
+      "cad/print/foot_3.stl": {
+        "bytes": 16684,
+        "sha256": "54bb09479b3519c30aabf9ab13b333f16d5fe84d2a5af64327d3acf531574eef"
+      },
+      "cad/print/foot_4.step": {
+        "bytes": 5615,
+        "sha256": "31ede07eb8ac906f26e6230363da0d1e566d563b161a0aca6a6f5c2c262487d2"
+      },
+      "cad/print/foot_4.stl": {
+        "bytes": 16684,
+        "sha256": "54bb09479b3519c30aabf9ab13b333f16d5fe84d2a5af64327d3acf531574eef"
+      },
+      "cad/print/seam_plate_1.step": {
+        "bytes": 34344,
+        "sha256": "5650df68c5ad840ba53aaa1d385bcda825e7d5d6dafd2a8f0beb5529d2fc0f78"
+      },
+      "cad/print/seam_plate_1.stl": {
+        "bytes": 68684,
+        "sha256": "e6a32d28036e98e26cdb7d35b9294fe0360d34a4dec43745c07d465c42c23fe6"
+      },
+      "cad/print/seam_plate_2.step": {
+        "bytes": 34344,
+        "sha256": "d16865c6076127e32fa9872e8d20bf1773d61e891165cd606f805a631ad3016f"
+      },
+      "cad/print/seam_plate_2.stl": {
+        "bytes": 68684,
+        "sha256": "e6a32d28036e98e26cdb7d35b9294fe0360d34a4dec43745c07d465c42c23fe6"
+      },
+      "cad/print/seam_plate_3.step": {
+        "bytes": 34344,
+        "sha256": "cf97a2224290d78c58be80d4ed467f9e4cc10a367b9268ec1d6070ebc229f8d5"
+      },
+      "cad/print/seam_plate_3.stl": {
+        "bytes": 68684,
+        "sha256": "e6a32d28036e98e26cdb7d35b9294fe0360d34a4dec43745c07d465c42c23fe6"
+      },
+      "cad/print/seam_plate_4.step": {
+        "bytes": 34344,
+        "sha256": "379017dfe1e023a2cd9e1b6e480977484abb44608c0cd31ddbded4b32cf7e0d1"
+      },
+      "cad/print/seam_plate_4.stl": {
+        "bytes": 68684,
+        "sha256": "e6a32d28036e98e26cdb7d35b9294fe0360d34a4dec43745c07d465c42c23fe6"
+      },
+      "cad/print/seam_plate_5.step": {
+        "bytes": 34344,
+        "sha256": "2bf3e76cc316cfb54d8b27135193914bd7ecb2c26e5e9fbcda40025b76fa546a"
+      },
+      "cad/print/seam_plate_5.stl": {
+        "bytes": 68684,
+        "sha256": "533161fdb334469ea9bc19c6dfccaf2a9b13f4a7ef87206c7332295575b387b3"
+      },
+      "cad/print/seam_plate_6.step": {
+        "bytes": 34344,
+        "sha256": "91d492dcb885a6f1f0286d4003b81914edf464b3f73479cae7e049784212a7bd"
+      },
+      "cad/print/seam_plate_6.stl": {
+        "bytes": 68684,
+        "sha256": "533161fdb334469ea9bc19c6dfccaf2a9b13f4a7ef87206c7332295575b387b3"
+      },
+      "cad/print/tray_front_left.step": {
+        "bytes": 300419,
+        "sha256": "460b66d13711881f8dec0de4050579907619bef26c58b91ea6c10a2d18b7f629"
+      },
+      "cad/print/tray_front_left.stl": {
+        "bytes": 213484,
+        "sha256": "b210b3dcc1d28feaa4b37b01e7bf3fea724feffea9b126c9d81449cf3da51be3"
+      },
+      "cad/print/tray_front_right.step": {
+        "bytes": 191828,
+        "sha256": "a681633627462ce19a951b79b1ebd3eff88734b721ae03255a7036209415d4d2"
+      },
+      "cad/print/tray_front_right.stl": {
+        "bytes": 206484,
+        "sha256": "c659884ad33cec5c8bcf61665af3fe9534d4497fea5dd55d3f2bb91d8693645f"
+      },
+      "cad/print/tray_rear_left.step": {
+        "bytes": 373628,
+        "sha256": "c50b12050ca654c7ebaa26f04f33036c717565b280eef8d66f9bbd78b2e6d192"
+      },
+      "cad/print/tray_rear_left.stl": {
+        "bytes": 556084,
+        "sha256": "94690741e3226308bd413cc231cab1287da0dd8843813eb8b69748d686fced8a"
+      },
+      "cad/print/tray_rear_right.step": {
+        "bytes": 364162,
+        "sha256": "3c913e8464f3e879328ef6720dcac187baadbadcafddfa717918e8fd19d084ca"
+      },
+      "cad/print/tray_rear_right.stl": {
+        "bytes": 420084,
+        "sha256": "6dc6dac8764a7c1d5dc66589f67f40ff7b3468b25ed512180dc41598448ce045"
+      },
+      "design.json": {
+        "bytes": 5598,
+        "sha256": "0883100a6ae3accd11c70fd731cc98bf46646b878ab5ce37a086b386bb73e192"
+      },
+      "engineering.py": {
+        "bytes": 5889,
+        "sha256": "1e8924b81567366ca692cebcec2061c38721c3829f230cabe864c96aa9983de5"
+      },
+      "render_device.py": {
+        "bytes": 5879,
+        "sha256": "f492d5b1a8d7865a56af21c203a67e1e2993bc3c0a2c1b6d836185e5ba2127f5"
+      },
+      "requirements.json": {
+        "bytes": 287,
+        "sha256": "59340c6898e6f3596bf8057d79e7b2361f5e194024977e6b6219994f13a38ba2"
+      },
+      "software/README.md": {
+        "bytes": 2929,
+        "sha256": "0921d006e4777065ff6f1cf463c9c41526549cb8a6b98af6e3aaaa2b9b18cad0"
+      },
+      "software/healthcheck.sh": {
+        "bytes": 964,
+        "sha256": "0d54729e2183ecd4c4b30710b4a65dc02b5cbcaee62773a7f846ca0cef250528"
+      },
+      "software/setup.sh": {
+        "bytes": 1329,
+        "sha256": "b4ea5a11c76e46f32fba768e157a53a271080deb3f86e8b2a561036f17f659f9"
+      },
+      "sources/references.json": {
+        "bytes": 7298,
+        "sha256": "8f3ef24868bffe6289cd515a9d704d4bd2c2533da586c9ca763fe843aeb49088"
+      },
+      "sources/touch_display2_7inch.step": {
+        "bytes": 1352219,
+        "sha256": "8a977a4d6a6fdd1253b9f69274d41bc308eff57b3268ccdbf4214f5dacda1a57"
+      },
+      "sources/touch_display2_LICENSE.txt": {
+        "bytes": 1881,
+        "sha256": "4ca2d350552b24137e55587e13fb09a249b757c6af49652ff02ea524d154c7fc"
+      },
+      "study-contract.json": {
+        "bytes": 5567,
+        "sha256": "128066fb9fc1bf30cd51ea51319a0d1f552306a104d93082fedb5a320145b4b9"
+      },
+      "study-verification.json": {
+        "bytes": 12143,
+        "sha256": "af40599e1619e6bea1344391306cdd5bb976472aee7abb7e3a22d9b95bc1546e"
+      },
+      "study_contract.py": {
+        "bytes": 15076,
+        "sha256": "69d141f403e5399a63a6a0743545b741e5b79eae1deb0b4f0038f89a55504b9f"
+      },
+      "verify_device.py": {
+        "bytes": 16358,
+        "sha256": "325fdddfcb152fc8c2ac326e18e57a9175016d43dbfab271b8c6298bcfbc1f76"
+      },
+      "views/assembled.png": {
+        "bytes": 73980,
+        "sha256": "344543e84c2f3d31b5ef65a8dd5b53eb636aff792680007f874624bd99a2dca7"
+      },
+      "views/dimensioned_layout.png": {
+        "bytes": 142190,
+        "sha256": "d6d7abb3a8cf49dcfe57c05c13777070391ea63cc6d4f0bc7c2174956f65b7bb"
+      },
+      "views/dimensioned_layout.svg": {
+        "bytes": 81151,
+        "sha256": "c0945c3fc349cae8e253f3372003a9cdb8f2420d757241190e02eb07bda965c3"
+      },
+      "views/exploded.png": {
+        "bytes": 72911,
+        "sha256": "146698cfb55ff369a2c030ca9953a0c4931c2dc95e0a9531100b0dbf7ea40d46"
+      },
+      "views/internal.png": {
+        "bytes": 69194,
+        "sha256": "17ee6e7742127b8c02db6cfa12bb8b3b7ba36629580c7cfd23e61b7005095597"
+      }
+    },
+    "attempt_id": "27166fdd0c674bd79c1180a26256c758",
+    "change_request": "Restore default workload and design goals",
+    "job_id": "1180e2d6cd115f5fa7ca5e86490d4a03",
+    "parent_revision": 2,
+    "revision": 3,
+    "run_id": "11b9dc9d61174416a26271819a18dcec",
+    "saved_at": "2026-11-17T15:44:59.240400+00:00",
+    "summary": {
+      "artifact_integrity": true,
+      "case_id": "fielddeck-7",
+      "constraints": [
+        {
+          "actual": 2.781818,
+          "id": "work_runtime",
+          "label": "Conservative work-runtime scenario",
+          "limit": 2.5,
+          "passed": true,
+          "unit": "h"
+        },
+        {
+          "actual": 0.48,
+          "id": "supply_current_margin",
+          "label": "Smallest ordinary-operation single-port current margin",
+          "limit": 0.3,
+          "passed": true,
+          "unit": "A"
+        },
+        {
+          "actual": 2.92,
+          "id": "sensitivity_supply_limit",
+          "label": "Largest modelled current including keyboard sensitivity",
+          "limit": 3.0,
+          "passed": true,
+          "unit": "A"
+        },
+        {
+          "actual": 0.57,
+          "id": "usb_current_limit",
+          "label": "Largest modelled USB load",
+          "limit": 1.2,
+          "passed": true,
+          "unit": "A"
+        },
+        {
+          "actual": 310.0,
+          "id": "case_width",
+          "label": "Nominal enclosure width",
+          "limit": 320.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        {
+          "actual": 285.0,
+          "id": "case_depth",
+          "label": "Nominal enclosure depth",
+          "limit": 300.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        {
+          "actual": 64.0,
+          "id": "case_height",
+          "label": "Nominal enclosure height",
+          "limit": 75.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        {
+          "actual": 154.85,
+          "id": "print_bed_x",
+          "label": "Largest printed-part x span",
+          "limit": 220.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        {
+          "actual": 144.85,
+          "id": "print_bed_y",
+          "label": "Largest printed-part y span",
+          "limit": 220.0,
+          "passed": true,
+          "unit": "mm"
+        },
+        {
+          "actual": 0.9949378429526526,
+          "id": "display_post_bending",
+          "label": "Ideal display-post bending stress",
+          "limit": 10.0,
+          "passed": true,
+          "unit": "MPa"
+        }
+      ],
+      "engine": "Registered native CAD and engineering case",
+      "metrics": {
+        "case_depth_mm": 285.0,
+        "case_height_mm": 64.0,
+        "case_width_mm": 310.0,
+        "minimum_supply_current_margin_a": 0.48,
+        "planning_cost_usd": 336.73,
+        "solid_petg_mass_g": 841.025,
+        "stress_current_margin_a": 0.48,
+        "work_runtime_lower_h": 2.781818,
+        "work_runtime_upper_h": 3.927273
+      },
+      "physical_authority_granted": false,
+      "physical_work_requested": false,
+      "requirements": {
+        "keyboard_current_a": 0.1,
+        "maximum_case_depth_mm": 300.0,
+        "maximum_case_height_mm": 75.0,
+        "maximum_case_width_mm": 320.0,
+        "minimum_supply_margin_a": 0.3,
+        "minimum_work_runtime_h": 2.5,
+        "pi_work_current_a": 1.0,
+        "printer_bed_x_mm": 220.0,
+        "printer_bed_y_mm": 220.0
+      },
+      "requirements_met": true,
+      "scope_limits": [
+        "Digital geometry and declared calculation/simulation models only.",
+        "No purchased/owned hardware, physical fit, operation or fabrication is established."
+      ],
+      "source_sha256": {
+        "ASSEMBLY.md": "d1c39725839065a79900209d14b7aa7978cdc5200b7c3163e17273710ca43f1b",
+        "BACKEND.md": "74889eee47719f057d8a38ae6cb9ab6ff6995ff4b087059e7094c0a232ddc188",
+        "CONNECTIONS.md": "ca0c5880a23af89deeee51cc968114f33bafb228064756b481b50903dfaea025",
+        "README.md": "c5551dc9d4e1d870a2a0cb69a4e896151b490190c26e63a95bed53473746f25a",
+        "author_cad.py": "000480690a347006001ba026098183597caf6275860a24c69dd06c8cc7e4119c",
+        "bom.json": "480a43aedbbb4bcd1b30ac6a7170a995c89b5bd92defe43fcb41c11ab4d47679",
+        "design.json": "0883100a6ae3accd11c70fd731cc98bf46646b878ab5ce37a086b386bb73e192",
+        "engineering.py": "1e8924b81567366ca692cebcec2061c38721c3829f230cabe864c96aa9983de5",
+        "render_device.py": "f492d5b1a8d7865a56af21c203a67e1e2993bc3c0a2c1b6d836185e5ba2127f5",
+        "software/README.md": "0921d006e4777065ff6f1cf463c9c41526549cb8a6b98af6e3aaaa2b9b18cad0",
+        "software/healthcheck.sh": "0d54729e2183ecd4c4b30710b4a65dc02b5cbcaee62773a7f846ca0cef250528",
+        "software/setup.sh": "b4ea5a11c76e46f32fba768e157a53a271080deb3f86e8b2a561036f17f659f9",
+        "sources/references.json": "8f3ef24868bffe6289cd515a9d704d4bd2c2533da586c9ca763fe843aeb49088",
+        "sources/touch_display2_7inch.step": "8a977a4d6a6fdd1253b9f69274d41bc308eff57b3268ccdbf4214f5dacda1a57",
+        "sources/touch_display2_LICENSE.txt": "4ca2d350552b24137e55587e13fb09a249b757c6af49652ff02ea524d154c7fc",
+        "study_contract.py": "69d141f403e5399a63a6a0743545b741e5b79eae1deb0b4f0038f89a55504b9f",
+        "verify_device.py": "325fdddfcb152fc8c2ac326e18e57a9175016d43dbfab271b8c6298bcfbc1f76"
+      }
+    }
+  }
+}

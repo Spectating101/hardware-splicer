@@ -1,0 +1,243 @@
+{
+  "basis": "CAD model, including envelope and unknown-shape stand-ins; physical fit not tested",
+  "counts": {
+    "near": 1,
+    "overlap": 0,
+    "overlap_real": 0,
+    "overlap_stand_in": 0,
+    "tight": 1,
+    "touching": 13
+  },
+  "glb_sha256": "64e1bce55a5b4618c9ceb91e7dc67398beaecec12a2eb1aa21a8d01aa116bee7",
+  "method": {
+    "clearance": "minimum distance between surface samples about 0.35 mm apart",
+    "interference": "exact intersection volume of closed meshes (manifold3d)",
+    "near_mm": 2.0,
+    "overlap_mm3": 0.5,
+    "tight_mm": 1.0,
+    "touch_mm": 0.05
+  },
+  "not_computed": [],
+  "pairs": [
+    {
+      "a": "c2",
+      "b": "c1",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.5,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "r2",
+      "b": "r1",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 1.8,
+      "kind": "near",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "u1",
+      "b": "r2",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.49,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "u1",
+      "b": "r1",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.47,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "c1",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "c2",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "j1",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "j2",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "j3",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "j4",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "r1",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "r2",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "u1",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "u2",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "u3",
+      "b": "board",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    }
+  ],
+  "parts_measured": 12,
+  "parts_sha256": "0a1e4e11e0715102117ef8875b881e200a8478bf199434489a066dd11a6a940f",
+  "parts_unmatched": [],
+  "schema": "hardware_splicer.scene_fit.v1",
+  "size_mm": [
+    80.0,
+    50.0,
+    10.1
+  ],
+  "version": "scene-fit.v4"
+}

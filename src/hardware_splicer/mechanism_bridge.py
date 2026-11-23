@@ -6,10 +6,11 @@ import json
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence
+from .state_paths import repo_root
 
 SCHEMA_VERSION = "hardware_splicer.mechanism_pack.v1"
 
-_ROOT = Path(__file__).resolve().parents[2]
+_ROOT = repo_root()
 _MECHA_SRC = _ROOT / "apps" / "mecha-splicer" / "src"
 
 

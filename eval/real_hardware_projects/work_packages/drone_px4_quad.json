@@ -1,0 +1,366 @@
+{
+  "schema_version": "hardware_splicer.real_device_work_package.v1",
+  "project_id": "drone_px4_quad",
+  "device": "450 mm class quadcopter on Pixhawk 6C / PX4",
+  "project_kind": "new_build",
+  "catalog_routing": {
+    "candidate": "bench_power_adapter",
+    "status": "blocked_no_compatible_catalog_build"
+  },
+  "source_leads": [
+    {
+      "source_id": "px4_pixhawk6c",
+      "uri": "https://github.com/PX4/PX4-Autopilot/blob/main/docs/en/flight_controller/pixhawk6c.md",
+      "verified_full_document": false,
+      "content_hash": null
+    },
+    {
+      "source_id": "px4_wiring",
+      "uri": "https://docs.px4.io/v1.17/en/assembly/quick_start_pixhawk6c",
+      "verified_full_document": false,
+      "content_hash": null
+    }
+  ],
+  "requirements": [
+    {
+      "id": "req-01",
+      "requirement": "exact controller power-rail design and isolation",
+      "status": "unverified",
+      "evidence_refs": [],
+      "verification_required": true
+    },
+    {
+      "id": "req-02",
+      "requirement": "four motor ESC battery sizing table",
+      "status": "unverified",
+      "evidence_refs": [],
+      "verification_required": true
+    },
+    {
+      "id": "req-03",
+      "requirement": "thrust to weight calculations and expected current",
+      "status": "unverified",
+      "evidence_refs": [],
+      "verification_required": true
+    },
+    {
+      "id": "req-04",
+      "requirement": "assembly wiring and BOM",
+      "status": "unverified",
+      "evidence_refs": [],
+      "verification_required": true
+    },
+    {
+      "id": "req-05",
+      "requirement": "PX4 configuration and bench-only validation protocol",
+      "status": "unverified",
+      "evidence_refs": [],
+      "verification_required": true
+    }
+  ],
+  "work_steps": [
+    {
+      "id": "step-01",
+      "instruction": "Freeze the non-flight scope and label the aircraft as not flight-authorized.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-02",
+      "instruction": "Document the Pixhawk 6C connector pinouts and PX4 output mapping from the cited documentation, then obtain the exact hardware revision and connector implementation.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-03",
+      "instruction": "Define the battery-side distribution path, power-module input path, regulated controller output, POWER1/POWER2 allocation, sensing path, grounds, protection, and isolation boundaries.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-04",
+      "instruction": "Create a four-channel propulsion interface table covering motor, ESC, battery, propeller, connector, PWM signal, signal ground, power conductors, and mechanical mounting.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-05",
+      "instruction": "Collect exact motor-propeller-battery thrust and current data, then calculate total thrust, thrust-to-weight ratio, hover and peak current, battery energy, voltage sag margin, ESC margin, conductor sizing, and expected runtime.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-06",
+      "instruction": "Define frame geometry, rotor orientation, motor locations, clearance, landing structure, center of gravity, payload allowance, and vibration-control provisions.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-07",
+      "instruction": "Bind each front-left, front-right, rear-right, and rear-left actuator role to a declared structured part and document designed or measured joint limits.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-08",
+      "instruction": "Produce the assembly wiring diagram, power-rail diagram, connector and polarity schedule, BOM, mass budget, and unresolved-assumption register.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-09",
+      "instruction": "Configure PX4 for the documented Pixhawk 6C, frame type, output mapping, sensor interfaces, safety settings, and calibration requirements without enabling flight authorization.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-10",
+      "instruction": "Perform only bench validation with propellers removed: continuity and polarity checks, isolated rail checks, regulated-output checks, controller boot and power redundancy checks, sensor recognition, GPS/compass interface checks, ESC signal checks without propulsion operation, logging, and fault recording.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    },
+    {
+      "id": "step-11",
+      "instruction": "Update the design only after measured or documented evidence resolves the electrical, propulsion, mechanical, thermal, and topology unknowns.",
+      "status": "proposed_not_executed",
+      "evidence_refs": []
+    }
+  ],
+  "critical_unknowns": [
+    {
+      "id": "gap-01",
+      "description": "Exact Pixhawk 6C hardware revision, connector pinout, and required POWER1/POWER2 operating ranges",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-02",
+      "description": "Power module model, regulated output ratings, input range, current-sensing range, voltage-sensing range, connector pinout, and isolation behavior",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-03",
+      "description": "Battery nominal voltage, maximum voltage, capacity, discharge rating, connector, dimensions, and mass",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-04",
+      "description": "Motor model, KV, winding or phase characteristics, mounting pattern, voltage range, continuous current, peak current, and thrust data",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-05",
+      "description": "Propeller manufacturer, diameter, pitch, material, rotation direction, clearance, and thrust-current data",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-06",
+      "description": "ESC models, voltage/current ratings, cooling, firmware, input signal compatibility, telemetry capability, BEC behavior, connectors, and peak margin",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-07",
+      "description": "Frame mass, arm length, rotor spacing, motor-mount pattern, structural limits, vibration behavior, and actual 450 mm classification",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-08",
+      "description": "Total empty mass, payload mass, maximum takeoff mass, center of gravity, and required thrust-to-weight margin",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-09",
+      "description": "Expected hover and peak current, battery voltage sag, energy consumption, thermal loads, and runtime target",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-10",
+      "description": "Power-distribution-board or harness ratings, conductor gauge, connector ratings, protection strategy, and grounding topology",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-11",
+      "description": "GPS/compass model, mounting location, cable compatibility, interference-control requirements, and availability",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-12",
+      "description": "PX4 release, parameter set, output assignment, sensor calibration state, safety configuration, and documented controller firmware compatibility",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-13",
+      "description": "Rotor actuator source-part identifiers for all four topology slots",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-14",
+      "description": "Designed or measured joint limits for all four rotor joints",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-15",
+      "description": "Runtime target, budget limit, measured dimensions, mechanical simulation, bench evidence, reviewed release scope, and payload limits",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-16",
+      "description": "Inputs for runtime analysis: battery energy or voltage and capacity plus continuous or average load power",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-17",
+      "description": "Inputs for current-margin analysis: supply-current limit, peak current, and per-load peak or stall current",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-18",
+      "description": "Inputs for payload-margin analysis: payload mass and payload limit",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-19",
+      "description": "Inputs for static-stability analysis: support width or wheel track and combined center-of-gravity height",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-20",
+      "description": "Inputs for actuator-torque analysis: payload mass, payload lever arm, and actuator continuous torque",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-21",
+      "description": "Inputs for dimensional-envelope analysis: candidate width and maximum width",
+      "status": "open",
+      "resolution_evidence": null
+    },
+    {
+      "id": "gap-22",
+      "description": "Inputs for thermal analysis: estimated power loss, thermal resistance, ambient temperature, and maximum component temperature",
+      "status": "open",
+      "resolution_evidence": null
+    }
+  ],
+  "acceptance_gates": [
+    {
+      "id": "gate-01",
+      "criterion": "Do not wire battery directly to flight-controller regulated POWER port",
+      "status": "not_accepted",
+      "evidence_refs": []
+    },
+    {
+      "id": "gate-02",
+      "criterion": "No assumed thrust or runtime without motor prop battery data",
+      "status": "not_accepted",
+      "evidence_refs": []
+    },
+    {
+      "id": "gate-03",
+      "criterion": "No flight authorization",
+      "status": "not_accepted",
+      "evidence_refs": []
+    }
+  ],
+  "required_parts": [
+    {
+      "requirement": "The documented source claims state that Pixhawk 6C POWER1 and POWER2 require regulated supply through a suitable power module.",
+      "verified_part_number": null,
+      "vendor": null,
+      "price": null,
+      "compatibility_verified": false
+    },
+    {
+      "requirement": "The battery must not be wired directly to a regulated Pixhawk 6C POWER port.",
+      "verified_part_number": null,
+      "vendor": null,
+      "price": null,
+      "compatibility_verified": false
+    },
+    {
+      "requirement": "The documented source claims state that Pixhawk 6C supports PWM servo outputs and PX4 multicopter configurations.",
+      "verified_part_number": null,
+      "vendor": null,
+      "price": null,
+      "compatibility_verified": false
+    },
+    {
+      "requirement": "The documented source claims state that Pixhawk 6C supports power-module, GPS/compass, and ESC-interface wiring.",
+      "verified_part_number": null,
+      "vendor": null,
+      "price": null,
+      "compatibility_verified": false
+    },
+    {
+      "requirement": "A power module must provide a verified regulated controller output and compatible voltage, current, connector, pinout, sensing, and isolation characteristics; the exact model is unknown.",
+      "verified_part_number": null,
+      "vendor": null,
+      "price": null,
+      "compatibility_verified": false
+    },
+    {
+      "requirement": "Four ESCs must be compatible with the selected battery voltage, motor current envelope, cooling conditions, signal interface, connector scheme, and PX4 output assignment; exact ESCs are unknown.",
+      "verified_part_number": null,
+      "vendor": null,
+      "price": null,
+      "compatibility_verified": false
+    },
+    {
+      "requirement": "Four motors must have verified mounting dimensions, shaft or propeller interface, voltage range, KV, continuous and peak current data, and thrust tables for the selected propellers; exact motors are unknown.",
+      "verified_part_number": null,
+      "vendor": null,
+      "price": null,
+      "compatibility_verified": false
+    },
+    {
+      "requirement": "Propellers must be selected only from verified motor, battery-voltage, rotation-direction, clearance, and thrust-current data; propeller size and type are unknown.",
+      "verified_part_number": null,
+      "vendor": null,
+      "price": null,
+      "compatibility_verified": false
+    },
+    {
+      "requirement": "The battery must have verified nominal voltage, capacity, continuous discharge capability, peak capability, connector, physical dimensions, and mass; battery voltage and capacity are unknown.",
+      "verified_part_number": null,
+      "vendor": null,
+      "price": null,
+      "compatibility_verified": false
+    },
+    {
+      "requirement": "The frame and motor mounts must provide verified 450 mm-class geometry, structural compatibility, clearance, and landing support; measured dimensions and mechanical evidence are missing.",
+      "verified_part_number": null,
+      "vendor": null,
+      "price": null,
+      "compatibility_verified": false
+    },
+    {
+      "requirement": "The catalog recommendation bench_power_adapter is potentially compatible with the bench-only scope, but its electrical ratings and compatibility with the planned power path are unverified.",
+      "verified_part_number": null,
+      "vendor": null,
+      "price": null,
+      "compatibility_verified": false
+    }
+  ],
+  "engineering_readiness": "blocked",
+  "physical_validation_performed": false,
+  "source_documents_verified": false,
+  "build_or_repair_completed": false
+}

@@ -1,5 +1,12 @@
 # Hardware Splicer
 
+**Integrated GitHub features:** [available functionality, entry points and combined validation, November 16, 2026](docs/GITHUB_FEATURE_INTEGRATION_2026-11-16.md).
+
+**Where things are:** start at [`docs/README.md`](docs/README.md), an index of the documentation grouped by audience.
+Release notes are in [`docs/releases/`](docs/releases/) and dated plans, audits and strategy notes are in [`docs/archive/`](docs/archive/).
+
+**Broader engineering-agent mission and operating contract:** [`docs/HARDWARE_SPLICER_MISSION_FREEZE.md`](docs/HARDWARE_SPLICER_MISSION_FREEZE.md). The bounded SPI adapter demonstration below is evidence of a particular current capability, not the full intended product scope.
+
 **Software that runs the checks a hardware engineer would run before a circuit board is built, and packages the result so anyone can rebuild and verify it.**
 
 ![SPI flash adapter reference design, top copper layer](docs/product/media/spi_flash_adapter_v1-top.svg)
@@ -7,6 +14,8 @@
 *The SPI flash adapter reference design: a routed two-layer board with 18 test points, produced and checked through the workflow.*
 
 Hardware Splicer takes a board design through KiCad electrical and design-rule checks, a bill of materials and fabrication-file check, and a staged list of what must pass before bench work begins. An AI agent can do parts of the engineering, but only through those same checks: a model's suggestion never becomes a physical instruction on its own say-so.
+
+The offline manufacturing catalog covers 270 product offers. Its engineering reader links 153 of them to editable designs or models, replay results and the next physical check. Extract the ZIP and open `catalog/index.html`. [Offline catalog](projects/engineering-opportunity-portfolio/HS-manufacturing-catalog.zip) · [Portfolio guide](projects/engineering-opportunity-portfolio/README.md)
 
 | | |
 |---|---|
@@ -17,10 +26,63 @@ Hardware Splicer takes a board design through KiCad electrical and design-rule c
 | **Status** | Software and design-review layer complete for the SPI reference design. **No board has been fabricated or measured yet**, and nothing here claims physical correctness |
 
 ```bash
-git clone https://github.com/Spectating101/hardware-splicer.git && cd hardware-splicer
-bash scripts/install_splice_v1.sh && source .venv/bin/activate
-hs-doctor && make splice-ui-serve
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements-splice-v1.txt -e '.[digital]'
+.venv/bin/hs-digital cases
 ```
+
+**Engineering operator pilot:** `python3 scripts/hs_workshop_operator.py --list` exposes
+reviewed, bounded workflows that reuse the existing native verification and
+repair/salvage engines. The [two real work-order runs](examples/workshop_operator/README.md)
+show a successful SPI design check and a correctly blocked donor repair. This is
+software-level engineering evidence, **not** an autonomous physical repair or
+fabrication approval.
+
+**Headless digital engine:** `hs-digital` and `hardware_splicer.sdk.digital_engine`
+create/resume studies, change requirements, execute native CAD/physics jobs,
+compare revisions, audit their evidence and export verified packages. Registered
+cases include the HS-3G-B drone, [Fielddeck 7 cyberdeck](projects/cyberdeck-real-trial-20261020/digital_v1/README.md),
+[Fielddeck 5 display revision](docs/status/generated/fielddeck-5-registered-20261118.json)
+and [Ender-3 reference-donor pen plotter](projects/ender3-penplotter-digital/README.md).
+`hs-digital cases` lists their supported requirements. Failed
+requirements retain their artifacts. The current focus is the backend engine;
+frontend work is deferred. See the [engine guide](docs/ENGINE.md#headless-digital-engine).
+No HTTP server, browser, physical parts or model-service key is required.
+See the [backend install and deployment guide](docs/PACKAGING_AND_DEPLOYMENT.md#current-headless-backend)
+for the native dependencies, optional HTTP service and persistent state setup.
+
+**Native source splicing:** uploaded KiCad boards can become editable project
+revisions with their original footprints, pad/net identities and supplied project
+rules. Engineering actions can import those sources and propose native edits;
+reviews retain their original base, and native ZIP exports include the rule
+companions. Source changes invalidate inherited verification results. See the
+[native editing workflow](docs/ENGINE.md#native-source-editing-and-splicing).
+
+**Part substitution:** compare a supplied replacement against the whole declared
+assembly. HS reports electrical and mechanical conflicts, required adapters and
+missing donor specifications, then exports the revised BOM, connection plan and
+optional nominal STEP/STL. See the [substitution workflow](docs/ENGINE.md#part-substitution-across-a-declared-assembly).
+
+**Robot donor example.** Can the passive servo from a SO-ARM102 leader drive the
+follower shoulder? Run `hs-digital so102-drive shoulder --passive-leader`.
+The result identifies the required motor, shared printed mount, bus wiring and
+simulation joint, and explains which requirement the donor fails. Supply your
+own servo profile or check a target joint angle using the [worked example](docs/ENGINE.md#so-arm102-follower-drive).
+
+The [unseen Sweep keyboard challenge](eval/unseen_sweep/README.md) records what
+HS got right, missed, and left open when assessing a previously unused split
+keyboard. It includes donor decisions sealed before scoring, a reproducible
+switch-to-controller map, and a PCB/schematic disagreement on both controllers.
+
+The [five-device challenge](eval/unseen_devices/README.md) tests whether a tray
+fits a printer, a robot joint can reach an angle, and parts of a handheld,
+sensor logger and stereo amplifier can be reused. It includes an editable tray
+model, the sealed decisions, the manufacturers' answers and board trace checks.
+
+The [HS PCB inspection nest](projects/pcb-inspection-nest/README.md) is an
+HS-authored digital hardware release candidate. One common dock accepts
+three board-specific carriers. Its package includes editable CAD, print meshes,
+source, and nominal fit checks.
 
 Design principles and the full authority model: [`docs/DESIGN_PRINCIPLES.md`](docs/DESIGN_PRINCIPLES.md).
 
@@ -113,7 +175,8 @@ At the current external-proof checkpoint, exact-head CI has exercised:
 - the installed canonical MCP entry point;
 - frozen ten-case external corpus inventory;
 - the non-golden external trace audit;
-- **193 canonical backend operations**;
+- every canonical backend operation in the generated OpenAPI catalog (the live count is
+  `backend_contract()["operation_count"]`; it changes as the API grows, so it is not restated here);
 - `physical_authority_granted = false` at the MCP boundary.
 
 This proves the engineering surface and proof harness exist. Separate durable Astra evidence now
@@ -190,15 +253,11 @@ The repository also retains earlier Splice/Circuit/mechanical lineage and intern
 ## Developer quick start
 
 ```bash
-git clone https://github.com/Spectating101/hardware-splicer.git
-cd hardware-splicer
-bash scripts/install_splice_v1.sh
-source .venv/bin/activate
-hs-doctor
-make splice-ui-serve
+.venv/bin/python -m pip install -e '.[dev]'
+make verify-headless-backend
 ```
 
-For internal/developer navigation, see [`docs/GITHUB_START_HERE.md`](docs/GITHUB_START_HERE.md) and the broader [`docs/`](docs/) tree.
+See the [headless backend verification scope](docs/PACKAGING_AND_DEPLOYMENT.md#headless-backend-verification) and [developer navigation](docs/GITHUB_START_HERE.md).
 
 ## Canonical generated artifacts
 

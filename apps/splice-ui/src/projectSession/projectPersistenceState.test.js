@@ -10,6 +10,16 @@ import {
 
 
 describe("persistent project session state", () => {
+  it("keeps the saved digital run and requirements when reopening a revision", () => {
+    const digitalStudy = { run_id: "verified-run", requirements: { payload_mass_g: 10 } };
+    const restored = projectSessionReducer(createEmptySession(), {
+      type: ACTIONS.RESTORE_PROJECT_SNAPSHOT, revision: 2,
+      snapshot: { projectId: "digital-drone", projectName: "Drone", mode: "digital", currentStage: "digital", digitalStudy },
+    });
+    expect(restored.digitalStudy).toEqual(digitalStudy);
+    expect(restored.snapshotRevision).toBe(2);
+    expect(projectSnapshot(restored).digitalStudy).toEqual(digitalStudy);
+  });
   it("restores a server snapshot without promoting or dirtying it", () => {
     const restored = projectSessionReducer(createEmptySession(), {
       type: ACTIONS.RESTORE_PROJECT_SNAPSHOT,
@@ -99,5 +109,34 @@ describe("persistent project session state", () => {
     expect(state.machineProject.project_id).toBe("robot");
     expect(state.dirty).toBe(true);
     expect(sessionIsPersistable(state)).toBe(true);
+  });
+});
+
+
+it("restores owned units independently of catalogue identity and retains backend substitution references", () => {
+  const snapshot = {
+    projectId: "motors", projectName: "Plotter",
+    intake: { owned_units: [{ unit_id: "motor-1", name: "Salvaged stepper", source: "salvaged", known_facts: "Current unknown" }] },
+    partAssembly: { parts: [{ part_id: "catalogue-motor", catalog_part_id: 17 }] },
+    partSubstitution: { assessment_id: "substitution-1", source_revision: 3 },
+  };
+  const restored = projectSessionReducer(createEmptySession(), {
+    type: ACTIONS.RESTORE_PROJECT_SNAPSHOT, revision: 4, snapshot,
+  });
+  expect(projectSnapshot(restored)).toMatchObject(snapshot);
+  expect(restored.intake.owned_units[0]).not.toHaveProperty("catalog_part_id");
+  expect(restored.intake.owned_units[0]).not.toHaveProperty("authority");
+});
+
+describe("graph sync", () => {
+  it("leaves the session untouched when the design panel reports the graph it already has", () => {
+    const graph = { nodes: [{ id: "controller", data: { label: "MCU" } }], edges: [], phrase: "robot", composeMode: "canvas" };
+    const state = createEmptySession({ projectId: "robot", projectName: "Robot", graph, dirty: false });
+    const same = projectSessionReducer(state, { type: ACTIONS.SYNC_GRAPH, nodes: [{ data: { label: "MCU" }, id: "controller" }],
+      edges: [], phrase: "robot", composeMode: "canvas" });
+    expect(same).toBe(state);
+    const edited = projectSessionReducer(state, { type: ACTIONS.SYNC_GRAPH, phrase: "robot arm" });
+    expect(edited.dirty).toBe(true);
+    expect(edited.graph.phrase).toBe("robot arm");
   });
 });

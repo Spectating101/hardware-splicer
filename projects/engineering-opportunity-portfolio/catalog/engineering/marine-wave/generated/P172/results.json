@@ -1,0 +1,19 @@
+{
+  "pilot": "Taiwan dry deck, disconnected 50 m Standard Fathom tether",
+  "metrics": {
+    "candidate": {
+      "layers": 7,
+      "turns_per_layer": 18,
+      "net_storage_m": 58.07,
+      "minimum_working_drum_diameter_mm": 94,
+      "minimum_brake_holding_nm": 3.45
+    },
+    "control": {
+      "layers": 9,
+      "turns_per_layer": 18,
+      "net_storage_m": 65.93,
+      "minimum_working_drum_diameter_mm": 59,
+      "minimum_brake_holding_nm": 3.45
+    }
+  }
+}

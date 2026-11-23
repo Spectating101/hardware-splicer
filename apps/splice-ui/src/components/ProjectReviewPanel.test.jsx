@@ -7,9 +7,9 @@ import {
   listProjectReviews,
   listProjectRevisions,
   loadProjectReview,
-} from "../projectSession/projectReviewApi.js";
+} from "../projectSession/projectReviewApi";
 
-vi.mock("../projectSession/projectReviewApi.js", () => ({
+vi.mock("../projectSession/projectReviewApi", () => ({
   decideProjectReview: vi.fn(),
   listProjectReviews: vi.fn(),
   listProjectRevisions: vi.fn(),

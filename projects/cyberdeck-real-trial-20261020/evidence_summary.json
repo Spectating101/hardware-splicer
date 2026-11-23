@@ -1,0 +1,220 @@
+{
+  "schema": "hardware_splicer.external_real_device_evidence_audit.v1",
+  "date": "2026-10-20",
+  "objective": "Independent end-to-end Linux cyberdeck engineering from a goal, under evaluator-defined USD 250 target; then source-backed condition with real open-source cyberdeck KiCad and STL files",
+  "method": "External Copilot operator used live isolated HS HTTP backend. Evaluator only initialized canonical project after agent failed to persist intake. Evaluator supplied raw public cyberdeck reference files in separately labeled second condition. Later evaluator repaired opt-in model connection and exercised the native model session via backend. No design source written by evaluator or external agent is counted as HS engineering output.",
+  "trial_project_id": "hs-real-cyberdeck-20261020",
+  "initial_intake": {
+    "response_ok": false,
+    "compile_ok": true,
+    "generated_file_count": 88,
+    "project_name": "hardware_splicer_project",
+    "dashboard_build_ready": true,
+    "dashboard_drc_pass": true,
+    "project_claimable": false,
+    "salvage_bom_line_count": 0,
+    "scenario_goal": "hardware_splicer_project",
+    "observed_issue": "generic-mechatronics starter generated nominal PCB/STEP/SCAD/Gerber assets without identifying any actual cyberdeck components; quality metrics cannot validate target"
+  },
+  "canonical_plan": {
+    "api_ok": true,
+    "revision": 2,
+    "architecture_status": "unresolved",
+    "architecture_build_id": null,
+    "architecture_error": "qwen_http_error",
+    "source_count": 0,
+    "analysis": {
+      "finding_count": 7,
+      "blocking_count": 1,
+      "counts_by_status": {
+        "pass": 0,
+        "fail": 0,
+        "review": 0,
+        "unknown": 7
+      },
+      "known_fraction": 0.0
+    }
+  },
+  "compose_attempt": {
+    "response_ok": false,
+    "error": "need >=2 modules, got []",
+    "module_count": 0,
+    "build_id": "generic_low_voltage_build",
+    "kicad_pcb_present": false,
+    "circuit_netlist_present": false,
+    "generated_package_path_is_not_proof_of_target": true
+  },
+  "ai_provider_fix": {
+    "default_provider_failed_http": 503,
+    "initial_opt_in_attempt_http": 422,
+    "opt_in_fixed_http": 200,
+    "provider": "copilot_cli",
+    "revision": 3,
+    "candidate_count": 3,
+    "action_types": [
+      "clarify_requirement",
+      "identify_missing_evidence",
+      "compare_architectures",
+      "propose_components",
+      "propose_interfaces",
+      "prepare_verification"
+    ],
+    "actions_executed": 0,
+    "physical_authority_unchanged": true
+  },
+  "real_reference_condition": {
+    "repo": "https://github.com/sector07-dev/RPI_DEV",
+    "cloned_commit": "ebdfcff",
+    "sources": [
+      {
+        "filename": "RPI_Dev_1.kicad_sch",
+        "source_id": "upload-2e26a451bd7d4821f4fd",
+        "original_sha256": "sha256:2e26a451bd7d4821f4fde3f76af84eb7df749dc7683392f86c1a799008137280",
+        "bytes": 151410,
+        "classification": "kicad_design",
+        "ingest_parser_disposition": "inventory_only",
+        "canonical_parse_status": "skipped",
+        "derived_sources": 0,
+        "limitations": [
+          "The registered source is inventory-only and has no executable bounded parser."
+        ]
+      },
+      {
+        "filename": "RPI_Dev_1.kicad_pcb",
+        "source_id": "upload-ddf94ad6fdaee46a5202",
+        "original_sha256": "sha256:ddf94ad6fdaee46a52022b20da8678cebd34cec4f4db817d090cd0e45119f042",
+        "bytes": 222472,
+        "classification": "kicad_design",
+        "ingest_parser_disposition": "inventory_only",
+        "canonical_parse_status": "skipped",
+        "derived_sources": 0,
+        "limitations": [
+          "The registered source is inventory-only and has no executable bounded parser."
+        ]
+      },
+      {
+        "filename": "Front Case.stl",
+        "source_id": "upload-b1d2861245bdf8e5b7e6",
+        "original_sha256": "sha256:b1d2861245bdf8e5b7e67f90a2862c6ffccf48aee8ffeeef2dbff86a5d1da041",
+        "bytes": 259084,
+        "classification": "unknown",
+        "ingest_parser_disposition": "inventory_only",
+        "canonical_parse_status": "skipped",
+        "derived_sources": 0,
+        "limitations": [
+          "The registered source is inventory-only and has no executable bounded parser."
+        ]
+      }
+    ],
+    "canonical_parser_supported_routes": [
+      "robot_model_import",
+      "engineering_source_descriptor"
+    ],
+    "canonical_parser_actual_stages": [
+      "skipped",
+      "skipped",
+      "skipped"
+    ],
+    "ai_session_provider": "copilot_cli",
+    "source_backed_revision": 10,
+    "source_backed_summary_excerpt": "Proposed engineering plan for hs-real-cyberdeck-20261020 remains evidence-blocked. Three registered reference files are identified: KiCad schematic upload-2e26a451bd7d4821f4fd, KiCad PCB upload-ddf94ad6fdaee46a52022b20da8678cebd34cec4f4db817d090cd0e45119f042, and STL case upload-b1d2861245bdf8e5b7e6. The canonical parser skipped all three, so no extractable netlist, pin map, PCB geometry, or STL geometry is available. No component bindings, interfaces, BOM, manufacturing records, or quantitative power data can be defensibly derived; all candidates remain proposed and non-operational.",
+    "source_backed_actions_executed": 0
+  },
+  "independent_kicad_control": {
+    "command": "kicad-cli sch erc / pcb drc --exit-code-violations against real upstream KiCad design; outside HS",
+    "erc": {
+      "total": 43,
+      "by_type": {
+        "footprint_link_issues": 14,
+        "lib_symbol_issues": 29
+      }
+    },
+    "drc": {
+      "total": 16,
+      "by_type": {
+        "lib_footprint_issues": 15,
+        "lib_footprint_mismatch": 1
+      }
+    },
+    "exit_code": 5,
+    "interpretation": "Predominantly missing libraries/footprint resolution in local environment; results do not establish faulty manufacturer design or validated electrical correctness"
+  },
+  "project_completion": {
+    "verified_part_choices": 0,
+    "verified_complete_bom": false,
+    "target_device_specific_cad_generated_by_hs": false,
+    "source_design_netlist_parsed_by_hs": false,
+    "mechanical_fit_verified_by_hs": false,
+    "software_simulation_run": false,
+    "physical_device_assembled": false,
+    "engineering_ready": false,
+    "release_authorized": false
+  },
+  "evidence_files": [
+    {
+      "location": "optiplex:/tmp/hs-capability-trial-20261020/agent-output/response-intake-final.json",
+      "sha256": "22e03e29b3d1346df91380bbfc93593f0bebd590801b5e8ce486a6a1dfd3306c",
+      "bytes": 199989
+    },
+    {
+      "location": "optiplex:/tmp/hs-capability-trial-20261020/agent-output/phase2/05-engineering-plan.response.json",
+      "sha256": "076ea41db29ca539ebaad0fbf16c345d1010647bfbe9a9553f968df88826439b",
+      "bytes": 396339
+    },
+    {
+      "location": "optiplex:/tmp/hs-capability-trial-20261020/agent-output/phase2/12-compose.response.json",
+      "sha256": "c32287415427d7dec35b970a310b4d927402bbb5ee1edf208871a168f5245bc8",
+      "bytes": 8004
+    },
+    {
+      "location": "optiplex:/tmp/hs-capability-trial-20261020/agent-output/04-copilot-ai-session-fixed-response.txt",
+      "sha256": "fedb710fa35a0c45313ce04fc2b8c52d9d457d23eb8a9ee31397588860b0000c",
+      "bytes": 113136
+    },
+    {
+      "location": "optiplex:/tmp/hs-capability-trial-20261020/source-condition/source-backed-ai-response.txt",
+      "sha256": "29a6e71015f9a93c0fe23150f7c2a79075ae7a9984bd4dbc459d30a9a003d084",
+      "bytes": 118363
+    },
+    {
+      "location": "optiplex:/tmp/hs-capability-trial-20261020/source-condition/rpi-dev-sch-erc.txt",
+      "sha256": "d19e59af3921abc8eb817eed47e35a1b042575b225a0a29522ebd7a702254d42",
+      "bytes": 7478
+    },
+    {
+      "location": "optiplex:/tmp/hs-capability-trial-20261020/source-condition/rpi-dev-pcb-drc.txt",
+      "sha256": "7b8071f5b1d67b18e97406b8b032c9a06ecd76a2ccc5bec3d30403c6f435d153",
+      "bytes": 3026
+    },
+    {
+      "location": "optiplex:/tmp/hs-capability-trial-20261020/source-condition/ingest-RPI_Dev_1.kicad_sch.json",
+      "sha256": "2f7d3fb735a89c08a3b2792e947cf920c513ddafc3fa6a6d0b5461bc01e04bc4",
+      "bytes": 2746
+    },
+    {
+      "location": "optiplex:/tmp/hs-capability-trial-20261020/source-condition/ingest-RPI_Dev_1.kicad_pcb.json",
+      "sha256": "f1b5ee373ad2cc2cec21fc9ecf212d1a685e6a68ec625b18e6b6924b4887ccaf",
+      "bytes": 2746
+    },
+    {
+      "location": "optiplex:/tmp/hs-capability-trial-20261020/source-condition/ingest-Front Case.stl.json",
+      "sha256": "398d3a500b9120df2c2f81688ccebf42eb5160f72c25a17b5b7c913642e0a7c8",
+      "bytes": 2607
+    },
+    {
+      "location": "optiplex:/tmp/hs-capability-trial-20261020/source-condition/parse-RPI_Dev_1.kicad_sch.json",
+      "sha256": "f9f569b90a9b3f89117c88acc16e4e3415a3380ac3bea837171ac683a8ddde28",
+      "bytes": 941
+    },
+    {
+      "location": "optiplex:/tmp/hs-capability-trial-20261020/source-condition/parse-RPI_Dev_1.kicad_pcb.json",
+      "sha256": "adc16c58640d233581f5ce079abeaa04a27cdf282812cdefc538ffa9267dff70",
+      "bytes": 941
+    },
+    {
+      "location": "optiplex:/tmp/hs-capability-trial-20261020/source-condition/parse-Front Case.stl.json",
+      "sha256": "f0b8ab7f352f960987f96b6eb8ef8726543778ac3379302ad9a17143a5d7eaa9",
+      "bytes": 941
+    }
+  ]
+}

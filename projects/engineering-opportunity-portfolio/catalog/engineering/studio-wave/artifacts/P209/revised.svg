@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960mm" height="890mm" viewBox="0 0 960 890">
+  <title>P209 revised · full-size proof coupon</title>
+  <rect id="scale" data-operation="score" stroke-width="0.16" fill="none" stroke="#363636" x="10" y="6" width="20" height="10" />
+  <rect id="rear-panel" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="22" y="25" width="360" height="260" />
+  <rect id="wing-cut-0" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="22" y="310" width="163" height="260" />
+  <rect id="wing-cut-1" data-operation="cut" stroke-width="0.16" fill="none" stroke="#b52e24" x="22" y="595" width="163" height="260" />
+  <circle id="mic-datum" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" cx="628" cy="600" r="3" />
+  <line id="rear-trace" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x1="448" y1="700" x2="808" y2="700" />
+  <line id="wing-trace-0" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x1="448" y1="700" x2="368.976032" y2="557.436988" />
+  <line id="wing-trace-1" data-operation="ref" stroke-width="0.16" fill="none" stroke="#216793" x1="808" y1="700" x2="887.023968" y2="557.436988" />
+</svg>

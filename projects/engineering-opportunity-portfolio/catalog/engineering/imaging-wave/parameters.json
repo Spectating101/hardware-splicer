@@ -1,0 +1,13 @@
+{
+  "P008": {"body":[112,68], "window":[37.4,25.8], "stock_mm":[34.8,35.1], "coupon_frames_mm":[35.8,23.8], "min_perforation_distance_mm":13.75, "guide_gap_error_mm":0.15, "mask_align_mm":0.10, "feed_reg_mm":0.35, "baseline":{"gap":36.2}, "revised":{"gap":35.55}},
+  "P017": {"steps_per_rev":2048, "captures":36, "dial_r":90, "settle_ms":280, "extra_ms":80, "baseline":{"absolute":false, "dwell_ms":190}, "revised":{"absolute":true, "dwell_ms":380}},
+  "P018": {"deck_diameter":260, "base_half_spacing":78, "base_mass":1.2, "deck_mass":0.45, "load_mass":0.8, "load_height":0.18, "push_n":6, "socket_pin_d_mm":5, "offset_pin_mm":18, "holes_mm":[8.5,5.5], "baseline":{"load_radius":100}, "revised":{"load_radius":60}},
+  "P019": {"base":[270,190], "height":190, "nominal_side_depth":184, "stock_thickness":3, "hinge_gap":4, "stack_displacement_mm":2, "baseline":{"split":false, "hinge_offset":5}, "revised":{"split":true, "hinge_offset":7}},
+  "P020": {"span_mm":610, "lower_modulus_n_mm2":4500, "load_with_self_weight_n_mm":0.021, "panel_coupon_mass_kg":0.8, "baseline":{"depth":5, "width":28}, "revised":{"depth":24, "width":28}},
+  "P195": {"host_body_mm":[134.112,86.106], "host_active_mm":[110.02,61.88], "anchor":[132,76], "edge_register_mm":1.2, "horizontal_view_deg":12, "vertical_view_deg":7, "top_light_deg":60, "baseline":{"depth":26}, "revised":{"depth":44}},
+  "P196": {"rod_diameter_mm":15, "rod_spacing_mm":60, "axis_above_rod_centers_mm":85, "lens_diameters_mm":[54,80], "pad_mm":2, "axis_error_mm":0.3, "baseline":{"apex_low":32, "apex_high":48}, "revised":{"apex_low":23, "apex_high":47}},
+  "P199": {"sensor_mm":[36,24], "focal_mm":24, "pupil_r_mm":7, "registration_error_mm":0.8, "filter_mm":[143.51,101.6], "positions_mm":[15,37,50], "baseline":{"front_aperture":[98,62]}, "revised":{"front_aperture":[100,72]}},
+  "P200": {"clear_mm":[88,44], "grid":[9,5], "cell_across_flats":8, "web":1, "sheet_mm":3, "baseline":{"layers":3}, "revised":{"layers":6}},
+  "P203": {"body_mm":[130,86], "jaw_mm":14, "pivot_mm":8, "hole_d_mm":3.4, "reading_samples":["SCENE 場次","TAKE 次數","SHOT 鏡號","DATE 日期"], "stroke_limit_deg":55, "write_height_mm":17, "baseline":{"label_height_mm":2.5, "jaw_clearance":0}, "revised":{"label_height_mm":4, "jaw_clearance":1.2}},
+  "P205": {"screen_mm":[140,64], "phone_mm":[160,78], "case_allowance_mm":1, "phone_drop_mm":50, "talent_distance_mm":1400, "talent_height_range_mm":[-220,220], "talent_side_range_mm":[-220,220], "camera_pupil_mm":4, "camera_offset_mm":35, "camera_vertical_deg":19, "camera_horizontal_deg":29, "baseline":{"glass_len":70,"glass_w":150}, "revised":{"glass_len":132,"glass_w":170}}
+}

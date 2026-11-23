@@ -1,0 +1,40 @@
+{
+  "cases": {
+    "amplifier": {
+      "donor_condition": "control_unresolved",
+      "line_input": "correct_yes",
+      "shared_return": "correct_no"
+    },
+    "arm": {
+      "j2_135": "correct_yes",
+      "j2_145": "correct_no",
+      "j6_175": "correct_yes",
+      "payload": "abstained"
+    },
+    "console": {
+      "i2c_buttons": "correct_no",
+      "sd_d4": "correct_yes",
+      "shared_flash": "correct_no"
+    },
+    "logger": {
+      "sd_d10": "correct_no",
+      "separate_power": "correct_yes",
+      "spi_imu": "correct_yes"
+    },
+    "printer": {
+      "tower": "correct_no",
+      "tray": "correct_yes",
+      "wide": "correct_no"
+    }
+  },
+  "counts": {
+    "abstained": 1,
+    "control_unresolved": 1,
+    "correct_no": 7,
+    "correct_yes": 7,
+    "false_accept": 0,
+    "false_reject": 0,
+    "unsupported_control_decision": 0
+  },
+  "predictions_sha256": "ba08a1c1984c06d7fb144d67540d963bcfba5e7a0db49391b690a83bd9f83163"
+}

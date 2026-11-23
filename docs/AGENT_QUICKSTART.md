@@ -3,7 +3,7 @@
 **Audience:** MCP clients, HTTP callers, Cursor/Claude agents.  
 **Prereq:** Python 3.11+, KiCad CLI on PATH, repo cloned.
 
-**Full runbook:** [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) · **Scale plan:** [`PRODUCT_SCALE_PLAN.md`](PRODUCT_SCALE_PLAN.md) · **Cold exit:** [`COLD_INTERNAL_EXIT.md`](COLD_INTERNAL_EXIT.md)
+**Full runbook:** [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) · **Scale plan:** [`PRODUCT_SCALE_PLAN.md`](archive/strategy/PRODUCT_SCALE_PLAN.md) · **Cold exit:** [`COLD_INTERNAL_EXIT.md`](COLD_INTERNAL_EXIT.md)
 
 ---
 
@@ -139,7 +139,7 @@ bash scripts/deploy_alien_quickstart.sh v1.1.0-alpha.16
 ```
 
 **Cold-internal dry-run (no strangers required):** fresh archive on a second machine, follow only this doc + [`AGENT_DRY_RUN_CHECKLIST.md`](AGENT_DRY_RUN_CHECKLIST.md), then fill an install report.  
-**Operator real-bench:** [`REAL_BENCH_OPERATOR.md`](REAL_BENCH_OPERATOR.md)  
+**Operator real-bench:** [`REAL_BENCH_OPERATOR.md`](reference/REAL_BENCH_OPERATOR.md)  
 **Live vision (keyed):** steps 6b/6c in `scripts/agent_quickstart_verify.sh` when `.env.local` present.  
 **Public-web DMM:** `scripts/public_web_bench_capture.py` (Wikimedia meter photos).
 
@@ -151,7 +151,7 @@ Start MCP (separate terminal):
 PYTHONPATH=src python3 -m hardware_splicer.mcp_server
 ```
 
-Or configure in Cursor/Claude per [`MCP.md`](MCP.md).
+Or configure in Cursor/Claude per [`MCP.md`](reference/MCP.md).
 
 ### MCP 1 — `hs_modules_catalog`
 
@@ -203,7 +203,7 @@ Use `out_dir` from compose result:
 }
 ```
 
-**Path policy:** If `build_dir` is outside the API output root, set `HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR=1` for local dev. See [`AGENT_BUILD_DIR_POLICY.md`](AGENT_BUILD_DIR_POLICY.md).
+**Path policy:** If `build_dir` is outside the API output root, set `HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR=1` for local dev. See [`AGENT_BUILD_DIR_POLICY.md`](reference/AGENT_BUILD_DIR_POLICY.md).
 
 ---
 
@@ -258,5 +258,5 @@ Vision drafts are **not** evidence.
 
 - Alien one-shot: `bash scripts/deploy_alien_quickstart.sh`
 - Browser legibility: Design Studio → **AI phrase compose** or canvas compile
-- Demo script: [`DEMO_DESIGN_STUDIO_DRC_LOOP.md`](DEMO_DESIGN_STUDIO_DRC_LOOP.md)
+- Demo script: [`DEMO_DESIGN_STUDIO_DRC_LOOP.md`](archive/demos/DEMO_DESIGN_STUDIO_DRC_LOOP.md)
 - Internal bar: `make verify-product-internal`

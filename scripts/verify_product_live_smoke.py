@@ -232,7 +232,7 @@ def main() -> int:
                 python,
                 "-m",
                 "uvicorn",
-                "hardware_splicer.api:app",
+                "hardware_splicer.product_api:app",
                 "--host",
                 "127.0.0.1",
                 "--port",

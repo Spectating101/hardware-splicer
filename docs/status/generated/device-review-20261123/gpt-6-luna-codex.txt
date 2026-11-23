@@ -1,0 +1,45 @@
+## 1. Verdict
+
+- **Visual craft: 6/10.** The dark, consistent interface and detailed device views feel credible, but small low-contrast text, crowded overlays, and ghosted geometry make key evidence hard to read.
+- **Engineering usefulness: 6/10.** It brings mechanics, electronics, simulation, and provenance into one review, but several results are difficult to inspect or turn into a clear next step.
+- **Against the references:** The whole-device scope is a promising distinction, but the execution doesn’t yet hold up: Altium 365 supports cross-probing across schematic, PCB, 3D, and BOM; InteractiveHtmlBom makes board-to-BOM selection direct; DRCY attaches findings to design review comments; and Flux frames work around whole-device goals. Onshape’s AI Advisor and SOLIDWORKS’ Virtual Companion are more focused on product guidance and CAD tasks, so Hardware Splicer has room to differentiate with engineering context—but needs stronger evidence drill-down. ([Altium 365](https://www.altium.com/documentation/altium-365/viewers/web-viewer), [InteractiveHtmlBom](https://github.com/openscopeproject/InteractiveHtmlBom/wiki/Usage), [DRCY](https://learn.allspice.io/docs/drcy-ai-design-review), [Flux](https://docs.flux.ai/reference/flux-agent), [Onshape](https://cad.onshape.com/help/Content/Home/ai_advisor.htm), [SOLIDWORKS](https://www.solidworks.com/product/solidworks-design/whats-new))
+
+## 2. Ten most important problems, ranked
+
+1. **Image 05 — DRC findings aren’t mapped onto the electrical design.** The list reports shorts between nets, but the board view shows a selected component on a largely blank board, with no visible copper, nets, or short locations. That makes the key result hard to diagnose. **Fix:** Show the affected copper and both nets in distinct colors, zoom to each violation, and link each finding to its KiCad marker and schematic connection.
+
+2. **Image 03 — Detail panels squeeze and cover the device.** The left list, floating question bar, and right connection card compete with the model; the right card hides a substantial portion of the view. **Fix:** Dock the inspector instead of overlaying it; at 1440 px, target a 340 px left rail, 300 px inspector, and at least 680 px canvas. Let either rail collapse.
+
+3. **Images 05 and 08 — Ghosted envelopes read like missing design detail.** The PCB bodies appear as dashed translucent shapes over a plain board, so it’s hard to tell which geometry is real and what the tool actually checked. **Fix:** Render available PCB components and copper as solid geometry; label envelopes on the object itself and provide a separate “Show rough shapes” toggle.
+
+4. **Image 07 — The no-model state wastes the main workspace.** The options and rationale are in the left rail, while the center is mostly an empty canvas with a small explanation. **Fix:** Use the canvas for an option comparison: known cost, unpriced items, dependencies, and selection rationale, with an explicit “No model available” status.
+
+5. **Image 02 — The faceplate result can sound more conclusive than its evidence.** “Faceplate covers glass edge” reads like a fit conclusion, while the supporting text says it is projected CAD and stack-up and lug alignment are unverified. **Fix:** Lead with “CAD estimate: 12.98 mm minimum glass-edge lip” and keep “Physical fit: untested” beside it.
+
+6. **Image 04 — The 16-pair seam result is not easy to locate in the view.** The grouping is useful, but the screenshot doesn’t make the repeated 0.30 mm gaps legible as a set. **Fix:** Highlight the seam continuously, number the gaps, and provide a clickable list of the 16 part pairs and measured gaps. Call it a “candidate seam” unless design intent is confirmed.
+
+7. **Image 06 — The simulation summary hides scenario-level outcomes.** “3 of 3 scenarios behaved as expected” is an aggregate; the motor-failure detection detail doesn’t tell the owner how each mission ended. **Fix:** Show each scenario’s input, result, and pass criterion in a compact table, with the simulation version and a clear “simulation only” label.
+
+8. **Images 01 and 04 — The open/unknown count differs.** The header shows 9 in image 01 and 11 in image 04 for the same device. I can’t tell from screenshots whether this reflects a data update or a mismatch. **Fix:** Show the active revision and separate “open” from “unknown”; calculate both from the same visible review state.
+
+9. **Images 01, 03, and 08 — Dense, small text makes evidence costly to scan.** Long cards share similar visual weight, body text is subdued, and findings continue below the captured viewport. **Fix:** Use 14–16 px for primary body and finding text, keep 12 px for metadata, pin the selected answer summary, and collapse lengthy evidence behind a clear “Show details” control.
+
+10. **Images 02–08 — It’s not obvious what selecting a question changed.** The “Showing” bar identifies a question, and the different captures suggest the camera or selection changes, but static screenshots can’t prove the interaction. **Fix:** Display the resulting state next to the question—such as “Rev 5-inch · face view · display selected”—and visibly animate or highlight the changed selection and geometry.
+
+## 3. Does “questions compose the view” work?
+
+**Partly.** The face-on view in image 02 and focused electrical view in image 03 suggest question-driven composition. But the persistent left list and separate viewer still read as “questions beside a viewer”; I’m inferring the interaction from the captures, not observing it happen. Put the active question and its resulting revision, selection, explode state, and camera together in one persistent header, and visibly transition the view when a question is chosen.
+
+## 4. Honesty check
+
+The repeated “physical fit not tested on hardware,” “unknown,” “open,” “computed from CAD,” and “physical correctness unproven” labels are strong. Images 05 and 08 also name the checking tool and report concrete counts rather than implying physical proof.
+
+The main risk is the wording in image 02: “covers glass edge” sounds like a fit verdict despite the caveats below. Image 04’s “usually a designed seam” is also an inference about intent; mark it as a possible seam unless that intent is recorded. Image 06 is not over-cautious to say flight isn’t authorized, but it should show the actual simulated outcomes so that caveat doesn’t obscure useful results.
+
+## 5. What is strong and must be kept
+
+Keep the whole-device framing, question-led evidence summaries, source and tool attribution, explicit unknowns, and the distinction between CAD calculations, KiCad checks, and physical testing. The faceplate dimensions, DRC error counts, and simulation scenario count are useful engineering results; make them easier to inspect rather than replacing them with generic status badges.
+
+## 6. Single change most likely to raise usefulness
+
+Give every finding a **prioritized next action linked to its evidence**: for example, “Confirm display cable voltage drop” linked to the GPIO endpoints and open check, or “Inspect short between these nets” linked to the exact DRC location. That would turn this from a readable engineering record into a workspace an engineer can use to decide what to do next.
