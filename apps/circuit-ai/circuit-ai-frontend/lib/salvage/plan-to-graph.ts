@@ -558,15 +558,18 @@ const RECIPES: Record<string, Recipe> = {
       { role: "usb", moduleId: "usb-power-5v" },
       { role: "chg", moduleId: "tp4056" },
       { role: "ldo", moduleId: "ldo-ams1117-3v3" },
+      { role: "out", moduleId: "terminal-block-2p-dc" },
     ],
     wires: [
       { from: { role: "usb", pin: "V+" }, to: { role: "chg", pin: "IN+" } },
       { from: { role: "usb", pin: "GND" }, to: { role: "chg", pin: "IN-" } },
       { from: { role: "chg", pin: "OUT+" }, to: { role: "ldo", pin: "VIN" } },
       { from: { role: "chg", pin: "OUT-" }, to: { role: "ldo", pin: "GND" } },
+      { from: { role: "ldo", pin: "VOUT" }, to: { role: "out", pin: "V+" } },
+      { from: { role: "ldo", pin: "GND" }, to: { role: "out", pin: "GND" } },
     ],
     notes: [
-      "3.3V on LDO VOUT for sensors/MCU.",
+      "3.3V for sensors/MCU on the 2-pin output terminal (V+ = LDO VOUT, GND).",
       "Optional Li-ion cell on TP4056 BAT+/BAT- for charging.",
     ],
   },
@@ -610,14 +613,22 @@ const RECIPES: Record<string, Recipe> = {
       { role: "pwr", moduleId: "dc-barrel-12v" },
       { role: "psu", moduleId: "buck-mp1584" },
       { role: "drv", moduleId: "mosfet-irlz44n" },
+      { role: "mcu", moduleId: "arduino-nano" },
     ],
     wires: [
       ...barrelToBuck("pwr", "psu"),
       { from: { role: "psu", pin: "OUT+" }, to: { role: "drv", pin: "VIN" } },
       { from: { role: "psu", pin: "OUT-" }, to: { role: "drv", pin: "VIN-" } },
       { from: { role: "psu", pin: "OUT-" }, to: { role: "drv", pin: "GND" } },
+      // The Nano (5 V logic) rides on the same buck output and ground; D3 is its PWM pin.
+      { from: { role: "psu", pin: "OUT+" }, to: { role: "mcu", pin: "VIN" } },
+      { from: { role: "psu", pin: "OUT-" }, to: { role: "mcu", pin: "GND" } },
+      { from: { role: "mcu", pin: "D3" }, to: { role: "drv", pin: "SIG" } },
     ],
-    notes: ["LED load on VOUT+/VOUT- with appropriate series resistor."],
+    notes: [
+      "LED load on VOUT+/VOUT- with appropriate series resistor.",
+      "Arduino Nano D3 (PWM) drives the MOSFET SIG input to dim the light; set the buck output to 5-12 V for the Nano VIN pin.",
+    ],
   },
 
   low_voltage_motor_test_jig: {
@@ -669,6 +680,7 @@ const RECIPES: Record<string, Recipe> = {
       { role: "mcu", moduleId: "esp32-devkit" },
       { role: "ui", moduleId: "ili9341_tft" },
       { role: "sns", moduleId: "dht22" },
+      { role: "bl_r", moduleId: "resistor-10r" },
     ],
     wires: [
       ...usbToMcu("usb", "mcu", "VIN"),
@@ -682,9 +694,13 @@ const RECIPES: Record<string, Recipe> = {
       { from: { role: "mcu", pin: "3V3" }, to: { role: "sns", pin: "VCC" } },
       { from: { role: "mcu", pin: "GND" }, to: { role: "sns", pin: "GND" } },
       { from: { role: "mcu", pin: "GPIO16" }, to: { role: "sns", pin: "DATA" } },
+      // Backlight from 3V3 through a series resistor (see note).
+      { from: { role: "mcu", pin: "3V3" }, to: { role: "bl_r", pin: "1" } },
+      { from: { role: "bl_r", pin: "2" }, to: { role: "ui", pin: "LED" } },
     ],
     notes: [
       "ILI9341 color TFT on SPI; DHT22 on GPIO16.",
+      "Backlight (LED pin) is fed from the ESP32 3V3 through a 10 ohm series resistor. The module data documents no onboard backlight resistor or transistor, so the recipe limits the current itself: assuming about four white LEDs in parallel (Vf near 3.0 V), 10 ohm keeps the backlight near 30 mA and under about 50 mA if Vf falls to 2.8 V. Check your module's backlight rating, and drop the resistor if the breakout already has one.",
       "Install TFT_eSPI + DHT libraries — match User_Setup pins to wiring above.",
     ],
   },
@@ -743,6 +759,7 @@ const RECIPES: Record<string, Recipe> = {
       { role: "lim_y", moduleId: "limit-switch-3pin" },
       { role: "svo_psu", moduleId: "ldo-ams1117-5v" },
       { role: "svo", moduleId: "sg90" },
+      { role: "motor", moduleId: "terminal-block-4p" },
     ],
     wires: [
       ...barrelToBuck("pwr", "mot_psu"),
@@ -765,9 +782,19 @@ const RECIPES: Record<string, Recipe> = {
       { from: { role: "svo_psu", pin: "VOUT" }, to: { role: "svo", pin: "VCC" } },
       { from: { role: "svo_psu", pin: "GND" }, to: { role: "svo", pin: "GND" } },
       { from: { role: "mcu", pin: "A5" }, to: { role: "svo", pin: "SIG" } },
+      // Standard Pololu A4988 wiring: RST strapped to SLP (the carrier holds SLP high, so the
+      // driver stays awake). EN is tied to GND (always enabled): every Arduino Nano pin in the
+      // module data is already used, so there is no free GPIO to drive it from.
+      { from: { role: "drv", pin: "RST" }, to: { role: "drv", pin: "SLP" } },
+      { from: { role: "drv", pin: "EN" }, to: { role: "mcu", pin: "GND" } },
+      { from: { role: "drv", pin: "1A" }, to: { role: "motor", pin: "COIL1_A" } },
+      { from: { role: "drv", pin: "1B" }, to: { role: "motor", pin: "COIL1_B" } },
+      { from: { role: "drv", pin: "2A" }, to: { role: "motor", pin: "COIL2_A" } },
+      { from: { role: "drv", pin: "2B" }, to: { role: "motor", pin: "COIL2_B" } },
     ],
     notes: [
-      "A4988 stepper on motor buck; dual limit switches on A0/A4; tie EN to GND to enable driver.",
+      "A4988 stepper on motor buck; dual limit switches on A0/A4; RST is strapped to SLP and EN is tied to GND (driver always enabled, because every Nano pin is in use so firmware cannot disable the motor).",
+      "Stepper motor coils land on the 4-pin terminal: 1A/1B = coil 1, 2A/2B = coil 2.",
       "12V barrel feeds motor buck + servo LDO; USB 5V feeds Arduino.",
     ],
   },
@@ -790,7 +817,7 @@ const RECIPES: Record<string, Recipe> = {
       { from: { role: "mcu", pin: "D3" }, to: { role: "drv", pin: "IN2" } },
     ],
     notes: [
-      "Set motor buck to motor rated voltage. Motors on OUT1/OUT2.",
+      "Set motor buck to the motor rated voltage, which must be 7-12 V: the L298N 5V_EN jumper stays fitted so its onboard 5 V regulator runs and the 5V terminal is an unused output. Above a 12 V motor supply remove the jumper and feed the 5V terminal from an external 5 V logic supply. Motors on OUT1/OUT2.",
       "USB 5V feeds Arduino; 12V barrel feeds motor driver supply.",
     ],
   },
@@ -817,6 +844,7 @@ const RECIPES: Record<string, Recipe> = {
       { role: "usb", moduleId: "usb-power-5v" },
       { role: "mcu", moduleId: "esp32-devkit" },
       { role: "amp", moduleId: "max98357a-i2s-amp" },
+      { role: "spk", moduleId: "terminal-block-2p" },
     ],
     wires: [
       ...usbToMcu("usb", "mcu", "VIN"),
@@ -825,9 +853,11 @@ const RECIPES: Record<string, Recipe> = {
       { from: { role: "mcu", pin: "GPIO21" }, to: { role: "amp", pin: "LRC" } },
       { from: { role: "mcu", pin: "GPIO22" }, to: { role: "amp", pin: "BCLK" } },
       { from: { role: "mcu", pin: "GPIO4" }, to: { role: "amp", pin: "DIN" } },
+      { from: { role: "amp", pin: "SPK+" }, to: { role: "spk", pin: "1" } },
+      { from: { role: "amp", pin: "SPK-" }, to: { role: "spk", pin: "2" } },
     ],
     notes: [
-      "MAX98357A I2S Class-D mono amp — connect 4Ω+ speaker across SPK+/SPK-.",
+      "MAX98357A I2S Class-D mono amp — connect a 4Ω+ speaker to the 2-pin terminal (1 = SPK+, 2 = SPK-). The outputs are bridge-tied, so never ground SPK-.",
     ],
   },
 

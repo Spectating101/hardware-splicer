@@ -33,7 +33,7 @@ def _constraint(candidate, constraint_id: str):
     return rows[0]
 
 
-def test_power_rail_planner_selects_buck_and_compiles(tmp_path: Path, assume_clean_kicad_erc: None) -> None:
+def test_power_rail_planner_selects_buck_and_compiles(tmp_path: Path) -> None:
     intent = {
         "goal": "make a 12V to 5V regulated rail for an ESP32 sensor node",
         "supply_rails": [{"name": "adapter input", "role": "input", "voltage_v": 12.0}],
@@ -95,7 +95,7 @@ def test_level_shift_planner_blocks_missing_shifter() -> None:
     assert "level_shifter_module" in candidate["missing_evidence"]
 
 
-def test_sensor_interface_planner_handles_i2c_sensor_and_compiles(tmp_path: Path, assume_clean_kicad_erc: None) -> None:
+def test_sensor_interface_planner_handles_i2c_sensor_and_compiles(tmp_path: Path) -> None:
     intent = {
         "goal": "wire an ESP32 to a BME280 environmental sensor",
         "allowed_modules": ["usb-power-5v", "esp32-devkit", "bme280"],

@@ -224,11 +224,35 @@ _MODULE_FOOTPRINTS: dict[str, dict] = {
     },
     "a4988-stepper": {
         "kicadFootprint": "Driver:A4988-STEPSTICK",
-        "bodyMm": {"w": 20, "h": 15},
-        "pads": _row(
-            ["VDD", "GND_LOGIC", "STEP", "DIR", "EN", "VMOT", "GND_MOTOR"],
-            0, 0, _P * 1.4,
+        # Pololu A4988 carrier: 2x8 header, 2.54 mm pitch, rows 12.7 mm apart, 15.2 x 20.3 mm.
+        # One row is ENABLE, MS1-MS3, RESET, SLEEP, STEP, DIR; the other VMOT, GND, 2B, 2A, 1A,
+        # 1B, VDD, GND. Pad coordinates are per pin, so the two rows are real, not a faked line.
+        "bodyMm": {"w": 15.2, "h": 20.3},
+        "pads": _dual_col(
+            ["EN", "MS1", "MS2", "MS3", "RST", "SLP", "STEP", "DIR"],
+            ["VMOT", "GND_MOTOR", "2B", "2A", "1A", "1B", "VDD", "GND_LOGIC"],
+            12.7,
         ),
+    },
+    "resistor-10r": {
+        "kicadFootprint": "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal",
+        "bodyMm": {"w": 12, "h": 4},
+        "pads": _row(["1", "2"], 0, 0, 10.16),
+    },
+    "terminal-block-2p": {
+        "kicadFootprint": "TerminalBlock:TerminalBlock_bornier-2_P5.08mm",
+        "bodyMm": {"w": 12, "h": 10},
+        "pads": _row(["1", "2"], 0, 0, 5.08),
+    },
+    "terminal-block-2p-dc": {
+        "kicadFootprint": "TerminalBlock:TerminalBlock_bornier-2_P5.08mm",
+        "bodyMm": {"w": 12, "h": 10},
+        "pads": _row(["V+", "GND"], 0, 0, 5.08),
+    },
+    "terminal-block-4p": {
+        "kicadFootprint": "TerminalBlock:TerminalBlock_bornier-4_P5.08mm",
+        "bodyMm": {"w": 22, "h": 10},
+        "pads": _row(["COIL1_A", "COIL1_B", "COIL2_A", "COIL2_B"], 0, 0, 5.08),
     },
     "max98357a-i2s-amp": {
         "kicadFootprint": "Driver:MAX98357A-I2S",
