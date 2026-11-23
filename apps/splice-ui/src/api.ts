@@ -785,6 +785,107 @@ export async function fetchSceneManifest(projectId: string, signal?: AbortSignal
   return parseJson<SceneManifest>(res);
 }
 
+/** One pair of parts the fit engine measured: overlapping, touching, tight or near. */
+export interface SceneFitPair {
+  a: string;
+  b: string;
+  kind: "overlap" | "touching" | "tight" | "near";
+  basis: [string, string];
+  stand_in: boolean;
+  gap_mm: number;
+  precision_mm: number;
+  overlap_mm3: number | null;
+  overlap_computed: boolean;
+}
+
+/** GET /v1/scenes/{id}/{revision}/fit: the CAD model measured, never a physical result. */
+export interface SceneFit {
+  project_id: string;
+  revision: string;
+  schema: string;
+  version: string;
+  basis: string;
+  size_mm: [number, number, number] | null;
+  parts_measured: number;
+  parts_unmatched: string[];
+  pairs: SceneFitPair[];
+  counts: Record<string, number>;
+  not_computed: { what: string; parts: string[]; why: string }[];
+  method: Record<string, unknown>;
+}
+
+export async function fetchSceneFit(projectId: string, revision: string, signal?: AbortSignal): Promise<SceneFit> {
+  const res = await fetch(`${sceneRevisionUrl(projectId, revision)}/fit`, { signal });
+  return parseJson<SceneFit>(res);
+}
+
+/** GET /v1/scenes/{id}/evidence: the records a scene lists, normalised by kind. */
+export interface SceneEvidence {
+  project_id: string;
+  records: ({ kind: string; label: string; source: string; sha256?: string; error?: string } & Record<string, unknown>)[];
+}
+
+export async function fetchSceneEvidence(projectId: string, signal?: AbortSignal): Promise<SceneEvidence> {
+  const res = await fetch(`${API_BASE}/v1/scenes/${encodeURIComponent(projectId)}/evidence`, { signal });
+  return parseJson<SceneEvidence>(res);
+}
+
+/** One KiCad DRC/ERC violation, traced to the parts it touches. */
+export interface KicadViolation {
+  group: string;
+  type: string | null;
+  severity: string | null;
+  description: string | null;
+  items: string[];
+  parts: string[];
+  part_ids: string[];
+}
+
+export interface KicadReport {
+  kicad_version: string | null;
+  counts: Record<string, number>;
+  total: number;
+  violations: KicadViolation[];
+}
+
+/** GET /v1/scenes/{id}/{revision}/kicad: KiCad's own checks on the revision's board files. */
+export interface SceneKicadChecks {
+  project_id: string;
+  revision: string;
+  board: string;
+  schematic: string | null;
+  drc: KicadReport | null;
+  erc: KicadReport | null;
+}
+
+export async function fetchSceneKicad(projectId: string, revision: string, signal?: AbortSignal): Promise<SceneKicadChecks> {
+  const res = await fetch(`${sceneRevisionUrl(projectId, revision)}/kicad`, { signal });
+  return parseJson<SceneKicadChecks>(res);
+}
+
+export type SceneDecisionKind = "needs_bench_test" | "accept_risk" | "waive" | "ask_agent";
+
+export interface SceneDecision {
+  finding_id: string;
+  decision: SceneDecisionKind;
+  note: string;
+  at: string;
+}
+
+export async function fetchSceneDecisions(projectId: string, signal?: AbortSignal): Promise<Record<string, SceneDecision>> {
+  const res = await fetch(`${API_BASE}/v1/scenes/${encodeURIComponent(projectId)}/decisions`, { signal });
+  return (await parseJson<{ decisions: Record<string, SceneDecision> }>(res)).decisions;
+}
+
+export async function postSceneDecision(projectId: string, findingId: string, decision: SceneDecisionKind, note = ""): Promise<SceneDecision> {
+  const res = await fetch(`${API_BASE}/v1/scenes/${encodeURIComponent(projectId)}/decisions`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ finding_id: findingId, decision, note }),
+  });
+  return parseJson<SceneDecision>(res);
+}
+
 export async function fetchHealth(): Promise<HealthResponse> {
   const res = await fetch(`${API_BASE}/health`);
   return parseJson<HealthResponse>(res);

@@ -168,7 +168,6 @@ def _stages(
     return stages
 
 
-_REPO_ROOT = Path(__file__).resolve().parents[2]
 _MAX_ATTACHED_BOARDS = 16
 _BOARD_KINDS = {"pcb", "kicad_pcb", "board"}
 _DRC_CACHE: Dict[tuple, Dict[str, Any]] = {}
@@ -178,10 +177,13 @@ def _resolve_board_path(raw: str) -> str:
     """The compiler's resolution for a board path: as given if absolute, else the first existing of
     the working directory, the repository root, and examples/ (unresolved paths stay as given and
     fail DRC as missing)."""
+    from .state_paths import repo_root
+
     path = Path(raw)
     if path.is_absolute():
         return str(path)
-    for candidate in (Path.cwd() / path, _REPO_ROOT / path, _REPO_ROOT / "examples" / path):
+    root = repo_root()
+    for candidate in (Path.cwd() / path, root / path, root / "examples" / path):
         if candidate.is_file():
             return str(candidate.resolve())
     return raw

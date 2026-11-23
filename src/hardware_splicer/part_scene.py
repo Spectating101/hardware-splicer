@@ -16,11 +16,13 @@ _SWAP = "display_swap"
 _GLB7 = f"{_BASE}/cad/FIELDDECK_7.glb"
 _GLB5 = "FIELDDECK_5.glb"
 _REPORT = f"{_BASE}/cad/geometry_report.json"
+_COMPACT_GLB = "compact/cad/FIELDDECK_5C.glb"
+_COMPACT_GEOMETRY = "compact/geometry.json"
 _STATUS = "docs/status/generated/fielddeck-display-swap-20261118.json"
 _DISPLAY7 = "touch_display_2_manufacturer"
 _DISPLAY5 = "touch_display_2_5inch_sc1975"
 _BASIS = {
-    "custom": "custom", "manufacturer_step": "vendor_step", "vendor_step": "vendor_step",
+    "custom": "custom", "manufacturer_step": "vendor_step", "vendor_step": "vendor_step", "copper": "copper",
     "purchased_envelope": "envelope", "envelope": "envelope", "proxy": "proxy",
 }
 _COMPONENT_BYTES = {5120: 1, 5121: 1, 5122: 2, 5123: 2, 5125: 4, 5126: 4}
@@ -474,11 +476,16 @@ def build_parts_sidecar(project_dir, revision) -> dict:
     """Read Fielddeck records and return a sidecar without writing any inputs or outputs.
 
     Revisions 7 and 5 select the assembly shown. When both GLBs are available,
-    the diff always runs from Fielddeck 7 to Fielddeck 5.
+    the diff always runs from Fielddeck 7 to Fielddeck 5. Revision 5c, the proposed compact
+    layout (compact/), reuses the 5-inch records, shows its own GLB, diffs from 5 to 5c and adds
+    the blockers its geometry record lists.
     """
     revision = str(revision).lower().removeprefix("fielddeck").strip(" _-")
-    if revision not in {"7", "5"}:
-        raise ValueError("Expected Fielddeck revision 7 or 5")
+    if revision not in {"7", "5", "5c"}:
+        raise ValueError("Expected Fielddeck revision 7, 5 or 5c")
+    compact = revision == "5c"
+    if compact:
+        revision = "5"
     project = Path(project_dir).resolve()
     missing = []
 
@@ -531,7 +538,13 @@ def build_parts_sidecar(project_dir, revision) -> dict:
 
     base_nodes, swap_nodes = _nodes(base_data), _nodes(swap_data)
     mesh_origin = base_mesh_origin if revision == "7" else swap_mesh_origin
-    parts = _parts(base_nodes if revision == "7" else swap_nodes, report, design, references,
+    shown_nodes = base_nodes if revision == "7" else swap_nodes
+    compact_geometry, compact_origin = {}, (None, None)
+    if compact:
+        compact_data, mesh_origin = read(project / _COMPACT_GLB, _COMPACT_GLB)
+        compact_geometry, compact_origin = record(project / _COMPACT_GEOMETRY)
+        shown_nodes = _nodes(compact_data)
+    parts = _parts(shown_nodes, report, design, references,
                    swap_source, swap_geometry, bom, revised_ids,
                    (report_origin, mesh_origin, design_origin, swap_geometry_origin), revision)
     interfaces, blockers, alternates = _links(status, calculations, bom, bom_source, swap_source, revision, parts)
@@ -539,12 +552,19 @@ def build_parts_sidecar(project_dir, revision) -> dict:
         for line in ("display", "m25_6"):
             if reason := bom.get(line, {}).get("open_issue"):
                 blockers.append({"reason": reason, "part_id": "display", "source": bom_source})
+    diff = _diff(base_nodes, swap_nodes, base_data is not None and swap_data is not None)
+    if compact:
+        for row in compact_geometry.get("blockers", []):
+            blockers.append({"reason": row["reason"], "part_id": row.get("part_id"), "source": compact_origin[0]})
+        diff = _diff(swap_nodes, shown_nodes, swap_data is not None and bool(shown_nodes))
+        diff.update(from_revision="5", to_revision="5c")
+        revision = "5c"
     return {
         "schema_version": "hardware_splicer.parts_sidecar.v1",
         "revision": revision, "units": "mm", "glb_native_units": "mm", "glb_scale_to_mm": 1,
         "glb_source": mesh_origin[0], "glb_sha256": mesh_origin[1],
         "parts": parts, "interfaces": interfaces, "blockers": blockers, "alternates": alternates,
-        "revision_diff": _diff(base_nodes, swap_nodes, base_data is not None and swap_data is not None),
+        "revision_diff": diff,
         "missing_inputs": missing,
     }
 
@@ -577,6 +597,25 @@ def _project_part_records(glb, project):
     return bom, evidence
 
 
+def _basis_rules(project):
+    """Optional geometry-basis.json: how faithful each part's shape is, as the project documents it.
+
+    {"source": "<where the project states this>", "rules": [{"match": "<regex on node name>",
+    "basis": "custom|vendor_step|envelope|proxy|unknown"}]}. The first matching rule wins; a node no
+    rule matches keeps the basis the GLB itself declares, or unknown.
+    """
+    path = project / "geometry-basis.json"
+    if not path.is_file():
+        return []
+    document = json.loads(path.read_text(encoding="utf-8"))
+    rules = []
+    for rule in document.get("rules", []) if isinstance(document, dict) else []:
+        basis = rule.get("basis") if isinstance(rule, dict) else None
+        if basis in {"custom", "vendor_step", "envelope", "proxy", "unknown", "copper"} and isinstance(rule.get("match"), str):
+            rules.append((re.compile(rule["match"]), basis))
+    return rules
+
+
 def build_parts_sidecar_for(glb_path, project_dir, revision_id, *, glb_native_units=None) -> dict:
     """Read one GLB without inferring a comparison or engineering evidence."""
     project = Path(project_dir).resolve()
@@ -591,6 +630,7 @@ def build_parts_sidecar_for(glb_path, project_dir, revision_id, *, glb_native_un
     nodes = _glb_nodes(doc, binary)
     bom, evidence = _project_part_records(glb, project)
     custom = {path.stem for path in (project / "exports").glob("*.step") if path.is_file()}
+    basis_rules = _basis_rules(project)
     extents = _bounds(point for _, _, bounds, _, _ in nodes.values()
                       if bounds for point in (bounds[:3], bounds[3:]))
     centre = _centre(extents) if extents else [0, 0, 0]
@@ -606,7 +646,10 @@ def build_parts_sidecar_for(glb_path, project_dir, revision_id, *, glb_native_un
         used_ids.add(part_id)
         kind = extras.get("geometry_basis") or extras.get("basis") or extras.get("kind")
         basis = _BASIS.get(kind, "unknown") if isinstance(kind, str) else "unknown"
-        if name in custom:
+        ruled = next((value for pattern, value in basis_rules if pattern.fullmatch(name or "")), None)
+        if ruled:
+            basis = ruled
+        elif name in custom:
             basis = "custom"
         elif basis == "unknown" and name.upper().startswith("REFERENCE_ENVELOPE"):
             # The author named this node as a reference envelope, not real part geometry.

@@ -23,7 +23,7 @@ def client():
 
 def test_list_and_read_scene_manifests(client):
     expected = {
-        FIELDDECK: ("available", ["7", "5"], ["fielddeck-7", "fielddeck-5"]),
+        FIELDDECK: ("available", ["7", "5", "5c"], ["fielddeck-7", "fielddeck-5"]),
         PLOTTER: ("available", ["v1"], ["ender3-penplotter"]),
         "drone-build": ("unavailable", ["v1"], []),
     }
@@ -88,6 +88,12 @@ def test_fielddeck_alias_serves_the_same_assets(client, tmp_path, monkeypatch):
             (tmp_path / asset).write_bytes(content)
         base = f"/v1/scenes/{FIELDDECK}/{revision}"
         alias = f"/v1/scenes/fielddeck/{revision}"
+        if revision not in {"7", "5"}:
+            # The legacy alias keeps serving only the URLs it always served; newer revisions are
+            # reached through the canonical route.
+            assert client.get(f"{base}/parts").status_code == 200
+            assert client.get(alias).status_code == 404
+            continue
         for path, legacy, content_type in (
             (f"{base}/parts", alias, "application/json"),
             (f"{base}/model", f"{alias}/model", "model/gltf-binary"),
