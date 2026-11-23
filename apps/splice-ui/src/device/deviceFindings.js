@@ -381,7 +381,9 @@ export function kicadFindings(report, { revision } = {}) {
       const parts = [...new Set(rows.flatMap((row) => row.part_ids ?? []))];
       const first = rows.find((row) => row.part_ids?.length) ?? rows[0];
       // Parts and the copper of the nets involved, so a short shows both nets on the board.
-      const highlight = [...new Set([...(first?.part_ids ?? []), ...(first?.net_ids ?? [])])];
+      // Every part and net copper the group's violations touch (capped for legibility), led by the first.
+      const highlight = [...new Set([...(first?.part_ids ?? []), ...(first?.net_ids ?? []),
+        ...rows.flatMap((row) => [...(row.part_ids ?? []), ...(row.net_ids ?? [])])])].slice(0, 40);
       items.push({
         id: `kicad:${name}:${type}`,
         question: `${kicadType(type)} (${title})`,

@@ -1,1 +1,18 @@
-{"project_id":"spi-flash-adapter-board","revision":"a","board":"spi_flash_adapter_v1.kicad_pcb","schematic":"spi_flash_adapter_v1.kicad_sch","drc":{"kicad_version":"9.0.2","counts":{},"total":0,"violations":[]},"erc":{"kicad_version":"9.0.2","counts":{},"total":0,"violations":[]}}
+{
+ "project_id": "spi-flash-adapter-board",
+ "revision": "a",
+ "board": "spi_flash_adapter_v1.kicad_pcb",
+ "schematic": "spi_flash_adapter_v1.kicad_sch",
+ "drc": {
+  "kicad_version": "9.0.2",
+  "counts": {},
+  "total": 0,
+  "violations": []
+ },
+ "erc": {
+  "kicad_version": "9.0.2",
+  "counts": {},
+  "total": 0,
+  "violations": []
+ }
+}

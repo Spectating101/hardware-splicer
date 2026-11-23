@@ -71,3 +71,15 @@ describe("evidence findings", () => {
     expect(items[0]).toMatchObject({ state: "unknown", answer: "Not readable: Evidence record not found." });
   });
 });
+
+describe("grouped KiCad findings", () => {
+  it("highlight every part and net the group's violations touch, not only the first", () => {
+    const report = fixture("kicad-esp32-board");
+    const shorts = flat(kicadFindings(report, { revision: "a" })).find((item) => item.id === "kicad:drc:shorting_items");
+    const rows = report.drc.violations.filter((row) => row.type === "shorting_items");
+    const touched = new Set(rows.flatMap((row) => [...(row.part_ids ?? []), ...(row.net_ids ?? [])]));
+    const highlighted = [shorts.view.selected, ...shorts.view.also];
+    expect(highlighted).toHaveLength(Math.min(40, touched.size));
+    expect(highlighted.length).toBeGreaterThan((rows[0].part_ids ?? []).length + (rows[0].net_ids ?? []).length);
+  });
+});
