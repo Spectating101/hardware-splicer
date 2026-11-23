@@ -12,6 +12,7 @@ from hardware_splicer.mechatronics_authority import _electrical_status
 
 ROOT = Path(__file__).resolve().parents[1]
 SHORTED_BOARD = ROOT / "examples" / "main_ctrl_esp32_servo.kicad_pcb"
+REV_B_BOARD = ROOT / "examples" / "main_ctrl_esp32_servo_rev_b.kicad_pcb"
 CLEAN_BOARD = ROOT / "hardware" / "reference_designs" / "spi_flash_adapter_v1" / "spi_flash_adapter_v1.kicad_pcb"
 
 
@@ -60,3 +61,9 @@ def test_the_real_pan_tilt_board_is_blocked_and_a_clean_board_is_not():
     shorted = _electrical_status(_body(SHORTED_BOARD), {})
     assert shorted["release_ready"] is False and shorted["board_drc"]["main_ctrl"]["report_errors"] > 0
     assert _electrical_status(_body(CLEAN_BOARD), {})["release_ready"] is True
+
+
+@pytest.mark.skipif(shutil.which("kicad-cli") is None, reason="kicad-cli not installed")
+def test_the_rerouted_revision_b_board_clears_the_gate():
+    status = _electrical_status(_body(REV_B_BOARD), {})
+    assert status["board_drc"]["main_ctrl"]["pass"] is True and status["release_ready"] is True
