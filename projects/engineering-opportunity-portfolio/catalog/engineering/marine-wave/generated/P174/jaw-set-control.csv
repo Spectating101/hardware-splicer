@@ -1,0 +1,4 @@
+fitting,flats_mm,jaw_gap_mm,engagement_mm,nominal_plug_torque_nm
+M06,12,12.03,5,14
+M10,16,16.03,5,14
+M14,20,20.03,5,20

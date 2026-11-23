@@ -5,7 +5,7 @@ import {
   fetchNetlistFixture,
   fetchNetlistFixtures,
   netlistCompile,
-} from "../api.js";
+} from "../api";
 import LabResultCard from "./LabResultCard.jsx";
 import IntegrationsCatalog from "./IntegrationsPanel.jsx";
 

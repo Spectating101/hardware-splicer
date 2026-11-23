@@ -1,0 +1,17 @@
+{
+  "pilot": "FIFISH V6 EXPERT survey coupon, six assumed thruster seats",
+  "metrics": {
+    "candidate": {
+      "stations": 6,
+      "min_radial_clearance_mm": 6.0,
+      "min_seat_edge_mm": 0.05,
+      "min_open_face_pct": 77.74
+    },
+    "control": {
+      "stations": 6,
+      "min_radial_clearance_mm": 6.0,
+      "min_seat_edge_mm": 0.05,
+      "min_open_face_pct": 55.57
+    }
+  }
+}

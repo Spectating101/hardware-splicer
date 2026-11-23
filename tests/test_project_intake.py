@@ -151,7 +151,7 @@ def test_intake_run_api_returns_planning_authority(tmp_path, monkeypatch):
 
 
 @pytest.mark.skipif(not shutil.which("node"), reason="node not available")
-def test_splice_and_build_from_intake_produces_fab_artifacts(tmp_path: Path) -> None:
+def test_splice_and_build_from_intake_produces_fab_artifacts(tmp_path: Path, assume_clean_kicad_erc: None) -> None:
     intake = load_project_intake(PLANT_INTAKE)
     result = splice_and_build_from_intake(intake, out_dir=tmp_path / "splice", export_gerber=False)
     assert result["ok"] is True
@@ -164,7 +164,7 @@ def test_splice_and_build_from_intake_produces_fab_artifacts(tmp_path: Path) -> 
 
 
 @pytest.mark.skipif(not shutil.which("node"), reason="node not available")
-def test_splice_and_build_api(tmp_path, monkeypatch) -> None:
+def test_splice_and_build_api(tmp_path, monkeypatch, assume_clean_kicad_erc) -> None:
     pytest.importorskip("fastapi")
     from fastapi.testclient import TestClient
 
@@ -270,7 +270,9 @@ def test_project_intake_maps_supplied_evidence_into_compile_spec():
     assert plan["scenario"]["expected"]["minimum_authority_level"] == "field_validation_authority"
 
 
-def test_project_intake_evidence_pack_closes_scoped_production_package(tmp_path):
+@pytest.mark.requires_cadquery
+def test_project_intake_evidence_pack_closes_scoped_production_package(tmp_path, assume_clean_kicad_erc):
+    # Positive evidence closure assumes clean ERC; the failure path has its own regression.
     intake = load_project_intake(PLANT_EVIDENCE_INTAKE)
 
     result = run_project_intake(intake, out_dir=tmp_path / "plant-evidence", start_splicer=False, request_id="plant-evidence")
@@ -298,7 +300,9 @@ def test_project_intake_evidence_pack_closes_scoped_production_package(tmp_path)
     assert Path(result["artifacts"]["evidence_capture_kit"]).exists()
 
 
-def test_project_intake_extracts_notes_into_production_evidence(tmp_path):
+@pytest.mark.requires_cadquery
+def test_project_intake_extracts_notes_into_production_evidence(tmp_path, assume_clean_kicad_erc):
+    # Isolate note extraction from the catalog schematic's native ERC defects.
     intake = load_project_intake(PLANT_NOTES_INTAKE)
 
     plan = plan_project_from_intake(intake)

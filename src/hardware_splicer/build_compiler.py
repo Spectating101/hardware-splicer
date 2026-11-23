@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Mapping, Optional
 
 from .catalog import CATALOG_BUILD_IDS
 from .compile_stages import run_artifact_stage, run_graph_stage_node
-from .design_quality import build_design_quality_gate
+from .design_quality import apply_goal_coverage, build_design_quality_gate
 from .fabrication_inspection import inspect_fabrication_package
 from .functional_delivery import build_functional_delivery_score
 from .netlist.ir import CircuitNetlist
@@ -453,6 +453,12 @@ def attach_build_compilation_artifacts(
     if design_quality.get("drc_pass") and design_quality.get("electrical_safety_pass"):
         design_quality["compiler_verified"] = True
         payload["design_quality"] = design_quality
+    apply_goal_coverage(
+        design_quality,
+        build_compilation.get("goal_coverage"),
+        quality_file=result.design_quality_file,
+    )
+    payload["design_quality"] = design_quality
     payload["design_quality_gate"] = build_design_quality_gate(design_quality)
     if result.kicad_pcb_file and Path(result.kicad_pcb_file).is_file():
         outline = dict(result.design_quality.get("board_outline") or {})

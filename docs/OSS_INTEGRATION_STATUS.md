@@ -33,7 +33,7 @@
 | kicad-cli | KiCad 9 CLI | core | `kicad_cli_drc.py`, ERC, Gerber in `build_compilation/` | Authoritative DRC/ERC/fab export |
 | freerouting | [FreeRouting](https://github.com/freerouting/freerouting) | opt_in | `freerouting_bridge.py`, `POST /v1/build-files/autoroute` | Optional carrier autoroute — never default |
 | tscircuit-autorouter | [tscircuit-autorouter](https://github.com/tscircuit/tscircuit-autorouter) | opt_in | `engine=tscircuit` on autoroute | MIT autoroute from circuit-json when Node package present |
-| kicad-mcp | KiCad MCP servers | documented | [`KICAD_MCP_SIDECAR.md`](KICAD_MCP_SIDECAR.md) | Human KiCad session sidecar; re-compile on save |
+| kicad-mcp | KiCad MCP servers | documented | [`KICAD_MCP_SIDECAR.md`](reference/KICAD_MCP_SIDECAR.md) | Human KiCad session sidecar; re-compile on save |
 | kibot | [KiBot](https://github.com/INTI-CMNB/KiBot) | reference | `kibot_reference.py` + `POST /v1/build-files/fab-manifest` | Fab artifact coverage comparison (not vendored) |
 | ibom | [InteractiveHtmlBom](https://github.com/openscopeproject/InteractiveHtmlBom) | wired | `ibom_bridge` + `oss_export_bundle` / export-views | Best-effort HTML BOM — skips if CLI absent |
 | pcbdraw | [PcbDraw](https://github.com/yaqwsx/PcbDraw) | wired | `pcbdraw_bridge` + package / export-views | Best-effort board SVG — skips if CLI absent |

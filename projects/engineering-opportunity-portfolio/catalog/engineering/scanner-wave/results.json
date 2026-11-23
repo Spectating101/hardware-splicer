@@ -1,0 +1,520 @@
+{
+  "P009": {
+    "baseline": {
+      "Minimum field clearance at maximum ray slope": {
+        "value": 15.24735,
+        "relation": "≥",
+        "target": 1,
+        "unit": "mm",
+        "pass": true
+      },
+      "Bright area outside target as a share of aperture": {
+        "value": 80.98125,
+        "relation": "≤",
+        "target": 25,
+        "unit": "%",
+        "pass": false
+      },
+      "Aperture coverage by published lit field": {
+        "value": 19.625,
+        "relation": "≥",
+        "target": 10,
+        "unit": "mm",
+        "pass": true
+      },
+      "Baffle margin inside outer light body": {
+        "value": 4.05,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Minimum field clearance at maximum ray slope": {
+        "value": 1.24735,
+        "relation": "≥",
+        "target": 1,
+        "unit": "mm",
+        "pass": true
+      },
+      "Bright area outside target as a share of aperture": {
+        "value": 23.925,
+        "relation": "≤",
+        "target": 25,
+        "unit": "%",
+        "pass": true
+      },
+      "Aperture coverage by published lit field": {
+        "value": 33.625,
+        "relation": "≥",
+        "target": 10,
+        "unit": "mm",
+        "pass": true
+      },
+      "Baffle margin inside outer light body": {
+        "value": 4.05,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P011": {
+    "baseline": {
+      "Synthetic calibration-zone clearance": {
+        "value": 8.0,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Carrier to coupon footprint edge": {
+        "value": 4.0,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Worst indexed frame margin": {
+        "value": -0.43246,
+        "relation": "≥",
+        "target": 0.12,
+        "unit": "mm",
+        "pass": false
+      },
+      "Largest index scale interval error": {
+        "value": 0.0,
+        "relation": "≤",
+        "target": 0.02,
+        "unit": "deg",
+        "pass": true
+      },
+      "Rotational seating uncertainty": {
+        "value": 1.65112,
+        "relation": "≤",
+        "target": 0.6,
+        "unit": "deg",
+        "pass": false
+      }
+    },
+    "revised": {
+      "Synthetic calibration-zone clearance": {
+        "value": 8.0,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Carrier to coupon footprint edge": {
+        "value": 4.0,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Worst indexed frame margin": {
+        "value": 0.16559,
+        "relation": "≥",
+        "target": 0.12,
+        "unit": "mm",
+        "pass": true
+      },
+      "Largest index scale interval error": {
+        "value": 0.0,
+        "relation": "≤",
+        "target": 0.02,
+        "unit": "deg",
+        "pass": true
+      },
+      "Rotational seating uncertainty": {
+        "value": 0.42729,
+        "relation": "≤",
+        "target": 0.6,
+        "unit": "deg",
+        "pass": true
+      }
+    }
+  },
+  "P012": {
+    "baseline": {
+      "Synthetic calibration-zone clearance": {
+        "value": 7.0,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Carrier to coupon footprint edge": {
+        "value": 5.0,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Worst modeled free-edge rise": {
+        "value": 3.82429,
+        "relation": "≤",
+        "target": 0.5,
+        "unit": "mm",
+        "pass": false
+      },
+      "Minimum clamp-to-image margin": {
+        "value": 0.5,
+        "relation": "≥",
+        "target": 0.3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Minimum aperture margin": {
+        "value": 0.95,
+        "relation": "≥",
+        "target": 0.5,
+        "unit": "mm",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Synthetic calibration-zone clearance": {
+        "value": 7.0,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Carrier to coupon footprint edge": {
+        "value": 5.0,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Worst modeled free-edge rise": {
+        "value": 0.43574,
+        "relation": "≤",
+        "target": 0.5,
+        "unit": "mm",
+        "pass": true
+      },
+      "Minimum clamp-to-image margin": {
+        "value": 0.5,
+        "relation": "≥",
+        "target": 0.3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Minimum aperture margin": {
+        "value": 0.95,
+        "relation": "≥",
+        "target": 0.5,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P013": {
+    "baseline": {
+      "Synthetic calibration-zone clearance": {
+        "value": 8.0,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Carrier to coupon footprint edge": {
+        "value": 6.0,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Forward orientation minimum pin seating margin": {
+        "value": -31.3,
+        "relation": "≥",
+        "target": 0.15,
+        "unit": "mm",
+        "pass": false
+      },
+      "Reversed orientation maximum pin seating margin": {
+        "value": 0.2,
+        "relation": "≤",
+        "target": -0.15,
+        "unit": "mm",
+        "pass": false
+      },
+      "Minimum aperture margin": {
+        "value": 0.5,
+        "relation": "≥",
+        "target": 0.4,
+        "unit": "mm",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Synthetic calibration-zone clearance": {
+        "value": 8.0,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Carrier to coupon footprint edge": {
+        "value": 6.0,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Forward orientation minimum pin seating margin": {
+        "value": 0.2,
+        "relation": "≥",
+        "target": 0.15,
+        "unit": "mm",
+        "pass": true
+      },
+      "Reversed orientation maximum pin seating margin": {
+        "value": -31.3,
+        "relation": "≤",
+        "target": -0.15,
+        "unit": "mm",
+        "pass": true
+      },
+      "Minimum aperture margin": {
+        "value": 0.5,
+        "relation": "≥",
+        "target": 0.4,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P014": {
+    "baseline": {
+      "Synthetic calibration-zone clearance": {
+        "value": 6.0,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Carrier to coupon footprint edge": {
+        "value": 5.0,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Best worst-case hypothetical focus reserve": {
+        "value": -0.43,
+        "relation": "≥",
+        "target": 0.15,
+        "unit": "mm",
+        "pass": false
+      },
+      "Total prototype shim sweep": {
+        "value": 0.0,
+        "relation": "≥",
+        "target": 0.45,
+        "unit": "mm",
+        "pass": false
+      },
+      "Frame aperture edge margin": {
+        "value": 0.75,
+        "relation": "≥",
+        "target": 0.6,
+        "unit": "mm",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Synthetic calibration-zone clearance": {
+        "value": 6.0,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Carrier to coupon footprint edge": {
+        "value": 5.0,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Best worst-case hypothetical focus reserve": {
+        "value": 0.17,
+        "relation": "≥",
+        "target": 0.15,
+        "unit": "mm",
+        "pass": true
+      },
+      "Total prototype shim sweep": {
+        "value": 0.5,
+        "relation": "≥",
+        "target": 0.45,
+        "unit": "mm",
+        "pass": true
+      },
+      "Frame aperture edge margin": {
+        "value": 0.75,
+        "relation": "≥",
+        "target": 0.6,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P015": {
+    "baseline": {
+      "Synthetic calibration-zone clearance": {
+        "value": 8.0,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Carrier to coupon footprint edge": {
+        "value": 7.0,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Worst registration margin across all four crops": {
+        "value": -0.9,
+        "relation": "≥",
+        "target": 0.25,
+        "unit": "mm",
+        "pass": false
+      },
+      "Smallest crossbar land between apertures": {
+        "value": 0.0,
+        "relation": "≥",
+        "target": 0.6,
+        "unit": "mm",
+        "pass": false
+      },
+      "Film overlap per long edge": {
+        "value": 0.95,
+        "relation": "≥",
+        "target": 0.8,
+        "unit": "mm",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Synthetic calibration-zone clearance": {
+        "value": 8.0,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Carrier to coupon footprint edge": {
+        "value": 7.0,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Worst registration margin across all four crops": {
+        "value": 0.375,
+        "relation": "≥",
+        "target": 0.25,
+        "unit": "mm",
+        "pass": true
+      },
+      "Smallest crossbar land between apertures": {
+        "value": 0.85,
+        "relation": "≥",
+        "target": 0.6,
+        "unit": "mm",
+        "pass": true
+      },
+      "Film overlap per long edge": {
+        "value": 0.95,
+        "relation": "≥",
+        "target": 0.8,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  },
+  "P016": {
+    "baseline": {
+      "Synthetic calibration-zone clearance": {
+        "value": 10.0,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Carrier to coupon footprint edge": {
+        "value": 7.0,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Worst full-frame margin through skew sweep": {
+        "value": -0.7183,
+        "relation": "≥",
+        "target": 0.05,
+        "unit": "mm",
+        "pass": false
+      },
+      "Perforation-side exclusion margin": {
+        "value": -0.85203,
+        "relation": "≥",
+        "target": 0.1,
+        "unit": "mm",
+        "pass": false
+      },
+      "Minimum neighboring frame exclusion": {
+        "value": 0.18519,
+        "relation": "≥",
+        "target": 0.1,
+        "unit": "mm",
+        "pass": true
+      }
+    },
+    "revised": {
+      "Synthetic calibration-zone clearance": {
+        "value": 10.0,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Carrier to coupon footprint edge": {
+        "value": 7.0,
+        "relation": "≥",
+        "target": 3,
+        "unit": "mm",
+        "pass": true
+      },
+      "Worst full-frame margin through skew sweep": {
+        "value": 0.05888,
+        "relation": "≥",
+        "target": 0.05,
+        "unit": "mm",
+        "pass": true
+      },
+      "Perforation-side exclusion margin": {
+        "value": 0.10797,
+        "relation": "≥",
+        "target": 0.1,
+        "unit": "mm",
+        "pass": true
+      },
+      "Minimum neighboring frame exclusion": {
+        "value": 0.18519,
+        "relation": "≥",
+        "target": 0.1,
+        "unit": "mm",
+        "pass": true
+      }
+    }
+  }
+}

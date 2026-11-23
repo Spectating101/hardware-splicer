@@ -1,0 +1,235 @@
+{
+  "schema": "hs.keyboard-cut-splice-screen.v1",
+  "source_file_sha256": "9b8dda6a2dbb5bd4c433151e24252592820e3e79ef9596ff7448cc89bbbdb2a2",
+  "source_label": "one_row_six_key_source.kicad_pcb",
+  "source_design_only": true,
+  "physical_donor_exists": false,
+  "analysis_tool": "Native KiCad pcbnew geometry extraction + HS bounded geometry screen",
+  "config": {
+    "kerf_mm": 1.0,
+    "pad_clearance_mm": 1.0,
+    "switch_keepout_mm": 8.0,
+    "min_key_side_fraction": 0.3,
+    "scan_fraction_min": 0.3,
+    "scan_fraction_max": 0.7,
+    "scan_step_mm": 1.0
+  },
+  "board": {
+    "outline_bbox_mm": {
+      "x_min": -0.025,
+      "x_max": 176.025,
+      "y_min": -0.025,
+      "y_max": 87.025
+    },
+    "zone_count": 0
+  },
+  "counts": {
+    "tracks": 20,
+    "pads": 37,
+    "via_count": 6,
+    "switch_footprint_candidates": 6
+  },
+  "scanned_straight_seams": 71,
+  "passing_seams": 21,
+  "midpoint": {
+    "x_mm": 88.0,
+    "track_segments_touched": 4,
+    "distinct_nets_touched": 4,
+    "net_categories": {
+      "key_matrix": 4
+    },
+    "matrix_nets_touched": [
+      "COL_3",
+      "COL_4",
+      "COL_5",
+      "ROW_0"
+    ],
+    "pads_at_risk": 0,
+    "vias_at_risk": 0,
+    "switch_centers_at_risk": 0,
+    "switch_candidates_left": 3,
+    "switch_candidates_right": 3,
+    "key_balance_pass": true,
+    "valid_straight_seam": true,
+    "all_intersected_nets": [
+      "COL_3",
+      "COL_4",
+      "COL_5",
+      "ROW_0"
+    ]
+  },
+  "best_scanned_straight_seam": {
+    "x_mm": 108.79,
+    "track_segments_touched": 3,
+    "distinct_nets_touched": 3,
+    "net_categories": {
+      "key_matrix": 3
+    },
+    "matrix_nets_touched": [
+      "COL_4",
+      "COL_5",
+      "ROW_0"
+    ],
+    "pads_at_risk": 0,
+    "vias_at_risk": 0,
+    "switch_centers_at_risk": 0,
+    "switch_candidates_left": 4,
+    "switch_candidates_right": 2,
+    "key_balance_pass": true,
+    "valid_straight_seam": true,
+    "all_intersected_nets": [
+      "COL_4",
+      "COL_5",
+      "ROW_0"
+    ],
+    "harness_candidates": [
+      {
+        "net": "COL_4",
+        "function_class": "key_matrix",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "J1",
+          "pad": "5",
+          "x": 10.0,
+          "y": 60.16,
+          "layer": "F.Cu",
+          "net": "COL_4"
+        },
+        "right_candidate_pad": {
+          "ref": "SW5",
+          "pad": "2",
+          "x": 118.65,
+          "y": 27.54,
+          "layer": "F.Cu",
+          "net": "COL_4"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "COL_5",
+        "function_class": "key_matrix",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "J1",
+          "pad": "6",
+          "x": 10.0,
+          "y": 62.7,
+          "layer": "F.Cu",
+          "net": "COL_5"
+        },
+        "right_candidate_pad": {
+          "ref": "SW6",
+          "pad": "2",
+          "x": 143.65,
+          "y": 27.54,
+          "layer": "F.Cu",
+          "net": "COL_5"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      },
+      {
+        "net": "ROW_0",
+        "function_class": "key_matrix",
+        "crossed_segments": 1,
+        "left_candidate_pad": {
+          "ref": "SW4",
+          "pad": "1",
+          "x": 100.0,
+          "y": 25.0,
+          "layer": "F.Cu",
+          "net": "ROW_0"
+        },
+        "right_candidate_pad": {
+          "ref": "SW5",
+          "pad": "1",
+          "x": 125.0,
+          "y": 25.0,
+          "layer": "F.Cu",
+          "net": "ROW_0"
+        },
+        "connection_required": "unresolved_requires_board_topology_and_continuity"
+      }
+    ]
+  },
+  "requested_seam": null,
+  "release": "BLOCKED_REFERENCE_ONLY",
+  "next_action": "Identify one exact-model salvaged keyboard; obtain both PCB images and unpowered continuity; identify controller/optional circuits; design stepped cut and interposer based on real measurements",
+  "blockers": [
+    "No evidence that a physical donor PCB matches this reference PCB revision",
+    "Copper planes, actual connected paths, and multi-crossing net topology are not proven by segment intersections",
+    "Cut-edge tolerances, component/plate keepouts and case/fastener clearances need physical registration",
+    "Candidate pad locations are not checked for solderability or post-cut continuity",
+    "Firmware matrix behavior, original controller, USB, ESD and safety require a physical test",
+    "No authority to cut, solder, fabricate or sell hardware from this design scan",
+    "Stepped cut is only a modeled path; component destruction and actual populated donor layout unverified",
+    "Modeled electrical islands are partial track/pad/via evidence, not validated post-cut conductivity"
+  ],
+  "stepped_path_summary": {
+    "payload_sha256": "47eaa1e3f29ba50917d2581e8a203bd1c0e4be5299a5a8208f8845df9efbe216",
+    "nominal_path_length_mm": 87.05,
+    "collision_counts": {
+      "pads": 0,
+      "vias": 0,
+      "switches": 0,
+      "critical": 0
+    },
+    "affected_net_count": 4,
+    "source_geometry_issues": [],
+    "release": "PROPOSED_CUT_ONLY_NOT_VERIFIED",
+    "physical_cut_authorized": false
+  },
+  "repair_loop_summary": {
+    "selected_strategy": "pad_only",
+    "total_iterations": 1,
+    "required_graph_connected_in_model": true,
+    "unresolved_source_baseline_terminal_net_gaps": 0,
+    "physical_authority_granted": false,
+    "result": "MODELED_POSTCUT_REQUIRED_GRAPH_RESTORED_WITH_REMNANT_ISOLATION"
+  },
+  "postcut_topology_summary": {
+    "model_pre_cut_island_count": 4,
+    "model_post_cut_island_count": 8,
+    "split_pre_cut_components": 4,
+    "candidate_graph_edges": 4,
+    "unanchored_split_components": 0,
+    "model_replay_remaining_split_components": 0,
+    "model_replay_remaining_required_components": 0,
+    "model_replay_achieved_required_restoration": true,
+    "planned_inert_track_remnants": 0,
+    "damaged_electrical_pad_count": 0,
+    "preexisting_unconnected_terminal_net_count": 0,
+    "repair_mode": "pad_only",
+    "model_replay_achieved_full_restoration": true,
+    "issues": [],
+    "release": "BLOCKED_REFERENCE_TOPOLOGY_ONLY",
+    "payload_sha256": "cde922aa725fc08181484dbe32b36dca596922edce722e17c3ea733da7038439"
+  },
+  "canonical_machine_release": {
+    "requested": "build_ready",
+    "achieved": "design_ready",
+    "allowed": false,
+    "blocker_codes": [
+      "unresolved_interface",
+      "safety_not_closed",
+      "verification_not_passed",
+      "release_state_not_reached"
+    ]
+  },
+  "interposer_preview_summary": {
+    "channels": 4,
+    "pcb_sha256": "b83e3b05178a6cb892e85b53e06baf1a7aa0f676902f304e0c78eefe9a800f68",
+    "native_drc_errors": 0,
+    "native_drc_warnings": 0,
+    "native_unconnected_items": 0,
+    "native_design_checks_passed": true,
+    "fabrication_release": "BLOCKED_PREVIEW_ONLY"
+  },
+  "passive_matrix_summary": {
+    "model_passed": true,
+    "key_switch_count": 6,
+    "ideal_combinations_tested": 64,
+    "ideal_combinations_failed": [],
+    "payload_sha256": "7b9cb10ffbfe1eadad0f41e2506c5b46f65d78afd8521166a8ec27139dd73e42",
+    "physical_repair_verified": false
+  }
+}

@@ -195,6 +195,8 @@ def test_snapshot_without_provenance_fields_is_unknown_never_deterministic() -> 
 
 def test_failed_check_deterministic_only_for_executor_registry() -> None:
     implemented = EXECUTABLE_AI_PREVIEW_ACTIONS[0]
+    unimplemented = "invented_preview"
+    assert unimplemented not in EXECUTABLE_AI_PREVIEW_ACTIONS
     snapshot = {
         "engineeringAiSessions": [
             _session(
@@ -207,8 +209,8 @@ def test_failed_check_deterministic_only_for_executor_registry() -> None:
                     ),
                     _failed_action(
                         "action-unknown-tool",
-                        "run_erc",
-                        "ERC adapter is not implemented.",
+                        unimplemented,
+                        "Fixture adapter is not implemented.",
                     ),
                 ],
             )

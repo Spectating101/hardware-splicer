@@ -1,0 +1,29 @@
+{
+ "source": "Two chain jobs captured from the cyberdeck-real-trial-20261020 Fielddeck scene (7-inch vs 5-inch display revisions), little-endian float64 segment pairs",
+ "jobs": [
+  {
+   "kind": "diff",
+   "key": "edges",
+   "offset": 0,
+   "length": 3348
+  },
+  {
+   "kind": "diff",
+   "key": "paired",
+   "offset": 3348,
+   "length": 4092
+  },
+  {
+   "kind": "overlay",
+   "key": "edges",
+   "offset": 7440,
+   "length": 4092
+  },
+  {
+   "kind": "overlay",
+   "key": "paired",
+   "offset": 11532,
+   "length": 3348
+  }
+ ]
+}

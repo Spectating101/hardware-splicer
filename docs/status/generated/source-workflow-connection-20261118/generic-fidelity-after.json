@@ -1,0 +1,173 @@
+{
+  "qfn": {
+    "source_to_serialized_pin_net_mapping_matches": true,
+    "source_refs": [
+      "J42",
+      "U37"
+    ],
+    "exported_refs": [
+      "J42",
+      "U37"
+    ],
+    "geometry_fidelity": {
+      "schema_version": "hardware_splicer.geometry_fidelity.v1",
+      "status": "logical_preview",
+      "requires_native_source_geometry": true,
+      "component_contracts_verified": false,
+      "synthetic_components": [
+        {
+          "node_id": "n1",
+          "source_ref": "U37",
+          "declared_footprint": "AuditOnly:QFN-8-EP_3x3mm_P0.5mm",
+          "rendered_footprint": "HardwareSplicerPreview:U37",
+          "pad_geometry_basis": "synthetic_through_hole_preview"
+        },
+        {
+          "node_id": "n2",
+          "source_ref": "J42",
+          "declared_footprint": "AuditOnly:OffsetKeyed_2x4_P1.0mm",
+          "rendered_footprint": "HardwareSplicerPreview:J42",
+          "pad_geometry_basis": "synthetic_through_hole_preview"
+        }
+      ],
+      "fabrication_blockers": [
+        "U37: AuditOnly:QFN-8-EP_3x3mm_P0.5mm uses synthetic through-hole pads. Use the original native PCB source/edit path and verify its actual footprint geometry before fabrication.",
+        "J42: AuditOnly:OffsetKeyed_2x4_P1.0mm uses synthetic through-hole pads. Use the original native PCB source/edit path and verify its actual footprint geometry before fabrication."
+      ],
+      "claim_boundary": "Source references, pin IDs and named nets are logical identity; generic pad placement does not establish package fit or electrical contracts."
+    },
+    "controlled_clean_receipts_gate": {
+      "physical_checks_executed": false,
+      "circuit_readiness": "logical_preview",
+      "fabrication_ready": false,
+      "fab_recommendation": "blocked_geometry_fidelity"
+    }
+  },
+  "different_packages": {
+    "source_to_serialized_pin_net_mapping_matches": true,
+    "source_refs": [
+      "J42",
+      "U37"
+    ],
+    "exported_refs": [
+      "J42",
+      "U37"
+    ],
+    "geometry_fidelity": {
+      "schema_version": "hardware_splicer.geometry_fidelity.v1",
+      "status": "logical_preview",
+      "requires_native_source_geometry": true,
+      "component_contracts_verified": false,
+      "synthetic_components": [
+        {
+          "node_id": "n1",
+          "source_ref": "U37",
+          "declared_footprint": "AuditOnly:SOIC-8_6x4mm_P1.27mm",
+          "rendered_footprint": "HardwareSplicerPreview:U37",
+          "pad_geometry_basis": "synthetic_through_hole_preview"
+        },
+        {
+          "node_id": "n2",
+          "source_ref": "J42",
+          "declared_footprint": "AuditOnly:SingleRow_1x8_P3.5mm",
+          "rendered_footprint": "HardwareSplicerPreview:J42",
+          "pad_geometry_basis": "synthetic_through_hole_preview"
+        }
+      ],
+      "fabrication_blockers": [
+        "U37: AuditOnly:SOIC-8_6x4mm_P1.27mm uses synthetic through-hole pads. Use the original native PCB source/edit path and verify its actual footprint geometry before fabrication.",
+        "J42: AuditOnly:SingleRow_1x8_P3.5mm uses synthetic through-hole pads. Use the original native PCB source/edit path and verify its actual footprint geometry before fabrication."
+      ],
+      "claim_boundary": "Source references, pin IDs and named nets are logical identity; generic pad placement does not establish package fit or electrical contracts."
+    },
+    "controlled_clean_receipts_gate": {
+      "physical_checks_executed": false,
+      "circuit_readiness": "logical_preview",
+      "fabrication_ready": false,
+      "fab_recommendation": "blocked_geometry_fidelity"
+    }
+  },
+  "renamed_identity": {
+    "source_to_serialized_pin_net_mapping_matches": true,
+    "source_refs": [
+      "U901",
+      "X808"
+    ],
+    "exported_refs": [
+      "U901",
+      "X808"
+    ],
+    "geometry_fidelity": {
+      "schema_version": "hardware_splicer.geometry_fidelity.v1",
+      "status": "logical_preview",
+      "requires_native_source_geometry": true,
+      "component_contracts_verified": false,
+      "synthetic_components": [
+        {
+          "node_id": "n1",
+          "source_ref": "U901",
+          "declared_footprint": "AuditOnly:QFN-8-EP_3x3mm_P0.5mm",
+          "rendered_footprint": "HardwareSplicerPreview:U901",
+          "pad_geometry_basis": "synthetic_through_hole_preview"
+        },
+        {
+          "node_id": "n2",
+          "source_ref": "X808",
+          "declared_footprint": "AuditOnly:OffsetKeyed_2x4_P1.0mm",
+          "rendered_footprint": "HardwareSplicerPreview:X808",
+          "pad_geometry_basis": "synthetic_through_hole_preview"
+        }
+      ],
+      "fabrication_blockers": [
+        "U901: AuditOnly:QFN-8-EP_3x3mm_P0.5mm uses synthetic through-hole pads. Use the original native PCB source/edit path and verify its actual footprint geometry before fabrication.",
+        "X808: AuditOnly:OffsetKeyed_2x4_P1.0mm uses synthetic through-hole pads. Use the original native PCB source/edit path and verify its actual footprint geometry before fabrication."
+      ],
+      "claim_boundary": "Source references, pin IDs and named nets are logical identity; generic pad placement does not establish package fit or electrical contracts."
+    },
+    "controlled_clean_receipts_gate": {
+      "physical_checks_executed": false,
+      "circuit_readiness": "logical_preview",
+      "fabrication_ready": false,
+      "fab_recommendation": "blocked_geometry_fidelity"
+    }
+  },
+  "unresolved_catalog_request": {
+    "graph": {
+      "nodes": [],
+      "wires": [],
+      "composition_request": {
+        "requested_module_ids": [
+          "usb-power-5v",
+          "esp32-devkit",
+          "donor:unidentified-driver"
+        ],
+        "resolved_module_ids": [
+          "usb-power-5v",
+          "esp32-devkit"
+        ],
+        "unresolved_module_ids": [
+          "donor:unidentified-driver"
+        ],
+        "status": "unresolved"
+      }
+    },
+    "build_id": "generic_low_voltage_build",
+    "notes": [],
+    "warnings": [
+      "Cannot auto-wire unidentified module IDs: donor:unidentified-driver. Supply an explicit netlist or a source-bound interface; donor pinouts are not inferred."
+    ],
+    "composition_status": "unresolved",
+    "requested_module_ids": [
+      "usb-power-5v",
+      "esp32-devkit",
+      "donor:unidentified-driver"
+    ],
+    "resolved_module_ids": [
+      "usb-power-5v",
+      "esp32-devkit"
+    ],
+    "unresolved_module_ids": [
+      "donor:unidentified-driver"
+    ]
+  }
+}

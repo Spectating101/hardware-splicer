@@ -1,0 +1,88 @@
+name: Keyboard splice - native geometry and interposer
+
+on:
+  pull_request:
+    paths:
+      - "src/hardware_splicer/keyboard_splice*.py"
+      - "src/hardware_splicer/_pcbnew_helpers/keyboard_splice*.py"
+      - "scripts/hs_keyboard_splice_probe.py"
+      - "tests/test_keyboard_splice*.py"
+      - "pyproject.toml"
+      - ".github/workflows/keyboard-splice-topology.yml"
+  push:
+    branches: [main]
+    paths:
+      - "src/hardware_splicer/keyboard_splice*.py"
+      - "src/hardware_splicer/_pcbnew_helpers/keyboard_splice*.py"
+      - "scripts/hs_keyboard_splice_probe.py"
+      - "tests/test_keyboard_splice*.py"
+      - "pyproject.toml"
+      - ".github/workflows/keyboard-splice-topology.yml"
+  workflow_dispatch:
+
+jobs:
+  check-virtual-copper:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install HS tests and native polygon solver
+        run: python -m pip install -e '.[dev,keyboard-splice]'
+      - name: Confirm genuine NumPy and Shapely
+        run: python -c "import shapely,numpy; print('Shapely',shapely.__version__,'NumPy',numpy.__version__)"
+      - name: Exercise cut search, copper pours, bridge replay, and guarded release
+        env:
+          PYTHONPATH: src
+          HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
+        run: |
+          python -m pytest -q -p no:cacheprovider \
+            tests/test_keyboard_splice.py \
+            tests/test_keyboard_splice_islands.py \
+            tests/test_keyboard_splice_path.py \
+            tests/test_keyboard_splice_route_search.py \
+            tests/test_keyboard_splice_handoff.py \
+            tests/test_keyboard_splice_repair_loop.py \
+            tests/test_keyboard_splice_matrix.py \
+            tests/test_keyboard_splice_source_audit.py \
+            tests/test_keyboard_splice_full_matrix.py \
+            tests/test_keyboard_splice_handoff_extended.py \
+            tests/test_keyboard_splice_arbitrary.py \
+            tests/test_keyboard_splice_arbitrary_evidence.py \
+            tests/test_keyboard_splice_f60_relocation_evidence.py \
+            tests/test_keyboard_splice_evidence.py \
+            tests/test_keyboard_splice_recovery_evidence.py
+
+  check-native-kicad-interposer:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install KiCad 9 with actual PCB and footprints
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository --yes ppa:kicad/kicad-9.0-releases
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends kicad kicad-footprints
+          case "$(kicad-cli version)" in
+            9.*) ;;
+            *) echo "Native KiCad 9.x required" >&2; exit 1;;
+          esac
+          /usr/bin/python3 -c "import pcbnew; print(pcbnew.Version())"
+          test -f /usr/share/kicad/footprints/Connector_PinHeader_2.54mm.pretty/PinHeader_1x03_P2.54mm_Vertical.kicad_mod
+      - name: Install HS test harness
+        run: python -m pip install -e '.[dev,keyboard-splice]'
+      - name: Verify native PCB generation, DRC and refused physical release
+        env:
+          PYTHONPATH: src
+          HARDWARE_SPLICER_SKIP_VISION_LIVE: "1"
+        run: |
+          python -m pytest -q -p no:cacheprovider \
+            tests/test_keyboard_splice_interposer.py \
+            tests/test_keyboard_splice_key_relocation.py \
+            tests/test_keyboard_splice_harness_bus.py \
+            tests/test_keyboard_splice_reference_1x6.py

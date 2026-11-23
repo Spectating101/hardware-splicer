@@ -1,0 +1,45 @@
+{
+  "schema_version": "hardware_splicer.drone_reference_build.v1",
+  "target": "Holybro X500 V2 + Pixhawk 6C PX4 reference quadcopter",
+  "intent": "Documented assembly and engineering verification; no actual physical testing or flight authorization",
+  "sources": [
+    {"id":"px4_assembly", "url":"https://docs.px4.io/main/en/frames_multicopter/holybro_x500v2_pixhawk6c", "use":"assembly order, power interface and PX4 setup"},
+    {"id":"holybro_devkit", "url":"https://holybro.com/products/px4-development-kit-x500-v2", "use":"manufacturer kit options, supplied hardware and component identities"},
+    {"id":"holybro_arf", "url":"https://holybro.com/products/x500-v2-kits", "use":"frame/ARF contents and dimensions"},
+    {"id":"qgc", "url":"https://github.com/mavlink/qgroundcontrol", "use":"firmware configuration and calibration GUI"},
+    {"id":"px4", "url":"https://github.com/PX4/PX4-Autopilot", "use":"flight control and simulation, not component selection"}
+  ],
+  "reference_bom": [
+    {"id":"frame", "part":"X500 V2 frame kit SKU30120", "quantity":1,"supply":"kit", "verified_order":false},
+    {"id":"fc", "part":"Pixhawk 6C flight controller", "quantity":1,"supply":"PX4 development kit option", "verified_order":false},
+    {"id":"power", "part":"Power module PM02 V3 or kit-specified compatible revision", "quantity":1,"supply":"variant dependent", "verified_order":false},
+    {"id":"motors", "part":"Holybro 2216 KV920 motors", "quantity":4,"supply":"ARF or development kit", "verified_order":false},
+    {"id":"esc", "part":"BLHeli S 20 A ESC rated for 4S", "quantity":4,"supply":"ARF or development kit", "verified_order":false},
+    {"id":"props", "part":"1045 propellers with correct rotational handedness and retainers", "quantity":6,"supply":"ARF or development kit", "verified_order":false},
+    {"id":"pdb", "part":"X500 V2 power distribution board with battery and ESC connectors", "quantity":1,"supply":"ARF or development kit", "verified_order":false},
+    {"id":"gps", "part":"Kit-specified M10 GPS", "quantity":1,"supply":"PX4 development kit option", "verified_order":false},
+    {"id":"telemetry", "part":"SiK telemetry radio matched to regional frequency", "quantity":1,"supply":"PX4 development kit option", "verified_order":false},
+    {"id":"battery", "part":"4S 3000–5000 mAh 20C+ LiPo with confirmed XT60 interface", "quantity":1,"supply":"purchase separately, NOT included", "verified_order":false},
+    {"id":"rc", "part":"Compatible RC transmitter and receiver for planned flight mode", "quantity":1,"supply":"purchase separately or document approved alternate", "verified_order":false}
+  ],
+  "critical_variant_checks": [
+    "Verify actual kit SKU and exact Pixhawk/power-module/GPS versions against package before wiring",
+    "Compare motor/ESC connectors: published kit descriptions vary between MR30 and XT30; do not assume mating compatibility",
+    "Confirm selected battery XT60 polarity, regulator rating, connector pinout, 4S suitability and charging/storage equipment",
+    "Verify props, motor rotational direction and PX4 actuator mapping for selected airframe revision",
+    "Confirm actual all-up mass, thrust-current curves, ESC thermal margins and battery capacity before calculating runtime",
+    "Confirm regional radio frequency and operator requirements before sourcing telemetry equipment"
+  ],
+  "assembly_stages": [
+    {"id":"identify", "task":"Inventory kit, hardware variants, connector types, fasteners and exact manual revision", "required_evidence":"Photos of labels, board revisions, complete parts inventory"},
+    {"id":"frame", "task":"Build frame, landing gear, battery/payload rail and vibration-isolated flight controller mount per X500 V2 guide", "required_evidence":"Dimension/mount verification and mechanical inspection"},
+    {"id":"power", "task":"Document PDB, ESC branch conductors and battery-to-power-module-to-POWER port separately; do not apply battery directly to regulated FC POWER port", "required_evidence":"Connector pin map, polarity and rail-voltage design review"},
+    {"id":"control", "task":"Map the four ESC signal/ground leads, GPS, telemetry and RC to the exact Pixhawk 6C ports", "required_evidence":"Port map and cable continuity review"},
+    {"id":"px4", "task":"Select documented X500 V2 airframe in QGroundControl; verify actuator/output assignments", "required_evidence":"Offline configuration manifest, parameter snapshot and reviewer signoff"},
+    {"id":"bench", "task":"Plan separately authorized, propeller-removed bench verification for power, sensors, ESC channels and failsafes", "required_evidence":"Independent powered-test procedure and physical supervisor approval"},
+    {"id":"release", "task":"Retain a hold until hardware measurements, local flight permissions and trained operator review are complete", "required_evidence":"Physical validation, mechanical/electrical acceptance, aviation compliance"}
+  ],
+  "physical_build_completed": false,
+  "flight_authorized": false,
+  "source_documents_archived_and_hash_verified": false
+}

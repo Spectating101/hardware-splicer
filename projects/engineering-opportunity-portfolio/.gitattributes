@@ -1,0 +1,3 @@
+# Engineering receipts and release hashes use the exact saved file bytes.
+catalog/** -text
+archive/** -text

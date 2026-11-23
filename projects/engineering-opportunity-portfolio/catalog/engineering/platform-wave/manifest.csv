@@ -1,0 +1,3 @@
+id,title,engineering,physical_check,report
+P031,Shallow-water tethered live-camera ROV,64 freshwater displacement and tolerance cases. The larger float pair retained 42.66 g minimum upward reserve under the assumed equipped mass and tether load.,Weigh the complete vehicle and submerged tether and test static trim and recovery in a contained tank. Check real sealed components independently.,P031/README.md
+P049,Assembled SO-101 follower arm,Replayed the upstream URDF in two cold bench layouts. A 1.5 degree shoulder zero error missed the revised position target by up to 4.79 mm.,Verify the exact servos and zero calibration. Measure repeatability and loaded pallet clearance on an actual assembled arm.,P049/README.md

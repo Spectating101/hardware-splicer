@@ -2,10 +2,87 @@
 
 from __future__ import annotations
 
+import importlib.util
 from collections.abc import Callable
 from datetime import datetime, timezone, tzinfo
 
+import os
+
 import pytest
+
+# Test apps do not probe the CAD runtimes in a background thread at startup; tests that mock the
+# probes would otherwise race it. test_runtime_prewarm.py turns it on where it is under test.
+os.environ.setdefault("HARDWARE_SPLICER_PREWARM_RUNTIME", "0")
+
+# Optional ``cad`` extra. Tests marked ``requires_cadquery`` / ``requires_trimesh``
+# are skipped, with a reason, when the package cannot be found.
+_OPTIONAL_CAD_MODULES = {
+    "requires_cadquery": "cadquery",
+    "requires_trimesh": "trimesh",
+}
+
+
+def _module_available(name: str) -> bool:
+    try:
+        return importlib.util.find_spec(name) is not None
+    except (ImportError, ValueError):
+        return False
+
+
+def _bind_import_time_repo_roots() -> None:
+    """Import every module that binds ``repo_root()`` at import, against the real checkout.
+
+    In production the root is fixed before the server starts (``hs-serve --repo-root``
+    re-executes with it set). In a test session, whichever test first imports such a
+    module would otherwise decide its root, so a test that points
+    ``HARDWARE_SPLICER_REPO_ROOT`` at a temporary checkout would leak that path into
+    every later test. Modules are found by source scan so new ones are covered.
+    """
+    import importlib
+    import os
+    import re
+    from pathlib import Path
+
+    package = Path(__file__).resolve().parents[1] / "src" / "hardware_splicer"
+    binds = re.compile(r"^[A-Z_][A-Z0-9_]*\s*(?::[^=]+)?=\s*_?repo_root\(\)", re.M)
+    saved = os.environ.pop("HARDWARE_SPLICER_REPO_ROOT", None)
+    try:
+        for path in sorted(package.rglob("*.py")):
+            if binds.search(path.read_text(encoding="utf-8", errors="replace")):
+                relative = path.relative_to(package.parent).with_suffix("")
+                try:
+                    importlib.import_module(".".join(relative.parts))
+                except ImportError:
+                    # Optional extras missing: the module's own tests skip or fail on their own.
+                    pass
+    finally:
+        if saved is not None:
+            os.environ["HARDWARE_SPLICER_REPO_ROOT"] = saved
+
+
+def pytest_configure(config: pytest.Config) -> None:
+    _bind_import_time_repo_roots()
+    for marker, module in _OPTIONAL_CAD_MODULES.items():
+        config.addinivalue_line(
+            "markers",
+            f"{marker}: skipped when the optional '{module}' package (cad extra) is not installed",
+        )
+
+
+def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:
+    missing = {
+        marker: module
+        for marker, module in _OPTIONAL_CAD_MODULES.items()
+        if not _module_available(module)
+    }
+    for item in items:
+        for marker, module in missing.items():
+            if item.get_closest_marker(marker) is not None:
+                item.add_marker(
+                    pytest.mark.skip(
+                        reason=f"requires optional '{module}' package (install the cad extra)"
+                    )
+                )
 
 
 @pytest.fixture(autouse=True)
@@ -58,3 +135,18 @@ def authorization_clock(monkeypatch: pytest.MonkeyPatch) -> Callable[[datetime],
     # After the fixture's evidence capture/review, before its September expiry.
     set_time(datetime(2026, 8, 4, 3, tzinfo=timezone.utc))
     return set_time
+
+
+@pytest.fixture
+def assume_clean_kicad_erc(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Isolate a test from the real KiCad ERC outcome on the emitted schematic.
+
+    KiCad ERC failures now veto build_ready (see test_kicad_erc_trust_gate.py), and the
+    generated catalog schematics currently report real ERC errors. Tests that exercise
+    downstream behaviour of a *ready* build use this fixture to state that assumption
+    explicitly instead of depending on the installed kicad-cli.
+    """
+    monkeypatch.setattr(
+        "hardware_splicer.netlist.compile.run_kicad_cli_erc",
+        lambda *a, **k: {"pass": True, "skipped": False, "errors": 0, "warnings": 0, "violations": [], "report_path": None},
+    )

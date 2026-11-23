@@ -1,0 +1,53 @@
+{
+ "drop_mm": 11.6,
+ "moved": {
+  "keyboard-nominal-envelope": "down 11.6 mm",
+  "power-bank-nominal-envelope": [
+   [
+    213.0,
+    171.0,
+    3.5
+   ],
+   [
+    265.3,
+    275.0,
+    29.5
+   ]
+  ],
+  "fan-envelope": "down 11.6 mm",
+  "face-front-left": "down 11.6 mm",
+  "face-front-right": "down 11.6 mm",
+  "face-rear-left": "down 11.6 mm",
+  "face-rear-right": "down 11.6 mm",
+  "fan-guard": "down 11.6 mm",
+  "display-spacer-1": "down 11.6 mm",
+  "display-spacer-2": "down 11.6 mm",
+  "display-spacer-3": "down 11.6 mm",
+  "display-spacer-4": "down 11.6 mm",
+  "display": "down 11.6 mm"
+ },
+ "trimmed": {
+  "tray-front-left": {
+   "before_mm3": 140902,
+   "after_mm3": 129435
+  },
+  "tray-front-right": {
+   "before_mm3": 136756,
+   "after_mm3": 125289
+  },
+  "tray-rear-left": {
+   "before_mm3": 133207,
+   "after_mm3": 120109
+  },
+  "tray-rear-right": {
+   "before_mm3": 133335,
+   "after_mm3": 120283
+  },
+  "fan-duct": "top cut 11.6 mm"
+ },
+ "size_mm": [
+  310.0,
+  285.7,
+  60.4
+ ]
+}

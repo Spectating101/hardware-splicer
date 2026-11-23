@@ -1,0 +1,20 @@
+[
+  {
+    "file": "touch_display2_7inch.step.zip",
+    "url": "https://pip-assets.raspberrypi.com/categories/1083-raspberry-pi-touch-display-2/documents/RP-009154-DD-3-raspberry-pi-touch-display-2-step-7inch.zip",
+    "sha256": "a5391c2e04dfc79f5c701295c7afe4ba998818c7a7104e8d81cb97c369bfc2b5",
+    "bytes": 251906
+  },
+  {
+    "file": "touch_display2_7inch_brief.pdf",
+    "url": "https://pip-assets.raspberrypi.com/categories/1083-raspberry-pi-touch-display-2/documents/RP-010429-MM-3-touch-display-2-7-inch-product-brief.pdf",
+    "sha256": "9a54a8d7621ef95cc0810362fc611781649443a326eefd9ffbcb98af6f92af29",
+    "bytes": 9702301
+  },
+  {
+    "file": "pi4_mechanical.pdf",
+    "url": "https://pip-assets.raspberrypi.com/categories/545-raspberry-pi-4-model-b/documents/RP-008343-DS-1-raspberry-pi-4-mechanical-drawing.pdf",
+    "sha256": "a5c88057563016631ebca26666fd672614fc9aaa1c59128a541612c7798e9809",
+    "bytes": 22819
+  }
+]

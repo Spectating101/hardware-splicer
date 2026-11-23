@@ -1,0 +1,204 @@
+{
+  "schema": "hs.keyboard-stepped-cut-solver.v1",
+  "source_sha256": "47f827a002c7de3be1a14aef81cbad1846ea1524730579beff1ddb7fb3f95525",
+  "method": "deterministic monotone-grid DP + exact Shapely buffered path collision replay",
+  "cut_points_mm": [
+    [
+      132.7767,
+      58.6557
+    ],
+    [
+      132.7767,
+      59.6361
+    ],
+    [
+      132.7767,
+      60.6164
+    ],
+    [
+      132.7767,
+      61.5967
+    ],
+    [
+      132.7767,
+      62.577
+    ],
+    [
+      132.7767,
+      63.5573
+    ],
+    [
+      132.7767,
+      64.5376
+    ],
+    [
+      132.7767,
+      65.5179
+    ],
+    [
+      132.7767,
+      66.4982
+    ],
+    [
+      132.7767,
+      67.4785
+    ],
+    [
+      132.7767,
+      68.4588
+    ],
+    [
+      132.7767,
+      69.4391
+    ],
+    [
+      132.7767,
+      70.4194
+    ],
+    [
+      132.7767,
+      71.3997
+    ],
+    [
+      132.7767,
+      72.38
+    ],
+    [
+      132.7767,
+      73.3603
+    ],
+    [
+      132.7767,
+      74.3406
+    ],
+    [
+      132.7767,
+      75.3209
+    ],
+    [
+      132.7767,
+      76.3012
+    ],
+    [
+      132.7767,
+      77.2815
+    ],
+    [
+      132.7767,
+      78.2618
+    ],
+    [
+      132.7767,
+      79.2421
+    ],
+    [
+      132.7767,
+      80.2224
+    ],
+    [
+      132.7767,
+      81.2027
+    ],
+    [
+      132.7767,
+      82.183
+    ],
+    [
+      132.7767,
+      83.1633
+    ],
+    [
+      132.7767,
+      84.1436
+    ],
+    [
+      132.7767,
+      85.1239
+    ],
+    [
+      132.7767,
+      86.1042
+    ],
+    [
+      132.7767,
+      87.0845
+    ],
+    [
+      133.7627,
+      88.0648
+    ],
+    [
+      132.7767,
+      89.0451
+    ],
+    [
+      132.7767,
+      90.0254
+    ],
+    [
+      132.7767,
+      91.0057
+    ],
+    [
+      132.7767,
+      91.986
+    ],
+    [
+      132.7767,
+      92.9663
+    ],
+    [
+      132.7767,
+      93.9466
+    ],
+    [
+      132.7767,
+      94.9269
+    ],
+    [
+      132.7767,
+      95.9072
+    ],
+    [
+      132.7767,
+      96.8875
+    ]
+  ],
+  "cut_path_type": "stepped_polyline",
+  "kerf_mm": 1.0,
+  "grid_step_mm": 1.0,
+  "max_lateral_step_mm": 3.0,
+  "objective_score": 60302.327,
+  "switch_candidates_left": 0,
+  "switch_candidates_right": 4,
+  "nominal_path_length_mm": 39.052,
+  "collision_counts": {
+    "pads": 0,
+    "vias": 1,
+    "switches": 1,
+    "critical": 0
+  },
+  "affected_nets": [
+    "/COL 0",
+    "/COL 1",
+    "/ROW 0",
+    "/ROW 1"
+  ],
+  "affected_net_count": 4,
+  "source_geometry_issues": [
+    "OVAL_PAD_APPROXIMATION",
+    "ZONE_BOUNDARY_RECONSTRUCTED_WITH_GEOMETRY_REPAIR"
+  ],
+  "modeled_clear_of_listed_components": false,
+  "source_footprints_may_have_alternative_layouts": true,
+  "physical_cut_authorized": false,
+  "release": "PROPOSED_CUT_ONLY_NOT_VERIFIED",
+  "blockers": [
+    "Actual installed switches, PCB stackup, case, plate and mounting keepouts not verified",
+    "Pads modeled with conservative circles; nonrectangular pads and tilted footprints approximate",
+    "Original PCB is a design reference, not a registered physical donor",
+    "No mechanical or fabrication authority; physical cutting prohibited until independently reviewed",
+    "Proposed path intersects recorded copper pads, vias, switches or critical components"
+  ],
+  "payload_sha256": "16556371a6488cd09152c6b2f196ea405d731a26728955cbb4527c19f9aba86d"
+}

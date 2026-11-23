@@ -3,9 +3,12 @@ from __future__ import annotations
 import hashlib
 import json
 import zipfile
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-from hardware_splicer.engineering_package import build_engineering_package
+import pytest
+
+from hardware_splicer.engineering_package import InvalidEngineeringPackage, build_engineering_package
 from hardware_splicer.project_store import ProjectStore
 
 
@@ -276,6 +279,25 @@ def test_engineering_package_is_reproducible_and_manifest_verified(tmp_path: Pat
         payload = entries[f"ENGINEERING_PACKAGE/{item['path']}"]
         assert hashlib.sha256(payload).hexdigest() == item["sha256"]
         assert len(payload) == item["size_bytes"]
+
+
+def test_package_rebuild_keeps_identical_zip_and_rejects_corruption(tmp_path: Path) -> None:
+    store = ProjectStore(tmp_path)
+    snapshot = _snapshot()
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        builds = [pool.submit(build_engineering_package, store, "rover", 7, snapshot) for _ in range(4)]
+        record = builds[0].result()
+        assert all(build.result() == record for build in builds)
+    path = store.root / "rover" / record["project_relative_zip"]
+    original = path.stat()
+    assert build_engineering_package(store, "rover", 7, snapshot) == record
+    assert path.stat().st_ino == original.st_ino
+    with path.open("r+b") as handle:
+        handle.write(b"XX")
+    with pytest.raises(InvalidEngineeringPackage, match="existing package ZIP does not match"):
+        build_engineering_package(store, "rover", 7, snapshot)
+    assert path.stat().st_size == original.st_size
+    assert not list(path.parent.glob(".*.tmp"))
 
 
 def test_engineering_package_omits_raw_content_and_preserves_trace(tmp_path: Path) -> None:

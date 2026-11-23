@@ -152,15 +152,24 @@ def build_graph_to_geometry(graph: dict) -> dict:
 
     for node in nodes:
         spec = find_module(node["moduleId"])
-        if spec is None:
+        declared_pins = list(node.get("pinIds") or [])
+        declared_footprint = str(node.get("footprint") or "")
+        registry_pins = {pin["id"] for pin in (spec or {}).get("pins") or []}
+        synthetic_package = spec is None or resolve_module_body_mm(node["moduleId"]) is None or bool(
+            node.get("netlistIdentity") and (
+                not set(declared_pins) <= registry_pins
+                or (declared_footprint and declared_footprint not in {node["moduleId"], resolve_module_footprint(node["moduleId"])})
+            )
+        )
+        if synthetic_package:
             from .arbitrary_placement import synthetic_module_spec
 
             spec = synthetic_module_spec(
-                str(node.get("moduleId") or ""),
+                "synthetic-package:" + str(node["id"]),
                 footprint=str(node.get("footprint") or ""),
                 value=str(node.get("value") or ""),
                 ref=str(node.get("ref") or node.get("id") or ""),
-                pin_ids=list(node.get("pinIds") or []) or None,
+                pin_ids=declared_pins or None,
             )
 
         pad_defs = resolve_module_pads(spec["id"], spec) or []
@@ -201,7 +210,9 @@ def build_graph_to_geometry(graph: dict) -> dict:
         pad_max_x = max(pad_xs)
 
         placed.append({
+            "node":      node,
             "nodeId":    node["id"],
+            "syntheticPackage": synthetic_package,
             "spec":      spec,
             "x":         center_x,
             "y":         center_y,
@@ -261,6 +272,12 @@ def build_graph_to_geometry(graph: dict) -> dict:
         for pin_id in p["pinOrder"]:
             pad_by_key[f"{p['nodeId']}|{pin_id}"] = {"placed": p, "pinId": pin_id}
 
+    source_net_names = {
+        frozenset(f"{pin['nodeId']}|{pin['pinId']}" for pin in net.get("pins") or []): str(net.get("name") or "")
+        for net in graph.get("source_nets") or []
+    }
+    reserved_names = set(source_net_names.values()) - {""}
+
     # Name nets; GND / +3V3 / +5V / Net-N
     root_to_net: dict[str, dict] = {}
     net_counter = 1
@@ -285,7 +302,10 @@ def build_graph_to_geometry(graph: dict) -> dict:
             roles.append(pin.get("role") if pin else None)
             voltages.append(pin.get("voltage") if pin else None)
 
-        if "gnd" in roles:
+        source_name = source_net_names.get(frozenset(members))
+        if source_name:
+            name = source_name
+        elif "gnd" in roles:
             name = "GND"
         else:
             v = next((x for x in voltages if x is not None), None)
@@ -296,6 +316,9 @@ def build_graph_to_geometry(graph: dict) -> dict:
             else:
                 name = f"Net-{net_counter}"
 
+        if not source_name:
+            while name in reserved_names:
+                name += "-preview"
         root_to_net[root] = {"id": net_counter, "name": name}
         net_counter += 1
 
@@ -323,7 +346,8 @@ def build_graph_to_geometry(graph: dict) -> dict:
             root = roots.get(net_key, net_key)
             net = root_to_net.get(root, {"id": 0, "name": ""})
             pads.append({
-                "num":        str(i + 1),
+                "num":        str(pin_id) if p["node"].get("netlistIdentity") else str(i + 1),
+                "source_pin_id": str(pin_id),
                 "wx":         pos["x"],
                 "wy":         pos["y"],
                 "net":        net,
@@ -334,9 +358,12 @@ def build_graph_to_geometry(graph: dict) -> dict:
                 "type":       "thru_hole",
             })
         footprints.append({
-            "ref":       f"U{idx + 1}",
-            "value":     p["spec"]["label"],
-            "footprint": resolve_module_footprint(p["spec"]["id"]),
+            "ref":       str(p["node"].get("ref") or f"U{idx + 1}"),
+            "value":     str(p["node"].get("value") or p["spec"]["label"]),
+            "footprint": ("HardwareSplicerPreview:" + str(p["node"].get("ref") or p["nodeId"])) if p["syntheticPackage"] else resolve_module_footprint(p["spec"]["id"]),
+            "source_footprint": str(p["node"].get("footprint") or ""),
+            "source_node_id": p["nodeId"],
+            "synthetic_package_geometry": p["syntheticPackage"],
             "layer":     "F.Cu",
             "at":        {"x": p["x"], "y": p["y"], "rot_deg": 0},
             "pads":      pads,
@@ -614,7 +641,7 @@ def build_graph_to_geometry(graph: dict) -> dict:
     for idx, p in enumerate(placed):
         silk_text.append({
             "layer":  "F.SilkS",
-            "text":   f"U{idx + 1}",
+            "text":   str(p["node"].get("ref") or f"U{idx + 1}"),
             "at":     {"x": p["x"], "y": p["y"] + p["hh"] - 1.2, "rot_deg": 0},
             "size_mm": 1.4,
         })
@@ -642,6 +669,30 @@ def build_graph_to_geometry(graph: dict) -> dict:
     bx1 = copper_max_x + edge_pad
     by1 = copper_max_y + edge_pad
 
+    synthetic_components = [
+        {
+            "node_id": fp["source_node_id"],
+            "source_ref": fp["ref"],
+            "declared_footprint": fp["source_footprint"],
+            "rendered_footprint": fp["footprint"],
+            "pad_geometry_basis": "synthetic_through_hole_preview",
+        }
+        for fp in footprints if fp["synthetic_package_geometry"]
+    ]
+    geometry_fidelity = {
+        "schema_version": "hardware_splicer.geometry_fidelity.v1",
+        "status": "logical_preview" if synthetic_components else "catalog_interfaces",
+        "requires_native_source_geometry": bool(synthetic_components),
+        "component_contracts_verified": False if synthetic_components else None,
+        "synthetic_components": synthetic_components,
+        "fabrication_blockers": [
+            f"{row['source_ref']}: {row['declared_footprint'] or 'unresolved package'} uses synthetic through-hole pads. "
+            "Use the original native PCB source/edit path and verify its actual footprint geometry before fabrication."
+            for row in synthetic_components
+        ],
+        "claim_boundary": "Source references, pin IDs and named nets are logical identity; generic pad placement does not establish package fit or electrical contracts.",
+    }
+
     return {
         "board": {
             "bbox_mm": {
@@ -654,6 +705,7 @@ def build_graph_to_geometry(graph: dict) -> dict:
             },
         },
         "nets":       list(root_to_net.values()),
+        "geometry_fidelity": geometry_fidelity,
         "footprints": footprints,
         "segments":   segments,
         "vias":       vias,

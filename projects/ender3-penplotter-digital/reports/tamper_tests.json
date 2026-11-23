@@ -1,0 +1,72 @@
+{
+  "case_id": "ender3-penplotter",
+  "physical_validation_performed": false,
+  "passed": true,
+  "cases": [
+    {
+      "name": "isolated_copy_without_large_assembly",
+      "passed": true,
+      "expected_integrity": true,
+      "observed_integrity": true,
+      "returncode": 0,
+      "rejected_checks": []
+    },
+    {
+      "name": "extrusion_decimal_word_rejected",
+      "passed": true,
+      "expected_integrity": false,
+      "observed_integrity": false,
+      "returncode": 1,
+      "rejected_checks": [
+        "verification_exception"
+      ]
+    },
+    {
+      "name": "duplicate_heater_setpoint_rejected",
+      "passed": true,
+      "expected_integrity": false,
+      "observed_integrity": false,
+      "returncode": 1,
+      "rejected_checks": [
+        "verification_exception"
+      ]
+    },
+    {
+      "name": "hidden_excess_Z_move_rejected",
+      "passed": true,
+      "expected_integrity": false,
+      "observed_integrity": false,
+      "returncode": 1,
+      "rejected_checks": [
+        "Gcode_CSV_roundtrip",
+        "all_acceptance_constraints_recomputed",
+        "simulation_constraints_recomputed",
+        "simulation_metrics_recomputed",
+        "engineering_summary_recomputed"
+      ]
+    },
+    {
+      "name": "consistent_but_forged_numeric_acceptance_rejected",
+      "passed": true,
+      "expected_integrity": false,
+      "observed_integrity": false,
+      "returncode": 1,
+      "rejected_checks": [
+        "all_acceptance_constraints_recomputed",
+        "simulation_constraints_recomputed",
+        "simulation_metrics_recomputed",
+        "engineering_summary_recomputed"
+      ]
+    },
+    {
+      "name": "self_consistent_forged_failed_goal_rejected",
+      "passed": true,
+      "expected_integrity": false,
+      "observed_integrity": false,
+      "returncode": 1,
+      "rejected_checks": [
+        "all_acceptance_constraints_recomputed"
+      ]
+    }
+  ]
+}
