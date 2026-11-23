@@ -1,0 +1,40 @@
+{
+  "schema": "policylab.plrs6_offline_intake_receipt.v1",
+  "decision": "TEST_FIXTURE_STRUCTURALLY_INGESTED_NO_PHYSICAL_CLAIMS",
+  "capture_kind": "TEST_FIXTURE",
+  "manifest_sha256": "443f6fa9243527bd2078d6ddbd5809cef98296e4b43e383b2c56ec84c1476017",
+  "evidence_root_sha256": "8207a99b8696bad5640764fc1d33333fa8f5fe0c375174776d5bece7b2bb3f38",
+  "normalized_capture_hashes_verified": 2,
+  "original_vendor_exports_verified": false,
+  "supporting_file_hashes_verified": 6,
+  "channel_diagnostics": {
+    "source_dc": {
+      "intervals": 3,
+      "primary_total_wh": 0.123143541,
+      "reference_total_wh": 0.123145902,
+      "max_abs_window_difference_wh": 7.87e-7,
+      "signed_difference_wh": 0.000002361,
+      "diagnostic_disagreement_windows": 0,
+      "physical_channel_identity_verified": false
+    }
+  },
+  "diagnostic_warnings": [],
+  "claimed_distinct_paths_only": true,
+  "calibration_documents_content_verified": false,
+  "independent_device_custody_verified": false,
+  "physical_channel_identity_verified": false,
+  "circuit_safety_review_verified": false,
+  "timebase_verified_against_external_clock": false,
+  "physical_ready": false,
+  "grid_export_eligible": false,
+  "spk_issuance_allowed": false,
+  "blockers": [
+    "Instrument serials and logger identities are self-declared, not independently attested",
+    "Digest equality proves submitted file integrity, not authenticity or capture origin",
+    "Calibration documents, metrological uncertainty and device installations require external review",
+    "Electrical setup, circuit safety, custody and actual timestamps require independent inspection",
+    "No utility export, renewable certification or SPK issuance is established"
+  ],
+  "frozen_protocol_sha256": "cc81825c7c2b86745df060898c230bb3af9c3f54ddcb7b5cd7800db0c459202d",
+  "frozen_protocol_commit": "a7aab92661c1520ff208ed3fdfc4d2c5ea24f0c8"
+}

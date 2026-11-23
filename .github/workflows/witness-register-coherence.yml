@@ -1,0 +1,36 @@
+name: Witness raw-register coherence (research fixture)
+
+on:
+  pull_request:
+    paths:
+      - 'hardware/reference_designs/low_voltage_witness_fixture_v0/measurement_screen.py'
+      - 'hardware/reference_designs/low_voltage_witness_fixture_v0/test_measurement_screen.py'
+      - '.github/workflows/witness-register-coherence.yml'
+  push:
+    branches: [fix/witness-raw-register-coherence-20261120]
+    paths:
+      - 'hardware/reference_designs/low_voltage_witness_fixture_v0/measurement_screen.py'
+      - 'hardware/reference_designs/low_voltage_witness_fixture_v0/test_measurement_screen.py'
+      - '.github/workflows/witness-register-coherence.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-fixture-coherence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate Python syntax
+        run: |
+          python -m py_compile hardware/reference_designs/low_voltage_witness_fixture_v0/measurement_screen.py
+          python -m py_compile hardware/reference_designs/low_voltage_witness_fixture_v0/test_measurement_screen.py
+      - name: Run strict source-coherence and adversarial fixture tests
+        run: |
+          python -m unittest discover \
+            -s hardware/reference_designs/low_voltage_witness_fixture_v0 \
+            -p test_measurement_screen.py -v

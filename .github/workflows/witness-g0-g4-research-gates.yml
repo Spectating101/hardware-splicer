@@ -1,0 +1,50 @@
+name: Witness G0–G4 evidence-readiness gates (research)
+
+on:
+  pull_request:
+    paths:
+      - 'projects/witness-g0-g4/**'
+      - 'hardware/reference_designs/low_voltage_witness_fixture_v0/measurement_screen.py'
+      - 'hardware/reference_designs/low_voltage_witness_fixture_v0/test_measurement_screen.py'
+      - '.github/workflows/witness-g0-g4-research-gates.yml'
+  push:
+    branches: [research/witness-g0-g4-validation-20261120]
+    paths:
+      - 'projects/witness-g0-g4/**'
+      - 'hardware/reference_designs/low_voltage_witness_fixture_v0/measurement_screen.py'
+      - 'hardware/reference_designs/low_voltage_witness_fixture_v0/test_measurement_screen.py'
+      - '.github/workflows/witness-g0-g4-research-gates.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  research-proof:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Python syntax
+        run: python -m compileall -q projects/witness-g0-g4
+      - name: G0–G4 model, source coherence, counterexample and non-promotion tests
+        run: python -m unittest discover -s projects/witness-g0-g4 -p 'test_*.py' -v
+      - name: Original G2 raw-register coherence regression
+        run: python -m unittest discover -s hardware/reference_designs/low_voltage_witness_fixture_v0 -p 'test_measurement_screen.py' -v
+      - name: Reproduce saved digital receipt; retain physical HOLD
+        run: |
+          python projects/witness-g0-g4/assessment.py --verify projects/witness-g0-g4/evidence/digital-gate-assessment.v1.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('projects/witness-g0-g4/evidence/digital-gate-assessment.v1.json').read_text())
+          assert r['gates']['G0']['status']=='DIGITAL_MODEL_PASS_PHYSICAL_BUILD_HOLD'
+          assert all(r[field] is False for field in ('build_authorized','power_on_authorized','physical_measurements_established','policy_lab_financial_claim_authorized'))
+          print('AUDIT GATE: ALL PHYSICAL AND FINANCIAL AUTHORITY HELD')
+          PY

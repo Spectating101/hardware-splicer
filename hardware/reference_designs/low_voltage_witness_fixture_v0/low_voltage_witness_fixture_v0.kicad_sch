@@ -1,0 +1,818 @@
+(kicad_sch
+(version 20250114)
+(generator "eeschema")
+(generator_version "9.0")
+(uuid "5a8d1fa3-f2dc-48eb-99a6-dca90b04a2b5")
+(paper "A4")
+(title_block (title "5V 0.5A dual-path DC witness fixture, carrier OUTSIDE PCB")
+(date "2026-11-20") (rev "v0 candidate - unbuilt")
+(company "Hardware Splicer") (comment 1 "Physical review required; low-power 5V/0.5A commissioning only")
+(comment 2 "Adafruit INA228 HIGH SIDE VBUS jumper OPEN, VBUS = LOAD_PLUS")
+(comment 3 "No test equipment, assembly, calibration or electrical power-on performed"))
+(lib_symbols
+(symbol "Connector:TestPoint"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0.762)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "TP"
+			(at 0 6.858 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "TestPoint"
+			(at 0 5.08 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 5.08 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 5.08 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "test point"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "test point tp"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "Pin* Test*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "TestPoint_0_1"
+			(circle
+				(center 0 3.302)
+				(radius 0.762)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "TestPoint_1_1"
+			(pin passive line
+				(at 0 0 90)
+				(length 2.54)
+				(name "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+(symbol "Connector_Generic:Conn_01x02"
+		(pin_names
+			(offset 1.016)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "J"
+			(at 0 2.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Conn_01x02"
+			(at 0 -5.08 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "connector"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "Connector*:*_1x??_*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "Conn_01x02_1_1"
+			(rectangle
+				(start -1.27 1.27)
+				(end 1.27 -3.81)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+			(rectangle
+				(start -1.27 0.127)
+				(end 0 -0.127)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -1.27 -2.413)
+				(end 0 -2.667)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(pin passive line
+				(at -5.08 0 0)
+				(length 3.81)
+				(name "Pin_1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -5.08 -2.54 0)
+				(length 3.81)
+				(name "Pin_2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+(symbol "Device:Fuse"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "F"
+			(at 2.032 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "Fuse"
+			(at -1.905 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at -1.778 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Fuse"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "fuse"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "*Fuse*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "Fuse_0_1"
+			(rectangle
+				(start -0.762 -2.54)
+				(end 0.762 2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0 2.54) (xy 0 -2.54)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "Fuse_1_1"
+			(pin passive line
+				(at 0 3.81 270)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -3.81 90)
+				(length 1.27)
+				(name "~"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+(symbol "Device:R_Shunt"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "R"
+			(at -4.445 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "R_Shunt"
+			(at -2.54 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at -1.778 0 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Shunt resistor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_keywords" "R res shunt resistor"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "ki_fp_filters" "R_*Shunt*"
+			(at 0 0 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "R_Shunt_0_1"
+			(rectangle
+				(start -1.016 -2.54)
+				(end 1.016 2.54)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0 -2.54) (xy 1.27 -2.54)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.27 2.54) (xy 0 2.54)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "R_Shunt_1_1"
+			(pin passive line
+				(at 0 5.08 270)
+				(length 2.54)
+				(name "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 0 -5.08 90)
+				(length 2.54)
+				(name "4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 3.81 2.54 180)
+				(length 2.54)
+				(name "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 3.81 -2.54 180)
+				(length 2.54)
+				(name "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+)
+(symbol
+(lib_id "Connector_Generic:Conn_01x02")
+(at 41.91 55.88 0)
+(unit 1)
+(exclude_from_sim no)
+(in_bom yes)
+(on_board yes)
+(dnp no)
+(uuid "6258da1f-b2aa-5682-928e-1ea30ca25a11")
+(property "Reference" "J1" (at 49.53 47.88 0) (effects (font (size 1.0 1.0))))
+(property "Value" "SOURCE_5V_0P5A" (at 49.53 50.88 0) (effects (font (size 1.0 1.0))))
+(property "Footprint" "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2_1x02_P5.00mm_Horizontal" (at 41.91 55.88 0) (effects (font (size 1.0 1.0)) (hide yes)))
+(pin "1" (uuid "c97f319a-bfc1-5710-907f-8c735321857b"))
+(pin "2" (uuid "0801b4b2-63f7-545e-90f9-d2be8e73ecda"))
+(instances (project "low_voltage_witness_fixture_v0" (path "/5a8d1fa3-f2dc-48eb-99a6-dca90b04a2b5" (reference "J1") (unit 1))))
+)
+(wire (pts (xy 36.83 55.88) (xy 39.37 55.88)) (stroke (width 0) (type default)) (uuid "eb59515a-7d69-51dd-9e83-6ee6bb5d1c8e"))
+(label "SRC_PLUS" (at 39.37 55.88 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "6da96497-824f-531e-a0ba-e53a64109803"))
+(wire (pts (xy 36.83 58.42) (xy 39.37 58.42)) (stroke (width 0) (type default)) (uuid "cf937176-633e-50cc-a474-e0049cc561c7"))
+(label "RETURN" (at 39.37 58.42 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "11133cad-ff70-530f-ac50-1bde78b25421"))
+(symbol
+(lib_id "Device:Fuse")
+(at 87.63 55.88 0)
+(unit 1)
+(exclude_from_sim no)
+(in_bom yes)
+(on_board yes)
+(dnp no)
+(uuid "e262b788-6b63-5d9a-b4fc-ba856a0cb004")
+(property "Reference" "F1" (at 95.25 47.88 0) (effects (font (size 1.0 1.0))))
+(property "Value" "1A_FUSE_CANDIDATE" (at 95.25 50.88 0) (effects (font (size 1.0 1.0))))
+(property "Footprint" "Fuse:Fuseholder_Cylinder-5x20mm_Schurter_FAB_0031-355x_Horizontal_Closed" (at 87.63 55.88 0) (effects (font (size 1.0 1.0)) (hide yes)))
+(pin "1" (uuid "455df291-c783-5357-a7c7-4aa8f9bb11d1"))
+(pin "2" (uuid "86636309-352e-52b3-baa1-6f630395ad30"))
+(instances (project "low_voltage_witness_fixture_v0" (path "/5a8d1fa3-f2dc-48eb-99a6-dca90b04a2b5" (reference "F1") (unit 1))))
+)
+(wire (pts (xy 87.63 52.07) (xy 87.63 54.61)) (stroke (width 0) (type default)) (uuid "ca35c0a0-009e-57f0-a14b-daa44713e1b1"))
+(label "SRC_PLUS" (at 87.63 54.61 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "e5ef2821-5623-54e5-b910-9be4f965549b"))
+(wire (pts (xy 87.63 59.69) (xy 87.63 57.15)) (stroke (width 0) (type default)) (uuid "fc4a32ac-4528-5194-b00d-90e1e547f999"))
+(label "FUSED_PLUS" (at 87.63 57.15 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "2628aab2-456e-52f3-8210-f686d9c58886"))
+(symbol
+(lib_id "Connector_Generic:Conn_01x02")
+(at 129.54 55.88 0)
+(unit 1)
+(exclude_from_sim no)
+(in_bom yes)
+(on_board yes)
+(dnp no)
+(uuid "6ecb64bd-1d8a-52e6-947b-a27b75205191")
+(property "Reference" "J3" (at 137.16 47.88 0) (effects (font (size 1.0 1.0))))
+(property "Value" "ADA_IN_PLUS_MINUS" (at 137.16 50.88 0) (effects (font (size 1.0 1.0))))
+(property "Footprint" "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2_1x02_P5.00mm_Horizontal" (at 129.54 55.88 0) (effects (font (size 1.0 1.0)) (hide yes)))
+(pin "1" (uuid "8e93fe2f-1ca9-51c7-b034-1f2cfb4dccb2"))
+(pin "2" (uuid "fe2922f7-3bc8-56a7-8aff-e9119c260494"))
+(instances (project "low_voltage_witness_fixture_v0" (path "/5a8d1fa3-f2dc-48eb-99a6-dca90b04a2b5" (reference "J3") (unit 1))))
+)
+(wire (pts (xy 124.46 55.88) (xy 127 55.88)) (stroke (width 0) (type default)) (uuid "85d393c0-3204-565d-bd9f-15749868a36b"))
+(label "FUSED_PLUS" (at 127 55.88 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "07641847-4e11-5015-b34a-fc9d4ea7a78c"))
+(wire (pts (xy 124.46 58.42) (xy 127 58.42)) (stroke (width 0) (type default)) (uuid "b8661213-9a56-56a0-baa6-fb744f2c2e55"))
+(label "ADA_OUT" (at 127 58.42 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "f407ea0d-4d7b-51e1-8a4f-f2435edda07e"))
+(symbol
+(lib_id "Device:R_Shunt")
+(at 177.8 55.88 0)
+(unit 1)
+(exclude_from_sim no)
+(in_bom yes)
+(on_board yes)
+(dnp no)
+(uuid "b3586d6e-abfa-55f7-a382-25401ff498c8")
+(property "Reference" "R1" (at 185.42 47.88 0) (effects (font (size 1.0 1.0))))
+(property "Value" "WSK2512R0100FEA_10mOhm_1pct" (at 185.42 50.88 0) (effects (font (size 1.0 1.0))))
+(property "Footprint" "Resistor_SMD:R_Shunt_Vishay_WSK2512_6332Metric_T1.19mm" (at 177.8 55.88 0) (effects (font (size 1.0 1.0)) (hide yes)))
+(pin "1" (uuid "7fe4769c-a3f4-5751-9b44-4ff7c0ec65aa"))
+(pin "4" (uuid "17781533-2240-538d-8ee5-7dac5920e7fa"))
+(pin "2" (uuid "db9b9ec0-b35a-55af-9f56-76d501829e4e"))
+(pin "3" (uuid "6f35d164-8862-5f05-9d68-f5c32160d745"))
+(instances (project "low_voltage_witness_fixture_v0" (path "/5a8d1fa3-f2dc-48eb-99a6-dca90b04a2b5" (reference "R1") (unit 1))))
+)
+(wire (pts (xy 177.8 50.8) (xy 177.8 53.34)) (stroke (width 0) (type default)) (uuid "b1d281b7-2452-503a-ab77-c10aac2b9bdc"))
+(label "ADA_OUT" (at 177.8 53.34 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "44d05571-5424-5eac-999b-7ec7cf920423"))
+(wire (pts (xy 177.8 60.96) (xy 177.8 58.42)) (stroke (width 0) (type default)) (uuid "5455514c-0513-5d00-bbc7-85272b2629c3"))
+(label "LOAD_PLUS" (at 177.8 58.42 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "2bd851d1-f2ae-582e-b93c-f7a4e961d3d8"))
+(wire (pts (xy 181.61 53.34) (xy 179.07 53.34)) (stroke (width 0) (type default)) (uuid "4f46b625-502b-5feb-9092-a0a62e3ce369"))
+(label "REF_SENSE_P" (at 179.07 53.34 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "09043401-800c-5fb0-8dd8-2cc975b7f365"))
+(wire (pts (xy 181.61 58.42) (xy 179.07 58.42)) (stroke (width 0) (type default)) (uuid "2663a0e3-79c5-528a-9d9a-465cf29f2b08"))
+(label "REF_SENSE_N" (at 179.07 58.42 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "834f7e54-2565-558c-81ca-a334acfe05de"))
+(symbol
+(lib_id "Connector_Generic:Conn_01x02")
+(at 217.17 55.88 0)
+(unit 1)
+(exclude_from_sim no)
+(in_bom yes)
+(on_board yes)
+(dnp no)
+(uuid "ce421d4a-1b13-577d-8809-a761653f573a")
+(property "Reference" "J2" (at 224.79 47.88 0) (effects (font (size 1.0 1.0))))
+(property "Value" "LOAD_5V_0P5A" (at 224.79 50.88 0) (effects (font (size 1.0 1.0))))
+(property "Footprint" "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2_1x02_P5.00mm_Horizontal" (at 217.17 55.88 0) (effects (font (size 1.0 1.0)) (hide yes)))
+(pin "1" (uuid "824d3dcd-4e84-501b-ace5-d1a04c2ad36f"))
+(pin "2" (uuid "fea09901-9f9e-53e5-9d53-298fbab2a551"))
+(instances (project "low_voltage_witness_fixture_v0" (path "/5a8d1fa3-f2dc-48eb-99a6-dca90b04a2b5" (reference "J2") (unit 1))))
+)
+(wire (pts (xy 212.09 55.88) (xy 214.63 55.88)) (stroke (width 0) (type default)) (uuid "c866bb67-4b9a-5402-bbdc-b9a59c57e343"))
+(label "LOAD_PLUS" (at 214.63 55.88 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "63124617-f580-51f2-b56e-9c0e82e2633a"))
+(wire (pts (xy 212.09 58.42) (xy 214.63 58.42)) (stroke (width 0) (type default)) (uuid "7fbcc9ea-3ead-5f8b-8748-91fb892ed4d3"))
+(label "RETURN" (at 214.63 58.42 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "bfdce3ab-f9bd-5dab-8ea2-28f5d61ac9df"))
+(symbol
+(lib_id "Connector_Generic:Conn_01x02")
+(at 217.17 88.9 0)
+(unit 1)
+(exclude_from_sim no)
+(in_bom yes)
+(on_board yes)
+(dnp no)
+(uuid "aa580e2d-daca-53c1-9342-06eaaba5999b")
+(property "Reference" "J4" (at 224.79 80.9 0) (effects (font (size 1.0 1.0))))
+(property "Value" "ADA_VBUS_GND" (at 224.79 83.9 0) (effects (font (size 1.0 1.0))))
+(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" (at 217.17 88.9 0) (effects (font (size 1.0 1.0)) (hide yes)))
+(pin "1" (uuid "002e66e4-99d2-5b1b-82ec-833c78c1d02f"))
+(pin "2" (uuid "6940bcab-a98e-5439-a07d-dcd0e100edb4"))
+(instances (project "low_voltage_witness_fixture_v0" (path "/5a8d1fa3-f2dc-48eb-99a6-dca90b04a2b5" (reference "J4") (unit 1))))
+)
+(wire (pts (xy 212.09 88.9) (xy 214.63 88.9)) (stroke (width 0) (type default)) (uuid "6315d439-b506-54ba-a4db-ae3ad3db08ab"))
+(label "LOAD_PLUS" (at 214.63 88.9 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "52b41f2a-bdea-517c-9a8c-a0a48dd18a59"))
+(wire (pts (xy 212.09 91.44) (xy 214.63 91.44)) (stroke (width 0) (type default)) (uuid "2b9d77ca-5e3a-5d38-ad51-468b2428b40c"))
+(label "RETURN" (at 214.63 91.44 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "265780dc-1b7f-53d1-98dc-a4787913e529"))
+(symbol
+(lib_id "Connector_Generic:Conn_01x02")
+(at 176.53 88.9 0)
+(unit 1)
+(exclude_from_sim no)
+(in_bom yes)
+(on_board yes)
+(dnp no)
+(uuid "3af5bcc9-d467-56a5-8204-ebc4889d2f60")
+(property "Reference" "J5" (at 184.15 80.9 0) (effects (font (size 1.0 1.0))))
+(property "Value" "REF_SHUNT_KELVIN" (at 184.15 83.9 0) (effects (font (size 1.0 1.0))))
+(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" (at 176.53 88.9 0) (effects (font (size 1.0 1.0)) (hide yes)))
+(pin "1" (uuid "0eaae074-6e0f-5cb1-8a57-be0764c5f8a5"))
+(pin "2" (uuid "66536283-d560-5a9b-986a-15f7ffd9d5fe"))
+(instances (project "low_voltage_witness_fixture_v0" (path "/5a8d1fa3-f2dc-48eb-99a6-dca90b04a2b5" (reference "J5") (unit 1))))
+)
+(wire (pts (xy 171.45 88.9) (xy 173.99 88.9)) (stroke (width 0) (type default)) (uuid "4502ed30-e7a9-5da6-87f9-0779c97a14f7"))
+(label "REF_SENSE_P" (at 173.99 88.9 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "c9f18ed6-a189-5af2-9b88-9ac06876135d"))
+(wire (pts (xy 171.45 91.44) (xy 173.99 91.44)) (stroke (width 0) (type default)) (uuid "41a0b558-7d68-5360-b874-b622d71101e5"))
+(label "REF_SENSE_N" (at 173.99 91.44 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "9d125b4c-874f-59ae-b7a1-b1d7cc35aef9"))
+(symbol
+(lib_id "Connector_Generic:Conn_01x02")
+(at 217.17 118.11 0)
+(unit 1)
+(exclude_from_sim no)
+(in_bom yes)
+(on_board yes)
+(dnp no)
+(uuid "3e11fae5-a613-54e9-aec2-e2466077cd26")
+(property "Reference" "J6" (at 224.79 110.11 0) (effects (font (size 1.0 1.0))))
+(property "Value" "REF_LOAD_VBUS" (at 224.79 113.11 0) (effects (font (size 1.0 1.0))))
+(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" (at 217.17 118.11 0) (effects (font (size 1.0 1.0)) (hide yes)))
+(pin "1" (uuid "928f9ed4-a88c-5e0f-8eb2-ac08feb5ff96"))
+(pin "2" (uuid "67d81d31-2fd2-5fe4-9352-1685a75db1d5"))
+(instances (project "low_voltage_witness_fixture_v0" (path "/5a8d1fa3-f2dc-48eb-99a6-dca90b04a2b5" (reference "J6") (unit 1))))
+)
+(wire (pts (xy 212.09 118.11) (xy 214.63 118.11)) (stroke (width 0) (type default)) (uuid "81b3aa2a-16ec-5dc7-941b-309676aa5c1a"))
+(label "LOAD_PLUS" (at 214.63 118.11 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "ae866b8f-0d8a-55a0-a674-619cc66d731f"))
+(wire (pts (xy 212.09 120.65) (xy 214.63 120.65)) (stroke (width 0) (type default)) (uuid "2e815323-fa11-5b28-864f-c752613f447c"))
+(label "RETURN" (at 214.63 120.65 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "9db147e9-bd60-5a16-9a85-24aff2909a53"))
+(symbol
+(lib_id "Connector:TestPoint")
+(at 158.75 116.84 0)
+(unit 1)
+(exclude_from_sim no)
+(in_bom no)
+(on_board yes)
+(dnp no)
+(uuid "4f199ad2-84bf-5db2-8f14-0cbe449f5400")
+(property "Reference" "TP1" (at 166.37 108.84 0) (effects (font (size 1.0 1.0))))
+(property "Value" "REF_SENSE_P" (at 166.37 111.84 0) (effects (font (size 1.0 1.0))))
+(property "Footprint" "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm" (at 158.75 116.84 0) (effects (font (size 1.0 1.0)) (hide yes)))
+(pin "1" (uuid "65357708-9720-5df3-886e-493c5bb7f25d"))
+(instances (project "low_voltage_witness_fixture_v0" (path "/5a8d1fa3-f2dc-48eb-99a6-dca90b04a2b5" (reference "TP1") (unit 1))))
+)
+(wire (pts (xy 158.75 116.84) (xy 158.75 114.3)) (stroke (width 0) (type default)) (uuid "38c8ee61-9a17-5a6f-8663-d3b4ce9df88b"))
+(label "REF_SENSE_P" (at 158.75 114.3 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "ad830c2d-64a1-5bec-b859-acf8b6580455"))
+(symbol
+(lib_id "Connector:TestPoint")
+(at 176.53 116.84 0)
+(unit 1)
+(exclude_from_sim no)
+(in_bom no)
+(on_board yes)
+(dnp no)
+(uuid "4c4f7ec7-5f44-5bff-a259-c1f779785c4f")
+(property "Reference" "TP2" (at 184.15 108.84 0) (effects (font (size 1.0 1.0))))
+(property "Value" "REF_SENSE_N" (at 184.15 111.84 0) (effects (font (size 1.0 1.0))))
+(property "Footprint" "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm" (at 176.53 116.84 0) (effects (font (size 1.0 1.0)) (hide yes)))
+(pin "1" (uuid "ea9138c6-a768-5452-bc29-5599faaac3e6"))
+(instances (project "low_voltage_witness_fixture_v0" (path "/5a8d1fa3-f2dc-48eb-99a6-dca90b04a2b5" (reference "TP2") (unit 1))))
+)
+(wire (pts (xy 176.53 116.84) (xy 176.53 114.3)) (stroke (width 0) (type default)) (uuid "8b8c72e7-2bfb-5aa9-a71b-65c906c5e1b5"))
+(label "REF_SENSE_N" (at 176.53 114.3 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "a0eedfa6-94c9-5976-8fba-373d1ba2b830"))
+(symbol
+(lib_id "Connector:TestPoint")
+(at 193.04 144.78 0)
+(unit 1)
+(exclude_from_sim no)
+(in_bom no)
+(on_board yes)
+(dnp no)
+(uuid "28a1ccbf-21e1-5cea-ac18-cf9e9dc51ae5")
+(property "Reference" "TP3" (at 200.66 136.78 0) (effects (font (size 1.0 1.0))))
+(property "Value" "LOAD_PLUS" (at 200.66 139.78 0) (effects (font (size 1.0 1.0))))
+(property "Footprint" "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm" (at 193.04 144.78 0) (effects (font (size 1.0 1.0)) (hide yes)))
+(pin "1" (uuid "7c14537d-52c5-514b-9c1e-aa1236748959"))
+(instances (project "low_voltage_witness_fixture_v0" (path "/5a8d1fa3-f2dc-48eb-99a6-dca90b04a2b5" (reference "TP3") (unit 1))))
+)
+(wire (pts (xy 193.04 144.78) (xy 193.04 142.24)) (stroke (width 0) (type default)) (uuid "9738d95d-1680-5af7-8e91-745e0d2a2a3c"))
+(label "LOAD_PLUS" (at 193.04 142.24 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "39a8fa43-2192-533c-ad6a-1021676fe449"))
+(symbol
+(lib_id "Connector:TestPoint")
+(at 217.17 144.78 0)
+(unit 1)
+(exclude_from_sim no)
+(in_bom no)
+(on_board yes)
+(dnp no)
+(uuid "20e0fe6e-90c6-5d42-8c54-dbe490c86d80")
+(property "Reference" "TP4" (at 224.79 136.78 0) (effects (font (size 1.0 1.0))))
+(property "Value" "RETURN" (at 224.79 139.78 0) (effects (font (size 1.0 1.0))))
+(property "Footprint" "TestPoint:TestPoint_THTPad_D2.0mm_Drill1.0mm" (at 217.17 144.78 0) (effects (font (size 1.0 1.0)) (hide yes)))
+(pin "1" (uuid "fe7f30f5-c6e8-5299-ab7f-d3c13608d845"))
+(instances (project "low_voltage_witness_fixture_v0" (path "/5a8d1fa3-f2dc-48eb-99a6-dca90b04a2b5" (reference "TP4") (unit 1))))
+)
+(wire (pts (xy 217.17 144.78) (xy 217.17 142.24)) (stroke (width 0) (type default)) (uuid "adeaa0ab-0d94-5d7d-b8d0-a245eacd068a"))
+(label "RETURN" (at 217.17 142.24 0) (effects (font (size 1.0 1.0)) (justify left bottom)) (uuid "251cfd2b-7e85-5f47-9270-8e55757e158e"))
+(text "POWER OFF before connecting J1/J3/J2. J3 is NOT a shorting jumper: route full load current through the external Adafruit INA228 VIN+ -> VIN- terminals.\nR1 uses 4-terminal WSK2512; pad 1/4 carry load, pad 2/3 are sense ONLY.\nJ4 is Adafruit VBUS at the J2 load boundary + return. Leave board VBUS-to-VIN+ jumper OPEN.\nJ5/J6 require independent reference equipment with documented paired readings; not 2 independent meters in this PCB.\n5V max, 0.5A nominal; current-limited isolated DC supply, proper 1A fuse, 10 ohm / 10W load external.\nUNBUILT and NOT POWER-AUTHORIZED. No mains, solar, battery, or 24V high-power operation." (exclude_from_sim no) (at 130 173 0) (effects (font (size 1.1 1.1))) (uuid "574dbc3e-3e27-5588-b9a3-89dde24d727c"))
+)

@@ -1,0 +1,25 @@
+{
+  "capture_kind": "TEST_FIXTURE",
+  "channel": "source_dc",
+  "environment": {
+    "battery_installed": false,
+    "solar_panel_installed": false,
+    "utility_grid_connected": false
+  },
+  "maximum_sample_gap_seconds": 1.5,
+  "primary": {
+    "device_id": "fixture_ada228_5v",
+    "logger_id": "fixture_ina228_logger"
+  },
+  "reference": {
+    "device_id": "fixture_wsk2512_ref",
+    "logger_id": "fixture_analytical_logger",
+    "shunt_resistance_ohms": 0.01,
+    "voltage_current_pairing": "Simulated simultaneous fixture values, not a physical DMM"
+  },
+  "schema": "policylab.dc_bench_capture_config.v1",
+  "window": {
+    "end_utc": "2026-11-20T00:03:00Z",
+    "start_utc": "2026-11-20T00:00:00Z"
+  }
+}

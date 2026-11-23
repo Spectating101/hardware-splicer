@@ -1,0 +1,109 @@
+{
+  "schema": "hs.witness_g0_g4_campaign.experimental.v1",
+  "campaign_id": "HS-PL-WITNESS-G0-G4-20261120",
+  "source": {
+    "station_spec": "hardware/reference_designs/low_voltage_witness_fixture_v0/station-spec-5v.json",
+    "sha256": "78257576dd6b78c158ed35157ade26d79a10ee9071b9d704758d0c17e29ad016",
+    "revision_status": "ORIGINAL_UNCHANGED"
+  },
+  "criteria": {
+    "bus_min_v": 4.75,
+    "bus_max_v": 5.25,
+    "load_power_ceiling_w": 2.5,
+    "design_reserve_fraction": 0.1,
+    "minimum_load_current_a": 0.34,
+    "series_resistance_max_ohm": 0.15,
+    "max_source_current_a_assumption": 0.65
+  },
+  "candidates": [
+    {
+      "id": "original_10R_5pct",
+      "ohms": 10,
+      "tolerance_pct": 5,
+      "qualification": "ORIGINAL_CONTROL",
+      "source_url": null
+    },
+    {
+      "id": "12R_5pct",
+      "ohms": 12,
+      "tolerance_pct": 5,
+      "qualification": "UNSELECTED_HS_360_MODEL",
+      "source_url": null
+    },
+    {
+      "id": "13R_5pct",
+      "ohms": 13,
+      "tolerance_pct": 5,
+      "qualification": "UNSELECTED_HS_359_MODEL",
+      "source_url": "https://www.ohmite.com/catalog/90-series/95J13RE/"
+    },
+    {
+      "id": "13R_1pct_TE355013RFT",
+      "ohms": 13,
+      "tolerance_pct": 1,
+      "qualification": "MANUFACTURER_IDENTIFIED_NOT_PROCURED",
+      "source_url": "https://www.te.com/en/product-2-2176403-8.html"
+    },
+    {
+      "id": "15R_5pct",
+      "ohms": 15,
+      "tolerance_pct": 5,
+      "qualification": "CURRENT_FLOOR_NEGATIVE_CONTROL",
+      "source_url": null
+    }
+  ],
+  "selected_for_digital_screen": "13R_1pct_TE355013RFT",
+  "engineering_provenance": {
+    "load_part_mpn": "TE 355013RFT / 2-2176403-8",
+    "load_nominal_w_rating": 5,
+    "load_physical_fit_verified": false,
+    "load_stock_in_taiwan_verified": false,
+    "load_thermal_mounting_verified": false,
+    "reference_shunt_mpn": "Vishay WSK2512R0100FEA",
+    "reference_shunt_calibration_verified": false,
+    "reference_dmm_candidate": "Siglent SDM3055",
+    "dmm_serial_and_calibration_verified": false,
+    "reference_two_channel_timing_verified": false,
+    "supply_candidate": "Siglent SPD3303X CH1 (not CH3)",
+    "supply_selected_or_bench_verified": false,
+    "source_output_ceiling_verified": false,
+    "independent_overvoltage_protection_verified": false,
+    "source_fault_current_characterized": false,
+    "fuse_and_holder_mpn_selected": false,
+    "fuse_dc_interruption_coordination_verified": false,
+    "earth_isolation_and_i2c_verified": false,
+    "wiring_mechanics_thermal_verified": false,
+    "original_board_fabricated": false,
+    "external_second_operator_verified": false,
+    "documentation": [
+      "https://www.te.com/en/product-2-2176403-8.html",
+      "https://www.ohmite.com/catalog/90-series/95J13RE/",
+      "https://www.siglent.com/na/products-overview/spd3303x-x-e/",
+      "https://siglent.oss-cn-shenzhen.aliyuncs.com/English_content/Document/Digital%20Multimeters/SDM3055_datasheet_e04a.pdf",
+      "https://www.schurter.com/en/knowledge/fuse-link",
+      "https://www.ti.com/product/INA228",
+      "https://www.digikey.com/en/products/detail/vishay-dale/WSK2512R0100FEA/12142494"
+    ]
+  },
+  "measurement_protocol": {
+    "reference_shunt_ohms_nominal": 0.01,
+    "reference_shunt_tolerance_pct_uncharacterized": 1,
+    "dmm_model": "SDM3055 candidate only",
+    "dmm_200mv_range_v": 0.2,
+    "dmm_accuracy_reading_pct": 0.015,
+    "dmm_accuracy_range_pct": 0.004,
+    "screen_threshold_pct_synthetic_only": 0.75,
+    "acquisition_class": "NO_PHYSICAL_CAPTURE",
+    "operator_identity": null,
+    "device_serials": null,
+    "calibration_documents": null,
+    "independent_reference_capture": null,
+    "utc_offset_calibration": null
+  },
+  "economics": {
+    "physical_measurement_available": false,
+    "independently_verified_service_output_available": false,
+    "priced_energy_invoices_available": false,
+    "verified_revenue_available": false
+  }
+}
