@@ -89,6 +89,27 @@ The probe's remaining overlaps are exactly the supports a real revision would sh
 - obtain bench rows below 50% throttle for this motor, prop and voltage. This is the cheapest option and changes no design;
 - choose a propulsion set whose measured range covers about 59 g per motor. A lower-KV motor or 3S would put hover inside measured data and probably save mass, but there is no data for those options yet, so the saving is not claimed.
 
+### Update: checking the extrapolation against the propeller's own law
+
+The maker's page ([Ligpower F1404](https://www.ligpower.com/product/f1404-fpv-motor.html)) has no rows below 50% throttle, and no third-party bench test of this combination was found. The retained table matches that page row for row.
+
+The measured rows do follow the propeller law closely: thrust ∝ RPM^2.06, and thrust/RPM² varies by only 3.7% across the table (`hs3g_hover_rpm_law.py`). Extending that law gives:
+
+| | Estimate |
+|---|---|
+| Hover RPM | about 14,370, which is 77% of the lowest measured RPM (18,626) |
+| Hover power per motor | 12.0 W |
+| Total hover current | 2.85 A |
+
+The current agrees with the simulation's estimated 3.09 A peak.
+
+Hover therefore needs a modest extrapolation in RPM rather than a guess about the throttle curve. Two things remain unmeasured:
+
+- how the ESC maps throttle to RPM below 50%;
+- motor efficiency at low RPM.
+
+A short bench sweep at 25–50% throttle would close both. This is still a calculation, not a measurement.
+
 ## 5. What holds up
 
 - **No real-geometry collisions in any of the five models.** The only overlaps involve stand-in shapes.
