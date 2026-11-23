@@ -2,7 +2,7 @@
 
 **Product story:** dissect a donor PCB → identify reusable functional blocks → plan safe splice contracts → compile a **carrier board** that mates with what you kept.
 
-**Canonical product reference:** [`SPLICE_PRODUCT.md`](SPLICE_PRODUCT.md) — maturity tiers, roadmap, how to proceed.
+**Canonical product reference:** [`SPLICE_PRODUCT.md`](../../SPLICE_PRODUCT.md) — maturity tiers, roadmap, how to proceed.
 
 Offline-friendly. No API keys required.
 
@@ -21,7 +21,7 @@ Confirm `demo_ready=True`. Node + KiCad CLI needed for carrier compile.
 make splice-demo
 ```
 
-Runs case `robot_drive_from_rc_toy` from [`examples/splice/manifest.json`](../examples/splice/manifest.json).
+Runs case `robot_drive_from_rc_toy` from [`examples/splice/manifest.json`](../../../examples/splice/manifest.json).
 
 ```bash
 # second canonical case — printer motion
@@ -59,7 +59,7 @@ Artifacts: `SPLICE_GOLDEN_LOOP_REPORT.json`, `SPLICE_GOLDEN_LOOP_STORY.md`, `SPL
 
 For **real junk**, set `donor_board_vision.live: true` and point `board_evidence` at a photo path; bench rows must come from physical DMM/PSU, not the simulator.
 
-See also: [`SPLICE_BEST_PRACTICES.md`](SPLICE_BEST_PRACTICES.md), [`COMPETITIVE_LANDSCAPE.md`](COMPETITIVE_LANDSCAPE.md).
+See also: [`SPLICE_BEST_PRACTICES.md`](../../reference/SPLICE_BEST_PRACTICES.md), [`COMPETITIVE_LANDSCAPE.md`](../strategy/COMPETITIVE_LANDSCAPE.md).
 
 ## What happens
 
@@ -115,8 +115,8 @@ curl -s -X POST http://127.0.0.1:8090/v1/splice-and-build \
 
 ## Related
 
-- Product + roadmap: [`SPLICE_PRODUCT.md`](SPLICE_PRODUCT.md)
+- Product + roadmap: [`SPLICE_PRODUCT.md`](../../SPLICE_PRODUCT.md)
 - Salvage bring-up only: `make salvage-demo`
-- Authority / evidence: [`DEMO_10_MIN.md`](DEMO_10_MIN.md)
+- Authority / evidence: [`DEMO_10_MIN.md`](../../DEMO_10_MIN.md)
 - Circuit-AI API: `apps/circuit-ai/docs/SALVAGE_TO_PRODUCT_WORKFLOW.md`
 - Planner eval (29 cases): `apps/circuit-ai/eval/salvage_splice_coverage/`

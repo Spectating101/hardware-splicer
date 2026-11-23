@@ -28,7 +28,7 @@
 | 2 | Sample zip | `releases/sample-splice-sprint-robot-repair-cafe.zip` | Present |
 | 3 | 5-min demo | [`DEMO_5_MIN_UI.md`](DEMO_5_MIN_UI.md) | Present |
 | 4 | Pilot offer | [`OFFER_SPLICE_BENCH_KIT_v1.md`](OFFER_SPLICE_BENCH_KIT_v1.md) | Present |
-| 5 | Before/after | [`COMPARISON_DEMO_CASE_robot_repair_cafe.md`](COMPARISON_DEMO_CASE_robot_repair_cafe.md) | Check exists |
+| 5 | Before/after | [`COMPARISON_DEMO_CASE_robot_repair_cafe.md`](archive/demos/COMPARISON_DEMO_CASE_robot_repair_cafe.md) | Check exists |
 | 6 | Proof pack index | [`PROOF_PACK_CONTENTS.md`](PROOF_PACK_CONTENTS.md) | Added 2026-07-18 |
 | 7 | Dry-run guide | [`EXTERNAL_DRY_RUN_ISSUE_GUIDE.md`](EXTERNAL_DRY_RUN_ISSUE_GUIDE.md) | Present |
 

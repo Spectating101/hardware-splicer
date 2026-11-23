@@ -4,7 +4,7 @@
 
 **Audience:** Founder, agents, future contributors.  
 **Status:** July 2026 · Active  
-**Related:** [`ENGINE_DONE.md`](ENGINE_DONE.md) · [`RELEASE_V1.md`](RELEASE_V1.md) · [`PRODUCT_SCALE_PLAN.md`](PRODUCT_SCALE_PLAN.md) · [`COLD_INTERNAL_EXIT.md`](COLD_INTERNAL_EXIT.md) · [`COMPETITIVE_PACKAGING_STRATEGY.md`](COMPETITIVE_PACKAGING_STRATEGY.md)
+**Related:** [`ENGINE_DONE.md`](archive/plans/ENGINE_DONE.md) · [`RELEASE_V1.md`](RELEASE_V1.md) · [`PRODUCT_SCALE_PLAN.md`](archive/strategy/PRODUCT_SCALE_PLAN.md) · [`COLD_INTERNAL_EXIT.md`](COLD_INTERNAL_EXIT.md) · [`COMPETITIVE_PACKAGING_STRATEGY.md`](archive/strategy/COMPETITIVE_PACKAGING_STRATEGY.md)
 
 ---
 
@@ -174,7 +174,7 @@ You may call the internal product **mature enough for external** when:
 
 ## 7. Relationship to competitors
 
-Competitive positioning matters **after** Tier I–III. See [`COMPETITIVE_PACKAGING_STRATEGY.md`](COMPETITIVE_PACKAGING_STRATEGY.md) — **external chapter**, not internal gate.
+Competitive positioning matters **after** Tier I–III. See [`COMPETITIVE_PACKAGING_STRATEGY.md`](archive/strategy/COMPETITIVE_PACKAGING_STRATEGY.md) — **external chapter**, not internal gate.
 
 Internal maturity question is not "beat Flux?" It is:
 

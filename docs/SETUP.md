@@ -15,7 +15,7 @@ Optional:
 
 - **CadQuery** — true STL rendering via 3D-Splicer (without it, script fallback still works)
 - **Qwen/Gemini API key** — live vision and text LLM (offline tier scoring and hybrid compose work without keys)
-- **agy CLI** (Antigravity) — text fallback when DashScope quota is tight; see [`docs/LLM_OPS.md`](LLM_OPS.md)
+- **agy CLI** (Antigravity) — text fallback when DashScope quota is tight; see [`docs/reference/LLM_OPS.md`](reference/LLM_OPS.md)
 
 ## Quick install
 
@@ -146,7 +146,7 @@ export HARDWARE_SPLICER_OFFLINE_COMPOSE=1
 export HARDWARE_SPLICER_OFFLINE_SALVAGE=1
 ```
 
-Inspect usage and quota: `python3 scripts/hardware_splicer.py text-usage` and `llm-quota`. Full reference: [`LLM_OPS.md`](LLM_OPS.md).
+Inspect usage and quota: `python3 scripts/hardware_splicer.py text-usage` and `llm-quota`. Full reference: [`LLM_OPS.md`](reference/LLM_OPS.md).
 
 ## Verify everything
 

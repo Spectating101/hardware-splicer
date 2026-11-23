@@ -66,4 +66,4 @@ intake (+ optional donor_board_vision)
 | S3 | Bench gates closed (`make verify-splice-loop`) |
 | S4 | Mech envelope + field validation (future) |
 
-See [`COMPETITIVE_LANDSCAPE.md`](COMPETITIVE_LANDSCAPE.md) for product positioning and [`REAL_WORLD_PARALLELS.md`](REAL_WORLD_PARALLELS.md) for how community/pro lab workflows map to our gates.
+See [`COMPETITIVE_LANDSCAPE.md`](../archive/strategy/COMPETITIVE_LANDSCAPE.md) for product positioning and [`REAL_WORLD_PARALLELS.md`](../archive/strategy/REAL_WORLD_PARALLELS.md) for how community/pro lab workflows map to our gates.

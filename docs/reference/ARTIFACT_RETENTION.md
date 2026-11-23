@@ -134,7 +134,7 @@ immutable. See [`AGENT_BUILD_DIR_POLICY.md`](AGENT_BUILD_DIR_POLICY.md) /
 
 ## Related
 
-- [`MACHINE_PROJECT_SPINE.md`](MACHINE_PROJECT_SPINE.md) — revisions are immutable
+- [`MACHINE_PROJECT_SPINE.md`](../MACHINE_PROJECT_SPINE.md) — revisions are immutable
 - `src/hardware_splicer/artifact_retention.py`
 - `src/hardware_splicer/project_artifact_api.py`
 - `src/hardware_splicer/kicad_diff.py`

@@ -123,6 +123,6 @@ network-capable and is enabled only for `HARDWARE_SPLICER_JLC_ENRICH` of
 ## Related
 
 - [`ARTIFACT_RETENTION.md`](ARTIFACT_RETENTION.md) — pins and `read_pinned_artifact`
-- [`MACHINE_PROJECT_SPINE.md`](MACHINE_PROJECT_SPINE.md) — revisions are immutable
+- [`MACHINE_PROJECT_SPINE.md`](../MACHINE_PROJECT_SPINE.md) — revisions are immutable
 - `src/hardware_splicer/parts_intel.py`
 - `src/hardware_splicer/project_parts_api.py`

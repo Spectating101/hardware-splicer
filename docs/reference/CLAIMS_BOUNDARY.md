@@ -2,8 +2,8 @@
 
 **Purpose:** What we **may** say after competitor comparison and release credibility check. Protects pilots, grants, and conversations.
 
-**Legal detail:** [`SUPPORT_AND_LIABILITY_v1.md`](SUPPORT_AND_LIABILITY_v1.md)  
-**Competitor context:** [`COMPETITOR_SCORECARD_v1.0.2.md`](COMPETITOR_SCORECARD_v1.0.2.md)
+**Legal detail:** [`SUPPORT_AND_LIABILITY_v1.md`](../SUPPORT_AND_LIABILITY_v1.md)  
+**Competitor context:** [`COMPETITOR_SCORECARD_v1.0.2.md`](../archive/strategy/COMPETITOR_SCORECARD_v1.0.2.md)
 
 ---
 
@@ -33,7 +33,7 @@
 | Artifact export / download from a build | `POST /v1/build-files/artifacts`, `download`, Design tab panel |
 | circuit-json export from compile output | `POST /v1/build-files/circuit-json`, `build_compilation/circuit_json.json` |
 | KiCad netlist ingest (SKiDL-class tools) | `kicad_netlist_text` on `/v1/netlist-compile`, fixture `esp32_servo_kicad` |
-| atopile import via KiCad netlist paste | Interface lab paste + [`ATOPILE_IMPORT.md`](ATOPILE_IMPORT.md) |
+| atopile import via KiCad netlist paste | Interface lab paste + [`ATOPILE_IMPORT.md`](../ATOPILE_IMPORT.md) |
 | OSS integration map in product | `GET /v1/integrations/catalog`, Interface lab panel |
 | Compile BOM surfaced in Design tab | `POST /v1/build-files/bom` |
 | Fab artifact coverage vs KiBot reference | `POST /v1/build-files/fab-manifest` |
@@ -86,7 +86,7 @@
 
 1. GitHub Release `v1.0.2` + sample zip  
 2. `docs/GITHUB_START_HERE.md`  
-3. `docs/COMPARISON_DEMO_CASE_robot_repair_cafe.md` (optional, internal reviewer)  
+3. `docs/archive/demos/COMPARISON_DEMO_CASE_robot_repair_cafe.md` (optional, internal reviewer)  
 4. `docs/install_reports/INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-07.md` (reproducibility)
 
 **Do not attach:** `FLUX_TARGET.md`, raw `COMPETITIVE_PACKAGING_STRATEGY.md` to customers without editing.

@@ -107,4 +107,4 @@ make splice-golden-loop
 # MCP: hs_splice_golden_loop { intake: {...}, simulate_bench: false }
 ```
 
-See [`COMPETITIVE_LANDSCAPE.md`](COMPETITIVE_LANDSCAPE.md) for product positioning and [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) for tool names.
+See [`COMPETITIVE_LANDSCAPE.md`](COMPETITIVE_LANDSCAPE.md) for product positioning and [`AGENT_HANDOFF.md`](../../AGENT_HANDOFF.md) for tool names.

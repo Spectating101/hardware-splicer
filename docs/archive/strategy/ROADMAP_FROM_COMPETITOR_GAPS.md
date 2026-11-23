@@ -1,10 +1,10 @@
 # Roadmap from competitor gaps — v1.0.2 (internal)
 
-**Historical scope:** the July v1.0.2 launch plan below describes the narrow SPI/donor pilot. The broader [engineering mission](HARDWARE_SPLICER_MISSION_FREEZE.md) governs current backend work. The [November 17 research assessment](#november-17-2026-practical-build-from-parts-assessment) below evaluates that broader objective; the old numerical competitor scores are not current measurements.
+**Historical scope:** the July v1.0.2 launch plan below describes the narrow SPI/donor pilot. The broader [engineering mission](../../HARDWARE_SPLICER_MISSION_FREEZE.md) governs current backend work. The [November 17 research assessment](#november-17-2026-practical-build-from-parts-assessment) below evaluates that broader objective; the old numerical competitor scores are not current measurements.
 
 **Purpose:** Prevent panic-building after competitor comparison. **Only** items that strengthen layer 5 (bring-up proof).
 
-**Inputs:** [`COMPETITOR_SCORECARD_v1.0.2.md`](COMPETITOR_SCORECARD_v1.0.2.md) · [`COMPARISON_DEMO_CASE_robot_repair_cafe.md`](COMPARISON_DEMO_CASE_robot_repair_cafe.md)
+**Inputs:** [`COMPETITOR_SCORECARD_v1.0.2.md`](COMPETITOR_SCORECARD_v1.0.2.md) · [`COMPARISON_DEMO_CASE_robot_repair_cafe.md`](../demos/COMPARISON_DEMO_CASE_robot_repair_cafe.md)
 
 ---
 
@@ -15,7 +15,7 @@
 | **CI badge fix** | README badge red because legacy `verify` job fails; Splice v1 bar is green | Split workflow or badge to `splice-v1` job only |
 | **Competitor pack** | Internal alignment before external talk | ✅ this doc set |
 | **One trusted reviewer** | External proof = one conversation with release zip | Founder |
-| **Claims discipline** | [`CLAIMS_BOUNDARY.md`](CLAIMS_BOUNDARY.md) on all outbound copy | Founder + agents |
+| **Claims discipline** | [`CLAIMS_BOUNDARY.md`](../../reference/CLAIMS_BOUNDARY.md) on all outbound copy | Founder + agents |
 
 **Do not** start outreach blast or grant apps until badge + one conversation.
 
@@ -117,7 +117,7 @@ A first comparative acceptance should use the same cyberdeck requirements, decla
 
 Remote main remains at the previously integrated `38dbad2b`. The newer [keyboard-salvage draft #342](https://github.com/Spectating101/hardware-splicer/pull/342) contains two commits beyond the locally integrated `f2310b96`: `e30b7a50` and `70a1e8de`. The new work includes a compact junction, source-bound nominal switch plates and corrected switch-aperture cut geometry. It is relevant to keyboard reuse for a cyberdeck and warrants selective review when that device objective needs it. The current draft remains a conditional reference design with unresolved real-donor/physical limitations. It was not merged in this research pass.
 
-The [normalized discovery feed](../examples/github_signals/build_from_parts_candidates_20261117.json) validates with the existing HS signal importer: 18 new discovery-only candidates plus the two unchanged existing approved adapters. The [research snapshot](status/generated/github-build-research-2026-11-17.json) records all 20 source pins, metadata, selected-source identities, asset inventories, comparison findings and upstream PR heads. Backend runtime and frontend files were not changed by this research.
+The [normalized discovery feed](../../../examples/github_signals/build_from_parts_candidates_20261117.json) validates with the existing HS signal importer: 18 new discovery-only candidates plus the two unchanged existing approved adapters. The [research snapshot](../../status/generated/github-build-research-2026-11-17.json) records all 20 source pins, metadata, selected-source identities, asset inventories, comparison findings and upstream PR heads. Backend runtime and frontend files were not changed by this research.
 
 ### Follow-up: first practical integration
 
@@ -125,7 +125,7 @@ The subsequent backend implementation connects InvenTree through its REST API. `
 
 An actual isolated upstream InvenTree server was exercised through the canonical HS HTTP route using a view-only fixture account. Four required motors, three healthy motors, 100 damaged motors, 20 unchecked motors and a cached supplier quantity of 1,000 correctly produce a shortage of one. These are controlled fixture records, not the user's possessions. Live execution exposed InvenTree's numeric built-in `status_custom_key` representation; the adapter now handles it and retains the distinct treatment of damaged/custom stock.
 
-The same engine assessed the existing digital drone with the user's declared empty inventory. The [18-line materials list](status/generated/hs3g-b-materials-2026-11-17.csv) expands its aggregate hardware into individual fasteners and separates the frame parts to make. It keeps the unitemized wiring, retained controller-sourcing gap and unspecified laminate grade visible. Its installed CLI runs outside the checkout, and assessing materials leaves the drone design and simulation history unchanged.
+The same engine assessed the existing digital drone with the user's declared empty inventory. The [18-line materials list](../../status/generated/hs3g-b-materials-2026-11-17.csv) expands its aggregate hardware into individual fasteners and separates the frame parts to make. It keeps the unitemized wiring, retained controller-sourcing gap and unspecified laminate grade visible. Its installed CLI runs outside the checkout, and assessing materials leaves the drone design and simulation history unchanged.
 
 This completes the first inventory/materials integration. The attached BOM is selected explicitly; an assessment does not establish that it exhaustively implements the saved device's functions or that its interfaces are compatible. Live regional procurement, arbitrary donor identification, nested BOM expansion and the complete cyberdeck construction outcome remain open. WireViz was still a candidate at that checkpoint; its subsequent implementation is recorded below.
 
@@ -133,8 +133,8 @@ This completes the first inventory/materials integration. The attached BOM is se
 
 The shared wiring engine now binds explicit pins and conductor cuts to an existing material assessment on the same project revision. It checks whole connected nets for role, voltage, current and ground-reference problems, exports a CSV cut list and WireViz document, and optionally invokes the separate local WireViz CLI for a native SVG/BOM. The SDK, `hs-wiring`, canonical HTTP API and OpenAPI-derived MCP gateway exercise the same implementation. No frontend or cloud-service integration was added.
 
-The existing digital drone now has a [receiver wiring draft](../examples/wiring/README.md) and native renderer output. Manufacturer manual review clarified UART1's T1/R1 pads and separate 5V/G connection, preserving the existing GPS/UART2 configuration. The draft retains 24 unresolved issues rather than asserting that nominal voltage labels, a 2A rail nameplate or drawn lines prove compatibility. The source notes preserve manual hashes; exact wire selection, electrical limits, physical board matching, lengths and terminations remain open. The old design and simulation study remain unchanged.
+The existing digital drone now has a [receiver wiring draft](../../../examples/wiring/README.md) and native renderer output. Manufacturer manual review clarified UART1's T1/R1 pads and separate 5V/G connection, preserving the existing GPS/UART2 configuration. The draft retains 24 unresolved issues rather than asserting that nominal voltage labels, a 2A rail nameplate or drawn lines prove compatibility. The source notes preserve manual hashes; exact wire selection, electrical limits, physical board matching, lengths and terminations remain open. The old design and simulation study remain unchanged.
 
 This completes a bounded backend integration and a partial same-project wiring artifact. It does not complete the construction-level harness, arbitrary donor interpretation, current regional sourcing or the cyberdeck objective. The next device work still needs sourced interfaces and complete material/power/fit coverage, with checks applied to the selected architecture rather than more synthetic demonstrations.
 
-The [verification record](status/generated/wiring-backend-verification-2026-11-17.json) distinguishes the complete suite from its four profile follow-ups and records the real CLI, MCP, native renderer and loopback HTTP exercise. A source-attachment workflow compatible with frozen digital simulation revisions remains a backend gap; new manually extracted contracts are currently retained as explicitly unbound wiring declarations on that drone.
+The [verification record](../../status/generated/wiring-backend-verification-2026-11-17.json) distinguishes the complete suite from its four profile follow-ups and records the real CLI, MCP, native renderer and loopback HTTP exercise. A source-attachment workflow compatible with frozen digital simulation revisions remains a backend gap; new manually extracted contracts are currently retained as explicitly unbound wiring declarations on that drone.

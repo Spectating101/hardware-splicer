@@ -6,11 +6,11 @@
 
 **Related:**
 
-- [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) — how to run the engine
-- [`HANDOFF_UPDATE.md`](HANDOFF_UPDATE.md) — technical delta since May
-- [`COMPETITION_HANDOFF.md`](COMPETITION_HANDOFF.md) — 5-minute judge entry
+- [`AGENT_HANDOFF.md`](../../AGENT_HANDOFF.md) — how to run the engine
+- [`HANDOFF_UPDATE.md`](../handoffs/HANDOFF_UPDATE.md) — technical delta since May
+- [`COMPETITION_HANDOFF.md`](../handoffs/COMPETITION_HANDOFF.md) — 5-minute judge entry
 - [`COMPETITION_PROPOSAL.md`](COMPETITION_PROPOSAL.md) — full competition narrative
-- [`competition/YZU_AI_Agent_競賽提案書_2026.md`](competition/YZU_AI_Agent_競賽提案書_2026.md) — 元智大學 AI Agent 競賽提案草稿
+- [`competition/YZU_AI_Agent_競賽提案書_2026.md`](../../competition/YZU_AI_Agent_競賽提案書_2026.md) — 元智大學 AI Agent 競賽提案草稿
 - [`COMPETITIVE_LANDSCAPE.md`](COMPETITIVE_LANDSCAPE.md) — vs Flux / Quilter / salvage shops
 
 ---
@@ -212,7 +212,7 @@ Investors bought **robotics + pilots**; Blueprint supports “we ship fast” na
 
 | Channel | Fit | Notes |
 |---------|-----|-------|
-| **元智 YZU AI Agent 競賽** | Closed (2026 proposal) | See [`competition/YZU_AI_Agent_2026_提案回顧與學習.md`](competition/YZU_AI_Agent_2026_提案回顧與學習.md) |
+| **元智 YZU AI Agent 競賽** | Closed (2026 proposal) | See [`competition/YZU_AI_Agent_2026_提案回顧與學習.md`](../../competition/YZU_AI_Agent_2026_提案回顧與學習.md) |
 | **Commercial product path** | **Primary after v1.0** | [`MONETIZATION_AND_PRODUCT_ASSESSMENT.md`](MONETIZATION_AND_PRODUCT_ASSESSMENT.md) |
 | **SBIR** (中小企業處) | High | Phase 1 ~NT$1M, Phase 2 up to ~NT$10M — needs **台灣公司** |
 | **Taiwan Tech Arena (TTA)** | Medium–high | Deep tech, international |
@@ -240,7 +240,7 @@ Aligns with: semiconductor-adjacent tooling, 不要浪費打樣, agent competiti
 
 ## 8. Competition funding → development capital
 
-**YZU 2026 提案結果：** 未入圍決賽（7 組晉級，決賽 2026-09-02）。回顧見 [`competition/YZU_AI_Agent_2026_提案回顧與學習.md`](competition/YZU_AI_Agent_2026_提案回顧與學習.md)。**落選 ≠ 專案無價值** — 半導體書院評審偏好與 Fab-Truth 敘事未對齊；SBIR / StarFab / POC 路徑不變。
+**YZU 2026 提案結果：** 未入圍決賽（7 組晉級，決賽 2026-09-02）。回顧見 [`competition/YZU_AI_Agent_2026_提案回顧與學習.md`](../../competition/YZU_AI_Agent_2026_提案回顧與學習.md)。**落選 ≠ 專案無價值** — 半導體書院評審偏好與 Fab-Truth 敘事未對齊；SBIR / StarFab / POC 路徑不變。
 
 **Plan (if similar funding lands later):**
 

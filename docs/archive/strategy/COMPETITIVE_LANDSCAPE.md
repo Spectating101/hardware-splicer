@@ -61,8 +61,8 @@ Honest positioning for **salvage → splice → carrier compile → bench-valida
 
 ## Related docs
 
-- [`SPLICE_PRODUCT.md`](SPLICE_PRODUCT.md) — maturity tiers S1–S4
-- [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) — canonical agent flow
+- [`SPLICE_PRODUCT.md`](../../SPLICE_PRODUCT.md) — maturity tiers S1–S4
+- [`AGENT_HANDOFF.md`](../../AGENT_HANDOFF.md) — canonical agent flow
 - [`REAL_WORLD_PARALLELS.md`](REAL_WORLD_PARALLELS.md) — community repair, RC retrofit, pro lab workflows
 
 ## Re-check, 2026-10-09
@@ -106,5 +106,5 @@ The 3D layer makes the evidence-first idea visible, and it is worth having for t
 ### Reused rather than built (2026-10-10)
 
 KiCad's installed symbol and footprint libraries give offline marking lookup, pin names and real package sizes; the repo's parts providers
-(with jlcsearch, free and keyless) give optional online lookup; iFixit's public search gives teardown links. See `docs/PART_LOOKUP.md`,
+(with jlcsearch, free and keyless) give optional online lookup; iFixit's public search gives teardown links. See `docs/reference/PART_LOOKUP.md`,
 which also lists what was looked at and left alone, and why.

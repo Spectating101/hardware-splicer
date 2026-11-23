@@ -29,7 +29,7 @@ It uses the MCP Python SDK v1 API. Install that compatibility surface with `.[mc
 
 | Capability | Tool / API |
 |------------|------------|
-| **Agent handoff** | [`docs/AGENT_HANDOFF.md`](AGENT_HANDOFF.md) |
+| **Agent handoff** | [`docs/AGENT_HANDOFF.md`](../AGENT_HANDOFF.md) |
 | Donor splice + carrier compile | `hs_splice_build` / `POST /v1/splice-and-build` |
 | S3 golden loop (one-shot compatibility surface) | `hs_splice_golden_loop` / `POST /v1/splice-golden-loop` |
 | S3 bench gate status | `hs_splice_bench_status` / `POST /v1/splice-bench/status` |

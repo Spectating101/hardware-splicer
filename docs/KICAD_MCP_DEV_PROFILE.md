@@ -4,7 +4,7 @@
 
 **Status:** **partial** — script + API wired; MCP server choice remains operator-configured.
 
-**Related:** [`KICAD_MCP_SIDECAR.md`](KICAD_MCP_SIDECAR.md) · [`BUILD_FILES_API_SECURITY.md`](BUILD_FILES_API_SECURITY.md)
+**Related:** [`KICAD_MCP_SIDECAR.md`](reference/KICAD_MCP_SIDECAR.md) · [`BUILD_FILES_API_SECURITY.md`](reference/BUILD_FILES_API_SECURITY.md)
 
 ---
 
@@ -52,7 +52,7 @@ Configure a KiCad MCP server in Cursor/Claude with working directory:
 <build_dir>/build_compilation
 ```
 
-Candidate servers: see [`KICAD_MCP_SIDECAR.md`](KICAD_MCP_SIDECAR.md). **Not bundled** — no hard dependency.
+Candidate servers: see [`KICAD_MCP_SIDECAR.md`](reference/KICAD_MCP_SIDECAR.md). **Not bundled** — no hard dependency.
 
 ---
 

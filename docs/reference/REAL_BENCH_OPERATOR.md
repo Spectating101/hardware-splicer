@@ -2,7 +2,7 @@
 
 **Purpose:** Close gates with **instrument-backed** `bench_topology_capture.v1` — not `simulate_bench`.
 
-**Related:** [`BENCH_LOOP_AGENT.md`](BENCH_LOOP_AGENT.md) · [`AGENT_DRY_RUN_CHECKLIST.md`](AGENT_DRY_RUN_CHECKLIST.md)
+**Related:** [`BENCH_LOOP_AGENT.md`](BENCH_LOOP_AGENT.md) · [`AGENT_DRY_RUN_CHECKLIST.md`](../AGENT_DRY_RUN_CHECKLIST.md)
 
 ---
 

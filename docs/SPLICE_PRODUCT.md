@@ -65,7 +65,7 @@ Use these tiers to avoid pretending the product is more complete than it is.
 | **S4** | Full product | Mech envelope + field validation + scoped release | 🟡 mecha/authority path exists; not splice-first UX |
 | **S5** | Greenfield + splice | Arbitrary schematic editor **and** donor splice in one session | ❌ Flux-class; future on same spine |
 
-**Current honest bar:** **S2** proven in CI (`verify-splice`). **S3** golden paths prove gate closure (`verify-splice-loop` simulated; `verify-splice-real-bench` hand-filled capture). Competition docs: [`COMPETITION_PROPOSAL.md`](COMPETITION_PROPOSAL.md).
+**Current honest bar:** **S2** proven in CI (`verify-splice`). **S3** golden paths prove gate closure (`verify-splice-loop` simulated; `verify-splice-real-bench` hand-filled capture). Competition docs: [`COMPETITION_PROPOSAL.md`](archive/strategy/COMPETITION_PROPOSAL.md).
 
 ---
 
@@ -234,7 +234,7 @@ python3 scripts/hardware_splicer.py splice-build \
 python3 scripts/verify_splice_demos.py --json --out /tmp/hs_splice_verify
 ```
 
-Docs: [`DEMO_SPLICE.md`](DEMO_SPLICE.md) (walkthrough) · [`FLUX_TARGET.md`](FLUX_TARGET.md) (long-term engine bar) · [`ENGINE_DONE.md`](ENGINE_DONE.md) (CI gates)
+Docs: [`DEMO_SPLICE.md`](archive/demos/DEMO_SPLICE.md) (walkthrough) · [`FLUX_TARGET.md`](archive/strategy/FLUX_TARGET.md) (long-term engine bar) · [`ENGINE_DONE.md`](archive/plans/ENGINE_DONE.md) (CI gates)
 
 ---
 

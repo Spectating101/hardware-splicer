@@ -1,6 +1,6 @@
 # Hardware-Splicer Integration
 
-For first-time setup and the 10-minute professor demo, see [`SETUP.md`](SETUP.md) and [`DEMO_10_MIN.md`](DEMO_10_MIN.md). Run `make verify` for an offline full check.
+For first-time setup and the 10-minute professor demo, see [`SETUP.md`](../SETUP.md) and [`DEMO_10_MIN.md`](../DEMO_10_MIN.md). Run `make verify` for an offline full check.
 
 This dump currently keeps three apps as separate runtimes:
 
@@ -25,7 +25,7 @@ This dump currently keeps three apps as separate runtimes:
 - `HARDWARE_SPLICER_OUTPUT_ROOT`: API output root, default `$HARDWARE_SPLICER_STATE_DIR/api`.
 - `HARDWARE_SPLICER_ALLOW_ARBITRARY_OUT_DIR`: set to `1` only for trusted local development if the API should write outside `HARDWARE_SPLICER_OUTPUT_ROOT`.
 - `HARDWARE_SPLICER_MAX_BOARD_FILE_BYTES`: maximum board design file size accepted by top-level spec validation, default `52428800`.
-- `HARDWARE_SPLICER_STATE_DIR`: root for persistent API state, default `.cache/hardware-splicer/state` in a source checkout, else `$XDG_STATE_HOME/hardware-splicer` or `~/.local/state/hardware-splicer` (see [SETUP.md](SETUP.md#where-server-state-lives)).
+- `HARDWARE_SPLICER_STATE_DIR`: root for persistent API state, default `.cache/hardware-splicer/state` in a source checkout, else `$XDG_STATE_HOME/hardware-splicer` or `~/.local/state/hardware-splicer` (see [SETUP.md](../SETUP.md#where-server-state-lives)).
 - `HARDWARE_SPLICER_JOB_DB`: SQLite job database path, default `$HARDWARE_SPLICER_STATE_DIR/jobs.sqlite3`.
 - `HARDWARE_SPLICER_JOB_WORKERS`: in-process async compile workers, default `1`.
 - `HARDWARE_SPLICER_JOB_POLL_INTERVAL_S`: worker polling interval, default `0.2`.

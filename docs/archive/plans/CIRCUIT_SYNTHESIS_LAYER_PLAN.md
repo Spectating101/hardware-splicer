@@ -547,7 +547,7 @@ Output statuses:
 
 ### Phase 1 - Audit only
 
-Status: this document and `docs/CIRCUIT_LOGIC_AUDIT.md`.
+Status: this document and `docs/archive/audits-and-results/CIRCUIT_LOGIC_AUDIT.md`.
 
 No behavior changes.
 

@@ -79,7 +79,7 @@ Writes `SALVAGE_BRINGUP_REPORT.json` with artifact paths, KiCad truth, and revie
 
 ## Splice demos (product wedge)
 
-Canonical cases live in `examples/splice/manifest.json`. Product reference: [`docs/SPLICE_PRODUCT.md`](SPLICE_PRODUCT.md).
+Canonical cases live in `examples/splice/manifest.json`. Product reference: [`docs/SPLICE_PRODUCT.md`](../../SPLICE_PRODUCT.md).
 
 ```bash
 make splice-demo       # robot_drive_from_rc_toy (default)

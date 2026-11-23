@@ -38,13 +38,13 @@ Your work is kept in this browser as you go; **Save** writes a JSON file and **O
   can hold a lethal charge that a hand meter and an ordinary resistor are not made for. The tool gives no discharge procedure;
   leave the part in place and the case closed, and leave it to someone trained. This includes every part skipped for voltage
   reasons and explicit microwave, CRT, photoflash, CCFL or lamp inverter context. An unmarked film cap or optocoupler alone
-  does not get an appliance-circuit disclaimer. See [the hazard rules and their sources](SALVAGE_PLAN.md#hazards-it-names).
+  does not get an appliance-circuit disclaimer. See [the hazard rules and their sources](../SALVAGE_PLAN.md#hazards-it-names).
 - The rule list depends on what you enter: a missing warning proves nothing. The plan approves no powering or reuse.
 
 ## Looking things up, measuring, reclaiming
 
 - **Marking lookup.** Type a chip's marking and the page shows what KiCad's library holds under it, with its datasheet, and offers the
-  library's package in one click. See `docs/PART_LOOKUP.md` for what a hit does and does not mean.
+  library's package in one click. See `docs/reference/PART_LOOKUP.md` for what a hit does and does not mean.
 - **Measure first.** A recognised chip comes with the measurements to make, a box for each reading, and a count of how many are
   recorded. A recorded reading is a number you wrote down, not a pass.
 - **Draw a box.** With a photo under the board, *Draw a box* sets a part's size and place from the photo instead of from the typical
@@ -58,7 +58,7 @@ Your work is kept in this browser as you go; **Save** writes a JSON file and **O
   it does not come with its board, pins, regulator or wiring rules. Both pages distinguish `chip_on_module` from `module` matches.
   The markings and kinds come from the
   current capture plan; stale plans offer no handoff links. A name match does not identify your chip or establish compatibility,
-  and the planner's data remains the library's. See `docs/DEVICE_PLAN.md`.
+  and the planner's data remains the library's. See `docs/reference/DEVICE_PLAN.md`.
 
 ## What is cleaned and refused
 

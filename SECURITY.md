@@ -30,6 +30,6 @@ Include: affected version/tag, reproduction steps, impact, and any logs (redact 
 
 - Treat `HARDWARE_SPLICER_*` secrets and API bind addresses as sensitive.
 - Do not expose `/v1` to the public internet without auth, TLS, and an allowlist.
-- See [`docs/BUILD_FILES_API_SECURITY.md`](docs/BUILD_FILES_API_SECURITY.md) when present.
+- See [`docs/reference/BUILD_FILES_API_SECURITY.md`](docs/reference/BUILD_FILES_API_SECURITY.md) when present.
 
 We aim to acknowledge valid reports within 14 days.

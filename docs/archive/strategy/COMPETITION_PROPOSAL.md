@@ -2,8 +2,8 @@
 
 **Updated:** June 2026
 **Status:** Spine complete for agent-first demo; **UI phase next**
-**Canonical agent entry:** [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md)
-**Judge / reviewer quick start:** [`COMPETITION_HANDOFF.md`](COMPETITION_HANDOFF.md)
+**Canonical agent entry:** [`AGENT_HANDOFF.md`](../../AGENT_HANDOFF.md)
+**Judge / reviewer quick start:** [`COMPETITION_HANDOFF.md`](../handoffs/COMPETITION_HANDOFF.md)
 
 ---
 
@@ -122,7 +122,7 @@ make vision-donor-smoke         # Qwen dry-run on golden photo
 
 | Surface | Entry |
 |---------|-------|
-| **Docs** | [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) |
+| **Docs** | [`AGENT_HANDOFF.md`](../../AGENT_HANDOFF.md) |
 | **MCP** | `python -m hardware_splicer.mcp_server` — `hs_splice_build`, `hs_splice_golden_loop`, … |
 | **SDK** | `hardware_splicer.sdk` — `splice_build`, `splice_golden_real`, … |
 | **HTTP** | `POST /v1/splice-and-build`, `/v1/splice-golden-loop`, `/v1/splice-bench/*` |
@@ -220,7 +220,7 @@ Production authority casefiles, CH340C showcase, bilingual frontend experiments 
 
 | Deliverable | Status |
 |-------------|--------|
-| Agent handoff docs | ✅ [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md), [`MCP.md`](MCP.md) |
+| Agent handoff docs | ✅ [`AGENT_HANDOFF.md`](../../AGENT_HANDOFF.md), [`MCP.md`](../../reference/MCP.md) |
 | Headless splice compile (S2) | ✅ `verify-splice` |
 | Bench gate model (S3) | ✅ sessions + capture bridge |
 | Golden real path | ✅ `verify-splice-real-bench` |
@@ -265,13 +265,13 @@ Suitable for token subsidy: Qwen VL directly improves donor-photo interpretation
 
 | Doc | Audience |
 |-----|----------|
-| [`COMPETITION_HANDOFF.md`](COMPETITION_HANDOFF.md) | Judges — 5-minute demo path |
-| [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) | Agents / developers |
-| [`SPLICE_PRODUCT.md`](SPLICE_PRODUCT.md) | Product tiers, roadmap |
-| [`DEMO_SPLICE.md`](DEMO_SPLICE.md) | 10-minute walkthrough |
+| [`COMPETITION_HANDOFF.md`](../handoffs/COMPETITION_HANDOFF.md) | Judges — 5-minute demo path |
+| [`AGENT_HANDOFF.md`](../../AGENT_HANDOFF.md) | Agents / developers |
+| [`SPLICE_PRODUCT.md`](../../SPLICE_PRODUCT.md) | Product tiers, roadmap |
+| [`DEMO_SPLICE.md`](../demos/DEMO_SPLICE.md) | 10-minute walkthrough |
 | [`COMPETITIVE_LANDSCAPE.md`](COMPETITIVE_LANDSCAPE.md) | vs Flux, repair, salvage |
-| [`SPLICE_BEST_PRACTICES.md`](SPLICE_BEST_PRACTICES.md) | Operator + engineering norms |
-| [`tests/data/golden/README.md`](../tests/data/golden/README.md) | Golden artifact contract |
+| [`SPLICE_BEST_PRACTICES.md`](../../reference/SPLICE_BEST_PRACTICES.md) | Operator + engineering norms |
+| [`tests/data/golden/README.md`](../../../tests/data/golden/README.md) | Golden artifact contract |
 
 ---
 

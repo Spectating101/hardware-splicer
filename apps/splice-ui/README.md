@@ -76,6 +76,6 @@ Production: `make splice-ui-build` then `HARDWARE_SPLICER_SERVE_UI=1 hs-serve`, 
 
 ## Related
 
-- `docs/UI_V1.md` — product UI scope for v1.0
+- `docs/reference/UI_V1.md` — product UI scope for v1.0
 - `docs/PACKAGING_AND_DEPLOYMENT.md` — install and deploy
 - `hs-mcp` — optional agent/MCP path alongside this UI

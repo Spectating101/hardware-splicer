@@ -2,7 +2,7 @@
 
 Current research manuscript:
 
-- [`docs/research/HARDWARE_SPLICER_PAPER_DRAFT_V0_3.md`](docs/research/HARDWARE_SPLICER_PAPER_DRAFT_V0_3.md) — **Draft v0.3 (September 2026)**
+- [`docs/research/HARDWARE_SPLICER_PAPER_DRAFT_V0_3.md`](research/HARDWARE_SPLICER_PAPER_DRAFT_V0_3.md) — **Draft v0.3 (September 2026)**
 
 ## Title
 

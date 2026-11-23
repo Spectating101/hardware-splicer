@@ -6,12 +6,12 @@
 
 1. [`MACHINE_PROJECT_SPINE.md`](MACHINE_PROJECT_SPINE.md) · [`INTEGRATION_STACK.md`](INTEGRATION_STACK.md) — architecture and authority invariants  
 2. [`PROGRESSION_STATUS.md`](PROGRESSION_STATUS.md) — what is shipped right now  
-3. [`ENGINE_DONE.md`](ENGINE_DONE.md) — engine completion / terms  
+3. [`ENGINE_DONE.md`](archive/plans/ENGINE_DONE.md) — engine completion / terms  
 4. [`SPLICE_PRODUCT.md`](SPLICE_PRODUCT.md) — splice product tiers  
 5. [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) — how to run (agents)  
 6. Everything else  
 
-**Point-in-time docs.** [`HANDOFF_UPDATE.md`](HANDOFF_UPDATE.md),
+**Point-in-time docs.** [`HANDOFF_UPDATE.md`](archive/handoffs/HANDOFF_UPDATE.md),
 [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md), `FUNCTIONAL_ASSESSMENT_*`, and
 `install_reports/` describe the repo on the date they were written. They are
 kept as record, not as current truth — when they disagree with
@@ -50,18 +50,18 @@ kept as record, not as current truth — when they disagree with
 | Read | Why |
 |------|-----|
 | [`RELEASE_V1.md`](RELEASE_V1.md) | Finish line, tag, deploy |
-| [`MONETIZATION_AND_PRODUCT_ASSESSMENT.md`](MONETIZATION_AND_PRODUCT_ASSESSMENT.md) | Buyers, pricing, risks, workbook |
-| [`BLUEPRINT_POSITIONING_AND_FUNDING.md`](BLUEPRINT_POSITIONING_AND_FUNDING.md) | vs Blueprint, Taiwan funding |
+| [`MONETIZATION_AND_PRODUCT_ASSESSMENT.md`](archive/strategy/MONETIZATION_AND_PRODUCT_ASSESSMENT.md) | Buyers, pricing, risks, workbook |
+| [`BLUEPRINT_POSITIONING_AND_FUNDING.md`](archive/strategy/BLUEPRINT_POSITIONING_AND_FUNDING.md) | vs Blueprint, Taiwan funding |
 | [`competition/YZU_AI_Agent_2026_提案回顧與學習.md`](competition/YZU_AI_Agent_2026_提案回顧與學習.md) | Competition loss lessons |
-| [`COMPETITIVE_PACKAGING_STRATEGY.md`](COMPETITIVE_PACKAGING_STRATEGY.md) | **Internal** — vs Flux/Blueprint/Quilter (after Tier I–III) |
-| [`COMPETITOR_SCORECARD_v1.0.2.md`](COMPETITOR_SCORECARD_v1.0.2.md) | **Internal** — layer-5 scorecard + do-not-compete axes |
-| [`COMPARISON_DEMO_CASE_robot_repair_cafe.md`](COMPARISON_DEMO_CASE_robot_repair_cafe.md) | **Internal** — artifact-to-artifact vs release sample zip |
-| [`ROADMAP_FROM_COMPETITOR_GAPS.md`](ROADMAP_FROM_COMPETITOR_GAPS.md) | **Internal** — do now / do if / do not after comparison |
-| [`CLAIMS_BOUNDARY.md`](CLAIMS_BOUNDARY.md) | **Internal + outbound** — allowed vs forbidden claims |
-| [`ENGINE_VS_INTERFACE.md`](ENGINE_VS_INTERFACE.md) | **Internal** — under-interfaced vs under-powered |
-| [`OSS_INTERFACE_INTEGRATION_STRATEGY.md`](OSS_INTERFACE_INTEGRATION_STRATEGY.md) | **Internal** — OSS embed map + P0 spike |
+| [`COMPETITIVE_PACKAGING_STRATEGY.md`](archive/strategy/COMPETITIVE_PACKAGING_STRATEGY.md) | **Internal** — vs Flux/Blueprint/Quilter (after Tier I–III) |
+| [`COMPETITOR_SCORECARD_v1.0.2.md`](archive/strategy/COMPETITOR_SCORECARD_v1.0.2.md) | **Internal** — layer-5 scorecard + do-not-compete axes |
+| [`COMPARISON_DEMO_CASE_robot_repair_cafe.md`](archive/demos/COMPARISON_DEMO_CASE_robot_repair_cafe.md) | **Internal** — artifact-to-artifact vs release sample zip |
+| [`ROADMAP_FROM_COMPETITOR_GAPS.md`](archive/strategy/ROADMAP_FROM_COMPETITOR_GAPS.md) | **Internal** — do now / do if / do not after comparison |
+| [`CLAIMS_BOUNDARY.md`](reference/CLAIMS_BOUNDARY.md) | **Internal + outbound** — allowed vs forbidden claims |
+| [`ENGINE_VS_INTERFACE.md`](archive/strategy/ENGINE_VS_INTERFACE.md) | **Internal** — under-interfaced vs under-powered |
+| [`OSS_INTERFACE_INTEGRATION_STRATEGY.md`](archive/strategy/OSS_INTERFACE_INTEGRATION_STRATEGY.md) | **Internal** — OSS embed map + P0 spike |
 | [`INTERNAL_MATURITY_PLAN.md`](INTERNAL_MATURITY_PLAN.md) | **Internal product maturity** — `verify-product-internal` |
-| [`HANDOFF_UPDATE.md`](HANDOFF_UPDATE.md) | Technical delta since May |
+| [`HANDOFF_UPDATE.md`](archive/handoffs/HANDOFF_UPDATE.md) | Technical delta since May |
 
 ### Agent / MCP / CI
 
@@ -69,35 +69,35 @@ kept as record, not as current truth — when they disagree with
 |------|-----|
 | [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) | **Primary runbook** |
 | [`AGENT_QUICKSTART.md`](AGENT_QUICKSTART.md) | **15 min** — 3 curls + 3 MCP tools |
-| [`PRODUCT_SCALE_PLAN.md`](PRODUCT_SCALE_PLAN.md) | **What we're building** — phased scale plan |
+| [`PRODUCT_SCALE_PLAN.md`](archive/strategy/PRODUCT_SCALE_PLAN.md) | **What we're building** — phased scale plan |
 | [`COLD_INTERNAL_EXIT.md`](COLD_INTERNAL_EXIT.md) | **Phase 0/1 cold exit** at alpha.16 (autoroute out of scope) |
 | [`AGENT_DRY_RUN_CHECKLIST.md`](AGENT_DRY_RUN_CHECKLIST.md) | **Zero-help** external operator proof |
 | [`EXTERNAL_DRY_RUN_ISSUE_GUIDE.md`](EXTERNAL_DRY_RUN_ISSUE_GUIDE.md) | How to file dry-run blockers on GitHub |
-| [`BENCH_LOOP_AGENT.md`](BENCH_LOOP_AGENT.md) | Compose → bench capture → gate closure (agent) |
-| [`AGENT_BUILD_DIR_POLICY.md`](AGENT_BUILD_DIR_POLICY.md) | MCP `hs_design_quality` path rules |
-| [`DESIGN_STUDIO_DRC_AGENT.md`](DESIGN_STUDIO_DRC_AGENT.md) | **Design Studio + DRC loop** — MCP/HTTP/SDK parity |
-| [`DEMO_DESIGN_STUDIO_DRC_LOOP.md`](DEMO_DESIGN_STUDIO_DRC_LOOP.md) | 3–5 min demo (agent track + UI track) |
-| [`MCP.md`](MCP.md) | MCP install + tool list |
-| [`DEMO_SPLICE.md`](DEMO_SPLICE.md) | Splice walkthrough + make targets |
-| [`SPLICE_BEST_PRACTICES.md`](SPLICE_BEST_PRACTICES.md) | Operator norms |
+| [`BENCH_LOOP_AGENT.md`](reference/BENCH_LOOP_AGENT.md) | Compose → bench capture → gate closure (agent) |
+| [`AGENT_BUILD_DIR_POLICY.md`](reference/AGENT_BUILD_DIR_POLICY.md) | MCP `hs_design_quality` path rules |
+| [`DESIGN_STUDIO_DRC_AGENT.md`](reference/DESIGN_STUDIO_DRC_AGENT.md) | **Design Studio + DRC loop** — MCP/HTTP/SDK parity |
+| [`DEMO_DESIGN_STUDIO_DRC_LOOP.md`](archive/demos/DEMO_DESIGN_STUDIO_DRC_LOOP.md) | 3–5 min demo (agent track + UI track) |
+| [`MCP.md`](reference/MCP.md) | MCP install + tool list |
+| [`DEMO_SPLICE.md`](archive/demos/DEMO_SPLICE.md) | Splice walkthrough + make targets |
+| [`SPLICE_BEST_PRACTICES.md`](reference/SPLICE_BEST_PRACTICES.md) | Operator norms |
 
 ### Engineer — engine internals
 
 | Read | Why |
 |------|-----|
-| [`ENGINE_DONE.md`](ENGINE_DONE.md) | Phases, PASS/OPEN, terms |
+| [`ENGINE_DONE.md`](archive/plans/ENGINE_DONE.md) | Phases, PASS/OPEN, terms |
 | [`ENGINE.md`](ENGINE.md) | Pipeline map |
-| [`CIRCUIT_SYNTHESIS_LAYER_PLAN.md`](CIRCUIT_SYNTHESIS_LAYER_PLAN.md) | Synthesis planners |
-| [`CIRCUIT_LOGIC_AUDIT.md`](CIRCUIT_LOGIC_AUDIT.md) | Logic / lowering audit |
-| [`INTEGRATION.md`](INTEGRATION.md) | Runtime flow, env vars |
+| [`CIRCUIT_SYNTHESIS_LAYER_PLAN.md`](archive/plans/CIRCUIT_SYNTHESIS_LAYER_PLAN.md) | Synthesis planners |
+| [`CIRCUIT_LOGIC_AUDIT.md`](archive/audits-and-results/CIRCUIT_LOGIC_AUDIT.md) | Logic / lowering audit |
+| [`INTEGRATION.md`](reference/INTEGRATION.md) | Runtime flow, env vars |
 | [`TESTING.md`](TESTING.md) | Test strategy |
 
 ### Judge / reviewer (5 min)
 
 | Read | Why |
 |------|-----|
-| [`COMPETITION_HANDOFF.md`](COMPETITION_HANDOFF.md) | One sentence + commands |
-| [`COMPETITION_PROPOSAL.md`](COMPETITION_PROPOSAL.md) | Full narrative (longer) |
+| [`COMPETITION_HANDOFF.md`](archive/handoffs/COMPETITION_HANDOFF.md) | One sentence + commands |
+| [`COMPETITION_PROPOSAL.md`](archive/strategy/COMPETITION_PROPOSAL.md) | Full narrative (longer) |
 
 ### Customer / pilot
 
@@ -113,9 +113,9 @@ kept as record, not as current truth — when they disagree with
 | [`INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md`](install_reports/INSTALL_REPORT_desktop-fgedhgv-wsl_2026-07-09.md) | **Alien machine** — alpha.5 **AGENT_QUICKSTART** Track B (36s) |
 | [`OPERATIONS_RUNBOOK_v1.md`](OPERATIONS_RUNBOOK_v1.md) | Lab ops |
 | [`PACKAGING_AND_DEPLOYMENT.md`](PACKAGING_AND_DEPLOYMENT.md) | Install + deploy plan |
-| [`DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md`](DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md) | Deploy → product → funding |
+| [`DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md`](archive/strategy/DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md) | Deploy → product → funding |
 | [`deploy/DEPLOY.md`](../deploy/DEPLOY.md) | Short deploy quickstart |
-| [`DEMO_SPLICE.md`](DEMO_SPLICE.md) | CLI splice walkthrough |
+| [`DEMO_SPLICE.md`](archive/demos/DEMO_SPLICE.md) | CLI splice walkthrough |
 
 ---
 
@@ -133,69 +133,69 @@ kept as record, not as current truth — when they disagree with
 | [`LAUNCH_v1.1.md`](LAUNCH_v1.1.md) | v1.1 launch pointer | Reference |
 | [`CONVERSION_DOCTRINE.md`](CONVERSION_DOCTRINE.md) | Conversion strategy | Reference |
 | [`CONVERSION_PUSH.md`](CONVERSION_PUSH.md) | Funnel tactics | Reference |
-| [`FUNCTIONAL_ASSESSMENT_2026-07-18.md`](FUNCTIONAL_ASSESSMENT_2026-07-18.md) | Value audit (2026-07-18) | Reference |
+| [`FUNCTIONAL_ASSESSMENT_2026-07-18.md`](archive/audits-and-results/FUNCTIONAL_ASSESSMENT_2026-07-18.md) | Value audit (2026-07-18) | Reference |
 | [`CONSOLIDATION_AUDIT_2026-07-31.md`](CONSOLIDATION_AUDIT_2026-07-31.md) | Repo-state audit — verified state, resolved items, open items | **Core** |
 | [`RELEASE_V1.md`](RELEASE_V1.md) | v1.0 finish line, checklist | Superseded by `RELEASE_v1.1.md` |
 | [`PACKAGING_AND_DEPLOYMENT.md`](PACKAGING_AND_DEPLOYMENT.md) | Install, deploy, systemd, release artifacts | **Core** |
-| [`DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md`](DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md) | Deploy → product → funding, 90-day plan, pitch scripts | **Core** |
-| [`MONETIZATION_AND_PRODUCT_ASSESSMENT.md`](MONETIZATION_AND_PRODUCT_ASSESSMENT.md) | Buyers, pricing, risks, workbook | **Core** |
-| [`COMPETITIVE_PACKAGING_STRATEGY.md`](COMPETITIVE_PACKAGING_STRATEGY.md) | **Internal** — vs competitors (external phase) | Reference |
+| [`DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md`](archive/strategy/DEPLOY_PRODUCT_FUNDING_PLAYBOOK.md) | Deploy → product → funding, 90-day plan, pitch scripts | **Core** |
+| [`MONETIZATION_AND_PRODUCT_ASSESSMENT.md`](archive/strategy/MONETIZATION_AND_PRODUCT_ASSESSMENT.md) | Buyers, pricing, risks, workbook | **Core** |
+| [`COMPETITIVE_PACKAGING_STRATEGY.md`](archive/strategy/COMPETITIVE_PACKAGING_STRATEGY.md) | **Internal** — vs competitors (external phase) | Reference |
 | [`INTERNAL_MATURITY_PLAN.md`](INTERNAL_MATURITY_PLAN.md) | **Internal gate** — Tier I–III before external | **Core** |
-| [`BLUEPRINT_POSITIONING_AND_FUNDING.md`](BLUEPRINT_POSITIONING_AND_FUNDING.md) | Strategy, funding | **Core** |
-| [`LAUNCH_PLAN.md`](LAUNCH_PLAN.md) | Phases A–C engine launch | Reference (mostly met) |
-| [`FLUX_TARGET.md`](FLUX_TARGET.md) | vs Flux positioning | Reference |
-| [`COMPETITIVE_LANDSCAPE.md`](COMPETITIVE_LANDSCAPE.md) | vs ECAD tools | Reference |
+| [`BLUEPRINT_POSITIONING_AND_FUNDING.md`](archive/strategy/BLUEPRINT_POSITIONING_AND_FUNDING.md) | Strategy, funding | **Core** |
+| [`LAUNCH_PLAN.md`](archive/strategy/LAUNCH_PLAN.md) | Phases A–C engine launch | Reference (mostly met) |
+| [`FLUX_TARGET.md`](archive/strategy/FLUX_TARGET.md) | vs Flux positioning | Reference |
+| [`COMPETITIVE_LANDSCAPE.md`](archive/strategy/COMPETITIVE_LANDSCAPE.md) | vs ECAD tools | Reference |
 
 ### Handoff & continuity
 
 | Doc | Role |
 |-----|------|
 | [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) | Agent entry — **read first for automation** |
-| [`HANDOFF_UPDATE.md`](HANDOFF_UPDATE.md) | Changelog narrative |
-| [`COMPETITION_HANDOFF.md`](COMPETITION_HANDOFF.md) | Short judge entry |
-| [`COMPETITION_PROPOSAL.md`](COMPETITION_PROPOSAL.md) | Long competition doc |
+| [`HANDOFF_UPDATE.md`](archive/handoffs/HANDOFF_UPDATE.md) | Changelog narrative |
+| [`COMPETITION_HANDOFF.md`](archive/handoffs/COMPETITION_HANDOFF.md) | Short judge entry |
+| [`COMPETITION_PROPOSAL.md`](archive/strategy/COMPETITION_PROPOSAL.md) | Long competition doc |
 
 ### Run & demo
 
 | Doc | Role |
 |-----|------|
 | [`SETUP.md`](SETUP.md) | Install, KiCad, venv |
-| [`DEMO_SPLICE.md`](DEMO_SPLICE.md) | Splice product demo |
+| [`DEMO_SPLICE.md`](archive/demos/DEMO_SPLICE.md) | Splice product demo |
 | [`DEMO_10_MIN.md`](DEMO_10_MIN.md) | Authority / fab demo |
-| [`MCP.md`](MCP.md) | MCP server |
-| [`LLM_OPS.md`](LLM_OPS.md) | Qwen, quota, cache |
-| [`MATERIAL_MODES.md`](MATERIAL_MODES.md) | Scratch vs salvage |
+| [`MCP.md`](reference/MCP.md) | MCP server |
+| [`LLM_OPS.md`](reference/LLM_OPS.md) | Qwen, quota, cache |
+| [`MATERIAL_MODES.md`](reference/MATERIAL_MODES.md) | Scratch vs salvage |
 
 ### Engine & integration
 
 | Doc | Role |
 |-----|------|
-| [`ENGINE_DONE.md`](ENGINE_DONE.md) | **Canonical engine gates** |
+| [`ENGINE_DONE.md`](archive/plans/ENGINE_DONE.md) | **Canonical engine gates** |
 | [`ENGINE.md`](ENGINE.md) | Pipeline diagram |
 | [`MACHINE_PROJECT_SPINE.md`](MACHINE_PROJECT_SPINE.md) | **Canonical project model**, durable revisions, staged review |
 | [`INTEGRATION_STACK.md`](INTEGRATION_STACK.md) | **Evidence-first external boundary**, donor virtual modules |
 | [`OSS_INTEGRATION_STATUS.md`](OSS_INTEGRATION_STATUS.md) | Wired vs planned OSS surfaces |
-| [`OSS_INTERFACE_INTEGRATION_STRATEGY.md`](OSS_INTERFACE_INTEGRATION_STRATEGY.md) | Interface-layer strategy |
+| [`OSS_INTERFACE_INTEGRATION_STRATEGY.md`](archive/strategy/OSS_INTERFACE_INTEGRATION_STRATEGY.md) | Interface-layer strategy |
 | [`ATOPILE_IMPORT.md`](ATOPILE_IMPORT.md) | atopile import path |
-| [`KICAD_MCP_SIDECAR.md`](KICAD_MCP_SIDECAR.md) | KiCad MCP sidecar |
+| [`KICAD_MCP_SIDECAR.md`](reference/KICAD_MCP_SIDECAR.md) | KiCad MCP sidecar |
 | [`KICAD_MCP_DEV_PROFILE.md`](KICAD_MCP_DEV_PROFILE.md) | KiCad MCP dev profile |
-| [`BUILD_FILES_API_SECURITY.md`](BUILD_FILES_API_SECURITY.md) | build_dir / out_dir security |
-| [`INTEGRATION.md`](INTEGRATION.md) | Env + runtime |
-| [`INTEGRATIONS_RESEARCH.md`](INTEGRATIONS_RESEARCH.md) | OSS integration research |
-| [`INCORPORATION_RESEARCH.md`](INCORPORATION_RESEARCH.md) | OSS stack — don’t rebuild |
-| [`CIRCUIT_SYNTHESIS_LAYER_PLAN.md`](CIRCUIT_SYNTHESIS_LAYER_PLAN.md) | Greenfield synthesis |
-| [`CIRCUIT_LOGIC_AUDIT.md`](CIRCUIT_LOGIC_AUDIT.md) | Netlist / lowering |
+| [`BUILD_FILES_API_SECURITY.md`](reference/BUILD_FILES_API_SECURITY.md) | build_dir / out_dir security |
+| [`INTEGRATION.md`](reference/INTEGRATION.md) | Env + runtime |
+| [`INTEGRATIONS_RESEARCH.md`](archive/strategy/INTEGRATIONS_RESEARCH.md) | OSS integration research |
+| [`INCORPORATION_RESEARCH.md`](archive/strategy/INCORPORATION_RESEARCH.md) | OSS stack — don’t rebuild |
+| [`CIRCUIT_SYNTHESIS_LAYER_PLAN.md`](archive/plans/CIRCUIT_SYNTHESIS_LAYER_PLAN.md) | Greenfield synthesis |
+| [`CIRCUIT_LOGIC_AUDIT.md`](archive/audits-and-results/CIRCUIT_LOGIC_AUDIT.md) | Netlist / lowering |
 | [`TESTING.md`](TESTING.md) | Tests |
-| [`CLUSTER.md`](CLUSTER.md) | Cluster / scale notes |
-| [`GIT_MIGRATION.md`](GIT_MIGRATION.md) | Repo history |
+| [`CLUSTER.md`](reference/CLUSTER.md) | Cluster / scale notes |
+| [`GIT_MIGRATION.md`](archive/plans/GIT_MIGRATION.md) | Repo history |
 
 ### Operator & context
 
 | Doc | Role |
 |-----|------|
-| [`SPLICE_BEST_PRACTICES.md`](SPLICE_BEST_PRACTICES.md) | Bench / splice norms |
-| [`REAL_BENCH_OPERATOR.md`](REAL_BENCH_OPERATOR.md) | Real-bench operator procedure |
-| [`REAL_WORLD_PARALLELS.md`](REAL_WORLD_PARALLELS.md) | Repair café, lab parallels |
+| [`SPLICE_BEST_PRACTICES.md`](reference/SPLICE_BEST_PRACTICES.md) | Bench / splice norms |
+| [`REAL_BENCH_OPERATOR.md`](reference/REAL_BENCH_OPERATOR.md) | Real-bench operator procedure |
+| [`REAL_WORLD_PARALLELS.md`](archive/strategy/REAL_WORLD_PARALLELS.md) | Repair café, lab parallels |
 
 ### Pilots & design partners
 
@@ -228,7 +228,7 @@ kept as record, not as current truth — when they disagree with
 | [`apps/mecha-splicer/docs/`](../apps/mecha-splicer/docs/) | Mechanical splice | S4 / future |
 | [`apps/README.md`](../apps/README.md) | Monorepo vs v1 product boundary | **Core** |
 | [`apps/splice-ui/README.md`](../apps/splice-ui/README.md) | **v1.0 product UI** — live splice workbench | **Ship with v1.0** |
-| [`docs/UI_V1.md`](UI_V1.md) | UI scope and architecture | **Core** |
+| [`docs/reference/UI_V1.md`](reference/UI_V1.md) | UI scope and architecture | **Core** |
 | [`apps/hardware-splicer-demo/README.md`](../apps/hardware-splicer-demo/README.md) | React demo shell (static sample data) | Legacy / reference |
 | [`tests/data/golden/README.md`](../tests/data/golden/README.md) | Golden S3 artifacts contract | **Important for CI narrative** |
 | [`mcp/hardware-splicer.mcp.json`](../mcp/hardware-splicer.mcp.json) | MCP config sample | Ship with v1.0 |
@@ -243,8 +243,8 @@ kept as record, not as current truth — when they disagree with
 
 | Gap | Priority | Status |
 |-----|----------|--------|
-| **`RELEASE_NOTES_v1.0.md`** | P0 | ✅ |
-| **`RELEASE_NOTES_v1.0.1.md`** | P0 | ✅ |
+| **`docs/releases/RELEASE_NOTES_v1.0.md`** | P0 | ✅ |
+| **`docs/releases/RELEASE_NOTES_v1.0.1.md`** | P0 | ✅ |
 | **`QUICKSTART_SPLICE_v1.md`** | P0 | ✅ |
 | **`SUPPORT_AND_LIABILITY_v1.md`** | P1 | ✅ |
 | **`OPERATIONS_RUNBOOK_v1.md`** | P1 | ✅ |
@@ -252,7 +252,7 @@ kept as record, not as current truth — when they disagree with
 | **`INSTALL_REPORT_TEMPLATE.md`** | P1 | ✅ (fill on external test) |
 | **`CHANGELOG.md`** | P1 | ✅ |
 | **Fresh VM install report** | P1 | ❌ — use template when testing |
-| **`ROADMAP_v2.md`** | P2 | Superseded by [`PRODUCT_SCALE_PLAN.md`](PRODUCT_SCALE_PLAN.md) |
+| **`ROADMAP_v2.md`** | P2 | Superseded by [`PRODUCT_SCALE_PLAN.md`](archive/strategy/PRODUCT_SCALE_PLAN.md) |
 | **OpenAPI export in release** | P2 | Use `/docs` live |
 | **`docs/zh-TW/` one-pager** | P2 | Optional |
 | **Stale banner on `LAUNCH_PLAN`** | P3 | Add “Phases A–C met; see RELEASE_V1” |
@@ -273,7 +273,7 @@ One sentence + 3 commands (setup, verify-splice, mcp)
 → docs/RELEASE_V1.md
 
 ## Quick demo
-→ docs/DEMO_SPLICE.md
+→ docs/archive/demos/DEMO_SPLICE.md
 
 ## License / limits
 Cosmetic copper; KiCad truth; bench gates

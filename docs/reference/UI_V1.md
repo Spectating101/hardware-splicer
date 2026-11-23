@@ -96,6 +96,6 @@ Open http://127.0.0.1:5178
 
 ## Related
 
-- [`apps/splice-ui/README.md`](../apps/splice-ui/README.md)
-- [`PACKAGING_AND_DEPLOYMENT.md`](PACKAGING_AND_DEPLOYMENT.md)
-- [`RELEASE_V1.md`](RELEASE_V1.md)
+- [`apps/splice-ui/README.md`](../../apps/splice-ui/README.md)
+- [`PACKAGING_AND_DEPLOYMENT.md`](../PACKAGING_AND_DEPLOYMENT.md)
+- [`RELEASE_V1.md`](../RELEASE_V1.md)

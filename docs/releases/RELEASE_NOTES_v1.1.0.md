@@ -39,7 +39,7 @@
 
 Bounded, secured endpoints: list, content, design-quality, artifacts, bom, fab-manifest, export-views, circuit-json, download, autoroute (confirm), recheck.
 
-See [`docs/BUILD_FILES_API_SECURITY.md`](docs/BUILD_FILES_API_SECURITY.md).
+See [`docs/BUILD_FILES_API_SECURITY.md`](../reference/BUILD_FILES_API_SECURITY.md).
 
 ---
 
@@ -63,7 +63,7 @@ source .venv/bin/activate
 make splice-ui-serve
 ```
 
-See [`docs/RELEASE_v1.1.md`](docs/RELEASE_v1.1.md) and [`deploy/DEPLOY.md`](deploy/DEPLOY.md).
+See [`docs/RELEASE_v1.1.md`](../RELEASE_v1.1.md) and [`deploy/DEPLOY.md`](../../deploy/DEPLOY.md).
 
 ---
 
@@ -85,6 +85,6 @@ No breaking changes to core splice/build endpoints. Rebuild UI (`make splice-ui-
 
 ## Documentation
 
-- [`docs/RELEASE_v1.1.md`](docs/RELEASE_v1.1.md) — install, verify, deploy  
-- [`docs/V1.1_INTERFACE_PREVIEW.md`](docs/V1.1_INTERFACE_PREVIEW.md) — scope boundary  
-- [`docs/CLAIMS_BOUNDARY.md`](docs/CLAIMS_BOUNDARY.md) — allowed claims  
+- [`docs/RELEASE_v1.1.md`](../RELEASE_v1.1.md) — install, verify, deploy  
+- [`docs/V1.1_INTERFACE_PREVIEW.md`](../V1.1_INTERFACE_PREVIEW.md) — scope boundary  
+- [`docs/CLAIMS_BOUNDARY.md`](../reference/CLAIMS_BOUNDARY.md) — allowed claims  

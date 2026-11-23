@@ -4,7 +4,7 @@
 
 **Prereqs:** API on `:8787`, UI built or `npm run dev` on `:5173`/`5178`.
 
-**Agent-only path:** [`AGENT_QUICKSTART.md`](AGENT_QUICKSTART.md) (no browser).
+**Agent-only path:** [`AGENT_QUICKSTART.md`](../../AGENT_QUICKSTART.md) (no browser).
 
 ```bash
 PYTHONPATH=src HARDWARE_SPLICER_OFFLINE_COMPOSE=1 \
@@ -140,7 +140,7 @@ curl -s -X POST http://127.0.0.1:8787/v1/project-package/render \
 - “Fab-ready” when copper tier is `cosmetic_preview`
 - “AI designs any board”
 
-See [`CLAIMS_BOUNDARY.md`](CLAIMS_BOUNDARY.md).
+See [`CLAIMS_BOUNDARY.md`](../../reference/CLAIMS_BOUNDARY.md).
 
 ---
 

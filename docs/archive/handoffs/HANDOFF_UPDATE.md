@@ -2,8 +2,8 @@
 
 **Date:** July 2026 (updated after alpha.16 cold-internal exit on `main`)
 **Audience:** You, ChatGPT, or the next agent — continuity without re-reading the whole repo
-**Operational entry:** [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) · **Quickstart:** [`AGENT_QUICKSTART.md`](AGENT_QUICKSTART.md) · **Scale plan:** [`PRODUCT_SCALE_PLAN.md`](PRODUCT_SCALE_PLAN.md) · **Cold exit:** [`COLD_INTERNAL_EXIT.md`](COLD_INTERNAL_EXIT.md)
-**Previous baseline:** [`apps/circuit-ai/docs/HANDOFF_CIRCUIT_AI_HARDWARE_SPLICER_2026-05-24.md`](../apps/circuit-ai/docs/HANDOFF_CIRCUIT_AI_HARDWARE_SPLICER_2026-05-24.md) (Circuit-AI salvage focus; pre-unified splice spine)
+**Operational entry:** [`AGENT_HANDOFF.md`](../../AGENT_HANDOFF.md) · **Quickstart:** [`AGENT_QUICKSTART.md`](../../AGENT_QUICKSTART.md) · **Scale plan:** [`PRODUCT_SCALE_PLAN.md`](../strategy/PRODUCT_SCALE_PLAN.md) · **Cold exit:** [`COLD_INTERNAL_EXIT.md`](../../COLD_INTERNAL_EXIT.md)
+**Previous baseline:** [`apps/circuit-ai/docs/HANDOFF_CIRCUIT_AI_HARDWARE_SPLICER_2026-05-24.md`](../../../apps/circuit-ai/docs/HANDOFF_CIRCUIT_AI_HARDWARE_SPLICER_2026-05-24.md) (Circuit-AI salvage focus; pre-unified splice spine)
 
 ---
 
@@ -11,7 +11,7 @@
 
 | Surface | What shipped |
 |---------|----------------|
-| **Exit** | Phase 0 + Phase 1 **cold exit** declared — [`COLD_INTERNAL_EXIT.md`](COLD_INTERNAL_EXIT.md) |
+| **Exit** | Phase 0 + Phase 1 **cold exit** declared — [`COLD_INTERNAL_EXIT.md`](../../COLD_INTERNAL_EXIT.md) |
 | **Bar** | Public-web DMM provenance + keyed live VL; copper honesty; alien + optiplex green |
 | **Autoroute** | **Maintainer-owned** — leave alone / headless only; default `AUTOROUTE=0` |
 | **Next** | On-board café DMM when hardware available; Design Studio depth; not FreeRouting product work |
@@ -219,11 +219,11 @@ All call into `src/hardware_splicer/sdk.py`:
 |-----|---------|
 | `docs/AGENT_HANDOFF.md` | Agent-first operational entry |
 | `docs/SPLICE_PRODUCT.md` | Tiers S0–S5, roadmap |
-| `docs/DEMO_SPLICE.md` | Walkthrough |
-| `docs/SPLICE_BEST_PRACTICES.md` | Operator norms |
-| `docs/COMPETITIVE_LANDSCAPE.md` | vs Flux, repair cafés |
-| `docs/REAL_WORLD_PARALLELS.md` | Rossmann-style bench, salvage shops |
-| `docs/MCP.md` | MCP setup |
+| `docs/archive/demos/DEMO_SPLICE.md` | Walkthrough |
+| `docs/reference/SPLICE_BEST_PRACTICES.md` | Operator norms |
+| `docs/archive/strategy/COMPETITIVE_LANDSCAPE.md` | vs Flux, repair cafés |
+| `docs/archive/strategy/REAL_WORLD_PARALLELS.md` | Rossmann-style bench, salvage shops |
+| `docs/reference/MCP.md` | MCP setup |
 | `tests/data/golden/README.md` | Golden artifact contract |
 
 ### 8. Circuit synthesis layer (`88f1db8` — Codex)
@@ -255,7 +255,7 @@ CircuitIntent
 | SDK | `plan_circuit_synthesis()`, `synthesize_circuit()`, per-domain `plan_*_circuit()` |
 | HTTP | `POST /v1/circuit-synthesis/plan`, `/compile`, `/capability`, per-domain `/motor-driver`, … |
 | MCP | **Wired** — `hs_plan_circuit_synthesis`, `hs_synthesize_circuit`, `hs_clarify_hardware_intent`, `hs_render_project_package` |
-| Docs | `docs/CIRCUIT_SYNTHESIS_LAYER_PLAN.md`, `docs/CIRCUIT_LOGIC_AUDIT.md` |
+| Docs | `docs/archive/plans/CIRCUIT_SYNTHESIS_LAYER_PLAN.md`, `docs/archive/audits-and-results/CIRCUIT_LOGIC_AUDIT.md` |
 | Tests | `pytest tests/test_circuit_synthesis_*.py tests/test_motor_driver_planner.py tests/test_topology_*.py` |
 
 **Policy:** blocked candidates refuse compile. Ready candidates compile with claim boundaries preserved. Topology authority report via `evaluate_topology_authority()`.
@@ -455,9 +455,9 @@ Call `hs_engine_doctor` before long compile loops.
 ## Related docs (read order)
 
 1. **This file** — what changed
-2. [`BLUEPRINT_POSITIONING_AND_FUNDING.md`](BLUEPRINT_POSITIONING_AND_FUNDING.md) — **why HS is not dead vs Blueprint; Taiwan funding + competition plan**
-3. [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) — how to drive it
-4. [`SPLICE_PRODUCT.md`](SPLICE_PRODUCT.md) — product tiers and roadmap
-5. [`ENGINE_DONE.md`](ENGINE_DONE.md) — compile engine completion gates
-6. [`CIRCUIT_SYNTHESIS_LAYER_PLAN.md`](CIRCUIT_SYNTHESIS_LAYER_PLAN.md) — synthesis planners + status
-7. May baseline: [`HANDOFF_CIRCUIT_AI_HARDWARE_SPLICER_2026-05-24.md`](../apps/circuit-ai/docs/HANDOFF_CIRCUIT_AI_HARDWARE_SPLICER_2026-05-24.md)
+2. [`BLUEPRINT_POSITIONING_AND_FUNDING.md`](../strategy/BLUEPRINT_POSITIONING_AND_FUNDING.md) — **why HS is not dead vs Blueprint; Taiwan funding + competition plan**
+3. [`AGENT_HANDOFF.md`](../../AGENT_HANDOFF.md) — how to drive it
+4. [`SPLICE_PRODUCT.md`](../../SPLICE_PRODUCT.md) — product tiers and roadmap
+5. [`ENGINE_DONE.md`](../plans/ENGINE_DONE.md) — compile engine completion gates
+6. [`CIRCUIT_SYNTHESIS_LAYER_PLAN.md`](../plans/CIRCUIT_SYNTHESIS_LAYER_PLAN.md) — synthesis planners + status
+7. May baseline: [`HANDOFF_CIRCUIT_AI_HARDWARE_SPLICER_2026-05-24.md`](../../../apps/circuit-ai/docs/HANDOFF_CIRCUIT_AI_HARDWARE_SPLICER_2026-05-24.md)

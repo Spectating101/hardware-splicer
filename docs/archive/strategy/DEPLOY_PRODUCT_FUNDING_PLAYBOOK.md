@@ -6,7 +6,7 @@
 
 **Prerequisites (engine):** Run `make verify-splice-v1` green on the machine you demo from.
 
-**Related:** [`MONETIZATION_AND_PRODUCT_ASSESSMENT.md`](MONETIZATION_AND_PRODUCT_ASSESSMENT.md) · [`PACKAGING_AND_DEPLOYMENT.md`](PACKAGING_AND_DEPLOYMENT.md) · [`BLUEPRINT_POSITIONING_AND_FUNDING.md`](BLUEPRINT_POSITIONING_AND_FUNDING.md) · [`RELEASE_V1.md`](RELEASE_V1.md)
+**Related:** [`MONETIZATION_AND_PRODUCT_ASSESSMENT.md`](MONETIZATION_AND_PRODUCT_ASSESSMENT.md) · [`PACKAGING_AND_DEPLOYMENT.md`](../../PACKAGING_AND_DEPLOYMENT.md) · [`BLUEPRINT_POSITIONING_AND_FUNDING.md`](BLUEPRINT_POSITIONING_AND_FUNDING.md) · [`RELEASE_V1.md`](../../RELEASE_V1.md)
 
 **Last updated:** July 2026
 
@@ -299,7 +299,7 @@ YZU finals favored **in-fab / yield / ESG / equipment** Agent stories. Your engi
 |------|--------|--------|
 | `make verify-splice-v1` green | ✅ on dev machine | Run on clean VM |
 | Git tag `v1.0.0` | ✅ | Tagged on `main` |
-| `RELEASE_NOTES_v1.0.md` | ✅ | Root release notes |
+| `docs/releases/RELEASE_NOTES_v1.0.md` | ✅ | Root release notes |
 | `install_splice_v1.sh` slim path | ✅ | `INSTALL_DEV=1` for pytest |
 | GitHub `splice-v1` CI job | ✅ | `.github/workflows/hardware-splicer.yml` |
 | One-page offer PDF | Pending | `OFFER_SPLICE_BENCH_KIT_v1.md` |

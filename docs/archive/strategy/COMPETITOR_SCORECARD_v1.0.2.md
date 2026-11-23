@@ -4,7 +4,7 @@
 
 **Status:** July 2026 · Post `v1.0.2` release  
 **Deeper reference:** [`COMPETITIVE_PACKAGING_STRATEGY.md`](COMPETITIVE_PACKAGING_STRATEGY.md)  
-**Demo proof:** [`COMPARISON_DEMO_CASE_robot_repair_cafe.md`](COMPARISON_DEMO_CASE_robot_repair_cafe.md) · release zip `sample-splice-sprint-robot-repair-cafe.zip`
+**Demo proof:** [`COMPARISON_DEMO_CASE_robot_repair_cafe.md`](../demos/COMPARISON_DEMO_CASE_robot_repair_cafe.md) · release zip `sample-splice-sprint-robot-repair-cafe.zip`
 
 ---
 

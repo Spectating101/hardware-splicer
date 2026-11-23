@@ -36,7 +36,7 @@ KiCad **must** run on the same machine as compile. There is no remote KiCad work
 | `HARDWARE_SPLICER_AUTOROUTE` | `0` | Keep `0` for honest v1 demos |
 | `HARDWARE_SPLICER_DRC_FIX_LOOP` | `1` | DRC retry loop in CI/prod |
 
-Full list: [`INTEGRATION.md`](INTEGRATION.md).
+Full list: [`INTEGRATION.md`](reference/INTEGRATION.md).
 
 ---
 

@@ -8,7 +8,7 @@
 
 **v1.1 preview (on `main`):** splice-ui **Design verify** tab (KiCanvas, BOM, fab) + **Interface lab** + OSS catalog. Verify: `make verify-ui-interface-smoke`.
 
-**Release boundary:** [`V1.1_INTERFACE_PREVIEW.md`](V1.1_INTERFACE_PREVIEW.md) · draft notes: [`RELEASE_NOTES_v1.1.0-alpha.1.md`](../RELEASE_NOTES_v1.1.0-alpha.1.md)
+**Release boundary:** [`V1.1_INTERFACE_PREVIEW.md`](../../V1.1_INTERFACE_PREVIEW.md) · draft notes: [`docs/releases/RELEASE_NOTES_v1.1.0-alpha.1.md`](../../releases/RELEASE_NOTES_v1.1.0-alpha.1.md)
 
 ---
 
@@ -96,14 +96,14 @@ make splice-ui-dev
 
 | Item | Status |
 |------|--------|
-| KiCad MCP dev profile | documented — [`KICAD_MCP_SIDECAR.md`](KICAD_MCP_SIDECAR.md) |
-| KiCad MCP recheck script + API | ✅ [`KICAD_MCP_DEV_PROFILE.md`](KICAD_MCP_DEV_PROFILE.md) |
+| KiCad MCP dev profile | documented — [`KICAD_MCP_SIDECAR.md`](../../reference/KICAD_MCP_SIDECAR.md) |
+| KiCad MCP recheck script + API | ✅ [`KICAD_MCP_DEV_PROFILE.md`](../../KICAD_MCP_DEV_PROFILE.md) |
 | Artifact export API + Design tab | ✅ wired |
 | FreeRouting opt-in (`POST /v1/build-files/autoroute`) | ✅ wired |
 | KiBot comparison for `build_compilation/` outputs | ✅ `POST /v1/build-files/fab-manifest` |
 | Donor photo wizard step (vision API exists) | partial |
 
-**Master matrix:** [`OSS_INTEGRATION_STATUS.md`](OSS_INTEGRATION_STATUS.md)
+**Master matrix:** [`OSS_INTEGRATION_STATUS.md`](../../OSS_INTEGRATION_STATUS.md)
 
 ### P2 — intake ecosystem
 

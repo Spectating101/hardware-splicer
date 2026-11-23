@@ -59,7 +59,7 @@ OSS editor/viewer → thin adapter in integrations/ → pytest → optional MCP/
 
 ---
 
-## What splice-ui still defers ([`UI_V1.md`](UI_V1.md))
+## What splice-ui still defers ([`UI_V1.md`](../../reference/UI_V1.md))
 
 - Full Circuit-AI canvas in main product wizard path  
 - Donor photo upload in wizard (API exists)  

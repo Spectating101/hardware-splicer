@@ -126,8 +126,8 @@ Expose our engine separately via existing `make run-mcp` (`hardware_splicer.mcp_
 
 | Asset | Purpose |
 |-------|---------|
-| `src/hardware_splicer/mcp_server.py` | Already exposes compile/salvage — document tools in `docs/INTEGRATION.md` |
-| Cursor skills (`docs/LLM_OPS.md` patterns) | Quota-aware Qwen/agy routing — add **hardware-splicer-verify** skill: run `make verify-engine && make verify-netlist-engine` |
+| `src/hardware_splicer/mcp_server.py` | Already exposes compile/salvage — document tools in `docs/reference/INTEGRATION.md` |
+| Cursor skills (`docs/reference/LLM_OPS.md` patterns) | Quota-aware Qwen/agy routing — add **hardware-splicer-verify** skill: run `make verify-engine && make verify-netlist-engine` |
 | `scripts/verify_jarvis_llm.py` | Jarvis phrase eval — tie to compose phrase corpus |
 | [Context7](https://context7.com) MCP | KiCad 9 / FastAPI docs in agent sessions |
 
@@ -185,7 +185,7 @@ Expose our engine separately via existing `make run-mcp` (`hardware_splicer.mcp_
 
 ## References
 
-- Internal gates: [ENGINE_DONE.md](./ENGINE_DONE.md)
+- Internal gates: [ENGINE_DONE.md](../plans/ENGINE_DONE.md)
 - Flux bar: [FLUX_TARGET.md](./FLUX_TARGET.md)
-- LLM ops: [LLM_OPS.md](./LLM_OPS.md)
+- LLM ops: [LLM_OPS.md](../../reference/LLM_OPS.md)
 - Launch verify: [LAUNCH_PLAN.md](./LAUNCH_PLAN.md)

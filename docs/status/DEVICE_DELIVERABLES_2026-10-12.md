@@ -74,7 +74,7 @@ upload corresponding artifacts when explicitly published and run.
 
 ## Reproduce and use
 
-See [DEVICE_FIRMWARE.md](../DEVICE_FIRMWARE.md) for the UI flow, exact commands,
+See [DEVICE_FIRMWARE.md](../reference/DEVICE_FIRMWARE.md) for the UI flow, exact commands,
 dependencies, supported scope and physical-use limits. The end-to-end
 verification checklist drove testing through UI → proxy → API → actual ZIP,
 rather than crediting source generation alone.

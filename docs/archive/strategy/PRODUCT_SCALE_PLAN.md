@@ -1,13 +1,13 @@
 # Product scale plan — Splice Agent (2026–2027)
 
-> **Historical execution plan.** This July 2026 scale plan remains useful for architecture history and previously completed work, but it is no longer the canonical source for current investment priority, competitor response, or next-action ordering. Use [`HARDWARE_SPLICER_OPERATING_STATE.md`](HARDWARE_SPLICER_OPERATING_STATE.md) and [`HARDWARE_SPLICER_OPERATING_STATE.json`](HARDWARE_SPLICER_OPERATING_STATE.json) for the current 2026-09-23 operating state. Where this plan conflicts with that state, the canonical operating state wins.
+> **Historical execution plan.** This July 2026 scale plan remains useful for architecture history and previously completed work, but it is no longer the canonical source for current investment priority, competitor response, or next-action ordering. Use [`HARDWARE_SPLICER_OPERATING_STATE.md`](../../HARDWARE_SPLICER_OPERATING_STATE.md) and [`HARDWARE_SPLICER_OPERATING_STATE.json`](../../HARDWARE_SPLICER_OPERATING_STATE.json) for the current 2026-09-23 operating state. Where this plan conflicts with that state, the canonical operating state wins.
 
 **Purpose:** Preserve what we were building, at what depth, and in what order during the alpha/beta scale phase — for founder, agents, and future contributors.
 
 **Status:** Historical plan · superseded for current prioritization on 2026-09-23  
 **Anchor tag:** `v1.1.0-alpha.16`  
-**Cold-internal exit:** ✅ declared — see [`COLD_INTERNAL_EXIT.md`](COLD_INTERNAL_EXIT.md)  
-**Related:** [`SPLICE_PRODUCT.md`](SPLICE_PRODUCT.md) · [`INTERNAL_MATURITY_PLAN.md`](INTERNAL_MATURITY_PLAN.md) · [`DESIGN_STUDIO_DRC_AGENT.md`](DESIGN_STUDIO_DRC_AGENT.md) · [`AGENT_QUICKSTART.md`](AGENT_QUICKSTART.md) · [`AGENT_DRY_RUN_CHECKLIST.md`](AGENT_DRY_RUN_CHECKLIST.md)
+**Cold-internal exit:** ✅ declared — see [`COLD_INTERNAL_EXIT.md`](../../COLD_INTERNAL_EXIT.md)  
+**Related:** [`SPLICE_PRODUCT.md`](../../SPLICE_PRODUCT.md) · [`INTERNAL_MATURITY_PLAN.md`](../../INTERNAL_MATURITY_PLAN.md) · [`DESIGN_STUDIO_DRC_AGENT.md`](../../reference/DESIGN_STUDIO_DRC_AGENT.md) · [`AGENT_QUICKSTART.md`](../../AGENT_QUICKSTART.md) · [`AGENT_DRY_RUN_CHECKLIST.md`](../../AGENT_DRY_RUN_CHECKLIST.md)
 
 ---
 
@@ -164,8 +164,8 @@ flowchart LR
 
 These were the July plan's next actions. They are retained for provenance, not as the current priority queue.
 
-1. ~~Phase 0 + Phase 1 cold-internal exit.~~ ✅ alpha.16 — [`COLD_INTERNAL_EXIT.md`](COLD_INTERNAL_EXIT.md)
-2. On-board café DMM when hardware is available ([`REAL_BENCH_OPERATOR.md`](REAL_BENCH_OPERATOR.md)).
+1. ~~Phase 0 + Phase 1 cold-internal exit.~~ ✅ alpha.16 — [`COLD_INTERNAL_EXIT.md`](../../COLD_INTERNAL_EXIT.md)
+2. On-board café DMM when hardware is available ([`REAL_BENCH_OPERATOR.md`](../../reference/REAL_BENCH_OPERATOR.md)).
 3. Autoroute / `fab_ready` — **maintainer track**; keep default `AUTOROUTE=0`.
 4. Design Studio pin-edit / live DRC hints (Phase 2 UX).
 5. Optional: stranger dry-run when someone appears.

@@ -6,10 +6,10 @@
 
 **Related:**
 
-- [`RELEASE_V1.md`](RELEASE_V1.md) — what “finished” means technically  
+- [`RELEASE_V1.md`](../../RELEASE_V1.md) — what “finished” means technically  
 - [`BLUEPRINT_POSITIONING_AND_FUNDING.md`](BLUEPRINT_POSITIONING_AND_FUNDING.md) — vs Blueprint, Taiwan grants  
-- [`SPLICE_PRODUCT.md`](SPLICE_PRODUCT.md) — tiers S0–S5, personas (short)  
-- [`competition/YZU_AI_Agent_2026_提案回顧與學習.md`](competition/YZU_AI_Agent_2026_提案回顧與學習.md) — competition misfit lessons  
+- [`SPLICE_PRODUCT.md`](../../SPLICE_PRODUCT.md) — tiers S0–S5, personas (short)  
+- [`competition/YZU_AI_Agent_2026_提案回顧與學習.md`](../../competition/YZU_AI_Agent_2026_提案回顧與學習.md) — competition misfit lessons  
 
 **Last updated:** June 2026  
 
@@ -488,7 +488,7 @@ Ship v1.0?
 |-----|---------|
 | `OFFER_SPLICE_BENCH_KIT_v1.md` | 1-page customer-facing offer |
 | `SUPPORT_AND_LIABILITY_v1.md` | License boundaries |
-| `RELEASE_NOTES_v1.0.md` | Ship with tag |
+| `docs/releases/RELEASE_NOTES_v1.0.md` | Ship with tag |
 | `ROADMAP_v2.md` | Ideas **after** commercial signal |
 
 ---

@@ -61,7 +61,7 @@ Explicitly **not** the main product wizard path.
 New bounded endpoints under `/v1/build-files/*`:
 
 - `list`, `content`, `design-quality`, `artifacts`, `bom`, `fab-manifest`, `export-views`, `circuit-json`, `download`, `autoroute` (confirm required), `recheck`
-- Security: output-root allow-list, traversal rejection, suffix allow-list, size caps — see [`docs/BUILD_FILES_API_SECURITY.md`](docs/BUILD_FILES_API_SECURITY.md)
+- Security: output-root allow-list, traversal rejection, suffix allow-list, size caps — see [`docs/BUILD_FILES_API_SECURITY.md`](../reference/BUILD_FILES_API_SECURITY.md)
 
 ---
 
@@ -79,10 +79,10 @@ Manual: Home → Quick demo → **Design verify** (KiCanvas + BOM + fab) → Int
 
 ## Documentation
 
-- [`docs/V1.1_INTERFACE_PREVIEW.md`](docs/V1.1_INTERFACE_PREVIEW.md)
-- [`docs/OSS_INTEGRATION_STATUS.md`](docs/OSS_INTEGRATION_STATUS.md)
-- [`docs/ATOPILE_IMPORT.md`](docs/ATOPILE_IMPORT.md)
-- [`docs/KICAD_MCP_SIDECAR.md`](docs/KICAD_MCP_SIDECAR.md)
+- [`docs/V1.1_INTERFACE_PREVIEW.md`](../V1.1_INTERFACE_PREVIEW.md)
+- [`docs/OSS_INTEGRATION_STATUS.md`](../OSS_INTEGRATION_STATUS.md)
+- [`docs/ATOPILE_IMPORT.md`](../ATOPILE_IMPORT.md)
+- [`docs/KICAD_MCP_SIDECAR.md`](../reference/KICAD_MCP_SIDECAR.md)
 
 ---
 
@@ -102,4 +102,4 @@ No breaking API changes to core splice/build endpoints. New UI panels require `m
 
 ---
 
-*Ready for GitHub prerelease publish — see [`docs/LAUNCH_v1.1.md`](docs/LAUNCH_v1.1.md).*
+*Ready for GitHub prerelease publish — see [`docs/LAUNCH_v1.1.md`](../LAUNCH_v1.1.md).*

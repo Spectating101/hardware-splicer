@@ -94,7 +94,7 @@ Details: [`deploy/DEPLOY.md`](../deploy/DEPLOY.md), [`OPERATIONS_RUNBOOK_v1.md`]
 ```bash
 gh release create v1.1.0 \
   --title "v1.1.0 — Design Verification Workbench" \
-  --notes-file RELEASE_NOTES_v1.1.0.md
+  --notes-file docs/releases/RELEASE_NOTES_v1.1.0.md
 ```
 
 Attach: `releases/sample-splice-sprint-robot-repair-cafe.zip` (gates + package proof).
@@ -121,7 +121,7 @@ Power-on authorization remains **operator-owned**. See [`SUPPORT_AND_LIABILITY_v
 
 ## 8. Claims
 
-Outbound copy must match [`CLAIMS_BOUNDARY.md`](CLAIMS_BOUNDARY.md). Preferred sentence:
+Outbound copy must match [`CLAIMS_BOUNDARY.md`](reference/CLAIMS_BOUNDARY.md). Preferred sentence:
 
 > Self-hosted bring-up workbench with design verification and bench gates before fabrication or power-on.
 

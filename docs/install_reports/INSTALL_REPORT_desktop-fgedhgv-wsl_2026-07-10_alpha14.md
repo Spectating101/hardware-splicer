@@ -32,4 +32,4 @@ deploy_alien_quickstart: PASS (v1.1.0-alpha.14 on desktop-fgedhgv)
 ## Notes
 
 - `.env.local` scp'd via `HS_ALIEN_QWEN=1` (not in git archive).
-- Live café DMM still requires physical instruments — see `docs/REAL_BENCH_OPERATOR.md`.
+- Live café DMM still requires physical instruments — see `docs/reference/REAL_BENCH_OPERATOR.md`.

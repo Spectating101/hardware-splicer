@@ -2,7 +2,7 @@
 
 **Purpose:** Close the loop from compose → **bench gates** → `power_on_authorized` on the **same spine** as `hs_compose_drc_agent`.
 
-**Related:** [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) · [`SPLICE_BEST_PRACTICES.md`](SPLICE_BEST_PRACTICES.md)
+**Related:** [`AGENT_HANDOFF.md`](../AGENT_HANDOFF.md) · [`SPLICE_BEST_PRACTICES.md`](SPLICE_BEST_PRACTICES.md)
 
 ---
 

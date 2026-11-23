@@ -2,7 +2,7 @@
 
 **Audience:** Agents calling `hs_design_quality`, `hs_render_project_package`, or any tool that reads `build_dir` / `out_dir`.
 
-**Related:** [`BUILD_FILES_API_SECURITY.md`](BUILD_FILES_API_SECURITY.md) · [`AGENT_QUICKSTART.md`](AGENT_QUICKSTART.md)
+**Related:** [`BUILD_FILES_API_SECURITY.md`](BUILD_FILES_API_SECURITY.md) · [`AGENT_QUICKSTART.md`](../AGENT_QUICKSTART.md)
 
 ---
 

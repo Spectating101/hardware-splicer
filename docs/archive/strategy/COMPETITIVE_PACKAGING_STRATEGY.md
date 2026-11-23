@@ -286,7 +286,7 @@ Position as **spine in the bring-up layer**, not replacement EDA.
 2. [ ] `make verify-install-smoke` after clean venv wipe
 3. [ ] `make splice-ui-serve` — full demo path without code edits
 4. [ ] Fill `INSTALL_REPORT_TEMPLATE.md` on spare machine (still internal)
-5. [ ] Close P0 gaps in §4 of [`INTERNAL_MATURITY_PLAN.md`](INTERNAL_MATURITY_PLAN.md)
+5. [ ] Close P0 gaps in §4 of [`INTERNAL_MATURITY_PLAN.md`](../../INTERNAL_MATURITY_PLAN.md)
 
 **Defer until internal done:** outreach, pilot emails, grant apps, GitHub Release marketing.
 

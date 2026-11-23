@@ -177,8 +177,8 @@ make verify-ui-interface-smoke
 
 ## Related docs
 
-- [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md) — full MCP flow
-- [`DEMO_DESIGN_STUDIO_DRC_LOOP.md`](DEMO_DESIGN_STUDIO_DRC_LOOP.md) — 3–5 min demo script (agent + UI)
+- [`AGENT_HANDOFF.md`](../AGENT_HANDOFF.md) — full MCP flow
+- [`DEMO_DESIGN_STUDIO_DRC_LOOP.md`](../archive/demos/DEMO_DESIGN_STUDIO_DRC_LOOP.md) — 3–5 min demo script (agent + UI)
 - [`CLAIMS_BOUNDARY.md`](CLAIMS_BOUNDARY.md) — what not to claim publicly
 
 ---

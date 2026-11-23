@@ -2,7 +2,7 @@
 
 **Purpose:** Artifact-to-artifact comparison using the **real** release sample — not slogans.
 
-**Proof object:** [`releases/sample-splice-sprint-robot-repair-cafe.zip`](../releases/sample-splice-sprint-robot-repair-cafe.zip) (GitHub Release `v1.0.2`)
+**Proof object:** [`releases/sample-splice-sprint-robot-repair-cafe.zip`](../../../releases/sample-splice-sprint-robot-repair-cafe.zip) (GitHub Release `v1.0.2`)
 
 **Case:** Repair-café S3 golden — salvaged robot drive donor → carrier compile → bench closure → `POWER_ON_AUTHORIZED`
 

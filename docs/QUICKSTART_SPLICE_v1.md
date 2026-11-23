@@ -71,7 +71,7 @@ hs-serve --host 127.0.0.1 --port 8787
 curl -s http://127.0.0.1:8787/health | jq .
 ```
 
-**MCP** (Cursor / Claude Desktop): see [`MCP.md`](MCP.md) and `mcp/hardware-splicer.mcp.json`.
+**MCP** (Cursor / Claude Desktop): see [`MCP.md`](reference/MCP.md) and `mcp/hardware-splicer.mcp.json`.
 
 **OpenAPI:** http://127.0.0.1:8787/docs
 

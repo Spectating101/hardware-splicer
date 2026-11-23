@@ -26,7 +26,7 @@ Not “clone their marketing.” It means a user can do in Circuit.AI what they 
 - Robotics / mech proof bundles
 - Evidence-first fab gate (not “looks fine on canvas”)
 
-Product framing: [SPLICE_PRODUCT.md](./SPLICE_PRODUCT.md) — own splice first; Flux-class editor is expansion on the same spine, not a reposition.
+Product framing: [SPLICE_PRODUCT.md](../../SPLICE_PRODUCT.md) — own splice first; Flux-class editor is expansion on the same spine, not a reposition.
 
 ## Engine order (no UI detour)
 
@@ -43,4 +43,4 @@ Product framing: [SPLICE_PRODUCT.md](./SPLICE_PRODUCT.md) — own splice first; 
 - **Flux-class arbitrary PCB:** engine path complete — routing + schematic + KiCad DRC/ERC; Tier C product bar = honest fab on all kits + KiCad truth in UI; Tier D = full schematic editor
 - **Worth doing:** yes, if we keep measuring against this table, not against “18 kits pass”
 
-See `docs/ENGINE_DONE.md` for gate IDs and CI status.
+See `docs/archive/plans/ENGINE_DONE.md` for gate IDs and CI status.

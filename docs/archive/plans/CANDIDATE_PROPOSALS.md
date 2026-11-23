@@ -144,7 +144,7 @@ never block, pass, or fail a candidate.
 | `max_passes` | 20 | integer 1 to 50 |
 | `keep_existing_tracks` | `true` | boolean; `false` lets the router remove existing tracks |
 
-The router is [`routing_engine.py`](ROUTING_ENGINE.md). Its output goes through the same path as an edit: structural
+The router is [`routing_engine.py`](../../reference/ROUTING_ENGINE.md). Its output goes through the same path as an edit: structural
 diff, optional DRC counts, a new candidate directory and a pending review. The routing engine's own guards refuse a
 result that changes anything but copper (placement, board setup, zone settings), and that refusal is HTTP 422
 `routing_failed`. A server without FreeRouting answers HTTP 409 `routing_unavailable` with the text that says what to
@@ -201,8 +201,8 @@ the server keeps answering other requests and live event streams while a proposa
 
 ## Related
 
-- [`MACHINE_PROJECT_SPINE.md`](MACHINE_PROJECT_SPINE.md) — staged review
-- [`ARTIFACT_RETENTION.md`](ARTIFACT_RETENTION.md) — pinned bytes this service reads
+- [`MACHINE_PROJECT_SPINE.md`](../../MACHINE_PROJECT_SPINE.md) — staged review
+- [`ARTIFACT_RETENTION.md`](../../reference/ARTIFACT_RETENTION.md) — pinned bytes this service reads
 - `src/hardware_splicer/project_candidates.py`
 - `src/hardware_splicer/project_candidates_api.py`
 

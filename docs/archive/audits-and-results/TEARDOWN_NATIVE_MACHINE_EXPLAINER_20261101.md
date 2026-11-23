@@ -18,9 +18,9 @@ coordinates still need registration. [Teardown source](https://github.com/elvaro
 | [PathOn SO-101 wrist](https://github.com/PathOn-AI/PathOnRoboticsOSS/tree/20940773bc2e6c83fea869580d53380ab1573795/hardware/robots/so101_6dof_wrist) | A useful comparison for adding a joint and changing the gripper. The original hardware has a restricted license, so the comparison links to the source. |
 | [Calibrex](https://github.com/rsasaki0109/calibrex) and [RoboSimStudio](https://github.com/robosimstudio/robosimstudio) | Calibrex can check calibration from recorded sensor data and report unobserved axes. RoboSimStudio is a comparison for reconstructing a physical scene and testing manipulation in simulation. |
 
-The [robotics signal feed](../examples/github_signals/robotics_candidates_20261118.json)
+The [robotics signal feed](../../../examples/github_signals/robotics_candidates_20261118.json)
 pins the candidates for review through the existing GitHub signal pipeline. The
-[comparison evidence](status/generated/robotics-external-comparison-20261118.json)
+[comparison evidence](../../status/generated/robotics-external-comparison-20261118.json)
 holds the exact inputs and observed results.
 
 The missing product workflow is a rebuildable teardown for one coherent revision.
@@ -28,7 +28,7 @@ Selecting a part should reveal its native geometry, assembly location, exact BOM
 entry, and connected schematic or wiring source. A substitution should identify
 which mounting, electrical and motion checks need to run again. Evidence for
 that workflow and the public service controls are tracked in the
-[deployment guide](PACKAGING_AND_DEPLOYMENT.md#external-backend-release).
+[deployment guide](../../PACKAGING_AND_DEPLOYMENT.md#external-backend-release).
 
 ## Scope
 

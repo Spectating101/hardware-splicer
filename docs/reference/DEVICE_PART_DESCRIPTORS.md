@@ -64,4 +64,4 @@ stack, by contrast, is 1,310 hand-written lines for the adapter lane alone.
 - **A part with no ID register cannot be told from another chip that acknowledges its address.**
 - The 1.2 divisor is the datasheet's typical value; the datasheet gives 0.96 to 1.44, so a real chip may differ by up to 20 %.
 
-See [the benchmark note](status/DEVICE_FAULT_MATRIX_BENCHMARK_2026-10-12.md) for how the tests are scored.
+See [the benchmark note](../status/DEVICE_FAULT_MATRIX_BENCHMARK_2026-10-12.md) for how the tests are scored.

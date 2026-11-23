@@ -4,7 +4,7 @@
 
 **Production entrypoint:** `scripts/hardware_splicer.py` → `src/hardware_splicer/` (Python).
 
-**Pipeline map:** [ENGINE.md](./ENGINE.md)
+**Pipeline map:** [ENGINE.md](../../ENGINE.md)
 
 ---
 
@@ -24,7 +24,7 @@ The **editor comes after** the engine can compile without a human fixing wires o
 
 **Differentiators we keep on top of that core:** **splicing** (donor PCB dissection → carrier compile), salvage intake, evidence/casefiles, deterministic prove gates.
 
-**Splice product reference (thesis, tiers, roadmap):** [SPLICE_PRODUCT.md](./SPLICE_PRODUCT.md) · verify bar: `make verify-splice`
+**Splice product reference (thesis, tiers, roadmap):** [SPLICE_PRODUCT.md](../../SPLICE_PRODUCT.md) · verify bar: `make verify-splice`
 
 ---
 
@@ -94,7 +94,7 @@ Update status only when verification is re-run.
 
 ---
 
-See **`docs/FLUX_TARGET.md`** for the Flux parity scorecard and strategic bar.
+See **`docs/archive/strategy/FLUX_TARGET.md`** for the Flux parity scorecard and strategic bar.
 
 ## 7. Phase 1 gates — bootstrap hardening
 
