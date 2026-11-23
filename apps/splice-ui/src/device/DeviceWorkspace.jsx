@@ -93,6 +93,14 @@ function SelectionCard({ row, index, sidecars, findings, onShow, onSelect }) {
   );
 }
 
+// "?compare=5,5c" compares two of the manifest's own revisions instead of its default pair.
+export function withComparison(manifest, search) {
+  const pair = new URLSearchParams(search ?? "").get("compare")?.split(",");
+  const ids = new Set((manifest?.revisions ?? []).map((row) => row.id));
+  if (pair?.length !== 2 || pair[0] === pair[1] || !pair.every((id) => ids.has(id))) return manifest;
+  return { ...manifest, compare: { base: pair[0], target: pair[1] } };
+}
+
 export default function DeviceWorkspace({ sceneId, onExit }) {
   const [manifest, setManifest] = useState(null);
   const [error, setError] = useState("");
@@ -109,7 +117,7 @@ export default function DeviceWorkspace({ sceneId, onExit }) {
     const controller = new AbortController();
     setManifest(null); setError("");
     fetchSceneManifest(sceneId, controller.signal)
-      .then((body) => { if (!controller.signal.aborted) setManifest(body); })
+      .then((body) => { if (!controller.signal.aborted) setManifest(withComparison(body, window.location.search)); })
       .catch((cause) => { if (!controller.signal.aborted) setError(cause.message); });
     return () => controller.abort();
   }, [sceneId]);
