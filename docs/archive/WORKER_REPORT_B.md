@@ -14,7 +14,7 @@ Implemented the smallest advisory handoff. No device-library entries, wiring rul
 - `apps/circuit-ai/circuit-ai-frontend/app/engineering/donor/page.tsx`: per-matching-row `reclaim-device-match` links and advisory text. Stale plans hide links; obsolete requests are aborted. Clicking passes only input fields through session storage; blocked storage is reported.
 - `apps/circuit-ai/circuit-ai-frontend/app/engineering/device/page.tsx`: when opened with `from=donor`, checks the stored input through the backend again and shows a separate advisory `device-on-hand` list. The example/spec/shopping list and wiring remain untouched.
 - `scripts/mock_canonical_project_studio_backend.py`: added a handler that reuses the real matcher and bounded JSON reader.
-- `docs/DEVICE_PLAN.md`, `docs/DONOR_CAPTURE.md`: documented endpoint, handoff and limits.
+- `docs/reference/DEVICE_PLAN.md`, `docs/reference/DONOR_CAPTURE.md`: documented endpoint, handoff and limits.
 - `tests/test_device_reclaim.py`: added matcher and endpoint regression tests.
 
 ## Verification

@@ -136,7 +136,7 @@ Example: [`nginx/splice-agent.conf.example`](nginx/splice-agent.conf.example)
 
 ## MCP (no HTTP)
 
-Configure Cursor/Claude with `.venv/bin/python -m hardware_splicer.mcp_server` and `PYTHONPATH=src`. See [`../docs/MCP.md`](../docs/MCP.md).
+Configure Cursor/Claude with `.venv/bin/python -m hardware_splicer.mcp_server` and `PYTHONPATH=src`. See [`../docs/MCP.md`](../docs/reference/MCP.md).
 
 ---
 

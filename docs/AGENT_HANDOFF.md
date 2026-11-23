@@ -4,10 +4,10 @@
 
 **15-minute path:** [`AGENT_QUICKSTART.md`](AGENT_QUICKSTART.md) — 3 curls + 3 MCP tools.  
 **Zero-help proof:** [`AGENT_DRY_RUN_CHECKLIST.md`](AGENT_DRY_RUN_CHECKLIST.md).  
-**build_dir policy:** [`AGENT_BUILD_DIR_POLICY.md`](AGENT_BUILD_DIR_POLICY.md).
+**build_dir policy:** [`AGENT_BUILD_DIR_POLICY.md`](reference/AGENT_BUILD_DIR_POLICY.md).
 
-**What changed since May:** [`HANDOFF_UPDATE.md`](HANDOFF_UPDATE.md) — build/upgrade delta for continuity.  
-**Strategy / funding / vs Blueprint:** [`BLUEPRINT_POSITIONING_AND_FUNDING.md`](BLUEPRINT_POSITIONING_AND_FUNDING.md) — do not kill HS because of Blueprint; Taiwan competition + grant path.
+**What changed since May:** [`HANDOFF_UPDATE.md`](archive/handoffs/HANDOFF_UPDATE.md) — build/upgrade delta for continuity.  
+**Strategy / funding / vs Blueprint:** [`BLUEPRINT_POSITIONING_AND_FUNDING.md`](archive/strategy/BLUEPRINT_POSITIONING_AND_FUNDING.md) — do not kill HS because of Blueprint; Taiwan competition + grant path.
 
 ## What this engine does (splice thesis)
 
@@ -18,7 +18,7 @@
 
 **Honest bar today:** S2 compile demos pass KiCad DRC (`make verify-splice`). S3 golden paths close gates in CI (`verify-splice-loop`) or via hand-filled real capture (`verify-splice-real-bench`). Circuit synthesis planners are test-covered (`88f1db8`) on a **parallel greenfield path** — not merged into splice verify yet. Splice and synthesis builds auto-emit **PROJECT_PACKAGE** artifacts (Blueprint-shaped tabs + **GATES**). Field validation on community junk is a future partner step.
 
-**Competition / judge entry:** [`COMPETITION_HANDOFF.md`](COMPETITION_HANDOFF.md) · full proposal [`COMPETITION_PROPOSAL.md`](COMPETITION_PROPOSAL.md)
+**Competition / judge entry:** [`COMPETITION_HANDOFF.md`](archive/handoffs/COMPETITION_HANDOFF.md) · full proposal [`COMPETITION_PROPOSAL.md`](archive/strategy/COMPETITION_PROPOSAL.md)
 
 ## Recommended flow
 
@@ -33,7 +33,7 @@ hs_sdk_info
   → hs_splice_bench_submit      # record measurements, close gates
 ```
 
-**Design Studio path (greenfield canvas):** same as `hs_compose` + `POST /v1/compose/agent-loop` — see [`DESIGN_STUDIO_DRC_AGENT.md`](DESIGN_STUDIO_DRC_AGENT.md). For long compiles, use **`POST /v1/jobs/compose-agent-loop`** and poll `GET /v1/jobs/{id}/result`.
+**Design Studio path (greenfield canvas):** same as `hs_compose` + `POST /v1/compose/agent-loop` — see [`DESIGN_STUDIO_DRC_AGENT.md`](reference/DESIGN_STUDIO_DRC_AGENT.md). For long compiles, use **`POST /v1/jobs/compose-agent-loop`** and poll `GET /v1/jobs/{id}/result`.
 
 **Salvage / donor shortcut:**
 
@@ -88,7 +88,7 @@ print(candidate.get("blocked"), candidate.get("blockers"))
 result = synthesize_circuit(candidate["intent"] if "intent" in candidate else {...}, export_gerber=False)
 ```
 
-Deep reference: [`CIRCUIT_SYNTHESIS_LAYER_PLAN.md`](CIRCUIT_SYNTHESIS_LAYER_PLAN.md). **Splice path and synthesis path are separate today** — RC demos still use donor fixtures + catalog `robot_drive_base`.
+Deep reference: [`CIRCUIT_SYNTHESIS_LAYER_PLAN.md`](archive/plans/CIRCUIT_SYNTHESIS_LAYER_PLAN.md). **Splice path and synthesis path are separate today** — RC demos still use donor fixtures + catalog `robot_drive_base`.
 
 ## Project package (Blueprint-shaped output)
 
@@ -272,7 +272,7 @@ Install: `pip install -r requirements-mcp.txt` then `PYTHONPATH=src python -m ha
 
 Golden real (no dedicated MCP tool yet): SDK `splice_golden_real()` or `make splice-golden-real`.
 
-See [`docs/MCP.md`](MCP.md) for Cursor/Claude config.
+See [`docs/reference/MCP.md`](reference/MCP.md) for Cursor/Claude config.
 
 ## HTTP API
 
@@ -311,7 +311,7 @@ make verify-splice-real-bench   # S3 golden real
 make pin-golden-live-evidence   # refresh Qwen pin (needs API key)
 ```
 
-See `docs/SPLICE_BEST_PRACTICES.md`, `docs/COMPETITIVE_LANDSCAPE.md`, `docs/COMPETITION_HANDOFF.md`.
+See `docs/reference/SPLICE_BEST_PRACTICES.md`, `docs/archive/strategy/COMPETITIVE_LANDSCAPE.md`, `docs/archive/handoffs/COMPETITION_HANDOFF.md`.
 
 ## Truth model (do not skip)
 
@@ -322,8 +322,8 @@ See `docs/SPLICE_BEST_PRACTICES.md`, `docs/COMPETITIVE_LANDSCAPE.md`, `docs/COMP
 ## Product docs
 
 - [`docs/SPLICE_PRODUCT.md`](SPLICE_PRODUCT.md) — maturity S0–S5, personas, gaps
-- [`docs/CIRCUIT_SYNTHESIS_LAYER_PLAN.md`](CIRCUIT_SYNTHESIS_LAYER_PLAN.md) — topology planners + implementation status
-- [`docs/DEMO_SPLICE.md`](DEMO_SPLICE.md) — 10-minute walkthrough
+- [`docs/archive/plans/CIRCUIT_SYNTHESIS_LAYER_PLAN.md`](archive/plans/CIRCUIT_SYNTHESIS_LAYER_PLAN.md) — topology planners + implementation status
+- [`docs/archive/demos/DEMO_SPLICE.md`](archive/demos/DEMO_SPLICE.md) — 10-minute walkthrough
 - [`examples/splice/manifest.json`](../examples/splice/manifest.json) — CI demo contract
 
 ## Environment defaults for agents
