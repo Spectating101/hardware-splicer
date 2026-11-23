@@ -1,6 +1,6 @@
 # Packaging and deployment
 
-**Related:** [`RELEASE_V1.md`](RELEASE_V1.md) · [`SETUP.md`](SETUP.md) · [`MCP.md`](MCP.md) · [`MONETIZATION_AND_PRODUCT_ASSESSMENT.md`](MONETIZATION_AND_PRODUCT_ASSESSMENT.md)
+**Related:** [`RELEASE_V1.md`](RELEASE_V1.md) · [`SETUP.md`](SETUP.md) · [`MCP.md`](reference/MCP.md) · [`MONETIZATION_AND_PRODUCT_ASSESSMENT.md`](archive/strategy/MONETIZATION_AND_PRODUCT_ASSESSMENT.md)
 
 ## Current headless backend
 
@@ -107,7 +107,7 @@ before opening the backend to outside accounts.
 For the robotics workflow, the release evidence also needs one reference robot
 whose assembly, electrical sources, BOM and supported substitutions agree at a
 single revision. Sortcell demonstrates exploration of an existing model.
-See the [robotics comparison and evidence](TEARDOWN_NATIVE_MACHINE_EXPLAINER_20261101.md#november-18-robotics-comparison).
+See the [robotics comparison and evidence](archive/audits-and-results/TEARDOWN_NATIVE_MACHINE_EXPLAINER_20261101.md#november-18-robotics-comparison).
 
 ---
 
@@ -224,7 +224,7 @@ INSTALL_DEV=1 bash scripts/install_splice_v1.sh
 | Command | Maps to |
 |---------|---------|
 | `hs-doctor` | `hardware_splicer.sdk:engine_doctor` wrapper or CLI doctor |
-| `hs-serve` | uvicorn `hardware_splicer.api:app` |
+| `hs-serve` | uvicorn `hardware_splicer.product_api:app` (API + built UI; see SETUP.md "Run the app") |
 | `hs-mcp` | `python -m hardware_splicer.mcp_server` |
 
 **Extras:**
@@ -299,7 +299,8 @@ WorkingDirectory=/opt/hardware-splicer
 Environment=PYTHONPATH=src
 Environment=HARDWARE_SPLICER_AUTOROUTE=0
 Environment=HARDWARE_SPLICER_TMP_ROOT=/var/lib/hardware-splicer/builds
-ExecStart=/opt/hardware-splicer/.venv/bin/uvicorn hardware_splicer.api:app --host 127.0.0.1 --port 8787
+Environment=HARDWARE_SPLICER_STATE_DIR=/var/lib/hardware-splicer/state
+ExecStart=/opt/hardware-splicer/.venv/bin/hs-serve --ui --host 127.0.0.1 --port 8787
 Restart=on-failure
 
 [Install]
@@ -339,7 +340,7 @@ Put **nginx** with TLS + API key in front if exposed beyond localhost.
 | Asset | Contents |
 |-------|----------|
 | **Source** | Tag `v1.0.0` on `main` |
-| `RELEASE_NOTES_v1.0.md` | In repo + pasted in release |
+| `docs/releases/RELEASE_NOTES_v1.0.md` | In repo + pasted in release |
 | `requirements-splice-v1.txt` | Pinned |
 | Optional **`golden-splice-bundle.zip`** | Pre-built output from `verify-splice-loop` (demo without KiCad) |
 | Optional **3 min demo video** | Link in release notes |
@@ -376,7 +377,7 @@ curl -s localhost:8787/...   # add GET /health if missing (v1.0.1)
 - [ ] `scripts/install_splice_v1.sh` documented in README  
 - [ ] `src/hardware_splicer/__version__ = "1.0.0"`  
 - [ ] `requirements-splice-v1.txt` pinned  
-- [ ] `RELEASE_NOTES_v1.0.md`  
+- [ ] `docs/releases/RELEASE_NOTES_v1.0.md`  
 - [ ] `make verify-splice && make verify-splice-loop` green  
 - [ ] `docs/SETUP.md` points to slim vs full install  
 
@@ -427,7 +428,7 @@ curl -s localhost:8787/...   # add GET /health if missing (v1.0.1)
 **Packaging done when:** stranger on Ubuntu with KiCad runs:
 
 ```bash
-git clone … && cd Hardware-Splicer && git checkout v1.0.0
+git clone … && cd Hardware-Splicer && git checkout <release-tag>
 bash scripts/install_splice_v1.sh
 hs-doctor   # ok: true, kicad_cli: ok
 make verify-splice-loop

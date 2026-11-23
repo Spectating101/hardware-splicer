@@ -6,7 +6,6 @@ Client snapshots cannot supply filesystem paths or substitute result claims.
 """
 from __future__ import annotations
 
-import hashlib
 import importlib.util
 import json
 import os
@@ -17,14 +16,17 @@ import subprocess
 import sys
 import tempfile
 import time
+import threading
 import uuid
 import zipfile
 from functools import lru_cache
 
 from .project_store import CorruptProject, ProjectNotFound, RevisionConflict, validate_project_id
 from . import digital_cases as cases
+from .state_paths import repo_root
+from .file_digest import sha256_file
 
-CASE = Path(__file__).resolve().parents[2] / 'examples/drone_proving_ground/digital'
+CASE = repo_root() / 'examples/drone_proving_ground/digital'
 DESIGN = CASE.parent / 'revision_b/reference'
 ARTIFACTS = frozenset({
     'ASSEMBLY.png', 'EXPLODED.png', 'FLIGHT.gif', 'HS-LICENSE.txt', 'HS3G_B_ASSEMBLY.glb',
@@ -45,7 +47,8 @@ def requirement_tools():
 
 
 def digest(path):
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    # Same check every read; bytes are re-read only when the file changed (see file_digest).
+    return sha256_file(path)
 
 
 def read_json(path):
@@ -87,8 +90,28 @@ def _runtime(interpreter):
             'or set HARDWARE_SPLICER_DIGITAL_PYTHON to a Python with that extra. Saved studies remain viewable.'}
 
 
+# One lock per probe: a request that needs a probe the startup prewarm is running waits for that
+# answer (then cached) instead of starting a second interpreter, while a probe that already has an
+# answer, or a different probe, is never held up behind a slow one.
+_probe_locks: dict[tuple, threading.Lock] = {}
+_probe_locks_guard = threading.Lock()
+
+
+def _probe_lock(*key) -> threading.Lock:
+    with _probe_locks_guard:
+        return _probe_locks.setdefault(key, threading.Lock())
+
+
 def runtime():
-    return _runtime(native_python())
+    interpreter = native_python()
+    with _probe_lock('drone', interpreter):
+        return _runtime(interpreter)
+
+
+def _device_probe(interpreter, substitution):
+    # Always pass substitution by keyword, so every caller shares one lru_cache entry per answer.
+    with _probe_lock('device', interpreter, bool(substitution)):
+        return _device_runtime(interpreter, substitution=bool(substitution))
 
 
 @lru_cache(maxsize=4)
@@ -111,8 +134,23 @@ def _device_runtime(interpreter, *, substitution=False):
 
 def runtime_for_case(case_id=cases.DEFAULT_CASE):
     cases.validate_case_id(case_id)
-    return runtime() if case_id == cases.DEFAULT_CASE else _device_runtime(
-        native_python(), substitution=case_id == 'fielddeck-5')
+    if case_id == cases.DEFAULT_CASE:
+        return runtime()
+    return _device_probe(native_python(), case_id == 'fielddeck-5')
+
+
+def prewarm_runtimes():
+    """Run the runtime probes once, so the first study request does not wait seconds on them.
+
+    The probes start an interpreter and import the CAD stack; their answers are cached per process.
+    """
+    interpreter = native_python()
+    # The same entry points requests use, so the answers land in the cache entries they read.
+    for probe in (runtime, lambda: _device_probe(interpreter, False), lambda: _device_probe(interpreter, True)):
+        try:
+            probe()
+        except Exception:  # a failed probe is answered again, synchronously, on first use
+            pass
 
 
 def artifact_names(case_id=cases.DEFAULT_CASE, *, case=None):
@@ -145,10 +183,10 @@ def resolve_requirements(seal, change_request='', requirements=None):
     case_id = case_id_for(seal)
     if case_id == cases.DEFAULT_CASE:
         return requirement_tools().resolve(seal['summary']['requirements'], change_request, requirements)
-    return _revision_case(seal).resolve(seal['summary']['requirements'], change_request, requirements)
+    return revision_case(seal).resolve(seal['summary']['requirements'], change_request, requirements)
 
 
-def _revision_case(seal):
+def revision_case(seal):
     case_id = case_id_for(seal)
     # Fielddeck 5 revisions change numeric goals against the parent's exact
     # assembly and evaluator, even if today's checkout has another variant.
@@ -459,7 +497,7 @@ def execute_study(backend, job):
         raise CorruptProject('Digital job targets a different registered case.')
     if store.load(project_id)['revision'] != base_revision:
         raise RevisionConflict('The project changed before this run started. Reload and run from the latest revision.')
-    case = None if case_id == cases.DEFAULT_CASE else _revision_case(parent_seal)
+    case = None if case_id == cases.DEFAULT_CASE else revision_case(parent_seal)
     requirements = (requirement_tools().validate(payload['requirements']) if case is None
                     else case.validate(payload['requirements']))
     attempt = Path(job.output_dir) / (job.attempt_id or uuid.uuid4().hex)

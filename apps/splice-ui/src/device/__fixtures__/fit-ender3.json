@@ -1,0 +1,425 @@
+{
+  "basis": "CAD model, including envelope and unknown-shape stand-ins; physical fit not tested",
+  "counts": {
+    "near": 0,
+    "overlap": 13,
+    "overlap_real": 0,
+    "overlap_stand_in": 13,
+    "tight": 4,
+    "touching": 11
+  },
+  "glb_sha256": "38fa947b0c118e392391d81cc5b5bb426e291a2a9fccd0352adcb62cf50a9a84",
+  "method": {
+    "clearance": "minimum distance between surface samples about 0.35 mm apart",
+    "interference": "exact intersection volume of closed meshes (manifold3d)",
+    "near_mm": 2.0,
+    "overlap_mm3": 0.5,
+    "tight_mm": 1.0,
+    "touch_mm": 0.05
+  },
+  "not_computed": [],
+  "pairs": [
+    {
+      "a": "reference-envelope-central-base",
+      "b": "reference-envelope-left-base",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "overlap",
+      "overlap_computed": true,
+      "overlap_mm3": 64000.0,
+      "precision_mm": 0.0,
+      "stand_in": true
+    },
+    {
+      "a": "reference-envelope-central-base",
+      "b": "reference-envelope-right-base",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "overlap",
+      "overlap_computed": true,
+      "overlap_mm3": 64000.0,
+      "precision_mm": 0.0,
+      "stand_in": true
+    },
+    {
+      "a": "reference-envelope-parked-fans-and-shroud",
+      "b": "reference-envelope-parked-intact-hotend",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "overlap",
+      "overlap_computed": true,
+      "overlap_mm3": 37800.0,
+      "precision_mm": 0.0,
+      "stand_in": true
+    },
+    {
+      "a": "reference-envelope-x-motor",
+      "b": "reference-envelope-left-upright",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "overlap",
+      "overlap_computed": true,
+      "overlap_mm3": 22680.0,
+      "precision_mm": 0.0,
+      "stand_in": true
+    },
+    {
+      "a": "reference-envelope-z-motor",
+      "b": "reference-envelope-left-upright",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "overlap",
+      "overlap_computed": true,
+      "overlap_mm3": 15334.0,
+      "precision_mm": 0.0,
+      "stand_in": true
+    },
+    {
+      "a": "reference-envelope-x-motor",
+      "b": "reference-envelope-x-rail",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "overlap",
+      "overlap_computed": true,
+      "overlap_mm3": 12520.0,
+      "precision_mm": 0.0,
+      "stand_in": true
+    },
+    {
+      "a": "reference-envelope-x-rail",
+      "b": "reference-envelope-left-upright",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "overlap",
+      "overlap_computed": true,
+      "overlap_mm3": 8000.0,
+      "precision_mm": 0.0,
+      "stand_in": true
+    },
+    {
+      "a": "reference-envelope-x-belt",
+      "b": "reference-envelope-x-rail",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "overlap",
+      "overlap_computed": true,
+      "overlap_mm3": 3900.0,
+      "precision_mm": 0.0,
+      "stand_in": true
+    },
+    {
+      "a": "reference-envelope-x-rail",
+      "b": "reference-envelope-right-upright",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "overlap",
+      "overlap_computed": true,
+      "overlap_mm3": 2280.0,
+      "precision_mm": 0.0,
+      "stand_in": true
+    },
+    {
+      "a": "reference-envelope-z-motor",
+      "b": "reference-envelope-left-base",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "overlap",
+      "overlap_computed": true,
+      "overlap_mm3": 374.0,
+      "precision_mm": 0.0,
+      "stand_in": true
+    },
+    {
+      "a": "reference-envelope-x-motor",
+      "b": "reference-envelope-x-belt",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "overlap",
+      "overlap_computed": true,
+      "overlap_mm3": 255.6,
+      "precision_mm": 0.0,
+      "stand_in": true
+    },
+    {
+      "a": "reference-envelope-x-belt",
+      "b": "reference-envelope-left-upright",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "overlap",
+      "overlap_computed": true,
+      "overlap_mm3": 240.0,
+      "precision_mm": 0.0,
+      "stand_in": true
+    },
+    {
+      "a": "reference-envelope-y-motor",
+      "b": "reference-envelope-y-belt",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "overlap",
+      "overlap_computed": true,
+      "overlap_mm3": 144.0,
+      "precision_mm": 0.0,
+      "stand_in": true
+    },
+    {
+      "a": "pen-envelope",
+      "b": "reference-envelope-bed-235x235",
+      "basis": [
+        "unknown",
+        "envelope"
+      ],
+      "gap_mm": 0.1,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "pen-clamp",
+      "b": "pen-adapter",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.4,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "pen-envelope",
+      "b": "pen-adapter",
+      "basis": [
+        "unknown",
+        "custom"
+      ],
+      "gap_mm": 0.607,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "pen-envelope",
+      "b": "pen-clamp",
+      "basis": [
+        "unknown",
+        "custom"
+      ],
+      "gap_mm": 0.607,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "hotend-parking-plate",
+      "b": "reference-envelope-top",
+      "basis": [
+        "custom",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "manufacturer-e-plate",
+      "b": "pen-adapter",
+      "basis": [
+        "unknown",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": -0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "paper-180mm-square",
+      "b": "reference-envelope-bed-235x235",
+      "basis": [
+        "unknown",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "pen-envelope",
+      "b": "paper-180mm-square",
+      "basis": [
+        "unknown",
+        "unknown"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "reference-envelope-controller-enclosure",
+      "b": "reference-envelope-left-base",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "reference-envelope-left-upright",
+      "b": "reference-envelope-left-base",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "reference-envelope-parked-fans-and-shroud",
+      "b": "hotend-parking-plate",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "reference-envelope-parked-intact-hotend",
+      "b": "hotend-parking-plate",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "reference-envelope-right-upright",
+      "b": "reference-envelope-right-base",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "reference-envelope-top",
+      "b": "reference-envelope-left-upright",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "reference-envelope-top",
+      "b": "reference-envelope-right-upright",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    }
+  ],
+  "parts_measured": 24,
+  "parts_sha256": "bb3de526cf728e0bd97981aa6ea6b925df05ee4eaa797140430958dea3b29b5a",
+  "parts_unmatched": [],
+  "schema": "hardware_splicer.scene_fit.v1",
+  "size_mm": [
+    434.0,
+    400.0,
+    465.0
+  ],
+  "version": "scene-fit.v4"
+}

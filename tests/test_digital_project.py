@@ -164,7 +164,7 @@ def test_product_spa_fallback_does_not_shadow_digital_api(service, monkeypatch):
     @engine.get('/{spa_path:path}', name='splice_ui_spa')
     def fallback(spa_path: str):
         return {'spa': True}
-    monkeypatch.setattr(product, 'create_engine_app', lambda: engine)
+    monkeypatch.setattr(product, 'create_engine_app', lambda **_: engine)
     app = product.create_product_app(store)
     client = TestClient(app)
     project = client.post('/v1/digital/projects', json={}).json()['project']

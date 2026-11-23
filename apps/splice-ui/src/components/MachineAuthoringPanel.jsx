@@ -4,7 +4,7 @@ import { PERSISTENCE_STATUS, projectSnapshot } from "../projectSession/projectSe
 import {
   editMachineProject,
   stageMachineProjectReview,
-} from "../projectSession/machineAuthoringApi.js";
+} from "../projectSession/machineAuthoringApi";
 import "./MachineAuthoringPanel.css";
 
 function splitList(value) {

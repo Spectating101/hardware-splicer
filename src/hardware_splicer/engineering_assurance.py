@@ -325,8 +325,14 @@ def build_engineering_assurance(
     *,
     project_id: str | None = None,
     revision: int | None = None,
+    study: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Project canonical state into an inspectable assurance graph."""
+    """Project canonical state into an inspectable assurance graph.
+
+    ``study`` is a digital revision's sealed checks from
+    ``study_evidence.load_study_evidence``. Each check becomes a ``check`` output
+    bound to that revision and run; a failed check keeps the graph blocked.
+    """
 
     graph = _source_graph(snapshot)
     raw_sources = {
@@ -430,6 +436,22 @@ def build_engineering_assurance(
             issue["output_id"] == output["node_id"] for issue in reference_issues
         )
 
+    study_projection = None
+    if study is not None:
+        from .study_evidence import study_check_nodes, study_dependencies
+
+        checks = study_check_nodes(study)
+        outputs.extend(checks)
+        for check in checks:
+            for dependency in check["dependency_ids"]:
+                edges.append({"from": dependency, "to": f"output:{check['node_id']}", "relationship": "input_of_check"})
+        study_projection = {
+            key: deepcopy(study[key])
+            for key in ("revision", "run_id", "case_id", "snapshot_sha256", "seal_sha256", "package", "requirements_met")
+        }
+        study_projection["dependencies"] = study_dependencies(study)
+    failed_checks = sum(output["kind"] == "check" and output["status"] != "passed" for output in outputs)
+
     conflicts: list[dict[str, Any]] = []
     for conflict in graph.conflicts:
         row = conflict.model_dump(mode="json")
@@ -485,6 +507,7 @@ def build_engineering_assurance(
             or graph.unresolved_source_ids
             or reference_issues
             or any(output["kind"] == "blocker" for output in outputs)
+            or failed_checks
             else "bounded"
         ),
         "sources": sources,
@@ -494,6 +517,7 @@ def build_engineering_assurance(
         "edges": edges,
         "reference_issues": reference_issues,
         "unresolved_source_ids": list(graph.unresolved_source_ids),
+        "study": study_projection,
         "review_state": {
             "status": adjudication.get("status", "not_declared"),
             "independent_signoff": adjudication.get("independent_signoff") is True,
@@ -518,6 +542,8 @@ def build_engineering_assurance(
             "output_count": len(outputs),
             "blocking_conflict_count": len(graph.blocking_conflicts),
             "blocker_count": sum(output["kind"] == "blocker" for output in outputs),
+            "check_count": sum(output["kind"] == "check" for output in outputs),
+            "failed_check_count": failed_checks,
             "reference_issue_count": len(reference_issues),
             "unreviewed_claim_count": sum(
                 claim["review"]["status"] in {"pending", "unreviewed", ""}
@@ -627,6 +653,9 @@ def evaluate_assurance_delta(
             }
         )
     for output in assurance.get("outputs") or []:
+        if output.get("kind") == "check":
+            # Study checks are judged revision to revision by study_evidence.
+            continue
         items.append(
             {
                 "evidence_id": f"output:{output['node_id']}",

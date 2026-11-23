@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { downloadBuildArtifact, fetchFabManifest, fetchIntegrationsCatalog } from "../api.js";
+import { downloadBuildArtifact, fetchFabManifest, fetchIntegrationsCatalog } from "../api";
 
 const FAB_STATUS_LABEL = {
   present: "Present",
@@ -106,7 +106,7 @@ export function DesignArtifactsPanel({ buildDir }) {
 
   useEffect(() => {
     if (!buildDir) return;
-    import("../api.js").then(({ listBuildArtifacts, exportCircuitJson }) => {
+    import("../api").then(({ listBuildArtifacts, exportCircuitJson }) => {
       listBuildArtifacts(buildDir)
         .then((payload) => setArtifacts(payload.artifacts || []))
         .catch((err) => setError(err.message));
@@ -135,7 +135,7 @@ export function DesignArtifactsPanel({ buildDir }) {
     setAutorouteMsg("");
     setError("");
     try {
-      const { runBuildAutoroute } = await import("../api.js");
+      const { runBuildAutoroute } = await import("../api");
       const result = await runBuildAutoroute(buildDir);
       setAutorouteMsg(
         result.autoroute?.ok
@@ -210,7 +210,7 @@ export function DesignReadinessPanel({ buildDir, onRecheckComplete }) {
     setRecheckBusy(true);
     setRecheckMsg("");
     try {
-      const { recheckBuildAfterKicad } = await import("../api.js");
+      const { recheckBuildAfterKicad } = await import("../api");
       const result = await recheckBuildAfterKicad(buildDir);
       const drc = result.drc || {};
       setRecheckMsg(
@@ -255,7 +255,7 @@ export function DesignBomPanel({ buildDir }) {
   const loadBom = (enrich = false) => {
     if (!buildDir) return;
     setEnriching(enrich);
-    import("../api.js")
+    import("../api")
       .then(({ fetchBuildBom }) => fetchBuildBom(buildDir, { enrich }))
       .then(setBom)
       .catch((err) => setError(err.message))
@@ -387,7 +387,7 @@ export function HumanViewsPanel({ buildDir }) {
     setBusy(true);
     setError("");
     try {
-      const { exportBuildViews, listBuildArtifacts } = await import("../api.js");
+      const { exportBuildViews, listBuildArtifacts } = await import("../api");
       if (generate) {
         const result = await exportBuildViews(buildDir);
         if (!result.ok && result.skipped) {

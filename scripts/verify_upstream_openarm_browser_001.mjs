@@ -19,6 +19,7 @@ try {
   page.on('pageerror',e=>errors.push(e.message));
   const resp=await page.goto(siteUrl,{waitUntil:'domcontentloaded',timeout:30000});
   if(!resp.ok())throw Error('HS app not served');
+  await page.getByTestId('nav-library').click();
   await page.getByTestId('nav-complete-assembly').click();
   const engineering=page.getByTestId('upstream-robot-engineering');
   await engineering.waitFor({state:'visible',timeout:30000});

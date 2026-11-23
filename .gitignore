@@ -20,6 +20,7 @@ htmlcov/
 venv/
 
 # Node/frontend
+src/hardware_splicer/ui_dist/
 node_modules/
 .next/
 dist/

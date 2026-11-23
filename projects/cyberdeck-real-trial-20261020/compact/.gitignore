@@ -1,0 +1,3 @@
+cad/*.step
+cad/print/
+__pycache__/

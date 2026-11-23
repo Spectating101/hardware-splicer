@@ -1,0 +1,8 @@
+{
+  "source": "examples/drone_proving_ground/digital/reference/README.md and model.json: \"Native frame plus representative components and propeller blades; not vendor-detailed CAD.\" \"The assembly uses simplified electronics and blades.\"",
+  "rules": [
+    {"match": "(top|bottom)_plate|standoff_\\d+", "basis": "custom", "why": "native frame geometry authored by the study"},
+    {"match": "motor_\\d+|prop_\\d+|stack_(FC|ESC)|(FC|ESC)_grommet_.*|battery_\\d+|gps_\\d+|receiver_\\d+|camera_\\d+|camera_lens|vtx_\\d+", "basis": "envelope", "why": "representative components and blades, not vendor CAD"},
+    {"match": "strap_(top|bottom)", "basis": "unknown", "why": "the study does not state how the straps are modelled"}
+  ]
+}

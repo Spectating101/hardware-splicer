@@ -41,7 +41,7 @@ python3 scripts/hardware_splicer.py splice-build \
   --out /tmp/hs_splice_build --no-gerber
 ```
 
-See [`DEMO_SPLICE.md`](DEMO_SPLICE.md). Donor fixtures: `examples/fixtures/splice_donor_*.json`.
+See [`DEMO_SPLICE.md`](archive/demos/DEMO_SPLICE.md). Donor fixtures: `examples/fixtures/splice_donor_*.json`.
 
 ---
 
@@ -87,7 +87,7 @@ python3 scripts/hardware_splicer.py intake \
   --out /tmp/hardware_splicer_intake_plant
 ```
 
-Emits `PROJECT_INTAKE.json`, `PROJECT_AUTHORITY.json`, `PRODUCTION_RELEASE_METRICS.json`, evidence reports, and related artifacts. See [`LLM_OPS.md`](LLM_OPS.md) for vision/text LLM providers.
+Emits `PROJECT_INTAKE.json`, `PROJECT_AUTHORITY.json`, `PRODUCTION_RELEASE_METRICS.json`, evidence reports, and related artifacts. See [`LLM_OPS.md`](reference/LLM_OPS.md) for vision/text LLM providers.
 
 ```bash
 make plant-qwen-pipeline    # live vision (API key)
@@ -116,7 +116,7 @@ python3 scripts/hardware_splicer.py serve --port 8090
 
 Endpoints include compile, intake-run, scenario-run, mechanical/robotics authority, and async jobs. Splice Agent v1 HTTP surface is documented in [`AGENT_HANDOFF.md`](AGENT_HANDOFF.md).
 
-Environment: [`INTEGRATION.md`](INTEGRATION.md) — `HARDWARE_SPLICER_OUTPUT_ROOT`, `HARDWARE_SPLICER_STATE_DIR`, job workers.
+Environment: [`INTEGRATION.md`](reference/INTEGRATION.md) — `HARDWARE_SPLICER_OUTPUT_ROOT`, `HARDWARE_SPLICER_STATE_DIR`, job workers.
 
 ---
 

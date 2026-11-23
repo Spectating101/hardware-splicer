@@ -1,0 +1,593 @@
+{
+  "basis": "CAD model, including envelope and unknown-shape stand-ins; physical fit not tested",
+  "counts": {
+    "near": 2,
+    "overlap": 13,
+    "overlap_real": 0,
+    "overlap_stand_in": 13,
+    "tight": 2,
+    "touching": 23
+  },
+  "glb_sha256": "989849c8c23b8eb6221d8977a9aadf7af8afa54da201d752027f77466366e434",
+  "method": {
+    "clearance": "minimum distance between surface samples about 0.35 mm apart",
+    "interference": "exact intersection volume of closed meshes (manifold3d)",
+    "near_mm": 2.0,
+    "overlap_mm3": 0.5,
+    "tight_mm": 1.0,
+    "touch_mm": 0.05
+  },
+  "not_computed": [],
+  "pairs": [
+    {
+      "a": "strap-top",
+      "b": "receiver-1",
+      "basis": [
+        "unknown",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "overlap",
+      "overlap_computed": true,
+      "overlap_mm3": 127.5,
+      "precision_mm": 0.0,
+      "stand_in": true
+    },
+    {
+      "a": "esc-grommet-1-1",
+      "b": "stack-esc",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "overlap",
+      "overlap_computed": true,
+      "overlap_mm3": 33.97,
+      "precision_mm": 0.0,
+      "stand_in": true
+    },
+    {
+      "a": "esc-grommet-1-1-5",
+      "b": "stack-esc",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "overlap",
+      "overlap_computed": true,
+      "overlap_mm3": 33.97,
+      "precision_mm": 0.0,
+      "stand_in": true
+    },
+    {
+      "a": "esc-grommet-1-1-6",
+      "b": "stack-esc",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "overlap",
+      "overlap_computed": true,
+      "overlap_mm3": 33.97,
+      "precision_mm": 0.0,
+      "stand_in": true
+    },
+    {
+      "a": "esc-grommet-1-1-7",
+      "b": "stack-esc",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "overlap",
+      "overlap_computed": true,
+      "overlap_mm3": 33.97,
+      "precision_mm": 0.0,
+      "stand_in": true
+    },
+    {
+      "a": "fc-grommet-1-1",
+      "b": "stack-fc",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "overlap",
+      "overlap_computed": true,
+      "overlap_mm3": 33.97,
+      "precision_mm": 0.0,
+      "stand_in": true
+    },
+    {
+      "a": "fc-grommet-1-1-10",
+      "b": "stack-fc",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "overlap",
+      "overlap_computed": true,
+      "overlap_mm3": 33.97,
+      "precision_mm": 0.0,
+      "stand_in": true
+    },
+    {
+      "a": "fc-grommet-1-1-11",
+      "b": "stack-fc",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "overlap",
+      "overlap_computed": true,
+      "overlap_mm3": 33.97,
+      "precision_mm": 0.0,
+      "stand_in": true
+    },
+    {
+      "a": "fc-grommet-1-1-12",
+      "b": "stack-fc",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "overlap",
+      "overlap_computed": true,
+      "overlap_mm3": 33.97,
+      "precision_mm": 0.0,
+      "stand_in": true
+    },
+    {
+      "a": "vtx-1",
+      "b": "fc-grommet-1-1",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "overlap",
+      "overlap_computed": true,
+      "overlap_mm3": 3.71,
+      "precision_mm": 0.0,
+      "stand_in": true
+    },
+    {
+      "a": "vtx-1",
+      "b": "fc-grommet-1-1-10",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "overlap",
+      "overlap_computed": true,
+      "overlap_mm3": 3.71,
+      "precision_mm": 0.0,
+      "stand_in": true
+    },
+    {
+      "a": "vtx-1",
+      "b": "fc-grommet-1-1-11",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "overlap",
+      "overlap_computed": true,
+      "overlap_mm3": 3.71,
+      "precision_mm": 0.0,
+      "stand_in": true
+    },
+    {
+      "a": "vtx-1",
+      "b": "fc-grommet-1-1-12",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "overlap",
+      "overlap_computed": true,
+      "overlap_mm3": 3.71,
+      "precision_mm": 0.0,
+      "stand_in": true
+    },
+    {
+      "a": "standoff-3",
+      "b": "camera-1",
+      "basis": [
+        "custom",
+        "envelope"
+      ],
+      "gap_mm": 0.5,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "standoff-4",
+      "b": "camera-1",
+      "basis": [
+        "custom",
+        "envelope"
+      ],
+      "gap_mm": 0.5,
+      "kind": "tight",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "standoff-1",
+      "b": "gps-1",
+      "basis": [
+        "custom",
+        "envelope"
+      ],
+      "gap_mm": 1.02,
+      "kind": "near",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "standoff-2",
+      "b": "gps-1",
+      "basis": [
+        "custom",
+        "envelope"
+      ],
+      "gap_mm": 1.02,
+      "kind": "near",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "battery-1",
+      "b": "bottom-plate",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "camera-lens",
+      "b": "camera-1",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "gps-1",
+      "b": "top-plate",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "motor-1",
+      "b": "bottom-plate",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": -0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "motor-2",
+      "b": "bottom-plate",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "motor-3",
+      "b": "bottom-plate",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "motor-4",
+      "b": "bottom-plate",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "prop-1",
+      "b": "motor-1",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "prop-2",
+      "b": "motor-2",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "prop-3",
+      "b": "motor-3",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": -0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "prop-4",
+      "b": "motor-4",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": -0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "receiver-1",
+      "b": "bottom-plate",
+      "basis": [
+        "envelope",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "standoff-1",
+      "b": "bottom-plate",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": -0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "standoff-1",
+      "b": "top-plate",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "standoff-2",
+      "b": "bottom-plate",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "standoff-2",
+      "b": "top-plate",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": -0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "standoff-3",
+      "b": "bottom-plate",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "standoff-3",
+      "b": "top-plate",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "standoff-4",
+      "b": "bottom-plate",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "standoff-4",
+      "b": "top-plate",
+      "basis": [
+        "custom",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": false
+    },
+    {
+      "a": "strap-bottom",
+      "b": "battery-1",
+      "basis": [
+        "unknown",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": -0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "strap-top",
+      "b": "bottom-plate",
+      "basis": [
+        "unknown",
+        "custom"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": -0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    },
+    {
+      "a": "vtx-1",
+      "b": "stack-fc",
+      "basis": [
+        "envelope",
+        "envelope"
+      ],
+      "gap_mm": 0.0,
+      "kind": "touching",
+      "overlap_computed": true,
+      "overlap_mm3": 0.0,
+      "precision_mm": 0.35,
+      "stand_in": true
+    }
+  ],
+  "parts_measured": 32,
+  "parts_sha256": "0dd34bdac8d47e6e22212b068cac04b8301e7d9dc16ee04c855b56724c207686",
+  "parts_unmatched": [],
+  "schema": "hardware_splicer.scene_fit.v1",
+  "size_mm": [
+    155.54,
+    163.61,
+    74.03
+  ],
+  "version": "scene-fit.v4"
+}
