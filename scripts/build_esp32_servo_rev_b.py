@@ -440,6 +440,10 @@ def stitch_planes(pcb: str, pitch_mm: float = 4.0) -> int:
         return 0
     taken = [(pcbnew.ToMM(item.GetPosition().x), pcbnew.ToMM(item.GetPosition().y))
              for item in board.GetTracks() if item.GetClass() == "PCB_VIA"]
+    # Keep clear of through-hole pads: a fill joined solidly to one would otherwise accept a via inside it.
+    pads = [(pcbnew.ToMM(pad.GetPosition().x), pcbnew.ToMM(pad.GetPosition().y),
+             pcbnew.ToMM(max(pad.GetSize().x, pad.GetSize().y)) / 2 + 0.7)
+            for fp in board.GetFootprints() for pad in fp.Pads() if pad.GetAttribute() == pcbnew.PAD_ATTRIB_PTH]
     ring = [(0.55 * math.cos(2 * math.pi * k / 12), 0.55 * math.sin(2 * math.pi * k / 12)) for k in range(12)] + [(0, 0)]
     added = 0
     y = pitch_mm / 2
@@ -448,7 +452,8 @@ def stitch_planes(pcb: str, pitch_mm: float = 4.0) -> int:
         while x < BOARD_W:
             inside = all(fill.Contains(pcbnew.VECTOR2I_MM(x + dx, y + dy))
                          for fill in fills.values() for dx, dy in ring)
-            if inside and all(math.hypot(x - tx, y - ty) > 1.5 for tx, ty in taken):
+            clear = all(math.hypot(x - px, y - py) > reach for px, py, reach in pads)
+            if inside and clear and all(math.hypot(x - tx, y - ty) > 1.5 for tx, ty in taken):
                 via = pcbnew.PCB_VIA(board)
                 via.SetPosition(pcbnew.VECTOR2I_MM(x, y))
                 via.SetDrill(pcbnew.FromMM(0.3))
@@ -490,13 +495,30 @@ def stitch_planes(pcb: str, pitch_mm: float = 4.0) -> int:
                     break
             if found:
                 break
-        if found and all(math.hypot(found[0] - tx, found[1] - ty) > 0.9 for tx, ty in taken):
+        if found and all(math.hypot(found[0] - tx, found[1] - ty) > 0.9 for tx, ty in taken) and \
+                all(math.hypot(found[0] - px, found[1] - py) > reach for px, py, reach in pads):
             add(*found)
             added += 1
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
     board.Save(pcb)
     print(added)
     return added
+
+
+def drop_vias_in_pads(pcb: str) -> None:
+    """Remove any unlocked ground via whose drill lands inside a plated through-hole pad (the pad already
+    joins the layers, and co-located drills are a fabrication defect). Vias in a surface-mount exposed pad
+    are thermal vias and stay."""
+    pcbnew = _pcbnew()
+    board = pcbnew.LoadBoard(pcb)
+    pads = [pad for fp in board.GetFootprints() for pad in fp.Pads() if pad.GetAttribute() == pcbnew.PAD_ATTRIB_PTH]
+    doomed = [via for via in board.GetTracks() if via.GetClass() == "PCB_VIA" and via.GetNetname() == "GND"
+              and not via.IsLocked() and any(pad.HitTest(via.GetPosition()) for pad in pads)]
+    for via in doomed:
+        board.Delete(via)
+    pcbnew.ZONE_FILLER(board).Fill(board.Zones())
+    board.Save(pcb)
+    print(len(doomed))
 
 
 def stranded_pads(pcb: str) -> None:
@@ -600,6 +622,7 @@ def build_all(out: str) -> dict:
     widen(out)
     _step("pour", out)
     _step("stitchplanes", out)
+    _step("dropvias", out)
     stitched = stitch_ground(out)
     removed = remove_dangling(out)
     settle(out)
@@ -624,6 +647,7 @@ if __name__ == "__main__":
         "pour": lambda: pour_ground(args[0]),
         "stitchplanes": lambda: stitch_planes(args[0]),
         "stranded": lambda: stranded_pads(args[0]),
+        "dropvias": lambda: drop_vias_in_pads(args[0]),
         "trialvia": lambda: try_ground_via(args[0], *map(float, args[1:5]), args[5]),
         "removetracks": lambda: remove_tracks(*args),
     }
