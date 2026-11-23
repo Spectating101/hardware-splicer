@@ -2,18 +2,18 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { downloadBuildArtifact } from "../api.js";
+import { downloadBuildArtifact } from "../api";
 import {
   fetchEngineeringReviewStatus,
   runEngineeringReview,
-} from "../engineeringReviewApi.js";
+} from "../engineeringReviewApi";
 import EngineeringReviewPanel from "./EngineeringReviewPanel.jsx";
 
-vi.mock("../api.js", () => ({
+vi.mock("../api", () => ({
   downloadBuildArtifact: vi.fn(),
 }));
 
-vi.mock("../engineeringReviewApi.js", () => ({
+vi.mock("../engineeringReviewApi", () => ({
   fetchEngineeringReviewStatus: vi.fn(),
   runEngineeringReview: vi.fn(),
 }));

@@ -1,0 +1,152 @@
+[
+  {
+    "manufacturer": "SpeedyBee",
+    "mpn": "F405 Mini BLS 35A 20x20 Stack",
+    "material_id": "stack",
+    "description": "SpeedyBee F405 Mini BLS 35A 20x20 stack (F405 Mini FC, ICM42688P, DPS310 baro, 8 MB flash; BLS 35A Mini V2 ESC, BLHeli_S J-H-40)",
+    "quantity": "1",
+    "source_ref": "examples/drone_proving_ground/revision_b/reference/BOM.csv#stack",
+    "unresolved": [
+      "Selected controller is discontinued in retained manufacturer evidence; a current source or compatible replacement needs confirmation."
+    ]
+  },
+  {
+    "manufacturer": "T-Hobby",
+    "mpn": "F1404 KV2900",
+    "material_id": "motor",
+    "description": "T-Hobby F1404 KV2900, 4-6S, 9N12P",
+    "quantity": "4",
+    "source_ref": "examples/drone_proving_ground/revision_b/reference/BOM.csv#motor"
+  },
+  {
+    "manufacturer": "Gemfan",
+    "mpn": "PMPC3028-3",
+    "material_id": "prop",
+    "description": "Gemfan Windancer 3028-3 PMPC3028-3, 1.5 mm T-mount, 2CW+2CCW pack",
+    "quantity": "2",
+    "unit": "pack",
+    "source_ref": "examples/drone_proving_ground/revision_b/reference/BOM.csv#prop"
+  },
+  {
+    "manufacturer": "CNHL",
+    "mpn": "85704G",
+    "material_id": "battery",
+    "description": "CNHL MiniStar 85704G, 850 mAh 4S 70C LiPo, factory XT60, 12AWG leads",
+    "quantity": "2",
+    "source_ref": "examples/drone_proving_ground/revision_b/reference/BOM.csv#battery"
+  },
+  {
+    "manufacturer": "iFlight",
+    "mpn": "BLITZ Mini M10 GPS V2",
+    "material_id": "gps",
+    "description": "iFlight BLITZ Mini M10 GPS V2 (20x20 mm; u-blox M10, QMC5883L compass)",
+    "quantity": "1",
+    "source_ref": "examples/drone_proving_ground/revision_b/reference/BOM.csv#gps"
+  },
+  {
+    "manufacturer": "RadioMaster",
+    "mpn": "RP1 V2",
+    "material_id": "receiver",
+    "description": "RadioMaster RP1 V2 ExpressLRS 2.4 GHz nano receiver",
+    "quantity": "1",
+    "source_ref": "examples/drone_proving_ground/revision_b/reference/BOM.csv#receiver"
+  },
+  {
+    "manufacturer": "Caddx",
+    "mpn": "Ant 1200TVL nano",
+    "material_id": "camera",
+    "description": "Caddx Ant 1200TVL nano (14 x 14 mm)",
+    "quantity": "1",
+    "source_ref": "examples/drone_proving_ground/revision_b/reference/BOM.csv#camera"
+  },
+  {
+    "manufacturer": "HGLRC",
+    "mpn": "Zeus Nano 350mW",
+    "material_id": "vtx",
+    "description": "HGLRC Zeus Nano 25-350 mW 5.8 GHz VTX (16x16 / 20x20 / 25.5x25.5 mount)",
+    "quantity": "1",
+    "source_ref": "examples/drone_proving_ground/revision_b/reference/BOM.csv#vtx"
+  },
+  {
+    "specification": "M3 x 30 mm aluminium hex standoff, 5 mm across flats",
+    "material_id": "standoff",
+    "description": "M3 x 30 mm aluminium hex standoff, 5 mm across flats",
+    "quantity": "4",
+    "source_ref": "examples/drone_proving_ground/revision_b/reference/BOM.csv#standoff"
+  },
+  {
+    "specification": "M2 x 5 button head, steel",
+    "material_id": "motor_screw",
+    "description": "M2 x 5 button head, steel",
+    "quantity": "16",
+    "source_ref": "examples/drone_proving_ground/revision_b/reference/results.json#hardware.items.motor_screw"
+  },
+  {
+    "specification": "M3 x 30 button head, titanium",
+    "material_id": "stack_screw",
+    "description": "M3 x 30 button head, titanium",
+    "quantity": "4",
+    "source_ref": "examples/drone_proving_ground/revision_b/reference/results.json#hardware.items.stack_screw"
+  },
+  {
+    "specification": "M3 x 6 button head, titanium",
+    "material_id": "standoff_screw",
+    "description": "M3 x 6 button head, titanium",
+    "quantity": "8",
+    "source_ref": "examples/drone_proving_ground/revision_b/reference/results.json#hardware.items.standoff_screw"
+  },
+  {
+    "specification": "M3 x 5 nylon hex spacer, 5 mm AF",
+    "material_id": "stack_spacer",
+    "description": "M3 x 5 nylon hex spacer, 5 mm AF",
+    "quantity": "4",
+    "source_ref": "examples/drone_proving_ground/revision_b/reference/results.json#hardware.items.stack_spacer"
+  },
+  {
+    "specification": "M3 nylon lock nut",
+    "material_id": "stack_nut",
+    "description": "M3 nylon lock nut",
+    "quantity": "4",
+    "source_ref": "examples/drone_proving_ground/revision_b/reference/results.json#hardware.items.stack_nut"
+  },
+  {
+    "specification": "10 x 200 mm battery strap",
+    "material_id": "strap",
+    "description": "10 x 200 mm battery strap",
+    "quantity": "1",
+    "source_ref": "examples/drone_proving_ground/revision_b/reference/results.json#hardware.items.strap"
+  },
+  {
+    "material_id": "wiring_allowance",
+    "description": "12 g allowance including factory XT60 mating lead, capacitor, wire and ties; weigh finished assembly",
+    "quantity": "1",
+    "unit": "bundle",
+    "source_ref": "examples/drone_proving_ground/revision_b/reference/BOM.csv#wiring",
+    "unresolved": [
+      "A mass/cost allowance is not an itemized materials list.",
+      "Capacitor identity/rating, wire lengths, tie quantities and mounting materials remain unspecified."
+    ]
+  },
+  {
+    "specification": "Carbon-fibre 2.01 mm bottom plate; cut blank examples/drone_proving_ground/revision_b/reference/cutter_blanks/hs3g_bottom_plate.dxf",
+    "material_id": "frame_bottom",
+    "description": "Carbon-fibre 2.01 mm bottom plate; cut blank examples/drone_proving_ground/revision_b/reference/cutter_blanks/hs3g_bottom_plate.dxf",
+    "quantity": "1",
+    "acquisition": "make",
+    "source_ref": "examples/drone_proving_ground/revision_b/reference/BOM.csv#frame_cut",
+    "unresolved": [
+      "Laminate grade, stock thickness availability and machining process require source confirmation."
+    ]
+  },
+  {
+    "specification": "Carbon-fibre 1.02 mm top plate; cut blank examples/drone_proving_ground/revision_b/reference/cutter_blanks/hs3g_top_plate.dxf",
+    "material_id": "frame_top",
+    "description": "Carbon-fibre 1.02 mm top plate; cut blank examples/drone_proving_ground/revision_b/reference/cutter_blanks/hs3g_top_plate.dxf",
+    "quantity": "1",
+    "acquisition": "make",
+    "source_ref": "examples/drone_proving_ground/revision_b/reference/BOM.csv#frame_cut",
+    "unresolved": [
+      "Laminate grade, stock thickness availability and machining process require source confirmation."
+    ]
+  }
+]

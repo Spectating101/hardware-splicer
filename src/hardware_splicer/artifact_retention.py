@@ -1,7 +1,8 @@
 """Content-addressed KiCad artifact retention for immutable project revisions.
 
 Build directories stay path references in the snapshot and remain mutable. This
-module copies only ``.kicad_sch`` / ``.kicad_pcb`` bytes into a separate
+module copies ``.kicad_sch`` / ``.kicad_pcb`` bytes and their exact-stem
+``.kicad_pro`` / ``.kicad_dru`` companions into a separate
 content-addressed store and pins them to a revision. Pins and blobs never
 rewrite a snapshot, revision envelope, or authority field.
 """
@@ -16,7 +17,7 @@ import re
 import stat
 import tempfile
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any, Mapping
 
 from .build_files_security import assert_build_dir_allowed, max_kicad_content_bytes
@@ -25,6 +26,7 @@ from .project_store import ProjectStore, validate_project_id
 PIN_SCHEMA = "hardware_splicer.artifact_pins.v1"
 RETENTION_BASES = frozenset({"at_save", "after_save"})
 ARTIFACT_KINDS = ("schematic", "pcb")
+ARTIFACT_SIDECARS = {"project": ".kicad_pro", "rules": ".kicad_dru"}
 _KICAD_SUFFIXES = {".kicad_sch": "schematic", ".kicad_pcb": "pcb"}
 _PIN_SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 _MAX_RETENTION_RESULTS = 256
@@ -40,6 +42,63 @@ class ArtifactIntegrityError(ArtifactRetentionError):
 
 class ArtifactPinConflict(ArtifactRetentionError):
     """A revision is already pinned to different artifact bytes."""
+
+
+def validate_kicad_rule_bytes(raw: bytes) -> None:
+    """Validate bounded native rules without following includes or file paths.
+
+    KiCad can silently ignore unknown top-level declarations. Check the file
+    envelope before invoking it, while leaving rule expressions and exact bytes
+    unchanged for native evaluation. This does not assert that DRC passed.
+    """
+    from .kicad_diff import KicadDiffError, parse_kicad_sexp
+
+    if not isinstance(raw, bytes) or len(raw) > max_kicad_content_bytes():
+        raise ValueError("KiCad custom rules exceed the supported input limit")
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError:
+        raise ValueError("KiCad custom rules must be UTF-8") from None
+    cleaned = []
+    quoted = escaped = comment = False
+    for char in text:
+        if comment:
+            if char == "\n":
+                comment = False
+                cleaned.append(char)
+            continue
+        if not quoted and char == "#":
+            comment = True
+            continue
+        cleaned.append(char)
+        if quoted and escaped:
+            escaped = False
+        elif quoted and char == "\\":
+            escaped = True
+        elif char == '"':
+            quoted = not quoted
+    try:
+        tree = parse_kicad_sexp("(custom_rules\n" + "".join(cleaned) + "\n)")
+    except KicadDiffError:
+        raise ValueError("KiCad custom rule declarations are malformed") from None
+    declarations = tree[1:]
+    def reject_includes(node):
+        if isinstance(node, list):
+            if node and node[0] == "include":
+                raise ValueError("KiCad custom rule includes are not supported")
+            for child in node:
+                reject_includes(child)
+    reject_includes(tree)
+    if not declarations or declarations[0] != ["version", "1"]:
+        raise ValueError("Only KiCad version-1 custom rule files are supported")
+    for declaration in declarations[1:]:
+        if (not isinstance(declaration, list) or len(declaration) < 3
+                or declaration[0] != "rule" or not isinstance(declaration[1], str)):
+            raise ValueError("Unsupported KiCad custom rule declaration; includes are not supported")
+        for clause in declaration[2:]:
+            if (not isinstance(clause, list) or not clause or not isinstance(clause[0], str)
+                    or clause[0] not in {"condition", "constraint", "layer", "severity"}):
+                raise ValueError("Unsupported KiCad custom rule clause")
 
 
 def _utc_now() -> str:
@@ -250,9 +309,10 @@ def _pin_payload(
     revision: int,
     basis: str,
     artifacts: dict[str, dict[str, Any] | None],
+    sidecars: Mapping[str, Mapping[str, dict[str, Any]]] | None = None,
     retained_at: str | None = None,
 ) -> dict[str, Any]:
-    return {
+    payload = {
         "schema_version": PIN_SCHEMA,
         "project_id": project_id,
         "revision": int(revision),
@@ -263,6 +323,9 @@ def _pin_payload(
             "pcb": artifacts.get("pcb"),
         },
     }
+    if sidecars:
+        payload["sidecars"] = {kind: dict(entries) for kind, entries in sidecars.items() if entries}
+    return payload
 
 
 def _pin_bytes(pin: Mapping[str, Any]) -> bytes:
@@ -345,6 +408,24 @@ def _validate_pin(pin: Mapping[str, Any], *, project_id: str, revision: int) -> 
         "schematic": _validate_pin_entry(artifacts.get("schematic")),
         "pcb": _validate_pin_entry(artifacts.get("pcb")),
     }
+    if "sidecars" in pin:
+        sidecars = pin["sidecars"]
+        if not isinstance(sidecars, Mapping) or set(sidecars) - set(ARTIFACT_KINDS):
+            raise _corrupt_pin()
+        validated = {}
+        for kind, entries in sidecars.items():
+            primary = body["artifacts"].get(kind)
+            if (primary is None or not isinstance(entries, Mapping)
+                    or not entries or set(entries) - set(ARTIFACT_SIDECARS)):
+                raise _corrupt_pin()
+            validated[kind] = {}
+            for role, raw in entries.items():
+                entry = _validate_pin_entry(raw)
+                expected = str(PurePosixPath(primary["relative"].replace("\\", "/")).with_suffix(ARTIFACT_SIDECARS[role]))
+                if entry is None or entry["relative"] != expected:
+                    raise _corrupt_pin()
+                validated[kind][role] = entry
+        body["sidecars"] = validated
     return body
 
 
@@ -369,7 +450,8 @@ def load_artifact_pin(store: ProjectStore, project_id: str, revision: int) -> di
 
 
 def _artifacts_equal(left: Mapping[str, Any], right: Mapping[str, Any]) -> bool:
-    return left.get("artifacts") == right.get("artifacts")
+    return (left.get("artifacts") == right.get("artifacts")
+            and left.get("sidecars", {}) == right.get("sidecars", {}))
 
 
 def _write_pin(store: ProjectStore, pin: Mapping[str, Any]) -> dict[str, Any]:
@@ -419,6 +501,7 @@ def retain_revision_artifacts(
 
     limit = max_kicad_content_bytes()
     artifacts: dict[str, dict[str, Any] | None] = {"schematic": None, "pcb": None}
+    sidecars: dict[str, dict[str, dict[str, Any]]] = {}
     stored_any = False
     for kind in ARTIFACT_KINDS:
         selected = chosen.get(kind)
@@ -435,6 +518,19 @@ def retain_revision_artifacts(
             "sha256": digest,
             "size_bytes": len(content),
         }
+        for role, suffix in ARTIFACT_SIDECARS.items():
+            companion = path.with_suffix(suffix)
+            if not os.path.lexists(companion):
+                continue
+            try:
+                companion_bytes = _read_regular_file(companion, limit=limit)
+            except (OSError, ValueError) as exc:
+                raise ArtifactRetentionError("matching KiCad rule sidecar is unreadable") from exc
+            sidecars.setdefault(kind, {})[role] = {
+                "relative": companion.relative_to(root).as_posix(),
+                "sha256": _store_blob(store, envelope["project_id"], companion_bytes),
+                "size_bytes": len(companion_bytes),
+            }
         stored_any = True
     if not stored_any:
         return None
@@ -445,6 +541,7 @@ def retain_revision_artifacts(
             revision=int(envelope["revision"]),
             basis=basis,
             artifacts=artifacts,
+            sidecars=sidecars,
         ),
     )
 
@@ -474,6 +571,32 @@ def read_pinned_artifact_bytes(
     public = dict(entry)
     public["retention_basis"] = pin.get("retention_basis")
     return data, public
+
+
+def read_pinned_artifact_sidecars(
+    store: ProjectStore,
+    project_id: str,
+    revision: int,
+    kind: str,
+) -> dict[str, tuple[bytes, dict[str, Any]]]:
+    """Read only this artifact's exact-stem project/rules, never referenced files.
+
+    Old revision pins have no companions and return an empty mapping. Every
+    returned byte string is read from its immutable content-addressed blob.
+    """
+    if kind not in ARTIFACT_KINDS:
+        raise ValueError("kind must be schematic or pcb")
+    pin = load_artifact_pin(store, project_id, revision)
+    if pin is None:
+        return {}
+    result = {}
+    for role, entry in pin.get("sidecars", {}).get(kind, {}).items():
+        data = _read_blob(store, project_id, entry["sha256"].split(":", 1)[1])
+        if len(data) != entry["size_bytes"]:
+            raise ArtifactIntegrityError("retained sidecar size differs from its pin")
+        public = {**entry, "retention_basis": pin["retention_basis"]}
+        result[role] = data, public
+    return result
 
 
 def read_pinned_artifact(

@@ -1,0 +1,17 @@
+{
+  "pilot": "Customer-specified BlueROV2 survey frame surrogate, assumed clamp centers",
+  "metrics": {
+    "candidate": {
+      "instrument_slots": 4,
+      "model_proof_load_n": 24.52,
+      "bar_stress_mpa": 5.63,
+      "bar_sag_mm": 0.098
+    },
+    "control": {
+      "instrument_slots": 4,
+      "model_proof_load_n": 24.52,
+      "bar_stress_mpa": 40.03,
+      "bar_sag_mm": 1.856
+    }
+  }
+}

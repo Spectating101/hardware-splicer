@@ -1,0 +1,44 @@
+{
+  "pilot": "Reed contact rainfall logger, two-rate freshwater bench volumes",
+  "metrics": {
+    "30": {
+      "candidate": {
+        "accepted_tips": 78,
+        "duplicate_tips": 0,
+        "delivered_depth_error_pct": 0.94
+      },
+      "long-control": {
+        "accepted_tips": 78,
+        "duplicate_tips": 0,
+        "delivered_depth_error_pct": 0.94
+      },
+      "unfiltered-control": {
+        "accepted_tips": 234,
+        "duplicate_tips": 156,
+        "delivered_depth_error_pct": 197.18
+      }
+    },
+    "120": {
+      "candidate": {
+        "accepted_tips": 78,
+        "duplicate_tips": 0,
+        "delivered_depth_error_pct": 0.94
+      },
+      "long-control": {
+        "accepted_tips": 39,
+        "duplicate_tips": 0,
+        "delivered_depth_error_pct": 50.47
+      },
+      "unfiltered-control": {
+        "accepted_tips": 234,
+        "duplicate_tips": 156,
+        "delivered_depth_error_pct": 197.18
+      }
+    },
+    "fixture": {
+      "input_volume_ml": 628.32,
+      "volume_per_tip_ml": 7.98,
+      "plotted_true_tips_per_rate": 78
+    }
+  }
+}

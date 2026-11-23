@@ -1,0 +1,8 @@
+{
+  "synthetic_correct_per_100_by_light": [
+    100,
+    100
+  ],
+  "gate_margin_s": 0.13,
+  "old_gate_margin_s": -0.05000000000000002
+}

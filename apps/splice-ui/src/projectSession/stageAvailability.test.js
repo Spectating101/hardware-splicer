@@ -14,8 +14,8 @@ import {
   stageIsAvailable,
   stageIsComplete,
   verifyReady,
-} from "./stageAvailability.js";
-import { deriveProjectTruth } from "./deriveProjectTruth.js";
+} from "./stageAvailability";
+import { deriveProjectTruth } from "./deriveProjectTruth";
 import { derivePackageHandoff } from "./packageHandoff.js";
 
 describe("stageAvailability", () => {

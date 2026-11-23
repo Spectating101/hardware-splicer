@@ -1,6 +1,17 @@
-"""Python PCB engine: graph → geometry → DRC → KiCad (no Node dependency)."""
+"""Python PCB engine for geometry, DRC and KiCad."""
 
-from .build_to_geometry import build_graph_to_geometry
-from .geometry_compile import compile_graph_to_artifacts
+from .._exports import resolve_export as _resolve_export
 
-__all__ = ["build_graph_to_geometry", "compile_graph_to_artifacts"]
+_MODULES = {
+    "build_graph_to_geometry": "build_to_geometry",
+    "compile_graph_to_artifacts": "geometry_compile",
+}
+__all__ = list(_MODULES)
+
+
+def __getattr__(name):
+    return _resolve_export(globals(), _MODULES, name)
+
+
+def __dir__():
+    return sorted(set(globals()).union(__all__, _MODULES.values()))

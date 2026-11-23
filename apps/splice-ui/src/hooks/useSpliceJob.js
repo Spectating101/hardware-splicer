@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { fetchJob, fetchJobResult, submitComposeJob, submitSpliceJob } from "../api.js";
+import { fetchJob, fetchJobResult, submitComposeJob, submitSpliceJob } from "../api";
 
 const POLL_MS = 2000;
 /** Client-side honesty cap — backend also has HARDWARE_SPLICER_JOB_TIMEOUT_S (default 180). */
@@ -8,7 +8,7 @@ const CLIENT_JOB_TIMEOUT_S = 210;
 const STAGE_LABELS = {
   queued: "Waiting in queue…",
   running: "Compiling splice plan and KiCad carrier…",
-  succeeded: "Build complete",
+  succeeded: "Build job finished",
   failed: "Build failed",
   cancelled: "Cancelled",
 };
@@ -16,7 +16,7 @@ const STAGE_LABELS = {
 const COMPOSE_STAGE_LABELS = {
   queued: "Waiting in queue…",
   running: "AI compose → KiCad compile…",
-  succeeded: "Design complete",
+  succeeded: "Design job finished",
   failed: "Compose failed",
   cancelled: "Cancelled",
 };

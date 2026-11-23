@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { PERSISTENCE_STATUS, projectSnapshot } from "../projectSession/projectSession.js";
-import { stageMachineProjectReview } from "../projectSession/machineAuthoringApi.js";
+import { stageMachineProjectReview } from "../projectSession/machineAuthoringApi";
 import {
   checkElectricalDesign,
   editElectricalDesign,
   projectElectricalDesign,
-} from "../projectSession/electricalDesignApi.js";
+} from "../projectSession/electricalDesignApi";
 import "./ElectricalDesignPanel.css";
 
 function numberOrNull(value) {

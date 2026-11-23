@@ -1,0 +1,33 @@
+{
+  "sheet_length_mm": 90.0,
+  "sheet_width_mm": 84.0,
+  "locator_inset_x_mm": 7.0,
+  "locator_inset_y_mm": 4.0,
+  "locator_diameter_mm": 3.2,
+  "base_window_mm": 61.0,
+  "mask_window_mm": 58.8,
+  "support_gap_mm": 58.5,
+  "base_thickness_mm": 1.5,
+  "support_thickness_mm": 0.8,
+  "mask_thickness_mm": 1.5,
+  "guide_thickness_mm": 0.30,
+  "film_total_thickness_max_mm": 0.16,
+  "guide_height_error_mm": 0.05,
+  "window_size_error_mm": 0.10,
+  "support_gap_error_mm": 0.10,
+  "guide_gap_error_mm": 0.05,
+  "layer_to_guide_center_error_mm": 0.15,
+  "image_to_strip_center_error_mm": 0.15,
+  "frame_side_mm": 56.0,
+  "longitudinal_centering_error_mm": 0.45,
+  "loading_skew_deg": 0.08,
+  "optical_ray_half_angle_deg": 10.0,
+  "minimum_edge_support_mm": 0.20,
+  "minimum_vertical_clearance_mm": 0.05,
+  "minimum_loading_clearance_mm": 0.05,
+  "maximum_lateral_reload_span_mm": 0.85,
+  "guide_profiles": {
+    "narrow": {"film_width_min_mm": 60.70, "film_width_max_mm": 61.20, "gap_mm": 61.45},
+    "wide": {"film_width_min_mm": 61.20, "film_width_max_mm": 61.70, "gap_mm": 61.95}
+  }
+}

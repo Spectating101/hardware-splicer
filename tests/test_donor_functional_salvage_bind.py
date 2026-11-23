@@ -71,7 +71,7 @@ def test_robot_drive_keeps_unknown_donor_hbridge_and_motor_identity_unresolved(m
     assert bound.get("catalog_standin_required") is False
 
 
-def test_enabot_lite_intake_keeps_donor_drive(tmp_path: Path) -> None:
+def test_enabot_lite_intake_keeps_donor_drive(tmp_path: Path, assume_clean_kicad_erc: None) -> None:
     intake = load_project_intake(ROOT / "examples" / "intakes" / "splice_vibe_enabot_lite_brief.json")
     result = splice_and_build_from_intake(
         intake,

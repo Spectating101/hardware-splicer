@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="230mm" height="230mm" viewBox="0 0 230 230">
+  <title>P017 baseline | full-size study patterns</title>
+  <rect id="scale" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x="8" y="8" width="20" height="10" />
+  <text id="scale-label" data-operation="engrave" fill="#333333" stroke="none" stroke-width="0.17" x="9" y="14" font-size="2.6" font-family="sans-serif">20 × 10 mm</text>
+  <circle id="dial" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" cx="115" cy="115" r="90" />
+  <circle id="shaft-mark" data-operation="cut" fill="none" stroke="#b82b28" stroke-width="0.17" cx="115" cy="115" r="3" />
+  <line id="tick-0" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="115" y1="30" x2="115" y2="26" />
+  <line id="tick-1" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="129.788629" y1="31.296377" x2="130.484565" y2="27.357383" />
+  <line id="tick-2" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="144.126161" y1="35.145966" x2="145.496804" y2="31.388129" />
+  <line id="tick-3" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="157.575258" y1="41.431342" x2="159.578799" y2="37.969287" />
+  <line id="tick-4" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="169.725681" y1="49.960782" x2="172.301007" y2="46.900113" />
+  <line id="tick-5" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="180.206808" y1="60.474114" x2="183.275363" y2="57.90819" />
+  <line id="tick-6" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="188.698931" y1="72.650648" x2="192.167116" y2="70.657738" />
+  <line id="tick-7" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="194.943016" y1="86.118965" x2="198.70504" y2="84.759857" />
+  <line id="tick-8" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="198.7486" y1="100.468239" x2="202.68971" y2="99.784392" />
+  <line id="tick-9" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="199.9996" y1="115.260776" x2="203.999581" y2="115.273048" />
+  <line id="tick-10" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="198.657858" y1="130.045359" x2="202.594698" y2="130.753376" />
+  <line id="tick-11" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="194.7643" y1="144.371013" x2="198.517915" y2="145.753178" />
+  <line id="tick-12" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="188.437693" y1="157.800763" x2="191.893584" y2="159.814916" />
+  <line id="tick-13" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="179.871015" y1="169.924961" x2="182.923769" y2="172.509665" />
+  <line id="tick-14" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="169.325578" y1="180.373784" x2="171.882076" y2="183.450197" />
+  <line id="tick-15" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="157.123047" y1="188.82851" x2="159.105308" y2="192.302793" />
+  <line id="tick-16" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="143.635638" y1="195.031246" x2="144.983197" y2="198.797422" />
+  <line id="tick-17" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="129.274755" y1="198.792788" x2="129.946508" y2="202.735978" />
+  <line id="tick-18" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="114.47845" y1="199.9984" x2="114.453906" y2="203.998325" />
+  <line id="tick-19" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="99.698053" y1="198.611306" x2="98.977962" y2="202.545955" />
+  <line id="tick-20" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="85.384412" y1="194.673816" x2="83.990737" y2="198.423172" />
+  <line id="tick-21" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="71.974135" y1="188.306036" x2="69.949389" y2="191.755732" />
+  <line id="tick-22" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="59.876276" y1="179.702203" x2="57.282218" y2="182.747012" />
+  <line id="tick-23" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="49.459855" y1="169.124758" x2="46.375613" y2="171.671806" />
+  <line id="tick-24" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="41.042606" y1="156.896346" x2="37.562258" y2="158.867939" />
+  <line id="tick-25" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="34.881278" y1="143.38997" x2="31.110985" y2="144.725969" />
+  <line id="tick-26" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="31.163812" y1="129.017615" x2="27.218579" y2="129.677268" />
+  <line id="tick-27" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="30.0036" y1="114.217681" x2="26.00377" y2="114.180866" />
+  <line id="tick-28" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="31.436034" y1="99.44161" x2="27.503612" y2="98.70945" />
+  <line id="tick-29" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="35.417418" y1="85.140116" x2="31.672356" y2="83.734945" />
+  <line id="tick-30" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="41.82631" y1="71.749438" x2="38.382842" y2="69.714117" />
+  <line id="tick-31" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="50.467219" y1="59.678032" x2="47.430382" y2="57.074645" />
+  <line id="tick-32" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="61.076571" y1="49.294111" x2="58.538998" y2="46.20207" />
+  <line id="tick-33" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="73.330749" y1="40.914418" x2="71.369843" y2="37.428037" />
+  <line id="tick-34" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="86.855964" y1="34.794556" x2="85.531539" y2="31.020182" />
+  <line id="tick-35" data-operation="engrave" fill="none" stroke="#333333" stroke-width="0.17" x1="101.239657" y1="31.121201" x2="100.592111" y2="27.173963" />
+</svg>

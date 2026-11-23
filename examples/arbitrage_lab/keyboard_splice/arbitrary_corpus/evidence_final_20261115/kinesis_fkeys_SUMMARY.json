@@ -1,0 +1,54 @@
+{
+  "schema": "hs.arbitrary-keyboard-real-reference.v1",
+  "case_id": "kinesis_fkeys",
+  "repository": "dodotronix/kinesis_board",
+  "reference_path": "kinesis_fkeys/kinesis_fkeys.kicad_pcb",
+  "source_url": "https://raw.githubusercontent.com/dodotronix/kinesis_board/main/kinesis_fkeys/kinesis_fkeys.kicad_pcb",
+  "expected_source_sha256": "0493adb4a3203bec918b3f4c8e83d412ea58cde7d3512a54a2c0ba4b782f94da",
+  "physical_donor_present": false,
+  "engine_uses_hand_written_wiring_map": false,
+  "actual_sha256": "0493adb4a3203bec918b3f4c8e83d412ea58cde7d3512a54a2c0ba4b782f94da",
+  "intake": {
+    "schema": "hs.arbitrary-keyboard-intake.v1",
+    "reference_source_sha256": "0493adb4a3203bec918b3f4c8e83d412ea58cde7d3512a54a2c0ba4b782f94da",
+    "reference_source_filename": "kinesis_fkeys.kicad_pcb",
+    "source_kind": "EXTERNAL_KICAD_REFERENCE_NOT_PHYSICAL_JUNK",
+    "copper_layers": 2,
+    "footprints": 40,
+    "key_switch_candidates": 18,
+    "switch_detection_methods": {
+      "candidate_switch_footprint_or_ref": 18
+    },
+    "routed_track_count": 0,
+    "plated_via_count": 6,
+    "routed_conductive_zone_count": 39,
+    "unfilled_conductive_zone_names": [
+      "GND_L",
+      "GND_R"
+    ],
+    "source_warnings": [
+      "unfilled_zone:11:GND_L",
+      "unfilled_zone:12:GND_R",
+      "SWITCH_IDENTITY_NEEDS_PHYSICAL_CONFIRMATION"
+    ],
+    "eligible_for_bounded_virtual_reconstruction": false,
+    "blocker_codes": [
+      "SOURCE_CONDUCTIVE_ZONES_NOT_FILLED"
+    ],
+    "claimed_physical_donor_present": false,
+    "physical_authority_granted": false
+  },
+  "status": "SOURCE_TRIAGE_REJECTED",
+  "verdict": {
+    "schema": "hs.arbitrary-keyboard-benchmark-verdict.v1",
+    "status": "SOURCE_REJECTED_BEFORE_MODEL",
+    "gates": {},
+    "strict_reference_digital_pass": false,
+    "source_sha256": "0493adb4a3203bec918b3f4c8e83d412ea58cde7d3512a54a2c0ba4b782f94da",
+    "actual_discarded_keyboard_tested": false,
+    "arbitrary_unphotographed_junk_supported": false,
+    "real_keyboard_function_verified": false,
+    "physical_release": "BLOCKED_NOT_TESTED",
+    "build_ready": false
+  }
+}

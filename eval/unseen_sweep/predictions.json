@@ -1,0 +1,271 @@
+{
+  "design": "Sweep v2.2",
+  "extractor_sha256": "a77f50d078f4b9d5e3a73823c3265aa28aecee59fb8f38111683b77b647f46e2",
+  "input_manifest_sha256": "49d49f93cea1e30246582d6f925bfedc206db8218f3f1630fc70810d0c523773",
+  "keys_by_controller": {
+    "U1": 17,
+    "U2": 17
+  },
+  "original_extractor_key_refs": [
+    "G***",
+    "J1",
+    "J2",
+    "POWER SW",
+    "POWER SW"
+  ],
+  "pcb_footprints": {
+    "* duckyb-collection:choc-v1-with-millmax": 34,
+    "Duckyb-Parts:mouse-bite-5mm-slot-with-space-for-track": 2,
+    "Kailh:SPDT_C128955": 2,
+    "Kailh:TRRS-PJ-320A": 2,
+    "Kailh:ferris_broom": 1,
+    "kbd:1pin_conn": 4,
+    "kbd:ProMicro_v3_min": 2,
+    "kbd:SW_SPST_B3U-1000P": 2,
+    "kbd:Tenting_Puck2": 2
+  },
+  "pcbnew": "9.0.2",
+  "recommended_board_holes_um": [
+    [
+      false,
+      -5500,
+      0,
+      1702
+    ],
+    [
+      false,
+      -5220,
+      -4200,
+      991
+    ],
+    [
+      false,
+      0,
+      0,
+      3429
+    ],
+    [
+      false,
+      5220,
+      -4200,
+      991
+    ],
+    [
+      false,
+      5500,
+      0,
+      1702
+    ],
+    [
+      true,
+      -5000,
+      3800,
+      1520
+    ],
+    [
+      true,
+      0,
+      5900,
+      1520
+    ]
+  ],
+  "swaps": {
+    "Alps / Matias": {
+      "prediction": "reject",
+      "reason": "The two electrical contacts cannot land on the board holes."
+    },
+    "Cherry MX": {
+      "prediction": "reject",
+      "reason": "The two electrical contacts cannot land on the board holes."
+    },
+    "Choc Mini": {
+      "prediction": "reject",
+      "reason": "The two electrical contacts cannot land on the board holes."
+    },
+    "Choc V1": {
+      "prediction": "accept",
+      "reason": "Board declares this series and its contact and locating-hole centers agree."
+    },
+    "Choc V2": {
+      "prediction": "unresolved",
+      "reason": "Contacts line up. Mechanical features or switch series still need confirmation."
+    },
+    "unmarked loose switch": {
+      "prediction": "unresolved",
+      "reason": "Missing identity and terminal dimensions."
+    }
+  },
+  "switch_footprint": "choc-v1-with-millmax",
+  "switch_to_controller": {
+    "SW10": {
+      "controller": "U1",
+      "pad": "14",
+      "signal": "Switch8"
+    },
+    "SW11": {
+      "controller": "U1",
+      "pad": "13",
+      "signal": "Switch9"
+    },
+    "SW11_r1": {
+      "controller": "U2",
+      "pad": "13",
+      "signal": "Switch9_r"
+    },
+    "SW12": {
+      "controller": "U1",
+      "pad": "1",
+      "signal": "Switch10"
+    },
+    "SW12_r1": {
+      "controller": "U2",
+      "pad": "1",
+      "signal": "Switch10_r"
+    },
+    "SW13_r1": {
+      "controller": "U2",
+      "pad": "5",
+      "signal": "Switch11_r"
+    },
+    "SW14": {
+      "controller": "U1",
+      "pad": "5",
+      "signal": "Switch11"
+    },
+    "SW15": {
+      "controller": "U1",
+      "pad": "6",
+      "signal": "Switch12"
+    },
+    "SW15_r1": {
+      "controller": "U2",
+      "pad": "7",
+      "signal": "Switch13_r"
+    },
+    "SW16": {
+      "controller": "U1",
+      "pad": "7",
+      "signal": "Switch13"
+    },
+    "SW16_r1": {
+      "controller": "U2",
+      "pad": "8",
+      "signal": "Switch14_r"
+    },
+    "SW17": {
+      "controller": "U1",
+      "pad": "8",
+      "signal": "Switch14"
+    },
+    "SW17_r1": {
+      "controller": "U2",
+      "pad": "9",
+      "signal": "Switch15_r"
+    },
+    "SW18": {
+      "controller": "U1",
+      "pad": "9",
+      "signal": "Switch15"
+    },
+    "SW18_r1": {
+      "controller": "U2",
+      "pad": "6",
+      "signal": "Switch12_r"
+    },
+    "SW2": {
+      "controller": "U1",
+      "pad": "10",
+      "signal": "Switch1"
+    },
+    "SW20": {
+      "controller": "U1",
+      "pad": "12",
+      "signal": "Switch17"
+    },
+    "SW20_r1": {
+      "controller": "U2",
+      "pad": "12",
+      "signal": "Switch17_r"
+    },
+    "SW21": {
+      "controller": "U1",
+      "pad": "11",
+      "signal": "Switch16"
+    },
+    "SW21_r1": {
+      "controller": "U2",
+      "pad": "11",
+      "signal": "Switch16_r"
+    },
+    "SW2_r1": {
+      "controller": "U2",
+      "pad": "10",
+      "signal": "Switch1_r"
+    },
+    "SW3": {
+      "controller": "U1",
+      "pad": "17",
+      "signal": "Switch2"
+    },
+    "SW3_r1": {
+      "controller": "U2",
+      "pad": "17",
+      "signal": "Switch2_r"
+    },
+    "SW4": {
+      "controller": "U1",
+      "pad": "18",
+      "signal": "Switch3"
+    },
+    "SW4_r1": {
+      "controller": "U2",
+      "pad": "18",
+      "signal": "Switch3_r"
+    },
+    "SW5": {
+      "controller": "U1",
+      "pad": "19",
+      "signal": "Switch4"
+    },
+    "SW5_r1": {
+      "controller": "U2",
+      "pad": "19",
+      "signal": "Switch4_r"
+    },
+    "SW6": {
+      "controller": "U1",
+      "pad": "20",
+      "signal": "Switch5"
+    },
+    "SW6_r1": {
+      "controller": "U2",
+      "pad": "20",
+      "signal": "Switch5_r"
+    },
+    "SW7_r1": {
+      "controller": "U2",
+      "pad": "16",
+      "signal": "Switch6_r"
+    },
+    "SW8": {
+      "controller": "U1",
+      "pad": "16",
+      "signal": "Switch6"
+    },
+    "SW8_r1": {
+      "controller": "U2",
+      "pad": "15",
+      "signal": "Switch7_r"
+    },
+    "SW9": {
+      "controller": "U1",
+      "pad": "15",
+      "signal": "Switch7"
+    },
+    "SW9_r1": {
+      "controller": "U2",
+      "pad": "14",
+      "signal": "Switch8_r"
+    }
+  }
+}

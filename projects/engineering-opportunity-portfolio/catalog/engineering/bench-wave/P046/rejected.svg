@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440mm" height="510mm" viewBox="0 0 440 510">
+  <title>Registered tray photo mount for a clean empty test tray</title>
+  <style>text{font:4px sans-serif;fill:#103341} .part,.tool,.test{stroke:#2a4148;stroke-width:.35;fill:none}.part{fill:#dce9e9;fill-opacity:.45}.tool{stroke:#006557}.test{stroke:#aa4c22;stroke-dasharray:2 1}</style>
+  <rect id="sample" class="part" x="145.0" y="322" width="150" height="4" />
+  <rect id="base" class="part" x="45" y="326" width="350" height="16" />
+  <rect id="left-column" class="part" x="60" y="42" width="16" height="284" />
+  <rect id="right-column" class="part" x="364" y="42" width="16" height="284" />
+  <rect id="beam" class="part" x="60" y="19" width="320" height="23" />
+  <circle id="lens" class="tool" cx="220" cy="42" r="4" />
+  <circle id="lamp-0" class="tool" cx="120" cy="182" r="5" />
+  <line id="aim-0" class="test" x1="120" y1="182" x2="220" y2="322" />
+  <circle id="lamp-1" class="tool" cx="320" cy="182" r="5" />
+  <line id="aim-1" class="test" x1="320" y1="182" x2="220" y2="322" />
+  <line id="hfov-0" class="test" x1="220" y1="42" x2="388.24097" y2="322" />
+  <line id="hfov-1" class="test" x1="220" y1="42" x2="51.75903" y2="322" />
+  <rect id="target-plan" class="part" x="145.0" y="350" width="150" height="110" />
+  <line id="depth-scale" class="tool" x1="307.0" y1="350" x2="307.0" y2="460" />
+  <line id="vertical-fov-at-tray" class="test" x1="95.33597" y1="470" x2="344.66403" y2="470" />
+  <text x="45" y="490">Lens 280 above tray. LED centers 100 off axis, 140 above tray.</text>
+  <text x="45" y="501">Side and plan at true scale. Use empty tray for this setup trial.</text>
+</svg>

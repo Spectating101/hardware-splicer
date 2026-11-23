@@ -1,0 +1,1188 @@
+{
+  "scope": "Production pure netlist lowering, PCB geometry, serializer, ERC/internal DRC. No routing/native CAD and no source edits.",
+  "entrypoints": [
+    "CircuitNetlist.from_dict",
+    "netlist_to_build_graph",
+    "build_graph_to_geometry",
+    "serialize_build_to_kicad_pcb",
+    "run_erc",
+    "run_drc",
+    "analyze_build"
+  ],
+  "comparisons": {
+    "different_footprint_names_same_local_pad_layouts": true,
+    "different_refs_pins_nets_same_local_pad_layouts": true,
+    "different_footprint_names_same_geometry": false,
+    "different_refs_pins_nets_same_geometry": false,
+    "different_refs_pins_nets_same_native_pcb_bytes": false
+  },
+  "runs": {
+    "qfn": {
+      "input_components": [
+        {
+          "ref": "U37",
+          "value": "unfamiliar-audit-device",
+          "footprint": "AuditOnly:QFN-8-EP_3x3mm_P0.5mm"
+        },
+        {
+          "ref": "J42",
+          "value": "unfamiliar-keyed-connector",
+          "footprint": "AuditOnly:OffsetKeyed_2x4_P1.0mm"
+        }
+      ],
+      "input_nets": [
+        {
+          "name": "VDD_AUDIT",
+          "pins": [
+            {
+              "component_ref": "U37",
+              "pin": "A1"
+            },
+            {
+              "component_ref": "J42",
+              "pin": "K1"
+            }
+          ]
+        },
+        {
+          "name": "CLK_AUDIT",
+          "pins": [
+            {
+              "component_ref": "U37",
+              "pin": "A2"
+            },
+            {
+              "component_ref": "J42",
+              "pin": "K2"
+            }
+          ]
+        },
+        {
+          "name": "DIN_AUDIT",
+          "pins": [
+            {
+              "component_ref": "U37",
+              "pin": "B1"
+            },
+            {
+              "component_ref": "J42",
+              "pin": "K3"
+            }
+          ]
+        },
+        {
+          "name": "DOUT_AUDIT",
+          "pins": [
+            {
+              "component_ref": "U37",
+              "pin": "B2"
+            },
+            {
+              "component_ref": "J42",
+              "pin": "K4"
+            }
+          ]
+        },
+        {
+          "name": "CS_AUDIT",
+          "pins": [
+            {
+              "component_ref": "U37",
+              "pin": "C1"
+            },
+            {
+              "component_ref": "J42",
+              "pin": "K5"
+            }
+          ]
+        },
+        {
+          "name": "IRQ_AUDIT",
+          "pins": [
+            {
+              "component_ref": "U37",
+              "pin": "C2"
+            },
+            {
+              "component_ref": "J42",
+              "pin": "K6"
+            }
+          ]
+        },
+        {
+          "name": "RESET_AUDIT",
+          "pins": [
+            {
+              "component_ref": "U37",
+              "pin": "D1"
+            },
+            {
+              "component_ref": "J42",
+              "pin": "K7"
+            }
+          ]
+        },
+        {
+          "name": "GND_AUDIT",
+          "pins": [
+            {
+              "component_ref": "U37",
+              "pin": "EP"
+            },
+            {
+              "component_ref": "J42",
+              "pin": "K8"
+            }
+          ]
+        }
+      ],
+      "graph_nodes": [
+        {
+          "id": "n1",
+          "moduleId": "unfamiliar-audit-device",
+          "ref": "U37",
+          "value": "unfamiliar-audit-device",
+          "footprint": "AuditOnly:QFN-8-EP_3x3mm_P0.5mm",
+          "pinIds": [
+            "A1",
+            "A2",
+            "B1",
+            "B2",
+            "C1",
+            "C2",
+            "D1",
+            "EP"
+          ]
+        },
+        {
+          "id": "n2",
+          "moduleId": "unfamiliar-keyed-connector",
+          "ref": "J42",
+          "value": "unfamiliar-keyed-connector",
+          "footprint": "AuditOnly:OffsetKeyed_2x4_P1.0mm",
+          "pinIds": [
+            "K1",
+            "K2",
+            "K3",
+            "K4",
+            "K5",
+            "K6",
+            "K7",
+            "K8"
+          ]
+        }
+      ],
+      "output_pads": [
+        {
+          "ref": "U1",
+          "value": "unfamiliar-audit-device",
+          "footprint": "Circuit.AI:unfamiliar-audit-device",
+          "pads": [
+            {
+              "num": "1",
+              "x_local_mm": -5.08,
+              "y_local_mm": -3.81,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-1"
+            },
+            {
+              "num": "2",
+              "x_local_mm": -5.08,
+              "y_local_mm": -1.27,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-2"
+            },
+            {
+              "num": "3",
+              "x_local_mm": -5.08,
+              "y_local_mm": 1.27,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-3"
+            },
+            {
+              "num": "4",
+              "x_local_mm": -5.08,
+              "y_local_mm": 3.81,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-4"
+            },
+            {
+              "num": "5",
+              "x_local_mm": 5.08,
+              "y_local_mm": -3.81,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-5"
+            },
+            {
+              "num": "6",
+              "x_local_mm": 5.08,
+              "y_local_mm": -1.27,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-6"
+            },
+            {
+              "num": "7",
+              "x_local_mm": 5.08,
+              "y_local_mm": 1.27,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-7"
+            },
+            {
+              "num": "8",
+              "x_local_mm": 5.08,
+              "y_local_mm": 3.81,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-8"
+            }
+          ]
+        },
+        {
+          "ref": "U2",
+          "value": "unfamiliar-keyed-connector",
+          "footprint": "Circuit.AI:unfamiliar-keyed-connector",
+          "pads": [
+            {
+              "num": "1",
+              "x_local_mm": -5.08,
+              "y_local_mm": -3.81,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-1"
+            },
+            {
+              "num": "2",
+              "x_local_mm": -5.08,
+              "y_local_mm": -1.27,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-2"
+            },
+            {
+              "num": "3",
+              "x_local_mm": -5.08,
+              "y_local_mm": 1.27,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-3"
+            },
+            {
+              "num": "4",
+              "x_local_mm": -5.08,
+              "y_local_mm": 3.81,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-4"
+            },
+            {
+              "num": "5",
+              "x_local_mm": 5.08,
+              "y_local_mm": -3.81,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-5"
+            },
+            {
+              "num": "6",
+              "x_local_mm": 5.08,
+              "y_local_mm": -1.27,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-6"
+            },
+            {
+              "num": "7",
+              "x_local_mm": 5.08,
+              "y_local_mm": 1.27,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-7"
+            },
+            {
+              "num": "8",
+              "x_local_mm": 5.08,
+              "y_local_mm": 3.81,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-8"
+            }
+          ]
+        }
+      ],
+      "output_nets": [
+        {
+          "id": 1,
+          "name": "Net-1"
+        },
+        {
+          "id": 2,
+          "name": "Net-2"
+        },
+        {
+          "id": 3,
+          "name": "Net-3"
+        },
+        {
+          "id": 4,
+          "name": "Net-4"
+        },
+        {
+          "id": 5,
+          "name": "Net-5"
+        },
+        {
+          "id": 6,
+          "name": "Net-6"
+        },
+        {
+          "id": 7,
+          "name": "Net-7"
+        },
+        {
+          "id": 8,
+          "name": "Net-8"
+        }
+      ],
+      "geometry_sha256": "7e5d1458d1d7661e9008626374226e306b8a27fb70fbb6eef83ed710ee291d4a",
+      "serialized_pcb_sha256": "78d696c12eb8294025ff5764aa0214ff2124ac39e3280459873b6495af43191a",
+      "fallback_flags_in_geometry": {},
+      "readiness": {
+        "build_ready": null,
+        "fabrication_ready": null,
+        "note": "These pure production lowering/geometry APIs do not emit readiness flags. No native checks or final compile readiness calculation was run.",
+        "erc": {
+          "pass": true,
+          "errors": 0,
+          "warnings": 0,
+          "violations": []
+        },
+        "internal_geometry_drc_pass": false,
+        "internal_geometry_drc_summary": {
+          "errors": 3,
+          "warnings": 0,
+          "byRule": {
+            "trace-short": 3
+          }
+        },
+        "electrical_safety_issues": []
+      }
+    },
+    "different_packages": {
+      "input_components": [
+        {
+          "ref": "U37",
+          "value": "unfamiliar-audit-device",
+          "footprint": "AuditOnly:SOIC-8_6x4mm_P1.27mm"
+        },
+        {
+          "ref": "J42",
+          "value": "unfamiliar-keyed-connector",
+          "footprint": "AuditOnly:SingleRow_1x8_P3.5mm"
+        }
+      ],
+      "input_nets": [
+        {
+          "name": "VDD_AUDIT",
+          "pins": [
+            {
+              "component_ref": "U37",
+              "pin": "A1"
+            },
+            {
+              "component_ref": "J42",
+              "pin": "K1"
+            }
+          ]
+        },
+        {
+          "name": "CLK_AUDIT",
+          "pins": [
+            {
+              "component_ref": "U37",
+              "pin": "A2"
+            },
+            {
+              "component_ref": "J42",
+              "pin": "K2"
+            }
+          ]
+        },
+        {
+          "name": "DIN_AUDIT",
+          "pins": [
+            {
+              "component_ref": "U37",
+              "pin": "B1"
+            },
+            {
+              "component_ref": "J42",
+              "pin": "K3"
+            }
+          ]
+        },
+        {
+          "name": "DOUT_AUDIT",
+          "pins": [
+            {
+              "component_ref": "U37",
+              "pin": "B2"
+            },
+            {
+              "component_ref": "J42",
+              "pin": "K4"
+            }
+          ]
+        },
+        {
+          "name": "CS_AUDIT",
+          "pins": [
+            {
+              "component_ref": "U37",
+              "pin": "C1"
+            },
+            {
+              "component_ref": "J42",
+              "pin": "K5"
+            }
+          ]
+        },
+        {
+          "name": "IRQ_AUDIT",
+          "pins": [
+            {
+              "component_ref": "U37",
+              "pin": "C2"
+            },
+            {
+              "component_ref": "J42",
+              "pin": "K6"
+            }
+          ]
+        },
+        {
+          "name": "RESET_AUDIT",
+          "pins": [
+            {
+              "component_ref": "U37",
+              "pin": "D1"
+            },
+            {
+              "component_ref": "J42",
+              "pin": "K7"
+            }
+          ]
+        },
+        {
+          "name": "GND_AUDIT",
+          "pins": [
+            {
+              "component_ref": "U37",
+              "pin": "EP"
+            },
+            {
+              "component_ref": "J42",
+              "pin": "K8"
+            }
+          ]
+        }
+      ],
+      "graph_nodes": [
+        {
+          "id": "n1",
+          "moduleId": "unfamiliar-audit-device",
+          "ref": "U37",
+          "value": "unfamiliar-audit-device",
+          "footprint": "AuditOnly:SOIC-8_6x4mm_P1.27mm",
+          "pinIds": [
+            "A1",
+            "A2",
+            "B1",
+            "B2",
+            "C1",
+            "C2",
+            "D1",
+            "EP"
+          ]
+        },
+        {
+          "id": "n2",
+          "moduleId": "unfamiliar-keyed-connector",
+          "ref": "J42",
+          "value": "unfamiliar-keyed-connector",
+          "footprint": "AuditOnly:SingleRow_1x8_P3.5mm",
+          "pinIds": [
+            "K1",
+            "K2",
+            "K3",
+            "K4",
+            "K5",
+            "K6",
+            "K7",
+            "K8"
+          ]
+        }
+      ],
+      "output_pads": [
+        {
+          "ref": "U1",
+          "value": "unfamiliar-audit-device",
+          "footprint": "Circuit.AI:unfamiliar-audit-device",
+          "pads": [
+            {
+              "num": "1",
+              "x_local_mm": -5.08,
+              "y_local_mm": -3.81,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-1"
+            },
+            {
+              "num": "2",
+              "x_local_mm": -5.08,
+              "y_local_mm": -1.27,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-2"
+            },
+            {
+              "num": "3",
+              "x_local_mm": -5.08,
+              "y_local_mm": 1.27,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-3"
+            },
+            {
+              "num": "4",
+              "x_local_mm": -5.08,
+              "y_local_mm": 3.81,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-4"
+            },
+            {
+              "num": "5",
+              "x_local_mm": 5.08,
+              "y_local_mm": -3.81,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-5"
+            },
+            {
+              "num": "6",
+              "x_local_mm": 5.08,
+              "y_local_mm": -1.27,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-6"
+            },
+            {
+              "num": "7",
+              "x_local_mm": 5.08,
+              "y_local_mm": 1.27,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-7"
+            },
+            {
+              "num": "8",
+              "x_local_mm": 5.08,
+              "y_local_mm": 3.81,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-8"
+            }
+          ]
+        },
+        {
+          "ref": "U2",
+          "value": "unfamiliar-keyed-connector",
+          "footprint": "Circuit.AI:unfamiliar-keyed-connector",
+          "pads": [
+            {
+              "num": "1",
+              "x_local_mm": -5.08,
+              "y_local_mm": -3.81,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-1"
+            },
+            {
+              "num": "2",
+              "x_local_mm": -5.08,
+              "y_local_mm": -1.27,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-2"
+            },
+            {
+              "num": "3",
+              "x_local_mm": -5.08,
+              "y_local_mm": 1.27,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-3"
+            },
+            {
+              "num": "4",
+              "x_local_mm": -5.08,
+              "y_local_mm": 3.81,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-4"
+            },
+            {
+              "num": "5",
+              "x_local_mm": 5.08,
+              "y_local_mm": -3.81,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-5"
+            },
+            {
+              "num": "6",
+              "x_local_mm": 5.08,
+              "y_local_mm": -1.27,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-6"
+            },
+            {
+              "num": "7",
+              "x_local_mm": 5.08,
+              "y_local_mm": 1.27,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-7"
+            },
+            {
+              "num": "8",
+              "x_local_mm": 5.08,
+              "y_local_mm": 3.81,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-8"
+            }
+          ]
+        }
+      ],
+      "output_nets": [
+        {
+          "id": 1,
+          "name": "Net-1"
+        },
+        {
+          "id": 2,
+          "name": "Net-2"
+        },
+        {
+          "id": 3,
+          "name": "Net-3"
+        },
+        {
+          "id": 4,
+          "name": "Net-4"
+        },
+        {
+          "id": 5,
+          "name": "Net-5"
+        },
+        {
+          "id": 6,
+          "name": "Net-6"
+        },
+        {
+          "id": 7,
+          "name": "Net-7"
+        },
+        {
+          "id": 8,
+          "name": "Net-8"
+        }
+      ],
+      "geometry_sha256": "17cf56988b6046e985e6c570c9823ff1596224b60d86358b495ee0730a35d4a5",
+      "serialized_pcb_sha256": "e4329a4746133961ffada0c4f5d34fb0528a3f4ba55d51c1c378c766eaf79e35",
+      "fallback_flags_in_geometry": {},
+      "readiness": {
+        "build_ready": null,
+        "fabrication_ready": null,
+        "note": "These pure production lowering/geometry APIs do not emit readiness flags. No native checks or final compile readiness calculation was run.",
+        "erc": {
+          "pass": true,
+          "errors": 0,
+          "warnings": 0,
+          "violations": []
+        },
+        "internal_geometry_drc_pass": true,
+        "internal_geometry_drc_summary": {
+          "errors": 0,
+          "warnings": 2,
+          "byRule": {
+            "copper-clearance": 2
+          }
+        },
+        "electrical_safety_issues": []
+      }
+    },
+    "renamed_identity": {
+      "input_components": [
+        {
+          "ref": "U901",
+          "value": "unfamiliar-audit-device",
+          "footprint": "AuditOnly:QFN-8-EP_3x3mm_P0.5mm"
+        },
+        {
+          "ref": "X808",
+          "value": "unfamiliar-keyed-connector",
+          "footprint": "AuditOnly:OffsetKeyed_2x4_P1.0mm"
+        }
+      ],
+      "input_nets": [
+        {
+          "name": "ALTERED_VDD_AUDIT",
+          "pins": [
+            {
+              "component_ref": "U901",
+              "pin": "Z90"
+            },
+            {
+              "component_ref": "X808",
+              "pin": "P90"
+            }
+          ]
+        },
+        {
+          "name": "ALTERED_CLK_AUDIT",
+          "pins": [
+            {
+              "component_ref": "U901",
+              "pin": "Z89"
+            },
+            {
+              "component_ref": "X808",
+              "pin": "P89"
+            }
+          ]
+        },
+        {
+          "name": "ALTERED_DIN_AUDIT",
+          "pins": [
+            {
+              "component_ref": "U901",
+              "pin": "Z88"
+            },
+            {
+              "component_ref": "X808",
+              "pin": "P88"
+            }
+          ]
+        },
+        {
+          "name": "ALTERED_DOUT_AUDIT",
+          "pins": [
+            {
+              "component_ref": "U901",
+              "pin": "Z87"
+            },
+            {
+              "component_ref": "X808",
+              "pin": "P87"
+            }
+          ]
+        },
+        {
+          "name": "ALTERED_CS_AUDIT",
+          "pins": [
+            {
+              "component_ref": "U901",
+              "pin": "Z86"
+            },
+            {
+              "component_ref": "X808",
+              "pin": "P86"
+            }
+          ]
+        },
+        {
+          "name": "ALTERED_IRQ_AUDIT",
+          "pins": [
+            {
+              "component_ref": "U901",
+              "pin": "Z85"
+            },
+            {
+              "component_ref": "X808",
+              "pin": "P85"
+            }
+          ]
+        },
+        {
+          "name": "ALTERED_RESET_AUDIT",
+          "pins": [
+            {
+              "component_ref": "U901",
+              "pin": "Z84"
+            },
+            {
+              "component_ref": "X808",
+              "pin": "P84"
+            }
+          ]
+        },
+        {
+          "name": "ALTERED_GND_AUDIT",
+          "pins": [
+            {
+              "component_ref": "U901",
+              "pin": "Z83"
+            },
+            {
+              "component_ref": "X808",
+              "pin": "P83"
+            }
+          ]
+        }
+      ],
+      "graph_nodes": [
+        {
+          "id": "n1",
+          "moduleId": "unfamiliar-audit-device",
+          "ref": "U901",
+          "value": "unfamiliar-audit-device",
+          "footprint": "AuditOnly:QFN-8-EP_3x3mm_P0.5mm",
+          "pinIds": [
+            "Z90",
+            "Z89",
+            "Z88",
+            "Z87",
+            "Z86",
+            "Z85",
+            "Z84",
+            "Z83"
+          ]
+        },
+        {
+          "id": "n2",
+          "moduleId": "unfamiliar-keyed-connector",
+          "ref": "X808",
+          "value": "unfamiliar-keyed-connector",
+          "footprint": "AuditOnly:OffsetKeyed_2x4_P1.0mm",
+          "pinIds": [
+            "P90",
+            "P89",
+            "P88",
+            "P87",
+            "P86",
+            "P85",
+            "P84",
+            "P83"
+          ]
+        }
+      ],
+      "output_pads": [
+        {
+          "ref": "U1",
+          "value": "unfamiliar-audit-device",
+          "footprint": "Circuit.AI:unfamiliar-audit-device",
+          "pads": [
+            {
+              "num": "1",
+              "x_local_mm": -5.08,
+              "y_local_mm": -3.81,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-1"
+            },
+            {
+              "num": "2",
+              "x_local_mm": -5.08,
+              "y_local_mm": -1.27,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-2"
+            },
+            {
+              "num": "3",
+              "x_local_mm": -5.08,
+              "y_local_mm": 1.27,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-3"
+            },
+            {
+              "num": "4",
+              "x_local_mm": -5.08,
+              "y_local_mm": 3.81,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-4"
+            },
+            {
+              "num": "5",
+              "x_local_mm": 5.08,
+              "y_local_mm": -3.81,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-5"
+            },
+            {
+              "num": "6",
+              "x_local_mm": 5.08,
+              "y_local_mm": -1.27,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-6"
+            },
+            {
+              "num": "7",
+              "x_local_mm": 5.08,
+              "y_local_mm": 1.27,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-7"
+            },
+            {
+              "num": "8",
+              "x_local_mm": 5.08,
+              "y_local_mm": 3.81,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-8"
+            }
+          ]
+        },
+        {
+          "ref": "U2",
+          "value": "unfamiliar-keyed-connector",
+          "footprint": "Circuit.AI:unfamiliar-keyed-connector",
+          "pads": [
+            {
+              "num": "1",
+              "x_local_mm": -5.08,
+              "y_local_mm": -3.81,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-1"
+            },
+            {
+              "num": "2",
+              "x_local_mm": -5.08,
+              "y_local_mm": -1.27,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-2"
+            },
+            {
+              "num": "3",
+              "x_local_mm": -5.08,
+              "y_local_mm": 1.27,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-3"
+            },
+            {
+              "num": "4",
+              "x_local_mm": -5.08,
+              "y_local_mm": 3.81,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-4"
+            },
+            {
+              "num": "5",
+              "x_local_mm": 5.08,
+              "y_local_mm": -3.81,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-5"
+            },
+            {
+              "num": "6",
+              "x_local_mm": 5.08,
+              "y_local_mm": -1.27,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-6"
+            },
+            {
+              "num": "7",
+              "x_local_mm": 5.08,
+              "y_local_mm": 1.27,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-7"
+            },
+            {
+              "num": "8",
+              "x_local_mm": 5.08,
+              "y_local_mm": 3.81,
+              "type": "thru_hole",
+              "size_w_mm": 1.8,
+              "size_h_mm": 1.8,
+              "drill_mm": 1.0,
+              "net_name": "Net-8"
+            }
+          ]
+        }
+      ],
+      "output_nets": [
+        {
+          "id": 1,
+          "name": "Net-1"
+        },
+        {
+          "id": 2,
+          "name": "Net-2"
+        },
+        {
+          "id": 3,
+          "name": "Net-3"
+        },
+        {
+          "id": 4,
+          "name": "Net-4"
+        },
+        {
+          "id": 5,
+          "name": "Net-5"
+        },
+        {
+          "id": 6,
+          "name": "Net-6"
+        },
+        {
+          "id": 7,
+          "name": "Net-7"
+        },
+        {
+          "id": 8,
+          "name": "Net-8"
+        }
+      ],
+      "geometry_sha256": "ef558b517c8c21e244d8e6e024776d225ce56d2b87f0547427cedd1818f9f67e",
+      "serialized_pcb_sha256": "a72dfb7be12cca526dd8897c3844abe5b02a81c02e82add2212322342a9fc604",
+      "fallback_flags_in_geometry": {},
+      "readiness": {
+        "build_ready": null,
+        "fabrication_ready": null,
+        "note": "These pure production lowering/geometry APIs do not emit readiness flags. No native checks or final compile readiness calculation was run.",
+        "erc": {
+          "pass": true,
+          "errors": 0,
+          "warnings": 0,
+          "violations": []
+        },
+        "internal_geometry_drc_pass": false,
+        "internal_geometry_drc_summary": {
+          "errors": 1,
+          "warnings": 0,
+          "byRule": {
+            "trace-short": 1
+          }
+        },
+        "electrical_safety_issues": []
+      }
+    }
+  }
+}

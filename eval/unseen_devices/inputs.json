@@ -1,0 +1,38 @@
+{
+  "printer.h": {
+    "repo": "prusa3d/Prusa-Firmware",
+    "revision": "f3e0dfd481a78b222d2a82752f261adbc5a2c4d7",
+    "path": "Firmware/variants/MK3S.h",
+    "sha256": "a2820d0c1bed055363d02b612f005943b9d09126bf776ba4d9a267f47f03932d"
+  },
+  "preset.ini": {
+    "repo": "prusa3d/PrusaSlicer-settings",
+    "revision": "4e9de405513f7c115f9d3b0fa6120e71a93e9f2d",
+    "path": "live/PrusaResearch/1.14.2.ini",
+    "sha256": "dcac7cbf4b32ead42d145481cde0f162b949bf4024c7fe45f88ac0b2c2ec1371"
+  },
+  "arm.urdf": {
+    "repo": "elephantrobotics/mycobot_ros",
+    "revision": "c0d6fbe8f7d9b18b46a9fcb0b041e5bc2d66196b",
+    "path": "mycobot_description/urdf/mycobot_280_m5/mycobot_280_m5.urdf",
+    "sha256": "9d8a533ebf7f8aa0376735b32d9ec039f2e78f22778de3995615cb126084edb9"
+  },
+  "console.brd": {
+    "repo": "adafruit/Adafruit-PyGamer-PCB",
+    "revision": "6725ded4a2049f7bf44a9078c141ceb65a5547e9",
+    "path": "Adafruit PyGamer.brd",
+    "sha256": "bb2e8b91280d6ff6078195da571b502224d12fa2cc67dd040e08b8acc7bbb89a"
+  },
+  "logger.brd": {
+    "repo": "sparkfun/OpenLog_Artemis",
+    "revision": "f9c8e66b7da6f27a4bf9be55016c5b9231b9fb22",
+    "path": "Hardware/SparkFun_Artemis_OpenLog.brd",
+    "sha256": "acb64b1740929b7ff3453dc98cabefc7bee8ed11e751bb80d11fca922bcfee61"
+  },
+  "amp.brd": {
+    "repo": "adafruit/Adafruit-MAX9744-Amplifier-PCB",
+    "revision": "8df09f97bcc66b78a54ca049957f7637fdd513c0",
+    "path": "Adafruit MAX9744.brd",
+    "sha256": "537bef8c62c59672eb57d3a8293ee9b8c971be879718cf91c400d8afc70db0eb"
+  }
+}

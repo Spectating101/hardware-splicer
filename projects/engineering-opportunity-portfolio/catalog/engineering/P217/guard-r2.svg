@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" width="268.6mm" height="190.1mm" viewBox="0 0 268.6 190.1">
+  <g fill="none" stroke="#000000" stroke-width="0.08">
+    <rect id="outline" x="0" y="0" width="268.600000" height="190.100000" rx="3" />
+    <circle id="mount-1" cx="4.400000" cy="4.500000" r="1.750000" />
+    <circle id="mount-2" cx="264.200000" cy="4.500000" r="1.750000" />
+    <circle id="mount-3" cx="4.400000" cy="185.600000" r="1.750000" />
+    <circle id="mount-4" cx="264.200000" cy="176.100000" r="1.750000" />
+    <rect id="access-top" x="27.390909" y="14.118182" width="213.818182" height="10.500000" rx="2" />
+    <rect id="access-bottom" x="27.390909" y="165.481818" width="213.818182" height="10.500000" rx="2" />
+    <rect id="access-left" x="6.500000" y="77.050000" width="31.390909" height="36" rx="2" />
+    <rect id="access-right" x="230.709091" y="77.050000" width="31.390909" height="36" rx="2" />
+    <rect id="window-r1c1" x="44.174242" y="35.712121" width="35.933333" height="26.312121" rx="2" />
+    <rect id="window-r1c2" x="92.280303" y="35.712121" width="35.933333" height="26.312121" rx="2" />
+    <rect id="window-r1c3" x="140.386364" y="35.712121" width="35.933333" height="26.312121" rx="2" />
+    <rect id="window-r1c4" x="188.492424" y="35.712121" width="35.933333" height="26.312121" rx="2" />
+    <rect id="window-r2c1" x="44.174242" y="81.893939" width="35.933333" height="26.312121" rx="2" />
+    <rect id="window-r2c2" x="97.668182" y="81.893939" width="30.545455" height="26.312121" rx="2" />
+    <rect id="window-r2c3" x="140.386364" y="81.893939" width="35.933333" height="26.312121" rx="2" />
+    <rect id="window-r2c4" x="188.492424" y="81.893939" width="35.933333" height="26.312121" rx="2" />
+    <rect id="window-r3c1" x="44.174242" y="128.075758" width="35.933333" height="26.312121" rx="2" />
+    <rect id="window-r3c2" x="92.280303" y="128.075758" width="35.933333" height="26.312121" rx="2" />
+    <rect id="window-r3c3" x="140.386364" y="128.075758" width="35.933333" height="26.312121" rx="2" />
+    <rect id="window-r3c4" x="188.492424" y="128.075758" width="35.933333" height="26.312121" rx="2" />
+  </g>
+</svg>

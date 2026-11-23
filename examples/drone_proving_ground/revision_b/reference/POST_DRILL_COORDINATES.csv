@@ -1,0 +1,17 @@
+hole,x_mm,y_mm,diameter_mm,process
+1,48.43681,52.93681,2.2,post-drill; excluded from waterjet blank
+2,43.93681,48.43681,2.2,post-drill; excluded from waterjet blank
+3,48.43681,43.93681,2.2,post-drill; excluded from waterjet blank
+4,52.93681,48.43681,2.2,post-drill; excluded from waterjet blank
+5,-52.93681,48.43681,2.2,post-drill; excluded from waterjet blank
+6,-48.43681,43.93681,2.2,post-drill; excluded from waterjet blank
+7,-43.93681,48.43681,2.2,post-drill; excluded from waterjet blank
+8,-48.43681,52.93681,2.2,post-drill; excluded from waterjet blank
+9,-48.43681,-52.93681,2.2,post-drill; excluded from waterjet blank
+10,-43.93681,-48.43681,2.2,post-drill; excluded from waterjet blank
+11,-48.43681,-43.93681,2.2,post-drill; excluded from waterjet blank
+12,-52.93681,-48.43681,2.2,post-drill; excluded from waterjet blank
+13,52.93681,-48.43681,2.2,post-drill; excluded from waterjet blank
+14,48.43681,-43.93681,2.2,post-drill; excluded from waterjet blank
+15,43.93681,-48.43681,2.2,post-drill; excluded from waterjet blank
+16,48.43681,-52.93681,2.2,post-drill; excluded from waterjet blank

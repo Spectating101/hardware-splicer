@@ -1,0 +1,176 @@
+{
+  "product": "HS Whoop65: 65 mm printed 1S brushless FPV whoop",
+  "source_design": "PR #276 examples/drone_lab/hs_whoop65_build.json (branch feature/hs-first-flyable-microdrone-20261104); build basis vsergeev/3d-parametric-whoop 65mm, CC-BY-4.0",
+  "scope": "Bind-and-fly airframe. Radio and charger are needed by BOTH build and buy, so they are 'shared' and excluded from the comparison.",
+  "lines": [
+    {
+      "id": "frame_print",
+      "qty": 1,
+      "spec": "printed 65 mm frame + battery cradle, PETG 50%",
+      "fixed_price_twd": 526,
+      "fixed_price_basis": "3DEX browser quote 2026-11-05 from PR #276 QUOTE_ESTIMATE.json (never submitted)"
+    },
+    {
+      "id": "motors",
+      "qty": 4,
+      "packs": true,
+      "spec": "0702 1S brushless, 1 mm shaft (RCinPower GTS V3 0702 27000KV per source build; Happymodel SE0702 23000-26000KV is a same-size substitute)",
+      "queries": [
+        "0702 無刷馬達",
+        "RCinPower 0702",
+        "0702 27000KV"
+      ],
+      "must": "0702",
+      "exclude": "有刷|空心杯|0802|0603|1102",
+      "unit_price_band_twd": [
+        120,
+        900
+      ]
+    },
+    {
+      "id": "fc_esc",
+      "qty": 1,
+      "spec": "BETAFPV Matrix 1S AIO with VTX+ELRS (5IN1). Current listings are the 12A 'II' revision with 3-point mounting: the printed 26x26 frame must be adapted",
+      "queries": [
+        "Matrix 1S",
+        "BETAFPV Matrix 1S"
+      ],
+      "must": "Matrix\\s*1S|Matrix1S",
+      "unit_price_band_twd": [
+        800,
+        4500
+      ],
+      "exclude": "3IN1|4IN1|整機|穿越機(?!.*飛控)|BNF|RTF"
+    },
+    {
+      "id": "props",
+      "qty": 1,
+      "spec": "Gemfan 1210-2 31 mm, 1 mm shaft, matched CW/CCW set",
+      "queries": [
+        "Gemfan 1210",
+        "31mm 槳 1mm"
+      ],
+      "must": "1210|31mm",
+      "exclude": "40mm|35mm|1219",
+      "unit_price_band_twd": [
+        40,
+        400
+      ]
+    },
+    {
+      "id": "camera",
+      "qty": 1,
+      "spec": "BETAFPV C03 FPV micro camera (fits the source canopy)",
+      "queries": [
+        "BETAFPV C03",
+        "C03 FPV 鏡頭"
+      ],
+      "must": "C03",
+      "unit_price_band_twd": [
+        250,
+        2000
+      ]
+    },
+    {
+      "id": "batteries",
+      "qty": 2,
+      "packs": true,
+      "spec": "1S 300 mAh LiHV, BT2.0",
+      "queries": [
+        "BT2.0 300mAh",
+        "1S 300mAh BT2.0 電池"
+      ],
+      "must": "BT2\\.0",
+      "exclude": "充電器|充電板|轉接|線",
+      "unit_price_band_twd": [
+        60,
+        500
+      ]
+    },
+    {
+      "id": "hardware",
+      "qty": 1,
+      "spec": "M1.4 screws/nuts for motors, FC and canopy",
+      "queries": [
+        "M1.4 螺絲"
+      ],
+      "must": "M1\\.4",
+      "unit_price_band_twd": [
+        15,
+        300
+      ]
+    },
+    {
+      "id": "charger",
+      "qty": 1,
+      "role": "shared",
+      "spec": "1S BT2.0 LiHV charger",
+      "queries": [
+        "BT2.0 充電器",
+        "1S 充電器 BT2.0"
+      ],
+      "must": "BT2\\.0",
+      "exclude": "電池(?!.*充電)",
+      "unit_price_band_twd": [
+        150,
+        1500
+      ]
+    },
+    {
+      "id": "radio",
+      "qty": 1,
+      "role": "shared",
+      "spec": "RadioMaster Pocket ELRS 2.4 GHz transmitter",
+      "queries": [
+        "RadioMaster Pocket"
+      ],
+      "must": "Pocket",
+      "unit_price_band_twd": [
+        1500,
+        5000
+      ]
+    }
+  ],
+  "buy_alternatives": [
+    {
+      "id": "Meteor65 (BNF)",
+      "spec": "BETAFPV Meteor65 / Meteor65 Pro 1S brushless whoop, ready to bind (analog only; HD/O4 variants excluded to match the analog build)",
+      "queries": [
+        "Meteor65",
+        "BETAFPV Meteor65 Pro"
+      ],
+      "must": "Meteor\\s*65",
+      "exclude": "鍵盤|ipad|iPad|妙控|RunCam|攝像頭|鏡頭|配件|零件|框|機架|frame|槳|馬達|電池|飛控|機殼|canopy|HD|O4|O3|數字|高清|高畫質|畫質|適配手機",
+      "unit_price_band_twd": [
+        2000,
+        9000
+      ]
+    },
+    {
+      "id": "Air65 (BNF)",
+      "spec": "BETAFPV Air65 1S whoop (analog only; HD/O4 variants excluded to match the analog build)",
+      "queries": [
+        "Air65"
+      ],
+      "must": "Air\\s*65",
+      "exclude": "鍵盤|ipad|iPad|妙控|RunCam|攝像頭|鏡頭|配件|零件|框|機架|frame|槳|馬達|電池|飛控|機殼|canopy|HD|O4|O3|數字|高清|高畫質|畫質|適配手機",
+      "unit_price_band_twd": [
+        2000,
+        9000
+      ]
+    },
+    {
+      "id": "Mobula6 (BNF)",
+      "spec": "Happymodel Mobula6 1S whoop (analog only; HD/O4 variants excluded to match the analog build)",
+      "queries": [
+        "Mobula6"
+      ],
+      "must": "Mobula\\s*6",
+      "exclude": "鍵盤|ipad|iPad|妙控|RunCam|攝像頭|鏡頭|配件|零件|框|機架|frame|槳|馬達|電池|飛控|機殼|canopy|HD|O4|O3|數字|高清|高畫質|畫質|適配手機",
+      "unit_price_band_twd": [
+        2000,
+        9000
+      ]
+    }
+  ]
+}
