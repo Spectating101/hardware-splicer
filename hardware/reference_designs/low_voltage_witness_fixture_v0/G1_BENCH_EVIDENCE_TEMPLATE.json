@@ -1,0 +1,90 @@
+{
+  "schema": "hardware_splicer.witness_g1_bench_packet.v1",
+  "capture_kind": "NOT_A_BENCH_CAPTURE",
+  "run_id": "",
+  "operator_id": "",
+  "independent_reviewer_id": "",
+  "load_mpn": "",
+  "source_model": "",
+  "source_serial": "",
+  "source_current_limit_a": null,
+  "fuse_link_mpn": "",
+  "fuse_holder_mpn": "",
+  "reference_meter_model": "",
+  "reference_meter_serial": "",
+  "reference_calibration_valid_until_utc": "",
+  "primary_sensor_serial": "",
+  "primary_shunt_measured_ohms": null,
+  "reference_shunt_measured_ohms": null,
+  "reference_capture_clock": "",
+  "measured_max_clock_offset_ms": null,
+  "start_utc": "",
+  "end_utc": "",
+  "files": [
+    {
+      "role": "source_fault_limit_record",
+      "path": "",
+      "sha256": ""
+    },
+    {
+      "role": "fuse_dc_coordination_review",
+      "path": "",
+      "sha256": ""
+    },
+    {
+      "role": "earth_ground_commonmode_review",
+      "path": "",
+      "sha256": ""
+    },
+    {
+      "role": "load_mount_thermal_record",
+      "path": "",
+      "sha256": ""
+    },
+    {
+      "role": "as_built_identity_and_photos",
+      "path": "",
+      "sha256": ""
+    },
+    {
+      "role": "primary_native_capture",
+      "path": "",
+      "sha256": ""
+    },
+    {
+      "role": "primary_registers",
+      "path": "",
+      "sha256": ""
+    },
+    {
+      "role": "primary_session",
+      "path": "",
+      "sha256": ""
+    },
+    {
+      "role": "reference_native_export",
+      "path": "",
+      "sha256": ""
+    },
+    {
+      "role": "reference_calibration_certificate",
+      "path": "",
+      "sha256": ""
+    },
+    {
+      "role": "clock_trace",
+      "path": "",
+      "sha256": ""
+    },
+    {
+      "role": "independent_signed_review",
+      "path": "",
+      "sha256": ""
+    }
+  ],
+  "limitations": [
+    "All fields are placeholders: no physical instrument, operator or calibration is claimed.",
+    "Even a structurally complete packet is not independent authenticity or a safety approval.",
+    "All physical commissioning remains subject to an authorized laboratory and independent engineering review."
+  ]
+}

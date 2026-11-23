@@ -1,0 +1,55 @@
+# Physical readiness and fabrication HOLD — HS witness v0
+
+**Current software/review navigation:** [CONSOLIDATED_REVIEW.md](CONSOLIDATED_REVIEW.md). This document remains the physical-build HOLD authority; the consolidated software review cannot override it. G1 primary/reference stream binding remains structural and cannot authenticate calibration or true ADC timing.
+
+**Verdict: HOLD.** A clean KiCad ERC, zero-unconnected-pad PCB DRC and passing ngspice / INA228-register fixture are **not** assembly validation or authority to power on.
+
+## Blocking items (must be resolved with actual physical evidence)
+
+| ID | Blocker | What closes it |
+|---|---|---|
+| PHY-01 | No parts or board actually assembled or measured | Exact BOM, as-delivered identification and inspected assembly |
+| PHY-02 | Vishay 4-terminal WSK2512R0100FEA Taiwan stock zero; no approved replacement | Exact same four-terminal/shunt pad geometry, rating and tolerance, independently inspected |
+| PHY-03 | INA228 carrier rev/shunt true tolerance and shunt power rating unknown; guide says 0.1%, schematic elsewhere said 1% | Actual manufacturer revision/part evidence and independent calibration against selected reference |
+| PHY-04 | No DC-qualified fuse-link selected or prospective fault-current analysis | Compatible fuse-link DC interrupt rating and full source/connector/fuse fault coordination review |
+| PHY-05 | No actually isolated current-limited source, earth topology or I2C host chosen | Named source, current-limit behavior, measured isolation/common-mode and fault handling |
+| PHY-06 | No high-side differential reference instrument or independent logger | Actual exact reference channels, high-side rated inputs, timestamp pairing, native exports, calibration and uncertainty |
+| PHY-07 | Mechanical and thermal of screw terminals, load mounting, shunt, cables uninspected | Mechanical drawing/fitted enclosure, standoffs, load thermal mounting, cable strain relief and temperature checks |
+| PHY-08 | No independent operator or genuine recorded bench run | Controlled, permitted physical commissioning with true source identity and independent repeat |
+| PHY-09 | This 5 V fixture has no authority for 24 V / 120 W | New higher-power design with independently reviewed ratings, protection and measured validation |
+| PHY-10 | Declared 2.5 W power ceiling is exceeded under some allowable 5.25 V / load corner assumptions | Reconcile maximum bus voltage, actual load tolerance and 2.5 W maximum before authorizing any test or build; independently rerun corner checks. A mathematically sufficient **unselected** 12 ohm +/-5% candidate is detailed in WITNESS_G0_G2_DISCRIMINATION.md; PHY-10 remains OPEN until an actual part and revised canonical test model are approved |
+
+## Hardware selection ledger
+
+- **Adafruit INA228 #5832**: real product with onboard 15 mΩ current shunt; separate external board, not fabricated into this PCB. A J3 open circuit is an intentional *carrier insertion* connection. Adafruit board VBUS-to-VIN+ jumper stays open so separately sensed VBUS observes J2 after BOTH shunts. Real carrier MUST match those pin labels.
+- **Vishay WSK2512R0100FEA**: 4-terminal 10 mΩ ±1%, 1 W. Footprint KiCad 4 pads, verified in generated board. Taiwan distributor reports no stock in current listing. No substitution without actual four-pad equivalence.
+- **Phoenix Contact 1715022 (5mm pitch 2-way)**: candidate for J1, J2 and J3. Exact geometry must be verified to native KiCad footprint prior to assembly.
+- **SCHURTER 0031.3551**: candidate capped 5×20 mm PCB fuse holder (straight pins). **No fuse-link yet.** Holder's 250 VAC catalog rating does NOT establish a suitable fuse cartridge DC interrupt rating.
+- **External load**: 10 Ω, ≥10 W (part and insulated mounting unselected). Simulation's `R_FUSE=0.05Ω` is a modeling assumption; nominal contact DCR of holder + fuse is NOT established.
+- **External reference**: not selected. J5/J6 separate header networks are not independent measurements by themselves.
+- **External source and I2C**: not selected. Optiplex has no identified suitable laboratory USB power meter; its internal /dev/i2c-* adapters are **not** an invitation to probe motherboard buses.
+
+## Status boundary
+
+| Layer | State |
+|---|---|
+| Editable schematic, netlist, PCB | Built in software |
+| KiCad9 ERC, PCB DRC, netlist/pad agreement | Pass |
+| Candidate Gerbers, STEP bare-board shape | Exported for review; **hold fabrication** |
+| SPICE steady-state equivalent | Pass mathematically under assumptions |
+| Actual HS INA228 decoder run | Run against **fake I2C registers**, not a sensor |
+| Policy Lab PLRS-6 receipt | `TEST_FIXTURE_STRUCTURALLY_INGESTED_NO_PHYSICAL_CLAIMS` |
+| Hardware procured or constructed | No |
+| Calibration / actual independent reference capture | No |
+| Operator energization / power-on | Not authorized |
+| Real-world research statement | Not established |
+
+**PHY-10 follow-up, still HOLD (20 Nov):** Supplier-backed G0 screening in G0_PART_SCREEN_AND_G1_EVIDENCE_20261120.md shows YAGEO SQP10AJB-12R (12 ohm, +/-5%, conservatively 300 ppm/C) can exceed 2.5 W at 5.25 V over the whole stated component temperature range (**2.516 W**), despite its room-temperature-bound pass. Vishay RE65G12R0C02 (12 ohm, +/-1%, 20 ppm/C) meets the normal-load resistance/power upper bound (**2.331 W**) but its required external chassis/heatsinking, real thermal derating and all source/protection/physical evidence are unverified. Neither is procured or qualified, and the original 10-ohm KiCad/SPICE/BOM remains unchanged. G1_BENCH_EVIDENCE_TEMPLATE.json and g1_evidence_gate.py establish an independent physical evidence preflight; they never grant release.
+
+**G1 source selection review, still HOLD (20 Nov):** `G1_SOURCE_SELECTION_AND_INSTRUMENT_BORROW_20261120.md` identifies Rigol DP832A CH1 as a possible **borrowing** source with documented adjustable OVP/OCP, while Siglent SPD3303X-E has no user-configurable OVP per vendor support. Neither is borrowed, connected, calibrated, or proven to keep J2 below 5.25 V during faults. G1 protection dossier now separately requires actual configured OVP trip-point, enabled state and measured J2 fault-event maximum before structural review. A SCHURTER SPT 5×20 **fuse family** with DC-rated variants is a supplier lead, not an exact qualified fuse link. PHY-04/05/06 remain OPEN; no software approval.
+
+**PHY-04/05/06 added G1 preflight, still HOLD:** [G1_INDEPENDENT_BENCH_COMMISSIONING_20261120.md](G1_INDEPENDENT_BENCH_COMMISSIONING_20261120.md) documents the read-only SCPI two-DMM capture prototype (host query brackets are not ADC aperture times), source current-limit / DC fuse-link vs holder / wiring / load thermal preflight and an integrated evidence release interlock. Source prospective-fault current, actual DC link rating/clearing, earth topology, shunt calibration, reference instrument IDs and real external clock remain unverified. All software gates explicitly withhold fabrication and energization. No meter, fuse link, board, source or technician was actually connected.
+
+**Measurement-discrimination boundary:** The additional strict software screen detects controlled 1% and 5% reference bias and +500 ms reference-clock offset on pinned TEST_FIXTURE data. It never proves real reference independence, resistor calibration, external clock synchronization, or electrical safety. See WITNESS_G0_G2_DISCRIMINATION.md. PHY-06/PHY-08 remain OPEN.
+
+**Stop condition:** If the selected part dimensions, pin naming, breakout shunt, power fuse or reference instrument are incompatible, revise schematic and PCB and repeat ERC/DRC. Never silently reclassify the candidate as safe/fabrication-ready because an electronic check returns zero violations.
