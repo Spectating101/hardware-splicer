@@ -13,6 +13,8 @@ const DECISIONS = [
   ["waive", "Waive"],
 ];
 const DECIDABLE = new Set(["open", "unknown", "failing", "clash", "simulated"]);
+// A decision is about a finding on one revision: the same check on another revision is a new call.
+const decisionKey = (item) => `${item.view?.mode ?? "device"}::${item.id}`;
 
 function DecisionBar({ item, decision, onDecide }) {
   if (!DECIDABLE.has(item.state)) return null;
@@ -23,7 +25,7 @@ function DecisionBar({ item, decision, onDecide }) {
         <small> · {decision.at.slice(0, 16).replace("T", " ")} UTC{decision.decision === "ask_agent" ? " · queued for the agent" : ""}</small></p>}
       <div className="dv-decide-row" role="group" aria-label="Your call on this finding">
         {DECISIONS.map(([id, text]) => (
-          <button key={id} type="button" aria-pressed={decision?.decision === id} onClick={() => onDecide(item.id, id)}>{text}</button>
+          <button key={id} type="button" aria-pressed={decision?.decision === id} onClick={() => onDecide(decisionKey(item), id)}>{text}</button>
         ))}
       </div>
     </div>
@@ -155,7 +157,8 @@ export default function DeviceWorkspace({ sceneId, onExit }) {
 
   useEffect(() => {
     const controller = new AbortController();
-    setManifest(null); setError("");
+    // A new project: drop everything read for the previous one before anything renders.
+    setManifest(null); setError(""); setData(null); setActive(null); setCommand(null); setSelected(null);
     fetchSceneManifest(sceneId, controller.signal)
       .then((body) => { if (!controller.signal.aborted) setManifest(body); })
       .catch((cause) => { if (!controller.signal.aborted) setError(cause.message); });
@@ -177,9 +180,10 @@ export default function DeviceWorkspace({ sceneId, onExit }) {
   }, [sceneId]);
   // KiCad's own DRC/ERC, for a revision that names its board files.
   useEffect(() => {
+    // Reset first: a project without board files must not keep the previous project's checks.
+    setKicad({ state: boardRevision ? "loading" : "idle", report: null, error: "" });
     if (!boardRevision) return undefined;
     const controller = new AbortController();
-    setKicad({ state: "loading", report: null, error: "" });
     fetchSceneKicad(sceneId, boardRevision, controller.signal)
       .then((report) => { if (!controller.signal.aborted) setKicad({ state: "ready", report, error: "" }); })
       .catch((cause) => { if (!controller.signal.aborted) setKicad({ state: "error", report: null, error: cause.message }); });
@@ -187,9 +191,9 @@ export default function DeviceWorkspace({ sceneId, onExit }) {
   }, [sceneId, boardRevision]);
   // The model as measured by the server's fit engine: computed once per model, then cached there.
   useEffect(() => {
+    setFit({ state: fitRevision ? "loading" : "idle", report: null, error: "" });
     if (!fitRevision) return undefined;
     const controller = new AbortController();
-    setFit({ state: "loading", report: null, error: "" });
     fetchSceneFit(sceneId, fitRevision, controller.signal)
       .then((report) => { if (!controller.signal.aborted) setFit({ state: "ready", report, error: "" }); })
       .catch((cause) => { if (!controller.signal.aborted) setFit({ state: "error", report: null, error: cause.message }); });
@@ -310,7 +314,7 @@ export default function DeviceWorkspace({ sceneId, onExit }) {
                     {item.next && <p className="dv-next"><span>Next</span> {item.next}</p>}
                     {item.detail?.length > 0 && <ul>{item.detail.map((line) => <li key={line}>{line}</li>)}</ul>}
                     {item.basis && <p>Basis · <Source basis={item.basis} /></p>}
-                    <DecisionBar item={item} decision={decisions[item.id]} onDecide={decide} />
+                    <DecisionBar item={item} decision={decisions[decisionKey(item)]} onDecide={decide} />
                   </div>}
                 </li>
               ))}
