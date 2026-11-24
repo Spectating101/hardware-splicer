@@ -118,34 +118,68 @@ def test_the_device_design_task_manifest_gives_an_agent_the_whole_workflow_in_on
     assert "modules" in plan["operation"]["requestBody"]["content"]["application/json"]["schema"]["properties"]
 
 
+def _pin_of(plan, endpoint):
+    """module.PIN as the spec writes it (a pin id or a printed name, any case) -> (module id, pin dict), or None."""
+    module_id, _, name = endpoint.partition(".")
+    module = next((m for m in plan["modules"] if m["id"] == module_id), None)
+    if module is None:
+        return None
+    pin = next((p for p in module["pins"] if p["id"] == name), None) or next((p for p in module["pins"] if p["name"].lower() == name.lower()), None)
+    return (module_id, pin) if pin else None
+
+
+def _same_pin(plan, endpoint, key):
+    found = _pin_of(plan, endpoint)
+    return found is not None and (found[0], found[1]["id"]) == key
+
+
 def apply_first_suggestions(spec, plan):
-    """What a simple agent does with the planner's suggestions: take the first candidate. Returns whether it changed anything."""
+    """What a simple agent does with the planner's suggestions: take the first candidate. Returns whether it changed anything.
+
+    A suggestion it cannot apply cleanly (no candidate, a pin it cannot find, a wire it cannot match) is skipped and changes nothing."""
     changed = False
     wires_by_id = {w["id"]: w for w in plan["wires"]}
     for finding in plan["findings"]:
         for suggestion in finding.get("suggestions", []):
+            options = suggestion.get("to_one_of") or []
+            if not options:
+                continue
             if suggestion["action"] == "add_connection":
-                spec["connections"].append({"from": suggestion["from"], "to": suggestion["to_one_of"][0]})
+                pin = _pin_of(plan, suggestion["from"])
+                if pin is None or any(_same_pin(plan, row[end], (pin[0], pin[1]["id"])) for row in spec["connections"] for end in ("from", "to")):
+                    continue  # already wired (a wire the planner rejected as it stands): a replacement is the repair, not a second wire
+                spec["connections"].append({"from": suggestion["from"], "to": options[0]})
                 changed = True
             elif suggestion["action"] == "replace_connection":
-                wire = wires_by_id[suggestion["wire"]]
+                wire = wires_by_id.get(suggestion["wire"])
+                keep = _pin_of(plan, suggestion["from"])
+                if wire is None or keep is None:
+                    continue
+                keep_key = (keep[0], keep[1]["id"])
+                ends = {(wire[end]["module"], wire[end]["pin_id"]) for end in ("from", "to")}
                 for row in spec["connections"]:
-                    if suggestion["from"] in (row["from"], row["to"]) and f"{wire['to']['module']}.{wire['to']['pin']}" in (row["from"], row["to"]):
-                        key = "to" if row["from"] == suggestion["from"] else "from"
-                        row[key] = suggestion["to_one_of"][0]
-                        changed = True
+                    keys = [_pin_of(plan, row[end]) for end in ("from", "to")]
+                    if None in keys or {(k[0], k[1]["id"]) for k in keys} != ends:
+                        continue
+                    # the end that is not the module's own pin is the one to replace, whichever way the wire is written
+                    replace = "to" if _same_pin(plan, row["from"], keep_key) else "from"
+                    row[replace] = options[0]
+                    changed = True
+                    break
             elif suggestion["action"] == "move_signal":
-                signal = "SCL" if suggestion["signal"] == "scl" else "SDA"
-                if not suggestion["to_one_of"]:
-                    continue
+                role = "i2c_scl" if suggestion["signal"] == "scl" else "i2c_sda"
+                mcu_ref = options[0].split(".")[0]
+                moved = False
                 for row in spec["connections"]:
-                    if row["from"].upper().endswith("." + signal):
-                        row["to"] = suggestion["to_one_of"][0]
-                        changed = True
-                        break
-                else:
-                    continue
-                return changed  # one move at a time, then re-plan
+                    ends = {end: _pin_of(plan, row[end]) for end in ("from", "to")}
+                    if any(found is None for found in ends.values()):
+                        continue
+                    for end, other in (("from", "to"), ("to", "from")):
+                        if ends[end][0] == mcu_ref and role in ends[other][1]["roles"] and ends[other][0] != mcu_ref:
+                            row[end] = options[0]  # every wire of this signal moves, so the bus is not split
+                            moved = True
+                if moved:
+                    return True  # one signal at a time, then re-plan
     return changed
 
 
@@ -178,6 +212,69 @@ def test_following_the_suggestions_repairs_a_broken_spec_until_the_plan_has_no_e
         assert apply_first_suggestions(spec, plan), [f["rule"] for f in plan["findings"] if f["severity"] == "error"]
         plan = build_device_plan(spec)
     assert plan["counts"]["errors"] == 0
+
+
+def _repair(spec, rounds=6):
+    plan = build_device_plan(spec)
+    for _ in range(rounds):
+        if plan["counts"]["errors"] == 0:
+            break
+        assert apply_first_suggestions(spec, plan), [f["rule"] for f in plan["findings"] if f["severity"] == "error"]
+        plan = build_device_plan(spec)
+    return plan
+
+
+def _rewire(spec, source, target):
+    for row in spec["connections"]:
+        if row["from"] == source:
+            row["to"] = target
+
+
+def _bme_only_pico_spec():
+    from hardware_splicer.device_draft import draft_device_spec
+
+    return draft_device_spec({"controller": "raspberry-pi-pico", "parts": ["adafruit-bme280-stemma-qt"]})["spec"]
+
+
+def test_a_bme280_on_the_wrong_i2c_controller_is_repaired_by_its_sdi_and_sck_pins():
+    spec = _bme_only_pico_spec()
+    _rewire(spec, "sensor.SCK", "mcu.GP7")  # SCL of I2C1 while SDA stays on I2C0
+    assert any(f["rule"] == "i2c_mixed_controllers" for f in build_device_plan(spec)["findings"])
+    assert _repair(spec)["counts"]["errors"] == 0
+
+
+def test_every_wire_of_a_moved_signal_moves_so_a_shared_bus_is_not_split():
+    spec = copy.deepcopy(example_specs()["pico_oled_bme280_usb"])
+    _rewire(spec, "display.SCL", "mcu.GP7")
+    _rewire(spec, "sensor.SCK", "mcu.GP7")  # both SCL wires on I2C1, both SDA wires on I2C0
+    plan = _repair(spec)
+    assert plan["counts"]["errors"] == 0
+    scl = {row["to"] for row in spec["connections"] if row["from"] in {"display.SCL", "sensor.SCK"}}
+    assert len(scl) == 1
+
+
+def test_a_wire_written_backwards_or_by_pin_id_is_repaired_on_the_right_endpoint():
+    spec = copy.deepcopy(example_specs()["pico_oled_usb"])
+    spec["connections"] = [{"from": "mcu.GP22", "to": "display.SDA"} if row["from"] == "display.SDA" else row for row in spec["connections"]]
+    assert any(f["rule"] == "not_an_i2c_pin" for f in build_device_plan(spec)["findings"])
+    assert _repair(spec)["counts"]["errors"] == 0
+    assert not any("mcu.GP22" in (row["from"], row["to"]) for row in spec["connections"])
+    assert sum(1 for row in spec["connections"] if "display.SDA" in (row["from"], row["to"])) == 1
+    by_id = copy.deepcopy(example_specs()["pico_oled_usb"])
+    _rewire(by_id, "display.SDA", "mcu.P29")  # GP22, written as the pin's id
+    assert _repair(by_id)["counts"]["errors"] == 0
+
+
+def test_a_suggestion_with_no_candidates_is_skipped_and_changes_nothing():
+    spec = copy.deepcopy(example_specs()["pico_oled_usb"])
+    break_a_wire(spec, "display.GND")
+    plan = build_device_plan(spec)
+    for finding in plan["findings"]:
+        for suggestion in finding.get("suggestions", []):
+            suggestion["to_one_of"] = []
+    before = copy.deepcopy(spec)
+    assert apply_first_suggestions(spec, plan) is False
+    assert spec == before
 
 
 def test_the_mixed_controller_suggestion_offers_only_pins_of_the_controller_already_in_use():
