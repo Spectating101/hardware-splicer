@@ -110,14 +110,17 @@ def _alloc_pin_by_role(mcu: ModuleSpec, used: Set[str], role: str) -> Optional[s
 
 
 def auto_wire_picked_modules(modules: List[ModuleSpec]) -> Recipe:
+    # Every entry of ``modules`` is its own instance with its own role (m1, m2,
+    # ... in list order), even when the same module id appears more than once.
+    # Wires address instances through the private ``_role`` key on a per-call
+    # copy of the spec, never through the module id, so a repeated module
+    # cannot collapse onto a single role. Callers' specs are not mutated.
     roles = [{"role": f"m{i + 1}", "moduleId": m["id"]} for i, m in enumerate(modules)]
-    role_of = {m["id"]: f"m{i + 1}" for i, m in enumerate(modules)}
+    modules = [{**m, "_role": f"m{i + 1}"} for i, m in enumerate(modules)]
     wires: List[Dict[str, Any]] = []
     wire_keys: Set[str] = set()
 
-    def wire(from_id: str, from_pin: str, to_id: str, to_pin: str) -> None:
-        fr = role_of.get(from_id)
-        tr = role_of.get(to_id)
+    def wire(fr: str, from_pin: str, tr: str, to_pin: str) -> None:
         if not fr or not tr:
             return
         key = f"{fr}:{from_pin}->{tr}:{to_pin}"
@@ -141,64 +144,64 @@ def auto_wire_picked_modules(modules: List[ModuleSpec]) -> Recipe:
     skip_ids = {m.get("id") for m in (power, mcu, barrel, buck, ldo) if m}
 
     if barrel and buck:
-        wire(barrel["id"], "V+", buck["id"], "IN+")
-        wire(barrel["id"], "GND", buck["id"], "IN-")
+        wire(barrel["_role"], "V+", buck["_role"], "IN+")
+        wire(barrel["_role"], "GND", buck["_role"], "IN-")
     elif buck and power and power.get("id") != buck.get("id") and not barrel:
         p_out = _power_out_pin(power) or _first_pin(power, lambda p: p.get("role") == "power_in")
         p_gnd = gnd_pin(power)
         if p_out:
-            wire(power["id"], p_out, buck["id"], "IN+")
+            wire(power["_role"], p_out, buck["_role"], "IN+")
         if p_gnd:
-            wire(power["id"], p_gnd, buck["id"], "IN-")
+            wire(power["_role"], p_gnd, buck["_role"], "IN-")
 
     m_in = _mcu_power_in_pin(mcu) if mcu else None
     m_gnd = gnd_pin(mcu) if mcu else None
     if buck and mcu and m_in and m_gnd:
-        wire(buck["id"], "OUT+", mcu["id"], m_in)
-        wire(buck["id"], "OUT-", mcu["id"], m_gnd)
+        wire(buck["_role"], "OUT+", mcu["_role"], m_in)
+        wire(buck["_role"], "OUT-", mcu["_role"], m_gnd)
     elif power and mcu and m_in and m_gnd:
         p_out = _power_out_pin(power)
         gnd = gnd_pin(power)
         if p_out:
-            wire(power["id"], p_out, mcu["id"], m_in)
+            wire(power["_role"], p_out, mcu["_role"], m_in)
         if gnd:
-            wire(power["id"], gnd, mcu["id"], m_gnd)
+            wire(power["_role"], gnd, mcu["_role"], m_gnd)
     elif barrel and mcu and not buck and m_in and m_gnd:
-        wire(barrel["id"], "V+", mcu["id"], m_in)
-        wire(barrel["id"], "GND", mcu["id"], m_gnd)
+        wire(barrel["_role"], "V+", mcu["_role"], m_in)
+        wire(barrel["_role"], "GND", mcu["_role"], m_gnd)
 
     if barrel and mcu and m_gnd and not buck:
-        wire(barrel["id"], "GND", mcu["id"], m_gnd)
+        wire(barrel["_role"], "GND", mcu["_role"], m_gnd)
 
     if barrel and ldo and not buck:
-        wire(barrel["id"], "V+", ldo["id"], "VIN")
-        wire(barrel["id"], "GND", ldo["id"], "GND")
+        wire(barrel["_role"], "V+", ldo["_role"], "VIN")
+        wire(barrel["_role"], "GND", ldo["_role"], "GND")
     elif ldo and power and power.get("id") != ldo.get("id") and not buck:
         p_out = _power_out_pin(power) or _first_pin(power, lambda p: p.get("role") == "power_in")
         p_gnd = gnd_pin(power)
         if p_out:
-            wire(power["id"], p_out, ldo["id"], "VIN")
+            wire(power["_role"], p_out, ldo["_role"], "VIN")
         if p_gnd:
-            wire(power["id"], p_gnd, ldo["id"], "GND")
+            wire(power["_role"], p_gnd, ldo["_role"], "GND")
 
     if buck:
-        rail_pos: Optional[Tuple[str, str]] = (buck["id"], "OUT+")
-        rail_gnd: Optional[Tuple[str, str]] = (buck["id"], "OUT-")
+        rail_pos: Optional[Tuple[str, str]] = (buck["_role"], "OUT+")
+        rail_gnd: Optional[Tuple[str, str]] = (buck["_role"], "OUT-")
     elif ldo:
-        rail_pos = (ldo["id"], "VOUT")
-        rail_gnd = (ldo["id"], "GND")
+        rail_pos = (ldo["_role"], "VOUT")
+        rail_gnd = (ldo["_role"], "GND")
     elif usb:
-        rail_pos = (usb["id"], _power_out_pin(usb) or "5V")
+        rail_pos = (usb["_role"], _power_out_pin(usb) or "5V")
         gnd = gnd_pin(usb)
-        rail_gnd = (usb["id"], gnd) if gnd else None
+        rail_gnd = (usb["_role"], gnd) if gnd else None
     elif barrel:
-        rail_pos = (barrel["id"], "V+")
-        rail_gnd = (barrel["id"], "GND")
+        rail_pos = (barrel["_role"], "V+")
+        rail_gnd = (barrel["_role"], "GND")
     elif mcu:
         v5 = next((p.get("id") for p in mcu.get("pins") or [] if p.get("id") == "5V"), None)
-        rail_pos = (mcu["id"], v5 or "3V3")
+        rail_pos = (mcu["_role"], v5 or "3V3")
         gnd = gnd_pin(mcu)
-        rail_gnd = (mcu["id"], gnd) if gnd else None
+        rail_gnd = (mcu["_role"], gnd) if gnd else None
     else:
         rail_pos = None
         rail_gnd = None
@@ -224,14 +227,14 @@ def auto_wire_picked_modules(modules: List[ModuleSpec]) -> Recipe:
         lv_rail = _first_pin(level_shifter, lambda p: p.get("id") == "LV")
         sh_gnd = gnd_pin(level_shifter)
         if hv_rail and rail_pos:
-            wire(rail_pos[0], rail_pos[1], level_shifter["id"], hv_rail)
+            wire(rail_pos[0], rail_pos[1], level_shifter["_role"], hv_rail)
         if sh_gnd and rail_gnd:
-            wire(rail_gnd[0], rail_gnd[1], level_shifter["id"], sh_gnd)
+            wire(rail_gnd[0], rail_gnd[1], level_shifter["_role"], sh_gnd)
         if lv_rail and mcu_vout:
-            wire(mcu["id"], mcu_vout, level_shifter["id"], lv_rail)
+            wire(mcu["_role"], mcu_vout, level_shifter["_role"], lv_rail)
         mcu_g = gnd_pin(mcu)
         if sh_gnd and mcu_g:
-            wire(mcu["id"], mcu_g, level_shifter["id"], sh_gnd)
+            wire(mcu["_role"], mcu_g, level_shifter["_role"], sh_gnd)
 
     switched_loads = {"water_pump_5v", "cooling_fan_5v", "mini-pump-5v"}
 
@@ -247,9 +250,9 @@ def auto_wire_picked_modules(modules: List[ModuleSpec]) -> Recipe:
         dev_gnd = gnd_pin(dev)
         mcu_g = gnd_pin(mcu) if mcu else None
         if not is_h_bridge_load and mcu and dev_gnd and mcu_g:
-            wire(mcu["id"], mcu_g, dev["id"], dev_gnd)
+            wire(mcu["_role"], mcu_g, dev["_role"], dev_gnd)
         elif not is_h_bridge_load and rail_gnd and dev_gnd:
-            wire(rail_gnd[0], rail_gnd[1], dev["id"], dev_gnd)
+            wire(rail_gnd[0], rail_gnd[1], dev["_role"], dev_gnd)
 
         has_dedicated_power = (
             is_mosfet_driver
@@ -267,25 +270,25 @@ def auto_wire_picked_modules(modules: List[ModuleSpec]) -> Recipe:
             via_switch = bool(load_switch and dev_id in switched_loads and dev_vcc)
             if via_switch and load_switch:
                 if rail_pos:
-                    wire(rail_pos[0], rail_pos[1], load_switch["id"], "VIN")
+                    wire(rail_pos[0], rail_pos[1], load_switch["_role"], "VIN")
                 if rail_gnd:
-                    wire(rail_gnd[0], rail_gnd[1], load_switch["id"], "VIN-")
-                wire(load_switch["id"], "VOUT+", dev["id"], dev_vcc)
+                    wire(rail_gnd[0], rail_gnd[1], load_switch["_role"], "VIN-")
+                wire(load_switch["_role"], "VOUT+", dev["_role"], dev_vcc)
                 vout_neg = _first_pin(load_switch, lambda p: p.get("id") == "VOUT-")
                 if vout_neg and dev_gnd:
-                    wire(load_switch["id"], vout_neg, dev["id"], dev_gnd)
+                    wire(load_switch["_role"], vout_neg, dev["_role"], dev_gnd)
             elif wants_5v and rail_pos and dev_vcc:
-                wire(rail_pos[0], rail_pos[1], dev["id"], dev_vcc)
+                wire(rail_pos[0], rail_pos[1], dev["_role"], dev_vcc)
             elif mcu and mcu_vout and dev_vcc:
-                wire(mcu["id"], mcu_vout, dev["id"], dev_vcc)
+                wire(mcu["_role"], mcu_vout, dev["_role"], dev_vcc)
             elif rail_pos and dev_vcc:
-                wire(rail_pos[0], rail_pos[1], dev["id"], dev_vcc)
+                wire(rail_pos[0], rail_pos[1], dev["_role"], dev_vcc)
 
         dev_sda = next((p.get("id") for p in dev.get("pins") or [] if p.get("role") == "i2c_sda"), None)
         dev_scl = next((p.get("id") for p in dev.get("pins") or [] if p.get("role") == "i2c_scl"), None)
         if mcu and mcu_sda and mcu_scl and dev_sda and dev_scl:
-            wire(mcu["id"], mcu_sda, dev["id"], dev_sda)
-            wire(mcu["id"], mcu_scl, dev["id"], dev_scl)
+            wire(mcu["_role"], mcu_sda, dev["_role"], dev_sda)
+            wire(mcu["_role"], mcu_scl, dev["_role"], dev_scl)
 
         dev_id = str(dev.get("id"))
         if mcu and re.search(r"mosfet", dev_id):
@@ -294,22 +297,22 @@ def auto_wire_picked_modules(modules: List[ModuleSpec]) -> Recipe:
             vin_neg = _first_pin(dev, lambda p: p.get("id") == "VIN-")
             sig_gnd = _first_pin(dev, lambda p: p.get("id") == "GND")
             if sig and _first_pin(dev, lambda p: p.get("id") == "SIG"):
-                wire(mcu["id"], sig, dev["id"], "SIG")
+                wire(mcu["_role"], sig, dev["_role"], "SIG")
             if rail_pos and vin:
-                wire(rail_pos[0], rail_pos[1], dev["id"], vin)
+                wire(rail_pos[0], rail_pos[1], dev["_role"], vin)
             if rail_gnd and vin_neg:
-                wire(rail_gnd[0], rail_gnd[1], dev["id"], vin_neg)
+                wire(rail_gnd[0], rail_gnd[1], dev["_role"], vin_neg)
             if mcu_g and sig_gnd:
-                wire(mcu["id"], mcu_g, dev["id"], "GND")
+                wire(mcu["_role"], mcu_g, dev["_role"], "GND")
         if mcu and dev_id in {"relay-1ch-5v", "relay_module_1ch_5v", "relay_module_4ch_5v"}:
             sig = _alloc_gpio(mcu, used_gpio)
             relay_in = "IN1" if _first_pin(dev, lambda p: p.get("id") == "IN1") else "IN"
             if sig:
-                wire(mcu["id"], sig, dev["id"], relay_in)
+                wire(mcu["_role"], sig, dev["_role"], relay_in)
             if rail_pos and _first_pin(dev, lambda p: p.get("id") == "VCC"):
-                wire(rail_pos[0], rail_pos[1], dev["id"], "VCC")
+                wire(rail_pos[0], rail_pos[1], dev["_role"], "VCC")
             if mcu_g and _first_pin(dev, lambda p: p.get("id") == "GND"):
-                wire(mcu["id"], mcu_g, dev["id"], "GND")
+                wire(mcu["_role"], mcu_g, dev["_role"], "GND")
         if mcu and dev_id == "l298n":
             # Dual H-bridge: always request both channels when pinout includes IN3/IN4.
             control_pins = ["IN1", "IN2"]
@@ -320,11 +323,11 @@ def auto_wire_picked_modules(modules: List[ModuleSpec]) -> Recipe:
                     continue
                 sig = _alloc_gpio(mcu, used_gpio)
                 if sig:
-                    wire(mcu["id"], sig, dev["id"], pin_name)
+                    wire(mcu["_role"], sig, dev["_role"], pin_name)
             if rail_pos:
-                wire(rail_pos[0], rail_pos[1], dev["id"], "VCC")
+                wire(rail_pos[0], rail_pos[1], dev["_role"], "VCC")
             if mcu_g:
-                wire(mcu["id"], mcu_g, dev["id"], "GND")
+                wire(mcu["_role"], mcu_g, dev["_role"], "GND")
             motor_loads = [
                 m
                 for m in modules
@@ -347,8 +350,8 @@ def auto_wire_picked_modules(modules: List[ModuleSpec]) -> Recipe:
                 )
                 load_gnd = gnd_pin(motor_load)
                 if load_pos and load_gnd:
-                    wire(dev["id"], out_a, motor_load["id"], load_pos)
-                    wire(dev["id"], out_b, motor_load["id"], load_gnd)
+                    wire(dev["_role"], out_a, motor_load["_role"], load_pos)
+                    wire(dev["_role"], out_b, motor_load["_role"], load_gnd)
         if mcu and dev_id in {"drv8833-motor", "l9110-motor", "bts7960-motor", "tb6612fng-motor"}:
             control_pins = [
                 str(p.get("id"))
@@ -358,20 +361,20 @@ def auto_wire_picked_modules(modules: List[ModuleSpec]) -> Recipe:
             for pin_id in control_pins:
                 sig = _alloc_gpio(mcu, used_gpio)
                 if sig:
-                    wire(mcu["id"], sig, dev["id"], pin_id)
+                    wire(mcu["_role"], sig, dev["_role"], pin_id)
             motor_supply = _first_pin(dev, lambda p: p.get("id") in {"VM", "B+"}) or _first_pin(
                 dev, lambda p: p.get("id") == "VCC" and p.get("role") == "power_in"
             )
             logic_supply = _first_pin(dev, lambda p: p.get("id") == "VCC")
             if rail_pos and motor_supply:
-                wire(rail_pos[0], rail_pos[1], dev["id"], motor_supply)
+                wire(rail_pos[0], rail_pos[1], dev["_role"], motor_supply)
             if mcu_vout and logic_supply and logic_supply != motor_supply:
-                wire(mcu["id"], mcu_vout, dev["id"], logic_supply)
+                wire(mcu["_role"], mcu_vout, dev["_role"], logic_supply)
             motor_ground = _first_pin(dev, lambda p: p.get("id") == "B-") or _first_pin(dev, lambda p: p.get("id") == "GND")
             if rail_gnd and motor_ground:
-                wire(rail_gnd[0], rail_gnd[1], dev["id"], motor_ground)
+                wire(rail_gnd[0], rail_gnd[1], dev["_role"], motor_ground)
             if mcu_g and _first_pin(dev, lambda p: p.get("id") == "GND"):
-                wire(mcu["id"], mcu_g, dev["id"], "GND")
+                wire(mcu["_role"], mcu_g, dev["_role"], "GND")
             motor_load = next(
                 (
                     m
@@ -389,69 +392,69 @@ def auto_wire_picked_modules(modules: List[ModuleSpec]) -> Recipe:
                 load_pos = _first_pin(motor_load, lambda p: p.get("id") in {"VCC", "V+", "VIN"} or p.get("role") == "power_in")
                 load_gnd = gnd_pin(motor_load)
                 if len(out_pins) >= 2 and load_pos and load_gnd:
-                    wire(dev["id"], out_pins[0], motor_load["id"], load_pos)
-                    wire(dev["id"], out_pins[1], motor_load["id"], load_gnd)
+                    wire(dev["_role"], out_pins[0], motor_load["_role"], load_pos)
+                    wire(dev["_role"], out_pins[1], motor_load["_role"], load_gnd)
         if mcu and dev_id == "a4988-stepper":
             step = _alloc_gpio(mcu, used_gpio)
             dir_pin = _alloc_gpio(mcu, used_gpio)
             if step:
-                wire(mcu["id"], step, dev["id"], "STEP")
+                wire(mcu["_role"], step, dev["_role"], "STEP")
             if dir_pin:
-                wire(mcu["id"], dir_pin, dev["id"], "DIR")
+                wire(mcu["_role"], dir_pin, dev["_role"], "DIR")
             if mcu_vout:
-                wire(mcu["id"], mcu_vout, dev["id"], "VDD")
+                wire(mcu["_role"], mcu_vout, dev["_role"], "VDD")
             if rail_pos:
-                wire(rail_pos[0], rail_pos[1], dev["id"], "VMOT")
+                wire(rail_pos[0], rail_pos[1], dev["_role"], "VMOT")
             if mcu_g:
-                wire(mcu["id"], mcu_g, dev["id"], "GND_LOGIC")
+                wire(mcu["_role"], mcu_g, dev["_role"], "GND_LOGIC")
             if rail_gnd:
-                wire(rail_gnd[0], rail_gnd[1], dev["id"], "GND_MOTOR")
+                wire(rail_gnd[0], rail_gnd[1], dev["_role"], "GND_MOTOR")
         if mcu and dev_id == "sg90":
             sig = _alloc_gpio(mcu, used_gpio)
             if sig:
-                wire(mcu["id"], sig, dev["id"], "SIG")
+                wire(mcu["_role"], sig, dev["_role"], "SIG")
         if mcu and dev_id == "hc-sr04":
             trig = _alloc_gpio(mcu, used_gpio)
             echo = _alloc_gpio(mcu, used_gpio)
             if level_shifter and trig and echo:
-                wire(mcu["id"], trig, level_shifter["id"], "LV1")
-                wire(level_shifter["id"], "HV1", dev["id"], "TRIG")
-                wire(dev["id"], "ECHO", level_shifter["id"], "HV2")
-                wire(level_shifter["id"], "LV2", mcu["id"], echo)
+                wire(mcu["_role"], trig, level_shifter["_role"], "LV1")
+                wire(level_shifter["_role"], "HV1", dev["_role"], "TRIG")
+                wire(dev["_role"], "ECHO", level_shifter["_role"], "HV2")
+                wire(level_shifter["_role"], "LV2", mcu["_role"], echo)
             else:
                 if trig:
-                    wire(mcu["id"], trig, dev["id"], "TRIG")
+                    wire(mcu["_role"], trig, dev["_role"], "TRIG")
                 if echo:
-                    wire(mcu["id"], echo, dev["id"], "ECHO")
+                    wire(mcu["_role"], echo, dev["_role"], "ECHO")
         if mcu and dev_id == "dht22":
             data = _alloc_gpio(mcu, used_gpio)
             if data:
-                wire(mcu["id"], data, dev["id"], "DATA")
+                wire(mcu["_role"], data, dev["_role"], "DATA")
         if mcu and dev_id == "soil_moisture":
             ao = _alloc_pin_by_role(mcu, used_gpio, "analog_in") or _alloc_gpio(mcu, used_gpio)
             if ao:
-                wire(mcu["id"], ao, dev["id"], "A0")
+                wire(mcu["_role"], ao, dev["_role"], "A0")
         if mcu and dev_id == "ldr_photoresistor":
             sense = _alloc_gpio(mcu, used_gpio)
             if mcu_vout:
-                wire(mcu["id"], mcu_vout, dev["id"], "PIN1")
+                wire(mcu["_role"], mcu_vout, dev["_role"], "PIN1")
             if sense:
-                wire(mcu["id"], sense, dev["id"], "PIN2")
+                wire(mcu["_role"], sense, dev["_role"], "PIN2")
         if mcu and dev_id == "limit-switch-3pin":
             sig = _alloc_gpio(mcu, used_gpio)
             if sig:
-                wire(mcu["id"], sig, dev["id"], "SIG")
+                wire(mcu["_role"], sig, dev["_role"], "SIG")
         if mcu and re.search(r"ili9341|st7735", dev_id):
 
             def pick_mcu_pin(preferred: List[str], dev_pin_id: str) -> None:
                 for p in preferred:
                     if any(pin.get("id") == p for pin in mcu_pins) and p not in used_gpio:
                         used_gpio.add(p)
-                        wire(mcu["id"], p, dev["id"], dev_pin_id)
+                        wire(mcu["_role"], p, dev["_role"], dev_pin_id)
                         return
                 sig = _alloc_gpio(mcu, used_gpio)
                 if sig:
-                    wire(mcu["id"], sig, dev["id"], dev_pin_id)
+                    wire(mcu["_role"], sig, dev["_role"], dev_pin_id)
 
             mosi_pin = next(
                 (
@@ -489,7 +492,7 @@ def auto_wire_picked_modules(modules: List[ModuleSpec]) -> Recipe:
             if dc_pin:
                 pick_mcu_pin(["GPIO4", "GPIO16", "GPIO17"], dc_pin)
             if rail_pos and any(p.get("id") == "VCC" for p in dev.get("pins") or []):
-                wire(rail_pos[0], rail_pos[1], dev["id"], "VCC")
+                wire(rail_pos[0], rail_pos[1], dev["_role"], "VCC")
         if mcu and dev_id == "max98357a-i2s-amp":
             bclk = next(
                 (p.get("id") for p in mcu_pins if p.get("id") == "GPIO22" or p.get("role") == "i2c_scl"),
@@ -501,28 +504,28 @@ def auto_wire_picked_modules(modules: List[ModuleSpec]) -> Recipe:
             )
             din = _alloc_gpio(mcu, used_gpio)
             if rail_pos:
-                wire(rail_pos[0], rail_pos[1], dev["id"], "VIN")
+                wire(rail_pos[0], rail_pos[1], dev["_role"], "VIN")
             elif mcu_vout:
-                wire(mcu["id"], mcu_vout, dev["id"], "VIN")
+                wire(mcu["_role"], mcu_vout, dev["_role"], "VIN")
             if mcu_g:
-                wire(mcu["id"], mcu_g, dev["id"], "GND")
+                wire(mcu["_role"], mcu_g, dev["_role"], "GND")
             if bclk:
-                wire(mcu["id"], bclk, dev["id"], "BCLK")
+                wire(mcu["_role"], bclk, dev["_role"], "BCLK")
             if lrc:
-                wire(mcu["id"], lrc, dev["id"], "LRC")
+                wire(mcu["_role"], lrc, dev["_role"], "LRC")
             if din:
-                wire(mcu["id"], din, dev["id"], "DIN")
+                wire(mcu["_role"], din, dev["_role"], "DIN")
         if power and dev_id == "esp32-cam-module":
             p_out = _power_out_pin(power)
             gnd = gnd_pin(power)
             dev_g = gnd_pin(dev)
             if p_out:
-                wire(power["id"], p_out, dev["id"], "5V")
+                wire(power["_role"], p_out, dev["_role"], "5V")
             if gnd and dev_g:
-                wire(power["id"], gnd, dev["id"], "GND")
+                wire(power["_role"], gnd, dev["_role"], "GND")
 
         if mcu:
-            dev_role = role_of.get(dev["id"])
+            dev_role = dev["_role"]
             wired_pins = {
                 pin
                 for w in wires
@@ -542,7 +545,7 @@ def auto_wire_picked_modules(modules: List[ModuleSpec]) -> Recipe:
                 if not mcu_analog:
                     mcu_analog = _alloc_gpio(mcu, used_gpio)
                 if mcu_analog:
-                    wire(mcu["id"], mcu_analog, dev["id"], analog["id"])
+                    wire(mcu["_role"], mcu_analog, dev["_role"], analog["id"])
             else:
                 digital = next(
                     (
@@ -557,7 +560,7 @@ def auto_wire_picked_modules(modules: List[ModuleSpec]) -> Recipe:
                 if digital:
                     sig = _alloc_gpio(mcu, used_gpio)
                     if sig:
-                        wire(mcu["id"], sig, dev["id"], digital["id"])
+                        wire(mcu["_role"], sig, dev["_role"], digital["id"])
 
     return {
         "modules": roles,
