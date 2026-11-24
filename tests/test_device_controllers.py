@@ -244,3 +244,16 @@ def test_the_stop_blocks_of_an_antenna_free_board_leave_exactly_the_clearance_be
     longer = case["outer_mm"]["x"] - build_device_plan(bare)["case"]["outer_mm"]["x"]
     assert longer == pytest.approx(0.64 / 2 + 0.5 + 2.0 - min_y, abs=0.01)
 
+
+@pytest.mark.parametrize("display_sda, sensor_sda", [("GP4", "GP6"), ("GP6", "GP4")])
+def test_mixed_i2c_controllers_are_found_whichever_module_has_which_sda_pin(display_sda, sensor_sda):
+    spec = copy.deepcopy(example_specs()["pico_oled_bme280_usb"])
+    for row in spec["connections"]:
+        if row["from"] == "display.SDA":
+            row["to"] = f"mcu.{display_sda}"
+        if row["from"] == "sensor.SDI":
+            row["to"] = f"mcu.{sensor_sda}"
+    findings = build_device_plan(spec)["findings"]
+    mixed = [f for f in findings if f["rule"] == "i2c_mixed_controllers"]
+    assert len(mixed) == 1 and mixed[0]["severity"] == "error"
+    assert "GP4" in mixed[0]["message"] and "GP6" in mixed[0]["message"]
