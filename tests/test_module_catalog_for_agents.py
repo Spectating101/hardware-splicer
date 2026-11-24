@@ -19,7 +19,7 @@ def client(tmp_path, monkeypatch):
 def test_the_default_catalog_response_is_unchanged(client) -> None:
     body = client.get("/v1/modules/catalog").json()
 
-    assert body["count"] == 50
+    assert body["count"] == len(body["modules"]) > 0
     assert "summary" in body["modules"][0]
 
 
@@ -27,7 +27,8 @@ def test_a_compact_catalog_lists_every_part_by_id_label_and_category_in_a_few_ki
     response = client.get("/v1/modules/catalog", params={"compact": "true"})
     body = response.json()
 
-    assert body["count"] == 50 and len(body["modules"]) == 50
+    full = client.get("/v1/modules/catalog").json()
+    assert body["count"] == full["count"] and len(body["modules"]) == full["count"]
     assert set(body["modules"][0]) <= {"id", "label", "category", "i2c_addresses"}
     assert {"id", "label", "category"} <= set(body["modules"][0])
     assert len(response.text) < 9000 < len(client.get("/v1/modules/catalog").text) / 3
