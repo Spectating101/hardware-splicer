@@ -43,3 +43,13 @@ def test_ci_compiles_the_pico_application_and_runs_its_tests():
     text = (Path(__file__).resolve().parents[1] / ".github/workflows/device-plan-deliverables.yml").read_text()
     assert "scripts/verify_device_application.py --example pico_oled_bme280_usb --platformio" in text
     assert "tests/test_device_application_pico.py" in text
+
+
+def test_every_device_test_file_is_in_the_workflows_focused_test_list():
+    """A test file that is not named in the workflow's pytest line never runs there, whatever it asserts."""
+    root = Path(__file__).resolve().parents[1]
+    text = (root / ".github/workflows/device-plan-deliverables.yml").read_text()
+    line = next(row for row in text.splitlines() if "-m pytest -q" in row)
+    listed = set(line.split())
+    missing = sorted(f"tests/{p.name}" for p in (root / "tests").glob("test_device*.py") if f"tests/{p.name}" not in listed)
+    assert missing == []
