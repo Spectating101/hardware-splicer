@@ -91,6 +91,11 @@ def append_outcome(ledger: Mapping[str, Any], transaction: Mapping[str, Any]) ->
     assert revenue is not None and all(x is not None for x in values.values())
     spent = sum(values.values())
     contribution = revenue - spent
+    # Each input is finite, but their sum or difference can still overflow.
+    margin = contribution / revenue if revenue > 0 else None
+    if not all(math.isfinite(x) for x in (spent, contribution, *([] if margin is None else [margin]))):
+        return {"status": "INVALID", "errors": ["non_finite_total"],
+                "ledger": dict(ledger), "transaction": None}
     entry = {
         "transaction_id": uid,
         "candidate_id": candidate,
@@ -104,7 +109,7 @@ def append_outcome(ledger: Mapping[str, Any], transaction: Mapping[str, Any]) ->
         "costs": {name: dict(item) for name, item in costs.items()},
         "total_actual_cost": round(spent, 2),
         "collected_contribution_to_date": round(contribution, 2),
-        "observed_cash_margin_to_date": round(contribution / revenue, 6) if revenue > 0 else None,
+        "observed_cash_margin_to_date": round(margin, 6) if margin is not None else None,
         "warranty_liability_finalized": False,
         "measurement_scope": "accepted_and_collected_transaction_only_future_claims_open",
     }

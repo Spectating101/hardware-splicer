@@ -295,6 +295,35 @@ def test_accepted_but_unpaid_invoice_never_counts_as_collected_revenue():
     assert "missing_payment_reference" in append_outcome(ledger, transaction_data)["errors"]
 
 
+@pytest.mark.parametrize("revenue,cost", [
+    (10000, 1e308),   # eight costs of 1e308 sum to inf
+    (1e308, 100),     # finite revenue and costs, margin finite: control, must record
+])
+def test_overflowing_totals_are_not_recorded(revenue, cost):
+    ledger = {"schema_version": OUTCOME_SCHEMA, "transactions": []}
+    t = transaction()
+    t["revenue"] = money(revenue, "MEASURED", "invoice-1")
+    t["costs"] = {k: money(cost, "MEASURED", "receipts-1") for k in t["costs"]}
+    result = append_outcome(ledger, t)
+    if cost == 1e308:
+        assert result["status"] == "INVALID"
+        assert "non_finite_total" in result["errors"]
+        assert result["ledger"]["transactions"] == []
+    else:
+        assert result["status"] == "RECORDED"
+
+
+def test_non_finite_amounts_are_rejected():
+    ledger = {"schema_version": OUTCOME_SCHEMA, "transactions": []}
+    for bad in (float("inf"), float("nan"), "1e999"):
+        t = transaction()
+        t["revenue"] = money(bad, "MEASURED", "invoice-1")
+        assert append_outcome(ledger, t)["status"] == "INVALID"
+        t = transaction()
+        t["costs"]["fees"] = money(bad, "MEASURED", "receipts-1")
+        assert append_outcome(ledger, t)["status"] == "INVALID"
+
+
 def test_perfect_information_value_is_a_ceiling_not_an_authorization():
     r = evaluate_commercial_case(case())["routes"][0]
     assert r["success_net_if_acquired"] == 290
