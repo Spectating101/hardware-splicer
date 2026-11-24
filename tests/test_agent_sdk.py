@@ -81,9 +81,7 @@ def test_dump_json_roundtrip() -> None:
 
 
 @pytest.mark.skipif(not (ROOT / "examples" / "intakes" / "salvage_wifi_logger_brief.json").is_file(), reason="intake")
-def test_compose_design_constrained_salvage(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, assume_clean_kicad_erc: None
-) -> None:
+def test_compose_design_constrained_salvage(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("HARDWARE_SPLICER_AUTOROUTE", "0")
     monkeypatch.setenv("HARDWARE_SPLICER_DRC_FIX_LOOP", "1")
     intake = json.loads(

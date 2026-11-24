@@ -1,0 +1,10 @@
+{
+  "bracket": {
+    "name": "plate",
+    "w_mm": 60,
+    "d_mm": 20,
+    "t_mm": 4,
+    "hole_d_mm": 3.2,
+    "hole_spacing_mm": 40
+  }
+}

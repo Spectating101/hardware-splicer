@@ -164,12 +164,16 @@ def build_graph_to_geometry(graph: dict) -> dict:
         if synthetic_package:
             from .arbitrary_placement import synthetic_module_spec
 
+            # A catalog node carries no pinIds of its own; its catalog pins are still its
+            # interface. Without them the preview falls back to two unconnected pads and the
+            # module's wires vanish from the board.
+            catalog_pin_order = [str(pin["id"]) for pin in (spec or {}).get("pins") or []]
             spec = synthetic_module_spec(
                 "synthetic-package:" + str(node["id"]),
                 footprint=str(node.get("footprint") or ""),
                 value=str(node.get("value") or ""),
                 ref=str(node.get("ref") or node.get("id") or ""),
-                pin_ids=declared_pins or None,
+                pin_ids=declared_pins or catalog_pin_order or None,
             )
 
         pad_defs = resolve_module_pads(spec["id"], spec) or []

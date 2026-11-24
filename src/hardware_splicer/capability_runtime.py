@@ -64,6 +64,21 @@ _INTERNAL_CAPABILITIES: list[dict[str, Any]] = [
         "implementation_path": "src/hardware_splicer/manufacturing_reconciliation.py",
     },
     {
+        "id": "curved-mechanical-contact-fem",
+        "layer": "mechanical",
+        "name": "Bounded curved structural and two-pin contact screening",
+        "status": "opt_in",
+        "priority": "P1",
+        "license": "MIT",
+        "hook": "hs-mechanical or Mecha-Splicer structural_screening='run'",
+        "claim": (
+            "Local CAD/FEM numerical investigation with independent reference "
+            "and fail-closed uncertainty checks; never strength certification"
+        ),
+        "implementation_path": "src/hardware_splicer/mechanical_contact_workbench.py",
+        "python_modules": ["gmsh", "skfem", "numpy", "scipy"],
+    },
+    {
         "id": "cadquery-isolated",
         "layer": "mechanical",
         "name": "Isolated generated CadQuery execution",
@@ -435,6 +450,32 @@ def _runtime_for(
             run=run,
         )
 
+    required_modules = definition.get("python_modules")
+    if isinstance(required_modules, list) and required_modules:
+        missing = []
+        for module_name in required_modules:
+            try:
+                found = importlib.util.find_spec(str(module_name)) is not None
+            except (ImportError, ModuleNotFoundError, ValueError):
+                found = False
+            if not found:
+                missing.append(str(module_name))
+        available = not missing
+        path = definition.get("implementation_path")
+        exists = bool(path and (ROOT / str(path)).is_file())
+        ready = available and exists
+        return {
+            "discovered": ready,
+            "configured": ready,
+            "compatible": True if ready else None,
+            "path": str((ROOT / str(path)).resolve()) if exists else None,
+            "version": None,
+            "missing_python_modules": missing,
+            "probe_error": (
+                "missing_optional_fem_modules" if missing
+                else "implementation_file_missing" if not exists else None
+            ),
+        }
     module = _PYTHON_PROBES.get(capability_id) or definition.get("python_module")
     if module:
         return _python_runtime(str(module))
