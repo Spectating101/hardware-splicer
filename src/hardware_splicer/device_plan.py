@@ -854,7 +854,7 @@ def _i2c_bus_findings(placed: dict[str, _Placed], pairs: list[tuple[str, tuple[_
     """Check shared signal paths introduced by multiple breakout modules, and that one bus uses one I2C controller."""
 
     findings = []
-    selected: dict[str, tuple[str, Any]] = {}  # signal -> (controller pin name, I2C controller index)
+    selected: dict[str, list[tuple[str, Any]]] = {"sda": [], "scl": []}  # signal -> every (controller pin name, I2C controller index) a net of it uses
     check_nets = any(module.entry["kind"] == "i2c_breakout" for module in placed.values())
     for members, pins in _signal_nets(pairs):
         roles = {role for node in members for role in pins[node][1]["roles"]}
@@ -870,13 +870,17 @@ def _i2c_bus_findings(placed: dict[str, _Placed], pairs: list[tuple[str, tuple[_
         elif len(controllers) == 1:
             module, pin = pins[controllers[0]]
             if module.entry.get("electrical", {}).get("i2c_pin_mux") == "fixed" and "i2c_controller" in pin:
-                selected["sda" if "i2c_sda" in roles else "scl"] = (f"{module.ref}.{pin['name']}", pin["i2c_controller"])
-    if len(selected) == 2 and selected["sda"][1] != selected["scl"][1]:
-        finding = _finding("error", "i2c_mixed_controllers", f"SDA is on {selected['sda'][0]} (I2C{selected['sda'][1]}) and SCL on {selected['scl'][0]} (I2C{selected['scl'][1]}). One I2C bus uses both signals of the same controller.", "the controller's pinout: each I2C controller has its own SDA and SCL pins")
-        mcu_ref = selected["sda"][0].split(".")[0]
+                selected["sda" if "i2c_sda" in roles else "scl"].append((f"{module.ref}.{pin['name']}", pin["i2c_controller"]))
+    # Every net counts, so the verdict does not depend on which net was met last.
+    used = sorted({index for picks in selected.values() for _, index in picks})
+    if selected["sda"] and selected["scl"] and len(used) > 1:
+        def where(signal: str) -> str:
+            return ", ".join(f"{pin} (I2C{index})" for pin, index in sorted(selected[signal]))
+        finding = _finding("error", "i2c_mixed_controllers", f"SDA is on {where('sda')} and SCL on {where('scl')}. One I2C bus uses both signals of the same controller.", "the controller's pinout: each I2C controller has its own SDA and SCL pins")
+        mcu_ref = sorted(selected["sda"])[0][0].split(".")[0]
         controller = placed[mcu_ref]
-        finding["suggestions"] = [{"action": "move_signal", "signal": signal, "to_one_of": [f"{mcu_ref}.{p['name']}" for p in controller.entry["pins"] if f"i2c_{signal}_capable" in p["roles"] and p.get("i2c_controller") == selected[other][1]]}
-                                  for signal, other in (("scl", "sda"), ("sda", "scl"))]
+        finding["suggestions"] = [{"action": "move_signal", "signal": signal, "to_one_of": [f"{mcu_ref}.{p['name']}" for p in controller.entry["pins"] if f"i2c_{signal}_capable" in p["roles"] and p.get("i2c_controller") == index]}
+                                  for signal in ("scl", "sda") for index in used if any(i != index for _, i in selected[signal])]
         findings.append(finding)
     return findings
 
@@ -1012,8 +1016,11 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
     antenna_extra = max(0.0, antenna_rule["clearance_mm"] - c) if antenna_rule and clean["antenna_clearance"] and antenna else 0.0
     stop_reach = 0.0
     if mcu.below > 0 and clean["board_stops"]:
-        # Room beyond the board's far edge for the stop blocks beyond the last header pin.
-        stop_reach = min(float(pin["y"]) for pin in mcu.entry["pins"]) + PIN_SQUARE_MM / 2 + STOP_GAP_MM + STOP_THICKNESS_MM
+        # Room beyond the board's far edge for the stop blocks beyond the last header pin. The board is turned, so a pin at
+        # board y sits y inside the far edge: the last pin (smallest y) is min_y inside it, and the block reaches past the
+        # edge by what it needs beyond the pin less that.
+        min_y = min(float(pin["y"]) for pin in mcu.entry["pins"])
+        stop_reach = max(0.0, PIN_SQUARE_MM / 2 + STOP_GAP_MM + STOP_THICKNESS_MM - min_y)
     extent_x = c + usb_over + mcu.pcb["y"] + max(antenna + antenna_extra, stop_reach)
     extent_z = c + mcu.pcb["x"]
     mcu_top = board_top + mcu.above

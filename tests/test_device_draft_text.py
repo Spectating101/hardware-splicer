@@ -133,3 +133,22 @@ def test_the_listed_boards_full_names_and_suffix_quantities_still_match():
 def test_windows_line_endings_and_tabs_are_accepted():
     parsed = parse_parts_text("ESP32\r\nBME280\r\n\tOLED")
     assert parsed["controller"] == ESP32 and parsed["parts"] == [BME, OLED]
+
+
+@pytest.mark.parametrize("typed", ["2x ESP32", "ESP32 x2", "2x Pico"])
+def test_a_quantity_on_the_controller_is_refused_and_not_dropped(typed):
+    parsed = parse_parts_text(f"{typed}\nBME280")
+    assert parsed["controller"] is None
+    with pytest.raises(DevicePlanError, match="one controller"):
+        draft_from_parts_text({"text": f"{typed}, BME280"})
+
+
+@pytest.mark.parametrize("typed", ["ESP32-CAM", "esp32 cam", "ESP32-WROVER", "ESP32 WROVER-E devkit", "ESP32-EYE"])
+def test_unlisted_esp32_boards_are_not_read_as_the_listed_devkit(typed):
+    parsed = parse_parts_text(f"{typed}\nBME280")
+    assert parsed["controller"] is None
+    fragment = parsed["fragments"][0]
+    assert fragment["matches"] == [] and fragment["text"] in parsed["left_out"]
+    assert "different board" in fragment["note"]
+    with pytest.raises(DevicePlanError, match="controller"):
+        draft_from_parts_text({"text": f"{typed}, BME280"})

@@ -168,6 +168,69 @@ def test_following_the_suggestions_repairs_a_broken_spec_until_the_plan_has_no_e
     assert plan["counts"]["errors"] == 0
 
 
+def _repair(spec, rounds=6):
+    plan = build_device_plan(spec)
+    for _ in range(rounds):
+        if plan["counts"]["errors"] == 0:
+            break
+        assert apply_first_suggestions(spec, plan), [f["rule"] for f in plan["findings"] if f["severity"] == "error"]
+        plan = build_device_plan(spec)
+    return plan
+
+
+def _rewire(spec, source, target):
+    for row in spec["connections"]:
+        if row["from"] == source:
+            row["to"] = target
+
+
+def _bme_only_pico_spec():
+    from hardware_splicer.device_draft import draft_device_spec
+
+    return draft_device_spec({"controller": "raspberry-pi-pico", "parts": ["adafruit-bme280-stemma-qt"]})["spec"]
+
+
+def test_a_bme280_on_the_wrong_i2c_controller_is_repaired_by_its_sdi_and_sck_pins():
+    spec = _bme_only_pico_spec()
+    _rewire(spec, "sensor.SCK", "mcu.GP7")  # SCL of I2C1 while SDA stays on I2C0
+    assert any(f["rule"] == "i2c_mixed_controllers" for f in build_device_plan(spec)["findings"])
+    assert _repair(spec)["counts"]["errors"] == 0
+
+
+def test_every_wire_of_a_moved_signal_moves_so_a_shared_bus_is_not_split():
+    spec = copy.deepcopy(example_specs()["pico_oled_bme280_usb"])
+    _rewire(spec, "display.SCL", "mcu.GP7")
+    _rewire(spec, "sensor.SCK", "mcu.GP7")  # both SCL wires on I2C1, both SDA wires on I2C0
+    plan = _repair(spec)
+    assert plan["counts"]["errors"] == 0
+    scl = {row["to"] for row in spec["connections"] if row["from"] in {"display.SCL", "sensor.SCK"}}
+    assert len(scl) == 1
+
+
+def test_a_wire_written_backwards_or_by_pin_id_is_repaired_on_the_right_endpoint():
+    spec = copy.deepcopy(example_specs()["pico_oled_usb"])
+    spec["connections"] = [{"from": "mcu.GP22", "to": "display.SDA"} if row["from"] == "display.SDA" else row for row in spec["connections"]]
+    assert any(f["rule"] == "not_an_i2c_pin" for f in build_device_plan(spec)["findings"])
+    assert _repair(spec)["counts"]["errors"] == 0
+    assert not any("mcu.GP22" in (row["from"], row["to"]) for row in spec["connections"])
+    assert sum(1 for row in spec["connections"] if "display.SDA" in (row["from"], row["to"])) == 1
+    by_id = copy.deepcopy(example_specs()["pico_oled_usb"])
+    _rewire(by_id, "display.SDA", "mcu.P29")  # GP22, written as the pin's id
+    assert _repair(by_id)["counts"]["errors"] == 0
+
+
+def test_a_suggestion_with_no_candidates_is_skipped_and_changes_nothing():
+    spec = copy.deepcopy(example_specs()["pico_oled_usb"])
+    break_a_wire(spec, "display.GND")
+    plan = build_device_plan(spec)
+    for finding in plan["findings"]:
+        for suggestion in finding.get("suggestions", []):
+            suggestion["to_one_of"] = []
+    before = copy.deepcopy(spec)
+    assert apply_first_suggestions(spec, plan) is False
+    assert spec == before
+
+
 def test_the_mixed_controller_suggestion_offers_only_pins_of_the_controller_already_in_use():
     spec = copy.deepcopy(example_specs()["pico_oled_usb"])
     for row in spec["connections"]:

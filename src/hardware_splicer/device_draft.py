@@ -34,7 +34,7 @@ TYPED_NAMES: dict[str, tuple[tuple[str, str], ...]] = {
 
 # Known different boards. A space-separated variant is still that other board, not the library entry.
 NOT_THE_LISTED_BOARD: dict[str, tuple[str, ...]] = {
-    "esp32-devkitc-v4": (r"\besp32[\s\-]*(?:s2|s3|c2|c3|c5|c6|h2|p4)\b",),
+    "esp32-devkitc-v4": (r"\besp32[\s\-]*(?:s2|s3|c2|c3|c5|c6|h2|p4)\b", r"\besp32[\s\-]*(?:cam|wrover|eye|solo|mini|ethernet|poe|lyrat|korvo)"),
     "raspberry-pi-pico": (r"\bpico[\s\-]*(?:2|w)\b", r"\brp2350\b"),
 }
 
@@ -260,7 +260,7 @@ def parse_parts_text(text: str) -> dict[str, Any]:
         fragments.append(fragment)
         for match in matches:
             if _module(match["module"])["kind"] == "mcu_board":
-                controllers.append(match["module"])
+                controllers.extend([match["module"]] * match["quantity"])
             else:
                 parts.extend([match["module"]] * match["quantity"])
     return {
@@ -277,12 +277,12 @@ def draft_from_parts_text(body: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(body, dict) or "text" not in body:
         raise DevicePlanError("text is required")
     parsed = parse_parts_text(body["text"])
-    named = [match["module"] for fragment in parsed["fragments"] for match in fragment["matches"] if _module(match["module"])["kind"] == "mcu_board"]
+    named = [match["module"] for fragment in parsed["fragments"] for match in fragment["matches"] if _module(match["module"])["kind"] == "mcu_board" for _ in range(match["quantity"])]
     if not named:
         names = ", ".join(entry["name"] for entry in module_library()["modules"] if entry["kind"] == "mcu_board")
         raise DevicePlanError(f"name a controller from the library: {names}")
     if len(named) > 1:
-        raise DevicePlanError("name one controller")
+        raise DevicePlanError(f"name one controller: a device has exactly one microcontroller board, and the text names {len(named)} (a quantity counts)")
     if not parsed["parts"]:
         raise DevicePlanError("name a display or I2C breakout part from the library")
     if len(parsed["parts"]) > MAX_PARTS:
