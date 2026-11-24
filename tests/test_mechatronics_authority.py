@@ -249,3 +249,25 @@ def test_requested_sheet_hybrid_must_not_bypass_whole_hardware_authority():
     assert result["subsystems"]["mechanical"]["production_authorized"] is False
     assert result["subsystems"]["mechanical"]["construction_release_blocked"] is True
     assert result["current_authority_level"] != "production_mechatronics_release"
+
+
+def test_requested_construction_without_comparison_report_blocks_release():
+    # The operator asked for a hybrid build but no comparison report exists
+    # (evaluator missing or failed). Missing comparison must never read as
+    # "nothing requested".
+    for preference in ("sheet_hybrid", "off_the_shelf"):
+        spec = _closed_spec()
+        spec["mechanism"]["construction"] = {"preference": preference}
+        result = build_mechatronics_authority(spec, engineering=_engineering())
+        assert result["production_authorized"] is False, preference
+        mech = result["subsystems"]["mechanical"]
+        assert mech["production_authorized"] is False
+        assert mech["construction_release_blocked"] is True
+        assert result["current_authority_level"] != "production_mechatronics_release"
+        assert any("construction" in str(x).lower() for x in result["stages"][-1]["blockers"])
+    for preference in ("auto", "full_print"):
+        spec = _closed_spec()
+        spec["mechanism"]["construction"] = {"preference": preference}
+        result = build_mechatronics_authority(spec, engineering=_engineering())
+        assert result["production_authorized"] is True, preference
+        assert result["subsystems"]["mechanical"]["construction_release_blocked"] is False

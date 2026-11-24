@@ -124,9 +124,15 @@ def build_mechanical_authority(payload: Mapping[str, Any] | Any, *, engineering:
     )
     # The comparison itself is non-authoritative. Only an explicit requested
     # switch away from the existing CAD affects release, not auto/preview.
+    # The operator's stated intent counts even when no comparison report
+    # exists (evaluator missing or failed): a missing comparison is a
+    # missing-evidence block, never "nothing requested".
+    requested_preferences = {
+        construction.get("requested_preference"),
+        _dict(mechanism_spec.get("construction")).get("preference"),
+    }
     construction_blocked = bool(
-        construction
-        and construction.get("requested_preference") in ("sheet_hybrid", "off_the_shelf")
+        requested_preferences & {"sheet_hybrid", "off_the_shelf"}
         # A client-edited release_authorized boolean cannot bypass the gate.
         # Actual release needs independently reviewed assembly evidence.
     )
