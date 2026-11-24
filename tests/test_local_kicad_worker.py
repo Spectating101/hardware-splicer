@@ -264,3 +264,126 @@ def test_verify_erc_rejects_report_schema_not_matching_receipt(prepared, tmp_pat
     _forge_job(ledger, key, identity, RID, GOOD_REPORT, monkeypatch, erc_schema="other")
     with pytest.raises(worker.WorkerError):
         worker.verify_erc(ledger, tmp_path, RID)
+
+
+BAD_RECEIPT_FIELDS = [
+    {"finding_count": True},
+    {"finding_count": 1.0},
+    {"severity_counts": {"error": False, "warning": 1, "exclusion": False}},
+    {"severity_counts": {"error": 0.0, "warning": 1.0, "exclusion": 0.0}},
+    {"severity_counts": {"error": 0, "warning": 1, "exclusion": 0, "extra": 0}},
+    {"report_bytes": "x"},
+    {"kicad_version": "9.fake"},
+    {"kicad_version": 9.0},
+    {"kicad_version": "10.0.1"},
+    {"kicad_version": "9.0"},
+    {"state": "design_approved"},
+    {"state": None},
+    {"source_commit": 123},
+    {"source_commit": None},
+    {"request_id": 5},
+    {"request_id": "../../evil"},
+    {"input_sha256": 7},
+    {"report_sha256": ["x"]},
+    {"heartbeat_sequence_at_execution": True},
+    {"heartbeat_sequence_at_execution": "1"},
+    {"design_approved": 0},
+    {"physical_authority": 0},
+]
+
+
+@pytest.mark.parametrize("override", BAD_RECEIPT_FIELDS, ids=str)
+def test_verify_erc_rejects_loosely_typed_receipt_fields(prepared, tmp_path, monkeypatch, override):
+    key, ledger, identity = prepared
+    worker.heartbeat(ledger, key)
+    _forge_job(ledger, key, identity, RID, GOOD_REPORT, monkeypatch, **override)
+    with pytest.raises(worker.WorkerError):
+        worker.verify_erc(ledger, tmp_path, RID)
+
+
+def test_non_string_worker_id_is_a_worker_error_not_a_type_error(prepared, tmp_path):
+    key, ledger, identity = prepared
+    folder = ledger / "node_jobs" / RID
+    folder.mkdir(parents=True)
+    (folder / "erc.json").write_text("{}")
+    (folder / "receipt.json").write_text(json.dumps(
+        {"body": {"worker_id": 123}, "signature": "00" * 64}))
+    with pytest.raises(worker.WorkerError):
+        worker.verify_erc(ledger, tmp_path, RID)
+    with pytest.raises(worker.WorkerError):
+        worker.accept_heartbeat(ledger, {"body": {"worker_id": ["x"]}, "signature": "00"})
+
+
+ROOT = Path(__file__).resolve().parents[1]
+PUBLIC_BUNDLE = ROOT / "evidence/github_signals/optiplex_signed_erc_20261105"
+
+
+def _forge_bundle(tmp_path, key, identity, report=None, **overrides):
+    """Signed exported bundle for the real committed source, with optional bad fields."""
+    import hashlib
+
+    body = dict(json.loads((PUBLIC_BUNDLE / "receipt.json").read_text())["body"])
+    report = report if report is not None else {
+        "$schema": ERC_SCHEMA, "sheets": [{"violations": [{"severity": "warning"}]}]}
+    raw = report if isinstance(report, bytes) else json.dumps(report).encode()
+    body.update(worker_id=identity["worker_id"], report_sha256=hashlib.sha256(raw).hexdigest(),
+                report_bytes=len(raw), finding_count=1,
+                severity_counts={"error": 0, "warning": 1, "exclusion": 0},
+                executed_utc=dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"))
+    body.update(overrides)
+    bundle = tmp_path / "forged-bundle"
+    bundle.mkdir()
+    (bundle / "public_identity.json").write_text(json.dumps(identity))
+    (bundle / "receipt.json").write_text(json.dumps(worker._sign(worker._private(key), body)))
+    (bundle / "erc.json").write_bytes(raw)
+    return bundle
+
+
+def _verify_bundle(bundle, identity, **kwargs):
+    return worker.verify_bundle(bundle, ROOT, **kwargs)
+
+
+def test_forged_bundle_baseline_is_accepted(prepared, tmp_path):
+    key, _, identity = prepared
+    bundle = _forge_bundle(tmp_path, key, identity)
+    assert _verify_bundle(bundle, identity)["finding_count"] == 1
+
+
+@pytest.mark.parametrize("override", BAD_RECEIPT_FIELDS + [
+    {"request_id": None}, {"state": "diagnostics_produced_not_design_approved_x"},
+], ids=str)
+def test_verify_bundle_rejects_loosely_typed_receipt_fields(prepared, tmp_path, override):
+    key, _, identity = prepared
+    bundle = _forge_bundle(tmp_path, key, identity, **override)
+    with pytest.raises(worker.WorkerError):
+        _verify_bundle(bundle, identity)
+
+
+def test_verify_bundle_rejects_missing_request_id_and_state(prepared, tmp_path):
+    import hashlib
+
+    key, _, identity = prepared
+    bundle = _forge_bundle(tmp_path, key, identity)
+    body = json.loads((bundle / "receipt.json").read_text())["body"]
+    for field in ("request_id", "state"):
+        trimmed = {k: v for k, v in body.items() if k != field}
+        (bundle / "receipt.json").write_text(json.dumps(worker._sign(worker._private(key), trimmed)))
+        with pytest.raises(worker.WorkerError):
+            _verify_bundle(bundle, identity)
+
+
+def test_verify_bundle_non_string_signed_worker_id_is_worker_error(prepared, tmp_path):
+    key, _, identity = prepared
+    bundle = _forge_bundle(tmp_path, key, identity, worker_id=123)
+    with pytest.raises(worker.WorkerError):
+        _verify_bundle(bundle, identity)
+
+
+def test_non_json_receipt_or_identity_is_a_worker_error(prepared, tmp_path):
+    key, _, identity = prepared
+    for name in ("receipt.json", "public_identity.json"):
+        (tmp_path / name).mkdir()
+        bundle = _forge_bundle(tmp_path / name, key, identity)
+        (bundle / name).write_bytes(b"\xff{not json")
+        with pytest.raises(worker.WorkerError):
+            _verify_bundle(bundle, identity)

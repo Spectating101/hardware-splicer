@@ -43,6 +43,13 @@ class WorkerError(ValueError):
     pass
 
 
+def _load_json(raw: bytes, what: str) -> Any:
+    try:
+        return json.loads(raw)
+    except (ValueError, RecursionError) as exc:
+        raise WorkerError(f"{what} is not valid JSON") from exc
+
+
 def _canonical(obj: Any) -> bytes:
     return json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode()
 
@@ -199,7 +206,7 @@ def revoke(ledger: Path, worker_id: str, *, approve: bool = False) -> dict[str, 
 
 
 def _lookup(ledger: Path, worker_id: str) -> dict[str, Any]:
-    if not NODE_ID.fullmatch(worker_id):
+    if not isinstance(worker_id, str) or not NODE_ID.fullmatch(worker_id):
         raise WorkerError("invalid worker id")
     node = next((n for n in _read_nodes(ledger)["nodes"]
                  if n["identity"]["worker_id"] == worker_id), None)
@@ -348,6 +355,51 @@ def _parse_erc_report(raw: bytes) -> tuple[dict[str, Any], list[dict[str, Any]],
     return native, found, counts
 
 
+RECEIPT_STATE = "diagnostics_produced_not_design_approved"
+SHA256 = re.compile(r"^[0-9a-f]{64}$")
+KICAD_VERSION = re.compile(r"9\.\d+\.\d+")
+
+
+def _is_int(value: Any) -> bool:
+    return type(value) is int  # bool and float are never counts
+
+
+def _check_receipt_body(body: dict[str, Any]) -> None:
+    """Strict type and constant checks on a signed ERC receipt body.
+
+    A valid signature only proves the key holder wrote the body; every field
+    must still be the exact type and value the verifier acts on.
+    """
+    def text(name: str) -> str:
+        value = body.get(name)
+        if not isinstance(value, str):
+            raise WorkerError(f"signed ERC receipt field {name} missing or not a string")
+        return value
+
+    counts = body.get("severity_counts")
+    if (text("schema_version") != SCHEMA or text("kind") != "erc_result"
+        or text("task") != CAPABILITY or text("source_path") != SOURCE
+        or text("state") != RECEIPT_STATE or text("erc_schema") != ERC_SCHEMA
+        or not REQUEST_ID.fullmatch(text("request_id"))
+        or not NODE_ID.fullmatch(text("worker_id"))
+        or not SHA40.fullmatch(text("source_commit"))
+        or not SHA256.fullmatch(text("input_sha256"))
+        or not SHA256.fullmatch(text("report_sha256"))
+        or not KICAD_VERSION.fullmatch(text("kicad_version"))):
+        raise WorkerError("signed ERC receipt identity or format invalid")
+    if (not _is_int(body.get("report_bytes")) or body["report_bytes"] < 0
+        or not _is_int(body.get("finding_count")) or body["finding_count"] < 0
+        or not _is_int(body.get("heartbeat_sequence_at_execution"))
+        or body["heartbeat_sequence_at_execution"] < 0
+        or not isinstance(counts, dict) or set(counts) != set(SEVERITIES)
+        or any(not _is_int(counts[k]) or counts[k] < 0 for k in SEVERITIES)):
+        raise WorkerError("signed ERC receipt counts must be non-negative integers")
+    if any(body.get(flag) is not False for flag in (
+            "physical_authority", "hardware_connected",
+            "fabrication_authorized", "design_approved")):
+        raise WorkerError("signed ERC receipt claims authority it must not carry")
+
+
 def run_erc(ledger: Path, key_dir: Path, workspace: Path, *,
             execute: bool = False, request_id: str | None = None,
             run_fn: Any = subprocess.run) -> dict[str, Any]:
@@ -443,30 +495,24 @@ def verify_erc(ledger: Path, workspace: Path, request_id: str) -> dict[str, Any]
         not receipt_file.is_file() or not report_file.is_file() or
         receipt_file.stat().st_size > 40_000 or report_file.stat().st_size > 2_000_000):
         raise WorkerError("signed ERC evidence missing or unsafe")
-    packet = json.loads(receipt_file.read_bytes())
+    packet = _load_json(receipt_file.read_bytes(), "signed ERC receipt")
     report_raw = report_file.read_bytes()  # read once: hash and parse the same bytes
     signed_body = packet.get("body") if isinstance(packet, dict) else None
     worker_id = signed_body.get("worker_id", "") if isinstance(signed_body, dict) else ""
     node = _lookup(ledger, worker_id)
     body = _check_signature(node["identity"], packet)
-    sha, raw = _source(workspace, body.get("source_commit"))
-    if (body.get("schema_version") != SCHEMA or body.get("kind") != "erc_result"
-        or body.get("request_id") != request_id or body.get("task") != CAPABILITY
-        or body.get("state") != "diagnostics_produced_not_design_approved"
-        or body.get("source_commit") != sha
-        or body.get("source_path") != SOURCE
-        or body.get("input_sha256") != hashlib.sha256(raw).hexdigest()
-        or body.get("report_sha256") != hashlib.sha256(report_raw).hexdigest()
-        or body.get("report_bytes") != len(report_raw)
-        or body.get("physical_authority") is not False
-        or body.get("hardware_connected") is not False
-        or body.get("fabrication_authorized") is not False
-        or body.get("design_approved") is not False):
+    _check_receipt_body(body)
+    sha, raw = _source(workspace, body["source_commit"])
+    if (body["request_id"] != request_id
+        or body["source_commit"] != sha
+        or body["input_sha256"] != hashlib.sha256(raw).hexdigest()
+        or body["report_sha256"] != hashlib.sha256(report_raw).hexdigest()
+        or body["report_bytes"] != len(report_raw)):
         raise WorkerError("ERC receipt, source pin or report integrity mismatch")
     report, findings, counts = _parse_erc_report(report_raw)
-    if body.get("erc_schema") != report["$schema"]:
+    if body["erc_schema"] != report["$schema"]:
         raise WorkerError("ERC receipt report schema mismatch")
-    if body.get("finding_count") != len(findings) or body.get("severity_counts") != counts:
+    if body["finding_count"] != len(findings) or body["severity_counts"] != counts:
         raise WorkerError("ERC signed finding counts mismatch")
     return {"ok": True, "request_id": request_id, "worker_id": worker_id,
             "signature_verified": True, "report_sha256": body["report_sha256"],
@@ -514,8 +560,8 @@ def verify_bundle(bundle: Path, workspace: Path) -> dict[str, Any]:
         for p, max_bytes in zip(paths, (4096, 40_000, 2_000_000))
     )):
         raise WorkerError("exported evidence bundle missing or unsafe")
-    identity = _validate_public(json.loads(paths[0].read_bytes()))
-    packet = json.loads(paths[1].read_bytes())
+    identity = _validate_public(_load_json(paths[0].read_bytes(), "bundle identity"))
+    packet = _load_json(paths[1].read_bytes(), "bundle receipt")
     body = _check_signature(identity, packet)
     raw = paths[2].read_bytes()
     native, found, counts = _parse_erc_report(raw)
@@ -524,21 +570,13 @@ def verify_bundle(bundle: Path, workspace: Path) -> dict[str, Any]:
         or reference.stat().st_size > 12 * 1024 * 1024):
         raise WorkerError("reference schematic missing or unsafe")
     input_hash = hashlib.sha256(reference.read_bytes()).hexdigest()
-    if (body.get("schema_version") != SCHEMA or body.get("kind") != "erc_result"
-        or body.get("task") != CAPABILITY or body.get("source_path") != SOURCE
-        or not SHA40.fullmatch(body.get("source_commit", ""))
-        or body.get("input_sha256") != input_hash
-        or body.get("report_sha256") != hashlib.sha256(raw).hexdigest()
-        or body.get("report_bytes") != len(raw)
-        or body.get("erc_schema") != "https://schemas.kicad.org/erc.v1.json"
-        or native.get("$schema") != body.get("erc_schema")
-        or not str(body.get("kicad_version", "")).startswith("9.")
-        or body.get("finding_count") != len(found)
-        or body.get("severity_counts") != counts
-        or body.get("physical_authority") is not False
-        or body.get("hardware_connected") is not False
-        or body.get("fabrication_authorized") is not False
-        or body.get("design_approved") is not False):
+    _check_receipt_body(body)
+    if (body["input_sha256"] != input_hash
+        or body["report_sha256"] != hashlib.sha256(raw).hexdigest()
+        or body["report_bytes"] != len(raw)
+        or native["$schema"] != body["erc_schema"]
+        or body["finding_count"] != len(found)
+        or body["severity_counts"] != counts):
         raise WorkerError("exported signed receipt/source/report inconsistent")
     return {
         "ok": True, "worker_id": identity["worker_id"],
