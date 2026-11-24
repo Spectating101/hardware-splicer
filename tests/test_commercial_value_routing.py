@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from copy import deepcopy
 
+import pytest
+
 from hardware_splicer.commercial_value_routing import (
     evaluate_commercial_case, evaluate_route, evaluate_portfolio,
 )
@@ -108,6 +110,7 @@ def test_full_receipted_case_remains_human_review_only():
     r = route()
     r["success_probability"] = 0.8
     r["probability_evidence"] = "MEASURED"
+    r["probability_reference"] = "bench-yield-log-004"
     r["sale_proceeds"] = money(600, "QUOTED", "buyer-po-004")
     for key in ("acquisition", "material_and_fab"):
         r["expenses"][key] = money(r["expenses"][key]["amount"], "QUOTED", "supplier-quote-2")
@@ -119,6 +122,26 @@ def test_full_receipted_case_remains_human_review_only():
     assert x["status"] == "REVIEW_READY"
     assert x["ready_for_human_commercial_review"] is True
     assert x["purchase_authorized"] is False
+
+
+@pytest.mark.parametrize("ref", [None, "", "   "])
+def test_measured_yield_without_reference_is_not_review_ready(ref):
+    r = route()
+    r["success_probability"] = 0.8
+    r["probability_evidence"] = "MEASURED"
+    if ref is not None:
+        r["probability_reference"] = ref
+    r["sale_proceeds"] = money(600, "QUOTED", "buyer-po-004")
+    for key in ("acquisition", "material_and_fab"):
+        r["expenses"][key] = money(r["expenses"][key]["amount"], "QUOTED", "supplier-quote-2")
+    gates = ("physical_test_passed", "rights_cleared", "compliance_cleared",
+             "buyer_committed", "procurement_verified")
+    r["gates"] = {gate: True for gate in gates}
+    r["gate_references"] = {gate: f"evidence-{gate}" for gate in gates}
+    x = evaluate_commercial_case(case(r))["routes"][0]
+    assert "unverified_yield" in x["blockers"]
+    assert x["status"] == "SCREENING_ONLY"
+    assert x["ready_for_human_commercial_review"] is False
 
 
 def test_unreferenced_measured_price_is_invalid():
@@ -208,6 +231,7 @@ def test_operating_asset_has_use_and_output_gates_not_buyer_gate():
     r["terminal_value"] = money(100, "QUOTED", "disposal-quote-1")
     r["monthly_discount_rate"] = 0
     r["probability_evidence"] = "MEASURED"
+    r["probability_reference"] = "meter-log-yield-3"
     for key in ("acquisition", "material_and_fab"):
         r["expenses"][key] = money(r["expenses"][key]["amount"], "QUOTED", "supplier-quote-3")
     gates = ("physical_test_passed", "rights_cleared", "compliance_cleared",

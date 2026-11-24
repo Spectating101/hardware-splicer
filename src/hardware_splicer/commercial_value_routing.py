@@ -210,6 +210,8 @@ def evaluate_route(route: Mapping[str, Any], *, currency: str, min_margin: float
         result["sale_price_plus_20pct"] = round(
             p * (sale_value * 1.2) + (1 - p) * failure_value - cost, 2
         )
+    # A MEASURED/QUOTED yield claim is only as good as the record it cites.
+    probability_reference = bool(str(route.get("probability_reference") or "").strip())
     # Lack of credible quotation/buyer evidence can never be papered over by margin.
     strong_cost = all(
         isinstance(expenses.get(key), Mapping)
@@ -242,7 +244,8 @@ def evaluate_route(route: Mapping[str, Any], *, currency: str, min_margin: float
         + ([] if strong_proceeds else [
             "unverified_operating_output" if action == "operate" else "unverified_buyer_price"
         ])
-        + ([] if probability_evidence in STRONG_EVIDENCE else ["unverified_yield"])
+        + ([] if probability_evidence in STRONG_EVIDENCE and probability_reference
+            else ["unverified_yield"])
         + ([] if (net > 0 and (action == "operate" or result["margin"] >= min_margin))
          else ["economics_below_gate"])
     )
