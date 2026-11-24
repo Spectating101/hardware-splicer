@@ -44,6 +44,9 @@ def i2c_findings(graph: Graph) -> List[Finding]:
             findings.append(_invalid_address(node_id, specs[node_id], declared, info))
         elif info and address not in info["addresses"]:
             findings.append(_not_possible(node_id, specs[node_id], str(declared), info))
+        elif info and address != info["default"]:
+            # A strap is a physical act wherever the device sits (alone on a bus, on its own bus, on none).
+            findings.append(_declared_strap(node_id, specs[node_id], address, info))
 
     for bus, members in buses.items():
         if len(members) < 2:
@@ -59,11 +62,6 @@ def i2c_findings(graph: Graph) -> List[Finding]:
         for address, group in by_address.items():
             if len(group) > 1:
                 findings.append(_clash(bus, address, group, nodes, specs, wires, buses, resolved))
-        for nid in members:
-            info = i2c_addresses_for(str(nodes[nid].get("moduleId") or ""))
-            declared = normalize_i2c_address(nodes[nid].get("i2c_address"))
-            if declared is not None and info and declared in info["addresses"] and declared != info["default"]:
-                findings.append(_declared_strap(nid, specs[nid], declared, info))
     return findings
 
 
