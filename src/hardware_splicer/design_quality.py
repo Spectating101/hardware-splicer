@@ -182,7 +182,8 @@ def build_design_quality_gate(
         "build_ready": strict_build_ready,
         "fabrication_ready": fabrication_ready,
         "compiler_verified": compiler_verified,
-        "circuit_readiness": "logical_preview" if compiler_verified and (body.get("geometry_fidelity") or {}).get("requires_native_source_geometry") else "build_ready" if compiler_verified and not person_pending else readiness,
+        # "build_ready" only when the gate itself says so; a blocked design never carries that label.
+        "circuit_readiness": "logical_preview" if compiler_verified and (body.get("geometry_fidelity") or {}).get("requires_native_source_geometry") else "build_ready" if compiler_verified and strict_build_ready else "gate_blocked" if readiness == "build_ready" else readiness,
         "drc_pass": drc_pass,
         "electrical_safety_pass": electrical_pass,
         "gerber_ready": gerber_ready,
