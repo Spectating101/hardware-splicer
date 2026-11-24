@@ -26,6 +26,8 @@ def agent_verdict(result: Mapping[str, Any]) -> Dict[str, Any]:
         "build_ready": bool(gate.get("build_ready")),
         "fabrication_ready": bool(gate.get("fabrication_ready")),
         "blockers": _blockers(gate, issues),
+        # Why fabrication_ready is false, when it is: the gate's own list, not a new claim.
+        "fabrication_blockers": [str(b) for b in gate.get("fabrication_blockers") or []],
         # Findings with repair options: an exact wire patch each, and whether a person must act.
         "repairable_findings": list(gate.get("repairable_findings") or []),
         # What only a person can do or confirm; HS cannot see or verify these.

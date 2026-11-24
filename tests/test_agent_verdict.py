@@ -121,3 +121,26 @@ def test_the_full_gate_still_carries_the_generic_line_for_the_records_that_read_
     )
 
     assert GENERIC in gate["blockers"] and "two devices clash" in gate["blockers"]
+
+
+def test_the_compact_verdict_carries_the_fabrication_blockers_the_gate_computed() -> None:
+    from hardware_splicer.build_verdict import agent_verdict
+
+    gate = {
+        "build_ready": True,
+        "fabrication_ready": False,
+        "blockers": [],
+        "fabrication_blockers": ["Gerber export is not ready.", "BOM is missing or empty."],
+        "summary": {"electrical_issues": []},
+    }
+
+    verdict = agent_verdict({"ok": True, "design_quality_gate": gate})
+
+    assert verdict["fabrication_ready"] is False
+    assert verdict["fabrication_blockers"] == ["Gerber export is not ready.", "BOM is missing or empty."]
+
+
+def test_a_gate_with_no_fabrication_blockers_gives_an_empty_list() -> None:
+    from hardware_splicer.build_verdict import agent_verdict
+
+    assert agent_verdict({"ok": True, "design_quality_gate": {"summary": {}}})["fabrication_blockers"] == []
