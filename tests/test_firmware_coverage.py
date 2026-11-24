@@ -159,7 +159,7 @@ def test_servos_plus_a_relay_sketch_that_never_drives_the_relay_is_reported_as_a
     result = assess_firmware_coverage(graph, scaffold["source"])
 
     assert result["status"] == "gaps"
-    assert [row["pin"] for row in result["uncovered_pins"]] == ["GPIO16"]
+    assert [row["pin"] for row in result["uncovered_pins"]] == ["GPIO17"]
     assert result["uncovered_pins"][0]["drives"] == "relay-1ch-5v.IN"
 
 

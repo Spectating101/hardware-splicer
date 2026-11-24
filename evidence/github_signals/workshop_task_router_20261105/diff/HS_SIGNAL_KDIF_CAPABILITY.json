@@ -1,7 +1,7 @@
 {
   "artifact": "HS_SIGNAL_KDIF_REVISIONS.html",
-  "artifact_bytes": 92459,
-  "artifact_sha256": "16e9fed55618a70c46a3c7f979f04376271a0e9b0c0b49e2d485864adc447202",
+  "artifact_bytes": 92043,
+  "artifact_sha256": "0c7a9ddb3c60f208b94c10239959904cd0958555a639c93a72a58fe5445939e7",
   "electrical_correctness_verified": false,
   "evidence_label": "Controlled PCB Git revision comparison; not production redesign",
   "execution_proven": true,
@@ -10,12 +10,12 @@
   "input": {
     "file_in_repo": "spi_flash_adapter_v1.kicad_pcb",
     "file_name": "spi_flash_adapter_v1.kicad_pcb",
-    "revision_a": "460c147f5ccd1736060ca397642877625720e5a2",
-    "revision_a_file_sha256": "86c0e72840b058b5dc4b56a820e560b306b2f624724a818e092fd1d003fdefbd",
-    "revision_b": "552f7adfaeadde7b2e41d00fa4344989c3457c64",
-    "revision_b_file_sha256": "c4dd674663116dffed5b42f19db3621941de17ddab86ead60830d4c8b712d2b7",
+    "revision_a": "408da1c030b935d2e197b4db38c539c54623b1bb",
+    "revision_a_file_sha256": "43a354a4624b69e8c26915680a69fea02b84e1b7e1e9816056522070c2269d24",
+    "revision_b": "353d7b5756f900e7378d10527c7518c7b5f576e0",
+    "revision_b_file_sha256": "a1dcd8983b95fd435843316ef0dbb90a6848fb69f8e63c87afe1ab9970e24a44",
     "revisions_have_distinct_bytes": true,
-    "working_tree_sha256": "c4dd674663116dffed5b42f19db3621941de17ddab86ead60830d4c8b712d2b7"
+    "working_tree_sha256": "a1dcd8983b95fd435843316ef0dbb90a6848fb69f8e63c87afe1ab9970e24a44"
   },
   "license": "MIT",
   "network_isolated": true,
