@@ -315,7 +315,9 @@ def splice_and_build_from_intake(
         quality_file=compile_result.design_quality_file,
     )
     fidelity = assess_request_fidelity(
-        plan.get("normalized_parts") or [], _read_build_graph(compile_result.build_graph_file)
+        plan.get("normalized_parts") or [],
+        _read_build_graph(compile_result.build_graph_file),
+        goal=goal,
     )
     gate = build_design_quality_gate(compile_result.design_quality, request_fidelity=fidelity)
     gate_path = out_path / "build_compilation" / "DESIGN_QUALITY_GATE.json"
