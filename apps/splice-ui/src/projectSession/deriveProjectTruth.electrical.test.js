@@ -160,3 +160,31 @@ describe("deriveProjectTruth when the DRC is clean but the quality gate says not
     expect(deriveProjectTruth(session).design.state).toBe("drc_clean");
   });
 });
+
+describe("deriveProjectTruth when another problem sets the state but a person-only step still blocks", () => {
+  it("keeps the strap step in view beside an electrical error", () => {
+    const fault = { level: "error", code: "power_short", message: "VCC is shorted to GND at J2." };
+    const session = projectSessionReducer(createEmptySession(), {
+      type: ACTIONS.HYDRATE_CURRENT_RESULT,
+      jobId: "job_1",
+      result: {
+        build_dir: "/tmp/b",
+        design_quality: { kicad_drc_errors: 0 },
+        design_quality_gate: {
+          build_ready: false,
+          blockers: [fault.message, STRAP.message],
+          summary: { electrical_issues: [fault, STRAP] },
+        },
+        project_package: { build_dir: "/tmp/b", gates: { compile_ok: true } },
+      },
+    });
+    const truth = deriveProjectTruth(session);
+
+    expect(truth.design.state).toBe("electrical_error");
+    const messages = truth.design.problems.map((p) => p.message);
+    expect(messages).toContain(fault.message);
+    expect(messages).toContain(STRAP.message);
+    expect(truth.design.problems.find((p) => p.message === STRAP.message).needsPerson).toBe(true);
+    expect(messages.filter((m) => m === fault.message)).toHaveLength(1);
+  });
+});

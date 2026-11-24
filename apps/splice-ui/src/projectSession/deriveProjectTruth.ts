@@ -323,6 +323,21 @@ export function deriveProjectTruth(session: ProjectTruthSessionInput = {}): Proj
       gateProblems.push({ message, repairs, needsPerson: Boolean(issue?.requires_person) });
     }
   }
+  if (gateBlocked && !needsAttention) {
+    // Another problem sets the state (a missing requested part, an electrical error), but a step only a
+    // person can take still blocks the build: keep it in view rather than letting the louder state hide it.
+    const listed = new Set(electricalErrors.map((issue) => String(issue.message)));
+    for (const issue of issuesByMessage.values()) {
+      const message = String(issue.message);
+      if (!issue.requires_person || listed.has(message)) continue;
+      const repairs = (issue.repairs || []).map((repair) => ({
+        summary: repair.summary,
+        requiresPerson: Boolean(repair.requires_person),
+        steps: repair.physical_steps || [],
+      }));
+      gateProblems.push({ message, repairs, needsPerson: true });
+    }
+  }
   const gateDetail = gateProblems.map((p) => p.message).join(" ");
   // Each problem as data, so a panel can show it in plain view and say who can fix it.
   const problems = [
