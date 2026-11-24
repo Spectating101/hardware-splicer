@@ -14,6 +14,21 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 SCHEMA_VERSION = "hardware_splicer.mechanical_fem.v1"
 
+# The constant-strain tetrahedron locks in bending (volumetric and shear locking): it is too stiff, so it
+# under-predicts deflection and stress. Measured on a 60x20x3 mm PLA cantilever with a 1 N tip load, three
+# structured meshes reached 0.15, 0.38 and 0.52 of the Euler-Bernoulli tip deflection
+# (tests/test_mechanical_fem_cantilever_benchmark.py). The quadratic solver needs optional scikit-fem, so
+# this solver stays the default and says plainly that its numbers are not conservative.
+NON_CONSERVATIVE_WARNING = (
+    "Non-conservative: linear (constant-strain) tetrahedra lock in bending and under-predict deflection and "
+    "stress, so a displacement or yield_safety_factor read from this result is optimistic."
+)
+NON_CONSERVATIVE_BLOCKER = (
+    "Linear-tetrahedron screening under-predicts bending deflection and stress (0.15 to 0.52 of beam theory on "
+    "a thin cantilever benchmark), so this result is not a pass. Re-run with quadratic elements "
+    "(mechanical_quadratic_fem, needs scikit-fem) or a closed-form check before relying on the margin."
+)
+
 
 class FemInput(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -256,7 +271,12 @@ def solve_linear_tetra_fem(request: FemInput | dict[str, Any]) -> dict[str, Any]
         "yield_safety_factor": yield_sf,
         "support_reactions_n": reactions.tolist(),
         "force_equilibrium_residual_n": equilibrium_residual,
+        "conservative": False,
+        "screening_verdict": "not_a_pass",
+        "screening_blockers": [NON_CONSERVATIVE_BLOCKER],
+        "warnings": [NON_CONSERVATIVE_WARNING],
         "limitations": [
+            "Linear tetrahedra are non-conservative in bending (locking): deflection and stress are under-predicted",
             "Explicit conforming tetrahedral volume mesh required",
             "Small-strain static isotropic elasticity; no plasticity, buckling, contacts or fatigue",
             "Mesh convergence, load cases, material and boundary conditions require independent validation",

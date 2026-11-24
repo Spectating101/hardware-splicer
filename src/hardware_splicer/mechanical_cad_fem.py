@@ -587,6 +587,8 @@ def run_cad_screening(
         },
         "boundary_conditions": boundary,
         "analysis": result,
+        "conservative": result["conservative"],
+        "screening_blockers": list(result["screening_blockers"]),
         "mesh_convergence_verified": False,
         "physical_validation_required": True,
         "fabrication_authorized": False,
