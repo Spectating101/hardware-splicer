@@ -175,7 +175,16 @@ def _run_vendor_host(project: Path, libdeps: Path | None, profile: str = "bme280
     }, log
 
 
-def _run_host(project: Path) -> tuple[dict, bytes]:
+def _run_donor_host(project: Path) -> tuple[dict, bytes]:
+    from .donor_device_application import DONOR_SCENARIOS, BOUNDARY
+    report, log = _run_host(project, scenarios_expected=DONOR_SCENARIOS, boundary=BOUNDARY,
+                            harness="test/donor_host/harness.cpp", binary_name="donor_harness",
+                            includes=["-I", "test/donor_host", "-I", "src"])
+    return {**report, "schema_version": "hardware_splicer.donor_input_behaviour.v1"}, log
+
+
+def _run_host(project: Path, *, scenarios_expected=HOST_SCENARIOS, boundary=CLAIM_BOUNDARY,
+              harness="test/host/harness.cpp", binary_name="harness", includes=None) -> tuple[dict, bytes]:
     gxx = shutil.which("g++")
     compiler = ""
     log = b""
@@ -188,7 +197,7 @@ def _run_host(project: Path) -> tuple[dict, bytes]:
         version = _execute([gxx, "--version"], timeout=30)
         compiler = version.stdout.decode(errors="replace").splitlines()[0] if version.stdout else ""
         compiled = _execute(
-            [gxx, "-std=c++17", "-Wall", "-Wextra", "-Werror", "-I", "src", "test/host/harness.cpp", "-o", "harness"],
+            [gxx, "-std=c++17", "-Wall", "-Wextra", "-Werror", *(includes or ["-I", "src"]), harness, "-o", binary_name],
             cwd=project,
             capture_output=True,
             check=False,
@@ -199,12 +208,12 @@ def _run_host(project: Path) -> tuple[dict, bytes]:
             reason = "host harness did not compile"
         else:
             try:
-                ran = _execute([str(project / "harness")], cwd=project, timeout=60)
+                ran = _execute([str(project / binary_name)], cwd=project, timeout=60)
             except (subprocess.TimeoutExpired, OSError, BoundedProcessError) as exc:
                 return {
                     "schema_version": "hardware_splicer.device_application_behaviour.v1", "pass": False,
                     "reason": f"host harness could not complete: {exc}", "scenarios": [], "compiler": compiler,
-                    "claim_boundary": CLAIM_BOUNDARY, "firmware_authorized": False,
+                    "claim_boundary": boundary, "firmware_authorized": False,
                     "power_on_authorized": False, "physical_correctness": "UNPROVEN",
                 }, log + (getattr(exc, "stdout", None) or b"")
             log = log + ran.stdout + ran.stderr
@@ -213,7 +222,7 @@ def _run_host(project: Path) -> tuple[dict, bytes]:
             except (json.JSONDecodeError, UnicodeDecodeError):
                 reason = "host harness did not print JSON scenario results"
             else:
-                reason = _scenario_failure(scenarios, HOST_SCENARIOS, ran.returncode)
+                reason = _scenario_failure(scenarios, scenarios_expected, ran.returncode)
                 passed = not reason
     return {
         "schema_version": "hardware_splicer.device_application_behaviour.v1",
@@ -221,7 +230,7 @@ def _run_host(project: Path) -> tuple[dict, bytes]:
         "reason": reason,
         "scenarios": scenarios,
         "compiler": compiler,
-        "claim_boundary": CLAIM_BOUNDARY,
+        "claim_boundary": boundary,
         "firmware_authorized": False,
         "power_on_authorized": False,
         "physical_correctness": "UNPROVEN",

@@ -29,10 +29,15 @@ except ImportError:  # Other API surfaces remain importable on non-POSIX hosts.
     fcntl = None
 
 from .device_draft import draft_from_parts_text, parse_parts_text
-from .device_plan import _OVERRIDE_KEYS, DevicePlanError, _module, _validate_spec, build_device_plan
+from .device_plan import (_OVERRIDE_KEYS, DevicePlanError, _module, _validate_spec, build_device_plan,
+                          unrecognized_device_spec_fields)
 from pydantic import ValidationError
 
-from .physical_evidence_ledger import PhysicalEvidenceEnvelope, physical_evidence_envelope_hash
+from .physical_evidence_ledger import (PhysicalEvidenceEnvelope, physical_evidence_envelope_hash,
+                                       validate_physical_evidence_envelope)
+from .mission_donors import (normalize_donors, normalize_used, normalize_finding, read_donors,
+                             donor_problem, donor_grounding, candidate_donor_coverage)
+from .donor_device_plan import mission_donor_modules
 from .project_store import InvalidProjectId, ProjectNotFound, ProjectStore, validate_project_id
 
 MISSION_SCHEMA = "hardware_splicer.fabrication_mission.v1"
@@ -57,9 +62,9 @@ TERMINAL_STATES = (
 _BLOCKED_STATES = frozenset(state for state in TERMINAL_STATES if state.startswith("BLOCKED_"))
 _CANDIDATE_KINDS = frozenset({"clean_sheet", "reclaim_heavy", "hybrid"})
 _PROPOSE_TYPES = frozenset(
-    {"candidate_proposed", "repair_proposed", "evidence_required", "terminal_proposed"}
+    {"candidate_proposed", "repair_proposed", "evidence_required", "terminal_proposed", "finding_offered"}
 )
-_EVENT_TYPES = _PROPOSE_TYPES | {"opened", "evaluation_recorded", "accepted", "inventory_read", "design_staged", "evidence_supplied"}
+_EVENT_TYPES = _PROPOSE_TYPES | {"opened", "evaluation_recorded", "accepted", "inventory_read", "donor_read", "design_staged", "evidence_supplied"}
 _EVAL_OPERATIONS = frozenset(
     {
         "device_draft",
@@ -69,11 +74,12 @@ _EVAL_OPERATIONS = frozenset(
         "device_application",
         "device_application_run",
         "device_reclaim_match",
+        "intact_reuse",
     }
 )
 _AUTHOR_KEYS = frozenset({"kind", "id"})
 _AUTHOR_KINDS = frozenset({"human", "agent", "system"})
-_INTAKE_KEYS = frozenset({"goal", "constraints", "inventory", "budgets", "measurements", "requirements"})
+_INTAKE_KEYS = frozenset({"goal", "constraints", "inventory", "budgets", "measurements", "requirements", "donors"})
 # Spec values a person can require, and where the planner's validated spec holds each one with its default applied.
 _REQUIREMENT_PATHS = {
     "case.wall_mm": ("wall", (int, float)),
@@ -90,7 +96,7 @@ _REQUEST_KINDS = {
     "continuity": "electrical_measurement",
     "boot_log": "inspection",
 }
-_REQUEST_KEYS = frozenset({"kind", "target", "quantity", "expected", "instructions"})
+_REQUEST_KEYS = frozenset({"kind", "target", "quantity", "expected", "instructions", "signal"})
 _DIMENSIONAL_QUANTITIES = frozenset({"pcb_mm.x", "pcb_mm.y", "pcb_mm.z", "above_board_mm"})
 _MAX_LOG_BYTES = 64 * 1024
 _MAX_READINGS = 10
@@ -145,6 +151,13 @@ class MissionStateError(MissionError):
 
 class MissionValidationError(MissionError, ValueError):
     pass
+
+
+def _donor_call(function, *args, **kwargs):
+    try:
+        return function(*args, **kwargs)
+    except (ValueError, TypeError, KeyError) as exc:
+        raise MissionValidationError(str(exc)) from exc
 
 
 def _serialized_mutation(method):
@@ -349,6 +362,8 @@ def _normalize_intake(intake: Any) -> tuple[Dict[str, Any], Dict[str, int]]:
         normalized["measurements"] = _normalize_measurements(raw["measurements"])
     if raw.get("requirements") is not None:
         normalized["requirements"] = _normalize_requirements(raw["requirements"])
+    if "donors" in raw:
+        normalized["donors"] = _donor_call(normalize_donors, raw["donors"])
     return normalized, budgets
 
 
@@ -413,6 +428,10 @@ def _normalize_request(value: Any) -> Dict[str, Any]:
         "target": _require_text(raw.get("target"), field="request.target", max_len=200),
         "instructions": _require_text(raw.get("instructions"), field="request.instructions", max_len=_MAX_NEED),
     }
+    if raw.get("signal") is not None:
+        if not request["target"].startswith("donor:") or kind not in {"electrical", "continuity"}:
+            raise MissionValidationError("request.signal requires an electrical/continuity donor target")
+        request["signal"] = _require_text(raw["signal"], field="request.signal", max_len=120)
     quantity = raw.get("quantity")
     if kind == "dimensional":
         try:
@@ -532,12 +551,13 @@ def _person_measurements(intake: Mapping[str, Any], replayed: Mapping[str, Any])
     return _merge_measurements(intake.get("measurements") or {}, replayed.get("supplied_measurements") or {})
 
 
-def _violated_requirements(requirements: list[Mapping[str, Any]], spec: Mapping[str, Any]) -> list[str]:
+def _violated_requirements(requirements: list[Mapping[str, Any]], spec: Mapping[str, Any], donors=None) -> list[str]:
     """Requirements the spec breaks, read from the planner's own validated spec so absent keys take its defaults."""
     if not requirements:
         return []
     try:
-        clean = _validate_spec(json.loads(json.dumps(spec)))
+        context = mission_donor_modules({"donors": donors or []}, spec)
+        clean = _validate_spec(json.loads(json.dumps(spec)), donor_modules=context)
     except DevicePlanError:
         return [f"{row['path']} (the spec does not validate)" for row in requirements]
     broken = []
@@ -603,6 +623,21 @@ def _normalize_candidate(value: Any) -> Dict[str, Any]:
     }
 
 
+def _native_donors(spec: Mapping[str, Any]) -> list[str]:
+    modules = spec.get("modules")
+    return [m["module"] for m in (modules if isinstance(modules, list) else []) if isinstance(m, Mapping)
+            and isinstance(m.get("module"), str) and m["module"].startswith("donor:")]
+
+
+def _assert_native_references(spec, references):
+    native = _native_donors(spec)
+    normalized = _donor_call(normalize_used, native, references)
+    if len(native) != len(normalized):
+        raise MissionValidationError("a physical donor block may not be placed more than once")
+    if native and set(normalized) != set(spec.get("donors_used") or []):
+        raise MissionValidationError("wired donor modules must cover exactly donors_used")
+
+
 def _normalize_result(value: Any, *, result_sha256: str | None = None) -> Dict[str, Any]:
     raw = dict(_require_mapping(value, label="result"))
     _reject_authority(raw, label="result")
@@ -642,6 +677,10 @@ def _canonical_json(value: Any) -> str:
 def _engineering_content(spec: Mapping[str, Any]) -> Dict[str, Any]:
     """What makes two candidates different designs: not their name, wire colours or the order things are listed in."""
     content = {key: value for key, value in spec.items() if key != "name"}
+    if "donors_used" in content:
+        content["donors_used"] = _donor_call(normalize_used, content["donors_used"])
+        if not content["donors_used"]:
+            content.pop("donors_used")
     if isinstance(content.get("modules"), list):
         content["modules"] = sorted(content["modules"], key=_canonical_json)
     if isinstance(content.get("connections"), list):
@@ -667,7 +706,9 @@ def _read_inventory(inventory: list[str]) -> Dict[str, Any]:
             findings = build_device_plan(spec).get("findings") or []
             draft = {"ok": True, "error": None,
                      "plan_errors": sum(item.get("severity") == "error" for item in findings),
-                     "plan_warnings": sum(item.get("severity") == "warning" for item in findings)}
+                     "plan_warnings": sum(item.get("severity") == "warning" for item in findings),
+                     "plan_unrepairable": sum(item.get("severity") in {"error", "warning"} and not item.get("suggestions")
+                                              for item in findings)}
         except DevicePlanError as exc:
             draft = {"ok": False, "error": str(exc), "plan_errors": 0, "plan_warnings": 0}
     result = {"reading": reading, "draft": draft}
@@ -724,8 +765,19 @@ def _latest_operation(
     return latest
 
 
+def _spec_diagnostics(spec: Mapping[str, Any]) -> Dict[str, Any]:
+    if spec.get("design_class") == "intact_input_reuse":
+        return {"scope": "intact_reuse_check_required", "unrecognized_fields": [],
+                "effect": "not_checked_by_catalog_diagnostics; run the strict intact_reuse check"}
+    return {
+        "scope": "catalog_device_spec",
+        "unrecognized_fields": unrecognized_device_spec_fields(spec, extra_top_level_fields=("donors_used",)),
+        "effect": "retained_in_proposal_not_checked_by_catalog_planner",
+    }
+
+
 def _public_candidate(state: Mapping[str, Any], inventory: Mapping[str, Any] | None,
-                      requirements: list[Mapping[str, Any]]) -> Dict[str, Any]:
+                      requirements: list[Mapping[str, Any]], donors=None, references=()) -> Dict[str, Any]:
     uncovered, remaining = _inventory_coverage(inventory["reading"], state["spec"]) if inventory else ([], Counter())
     return {
         "id": state["id"],
@@ -734,10 +786,14 @@ def _public_candidate(state: Mapping[str, Any], inventory: Mapping[str, Any] | N
         "rationale": state["rationale"],
         "spec": state["spec"],
         "repairs": state["repairs"],
+        "evaluation_base_seq": _since_seq(state),
         "covers_inventory": inventory is not None and not uncovered,
         "uncovered_inventory": uncovered,
         "not_in_inventory": sorted(module for module, count in remaining.items() if count > 0),
-        "violated_requirements": _violated_requirements(requirements, state["spec"]),
+        "violated_requirements": _violated_requirements(requirements, state["spec"], donors),
+        "donor_coverage": candidate_donor_coverage(
+            {"donors": donors or [], "donor_references": references}, state["spec"]),
+        "spec_diagnostics": _spec_diagnostics(state["spec"]),
         # Checks count only after this event: the latest repair or the latest physical fact that concerns the candidate.
         "since_seq": _since_seq(state),
         "evaluations": [
@@ -758,6 +814,8 @@ def _replay(events: list[Mapping[str, Any]], intake: Mapping[str, Any] | None = 
     terminal: Dict[str, Any] | None = None
     accepted: Dict[str, Any] | None = None
     inventory: Dict[str, Any] | None = None
+    donors: list[Dict[str, Any]] = []
+    donor_read = False
     staged: Dict[str, Any] | None = None
     needs: Dict[int, Dict[str, Any]] = {}
     supplied_measurements: Dict[str, Any] = {}
@@ -791,6 +849,13 @@ def _replay(events: list[Mapping[str, Any]], intake: Mapping[str, Any] | None = 
             phase = "ARCHITECTING"
         elif event_type == "inventory_read":
             inventory = {key: event[key] for key in ("reading", "draft", "result_sha256")}
+        elif event_type == "donor_read":
+            donor_read = True
+            donors = [{**d, "findings": [], "person_measurements": []} for d in event["donors"]]
+        elif event_type == "finding_offered":
+            for donor in donors:
+                if donor["donor_id"] == event["finding"]["donor_id"]:
+                    donor["findings"].append({**event["finding"], "seq": seq, "author": event["author"]})
         elif event_type == "design_staged":
             # Delivery after READY: it opens a review and changes neither the phase nor the verdict.
             staged = {"review_id": event["review_id"], "package_sha256": event["package_sha256"], "seq": seq}
@@ -819,6 +884,12 @@ def _replay(events: list[Mapping[str, Any]], intake: Mapping[str, Any] | None = 
             needs[seq] = {"seq": seq, "blocker": event["blocker"], "need": event["need"],
                           "candidate_id": event.get("candidate_id"), "request": event.get("request"),
                           "need_state": "open", "answered_by": None, "comparison": None, "reason": None}
+            needs[seq]["cites"] = list(event.get("cites") or [])
+            if event["blocker"] == "BLOCKED_UNSAFE":
+                # An explicit uncheckable concern, not keyword detection or a
+                # system safety assessment. Preserve its declared reporter.
+                needs[seq]["grounding"] = "agent_assertion"
+                needs[seq]["author"] = dict(event["author"])
             phase = "EVIDENCE_REQUIRED"
         elif event_type == "evidence_supplied":
             need = needs[int(event["need_seq"])]
@@ -834,6 +905,13 @@ def _replay(events: list[Mapping[str, Any]], intake: Mapping[str, Any] | None = 
             override = event.get("override")
             if override:
                 supplied_measurements = _merge_measurements(supplied_measurements, override)
+            request = need.get("request") or {}
+            if request.get("kind") == "electrical" and request.get("signal"):
+                for donor in donors:
+                    if donor["donor_id"] == request.get("target"):
+                        donor["person_measurements"].append({"signal": request["signal"], "values": event["values"],
+                            "evidence_id": event["evidence_id"], "envelope_hash": event["envelope_hash"],
+                            "seq": seq, "grade": "person_measurement", "comparison": event["comparison"]})
             standing = any(item["need_state"] != "resolved" for item in needs.values())
             phase = "EVIDENCE_REQUIRED" if standing else "EVALUATING"
         elif event_type == "terminal_proposed":
@@ -852,6 +930,9 @@ def _replay(events: list[Mapping[str, Any]], intake: Mapping[str, Any] | None = 
     return {
         "phase": phase,
         "inventory": inventory,
+        "donors": donors,
+        "donor_read": donor_read,
+        "donor_references": list((intake or {}).get("donors") or []),
         "candidates": candidates,
         "repairs_used": repairs_used,
         "operator_jobs_used": operator_jobs_used,
@@ -896,6 +977,13 @@ def _ready_problem(replayed: Mapping[str, Any], events: list[Mapping[str, Any]],
     if not isinstance(candidate_id, str) or candidate_id not in candidates:
         return "READY_FOR_HUMAN_BUILD requires a candidate with a passing device_plan"
     candidate = candidates[candidate_id]
+    problem = donor_problem(replayed, candidate["spec"], ready=True)
+    if problem:
+        return "READY_FOR_HUMAN_BUILD is refused: " + problem
+    try:
+        mission_donor_modules(replayed, candidate["spec"])
+    except DevicePlanError as exc:
+        return "READY_FOR_HUMAN_BUILD is refused: " + str(exc)
     inventory = replayed.get("inventory")
     if inventory is None:
         return "READY_FOR_HUMAN_BUILD requires an HS inventory_read event"
@@ -903,7 +991,7 @@ def _ready_problem(replayed: Mapping[str, Any], events: list[Mapping[str, Any]],
     if uncovered:
         return ("READY_FOR_HUMAN_BUILD is refused: the candidate does not contain "
                 + ", ".join(uncovered) + " from the person's inventory")
-    broken = _violated_requirements(replayed.get("requirements") or [], candidate["spec"])
+    broken = _violated_requirements(replayed.get("requirements") or [], candidate["spec"], replayed.get("donors"))
     if broken:
         return "READY_FOR_HUMAN_BUILD is refused: the candidate breaks the person's requirements: " + "; ".join(broken)
     plan = _latest_operation(candidate["evaluations"], "device_plan", after_seq=_since_seq(candidate))
@@ -996,7 +1084,10 @@ def _assert_no_feasible_architecture(replayed: Mapping[str, Any], budgets: Mappi
         if uncovered:
             raise MissionStateError(f"NO_FEASIBLE_ARCHITECTURE is refused: candidate {candidate_id} does not contain "
                                     + ", ".join(uncovered) + " from the person's inventory")
-        broken = _violated_requirements(replayed.get("requirements") or [], candidate["spec"])
+        donor_error = donor_problem(replayed, candidate["spec"], ready=False)
+        if donor_error:
+            raise MissionStateError(f"NO_FEASIBLE_ARCHITECTURE is refused: candidate {candidate_id}: {donor_error}")
+        broken = _violated_requirements(replayed.get("requirements") or [], candidate["spec"], replayed.get("donors"))
         if broken:
             # A design that ignores what the person required says nothing about whether their device is feasible.
             raise MissionStateError(f"NO_FEASIBLE_ARCHITECTURE is refused: candidate {candidate_id} breaks the "
@@ -1014,10 +1105,10 @@ def _part_data_grounding(replayed: Mapping[str, Any]) -> str:
     if inventory is not None:
         draft = inventory["draft"]
         if (inventory["reading"]["left_out"] or not draft["ok"]
-                or draft["plan_errors"] + draft["plan_warnings"] > 0):
+                or draft.get("plan_unrepairable", draft["plan_errors"] + draft["plan_warnings"]) > 0):
             return "hs_inventory_reading"
     raise MissionStateError("BLOCKED_NEEDS_PART_DATA is refused: HS has data for every part listed "
-                            "and its own draft of them plans clean")
+                            "and its own draft of them plans clean or has only repairable findings")
 
 
 def _assert_budget_exhausted(replayed: Mapping[str, Any], budgets: Mapping[str, int]) -> None:
@@ -1261,11 +1352,18 @@ class MissionStore:
             "phase": replayed["phase"],
             "accepted": replayed["accepted"],
             "inventory": replayed["inventory"],
-            "candidates": [_public_candidate(item, replayed["inventory"], replayed["requirements"])
+            "donors": replayed["donors"],
+            "candidates": [_public_candidate(item, replayed["inventory"], replayed["requirements"], replayed["donors"],
+                                             replayed["donor_references"])
                            for item in replayed["candidates"].values()],
             "terminal": replayed["terminal"],
             "staged": replayed["staged"],
             "needs": replayed["needs"],
+            "safety_concerns": [
+                {"need_seq": need["seq"], "state": need["need_state"], "candidate_id": need["candidate_id"],
+                 "concern": need["need"], "grounding": need["grounding"], "author": need["author"]}
+                for need in replayed["needs"] if need["blocker"] == "BLOCKED_UNSAFE"
+            ],
             "last_event_seq": replayed["last_event_seq"],
             "physical_correctness": "UNPROVEN",
             "firmware_authorized": False,
@@ -1449,6 +1547,38 @@ class MissionStore:
             raise MissionError(f"package {path.name} does not match its content hash")
         return data
 
+    def iter_retained_packages(self, project_id: str, mission_id: str) -> Iterator[tuple[str, bytes]]:
+        """Read bounded retained bytes, without building packages or creating directories.
+
+        A retained ZIP is not necessarily referenced by a successful operation.
+        Delivery projections must bind its contents to the mission before offering it.
+        """
+        self.get_mission(project_id, mission_id)
+        root = self._package_path(project_id, mission_id, "0" * 64).parent
+        _reject_symlink(root, label="packages directory")
+        if not root.exists():
+            return
+        if not root.is_dir():
+            raise MissionError("packages path is not a directory")
+        paths = sorted(root.iterdir())
+        if len(paths) > 256:
+            raise MissionError("retained package inspection exceeds its entry limit")
+        total = 0
+        for path in paths:
+            if re.fullmatch(r"[0-9a-f]{16}\.zip", path.name) is None:
+                continue
+            _reject_symlink(path, label="package file")
+            size = path.stat().st_size
+            total += size
+            if not path.is_file() or size > 64 * 1024 * 1024 or total > 128 * 1024 * 1024:
+                raise MissionError("retained package inspection exceeds its file/byte limits")
+            with path.open("rb") as stream:
+                data = stream.read(size + 1)
+            digest = hashlib.sha256(data).hexdigest()
+            if len(data) != size or digest[:16] != path.stem:
+                raise MissionError("retained package does not match its content name")
+            yield digest, data
+
     def _envelope_used(self, project_id: str, envelope_hash: str, envelope_id: str = "", evidence_id: str = "") -> bool:
         root = self._missions_root(project_id)
         if not root.is_dir():
@@ -1528,6 +1658,10 @@ class MissionStore:
             raise MissionValidationError("the envelope's record belongs to another project")
         if parsed.record.kind.value != _REQUEST_KINDS[request["kind"]]:
             raise MissionValidationError(f"a {request['kind']} need is answered by a {_REQUEST_KINDS[request['kind']]} record")
+        if request["target"].startswith("donor:"):
+            if (request["target"] not in parsed.record.target_ids or parsed.record.metadata.get("simulated")
+                    or validate_physical_evidence_envelope(parsed)):
+                raise MissionValidationError("donor evidence requires a matching target and a valid nonsimulated envelope")
         comparison, reason = _compare(request, readings)
         if not parsed.record.passed:
             comparison, reason = "record_failed", "the evidence record says the check did not pass"
@@ -1607,6 +1741,14 @@ class MissionStore:
                 {"type": "inventory_read", "author": dict(_SYSTEM_AUTHOR), **inventory},
             )
             last_seq += 1
+        if view["intake"].get("donors") and not replayed.get("donor_read"):
+            donors = _donor_call(read_donors, self.project_store, project_id, view["intake"]["donors"])
+            _reject_authority(donors, label="donor_read")
+            digest = hashlib.sha256(_canonical_json(donors).encode("utf-8")).hexdigest()
+            self._write_event(project_id, mission_id, last_seq + 1,
+                             {"type": "donor_read", "author": dict(_SYSTEM_AUTHOR),
+                              "donors": donors, "result_sha256": digest})
+            last_seq += 1
         self._write_event(
             project_id, mission_id, last_seq + 1,
             {"type": "accepted", "author": normalized_author, "budgets": budgets},
@@ -1640,12 +1782,16 @@ class MissionStore:
         if not isinstance(event_type, str) or event_type not in _PROPOSE_TYPES:
             raise MissionValidationError(
                 "event type must be 'candidate_proposed', 'repair_proposed', "
-                "'evidence_required', or 'terminal_proposed'"
+                "'evidence_required', 'finding_offered', or 'terminal_proposed'"
             )
         budgets = view["budgets"]
         record: Dict[str, Any] = {"type": event_type, "author": normalized_author}
+        references = list(view["intake"].get("donors") or [])
         if event_type == "candidate_proposed":
             candidate = _normalize_candidate(raw_event.get("candidate"))
+            if "donors_used" in candidate["spec"]:
+                candidate["spec"]["donors_used"] = _donor_call(normalize_used, candidate["spec"]["donors_used"], references)
+            _assert_native_references(candidate["spec"], references)
             if candidate["id"] in replayed["candidates"]:
                 raise MissionValidationError(f"candidate {candidate['id']!r} already exists")
             if len(replayed["candidates"]) >= int(budgets["max_candidates"]):
@@ -1667,16 +1813,28 @@ class MissionStore:
             new_fact = int(candidate.get("last_evidence_seq") or 0) > base
             failing = plan is not None and _plan_is_failing(plan.get("result"))
             review_failed = review is not None and int(review["result"].get("errors") or 0) > 0
-            if not (failing or review_failed or new_fact):
+            reuse = _latest_operation(candidate["evaluations"], "intact_reuse", after_seq=_since_seq(candidate))
+            reuse_failed = (candidate["spec"].get("design_class") == "intact_input_reuse"
+                            and reuse is not None and int(reuse["result"].get("errors") or 0) > 0)
+            if not (failing or review_failed or reuse_failed or new_fact):
                 raise MissionStateError("repair_proposed requires a failing device_plan or device_engineering evaluation "
-                                        "of the current spec, or a person's evidence since the latest repair")
+                                        "of the current spec, a failing intact_reuse check, or a person's evidence since the latest repair")
             if int(candidate["repairs"]) >= int(budgets["max_repairs_per_candidate"]):
                 raise MissionStateError("repair budget for this candidate is spent")
             record["candidate_id"] = candidate_id
             record["spec"] = _normalize_spec(raw_event.get("spec"), field="spec")
+            if "donors_used" in record["spec"]:
+                record["spec"]["donors_used"] = _donor_call(normalize_used, record["spec"]["donors_used"], references)
+            _assert_native_references(record["spec"], references)
+            dropped_donors = set(candidate["spec"].get("donors_used") or []) - set(record["spec"].get("donors_used") or [])
+            if dropped_donors:
+                raise MissionStateError("repair_proposed drops used donors: " + ", ".join(sorted(dropped_donors)))
+            removed = set(_native_donors(candidate["spec"])) - set(_native_donors(record["spec"]))
+            if removed:
+                raise MissionStateError("repair_proposed drops wired donor modules: " + ", ".join(sorted(removed)))
             _assert_measurements_are_the_persons(_person_measurements(view["intake"], replayed), record["spec"], field="spec")
-            newly_broken = (set(_violated_requirements(replayed["requirements"], record["spec"]))
-                            - set(_violated_requirements(replayed["requirements"], candidate["spec"])))
+            newly_broken = (set(_violated_requirements(replayed["requirements"], record["spec"], replayed["donors"]))
+                            - set(_violated_requirements(replayed["requirements"], candidate["spec"], replayed["donors"])))
             if newly_broken:
                 raise MissionStateError("repair_proposed is refused: the repair breaks the person's requirements: "
                                         + "; ".join(sorted(newly_broken)))
@@ -1704,6 +1862,31 @@ class MissionStore:
             record["need"] = _require_text(raw_event.get("need"), field="need", max_len=_MAX_NEED)
             if raw_event.get("request") is not None:
                 record["request"] = _normalize_request(raw_event["request"])
+                target = record["request"]["target"]
+                if target.startswith("donor:") and target not in {r["donor_id"] for r in references}:
+                    raise MissionValidationError("request donor target must be in intake")
+            if "cites" in raw_event:
+                cites = raw_event["cites"]
+                if not isinstance(cites, list) or len(cites) > 40:
+                    raise MissionValidationError("need.cites must be a list of at most 40 finding sequences")
+                by_seq = {e["seq"]: e for e in events}
+                record["cites"] = []
+                for cite in cites:
+                    cite = _require_int(cite, field="need.cites item", min_value=1)
+                    if by_seq.get(cite, {}).get("type") != "finding_offered":
+                        raise MissionValidationError("need.cites may reference only existing findings")
+                    target = (record.get("request") or {}).get("target")
+                    if target and target.startswith("donor:") and by_seq[cite]["finding"]["donor_id"] != target:
+                        raise MissionValidationError("cited finding belongs to another donor")
+                    record["cites"].append(cite)
+        elif event_type == "finding_offered":
+            if normalized_author["kind"] != "agent":
+                raise MissionValidationError("only agents may offer findings")
+            if set(raw_event) != {"type", "finding"}:
+                raise MissionValidationError("finding_offered accepts only type and finding; no author or grade override")
+            if replayed.get("accepted") is None:
+                raise MissionStateError("findings require an accepted mission with a frozen donor_read")
+            record["finding"] = _donor_call(normalize_finding, raw_event.get("finding"), references)
         else:
             state = raw_event.get("state")
             if state not in TERMINAL_STATES:
@@ -1722,7 +1905,8 @@ class MissionStore:
                 _assert_no_ready_candidate(replayed, events, state)
                 record["cites"] = _assert_blocked_cites(events, raw_event)
                 record["grounding"] = (_part_data_grounding(replayed)
-                                       if state == "BLOCKED_NEEDS_PART_DATA" else "agent_assertion")
+                                       if state == "BLOCKED_NEEDS_PART_DATA" else
+                                       donor_grounding(replayed, events, raw_event, record["cites"]))
             elif state == "NO_FEASIBLE_ARCHITECTURE":
                 _assert_no_feasible_architecture(replayed, budgets)
                 _assert_no_ready_candidate(replayed, events, state)
@@ -1766,7 +1950,7 @@ class MissionStore:
         if not isinstance(operation, str) or operation not in _EVAL_OPERATIONS:
             raise MissionValidationError(
                 "operation must be one of device_draft, device_plan, device_engineering, "
-                "device_case, device_application, device_application_run, device_reclaim_match"
+                "device_case, device_application, device_application_run, device_reclaim_match, intact_reuse"
             )
         last_seq = int(replayed["last_event_seq"])
         next_seq = last_seq + 1

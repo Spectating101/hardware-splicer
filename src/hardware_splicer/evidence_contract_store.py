@@ -114,6 +114,7 @@ def _contract_from_dict(raw: Mapping[str, Any]) -> InterfaceContract:
         power_domains=[dict(v) for v in (raw.get("power_domains") or []) if isinstance(v, Mapping)],
         reference_equivalents=[dict(v) for v in (raw.get("reference_equivalents") or []) if isinstance(v, Mapping)],
         interface_complete=_evidence_value(raw.get("interface_complete")),
+        planner_geometry=_evidence_value(raw.get("planner_geometry")),
         status=status,
         blockers=[str(v) for v in (raw.get("blockers") or []) if str(v)],
     )
