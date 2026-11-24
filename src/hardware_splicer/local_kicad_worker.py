@@ -565,13 +565,11 @@ def verify_bundle(bundle: Path, workspace: Path) -> dict[str, Any]:
     body = _check_signature(identity, packet)
     raw = paths[2].read_bytes()
     native, found, counts = _parse_erc_report(raw)
-    reference = workspace / SOURCE
-    if (reference.is_symlink() or not reference.is_file()
-        or reference.stat().st_size > 12 * 1024 * 1024):
-        raise WorkerError("reference schematic missing or unsafe")
-    input_hash = hashlib.sha256(reference.read_bytes()).hexdigest()
     _check_receipt_body(body)
-    if (body["input_sha256"] != input_hash
+    # The signed digest names a commit; hash the bytes at that commit, never the
+    # working tree (which may be edited, or may predate or postdate the receipt).
+    _, source_raw = _source(workspace, body["source_commit"])
+    if (body["input_sha256"] != hashlib.sha256(source_raw).hexdigest()
         or body["report_sha256"] != hashlib.sha256(raw).hexdigest()
         or body["report_bytes"] != len(raw)
         or native["$schema"] != body["erc_schema"]
@@ -584,7 +582,7 @@ def verify_bundle(bundle: Path, workspace: Path) -> dict[str, Any]:
         "signed_receipt_verified": True,
         "report_sha256": body["report_sha256"],
         "source_commit_claim": body["source_commit"],
-        "source_bytes_match_checkout": True,
+        "source_bytes_match_commit": True,
         "finding_count": len(found), "severity_counts": counts,
         "operator_enrollment_independently_proven": False,
         "device_identity_hardware_attested": False,

@@ -339,8 +339,8 @@ def _forge_bundle(tmp_path, key, identity, report=None, **overrides):
     return bundle
 
 
-def _verify_bundle(bundle, identity, **kwargs):
-    return worker.verify_bundle(bundle, ROOT, **kwargs)
+def _verify_bundle(bundle, identity, workspace=ROOT, **kwargs):
+    return worker.verify_bundle(bundle, workspace, **kwargs)
 
 
 def test_forged_bundle_baseline_is_accepted(prepared, tmp_path):
@@ -387,3 +387,46 @@ def test_non_json_receipt_or_identity_is_a_worker_error(prepared, tmp_path):
         (bundle / name).write_bytes(b"\xff{not json")
         with pytest.raises(worker.WorkerError):
             _verify_bundle(bundle, identity)
+
+
+def _tiny_repo(tmp_path):
+    import hashlib
+
+    repo = tmp_path / "repo"
+    source = repo / worker.SOURCE
+    source.parent.mkdir(parents=True)
+    source.write_bytes(b"committed schematic")
+    for cmd in (["init", "-q"], ["add", "-A"],
+                ["-c", "user.name=t", "-c", "user.email=t@example.invalid",
+                 "commit", "-q", "-m", "x"]):
+        subprocess.run(["git", "-C", str(repo), *cmd], check=True)
+    commit = subprocess.run(["git", "-C", str(repo), "rev-parse", "HEAD"], check=True,
+                            capture_output=True, text=True).stdout.strip()
+    return repo, commit, hashlib.sha256(b"committed schematic").hexdigest()
+
+
+def test_verify_bundle_hashes_source_at_commit_not_working_tree(prepared, tmp_path):
+    key, _, identity = prepared
+    repo, commit, digest = _tiny_repo(tmp_path)
+    bundle = _forge_bundle(tmp_path, key, identity, source_commit=commit, input_sha256=digest)
+    # Local edits to the checked-out schematic must not break historical evidence.
+    (repo / worker.SOURCE).write_bytes(b"locally edited schematic")
+    result = _verify_bundle(bundle, identity, workspace=repo)
+    assert result["source_bytes_match_commit"] is True
+    assert "source_bytes_match_checkout" not in result
+
+
+def test_verify_bundle_rejects_nonexistent_source_commit(prepared, tmp_path):
+    key, _, identity = prepared
+    # The working tree matches the signed digest, but the commit never existed.
+    bundle = _forge_bundle(tmp_path, key, identity, source_commit="0" * 40)
+    with pytest.raises(worker.WorkerError):
+        _verify_bundle(bundle, identity)
+
+
+def test_verify_bundle_rejects_commit_whose_source_differs_from_signed_digest(prepared, tmp_path):
+    key, _, identity = prepared
+    repo, commit, digest = _tiny_repo(tmp_path)
+    bundle = _forge_bundle(tmp_path, key, identity, source_commit=commit, input_sha256="0" * 64)
+    with pytest.raises(worker.WorkerError):
+        _verify_bundle(bundle, identity, workspace=repo)
