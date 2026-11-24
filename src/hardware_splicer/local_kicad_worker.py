@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import datetime as dt
 import hashlib
+import math
 import json
 import os
 import re
@@ -362,6 +363,11 @@ def _parse_erc_report(raw: bytes) -> tuple[dict[str, Any], list[dict[str, Any]],
         if any(not isinstance(row, dict) or row.get("severity") not in SEVERITIES
                for row in found):
             raise ValueError("invalid severity")
+        # A native KiCad finding always names its type, says what is wrong and lists the items involved.
+        if any(not isinstance(row.get("type"), str) or not row["type"].strip()
+               or not isinstance(row.get("description"), str)
+               or not isinstance(row.get("items"), list) for row in found):
+            raise ValueError("finding lacks the fields KiCad writes")
         counts = {kind: sum(row["severity"] == kind for row in found) for kind in SEVERITIES}
     except (TypeError, KeyError, ValueError, RecursionError) as exc:
         raise WorkerError("native ERC evidence malformed") from exc
@@ -415,8 +421,8 @@ def _check_receipt_body(body: dict[str, Any]) -> None:
 
 def _check_window(max_age_seconds: Any) -> float:
     if (isinstance(max_age_seconds, bool) or not isinstance(max_age_seconds, (int, float))
-        or not max_age_seconds > 0):
-        raise WorkerError("freshness window must be a positive number of seconds")
+        or not max_age_seconds > 0 or not math.isfinite(max_age_seconds)):
+        raise WorkerError("freshness window must be a positive, finite number of seconds")
     return float(max_age_seconds)
 
 
@@ -661,6 +667,10 @@ def verify_bundle(bundle: Path, workspace: Path, *, expected_public_key: str | N
                   max_age_seconds: float = DEFAULT_RECEIPT_MAX_AGE_SECONDS,
                   now: dt.datetime | None = None) -> dict[str, Any]:
     """Verify an exported public evidence bundle against a pinned trusted identity.
+
+    A ledger used as the pin is only as trustworthy as where it is stored: pass the
+    owner's own ledger file, never one supplied with the bundle or from storage the
+    sender controls, since a forged approved row would let a self-made key pass.
 
     The bundle's own public_identity.json is attacker-controllable, so a result
     is only verified when the caller pins the signer: an expected public key,

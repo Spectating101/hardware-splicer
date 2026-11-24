@@ -90,8 +90,8 @@ def test_erc_produces_signed_real_schema_report_and_verifies(prepared, tmp_path,
     monkeypatch.setattr(worker, "_source", lambda workspace, source_ref=None: ("a" * 40, b"fixed schematic bytes"))
     monkeypatch.setattr(worker, "KICAD_BIN", sys.executable)
     payload = {"$schema": "https://schemas.kicad.org/erc.v1.json",
-               "sheets": [{"violations": [{"severity": "warning", "type": "lib_symbol_issues"},
-                                          {"severity": "error", "type": "pin_conflict"}]}]}
+               "sheets": [{"violations": [{"severity": "warning", "type": "lib_symbol_issues", "description": "Symbol differs from library", "items": []},
+                                          {"severity": "error", "type": "pin_conflict", "description": "Conflict between pins", "items": []}]}]}
     args_seen = []
     def runner(args, **kw):
         args_seen.append(args)
@@ -164,7 +164,7 @@ def test_public_optiplex_native_evidence_bundle_and_tamper_detection(tmp_path):
                       now=COMMITTED_BUNDLE_EXECUTED + dt.timedelta(hours=1))
 
 
-@pytest.mark.parametrize("violations", [[{"severity": "bogus"}], {}])
+@pytest.mark.parametrize("violations", [[{"severity": "bogus"}], {}, [{"severity": "warning"}]])  # last: no type/description/items
 def test_exported_bundle_rejects_invalid_native_erc_findings(prepared, tmp_path, violations):
     import hashlib
 
@@ -231,7 +231,7 @@ def _forge_job(ledger, key, identity, rid, report, monkeypatch, **overrides):
 
 
 RID = "hs-local-2222222222222222"
-GOOD_REPORT = {"$schema": ERC_SCHEMA, "sheets": [{"violations": [{"severity": "warning"}]}]}
+GOOD_REPORT = {"$schema": ERC_SCHEMA, "sheets": [{"violations": [{"severity": "warning", "type": "lib_symbol_issues", "description": "Symbol differs from library", "items": []}]}]}
 
 
 def test_verify_erc_accepts_well_formed_forged_job_baseline(prepared, tmp_path, monkeypatch):
@@ -335,7 +335,7 @@ def _forge_bundle(tmp_path, key, identity, report=None, **overrides):
 
     body = dict(json.loads((PUBLIC_BUNDLE / "receipt.json").read_text())["body"])
     report = report if report is not None else {
-        "$schema": ERC_SCHEMA, "sheets": [{"violations": [{"severity": "warning"}]}]}
+        "$schema": ERC_SCHEMA, "sheets": [{"violations": [{"severity": "warning", "type": "lib_symbol_issues", "description": "Symbol differs from library", "items": []}]}]}
     raw = report if isinstance(report, bytes) else json.dumps(report).encode()
     body.update(worker_id=identity["worker_id"], report_sha256=hashlib.sha256(raw).hexdigest(),
                 report_bytes=len(raw), finding_count=1,
@@ -731,3 +731,9 @@ def test_run_erc_leaves_no_outputs_when_revoked_while_kicad_runs(prepared, tmp_p
     with pytest.raises(worker.WorkerError, match="revoked"):
         worker.run_erc(ledger, key, tmp_path, execute=True, request_id=RID, run_fn=runner)
     assert not (ledger / "node_jobs" / RID).exists()
+
+
+@pytest.mark.parametrize("window", [float("inf"), float("nan"), 0, -1, True])
+def test_freshness_window_must_be_positive_and_finite(window):
+    with pytest.raises(worker.WorkerError, match="finite|positive"):
+        worker._check_window(window)
