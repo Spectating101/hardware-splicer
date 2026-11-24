@@ -115,3 +115,19 @@ def test_single_servo_design_wiring_is_unchanged():
         ("n3", "V+", "n2", "VCC"),
         ("n1", "GPIO15", "n2", "SIG"),
     ]
+
+
+def test_repeated_analog_parts_each_get_their_own_mcu_input():
+    from hardware_splicer.auto_wire import compose_build_graph_from_canvas_nodes
+
+    graph = compose_build_graph_from_canvas_nodes([
+        {"id": "n1", "moduleId": "esp32-devkit"},
+        {"id": "n2", "moduleId": "joystick_module"},
+        {"id": "n3", "moduleId": "joystick_module"},
+        {"id": "n4", "moduleId": "usb-power-5v"},
+    ])
+    graph = graph.get("graph", graph)
+    analog = [(w["from"]["pinId"], w["to"]["nodeId"]) for w in graph["wires"]
+              if w["from"]["nodeId"] == "n1" and w["to"]["pinId"] == "VRx"]
+    assert sorted(node for _, node in analog) == ["n2", "n3"]
+    assert len({pin for pin, _ in analog}) == 2, f"both joysticks share one MCU input: {analog}"

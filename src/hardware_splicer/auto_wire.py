@@ -541,7 +541,8 @@ def auto_wire_picked_modules(modules: List[ModuleSpec]) -> Recipe:
                 None,
             )
             if analog:
-                mcu_analog = next((p.get("id") for p in mcu_pins if p.get("role") == "analog_in"), None)
+                # Reserve the pin, so a second analog part gets its own input rather than sharing this one.
+                mcu_analog = _alloc_pin_by_role(mcu, used_gpio, "analog_in")
                 if not mcu_analog:
                     mcu_analog = _alloc_gpio(mcu, used_gpio)
                 if mcu_analog:
