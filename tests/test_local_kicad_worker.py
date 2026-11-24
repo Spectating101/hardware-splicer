@@ -173,3 +173,94 @@ def test_exported_bundle_rejects_invalid_native_erc_findings(prepared, tmp_path,
     (bundle / "erc.json").write_bytes(raw)
     with pytest.raises(worker.WorkerError, match="malformed"):
         worker.verify_bundle(bundle, root)
+
+
+ERC_SCHEMA = "https://schemas.kicad.org/erc.v1.json"
+FAKE_SOURCE = b"fixed schematic bytes"
+
+
+def _forge_job(ledger, key, identity, rid, report, monkeypatch, **overrides):
+    """Write a correctly signed ERC job directory, optionally with bad fields.
+
+    The worker holds the key, so a compromised or buggy worker can sign any
+    body; the verifier must still reject what it cannot trust.
+    """
+    import hashlib
+
+    monkeypatch.setattr(worker, "_source",
+                        lambda workspace, source_ref=None: ("a" * 40, FAKE_SOURCE))
+    raw = report if isinstance(report, bytes) else json.dumps(report).encode()
+    try:
+        parsed = json.loads(raw)
+        found = [f for s in parsed["sheets"] for f in s["violations"]]
+    except Exception:
+        found = []
+    counts = {k: sum(isinstance(f, dict) and f.get("severity") == k for f in found)
+              for k in ("error", "warning", "exclusion")}
+    body = {
+        "schema_version": worker.SCHEMA, "kind": "erc_result", "request_id": rid,
+        "worker_id": identity["worker_id"], "task": worker.CAPABILITY,
+        "source_commit": "a" * 40, "source_path": worker.SOURCE,
+        "input_sha256": hashlib.sha256(FAKE_SOURCE).hexdigest(),
+        "state": "diagnostics_produced_not_design_approved",
+        "erc_schema": ERC_SCHEMA, "kicad_version": "9.0.2",
+        "report_sha256": hashlib.sha256(raw).hexdigest(), "report_bytes": len(raw),
+        "finding_count": len(found), "severity_counts": counts,
+        "design_approved": False, "hardware_connected": False,
+        "fabrication_authorized": False, "physical_authority": False,
+        "executed_utc": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
+        "heartbeat_sequence_at_execution": 1,
+    }
+    body.update(overrides)
+    folder = ledger / "node_jobs" / rid
+    folder.mkdir(parents=True)
+    (folder / "erc.json").write_bytes(raw)
+    (folder / "receipt.json").write_text(json.dumps(worker._sign(worker._private(key), body)))
+    return body
+
+
+RID = "hs-local-2222222222222222"
+GOOD_REPORT = {"$schema": ERC_SCHEMA, "sheets": [{"violations": [{"severity": "warning"}]}]}
+
+
+def test_verify_erc_accepts_well_formed_forged_job_baseline(prepared, tmp_path, monkeypatch):
+    key, ledger, identity = prepared
+    worker.heartbeat(ledger, key)
+    _forge_job(ledger, key, identity, RID, GOOD_REPORT, monkeypatch)
+    assert worker.verify_erc(ledger, tmp_path, RID)["finding_count"] == 1
+
+
+@pytest.mark.parametrize("report", [
+    {"$schema": ERC_SCHEMA, "sheets": [{"violations": [{"severity": "bogus"}]}]},
+    {"$schema": ERC_SCHEMA, "sheets": [{"violations": {}}]},
+    {"$schema": ERC_SCHEMA, "sheets": "nope"},
+    {"$schema": ERC_SCHEMA, "sheets": [{}]},
+    {"$schema": ERC_SCHEMA, "sheets": [{"violations": [{}]}]},
+    {"$schema": ERC_SCHEMA, "sheets": [{"violations": ["x"]}]},
+    {"$schema": ERC_SCHEMA, "sheets": [7]},
+    {"$schema": "https://example.invalid/not-erc.json", "sheets": []},
+    {"sheets": []},
+    [],
+], ids=str)
+def test_verify_erc_rejects_malformed_signed_report(prepared, tmp_path, monkeypatch, report):
+    key, ledger, identity = prepared
+    worker.heartbeat(ledger, key)
+    _forge_job(ledger, key, identity, RID, report, monkeypatch)
+    with pytest.raises(worker.WorkerError):
+        worker.verify_erc(ledger, tmp_path, RID)
+
+
+def test_verify_erc_rejects_non_json_signed_report(prepared, tmp_path, monkeypatch):
+    key, ledger, identity = prepared
+    worker.heartbeat(ledger, key)
+    _forge_job(ledger, key, identity, RID, b"\xff not json", monkeypatch)
+    with pytest.raises(worker.WorkerError):
+        worker.verify_erc(ledger, tmp_path, RID)
+
+
+def test_verify_erc_rejects_report_schema_not_matching_receipt(prepared, tmp_path, monkeypatch):
+    key, ledger, identity = prepared
+    worker.heartbeat(ledger, key)
+    _forge_job(ledger, key, identity, RID, GOOD_REPORT, monkeypatch, erc_schema="other")
+    with pytest.raises(worker.WorkerError):
+        worker.verify_erc(ledger, tmp_path, RID)

@@ -35,6 +35,8 @@ KEYDIR_PRIVATE = "identity.key"
 KEYDIR_PUBLIC = "identity.json"
 KICAD_BIN = "/usr/bin/kicad-cli"
 HB_MAX_SECONDS = 120
+ERC_SCHEMA = "https://schemas.kicad.org/erc.v1.json"
+SEVERITIES = ("error", "warning", "exclusion")
 
 
 class WorkerError(ValueError):
@@ -324,6 +326,28 @@ def _source(workspace: Path, source_ref: str | None = None) -> tuple[str, bytes]
     return sha, raw
 
 
+def _parse_erc_report(raw: bytes) -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, int]]:
+    """Strictly parse a native KiCad ERC report; never raise anything but WorkerError."""
+    try:
+        native = json.loads(raw)
+        if not isinstance(native, dict) or native.get("$schema") != ERC_SCHEMA:
+            raise ValueError("invalid report schema")
+        if not isinstance(native.get("sheets"), list):
+            raise ValueError("invalid sheets")
+        found: list[dict[str, Any]] = []
+        for sheet in native["sheets"]:
+            if not isinstance(sheet, dict) or not isinstance(sheet.get("violations"), list):
+                raise ValueError("invalid violations")
+            found.extend(sheet["violations"])
+        if any(not isinstance(row, dict) or row.get("severity") not in SEVERITIES
+               for row in found):
+            raise ValueError("invalid severity")
+        counts = {kind: sum(row["severity"] == kind for row in found) for kind in SEVERITIES}
+    except (TypeError, KeyError, ValueError, RecursionError) as exc:
+        raise WorkerError("native ERC evidence malformed") from exc
+    return native, found, counts
+
+
 def run_erc(ledger: Path, key_dir: Path, workspace: Path, *,
             execute: bool = False, request_id: str | None = None,
             run_fn: Any = subprocess.run) -> dict[str, Any]:
@@ -420,6 +444,7 @@ def verify_erc(ledger: Path, workspace: Path, request_id: str) -> dict[str, Any]
         receipt_file.stat().st_size > 40_000 or report_file.stat().st_size > 2_000_000):
         raise WorkerError("signed ERC evidence missing or unsafe")
     packet = json.loads(receipt_file.read_bytes())
+    report_raw = report_file.read_bytes()  # read once: hash and parse the same bytes
     signed_body = packet.get("body") if isinstance(packet, dict) else None
     worker_id = signed_body.get("worker_id", "") if isinstance(signed_body, dict) else ""
     node = _lookup(ledger, worker_id)
@@ -431,17 +456,16 @@ def verify_erc(ledger: Path, workspace: Path, request_id: str) -> dict[str, Any]
         or body.get("source_commit") != sha
         or body.get("source_path") != SOURCE
         or body.get("input_sha256") != hashlib.sha256(raw).hexdigest()
-        or body.get("report_sha256") != hashlib.sha256(report_file.read_bytes()).hexdigest()
-        or body.get("report_bytes") != report_file.stat().st_size
+        or body.get("report_sha256") != hashlib.sha256(report_raw).hexdigest()
+        or body.get("report_bytes") != len(report_raw)
         or body.get("physical_authority") is not False
         or body.get("hardware_connected") is not False
         or body.get("fabrication_authorized") is not False
         or body.get("design_approved") is not False):
         raise WorkerError("ERC receipt, source pin or report integrity mismatch")
-    report = json.loads(report_file.read_bytes())
-    findings = [f for sheet in report["sheets"] for f in sheet["violations"]]
-    counts = {k: sum(f["severity"] == k for f in findings)
-              for k in ("error", "warning", "exclusion")}
+    report, findings, counts = _parse_erc_report(report_raw)
+    if body.get("erc_schema") != report["$schema"]:
+        raise WorkerError("ERC receipt report schema mismatch")
     if body.get("finding_count") != len(findings) or body.get("severity_counts") != counts:
         raise WorkerError("ERC signed finding counts mismatch")
     return {"ok": True, "request_id": request_id, "worker_id": worker_id,
@@ -494,22 +518,7 @@ def verify_bundle(bundle: Path, workspace: Path) -> dict[str, Any]:
     packet = json.loads(paths[1].read_bytes())
     body = _check_signature(identity, packet)
     raw = paths[2].read_bytes()
-    try:
-        native = json.loads(raw)
-        if not isinstance(native, dict) or not isinstance(native.get("sheets"), list):
-            raise ValueError("invalid sheets")
-        found = []
-        for sheet in native["sheets"]:
-            if not isinstance(sheet, dict) or not isinstance(sheet.get("violations"), list):
-                raise ValueError("invalid violations")
-            found.extend(sheet["violations"])
-        if any(not isinstance(row, dict) or row.get("severity") not in
-               ("error", "warning", "exclusion") for row in found):
-            raise ValueError("invalid severity")
-        counts = {kind: sum(row["severity"] == kind for row in found)
-                  for kind in ("error", "warning", "exclusion")}
-    except (TypeError, KeyError, ValueError) as exc:
-        raise WorkerError("native ERC evidence malformed") from exc
+    native, found, counts = _parse_erc_report(raw)
     reference = workspace / SOURCE
     if (reference.is_symlink() or not reference.is_file()
         or reference.stat().st_size > 12 * 1024 * 1024):
