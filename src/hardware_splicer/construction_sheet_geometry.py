@@ -201,8 +201,10 @@ def schedule_scad_preview(schedule: Mapping[str,Any]) -> str:
         ("back",0,od-t,0,ow,t,oh),
         ("left",0,t,0,t,idepth,oh),
         ("right",ow-t,t,0,t,idepth,oh),
-        ("floor",t,t,t,iw,idepth,t),
-        ("lid",t,t,oh-2*t,iw,idepth,t),
+        # Floor top at z=t and lid underside at z=t+ih, so the clear gap is
+        # exactly the stated internal height; sides span ih+2t.
+        ("floor",t,t,0,iw,idepth,t),
+        ("lid",t,t,t+ih,iw,idepth,t),
     ]
     lines=[
         "// HS hybrid assembly geometry - VISUAL STUDY ONLY",

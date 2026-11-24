@@ -107,7 +107,8 @@ def test_mecha_exports_shop_packet_and_does_not_cut_ports(tmp_path):
     preview=(tmp_path/"HYBRID_ASSEMBLY_PREVIEW.scad").read_text()
     assert preview.count("cube([")==6
     assert "translate([0,0,0]) cube([106,3,36]" in preview
-    assert "translate([3,3,3]) cube([100,80,3]" in preview
+    assert "translate([3,3,0]) cube([100,80,3]" in preview  # floor z 0..t (was z=3)
+    assert "translate([3,3,33]) cube([100,80,3]" in preview  # lid z t+ih..2t+ih
     assert "NO CONNECTOR SEATS" in preview
     assert result["construction_alternatives"]["selected_manufacturing_method"] is None
 
@@ -221,3 +222,16 @@ def test_actual_hs_intake_compiler_delivers_hybrid_shop_packet(tmp_path,monkeypa
     assert report["requested_preference"]=="auto"
     assert report["selected_manufacturing_method"] is None
     assert report["release_authorized"] is False
+
+
+def test_preview_preserves_stated_internal_height():
+    # 30 mm internal height, 3 mm panels: the floor top sits at z=t and the
+    # lid underside at z=t+internal_height, so the clear gap is exactly 30 mm.
+    r=make_panel_schedule(_enclosure(),_construction())
+    scad=schedule_scad_preview(r)
+    t,ih=3,30
+    assert f"translate([3,3,0]) cube([100,80,{t}]" in scad  # floor: z 0..t
+    assert f"translate([3,3,{t+ih}]) cube([100,80,{t}]" in scad  # lid: z t+ih..2t+ih
+    assert "cube([6,80,36]" not in scad
+    assert "translate([0,0,0]) cube([106,3,36]" in scad  # side panels: ih+2t
+    assert (t+ih)-t==ih
