@@ -162,11 +162,27 @@ def compose_agent_loop(
         hints = next_hints
 
     review_blocked = bool(last_result.get("requires_human_review"))
+    # Resolved means the design quality gate says build ready (DRC, ERC and every other blocker), not only
+    # that the DRC retry loop ran out of errors. A result with no gate cannot be resolved.
+    gate = last_result.get("design_quality_gate")
+    gate_build_ready = bool(isinstance(gate, Mapping) and gate.get("build_ready"))
+    unresolved_reasons: List[str] = []
+    if review_blocked:
+        unresolved_reasons.append("A person has to review the semantic module proposal first.")
+    if errors != 0:
+        unresolved_reasons.append(f"KiCad DRC reports {errors} error(s).")
+    if not isinstance(gate, Mapping):
+        unresolved_reasons.append("The result carries no design quality gate, so build readiness is unknown.")
+    elif not gate_build_ready:
+        blockers = [str(b) for b in gate.get("blockers") or []]
+        unresolved_reasons.extend(blockers or ["The design quality gate does not say build ready."])
     agent_loop = {
         "schema_version": SCHEMA_VERSION,
         "rounds": rounds,
         "manual_retries_used": max(0, len(rounds) - 1),
-        "resolved": bool(errors == 0 and not review_blocked),
+        "resolved": bool(errors == 0 and not review_blocked and gate_build_ready),
+        "gate_build_ready": gate_build_ready,
+        "unresolved_reasons": unresolved_reasons,
         "review_blocked": review_blocked,
         "final_kicad_drc_errors": None if review_blocked and not last_result.get("design_quality") else errors,
         "final_drc_fixup": dict(hints),

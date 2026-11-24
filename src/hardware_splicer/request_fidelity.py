@@ -17,13 +17,125 @@ from .pcb.module_registry import find_module, list_canvas_modules
 SCHEMA_VERSION = "hardware_splicer.request_fidelity.v1"
 CLAIM_BOUNDARY = (
     "Compares the parts the request listed with the parts in the compiled design, by module and count. "
+    "It also looks in the goal text for parts it names and for a mains or high-voltage load. "
     "It does not check wiring, firmware or whether the design performs the requested function."
 )
+
+# Parts a goal can name in words. Each row is (label, pattern for the goal, pattern for a module id that
+# satisfies it). A goal that names one of these and a design with no matching module is a mismatch, whatever
+# the picker chose. A mechanical relay is not a solid-state relay, and a digital temperature probe is not a
+# thermistor, so the module patterns are narrow on purpose.
+_NAMED_PARTS: tuple[tuple[str, re.Pattern[str], re.Pattern[str]], ...] = (
+    ("thermistor", re.compile(r"\bthermistors?\b|\bntc\b", re.I), re.compile(r"thermistor|ntc", re.I)),
+    (
+        "thermocouple",
+        re.compile(r"\bthermocouples?\b|\bmax6675\b|\bmax31855\b|\bmax31856\b", re.I),
+        re.compile(r"thermocouple|max6675|max3185", re.I),
+    ),
+    (
+        "solid-state relay (SSR)",
+        re.compile(r"\bssrs?\b|\bsolid[- ]state relays?\b", re.I),
+        re.compile(r"ssr|solid.?state", re.I),
+    ),
+    (
+        "microSD card",
+        re.compile(r"\bmicro[- ]?sd\b|\bsd[- ]?cards?\b|\btf cards?\b", re.I),
+        re.compile(r"sd_card|sd-card|microsd|tf_card", re.I),
+    ),
+    ("GPS receiver", re.compile(r"\bgps\b|\bgnss\b|\bneo-?6m\b", re.I), re.compile(r"gps|gnss|neo-?6m", re.I)),
+    ("load cell", re.compile(r"\bload cells?\b|\bhx711\b", re.I), re.compile(r"hx711|load.?cell", re.I)),
+    ("OLED display", re.compile(r"\boleds?\b|\bssd1306\b", re.I), re.compile(r"ssd1306|oled|sh1106", re.I)),
+    (
+        "real-time clock",
+        re.compile(r"\brtc\b|\breal[- ]time clock\b|\bds3231\b|\bds1307\b", re.I),
+        re.compile(r"rtc|ds3231|ds1307", re.I),
+    ),
+    (
+        "stepper motor",
+        re.compile(r"\bstepper(?: motors?)?\b", re.I),
+        re.compile(r"stepper|a4988|drv8825|tmc2209", re.I),
+    ),
+    ("servo", re.compile(r"\bservos?\b", re.I), re.compile(r"sg90|servo|mg996", re.I)),
+)
+
+_NEGATION = re.compile(
+    # "no" joined by a hyphen ("no-load") describes a condition, not an absent part.
+    r"(?:\bno(?!-)|\bnot|\bwithout|\bexcluding|\bexcept|\binstead of|\bw/o|\bnor)\W+(?:\w+\W+){0,2}$", re.I
+)
+
+_VOLT = re.compile(
+    r"(?<![\w.])(\d+(?:\.\d+)?)\s*(k?)\s*(?:v|volts?)(?:\s*(ac|dc))?(?![a-z0-9])", re.I
+)
+_MAINS_WORDS = re.compile(
+    r"\bmains?\b|\bline voltage\b|\bhigh[- ]voltage\b|\bwall (?:power|outlet|socket)\b|\bac outlet\b"
+    r"|\bhousehold (?:power|current|voltage|outlet)\b"
+    # Spelled-out mains voltages: "two-thirty volt", "one twenty volts", "two hundred forty volts".
+    r"|\b(?:one|two)[- ](?:ten|twenty|thirty|forty|fifty)[- ]?volts?\b"
+    r"|\b(?:one|two|three|four)[- ]hundred(?:[- ](?:and[- ])?[a-z]+)?[- ]volts?\b",
+    re.I,
+)
+# A voltage that is a component's rating or part of a part number does not describe the load.
+_PART_NUMBER_BEFORE = re.compile(r"[A-Za-z0-9]-$")
+_RATING_NEAR = re.compile(r"\b(?:rating|rated|tolerant|withstand|breakdown|esd|capacitors?|caps?)\b", re.I)
+
+HIGH_VOLTAGE_FINDING = (
+    "The goal states a mains or high-voltage load ({evidence}). Switching or sensing mains is outside this "
+    "bounded low-voltage lane: HS will not mark such a design build ready. A person with mains-safety "
+    "training has to specify and review isolation, creepage, fusing, enclosure and certification."
+)
+
+
+def detect_high_voltage_goal(goal: str | None) -> Dict[str, Any] | None:
+    """Return the evidence when a goal states a mains or high-voltage load, else None.
+
+    Thresholds: 50 V AC or more, 120 V DC or more, and a bare voltage of 100 V or more (mains is the usual
+    reading of "230 V" or "110 V"). Below that, and everything without an explicit voltage, is not flagged.
+    """
+    text = str(goal or "")
+    if not text.strip():
+        return None
+    word = _MAINS_WORDS.search(text)
+    if word and not _NEGATION.search(text[: word.start()]):
+        return {"kind": "keyword", "evidence": word.group(0)}
+    for match in _VOLT.finditer(text):
+        if _PART_NUMBER_BEFORE.search(text[: match.start()]):
+            continue  # e.g. "LM317-100V"
+        before = text[max(0, match.start() - 20): match.start()]
+        after = text[match.end(): match.end() + 25]
+        if _RATING_NEAR.search(before) or _RATING_NEAR.search(after):
+            continue  # e.g. "100 V capacitor rating", "rated 1000 V"
+        value = float(match.group(1)) * (1000.0 if match.group(2) else 1.0)
+        kind = (match.group(3) or "").lower()
+        limit = {"ac": 50.0, "dc": 120.0}.get(kind, 100.0)
+        if value >= limit:
+            return {"kind": "voltage", "evidence": match.group(0).strip(), "volts": value, "current_type": kind or None}
+    return None
+
+
+def assess_goal_fidelity(goal: str | None, build_graph: Mapping[str, Any] | None) -> Dict[str, Any]:
+    """Compare the parts the goal text names, and any mains load it states, with the compiled design."""
+    text = str(goal or "")
+    in_design = [str(n.get("moduleId") or "") for n in (build_graph or {}).get("nodes") or []]
+    missing: list[Dict[str, Any]] = []
+    # With no compiled graph there is nothing to compare against; absence never upgrades, so the gate's own
+    # "did not compile" blocker stands.
+    if build_graph is not None:
+        for label, goal_pattern, module_pattern in _NAMED_PARTS:
+            named = next(
+                (m for m in goal_pattern.finditer(text) if not _NEGATION.search(text[: m.start()])),
+                None,
+            )
+            if named is None or any(module_pattern.search(mid) for mid in in_design if mid):
+                continue
+            missing.append({"label": label, "named_as": named.group(0)})
+    return {"named_parts_missing": missing, "high_voltage": detect_high_voltage_goal(text)}
 
 
 def assess_request_fidelity(
     requested_parts: Sequence[Mapping[str, Any]],
     build_graph: Mapping[str, Any] | None,
+    *,
+    goal: str | None = None,
 ) -> Dict[str, Any]:
     requested: Counter[str] = Counter()
     names: Dict[str, list[str]] = {}
@@ -62,7 +174,13 @@ def assess_request_fidelity(
         if module_id and module_id not in requested
     ]
 
-    if build_graph is None or not (requested or unmapped):
+    goal_check = assess_goal_fidelity(goal, build_graph) if goal else {"named_parts_missing": [], "high_voltage": None}
+
+    if goal_check["high_voltage"]:
+        status = "out_of_scope"
+    elif goal_check["named_parts_missing"]:
+        status = "mismatch"
+    elif build_graph is None or not (requested or unmapped):
         status = "not_assessable"
     elif missing:
         status = "mismatch"
@@ -71,7 +189,7 @@ def assess_request_fidelity(
     else:
         status = "matches"
 
-    return {
+    result = {
         "schema_version": SCHEMA_VERSION,
         "status": status,
         "missing_parts": missing,
@@ -79,6 +197,10 @@ def assess_request_fidelity(
         "unrequested_in_design": unrequested,
         "claim_boundary": CLAIM_BOUNDARY,
     }
+    if goal:
+        result["goal_named_parts_missing"] = goal_check["named_parts_missing"]
+        result["high_voltage_goal"] = goal_check["high_voltage"]
+    return result
 
 
 _WORD = re.compile(r"[a-z0-9]+")

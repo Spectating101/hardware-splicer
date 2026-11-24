@@ -184,17 +184,21 @@ def auto_wire_picked_modules(modules: List[ModuleSpec]) -> Recipe:
         if p_gnd:
             wire(power["_role"], p_gnd, ldo["_role"], "GND")
 
+    mcu_has_5v = bool(mcu and any(p.get("id") == "5V" for p in mcu.get("pins") or []))
     if buck:
         rail_pos: Optional[Tuple[str, str]] = (buck["_role"], "OUT+")
         rail_gnd: Optional[Tuple[str, str]] = (buck["_role"], "OUT-")
-    elif ldo:
+    elif ldo and not usb and not mcu_has_5v:
+        # The shared load rail feeds servos, relays, pumps and the level shifter's high side, all of which
+        # need 5 V. A 3.3 V LDO is the rail only when nothing 5 V-capable is present; with USB power or an
+        # MCU 5V pin it only feeds what is wired to it explicitly above.
         rail_pos = (ldo["_role"], "VOUT")
         rail_gnd = (ldo["_role"], "GND")
     elif usb:
         rail_pos = (usb["_role"], _power_out_pin(usb) or "5V")
         gnd = gnd_pin(usb)
         rail_gnd = (usb["_role"], gnd) if gnd else None
-    elif barrel:
+    elif barrel and not (ldo and mcu_has_5v):
         rail_pos = (barrel["_role"], "V+")
         rail_gnd = (barrel["_role"], "GND")
     elif mcu:

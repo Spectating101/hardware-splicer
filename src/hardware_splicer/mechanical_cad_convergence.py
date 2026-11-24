@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, Literal, Sequence
 
 from .mechanical_cad_fem import AxisPlane, LocalRefinement, run_cad_screening
+from .mechanical_fem import NON_CONSERVATIVE_BLOCKER
 
 
 def _validate_study_parameters(
@@ -229,6 +230,9 @@ def run_cad_mesh_sensitivity(
         "levels": levels,
         "adjacent_mesh_comparisons": comparisons,
         "sensitivity_blockers": blockers,
+        # Stable linear-tetrahedron numbers are stably optimistic in bending, not safe.
+        "conservative": False,
+        "screening_blockers": [NON_CONSERVATIVE_BLOCKER],
         "mesh_sensitivity_observed_stable": observed_stable,
         "fine_mesh_raw_yield_safety_factor": levels[-1]["raw_yield_safety_factor"],
         "yield_margin_usable_for_engineering_release": False,

@@ -137,7 +137,8 @@ def build_design_quality_gate(
     if readiness == "draft" and build_ready and not compiler_verified:
         blockers.append("Circuit engineering readiness is still draft while build graph claims readiness.")
 
-    if request_fidelity and request_fidelity.get("status") == "mismatch":
+    requires_person = False
+    if request_fidelity:
         for row in request_fidelity.get("missing_parts") or []:
             text = (
                 f"Design leaves out requested part {row['module_id']}: requested {row['requested']}, "
@@ -151,6 +152,17 @@ def build_design_quality_gate(
                 )
                 text += f" {row['module_id']!r} is not a part id HS knows.{hint}"
             blockers.append(text)
+        for row in request_fidelity.get("goal_named_parts_missing") or []:
+            blockers.append(
+                f"Design leaves out requested part {row['label']}: the goal names it ({row['named_as']!r}) "
+                "but no module in the design provides it. Add a matching part or take it out of the goal."
+            )
+        high_voltage = request_fidelity.get("high_voltage_goal")
+        if high_voltage:
+            from .request_fidelity import HIGH_VOLTAGE_FINDING
+
+            blockers.append(HIGH_VOLTAGE_FINDING.format(evidence=high_voltage.get("evidence")))
+            requires_person = True
 
     fabrication_blockers = list(dict.fromkeys([*blockers, *body.get("fabrication_blockers", [])]))
     if not gerber_ready:
@@ -172,7 +184,7 @@ def build_design_quality_gate(
     if bom_ready:
         score += 0.05
 
-    person_pending = any(i.get("requires_person") for i in electrical_issues)
+    person_pending = requires_person or any(i.get("requires_person") for i in electrical_issues)
     strict_build_ready = build_ready and not blockers and not person_pending
     fabrication_ready = bool(body.get("fabrication_ready")) and gerber_ready and bom_ready and not fabrication_blockers
 
@@ -188,6 +200,7 @@ def build_design_quality_gate(
         "electrical_safety_pass": electrical_pass,
         "gerber_ready": gerber_ready,
         "blockers": blockers,
+        "requires_person": person_pending,
         # Findings that come with repair options, for an agent to choose from and HS to re-verify.
         "repairable_findings": [i for i in electrical_issues if i.get("repairs")],
         "fabrication_blockers": fabrication_blockers,
