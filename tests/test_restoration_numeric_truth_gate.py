@@ -148,3 +148,20 @@ def test_plain_gemini_arm_is_not_implicitly_rewritten(tmp_path):
     # remains frozen and must not be reinterpreted as a rerun.
     result=validate_model_output(p,plain)
     assert result["hypotheses"]
+
+
+@pytest.mark.parametrize("ledger",[
+    None,{},{"graph_sha256":"x"},{"unresolved_source_ids":None},{"unresolved_source_ids":"no_verified_meter_observations"},
+])
+def test_missing_or_incomplete_ledger_fails_closed_for_numeric_cutoff(ledger):
+    plan=valid_plan()
+    plan["next_safe_check"]="Test for voltage above 5 V at the connector."
+    hit=unsourced_thresholds(plan,ledger)
+    assert any("5 V" in x["limit"] for x in hit)
+    with pytest.raises(UnsupportedQuantitativeThreshold):
+        reject_unsourced_thresholds(plan,ledger)
+
+def test_explicit_empty_unresolved_list_is_not_treated_as_missing():
+    plan=valid_plan()
+    plan["next_safe_check"]="Test for voltage above 5 V at the connector."
+    assert not unsourced_thresholds(plan,{"unresolved_source_ids":[]})

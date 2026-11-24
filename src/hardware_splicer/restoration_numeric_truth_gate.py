@@ -109,15 +109,18 @@ def unsourced_thresholds(
     technical documents may explicitly support one calibrated threshold,
     but this gate intentionally does not infer that from video narration.
     """
-    if not ledger:
-        return []
-    unresolved = set(ledger.get("unresolved_source_ids") or [])
-    if not unresolved.intersection({
-        "no_component_datasheet_provided",
-        "no_schematic_or_boardview_provided",
-        "no_verified_meter_observations",
-    }):
-        return []
+    # Fail closed: a missing ledger, or one that does not state its
+    # unresolved source IDs as a list, is incomplete provenance, not a pass.
+    # Only a ledger that explicitly lists its unresolved IDs and omits the
+    # three "nothing provided" markers is treated as sourced.
+    ids = ledger.get("unresolved_source_ids") if isinstance(ledger, Mapping) else None
+    if isinstance(ids, (list, tuple, set, frozenset)):
+        if not set(ids).intersection({
+            "no_component_datasheet_provided",
+            "no_schematic_or_boardview_provided",
+            "no_verified_meter_observations",
+        }):
+            return []
     findings = []
     for source, raw in iter_plan_text(plan):
         reasons = disallowed_text_reasons(raw)
