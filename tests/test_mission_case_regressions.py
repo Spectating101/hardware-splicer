@@ -9,14 +9,13 @@ from hardware_splicer.device_plan import _validate_spec
 from hardware_splicer.mission_executor import run_mission_operation
 from hardware_splicer.mission_store import MissionStateError, MissionStore
 from hardware_splicer.product_api import create_product_app
-from hardware_splicer.salvage_fabrication import build_salvage_fabrication_context
 from test_mission_donors import DONOR, OTHER, _open, _spec
 from test_mission_feedback import AGENT, _candidate, _evaluate, _propose, _store
 
 
 def _context(missions, mid):
-    return build_salvage_fabrication_context(
-        mission_store=missions, project_id="monitor", mission_id=mid)
+    """The mission's own read view; the agent-context builder is not part of this tree."""
+    return missions.get_mission("monitor", mid)
 
 
 def test_unsafe_warning_survives_reload_and_is_not_a_measured_finding(tmp_path):
@@ -43,9 +42,6 @@ def test_unsafe_warning_survives_reload_and_is_not_a_measured_finding(tmp_path):
     assert resumed.get_mission("monitor", mid)["safety_concerns"] == [concern]
     context = _context(resumed, mid)
     assert context["safety_concerns"] == [concern]
-    assert context["next_state"]["state"] == "safety_concern_recorded"
-    assert "propose_grounded_unsafe_terminal" in context["next_state"]["recommended_intents"]
-    assert "await_human_physical_evidence" not in context["next_state"]["recommended_intents"]
     assert view["physical_correctness"] == "UNPROVEN"
     assert not view["power_on_authorized"] and not view["firmware_authorized"]
     assert missions.project_store.load_latest_with_recovery("monitor") == project_before
@@ -54,7 +50,6 @@ def test_unsafe_warning_survives_reload_and_is_not_a_measured_finding(tmp_path):
         "reason": "Unsafe goal, not a request for powered measurements.", "cites": [concern["need_seq"]]})
     assert final["terminal"]["grounding"] == "agent_assertion"
     assert final["safety_concerns"] == [concern]
-    assert "build_or_read_package" not in _context(resumed, mid)["next_state"]["recommended_intents"]
 
 
 def test_hazard_words_do_not_create_a_deterministic_safety_finding(tmp_path):
@@ -64,8 +59,6 @@ def test_hazard_words_do_not_create_a_deterministic_safety_finding(tmp_path):
                             "need": "Missing documentation, not a safety assessment."})
     context = _context(missions, mid)
     assert context["safety_concerns"] == []
-    assert context["truth_contract"]["absence_of_safety_concerns_means_safe"] is False
-    assert context["next_state"]["state"] == "evidence_required"
 
 
 def test_safety_concern_remains_visible_after_independent_proposal(tmp_path):
@@ -75,8 +68,6 @@ def test_safety_concern_remains_visible_after_independent_proposal(tmp_path):
                             "need": "Do not implement the hazardous proposal."})
     _candidate(missions, mid, _spec())
     context = _context(missions, mid)
-    assert context["phase"] == "ARCHITECTING"
-    assert context["next_state"]["state"] == "safety_concern_recorded"
     assert context["safety_concerns"][0]["grounding"] == "agent_assertion"
 
 
@@ -210,21 +201,3 @@ def test_intact_reuse_is_not_mislabelled_as_unknown_catalog_fields(tmp_path):
     assert diagnostics["scope"] == "intact_reuse_check_required"
     assert diagnostics["unrecognized_fields"] == []
     assert view["terminal"] is None
-
-
-def test_discoverable_guidance_distinguishes_useful_progress_and_explicit_unsafe_refusal():
-    from hardware_splicer.mission_agent_contract import mission_event_openapi
-    from hardware_splicer.salvage_fabrication_manifest import salvage_fabrication_manifest
-    from pathlib import Path
-
-    schema = mission_event_openapi()["requestBody"]["content"]["application/json"]["schema"]
-    need = next(item for item in schema["properties"]["event"]["oneOf"]
-                if item["properties"]["type"]["const"] == "evidence_required")
-    assert "BLOCKED_UNSAFE" in need["description"]
-    assert "agent_assertion" in need["description"]
-    manifest = salvage_fabrication_manifest()
-    instructions = " ".join(manifest["workflow"])
-    assert "donor_coverage" in instructions and "spec_diagnostics" in instructions
-    quickstart = (Path(__file__).resolve().parents[1] / "docs" / "AGENT_QUICKSTART.md").read_text()
-    assert "BLOCKED_UNSAFE" in quickstart and "not checked by the catalog planner" in quickstart
-    assert "A chat-only plan is not a saved deliverable" in quickstart

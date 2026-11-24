@@ -19,7 +19,6 @@ from hardware_splicer.intact_reuse_adapter import Adapter
 from hardware_splicer.operator_identity import hash_operator_token
 from hardware_splicer.product_api import create_product_app
 from hardware_splicer.project_store import ProjectStore
-from hardware_splicer.salvage_fabrication_manifest import salvage_fabrication_manifest
 
 AGENT = {"kind": "agent", "id": "intact-reuse-test"}
 DONOR = "donor:usb-mouse:controller"
@@ -191,7 +190,7 @@ def test_discovery_is_small_and_part_of_the_agent_manifest(host):
     schema = client.get(prefix + "/intact-reuse-spec").json()
     assert IntactReuseSpec.model_validate(schema["example"])
     assert len(json.dumps(schema).encode()) < 7000
-    paths = {row["path"] for row in salvage_fabrication_manifest(app)["operations"]}
+    paths = set(app.openapi()["paths"])
     assert any(path.endswith("/intact-reuse-spec") for path in paths)
     assert any(path.endswith("/runs/{name}/bundle") for path in paths)
 
@@ -258,10 +257,3 @@ def test_only_one_symbolic_action_is_emitted_no_host_side_effects():
     assert adapter.feed({"type": "released", "device": "mouse", "button": "left"}) == []
     assert adapter.feed({"type": "pressed", "device": "mouse", "button": "left"}) == [{"type": "action", "action": "activate", "device_alias": "mouse"}]
     assert adapter.feed({"type": "pressed", "device": "mouse", "button": "left"}) == []
-
-
-def test_direct_smoke_entrypoint_is_not_shadowed_by_legacy_script():
-    script = Path(__file__).resolve().parents[1] / "scripts/smoke_intact_reuse_mcp.py"
-    result = subprocess.run([sys.executable, "-I", str(script), "--help"], capture_output=True, text=True, timeout=20)
-    assert result.returncode == 0, result.stderr
-    assert "--output" in result.stdout

@@ -239,11 +239,8 @@ def test_old_software_output_is_explicitly_historical_after_repair(host):
     assert _tree(store.root) == before
 
 
-def test_inspection_operations_are_discoverable_and_non_mutating():
-    from hardware_splicer.salvage_fabrication_manifest import salvage_fabrication_manifest
-
-    rows = salvage_fabrication_manifest()["operations"]
-    paths = {row["path"]: row for row in rows}
+def test_inspection_routes_are_get_only_and_discoverable():
+    paths = create_product_app().openapi()["paths"]
     for suffix in ("/delivery", "/delivery/packages/{package_sha256}"):
-        row = next(value for path, value in paths.items() if path.endswith(suffix))
-        assert row["method"] == "GET" and row["mutation"] is False
+        path = next(value for key, value in paths.items() if key.endswith(suffix))
+        assert set(path) == {"get"}
