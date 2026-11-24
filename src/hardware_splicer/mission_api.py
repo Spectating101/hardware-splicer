@@ -106,6 +106,22 @@ def _human_operator_required() -> HTTPException:
     )
 
 
+def _route_author(body_author: Any, token: str | None) -> Any:
+    """Who a request is from. An operator token decides it; a body-supplied author is never trusted as a person.
+
+    With a valid token the author is the token's identity and any author in the body is ignored. Without one, a body
+    author may name an agent, but not a human: a person is identified only by their operator token.
+    """
+    identity = resolve_operator(_operator_token(token))
+    if identity is not None:
+        return {"kind": identity.kind, "id": identity.id}
+    if isinstance(body_author, Mapping):
+        kind = body_author.get("kind")
+        if isinstance(kind, str) and kind.strip() == "human":
+            raise _human_operator_required()
+    return body_author
+
+
 def _latest_evaluation(mission: Mapping[str, Any], candidate_id: str) -> Dict[str, Any]:
     for candidate in mission.get("candidates") or []:
         if candidate.get("id") != candidate_id:
@@ -123,14 +139,20 @@ def create_mission_router(mission_store: MissionStore) -> APIRouter:
     )
 
     @router.post("", status_code=http_status.HTTP_201_CREATED)
-    def open_project_mission(project_id: str, request: Dict[str, Any]) -> Dict[str, Any]:
+    def open_project_mission(
+        project_id: str,
+        request: Dict[str, Any],
+        x_hs_operator_token: str | None = Header(default=None, alias="X-HS-Operator-Token"),
+    ) -> Dict[str, Any]:
         try:
             payload = _as_request_object(request, label="request")
             mission = mission_store.open_mission(
                 project_id,
                 intake=payload.get("intake"),
-                author=payload.get("author"),
+                author=_route_author(payload.get("author"), x_hs_operator_token),
             )
+        except HTTPException:
+            raise
         except Exception as exc:
             raise _mission_error(exc) from exc
         return {"ok": True, "mission": mission}
@@ -177,6 +199,7 @@ def create_mission_router(mission_store: MissionStore) -> APIRouter:
         project_id: str,
         mission_id: str,
         request: Dict[str, Any],
+        x_hs_operator_token: str | None = Header(default=None, alias="X-HS-Operator-Token"),
     ) -> Dict[str, Any]:
         try:
             payload = _as_request_object(request, label="request")
@@ -184,9 +207,11 @@ def create_mission_router(mission_store: MissionStore) -> APIRouter:
                 project_id,
                 mission_id,
                 payload.get("event"),
-                author=payload.get("author"),
+                author=_route_author(payload.get("author"), x_hs_operator_token),
                 expected_event_seq=payload.get("expected_event_seq"),
             )
+        except HTTPException:
+            raise
         except Exception as exc:
             raise _mission_error(exc) from exc
         return {"ok": True, "mission": mission}
@@ -285,13 +310,21 @@ def create_mission_router(mission_store: MissionStore) -> APIRouter:
                         headers={"Content-Disposition": f'attachment; filename="{mission_id}-package.zip"'})
 
     @router.post("/{mission_id}/stage", status_code=http_status.HTTP_201_CREATED)
-    async def stage_project_mission_design(project_id: str, mission_id: str, request: Dict[str, Any]) -> Dict[str, Any]:
+    async def stage_project_mission_design(
+        project_id: str,
+        mission_id: str,
+        request: Dict[str, Any],
+        x_hs_operator_token: str | None = Header(default=None, alias="X-HS-Operator-Token"),
+    ) -> Dict[str, Any]:
         # Opens a review of the READY design. No route here decides a review: that stays a person's review decision.
         try:
             payload = _as_request_object(request, label="request")
             staged = await run_in_threadpool(
-                stage_mission_design, mission_store, project_id, mission_id, author=payload.get("author")
+                stage_mission_design, mission_store, project_id, mission_id,
+                author=_route_author(payload.get("author"), x_hs_operator_token),
             )
+        except HTTPException:
+            raise
         except Exception as exc:
             raise _mission_error(exc) from exc
         return {"ok": True, **staged}

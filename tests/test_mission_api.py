@@ -246,3 +246,31 @@ def test_a_modeled_run_needs_the_same_gate_as_the_device_run_route(tmp_path, mon
     assert calls == []
     local = TestClient(create_product_app(store))
     assert local.post(route, json=run).status_code == 409
+
+
+def test_a_body_supplied_human_author_is_not_trusted_on_open_propose_and_stage(client):
+    human = {"kind": "human", "id": "bench-lead"}
+    intake = {"goal": "A small sensor device from my parts", "inventory": ["ESP32", "BME280", "OLED"]}
+    # Without a token a body cannot claim to be a person.
+    assert client.post(BASE, json={"intake": intake, "author": human}).status_code == 403
+    mid = _open(client)["mission_id"]
+    seq = client.get(f"{BASE}/{mid}").json()["mission"]["last_event_seq"]
+    event = {"type": "evidence_required", "blocker": "BLOCKED_UNSAFE", "need": "x"}
+    assert client.post(f"{BASE}/{mid}/events", json={"event": event, "author": human, "expected_event_seq": seq}).status_code == 403
+    assert client.post(f"{BASE}/{mid}/stage", json={"author": human}).status_code == 403
+    assert client.get(f"{BASE}/{mid}").json()["mission"]["last_event_seq"] == seq
+    # With a token, the author is the token's identity whatever the body says.
+    agent_headers = {"X-HS-Operator-Token": AGENT_TOKEN}
+    claimed = client.post(BASE, json={"intake": intake, "author": human}, headers=agent_headers)
+    assert claimed.status_code == 201, claimed.text
+    assert claimed.json()["mission"]["events"][0]["author"] == {"kind": "agent", "id": "some-agent"}
+    other = claimed.json()["mission"]["mission_id"]
+    proposed = client.post(f"{BASE}/{other}/events", headers=agent_headers,
+                           json={"event": event, "author": human, "expected_event_seq": 1})
+    assert proposed.status_code == 201, proposed.text
+    assert proposed.json()["mission"]["events"][-1]["author"] == {"kind": "agent", "id": "some-agent"}
+    # A person's token authors as that person even when the body names someone else, and needs no body author.
+    by_person = client.post(BASE, json={"intake": intake}, headers={"X-HS-Operator-Token": PERSON_TOKEN})
+    assert by_person.status_code == 201, by_person.text
+    assert by_person.json()["mission"]["events"][0]["author"] == {"kind": "human", "id": "bench-lead"}
+    assert client.post(BASE, json={"intake": intake}, headers={"X-HS-Operator-Token": "unknown-" + "c" * 48}).status_code == 401
