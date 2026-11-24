@@ -43,6 +43,9 @@ def main() -> int:
     bundle = p.add_parser("verify-bundle", help="Verify exported public signature and ERC report")
     bundle.add_argument("--bundle", type=Path, required=True)
     bundle.add_argument("--workspace", type=Path, default=Path(__file__).resolve().parents[1])
+    bundle.add_argument("--expected-public-key", help="pinned trusted Ed25519 public key (hex)")
+    bundle.add_argument("--expected-worker-id", help="pinned trusted worker id")
+    bundle.add_argument("--ledger", type=Path, help="enrolled worker ledger to pin against")
     a = parser.parse_args()
     try:
         if a.action == "identity":
@@ -52,7 +55,10 @@ def main() -> int:
         elif a.action == "heartbeat":
             result = heartbeat(a.ledger, a.key_dir)
         elif a.action == "verify-bundle":
-            result = verify_bundle(a.bundle, a.workspace)
+            result = verify_bundle(a.bundle, a.workspace,
+                                   expected_public_key=a.expected_public_key,
+                                   expected_worker_id=a.expected_worker_id,
+                                   ledger=a.ledger)
         elif a.action == "status":
             result = nodes_status(a.ledger)
         elif a.action == "run":
@@ -62,8 +68,10 @@ def main() -> int:
             result = verify_erc(a.ledger, a.workspace, a.request_id)
         else:
             result = revoke(a.ledger, a.worker_id, approve=a.approve)
-        print(json.dumps({"ok": True, "result": result}, indent=2, sort_keys=True))
-        return 0
+        # A verifier that declines (ok=False) must not look like success to a caller.
+        ok = result.get("ok", True) is not False
+        print(json.dumps({"ok": ok, "result": result}, indent=2, sort_keys=True))
+        return 0 if ok else 2
     except (WorkerError, OSError, ValueError, TypeError, KeyError, json.JSONDecodeError) as exc:
         print(json.dumps({"ok": False, "action": a.action, "error": str(exc)}, indent=2))
         return 2

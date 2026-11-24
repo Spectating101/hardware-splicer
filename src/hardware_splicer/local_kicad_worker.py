@@ -548,12 +548,50 @@ def nodes_status(ledger: Path) -> dict[str, Any]:
             "source": "local_operator_approved_only", "remote_dispatch_enabled": False}
 
 
-def verify_bundle(bundle: Path, workspace: Path) -> dict[str, Any]:
-    """Verify an exported public evidence bundle, without a private key/ledger.
+def _pin_identity(identity: dict[str, Any], *, expected_public_key: str | None,
+                  expected_worker_id: str | None, ledger: Path | None) -> str:
+    """Compare a bundle's self-declared identity with out-of-band trusted values."""
+    anchors = []
+    if expected_public_key is not None:
+        if (not isinstance(expected_public_key, str)
+            or not re.fullmatch(r"[0-9a-f]{64}", expected_public_key)):
+            raise WorkerError("expected public key must be 64 lowercase hex characters")
+        if identity["public_key"] != expected_public_key:
+            raise WorkerError("bundle identity does not match the pinned public key")
+        anchors.append("public_key")
+    if expected_worker_id is not None:
+        if not isinstance(expected_worker_id, str) or not NODE_ID.fullmatch(expected_worker_id):
+            raise WorkerError("expected worker id malformed")
+        if identity["worker_id"] != expected_worker_id:
+            raise WorkerError("bundle identity does not match the pinned worker id")
+        anchors.append("worker_id")
+    if ledger is not None:
+        enrolled = _lookup(ledger, identity["worker_id"])
+        if enrolled["identity"]["public_key"] != identity["public_key"]:
+            raise WorkerError("bundle identity does not match the pinned ledger enrollment")
+        anchors.append("ledger")
+    return "+".join(anchors)
 
-    This proves signature ownership of the included public key and integrity
-    of the source/report; it does NOT independently vouch for the signer host.
+
+def verify_bundle(bundle: Path, workspace: Path, *, expected_public_key: str | None = None,
+                  expected_worker_id: str | None = None,
+                  ledger: Path | None = None) -> dict[str, Any]:
+    """Verify an exported public evidence bundle against a pinned trusted identity.
+
+    The bundle's own public_identity.json is attacker-controllable, so a result
+    is only verified when the caller pins the signer: an expected public key,
+    an expected worker id, or the enrolled ledger. Without a pin this returns
+    ok=False. It still does NOT independently vouch for the signer host.
     """
+    if expected_public_key is None and expected_worker_id is None and ledger is None:
+        return {
+            "ok": False, "signed_receipt_verified": False,
+            "reason": ("no trusted identity pinned: supply an expected public key, "
+                       "worker id or enrolled ledger; the bundle's own "
+                       "public_identity.json is not a trust anchor"),
+            "operator_enrollment_independently_proven": False,
+            "physical_authority": False, "design_approved": False,
+        }
     paths = [bundle / name for name in ("public_identity.json", "receipt.json", "erc.json")]
     if (bundle.is_symlink() or any(
         p.is_symlink() or not p.is_file() or p.stat().st_size > max_bytes
@@ -561,6 +599,8 @@ def verify_bundle(bundle: Path, workspace: Path) -> dict[str, Any]:
     )):
         raise WorkerError("exported evidence bundle missing or unsafe")
     identity = _validate_public(_load_json(paths[0].read_bytes(), "bundle identity"))
+    trust_anchor = _pin_identity(identity, expected_public_key=expected_public_key,
+                                 expected_worker_id=expected_worker_id, ledger=ledger)
     packet = _load_json(paths[1].read_bytes(), "bundle receipt")
     body = _check_signature(identity, packet)
     raw = paths[2].read_bytes()
@@ -579,7 +619,7 @@ def verify_bundle(bundle: Path, workspace: Path) -> dict[str, Any]:
     return {
         "ok": True, "worker_id": identity["worker_id"],
         "request_id": body["request_id"],
-        "signed_receipt_verified": True,
+        "signed_receipt_verified": True, "trust_anchor": trust_anchor,
         "report_sha256": body["report_sha256"],
         "source_commit_claim": body["source_commit"],
         "source_bytes_match_commit": True,

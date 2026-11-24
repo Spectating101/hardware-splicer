@@ -135,12 +135,17 @@ def test_legacy_remote_dispatch_stays_separate():
     assert worker.KICAD_BIN == "/usr/bin/kicad-cli"
 
 
+# Pinned out of band (here: in the test); never read from the bundle under test.
+COMMITTED_BUNDLE_PUBLIC_KEY = "a137d80e92e91a6490df2e12d4245b2162ae7bc91e3c75de443aa88a019c0800"
+
+
 def test_public_optiplex_native_evidence_bundle_and_tamper_detection(tmp_path):
     from hardware_splicer.local_kicad_worker import verify_bundle
     import shutil
     bundle = (Path(__file__).resolve().parents[1] /
               "evidence/github_signals/optiplex_signed_erc_20261105")
-    result = verify_bundle(bundle, Path(__file__).resolve().parents[1])
+    result = verify_bundle(bundle, Path(__file__).resolve().parents[1],
+                           expected_public_key=COMMITTED_BUNDLE_PUBLIC_KEY)
     assert result["ok"] is True
     assert result["signed_receipt_verified"] is True
     assert result["finding_count"] == 40
@@ -150,7 +155,8 @@ def test_public_optiplex_native_evidence_bundle_and_tamper_detection(tmp_path):
     shutil.copytree(bundle, copy)
     (copy / "erc.json").write_text("{}")
     with pytest.raises(worker.WorkerError, match="malformed|inconsistent"):
-        verify_bundle(copy, Path(__file__).resolve().parents[1])
+        verify_bundle(copy, Path(__file__).resolve().parents[1],
+                      expected_public_key=COMMITTED_BUNDLE_PUBLIC_KEY)
 
 
 @pytest.mark.parametrize("violations", [[{"severity": "bogus"}], {}])
@@ -172,7 +178,7 @@ def test_exported_bundle_rejects_invalid_native_erc_findings(prepared, tmp_path,
     (bundle / "receipt.json").write_text(json.dumps(worker._sign(worker._private(key), body)))
     (bundle / "erc.json").write_bytes(raw)
     with pytest.raises(worker.WorkerError, match="malformed"):
-        worker.verify_bundle(bundle, root)
+        worker.verify_bundle(bundle, root, expected_public_key=identity["public_key"])
 
 
 ERC_SCHEMA = "https://schemas.kicad.org/erc.v1.json"
@@ -340,6 +346,8 @@ def _forge_bundle(tmp_path, key, identity, report=None, **overrides):
 
 
 def _verify_bundle(bundle, identity, workspace=ROOT, **kwargs):
+    if not ({"expected_public_key", "expected_worker_id", "ledger"} & set(kwargs)):
+        kwargs["expected_public_key"] = identity["public_key"]
     return worker.verify_bundle(bundle, workspace, **kwargs)
 
 
@@ -430,3 +438,69 @@ def test_verify_bundle_rejects_commit_whose_source_differs_from_signed_digest(pr
     bundle = _forge_bundle(tmp_path, key, identity, source_commit=commit, input_sha256="0" * 64)
     with pytest.raises(worker.WorkerError):
         _verify_bundle(bundle, identity, workspace=repo)
+
+
+def test_bundle_without_pinned_identity_is_not_verified(prepared, tmp_path):
+    """A self-signed bundle must not verify on the strength of its own identity file."""
+    key, _, identity = prepared
+    bundle = _forge_bundle(tmp_path, key, identity)  # fully valid, self-signed
+    result = worker.verify_bundle(bundle, ROOT)
+    assert result["ok"] is False
+    assert result["signed_receipt_verified"] is False
+    assert "trusted identity" in result["reason"]
+    assert result["design_approved"] is False
+
+
+def test_attacker_keypair_bundle_fails_against_pinned_real_identity(prepared, tmp_path):
+    key, _, identity = prepared
+    bundle = _forge_bundle(tmp_path, key, identity)
+    with pytest.raises(worker.WorkerError, match="pinned"):
+        worker.verify_bundle(bundle, ROOT, expected_public_key=COMMITTED_BUNDLE_PUBLIC_KEY)
+    with pytest.raises(worker.WorkerError, match="pinned"):
+        worker.verify_bundle(bundle, ROOT, expected_worker_id="hs-node-73631d056b246341")
+
+
+def test_bundle_verifies_against_each_kind_of_pin(prepared, tmp_path):
+    key, ledger, identity = prepared
+    bundle = _forge_bundle(tmp_path, key, identity)
+    by_key = worker.verify_bundle(bundle, ROOT, expected_public_key=identity["public_key"])
+    by_id = worker.verify_bundle(bundle, ROOT, expected_worker_id=identity["worker_id"])
+    by_ledger = worker.verify_bundle(bundle, ROOT, ledger=ledger)
+    assert by_key["ok"] and by_id["ok"] and by_ledger["ok"]
+    assert (by_key["trust_anchor"], by_id["trust_anchor"], by_ledger["trust_anchor"]) == (
+        "public_key", "worker_id", "ledger")
+    assert by_key["operator_enrollment_independently_proven"] is False
+
+
+def test_bundle_pin_must_be_well_formed_and_ledger_must_enroll_the_key(prepared, tmp_path):
+    key, _, identity = prepared
+    bundle = _forge_bundle(tmp_path, key, identity)
+    with pytest.raises(worker.WorkerError):
+        worker.verify_bundle(bundle, ROOT, expected_public_key="not-hex")
+    with pytest.raises(worker.WorkerError):
+        worker.verify_bundle(bundle, ROOT, expected_worker_id="hs-node-short")
+    empty = tmp_path / "empty-ledger"
+    empty.mkdir()
+    with pytest.raises(worker.WorkerError, match="not enrolled"):
+        worker.verify_bundle(bundle, ROOT, ledger=empty)
+
+
+def _cli(*args):
+    script = ROOT / "scripts/hs_optiplex_worker.py"
+    return subprocess.run([sys.executable, str(script), *args], capture_output=True, text=True,
+                          env={**os.environ, "PYTHONPATH": str(ROOT / "src")})
+
+
+def test_cli_verify_bundle_exits_nonzero_without_pin_and_zero_with_it(prepared, tmp_path):
+    key, _, identity = prepared
+    bundle = _forge_bundle(tmp_path, key, identity)
+    unpinned = _cli("verify-bundle", "--bundle", str(bundle), "--workspace", str(ROOT))
+    assert unpinned.returncode != 0
+    assert json.loads(unpinned.stdout)["ok"] is False
+    wrong = _cli("verify-bundle", "--bundle", str(bundle), "--workspace", str(ROOT),
+                 "--expected-public-key", COMMITTED_BUNDLE_PUBLIC_KEY)
+    assert wrong.returncode != 0
+    pinned = _cli("verify-bundle", "--bundle", str(bundle), "--workspace", str(ROOT),
+                  "--expected-public-key", identity["public_key"])
+    assert pinned.returncode == 0, pinned.stdout
+    assert json.loads(pinned.stdout)["result"]["ok"] is True
