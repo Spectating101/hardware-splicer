@@ -11,6 +11,7 @@ from __future__ import annotations
 from copy import deepcopy
 from typing import Any, Dict, Mapping
 
+from .i2c_addresses import normalize_i2c_address
 from .pcb.module_registry import find_module, find_pin
 
 _SETTABLE_NODE_FIELDS = frozenset({"i2c_address"})
@@ -51,7 +52,12 @@ def apply_graph_patch(graph: Mapping[str, Any], patch: Mapping[str, Any]) -> Dic
         extra = set(fields) - _SETTABLE_NODE_FIELDS
         if extra:
             raise ValueError(f"a patch may set only i2c_address on a node, not {sorted(extra)}")
-        nodes[str(node_id)].update({k: str(v) for k, v in fields.items()})
+        if "i2c_address" not in fields:
+            continue
+        address = normalize_i2c_address(fields.get("i2c_address"))
+        if address is None:
+            raise ValueError(f"patch sets an invalid I2C address on {node_id!r}: {fields.get('i2c_address')!r}")
+        nodes[str(node_id)]["i2c_address"] = address
 
     out["wires"] = wires
     return out

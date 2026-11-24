@@ -14,7 +14,7 @@ from __future__ import annotations
 import re
 from typing import Any, Dict, List, Mapping, Optional, Tuple
 
-from .i2c_addresses import i2c_addresses_for
+from .i2c_addresses import FIRST_DEVICE_ADDRESS, LAST_DEVICE_ADDRESS, i2c_addresses_for, normalize_i2c_address
 from .pcb.module_registry import find_module
 
 Graph = Mapping[str, Any]
@@ -37,7 +37,12 @@ def i2c_findings(graph: Graph) -> List[Finding]:
     for node_id, node in nodes.items():
         declared = node.get("i2c_address")
         info = i2c_addresses_for(str(node.get("moduleId") or ""))
-        if declared is not None and info and str(declared) not in info["addresses"]:
+        if declared is None or not (info or (specs.get(node_id) and _device_pins(specs[node_id]))):
+            continue
+        address = normalize_i2c_address(declared)
+        if address is None:
+            findings.append(_invalid_address(node_id, specs[node_id], declared, info))
+        elif info and address not in info["addresses"]:
             findings.append(_not_possible(node_id, specs[node_id], str(declared), info))
 
     for bus, members in buses.items():
@@ -56,9 +61,9 @@ def i2c_findings(graph: Graph) -> List[Finding]:
                 findings.append(_clash(bus, address, group, nodes, specs, wires, buses, resolved))
         for nid in members:
             info = i2c_addresses_for(str(nodes[nid].get("moduleId") or ""))
-            declared = nodes[nid].get("i2c_address")
-            if declared is not None and info and str(declared) in info["addresses"] and str(declared) != info["default"]:
-                findings.append(_declared_strap(nid, specs[nid], str(declared), info))
+            declared = normalize_i2c_address(nodes[nid].get("i2c_address"))
+            if declared is not None and info and declared in info["addresses"] and declared != info["default"]:
+                findings.append(_declared_strap(nid, specs[nid], declared, info))
     return findings
 
 
@@ -66,8 +71,8 @@ def _effective(node: Mapping[str, Any]) -> Optional[str]:
     info = i2c_addresses_for(str(node.get("moduleId") or ""))
     if info is None:
         return None
-    declared = node.get("i2c_address")
-    return str(declared) if declared is not None and str(declared) in info["addresses"] else info["default"]
+    declared = normalize_i2c_address(node.get("i2c_address"))
+    return declared if declared is not None and declared in info["addresses"] else info["default"]
 
 
 def _device_pins(spec: Mapping[str, Any]) -> Optional[Tuple[str, str]]:
@@ -183,6 +188,21 @@ def _unknown(bus: Bus, members: List[str], unknown: List[str], specs, nodes) -> 
         finding["requires_person"] = True
         finding["message"] += " Identical parts usually share one factory address, so they would clash."
     return finding
+
+
+def _invalid_address(node_id: str, spec, declared: Any, info: Optional[Mapping[str, Any]]) -> Finding:
+    return {
+        "id": f"{node_id}-i2c-address-invalid",
+        "level": "error",
+        "code": "i2c_address_not_possible",
+        "message": (
+            f"{_label(spec, node_id)} is declared at {declared!r}, which is not a 7-bit I2C device address "
+            f"(0x{FIRST_DEVICE_ADDRESS:02X} to 0x{LAST_DEVICE_ADDRESS:02X}, written like 0x3C)."
+        ),
+        "nodeId": node_id,
+        "address": str(declared),
+        "address_basis": (info or {}).get("basis", ""),
+    }
 
 
 def _not_possible(node_id: str, spec, declared: str, info: Mapping[str, Any]) -> Finding:
