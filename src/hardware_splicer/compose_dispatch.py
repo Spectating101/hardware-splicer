@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence
 
@@ -17,14 +18,31 @@ from .scratch_pipeline import compile_scratch_build
 SCHEMA_VERSION = "hardware_splicer.compose_dispatch.v1"
 
 
+def _read_graph(out_dir: Any) -> Dict[str, Any] | None:
+    if not out_dir:
+        return None
+    try:
+        graph = json.loads((Path(str(out_dir)) / "build_compilation" / "build_graph.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return graph if isinstance(graph, dict) else None
+
+
 def _finalize_payload(
     payload: Dict[str, Any],
     *,
     quality: Mapping[str, Any],
     request_id: str | None = None,
     compile_payload: Mapping[str, Any] | None = None,
+    goal: str | None = None,
 ) -> Dict[str, Any]:
-    gate = build_design_quality_gate(dict(quality))
+    fidelity = None
+    if goal:
+        # The phrase picker can drop a part the phrase names (a microSD card) and still compile clean boards.
+        from .request_fidelity import assess_request_fidelity
+
+        fidelity = assess_request_fidelity([], _read_graph(payload.get("out_dir")), goal=goal)
+    gate = build_design_quality_gate(dict(quality), request_fidelity=fidelity)
     out = {
         "schema_version": SCHEMA_VERSION,
         **payload,
@@ -274,6 +292,7 @@ def compose_dispatch(
                 quality=quality,
                 request_id=request_id,
                 compile_payload=compile_result.to_dict() if compile_result else None,
+                goal=phrase,
             )
 
     catalog_build_id = build_id or str(constraints_map.get("target_build_id") or constraints_map.get("build_id") or "").strip()
@@ -353,4 +372,5 @@ def compose_dispatch(
         quality=quality,
         request_id=request_id,
         compile_payload=compile_result.to_dict() if compile_result else None,
+        goal=phrase,
     )

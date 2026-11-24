@@ -147,3 +147,32 @@ def test_the_heater_brief_through_splice_and_build_is_blocked(tmp_path) -> None:
     assert any("SSR" in b for b in gate["blockers"])
     assert result["design_quality_gate"]["build_ready"] is False
 
+
+def test_compose_phrase_that_asks_for_a_microsd_card_is_not_build_ready_when_the_card_is_dropped(tmp_path) -> None:
+    """Probe on main: the phrase picker dropped the card, ERC/DRC were clean, and compose said build_ready."""
+    from hardware_splicer.compose_dispatch import compose_dispatch
+
+    result = compose_dispatch(
+        out_dir=tmp_path / "logger",
+        phrase="ESP32 environmental sensor logger with I2C BME280 and microSD card",
+        export_gerber=False,
+    )
+
+    assert "sd_card_module" not in result["module_ids"]
+    gate = result["design_quality_gate"]
+    assert gate["build_ready"] is False
+    assert result["ok"] is False
+    assert any("microSD card" in b and "leaves out" in b for b in gate["blockers"])
+    assert gate["request_fidelity"]["status"] == "mismatch"
+
+
+def test_compose_phrase_without_a_named_missing_part_is_unaffected(tmp_path) -> None:
+    from hardware_splicer.compose_dispatch import compose_dispatch
+
+    result = compose_dispatch(
+        out_dir=tmp_path / "plain",
+        phrase="ESP32 environmental sensor logger with I2C BME280",
+        export_gerber=False,
+    )
+
+    assert not any("leaves out" in b for b in result["design_quality_gate"]["blockers"])
