@@ -436,6 +436,8 @@ def _normalize_request(value: Any) -> Dict[str, Any]:
             raise MissionValidationError("request.expected.min must not exceed max")
         request["expected"] = {"min": low, "max": high,
                                "unit": _require_text(expected["unit"], field="request.expected.unit", max_len=10)}
+        if kind == "dimensional" and request["expected"]["unit"] != "mm":
+            raise MissionValidationError("a dimensional request's expected unit must be mm")
     return request
 
 
@@ -461,14 +463,49 @@ def _normalize_readings(request: Mapping[str, Any], values: Any) -> Any:
     return readings
 
 
-def _compare(request: Mapping[str, Any], readings: Any) -> str:
+# The planner only accepts measured sizes inside these bounds (device_plan's override validation).
+_PLANNER_BOUNDS_MM = {"pcb_mm": (0.5, 300.0), "above_board_mm": (0.0, 100.0)}
+_CONTRADICTING = frozenset({"outside", "record_failed"})
+
+
+def _compare(request: Mapping[str, Any], readings: Any) -> tuple[str, str | None]:
+    """How an answer relates to what the need asked, as (comparison, reason).
+
+    Only "within" and "recorded" can resolve a need. "outside" and "record_failed" contradict it. "not_comparable"
+    (wrong unit, a size the planner would refuse, or no range to compare against) leaves the need open.
+    """
+    if request["kind"] == "boot_log":
+        return "recorded", None  # kept as text; nothing to compare
+    if not isinstance(readings, list):
+        return "not_comparable", "the answer holds no readings"
     expected = request.get("expected")
-    if not expected or not isinstance(readings, list):
-        return "not_comparable"
-    if any(row["unit"] != expected["unit"] for row in readings):
-        return "not_comparable"
+    dimensional = request["kind"] == "dimensional"
+    for row in readings:
+        if dimensional and row["unit"] != "mm":
+            return "not_comparable", f"a dimensional reading must be in mm, not {row['unit']!r}"
+        if expected and row["unit"] != expected["unit"]:
+            return "not_comparable", f"the reading unit {row['unit']!r} is not the expected unit {expected['unit']!r}"
+    if dimensional:
+        group = request["quantity"].split(".", 1)[0]
+        low, high = _PLANNER_BOUNDS_MM[group]
+        if any(not low <= row["value"] <= high for row in readings):
+            return "not_comparable", f"a {request['quantity']} reading must be between {low} and {high} mm for the planner to use it"
+    if not expected:
+        if dimensional:
+            return "recorded", None  # the planner's bounds are the only check; the size is applied as the person's measurement
+        return "not_comparable", "the need names no expected range, so the reading cannot be compared; ask again with one"
     inside = all(expected["min"] <= row["value"] <= expected["max"] for row in readings)
-    return "within" if inside else "outside"
+    return ("within", None) if inside else ("outside", f"a reading is outside {expected['min']} to {expected['max']} {expected['unit']}")
+
+
+def _need_state_after(event: Mapping[str, Any]) -> str:
+    """What an answer does to its need. Events written before comparison existed resolve unless they were outside."""
+    comparison = event.get("comparison")
+    if comparison in _CONTRADICTING:
+        return "contradicted"
+    if comparison == "not_comparable":
+        return "not_comparable"
+    return "resolved"
 
 
 def _dimensional_override(request: Mapping[str, Any], readings: list[Mapping[str, Any]]) -> Dict[str, Any]:
@@ -779,15 +816,18 @@ def _replay(events: list[Mapping[str, Any]], intake: Mapping[str, Any] | None = 
         elif event_type == "evidence_required":
             needs[seq] = {"seq": seq, "blocker": event["blocker"], "need": event["need"],
                           "candidate_id": event.get("candidate_id"), "request": event.get("request"),
-                          "need_state": "open", "answered_by": None}
+                          "need_state": "open", "answered_by": None, "comparison": None, "reason": None}
             phase = "EVIDENCE_REQUIRED"
         elif event_type == "evidence_supplied":
             need = needs[int(event["need_seq"])]
-            need["need_state"] = "contradicted" if event["comparison"] == "outside" else "resolved"
+            need["need_state"] = _need_state_after(event)
             need["answered_by"] = seq
-            # A new physical fact invalidates checks that came before it, as a repair does.
+            need["comparison"] = event["comparison"]
+            need["reason"] = event.get("comparison_reason")
+            # A new physical fact invalidates checks that came before it, as a repair does. An answer that could not
+            # be compared is not a usable fact: the need stays open and nothing earlier is invalidated.
             for candidate_id, state in candidates.items():
-                if need["candidate_id"] in (None, candidate_id):
+                if need["need_state"] != "not_comparable" and need["candidate_id"] in (None, candidate_id):
                     state["last_evidence_seq"] = seq
             override = event.get("override")
             if override:
@@ -833,7 +873,7 @@ def _since_seq(candidate: Mapping[str, Any]) -> int:
 
 def _resolved_needs(events: list[Mapping[str, Any]]) -> set[int]:
     return {int(item["need_seq"]) for item in events
-            if item.get("type") == "evidence_supplied" and item.get("comparison") != "outside"}
+            if item.get("type") == "evidence_supplied" and _need_state_after(item) == "resolved"}
 
 
 def _open_evidence_need_blocks(events: list[Mapping[str, Any]], candidate_id: str) -> bool:
@@ -1475,6 +1515,7 @@ class MissionStore:
             raise MissionValidationError("the envelope's record belongs to another project")
         if parsed.record.kind.value != _REQUEST_KINDS[request["kind"]]:
             raise MissionValidationError(f"a {request['kind']} need is answered by a {_REQUEST_KINDS[request['kind']]} record")
+        comparison, reason = _compare(request, readings)
         record: Dict[str, Any] = {
             "type": "evidence_supplied",
             "author": person,
@@ -1483,9 +1524,13 @@ class MissionStore:
             "envelope_hash": parsed.envelope_hash,
             "evidence_id": parsed.record.evidence_id,
             "values": readings,
-            "comparison": _compare(request, readings),
+            "comparison": comparison,
         }
+        if reason:
+            record["comparison_reason"] = reason
         if request["kind"] == "dimensional":
+            # Only a size that is usable is applied. A contradicted or not comparable one never becomes an override.
+            usable = comparison in {"within", "recorded"}
             override = {request["target"]: _dimensional_override(request, readings)}
             intake_sizes = (view["intake"].get("measurements") or {}).get(request["target"]) or {}
             for key, value in override[request["target"]].items():
@@ -1493,9 +1538,10 @@ class MissionStore:
                 clash = (isinstance(value, Mapping) and isinstance(known, Mapping)
                          and any(k in known and known[k] != v for k, v in value.items())) or (
                     not isinstance(value, Mapping) and known is not None and known != value)
-                if clash:
+                if clash and comparison != "not_comparable":
                     raise MissionValidationError(f"this measurement contradicts the intake measurement of {request['target']} {key}")
-            record["override"] = override
+            if usable:
+                record["override"] = override
         self._write_event(project_id, mission_id, last_seq + 1, record)
         return self.get_mission(project_id, mission_id)
 

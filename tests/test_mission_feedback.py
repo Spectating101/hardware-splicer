@@ -73,17 +73,18 @@ def _need(missions, mid, request, cid=None, blocker="BLOCKED_NEEDS_PHYSICAL_MEAS
     return _propose(missions, mid, event)["last_event_seq"]
 
 
-def _envelope(mid, need_seq, values, *, project_id="monitor", kind="electrical_measurement", envelope_id="env-1",
-              mission_id=None, bound_values=None):
-    record = {"evidence_id": f"ev-{envelope_id}", "project_id": project_id, "candidate_revision": "mission",
-              "kind": kind, "target_ids": ["mcu"], "procedure_id": "mission-need", "passed": True,
-              "captured_at": "2026-10-16T12:00:00Z", "operator": "bench-lead"}
+def _envelope(mid, need_seq, values, *, project_id="monitor", kind="electrical_measurement", envelope_id="env-1", revision="1",
+              mission_id=None, bound_values=None, operator="bench-lead", created_by="bench-lead", passed=True,
+              evidence_id=None):
+    record = {"evidence_id": evidence_id or f"ev-{envelope_id}", "project_id": project_id, "candidate_revision": revision,
+              "kind": kind, "target_ids": ["mcu"], "procedure_id": "mission-need", "passed": passed,
+              "captured_at": "2026-10-16T12:00:00Z", "operator": operator}
     metadata = {"mission": {"project_id": project_id, "mission_id": mission_id or mid, "need_seq": need_seq,
                             "values": values if bound_values is None else bound_values}}
     return build_physical_evidence_envelope(
         envelope_id=envelope_id, record=record,
         raw_files=[{"ref": "reading.txt", "content_hash": "sha256:" + "a" * 64}],
-        created_at="2026-10-16T12:00:00Z", created_by="bench-lead", metadata=metadata,
+        created_at="2026-10-16T12:00:00Z", created_by=created_by, metadata=metadata,
     ).model_dump(mode="json")
 
 
@@ -262,7 +263,7 @@ def test_a_boot_log_is_kept_as_text_and_not_interpreted(tmp_path):
     need = _need(missions, mid, {"kind": "boot_log", "target": "mcu", "instructions": "Flash and copy the serial log."})
     log = {"log": "[BOOT] sensor init failed at 0x76\n"}
     view = _supply(missions, mid, need, log, kind="inspection")
-    assert view["events"][-1]["values"] == log and view["events"][-1]["comparison"] == "not_comparable"
+    assert view["events"][-1]["values"] == log and view["events"][-1]["comparison"] == "recorded"
     assert [n["need_state"] for n in view["needs"]] == ["resolved"]
 
 
@@ -276,6 +277,72 @@ def test_after_new_evidence_the_agent_may_repair(tmp_path):
     repaired = _propose(missions, mid, {"type": "repair_proposed", "candidate_id": "A",
                                          "spec": example_specs()["esp32_oled_bme280_usb"], "rationale": "per the boot log"})
     assert repaired["candidates"][0]["repairs"] == 1
+
+
+def _ready_after_checks(missions, mid):
+    _evaluate(missions, mid)
+    _evaluate(missions, mid, operation="device_engineering")
+    return _propose(missions, mid, {"type": "terminal_proposed", "state": "READY_FOR_HUMAN_BUILD", "candidate_id": "A",
+                                    "reason": "checked"})
+
+
+@pytest.mark.parametrize("values", [
+    [{"quantity": "voltage", "value": 3300.0, "unit": "mV"}],
+    [{"quantity": "voltage", "value": 3.3, "unit": "V"}, {"quantity": "voltage", "value": 3300.0, "unit": "mV"}],
+])
+def test_a_reading_in_the_wrong_unit_does_not_resolve_the_need(tmp_path, values):
+    missions = _store(tmp_path)
+    mid = _mission(missions)["mission_id"]
+    _candidate(missions, mid)
+    _evaluate(missions, mid)
+    _evaluate(missions, mid, operation="device_engineering")
+    need = _need(missions, mid, VOLTAGE_REQUEST)
+    view = _supply(missions, mid, need, values)
+    assert view["events"][-1]["comparison"] == "not_comparable"
+    assert "unit" in view["events"][-1]["comparison_reason"]
+    assert [(n["need_state"], n["comparison"]) for n in view["needs"]] == [("not_comparable", "not_comparable")]
+    assert "unit" in view["needs"][0]["reason"]
+    assert view["phase"] == "EVIDENCE_REQUIRED"
+    with pytest.raises(MissionStateError, match="evidence need"):
+        _ready_after_checks(missions, mid)
+    # The need is still open: a reading in the asked unit resolves it.
+    good = [{"quantity": "voltage", "value": 3.3, "unit": "V"}]
+    again = _supply(missions, mid, need, good, envelope_id="env-2")
+    assert [n["need_state"] for n in again["needs"]] == ["resolved"]
+
+
+def test_a_need_that_names_no_range_cannot_be_resolved_by_a_reading(tmp_path):
+    missions = _store(tmp_path)
+    mid = _mission(missions)["mission_id"]
+    need = _need(missions, mid, {key: value for key, value in VOLTAGE_REQUEST.items() if key != "expected"})
+    view = _supply(missions, mid, need, [{"quantity": "voltage", "value": 3.3, "unit": "V"}])
+    assert [n["need_state"] for n in view["needs"]] == ["not_comparable"]
+    assert "range" in view["needs"][0]["reason"]
+
+
+@pytest.mark.parametrize("value, unit", [(28.1, "in"), (28.1, "cm"), (400.0, "mm"), (0.1, "mm")])
+def test_a_dimension_in_the_wrong_unit_or_beyond_the_planner_bounds_is_not_used(tmp_path, value, unit):
+    missions = _store(tmp_path)
+    mid = _mission(missions)["mission_id"]
+    need = _need(missions, mid, WIDTH_REQUEST)
+    view = _supply(missions, mid, need, [{"quantity": "pcb_mm.x", "value": value, "unit": unit}], kind="dimensional_measurement")
+    assert [n["need_state"] for n in view["needs"]] == ["not_comparable"]
+    assert "override" not in view["events"][-1]
+    spec = copy.deepcopy(example_specs()["esp32_oled_bme280_usb"])
+    spec["modules"][0]["overrides"] = {"pcb_mm": {"x": value}}
+    with pytest.raises(MissionValidationError, match="physical evidence"):
+        _candidate(missions, mid, spec)
+
+
+def test_a_dimensional_range_must_be_in_mm_and_a_contradicting_size_is_not_applied(tmp_path):
+    missions = _store(tmp_path)
+    mid = _mission(missions)["mission_id"]
+    with pytest.raises(MissionValidationError, match="mm"):
+        _need(missions, mid, {**WIDTH_REQUEST, "expected": {"min": 1.0, "max": 2.0, "unit": "in"}})
+    need = _need(missions, mid, {**WIDTH_REQUEST, "expected": {"min": 27.0, "max": 29.0, "unit": "mm"}})
+    view = _supply(missions, mid, need, [{"quantity": "pcb_mm.x", "value": 40.0, "unit": "mm"}], kind="dimensional_measurement")
+    assert [n["need_state"] for n in view["needs"]] == ["contradicted"]
+    assert "override" not in view["events"][-1]
 
 
 PERSON_TOKEN = "person-token-" + "a" * 48
