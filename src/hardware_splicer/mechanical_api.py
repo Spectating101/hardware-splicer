@@ -15,6 +15,7 @@ from .mechanical_fit import (
     build_mechanical_fit_report,
 )
 from .mechanical_fit_plan_update import apply_mechanical_fit_to_plan
+from .mechanical_fem import FemInput, solve_linear_tetra_fem
 from .mechanical_geometry_plan_update import apply_mechanical_geometry_to_plan
 from .step_geometry import MechanicalGeometryReport
 
@@ -66,9 +67,28 @@ def create_mechanical_router() -> APIRouter:
             "fit_apply_request_schema": MechanicalFitApplyRequest.model_json_schema(),
             "full_brep_collision": False,
             "structural_analysis": False,
+            "bounded_linear_tetra_fem": True,
+            "fem_request_schema": FemInput.model_json_schema(),
             "thread_strength_verified": False,
             **_authority_payload(),
         }
+
+    @router.post("/physics/linear-elasticity")
+    def check_linear_elasticity(request: FemInput) -> Dict[str, Any]:
+        """Independent *screening* solver; never promote a design to release."""
+        try:
+            report = solve_linear_tetra_fem(request)
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail={"type": "invalid_fem_model", "message": str(exc)},
+            ) from exc
+        except RuntimeError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail={"type": "physics_backend_unavailable", "message": str(exc)},
+            ) from exc
+        return {"ok": True, "structural_screening": report, **_authority_payload()}
 
     @router.post("/geometry/apply")
     def apply_geometry(request: MechanicalGeometryApplyRequest) -> Dict[str, Any]:

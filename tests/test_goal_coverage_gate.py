@@ -63,7 +63,7 @@ def test_keyword_matched_goal_is_covered() -> None:
     assert package["goal_coverage"]["covered"] is True
 
 
-def test_run_project_intake_cyberdeck_is_not_build_ready(tmp_path: Path, assume_clean_kicad_erc: None) -> None:
+def test_run_project_intake_cyberdeck_is_not_build_ready(tmp_path: Path) -> None:
     # KiCad ERC is held clean so only the scaffold/goal mismatch can block readiness.
     result = run_project_intake({"goal": CYBERDECK_GOAL}, out_dir=tmp_path / "deck", start_splicer=False)
     gates = [

@@ -126,6 +126,16 @@ def test_project_cannot_disable_clearance_checks() -> None:
         CHECKS.validate_rules(project)
 
 
+def test_project_keeps_fab_legend_limits() -> None:
+    project = json.loads((DESIGN / "spi_flash_adapter_v1.kicad_pro").read_text())
+    rules = project["board"]["design_settings"]["rules"]
+    for name in ("min_silk_clearance", "min_text_height", "min_text_thickness"):
+        relaxed = json.loads(json.dumps(project))
+        relaxed["board"]["design_settings"]["rules"][name] = rules[name] / 2
+        with pytest.raises(ValueError, match="unreviewed design rule"):
+            CHECKS.validate_rules(relaxed)
+
+
 def test_read_return_budget_includes_outward_clock() -> None:
     manifest = json.loads((DESIGN / "design_manifest.json").read_text())
     CHECKS.validate_timing(manifest)

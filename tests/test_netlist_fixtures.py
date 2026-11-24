@@ -55,6 +55,11 @@ def test_netlist_fixture_compiles_kicad_clean(tmp_path: Path, fixture: dict) -> 
     elif not kicad_erc_pass:
         assert q.get("fab_recommendation") == "blocked_erc", q
         assert q.get("kicad_truth_pass") is False
+    elif (q.get("geometry_fidelity") or {}).get("requires_native_source_geometry"):
+        # KiCad passes, but a package drawn with synthetic preview pads still blocks fabrication.
+        assert q.get("fab_recommendation") == "blocked_geometry_fidelity", q
+        assert q.get("fabrication_ready") is False
+        assert q.get("kicad_truth_pass") is True
     else:
         assert q.get("fab_recommendation") == "review_required_preview_copper", q
         assert q.get("kicad_truth_pass") is True

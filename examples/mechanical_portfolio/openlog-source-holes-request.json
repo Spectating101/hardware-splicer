@@ -1,0 +1,64 @@
+{
+  "schema": "hardware_splicer.mechanical_fixture_request.v1",
+  "project_id": "sparkfun-openlog-artemis-optical-fixture",
+  "revision": 1,
+  "objective": "Source-reviewable inspection nest for actual OpenLog mounting pattern",
+  "source": {
+    "filename": "SparkFun_Artemis_OpenLog.brd",
+    "url": "https://raw.githubusercontent.com/sparkfun/OpenLog_Artemis/f9c8e66b7da6f27a4bf9be55016c5b9231b9fb22/Hardware/SparkFun_Artemis_OpenLog.brd",
+    "sha256": "acb64b1740929b7ff3453dc98cabefc7bee8ed11e751bb80d11fca922bcfee61",
+    "geometry_basis": "reviewed_source_geometry",
+    "reproduction_rights": "external_reference_not_redistributed"
+  },
+  "board": {
+    "width_mm": 30.48,
+    "depth_mm": 30.48,
+    "thickness_mm": 1.6,
+    "thickness_basis": "unverified_assumption",
+    "outline_xy_mm": null,
+    "source_center_mm": [
+      15.24,
+      15.24
+    ],
+    "mounting_holes": [
+      {
+        "x_mm": -12.7,
+        "y_mm": -12.7,
+        "diameter_mm": 3.302,
+        "source_anchor": "H1"
+      },
+      {
+        "x_mm": 12.7,
+        "y_mm": -12.7,
+        "diameter_mm": 3.302,
+        "source_anchor": "H2"
+      },
+      {
+        "x_mm": -12.7,
+        "y_mm": 12.7,
+        "diameter_mm": 3.302,
+        "source_anchor": "H3"
+      },
+      {
+        "x_mm": 12.7,
+        "y_mm": 12.7,
+        "diameter_mm": 3.302,
+        "source_anchor": "H4"
+      }
+    ],
+    "mounting_holes_status": "verified_source_geometry",
+    "unknown_contacts": true
+  },
+  "interface": {
+    "usb_corridor_width_mm": 9,
+    "usb_corridor_depth_mm": 6,
+    "antenna_geometry_status": "unknown",
+    "edge_contacts_status": "unknown"
+  },
+  "requirements": {
+    "min_nominal_edge_gap_mm": 0.4,
+    "max_base_width_mm": 55,
+    "max_base_depth_mm": 55,
+    "stationary_unpowered_only": true
+  }
+}

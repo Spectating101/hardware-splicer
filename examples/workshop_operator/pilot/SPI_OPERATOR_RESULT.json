@@ -1,9 +1,9 @@
 {
   "artifacts_sha256": {
     "source_copy/design_manifest.json": "1fd7e647abbc10faa4fa8a53d0e237ee19a7575383f1b82c27220d759f90e443",
-    "source_copy/spi_flash_adapter_v1.kicad_pcb": "86c0e72840b058b5dc4b56a820e560b306b2f624724a818e092fd1d003fdefbd",
+    "source_copy/spi_flash_adapter_v1.kicad_pcb": "43a354a4624b69e8c26915680a69fea02b84e1b7e1e9816056522070c2269d24",
     "source_copy/spi_flash_adapter_v1.kicad_sch": "6f322855430c53bcac5b65b23ec2a271ae45203f894b9775339eb9ae04b5faf3",
-    "source_copy/verification.json": "6fa005f1d3544275997c8588af277277a67bef6c8d30c1c4da2eab356982596b"
+    "source_copy/verification.json": "7e72a9062ce6dbbd8d36ab18fc304804aa868989d51071f373b95d63d3a3e12d"
   },
   "canonical_machine_release": {
     "achieved": "build_ready",
@@ -42,7 +42,7 @@
   "real_repair_confirmed": false,
   "registered_source": "hardware/reference_designs/spi_flash_adapter_v1",
   "schema_version": "hardware_splicer.workshop_operator.v1",
-  "source_sha256": "9d00c1842d1e66970567bd64e919443fd35acdc6ee85136137f4c1155bc55c78",
+  "source_sha256": "6ae14227488a4a5321438752d0f6714e10ff4749c486805841a23d9b5ddcf008",
   "status": "verified_design_only_physical_blocked",
   "tool_versions": {
     "kicad_cli": "9.0.2",
@@ -54,7 +54,7 @@
       "details": "Staged the complete editable reference source; no synthesized replacement.",
       "existing_engine": "published SPI reference + SHA-256",
       "source_artifacts_sha256": {
-        "spi_flash_adapter_v1.kicad_pcb": "86c0e72840b058b5dc4b56a820e560b306b2f624724a818e092fd1d003fdefbd",
+        "spi_flash_adapter_v1.kicad_pcb": "43a354a4624b69e8c26915680a69fea02b84e1b7e1e9816056522070c2269d24",
         "spi_flash_adapter_v1.kicad_sch": "6f322855430c53bcac5b65b23ec2a271ae45203f894b9775339eb9ae04b5faf3",
         "verify_design.py": "1711dfc2e47b8ea14eec08a763aea5872d0962ea01fd1973be9234f9e77dcd63"
       },

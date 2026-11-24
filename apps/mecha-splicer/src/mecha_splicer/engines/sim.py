@@ -129,12 +129,12 @@ def _run_high_fidelity(project: ProjectSpec) -> List[Dict[str, Any]]:
         mass_kg = ax.payload_n / g
         accel_m_s2 = ax.target_accel_mm_s2 / 1000.0
         r_m = (ax.pulley_teeth * 2.0 / 1000.0) / (2.0 * math.pi)
-        force_n = ax.payload_n + mass_kg * accel_m_s2
-        torque_nm_load = force_n * r_m
-
-        j_ref = mass_kg * (r_m**2)
-        alpha = accel_m_s2 / max(r_m, 1e-6)
-        torque_nm_dyn = j_ref * alpha
+        # The declared payload is the steady load force. Its inferred mass
+        # contributes the acceleration term exactly once (F = F_load + m*a).
+        # The reflected-inertia formulation m*r^2 * a/r is algebraically the
+        # same dynamic torque; adding it *again* double-counted acceleration.
+        torque_nm_load = ax.payload_n * r_m
+        torque_nm_dyn = mass_kg * accel_m_s2 * r_m
         torque_nm_total = torque_nm_load + torque_nm_dyn
 
         torque_nm_cont_limit = 0.28
@@ -151,7 +151,10 @@ def _run_high_fidelity(project: ProjectSpec) -> List[Dict[str, Any]]:
                 ),
                 "metrics": {
                     "torque_total_nm": round(torque_nm_total, 4),
+                    "torque_load_nm": round(torque_nm_load, 4),
+                    "torque_acceleration_nm": round(torque_nm_dyn, 4),
                     "torque_margin_x": round(margin, 3),
+                    "assumed_continuous_motor_torque_nm": torque_nm_cont_limit,
                 },
             }
         )

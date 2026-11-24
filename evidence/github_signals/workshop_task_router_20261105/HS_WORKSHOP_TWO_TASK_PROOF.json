@@ -1,14 +1,16 @@
 {
   "schema_version": "hardware_splicer.github_signal_two_task_proof.v1",
   "date": "2026-11-05",
+  "kdif_task_regenerated_date": "2026-11-15",
+  "kdif_task_regenerated_reason": "SPI adapter PCB bytes changed when its silkscreen was brought within fab legend limits; local run of the same pinned tooling",
   "tool_selector": "rules_v1_not_an_llm",
   "real_hs_design": "hardware/reference_designs/spi_flash_adapter_v1/",
   "hs_product_board_baseline_byte_identical": true,
   "controlled_fixture_only": true,
   "changes": "F.SilkS annotation only; no PCB routing, footprint, BOM, or electrical redesign",
-  "source_board_original_sha256": "86c0e72840b058b5dc4b56a820e560b306b2f624724a818e092fd1d003fdefbd",
-  "fixture_sha_a": "460c147f5ccd1736060ca397642877625720e5a2",
-  "fixture_sha_b": "552f7adfaeadde7b2e41d00fa4344989c3457c64",
+  "source_board_original_sha256": "43a354a4624b69e8c26915680a69fea02b84e1b7e1e9816056522070c2269d24",
+  "fixture_sha_a": "408da1c030b935d2e197b4db38c539c54623b1bb",
+  "fixture_sha_b": "353d7b5756f900e7378d10527c7518c7b5f576e0",
   "tasks": [
     {
       "objective": "Inspect the existing SPI schematic for layout and electrical review issues",
@@ -22,8 +24,8 @@
       "objective": "Compare the historical PCB revisions visually",
       "selected": "0x12net/kdif",
       "output": "diff/HS_SIGNAL_KDIF_REVISIONS.html",
-      "evidence_sha256": "16e9fed55618a70c46a3c7f979f04376271a0e9b0c0b49e2d485864adc447202",
-      "output_bytes": 92459,
+      "evidence_sha256": "0c7a9ddb3c60f208b94c10239959904cd0958555a639c93a72a58fe5445939e7",
+      "output_bytes": 92043,
       "execution": "native official KiCad Docker digest networkless"
     }
   ],
