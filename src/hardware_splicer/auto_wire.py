@@ -608,7 +608,7 @@ def pick_modules_for_requirements(req_any: List[List[str]]) -> List[ModuleSpec]:
     return chosen
 
 
-def compose_build_graph_from_module_ids(module_ids: List[str]) -> ComposeResult:
+def compose_build_graph_from_module_ids(module_ids: List[str], *, auto_repair: bool = True) -> ComposeResult:
     modules = [find_module(mid) for mid in module_ids]
     unresolved = [mid for mid, module in zip(module_ids, modules) if module is None]
     request = {
@@ -640,10 +640,18 @@ def compose_build_graph_from_module_ids(module_ids: List[str]) -> ComposeResult:
             **{key: value for key, value in request.items() if key != "status"},
         }
     recipe = auto_wire_picked_modules(modules)
+    graph = _recipe_to_build_graph(recipe)
+    notes = list(recipe.get("notes") or [])
+    if auto_repair:
+        # HS composing on its own does not hand out a design it can already see is broken.
+        from .graph_patch import auto_repair_i2c
+
+        graph, repair_notes = auto_repair_i2c(graph)
+        notes.extend(repair_notes)
     return {
-        "graph": {**_recipe_to_build_graph(recipe), "composition_request": request},
+        "graph": {**graph, "composition_request": request},
         "build_id": "generic_low_voltage_build",
-        "notes": list(recipe.get("notes") or []),
+        "notes": notes,
         "warnings": [],
         "composition_status": request["status"],
         **{key: value for key, value in request.items() if key != "status"},

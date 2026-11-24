@@ -25,7 +25,9 @@ export type DesignState =
   | "unknown"
   | "drc_errors"
   | "drc_clean"
-  | "request_mismatch";
+  | "request_mismatch"
+  | "electrical_error"
+  | "needs_attention";
 
 export type CopperState =
   | "not_available"
@@ -99,6 +101,34 @@ export interface RequestFidelityMissingPart {
   names?: readonly string[] | null;
   requested?: number;
   in_design?: number;
+  unknown_module_id?: boolean;
+  did_you_mean?: readonly string[] | null;
+}
+
+export interface ElectricalRepairInput {
+  summary?: string;
+  requires_person?: boolean;
+  physical_steps?: readonly string[] | null;
+}
+
+export interface ElectricalIssueInput {
+  level?: string;
+  message?: string;
+  requires_person?: boolean;
+  repairs?: readonly ElectricalRepairInput[] | null;
+}
+
+export interface ProjectProblemRepair {
+  summary: string | undefined;
+  requiresPerson: boolean;
+  steps: readonly string[];
+}
+
+export interface ProjectProblem {
+  message: string;
+  repairs: ProjectProblemRepair[];
+  // True when only a person can clear it and HS has no repair step to show for it.
+  needsPerson?: boolean;
 }
 
 export interface RequestFidelityInput {
@@ -122,7 +152,12 @@ export interface ProjectTruthSessionInput {
     design_quality?: DesignQualityInput | null;
     bench_session?: BenchSessionInput | null;
     design_quality_gate?: {
+      build_ready?: boolean | null;
+      blockers?: readonly string[] | null;
       request_fidelity?: RequestFidelityInput | null;
+      summary?: {
+        electrical_issues?: readonly ElectricalIssueInput[] | null;
+      } | null;
     } | null;
   } | null;
   composeResult?: {
@@ -141,6 +176,7 @@ export interface ProjectTruth {
     errors: number | null;
     warnings: number | null;
     detail: string;
+    problems: ProjectProblem[];
     label: string;
   };
   copper: {
@@ -203,6 +239,25 @@ export function hasAffirmativePhysicalEvidence(
   return false;
 }
 
+function designLabel(designState: DesignState, errors: number | null): string {
+  switch (designState) {
+    case "not_compiled":
+      return "Not compiled";
+    case "electrical_error":
+      return "Electrical problem";
+    case "needs_attention":
+      return "Not build-ready";
+    case "request_mismatch":
+      return "Missing requested part";
+    case "drc_errors":
+      return `${errors ?? "?"} DRC error(s)`;
+    case "drc_clean":
+      return "DRC clean";
+    default:
+      return "DRC unknown";
+  }
+}
+
 export function deriveProjectTruth(session: ProjectTruthSessionInput = {}): ProjectTruth {
   const pkg = session.projectPackage || {};
   const gates = pkg.gates || {};
@@ -230,9 +285,84 @@ export function deriveProjectTruth(session: ProjectTruthSessionInput = {}): Proj
     designState = "unknown";
   }
 
-  const fidelity = session.displayResult?.design_quality_gate?.request_fidelity;
+  const gate = session.displayResult?.design_quality_gate;
+  const fidelity = gate?.request_fidelity;
   const requestMismatch = sessionHasBuild(session) && fidelity?.status === "mismatch";
   if (requestMismatch) designState = "request_mismatch";
+  // A design the electrical check rejects is not a DRC failure; say what it found, in its own words.
+  const electricalErrors = sessionHasBuild(session)
+    ? (gate?.summary?.electrical_issues || []).filter(
+        (issue): issue is ElectricalIssueInput & { message: string } => issue?.level === "error" && Boolean(issue?.message),
+      )
+    : [];
+  const electricalError = !requestMismatch && electricalErrors.length > 0;
+  if (electricalError) designState = "electrical_error";
+  // Electrical errors are listed even when a missing requested part is the state said first.
+  const electricalDetail = electricalErrors.map((issue) => issue.message).join(" ");
+  // A clean DRC is not a build-ready design. When the quality gate says it is not (a strap only a
+  // person can set, a failing KiCad ERC, a goal the design does not cover), say so and list why.
+  const gateBlocked = sessionHasBuild(session) && gate?.build_ready === false;
+  const needsAttention = gateBlocked && designState === "drc_clean";
+  if (needsAttention) designState = "needs_attention";
+  const issuesByMessage = new Map<string, ElectricalIssueInput>(
+    (gate?.summary?.electrical_issues || []).filter((i) => i?.message).map((i) => [String(i.message), i]),
+  );
+  const gateProblems: ProjectProblem[] = [];
+  if (needsAttention) {
+    const messages = [
+      ...(gate?.blockers || []).map(String),
+      ...[...issuesByMessage.values()].filter((i) => i.requires_person).map((i) => String(i.message)),
+    ];
+    for (const message of [...new Set(messages)]) {
+      const issue = issuesByMessage.get(message);
+      const repairs = (issue?.repairs || []).map((repair) => ({
+        summary: repair.summary,
+        requiresPerson: Boolean(repair.requires_person),
+        steps: repair.physical_steps || [],
+      }));
+      gateProblems.push({ message, repairs, needsPerson: Boolean(issue?.requires_person) });
+    }
+  }
+  if (gateBlocked && !needsAttention) {
+    // Another problem sets the state (a missing requested part, an electrical error), but a step only a
+    // person can take still blocks the build: keep it in view rather than letting the louder state hide it.
+    const listed = new Set(electricalErrors.map((issue) => String(issue.message)));
+    for (const issue of issuesByMessage.values()) {
+      const message = String(issue.message);
+      if (!issue.requires_person || listed.has(message)) continue;
+      const repairs = (issue.repairs || []).map((repair) => ({
+        summary: repair.summary,
+        requiresPerson: Boolean(repair.requires_person),
+        steps: repair.physical_steps || [],
+      }));
+      gateProblems.push({ message, repairs, needsPerson: true });
+    }
+  }
+  const gateDetail = gateProblems.map((p) => p.message).join(" ");
+  // Each problem as data, so a panel can show it in plain view and say who can fix it.
+  const problems = [
+    ...(requestMismatch
+      ? (fidelity?.missing_parts || []).map((row) => ({
+          message: `Design leaves out requested part ${row.module_id}: requested ${row.requested}, design has ${row.in_design} (${(row.names || []).join(", ")}).${
+            row.unknown_module_id
+              ? ` ${row.module_id} is not a part id HS knows.${row.did_you_mean?.length ? ` Did you mean ${row.did_you_mean.join(" or ")}?` : " Look the part up in the module catalog."}`
+              : ""
+          }`,
+          repairs: [],
+        }))
+      : []),
+    ...gateProblems,
+    ...(electricalErrors.length > 0
+      ? electricalErrors.map((issue) => ({
+          message: issue.message,
+          repairs: (issue.repairs || []).map((repair) => ({
+            summary: repair.summary,
+            requiresPerson: Boolean(repair.requires_person),
+            steps: repair.physical_steps || [],
+          })),
+        }))
+      : []),
+  ];
   const requestDetail = requestMismatch
     ? (fidelity!.missing_parts || [])
         .map(
@@ -315,6 +445,16 @@ export function deriveProjectTruth(session: ProjectTruthSessionInput = {}): Proj
     overallState = "needs_design";
     headline = "Design and compile the board";
     nextAction = { label: "Open Design", stage: STAGES.design };
+  } else if (designState === "electrical_error") {
+    overallState = "needs_verification";
+    headline = "The design has an electrical problem";
+    nextAction = { label: "Open Verify", stage: STAGES.verify };
+  } else if (designState === "needs_attention") {
+    overallState = "needs_verification";
+    headline = gateProblems.some((p) => p.needsPerson || p.repairs.some((r) => r.requiresPerson))
+      ? "The design needs you before it is build-ready"
+      : "The design is not build-ready";
+    nextAction = { label: "Open Verify", stage: STAGES.verify };
   } else if (designState === "request_mismatch") {
     overallState = "needs_verification";
     headline = "The design leaves out a part you asked for";
@@ -354,17 +494,9 @@ export function deriveProjectTruth(session: ProjectTruthSessionInput = {}): Proj
       state: designState,
       errors,
       warnings,
-      detail: requestDetail,
-      label:
-        designState === "not_compiled"
-          ? "Not compiled"
-          : designState === "request_mismatch"
-            ? "Missing requested part"
-            : designState === "drc_errors"
-            ? `${errors ?? "?"} DRC error(s)`
-            : designState === "drc_clean"
-              ? "DRC clean"
-              : "DRC unknown",
+      detail: [requestDetail, electricalDetail].filter(Boolean).join(" ") || gateDetail,
+      problems,
+      label: designLabel(designState, errors),
     },
     copper: {
       state: copperState,

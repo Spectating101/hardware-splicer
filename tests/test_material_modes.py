@@ -39,3 +39,9 @@ def test_salvage_adds_only_allowed_purchase() -> None:
     )
     assert "level-shifter-4ch" in ids
     assert "l298n" not in ids
+
+
+def test_expanding_for_safety_keeps_repeated_parts_when_it_adds_nothing() -> None:
+    ids = ["esp32-devkit", "bme280", "bme280", "usb-power-5v"]
+
+    assert expand_module_ids_for_safety(ids, safety_messages=["unrelated"], material_mode="salvage", inventory_ids=ids) == ids
