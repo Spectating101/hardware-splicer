@@ -108,6 +108,16 @@ def _entries(plan: dict[str, Any], library: dict[str, Any]) -> list[tuple[dict[s
 
 # --- electrical -------------------------------------------------------------------------------------------------------
 
+def _apply_bus_limit(status: str, text: str, best: float, worst: float, limit: float) -> tuple[str, str]:
+    """UM10204 caps the bus capacitance at ``limit`` pF whatever the pull-ups could carry. The low estimate (wire alone) over it
+    is certain, so it exceeds; only the high estimate over it leaves the wire to decide, so it is at least advisory."""
+    if best > limit:
+        return EXCEEDS, f"The estimated bus capacitance, {best:g} to {worst:g} pF, is over the {limit} pF maximum for the bus (UM10204, Table 10, Cb) even at its low estimate. " + text
+    if worst > limit and status in (WITHIN, NOT_ASSESSED):
+        return ADVISORY, f"The high estimate of the bus capacitance, {worst:g} pF, is over the {limit} pF maximum for the bus (UM10204, Table 10, Cb); the low estimate is {best:g} pF, so wire capacitance decides. " + text
+    return status, text
+
+
 def _i2c_bus(plan: dict[str, Any], library: dict[str, Any]) -> dict[str, Any]:
     roles = _roles(plan)
     lines: dict[str, list[dict[str, Any]]] = {"sda": [], "scl": []}
@@ -153,10 +163,12 @@ def _i2c_bus(plan: dict[str, Any], library: dict[str, Any]) -> dict[str, Any]:
         "pullups_known": [{"module": ref, "ohm": ohm} for ref, ohm in known],
         "pullups_unknown": unknown,
     }
+    limit = STANDARDS["i2c_cb_max_pf"][0]
     if not known:
-        return _check("i2c_bus", "I2C bus loading", NOT_ASSESSED,
-                      f"No module on this bus states its pull-up value, so the rise time cannot be checked. Estimated bus capacitance is {best:g} to {worst:g} pF "
-                      f"against the {STANDARDS['i2c_cb_max_pf'][0]} pF limit.", quantities, inputs,
+        status, text = NOT_ASSESSED, (f"No module on this bus states its pull-up value, so the rise time cannot be checked. Estimated bus capacitance is {best:g} to {worst:g} pF "
+                                      f"against the {limit} pF limit.")
+        status, text = _apply_bus_limit(status, text, best, worst, limit)
+        return _check("i2c_bus", "I2C bus loading", status, text, quantities, inputs,
                       ["Pull-ups on the modules that do not state them are unknown, and an unknown pull-up is not a pass."])
     rp_eff = 1 / sum(1 / ohm for _, ohm in known)
     tolerated = tr / (k * rp_eff) * 1e12
@@ -181,6 +193,7 @@ def _i2c_bus(plan: dict[str, Any], library: dict[str, Any]) -> dict[str, Any]:
         status, text = ADVISORY, f"The bus can carry {tolerated:.0f} pF at {rp_eff:.0f} ohm; the estimate runs {best:g} to {worst:g} pF, so wire capacitance decides."
     else:
         status, text = WITHIN, f"At {rp_eff:.0f} ohm the bus can carry {tolerated:.0f} pF; the estimate is {best:g} to {worst:g} pF."
+    status, text = _apply_bus_limit(status, text, best, worst, limit)
     return _check("i2c_bus", "I2C bus loading", status, text + " At 100 kHz (the rise time limit of Standard-mode).", quantities, inputs, limits)
 
 

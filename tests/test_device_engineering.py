@@ -465,3 +465,35 @@ def test_input_names_of_a_single_instance_are_unchanged_by_the_repeat_fix():
     names = [item["name"] for item in checks(review)["supply_current"]["inputs"]]
     assert not any("@" in name for name in names)
 
+
+def _bus_with_wire_capacitance(monkeypatch, low, high, parts=5):
+    monkeypatch.setitem(ASSUMED, "wire_pf_per_m", ((low, high), "pF/m", "a test value"))
+    return checks(build_engineering_review(_repeated_sensor_spec("adafruit-bh1750-stemma-qt", parts)))["i2c_bus"]
+
+
+def test_the_stated_400_pf_bus_limit_is_compared_and_not_only_quoted(monkeypatch):
+    # The model's own wire figures cannot reach 400 pF with in-case wiring (the five-BH1750 draft estimates 8 to 87 pF), so the
+    # wire capacitance is raised to make both estimates cross the limit. Five 10 kohm pull-ups (2 kohm) could carry 590 pF by
+    # the rise-time arithmetic alone; the standard's own ceiling is 400 pF (UM10204, Table 10, Cb).
+    bus = _bus_with_wire_capacitance(monkeypatch, 1800.0, 2500.0)
+    assert bus["quantities"]["bus_capacitance_tolerated_pf"] > 400
+    assert bus["quantities"]["bus_capacitance_pf_estimate"]["low"] > 400
+    assert bus["status"] == EXCEEDS
+    assert "400" in bus["summary"] and "UM10204" in bus["summary"]
+
+
+def test_a_high_estimate_alone_over_400_pf_is_advisory_and_a_low_one_is_untouched(monkeypatch):
+    advisory = _bus_with_wire_capacitance(monkeypatch, 30.0, 2500.0)
+    assert advisory["quantities"]["bus_capacitance_pf_estimate"]["low"] < 400 < advisory["quantities"]["bus_capacitance_pf_estimate"]["high"]
+    assert advisory["status"] == ADVISORY and "wire capacitance decides" in advisory["summary"]
+    assert _bus_with_wire_capacitance(monkeypatch, 30.0, 100.0)["status"] == WITHIN
+
+
+def test_the_limit_also_applies_when_no_module_states_its_pullups(monkeypatch):
+    from hardware_splicer.device_draft import draft_device_spec
+
+    monkeypatch.setitem(ASSUMED, "wire_pf_per_m", ((20000.0, 25000.0), "pF/m", "a test value"))
+    spec = draft_device_spec({"controller": "esp32-devkitc-v4", "parts": ["ssd1306-096-i2c"]})["spec"]
+    bus = checks(build_engineering_review(spec))["i2c_bus"]
+    assert bus["quantities"]["pullups_known"] == []
+    assert bus["status"] == EXCEEDS
