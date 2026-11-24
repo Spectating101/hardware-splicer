@@ -661,3 +661,73 @@ def test_cli_exposes_freshness_window_and_exits_nonzero_on_stale(prepared, tmp_p
     stale = _cli(*base, "--max-age-seconds", "3600")
     assert stale.returncode != 0 and "stale" in stale.stdout
     assert _cli(*base, "--max-age-seconds", "86400").returncode == 0
+
+
+def _erc_runner(payload, on_erc=None):
+    def runner(args, **kw):
+        if args[1:] == ["version"]:
+            return subprocess.CompletedProcess(args, 0, stdout="9.0.2\n", stderr="")
+        if on_erc:
+            on_erc()
+        open(args[6], "w").write(json.dumps(payload))
+        return subprocess.CompletedProcess(args, 0, stdout="", stderr="")
+    return runner
+
+
+def test_run_erc_writes_outputs_while_holding_the_allocation_lock(prepared, tmp_path, monkeypatch):
+    import contextlib
+
+    key, ledger, _ = prepared
+    worker.heartbeat(ledger, key)
+    monkeypatch.setattr(worker, "_source", lambda workspace, source_ref=None: ("a" * 40, FAKE_SOURCE))
+    monkeypatch.setattr(worker, "KICAD_BIN", sys.executable)
+    real_lock, held, writes = worker.allocation_lock, [], []
+
+    @contextlib.contextmanager
+    def tracking_lock(path):
+        with real_lock(path):
+            held.append(True)
+            try:
+                yield
+            finally:
+                held.pop()
+
+    real_write = Path.write_bytes
+
+    def spy(self, data):
+        if self.name.startswith(("erc.json", "receipt.json")):
+            writes.append((self.name, bool(held)))
+        return real_write(self, data)
+
+    monkeypatch.setattr(worker, "allocation_lock", tracking_lock)
+    monkeypatch.setattr(Path, "write_bytes", spy)
+    worker.run_erc(ledger, key, tmp_path, execute=True, request_id=RID,
+                   run_fn=_erc_runner({"$schema": ERC_SCHEMA, "sheets": []}))
+    assert writes and all(locked for _, locked in writes), writes
+
+
+def test_run_erc_records_the_heartbeat_sequence_current_at_signing(prepared, tmp_path, monkeypatch):
+    key, ledger, _ = prepared
+    worker.heartbeat(ledger, key)
+    monkeypatch.setattr(worker, "_source", lambda workspace, source_ref=None: ("a" * 40, FAKE_SOURCE))
+    monkeypatch.setattr(worker, "KICAD_BIN", sys.executable)
+    # A newer heartbeat lands while KiCad is still running.
+    runner = _erc_runner({"$schema": ERC_SCHEMA, "sheets": []},
+                         on_erc=lambda: worker.heartbeat(ledger, key))
+    result = worker.run_erc(ledger, key, tmp_path, execute=True, request_id=RID, run_fn=runner)
+    assert result["heartbeat_sequence_at_execution"] == 2
+    signed = json.loads((ledger / "node_jobs" / RID / "receipt.json").read_text())
+    assert signed["body"]["heartbeat_sequence_at_execution"] == 2
+    assert worker.verify_erc(ledger, tmp_path, RID)["ok"] is True
+
+
+def test_run_erc_leaves_no_outputs_when_revoked_while_kicad_runs(prepared, tmp_path, monkeypatch):
+    key, ledger, identity = prepared
+    worker.heartbeat(ledger, key)
+    monkeypatch.setattr(worker, "_source", lambda workspace, source_ref=None: ("a" * 40, FAKE_SOURCE))
+    monkeypatch.setattr(worker, "KICAD_BIN", sys.executable)
+    runner = _erc_runner({"$schema": ERC_SCHEMA, "sheets": []},
+                         on_erc=lambda: worker.revoke(ledger, identity["worker_id"], approve=True))
+    with pytest.raises(worker.WorkerError, match="revoked"):
+        worker.run_erc(ledger, key, tmp_path, execute=True, request_id=RID, run_fn=runner)
+    assert not (ledger / "node_jobs" / RID).exists()

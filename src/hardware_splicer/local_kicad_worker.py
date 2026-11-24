@@ -528,25 +528,30 @@ def run_erc(ledger: Path, key_dir: Path, workspace: Path, *,
             counts = {k: sum(f["severity"] == k for f in findings)
                       for k in ("error", "warning", "exclusion")}
             report_bytes = report.read_bytes()
-            receipt = {
-                **planned, "schema_version": SCHEMA, "kind": "erc_result",
-                "state": "diagnostics_produced_not_design_approved",
-                "kicad_version": version,
-                "erc_schema": payload["$schema"],
-                "report_sha256": hashlib.sha256(report_bytes).hexdigest(),
-                "report_bytes": len(report_bytes), "finding_count": len(findings),
-                "severity_counts": counts, "design_approved": False,
-                "hardware_connected": False, "fabrication_authorized": False,
-                "executed_utc": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
-                "heartbeat_sequence_at_execution": node["last_seq"],
-            }
-            signed = _sign(key, receipt)
-            _check_signature(node["identity"], signed)
-            # A revocation occurring while KiCad runs must block output acceptance.
+            # A revocation or newer heartbeat while KiCad ran must be seen at
+            # signing time, and nothing may be written once a revoke can win the
+            # lock: re-read the node, sign, and write while still holding it.
             with allocation_lock(ledger):
-                _require_online(ledger, worker_id)
-            (destination / "erc.json").write_bytes(report_bytes)
-            (destination / "receipt.json").write_bytes(_canonical(signed) + b"\n")
+                node = _require_online(ledger, worker_id)
+                receipt = {
+                    **planned, "schema_version": SCHEMA, "kind": "erc_result",
+                    "state": RECEIPT_STATE,
+                    "kicad_version": version,
+                    "erc_schema": payload["$schema"],
+                    "report_sha256": hashlib.sha256(report_bytes).hexdigest(),
+                    "report_bytes": len(report_bytes), "finding_count": len(findings),
+                    "severity_counts": counts, "design_approved": False,
+                    "hardware_connected": False, "fabrication_authorized": False,
+                    "executed_utc": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
+                    "heartbeat_sequence_at_execution": node["last_seq"],
+                }
+                signed = _sign(key, receipt)
+                _check_signature(node["identity"], signed)
+                (destination / "erc.json").write_bytes(report_bytes)
+                # The receipt lands last and atomically, so verifiers never see a partial one.
+                staging = destination / "receipt.json.tmp"
+                staging.write_bytes(_canonical(signed) + b"\n")
+                os.replace(staging, destination / "receipt.json")
             return {**receipt, "signature_verified": True, "artifact_directory": str(destination)}
     except BaseException:
         shutil.rmtree(destination)
