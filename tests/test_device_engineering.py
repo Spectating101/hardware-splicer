@@ -440,3 +440,28 @@ def test_a_module_that_publishes_only_peaks_is_named_and_not_silently_left_out_o
     c = checks(build_engineering_review(spec))["supply_current"]
     assert c["quantities"]["modules_with_only_peak_figures"] == ["sensor"]
     assert "only peak figures" in c["summary"]
+
+
+def _repeated_sensor_spec(part, count, controller="esp32-devkitc-v4"):
+    from hardware_splicer.device_draft import draft_device_spec
+
+    return draft_device_spec({"controller": controller, "parts": [part] * count})["spec"]
+
+
+@pytest.mark.parametrize("part", ["adafruit-bme280-stemma-qt", "adafruit-bh1750-stemma-qt", "adafruit-ds3231-stemma-qt"])
+def test_two_instances_of_one_module_do_not_share_an_input_name(part):
+    import collections
+
+    review = build_engineering_review(_repeated_sensor_spec(part, 2))
+    for check in checks(review).values():
+        names = collections.Counter(item["name"] for item in check["inputs"])
+        assert [name for name, count in names.items() if count > 1] == [], check["id"]
+    names = [item["name"] for item in checks(review)["supply_current"]["inputs"] if item["name"].startswith(part)]
+    assert any(name.startswith(f"{part}@sensor.") for name in names) and any(name.startswith(f"{part}@sensor_2.") for name in names)
+
+
+def test_input_names_of_a_single_instance_are_unchanged_by_the_repeat_fix():
+    review = build_engineering_review(example_specs()["esp32_oled_bme280_usb"])
+    names = [item["name"] for item in checks(review)["supply_current"]["inputs"]]
+    assert not any("@" in name for name in names)
+

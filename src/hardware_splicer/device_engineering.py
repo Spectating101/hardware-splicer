@@ -73,8 +73,9 @@ def _asm(key: str) -> dict[str, Any]:
 
 
 def _fact(module: dict[str, Any], name: str, value: Any, unit: str, locator: str, url: str) -> dict[str, Any]:
-    """A figure read from a module's library entry, with where in which document it was read."""
-    return {"name": f"{module['id']}.{name}", "value": value, "unit": unit, "basis": "sourced", "source": f"{module['name']}: {locator}", "url": url}
+    """A figure read from a module's library entry, with where in which document it was read. A library module placed more than
+    once carries ``input_prefix`` (see ``_entries``), so each placed instance names its own figures."""
+    return {"name": f"{module.get('input_prefix', module['id'])}.{name}", "value": value, "unit": unit, "basis": "sourced", "source": f"{module['name']}: {locator}", "url": url}
 
 
 def _check(check_id: str, title: str, status: str, summary: str, quantities: dict[str, Any], inputs: list[dict[str, Any]],
@@ -98,8 +99,11 @@ def _roles(plan: dict[str, Any]) -> dict[tuple[str, str], list[str]]:
 
 
 def _entries(plan: dict[str, Any], library: dict[str, Any]) -> list[tuple[dict[str, Any], dict[str, Any]]]:
-    """Each placed module with its library entry."""
-    return [(m, library[m["module"]]) for m in plan["modules"]]
+    """Each placed module with its library entry. When one library module is placed more than once, each instance's entry is a copy
+    that carries an ``input_prefix`` of ``<library id>@<placed id>``, so the inputs it yields have distinct names."""
+    placed = [m["module"] for m in plan["modules"]]
+    return [(m, {**library[m["module"]], "input_prefix": f"{m['module']}@{m['id']}"} if placed.count(m["module"]) > 1 else library[m["module"]])
+            for m in plan["modules"]]
 
 
 # --- electrical -------------------------------------------------------------------------------------------------------
