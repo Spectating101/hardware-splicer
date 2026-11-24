@@ -168,3 +168,37 @@ def test_everything_the_original_gate_caught_is_still_caught():
 ])
 def test_dash_bullet_and_ellipsis_between_pin_and_number_are_flagged(phrase):
     assert unsafe_pin_actions(plan(next_safe_check=phrase), REF), phrase
+
+
+NAMED_PHRASES = [
+    "Probe the VIN pin", "Check the RESET pin with a meter", "Put the probe on the GND pad",
+    "Measure the 3V3 pin", "Check the pad labelled GND", "Probe pin VIN", "Probe the 5 V pad",
+    "Touch the VBUS pad", "Check the enable pin", "Probe the SDA and SCL pins",
+    "Probe test point TP4", "Probe TP12", "Probe test point 2", "Probe the test point labelled VCC",
+    "Check the BOOT0 pin", "Probe the D+ pad", "Check the GND terminal",
+]
+
+
+@pytest.mark.parametrize("phrase", NAMED_PHRASES)
+@pytest.mark.parametrize("field", ["next_safe_check", "summary", "hyp.safe_test"])
+def test_named_pin_pad_and_test_point_advice_is_withheld(phrase, field):
+    p = plan()
+    if field.startswith("hyp."):
+        p["hypotheses"][0][field[4:]] = phrase
+    else:
+        p[field] = phrase
+    assert unsafe_pin_actions(p, REF), (phrase, field)
+    with pytest.raises(UnverifiedBoardPinAction):
+        reject_unverified_board_pin_actions(p, REF)
+    assert not unsafe_pin_actions(p, {"target_board_physically_verified": True})
+
+
+@pytest.mark.parametrize("text", [
+    "Inspect the HDMI port for bent pins.",
+    "Photograph the silkscreen marking near the battery compartment.",
+    "Keep the unit unpowered and verify the printed mainboard revision.",
+    "Compare the pad layout visually with the photo.",
+    "The device resets itself, then the screen stays black.",
+])
+def test_named_pin_patterns_do_not_flag_plain_inspection(text):
+    assert not unsafe_pin_actions(plan(next_safe_check=text), REF), text

@@ -10,9 +10,12 @@ so is reference-topology prose: a pin reference in a rationale field is
 withheld too. The check is pattern based and deliberately broad. It flags a
 numbered pin, pad, terminal or contact with or without a designator, a
 designator joined to a number ("DC1-4", "DC1.4"), a designator near a
-pin-like word, and "the centre pin of the barrel jack". It also flags
-harmless text such as "C10 pin 1 convention"; false rejections are
-accepted. Pins named rather than numbered ("the VIN pin") are not caught.
+pin-like word, and "the centre pin of the barrel jack". Pins named rather than numbered are
+flagged too: a common signal or net name next to a pin/pad/terminal/test-point
+word ("the VIN pin", "RESET pin", "GND pad", "pad labelled GND") and test-point
+designators ("TP4", "test point 2"). It also flags harmless text such as
+"C10 pin 1 convention" or "inspect the USB data pins"; false rejections are
+accepted. The signal-name list is finite, so an unusual net name is not caught.
 """
 from __future__ import annotations
 import re
@@ -37,6 +40,22 @@ _COMPONENT_PIN = re.compile(
     r"(?i)\b(?:[A-Z]{1,3}\d{1,4})\s*(?:pin\s*#?\s*\d+|[.]\d+|pins\s*\d+\s*(?:and|to|-)\s*\d+)\b"
     r"|\bpin\s*#?\s*\d+\s+(?:on|of|at)\s+[A-Z]{1,3}\d{1,4}\b"
 )
+_PINWORD = r"(?:pins?|pads?|terminals?|test[\s\-]?points?|testpoints?|balls?)"
+_SIGNAL = (
+    r"(?:v(?:in|out|cc|dd|ss|bus|bat|sys|ref|usb|core|batt)|[ad]?gnd|ground|n?rst|"
+    r"reset|enable|boot0?|bootsel|en|[rt]xd?|sda|scl|s?clk|sclk|sck|mosi|miso|cs|ss|"
+    r"d[+\-]|dp|dm|swdio|swclk|gpio\s?\d+|cc[12]|dtr|rts|cts|irq|int|adc|dac|pwm|"
+    r"pwr|power|positive|negative|input|output|data|signal|trigger|"
+    r"\d+v\d+|\d+(?:\.\d+)?\s?v)"
+)
+_NAMED_SEP = r"(?:\s|-|/|_)*"
+_LABEL = r"(?:\s+(?:named|called|labell?ed|marked|printed|silkscreened)(?:\s+as)?)?"
+NAMED_PATTERNS = [
+    re.compile(rf"(?<![\w+\-]){_SIGNAL}{_NAMED_SEP}{_PINWORD}\b", re.I),
+    re.compile(rf"\b{_PINWORD}{_LABEL}\s*[:#]?\s*{_SIGNAL}(?![\w+\-]|\.\d)", re.I),
+    re.compile(r"\bTP\s?-?\d{1,3}\b"),
+    re.compile(r"\btest[\s\-]?points?\s*#?\s*(?:[A-Z]{1,3}\s?-?)?\d{1,3}\b", re.I),
+]
 # Run on the text as written (the original pattern is always among them).
 PATTERNS = [
     _COMPONENT_PIN,
@@ -68,7 +87,7 @@ def _mask_evidence_ids(text: str, evidence_ids: Collection[str] | None) -> str:
 def _spans(text: str, evidence_ids: Collection[str] | None) -> list[tuple[int, int]]:
     masked = _mask_evidence_ids(text, evidence_ids)
     found = sorted(
-        [(m.start(), m.end()) for p in PATTERNS for m in p.finditer(text)]
+        [(m.start(), m.end()) for p in PATTERNS + NAMED_PATTERNS for m in p.finditer(text)]
         + [(m.start(), m.end()) for p in PROXIMITY_PATTERNS for m in p.finditer(masked)]
     )
     merged: list[tuple[int, int]] = []
