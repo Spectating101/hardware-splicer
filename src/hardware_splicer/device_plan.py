@@ -262,7 +262,11 @@ def module_library() -> dict[str, Any]:
     return json.loads(json.dumps(_library()))
 
 
-def _module(module_id: str) -> dict[str, Any]:
+def _module(module_id: str, donor_modules=None) -> dict[str, Any]:
+    if module_id.startswith("donor:"):
+        if donor_modules is not None and module_id in donor_modules:
+            return donor_modules[module_id]
+        raise DevicePlanError(f"donor {module_id} requires HS-frozen project context, not an embedded contract")
     for module in _library()["modules"]:
         if module["id"] == module_id:
             return module
@@ -354,7 +358,7 @@ def example_specs() -> dict[str, Any]:
 
 
 
-def device_spec_json_schema() -> dict[str, Any]:
+def device_spec_json_schema(*, include_project_donors: bool = False) -> dict[str, Any]:
     """A JSON Schema for the device spec, built from the library so the module ids, wire colours and ranges are the ones the planner accepts.
 
     It is meant for a person or a model writing a spec: constrained output that satisfies it still has to pass the planner's wiring
@@ -362,6 +366,10 @@ def device_spec_json_schema() -> dict[str, Any]:
     """
 
     ids = [m["id"] for m in _library()["modules"]]
+    module_schema = {"enum": ids}
+    if include_project_donors:
+        module_schema = {"anyOf": [{"enum": ids}, {"type": "string", "pattern": r"^donor:[a-z0-9][a-z0-9-]{0,63}:[a-z0-9][a-z0-9-]{0,63}$"}],
+                         "description": "Donor IDs require an accepted mission's frozen project context; the standalone device API cannot resolve them."}
     endpoint = {"type": "string", "pattern": r"^[a-z][a-z0-9_]{0,23}\.[^.\s]{1,40}$",
                 "description": "module_id.PIN, for example display.SDA. A pin is named by its id or its printed name, case-insensitively."}
     return {
@@ -382,7 +390,7 @@ def device_spec_json_schema() -> dict[str, Any]:
                     "type": "object", "required": ["id", "module"], "additionalProperties": False,
                     "properties": {
                         "id": {"type": "string", "pattern": _SLUG.pattern, "description": "Your name for this module in connections, for example mcu, display, sensor."},
-                        "module": {"enum": ids},
+                        "module": module_schema,
                         "pin_order": {"type": "string", "description": "For a module whose pin order varies by seller: the id of the order printed on yours (see the module's pin_orders)."},
                         "overrides": {"type": "object", "additionalProperties": False, "properties": {
                             "pcb_mm": {"type": "object", "additionalProperties": False, "properties": {k: {"type": "number", "minimum": 0.5, "maximum": 300} for k in ("x", "y", "z")}},
@@ -406,6 +414,34 @@ def device_spec_json_schema() -> dict[str, Any]:
             },
         },
     }
+
+
+def unrecognized_device_spec_fields(spec: dict[str, Any], *, extra_top_level_fields=()) -> list[str]:
+    """Return unknown JSON pointers without validating or discarding proposal content.
+
+    The legacy parser drops many unknown keys; strict subobjects may refuse them.
+    Reporting omissions separately keeps partial/generic proposals admissible and
+    does not pretend an extension was checked just because a narrow check is clean.
+    """
+    schema = device_spec_json_schema()
+    schema["properties"].update({key: {} for key in extra_top_level_fields})
+    unknown = []
+
+    def walk(value, definition, path):
+        if isinstance(value, dict) and definition.get("type") == "object":
+            properties = definition.get("properties", {})
+            for key, child in value.items():
+                pointer = path + "/" + key.replace("~", "~0").replace("/", "~1")
+                if key not in properties:
+                    unknown.append(pointer)
+                else:
+                    walk(child, properties[key], pointer)
+        elif isinstance(value, list) and definition.get("type") == "array":
+            for index, child in enumerate(value):
+                walk(child, definition.get("items", {}), path + "/" + str(index))
+
+    walk(spec, schema, "")
+    return sorted(unknown)
 
 
 def device_catalog() -> list[dict[str, Any]]:
@@ -433,7 +469,7 @@ def _number(value: Any, label: str, low: float, high: float) -> float:
     return number
 
 
-def _validate_spec(spec: Any) -> dict[str, Any]:
+def _validate_spec(spec: Any, *, donor_modules=None) -> dict[str, Any]:
     if not isinstance(spec, dict):
         raise DevicePlanError("the spec must be an object")
     if spec.get("schema_version", DEVICE_SPEC_SCHEMA) != DEVICE_SPEC_SCHEMA:
@@ -460,7 +496,9 @@ def _validate_spec(spec: Any) -> dict[str, Any]:
         if mid in seen:
             raise DevicePlanError(f"module id {mid!r} is used twice")
         seen.add(mid)
-        library_entry = _module(str(row.get("module")))
+        library_entry = _module(str(row.get("module")), donor_modules)
+        if library_entry["kind"] == "donor_passive" and (row.get("overrides") or "pin_order" in row):
+            raise DevicePlanError("donor geometry and contact order come only from the frozen contract")
         order_ids = [order["id"] for order in library_entry.get("pin_orders", [])]
         if "pin_order" in row and (not isinstance(row["pin_order"], str) or row["pin_order"] not in order_ids):
             raise DevicePlanError(f"modules[{index}].pin_order must be text naming one of the valid ids: {', '.join(order_ids) or '(none for this module)'}")
@@ -581,7 +619,7 @@ def _resolve_pin(placed: dict[str, _Placed], endpoint: str, other: dict[str, flo
     if not matches:
         errors.append(f"{endpoint!r}: {module.entry['name']} has no pin named {name!r}")
         return None
-    points = [(p, module.point(p["x"], p["y"], _pin_tip(module))) for p in matches]
+    points = [(p, module.point(p["x"], p["y"], _pin_tip(module, p))) for p in matches]
     if len(points) > 1 and other is not None:
         points.sort(key=lambda row: (math.dist((row[1]["x"], row[1]["y"], row[1]["z"]), (other["x"], other["y"], other["z"])), row[0]["id"]))
     elif len(points) > 1:
@@ -601,9 +639,11 @@ def _pins_up(module: _Placed) -> bool:
     return module.entry["kind"] != "display"
 
 
-def _pin_tip(module: _Placed) -> float:
+def _pin_tip(module: _Placed, pin=None) -> float:
     """How far above the module's PCB a connected wire reaches: the pin tips on a board with headers; the board's face for the rest."""
 
+    if module.entry["kind"] == "donor_passive":
+        return pin["tip_mm"] if pin is not None else max(p["tip_mm"] for p in module.entry["pins"])
     if not _pins_up(module):
         return -0.0  # the header is on the back, so the wire meets the underside
     return module.pcb.get("z", 1.6) + PIN_TIP_ABOVE_BOARD_MM
@@ -682,6 +722,16 @@ def _check_connection(wire_id: str, a: tuple[_Placed, dict[str, Any]], b: tuple[
         elif "reset" in pin_roles:
             out.append(_finding("error", "reset_pin", f"{name} uses the reset pin ({owner.ref}.{pin['name']}). Holding it low stops the board; nothing belongs on it here.", datasheet, wire_id))
     if any(f["severity"] == "error" for f in out):
+        return out
+
+    for owner, pin, other_owner, other in ((ma, pa, mb, pb), (mb, pb, ma, pa)):
+        if "donor_switch" not in pin["roles"]:
+            continue
+        bad = set(other["roles"]) & {"strapping", "usb_serial", "do_not_use", "reset", "gpio_input_only"}
+        if (other_owner.entry["kind"] != "mcu_board" or other_owner.entry["id"] not in {"esp32-devkitc-v4", "raspberry-pi-pico"}
+                or "gpio" not in other["roles"]
+                or bad or pin["controller_pin"] not in {other["id"], other["name"]}):
+            return [_finding("error", "donor_controller_pin", f"{name}: donor {pin['name']} requires its measured controller pin {pin['controller_pin']} on an unreserved GPIO.", "frozen donor contract plus controller pin roles", wire_id)]
         return out
 
     ground_a, ground_b = has(ra, "ground"), has(rb, "ground")
@@ -969,6 +1019,8 @@ def _attach_suggestions(findings: list[dict[str, Any]], placed: dict[str, _Place
 
 
 def _required_roles(module: _Placed) -> list[tuple[str, str]]:
+    if module.entry["kind"] == "donor_passive":
+        return [("ground", "ground")]
     if module.entry["kind"] in {"display", "i2c_breakout"}:
         return [("ground", "ground"), ("power_in", "power"), ("i2c_sda", "SDA"), ("i2c_scl", "SCL")]
     return []
@@ -977,14 +1029,14 @@ def _required_roles(module: _Placed) -> list[tuple[str, str]]:
 # --- the plan -------------------------------------------------------------------------------------------------------------
 
 
-def build_device_plan(spec: Any) -> dict[str, Any]:
+def build_device_plan(spec: Any, *, donor_modules=None) -> dict[str, Any]:
     """The plan for a device spec. Pure: no I/O, deterministic for the same spec."""
 
-    clean = _validate_spec(spec)
+    clean = _validate_spec(spec, donor_modules=donor_modules)
     placed: dict[str, _Placed] = {}
     for row in clean["modules"]:
-        entry = _module(row["module"])
-        if entry["kind"] not in _MODULE_KINDS:
+        entry = _module(row["module"], donor_modules)
+        if entry["kind"] not in _MODULE_KINDS | {"donor_passive"}:
             raise DevicePlanError(f"module kind {entry['kind']!r} cannot be placed in a case yet")
         placed[row["id"]] = _Placed(row["id"], entry, row["overrides"], row.get("pin_order"))
     boards = [m for m in placed.values() if m.entry["kind"] == "mcu_board"]
@@ -1036,7 +1088,7 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
     else:
         lid_underside = mcu_top + c
     cursor_z = c + mcu.pcb["x"] + c
-    for breakout in sorted((m for m in placed.values() if m.entry["kind"] == "i2c_breakout"), key=lambda m: m.ref):
+    for breakout in sorted((m for m in placed.values() if m.entry["kind"] in {"i2c_breakout", "donor_passive"}), key=lambda m: m.ref):
         breakout.base_y = wall + breakout.below
         # USB-side of the antenna, on the case floor, beside the board so the case grows from every module.
         breakout.origin = (c + usb_over + 4.0, cursor_z)
@@ -1044,6 +1096,8 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
         extent_z = max(extent_z, breakout.origin[1] + breakout.pcb["y"])
         cursor_z = breakout.origin[1] + breakout.pcb["y"] + c
         housing_top = breakout.base_y + breakout.pcb.get("z", 1.6) + PIN_TIP_ABOVE_BOARD_MM + WIRE_CONNECTOR_HEIGHT_MM + WIRE_BEND_ALLOWANCE_MM
+        if breakout.entry["kind"] == "donor_passive":
+            housing_top = breakout.base_y + _pin_tip(breakout) + WIRE_CONNECTOR_HEIGHT_MM + WIRE_BEND_ALLOWANCE_MM
         component_top = breakout.base_y + breakout.pcb["z"] + breakout.above
         lid_underside = max(lid_underside, housing_top + c, component_top + c)
     inner_x = extent_x + c
@@ -1123,6 +1177,13 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
     findings.extend(_net_findings(placed, [pair for pair in resolved_pairs if pair[0] not in rejected]))
     findings.extend(_i2c_bus_findings(placed, [pair for pair in resolved_pairs if pair[0] not in rejected]))
     # Everything a module needs to work is wired, by a wire that the checks did not reject.
+    for module in placed.values():
+        if module.entry["kind"] == "donor_passive":
+            for pin in module.entry["pins"]:
+                if "donor_switch" in pin["roles"] and not any(
+                    w not in rejected and any(m.ref == module.ref and p["id"] == pin["id"] for m, p in (a, b))
+                    for w, a, b in resolved_pairs):
+                    findings.append(_finding("error", "donor_signal_unwired", f"{module.ref}.{pin['name']} is not wired to its declared controller pin.", "every declared donor switch contact must be implemented"))
     for module in sorted(placed.values(), key=lambda m: m.ref):
         for role, label in _required_roles(module):
             connected = any(
@@ -1268,6 +1329,8 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
     steps = _steps(placed, mcu, display, wires, usb, window, findings)
     return {
         "schema_version": DEVICE_PLAN_SCHEMA,
+        **({"donor_scope": {"implementation": "passive_switch_topology_and_geometry", "firmware_implemented": False,
+                           "physical_correctness": "UNPROVEN"}} if any(m.entry["kind"] == "donor_passive" for m in placed.values()) else {}),
         "authority": AUTHORITY_STATEMENT,
         "name": clean["name"],
         "power": clean["power"],
@@ -1313,6 +1376,11 @@ def _steps(placed: dict[str, _Placed], mcu: _Placed, display: _Placed | None, wi
             checks=[{"kind": "suggested_check", "check": "measure", "from": f"{display.ref} width", "to": "your spec's dimension override", "net": None, "expect": "record what you observe; this plan supplies no reading"}],
         )
     add("place", f"Lay the {mcu.entry['name'].split(' (')[0]} in the case", f"Lower the board into the base with the USB socket at the cut-out{' and the antenna end clear of the wall' if antenna else ''}. {'It rests on its header pins.' if mcu.below else ''}", parts=[mcu.ref], motion="drop")
+    for donor in sorted((m for m in placed.values() if m.entry["kind"] == "donor_passive"), key=lambda m: m.ref):
+        add("place", f"Place donor {donor.entry['name']} in its proposed position",
+            "Keep all power disconnected. Match the frozen measured donor outline and contact identities, with the measured header tips facing up. "
+            "The outline is placed on the case floor; retention, switch actuation and mounting strength are not designed or verified here.",
+            parts=[donor.ref], motion="drop")
     for breakout in sorted((m for m in placed.values() if m.entry["kind"] == "i2c_breakout"), key=lambda m: m.ref):
         add(
             "place",

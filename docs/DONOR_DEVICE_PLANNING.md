@@ -77,7 +77,7 @@ proposals and case geometry. Engineering coverage includes the donor as a separa
 thermal, input suitability, debounce and contact-life information explicitly unassessed.
 
 The deterministic mission package retains `donor_read.json`, a `donor_scope.json` limitation record, the actual
-native plan and generated enclosure STL/OpenSCAD. A separate bounded [input firmware proposal](DONOR_INPUT_FIRMWARE.md)
+native plan and generated enclosure STL/OpenSCAD. A separate bounded input firmware proposal (`donor_device_application.py`)
 can now accompany the existing sensor-monitor application. It reports passive contact states and carries a distinct
 GPIO/clock host-model phase. Unsupported application combinations remain blocked, never silently replaced by a
 library-only sketch. Package generation still follows the existing READY contract, which can contain explicitly

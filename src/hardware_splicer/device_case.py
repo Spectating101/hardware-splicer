@@ -271,10 +271,10 @@ def _json(value: Any) -> bytes:
     return (json.dumps(value, sort_keys=True, ensure_ascii=True, indent=2, allow_nan=False) + "\n").encode()
 
 
-def build_device_case(spec: Any) -> tuple[dict[str, Any], bytes]:
+def build_device_case(spec: Any, *, donor_modules=None) -> tuple[dict[str, Any], bytes]:
     """Recompute the plan from the spec and export its case; never trust a caller's plan or findings."""
 
-    plan = build_device_plan(spec)
+    plan = build_device_plan(spec, donor_modules=donor_modules) if donor_modules else build_device_plan(spec)
     blockers = [f for f in plan["findings"] if f["severity"] == "error"]
     if blockers:
         raise DevicePlanError("Resolve the plan's errors before exporting a case: " + ", ".join(sorted({f["rule"] for f in blockers})))

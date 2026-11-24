@@ -180,9 +180,9 @@ def _for_board(text: str, controller_id: str) -> str:
     return text
 
 
-def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
+def build_device_application(spec: Any, *, donor_modules=None) -> tuple[dict[str, Any], bytes]:
     """Recompute from spec; never credit caller-supplied plan/findings/authority."""
-    plan = build_device_plan(spec)
+    plan = build_device_plan(spec, donor_modules=donor_modules) if donor_modules else build_device_plan(spec)
     try:
         spec_bytes = _json(spec)
     except (ValueError, TypeError, RecursionError) as exc:
@@ -198,6 +198,8 @@ def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
     if controller is None:
         raise DevicePlanError("application source supports only the catalog ESP32-DevKitC V4 and Raspberry Pi Pico")
     library = {m["id"]: m for m in module_library()["modules"]}
+    if donor_modules:
+        library.update(donor_modules)
     parts = available_parts()
     i2c_placed = [m for m in plan["modules"] if library[m["module"]].get("i2c")]
     sensors = [m for m in i2c_placed if m["module"] in parts]
@@ -225,6 +227,7 @@ def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
     bindings, declarations = resolve_shared_i2c_bus(
         plan,
         bus_error="application source requires exactly one shared SDA GPIO and one distinct SCL GPIO",
+        **({"donor_modules": donor_modules} if donor_modules else {}),
     )
     sensor = next(d for d in declarations if d["library_id"] == part["library_id"])
     if list(sensor["possible_addresses"]) != list(part["addresses"]):
@@ -265,6 +268,12 @@ def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
         "test/host/README.md": _template("host_README.md").encode(),
         "PART_DESCRIPTOR.json": descriptor_bytes,
     }
+    donor_manifest = None
+    if donor_modules:
+        from .donor_device_application import donor_input_files, attach_donor_adapter
+        donor_manifest, donor_files = donor_input_files(plan, donor_modules)
+        files.update(donor_files)
+        files["src/main.cpp"] = attach_donor_adapter(main).encode()
     if part["adapter"]["vendor_host"]:
         files.update(_vendor_host_files(part["adapter"]["vendor_profile"], mcu["module"], bindings))
     files.update({
@@ -323,6 +332,15 @@ def build_device_application(spec: Any) -> tuple[dict[str, Any], bytes]:
         "plan_sha256": _sha(files["DEVICE_PLAN.json"]),
         "files": {name: {"sha256": _sha(data), "size_bytes": len(data)} for name, data in sorted(files.items())},
     }
+    if donor_manifest:
+        note = "Donor inputs are proposed INPUT_PULLUP sampled at loop time with 20 ms software debounce. See DONOR_INPUTS.json; suitability and electrical behavior remain unverified."
+        files["README.md"] += ("\n" + note + "\nDonor adapter tests (no hardware): "
+            "`g++ -std=c++17 -Wall -Wextra -Werror -I test/donor_host -I src test/donor_host/harness.cpp -o donor_harness && ./donor_harness`\n").encode()
+        metadata.update(donor_inputs=donor_manifest["inputs"], donor_behaviour_tests="NOT_RUN",
+                        donor_claim_boundary=donor_manifest["claim_boundary"])
+        metadata["non_claims"].extend(donor_manifest["assumptions"])
+        metadata["non_claims"].append(note)
+        metadata["files"] = {name: {"sha256": _sha(data), "size_bytes": len(data)} for name, data in sorted(files.items())}
     files["FIRMWARE_PROPOSAL.json"] = _json(metadata)
     output = io.BytesIO()
     with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_STORED) as archive:
