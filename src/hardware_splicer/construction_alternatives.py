@@ -550,6 +550,29 @@ def evaluate_construction_alternatives(
         print_mass_g is not None and mass_hybrid is not None) else None
     delta_cost = round(print_cost - hybrid_cost,3) if (
         print_cost is not None and hybrid_cost is not None) else None
+    # A cost preference needs both price/density records to be quoted or
+    # measured. Assumed figures stay hypothetical: they are reported in the
+    # difference fields but never turned into a "cheaper" claim.
+    unquoted = [
+        label for label, record in (("filament", print_record), ("panel", panel_record))
+        if record is not None and record.get("evidence_kind") not in ("datasheet", "measured")
+    ]
+    if delta_cost is None:
+        economic_preference = "cost_comparison_unavailable"
+        economic_reason = "required_cost_or_mass_inputs_missing"
+    elif unquoted:
+        economic_preference = None
+        economic_reason = (
+            "cost_and_density_inputs_not_quoted_or_measured_so_figures_are_hypothetical: "
+            + ", ".join(f"{label}_evidence_assumed" for label in unquoted)
+        )
+    else:
+        economic_preference = (
+            "hybrid_lower_estimated_material_cost" if delta_cost > 0 else
+            "full_print_lower_estimated_material_cost" if delta_cost < 0 else
+            "material_cost_tie"
+        )
+        economic_reason = "from_supplied_quoted_or_measured_inputs_not_a_recommendation"
     alternatives = [
         {
             "method": "full_print",
@@ -627,13 +650,8 @@ def evaluate_construction_alternatives(
         "alternatives": alternatives,
         "hypothetical_full_print_minus_hybrid_mass_g": delta_mass,
         "hypothetical_material_cost_difference": delta_cost,
-        "economic_preference": (
-            "hybrid_lower_estimated_material_cost"
-            if delta_cost is not None and delta_cost>0 else
-            "full_print_lower_estimated_material_cost"
-            if delta_cost is not None and delta_cost<0 else
-            "material_cost_tie" if delta_cost==0 else "cost_comparison_unavailable"
-        ),
+        "economic_preference": economic_preference,
+        "economic_preference_reason": economic_reason,
         "selected_manufacturing_method": None,
         "no_unverified_automatic_substitution": True,
         "physical_panel_joint_testing_required": True,

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+from pathlib import Path
 
 import pytest
 
@@ -125,6 +126,7 @@ def test_missing_properties_do_not_create_imaginary_savings():
     assert r["hypothetical_full_print_minus_hybrid_mass_g"] is None
     assert r["hypothetical_material_cost_difference"] is None
     assert r["economic_preference"] == "cost_comparison_unavailable"
+    assert r["economic_preference_reason"] == "required_cost_or_mass_inputs_missing"
     assert "sheet_material_or_measured_thickness_missing" in _hybrid(r)["blockers"]
 
 
@@ -441,3 +443,27 @@ def test_boxkit_source_is_pinned_but_not_licensed_or_fit_proven():
     assert "external_connector_license_not_verified" in _hybrid(r)["blockers"]
     assert source["local_asset_validated"] is False
     assert r["release_authorized"] is False
+
+
+def test_assumed_inputs_give_hypothetical_figures_but_no_economic_preference():
+    for role in ("filament_material","panel_material"):
+        project=_project()
+        project["construction"][role]["evidence_kind"]="assumed"
+        r=evaluate_construction_alternatives(project)
+        # Figures are still computed, but only as hypothetical numbers.
+        assert r["hypothetical_material_cost_difference"] is not None
+        assert r["economic_preference"] is None
+        assert "assumed" in r["economic_preference_reason"]
+    r=evaluate_construction_alternatives(_project())
+    assert r["economic_preference"] in (
+        "hybrid_lower_estimated_material_cost",
+        "full_print_lower_estimated_material_cost",
+        "material_cost_tie",
+    )
+
+
+def test_example_with_assumed_prices_makes_no_cost_preference():
+    path=Path(__file__).resolve().parents[1]/"examples/mechanical/hybrid_enclosure_assumptions.json"
+    r=evaluate_construction_alternatives(json.loads(path.read_text()))
+    assert r["economic_preference"] is None
+    assert r["economic_preference_reason"]
