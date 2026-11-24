@@ -167,11 +167,13 @@ def schedule_parts(
          "fit_verified":False}
         for p in schedule["panels"]
     ]
-    n=construction.get("connector_count",0)
-    if n:
+    n=construction.get("connector_count")
+    family=construction.get("connector_family","unselected")
+    if n or (n is None and family!="unselected"):
         parts.append({
             "kind":"external_connector_reference",
-            "source_key":construction.get("connector_family","unselected"),
+            "source_key":family,
+            # None means the operator has not stated a count; never invented.
             "quantity":n,"file_verified":False,"fit_verified":False,
             "source_url":(source or {}).get("url"),
             "pinned_revision":(source or {}).get("pinned_revision"),

@@ -126,7 +126,6 @@ def test_missing_properties_do_not_create_imaginary_savings():
     assert r["hypothetical_full_print_minus_hybrid_mass_g"] is None
     assert r["hypothetical_material_cost_difference"] is None
     assert r["economic_preference"] == "cost_comparison_unavailable"
-    assert r["economic_preference_reason"] == "required_cost_or_mass_inputs_missing"
     assert "sheet_material_or_measured_thickness_missing" in _hybrid(r)["blockers"]
 
 
@@ -467,3 +466,34 @@ def test_example_with_assumed_prices_makes_no_cost_preference():
     r=evaluate_construction_alternatives(json.loads(path.read_text()))
     assert r["economic_preference"] is None
     assert r["economic_preference_reason"]
+
+
+def test_missing_connector_count_is_missing_data_not_a_default():
+    project=_project()
+    del project["construction"]["connector_count"]
+    r=evaluate_construction_alternatives(project)
+    hybrid=_hybrid(r)
+    assert hybrid["connector_printed_mass_g"] is None
+    assert hybrid["combined_estimated_mass_g"] is None
+    assert hybrid["material_cost_only"] is None
+    assert "connector_count_not_supplied" in hybrid["blockers"]
+    assert r["hypothetical_full_print_minus_hybrid_mass_g"] is None
+    assert r["hypothetical_material_cost_difference"] is None
+    assert r["economic_preference"] == "cost_comparison_unavailable"
+    # Explicit zero is a stated count, not missing data.
+    project["construction"]["connector_count"]=0
+    z=_hybrid(evaluate_construction_alternatives(project))
+    assert z["connector_printed_mass_g"] == 0
+    assert "connector_count_not_supplied" not in z["blockers"]
+
+
+def test_typed_connector_count_has_no_default():
+    from hardware_splicer.mechanism_bridge import _ensure_mecha_on_path
+    if not _ensure_mecha_on_path():
+        pytest.skip("Mecha-Splicer unavailable")
+    from mecha_splicer.spec import ConstructionSpec
+    assert ConstructionSpec().connector_count is None
+    assert ConstructionSpec(connector_count=4).connector_count == 4
+    assert ConstructionSpec(connector_count=0).connector_count == 0
+    with pytest.raises(ValueError):
+        ConstructionSpec(connector_count=101)

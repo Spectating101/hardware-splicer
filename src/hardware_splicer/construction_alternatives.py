@@ -423,8 +423,13 @@ def evaluate_construction_alternatives(
         fill = _valid_positive(fill,"printed_material_fraction")
         if fill > 1:
             raise ValueError("printed_material_fraction must be <=1")
-    connector_count = construction.get("connector_count",8)
-    if not isinstance(connector_count,int) or not 0 <= connector_count <= 100:
+    # No default: an unstated count is missing data, never a number.
+    connector_count = construction.get("connector_count")
+    if connector_count is not None and (
+        isinstance(connector_count,bool)
+        or not isinstance(connector_count,int)
+        or not 0 <= connector_count <= 100
+    ):
         raise ValueError("connector_count must be integer in [0,100]")
     connector_volume_cm3 = construction.get("connector_print_volume_cm3")
     if connector_volume_cm3 is not None:
@@ -492,6 +497,8 @@ def evaluate_construction_alternatives(
             panel_blockers.append("connector_fit_requires_measured_thickness")
         elif abs(thickness - nominal)>0.1:
             panel_blockers.append("connector_nominal_thickness_mismatch")
+    if connector_count is None:
+        panel_blockers.append("connector_count_not_supplied")
     if connector_count and connector_volume_cm3 is None:
         panel_blockers.append("connector_volume_not_measured")
     for role in ("filament","panel"):
@@ -524,9 +531,11 @@ def evaluate_construction_alternatives(
         sheet_area_mm2*thickness if sheet_area_mm2 is not None and thickness is not None else 0,
         panel_record.get("density_kg_m3") if panel_record and thickness is not None and sheet_area_mm2 is not None else None,
     )
-    connector_mass_g = _mass_g(
-        (connector_volume_cm3 or 0)*1000 * connector_count,
-        print_record.get("density_kg_m3") if print_record and connector_volume_cm3 is not None else None,
+    connector_mass_g = (
+        None if connector_count is None else _mass_g(
+            (connector_volume_cm3 or 0)*1000 * connector_count,
+            print_record.get("density_kg_m3") if print_record and connector_volume_cm3 is not None else None,
+        )
     )
     mass_hybrid = (
         round(sheet_mass_g+connector_mass_g,3)
