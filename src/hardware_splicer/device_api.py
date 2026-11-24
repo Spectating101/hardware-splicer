@@ -60,6 +60,20 @@ def _spec_body(description: str) -> dict[str, Any]:
     return {"requestBody": {"required": True, "description": description, "content": {"application/json": {"schema": device_spec_json_schema()}}}}
 
 
+def require_modeled_execution_access(request: Request) -> None:
+    """Gate for anything that executes generated host code: the configured app API key, else localhost only.
+
+    This credential permits bounded software execution, never operator or physical authority.
+    """
+
+    key = (os.environ.get("HARDWARE_SPLICER_API_KEY") or os.environ.get("CIRCUIT_AI_API_KEY", "")).strip()
+    if key:
+        if not secrets.compare_digest(request.headers.get("authorization", "").encode("utf-8"), f"Bearer {key}".encode("utf-8")):
+            raise HTTPException(status_code=401, detail={"type": "unauthorized", "message": "Modeled execution requires the configured app API key."})
+    elif request.client is None or request.client.host not in {"127.0.0.1", "::1", "testclient"}:
+        raise HTTPException(status_code=403, detail={"type": "local_execution_only", "message": "Configure the app API key before allowing remote modeled execution."})
+
+
 def create_device_router() -> APIRouter:
     router = APIRouter(prefix="/v1/devices", tags=["devices"])
     body = _spec_body("A device spec, or {\"spec\": <device spec>}. Get the schema, module ids and pins from GET /v1/devices/spec-schema.")
@@ -173,13 +187,7 @@ def create_device_router() -> APIRouter:
 
     @router.post("/application/run", summary="Run the generated application off-hardware", description="Compiles and exercises the application against modelled buses. Server-enabled only. Not an emulator and not a physical result.", openapi_extra=_spec_body("{\"spec\": <device spec>} only."))
     async def post_application_run(request: Request) -> Dict[str, Any]:
-        # This credential permits bounded software execution, never operator or physical authority.
-        key = (os.environ.get("HARDWARE_SPLICER_API_KEY") or os.environ.get("CIRCUIT_AI_API_KEY", "")).strip()
-        if key:
-            if not secrets.compare_digest(request.headers.get("authorization", "").encode("utf-8"), f"Bearer {key}".encode("utf-8")):
-                raise HTTPException(status_code=401, detail={"type": "unauthorized", "message": "Modeled execution requires the configured app API key."})
-        elif request.client is None or request.client.host not in {"127.0.0.1", "::1", "testclient"}:
-            raise HTTPException(status_code=403, detail={"type": "local_execution_only", "message": "Configure the app API key before allowing remote modeled execution."})
+        require_modeled_execution_access(request)
         body = await _read_body(request, error_type="invalid_device_spec", label="spec")
         if not isinstance(body, dict) or set(body) != {"spec"}:
             raise _unprocessable("send only {spec}; code, tools, paths and authority flags are not accepted")

@@ -207,3 +207,42 @@ def test_http_refuses_ready_and_repair_that_drop_a_persons_part(client):
     client.post(f"{BASE}/{other}/candidates/A/run", json={"operation": "device_plan"})
     refused = _propose(client, other, {"type": "repair_proposed", "candidate_id": "A", "spec": spec, "rationale": "drop display"})
     assert refused.status_code == 409 and "OLED" in refused.text
+
+
+def test_a_modeled_run_needs_the_same_gate_as_the_device_run_route(tmp_path, monkeypatch):
+    """The mission run route executes generated host code, so it takes the /v1/devices/application/run gate."""
+    from hardware_splicer import mission_api
+
+    store = ProjectStore(tmp_path)
+    store.save("monitor", {"projectId": "monitor", "projectName": "Field monitor", "currentStage": "design", "mode": "greenfield",
+                           "graph": {"nodes": [], "edges": []},
+                           "machineProject": {"project_id": "monitor", "name": "Field monitor", "purpose": "monitor"}},
+               expected_revision=0)
+    calls = []
+
+    def executor(*args, **kwargs):
+        calls.append(kwargs.get("operation"))
+        raise mission_api.MissionStateError("stub: the gate was passed")
+
+    monkeypatch.setattr(mission_api, "run_mission_operation", executor)
+    route = f"{BASE}/mission-0000000000000000/candidates/A/run"
+    run = {"operation": "device_application_run"}
+
+    monkeypatch.setenv("HARDWARE_SPLICER_API_KEY", "fake-test-key-only")
+    keyed = TestClient(create_product_app(store))
+    assert keyed.post(route, json=run).status_code == 401
+    assert keyed.post(route, json=run, headers={"authorization": "Bearer wrong"}).status_code == 401
+    assert calls == []
+    assert keyed.post(route, json=run, headers={"authorization": "Bearer fake-test-key-only"}).status_code == 409
+    assert calls == ["device_application_run"]
+    # Operations that run no host code are not gated.
+    assert keyed.post(route, json={"operation": "device_plan"}).status_code == 409
+
+    monkeypatch.delenv("HARDWARE_SPLICER_API_KEY", raising=False)
+    monkeypatch.delenv("CIRCUIT_AI_API_KEY", raising=False)
+    calls.clear()
+    remote = TestClient(create_product_app(store), client=("203.0.113.20", 1234))
+    assert remote.post(route, json=run).status_code == 403
+    assert calls == []
+    local = TestClient(create_product_app(store))
+    assert local.post(route, json=run).status_code == 409

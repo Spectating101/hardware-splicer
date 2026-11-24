@@ -9,10 +9,11 @@ from __future__ import annotations
 
 from typing import Any, Dict, Mapping
 
-from fastapi import APIRouter, Header, HTTPException, Response
+from fastapi import APIRouter, Header, HTTPException, Request, Response
 from fastapi import status as http_status
 from fastapi.concurrency import run_in_threadpool
 
+from .device_api import require_modeled_execution_access
 from .mission_delivery import build_mission_package, read_mission_package, stage_mission_design
 from .mission_executor import run_mission_operation
 from .mission_store import (
@@ -196,9 +197,13 @@ def create_mission_router(mission_store: MissionStore) -> APIRouter:
         mission_id: str,
         candidate_id: str,
         request: Dict[str, Any],
+        http_request: Request,
     ) -> Dict[str, Any]:
         try:
             payload = _as_request_object(request, label="request")
+            if payload.get("operation") == "device_application_run":
+                # Executes generated host code: same gate as /v1/devices/application/run, before anything is run.
+                require_modeled_execution_access(http_request)
             mission = await run_in_threadpool(
                 run_mission_operation,
                 mission_store,
@@ -208,6 +213,8 @@ def create_mission_router(mission_store: MissionStore) -> APIRouter:
                 operation=payload.get("operation"),
             )
             evaluation = _latest_evaluation(mission, candidate_id)
+        except HTTPException:
+            raise
         except Exception as exc:
             raise _mission_error(exc) from exc
         return {"ok": True, "mission": mission, "evaluation": evaluation}
