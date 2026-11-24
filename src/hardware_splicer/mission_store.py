@@ -1447,7 +1447,7 @@ class MissionStore:
             raise MissionError(f"package {path.name} does not match its content hash")
         return data
 
-    def _envelope_used(self, project_id: str, envelope_hash: str) -> bool:
+    def _envelope_used(self, project_id: str, envelope_hash: str, envelope_id: str = "", evidence_id: str = "") -> bool:
         root = self._missions_root(project_id)
         if not root.is_dir():
             return False
@@ -1455,7 +1455,11 @@ class MissionStore:
             if not (mission_dir / "mission.json").is_file():
                 continue
             for event in self._events(project_id, mission_dir.name):
-                if event.get("type") == "evidence_supplied" and event.get("envelope_hash") == envelope_hash:
+                if event.get("type") != "evidence_supplied":
+                    continue
+                if (event.get("envelope_hash") == envelope_hash
+                        or (envelope_id and event.get("envelope_id") == envelope_id)
+                        or (evidence_id and event.get("evidence_id") == evidence_id)):
                     return True
         return False
 
@@ -1504,8 +1508,15 @@ class MissionStore:
         )
         if recomputed != parsed.envelope_hash:
             raise MissionValidationError("envelope_hash does not match the envelope's contents")
-        if self._envelope_used(project_id, parsed.envelope_hash):
-            raise MissionValidationError("this envelope was already used in this project")
+        if self._envelope_used(project_id, parsed.envelope_hash, parsed.envelope_id, parsed.record.evidence_id):
+            raise MissionValidationError("this envelope or its evidence record was already used in this project")
+        # The person submitting is the person on record: an envelope cannot be made out in someone else's name.
+        if parsed.created_by != person["id"] or parsed.record.operator != person["id"]:
+            raise MissionValidationError(
+                "the envelope's created_by and record.operator must be the operator submitting it")
+        if parsed.record.candidate_revision != str(view["revision"]):
+            raise MissionValidationError(
+                f"the envelope's record.candidate_revision must be this mission's anchored revision {view['revision']}")
         binding = parsed.metadata.get("mission")
         expected_binding = {"project_id": project_id, "mission_id": mission_id, "need_seq": need_seq, "values": readings}
         if not isinstance(binding, Mapping) or json.loads(json.dumps(dict(binding))) != json.loads(json.dumps(expected_binding)):
@@ -1516,6 +1527,8 @@ class MissionStore:
         if parsed.record.kind.value != _REQUEST_KINDS[request["kind"]]:
             raise MissionValidationError(f"a {request['kind']} need is answered by a {_REQUEST_KINDS[request['kind']]} record")
         comparison, reason = _compare(request, readings)
+        if not parsed.record.passed:
+            comparison, reason = "record_failed", "the evidence record says the check did not pass"
         record: Dict[str, Any] = {
             "type": "evidence_supplied",
             "author": person,

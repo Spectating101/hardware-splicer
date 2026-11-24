@@ -345,6 +345,67 @@ def test_a_dimensional_range_must_be_in_mm_and_a_contradicting_size_is_not_appli
     assert "override" not in view["events"][-1]
 
 
+def _supply_expecting_refusal(missions, mid, need, values, match, **envelope_kwargs):
+    seq = missions.get_mission("monitor", mid)["last_event_seq"]
+    with pytest.raises(MissionValidationError, match=match):
+        missions.supply_evidence("monitor", mid, need, envelope=_envelope(mid, need, values, **envelope_kwargs),
+                                 values=values, author=HUMAN, expected_event_seq=seq)
+    assert missions.get_mission("monitor", mid)["last_event_seq"] == seq
+
+
+@pytest.mark.parametrize("who", [{"created_by": "someone-else"}, {"operator": "someone-else"}])
+def test_an_envelope_made_out_in_another_name_is_refused(tmp_path, who):
+    missions = _store(tmp_path)
+    mid = _mission(missions)["mission_id"]
+    need = _need(missions, mid, VOLTAGE_REQUEST)
+    _supply_expecting_refusal(missions, mid, need, [{"quantity": "voltage", "value": 3.3, "unit": "V"}],
+                              "operator submitting", **who)
+
+
+def test_an_envelope_for_another_revision_is_refused(tmp_path):
+    missions = _store(tmp_path)
+    mission = _mission(missions)
+    assert mission["revision"] == 1
+    need = _need(missions, mission["mission_id"], VOLTAGE_REQUEST)
+    _supply_expecting_refusal(missions, mission["mission_id"], need, [{"quantity": "voltage", "value": 3.3, "unit": "V"}],
+                              "anchored revision", revision="7")
+    _supply_expecting_refusal(missions, mission["mission_id"], need, [{"quantity": "voltage", "value": 3.3, "unit": "V"}],
+                              "anchored revision", revision="mission")
+
+
+def test_a_record_that_did_not_pass_contradicts_the_need_and_applies_nothing(tmp_path):
+    missions = _store(tmp_path)
+    mid = _mission(missions)["mission_id"]
+    _candidate(missions, mid)
+    need = _need(missions, mid, VOLTAGE_REQUEST)
+    view = _supply(missions, mid, need, [{"quantity": "voltage", "value": 3.3, "unit": "V"}], passed=False)
+    assert view["events"][-1]["comparison"] == "record_failed"
+    assert [n["need_state"] for n in view["needs"]] == ["contradicted"]
+    assert view["phase"] == "EVIDENCE_REQUIRED"
+    _evaluate(missions, mid)
+    _evaluate(missions, mid, operation="device_engineering")
+    with pytest.raises(MissionStateError, match="evidence need"):
+        _propose(missions, mid, {"type": "terminal_proposed", "state": "READY_FOR_HUMAN_BUILD", "candidate_id": "A", "reason": "r"})
+    sized = _need(missions, mid, WIDTH_REQUEST)
+    failed = _supply(missions, mid, sized, [{"quantity": "pcb_mm.x", "value": 28.1, "unit": "mm"}],
+                     kind="dimensional_measurement", envelope_id="env-2", passed=False)
+    assert "override" not in failed["events"][-1]
+    assert [n["need_state"] for n in failed["needs"]][-1] == "contradicted"
+
+
+@pytest.mark.parametrize("reuse", ["envelope_id", "evidence_id"])
+def test_an_envelope_or_evidence_id_cannot_be_replayed_in_a_new_envelope(tmp_path, reuse):
+    missions = _store(tmp_path)
+    mid = _mission(missions)["mission_id"]
+    first = _need(missions, mid, VOLTAGE_REQUEST)
+    _supply(missions, mid, first, [{"quantity": "voltage", "value": 3.3, "unit": "V"}])
+    second = _need(missions, mid, {**VOLTAGE_REQUEST, "instructions": "again"})
+    kwargs = {"envelope_id": "env-1"} if reuse == "envelope_id" else {"envelope_id": "env-9", "evidence_id": "ev-env-1"}
+    # Different readings give a different hash, so only the reused identifier can catch it.
+    _supply_expecting_refusal(missions, mid, second, [{"quantity": "voltage", "value": 3.31, "unit": "V"}],
+                              "already used", **kwargs)
+
+
 PERSON_TOKEN = "person-token-" + "a" * 48
 AGENT_TOKEN = "agent-token-" + "b" * 48
 BASE = "/v1/projects/monitor/missions"
