@@ -42,6 +42,11 @@ export default function ProjectReadinessPanel({ session, onGoStage }) {
             {truth.design.problems.map((problem) => (
               <li key={problem.message}>
                 <p>{problem.message}</p>
+                {problem.needsPerson && !problem.repairs.some((r) => r.requiresPerson) && (
+                  <p className="muted" data-testid="problem-person">
+                    Needs you: HS cannot see or do this.
+                  </p>
+                )}
                 {problem.repairs.filter((r) => !r.requiresPerson).map((r) => (
                   <p key={r.summary} className="muted" data-testid="repair-hs">
                     HS can fix this: {r.summary}
@@ -82,6 +87,7 @@ export default function ProjectReadinessPanel({ session, onGoStage }) {
 
 function toneForDesign(state) {
   if (state === "drc_clean") return "ok";
+  if (state === "needs_attention") return "warn";
   if (state === "drc_errors" || state === "request_mismatch" || state === "electrical_error") return "fail";
   return "neutral";
 }
