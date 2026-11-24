@@ -54,7 +54,7 @@ public:
         // bound to addr, then returns false if chip id is not 0x60. A failed begin leaves
         // the driver bound to the address it just tried.
         // Bosch BST-BME280-DS001-24: "The “id” register contains the chip identification number chip_id[7:0], which is 0x60."
-        return bme_.begin_bounded(addr, &Wire);
+        return bme_.begin_bounded(addr, &{{WIRE}});
     }
 
     bool sensor_read(Reading& out) override {
@@ -68,8 +68,8 @@ public:
         // 128x64 is the catalog 0.96" SSD1306 listing, not a measurement of a particular module.
         // Adafruit_SSD1306.cpp, tag 2.5.17: "return true; // Success"
         // begin() does not detect the display; its only return false is a failed buffer allocation.
-        Wire.beginTransmission(addr);
-        if (Wire.endTransmission() != 0) return false;
+        {{WIRE}}.beginTransmission(addr);
+        if ({{WIRE}}.endTransmission() != 0) return false;
         // reset=true, periphBegin=false so the library does not call Wire.begin() again.
         return display_.begin(SSD1306_SWITCHCAPVCC, addr, true, false);
     }
@@ -89,14 +89,12 @@ public:
     void log(const char* line) override { Serial.println(line); }
 
     bool bus_recover() override {
-        Wire.end();
-        Wire.setTimeOut(50);
-        return Wire.begin(SDA_PIN, SCL_PIN, 100000);
+{{WIRE_RESTART}}
     }
 
 private:
     BoundedBme280 bme_;
-    Adafruit_SSD1306 display_{128, 64, &Wire, -1};
+    Adafruit_SSD1306 display_{128, 64, &{{WIRE}}, -1};
 };
 
 static ArduinoHal g_hal;
@@ -104,8 +102,7 @@ static SensorApp* g_app = nullptr;
 
 void setup() {
     Serial.begin(115200);
-    Wire.setTimeOut(50);
-    Wire.begin(SDA_PIN, SCL_PIN, 100000);
+{{WIRE_START}}
     static SensorApp app(g_hal, kSensorAddrs, sizeof kSensorAddrs / sizeof kSensorAddrs[0],
                          {{DISPLAY_PTR}}, {{DISPLAY_COUNT}});
     g_app = &app;

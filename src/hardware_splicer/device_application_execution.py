@@ -23,6 +23,7 @@ VENDOR_HOST_CLAIM_BOUNDARY = (
     "Vendor-host compile of the real Arduino adapter and the pinned Adafruit sources "
     "against a modelled I2C bus. Not silicon, not ESP32 Wire timing, not electrical behaviour."
 )
+RP2040_VENDOR_HOST_CLAIM_BOUNDARY = VENDOR_HOST_CLAIM_BOUNDARY.replace("ESP32 Wire timing", "RP2040 Wire timing or the pico-sdk")
 # The diagnostic verifier's toolchain cache, so one download serves both. Set PLATFORMIO_CORE_DIR to use another.
 HOST_SCENARIOS = (
     "boot_ok", "default_address_binding", "sensor_missing_at_boot", "display_missing",
@@ -87,9 +88,14 @@ def vendor_host_compile_command(project: Path, libdeps: Path, output: Path, prof
     ]
     for folder, source in chosen["lib_sources"]:
         sources.append(str(libdeps / folder / source))
+    # A package for another board carries board_config.h, which the Arduino shim includes to select that board's core
+    # macros and Wire model; only an ESP32 package is compiled with the ESP32 macros.
+    # As PlatformIO passes them for board = pico; the libraries test these before they include Arduino.h.
+    board = (["-DHS_RP2040", "-DARDUINO_ARCH_RP2040", "-DARDUINO_RASPBERRY_PI_PICO"] if (host / "board_config.h").is_file()
+             else ["-DESP32", "-DARDUINO_ARCH_ESP32"])
     return [
         gxx, "-std=c++17", "-Wall", "-Wextra", "-Wno-macro-redefined",
-        "-DARDUINO=10812", "-DESP32", "-DARDUINO_ARCH_ESP32",
+        "-DARDUINO=10812", *board,
         *includes, *sources, "-o", str(output),
     ]
 
@@ -110,11 +116,18 @@ def _not_run_vendor(reason: str) -> dict:
 
 
 def _run_vendor_host(project: Path, libdeps: Path | None, profile: str = "bme280") -> tuple[dict, bytes]:
+    # A Pico package carries board_config.h, the same marker the compile command switches on.
+    boundary = (RP2040_VENDOR_HOST_CLAIM_BOUNDARY if (project / "test" / "vendor_host" / "board_config.h").is_file()
+                else VENDOR_HOST_CLAIM_BOUNDARY)
+
+    def _not_run(reason: str) -> dict:
+        return {**_not_run_vendor(reason), "claim_boundary": boundary}
+
     if not vendor_libs_available(libdeps, profile):
-        return _not_run_vendor("not run: libraries not available"), b""
+        return _not_run("not run: libraries not available"), b""
     gxx = shutil.which("g++")
     if not gxx:
-        return _not_run_vendor("not run: libraries not available"), b"g++ is missing\n"
+        return _not_run("not run: libraries not available"), b"g++ is missing\n"
     assert libdeps is not None
     # Compilation runs inside the extracted project, not the caller's cwd.
     libdeps = libdeps.resolve()
@@ -125,13 +138,13 @@ def _run_vendor_host(project: Path, libdeps: Path | None, profile: str = "bme280
     compiled = _execute(command, cwd=project, timeout=120)
     log = compiled.stdout + compiled.stderr
     if compiled.returncode != 0:
-        report = _not_run_vendor("vendor-host harness did not compile")
+        report = _not_run("vendor-host harness did not compile")
         report["compiler"] = compiler
         return report, log
     try:
         ran = _execute([str(binary)], cwd=project, timeout=60)
     except (subprocess.TimeoutExpired, OSError, BoundedProcessError) as exc:
-        report = _not_run_vendor(f"vendor-host harness could not complete: {exc}")
+        report = _not_run(f"vendor-host harness could not complete: {exc}")
         report["compiler"] = compiler
         return report, log + (getattr(exc, "stdout", None) or b"")
     log = log + ran.stdout + ran.stderr
@@ -141,7 +154,7 @@ def _run_vendor_host(project: Path, libdeps: Path | None, profile: str = "bme280
         scenarios = [json.loads(line) for line in ran.stdout.decode().splitlines() if line.strip()]
     except (json.JSONDecodeError, UnicodeDecodeError):
         reason = "vendor-host harness did not print JSON scenario results"
-        report = _not_run_vendor(reason)
+        report = _not_run(reason)
         report["compiler"] = compiler
         return report, log
     reason = _scenario_failure(scenarios, vendor_profile(profile)["scenarios"], ran.returncode)
@@ -155,7 +168,7 @@ def _run_vendor_host(project: Path, libdeps: Path | None, profile: str = "bme280
         "findings": findings,
         "compiler": compiler,
         "exit_code": ran.returncode,
-        "claim_boundary": VENDOR_HOST_CLAIM_BOUNDARY,
+        "claim_boundary": boundary,
         "firmware_authorized": False,
         "power_on_authorized": False,
         "physical_correctness": "UNPROVEN",

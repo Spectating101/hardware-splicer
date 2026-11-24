@@ -603,6 +603,8 @@ def assembly_plan(project_id: str, revision: int) -> dict[str, Any]:
 # --- Whole-device plans: the real planner, stateless, exactly as the real API serves it -------------------------------
 _build_device_plan = _load_hs_attr("device_plan", "build_device_plan")
 _DevicePlanError = _load_hs_attr("device_plan", "DevicePlanError")
+_draft_device_spec = _load_hs_attr("device_draft", "draft_device_spec")
+_draft_from_parts_text = _load_hs_attr("device_draft", "draft_from_parts_text")
 _example_device_specs = _load_hs_attr("device_plan", "example_specs")
 _device_module_library = _load_hs_attr("device_plan", "module_library")
 _match_reclaimed_parts = _load_hs_attr("device_reclaim", "match_reclaimed_parts")
@@ -674,6 +676,20 @@ def device_example_plan(example_id: str) -> dict[str, Any]:
     if example_id not in examples:
         raise _thread_error(404, "not_found", "no such example")
     return {"ok": True, "spec": examples[example_id], "plan": _build_device_plan(examples[example_id])}
+
+
+@app.post("/v1/devices/draft")
+async def device_draft_post(request: Request) -> dict[str, Any]:
+    try:
+        body = await request.json()
+    except ValueError:
+        raise _thread_error(422, "invalid_device_spec", "the body is not JSON") from None
+    try:
+        if isinstance(body, dict) and "text" in body:
+            return {"ok": True, **_draft_from_parts_text(body)}
+        return {"ok": True, **_draft_device_spec(body)}
+    except _DevicePlanError as exc:
+        raise _thread_error(422, "invalid_device_spec", str(exc)) from None
 
 
 @app.post("/v1/devices/plan")

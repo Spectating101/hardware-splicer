@@ -4,8 +4,10 @@
 #define SPI_HAS_TRANSACTION 1
 #define SPI_MSBFIRST 1
 #define SPI_LSBFIRST 0
+#ifndef HS_RP2040
 #define MSBFIRST SPI_MSBFIRST
 #define LSBFIRST SPI_LSBFIRST
+#endif  // on the RP2040 they are the BitOrder enum from the core's ArduinoCore-API (Arduino.h)
 #define SPI_MODE0 0x00
 #define SPI_MODE1 0x01
 #define SPI_MODE2 0x02

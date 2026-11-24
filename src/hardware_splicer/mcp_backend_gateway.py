@@ -25,6 +25,16 @@ _HTTP_METHODS = ("get", "post", "put", "patch", "delete")
 _PATH_PARAM_RE = re.compile(r"\{([^{}]+)\}")
 _SUPPORTED_PARAMETER_LOCATIONS = {"path", "query", "header", "cookie"}
 _TASK_OPERATION_PATHS = {
+    "device_design": (
+        ("GET", "/v1/devices/spec-schema"),
+        ("GET", "/v1/devices/examples"),
+        ("POST", "/v1/devices/draft"),
+        ("POST", "/v1/devices/plan"),
+        ("POST", "/v1/devices/engineering"),
+        ("POST", "/v1/devices/case"),
+        ("POST", "/v1/devices/application"),
+        ("POST", "/v1/devices/observations"),
+    ),
     "bounded_pre_fabrication": (
         ("GET", "/v1/projects/{project_id}"),
         ("PUT", "/v1/projects/{project_id}/snapshot"),

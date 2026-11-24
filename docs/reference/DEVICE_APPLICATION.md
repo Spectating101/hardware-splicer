@@ -38,12 +38,55 @@ A deterministic ZIP with:
 `physical_correctness` is `UNPROVEN`. Declared devices keep their possible
 addresses and the library basis; no address is chosen in the proposal.
 
+## On the Raspberry Pi Pico
+
+The same package is generated for the Pico. `src/app_core.h`, which holds everything the application does, is the same
+file on both boards, so the host scenarios are the same scenarios. What differs is the adapter's I2C start and the compile
+target:
+
+- The RP2040 can put each of its two I2C controllers only on certain pins. The library marks each Pico pin with its
+  controller (`i2c_controller`), the planner refuses SDA and SCL on different controllers, and the adapter uses `Wire` for
+  I2C0 and `Wire1` for I2C1. It sets the pins with `setSDA`/`setSCL` before `begin()`, as the arduino-pico core requires.
+  For a pin the controller cannot use, the core does not return false: it halts with a fatal `panic()` (its `Wire.cpp`), so
+  the sketch never runs on other pins. The planner refuses such pins before any source is made.
+- The target is `board = pico` with the earlephilhower arduino-pico core, through
+  [maxgerhardt/platform-raspberrypi](https://github.com/maxgerhardt/platform-raspberrypi) pinned to one commit. That
+  platform is not in the PlatformIO registry; it is the usual way to build arduino-pico with PlatformIO. The registry's own
+  `raspberrypi` platform uses the Mbed core, which does not set I2C pins this way.
+- The Pico has its own vendor-host lane. A Pico package swaps the ESP32 `Wire` model for a model of the arduino-pico
+  `TwoWire` at the pinned core commit (`vendor_host/rp2040/`), and carries a generated `board_config.h` naming the planned
+  controller (`Wire` or `Wire1`) and pins. The real Adafruit sources compile with the RP2040 architecture macros, as under
+  PlatformIO, and run the same 11 scenarios as on the ESP32. The model follows the core where it differs from the ESP32: an
+  illegal pin panics, `begin()` on a running bus does nothing (so recovery must `end()` first), any NACK on a data write is
+  4, and the other controller has its own empty bus, so the pin scenario fails if the adapter talks on the wrong one.
+  - The model was drafted by Gemini 4 Argon from the core's `Wire.cpp` and reviewed here. A C++ test
+    (`tests/data/device_vendor_host/rp2040_wire_model_test.cpp`) pins it to that source's behaviour, and four plausible
+    model errors each fail that test.
+  - Seeded adapter bugs on I2C1 are caught: the display or sensor on `Wire` instead of `Wire1`, recovery without `end()`,
+    pins never set, and 400 kHz. Leaving the pins unset on I2C0 is not caught, because the core's defaults are GP4/GP5,
+    the planned pins, so a real Pico behaves the same.
+  - An Argon review of the change found two holes in the pin scenario, both reproduced and closed. The display library
+    restores 100 kHz after its own transfers, which hid a recovery that restarted the bus at 400 kHz; the model now records
+    the clock of every transaction, and every device but the display must see 100 kHz. Restarts were counted over the whole
+    run, so two starts at boot hid a recovery that never restarted the bus; they are now counted from the unplug. It also
+    found that a core panic inside a forked sub-case reported that scenario twice.
+  - Two host-only stand-ins are needed: an empty `util/delay.h` (the ARM compiler defines `__ARM_ARCH`, so the real build
+    never includes it) and the core's `api/deprecated-avr-comp/avr/pgmspace.h`, which forwards to the shared host one.
+  - It is still a model: not the RP2040 I2C peripheral, the pico-sdk or its timing, and not silicon.
+- The diagnostic now has a Pico version that starts the bus the arduino-pico way on the planned controller (`Wire` or `Wire1`). It is compile-only and keeps the same review boundary.
+
+Checked on 2026-10-14 with `scripts/verify_device_application.py --platformio` (PlatformIO Core 6.1.18, the pinned platform
+commit): the BME280 package on I2C0 (GP4/GP5) and on I2C1 (GP2/GP3, so `Wire1`), and the BH1750 package, each compiled
+with exit 0 and produced an ELF and a BIN, and each passed its host scenarios. The first run downloads the RP2040 core and
+toolchain (several minutes). A compile shows the adapter is valid C++ against that core; it is not a run on a Pico, and
+nothing here was flashed.
+
 ## What is refused
 
 Any planner error or warning blocks export, as with the diagnostic. Export
 also refuses when:
 
-- the MCU is not the catalog ESP32-DevKitC V4;
+- the MCU is neither the catalog ESP32-DevKitC V4 nor the Raspberry Pi Pico;
 - there is no BME280 breakout (`adafruit-bme280-stemma-qt`);
 - there is more than one BME280;
 - any I2C peripheral other than the BME280 and the SSD1306 is present;
@@ -140,6 +183,9 @@ no arguments follows 2.0.17 `Wire.cpp`: it calls `begin(-1, -1, 0)`. If the bus 
 inited, that returns true without changing pins. Otherwise `initPins` reuses the prior
 `sda`/`scl` if they were set, else the esp32dev defaults `SDA=21` `SCL=22`
 (`variants/esp32/pins_arduino.h`).
+
+Carried over from the Pico review, the ESP32 pin scenario now checks the clock of every non-display transaction.
+It counts the recovery restart from the unplug, so extra starts at boot cannot stand in for recovery.
 
 BME280 registers follow BST-BME280-DS001-24 §5. Compensation compared to the library is
 the datasheet §8.1 double-precision formulas, implemented independently. ADC and
