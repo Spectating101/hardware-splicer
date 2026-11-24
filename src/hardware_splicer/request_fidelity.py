@@ -59,13 +59,24 @@ _NAMED_PARTS: tuple[tuple[str, re.Pattern[str], re.Pattern[str]], ...] = (
 )
 
 _NEGATION = re.compile(
-    r"(?:\bno|\bnot|\bwithout|\bexcluding|\bexcept|\binstead of|\bw/o|\bnor)\W+(?:\w+\W+){0,2}$", re.I
+    # "no" joined by a hyphen ("no-load") describes a condition, not an absent part.
+    r"(?:\bno(?!-)|\bnot|\bwithout|\bexcluding|\bexcept|\binstead of|\bw/o|\bnor)\W+(?:\w+\W+){0,2}$", re.I
 )
 
 _VOLT = re.compile(
     r"(?<![\w.])(\d+(?:\.\d+)?)\s*(k?)\s*(?:v|volts?)(?:\s*(ac|dc))?(?![a-z0-9])", re.I
 )
-_MAINS_WORDS = re.compile(r"\bmains?\b|\bline voltage\b|\bhigh[- ]voltage\b|\bwall (?:power|outlet|socket)\b|\bac outlet\b", re.I)
+_MAINS_WORDS = re.compile(
+    r"\bmains?\b|\bline voltage\b|\bhigh[- ]voltage\b|\bwall (?:power|outlet|socket)\b|\bac outlet\b"
+    r"|\bhousehold (?:power|current|voltage|outlet)\b"
+    # Spelled-out mains voltages: "two-thirty volt", "one twenty volts", "two hundred forty volts".
+    r"|\b(?:one|two)[- ](?:ten|twenty|thirty|forty|fifty)[- ]?volts?\b"
+    r"|\b(?:one|two|three|four)[- ]hundred(?:[- ](?:and[- ])?[a-z]+)?[- ]volts?\b",
+    re.I,
+)
+# A voltage that is a component's rating or part of a part number does not describe the load.
+_PART_NUMBER_BEFORE = re.compile(r"[A-Za-z0-9]-$")
+_RATING_NEAR = re.compile(r"\b(?:rating|rated|tolerant|withstand|breakdown|esd|capacitors?|caps?)\b", re.I)
 
 HIGH_VOLTAGE_FINDING = (
     "The goal states a mains or high-voltage load ({evidence}). Switching or sensing mains is outside this "
@@ -87,6 +98,12 @@ def detect_high_voltage_goal(goal: str | None) -> Dict[str, Any] | None:
     if word and not _NEGATION.search(text[: word.start()]):
         return {"kind": "keyword", "evidence": word.group(0)}
     for match in _VOLT.finditer(text):
+        if _PART_NUMBER_BEFORE.search(text[: match.start()]):
+            continue  # e.g. "LM317-100V"
+        before = text[max(0, match.start() - 20): match.start()]
+        after = text[match.end(): match.end() + 25]
+        if _RATING_NEAR.search(before) or _RATING_NEAR.search(after):
+            continue  # e.g. "100 V capacitor rating", "rated 1000 V"
         value = float(match.group(1)) * (1000.0 if match.group(2) else 1.0)
         kind = (match.group(3) or "").lower()
         limit = {"ac": 50.0, "dc": 120.0}.get(kind, 100.0)
