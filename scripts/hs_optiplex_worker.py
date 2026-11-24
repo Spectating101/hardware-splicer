@@ -14,7 +14,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from hardware_splicer.local_kicad_worker import (
-    WorkerError, create_identity, enroll, heartbeat, nodes_status, revoke, run_erc, verify_erc, verify_bundle,
+    DEFAULT_RECEIPT_MAX_AGE_SECONDS, WorkerError, create_identity, enroll, heartbeat, nodes_status, revoke, run_erc, verify_erc, verify_bundle,
 )
 
 def main() -> int:
@@ -39,6 +39,8 @@ def main() -> int:
             sub.add_argument("--execute", action="store_true")
         if name == "verify":
             sub.add_argument("--request-id", required=True)
+            sub.add_argument("--max-age-seconds", type=float, default=DEFAULT_RECEIPT_MAX_AGE_SECONDS,
+                             help="reject receipts executed longer ago than this")
             sub.add_argument("--workspace", type=Path, default=Path(__file__).resolve().parents[1])
     bundle = p.add_parser("verify-bundle", help="Verify exported public signature and ERC report")
     bundle.add_argument("--bundle", type=Path, required=True)
@@ -46,6 +48,8 @@ def main() -> int:
     bundle.add_argument("--expected-public-key", help="pinned trusted Ed25519 public key (hex)")
     bundle.add_argument("--expected-worker-id", help="pinned trusted worker id")
     bundle.add_argument("--ledger", type=Path, help="enrolled worker ledger to pin against")
+    bundle.add_argument("--max-age-seconds", type=float, default=DEFAULT_RECEIPT_MAX_AGE_SECONDS,
+                        help="reject receipts executed longer ago than this")
     a = parser.parse_args()
     try:
         if a.action == "identity":
@@ -58,14 +62,15 @@ def main() -> int:
             result = verify_bundle(a.bundle, a.workspace,
                                    expected_public_key=a.expected_public_key,
                                    expected_worker_id=a.expected_worker_id,
-                                   ledger=a.ledger)
+                                   ledger=a.ledger, max_age_seconds=a.max_age_seconds)
         elif a.action == "status":
             result = nodes_status(a.ledger)
         elif a.action == "run":
             result = run_erc(a.ledger, a.key_dir, a.workspace,
                              execute=a.execute, request_id=a.request_id)
         elif a.action == "verify":
-            result = verify_erc(a.ledger, a.workspace, a.request_id)
+            result = verify_erc(a.ledger, a.workspace, a.request_id,
+                                max_age_seconds=a.max_age_seconds)
         else:
             result = revoke(a.ledger, a.worker_id, approve=a.approve)
         # A verifier that declines (ok=False) must not look like success to a caller.

@@ -139,13 +139,17 @@ def test_legacy_remote_dispatch_stays_separate():
 COMMITTED_BUNDLE_PUBLIC_KEY = "a137d80e92e91a6490df2e12d4245b2162ae7bc91e3c75de443aa88a019c0800"
 
 
+COMMITTED_BUNDLE_EXECUTED = dt.datetime(2026, 11, 5, 7, 51, 41, tzinfo=dt.timezone.utc)
+
+
 def test_public_optiplex_native_evidence_bundle_and_tamper_detection(tmp_path):
     from hardware_splicer.local_kicad_worker import verify_bundle
     import shutil
     bundle = (Path(__file__).resolve().parents[1] /
               "evidence/github_signals/optiplex_signed_erc_20261105")
     result = verify_bundle(bundle, Path(__file__).resolve().parents[1],
-                           expected_public_key=COMMITTED_BUNDLE_PUBLIC_KEY)
+                           expected_public_key=COMMITTED_BUNDLE_PUBLIC_KEY,
+                           now=COMMITTED_BUNDLE_EXECUTED + dt.timedelta(hours=1))
     assert result["ok"] is True
     assert result["signed_receipt_verified"] is True
     assert result["finding_count"] == 40
@@ -156,7 +160,8 @@ def test_public_optiplex_native_evidence_bundle_and_tamper_detection(tmp_path):
     (copy / "erc.json").write_text("{}")
     with pytest.raises(worker.WorkerError, match="malformed|inconsistent"):
         verify_bundle(copy, Path(__file__).resolve().parents[1],
-                      expected_public_key=COMMITTED_BUNDLE_PUBLIC_KEY)
+                      expected_public_key=COMMITTED_BUNDLE_PUBLIC_KEY,
+                      now=COMMITTED_BUNDLE_EXECUTED + dt.timedelta(hours=1))
 
 
 @pytest.mark.parametrize("violations", [[{"severity": "bogus"}], {}])
@@ -462,6 +467,7 @@ def test_attacker_keypair_bundle_fails_against_pinned_real_identity(prepared, tm
 
 def test_bundle_verifies_against_each_kind_of_pin(prepared, tmp_path):
     key, ledger, identity = prepared
+    worker.heartbeat(ledger, key)
     bundle = _forge_bundle(tmp_path, key, identity)
     by_key = worker.verify_bundle(bundle, ROOT, expected_public_key=identity["public_key"])
     by_id = worker.verify_bundle(bundle, ROOT, expected_worker_id=identity["worker_id"])
@@ -504,3 +510,154 @@ def test_cli_verify_bundle_exits_nonzero_without_pin_and_zero_with_it(prepared, 
                   "--expected-public-key", identity["public_key"])
     assert pinned.returncode == 0, pinned.stdout
     assert json.loads(pinned.stdout)["result"]["ok"] is True
+
+
+def _iso(moment):
+    return moment.isoformat(timespec="seconds")
+
+
+def _now():
+    return dt.datetime.now(dt.timezone.utc)
+
+
+@pytest.mark.parametrize("executed", [None, "garbage", "2026-11-05T07:51:41", 5, ["x"], ""],
+                         ids=str)
+def test_receipt_without_a_valid_executed_utc_is_rejected(prepared, tmp_path, monkeypatch, executed):
+    key, ledger, identity = prepared
+    worker.heartbeat(ledger, key)
+    body = _forge_job(ledger, key, identity, RID, GOOD_REPORT, monkeypatch)
+    folder = ledger / "node_jobs" / RID
+    if executed is None:
+        body.pop("executed_utc")
+    else:
+        body["executed_utc"] = executed
+    (folder / "receipt.json").write_text(json.dumps(worker._sign(worker._private(key), body)))
+    with pytest.raises(worker.WorkerError, match="executed_utc"):
+        worker.verify_erc(ledger, tmp_path, RID)
+    bundle = _forge_bundle(tmp_path, key, identity,
+                           **({"executed_utc": executed} if executed is not None else {}))
+    if executed is None:
+        parsed = json.loads((bundle / "receipt.json").read_text())["body"]
+        parsed.pop("executed_utc")
+        (bundle / "receipt.json").write_text(json.dumps(worker._sign(worker._private(key), parsed)))
+    with pytest.raises(worker.WorkerError, match="executed_utc"):
+        _verify_bundle(bundle, identity)
+
+
+def test_stale_and_future_receipts_are_rejected_and_window_is_configurable(prepared, tmp_path, monkeypatch):
+    key, ledger, identity = prepared
+    worker.heartbeat(ledger, key)
+    _forge_job(ledger, key, identity, RID, GOOD_REPORT, monkeypatch,
+               executed_utc=_iso(_now() - dt.timedelta(hours=2)))
+    with pytest.raises(worker.WorkerError, match="stale"):
+        worker.verify_erc(ledger, tmp_path, RID, max_age_seconds=3600)
+    assert worker.verify_erc(ledger, tmp_path, RID, max_age_seconds=3 * 3600)["ok"] is True
+    rid2 = "hs-local-3333333333333333"
+    _forge_job(ledger, key, identity, rid2, GOOD_REPORT, monkeypatch,
+               executed_utc=_iso(_now() + dt.timedelta(hours=1)), request_id=rid2)
+    with pytest.raises(worker.WorkerError, match="future"):
+        worker.verify_erc(ledger, tmp_path, rid2)
+    for bad in (0, -5, True, "3600"):
+        with pytest.raises(worker.WorkerError, match="window"):
+            worker.verify_erc(ledger, tmp_path, RID, max_age_seconds=bad)
+
+
+def test_stale_bundle_is_rejected_and_window_is_configurable(prepared, tmp_path):
+    key, _, identity = prepared
+    bundle = _forge_bundle(tmp_path, key, identity,
+                           executed_utc=_iso(_now() - dt.timedelta(days=2)))
+    with pytest.raises(worker.WorkerError, match="stale"):
+        _verify_bundle(bundle, identity)
+    assert _verify_bundle(bundle, identity, max_age_seconds=3 * 86400)["ok"] is True
+
+
+def test_committed_historical_bundle_is_stale_by_default(tmp_path):
+    with pytest.raises(worker.WorkerError, match="stale"):
+        worker.verify_bundle(PUBLIC_BUNDLE, ROOT, expected_public_key=COMMITTED_BUNDLE_PUBLIC_KEY)
+
+
+def test_revocation_records_time_and_sequence(prepared):
+    key, ledger, identity = prepared
+    worker.heartbeat(ledger, key)
+    worker.heartbeat(ledger, key)
+    moment = _now()
+    row = worker.revoke(ledger, identity["worker_id"], approve=True, now=moment)
+    assert row["revoked_utc"] == _iso(moment)
+    assert row["revoked_at_seq"] == 2
+    stored = json.loads((ledger / "local_worker_nodes.json").read_text())["nodes"][0]
+    assert stored["revoked_utc"] == _iso(moment) and stored["revoked_at_seq"] == 2
+
+
+def test_receipt_executed_after_revocation_is_rejected_by_both_verifiers(prepared, tmp_path, monkeypatch):
+    key, ledger, identity = prepared
+    worker.heartbeat(ledger, key)
+    worker.revoke(ledger, identity["worker_id"], approve=True, now=_now() - dt.timedelta(minutes=30))
+    # The revoked key still signs a fresh, otherwise perfect receipt.
+    _forge_job(ledger, key, identity, RID, GOOD_REPORT, monkeypatch)
+    with pytest.raises(worker.WorkerError, match="after revocation"):
+        worker.verify_erc(ledger, tmp_path, RID)
+    bundle = _forge_bundle(tmp_path, key, identity)
+    with pytest.raises(worker.WorkerError, match="after revocation"):
+        _verify_bundle(bundle, identity, ledger=ledger)
+
+
+def test_receipt_from_before_revocation_never_reads_as_ok(prepared, tmp_path, monkeypatch):
+    key, ledger, identity = prepared
+    worker.heartbeat(ledger, key)
+    _forge_job(ledger, key, identity, RID, GOOD_REPORT, monkeypatch,
+               executed_utc=_iso(_now() - dt.timedelta(minutes=10)))
+    worker.revoke(ledger, identity["worker_id"], approve=True)
+    result = worker.verify_erc(ledger, tmp_path, RID)
+    assert result["ok"] is False
+    assert result["worker_currently_revoked"] is True
+    assert result["historical_only"] is True
+    monkeypatch.undo()  # the bundle verifier must use the real committed source
+    bundle = _forge_bundle(tmp_path, key, identity,
+                           executed_utc=_iso(_now() - dt.timedelta(minutes=10)))
+    assert _verify_bundle(bundle, identity, ledger=ledger)["ok"] is False
+
+
+def test_revoked_worker_with_unrecorded_revocation_time_fails_closed(prepared, tmp_path, monkeypatch):
+    key, ledger, identity = prepared
+    worker.heartbeat(ledger, key)
+    worker.revoke(ledger, identity["worker_id"], approve=True)
+    registry = ledger / "local_worker_nodes.json"
+    data = json.loads(registry.read_text())
+    for field in ("revoked_utc", "revoked_at_seq"):
+        data["nodes"][0].pop(field)
+    registry.write_text(json.dumps(data))
+    _forge_job(ledger, key, identity, RID, GOOD_REPORT, monkeypatch,
+               executed_utc=_iso(_now() - dt.timedelta(minutes=10)))
+    with pytest.raises(worker.WorkerError, match="after revocation"):
+        worker.verify_erc(ledger, tmp_path, RID)
+
+
+def test_receipt_from_key_with_no_heartbeat_is_rejected(prepared, tmp_path, monkeypatch):
+    key, ledger, identity = prepared  # enrolled, never sent a heartbeat
+    _forge_job(ledger, key, identity, RID, GOOD_REPORT, monkeypatch)
+    with pytest.raises(worker.WorkerError, match="heartbeat"):
+        worker.verify_erc(ledger, tmp_path, RID)
+    bundle = _forge_bundle(tmp_path, key, identity)
+    with pytest.raises(worker.WorkerError, match="heartbeat"):
+        _verify_bundle(bundle, identity, ledger=ledger)
+
+
+@pytest.mark.parametrize("sequence", [0, 2])
+def test_receipt_heartbeat_sequence_must_be_recorded_by_the_ledger(prepared, tmp_path, monkeypatch, sequence):
+    key, ledger, identity = prepared
+    worker.heartbeat(ledger, key)  # ledger has seen sequence 1 only
+    _forge_job(ledger, key, identity, RID, GOOD_REPORT, monkeypatch,
+               heartbeat_sequence_at_execution=sequence)
+    with pytest.raises(worker.WorkerError, match="heartbeat"):
+        worker.verify_erc(ledger, tmp_path, RID)
+
+
+def test_cli_exposes_freshness_window_and_exits_nonzero_on_stale(prepared, tmp_path):
+    key, _, identity = prepared
+    bundle = _forge_bundle(tmp_path, key, identity,
+                           executed_utc=_iso(_now() - dt.timedelta(hours=2)))
+    base = ["verify-bundle", "--bundle", str(bundle), "--workspace", str(ROOT),
+            "--expected-public-key", identity["public_key"]]
+    stale = _cli(*base, "--max-age-seconds", "3600")
+    assert stale.returncode != 0 and "stale" in stale.stdout
+    assert _cli(*base, "--max-age-seconds", "86400").returncode == 0

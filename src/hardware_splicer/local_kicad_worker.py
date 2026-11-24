@@ -37,6 +37,9 @@ KICAD_BIN = "/usr/bin/kicad-cli"
 HB_MAX_SECONDS = 120
 ERC_SCHEMA = "https://schemas.kicad.org/erc.v1.json"
 SEVERITIES = ("error", "warning", "exclusion")
+# Receipts older than this are stale evidence unless the caller widens the window.
+DEFAULT_RECEIPT_MAX_AGE_SECONDS = 24 * 3600
+RECEIPT_CLOCK_SKEW_SECONDS = 60
 
 
 class WorkerError(ValueError):
@@ -151,6 +154,10 @@ def _read_nodes(ledger: Path) -> dict[str, Any]:
             (node.get("last_seen_utc") is not None and
              not isinstance(node.get("last_seen_utc"), str))):
             raise WorkerError("worker enrollment state invalid")
+        if ((node.get("revoked_utc") is not None and not isinstance(node["revoked_utc"], str))
+            or (node.get("revoked_at_seq") is not None
+                and (type(node["revoked_at_seq"]) is not int or node["revoked_at_seq"] < 0))):
+            raise WorkerError("worker revocation record invalid")
     return data
 
 
@@ -189,7 +196,8 @@ def enroll(ledger: Path, identity_file: Path, *, approve: bool = False) -> dict[
         return row
 
 
-def revoke(ledger: Path, worker_id: str, *, approve: bool = False) -> dict[str, Any]:
+def revoke(ledger: Path, worker_id: str, *, approve: bool = False,
+           now: dt.datetime | None = None) -> dict[str, Any]:
     if approve is not True:
         raise WorkerError("revocation requires explicit --approve")
     if not NODE_ID.fullmatch(worker_id):
@@ -199,8 +207,13 @@ def revoke(ledger: Path, worker_id: str, *, approve: bool = False) -> dict[str, 
         node = next((x for x in data["nodes"] if x["identity"]["worker_id"] == worker_id), None)
         if node is None:
             raise WorkerError("worker not enrolled")
+        moment = (now or dt.datetime.now(dt.timezone.utc)).astimezone(dt.timezone.utc)
         node["state"] = "revoked"
         node["last_seen_utc"] = None
+        # Receipts executed from this instant, or past this heartbeat sequence,
+        # were produced by a key the operator had already withdrawn.
+        node["revoked_utc"] = moment.isoformat(timespec="seconds")
+        node["revoked_at_seq"] = node["last_seq"]
         _save_nodes(ledger, data)
         return node
 
@@ -400,6 +413,61 @@ def _check_receipt_body(body: dict[str, Any]) -> None:
         raise WorkerError("signed ERC receipt claims authority it must not carry")
 
 
+def _check_window(max_age_seconds: Any) -> float:
+    if (isinstance(max_age_seconds, bool) or not isinstance(max_age_seconds, (int, float))
+        or not max_age_seconds > 0):
+        raise WorkerError("freshness window must be a positive number of seconds")
+    return float(max_age_seconds)
+
+
+def _check_executed(body: dict[str, Any], *, now: dt.datetime | None,
+                    max_age_seconds: Any) -> dt.datetime:
+    """Require a well-formed, not-future executed_utc inside the freshness window."""
+    window = _check_window(max_age_seconds)
+    current = (now or dt.datetime.now(dt.timezone.utc)).astimezone(dt.timezone.utc)
+    stamp = body.get("executed_utc")
+    try:
+        if not isinstance(stamp, str):
+            raise ValueError("not a string")
+        executed = dt.datetime.fromisoformat(stamp)
+        if executed.utcoffset() is None:
+            raise ValueError("naive timestamp")
+    except ValueError as exc:
+        raise WorkerError("signed ERC receipt executed_utc missing or malformed") from exc
+    age = (current - executed).total_seconds()
+    if age < -RECEIPT_CLOCK_SKEW_SECONDS:
+        raise WorkerError("signed ERC receipt executed_utc is in the future")
+    if age > window:
+        raise WorkerError("signed ERC receipt is stale: older than the freshness window")
+    return executed.astimezone(dt.timezone.utc)
+
+
+def _check_node_standing(node: dict[str, Any], body: dict[str, Any],
+                         executed: dt.datetime) -> bool:
+    """Check the signer's ledger record; True when the worker is now revoked.
+
+    A receipt only counts if the ledger saw a heartbeat from the key and the
+    receipt cites one it recorded; a receipt executed after revocation is
+    refused outright.
+    """
+    seq = body["heartbeat_sequence_at_execution"]
+    if node["last_seq"] < 1 or seq < 1:
+        raise WorkerError("no signed heartbeat on record for the worker key")
+    if node["state"] == "revoked":
+        revoked_utc, revoked_seq = node.get("revoked_utc"), node.get("revoked_at_seq")
+        try:
+            revoked = dt.datetime.fromisoformat(revoked_utc).astimezone(dt.timezone.utc)
+        except (TypeError, ValueError):
+            revoked = None  # unrecorded or unreadable: fail closed
+        if (revoked is None or revoked_seq is None
+            or executed >= revoked.replace(microsecond=0) or seq > revoked_seq):
+            raise WorkerError("signed ERC receipt executed after revocation")
+        return True
+    if seq > node["last_seq"]:
+        raise WorkerError("receipt cites a heartbeat sequence the ledger never recorded")
+    return False
+
+
 def run_erc(ledger: Path, key_dir: Path, workspace: Path, *,
             execute: bool = False, request_id: str | None = None,
             run_fn: Any = subprocess.run) -> dict[str, Any]:
@@ -485,7 +553,9 @@ def run_erc(ledger: Path, key_dir: Path, workspace: Path, *,
         raise
 
 
-def verify_erc(ledger: Path, workspace: Path, request_id: str) -> dict[str, Any]:
+def verify_erc(ledger: Path, workspace: Path, request_id: str, *,
+               max_age_seconds: float = DEFAULT_RECEIPT_MAX_AGE_SECONDS,
+               now: dt.datetime | None = None) -> dict[str, Any]:
     if not REQUEST_ID.fullmatch(request_id):
         raise WorkerError("invalid local job ID")
     folder = ledger / "node_jobs" / request_id
@@ -502,6 +572,8 @@ def verify_erc(ledger: Path, workspace: Path, request_id: str) -> dict[str, Any]
     node = _lookup(ledger, worker_id)
     body = _check_signature(node["identity"], packet)
     _check_receipt_body(body)
+    executed = _check_executed(body, now=now, max_age_seconds=max_age_seconds)
+    revoked = _check_node_standing(node, body, executed)
     sha, raw = _source(workspace, body["source_commit"])
     if (body["request_id"] != request_id
         or body["source_commit"] != sha
@@ -514,11 +586,16 @@ def verify_erc(ledger: Path, workspace: Path, request_id: str) -> dict[str, Any]
         raise WorkerError("ERC receipt report schema mismatch")
     if body["finding_count"] != len(findings) or body["severity_counts"] != counts:
         raise WorkerError("ERC signed finding counts mismatch")
-    return {"ok": True, "request_id": request_id, "worker_id": worker_id,
-            "signature_verified": True, "report_sha256": body["report_sha256"],
-            "finding_count": len(findings), "severity_counts": counts,
-            "worker_currently_revoked": node["state"] == "revoked",
-            "design_approved": False, "physical_authority": False}
+    result = {"ok": not revoked, "request_id": request_id, "worker_id": worker_id,
+              "signature_verified": True, "report_sha256": body["report_sha256"],
+              "finding_count": len(findings), "severity_counts": counts,
+              "worker_currently_revoked": revoked,
+              "executed_utc": body["executed_utc"],
+              "design_approved": False, "physical_authority": False}
+    if revoked:
+        result.update(historical_only=True,
+                      reason="worker is revoked; the receipt predates revocation and is not current evidence")
+    return result
 
 
 def nodes_status(ledger: Path) -> dict[str, Any]:
@@ -575,7 +652,9 @@ def _pin_identity(identity: dict[str, Any], *, expected_public_key: str | None,
 
 def verify_bundle(bundle: Path, workspace: Path, *, expected_public_key: str | None = None,
                   expected_worker_id: str | None = None,
-                  ledger: Path | None = None) -> dict[str, Any]:
+                  ledger: Path | None = None,
+                  max_age_seconds: float = DEFAULT_RECEIPT_MAX_AGE_SECONDS,
+                  now: dt.datetime | None = None) -> dict[str, Any]:
     """Verify an exported public evidence bundle against a pinned trusted identity.
 
     The bundle's own public_identity.json is attacker-controllable, so a result
@@ -606,6 +685,10 @@ def verify_bundle(bundle: Path, workspace: Path, *, expected_public_key: str | N
     raw = paths[2].read_bytes()
     native, found, counts = _parse_erc_report(raw)
     _check_receipt_body(body)
+    executed = _check_executed(body, now=now, max_age_seconds=max_age_seconds)
+    revoked = False
+    if ledger is not None:
+        revoked = _check_node_standing(_lookup(ledger, identity["worker_id"]), body, executed)
     # The signed digest names a commit; hash the bytes at that commit, never the
     # working tree (which may be edited, or may predate or postdate the receipt).
     _, source_raw = _source(workspace, body["source_commit"])
@@ -616,8 +699,8 @@ def verify_bundle(bundle: Path, workspace: Path, *, expected_public_key: str | N
         or body["finding_count"] != len(found)
         or body["severity_counts"] != counts):
         raise WorkerError("exported signed receipt/source/report inconsistent")
-    return {
-        "ok": True, "worker_id": identity["worker_id"],
+    result = {
+        "ok": not revoked, "worker_id": identity["worker_id"],
         "request_id": body["request_id"],
         "signed_receipt_verified": True, "trust_anchor": trust_anchor,
         "report_sha256": body["report_sha256"],
@@ -628,4 +711,12 @@ def verify_bundle(bundle: Path, workspace: Path, *, expected_public_key: str | N
         "device_identity_hardware_attested": False,
         "physical_authority": False,
         "design_approved": False,
+        "executed_utc": body["executed_utc"],
+        "freshness_window_seconds": max_age_seconds,
+        "ledger_standing_checked": ledger is not None,
+        "worker_currently_revoked": revoked,
     }
+    if revoked:
+        result.update(historical_only=True,
+                      reason="worker is revoked; the receipt predates revocation and is not current evidence")
+    return result
