@@ -46,7 +46,7 @@ def i2c_findings(graph: Graph) -> List[Finding]:
         resolved = {nid: _effective(nodes[nid]) for nid in members}
         unknown = [nid for nid, addr in resolved.items() if addr is None]
         if unknown:
-            findings.append(_unknown(bus, members, unknown, specs))
+            findings.append(_unknown(bus, members, unknown, specs, nodes))
         by_address: Dict[str, List[str]] = {}
         for nid, addr in resolved.items():
             if addr is not None:
@@ -160,11 +160,16 @@ def _label(spec: Optional[Mapping[str, Any]], node_id: str) -> str:
     return f"{(spec or {}).get('label') or (spec or {}).get('id') or 'device'} ({node_id})"
 
 
-def _unknown(bus: Bus, members: List[str], unknown: List[str], specs) -> Finding:
+def _unknown(bus: Bus, members: List[str], unknown: List[str], specs, nodes) -> Finding:
     names = ", ".join(_label(specs[n], n) for n in unknown)
-    return {
+    module_ids = [str(nodes[n].get("moduleId") or "") for n in unknown]
+    identical = len(module_ids) != len(set(module_ids))
+    finding: Finding = {
         "id": f"i2c-unknown-{bus[0]}-{bus[1]}-{bus[2]}",
-        "level": "info",
+        # Two of the same part with no known address almost certainly share their factory default, so
+        # that is a warning a person must clear (and it blocks build_ready). Different unknown parts
+        # on one bus are only a note: they usually differ, and HS cannot tell either way.
+        "level": "warn" if identical else "info",
         "code": "i2c_address_unknown",
         "message": (
             f"HS cannot tell whether the {len(members)} devices on one I2C bus have different addresses: "
@@ -174,6 +179,10 @@ def _unknown(bus: Bus, members: List[str], unknown: List[str], specs) -> Finding
         "nodes": list(members),
         "bus": {"controller": bus[0], "sda": bus[1], "scl": bus[2]},
     }
+    if identical:
+        finding["requires_person"] = True
+        finding["message"] += " Identical parts usually share one factory address, so they would clash."
+    return finding
 
 
 def _not_possible(node_id: str, spec, declared: str, info: Mapping[str, Any]) -> Finding:

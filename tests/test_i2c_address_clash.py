@@ -48,7 +48,7 @@ def test_parts_with_no_sourced_address_are_reported_as_unknown_never_as_fine() -
 
     assert not _findings(graph, "i2c_address_clash")
     [unknown] = _findings(graph, "i2c_address_unknown")
-    assert unknown["level"] == "info"
+    assert unknown["level"] == "warn" and unknown["requires_person"] is True
     assert "cannot tell" in unknown["message"]
 
 

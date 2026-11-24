@@ -32,7 +32,7 @@ def agent_verdict(result: Mapping[str, Any]) -> Dict[str, Any]:
         "needs_a_person": _needs_a_person(issues),
         "request_fidelity": _pick(fidelity, ("status", "missing_parts", "unmapped_requests")),
         "firmware_coverage": _pick(coverage, ("status", "uncovered_pins")),
-        "notes": [str(n) for n in summary.get("notes") or []],
+        "notes": [*(str(n) for n in summary.get("notes") or []), *_unchecked_notes(issues)],
         "physical_correctness": "UNPROVEN",
         "claim_boundary": "Software checks only. Nothing here shows the design works on real hardware.",
         "out_dir": _out_dir(result),
@@ -59,6 +59,15 @@ def _needs_a_person(issues: List[Mapping[str, Any]]) -> List[Dict[str, Any]]:
         {"node": i.get("node_id"), "code": i.get("code"), "message": str(i.get("message") or "")}
         for i in issues
         if i.get("requires_person")
+    ]
+
+
+def _unchecked_notes(issues: List[Mapping[str, Any]]) -> List[str]:
+    """Checks HS could not make, said plainly, so an agent does not read silence as a pass."""
+    return [
+        str(i.get("message") or "")
+        for i in issues
+        if i.get("code") == "i2c_address_unknown" and not i.get("requires_person") and i.get("message")
     ]
 
 
