@@ -172,7 +172,8 @@ def build_design_quality_gate(
     if bom_ready:
         score += 0.05
 
-    strict_build_ready = build_ready and not blockers
+    person_pending = any(i.get("requires_person") for i in electrical_issues)
+    strict_build_ready = build_ready and not blockers and not person_pending
     fabrication_ready = bool(body.get("fabrication_ready")) and gerber_ready and bom_ready and not fabrication_blockers
 
     gate = {
@@ -181,7 +182,7 @@ def build_design_quality_gate(
         "build_ready": strict_build_ready,
         "fabrication_ready": fabrication_ready,
         "compiler_verified": compiler_verified,
-        "circuit_readiness": "logical_preview" if compiler_verified and (body.get("geometry_fidelity") or {}).get("requires_native_source_geometry") else "build_ready" if compiler_verified else readiness,
+        "circuit_readiness": "logical_preview" if compiler_verified and (body.get("geometry_fidelity") or {}).get("requires_native_source_geometry") else "build_ready" if compiler_verified and not person_pending else readiness,
         "drc_pass": drc_pass,
         "electrical_safety_pass": electrical_pass,
         "gerber_ready": gerber_ready,

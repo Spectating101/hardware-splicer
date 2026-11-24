@@ -70,9 +70,13 @@ def compile_graph_to_artifacts(
         }
 
     drc_errors = sum(1 for v in drc.get("violations") or [] if v.get("severity") == "error")
+    # A finding only a person can clear (an address strap HS cannot see) is never build-ready, so this
+    # record and the quality gate say the same thing.
+    needs_a_person = any(w.get("requires_person") for w in electrical)
     build_ready = (
         bool(nodes)
         and not electrical_errors
+        and not needs_a_person
         and drc.get("pass") is True
         and kicad_text.startswith("(kicad_pcb")
     )
