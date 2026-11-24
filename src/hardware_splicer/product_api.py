@@ -77,6 +77,8 @@ from .project_pre_fabrication_plan_api import create_project_pre_fabrication_pla
 from .project_physical_validation_api import create_project_physical_validation_router
 from .project_store import ProjectStore
 from .project_events_api import create_project_events_router
+from .mission_api import create_mission_router
+from .mission_store import MissionStore
 from .project_thread_api import create_project_thread_router
 from .project_thread_store import ProjectThreadStore
 from .semantic_circuit_api import create_semantic_circuit_router
@@ -143,6 +145,7 @@ def create_product_app(
     app.include_router(create_project_candidates_router(resolved_store))
     app.include_router(create_project_review_packet_router(resolved_store))
     app.include_router(create_project_thread_router(ProjectThreadStore(resolved_store)))
+    app.include_router(create_mission_router(MissionStore(resolved_store)))
     app.include_router(create_project_events_router(resolved_store))
     app.include_router(create_project_findings_router(resolved_store))
     app.include_router(create_machine_project_router())

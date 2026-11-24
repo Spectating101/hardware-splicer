@@ -1,6 +1,7 @@
 """What an AI agent sees: the spec schema, the described operations, and suggestions that repair a broken spec."""
 import copy
 import re
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -8,6 +9,7 @@ from fastapi.testclient import TestClient
 from hardware_splicer.device_plan import (
     WIRE_COLORS, DevicePlanError, build_device_plan, device_catalog, device_spec_json_schema, example_specs, module_library,
 )
+from hardware_splicer.device_suggestions import apply_first_suggestions as _apply_first_suggestions
 from hardware_splicer.mcp_backend_gateway import task_operation_manifest
 from hardware_splicer.product_api import create_product_app
 from hardware_splicer.project_store import ProjectStore
@@ -111,75 +113,27 @@ def test_the_device_design_task_manifest_gives_an_agent_the_whole_workflow_in_on
     assert manifest["workflow_operation_ids"] == [
         "get_spec_schema_v1_devices_spec_schema_get", "get_examples_v1_devices_examples_get", "post_draft_v1_devices_draft_post", "post_plan_v1_devices_plan_post",
         "post_engineering_v1_devices_engineering_post", "post_case_v1_devices_case_post", "post_application_v1_devices_application_post",
-        "post_observations_v1_devices_observations_post",
+        "post_application_run_v1_devices_application_run_post", "post_observations_v1_devices_observations_post",
     ]
     assert manifest["authority_contract"] == {"projection_grants_physical_authority": False, "backend_gates_bypassed": False, "automatic_execution": False}
     plan = next(op for op in manifest["operations"] if op["operation_id"].startswith("post_plan"))
     assert "modules" in plan["operation"]["requestBody"]["content"]["application/json"]["schema"]["properties"]
 
 
-def _pin_of(plan, endpoint):
-    """module.PIN as the spec writes it (a pin id or a printed name, any case) -> (module id, pin dict), or None."""
-    module_id, _, name = endpoint.partition(".")
-    module = next((m for m in plan["modules"] if m["id"] == module_id), None)
-    if module is None:
-        return None
-    pin = next((p for p in module["pins"] if p["id"] == name), None) or next((p for p in module["pins"] if p["name"].lower() == name.lower()), None)
-    return (module_id, pin) if pin else None
-
-
-def _same_pin(plan, endpoint, key):
-    found = _pin_of(plan, endpoint)
-    return found is not None and (found[0], found[1]["id"]) == key
+def test_the_task_manifest_offers_every_operation_the_agent_guide_lists_in_its_order():
+    # The guide's loop table and the projection drifted once: application/run was documented but not offered.
+    guide = (Path(__file__).resolve().parents[1] / "docs" / "AGENT_DEVICE_DESIGN.md").read_text()
+    listed = re.findall(r"^\| \d+b? \| `(GET|POST) (/v1/devices/[a-z/-]+)` \|", guide, flags=re.MULTILINE)
+    manifest = task_operation_manifest("device_design", create_product_app())
+    offered = [(op["method"], op["path"]) for op in manifest["operations"]]
+    assert listed and offered == listed
 
 
 def apply_first_suggestions(spec, plan):
-    """What a simple agent does with the planner's suggestions: take the first candidate. Returns whether it changed anything.
-
-    A suggestion it cannot apply cleanly (no candidate, a pin it cannot find, a wire it cannot match) is skipped and changes nothing."""
-    changed = False
-    wires_by_id = {w["id"]: w for w in plan["wires"]}
-    for finding in plan["findings"]:
-        for suggestion in finding.get("suggestions", []):
-            options = suggestion.get("to_one_of") or []
-            if not options:
-                continue
-            if suggestion["action"] == "add_connection":
-                pin = _pin_of(plan, suggestion["from"])
-                if pin is None or any(_same_pin(plan, row[end], (pin[0], pin[1]["id"])) for row in spec["connections"] for end in ("from", "to")):
-                    continue  # already wired (a wire the planner rejected as it stands): a replacement is the repair, not a second wire
-                spec["connections"].append({"from": suggestion["from"], "to": options[0]})
-                changed = True
-            elif suggestion["action"] == "replace_connection":
-                wire = wires_by_id.get(suggestion["wire"])
-                keep = _pin_of(plan, suggestion["from"])
-                if wire is None or keep is None:
-                    continue
-                keep_key = (keep[0], keep[1]["id"])
-                ends = {(wire[end]["module"], wire[end]["pin_id"]) for end in ("from", "to")}
-                for row in spec["connections"]:
-                    keys = [_pin_of(plan, row[end]) for end in ("from", "to")]
-                    if None in keys or {(k[0], k[1]["id"]) for k in keys} != ends:
-                        continue
-                    # the end that is not the module's own pin is the one to replace, whichever way the wire is written
-                    replace = "to" if _same_pin(plan, row["from"], keep_key) else "from"
-                    row[replace] = options[0]
-                    changed = True
-                    break
-            elif suggestion["action"] == "move_signal":
-                role = "i2c_scl" if suggestion["signal"] == "scl" else "i2c_sda"
-                mcu_ref = options[0].split(".")[0]
-                moved = False
-                for row in spec["connections"]:
-                    ends = {end: _pin_of(plan, row[end]) for end in ("from", "to")}
-                    if any(found is None for found in ends.values()):
-                        continue
-                    for end, other in (("from", "to"), ("to", "from")):
-                        if ends[end][0] == mcu_ref and role in ends[other][1]["roles"] and ends[other][0] != mcu_ref:
-                            row[end] = options[0]  # every wire of this signal moves, so the bus is not split
-                            moved = True
-                if moved:
-                    return True  # one signal at a time, then re-plan
+    """What a simple agent does with the planner's suggestions: take the first candidate. Returns whether it changed anything."""
+    new_spec, changed = _apply_first_suggestions(spec, plan)
+    spec.clear()
+    spec.update(new_spec)
     return changed
 
 
