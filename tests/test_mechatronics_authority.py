@@ -232,3 +232,42 @@ def test_inconclusive_structural_screen_blocks_hardware_splicer_product_release(
         "structural screening" in str(x).lower()
         for x in guarded["stages"][-1]["blockers"]
     )
+
+
+def test_requested_sheet_hybrid_must_not_bypass_whole_hardware_authority():
+    original=build_mechatronics_authority(_closed_spec(), engineering=_engineering())
+    assert original["production_authorized"] is True
+    analysis=_engineering()
+    analysis["analysis"]["mechanism"]["construction_alternatives"]={
+        "status":"comparison_produced_research_only",
+        "requested_preference":"sheet_hybrid",
+        "release_authorized":True,  # forged authority is deliberately ignored
+        "fabrication_authorized":True,
+    }
+    result=build_mechatronics_authority(_closed_spec(),engineering=analysis)
+    assert result["production_authorized"] is False
+    assert result["subsystems"]["mechanical"]["production_authorized"] is False
+    assert result["subsystems"]["mechanical"]["construction_release_blocked"] is True
+    assert result["current_authority_level"] != "production_mechatronics_release"
+
+
+def test_requested_construction_without_comparison_report_blocks_release():
+    # The operator asked for a hybrid build but no comparison report exists
+    # (evaluator missing or failed). Missing comparison must never read as
+    # "nothing requested".
+    for preference in ("sheet_hybrid", "off_the_shelf"):
+        spec = _closed_spec()
+        spec["mechanism"]["construction"] = {"preference": preference}
+        result = build_mechatronics_authority(spec, engineering=_engineering())
+        assert result["production_authorized"] is False, preference
+        mech = result["subsystems"]["mechanical"]
+        assert mech["production_authorized"] is False
+        assert mech["construction_release_blocked"] is True
+        assert result["current_authority_level"] != "production_mechatronics_release"
+        assert any("construction" in str(x).lower() for x in result["stages"][-1]["blockers"])
+    for preference in ("auto", "full_print"):
+        spec = _closed_spec()
+        spec["mechanism"]["construction"] = {"preference": preference}
+        result = build_mechatronics_authority(spec, engineering=_engineering())
+        assert result["production_authorized"] is True, preference
+        assert result["subsystems"]["mechanical"]["construction_release_blocked"] is False
