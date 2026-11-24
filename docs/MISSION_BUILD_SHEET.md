@@ -1,50 +1,41 @@
-# Mission engineering review sheet — read-only handoff
+# Mission engineering review sheet (read-only)
 
-A fabrication mission can have a proposal, software evaluations, retained output, and
-unresolved physical facts, all with different authority. The engineering review sheet under
-/engineering/missions makes those distinctions legible without giving an agent build authority.
+A fabrication mission can hold a proposal, software evaluations, retained output and unresolved
+physical facts, each with different authority. The review sheet at
+`/engineering/missions?project=<id>&mission=<id>` shows them side by side without giving an agent
+or the page any build authority. The page only reads.
 
-## Surface and input
+## What it shows
 
-- Open **Engineering review sheet** on any accepted mission with a proposal.
-- Choose one agent-proposed candidate when multiple candidates exist. A READY terminal applies
-  only to its named candidate, not all the agent's proposals.
-- Inventory is displayed as user-listed, not a verified bill of materials. Agent-cited source IDs,
-  named donors and unrecognized spec fields are not treated as verified design implementation.
-- Physical correctness, physical authorization, unresolved needs, safety concerns and candidate
-  check results are displayed in their actual backend terms.
-- Copy review sheet copies an inspectable text summary, including the exact mission event sequence,
-  source/donor caveats, software result hashes, and any retained output returned by inspection.
-  The copied text is not a wiring plan or fabrication instruction.
+- Open **Engineering review sheet** on an accepted mission with at least one candidate. When there
+  are several, a READY verdict applies only to the candidate it names.
+- Inventory is the user's list, not a verified bill of materials. Agent-cited source IDs, named
+  donors and unrecognized spec fields are shown as unverified, never as implemented design.
+- Physical correctness, firmware and power-on authorization, open needs, safety concerns and each
+  candidate's check results are shown in the backend's own terms.
+- **Copy review sheet** copies a text summary headed "NOT BUILD INSTRUCTIONS" with the mission event
+  sequence, caveats, software result hashes and any retained output. It is not a wiring plan.
 
-## Evidence and non-generating file inspection
+## Non-generating inspection
 
-The read-only frontend GET route at
-/api/proxy/engineering/projects/{projectId}/missions/{missionId}/delivery forwards to
-the canonical backend GET /v1/projects/{projectId}/missions/{missionId}/delivery.
-That backend route:
+The frontend route `/api/proxy/engineering/projects/{projectId}/missions/{missionId}/delivery`
+forwards GET only to `GET /v1/projects/{projectId}/missions/{missionId}/delivery`. That backend
+route reads existing evaluation artifacts and retained package manifests, checks their binding to the
+mission, marks superseded or unavailable files, and exposes hashes. It never runs a check, builds a
+package, approves a review or touches hardware. It reports `not_generated`, `blocked` and `available`
+for the prototype review package separately, and says that file presence does not show which agent made
+the file.
 
-- reads existing evaluation artifacts and currently retained package manifests;
-- checks package/mission binding, identifies superseded or unavailable files and exposes hashes;
-- never generates new output or performs software checks, fabrication, actuation or review approval;
-- reports not_generated versus blocked versus available for the prototype review package;
-- explicitly says file presence alone does not establish which agent created it.
+The proxy (`missions/forward.ts`) forwards no operator token, so it cannot act as a person, and the
+route set contains no POST.
 
-The sheet only enumerates files in the chosen candidate's inspected recorded_files.
-The existing separate Hand-off panel is the only UI path here that explicitly asks the
-backend to generate the ready candidate's review package.
+## Not in this tree
 
-## Verification
-
-The real missions Playwright test suite checks:
-
-1. An unverified, donor-omitting, unrecognized-field proposal carrying BLOCKED_UNSAFE is
-   review-only; no action is authorized, no file is invented, and opening/copying leaves
-   the mission event sequence unchanged.
-2. A READY_FOR_HUMAN_BUILD software verdict displays two retained HS check artifacts but
-   says the prototype package is not generated until the person explicitly clicks the
-   preexisting Hand-off generation action; refreshed inspection then reports the real
-   package hash, size and unknown producer attribution.
-
-No physical device is used or evaluated by these tests. The sheet does not constitute a
-safety certification, manufacturing instruction, accessibility suitability claim or sale approval.
+The mission start, accept, answer, hand-off and staging screens, the POST proxy routes and the
+browser suite that drove them live in other open branches. This slice ships no Playwright spec.
+Its checks are the backend tests (`tests/test_mission_delivery_inspection.py`,
+`tests/test_mission_case_regressions.py`) and the TypeScript typecheck. The page was also exercised
+once in headless Chromium against a real backend: an accepted mission with an omitted required donor,
+an unrecognized spec field and a recorded `BLOCKED_UNSAFE` concern showed REVIEW ONLY, the donor gap,
+the unchecked field, the unverified safety concern and `Prototype review package: blocked`, the copied
+text began "NOT BUILD INSTRUCTIONS", and the page made no non-GET request.
