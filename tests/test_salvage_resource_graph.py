@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import pytest
 
-from hardware_splicer.fabrication_operator import FabricationValidationError
-from hardware_splicer.fabrication_option_tradeoff import FabricationOptionTradeoff
-from hardware_splicer.procurement_quotes import ProcurementQuoteBook
-from hardware_splicer.salvage_resource_graph import project_salvage_resource_graph, resource_index
+from hardware_splicer.donor_errors import DonorValidationError
+from hardware_splicer.salvage_resource_graph import (
+    _project_salvage_resource_graph, build_salvage_resource_graph, resource_index,
+)
 
 
 def _graph():
-    return project_salvage_resource_graph(
+    return _project_salvage_resource_graph(
         project_id="resource-test",
         donors=[
             {
@@ -43,22 +43,6 @@ def _graph():
     )
 
 
-def _quotes() -> ProcurementQuoteBook:
-    quotes = ProcurementQuoteBook()
-    quotes.add(
-        quote_id="q-mcu",
-        supplier_id="supplier-a",
-        part_key="mcu",
-        currency="USD",
-        unit_price="5.00",
-        stock_quantity=100,
-        lead_time_days=2,
-        source_ref="snapshot-1",
-        observed_at="2026-10-17T00:00:00+00:00",
-    )
-    return quotes
-
-
 def test_resource_graph_is_projection_and_preserves_donor_uncertainty():
     graph = _graph()
     assert graph["truth_contract"]["projection_only"] is True
@@ -76,103 +60,35 @@ def test_resource_graph_is_projection_and_preserves_donor_uncertainty():
     assert donor["grants_physical_authority"] is False
 
     printer = indexed["operator:printer-1"]
-    assert printer["support"]["kind"] == "server_configuration"
+    assert printer["support"]["kind"] == "caller_supplied_descriptor"
     assert printer["available"] is True
     assert printer["grants_physical_authority"] is False
 
 
-def test_tradeoff_derives_resource_burden_instead_of_trusting_agent_counts():
-    graph = _graph()
-    tradeoff = FabricationOptionTradeoff(procurement=_quotes())
-    comparison = tradeoff.compare(
-        options=[
-            {
-                "option_id": "clean",
-                "kind": "clean_sheet",
-                "bom": [{"part_key": "mcu", "quantity": 1}],
-                "resource_refs": ["operator:printer-1"],
-                "unresolved_evidence": 0,
-                "fabrication_operations": 1,
-                "manual_steps": 2,
-            },
-            {
-                "option_id": "reclaim",
-                "kind": "reclaim_heavy",
-                "bom": [{"part_key": "mcu", "quantity": 1}],
-                "resource_refs": ["donor:printer:switch", "operator:meter-1"],
-                "unresolved_evidence": 0,
-                "fabrication_operations": 1,
-                "manual_steps": 2,
-            },
-        ],
-        currency="USD",
-        as_of="2026-10-17T01:00:00+00:00",
-        resource_graph=graph,
+def test_built_graph_never_marks_an_unevidenced_donor_ready(tmp_path):
+    from test_mission_feedback import _store
+
+    missions = _store(tmp_path)
+    graph = build_salvage_resource_graph(
+        project_store=missions.project_store,
+        project_id="monitor",
+        donor_references=[{"donor_id": "donor:radio:buttons", "label": "Buttons"}],
     )
-    assert comparison["resource_graph_used"] is True
-    reclaim = next(row for row in comparison["options"] if row["option_id"] == "reclaim")
-    assert reclaim["metrics"]["resource_dependencies"] == 2
-    assert reclaim["metrics"]["donor_dependencies"] == 1
-    assert reclaim["metrics"]["unresolved_resource_facts"] == 1
-    assert reclaim["metrics"]["unavailable_resource_dependencies"] == 1
+    donor = resource_index(graph)["donor:radio:buttons"]
+    assert donor["contract_state"] == "unknown"
+    assert donor["usable_for_architecture"] is False
+    assert donor["verified_for_ready"] is False
+    assert donor["grants_physical_authority"] is False
 
 
-def test_tradeoff_rejects_agent_donor_count_that_disagrees_with_graph():
-    tradeoff = FabricationOptionTradeoff(procurement=_quotes())
-    with pytest.raises(FabricationValidationError, match="donor_dependencies disagrees"):
-        tradeoff.compare(
-            options=[
-                {
-                    "option_id": "reclaim",
-                    "kind": "reclaim_heavy",
-                    "bom": [{"part_key": "mcu", "quantity": 1}],
-                    "resource_refs": ["donor:printer:switch"],
-                    "donor_dependencies": 0,
-                    "unresolved_evidence": 0,
-                    "fabrication_operations": 1,
-                    "manual_steps": 1,
-                },
-                {
-                    "option_id": "clean",
-                    "kind": "clean_sheet",
-                    "bom": [{"part_key": "mcu", "quantity": 1}],
-                    "resource_refs": [],
-                    "unresolved_evidence": 0,
-                    "fabrication_operations": 1,
-                    "manual_steps": 1,
-                },
-            ],
-            currency="USD",
-            as_of="2026-10-17T01:00:00+00:00",
-            resource_graph=_graph(),
+def test_lab_tool_descriptors_are_recorded_as_unverified_and_malformed_ones_rejected():
+    graph = _graph()
+    printer = resource_index(graph)["operator:printer-1"]
+    assert printer["source"]["kind"] == "caller_supplied_descriptor"
+    assert graph["truth_contract"]["lab_truth_owner"] == "caller_supplied_descriptor_unverified"
+    with pytest.raises(DonorValidationError):
+        _project_salvage_resource_graph(
+            project_id="monitor", donors=[],
+            fabrication_resources=[{"operator_id": "x", "display_name": "x", "capabilities": ["a"],
+                                    "available": "yes", "simulated_only": False}],
         )
-
-
-def test_resource_refs_fail_closed_without_graph_or_on_unknown_id():
-    tradeoff = FabricationOptionTradeoff(procurement=_quotes())
-    options = [
-        {
-            "option_id": "a",
-            "kind": "clean_sheet",
-            "bom": [{"part_key": "mcu", "quantity": 1}],
-            "resource_refs": ["operator:printer-1"],
-            "unresolved_evidence": 0,
-            "fabrication_operations": 1,
-            "manual_steps": 1,
-        },
-        {
-            "option_id": "b",
-            "kind": "hybrid",
-            "bom": [{"part_key": "mcu", "quantity": 1}],
-            "resource_refs": [],
-            "unresolved_evidence": 0,
-            "fabrication_operations": 1,
-            "manual_steps": 1,
-        },
-    ]
-    with pytest.raises(FabricationValidationError, match="resource_refs require resource_graph"):
-        tradeoff.compare(options=options, currency="USD")
-
-    options[0]["resource_refs"] = ["operator:not-registered"]
-    with pytest.raises(FabricationValidationError, match="unknown resource_ref"):
-        tradeoff.compare(options=options, currency="USD", resource_graph=_graph())
