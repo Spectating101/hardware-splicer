@@ -297,7 +297,8 @@ export function deriveProjectTruth(session: ProjectTruthSessionInput = {}): Proj
     : [];
   const electricalError = !requestMismatch && electricalErrors.length > 0;
   if (electricalError) designState = "electrical_error";
-  const electricalDetail = electricalError ? electricalErrors.map((issue) => issue.message).join(" ") : "";
+  // Electrical errors are listed even when a missing requested part is the state said first.
+  const electricalDetail = electricalErrors.map((issue) => issue.message).join(" ");
   // A clean DRC is not a build-ready design. When the quality gate says it is not (a strap only a
   // person can set, a failing KiCad ERC, a goal the design does not cover), say so and list why.
   const gateBlocked = sessionHasBuild(session) && gate?.build_ready === false;
@@ -336,7 +337,7 @@ export function deriveProjectTruth(session: ProjectTruthSessionInput = {}): Proj
         }))
       : []),
     ...gateProblems,
-    ...(electricalError
+    ...(electricalErrors.length > 0
       ? electricalErrors.map((issue) => ({
           message: issue.message,
           repairs: (issue.repairs || []).map((repair) => ({
@@ -478,7 +479,7 @@ export function deriveProjectTruth(session: ProjectTruthSessionInput = {}): Proj
       state: designState,
       errors,
       warnings,
-      detail: requestDetail || electricalDetail || gateDetail,
+      detail: [requestDetail, electricalDetail].filter(Boolean).join(" ") || gateDetail,
       problems,
       label: designLabel(designState, errors),
     },

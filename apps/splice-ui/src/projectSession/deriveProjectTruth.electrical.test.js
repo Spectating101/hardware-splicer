@@ -58,6 +58,23 @@ describe("deriveProjectTruth with an electrical error", () => {
     expect(truth.design.state).toBe("request_mismatch");
   });
 
+  it("still lists the electrical error and its repairs beside a missing requested part", () => {
+    const mismatch = { status: "mismatch", missing_parts: [{ module_id: "sg90", names: ["pan"], requested: 2, in_design: 1 }] };
+    const clash = {
+      ...CLASH,
+      repairs: [{ summary: "Set it to 0x76.", requires_person: true, physical_steps: ["Set the pin."] }],
+    };
+    const truth = deriveProjectTruth(
+      sessionFor({ build_ready: false, request_fidelity: mismatch, summary: { electrical_issues: [clash] } })
+    );
+
+    const messages = truth.design.problems.map((p) => p.message);
+    expect(messages.some((m) => m.includes("requested part sg90"))).toBe(true);
+    expect(messages).toContain(CLASH.message);
+    expect(truth.design.problems.find((p) => p.message === CLASH.message).repairs[0].requiresPerson).toBe(true);
+    expect(truth.design.detail).toContain("0x77");
+  });
+
   it("leaves a design with only notes as clean", () => {
     const info = { level: "info", message: "confirm pull-ups" };
     const truth = deriveProjectTruth(
