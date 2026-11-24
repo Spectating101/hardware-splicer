@@ -11,6 +11,7 @@ finding: it becomes a standing warning for a person to carry out.
 
 from __future__ import annotations
 
+import re
 from typing import Any, Dict, List, Mapping, Optional, Tuple
 
 from .i2c_addresses import i2c_addresses_for
@@ -86,17 +87,72 @@ def _peers(wires: List[Mapping[str, Any]], node_id: str, pin_id: str) -> List[Tu
     return out
 
 
+Pin = Tuple[str, str]
+
+
+def _nets(nodes, specs, wires) -> Dict[Pin, Pin]:
+    """Map every wired pin to a representative of its net (union-find over the wires).
+
+    A level shifter passes a signal between the low and high side of each channel, so its LVn and
+    HVn pins are joined: an I2C bus continues through it.
+    """
+    parent: Dict[Pin, Pin] = {}
+
+    def find(pin: Pin) -> Pin:
+        parent.setdefault(pin, pin)
+        while parent[pin] != pin:
+            parent[pin] = parent[parent[pin]]
+            pin = parent[pin]
+        return pin
+
+    def join(a: Pin, b: Pin) -> None:
+        parent[find(a)] = find(b)
+
+    for w in wires:
+        a, b = w.get("from") or {}, w.get("to") or {}
+        join((str(a.get("nodeId")), str(a.get("pinId"))), (str(b.get("nodeId")), str(b.get("pinId"))))
+    for nid, node in nodes.items():
+        if not str(node.get("moduleId") or "").startswith("level-shifter"):
+            continue
+        pin_ids = {p.get("id") for p in (specs.get(nid) or {}).get("pins") or []}
+        for pin_id in pin_ids:
+            match = re.fullmatch(r"LV(\d+)", str(pin_id))
+            if match and f"HV{match.group(1)}" in pin_ids:
+                join((nid, str(pin_id)), (nid, f"HV{match.group(1)}"))
+    return {pin: find(pin) for pin in list(parent)}
+
+
+def _controller_pins(net: Optional[Pin], nets: Mapping[Pin, Pin], controllers) -> List[Pin]:
+    if net is None:
+        return []
+    return sorted(pin for pin, rep in nets.items() if rep == net and pin[0] in controllers)
+
+
 def _buses(nodes, specs, controllers, wires) -> Dict[Bus, List[str]]:
+    """A device is on a bus when its SDA and SCL nets each reach a pin of the same controller.
+
+    Membership follows connectivity, not direct wires: a daisy-chained device (Qwiic style) and a
+    device behind a level shifter reach the controller through other pins, and a device with several
+    wires on SDA or SCL is still one device on one net.
+    """
+    nets = _nets(nodes, specs, wires)
     buses: Dict[Bus, List[str]] = {}
     for nid in nodes:
         spec = specs.get(nid)
         pins = _device_pins(spec) if spec and nid not in controllers else None
         if not pins:
             continue
-        sda_peers = [p for p in _peers(wires, nid, pins[0]) if p[0] in controllers]
-        scl_peers = [p for p in _peers(wires, nid, pins[1]) if p[0] in controllers]
-        if len(sda_peers) == 1 and len(scl_peers) == 1 and sda_peers[0][0] == scl_peers[0][0]:
-            buses.setdefault((sda_peers[0][0], sda_peers[0][1], scl_peers[0][1]), []).append(nid)
+        sda_net, scl_net = nets.get((nid, pins[0])), nets.get((nid, pins[1]))
+        if sda_net is None or scl_net is None or sda_net == scl_net:
+            continue
+        sda_pins = _controller_pins(sda_net, nets, controllers)
+        scl_pins = _controller_pins(scl_net, nets, controllers)
+        controller = next((c for c in dict.fromkeys(p[0] for p in sda_pins) if any(q[0] == c for q in scl_pins)), None)
+        if controller is None:
+            continue
+        sda = next(p[1] for p in sda_pins if p[0] == controller)
+        scl = next(p[1] for p in scl_pins if p[0] == controller)
+        buses.setdefault((controller, sda, scl), []).append(nid)
     return buses
 
 
@@ -176,13 +232,28 @@ def _clash(bus: Bus, address: str, group: List[str], nodes, specs, wires, buses,
 
 def _repairs(bus, address, group, moved, nodes, specs, wires, buses, resolved) -> List[Dict[str, Any]]:
     repairs: List[Dict[str, Any]] = []
-    second = _second_bus_repair(bus, moved, nodes, specs, wires, buses)
-    if second:
-        repairs.append(second)
+    for candidate in group[1:]:
+        second = _second_bus_repair(bus, candidate, nodes, specs, wires, buses)
+        if second:
+            repairs.append(second)
+            break
     strap = _strap_repair(moved, nodes, specs, resolved, buses.get(bus, []))
     if strap:
         repairs.append(strap)
     return repairs
+
+
+def _wired_only_to(wires, node_id: str, pins: Tuple[str, str], controller: str) -> bool:
+    """True when each of the device's bus pins is wired, and only to the controller.
+
+    A device chained through another device, behind a level shifter, or with another device hanging
+    off its pins cannot be moved by rewiring its controller wires alone, so no repair is offered.
+    """
+    for pin in pins:
+        peers = _peers(wires, node_id, pin)
+        if not peers or any(peer[0] != controller for peer in peers):
+            return False
+    return True
 
 
 def _second_bus_repair(bus: Bus, moved: str, nodes, specs, wires, buses) -> Optional[Dict[str, Any]]:
@@ -196,7 +267,7 @@ def _second_bus_repair(bus: Bus, moved: str, nodes, specs, wires, buses) -> Opti
     present = {p["id"] for p in spec.get("pins") or []}
     free = [p for p in _SECOND_BUS_PINS if p in present and p not in used][:2]
     pins = _device_pins(specs[moved])
-    if len(free) < 2 or not pins:
+    if len(free) < 2 or not pins or not _wired_only_to(wires, moved, pins, controller):
         return None
     sda_pin, scl_pin = free
     remove = [w[2] for pin in pins for w in _peers(wires, moved, pin) if w[0] == controller]
