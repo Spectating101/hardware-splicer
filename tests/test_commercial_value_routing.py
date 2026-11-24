@@ -1,0 +1,419 @@
+"""Commercial value routing: never infer authorization from a positive spread."""
+from __future__ import annotations
+
+from copy import deepcopy
+
+import pytest
+
+from hardware_splicer.commercial_value_routing import (
+    evaluate_commercial_case, evaluate_route, evaluate_portfolio,
+)
+from hardware_splicer.commercial_outcomes import append_outcome, SCHEMA as OUTCOME_SCHEMA
+from hardware_splicer.commercial_materials import evaluate_material_plan
+from hardware_splicer.commercial_identity_audit import reconcile_identity_claims
+
+
+def money(amount, evidence_class="ESTIMATED", reference=None):
+    record = {"amount": amount, "evidence_class": evidence_class}
+    if reference is not None:
+        record["reference"] = reference
+    return record
+
+
+def route(*, currency="TWD", action="refurbish", p=0.8):
+    return {
+        "route_id": "repair-and-sell",
+        "action": action,
+        "currency": currency,
+        "success_probability": p,
+        "probability_evidence": "HYPOTHESIS",
+        "sale_proceeds": money(600, "HYPOTHESIS"),
+        "failure_proceeds": money(20, "ESTIMATED"),
+        "expenses": {
+            "acquisition": money(100), "material_and_fab": money(100),
+            "engineering": money(50), "labor": money(20),
+            "quality": money(10), "freight_and_tax": money(10),
+            "sales_and_payment": money(10), "warranty_and_returns": money(10),
+        },
+    }
+
+
+def case(r=None):
+    return {
+        "schema_version": "hardware_splicer.commercial_value_case.v1",
+        "candidate_id": "TW-USED-001", "currency": "TWD", "market": "Taiwan",
+        "routes": [r or route()],
+    }
+
+
+def test_expected_value_uses_failure_proceeds_and_all_costs():
+    result = evaluate_commercial_case(case())
+    priced = result["routes"][0]
+    assert priced["expected_proceeds"] == 484.0
+    assert priced["total_cost"] == 310.0
+    assert priced["net_value"] == 174.0
+    assert priced["break_even_bid"] == 274.0
+    assert priced["bid_ceiling_at_target_margin"] == 128.8
+    assert priced["sale_price_minus_20pct"] == 78
+    assert priced["sale_price_plus_20pct"] == 270
+    assert priced["status"] == "SCREENING_ONLY"
+    assert priced["purchase_authorized"] is False
+    assert result["best_screening_route"] == "repair-and-sell"
+
+
+def test_missing_expense_cannot_become_zero():
+    r = route()
+    del r["expenses"]["quality"]
+    result = evaluate_commercial_case(case(r))["routes"][0]
+    assert "missing_money:expenses.quality" in result["errors"]
+    assert result["net_value"] is None
+
+
+def test_explicit_zero_is_allowed_when_recorded():
+    r = route()
+    r["expenses"]["quality"] = money(0, "ESTIMATED")
+    assert evaluate_commercial_case(case(r))["routes"][0]["net_value"] == 184
+
+
+def test_invalid_price_and_nonfinite_values_fail_closed():
+    for price in [float("nan"), float("inf"), -1, True, "nope"]:
+        r = route()
+        r["sale_proceeds"] = money(price)
+        x = evaluate_commercial_case(case(r))["routes"][0]
+        assert x["status"] == "INVALID"
+        assert x["purchase_authorized"] is False
+
+
+def test_missing_probability_is_not_assumed_one():
+    r = route()
+    del r["success_probability"]
+    x = evaluate_commercial_case(case(r))["routes"][0]
+    assert "missing_fraction:success_probability" in x["errors"]
+
+
+def test_currency_is_not_silently_converted():
+    r = route(currency="CNY")
+    x = evaluate_commercial_case(case(r))["routes"][0]
+    assert "currency_mismatch" in x["errors"]
+    assert x["status"] == "INVALID"
+
+
+def test_positive_margin_does_not_authorize_purchase():
+    x = evaluate_commercial_case(case())["routes"][0]
+    assert x["net_value"] > 0
+    assert "unproven_gate:physical_test_passed" in x["blockers"]
+    assert "unquoted_core_cost" in x["blockers"]
+    assert "unverified_buyer_price" in x["blockers"]
+
+
+def test_full_receipted_case_remains_human_review_only():
+    r = route()
+    r["success_probability"] = 0.8
+    r["probability_evidence"] = "MEASURED"
+    r["probability_reference"] = "bench-yield-log-004"
+    r["sale_proceeds"] = money(600, "QUOTED", "buyer-po-004")
+    for key in ("acquisition", "material_and_fab"):
+        r["expenses"][key] = money(r["expenses"][key]["amount"], "QUOTED", "supplier-quote-2")
+    gates = ("physical_test_passed", "rights_cleared", "compliance_cleared",
+             "buyer_committed", "procurement_verified")
+    r["gates"] = {gate: True for gate in gates}
+    r["gate_references"] = {gate: f"evidence-{gate}" for gate in gates}
+    x = evaluate_commercial_case(case(r))["routes"][0]
+    assert x["status"] == "REVIEW_READY"
+    assert x["ready_for_human_commercial_review"] is True
+    assert x["purchase_authorized"] is False
+
+
+@pytest.mark.parametrize("ref", [None, "", "   "])
+def test_measured_yield_without_reference_is_not_review_ready(ref):
+    r = route()
+    r["success_probability"] = 0.8
+    r["probability_evidence"] = "MEASURED"
+    if ref is not None:
+        r["probability_reference"] = ref
+    r["sale_proceeds"] = money(600, "QUOTED", "buyer-po-004")
+    for key in ("acquisition", "material_and_fab"):
+        r["expenses"][key] = money(r["expenses"][key]["amount"], "QUOTED", "supplier-quote-2")
+    gates = ("physical_test_passed", "rights_cleared", "compliance_cleared",
+             "buyer_committed", "procurement_verified")
+    r["gates"] = {gate: True for gate in gates}
+    r["gate_references"] = {gate: f"evidence-{gate}" for gate in gates}
+    x = evaluate_commercial_case(case(r))["routes"][0]
+    assert "unverified_yield" in x["blockers"]
+    assert x["status"] == "SCREENING_ONLY"
+    assert x["ready_for_human_commercial_review"] is False
+
+
+def test_unreferenced_measured_price_is_invalid():
+    r = route()
+    r["sale_proceeds"] = money(600, "MEASURED")
+    x = evaluate_commercial_case(case(r))["routes"][0]
+    assert "missing_reference:sale_proceeds" in x["errors"]
+
+
+def test_operating_value_is_discounted_cashflow_not_sale_margin():
+    r = route(action="operate", p=1)
+    del r["sale_proceeds"]
+    del r["failure_proceeds"]
+    r["probability_evidence"] = "HYPOTHESIS"
+    r["monthly_net_cashflows"] = [money(20), money(-5)]
+    r["terminal_value"] = money(390)
+    r["monthly_discount_rate"] = 0
+    x = evaluate_commercial_case(case(r))["routes"][0]
+    assert x["metric"] == "net_present_value"
+    assert x["net_value"] == 95  # 20 - 5 + 390 - 310
+    assert x["margin"] is None
+    assert x["purchase_authorized"] is False
+
+
+def test_operating_requires_real_cashflow_inputs():
+    r = route(action="operate", p=1)
+    del r["sale_proceeds"]
+    r["monthly_net_cashflows"] = []
+    r["terminal_value"] = money(100)
+    r["monthly_discount_rate"] = 0.01
+    x = evaluate_commercial_case(case(r))["routes"][0]
+    assert x["status"] == "INVALID"
+    assert "missing_monthly_net_cashflows" in x["errors"]
+
+
+def test_duplicate_ids_invalid_even_with_different_routes():
+    r1, r2 = route(), route()
+    c = case()
+    c["routes"] = [r1, r2]
+    out = evaluate_commercial_case(c)
+    assert "duplicate_route_id" in out["errors"]
+
+
+def transaction():
+    keys = ("acquisition", "materials", "engineering", "labor", "quality",
+            "logistics_and_tax", "fees", "warranty_cash_spent")
+    return {
+        "transaction_id": "accepted-001", "candidate_id": "benchhmi-v0",
+        "route_id": "refurbish", "currency": "TWD",
+        "acceptance_status": "ACCEPTED", "acceptance_reference": "acceptance-signed-1",
+        "payment_status": "SETTLED", "payment_reference": "bank-reconciliation-1",
+        "revenue": money(10000, "MEASURED", "invoice-1"),
+        "costs": {k: money(100, "MEASURED", "receipts-1") for k in keys},
+    }
+
+
+def test_measured_outcomes_append_once_without_mutating_source():
+    ledger = {"schema_version": OUTCOME_SCHEMA, "transactions": []}
+    original = deepcopy(ledger)
+    first = append_outcome(ledger, transaction())
+    assert first["status"] == "RECORDED"
+    assert len(first["ledger"]["transactions"]) == 1
+    assert first["transaction"]["collected_contribution_to_date"] == 9200
+    assert first["transaction"]["warranty_liability_finalized"] is False
+    assert ledger == original
+    second = append_outcome(first["ledger"], transaction())
+    assert second["status"] == "INVALID"
+    assert second["errors"] == ["duplicate_transaction_id"]
+
+
+def test_deposit_and_hypothetical_revenue_never_count_as_sale():
+    t = transaction()
+    t["acceptance_status"] = "DEPOSIT_RECEIVED"
+    assert append_outcome({"schema_version": OUTCOME_SCHEMA, "transactions": []}, t)["status"] == "INVALID"
+    t = transaction()
+    t["revenue"] = money(10000, "ESTIMATED")
+    assert "not_measured:revenue" in append_outcome(
+        {"schema_version": OUTCOME_SCHEMA, "transactions": []}, t
+    )["errors"]
+
+
+def test_operating_asset_has_use_and_output_gates_not_buyer_gate():
+    r = route(action="operate", p=1)
+    del r["sale_proceeds"]
+    del r["failure_proceeds"]
+    r["monthly_net_cashflows"] = [money(400, "MEASURED", "meter-log-1")]
+    r["terminal_value"] = money(100, "QUOTED", "disposal-quote-1")
+    r["monthly_discount_rate"] = 0
+    r["probability_evidence"] = "MEASURED"
+    r["probability_reference"] = "meter-log-yield-3"
+    for key in ("acquisition", "material_and_fab"):
+        r["expenses"][key] = money(r["expenses"][key]["amount"], "QUOTED", "supplier-quote-3")
+    gates = ("physical_test_passed", "rights_cleared", "compliance_cleared",
+             "procurement_verified", "site_or_use_rights_cleared", "operational_benefit_verified")
+    r["gates"] = {gate: True for gate in gates}
+    r["gate_references"] = {gate: f"evidence-{gate}" for gate in gates}
+    result = evaluate_commercial_case(case(r))["routes"][0]
+    assert result["net_value"] == 190
+    assert result["status"] == "REVIEW_READY"
+    assert result["purchase_authorized"] is False
+    assert "unproven_gate:buyer_committed" not in result["blockers"]
+
+
+def test_operating_forecasts_do_not_count_as_measured_output():
+    r = route(action="operate", p=1)
+    del r["sale_proceeds"]
+    r["monthly_net_cashflows"] = [money(400, "ESTIMATED")]
+    r["terminal_value"] = money(100, "ESTIMATED")
+    r["monthly_discount_rate"] = 0
+    result = evaluate_commercial_case(case(r))["routes"][0]
+    assert "unverified_operating_output" in result["blockers"]
+
+
+def test_mixed_operating_npv_and_sales_do_not_rank_without_comparable_horizon():
+    r = route(action="operate", p=1)
+    del r["sale_proceeds"]
+    del r["failure_proceeds"]
+    r["monthly_net_cashflows"] = [money(500)]
+    r["terminal_value"] = money(0)
+    r["monthly_discount_rate"] = 0
+    screen = case()
+    screen["routes"] = [route(), r]
+    screen["routes"][1]["route_id"] = "operate"
+    x = evaluate_commercial_case(screen)
+    assert x["best_screening_route"] is None
+    assert x["screening_rank"] == []
+    assert "mixed_operating_npv_and_sales_contribution" in x["comparability_blockers"]
+
+
+def test_portfolio_keeps_cny_and_twd_rankings_separate():
+    tw = case(route())
+    cn = case(route(currency="CNY"))
+    cn["candidate_id"] = "CN-LOT-01"
+    cn["currency"] = "CNY"
+    x = evaluate_portfolio([tw, cn])
+    assert set(x["native_currency_rankings"]) == {"TWD", "CNY"}
+    assert x["native_currency_rankings"]["TWD"][0]["candidate_id"] == "TW-USED-001"
+    assert x["native_currency_rankings"]["CNY"][0]["candidate_id"] == "CN-LOT-01"
+    assert x["purchase_authorized"] is False
+
+
+def test_accepted_but_unpaid_invoice_never_counts_as_collected_revenue():
+    ledger = {"schema_version": OUTCOME_SCHEMA, "transactions": []}
+    transaction_data = transaction()
+    transaction_data["payment_status"] = "INVOICED"
+    result = append_outcome(ledger, transaction_data)
+    assert result["status"] == "INVALID"
+    assert "unsettled_revenue" in result["errors"]
+    transaction_data["payment_status"] = "SETTLED"
+    del transaction_data["payment_reference"]
+    assert "missing_payment_reference" in append_outcome(ledger, transaction_data)["errors"]
+
+
+@pytest.mark.parametrize("revenue,cost", [
+    (10000, 1e308),   # eight costs of 1e308 sum to inf
+    (1e308, 100),     # finite revenue and costs, margin finite: control, must record
+])
+def test_overflowing_totals_are_not_recorded(revenue, cost):
+    ledger = {"schema_version": OUTCOME_SCHEMA, "transactions": []}
+    t = transaction()
+    t["revenue"] = money(revenue, "MEASURED", "invoice-1")
+    t["costs"] = {k: money(cost, "MEASURED", "receipts-1") for k in t["costs"]}
+    result = append_outcome(ledger, t)
+    if cost == 1e308:
+        assert result["status"] == "INVALID"
+        assert "non_finite_total" in result["errors"]
+        assert result["ledger"]["transactions"] == []
+    else:
+        assert result["status"] == "RECORDED"
+
+
+def test_non_finite_amounts_are_rejected():
+    ledger = {"schema_version": OUTCOME_SCHEMA, "transactions": []}
+    for bad in (float("inf"), float("nan"), "1e999"):
+        t = transaction()
+        t["revenue"] = money(bad, "MEASURED", "invoice-1")
+        assert append_outcome(ledger, t)["status"] == "INVALID"
+        t = transaction()
+        t["costs"]["fees"] = money(bad, "MEASURED", "receipts-1")
+        assert append_outcome(ledger, t)["status"] == "INVALID"
+
+
+def test_perfect_information_value_is_a_ceiling_not_an_authorization():
+    r = evaluate_commercial_case(case())["routes"][0]
+    assert r["success_net_if_acquired"] == 290
+    assert r["failure_net_if_acquired"] == -290
+    assert r["evpi_upper_bound"] == 58  # .8 * 290 - max(0, expected 174)
+    assert r["purchase_authorized"] is False
+    certain = route(p=1)
+    certain["failure_proceeds"] = money(0)
+    assert evaluate_commercial_case(case(certain))["routes"][0]["evpi_upper_bound"] == 0
+
+
+def test_huge_finite_line_items_cannot_create_infinite_cost_or_profit():
+    r = route()
+    for name in r["expenses"]:
+        r["expenses"][name] = money(1e308)
+    x = evaluate_commercial_case(case(r))["routes"][0]
+    assert x["status"] == "INVALID"
+    assert "nonfinite_aggregated_cost" in x["errors"]
+    assert x["net_value"] is None
+
+
+def test_owned_hardware_requires_reconciled_itemized_material_plan():
+    owned = route(action="build_product")
+    first = evaluate_commercial_case(case(owned))["routes"][0]
+    assert first["status"] == "INVALID"
+    assert "missing_material_plan" in first["errors"]
+    owned["material_plan"] = {
+        "currency": "TWD",
+        "line_items": [{"part_id": "board", "quantity": 1,
+                        "unit_cost": money(80), "material_state": "new"}],
+        "fabrication_service": money(20),
+    }
+    assert evaluate_commercial_case(case(owned))["routes"][0]["material_plan"]["total"] == 100
+    owned["material_plan"]["line_items"][0]["unit_cost"] = money(40)
+    unmatched = evaluate_commercial_case(case(owned))["routes"][0]
+    assert unmatched["status"] == "INVALID"
+    assert "material_total_does_not_reconcile" in unmatched["errors"]
+
+
+def test_unverified_salvaged_materials_require_donor_provenance_and_test():
+    plan = {
+        "currency": "TWD",
+        "line_items": [{
+            "part_id": "used-fan", "quantity": 1, "unit_cost": money(40),
+            "material_state": "salvaged_unverified", "donor_asset_ref": "donor-001",
+        }],
+        "fabrication_service": money(60),
+        "recovery_labor_cost_location": "expenses.labor",
+    }
+    report = evaluate_material_plan(plan, currency="TWD", expected_cost=100)
+    assert report["status"] == "SCREENING_ONLY"
+    assert "salvaged_component_unverified:0" in report["blockers"]
+    plan["line_items"][0]["material_state"] = "salvaged_bench_verified"
+    plan["line_items"][0]["test_reference"] = "bench-record-17"
+    assert "salvaged_component_unverified:0" not in evaluate_material_plan(
+        plan, currency="TWD", expected_cost=100
+    )["blockers"]
+
+
+def test_identity_without_technical_discrepancy_is_still_not_physically_verified():
+    claim = {
+        "schema_version": "hardware_splicer.commercial_identity_claims.v1",
+        "candidate_id": "test-only",
+        "source_groups": [
+            {"source_role": "manufacturer_spec", "source_url": "https://example.org/oem",
+             "claims": [{"attribute": "cpu_family", "value": "AMD GX series"}]},
+            {"source_role": "seller_listing", "source_url": "https://example.org/seller",
+             "claims": [{"attribute": "cpu_family", "value": "AMD GX Series"}]},
+        ],
+    }
+    r = reconcile_identity_claims(claim)
+    assert r["status"] == "NO_CONTRADICTION_FOUND"
+    assert r["physical_identity_verified"] is False
+    assert r["purchase_authorized"] is False
+
+
+def test_identity_conflict_between_seller_listing_and_oem_spec_holds_the_candidate():
+    claim = {
+        "schema_version": "hardware_splicer.commercial_identity_claims.v1",
+        "candidate_id": "test-only",
+        "source_groups": [
+            {"source_role": "manufacturer_spec", "source_url": "https://example.org/oem",
+             "claims": [{"attribute": "cpu_family", "value": "AMD GX series"}]},
+            {"source_role": "seller_listing", "source_url": "https://example.org/seller",
+             "claims": [{"attribute": "cpu_family", "value": "Intel J1900"}]},
+        ],
+    }
+    report = reconcile_identity_claims(claim)
+    assert report["status"] == "HOLD_IDENTITY_CONFLICT"
+    assert report["conflicts"][0]["attribute"] == "cpu_family"
+    assert report["conflicts"][0]["seller_claim"] == "Intel J1900"
+    assert report["physical_identity_verified"] is False
+    assert report["purchase_authorized"] is False
