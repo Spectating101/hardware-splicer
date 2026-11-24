@@ -233,3 +233,59 @@ def test_hardware_splicer_cannot_be_named_as_the_stager(tmp_path):
     _projects, missions, mid, _ = _mission(tmp_path, ["ESP32", "BME280", "OLED"])
     with pytest.raises(MissionValidationError):
         stage_mission_design(missions, "monitor", mid, author={"kind": "system", "id": "hardware-splicer"})
+
+
+def _answered_mission(tmp_path, *, answer: bool):
+    """A READY mission whose off-hardware run was recorded, then (optionally) a person's evidence arrived."""
+    from hardware_splicer.mission_executor import run_mission_operation
+    from hardware_splicer.physical_evidence_ledger import build_physical_evidence_envelope
+
+    projects = ProjectStore(tmp_path)
+    projects.save("monitor", _snapshot(), expected_revision=0)
+    missions = MissionStore(projects)
+    mid = missions.open_mission("monitor", intake={"goal": "g", "inventory": ["ESP32", "BME280", "OLED"]},
+                                author=AGENT)["mission_id"]
+    missions.accept_mission("monitor", mid, author=HUMAN)
+
+    def propose(event):
+        seq = missions.get_mission("monitor", mid)["last_event_seq"]
+        return missions.propose("monitor", mid, event, author=AGENT, expected_event_seq=seq)
+
+    def run(operation):
+        return run_mission_operation(missions, "monitor", mid, candidate_id="A", operation=operation)
+
+    propose({"type": "candidate_proposed", "candidate": {
+        "id": "A", "kind": "clean_sheet", "label": "A", "spec": example_specs()["esp32_oled_bme280_usb"], "rationale": "r"}})
+    run("device_plan")
+    run("device_engineering")
+    missions.record_evaluation("monitor", mid, candidate_id="A", operation="device_application_run", artifact={"ok": True},
+                               result={"errors": 0, "warnings": 0, "result_sha256": "0" * 64, "summary": "host model passed"})
+    if answer:
+        request = {"kind": "electrical", "target": "3V3 rail", "quantity": "voltage",
+                   "expected": {"min": 3.2, "max": 3.4, "unit": "V"}, "instructions": "Measure 3V3 to GND."}
+        need = propose({"type": "evidence_required", "blocker": "BLOCKED_NEEDS_PHYSICAL_MEASUREMENT",
+                        "need": "Measure 3V3 to GND.", "request": request})["last_event_seq"]
+        values = [{"quantity": "voltage", "value": 3.3, "unit": "V"}]
+        envelope = build_physical_evidence_envelope(
+            envelope_id="env-1",
+            record={"evidence_id": "ev-1", "project_id": "monitor", "candidate_revision": "1",
+                    "kind": "electrical_measurement", "target_ids": ["mcu"], "procedure_id": "mission-need", "passed": True,
+                    "captured_at": "2026-10-16T12:00:00Z", "operator": HUMAN["id"]},
+            raw_files=[{"ref": "reading.txt", "content_hash": "sha256:" + "a" * 64}],
+            created_at="2026-10-16T12:00:00Z", created_by=HUMAN["id"],
+            metadata={"mission": {"project_id": "monitor", "mission_id": mid, "need_seq": need, "values": values}},
+        ).model_dump(mode="json")
+        missions.supply_evidence("monitor", mid, need, envelope=envelope, values=values, author=HUMAN,
+                                 expected_event_seq=missions.get_mission("monitor", mid)["last_event_seq"])
+        run("device_plan")
+        run("device_engineering")
+    propose({"type": "terminal_proposed", "state": "READY_FOR_HUMAN_BUILD", "candidate_id": "A", "reason": "checked"})
+    return missions, mid
+
+
+def test_a_run_recorded_before_new_evidence_is_not_reported_as_a_firmware_test(tmp_path):
+    missions, mid = _answered_mission(tmp_path / "fresh", answer=False)
+    assert build_mission_package(missions, "monitor", mid)["deliverables"]["firmware_test"]["status"] == "modeled_passed"
+    missions, mid = _answered_mission(tmp_path / "stale", answer=True)
+    # The person's evidence came after the run, so the run no longer describes the design the checks now rest on.
+    assert build_mission_package(missions, "monitor", mid)["deliverables"]["firmware_test"]["status"] == "not_run"

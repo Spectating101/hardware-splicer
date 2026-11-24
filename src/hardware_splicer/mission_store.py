@@ -738,6 +738,8 @@ def _public_candidate(state: Mapping[str, Any], inventory: Mapping[str, Any] | N
         "uncovered_inventory": uncovered,
         "not_in_inventory": sorted(module for module, count in remaining.items() if count > 0),
         "violated_requirements": _violated_requirements(requirements, state["spec"]),
+        # Checks count only after this event: the latest repair or the latest physical fact that concerns the candidate.
+        "since_seq": _since_seq(state),
         "evaluations": [
             {
                 "seq": item["seq"],

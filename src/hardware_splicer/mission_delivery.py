@@ -133,7 +133,8 @@ def _assemble(missions: MissionStore, project_id: str, mission_id: str) -> tuple
         "files": {name: {"sha256": _sha(data), "size_bytes": len(data)} for name, data in sorted(files.items())},
         "deliverables": {
             "firmware": firmware,
-            "firmware_test": _firmware_test(candidate, since),
+            # The same invalidation rule as the mission's READY check: a later repair or physical fact voids older runs.
+            "firmware_test": _firmware_test(candidate, int(candidate.get("since_seq") or since)),
             "enclosure": enclosure,
             "physical": {"status": "required", "checks": checks},
         },
