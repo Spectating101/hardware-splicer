@@ -227,3 +227,20 @@ def test_stop_blocks_sit_just_past_each_rows_last_pin_inside_the_case_and_clear_
     bare = copy.deepcopy(example_specs()["pico_oled_usb"])
     bare["case"]["board_stops"] = False
     assert pico["outer_mm"]["x"] > build_device_plan(bare)["case"]["outer_mm"]["x"]
+
+
+def test_the_stop_blocks_of_an_antenna_free_board_leave_exactly_the_clearance_beyond_them():
+    """Pico: the last pin is min_y inside the board edge, so the case grows by half a pin + gap + stop - min_y, not + min_y."""
+    spec = example_specs()["pico_oled_usb"]
+    entry = library()[spec["modules"][0]["module"]]
+    min_y = min(float(pin["y"]) for pin in entry["pins"])
+    assert min_y == pytest.approx(1.37, abs=0.01)
+    plan = build_device_plan(spec)
+    case = plan["case"]
+    far_x1 = max(box["x1"] for box in case["board_stops"]["boxes"])
+    assert case["inner_mm"]["x"] / 2 - far_x1 == pytest.approx(case["clearance_mm"], abs=0.01)
+    bare = copy.deepcopy(spec)
+    bare["case"]["board_stops"] = False
+    longer = case["outer_mm"]["x"] - build_device_plan(bare)["case"]["outer_mm"]["x"]
+    assert longer == pytest.approx(0.64 / 2 + 0.5 + 2.0 - min_y, abs=0.01)
+

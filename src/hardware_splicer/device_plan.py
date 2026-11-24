@@ -1012,8 +1012,11 @@ def build_device_plan(spec: Any) -> dict[str, Any]:
     antenna_extra = max(0.0, antenna_rule["clearance_mm"] - c) if antenna_rule and clean["antenna_clearance"] and antenna else 0.0
     stop_reach = 0.0
     if mcu.below > 0 and clean["board_stops"]:
-        # Room beyond the board's far edge for the stop blocks beyond the last header pin.
-        stop_reach = min(float(pin["y"]) for pin in mcu.entry["pins"]) + PIN_SQUARE_MM / 2 + STOP_GAP_MM + STOP_THICKNESS_MM
+        # Room beyond the board's far edge for the stop blocks beyond the last header pin. The board is turned, so a pin at
+        # board y sits y inside the far edge: the last pin (smallest y) is min_y inside it, and the block reaches past the
+        # edge by what it needs beyond the pin less that.
+        min_y = min(float(pin["y"]) for pin in mcu.entry["pins"])
+        stop_reach = max(0.0, PIN_SQUARE_MM / 2 + STOP_GAP_MM + STOP_THICKNESS_MM - min_y)
     extent_x = c + usb_over + mcu.pcb["y"] + max(antenna + antenna_extra, stop_reach)
     extent_z = c + mcu.pcb["x"]
     mcu_top = board_top + mcu.above
