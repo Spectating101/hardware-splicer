@@ -232,3 +232,20 @@ def test_inconclusive_structural_screen_blocks_hardware_splicer_product_release(
         "structural screening" in str(x).lower()
         for x in guarded["stages"][-1]["blockers"]
     )
+
+
+def test_requested_sheet_hybrid_must_not_bypass_whole_hardware_authority():
+    original=build_mechatronics_authority(_closed_spec(), engineering=_engineering())
+    assert original["production_authorized"] is True
+    analysis=_engineering()
+    analysis["analysis"]["mechanism"]["construction_alternatives"]={
+        "status":"comparison_produced_research_only",
+        "requested_preference":"sheet_hybrid",
+        "release_authorized":True,  # forged authority is deliberately ignored
+        "fabrication_authorized":True,
+    }
+    result=build_mechatronics_authority(_closed_spec(),engineering=analysis)
+    assert result["production_authorized"] is False
+    assert result["subsystems"]["mechanical"]["production_authorized"] is False
+    assert result["subsystems"]["mechanical"]["construction_release_blocked"] is True
+    assert result["current_authority_level"] != "production_mechatronics_release"

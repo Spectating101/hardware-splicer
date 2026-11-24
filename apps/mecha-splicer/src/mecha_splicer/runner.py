@@ -49,6 +49,12 @@ def run(
     project = _auto_fill_from_electronics(project)
     project = _apply_mode_defaults(project)
     project, composition = compose_project(project)
+    # An enclosure always gets a no-assumptions construction comparison.
+    # This is advisory only: no alternative CAD is auto-selected.
+    if project.enclosure is not None and project.construction is None:
+        project = ProjectSpec.model_validate({
+            **project.model_dump(), "construction": {"preference":"auto"},
+        })
 
     bundle = _generate_bundle(project.model_dump(), out_dir=out_dir)
     bundle["parts"] = [p.to_dict() for p in build_parts_meta(project, bundle.get("outputs") or [])]
@@ -89,6 +95,38 @@ def run(
         project.bracket is not None or
         structural.get("status") in {"solver_blocked", "unsupported_mechanical_topology"}
     )
+
+    # Existing Mecha output remains the fallback. This is a zero-dependency
+    # construction comparison, not a new generator or production approval.
+    if project.construction is not None:
+        try:
+            from hardware_splicer.construction_alternatives import evaluate_construction_alternatives
+        except ImportError:
+            # Mecha-Splicer can also be installed without the HS package.
+            bundle["construction_alternatives"] = {
+                "status": "capability_unavailable",
+                "blockers": ["hardware_splicer_construction_evaluator_not_installed"],
+                "alternatives": [],
+                "fabrication_authorized": False,
+                "release_authorized": False,
+            }
+        else:
+            from hardware_splicer.construction_alternatives import inspect_local_connector_assets
+            bundle["construction_alternatives"] = evaluate_construction_alternatives(
+                project.model_dump(mode="json")
+            )
+            if out_dir is not None:
+                bundle["construction_alternatives"]["external_asset_integrity"] = (
+                    inspect_local_connector_assets(
+                        project.construction.model_dump(mode="json"),out_dir
+                    )
+                )
+            else:
+                bundle["construction_alternatives"]["external_asset_integrity"] = {
+                    "status": "not_checked_no_local_build_folder",
+                    "assets": [],
+                    "assets_usable_for_manufacturing": False,
+                }
 
     commerce = estimate_digital_pack(price_usd=29.0, support_minutes=10.0).to_dict()
     bundle["commerce"] = {"digital_pack": commerce, "assumptions": {"price_usd": 29.0, "support_minutes": 10.0}}
@@ -173,6 +211,55 @@ def run(
         (outp / "BUILD_RECIPE.md").write_text(_render_build_recipe(bundle), encoding="utf-8")
         (outp / "PARTS.json").write_text(json.dumps(bundle.get("parts") or [], indent=2), encoding="utf-8")
         (outp / "PRINT_PLAN.md").write_text(_render_print_plan(bundle), encoding="utf-8")
+        if bundle.get("construction_alternatives"):
+            construction = bundle["construction_alternatives"]
+            (outp / "CONSTRUCTION_ALTERNATIVES.json").write_text(
+                json.dumps(construction, indent=2, allow_nan=False), encoding="utf-8"
+            )
+            try:
+                from hardware_splicer.construction_alternatives import render_construction_plan
+            except ImportError:
+                # Mecha must remain usable standalone without the HS package.
+                content = (
+                    "# Construction alternatives unavailable\n\n"
+                    "HS's optional construction evaluator is not installed; "
+                    "no alternative manufacturing method is approved.\n"
+                )
+            else:
+                content = render_construction_plan(construction)
+            (outp / "CONSTRUCTION_PLAN.md").write_text(content, encoding="utf-8")
+            schedule = construction.get("hybrid_sheet_geometry") or {}
+            if schedule.get("status")=="dimensioned_blank_cut_proposal":
+                from hardware_splicer.construction_sheet_geometry import (
+                    schedule_csv, schedule_svg, schedule_parts, schedule_scad_preview,
+                )
+                (outp / "HYBRID_PANEL_CUTS.csv").write_text(
+                    schedule_csv(schedule),encoding="utf-8"
+                )
+                (outp / "HYBRID_PANEL_BLANKS.svg").write_text(
+                    schedule_svg(schedule),encoding="utf-8"
+                )
+                (outp / "HYBRID_ASSEMBLY_PREVIEW.scad").write_text(
+                    schedule_scad_preview(schedule),encoding="utf-8"
+                )
+                (outp / "HYBRID_PARTS.json").write_text(
+                    json.dumps(schedule_parts(
+                        schedule,
+                        project.construction.model_dump(mode="json"),
+                        next((
+                            row.get("connector_source") for row in construction.get("alternatives") or []
+                            if row.get("method")=="sheet_hybrid"
+                        ),None)
+                    ),indent=2),encoding="utf-8"
+                )
+                (outp / "HYBRID_INTERFACE_REVIEW.json").write_text(
+                    json.dumps({
+                        "geometry":schedule["untransformed_interfaces"],
+                        "status":"requires_manual_connector_and_cutout_layout",
+                        "fabrication_authorized":False,
+                        "warning":"Preliminary panel dimensions only. No actual joint seats, fasteners or port toolpaths.",
+                    },indent=2),encoding="utf-8"
+                )
 
         if render_openscad_stl:
             from .engines.render import render_openscad_to_stl
@@ -326,6 +413,13 @@ def _render_mech_check(bundle: Dict[str, Any]) -> str:
         artifacts = structural.get("artifacts") or {}
         if artifacts.get("review_html"):
             lines.append(f"- Open investigation review: {artifacts['review_html']}")
+    construction = bundle.get("construction_alternatives") or {}
+    if construction:
+        lines.extend(["", "## Construction and Material Alternatives",
+                      f"- Status: {construction.get('status')}",
+                      "- Thermal/chemical compatibility and joint strength are not certified."])
+        for method in construction.get("alternatives") or []:
+            lines.append(f"- {method['method']}: {method['status']}")
     sim = bundle.get("simulation") or []
     if sim:
         lines.append("")
@@ -367,6 +461,18 @@ def _render_build_recipe(bundle: Dict[str, Any]) -> str:
     lines.append("")
     lines.append("## Evidence Bundle")
     lines.append("- `DESIGN_DECISIONS.md`")
+    if bundle.get("construction_alternatives"):
+        lines.extend(["- `CONSTRUCTION_ALTERNATIVES.json`", "- `CONSTRUCTION_PLAN.md`",
+                      "- Construction suggestions do not replace existing enclosure CAD."])
+        schedule = (bundle.get("construction_alternatives") or {}).get("hybrid_sheet_geometry") or {}
+        if schedule.get("status")=="dimensioned_blank_cut_proposal":
+            lines.extend([
+                "- `HYBRID_PANEL_CUTS.csv` (blank sizes, not validated cut paths)",
+                "- `HYBRID_PANEL_BLANKS.svg` (dimensioned reference drawing, NOT CAM)",
+                "- `HYBRID_ASSEMBLY_PREVIEW.scad` (virtual panels only, not manufacture-ready)",
+                "- `HYBRID_PARTS.json` (separate hybrid-only parts schedule)",
+                "- `HYBRID_INTERFACE_REVIEW.json` (untransformed ports/mounts and missing connectors)",
+            ])
     structural = bundle.get("structural_screening") or {}
     if structural.get("status") not in {"not_applicable", "disabled_by_request"}:
         lines.append("- Structural contact analysis: " + str(structural.get("status")))
@@ -381,9 +487,20 @@ def _render_build_recipe(bundle: Dict[str, Any]) -> str:
 
     lines.append("")
     lines.append("## Assembly (prototype-grade)")
-    lines.append("- Print base + lid; test-fit PCB/module with clearance.")
-    lines.append("- Install heat-set inserts (optional) and fasteners.")
-    lines.append("- Verify connector cutouts and cable strain relief.")
+    construction = bundle.get("construction_alternatives") or {}
+    preference = construction.get("requested_preference", "auto")
+    if construction:
+        lines.append("- Review `CONSTRUCTION_PLAN.md` before selecting a construction method.")
+        lines.append("- Sheet panels and connector source models are not approved for fabrication.")
+        if (construction.get("hybrid_sheet_geometry") or {}).get("status") == "dimensioned_blank_cut_proposal":
+            lines.append("- Before cutting, review `HYBRID_INTERFACE_REVIEW.json` for missing ports, support and connector geometry.")
+    if preference in {"sheet_hybrid","off_the_shelf"}:
+        lines.append("- Requested alternative is a proposal only; do NOT assume the full-print CAD is the selected build.")
+        lines.append("- Complete physical panel/connector fit, thermal and fastening evidence before choosing this alternative.")
+    else:
+        lines.append("- Existing printable baseline: print base + lid; test-fit PCB/module with clearance.")
+        lines.append("- Install heat-set inserts (optional) and fasteners.")
+        lines.append("- Verify connector cutouts and cable strain relief.")
 
     has_gt2_axis = any(n in outputs for n in ("motor_mount.scad", "idler_mount.scad", "carriage.scad"))
     has_leadscrew_axis = any(str(n).startswith("ls_") for n in outputs)
@@ -436,6 +553,7 @@ def _write_evidence_bundle(out_dir: Path, bundle: Dict[str, Any], project: Proje
         "severity_counts": _severity_counts(bundle.get("simulation") or []),
         "structural_screening": bundle.get("structural_screening") or {},
         "structural_release_blocked": bundle.get("structural_release_blocked", True),
+        "construction_alternatives": bundle.get("construction_alternatives"),
     }
     sim_path = out_dir / "SIM_RESULTS.json"
     sim_path.write_text(json.dumps(sim_summary, indent=2), encoding="utf-8")
@@ -459,6 +577,8 @@ def _render_design_decisions(bundle: Dict[str, Any], project: ProjectSpec) -> st
     lines.append(f"- Mode: `{project.mode}`")
     lines.append(f"- Process: `{project.process}`")
     lines.append(f"- Simulation Fidelity: `{project.simulation_fidelity}`")
+    if bundle.get("construction_alternatives"):
+        lines.append("- Construction alternatives: evidence-only, no automatic redesign or approval.")
 
     composition = bundle.get("composition") or {}
     lines.append("")
@@ -509,6 +629,13 @@ def _render_risk_register(bundle: Dict[str, Any]) -> str:
     emit(bundle.get("dfm") or [], "dfm")
     emit(bundle.get("simulation") or [], "simulation")
     emit(bundle.get("safety") or [], "safety")
+    construction = bundle.get("construction_alternatives") or {}
+    sheet = next((x for x in construction.get("alternatives") or []
+                  if x.get("method") == "sheet_hybrid"), {})
+    for blocker in sheet.get("blockers") or []:
+        message = str(blocker).replace("|", "/").replace("\n", " ")[:160]
+        lines.append(f"| construction | block | {message} | "
+                     "Obtain sourced material/fit evidence before changing fabrication. |")
     structural = bundle.get("structural_screening") or {}
     for blocker in structural.get("blockers") or []:
         # Candidate/advisory/solver blockers are not material strength evidence.
