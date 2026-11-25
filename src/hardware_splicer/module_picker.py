@@ -197,7 +197,7 @@ MODULE_HINTS: list[ModuleHint] = [
         priority=5,
     ),
     ModuleHint(
-        patterns=[re.compile(r"led|indicator light|status light|blink", re.I)],
+        patterns=[re.compile(r"\bleds?\b|indicator light|status light|blink", re.I)],  # whole word: not the "led" in "oled"
         label="indicator LED",
         requires_any=[["led_or_light", "display_or_ui"]],
         priority=5,
@@ -380,8 +380,25 @@ def _pick_modules_regex(text: str) -> ModulePick:
         labels.append(mcu.get("label") if mcu else "ESP32 DevKit")
 
     sensor_picks: set[str] = set()
+    infrastructure = {"esp32-devkit", "usb-power-5v", "dc-barrel-12v", "buck-lm2596"}
+
+    def already_covered(group: list[str]) -> bool:
+        # One display satisfies every hint that needs a display; a second is added only when a hint names it (prefer_id).
+        return any(set(group) & set((find_module(m) or {}).get("capabilityTags") or []) for m in module_ids - infrastructure)
+
+    # First the parts the matched hints name, so a generic group below does not fill a slot with something else first.
+    for hint in matched_hints:
+        preferred = find_module(hint.prefer_id) if hint.prefer_id else None
+        tags = set((preferred or {}).get("capabilityTags") or [])
+        if preferred and hint.prefer_id not in module_ids and any(set(group) & tags for group in hint.requires_any):
+            if hint.prefer_id in SENSOR_PREFER_IDS:
+                sensor_picks.add(hint.prefer_id)
+            module_ids.add(hint.prefer_id)
+            labels.append(str(preferred.get("label") or hint.prefer_id))
     for hint in matched_hints:
         for group in hint.requires_any:
+            if already_covered(group):
+                continue
             pick = _pick_from_capabilities(group, module_ids, hint.prefer_id)
             if not pick:
                 continue
