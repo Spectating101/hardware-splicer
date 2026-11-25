@@ -118,3 +118,11 @@ def test_wokwi_parts_are_listed_and_corroborate_the_oled_pin_order():
                                                if m["id"] == "adafruit-oled-1.3-128x64-stemma-qt")["pins"], key=lambda p: p["x"])]
     assert [w.upper() for w in wokwi] == [a.upper() for a in ["Data", "Clk", "DC", "Rst", "CS", "3v3", "Vin", "GND"]] == [a.upper() for a in adafruit]
     assert unified_catalog()["capability_counts"]["pin_signals"] >= 30
+
+
+def test_an_led_strip_takes_power_rather_than_supplying_it():
+    """Its 5V pin was typed power_out, so a strip on an MCU's VIN read as a supply (found in the 26 Nov 2026 head-to-head)."""
+    strip = {"modules": [{"id": "mcu", "module": "esp32-devkit"}, {"id": "strip", "module": "ws2812b_strip"}],
+             "connections": [{"from": "strip.5V", "to": "mcu.VIN"}, {"from": "strip.GND", "to": "mcu.GND"}, {"from": "strip.DIN", "to": "mcu.GPIO18"}]}
+    rules = {f["rule"] for f in check_any_wiring(strip)["findings"]}
+    assert "logicLow" in rules and "noSource" in rules  # two power inputs joined: nothing on that wire supplies the strip

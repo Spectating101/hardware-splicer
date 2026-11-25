@@ -7998,7 +7998,7 @@
         {
           "id": "5V",
           "label": "5V",
-          "role": "power_out",
+          "role": "power_in",
           "voltage": "5V",
           "notes": "5V power"
         },
