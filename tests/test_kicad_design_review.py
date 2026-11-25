@@ -267,3 +267,12 @@ def test_usb_c_data_wired_on_one_row_only_is_flagged():
     both = netlist([usb, mcu, *rd], [*cc, ("USB_DP", [("U4", "A6", "D+", "bidirectional"), ("U4", "B6", "D+", "bidirectional"), ("U1", "47", "USB_DP", "bidirectional")]),
                                      ("USB_DM", [("U4", "A7", "D-", "bidirectional"), ("U4", "B7", "D-", "bidirectional"), ("U1", "46", "USB_DM", "bidirectional")])], pins)
     assert rules(both) == []
+
+
+def test_sda_and_scl_on_one_net_is_a_short():
+    """bitaxeorg/bitaxeGamma a75fdfd7 'fixed SDA/SCL short' (KiCad ERC saw two labels on one net)."""
+    parts = [("U5", "EMC2101", "Sensor_Temperature", "EMC2101", "Fan controller, I2C"), ("U8", "INA260", "Sensor_Energy", "INA260", "Power monitor, I2C"),
+             ("R1", "4.7k", "Device", "R", "Resistor")]
+    short = netlist(parts, [("SCL", [("U5", "8", "SMDATA", "bidirectional"), ("U5", "7", "SMCLK", "input"), ("U8", "9", "SCL", "input"),
+                                     ("U8", "8", "SDA", "bidirectional"), ("R1", "1", "", "passive")]), ("+3V3", [("R1", "2", "", "passive")])])
+    assert rules(short) == ["i2c_sda_scl_short"]

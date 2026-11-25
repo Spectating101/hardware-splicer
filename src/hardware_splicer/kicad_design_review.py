@@ -262,6 +262,11 @@ def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[s
         if len(nodes) == 1 and n["type"] == "power_in" and not is_module and not twin_wired:
             finding("error", "power_pin_unconnected", f"{n['ref']} pin {n['pin']} ({n['function'] or 'power input'}) is a power input with nothing else on its net.",
                     "KiCad pin type power_in", [n["ref"]], name)
+        sda = sorted({n["ref"] + "." + n["function"] for n in parts if re.search(r"(^|[/_])SDA", n["function"], re.I) and not re.search(r"SCL", n["function"], re.I)})
+        scl = sorted({n["ref"] + "." + n["function"] for n in parts if re.search(r"(^|[/_])SCL", n["function"], re.I) and not re.search(r"SDA", n["function"], re.I)})
+        if sda and scl:
+            finding("error", "i2c_sda_scl_short", f"Net {name} joins I2C data ({', '.join(sda)}) and clock ({', '.join(scl)}). SDA and SCL must be separate nets.",
+                    UM10204, [x.split(".")[0] for x in sda + scl], name)
         i2c_parts = {n["ref"] for n in parts if I2C.search(n["function"])}
         if len(i2c_parts) >= 2 and not resistor_to(name, SUPPLY):  # a bus needs two parts; one strap pin is not a bus
             # Any part on the net that is a module (judged by its part name, never its library's name), whatever its pin there is called.
