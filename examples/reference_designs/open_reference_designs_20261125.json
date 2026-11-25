@@ -36,8 +36,10 @@
     "hs_kicad_design_review": {
      "error": 0,
      "warning": 0,
-     "info": 2,
+     "info": 7,
      "rules": [
+      "i2c_no_pullup",
+      "input_pin_floating",
       "usb_c_cc_no_pulldown"
      ]
     }
@@ -112,7 +114,7 @@
     "hs_kicad_design_review": {
      "error": 0,
      "warning": 0,
-     "info": 4,
+     "info": 6,
      "rules": [
       "i2c_no_pullup"
      ]
@@ -260,8 +262,10 @@
     "hs_kicad_design_review": {
      "error": 0,
      "warning": 0,
-     "info": 0,
-     "rules": []
+     "info": 2,
+     "rules": [
+      "i2c_no_pullup"
+     ]
     }
    }
   },

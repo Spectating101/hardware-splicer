@@ -34,7 +34,7 @@ HS-3G ([`../drone_proving_ground/inputs/parts.json`](../drone_proving_ground/inp
 |---|---|---|
 | KiCad ERC | 0 to 62 per board (190 in all), plus 67 to 873 warnings | 150 of the 190 errors are "pin not driven" or "power pin not driven": an input or power pin whose net has no pin typed as a driver |
 | kicad-happy (deterministic) | 0 to 29 per board (85 in all) | |
-| HS `kicad_design_review` | 0 errors, 0 warnings; notes only | **Not a false-positive rate**: HS's rules were adjusted on these same boards. The held-out measurement is recorded separately. |
+| HS `kicad_design_review` | 0 errors, 0 warnings; notes only | **Not a false-positive rate**: HS's rules were adjusted on these same boards. On 10 held-out boards, HS before those changes raised 6 findings: 2 true, 4 false (see [`../schematic_bug_benchmark/fix_commit_benchmark_20261125.json`](../schematic_bug_benchmark/fix_commit_benchmark_20261125.json)). |
 
 Read the totals with care. A board being published is not proof that it works, and these counts were not judged one by one.
 
