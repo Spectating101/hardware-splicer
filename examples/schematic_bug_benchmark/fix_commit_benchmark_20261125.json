@@ -12,7 +12,8 @@
   "Fix commits often bundle unrelated changes; only the named bug was judged.",
   "kicad-happy ran without its datasheet download and AI layers.",
   "Projects keep their own licences; this file holds only names, commits and messages.",
-  "The USB-C findings on bitaxeGamma are left unjudged: kicad-cli's netlist shows the CC pins unwired on both sides of the fix commits while kicad-happy's single-pin-net findings disappear; the board would have to be opened in KiCad to settle it."
+  "The USB-C findings on bitaxeGamma are left unjudged: kicad-cli's netlist shows the CC pins unwired on both sides of the fix commits while kicad-happy's single-pin-net findings disappear; the board would have to be opened in KiCad to settle it.",
+  "A declared mate is one line of design intent (which board a connector plugs into); it names no bug. The pinout comes from Black Wire."
  ],
  "tally": {
   "kicad_erc": {
@@ -35,16 +36,14 @@
   },
   "hs_review": {
    "caught": 1,
-   "possible": 0,
-   "missed": 23,
-   "did_not_run": 0
+   "caught_with_declared_mate": 1,
+   "missed": 22
   }
  },
  "missed_by_every_checker": [
   "83f5246d",
   "28a57dc0",
   "7749c902",
-  "ff3dc03b",
   "45985bcd",
   "8154a0a0",
   "8725590c",
@@ -194,9 +193,9 @@
     "kicad_erc": "missed",
     "kicad_happy": "missed",
     "hs": "missed",
-    "hs_review": "missed"
+    "hs_review": "caught_with_declared_mate"
    },
-   "note": "",
+   "note": "HS review with one declared mate (J20 plugs into the Flipper Zero GPIO header; offset 8 inferred from 5 pins): uart_tx_to_tx and uart_rx_to_rx across J20 on the buggy side, nothing after the fix",
    "finding_counts": {
     "kicad_erc": {
      "before": 146,
@@ -209,6 +208,11 @@
     "hs": {
      "before": 6,
      "after": 6
+    }
+   },
+   "mates_declared": {
+    "J20": {
+     "board": "flipper-devices-gpio-device-flipper-zero"
     }
    }
   },
@@ -808,6 +812,7 @@
   "218f80b8",
   "4ee16e00",
   "a75fdfd7",
-  "e1f5f9df"
+  "e1f5f9df",
+  "ff3dc03b"
  ]
 }
