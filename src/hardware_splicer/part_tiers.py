@@ -32,6 +32,7 @@ CAPABILITIES = {
     "pcb_compose": "placed on a KiCad schematic and PCB (has a footprint)",
     "wiring_check": "wiring checked by pin role and voltage (no outline, so no case)",
     "design_review": "WireStudio part or board: HS reviews WireStudio designs that use it (wirestudio_bridge)",
+    "board_metadata": "PlatformIO board definition: chip, clock, flash, RAM, radios and PSRAM type (board_catalog)",
 }
 
 
@@ -79,6 +80,9 @@ def unified_catalog(query: str | None = None) -> dict[str, Any]:
                 "evidence": "WireStudio's part data, imported unchanged (MIT); HS has not cited it figure by figure",
                 **({"known_part_file_error": PART_FILE_ERRATA[ws_id]["maker_value"]} if ws_id in PART_FILE_ERRATA else {}),
             })
+    from .board_catalog import catalog_rows as platformio_rows
+
+    rows.extend(platformio_rows())
     # Engine entries that name the same part twice (an id with and without "_board", hyphen and underscore spellings).
     by_number: dict[str, list[str]] = defaultdict(list)
     for part in engine:

@@ -99,6 +99,18 @@ def review_design(design: dict[str, Any]) -> dict[str, Any]:
         findings.append(row)
 
     io_limit = 3.6  # VDD 3.3 V + 0.3 V, the ESP32 figure HS cites
+    from .board_catalog import find_board, octal_psram
+    from .esplabs_bridge import S3_DATASHEET, S3_FACTS
+
+    if chip == "esp32s3" and octal_psram(find_board(board.get("platformio_board") or "")):
+        used = {c["target"].get("pin") for c in connections if c["target"].get("kind") == "gpio"}
+        used |= {v for bus in design.get("buses", []) for v in bus.values() if isinstance(v, str)}
+        for pin in sorted(S3_FACTS["octal_psram"]["pins"]):
+            if f"GPIO{pin}" in used:
+                fact = S3_FACTS["octal_psram"]
+                finding("error", "pin_taken_by_octal_psram", "board",
+                        f"GPIO{pin} is wired in this design, but PlatformIO declares an Octal SPI PSRAM module for {board.get('platformio_board')}, "
+                        "which takes GPIO35 to GPIO37.", f"{fact['locator']}: \"{fact['quote']}\" ({S3_DATASHEET}); PlatformIO memory_type")
     for comp in components.values():
         part = snap["components"].get(comp["library_id"]) or {}
         electrical = part.get("electrical") or {}
