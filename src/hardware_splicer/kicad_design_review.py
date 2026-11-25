@@ -301,6 +301,14 @@ def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[s
                             f"A {'P' if kind == 'pmos' else 'N'}-channel switch normally has its source on the {where}; reversed, the body diode conducts and it cannot switch off.",
                             "MOSFET body-diode orientation (high-side P-channel, low-side N-channel); pin names from KiCad's symbol", [ref], d)
         if kind == "usb_c":
+            # USB 2.0 data appears twice on a full receptacle (A6/B6 D+, A7/B7 D-); with one copy open, data works in one plug orientation only.
+            for signal in ("D+", "D-"):
+                copies = [q["num"] for q in comp.get("pins", []) if str(q.get("name", "")).upper() == signal]
+                wired = [q for q in copies if len(nets.get(pin_net.get((ref, q), ""), [])) > 1]
+                if len(copies) == 2 and len(wired) == 1:
+                    open_pin = next(q for q in copies if q not in wired)
+                    finding("warning", "usb_c_data_one_side", f"{ref} {signal} is wired on pin {wired[0]} but pin {open_pin} is open, so USB data works with the plug "
+                            "one way round only. Join both copies.", "USB Type-C receptacle pinout (D+ on A6/B6, D- on A7/B7)", [ref], pin_net.get((ref, wired[0])))
             # Every CC pin the symbol has, wired or not: an unwired CC pin does not appear in any net.
             cc_pins = [(p["num"], p["name"]) for p in comp.get("pins", []) if re.fullmatch(r"CC\d", p["name"], re.I)]
             for p, fn in cc_pins:

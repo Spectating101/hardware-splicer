@@ -250,3 +250,20 @@ def test_a_receptacle_named_by_part_number_is_known_by_its_cc_pins():
     controller = ("U3", "HUSB238", "Interface_USB", "HUSB238", "USB PD sink controller")
     cpins = [("Interface_USB", "HUSB238", [("1", "CC1", "bidirectional"), ("2", "CC2", "bidirectional")])]
     assert rules(netlist([controller], [], cpins)) == []
+
+
+def test_usb_c_data_wired_on_one_row_only_is_flagged():
+    """FPGA-Research/FABulous_board c64a369c joined the second D+/D- pins 'to allow a reversible plugging'."""
+    usb = ("U4", "USB_C_Receptacle_USB2.0", "Connector", "USB_C_Receptacle_USB2.0", "USB 2.0-only Type-C Receptacle connector")
+    rd = [("R1", "5.1k", "Device", "R", "Resistor"), ("R2", "5.1k", "Device", "R", "Resistor")]
+    pins = [("Connector", "USB_C_Receptacle_USB2.0", [("A5", "CC1", "bidirectional"), ("B5", "CC2", "bidirectional"), ("A6", "D+", "bidirectional"),
+                                                       ("B6", "D+", "bidirectional"), ("A7", "D-", "bidirectional"), ("B7", "D-", "bidirectional")])]
+    mcu = ("U1", "RP2040", "MCU_RaspberryPi", "RP2040", "MCU")
+    cc = [("CC1", [("U4", "A5", "CC1", "bidirectional"), ("R1", "1", "", "passive")]), ("CC2", [("U4", "B5", "CC2", "bidirectional"), ("R2", "1", "", "passive")]),
+          ("GND", [("R1", "2", "", "passive"), ("R2", "2", "", "passive")])]
+    one_row = netlist([usb, mcu, *rd], [*cc, ("USB_DP", [("U4", "B6", "D+", "bidirectional"), ("U1", "47", "USB_DP", "bidirectional")]),
+                                        ("USB_DM", [("U4", "A7", "D-", "bidirectional"), ("U1", "46", "USB_DM", "bidirectional")])], pins)
+    assert rules(one_row) == ["usb_c_data_one_side"] * 2
+    both = netlist([usb, mcu, *rd], [*cc, ("USB_DP", [("U4", "A6", "D+", "bidirectional"), ("U4", "B6", "D+", "bidirectional"), ("U1", "47", "USB_DP", "bidirectional")]),
+                                     ("USB_DM", [("U4", "A7", "D-", "bidirectional"), ("U4", "B7", "D-", "bidirectional"), ("U1", "46", "USB_DM", "bidirectional")])], pins)
+    assert rules(both) == []
