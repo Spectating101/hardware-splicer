@@ -120,3 +120,22 @@ def test_without_a_declaration_or_an_alignment_nothing_is_guessed():
     lone = netlist([ESP, HEADER], [("TX", [("J20", "5", "Pin_5", "passive"), ("U1", "37", "TXD0", "bidirectional")])])
     assert [f["rule"] for f in review(lone, FLIPPER)["findings"]] == ["mate_unaligned"]
     assert [f["rule"] for f in review(lone, {"J20": {"board": "no-such-board"}})["findings"]] == ["mate_unknown"]
+
+
+def test_usb_c_source_ports_and_controller_terminated_cc_are_not_warnings():
+    """Patterns from piecol/CM5_MINIMA_REV2: a host port with 22k Rp, and CC wired straight to the CM5 module."""
+    usb = ("J1", "USB_C_Receptacle_USB2.0", "Connector", "USB_C_Receptacle_USB2.0", "USB 2.0-only Type-C Receptacle connector")
+    pins = [("Connector", "USB_C_Receptacle_USB2.0", [("A5", "CC1", "bidirectional"), ("B5", "CC2", "bidirectional")])]
+    rp = [("R1", "22k", "Device", "R", "Resistor"), ("R2", "22k", "Device", "R", "Resistor")]
+    host = netlist([usb, *rp], [("CC1", [("J1", "A5", "CC1", "bidirectional"), ("R1", "1", "", "passive")]), ("CC2", [("J1", "B5", "CC2", "bidirectional"), ("R2", "1", "", "passive")]),
+                                ("+5V", [("R1", "2", "", "passive"), ("R2", "2", "", "passive")])], pins)
+    assert rules(host) == []
+    cm5 = ("M1", "ComputeModule5-CM5", "CM5IO", "ComputeModule5-CM5", "Raspberry Pi Compute Module 5")
+    module = netlist([usb, cm5], [("CC1", [("J1", "A5", "CC1", "bidirectional"), ("M1", "94", "CC1", "passive")]),
+                                  ("CC2", [("J1", "B5", "CC2", "bidirectional"), ("M1", "96", "CC2", "passive")])], pins)
+    found = review(module)["findings"]
+    assert [(f["rule"], f["severity"]) for f in found] == [("usb_c_cc_no_pulldown", "info")] * 2
+    esd = ("U2", "USBLC6-2SC6", "Power_Protection", "USBLC6-2SC6", "Very low capacitance ESD protection diode")
+    clamped = netlist([usb, esd], [("CC1", [("J1", "A5", "CC1", "bidirectional"), ("U2", "1", "IO1", "passive")]),
+                                   ("CC2", [("J1", "B5", "CC2", "bidirectional"), ("U2", "3", "IO2", "passive")])], pins)
+    assert [(f["rule"], f["severity"]) for f in review(clamped)["findings"]] == [("usb_c_cc_no_pulldown", "warning")] * 2

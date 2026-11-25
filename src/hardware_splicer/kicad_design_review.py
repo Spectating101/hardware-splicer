@@ -10,7 +10,8 @@ that KiCad's ERC and other checkers missed on real fix commits (examples/schemat
 * ``i2c_no_pullup``: an I2C data or clock net with no resistor to a supply;
 * ``mosfet_source_drain``: a MOSFET whose drain, not its source, sits on the rail its type expects at the source, unless it is
   half of a common-source pair or a P-channel load-sharing switch with its gate on a supply;
-* ``usb_c_cc_no_pulldown``: a USB-C receptacle's CC pin with no resistor to ground.
+* ``usb_c_cc_no_pulldown``: a USB-C receptacle's CC pin with no resistor to ground, unless it has Rp to a supply (a source port);
+  a CC pin that reaches a controller or module is reported as a note.
 
 Each finding says what it rests on: KiCad's pin data plus a stated convention or standard. A finding is a reason to look,
 never a verdict, and nothing here was measured. Net names are not trusted for direction: a net called RX may be named
@@ -248,6 +249,15 @@ def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[s
             cc_pins = [(p["num"], p["name"]) for p in comp.get("pins", []) if re.fullmatch(r"CC\d", p["name"], re.I)]
             for p, fn in cc_pins:
                 net = pin_net.get((ref, p))
+                if net is not None and resistor_to(net, SUPPLY) and not resistor_to(net, GROUND):
+                    continue  # Rp to a supply: a source (host) port, which needs no Rd
+                # An IC or module on the CC net (by designator; its pins may be typed passive), never an ESD or TVS clamp.
+                controller = sorted({x["ref"] for x in nets.get(net or "", []) if x["ref"] != ref and re.match(r"(U|IC|M|MOD|Module)\d", x["ref"])
+                                     and not re.search(r"esd|tvs|usblc|prtr|clamp|protect", " ".join(str(v) for v in comps.get(x["ref"], {}).values()), re.I)})
+                if controller:
+                    finding("info", "usb_c_cc_no_pulldown", f"{ref} {fn} has no resistor to ground but goes to {', '.join(controller)}, which may terminate CC itself "
+                            "(a PD or CC controller, or a module such as the CM5): check its datasheet.", "USB Type-C sink termination Rd = 5.1 kOhm", [ref, *controller], net)
+                    continue
                 if net is None or not resistor_to(net, GROUND):
                     finding("warning", "usb_c_cc_no_pulldown", f"{ref} {fn} {'is not connected' if net is None else 'has no resistor to ground'}. A USB-C sink needs Rd (5.1 kOhm) on each CC pin or a "
                             "source will not supply 5 V.", "USB Type-C specification, sink termination Rd = 5.1 kOhm (cited by section, not quoted here)", [ref], net)
