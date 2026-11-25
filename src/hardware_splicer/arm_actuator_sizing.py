@@ -47,6 +47,27 @@ def cited_servo_rows(supply_v: float, path: Path | None = None) -> list[dict[str
     return rows
 
 
+def joint_actuator_rows(supply_v: float, folder: Path | None = None) -> list[dict[str, Any]]:
+    """Robot joint actuators (quasi-direct-drive, planetary, harmonic) from the CC BY 4.0 comparison dataset, keyed by
+    the maker's rated (continuous) torque; only variants whose voltage is at or below the supply."""
+    folder = folder or DATA / "joint_actuator_comparison" / "families"
+    rows = []
+    for path in sorted(folder.glob("*.json")):
+        family = json.loads(path.read_text() or "{}")
+        if not isinstance(family, dict):
+            continue
+        maker = family.get("shared", {}).get("manufacturer_en") or family.get("shared", {}).get("manufacturer")
+        for v in family.get("variants", []):
+            mech, elec = v.get("mechanical", {}), v.get("electrical", {})
+            volts = elec.get("voltage_v")
+            if not (mech.get("rated_torque_nm") and mech.get("weight_kg") and volts and volts <= supply_v + 1e-9):
+                continue
+            rows.append({"component_id": v["id"], "model": f"{maker} {v.get('model')}", "rated_torque_nm": mech["rated_torque_nm"],
+                         "peak_torque_nm": mech.get("peak_torque_nm"), "mass_kg": mech["weight_kg"], "at_voltage_v": volts,
+                         "source": "Dynamic Robot Joint Actuator Comparison dataset (CC BY 4.0), " + str(v.get("datasheet_url") or "")})
+    return rows
+
+
 def static_loads(links_mm: Sequence[float], payload_kg: float, actuator_kg: Sequence[float | None],
                  link_g_per_m: float | None = None) -> list[dict[str, Any]]:
     """Torque (N m) at each joint with the arm stretched horizontally. Joint k sits at the sum of the links before it."""
@@ -64,15 +85,17 @@ def static_loads(links_mm: Sequence[float], payload_kg: float, actuator_kg: Sequ
 
 
 def pick(links_mm: Sequence[float], payload_kg: float, safety_factor: float, rows: Sequence[dict[str, Any]],
-         max_stall_share: float, link_g_per_m: float | None = None) -> dict[str, Any]:
-    usable = sorted((r for r in rows if r.get("mass_kg")), key=lambda r: (r["mass_kg"], r["stall_torque_nm"]))
+         max_stall_share: float, link_g_per_m: float | None = None, torque_key: str = "stall_torque_nm") -> dict[str, Any]:
+    """``torque_key`` is stall_torque_nm for hobby/smart servos (then max_stall_share is your derating) or rated_torque_nm
+    for joint actuators with a continuous rating (then pass a share of 1.0)."""
+    usable = sorted((r for r in rows if r.get("mass_kg") and r.get(torque_key)), key=lambda r: (r["mass_kg"], r[torque_key]))
     n = len(links_mm)
     chosen: list[dict[str, Any] | None] = [None] * n
     masses: list[float | None] = [None] * n
     fail_at = None
     for i in reversed(range(n)):
         need = static_loads(links_mm, payload_kg, masses, link_g_per_m)[i]["torque_nm"] * safety_factor
-        fit = next((r for r in usable if r["stall_torque_nm"] * max_stall_share >= need), None)
+        fit = next((r for r in usable if r[torque_key] * max_stall_share >= need), None)
         chosen[i] = fit
         if fit is None:
             fail_at = i
@@ -83,8 +106,8 @@ def pick(links_mm: Sequence[float], payload_kg: float, safety_factor: float, row
     for i in range(n):
         row, need = chosen[i], loads[i]["torque_nm"] * safety_factor
         joints.append({"joint": i, "link_mm": links_mm[i], "required_nm": round(need, 4), "load_parts_nm": loads[i]["parts_nm"],
-                       "actuator": row and row["component_id"], "stall_nm": row and row["stall_torque_nm"],
-                       "stall_share": row and round(need / row["stall_torque_nm"], 3), "mass_kg": row and row["mass_kg"],
+                       "actuator": row and row["component_id"], "rating_nm": row and row[torque_key],
+                       "rating_share": row and round(need / row[torque_key], 3), "mass_kg": row and row["mass_kg"],
                        "status": "picked" if row else ("no_cited_actuator_holds_it" if i == fail_at else "not_reached")})
     payload_only = [payload_kg * G * sum(links_mm[i:]) / 1000 * safety_factor for i in range(n)]
     return {
@@ -92,7 +115,9 @@ def pick(links_mm: Sequence[float], payload_kg: float, safety_factor: float, row
         "actuator_mass_kg": round(sum(m for m in masses if m), 4),
         "payload_only_required_nm": [round(v, 4) for v in payload_only],
         "inputs": {"links_mm": list(links_mm), "payload_kg": payload_kg, "safety_factor": safety_factor,
-                   "max_stall_share": {"value": max_stall_share, "basis": "assumed design rule, not a published rating", "why": STALL_NOTE},
+                   "torque_rating": torque_key,
+                   "max_share_of_rating": ({"value": max_stall_share, "basis": "assumed design rule, not a published rating", "why": STALL_NOTE}
+                                           if torque_key == "stall_torque_nm" else {"value": max_stall_share, "basis": "given"}),
                    "link_g_per_m": {"value": link_g_per_m, "basis": "assumed" if link_g_per_m else "not counted"},
                    "actuators_considered": [r["component_id"] for r in rows],
                    "skipped_without_mass": [r["component_id"] for r in rows if not r.get("mass_kg")]},

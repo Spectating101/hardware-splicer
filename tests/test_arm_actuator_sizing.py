@@ -26,10 +26,20 @@ def test_pick_reports_where_no_cited_actuator_holds_the_load() -> None:
     assert result["joints"][0]["status"] == "no_cited_actuator_holds_it"
     assert result["joints"][1]["actuator"] == "dynamixel-xm540-w270"
     lighter = pick([80, 150, 150, 60, 40, 20], 0.2, 1.5, cited_servo_rows(12.0), 0.5)
-    assert lighter["feasible"] and all(j["stall_share"] <= 0.5 for j in lighter["joints"])
+    assert lighter["feasible"] and all(j["rating_share"] <= 0.5 for j in lighter["joints"])
 
 
 def test_assess_openmanipulator_x_at_its_rated_payload() -> None:
     # ROBOTIS OpenMANIPULATOR-X: XM430-W350 joints, 500 g payload, 380 mm reach (shoulder 130, elbow 124, wrist 126 mm).
     result = assess([130, 124, 126], 0.5, ["dynamixel-xm430-w350"] * 3, cited_servo_rows(12.0))
     assert result["joints"][0]["stall_share"] == pytest.approx(0.53, abs=0.01)
+
+
+def test_joint_actuator_dataset_sizes_the_arm_the_servos_cannot() -> None:
+    from hardware_splicer.arm_actuator_sizing import joint_actuator_rows
+
+    rows = joint_actuator_rows(24.0)
+    assert len(rows) >= 40 and all(r["at_voltage_v"] <= 24 for r in rows)
+    result = pick([80, 150, 150, 60, 40, 20], 0.5, 1.5, rows, 1.0, torque_key="rated_torque_nm")
+    assert result["feasible"]
+    assert all(j["rating_share"] <= 1.0 for j in result["joints"])
