@@ -207,3 +207,12 @@ def test_rails_written_with_a_point_or_an_embedded_3v3_count_as_supplies():
         assert SUPPLY.search(name), name
     for name in ("P1.26(I2C2.SDA)", "GPIO3", "/USB/CC1", "MOTOR_A", "IO12_20"):
         assert not SUPPLY.search(name), name
+
+
+def test_a_pull_up_through_a_solder_jumper_counts():
+    """CIRCUITSTATE/AQEYE-SB-D1: 5.1k pull-ups reach +3.3V through JP1 (I2C_PUE), a pull-up enable jumper."""
+    parts = [("U1", "SCD40-D-R2", "Sensor_Gas", "SCD40", "CO2 sensor, I2C"), ("U2", "SGP40-D-R4", "Sensor_Gas", "SGP40", "VOC sensor, I2C"),
+             ("R3", "5.1K", "Device", "R", "Resistor"), ("JP1", "I2C_PUE", "Jumper", "SolderJumper_2_Open", "Solder jumper")]
+    board = netlist(parts, [("/I2C_SCL", [("U1", "9", "SCL", "input"), ("U2", "6", "SCL", "input"), ("R3", "1", "", "passive")]),
+                            ("Net-(JP1-A)", [("R3", "2", "", "passive"), ("JP1", "1", "A", "passive")]), ("+3.3V", [("JP1", "2", "B", "passive")])])
+    assert rules(board) == []

@@ -222,9 +222,19 @@ def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[s
             if _kind(comps.get(n["ref"], {"lib": "", "part": "", "description": ""}), n["ref"]) != "resistor":
                 continue
             other = [pin_net.get((n["ref"], p)) for p in ("1", "2") if p != n["pin"]]
+            # A solder jumper or net tie may sit between the resistor and the rail (AQEYE's I2C_PUE pull-up enable).
+            other += [far for o in other if o for far in beyond_jumper(o)]
             if any(o and (pattern.search(o) or (pattern is SUPPLY and driven_supply(o))) for o in other):
                 return True
         return False
+
+    def beyond_jumper(net_name: str) -> list[str]:
+        nets_beyond = []
+        for n in nets.get(net_name, []):
+            comp = comps.get(n["ref"], {})
+            if re.match(r"(JP|SJ|NT)\d", n["ref"]) or re.search(r"jumper|net_?tie", f"{comp.get('lib', '')} {comp.get('part', '')}", re.I):
+                nets_beyond += [net for (r, q), net in pin_net.items() if r == n["ref"] and q != n["pin"]]
+        return nets_beyond
 
     for name, nodes in nets.items():
         parts = [n for n in nodes if n["type"] != "passive" and not n["function"].lower().startswith("pin_")]
