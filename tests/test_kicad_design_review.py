@@ -139,3 +139,12 @@ def test_usb_c_source_ports_and_controller_terminated_cc_are_not_warnings():
     clamped = netlist([usb, esd], [("CC1", [("J1", "A5", "CC1", "bidirectional"), ("U2", "1", "IO1", "passive")]),
                                    ("CC2", [("J1", "B5", "CC2", "bidirectional"), ("U2", "3", "IO2", "passive")])], pins)
     assert [(f["rule"], f["severity"]) for f in review(clamped)["findings"]] == [("usb_c_cc_no_pulldown", "warning")] * 2
+
+
+def test_a_repeated_connector_supply_pin_may_stay_open_when_its_twin_is_wired():
+    pi = ("J4", "Raspberry_Pi_2_3", "Connector", "Raspberry_Pi_2_3", "expansion header for Raspberry Pi 2 & 3")
+    reg = ("U6", "AP2112K-3.3", "Regulator_Linear", "AP2112K-3.3", "LDO")
+    board = netlist([pi, reg], [("Pi_3v3", [("J4", "1", "3V3", "power_in"), ("U6", "5", "VOUT", "power_out")]), ("unconnected-(J4-3V3-Pad17)", [("J4", "17", "3V3", "power_in")])])
+    assert rules(board) == []
+    alone = netlist([reg], [("unconnected-(U6-VIN-Pad1)", [("U6", "1", "VIN", "power_in")])])
+    assert rules(alone) == ["power_pin_unconnected"]

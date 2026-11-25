@@ -6,7 +6,7 @@ its value and library symbol. That is enough to check a board drawn by anyone. T
 that KiCad's ERC and other checkers missed on real fix commits (examples/schematic_bug_benchmark):
 
 * ``uart_tx_to_tx`` / ``uart_rx_to_rx``: one net joins the transmit pins (or the receive pins) of two different parts;
-* ``power_pin_unconnected``: a power-input pin with nothing else on its net;
+* ``power_pin_unconnected``: a power-input pin with nothing else on its net (not a connector pin whose same-named twin is wired);
 * ``i2c_no_pullup``: an I2C data or clock net with no resistor to a supply;
 * ``mosfet_source_drain``: a MOSFET whose drain, not its source, sits on the rail its type expects at the source, unless it is
   half of a common-source pair or a P-channel load-sharing switch with its gate on a supply;
@@ -84,6 +84,10 @@ def parse_netlist(text: str) -> dict[str, Any]:
                               "function": _scalar(node, "pinfunction") or "", "type": _scalar(node, "pintype") or ""})
         nets[_scalar(net, "name") or f"net{len(nets)}"] = nodes
     return {"components": comps, "nets": nets}
+
+
+def _is_connector(comp: dict[str, Any]) -> bool:
+    return bool(re.search(r"connector|header|receptacle|socket", f"{comp.get('lib', '')} {comp.get('part', '')}", re.I))
 
 
 def _kind(comp: dict[str, Any]) -> str:
@@ -206,8 +210,12 @@ def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[s
         module = comps.get(nodes[0]["ref"], {}) if nodes else {}
         # A module (a Pico, a DevKit, a breakout) exposes optional supply pins that may stay open: VBUS, VSYS, 3V3 out.
         is_module = bool(re.search(r"module|pico|devkit|board|breakout", f"{module.get('lib', '')} {module.get('part', '')}", re.I))
-        if len(nodes) == 1 and nodes[0]["type"] == "power_in" and not is_module:
-            n = nodes[0]
+        n = nodes[0] if nodes else None
+        # A connector repeats supply pins (a Raspberry Pi header has two 3V3 pins); one wired twin is enough.
+        twin_wired = n is not None and _is_connector(comps.get(n["ref"], {})) and any(
+            r == n["ref"] and q != n["pin"] and len(nets[net]) > 1 and any(x["ref"] == r and x["pin"] == q and x["function"] == n["function"] for x in nets[net])
+            for (r, q), net in pin_net.items())
+        if len(nodes) == 1 and n["type"] == "power_in" and not is_module and not twin_wired:
             finding("error", "power_pin_unconnected", f"{n['ref']} pin {n['pin']} ({n['function'] or 'power input'}) is a power input with nothing else on its net.",
                     "KiCad pin type power_in", [n["ref"]], name)
         i2c_parts = {n["ref"] for n in parts if I2C.search(n["function"])}
