@@ -1,0 +1,514 @@
+{
+ "schema": "hardware_splicer.open_reference_designs.v1",
+ "captured": "2026-11-25",
+ "claim_boundary": "Facts read from published KiCad schematics: which parts each board uses and how its rails connect. Nothing was built or measured, and publication does not prove a board works. No design files are copied here; follow each source link under its own licence.",
+ "method": "Schematics fetched at a pinned commit; KiCad's own netlist export (kicad-cli 9.0.2, or 10.0.8 in the official container for KiCad 10 files) read by hardware_splicer.kicad_design_review; KiCad ERC and kicad-happy's deterministic analyser run on the same files, network-isolated. Block notes were read by hand from the netlists.",
+ "hs_rule_tuning": "HS's review rules were adjusted on these boards (deliberate MOSFET pairs, source ports, controller-terminated CC, imported resistors, regulator-driven pull-up rails), so a clean result here is fit, not a false-positive rate. The held-out measurement is separate.",
+ "boards": [
+  {
+   "product_class": "fielddeck",
+   "repository": "azlan-works/Argo",
+   "what": "Portable Raspberry Pi CM5 carrier with a 1S battery",
+   "blocks": {
+    "usb_c_input": "PWR receptacle with 5.1k Rd on CC1/CC2 (sink); a second USB-C 3.0 port's CC goes to an HD3SS3220 role controller and mux",
+    "charger_power_path": "BQ25895: VBUS to PMID, SYS rail VSYS, BAT to the cell, I2C on the CM5's GPIO2/3",
+    "boost_to_5v": "TPS61022: VSYS in, +5V out for the CM5",
+    "port_power_switches": "AP22653 current-limited switch (VBUS_EN) and RT9742 load switch on +5V",
+    "sensors": "LSM6DSV16X IMU and LIS3MDL magnetometer on the same I2C bus, pulled up by 10k to a TLV70430 output"
+   },
+   "source": {
+    "url": "https://github.com/azlan-works/Argo",
+    "commit": "c930ffd148ca183f6c6ecf282bc7807ea55420d4",
+    "licence": "CERN-OHL-S-2.0",
+    "stars_at_capture": 138,
+    "project": "KiCad/argo-v2.kicad_pro"
+   },
+   "checkers": {
+    "kicad_erc": {
+     "kicad_version": "10.0.8",
+     "errors": 62,
+     "warnings": 681
+    },
+    "kicad_happy_deterministic": {
+     "errors": 5,
+     "warnings": 14
+    },
+    "hs_kicad_design_review": {
+     "error": 0,
+     "warning": 0,
+     "info": 2,
+     "rules": [
+      "usb_c_cc_no_pulldown"
+     ]
+    }
+   }
+  },
+  {
+   "product_class": "fielddeck",
+   "repository": "piecol/CM5_MINIMA_REV2",
+   "what": "Compact CM5 carrier powered from 5 V USB-C",
+   "blocks": {
+    "usb_c_input": "J101 CC1/CC2 wired straight to the CM5 module's CC pins (the module negotiates)",
+    "regulation": "AP3441 buck from +5V for the M.2 slot rail",
+    "port_power_switches": "AP22653 and STMPS2151 current-limited switches on downstream USB; the USB 2.0 host port has 22k Rp",
+    "protection": "TPD4EUSB30 ESD arrays",
+    "rtc": "32.768 kHz crystal and VBAT for the CM5's own RTC"
+   },
+   "source": {
+    "url": "https://github.com/piecol/CM5_MINIMA_REV2",
+    "commit": "e9dbac2df2d8a7606cb91eae80b1b3b740250910",
+    "licence": "CERN-OHL-S-2.0",
+    "stars_at_capture": 175,
+    "project": "CM5_MINIMA_2.kicad_pro"
+   },
+   "checkers": {
+    "kicad_erc": {
+     "kicad_version": "9.0.2",
+     "errors": 3,
+     "warnings": 211
+    },
+    "kicad_happy_deterministic": {
+     "errors": 2,
+     "warnings": 8
+    },
+    "hs_kicad_design_review": {
+     "error": 0,
+     "warning": 0,
+     "info": 3,
+     "rules": [
+      "i2c_no_pullup",
+      "usb_c_cc_no_pulldown"
+     ]
+    }
+   }
+  },
+  {
+   "product_class": "fielddeck",
+   "repository": "raspberrypi/cm4io",
+   "what": "Raspberry Pi's own CM4 IO board (reference carrier)",
+   "blocks": {
+    "regulation": "AP64501 bucks from the 12 V input",
+    "usb": "USB2514B hub, FSUSB42 mux, RT9742 load switches, TPD4EUSB30 ESD",
+    "fan": "EMC2301 fan controller on the CM4's I2C",
+    "rtc": "PCF85063AT RTC",
+    "ethernet": "MagJack with integrated magnetics"
+   },
+   "source": {
+    "url": "https://datasheets.raspberrypi.com/cm4io/CM4IO-KiCAD.zip",
+    "sha256": "5ea867e17968cb9c117fbce7a982ea395d66a6ee605253a9a0879483bbfcb0aa",
+    "licence": "none stated (README: KiCad 6 files; 3D models stay under their makers' terms)",
+    "project": "CM4IOv5.kicad_pro"
+   },
+   "checkers": {
+    "kicad_erc": {
+     "kicad_version": "9.0.2",
+     "errors": 11,
+     "warnings": 873
+    },
+    "kicad_happy_deterministic": {
+     "errors": 3,
+     "warnings": 6
+    },
+    "hs_kicad_design_review": {
+     "error": 0,
+     "warning": 0,
+     "info": 4,
+     "rules": [
+      "i2c_no_pullup"
+     ]
+    }
+   }
+  },
+  {
+   "product_class": "fielddeck",
+   "repository": "diminDDL/PiUPS",
+   "what": "Raspberry Pi UPS HAT: the block HS's cyberdeck plan buys as one part",
+   "blocks": {
+    "charger_power_path": "BQ25895 from micro-USB VBUS, SYS rail VSYS, BAT to a screw-terminal cell",
+    "boost_to_5v": "TPS61088 boost from VSYS to the Pi's 5 V",
+    "rtc": "DS3231M",
+    "reverse_blocking": "IRF7404 P-MOS pair in common-source (back-to-back) configuration"
+   },
+   "source": {
+    "url": "https://github.com/diminDDL/PiUPS",
+    "commit": "423f9aa1606c04cad0df986af8045d4db65deac5",
+    "licence": "CERN-OHL-W-2.0",
+    "stars_at_capture": 15,
+    "project": "PiUPS/PiUPS.kicad_pro"
+   },
+   "checkers": {
+    "kicad_erc": {
+     "kicad_version": "9.0.2",
+     "errors": 24,
+     "warnings": 435
+    },
+    "kicad_happy_deterministic": {
+     "errors": 4,
+     "warnings": 11
+    },
+    "hs_kicad_design_review": {
+     "error": 0,
+     "warning": 0,
+     "info": 1,
+     "rules": [
+      "unannotated"
+     ]
+    }
+   }
+  },
+  {
+   "product_class": "fielddeck",
+   "repository": "sqfmi/beepy-hardware",
+   "what": "Handheld with a Sharp memory LCD and BlackBerry keyboard around a Pi Zero",
+   "blocks": {
+    "charger": "TP4054 linear charger from VBUS",
+    "load_sharing": "P-MOS with its gate on VBUS: the battery feeds the system only when USB is absent",
+    "boost_to_5v": "TPS61090 boost to +5V",
+    "regulation": "AP2112K 3.3 V; ME6212 1.8 V and 2.8 V for the keyboard",
+    "controller": "RP2040 runs keyboard, battery ADC and power",
+    "display": "LS027B7DH01 2.7-inch Sharp memory LCD"
+   },
+   "source": {
+    "url": "https://github.com/sqfmi/beepy-hardware",
+    "commit": "5e35c7be4ca82a4c1ce222380d37c6be8302f0db",
+    "licence": "MIT",
+    "stars_at_capture": 348,
+    "project": "KiCad/beepy.kicad_pro"
+   },
+   "checkers": {
+    "kicad_erc": {
+     "kicad_version": "9.0.2",
+     "errors": 4,
+     "warnings": 770
+    },
+    "kicad_happy_deterministic": {
+     "errors": 4,
+     "warnings": 5
+    },
+    "hs_kicad_design_review": {
+     "error": 0,
+     "warning": 0,
+     "info": 0,
+     "rules": []
+    }
+   }
+  },
+  {
+   "product_class": "fielddeck",
+   "repository": "YC-Lam/IP5328P-powerbank_design",
+   "what": "USB-PD power bank on a single power-bank SoC",
+   "blocks": {
+    "power_bank_soc": "IP5328P: charger, boost and fast-charge protocols in one chip",
+    "input_switches": "AO3401A P-MOS on VBUS and VIN into a shared VMID (common-source)"
+   },
+   "source": {
+    "url": "https://github.com/YC-Lam/IP5328P-powerbank_design",
+    "commit": "5ee7f8beab0850d2a474630bbdaf65c30a711808",
+    "licence": "GPL-3.0",
+    "stars_at_capture": 59,
+    "project": "usbpd_powerbank.kicad_pro"
+   },
+   "checkers": {
+    "kicad_erc": {
+     "kicad_version": "9.0.2",
+     "errors": 4,
+     "warnings": 67
+    },
+    "kicad_happy_deterministic": {
+     "errors": 2,
+     "warnings": 10
+    },
+    "hs_kicad_design_review": {
+     "error": 0,
+     "warning": 0,
+     "info": 0,
+     "rules": []
+    }
+   }
+  },
+  {
+   "product_class": "drone",
+   "repository": "Caped-Crussader/VENDETTAFC",
+   "what": "F7 flight controller with OSD",
+   "blocks": {
+    "mcu": "STM32F722RE",
+    "sensors": "ICM-42688-P IMU, BMP388 barometer",
+    "osd_and_logging": "AT7456E analog OSD, W25Q256 blackbox flash",
+    "wireless": "ESP32-C3",
+    "regulation": "two MP9943 bucks from +VLIPO (+9V, +5V); AP7361C 3.3 V LDO for logic",
+    "sensor_rail": "a separate NCP167 3.3 V LDO through ferrite beads (FL1, FL2) to +3.3VA, which feeds only the IMU and barometer",
+    "battery_sense": "ADC_VBAT divider into PC1; USB VBUS sense",
+    "protection": "USBLC6-2SC6 ESD and a polyfuse on USB 5 V"
+   },
+   "source": {
+    "url": "https://github.com/Caped-Crussader/VENDETTAFC",
+    "commit": "35d83350ecc9c599caf4eed0946b28929292cea0",
+    "licence": "CERN-OHL-S-2.0",
+    "stars_at_capture": 32,
+    "project": "VFC/VENDETTAFC.kicad_pro"
+   },
+   "checkers": {
+    "kicad_erc": {
+     "kicad_version": "10.0.8",
+     "errors": 20,
+     "warnings": 479
+    },
+    "kicad_happy_deterministic": {
+     "errors": 4,
+     "warnings": 11
+    },
+    "hs_kicad_design_review": {
+     "error": 0,
+     "warning": 0,
+     "info": 0,
+     "rules": []
+    }
+   }
+  },
+  {
+   "product_class": "drone",
+   "repository": "OpenDrone-hw/OpenAIO",
+   "what": "2-6S toothpick all-in-one: flight controller, 4-in-1 AM32 ESC and ELRS receiver on one board",
+   "blocks": {
+    "mcu": "RP2354A flight controller; four AT32F421 ESC MCUs, one per motor (AM32 firmware)",
+    "motor_drive": "four NSG2065Q three-phase drivers from a +10V gate rail",
+    "sensors": "BMI270 IMU (its own LP5912 1.8 V rail), BMP580 barometer",
+    "radio": "SX1281 2.4 GHz (ExpressLRS), ESP32-C3",
+    "regulation": "two LMR51430 bucks from +BATT (+10V gate drive, +4v5), TLV76733 to +3.3V",
+    "current_sense": "INA186 on the battery line; TLV7031 comparator"
+   },
+   "source": {
+    "url": "https://github.com/OpenDrone-hw/OpenAIO",
+    "commit": "4d315fb4ea4bb7415bed2ccd77f59c03f3aa5abc",
+    "licence": "CERN-OHL-S-2.0",
+    "stars_at_capture": 23,
+    "project": "hardware/OpenAIO.kicad_pro"
+   },
+   "checkers": {
+    "kicad_erc": {
+     "kicad_version": "10.0.8",
+     "errors": 31,
+     "warnings": 740
+    },
+    "kicad_happy_deterministic": {
+     "errors": 29,
+     "warnings": 16
+    },
+    "hs_kicad_design_review": {
+     "error": 0,
+     "warning": 0,
+     "info": 0,
+     "rules": []
+    }
+   }
+  },
+  {
+   "product_class": "drone",
+   "repository": "OpenDrone-hw/OpenESC-20x20",
+   "what": "20x20 mm 4-in-1 AM32 ESC, 2-6S",
+   "blocks": {
+    "mcu": "four AT32F421 (one per motor, AM32)",
+    "motor_drive": "four NSG2065Q three-phase drivers on +10V",
+    "regulation": "LMR54406 buck from +BATT to +10V, TLV76733 from +10V to +3V3",
+    "current_sense": "INA186"
+   },
+   "source": {
+    "url": "https://github.com/OpenDrone-hw/OpenESC-20x20",
+    "commit": "744c623bb1f9d9c90284db86a753224d92b13713",
+    "licence": "CERN-OHL-S-2.0",
+    "stars_at_capture": 287,
+    "project": "hardware/4in1-mini.kicad_pro"
+   },
+   "checkers": {
+    "kicad_erc": {
+     "kicad_version": "10.0.8",
+     "errors": 28,
+     "warnings": 425
+    },
+    "kicad_happy_deterministic": {
+     "errors": 24,
+     "warnings": 7
+    },
+    "hs_kicad_design_review": {
+     "error": 0,
+     "warning": 0,
+     "info": 0,
+     "rules": []
+    }
+   }
+  },
+  {
+   "product_class": "drone",
+   "repository": "OpenDrone-hw/OpenAIO-Whoop",
+   "what": "1S whoop all-in-one: flight controller, brushless ESC, ELRS and analog VTX",
+   "blocks": {
+    "mcu": "RP2354A; four EFM8BB51 ESC MCUs",
+    "radio_and_video": "SX1281 with SE5004L amplifier (ExpressLRS), RTC6705 analog VTX, ESP32-PICO-V3",
+    "regulation": "TPS61022 boost from 1S to +5V, TPS7A20 and TLV757 LDOs (gyro, VTX and camera rails split)",
+    "sensors": "BMI270",
+    "current_sense": "INA186"
+   },
+   "source": {
+    "url": "https://github.com/OpenDrone-hw/OpenAIO-Whoop",
+    "commit": "c2bcf1c3d5f63a6aed50999f0e3a740f01a9d5d1",
+    "licence": "CERN-OHL-S-2.0",
+    "stars_at_capture": 17,
+    "project": "hardware/OpenAIO-Whoop.kicad_pro"
+   },
+   "checkers": {
+    "kicad_erc": {
+     "kicad_version": "10.0.8",
+     "errors": 0,
+     "warnings": 226
+    },
+    "kicad_happy_deterministic": {
+     "errors": 1,
+     "warnings": 2
+    },
+    "hs_kicad_design_review": {
+     "error": 0,
+     "warning": 0,
+     "info": 0,
+     "rules": []
+    }
+   }
+  },
+  {
+   "product_class": "power_station",
+   "repository": "LibreSolar/bms-c1",
+   "what": "3-16S battery management system with CAN and RS485",
+   "blocks": {
+    "bms_afe": "BQ76952 analog front end",
+    "mcu": "ESP32-C3-MINI-1",
+    "regulation": "LMR38010 buck from the pack",
+    "interfaces": "SN65HVD230 CAN, SN65HVD75 RS485"
+   },
+   "source": {
+    "url": "https://github.com/LibreSolar/bms-c1",
+    "commit": "7c2dcc1c4f266ce2a977c386ddaa4319f1ed1095",
+    "licence": "NOASSERTION",
+    "stars_at_capture": 284,
+    "project": "kicad/bms-c1.kicad_pro"
+   },
+   "checkers": {
+    "kicad_erc": {
+     "kicad_version": "9.0.2",
+     "errors": 3,
+     "warnings": 419
+    },
+    "kicad_happy_deterministic": {
+     "errors": 0,
+     "warnings": 6
+    },
+    "hs_kicad_design_review": {
+     "error": 0,
+     "warning": 0,
+     "info": 0,
+     "rules": []
+    }
+   }
+  },
+  {
+   "product_class": "power_station",
+   "repository": "jaisor/SNAP_Power_Controller",
+   "what": "Solar 1S LiPo charger with power monitoring",
+   "blocks": {
+    "charger_mppt": "CN3791 MPPT charger",
+    "monitoring": "INA3221 three-channel current/voltage monitor"
+   },
+   "source": {
+    "url": "https://github.com/jaisor/SNAP_Power_Controller",
+    "commit": "0492c3fc19a3641518a36f7a7f8d07edf7a1ce7b",
+    "licence": "CERN-OHL-P-2.0",
+    "stars_at_capture": 4,
+    "project": "SNAP_Power_Controller.kicad_pro"
+   },
+   "checkers": {
+    "kicad_erc": {
+     "kicad_version": "10.0.8",
+     "errors": 0,
+     "warnings": 107
+    },
+    "kicad_happy_deterministic": {
+     "errors": 2,
+     "warnings": 3
+    },
+    "hs_kicad_design_review": {
+     "error": 0,
+     "warning": 0,
+     "info": 0,
+     "rules": []
+    }
+   }
+  },
+  {
+   "product_class": "power_station",
+   "repository": "h0lad/SolarMeshtasticNode",
+   "what": "Solar Meshtastic LoRa node",
+   "blocks": {
+    "charger": "BQ25185 solar/USB charger",
+    "radio_module": "HT-CT62 (ESP32-C3 with SX1262 LoRa)",
+    "regulation": "HE9073 3.0 V LDO, TPS22917 load switch, APX803 reset supervisor"
+   },
+   "source": {
+    "url": "https://github.com/h0lad/SolarMeshtasticNode",
+    "commit": "84a856f61c059745d9ac1f0b26ea4f7c7c8f25a3",
+    "licence": "CERN-OHL-S-2.0",
+    "stars_at_capture": 40,
+    "project": "pcb/MeshtasticNode_BQ25185.kicad_pro"
+   },
+   "checkers": {
+    "kicad_erc": {
+     "kicad_version": "10.0.8",
+     "errors": 0,
+     "warnings": 130
+    },
+    "kicad_happy_deterministic": {
+     "errors": 2,
+     "warnings": 4
+    },
+    "hs_kicad_design_review": {
+     "error": 0,
+     "warning": 0,
+     "info": 0,
+     "rules": []
+    }
+   }
+  },
+  {
+   "product_class": "logger",
+   "repository": "roepkefeller/air-quality-sensor",
+   "what": "ESP32-C3 air-quality logger with four Sensirion/Bosch sensors",
+   "blocks": {
+    "mcu": "ESP32-C3-WROOM-02",
+    "sensors": "SCD41 CO2, SGP41 VOC/NOx, SHT40, BMP280",
+    "regulation": "TLV62569 buck, TPS7A20 and TLV755 LDOs giving the CO2 sensor and the other sensors their own rails",
+    "protection": "TPD2EUSB30"
+   },
+   "source": {
+    "url": "https://github.com/roepkefeller/air-quality-sensor",
+    "commit": "d823c86ab1b2e6c84bcf75914efddbc812b2155d",
+    "licence": "none stated",
+    "stars_at_capture": 60,
+    "project": "hardware/pcb/air_quality_sensor/air_quality_sensor.kicad_pro"
+   },
+   "checkers": {
+    "kicad_erc": {
+     "kicad_version": "10.0.8",
+     "errors": 0,
+     "warnings": 244
+    },
+    "kicad_happy_deterministic": {
+     "errors": 3,
+     "warnings": 4
+    },
+    "hs_kicad_design_review": {
+     "error": 0,
+     "warning": 0,
+     "info": 0,
+     "rules": []
+    }
+   }
+  }
+ ]
+}
