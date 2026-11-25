@@ -208,9 +208,18 @@ def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[s
             n = nodes[0]
             finding("error", "power_pin_unconnected", f"{n['ref']} pin {n['pin']} ({n['function'] or 'power input'}) is a power input with nothing else on its net.",
                     "KiCad pin type power_in", [n["ref"]], name)
-        if any(I2C.search(n["function"]) for n in parts) and len({n["ref"] for n in nodes}) >= 2 and not resistor_to(name, SUPPLY):
-            finding("warning", "i2c_no_pullup", f"Net {name} carries I2C ({', '.join(sorted({n['ref'] + '.' + n['function'] for n in parts if I2C.search(n['function'])}))}) "
-                    "but no resistor on it reaches a supply net. Check the parts for built-in pull-ups.", UM10204, [n["ref"] for n in nodes], name)
+        i2c_parts = {n["ref"] for n in parts if I2C.search(n["function"])}
+        if len(i2c_parts) >= 2 and not resistor_to(name, SUPPLY):  # a bus needs two parts; one strap pin is not a bus
+            # Any part on the net that is a module (judged by its part name, never its library's name), whatever its pin there is called.
+            modules = sorted({n["ref"] for n in nodes if re.search(r"module|compute ?module|\bcm[345]\b|wroom|wrover|\bpico\b|devkit",
+                                                                    f"{comps.get(n['ref'], {}).get('part', '')} {comps.get(n['ref'], {}).get('value', '')}", re.I)})
+            listed = ", ".join(sorted(n["ref"] + "." + n["function"] for n in parts if I2C.search(n["function"])))
+            if modules:
+                finding("info", "i2c_no_pullup", f"Net {name} carries I2C ({listed}) with no resistor to a supply on this board. {', '.join(modules)} is a module, "
+                        "which often carries its own pull-ups: check its datasheet.", UM10204, sorted(i2c_parts), name)
+            else:
+                finding("warning", "i2c_no_pullup", f"Net {name} carries I2C ({listed}) but no resistor on it reaches a supply net. Check the parts for built-in pull-ups.",
+                        UM10204, sorted(i2c_parts), name)
 
     for ref, comp in comps.items():
         kind = _kind(comp)
