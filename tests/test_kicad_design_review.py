@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from hardware_splicer.kicad_design_review import KicadReviewError, parse_netlist, review
+from hardware_splicer.kicad_design_review import KicadReviewError, parse_netlist, review, review_schematic
 
 
 def netlist(comps, nets, libparts=()):
@@ -158,3 +158,14 @@ def test_unannotated_parts_give_one_note_instead_of_findings():
                                                                     ("CC2", [("U?", "B5", "CC2", "bidirectional"), ("R?", "1", "", "passive")])], pins)
     found = review(board)["findings"]
     assert [f["rule"] for f in found] == ["unannotated"] and "2 check(s)" in found[0]["message"]
+
+
+def test_a_newer_schematic_than_kicad_cli_reads_says_which_kicad_it_needs(tmp_path, monkeypatch):
+    fake = tmp_path / "kicad-cli"
+    fake.write_text("#!/bin/sh\necho 'Failed to load schematic' >&2\nexit 1\n")
+    fake.chmod(0o755)
+    monkeypatch.setenv("HARDWARE_SPLICER_KICAD_CLI", str(fake))
+    sch = tmp_path / "board.kicad_sch"
+    sch.write_text('(kicad_sch\n\t(version 20260306)\n\t(generator "eeschema")\n)\n')
+    with pytest.raises(KicadReviewError, match="needs KiCad 10"):
+        review_schematic(sch)

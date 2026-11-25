@@ -290,10 +290,17 @@ def review_schematic(path: Path, mates: dict[str, Any] | None = None) -> dict[st
         return review(parse_netlist(path.read_text(encoding="utf-8", errors="replace")), mates)
     with tempfile.TemporaryDirectory() as tmp:
         out = Path(tmp) / "board.net"
-        run = subprocess.run(["kicad-cli", "sch", "export", "netlist", "--format", "kicadsexpr", "--output", str(out), str(path)],
+        from .model3d import resolve_kicad_cli
+
+        cli = resolve_kicad_cli()
+        if cli is None:
+            raise KicadReviewError("kicad-cli not found: install KiCad or set HARDWARE_SPLICER_KICAD_CLI")
+        run = subprocess.run([cli, "sch", "export", "netlist", "--format", "kicadsexpr", "--output", str(out), str(path)],
                              capture_output=True, text=True, timeout=300, check=False)
         if not out.exists():
-            raise KicadReviewError(f"kicad-cli could not export a netlist: {run.stderr.strip()[:300]}")
+            fmt = re.search(r"\(version (\d{8})\)", path.read_text(encoding="utf-8", errors="replace")[:400])
+            newer = f" The schematic's file format is {fmt.group(1)}; a format from 2026 needs KiCad 10, which HARDWARE_SPLICER_KICAD_CLI can point to." if fmt and fmt.group(1) >= "20260101" else ""
+            raise KicadReviewError(f"kicad-cli could not export a netlist: {run.stderr.strip()[:300]}.{newer}")
         return review(parse_netlist(out.read_text(encoding="utf-8", errors="replace")), mates)
 
 
