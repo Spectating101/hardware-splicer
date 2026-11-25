@@ -65,3 +65,69 @@ What is worth taking, all of it MIT:
 3. **Reference beside model.** Every stage is rendered next to its reference image, with a second pass where the model came out plainer, and a per-experiment status that says plainly what only partly works.
 
 HS already measures static interference (`scene_fit.py`) and imports URDF/SDF/MJCF joints (`robot_model_import.py`), but it never moves the joints. Combining the two gives the missing check: sweep each joint of a robot's own model through its limits and report clashes and minimum clearance. SO-101, Open Duck Mini and other Tnkr-hosted robots publish URDFs, and FieldDeck's clamshell lid and the pan-tilt head are the same problem.
+
+## Small open-source agent projects on the physical side (GitHub sweep, 26 Nov 2026)
+
+The sweep ran 42 GitHub searches for repositories created in 2026 and found 491; about 150 are on the physical side. Excluded:
+- eight near-identical `blender-ai-copilot-*` repositories, all created 12 Nov 2026 by throwaway-looking accounts with about 500 stars each, which looks like star farming;
+- ESP32 desk gadgets that display Claude usage.
+
+Stars, licences and dates are from the GitHub API on 26 Nov 2026. The descriptions come from each project's README; nothing was run.
+
+**Whole things from a sentence, with gates (closest to HS):**
+
+| Project | Licence, stars | What it does | What it checks |
+|---|---|---|---|
+| [Formwright](https://github.com/Romanok2805/formwright) (Axo) | not stated, 27; built 27 Oct-4 Nov 2026 for a Meta hackathon; [live app](https://formwright.axo.kz) | Sentence, photo, caliper readings or voice to a device: real LCSC parts wired in a node editor, a placed and routed board, a printed case, firmware, then an order; also spare parts | Electrical and design rules; the firmware runs against its own circuit on a virtual board; each printed part passes a slicer-like check and an independent critic; dimensions come from measurement, standards and specs; "done" is refused until the checks pass |
+| [claude-hardware-in-the-loop](https://github.com/Kemerd/claude-hardware-in-the-loop), now [Nihil.sh](https://nihil.sh) | not stated, 98 | Boards written as Python scripts and generated into KiCad, plus CAD and firmware, under a Claude Code skill | ERC and DRC at KiCad defaults; a live distributor check of every part (it caught an 0603 part sold under a code assumed to be 0402); a "no-shortcut" audit that fails on stubs and admitted guesses; it says green gates are not an engineer's review |
+| [Replicator](https://github.com/T-Crypt/replicator) | MIT, 25 | Sentence to a validated build program on the manifold3d kernel: buildings, boards, machines (involute gears, nozzles); exports STEP, URDF, MJCF and Blender | Thirteen measured checks (floating or loose parts, missing planned parts, whether it stands); mass and centre of gravity; a MuJoCo check; Reverse mode keeps a ledger of what was measured, inferred or unknown |
+| [Cadex](https://github.com/ayutaz/cadex) | LGPL-2.1, 0; 0.2.0 pre-release | Headless CAD engine for robots and mechanisms driven by your agent: exact OCCT geometry, renders, exports, MuJoCo simulation, trained control policies | Checks geometry and verifies trained policies before playing them |
+| [machine-cad-agent](https://github.com/dylanstechmann/machine-cad-agent) | MIT, 0 | Mechanical CAD an agent can edit, measure and inspect with a vision model; a humanoid concept with a full motion storyboard | Measurement and vision inspection; the author says it is a digital concept only |
+
+**Agent-written mechanical CAD:**
+- [text-to-cad](https://github.com/earthtojake/text-to-cad) (MIT, 27,435 stars, [texttocad.dev](https://www.texttocad.dev)): the agent writes a Python model, the `cad` command builds it, a viewer shows it; installs into 20+ agent apps.
+- [SOMA](https://github.com/Kai-Jungsthoefel/SOMA) (GPL-3.0, 564): a CadQuery desktop app for makers' cases and brackets.
+- [AgentSCAD](https://github.com/Kevoyuan/AgentSCAD) (MIT, 26):
+  - writes OpenSCAD and checks manifoldness, wall thickness, bounds, hole connectivity and clearance with code rather than a model;
+  - asks when a request has two readings;
+  - keeps "delivered" separate from "accepted".
+- [Prompt2Product](https://github.com/atechdotdev/prompt-to-product) (GPL-3.0, 33, by Atech): FreeCAD; sizes and volumes are measured off the solid; it knows its maker's own boards for enclosures.
+- [Varen CAD](https://github.com/vanyu0710/Varen-AI-CAD) (66, closed beta):
+  - the BOM plan needs approval before modelling;
+  - a result does not count as delivered unless the geometry and collision checks pass;
+  - it published gearboxes with 0 hard collisions;
+  - the source was withdrawn in Oct 2026, and older AGPL forks exist.
+- [mesh2cad](https://github.com/emirmrkaljevic/mesh2cad) (MIT, 153, covered by Hackaday): STL to parametric STEP, CadQuery or OpenSCAD, with the deviation reported.
+
+**Electronics, firmware and review skills:**
+- [pcb-skill](https://github.com/daishuge/pcb-skill) (MIT, 191):
+  - takes an idea to an orderable board through EasyEDA Pro, stopping at the payment page;
+  - its gates each come from a real board failure, such as a socket rotated so the display cannot plug in, a capacitor under a module, or a keep-out drawn on the wrong layer; see its case study.
+- [agentic-hil](https://github.com/agentic-hil/agentic-hil) (Apache-2.0, 33): the agent develops firmware on a real board, which acts as the gate.
+- [claude-code-eyes](https://github.com/fcavalcantirj/claude-code-eyes) (MIT, 52): a camera skill so the agent checks the real display and wiring.
+- [datasheet-cli](https://github.com/akiselev/datasheet-cli) (GPL-3.0, 32): datasheet PDF to JSON pinouts and footprints, with Mouser, DigiKey and JLCPCB search.
+- [Mechanical-AI-Skill](https://github.com/almightyshui/Mechanical-AI-Skill) (MIT, 34): engineering review of a STEP assembly (risks, DFM, DFA); the mechanical counterpart of HS's schematic review.
+- [claude-for-hardware](https://github.com/LilithSemi/claude-for-hardware) (Apache-2.0, 26): HDL, FPGA and SoC bring-up skills.
+
+**Robots:**
+- [robium](https://github.com/robium-ai/robium) (MIT, 111): robotics skills and runnable reference robots for coding agents.
+- [Hebbian RUA](https://github.com/Hebbian-Robotics/rua) (MIT, 123): an LLM observes and acts through a real arm.
+
+**A published benchmark:** [PCB-Bench](https://github.com/digailab/PCB-Bench) (ICLR 2026, no licence): about 3,700 PCB placement and routing questions, plus layout tasks, for grading language models. It tests layout knowledge, not schematic checking.
+
+### What HS should take
+
+Only MIT, Apache or BSD code can be copied into HS; for GPL, AGPL, LGPL and unlicensed projects take the idea only.
+
+1. **Gates that refuse "done".** Formwright and Nihil will not accept the agent's word that something is finished:
+   - the firmware has to run against its own circuit;
+   - every part has to resolve at a distributor to the package that was assumed;
+   - stubs and guesses fail the build.
+   HS has the authority rules but not the distributor-resolution gate or the firmware-on-circuit gate.
+2. **A real-failure rule list.** pcb-skill's gates (rotated socket, part under a module, keep-out on a drawing layer) are layout bugs HS does not check yet and are candidate benchmark cases.
+3. **Measured mechanical checks.**
+   - From AgentSCAD and Replicator: wall thickness, clearance, floating or loose parts, whether it stands, mass and centre of gravity.
+   - From AnyMachine and Cadex: a joint-range sweep.
+   HS's `scene_fit.py` covers static clearance only.
+4. **One evidence ledger.** Replicator's measured, inferred and unknown, and AgentSCAD's delivered versus accepted, match HS's authority states. Using the same words would make HS easier to compare.
+5. **Same-brief benchmark.** Formwright's live app, Replicator, AgentSCAD and text-to-cad can take the same briefs as the hosted tools above, graded on the same traps.
