@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 
 import pytest
 
@@ -68,3 +69,27 @@ def test_an_unknown_board_is_refused(capsys, tmp_path):
     path.write_text(json.dumps(design))
     assert main([str(path)]) == 2
     capsys.readouterr()
+
+
+def test_firmware_generation_says_plainly_when_wirestudio_is_not_configured(tmp_path, monkeypatch):
+    from hardware_splicer.wirestudio_bridge import generate_with_wirestudio
+
+    monkeypatch.delenv("HS_WIRESTUDIO_GENERATE", raising=False)
+    result = generate_with_wirestudio(snapshot()["examples"]["access-panel"], tmp_path / "out")
+    assert result["generated"] is False and "HS_WIRESTUDIO_GENERATE" in result["reason"]
+    assert result["review"]["counts"]["error"] == 2  # the review still runs
+    monkeypatch.setenv("HS_WIRESTUDIO_GENERATE", str(tmp_path / "missing"))
+    assert "does not exist" in generate_with_wirestudio(snapshot()["examples"]["access-panel"], tmp_path / "out")["reason"]
+
+
+GENERATE = os.environ.get("HS_WIRESTUDIO_GENERATE_TEST")
+
+
+@pytest.mark.skipif(not GENERATE, reason="set HS_WIRESTUDIO_GENERATE_TEST to a wirestudio-generate command")
+def test_firmware_generation_with_a_real_wirestudio(tmp_path, monkeypatch):
+    from hardware_splicer.wirestudio_bridge import generate_with_wirestudio
+
+    monkeypatch.setenv("HS_WIRESTUDIO_GENERATE", GENERATE)
+    result = generate_with_wirestudio(snapshot()["examples"]["usbc-led-strip"], tmp_path / "out")
+    assert result["generated"] is True and result["files"] == ["esphome.yaml", "wiring.txt"]
+    assert "esphome:" in (tmp_path / "out" / "esphome.yaml").read_text()

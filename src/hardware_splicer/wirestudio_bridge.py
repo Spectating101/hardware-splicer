@@ -172,6 +172,40 @@ def review_examples() -> dict[str, Any]:
             "part_file_errata": PART_FILE_ERRATA, "snapshot": snapshot()["meta"]}
 
 
+def generate_with_wirestudio(design: dict[str, Any], out_dir: Path, *, timeout_s: float = 120.0) -> dict[str, Any]:
+    """ESPHome YAML and an ASCII wiring diagram from WireStudio itself, when a WireStudio install is configured.
+
+    HS does not bundle WireStudio's code. Point ``HS_WIRESTUDIO_GENERATE`` at its ``wirestudio-generate`` command (from
+    ``pip install wirestudio`` in its own environment). The design is reviewed by HS first; the files are WireStudio's
+    output, unchanged, and generating them approves nothing.
+    """
+    import os
+    import subprocess
+    import tempfile
+
+    review = review_design(design)
+    command = os.environ.get("HS_WIRESTUDIO_GENERATE", "").strip()
+    if not command:
+        return {"generated": False, "reason": "HS_WIRESTUDIO_GENERATE is not set; install WireStudio and point it at wirestudio-generate",
+                "review": review}
+    if not Path(command).is_file():
+        return {"generated": False, "reason": f"{command} does not exist", "review": review}
+    out_dir.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory() as tmp:
+        spec = Path(tmp) / "design.json"
+        spec.write_text(json.dumps(design), encoding="utf-8")
+        yaml_path, ascii_path = out_dir / "esphome.yaml", out_dir / "wiring.txt"
+        try:
+            run = subprocess.run([command, str(spec), "--out-yaml", str(yaml_path), "--out-ascii", str(ascii_path)],
+                                 capture_output=True, text=True, timeout=timeout_s, check=False)
+        except subprocess.TimeoutExpired:
+            return {"generated": False, "reason": f"wirestudio-generate took longer than {timeout_s:g} s", "review": review}
+    ok = run.returncode == 0 and yaml_path.is_file()
+    return {"generated": ok, "files": sorted(p.name for p in out_dir.iterdir()) if ok else [], "review": review,
+            "wirestudio_messages": (run.stderr or "").strip().splitlines()[-20:],
+            **({} if ok else {"reason": f"wirestudio-generate exited {run.returncode}"})}
+
+
 def main(argv: list[str] | None = None) -> int:
     args = sys.argv[1:] if argv is None else argv
     try:
