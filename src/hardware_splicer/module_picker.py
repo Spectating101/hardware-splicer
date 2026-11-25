@@ -354,11 +354,11 @@ def pick_modules_for_goal(text: str) -> ModulePick:
     if qwen_module_pick_enabled() and not offline_compose_enabled():
         picked = call_qwen_module_pick(goal)
         if picked.get("ok"):
-            return ModulePick(
+            return apply_brief_rules(goal, ModulePick(
                 module_ids=list(picked.get("module_ids") or []),
                 labels=[],
                 hints=[str(picked.get("reasoning") or "semantic_model_selection")],
-            )
+            ))
         reason = str(
             picked.get("message")
             or picked.get("reason")
@@ -368,6 +368,44 @@ def pick_modules_for_goal(text: str) -> ModulePick:
         return ModulePick(module_ids=[], labels=[], hints=[f"unresolved:{reason}"])
 
     return _pick_modules_regex(goal)
+
+
+# family, how a brief names it, how a library id shows it, the controller used when the model chose another family
+_CONTROLLER_FAMILIES = (("esp32", r"\besp32\b", r"esp32", "esp32-devkit"), ("rp2040", r"\b(?:rp2040|raspberry pi pico|pico w?)\b", r"pico|rp2040", "rpi-pico"),
+                        ("arduino", r"\barduino\b", r"arduino", "arduino-nano"))
+
+
+def apply_brief_rules(text: str, pick: ModulePick) -> ModulePick:
+    """Deterministic corrections to a model's pick: what the brief states outranks what the model chose.
+
+    * a part named by its number is included, with its count ("four SG90");
+    * a controller family the brief names replaces a controller from another family (a brief that says ESP32 gets no Nano);
+    * a 5 V-logic sensor on a 3.3 V controller gets a level shifter.
+    Each change is noted in the pick's hints.
+    """
+    ids = list(dict.fromkeys(pick.module_ids))
+    notes: list[str] = []
+    lowered = text.lower()
+    named = next((row for row in _CONTROLLER_FAMILIES if re.search(row[1], lowered)), None)
+    controllers = [m for m in ids if (find_module(m) or {}).get("category") == "mcu"]
+    if named and controllers and not any(re.search(named[2], m) for m in controllers):
+        named_family, replacement = named[0], named[3]
+        if find_module(replacement):
+            ids = [m for m in ids if m not in controllers] + [replacement]
+            notes.append(f"brief names {named_family}: replaced {', '.join(controllers)} with {replacement}")
+    quantities = dict(pick.quantities)
+    for module_id, count in _explicit_parts(text).items():
+        if module_id not in ids:
+            ids.append(module_id)
+            notes.append(f"brief names {module_id}")
+        if count > 1:
+            quantities[module_id] = count
+    controller_v = [(find_module(m) or {}).get("logicVoltage") for m in ids if (find_module(m) or {}).get("category") == "mcu"]
+    five_v = [m for m in ids if m in {"hc-sr04"}]
+    if five_v and 3.3 in controller_v and "level-shifter-4ch" not in ids:
+        ids.append("level-shifter-4ch")
+        notes.append(f"{', '.join(five_v)} has 5 V logic on a 3.3 V controller: added a level shifter")
+    return ModulePick(module_ids=ids, labels=pick.labels, hints=[*pick.hints, *notes], quantities=quantities)
 
 
 def _pick_modules_regex(text: str) -> ModulePick:

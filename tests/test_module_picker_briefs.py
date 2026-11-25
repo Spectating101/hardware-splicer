@@ -40,3 +40,15 @@ def test_part_numbers_resolve_only_when_they_look_like_part_numbers():
     assert _explicit_parts("four SG90 servos and 60 WS2812B LEDs on an SX1278") == {"sg90": 4, "ws2812b_strip": 60, "lora_sx1278": 1}
     assert _explicit_parts("a servo, a relay and a fan") == {}
     assert "esp32-devkit" not in _explicit_parts("an ESP32-C3 board")
+
+
+def test_brief_rules_correct_a_model_pick():
+    """DeepSeek, through HS's model path, chose an Arduino Nano for 'An ESP32 distance meter' and no level shifter (26 Nov 2026)."""
+    from hardware_splicer.module_picker import ModulePick, apply_brief_rules
+
+    brief = "An ESP32 distance meter: an HC-SR04 ultrasonic sensor shows distance on a small OLED; four SG90 servos point it."
+    fixed = apply_brief_rules(brief, ModulePick(module_ids=["arduino-nano", "hc-sr04", "ssd1306-128x64"], labels=[], hints=["model"]))
+    assert "arduino-nano" not in fixed.module_ids and "esp32-devkit" in fixed.module_ids
+    assert "level-shifter-4ch" in fixed.module_ids and fixed.quantities == {"sg90": 4} and "sg90" in fixed.module_ids
+    untouched = apply_brief_rules("a weather display", ModulePick(module_ids=["arduino-nano", "bme280"], labels=[], hints=[]))
+    assert untouched.module_ids == ["arduino-nano", "bme280"]  # no family named, no 5 V part on a 3.3 V controller
