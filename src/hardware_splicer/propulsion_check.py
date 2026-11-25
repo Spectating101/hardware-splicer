@@ -42,7 +42,8 @@ DEFAULTS = {
 G = 9.80665
 # Where bench data may come from. Anything else (a shop listing, a hand transcription, a model's memory) is reported as
 # unverified, so the results cannot read as clean.
-BENCH_SOURCE_CLASSES = {"maker_page", "maker_datasheet", "independent_bench", "own_measurement"}
+# maker_data_reseller_copy: the maker's own test table as a dealer reproduces it, when the maker's page cannot be fetched.
+BENCH_SOURCE_CLASSES = {"maker_page", "maker_datasheet", "maker_data_reseller_copy", "independent_bench", "own_measurement"}
 MAX_FIGURE_OF_MERIT = 0.85  # real small props reach roughly 0.5-0.75; a table implying more is suspect
 
 
@@ -67,7 +68,7 @@ def _rows(table: Any, prop: str) -> tuple[list[dict[str, float]], dict[str, Any]
     if not isinstance(source, str) or not source.startswith(("http://", "https://")):
         raise PropulsionCheckError("thrust_table.source must be the URL the bench data came from; HS does not size from unsourced tables")
     columns = table.get("columns")
-    need = {"throttle_pct", "thrust_g", "voltage_v", "current_a"}
+    need = {"thrust_g", "voltage_v", "current_a"}  # throttle_pct is optional: many maker tables step by thrust instead
     if not isinstance(columns, list) or not need <= set(columns):
         raise PropulsionCheckError("thrust_table.columns must include " + ", ".join(sorted(need)))
     props = table.get("props")
@@ -77,7 +78,7 @@ def _rows(table: Any, prop: str) -> tuple[list[dict[str, float]], dict[str, Any]
     for index, raw in enumerate(props[prop]):
         if not isinstance(raw, list) or len(raw) != len(columns):
             raise PropulsionCheckError(f"row {index} for {prop!r} does not match the columns")
-        row = {c: _num(v, f"row {index} {c}", positive=c not in {"throttle_pct"}) for c, v in zip(columns, raw) if c in need | {"power_w", "rpm"}}
+        row = {c: _num(v, f"row {index} {c}", positive=c not in {"throttle_pct"}) for c, v in zip(columns, raw) if c in need | {"throttle_pct", "power_w", "rpm"}}
         row.setdefault("power_w", row["voltage_v"] * row["current_a"])
         rows.append(row)
     if len(rows) < 2:
@@ -113,6 +114,8 @@ def _power_at(rows: list[dict[str, float]], thrust_g: float) -> tuple[float, str
         for a, b in zip(rows, rows[1:]):
             if a["thrust_g"] <= thrust_g <= b["thrust_g"]:
                 power = _loglog(a["thrust_g"], a["power_w"], b["thrust_g"], b["power_w"], thrust_g)
+                if "throttle_pct" not in a or "throttle_pct" not in b:
+                    return power, "interpolated", {}
                 throttle = a["throttle_pct"] + (b["throttle_pct"] - a["throttle_pct"]) * (thrust_g - a["thrust_g"]) / (b["thrust_g"] - a["thrust_g"])
                 return power, "interpolated", {"throttle_pct": round(throttle, 1)}
     fit_rows = rows[: max(2, len(rows) // 2)]  # the lower half, nearest hover
@@ -169,6 +172,8 @@ def check_propulsion(spec: Any, table: Any = None) -> dict[str, Any]:
     c_burst = _num(battery["c_burst"], "battery.c_burst") if battery.get("c_burst") is not None else None
     esc_a = _num(spec.get("esc_continuous_a"), "esc_continuous_a")
     motor_a = _num(spec["motor_max_current_a"], "motor_max_current_a") if spec.get("motor_max_current_a") is not None else None
+    if motor_a is None and isinstance(table, dict) and table.get("motor_max_current_a") is not None:
+        motor_a = _num(table["motor_max_current_a"], "thrust_table.motor_max_current_a")  # the maker's rating, from the table's source
 
     assumptions: dict[str, Any] = {}
     v_cell = _value(spec, "nominal_cell_v", assumptions)
@@ -248,7 +253,8 @@ def check_propulsion(spec: Any, table: Any = None) -> dict[str, Any]:
         limit = [r for r in rows if rotors * r["current_a"] + avionics_w / v_pack <= i_cont]
         if limit:
             top = max(limit, key=lambda r: r["thrust_g"])
-            results.update({"battery_limited_throttle_pct": top["throttle_pct"], "battery_limited_thrust_to_weight": round(rotors * top["thrust_g"] / auw, 2)})
+            results.update({"battery_limited_throttle_pct": top.get("throttle_pct"), "battery_limited_thrust_per_rotor_g": top["thrust_g"],
+                            "battery_limited_thrust_to_weight": round(rotors * top["thrust_g"] / auw, 2)})
         burst_note = ""
         if c_burst is not None:
             results["battery_burst_a"] = round(c_burst * capacity_ah, 1)
