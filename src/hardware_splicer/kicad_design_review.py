@@ -68,8 +68,15 @@ def parse_netlist(text: str) -> dict[str, Any]:
     for comp in (_child(tree, "components") or [])[1:]:
         if isinstance(comp, list) and comp[:1] == ["comp"]:
             src = _child(comp, "libsource") or []
+            # Fields carry part numbers (LCSC, MPN, distributor codes); KiCad 9 writes them both as (fields) and (property).
+            fields = {_scalar(f, "name") or "": (f[2] if len(f) > 2 and isinstance(f[2], str) else "")
+                      for f in (_child(comp, "fields") or [])[1:] if isinstance(f, list) and f[:1] == ["field"]}
+            for prop in comp[1:]:
+                if isinstance(prop, list) and prop[:1] == ["property"] and _scalar(prop, "name"):
+                    fields.setdefault(_scalar(prop, "name"), _scalar(prop, "value") or "")
             comps[_scalar(comp, "ref") or "?"] = {"value": _scalar(comp, "value") or "", "lib": _scalar(src, "lib") or "",
-                                                 "part": _scalar(src, "part") or "", "description": _scalar(src, "description") or ""}
+                                                 "part": _scalar(src, "part") or "", "description": _scalar(src, "description") or "",
+                                                 "footprint": _scalar(comp, "footprint") or "", "fields": {k: v for k, v in fields.items() if k}}
     libparts: dict[tuple[str, str], list[dict[str, str]]] = {}
     for lp in (_child(tree, "libparts") or [])[1:]:
         if isinstance(lp, list) and lp[:1] == ["libpart"]:
@@ -247,7 +254,7 @@ def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[s
     for name, nodes in nets.items():
         parts = [n for n in nodes if n["type"] != "passive" and not n["function"].lower().startswith("pin_")]
         # A bus transceiver's RXD is an output to the MCU, and boards often carry two alternative transceivers on one footprint pair.
-        uart_parts = [n for n in parts if not TRANSCEIVER.search(" ".join(str(v) for k, v in comps.get(n["ref"], {}).items() if k != "pins"))]
+        uart_parts = [n for n in parts if not TRANSCEIVER.search(" ".join(str(v) for k, v in comps.get(n["ref"], {}).items() if k not in ("pins", "fields", "footprint")))]
         txs = [n for n in uart_parts if TX.search(n["function"]) and not RX.search(n["function"])]
         rxs = [n for n in uart_parts if RX.search(n["function"]) and not TX.search(n["function"])]
         for label, group, rule in (("transmit", txs, "uart_tx_to_tx"), ("receive", rxs, "uart_rx_to_rx")):
@@ -345,7 +352,7 @@ def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[s
                     continue  # Rp to a supply: a source (host) port, which needs no Rd
                 # An IC or module on the CC net (by designator; its pins may be typed passive), never an ESD or TVS clamp.
                 controller = sorted({x["ref"] for x in nets.get(net or "", []) if x["ref"] != ref and re.match(r"(U|IC|M|MOD|Module)\d", x["ref"])
-                                     and not re.search(r"esd|tvs|usblc|prtr|clamp|protect", " ".join(str(v) for v in comps.get(x["ref"], {}).values()), re.I)})
+                                     and not re.search(r"esd|tvs|usblc|prtr|clamp|protect", " ".join(str(v) for k, v in comps.get(x["ref"], {}).items() if k not in ("pins", "fields", "footprint")), re.I)})
                 if controller:
                     finding("info", "usb_c_cc_no_pulldown", f"{ref} {fn} has no resistor to ground but goes to {', '.join(controller)}, which may terminate CC itself "
                             "(a PD or CC controller, or a module such as the CM5): check its datasheet.", "USB Type-C sink termination Rd = 5.1 kOhm", [ref, *controller], net)

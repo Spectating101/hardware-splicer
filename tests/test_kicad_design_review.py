@@ -319,3 +319,17 @@ def test_part_kinds_need_whole_words():
     assert _kind(eagle_r, "R24") == "resistor"
     for description, kind in (("P-Channel MOSFET", "pmos"), ("-30V P-Ch MOSFET", "pmos"), ("N-Channel MOSFET, SOT-23", "nmos"), ("30V N-CH", "nmos")):
         assert _kind({"lib": "Transistor_FET", "part": "X", "description": description, "value": "", "pins": []}, "Q1") == kind, description
+
+
+def test_component_footprints_and_part_number_fields_are_read():
+    """KiCad 9 writes part fields both as (fields (field ...)) and as (property ...); either way they reach the model."""
+    text = """(export (version "E")
+      (components
+        (comp (ref "R14") (value "5.1k") (footprint "Resistor_SMD:R_0402_1005Metric")
+          (fields (field (name "LCSC Part") "C25905") (field (name "Datasheet")))
+          (libsource (lib "Device") (part "R_US") (description "Resistor"))
+          (property (name "PARTNO") (value "RMCF0402JT5K10"))))
+      (libparts) (nets))"""
+    comp = parse_netlist(text)["components"]["R14"]
+    assert comp["footprint"] == "Resistor_SMD:R_0402_1005Metric"
+    assert comp["fields"]["LCSC Part"] == "C25905" and comp["fields"]["PARTNO"] == "RMCF0402JT5K10"
