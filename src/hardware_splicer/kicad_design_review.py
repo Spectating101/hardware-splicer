@@ -193,7 +193,8 @@ def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[s
             pin_net[(n["ref"], n["pin"])] = name
     findings: list[dict[str, Any]] = []
 
-    unannotated = sorted(r for r in comps if "?" in r)
+    wired = {n["ref"] for ns in nets.values() for n in ns}
+    unannotated = sorted(r for r in comps if "?" in r and r in wired)  # a drawing-sheet symbol is on no net
     skipped: list[str] = []
 
     def finding(severity: str, rule: str, message: str, basis: str, refs: list[str], net: str | None = None) -> None:
