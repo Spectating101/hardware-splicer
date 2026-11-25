@@ -1,0 +1,88 @@
+{
+ "schema": "hardware_splicer.bom.v1",
+ "project": "hs-arm-a",
+ "currency": "USD",
+ "priced": "2026-11-26",
+ "lines": [
+  {
+   "item": "DYNAMIXEL XM430-W350-T (base yaw, shoulder, elbow)",
+   "qty": 3,
+   "unit_price": 269.9,
+   "line_total": 809.7,
+   "source": "https://en.robotis.com/shop_en/item.php?it_id=902-0124-000",
+   "basis": "cited"
+  },
+  {
+   "item": "DYNAMIXEL XL430-W250-T (wrist pitch, wrist roll, gripper)",
+   "qty": 3,
+   "unit_price": 23.9,
+   "line_total": 71.7,
+   "source": "https://en.robotis.com/shop_en/item.php?it_id=902-0135-000",
+   "basis": "cited"
+  },
+  {
+   "item": "HN12-I101 idler horn set (shoulder, elbow, wrist pitch, gripper cheeks)",
+   "qty": 4,
+   "unit_price": 17.8,
+   "line_total": 71.2,
+   "source": "https://en.robotis.com/shop_en/item.php?it_id=903-0240-000",
+   "basis": "cited"
+  },
+  {
+   "item": "U2D2 USB to TTL/RS-485 interface",
+   "qty": 1,
+   "unit_price": 32.1,
+   "line_total": 32.1,
+   "source": "https://en.robotis.com/shop_en/item.php?it_id=902-0132-000",
+   "basis": "cited"
+  },
+  {
+   "item": "U2D2 Power Hub Board Set (3.5-24 V, 10 A max)",
+   "qty": 1,
+   "unit_price": 19.0,
+   "line_total": 19.0,
+   "source": "https://en.robotis.com/shop_en/item.php?it_id=902-0145-001",
+   "basis": "cited"
+  },
+  {
+   "item": "ROBOTIS SMPS 12V 5A PS-10",
+   "qty": 1,
+   "unit_price": 28.95,
+   "line_total": 28.95,
+   "source": "https://www.robotshop.com/products/robotis-power-supply-smps-12v-5a-ps-10",
+   "basis": "cited (RobotShop)"
+  },
+  {
+   "item": "Robot Cable-X3P 180 mm, 10 pcs",
+   "qty": 1,
+   "unit_price": 21.85,
+   "line_total": 21.85,
+   "source": "https://www.robotshop.com/products/robotis-robot-cable-x3p-180mm-dynamixel-x-series-ttl-only-10x",
+   "basis": "cited (RobotShop)"
+  },
+  {
+   "item": "PLA filament, 1 kg spool (parts use 322 g at 60% fill)",
+   "qty": 1,
+   "unit_price": 20.0,
+   "line_total": 20.0,
+   "source": null,
+   "basis": "assumed"
+  },
+  {
+   "item": "Fastener kit M2/M2.5/M3 and 1 mm PTFE sheet for the turntable washer",
+   "qty": 1,
+   "unit_price": 15.0,
+   "line_total": 15.0,
+   "source": null,
+   "basis": "assumed"
+  }
+ ],
+ "total": 1089.5,
+ "cited_share": 1054.5,
+ "assumed_share": 35.0,
+ "notes": [
+  "The three XM430s are 75% of the cost; the cited servo data rules out the XL430 at the shoulder and elbow for a 150 g payload at this length (needs 1.18-2.02 N m with the 1.5 safety factor against 1.5 N m stall).",
+  "XM430 lead time 50 days and XL430 30 days on the ROBOTIS shop page; shipping and tax not included.",
+  "Bench clamps (2) to hold the base are assumed to be on hand: the arm can tip a free-standing base (verification.json tip_over)."
+ ]
+}
