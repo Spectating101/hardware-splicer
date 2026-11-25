@@ -40,6 +40,7 @@ GROUND = re.compile(r"(^|[/_])(A|D|P|S)?GND\w*$|^/?(GND|VSS|0V)\w*$", re.I)
 SUPPLY = re.compile(r"^\+|(^|[/_])(\d+V\d*\w*|V(CC|DD|IN|BUS|BAT|SYS)\w*|3V3\w*|1V8\w*|VBATT?\w*)$|(^|[^A-Za-z0-9.])\d+\.\d+V\w*$|\dV\d+\w*$", re.I)
 TX = re.compile(r"(^|[/_])(U\d?TXD?\d?|TXD?\d?|UART\d?_TX)($|[/_])", re.I)
 RX = re.compile(r"(^|[/_])(U\d?RXD?\d?|RXD?\d?|UART\d?_RX)($|[/_])", re.I)
+TRANSCEIVER = re.compile(r"transceiver|\bCAN\b|RS-?485|RS-?422|\bLIN\b|ISO10[45]\d|TJA1\d|SN65HVD|MCP25\d\d|MAX3?48\d|ADM\d{4}|THVD", re.I)
 I2C = re.compile(r"(^|[/_])(I2C\d?_)?(SDA|SCL)\d?($|[/_])", re.I)
 
 
@@ -238,8 +239,10 @@ def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[s
 
     for name, nodes in nets.items():
         parts = [n for n in nodes if n["type"] != "passive" and not n["function"].lower().startswith("pin_")]
-        txs = [n for n in parts if TX.search(n["function"]) and not RX.search(n["function"])]
-        rxs = [n for n in parts if RX.search(n["function"]) and not TX.search(n["function"])]
+        # A bus transceiver's RXD is an output to the MCU, and boards often carry two alternative transceivers on one footprint pair.
+        uart_parts = [n for n in parts if not TRANSCEIVER.search(" ".join(str(v) for k, v in comps.get(n["ref"], {}).items() if k != "pins"))]
+        txs = [n for n in uart_parts if TX.search(n["function"]) and not RX.search(n["function"])]
+        rxs = [n for n in uart_parts if RX.search(n["function"]) and not TX.search(n["function"])]
         for label, group, rule in (("transmit", txs, "uart_tx_to_tx"), ("receive", rxs, "uart_rx_to_rx")):
             if len({n["ref"] for n in group}) >= 2:
                 finding("error", rule, f"Net {name} joins the UART {label} pins of {', '.join(sorted({n['ref'] + '.' + n['function'] for n in group}))}. "

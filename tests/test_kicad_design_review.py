@@ -216,3 +216,14 @@ def test_a_pull_up_through_a_solder_jumper_counts():
     board = netlist(parts, [("/I2C_SCL", [("U1", "9", "SCL", "input"), ("U2", "6", "SCL", "input"), ("R3", "1", "", "passive")]),
                             ("Net-(JP1-A)", [("R3", "2", "", "passive"), ("JP1", "1", "A", "passive")]), ("+3.3V", [("JP1", "2", "B", "passive")])])
     assert rules(board) == []
+
+
+def test_alternative_bus_transceivers_sharing_rxd_are_not_a_uart_error():
+    """Zektopic/ESP32S3-mini-DATALOGGER (held out): an ISO1050 and a TJA1051 share RX-CAN and TX-CAN, one fitted at a time."""
+    parts = [("U401", "ISO1050DUB", "Interface_CAN_LIN", "ISO1050DUB", "Isolated CAN Transceiver, SOP-8"),
+             ("U402", "TJA1051T", "Interface_CAN_LIN", "TJA1051T", "High-Speed CAN Transceiver, silent mode")]
+    board = netlist(parts, [("RX-CAN", [("U401", "2", "RXD", "output"), ("U402", "4", "RXD", "output")]),
+                            ("TX-CAN", [("U401", "3", "TXD", "input"), ("U402", "1", "TXD", "input")])])
+    assert rules(board) == []
+    mcus = [("U1", "ESP32-S3", "RF_Module", "ESP32-S3-MINI-1", "MCU"), ("U2", "RP2040", "MCU_RaspberryPi", "RP2040", "MCU")]
+    assert rules(netlist(mcus, [("TX", [("U1", "37", "TXD0", "bidirectional"), ("U2", "2", "UART0_TX", "bidirectional")])])) == ["uart_tx_to_tx"]
