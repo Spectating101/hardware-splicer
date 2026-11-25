@@ -54,6 +54,9 @@ ASSUMED = {
     "convection_w_per_m2k": ((5.0, 10.0), "W/m2K", f"natural convection from a small box in still air; {GENERAL}"),
     "ambient_c": ((25.0, 40.0), "C", "a room and a warm room or a car in summer; change to your use"),
     "usb_port_budget_ma": (500, "mA", f"a standard USB 2.0 port; {GENERAL}"),
+    "power_bank_cell_v": (3.7, "V", "the cell voltage power banks usually quote their mAh at; read it from the bank's label"),
+    "power_bank_efficiency": ((0.8, 0.9), "", f"cell to 5 V USB through the bank's boost converter; {GENERAL}"),
+    "power_bank_keepalive_ma": ((50, 100), "mA", f"below about this current many power banks switch themselves off; {GENERAL}, check yours"),
     "print_tolerance_mm": (0.3, "mm", f"dimensional accuracy of a desktop FDM printer, each way; {GENERAL}"),
     "nozzle_mm": (0.4, "mm", "the most common nozzle"),
     "bridge_limit_mm": (20.0, "mm", f"a span that prints cleanly without support on a tuned printer; {GENERAL}"),
@@ -281,6 +284,56 @@ def _supply(plan: dict[str, Any], library: dict[str, Any]) -> dict[str, Any]:
         status = EXCEEDS
         summary = f"The controller needs a supply that can deliver {needs['value']:g} A and a standard port is assumed to give {budget} mA. " + summary
     return _check("supply_current", "USB supply current", status, summary, quantities, inputs, limits)
+
+
+def _power_bank(plan: dict[str, Any], library: dict[str, Any]) -> dict[str, Any]:
+    """Runtime on a USB power bank from the modules' published sustained currents. Modules without a sourced current, the USB
+    bridge and the regulator's own draw are left out, so the figure is a ceiling: the device can only run for less."""
+
+    power = plan["power"]
+    load = _loads(plan, library)
+    cap = power["capacity_mah"]
+    cell_v = power.get("cell_v", ASSUMED["power_bank_cell_v"][0])
+    eff_low, eff_high = ASSUMED["power_bank_efficiency"][0]
+    keep_low, keep_high = ASSUMED["power_bank_keepalive_ma"][0]
+    usb_v = ASSUMED["usb_input_v"][0]
+    cap_input = {"name": "power.capacity_mah", "value": cap, "unit": "mAh", "basis": "given", "source": "the device spec: the bank's rated capacity"}
+    cell_input = ({"name": "power.cell_v", "value": cell_v, "unit": "V", "basis": "given", "source": "the device spec"} if "cell_v" in power
+                  else _asm("power_bank_cell_v"))
+    inputs = [cap_input, cell_input, _asm("power_bank_efficiency"), _asm("usb_input_v"), _asm("power_bank_keepalive_ma"), *load["facts"]]
+    limits = [
+        "Each module is counted at the highest sustained current its sources publish, all at once; sleep and duty cycling are not modelled.",
+        "Modules with no sourced current, the USB bridge and the regulator's own draw are not counted, so the runtime is a ceiling.",
+        "Capacity fades with age and cold; a bank's real output is often well under its label.",
+    ]
+    sustained = load["sustained_ma"]
+    if sustained <= 0:
+        return _check("power_bank_runtime", "Power bank runtime", NOT_ASSESSED,
+                      "No module in this plan publishes a sustained current, so there is nothing to estimate a runtime from.",
+                      {"modules_without_a_sourced_current": load["missing"]}, inputs, limits)
+    usb_w = sustained / 1000 * usb_v
+    hours = [cap / 1000 * cell_v * eff / usb_w for eff in (eff_low, eff_high)]
+    quantities = {"sourced_sustained_ma_at_usb": _r(sustained, 3), "usb_load_w": _r(usb_w, 3), "bank_energy_wh": _r(cap / 1000 * cell_v, 2),
+                  "runtime_ceiling_h": [_r(hours[0], 1), _r(hours[1], 1)], "modules_without_a_sourced_current": load["missing"]}
+    summary = (f"A {cap:g} mAh bank at {cell_v:g} V holds about {cap / 1000 * cell_v:.0f} Wh. At the sourced sustained load of {sustained:.0f} mA "
+               f"from 5 V ({usb_w:.2f} W) it runs at most {hours[0]:.1f} to {hours[1]:.1f} h, for a converter {eff_low:.0%} to {eff_high:.0%} efficient.")
+    status = ADVISORY
+    if load["missing"]:
+        summary += f" {', '.join(load['missing'])} publish{'es' if len(load['missing']) == 1 else ''} no current and {'is' if len(load['missing']) == 1 else 'are'} not counted."
+    if sustained < keep_high:
+        summary += (f" The sourced load is under {keep_high:g} mA; many banks switch off below {keep_low:g} to {keep_high:g} mA, so check this bank "
+                    "keeps a light load powered, or choose one with an always-on mode.")
+    need = power.get("min_runtime_h")
+    if need is not None:
+        quantities["required_runtime_h"] = need
+        if hours[1] < need:
+            status = EXCEEDS
+            summary = f"The device must run {need:g} h but even the ceiling is {hours[1]:.1f} h. " + summary
+        elif hours[0] < need:
+            summary = f"The required {need:g} h falls inside the ceiling's range, so it depends on the bank's converter. " + summary
+        else:
+            summary = f"The required {need:g} h is under the ceiling; the real runtime is lower than the ceiling, so measure it. " + summary
+    return _check("power_bank_runtime", "Power bank runtime", status, summary, quantities, inputs, limits)
 
 
 # --- thermal ----------------------------------------------------------------------------------------------------------
@@ -526,7 +579,7 @@ def build_engineering_review(spec: Any, *, donor_modules=None) -> dict[str, Any]
     library.update(donor_modules or {})
     domains = [
         {"id": "electrical", "title": "Electrical", "checks": [_i2c_bus(plan, library)]},
-        {"id": "power", "title": "Power", "checks": [_supply(plan, library)]},
+        {"id": "power", "title": "Power", "checks": [_supply(plan, library)] + ([_power_bank(plan, library)] if plan["power"]["source"] == "usb_power_bank" else [])},
         {"id": "thermal", "title": "Thermal", "checks": _thermal(plan, library)},
         {"id": "rf", "title": "Radio", "checks": [_antenna(plan, library)]},
         {"id": "mechanical", "title": "Mechanical fit", "checks": _fit(plan, library)},
@@ -542,6 +595,8 @@ def build_engineering_review(spec: Any, *, donor_modules=None) -> dict[str, Any]
         "domains": domains, "counts": counts,
         "sourced_inputs": sorted((i for i in used.values() if i["basis"] == "sourced"), key=lambda i: i["name"]),
         "assumptions": sorted((i for i in used.values() if i["basis"] == "assumed"), key=lambda i: i["name"]),
+        # Figures the spec itself states (a power bank's capacity): neither sourced nor assumed by HS.
+        "given_inputs": sorted((i for i in used.values() if i["basis"] == "given"), key=lambda i: i["name"]),
         "coverage": _coverage(plan, library),
         "not_assessed": _not_assessed() + ([{"domain": "Donor physical input behavior",
             "why": "Input firmware may be proposed separately; physical pull-up suitability, debounce, contact life and actual operation are not verified."}]
