@@ -277,11 +277,15 @@ def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[s
             finding("error", "i2c_sda_scl_short", f"Net {name} joins I2C data ({', '.join(sda)}) and clock ({', '.join(scl)}). SDA and SCL must be separate nets.",
                     UM10204, [x.split(".")[0] for x in sda + scl], name)
         i2c_parts = {n["ref"] for n in parts if I2C.search(n["function"])}
+        # A bus from GPIO pins to a connector is I2C by its net name only (vandaemon's /MCU/I2C_SDA on IO12 and J13).
+        named_bus = len(i2c_parts) < 2 and bool(I2C.search(name.split("/")[-1])) and bool(parts) and len({n["ref"] for n in nodes}) >= 2
+        if named_bus:
+            i2c_parts = {n["ref"] for n in nodes}
         if len(i2c_parts) >= 2 and not resistor_to(name, SUPPLY):  # a bus needs two parts; one strap pin is not a bus
             # Any part on the net that is a module (judged by its part name, never its library's name), whatever its pin there is called.
             modules = sorted({n["ref"] for n in nodes if re.search(r"module|compute ?module|\bcm[345]\b|wroom|wrover|\bpico\b|devkit",
                                                                     f"{comps.get(n['ref'], {}).get('part', '')} {comps.get(n['ref'], {}).get('value', '')}", re.I)})
-            listed = ", ".join(sorted(n["ref"] + "." + n["function"] for n in parts if I2C.search(n["function"])))
+            listed = ", ".join(sorted(n["ref"] + "." + (n["function"] or n["pin"]) for n in (nodes if named_bus else parts) if named_bus or I2C.search(n["function"])))
             if modules:
                 finding("info", "i2c_no_pullup", f"Net {name} carries I2C ({listed}) with no resistor to a supply on this board. {', '.join(modules)} is a module, "
                         "which often carries its own pull-ups: check its datasheet.", UM10204, sorted(i2c_parts), name)

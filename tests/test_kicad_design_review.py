@@ -291,3 +291,15 @@ def test_a_forgotten_input_floats_but_marked_and_gpio_pins_do_not():
     assert rules(forgotten) == ["input_pin_floating"]
     marked = netlist([shifter], [("unconnected-(U9-CE-Pad15)", [("U9", "15", "CE", "input+no_connect")])])
     assert rules(marked) == []
+
+
+def test_an_i2c_bus_known_only_by_its_net_name_needs_a_pull_up_too():
+    """StuartF303/vandaemon 0f5083fa 'fit the I2C pull-ups': GPIO pins to a connector, named /MCU/I2C_SDA."""
+    mcu = ("U1", "ESP32-C3", "MCU_Espressif", "ESP32-C3", "MCU")
+    header = ("J13", "Conn_01x04", "Connector_Generic", "Conn_01x04", "Generic connector")
+    bare = netlist([mcu, header], [("/MCU/I2C_SDA", [("U1", "20", "IO12", "bidirectional"), ("J13", "3", "Pin_3", "passive")])])
+    assert rules(bare) == ["i2c_no_pullup"]
+    pulled = netlist([mcu, header, ("R45", "4.7k", "Device", "R", "Resistor")],
+                     [("/MCU/I2C_SDA", [("U1", "20", "IO12", "bidirectional"), ("J13", "3", "Pin_3", "passive"), ("R45", "1", "", "passive")]),
+                      ("+3V3", [("R45", "2", "", "passive")])])
+    assert rules(pulled) == []
