@@ -62,6 +62,16 @@ def test_refuses_a_table_without_a_source():
         check_propulsion(HS3G, table)
 
 
+def test_flags_a_table_that_is_not_bench_data():
+    """A product trial agent, offline, typed a table from memory and cited a shop listing; that must not read as clean."""
+
+    table = copy.deepcopy(TABLE)
+    table.update(source="https://www.tokopedia.com/some-shop/motor", source_class="vendor chart transcribed by hand", accessed="not available offline")
+    report = check_propulsion(HS3G, table)
+    assert "table_unverified" in rules(report) and report["table"]["verified"] is False
+    assert check_propulsion(HS3G, TABLE)["table"]["verified"] is True
+
+
 def test_flags_a_table_from_another_voltage():
     assert "bench_voltage_mismatch" in rules(check_propulsion(dict(HS3G, battery=dict(HS3G["battery"], cells=3)), TABLE))
 

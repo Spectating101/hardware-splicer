@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -39,6 +40,9 @@ DEFAULTS = {
     "bench_voltage_tolerance": (0.10, "Largest relative difference between bench and pack voltage before the table stops applying."),
 }
 G = 9.80665
+# Where bench data may come from. Anything else (a shop listing, a hand transcription, a model's memory) is reported as
+# unverified, so the results cannot read as clean.
+BENCH_SOURCE_CLASSES = {"maker_page", "maker_datasheet", "independent_bench", "own_measurement"}
 MAX_FIGURE_OF_MERIT = 0.85  # real small props reach roughly 0.5-0.75; a table implying more is suspect
 
 
@@ -180,6 +184,14 @@ def check_propulsion(spec: Any, table: Any = None) -> dict[str, Any]:
 
     def finding(severity: str, rule: str, message: str) -> None:
         findings.append({"severity": severity, "rule": rule, "message": message})
+
+    accessed = str(meta.get("accessed") or "")
+    meta["verified"] = meta.get("source_class") in BENCH_SOURCE_CLASSES and re.fullmatch(r"\d{4}-\d{2}-\d{2}", accessed) is not None
+    if not meta["verified"]:
+        finding("warning", "table_unverified",
+                f"The table's source class is {meta.get('source_class')!r} and its access date {accessed or 'missing'}; only "
+                f"{', '.join(sorted(BENCH_SOURCE_CLASSES))} with an ISO access date count as bench data. Every result below inherits "
+                "that uncertainty until the table is checked against the maker's chart or measured.")
 
     v_pack = cells * v_cell
     v_bench = sum(r["voltage_v"] for r in rows) / len(rows)
