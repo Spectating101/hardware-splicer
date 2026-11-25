@@ -269,8 +269,13 @@ def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[s
         # General-purpose and analog pins (GPIO, PA3, ADC1) are left open on most boards, so only fixed-function inputs count.
         if (len(nodes) == 1 and n["type"] == "input" and not is_module and not _is_connector(comps.get(n["ref"], {}))
                 and not re.match(r"(GPIO|GP\d|IO\d|P[A-K]?\d|ADC|AIN|SENSOR|A\d|D\d|NC|DNC|N\.C|TEST|TP|RESERVED|RSV)", n["function"], re.I)):
-            finding("warning", "input_pin_floating", f"{n['ref']} pin {n['pin']} ({n['function'] or 'input'}) is an input with nothing on it. Tie it high or low, "
-                    "or mark it no-connect if the datasheet allows.", "KiCad pin type input; CMOS inputs must not float", [n["ref"]], name)
+            # Standard logic (74xx, 4000 series) has no internal pull resistors; other ICs often do (BQ25895 QON, TJA1051 S), so those get a note.
+            part = comps.get(n["ref"], {})
+            logic = bool(re.search(r"^(4xxx|74xx|CMOS)|^(74|CD4|HEF4|MC14|SN74|4\d{3}\b)", f"{part.get('lib', '')}|{part.get('value', '')}|{part.get('part', '')}".replace("|", "\n"), re.I | re.M))
+            finding("warning" if logic else "info", "input_pin_floating",
+                    f"{n['ref']} pin {n['pin']} ({n['function'] or 'input'}) is an input with nothing on it. "
+                    + ("Standard logic has no internal pull: tie it high or low." if logic else "Check the datasheet for an internal pull resistor; otherwise tie it high or low."),
+                    "KiCad pin type input; CMOS inputs must not float", [n["ref"]], name)
         sda = sorted({n["ref"] + "." + n["function"] for n in parts if re.search(r"(^|[/_])SDA", n["function"], re.I) and not re.search(r"SCL", n["function"], re.I)})
         scl = sorted({n["ref"] + "." + n["function"] for n in parts if re.search(r"(^|[/_])SCL", n["function"], re.I) and not re.search(r"SDA", n["function"], re.I)})
         if sda and scl:
@@ -286,7 +291,12 @@ def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[s
             modules = sorted({n["ref"] for n in nodes if re.search(r"module|compute ?module|\bcm[345]\b|wroom|wrover|\bpico\b|devkit",
                                                                     f"{comps.get(n['ref'], {}).get('part', '')} {comps.get(n['ref'], {}).get('value', '')}", re.I)})
             listed = ", ".join(sorted(n["ref"] + "." + (n["function"] or n["pin"]) for n in (nodes if named_bus else parts) if named_bus or I2C.search(n["function"])))
-            if modules:
+            # A bus known only by name that leaves through a connector may get its pull-ups from the far side (a GPS module, an HDMI sink).
+            off_board = named_bus and any(_is_connector(comps.get(n["ref"], {})) or re.match(r"(J|CN|P|X|CON|HDMI|DPHY)\d", n["ref"]) for n in nodes)
+            if off_board:
+                finding("info", "i2c_no_pullup", f"Net {name} is named as I2C and leaves the board through a connector with no pull-up here ({listed}). "
+                        "Fit pull-ups unless the device on the other end has them.", UM10204, sorted(i2c_parts), name)
+            elif modules:
                 finding("info", "i2c_no_pullup", f"Net {name} carries I2C ({listed}) with no resistor to a supply on this board. {', '.join(modules)} is a module, "
                         "which often carries its own pull-ups: check its datasheet.", UM10204, sorted(i2c_parts), name)
             else:

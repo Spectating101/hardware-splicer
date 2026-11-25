@@ -291,6 +291,9 @@ def test_a_forgotten_input_floats_but_marked_and_gpio_pins_do_not():
     assert rules(forgotten) == ["input_pin_floating"]
     marked = netlist([shifter], [("unconnected-(U9-CE-Pad15)", [("U9", "15", "CE", "input+no_connect")])])
     assert rules(marked) == []
+    charger = ("U9", "BQ25895RTWR", "Battery_Management", "BQ25895", "Charger")  # azlan-works/Argo leaves QON open: it has an internal pull-up
+    found = review(netlist([charger], [("unconnected-(U9-QON-Pad12)", [("U9", "12", "QON", "input")])]))["findings"]
+    assert [(f["rule"], f["severity"]) for f in found] == [("input_pin_floating", "info")]
 
 
 def test_an_i2c_bus_known_only_by_its_net_name_needs_a_pull_up_too():
@@ -298,7 +301,10 @@ def test_an_i2c_bus_known_only_by_its_net_name_needs_a_pull_up_too():
     mcu = ("U1", "ESP32-C3", "MCU_Espressif", "ESP32-C3", "MCU")
     header = ("J13", "Conn_01x04", "Connector_Generic", "Conn_01x04", "Generic connector")
     bare = netlist([mcu, header], [("/MCU/I2C_SDA", [("U1", "20", "IO12", "bidirectional"), ("J13", "3", "Pin_3", "passive")])])
-    assert rules(bare) == ["i2c_no_pullup"]
+    assert [(f["rule"], f["severity"]) for f in review(bare)["findings"]] == [("i2c_no_pullup", "info")]  # the far side may hold the pull-ups
+    sensor = ("U2", "SHT40", "Sensor_Humidity", "SHT40", "Humidity sensor")
+    on_board = netlist([mcu, sensor], [("/MCU/I2C_SDA", [("U1", "20", "IO12", "bidirectional"), ("U2", "3", "DATA", "bidirectional")])])
+    assert rules(on_board) == ["i2c_no_pullup"]
     pulled = netlist([mcu, header, ("R45", "4.7k", "Device", "R", "Resistor")],
                      [("/MCU/I2C_SDA", [("U1", "20", "IO12", "bidirectional"), ("J13", "3", "Pin_3", "passive"), ("R45", "1", "", "passive")]),
                       ("+3V3", [("R45", "2", "", "passive")])])
