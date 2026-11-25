@@ -102,9 +102,9 @@ RESISTANCE = re.compile(r"^\d+(\.\d+)?\s*[RkKM]?\d*\s*(Ω|ohms?)?$", re.I)
 
 def _kind(comp: dict[str, Any], ref: str = "") -> str:
     text = f"{comp['lib']}:{comp['part']} {comp['description']}".lower()
-    if re.search(r"pmos|p-?ch|q_p\w*mos|pfet", text):
+    if re.search(r"pmos|\bp-?ch(annel)?\b|q_p\w*mos|pfet", text):
         return "pmos"
-    if re.search(r"nmos|n-?ch|q_n\w*mos|nfet", text):
+    if re.search(r"nmos|\bn-?ch(annel)?\b|q_n\w*mos|nfet", text):
         return "nmos"
     if re.search(r"usb_?c|type-?c", text):
         return "usb_c"

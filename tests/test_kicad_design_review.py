@@ -309,3 +309,13 @@ def test_an_i2c_bus_known_only_by_its_net_name_needs_a_pull_up_too():
                      [("/MCU/I2C_SDA", [("U1", "20", "IO12", "bidirectional"), ("J13", "3", "Pin_3", "passive"), ("R45", "1", "", "passive")]),
                       ("+3V3", [("R45", "2", "", "passive")])])
     assert rules(pulled) == []
+
+
+def test_part_kinds_need_whole_words():
+    """beagleboard/capes: an Eagle RESISTOR-(INCH)-0402 was read as an N-channel MOSFET because of 'nch' in 'inch'."""
+    from hardware_splicer.kicad_design_review import _kind
+
+    eagle_r = {"lib": "TechLab-eagle-import", "part": "RESISTOR-(INCH)-0402", "description": "Basic SMD Resistors", "value": "4.7k", "pins": []}
+    assert _kind(eagle_r, "R24") == "resistor"
+    for description, kind in (("P-Channel MOSFET", "pmos"), ("-30V P-Ch MOSFET", "pmos"), ("N-Channel MOSFET, SOT-23", "nmos"), ("30V N-CH", "nmos")):
+        assert _kind({"lib": "Transistor_FET", "part": "X", "description": description, "value": "", "pins": []}, "Q1") == kind, description
