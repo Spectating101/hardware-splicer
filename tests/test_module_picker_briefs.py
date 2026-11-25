@@ -6,7 +6,7 @@ published example projects, which HS did not write.
 
 from __future__ import annotations
 
-from hardware_splicer.module_picker import _pick_modules_regex
+from hardware_splicer.module_picker import _explicit_parts, _pick_modules_regex
 
 
 def ids(text):
@@ -19,8 +19,8 @@ def test_an_led_strip_is_a_strip_not_a_display():
 
 
 def test_a_robot_arm_gets_servos_not_a_wheel_motor_driver():
-    got = ids("A small desk robot arm: four SG90 servos moved by an ESP32 from a phone app over Wi-Fi.")
-    assert "sg90" in got and "l298n" not in got
+    pick = _pick_modules_regex("A small desk robot arm: four SG90 servos moved by an ESP32 from a phone app over Wi-Fi.")
+    assert "sg90" in pick.module_ids and "l298n" not in pick.module_ids and pick.quantities == {"sg90": 4}
     assert "l298n" in ids("A plant watering robot that drives around the greenhouse on two DC motors")
 
 
@@ -34,3 +34,9 @@ def test_formwright_examples_get_their_named_parts():
     kitchen = ids("Kitchen timer: a countdown on an OLED, three buttons, a buzzer, a LiPo charged over USB-C")
     assert {"ssd1306-128x64", "tp4056"} <= kitchen
     assert "ssd1306-128x64" not in ids("Water leak alarm: a probe on a cable, a buzzer and a red LED, months of sleep on a LiPo")
+
+
+def test_part_numbers_resolve_only_when_they_look_like_part_numbers():
+    assert _explicit_parts("four SG90 servos and 60 WS2812B LEDs on an SX1278") == {"sg90": 4, "ws2812b_strip": 60, "lora_sx1278": 1}
+    assert _explicit_parts("a servo, a relay and a fan") == {}
+    assert "esp32-devkit" not in _explicit_parts("an ESP32-C3 board")

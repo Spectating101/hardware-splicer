@@ -9,7 +9,8 @@ candidate validation; failure stays unresolved rather than falling through to re
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from functools import lru_cache
 from typing import Optional
 
 from .pcb.module_registry import find_module, find_modules_by_capabilities
@@ -21,6 +22,7 @@ class ModulePick:
     module_ids: list[str]
     labels: list[str]
     hints: list[str]
+    quantities: dict[str, int] = field(default_factory=dict)  # "four SG90 servos" -> {"sg90": 4}
 
 
 @dataclass
@@ -474,11 +476,60 @@ def _pick_modules_regex(text: str) -> ModulePick:
         mod = find_module("level-shifter-4ch")
         labels.append(mod.get("label") if mod else "Level shifter")
 
+    # A part the brief names by its number (SG90, WS2812B, SX1278) is that part, whatever the hints chose.
+    quantities: dict[str, int] = {}
+    for module_id, count in _explicit_parts(text).items():
+        if module_id not in module_ids:
+            module_ids.add(module_id)
+            mod = find_module(module_id)
+            labels.append(str((mod or {}).get("label") or module_id))
+        if count > 1:
+            quantities[module_id] = count
+
     return ModulePick(
         module_ids=list(module_ids),
         labels=list(dict.fromkeys(labels)),
         hints=hints,
+        quantities=quantities,
     )
+
+
+_NUMBER_WORDS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10, "twelve": 12}
+_NOT_NAMED = {"esp32-devkit", "esp32-devkitc-v4", "usb-power-5v", "dc-barrel-12v"}  # the controller and power are chosen separately
+
+
+@lru_cache(maxsize=1)
+def _part_number_index() -> dict[str, str]:
+    """Normalized part number -> module id, from each engine part's partNumber, id and leading label word."""
+    import json
+    from pathlib import Path
+
+    library = json.loads((Path(__file__).resolve().parent / "data" / "engine_pcb_data.json").read_text(encoding="utf-8"))["module_library"]
+    index: dict[str, str] = {}
+    for module in sorted(library, key=lambda m: m["id"]):
+        if module["id"] in _NOT_NAMED or not find_module(module["id"]):
+            continue
+        for raw in (module.get("partNumber"), module["id"].split("_")[0], str(module.get("label", "")).split(" ")[0]):
+            key = re.sub(r"[^A-Z0-9]", "", str(raw or "").upper())
+            # Part-number-like only (letters and digits, 4+ chars): never a plain word such as "servo" or "relay".
+            if len(key) >= 4 and re.search(r"\d", key) and re.search(r"[A-Z]", key) and not key.startswith("ESP32"):
+                index.setdefault(key, module["id"])
+    return index
+
+
+def _explicit_parts(text: str) -> dict[str, int]:
+    """Parts named by number in the brief, with a count when one precedes them ("four SG90", "60 WS2812B")."""
+    found: dict[str, int] = {}
+    index = _part_number_index()
+    pattern = r"(?:(\d+|" + "|".join(_NUMBER_WORDS) + r")\s+(?:x\s+)?)?\b([A-Za-z]+[-_]?[A-Za-z]*\d[\w-]*)"  # no space inside a part number
+    for match in re.finditer(pattern, text, re.I):
+        module_id = index.get(re.sub(r"[^A-Z0-9]", "", match.group(2).upper()))
+        if not module_id:
+            continue
+        count = match.group(1)
+        n = int(count) if count and count.isdigit() else _NUMBER_WORDS.get((count or "").lower(), 1)
+        found[module_id] = max(found.get(module_id, 1), n)
+    return found
 
 
 def wants_module_composition(text: str) -> bool:
