@@ -105,6 +105,10 @@ def _kind(comp: dict[str, Any], ref: str = "") -> str:
         return "nmos"
     if re.search(r"usb_?c|type-?c", text):
         return "usb_c"
+    # A receptacle named only by its maker's part number (CUI UJ20-C, GCT USB4105): a connector designator with CC1 and CC2 pins.
+    # A PD controller IC has CC pins too, so only connector designators count.
+    if re.fullmatch(r"(J|P|CN|CON|USB|X)\d+", ref) and {"CC1", "CC2"} <= {str(p.get("name", "")).upper() for p in comp.get("pins", [])}:
+        return "usb_c"
     # Imported designs (EasyEDA, Altium) carry a manufacturer part number instead of Device:R: judge those by designator and value.
     by_value = bool(re.fullmatch(r"R\d+", ref)) and bool(RESISTANCE.match(str(comp.get("value", "")).strip()))
     if re.search(r"(^|[:_ ])r($|[_ ])|resistor|r_small|r_us", text) or comp["part"] in ("R", "R_Small", "R_US") or by_value:

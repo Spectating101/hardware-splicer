@@ -240,3 +240,13 @@ def test_reverse_polarity_protection_mosfets_are_not_flagged():
     nmos = ("Q4", "AO3400A", "Transistor_FET", "AO3400A", "N-Channel MOSFET")
     low_side_guard = netlist([nmos], [("GND", [("Q4", "3", "D", "passive")]), ("BAT-", [("Q4", "2", "S", "passive")]), ("+BATT", [("Q4", "1", "G", "input")])])
     assert rules(low_side_guard) == []
+
+
+def test_a_receptacle_named_by_part_number_is_known_by_its_cc_pins():
+    """Allegra42/ZEReader-KiCad 13fb744f and brenocq/bldc-motor 526db53d: CUI UJ20-C and a 12402012E212A receptacle."""
+    usb = ("J5", "UJ20-C-H-G-SMT-TR", "UJ20-C-H-G-SMT-TR", "UJ20-C-H-G-SMT-TR", "")
+    pins = [("UJ20-C-H-G-SMT-TR", "UJ20-C-H-G-SMT-TR", [("A5", "CC1", "bidirectional"), ("B5", "CC2", "bidirectional")])]
+    assert rules(netlist([usb], [], pins)) == ["usb_c_cc_no_pulldown"] * 2
+    controller = ("U3", "HUSB238", "Interface_USB", "HUSB238", "USB PD sink controller")
+    cpins = [("Interface_USB", "HUSB238", [("1", "CC1", "bidirectional"), ("2", "CC2", "bidirectional")])]
+    assert rules(netlist([controller], [], cpins)) == []
