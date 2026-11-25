@@ -10,6 +10,9 @@ that KiCad's ERC and other checkers missed on real fix commits (examples/schemat
 * ``i2c_no_pullup``: an I2C data or clock net with no resistor to a supply;
 * ``mosfet_source_drain``: a MOSFET whose drain, not its source, sits on the rail its type expects at the source, unless it is
   half of a common-source pair or a P-channel load-sharing switch with its gate on a supply;
+* ``input_pin_floating``: a fixed-function input pin (not a GPIO) with nothing on it and no no-connect mark;
+* ``i2c_sda_scl_short``: SDA and SCL pins on one net;
+* ``usb_c_data_one_side``: a USB-C receptacle's D+ or D- wired on one row only;
 * ``usb_c_cc_no_pulldown``: a USB-C receptacle's CC pin with no resistor to ground, unless it has Rp to a supply (a source port);
   a CC pin that reaches a controller or module is reported as a note.
 
@@ -262,6 +265,12 @@ def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[s
         if len(nodes) == 1 and n["type"] == "power_in" and not is_module and not twin_wired:
             finding("error", "power_pin_unconnected", f"{n['ref']} pin {n['pin']} ({n['function'] or 'power input'}) is a power input with nothing else on its net.",
                     "KiCad pin type power_in", [n["ref"]], name)
+        # A logic input with nothing on it floats. KiCad marks deliberate no-connects as "input+no_connect", so a bare "input" was forgotten.
+        # General-purpose and analog pins (GPIO, PA3, ADC1) are left open on most boards, so only fixed-function inputs count.
+        if (len(nodes) == 1 and n["type"] == "input" and not is_module and not _is_connector(comps.get(n["ref"], {}))
+                and not re.match(r"(GPIO|GP\d|IO\d|P[A-K]?\d|ADC|AIN|SENSOR|A\d|D\d|NC|DNC|N\.C|TEST|TP|RESERVED|RSV)", n["function"], re.I)):
+            finding("warning", "input_pin_floating", f"{n['ref']} pin {n['pin']} ({n['function'] or 'input'}) is an input with nothing on it. Tie it high or low, "
+                    "or mark it no-connect if the datasheet allows.", "KiCad pin type input; CMOS inputs must not float", [n["ref"]], name)
         sda = sorted({n["ref"] + "." + n["function"] for n in parts if re.search(r"(^|[/_])SDA", n["function"], re.I) and not re.search(r"SCL", n["function"], re.I)})
         scl = sorted({n["ref"] + "." + n["function"] for n in parts if re.search(r"(^|[/_])SCL", n["function"], re.I) and not re.search(r"SDA", n["function"], re.I)})
         if sda and scl:

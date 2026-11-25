@@ -59,9 +59,10 @@ PMOS = ("Q3", "AO3401A", "Transistor_FET", "AO3401A", "-4.0A Id, -30V Vds, P-Cha
 
 def test_a_p_channel_switch_with_its_drain_on_the_supply_is_flagged():
     """The real fix in ebastler/zmk-designguide 1b4583ed: drain on +VSW, source on the load."""
-    reversed_ = netlist([PMOS], [("+VSW", [("Q3", "3", "D", "passive")]), ("UG_PWR", [("Q3", "2", "S", "passive")]), ("Net-(Q3-G)", [("Q3", "1", "G", "input")])])
+    gate = ("Net-(Q3-G)", [("Q3", "1", "G", "input"), ("U1", "10", "GPIO10", "bidirectional")])  # driven, as on the real board (by Q4)
+    reversed_ = netlist([PMOS, MCU], [("+VSW", [("Q3", "3", "D", "passive")]), ("UG_PWR", [("Q3", "2", "S", "passive")]), gate])
     assert rules(reversed_) == ["mosfet_source_drain"]
-    correct = netlist([PMOS], [("+VSW", [("Q3", "2", "S", "passive")]), ("UG_PWR", [("Q3", "3", "D", "passive")]), ("Net-(Q3-G)", [("Q3", "1", "G", "input")])])
+    correct = netlist([PMOS, MCU], [("+VSW", [("Q3", "2", "S", "passive")]), ("UG_PWR", [("Q3", "3", "D", "passive")]), gate])
     assert rules(correct) == []
 
 
@@ -71,7 +72,8 @@ def test_deliberate_drain_on_supply_circuits_are_not_flagged():
     pair = netlist([PMOS, q2], [("+5V", [("Q3", "3", "D", "passive")]), ("Net-(Q3-S)", [("Q3", "2", "S", "passive"), ("Q2", "2", "S", "passive")]),
                                 ("V_UPS", [("Q2", "3", "D", "passive")]), ("Net-(Q3-G)", [("Q3", "1", "G", "input"), ("Q2", "1", "G", "input")])])
     assert rules(pair) == []
-    load_sharing = netlist([PMOS], [("+BATT", [("Q3", "3", "D", "passive")]), ("Net-(D1-K)", [("Q3", "2", "S", "passive")]), ("VBUS", [("Q3", "1", "G", "input")])])
+    load_sharing = netlist([PMOS, MCU], [("+BATT", [("Q3", "3", "D", "passive")]), ("Net-(D1-K)", [("Q3", "2", "S", "passive")]),
+                                         ("VBUS", [("Q3", "1", "G", "input"), ("U1", "2", "VBUS", "power_in")])])
     assert rules(load_sharing) == []
 
 
@@ -231,14 +233,16 @@ def test_alternative_bus_transceivers_sharing_rxd_are_not_a_uart_error():
 
 def test_reverse_polarity_protection_mosfets_are_not_flagged():
     """Miceuz/rs485-moist-sensor: Q1's drain takes VCC from the connector, its source feeds the LDO, its gate sits on GND."""
-    guard = netlist([PMOS], [("VCC", [("Q3", "3", "D", "passive")]), ("Net-(Q1-S)", [("Q3", "2", "S", "passive")]), ("GND", [("Q3", "1", "G", "input")])])
+    guard = netlist([PMOS, MCU], [("VCC", [("Q3", "3", "D", "passive")]), ("Net-(Q1-S)", [("Q3", "2", "S", "passive")]),
+                                  ("GND", [("Q3", "1", "G", "input"), ("U1", "1", "GND", "power_in")])])
     assert rules(guard) == []
     via_resistor = netlist([PMOS, ("R1", "100k", "Device", "R", "Resistor")],
                            [("VCC", [("Q3", "3", "D", "passive")]), ("Net-(Q1-S)", [("Q3", "2", "S", "passive")]),
                             ("Net-(Q3-G)", [("Q3", "1", "G", "input"), ("R1", "1", "", "passive")]), ("GND", [("R1", "2", "", "passive")])])
     assert rules(via_resistor) == []
     nmos = ("Q4", "AO3400A", "Transistor_FET", "AO3400A", "N-Channel MOSFET")
-    low_side_guard = netlist([nmos], [("GND", [("Q4", "3", "D", "passive")]), ("BAT-", [("Q4", "2", "S", "passive")]), ("+BATT", [("Q4", "1", "G", "input")])])
+    low_side_guard = netlist([nmos, MCU], [("GND", [("Q4", "3", "D", "passive"), ("U1", "1", "GND", "power_in")]), ("BAT-", [("Q4", "2", "S", "passive")]),
+                                           ("+BATT", [("Q4", "1", "G", "input"), ("U1", "2", "VBAT", "power_in")])])
     assert rules(low_side_guard) == []
 
 
@@ -276,3 +280,14 @@ def test_sda_and_scl_on_one_net_is_a_short():
     short = netlist(parts, [("SCL", [("U5", "8", "SMDATA", "bidirectional"), ("U5", "7", "SMCLK", "input"), ("U8", "9", "SCL", "input"),
                                      ("U8", "8", "SDA", "bidirectional"), ("R1", "1", "", "passive")]), ("+3V3", [("R1", "2", "", "passive")])])
     assert rules(short) == ["i2c_sda_scl_short"]
+
+
+def test_a_forgotten_input_floats_but_marked_and_gpio_pins_do_not():
+    """DuPAL-PAL-DUmper/DuPAL_Board 218f80b8 'Fix missing connection on a shifter': U9's CE was left open."""
+    shifter = ("U9", "74HC165", "74xx", "74HC165", "Parallel-in shift register")
+    mcu = ("U1", "RP2040", "MCU_RaspberryPi", "RP2040", "MCU")
+    forgotten = netlist([shifter, mcu], [("unconnected-(U9-CE-Pad15)", [("U9", "15", "CE", "input")]),
+                                         ("unconnected-(U1-GPIO7-Pad9)", [("U1", "9", "GPIO7", "input")])])
+    assert rules(forgotten) == ["input_pin_floating"]
+    marked = netlist([shifter], [("unconnected-(U9-CE-Pad15)", [("U9", "15", "CE", "input+no_connect")])])
+    assert rules(marked) == []
