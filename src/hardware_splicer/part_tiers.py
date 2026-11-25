@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import re
+from pathlib import Path
 import sys
 from collections import defaultdict
 from typing import Any
@@ -33,6 +34,7 @@ CAPABILITIES = {
     "wiring_check": "wiring checked by pin role and voltage (no outline, so no case)",
     "design_review": "WireStudio part or board: HS reviews WireStudio designs that use it (wirestudio_bridge)",
     "board_metadata": "PlatformIO board definition: chip, clock, flash, RAM, radios and PSRAM type (board_catalog)",
+    "pin_signals": "Wokwi part: pin names and the signals Wokwi gives them (I2C, SPI, UART, PWM, analog, power)",
 }
 
 
@@ -83,6 +85,14 @@ def unified_catalog(query: str | None = None) -> dict[str, Any]:
     from .board_catalog import catalog_rows as platformio_rows
 
     rows.extend(platformio_rows())
+    wokwi_dir = Path(__file__).resolve().parent / "data" / "third_party" / "wokwi"
+    wokwi_meta = json.loads((wokwi_dir / "SNAPSHOT.json").read_text(encoding="utf-8"))
+    for element, part in sorted(json.loads((wokwi_dir / "parts.json").read_text(encoding="utf-8")).items()):
+        rows.append({"id": f"wokwi:{element.removeprefix('wokwi-')}", "label": element, "library": "wokwi", "category": None,
+                     "capabilities": ["pin_signals"], "i2c_addresses": [],
+                     "sources": [f"{wokwi_meta['source']}/blob/{wokwi_meta['commit']}/src/{part['file']}"],
+                     "evidence": "Wokwi's simulator pin list, imported unchanged (MIT); pin positions are drawing coordinates",
+                     "pins": [p["name"] for p in part["pins"]]})
     # Engine entries that name the same part twice (an id with and without "_board", hyphen and underscore spellings).
     by_number: dict[str, list[str]] = defaultdict(list)
     for part in engine:

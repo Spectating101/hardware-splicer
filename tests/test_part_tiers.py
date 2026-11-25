@@ -13,7 +13,7 @@ def test_every_part_from_both_libraries_is_listed_once_with_what_hs_can_do_with_
     ids = [p["id"] for p in catalog["parts"]]
     assert len(ids) == len(set(ids)) == catalog["count"]
     counts = catalog["capability_counts"]
-    native = [p for p in catalog["parts"] if p["library"] not in ("wirestudio", "platformio")]
+    native = [p for p in catalog["parts"] if p["library"] not in ("wirestudio", "platformio", "wokwi")]
     assert counts["wiring_check"] == len(native)
     assert counts["design_review"] == sum(p["library"] == "wirestudio" for p in catalog["parts"]) > 100  # WireStudio's parts and boards
     assert counts["board_metadata"] == sum(p["library"] == "platformio" for p in catalog["parts"]) > 500  # PlatformIO's boards
@@ -74,7 +74,7 @@ def test_the_device_api_serves_the_catalogue_and_the_wiring_check(tmp_path, monk
     monkeypatch.setenv("HARDWARE_SPLICER_STATE_DIR", str(tmp_path / "state"))
     client = TestClient(create_product_app())
     parts = client.get("/v1/devices/parts", params={"q": "hc-sr04"}).json()
-    assert parts["ok"] and [p["id"] for p in parts["parts"]] == ["hc-sr04", "wirestudio:hc-sr04"]  # no PlatformIO board matches
+    assert parts["ok"] and {p["id"] for p in parts["parts"]} == {"hc-sr04", "wirestudio:hc-sr04", "wokwi:hc-sr04"}
     checked = client.post("/v1/devices/check-wiring", json=SONAR).json()
     assert checked["ok"] and checked["library"] == "engine"
     refused = client.post("/v1/devices/check-wiring", json={"modules": []})
@@ -106,3 +106,15 @@ def test_the_vl53l0x_was_promoted_with_the_current_board_outline():
     assert {"vl53l0x_tof"} <= {p["id"] for p in unified_catalog("vl53")["parts"]}
     plan = build_device_plan(draft_device_spec({"controller": "raspberry-pi-pico", "parts": ["adafruit-vl53l0x-stemma-qt"]})["spec"])
     assert plan["counts"]["errors"] == 0 and plan["counts"]["warnings"] == 0
+
+
+def test_wokwi_parts_are_listed_and_corroborate_the_oled_pin_order():
+    """Wokwi's SSD1306 module and Adafruit's 1.3 inch board file give the same eight pins in the same order."""
+    from hardware_splicer.device_plan import module_library
+
+    by_id = {p["id"]: p for p in unified_catalog()["parts"]}
+    wokwi = by_id["wokwi:ssd1306"]["pins"]
+    adafruit = [p["name"] for p in sorted(next(m for m in module_library()["modules"]
+                                               if m["id"] == "adafruit-oled-1.3-128x64-stemma-qt")["pins"], key=lambda p: p["x"])]
+    assert [w.upper() for w in wokwi] == [a.upper() for a in ["Data", "Clk", "DC", "Rst", "CS", "3v3", "Vin", "GND"]] == [a.upper() for a in adafruit]
+    assert unified_catalog()["capability_counts"]["pin_signals"] >= 30
