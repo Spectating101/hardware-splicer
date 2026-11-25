@@ -7,6 +7,10 @@ For each case: fetch the schematic files of the project at the fix's parent (bug
   2. kicad-happy's deterministic schematic analyser (network-isolated with bwrap),
   3. HS: KiCad netlist export -> hardware_splicer.netlist.import_kicad + netlist.erc.
 A finding "resolved by the fix" is one present before and absent after. Whether it is the bug is judged by hand later.
+
+Every checker runs on the project's root sheet (the .kicad_sch named after its .kicad_pro), not on the sheet the fix
+touched: a sub-sheet exported alone loses every connection that crosses the hierarchy. A file saved by a newer KiCad
+than the system kicad-cli is retried with HARDWARE_SPLICER_KICAD_CLI (for example a KiCad 10 wrapper).
 """
 import json
 import os
@@ -20,6 +24,25 @@ HERE = Path(__file__).resolve().parent
 # kicad-happy (MIT, github.com/aklofas/kicad-happy) is not bundled: point HS_KICAD_HAPPY at its analyze_schematic.py.
 KH = Path(os.environ.get("HS_KICAD_HAPPY", HERE / "tools/kicad-happy/skills/kicad/scripts/analyze_schematic.py"))
 HS_SRC = Path(sys.argv[3]) if len(sys.argv) > 3 else None
+NEWER_CLI = os.environ.get("HARDWARE_SPLICER_KICAD_CLI")
+
+
+def cli(args, timeout=300):
+    """kicad-cli, retried with HARDWARE_SPLICER_KICAD_CLI when the system one writes nothing (a newer file format)."""
+    out = Path(args[args.index("--output") + 1])
+    subprocess.run(["kicad-cli", *args], capture_output=True, text=True, timeout=timeout)
+    if not out.exists() and NEWER_CLI:
+        subprocess.run([NEWER_CLI, *args], capture_output=True, text=True, timeout=timeout * 3, cwd=str(Path(args[-1]).parent))
+    return out.exists()
+
+
+def project_root(src: Path, given: str) -> Path:
+    """The project's root sheet, preferring the project whose hierarchy names the sheet the fix touched."""
+    roots = [p.with_suffix(".kicad_sch") for p in sorted(src.glob("*.kicad_pro")) if p.with_suffix(".kicad_sch").exists()]
+    for root in roots:
+        if root.name == given or f'"{given}"' in root.read_text(encoding="utf-8", errors="replace"):
+            return root
+    return roots[0] if roots else src / given
 
 
 def gh_json(path):
@@ -41,14 +64,12 @@ def fetch(repo, sha, schematic, dest):
                            capture_output=True, timeout=90)
         if r.returncode != 0:
             out.unlink(missing_ok=True)
-    return dest / Path(schematic).name
+    return project_root(dest, Path(schematic).name)
 
 
 def kicad_erc(root, work):
     out = work / "kicad_erc.json"
-    subprocess.run(["kicad-cli", "sch", "erc", "--format", "json", "--severity-all", "--output", str(out), str(root)],
-                   capture_output=True, text=True, timeout=300)
-    if not out.exists():
+    if not cli(["sch", "erc", "--format", "json", "--severity-all", "--output", str(out), str(root)]):
         return None
     data = json.loads(out.read_text())
     rows = []
@@ -76,8 +97,7 @@ def kicad_happy(root, work):
 
 def hs_erc(root, work):
     net = work / "netlist.net"
-    subprocess.run(["kicad-cli", "sch", "export", "netlist", "--format", "kicadsexpr", "--output", str(net), str(root)],
-                   capture_output=True, text=True, timeout=300)
+    cli(["sch", "export", "netlist", "--format", "kicadsexpr", "--output", str(net), str(root)])
     if not net.exists() or HS_SRC is None:
         return None
     code = ("import json,sys;sys.path.insert(0,sys.argv[1]);from hardware_splicer.netlist.import_kicad import parse_kicad_netlist;"
@@ -115,7 +135,8 @@ def main():
             for side, sha in (("before", case["parent"]), ("after", case["sha"])):
                 work = out_dir / name / side
                 work.mkdir(parents=True, exist_ok=True)
-                roots[side] = (fetch(case["repo"], sha, case["schematic"], work / "src"), work)
+                roots[side] = (fetch(case["repo"], sha, case["schematic"], work / "src").resolve(), work)
+            row["root"] = roots["after"][0].name
             for checker, fn in (("kicad_erc", kicad_erc), ("kicad_happy", kicad_happy), ("hs", hs_erc), ("hs_review", hs_review)):
                 before, after = (fn(*roots[s]) for s in ("before", "after"))
                 if not isinstance(before, list) or not isinstance(after, list):
