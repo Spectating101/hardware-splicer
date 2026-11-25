@@ -1,0 +1,774 @@
+{
+ "schema_version": "hardware_splicer.schematic_checker_benchmark.v1",
+ "run_at": "2026-11-25",
+ "method": "Real schematic fix commits found in public KiCad projects (selected from the project list of aklofas/kicad-happy-testharness, only names used) and judged by hand. Each checker ran on the parent (buggy) and the fix; a bug counts as caught only when a finding about that bug is present before and gone after. KiCad ERC from kicad-cli 9.0.2; kicad-happy at a pinned commit with --only-deterministic, network-isolated; HS via kicad-cli netlist export into hardware_splicer.netlist.import_kicad and netlist.erc.",
+ "tools": {
+  "kicad_cli": "9.0.2",
+  "kicad_happy_commit": "6b9767e19979cdef91631573753b1547efdbeab9"
+ },
+ "caveats": [
+  "24 cases is a small sample.",
+  "Fix commits often bundle unrelated changes; only the named bug was judged.",
+  "kicad-happy ran without its datasheet download and AI layers.",
+  "Projects keep their own licences; this file holds only names, commits and messages."
+ ],
+ "tally": {
+  "kicad_erc": {
+   "caught": 3,
+   "possible": 2,
+   "missed": 19,
+   "did_not_run": 0
+  },
+  "kicad_happy": {
+   "caught": 4,
+   "possible": 0,
+   "missed": 20,
+   "did_not_run": 0
+  },
+  "hs": {
+   "caught": 1,
+   "possible": 0,
+   "missed": 22,
+   "did_not_run": 1
+  }
+ },
+ "missed_by_every_checker": [
+  "83f5246d",
+  "28a57dc0",
+  "7749c902",
+  "1b4583ed",
+  "ff3dc03b",
+  "45985bcd",
+  "8154a0a0",
+  "8725590c",
+  "1a5a9041",
+  "7b0be433",
+  "13485ee3",
+  "e14b09d1",
+  "95b240bc",
+  "30015fc5",
+  "0383e97d",
+  "3b5716db",
+  "13fb744f",
+  "e9cfe4fd",
+  "1d1d5d94"
+ ],
+ "cases": [
+  {
+   "repo": "cardonabits/haxo-hw",
+   "stars": 675,
+   "license": "NOASSERTION",
+   "fix_commit": "83f5246d0f7a92fb96a4dcdced43ce8ae4c35762",
+   "buggy_parent": "e56ee5a4de36197508161f2c93f8dfa28a903eed",
+   "schematic": "haxophone001.kicad_sch",
+   "message": "Fix incorrect cap part 1uF -> 0.1uF",
+   "bug_class": "wrong_value",
+   "verdict": {
+    "kicad_erc": "missed",
+    "kicad_happy": "missed",
+    "hs": "missed"
+   },
+   "note": "",
+   "finding_counts": {
+    "kicad_erc": {
+     "before": 137,
+     "after": 137
+    },
+    "kicad_happy": {
+     "before": 18,
+     "after": 18
+    },
+    "hs": {
+     "before": 20,
+     "after": 20
+    }
+   }
+  },
+  {
+   "repo": "cardonabits/haxo-hw",
+   "stars": 675,
+   "license": "NOASSERTION",
+   "fix_commit": "28a57dc0c2ac25278607cefc5118acb0723f45b3",
+   "buggy_parent": "a450af897ceca8d61887b87e84f53ccb7065362d",
+   "schematic": "haxophone001.kicad_sch",
+   "message": "Add external pull-up resistors to COL lines",
+   "bug_class": "missing_pullup",
+   "verdict": {
+    "kicad_erc": "missed",
+    "kicad_happy": "missed",
+    "hs": "missed"
+   },
+   "note": "",
+   "finding_counts": {
+    "kicad_erc": {
+     "before": 133,
+     "after": 137
+    },
+    "kicad_happy": {
+     "before": 18,
+     "after": 18
+    },
+    "hs": {
+     "before": 20,
+     "after": 20
+    }
+   }
+  },
+  {
+   "repo": "Wren6991/RISCBoy",
+   "stars": 515,
+   "license": "NONE",
+   "fix_commit": "7749c902e1680b56a4fd5feca571e547198e84b6",
+   "buggy_parent": "e4f4cddfa0988ab9e00c00cfa562112701647e6d",
+   "schematic": "board/riscboy_revb0/riscboy.kicad_sch",
+   "message": "Fix a couple of pin assignment issues found during review. Add 3V3A testpoint.",
+   "bug_class": "pin_assignment",
+   "verdict": {
+    "kicad_erc": "missed",
+    "kicad_happy": "missed",
+    "hs": "did_not_run"
+   },
+   "note": "HS netlist import failed: KiCad net node requires a component ref and pin",
+   "finding_counts": {
+    "kicad_erc": {
+     "before": 290,
+     "after": 292
+    },
+    "kicad_happy": {
+     "before": 37,
+     "after": 39
+    }
+   }
+  },
+  {
+   "repo": "ebastler/zmk-designguide",
+   "stars": 498,
+   "license": "NOASSERTION",
+   "fix_commit": "1b4583ed1fe225307f807862ee2afc1a4a0c8ec5",
+   "buggy_parent": "e374dc62df8a1e081de5cc5543394d486fe01e5c",
+   "schematic": "designguide-schematic/designguide-schematic.kicad_sch",
+   "message": "fixed wrong rotation of p-ch FET in underglow supply",
+   "bug_class": "fet_orientation",
+   "verdict": {
+    "kicad_erc": "missed",
+    "kicad_happy": "missed",
+    "hs": "missed"
+   },
+   "note": "",
+   "finding_counts": {
+    "kicad_erc": {
+     "before": 349,
+     "after": 349
+    },
+    "kicad_happy": {
+     "before": 145,
+     "after": 147
+    },
+    "hs": {
+     "before": 89,
+     "after": 89
+    }
+   }
+  },
+  {
+   "repo": "Chrismettal/flipper-zero-backpacks",
+   "stars": 458,
+   "license": "NOASSERTION",
+   "fix_commit": "ff3dc03bb29b67af53f2f2c6ea80519ccb5eb467",
+   "buggy_parent": "70bd25a34ea05b5b392ca23df20b22353f464100",
+   "schematic": "pcb/ESP32/ESP32.kicad_sch",
+   "message": "[ESP32] Fix RX/TX swapped",
+   "bug_class": "swapped_signals",
+   "verdict": {
+    "kicad_erc": "missed",
+    "kicad_happy": "missed",
+    "hs": "missed"
+   },
+   "note": "",
+   "finding_counts": {
+    "kicad_erc": {
+     "before": 146,
+     "after": 146
+    },
+    "kicad_happy": {
+     "before": 56,
+     "after": 56
+    },
+    "hs": {
+     "before": 6,
+     "after": 6
+    }
+   }
+  },
+  {
+   "repo": "baldengineer/bit-preserve",
+   "stars": 446,
+   "license": "NOASSERTION",
+   "fix_commit": "45985bcdf16f61417e88bbfa046e1f7d7646b15c",
+   "buggy_parent": "412180d4e0db5885be15d8a22702ce5ac6b06243",
+   "schematic": "Apple/Apple II+/AppleII+/CPU.kicad_sch",
+   "message": "flipped Q5, fixes #124",
+   "bug_class": "transistor_orientation",
+   "verdict": {
+    "kicad_erc": "missed",
+    "kicad_happy": "missed",
+    "hs": "missed"
+   },
+   "note": "",
+   "finding_counts": {
+    "kicad_erc": {
+     "before": 396,
+     "after": 396
+    },
+    "kicad_happy": {
+     "before": 74,
+     "after": 74
+    },
+    "hs": {
+     "before": 27,
+     "after": 27
+    }
+   }
+  },
+  {
+   "repo": "bitaxeorg/bitaxeGamma",
+   "stars": 440,
+   "license": "CERN-OHL-S-2.0",
+   "fix_commit": "8154a0a00baff17b0a75b3dd6bce8e8a641957b0",
+   "buggy_parent": "dd7b218cc2cffe65cbb8b5c70c340563d2fa2776",
+   "schematic": "esp32.kicad_sch",
+   "message": "Fix BAP port GPIO pins",
+   "bug_class": "pin_assignment",
+   "verdict": {
+    "kicad_erc": "possible",
+    "kicad_happy": "missed",
+    "hs": "missed"
+   },
+   "note": "ERC wire_dangling near the BAP connector; not confirmed to be the fixed pins",
+   "finding_counts": {
+    "kicad_erc": {
+     "before": 119,
+     "after": 112
+    },
+    "kicad_happy": {
+     "before": 63,
+     "after": 63
+    },
+    "hs": {
+     "before": 6,
+     "after": 6
+    }
+   }
+  },
+  {
+   "repo": "bitaxeorg/bitaxeGamma",
+   "stars": 440,
+   "license": "CERN-OHL-S-2.0",
+   "fix_commit": "8725590cb1eed0f03d39430a81da19f0bf278c13",
+   "buggy_parent": "ccdd1ee25f0026dc26fb79425a5bfc9502913d4c",
+   "schematic": "esp32.kicad_sch",
+   "message": "fix GND",
+   "bug_class": "ground",
+   "verdict": {
+    "kicad_erc": "missed",
+    "kicad_happy": "missed",
+    "hs": "missed"
+   },
+   "note": "",
+   "finding_counts": {
+    "kicad_erc": {
+     "before": 172,
+     "after": 172
+    },
+    "kicad_happy": {
+     "before": 94,
+     "after": 94
+    },
+    "hs": {
+     "before": 6,
+     "after": 6
+    }
+   }
+  },
+  {
+   "repo": "bitaxeorg/bitaxeGamma",
+   "stars": 440,
+   "license": "CERN-OHL-S-2.0",
+   "fix_commit": "0950fcef7bf7e225e176c3cccc6cb960c43af009",
+   "buggy_parent": "0d2778afd52b6420258db5fbeb675f2fe50d1817",
+   "schematic": "esp32.kicad_sch",
+   "message": "fixed up USB-C wiring. added CC pulldown resistors. added LCD display to play with",
+   "bug_class": "usb_wiring",
+   "verdict": {
+    "kicad_erc": "missed",
+    "kicad_happy": "caught",
+    "hs": "missed"
+   },
+   "note": "kicad-happy UC-003: CC1/CC2 missing 5.1k pull-down at J8",
+   "finding_counts": {
+    "kicad_erc": {
+     "before": 165,
+     "after": 192
+    },
+    "kicad_happy": {
+     "before": 95,
+     "after": 105
+    },
+    "hs": {
+     "before": 2,
+     "after": 5
+    }
+   }
+  },
+  {
+   "repo": "bitaxeorg/bitaxeGamma",
+   "stars": 440,
+   "license": "CERN-OHL-S-2.0",
+   "fix_commit": "4ee16e005d68af93fd0f5c319af368e902b0bbca",
+   "buggy_parent": "826061a2c5e5222e9c3c9e68571c07245c9f4fc3",
+   "schematic": "esp32.kicad_sch",
+   "message": "Fix USB wiring",
+   "bug_class": "usb_wiring",
+   "verdict": {
+    "kicad_erc": "caught",
+    "kicad_happy": "caught",
+    "hs": "missed"
+   },
+   "note": "ERC pin_not_connected on J8 CC1/D-; kicad-happy NT-001 single-pin nets on J8 D+/D-/CC1/CC2",
+   "finding_counts": {
+    "kicad_erc": {
+     "before": 175,
+     "after": 164
+    },
+    "kicad_happy": {
+     "before": 101,
+     "after": 95
+    },
+    "hs": {
+     "before": 2,
+     "after": 2
+    }
+   }
+  },
+  {
+   "repo": "bitaxeorg/bitaxeGamma",
+   "stars": 440,
+   "license": "CERN-OHL-S-2.0",
+   "fix_commit": "a75fdfd7fdc1b42147d8948947cf16f4b2206589",
+   "buggy_parent": "517793b2227401259830a971085794d99d2a6bd7",
+   "schematic": "esp32.kicad_sch",
+   "message": "more routing. fixed SDA/SCL short",
+   "bug_class": "short",
+   "verdict": {
+    "kicad_erc": "missed",
+    "kicad_happy": "caught",
+    "hs": "missed"
+   },
+   "note": "kicad-happy LB-001: net SCL has labels SCL and SDA",
+   "finding_counts": {
+    "kicad_erc": {
+     "before": 226,
+     "after": 230
+    },
+    "kicad_happy": {
+     "before": 79,
+     "after": 79
+    },
+    "hs": {
+     "before": 2,
+     "after": 2
+    }
+   }
+  },
+  {
+   "repo": "bitaxeorg/bitaxeGamma",
+   "stars": 440,
+   "license": "CERN-OHL-S-2.0",
+   "fix_commit": "1a5a9041df45160444aeca990c4180ae83b29032",
+   "buggy_parent": "bdb0fc71a813a3b86264e8412373b8f63b0d21bb",
+   "schematic": "esp32.kicad_sch",
+   "message": "fixed TX/RX mixup",
+   "bug_class": "swapped_signals",
+   "verdict": {
+    "kicad_erc": "missed",
+    "kicad_happy": "missed",
+    "hs": "missed"
+   },
+   "note": "",
+   "finding_counts": {
+    "kicad_erc": {
+     "before": 95,
+     "after": 95
+    },
+    "kicad_happy": {
+     "before": 87,
+     "after": 87
+    },
+    "hs": {
+     "before": 3,
+     "after": 3
+    }
+   }
+  },
+  {
+   "repo": "bschwind/key-ripper",
+   "stars": 288,
+   "license": "Apache-2.0",
+   "fix_commit": "7b0be433561c4b08f0d143b6468d7dd146c27a9c",
+   "buggy_parent": "94c0edf5c2218364d5242e540d04119d0c4375a0",
+   "schematic": "pcb/key-ripper.kicad_sch",
+   "message": "Add a pullup resistor the the RUN pin",
+   "bug_class": "missing_pullup",
+   "verdict": {
+    "kicad_erc": "missed",
+    "kicad_happy": "missed",
+    "hs": "missed"
+   },
+   "note": "",
+   "finding_counts": {
+    "kicad_erc": {
+     "before": 445,
+     "after": 444
+    },
+    "kicad_happy": {
+     "before": 24,
+     "after": 24
+    },
+    "hs": {
+     "before": 0,
+     "after": 0
+    }
+   }
+  },
+  {
+   "repo": "LibreSolar/bms-c1",
+   "stars": 284,
+   "license": "NOASSERTION",
+   "fix_commit": "13485ee3315776861d500324442db5cf8893d2f3",
+   "buggy_parent": "24033fa86f239aaabd0f209f86e4758324fe9423",
+   "schematic": "kicad/power-part.kicad_sch",
+   "message": "Swap D and S of Q12",
+   "bug_class": "swapped_transistor_pins",
+   "verdict": {
+    "kicad_erc": "missed",
+    "kicad_happy": "missed",
+    "hs": "missed"
+   },
+   "note": "",
+   "finding_counts": {
+    "kicad_erc": {
+     "before": 104,
+     "after": 104
+    },
+    "kicad_happy": {
+     "before": 20,
+     "after": 20
+    },
+    "hs": {
+     "before": 6,
+     "after": 6
+    }
+   }
+  },
+  {
+   "repo": "amachronic/echoplayer",
+   "stars": 280,
+   "license": "CERN-OHL-S-2.0",
+   "fix_commit": "e14b09d176ed4ae50ebee3c8a1b28d569ed9379b",
+   "buggy_parent": "1f5e0d3807479b5f61620142f56374aea73be908",
+   "schematic": "r1-rev1.1/audio.kicad_sch",
+   "message": "Fix incorrect 3.5mm jack pinout",
+   "bug_class": "wrong_pinout",
+   "verdict": {
+    "kicad_erc": "possible",
+    "kicad_happy": "missed",
+    "hs": "missed"
+   },
+   "note": "ERC wire_dangling near the jack; not confirmed to be the pinout error",
+   "finding_counts": {
+    "kicad_erc": {
+     "before": 73,
+     "after": 73
+    },
+    "kicad_happy": {
+     "before": 102,
+     "after": 102
+    },
+    "hs": {
+     "before": 11,
+     "after": 11
+    }
+   }
+  },
+  {
+   "repo": "AzonInc/Doorman",
+   "stars": 258,
+   "license": "GPL-3.0",
+   "fix_commit": "95b240bc18cfddcf0055a2c8662dd8d23773f6da",
+   "buggy_parent": "c463df5eb75e7b3633ba6ac5d88db9e6ff52f2ba",
+   "schematic": "pcb/doorman.kicad_sch",
+   "message": "Prevent short circuit when using a terminal as power source",
+   "bug_class": "power_short",
+   "verdict": {
+    "kicad_erc": "missed",
+    "kicad_happy": "missed",
+    "hs": "missed"
+   },
+   "note": "",
+   "finding_counts": {
+    "kicad_erc": {
+     "before": 86,
+     "after": 88
+    },
+    "kicad_happy": {
+     "before": 41,
+     "after": 41
+    },
+    "hs": {
+     "before": 26,
+     "after": 26
+    }
+   }
+  },
+  {
+   "repo": "eddyem/stm32samples",
+   "stars": 209,
+   "license": "NONE",
+   "fix_commit": "30015fc56ec3ebb66cdb49c495d1e58adad4c70e",
+   "buggy_parent": "07353b6111cb9acf8b7bcfa9d41f1832d9794ac0",
+   "schematic": "F0:F030,F042,F072/CANbus4BTA/kicad/stm32.kicad_sch",
+   "message": "fixed bug with dc-dc polarity in CANbus4BTA",
+   "bug_class": "polarity",
+   "verdict": {
+    "kicad_erc": "missed",
+    "kicad_happy": "missed",
+    "hs": "missed"
+   },
+   "note": "",
+   "finding_counts": {
+    "kicad_erc": {
+     "before": 1078,
+     "after": 1078
+    },
+    "kicad_happy": {
+     "before": 107,
+     "after": 107
+    },
+    "hs": {
+     "before": 14,
+     "after": 14
+    }
+   }
+  },
+  {
+   "repo": "bitaxeorg/ultraHex",
+   "stars": 191,
+   "license": "CERN-OHL-S-2.0",
+   "fix_commit": "e1f5f9df12838989923a0870ae64b7d478213308",
+   "buggy_parent": "1fd460b92828304397633fb44fa7647b8866cf82",
+   "schematic": "bitaxeHex.kicad_sch",
+   "message": "fix OP-AMP power supply, connect to GND,+5V",
+   "bug_class": "opamp_supply",
+   "verdict": {
+    "kicad_erc": "caught",
+    "kicad_happy": "missed",
+    "hs": "missed"
+   },
+   "note": "ERC power_pin_not_driven on U15/U21 V+",
+   "finding_counts": {
+    "kicad_erc": {
+     "before": 497,
+     "after": 444
+    },
+    "kicad_happy": {
+     "before": 154,
+     "after": 158
+    },
+    "hs": {
+     "before": 29,
+     "after": 29
+    }
+   }
+  },
+  {
+   "repo": "bitaxeorg/ultraHex",
+   "stars": 191,
+   "license": "CERN-OHL-S-2.0",
+   "fix_commit": "0383e97d321204c91682facf98daae5b12419188",
+   "buggy_parent": "30ecbdffddefeeda2fd37585da01a5557c36549c",
+   "schematic": "bitaxeHex.kicad_sch",
+   "message": "fixed the floating gnd net issue. started placement",
+   "bug_class": "floating_ground",
+   "verdict": {
+    "kicad_erc": "missed",
+    "kicad_happy": "missed",
+    "hs": "missed"
+   },
+   "note": "",
+   "finding_counts": {
+    "kicad_erc": {
+     "before": 1593,
+     "after": 1412
+    },
+    "kicad_happy": {
+     "before": 127,
+     "after": 93
+    },
+    "hs": {
+     "before": 63,
+     "after": 41
+    }
+   }
+  },
+  {
+   "repo": "anyshake/explorer",
+   "stars": 101,
+   "license": "NOASSERTION",
+   "fix_commit": "3b5716dbca55e94d42f8e841ed3b16ff447e7558",
+   "buggy_parent": "b8cbedd9f33427c42c939ccc824bacc6a38e2b74",
+   "schematic": "hardware/sensors.kicad_sch",
+   "message": "fix: Fix pinout of MMBD1503A",
+   "bug_class": "wrong_pinout",
+   "verdict": {
+    "kicad_erc": "missed",
+    "kicad_happy": "missed",
+    "hs": "missed"
+   },
+   "note": "",
+   "finding_counts": {
+    "kicad_erc": {
+     "before": 222,
+     "after": 222
+    },
+    "kicad_happy": {
+     "before": 141,
+     "after": 141
+    },
+    "hs": {
+     "before": 8,
+     "after": 8
+    }
+   }
+  },
+  {
+   "repo": "Allegra42/ZEReader-KiCad",
+   "stars": 71,
+   "license": "CERN-OHL-S-2.0",
+   "fix_commit": "13fb744f9022173749d4321b0fdedc3afffe3662",
+   "buggy_parent": "b4670a6a746f894859719f20fe82390be55ea90e",
+   "schematic": "01_mcu.kicad_sch",
+   "message": "Added CC line pulldown resistors",
+   "bug_class": "missing_pulldown",
+   "verdict": {
+    "kicad_erc": "missed",
+    "kicad_happy": "missed",
+    "hs": "missed"
+   },
+   "note": "",
+   "finding_counts": {
+    "kicad_erc": {
+     "before": 39,
+     "after": 39
+    },
+    "kicad_happy": {
+     "before": 29,
+     "after": 29
+    },
+    "hs": {
+     "before": 17,
+     "after": 17
+    }
+   }
+  },
+  {
+   "repo": "btb/DiskII",
+   "stars": 71,
+   "license": "Apache-2.0",
+   "fix_commit": "e9cfe4fd5fd6835f551df074f75d248558bcec09",
+   "buggy_parent": "4f827a48faae4890c3ba386f170331b494838f7f",
+   "schematic": "DiskII.kicad_sch",
+   "message": "fix misrouted data lines to shift register",
+   "bug_class": "misrouted_data",
+   "verdict": {
+    "kicad_erc": "missed",
+    "kicad_happy": "missed",
+    "hs": "missed"
+   },
+   "note": "",
+   "finding_counts": {
+    "kicad_erc": {
+     "before": 80,
+     "after": 80
+    },
+    "kicad_happy": {
+     "before": 17,
+     "after": 17
+    },
+    "hs": {
+     "before": 27,
+     "after": 27
+    }
+   }
+  },
+  {
+   "repo": "DuPAL-PAL-DUmper/DuPAL_Board",
+   "stars": 57,
+   "license": "CC-BY-SA-4.0",
+   "fix_commit": "218f80b818fb6d9fd730289319c32854df563710",
+   "buggy_parent": "d793ee65c3aeebef6e3d14501bc548dcc05646ab",
+   "schematic": "board/DuPal_V3/DuPal_V3.kicad_sch",
+   "message": "Fix missing connection on a shifter",
+   "bug_class": "missing_connection",
+   "verdict": {
+    "kicad_erc": "caught",
+    "kicad_happy": "caught",
+    "hs": "caught"
+   },
+   "note": "ERC pin_not_connected U9 CE; kicad-happy NT-001 and PU-001 on U9 CE; HS erc-floating-pin on U9 CE",
+   "finding_counts": {
+    "kicad_erc": {
+     "before": 189,
+     "after": 187
+    },
+    "kicad_happy": {
+     "before": 67,
+     "after": 65
+    },
+    "hs": {
+     "before": 7,
+     "after": 6
+    }
+   }
+  },
+  {
+   "repo": "alvarop/debugotron",
+   "stars": 52,
+   "license": "BSD-3-Clause",
+   "fix_commit": "1d1d5d9499a104057f3a0733bd38b5f53a03c946",
+   "buggy_parent": "e72b385271d1f844c22af42c81592bcd8ac95e93",
+   "schematic": "hw/swd_over_c/swd_over_c.kicad_sch",
+   "message": "Somehow got the values for R4 and R5 swapped...",
+   "bug_class": "wrong_value",
+   "verdict": {
+    "kicad_erc": "missed",
+    "kicad_happy": "missed",
+    "hs": "missed"
+   },
+   "note": "",
+   "finding_counts": {
+    "kicad_erc": {
+     "before": 36,
+     "after": 36
+    },
+    "kicad_happy": {
+     "before": 17,
+     "after": 17
+    },
+    "hs": {
+     "before": 16,
+     "after": 16
+    }
+   }
+  }
+ ]
+}
