@@ -65,6 +65,16 @@ def test_a_p_channel_switch_with_its_drain_on_the_supply_is_flagged():
     assert rules(correct) == []
 
 
+def test_deliberate_drain_on_supply_circuits_are_not_flagged():
+    """Patterns from known-good open boards: PiUPS's common-source pair and Beepy's VBUS/battery load-sharing switch."""
+    q2 = ("Q2", "IRF7404", "Transistor_FET", "IRF7404", "P-Channel MOSFET")
+    pair = netlist([PMOS, q2], [("+5V", [("Q3", "3", "D", "passive")]), ("Net-(Q3-S)", [("Q3", "2", "S", "passive"), ("Q2", "2", "S", "passive")]),
+                                ("V_UPS", [("Q2", "3", "D", "passive")]), ("Net-(Q3-G)", [("Q3", "1", "G", "input"), ("Q2", "1", "G", "input")])])
+    assert rules(pair) == []
+    load_sharing = netlist([PMOS], [("+BATT", [("Q3", "3", "D", "passive")]), ("Net-(D1-K)", [("Q3", "2", "S", "passive")]), ("VBUS", [("Q3", "1", "G", "input")])])
+    assert rules(load_sharing) == []
+
+
 def test_usb_c_cc_pins_need_a_pulldown_even_when_unwired():
     usb = ("J1", "USB_C_Receptacle_USB2.0", "Connector", "USB_C_Receptacle_USB2.0", "USB 2.0-only Type-C Receptacle connector")
     pins = [("Connector", "USB_C_Receptacle_USB2.0", [("A5", "CC1", "bidirectional"), ("B5", "CC2", "bidirectional"), ("A1", "GND", "passive")])]

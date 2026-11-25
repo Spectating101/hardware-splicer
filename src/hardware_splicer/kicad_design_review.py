@@ -8,7 +8,8 @@ that KiCad's ERC and other checkers missed on real fix commits (examples/schemat
 * ``uart_tx_to_tx`` / ``uart_rx_to_rx``: one net joins the transmit pins (or the receive pins) of two different parts;
 * ``power_pin_unconnected``: a power-input pin with nothing else on its net;
 * ``i2c_no_pullup``: an I2C data or clock net with no resistor to a supply;
-* ``mosfet_source_drain``: a MOSFET whose drain, not its source, sits on the rail its type expects at the source;
+* ``mosfet_source_drain``: a MOSFET whose drain, not its source, sits on the rail its type expects at the source, unless it is
+  half of a common-source pair or a P-channel load-sharing switch with its gate on a supply;
 * ``usb_c_cc_no_pulldown``: a USB-C receptacle's CC pin with no resistor to ground.
 
 Each finding says what it rests on: KiCad's pin data plus a stated convention or standard. A finding is a reason to look,
@@ -230,10 +231,14 @@ def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[s
                     fn = next((n["function"] for n in nets[net] if n["ref"] == ref and n["pin"] == p), "")
                     if fn.upper() in ("D", "S", "G", "DRAIN", "SOURCE", "GATE"):
                         pins[fn.upper()[:1]] = net
-            d, s = pins.get("D"), pins.get("S")
+            d, s, g = pins.get("D"), pins.get("S"), pins.get("G")
             if d and s:
                 rail = SUPPLY if kind == "pmos" else GROUND
-                if rail.search(d) and not rail.search(s):
+                # Two deliberate circuits put the drain on the rail: a common-source pair (reverse blocking or ORing: another
+                # FET's source shares this source net) and a load-sharing power path (the gate sits on a supply such as VBUS).
+                paired = any(n["ref"] != ref and n["function"].upper() in ("S", "SOURCE") for n in nets.get(s, []))
+                power_path = kind == "pmos" and g is not None and SUPPLY.search(g)
+                if rail.search(d) and not rail.search(s) and not paired and not power_path:
                     where = "supply" if kind == "pmos" else "ground"
                     finding("warning", "mosfet_source_drain", f"{ref} ({comp['part']}) has its drain on the {where} net {d} and its source on {s}. "
                             f"A {'P' if kind == 'pmos' else 'N'}-channel switch normally has its source on the {where}; reversed, the body diode conducts and it cannot switch off.",
