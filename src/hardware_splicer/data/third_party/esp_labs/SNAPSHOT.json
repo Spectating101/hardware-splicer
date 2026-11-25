@@ -1,0 +1,10 @@
+{
+ "source": "https://github.com/agharsallah/esp-labs-web",
+ "commit": "8661f1b2d493423913e2571a4cc76fa282cf8c65",
+ "license": "MIT (see LICENSE in this folder)",
+ "counts": {
+  "lessons": 32
+ },
+ "board": "ESP32-S3-DevKitC-1 (N16R8), as the lessons state",
+ "note": "esp-labs' lesson data, unchanged. Its status field is esp-labs' own report, not something HS observed."
+}

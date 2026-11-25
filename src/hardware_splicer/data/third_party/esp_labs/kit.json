@@ -1,0 +1,442 @@
+{
+ "items": [
+  {
+   "id": "led",
+   "part": "led"
+  },
+  {
+   "id": "tft",
+   "part": "tft"
+  },
+  {
+   "id": "button",
+   "part": "button"
+  },
+  {
+   "id": "rc522",
+   "part": "reader"
+  },
+  {
+   "id": "tags",
+   "part": "cards"
+  },
+  {
+   "id": "wifi",
+   "part": "router"
+  },
+  {
+   "id": "phone",
+   "part": "phone-ble"
+  },
+  {
+   "id": "ky037",
+   "part": "sensor"
+  },
+  {
+   "id": "inmp441",
+   "part": "mic"
+  },
+  {
+   "id": "amp",
+   "part": "speaker"
+  },
+  {
+   "id": "keyboard",
+   "part": "keyboard"
+  }
+ ],
+ "lesson_kit": {
+  "00": {
+   "need": []
+  },
+  "01": {
+   "need": []
+  },
+  "02": {
+   "need": [
+    [
+     "led"
+    ]
+   ]
+  },
+  "03": {
+   "need": [
+    [
+     "tft"
+    ]
+   ]
+  },
+  "03b": {
+   "need": [
+    [
+     "tft"
+    ]
+   ],
+   "optional": [
+    "button"
+   ]
+  },
+  "B1": {
+   "need": [
+    [
+     "tft"
+    ],
+    [
+     "phone"
+    ]
+   ],
+   "optional": [
+    "button"
+   ]
+  },
+  "B2": {
+   "need": [
+    [
+     "tft"
+    ],
+    [
+     "phone"
+    ]
+   ],
+   "optional": [
+    "button"
+   ]
+  },
+  "B3": {
+   "need": [
+    [
+     "tft"
+    ],
+    [
+     "phone"
+    ]
+   ],
+   "optional": [
+    "button"
+   ]
+  },
+  "B4": {
+   "need": [
+    [
+     "tft"
+    ],
+    [
+     "phone"
+    ]
+   ],
+   "optional": [
+    "button"
+   ]
+  },
+  "B5": {
+   "need": [
+    [
+     "tft"
+    ],
+    [
+     "phone"
+    ]
+   ],
+   "optional": [
+    "button"
+   ]
+  },
+  "B6": {
+   "need": [
+    [
+     "tft"
+    ],
+    [
+     "phone"
+    ]
+   ],
+   "optional": [
+    "button"
+   ]
+  },
+  "B7": {
+   "need": [
+    [
+     "tft"
+    ]
+   ],
+   "optional": [
+    "button",
+    "phone"
+   ]
+  },
+  "B8": {
+   "need": [
+    [
+     "tft"
+    ],
+    [
+     "keyboard"
+    ]
+   ],
+   "optional": [
+    "button"
+   ]
+  },
+  "R1": {
+   "need": [
+    [
+     "tft"
+    ],
+    [
+     "rc522"
+    ]
+   ],
+   "optional": [
+    "tags"
+   ]
+  },
+  "R2": {
+   "need": [
+    [
+     "tft"
+    ],
+    [
+     "rc522"
+    ],
+    [
+     "tags"
+    ]
+   ]
+  },
+  "R3": {
+   "need": [
+    [
+     "tft"
+    ],
+    [
+     "rc522"
+    ],
+    [
+     "tags"
+    ]
+   ]
+  },
+  "R4": {
+   "need": [
+    [
+     "tft"
+    ],
+    [
+     "rc522"
+    ],
+    [
+     "tags"
+    ]
+   ]
+  },
+  "R5": {
+   "need": [
+    [
+     "tft"
+    ],
+    [
+     "rc522"
+    ],
+    [
+     "tags"
+    ]
+   ]
+  },
+  "R6": {
+   "need": [
+    [
+     "tft"
+    ],
+    [
+     "rc522"
+    ],
+    [
+     "tags"
+    ]
+   ]
+  },
+  "R7": {
+   "need": [
+    [
+     "tft"
+    ],
+    [
+     "rc522"
+    ],
+    [
+     "tags"
+    ],
+    [
+     "wifi"
+    ]
+   ]
+  },
+  "R8": {
+   "need": [
+    [
+     "tft"
+    ],
+    [
+     "rc522"
+    ],
+    [
+     "tags"
+    ],
+    [
+     "wifi"
+    ]
+   ]
+  },
+  "S1": {
+   "need": [
+    [
+     "tft"
+    ],
+    [
+     "ky037",
+     "inmp441"
+    ]
+   ]
+  },
+  "S2": {
+   "need": [
+    [
+     "tft"
+    ],
+    [
+     "ky037",
+     "inmp441"
+    ]
+   ],
+   "optional": [
+    "amp",
+    "led"
+   ]
+  },
+  "S3": {
+   "need": [
+    [
+     "tft"
+    ],
+    [
+     "ky037",
+     "inmp441"
+    ]
+   ],
+   "optional": [
+    "amp",
+    "led"
+   ]
+  },
+  "S4": {
+   "need": [
+    [
+     "tft"
+    ],
+    [
+     "ky037",
+     "inmp441"
+    ]
+   ],
+   "optional": [
+    "amp",
+    "wifi"
+   ]
+  },
+  "S5": {
+   "need": [
+    [
+     "tft"
+    ],
+    [
+     "ky037",
+     "inmp441"
+    ]
+   ],
+   "optional": [
+    "amp"
+   ]
+  },
+  "S6": {
+   "need": [
+    [
+     "tft"
+    ],
+    [
+     "ky037",
+     "inmp441"
+    ]
+   ],
+   "optional": [
+    "amp",
+    "led"
+   ]
+  },
+  "S7": {
+   "need": [
+    [
+     "tft"
+    ],
+    [
+     "amp"
+    ]
+   ]
+  },
+  "S8": {
+   "need": [
+    [
+     "tft"
+    ],
+    [
+     "inmp441"
+    ],
+    [
+     "amp"
+    ]
+   ]
+  },
+  "W1": {
+   "need": [
+    [
+     "tft"
+    ],
+    [
+     "wifi"
+    ]
+   ],
+   "optional": [
+    "button"
+   ]
+  },
+  "W2": {
+   "need": [
+    [
+     "tft"
+    ],
+    [
+     "wifi"
+    ],
+    [
+     "phone"
+    ]
+   ],
+   "optional": [
+    "button"
+   ]
+  },
+  "W3": {
+   "need": [
+    [
+     "tft"
+    ],
+    [
+     "wifi"
+    ]
+   ],
+   "optional": [
+    "button"
+   ]
+  }
+ }
+}
