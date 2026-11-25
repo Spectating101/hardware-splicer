@@ -227,3 +227,16 @@ def test_alternative_bus_transceivers_sharing_rxd_are_not_a_uart_error():
     assert rules(board) == []
     mcus = [("U1", "ESP32-S3", "RF_Module", "ESP32-S3-MINI-1", "MCU"), ("U2", "RP2040", "MCU_RaspberryPi", "RP2040", "MCU")]
     assert rules(netlist(mcus, [("TX", [("U1", "37", "TXD0", "bidirectional"), ("U2", "2", "UART0_TX", "bidirectional")])])) == ["uart_tx_to_tx"]
+
+
+def test_reverse_polarity_protection_mosfets_are_not_flagged():
+    """Miceuz/rs485-moist-sensor: Q1's drain takes VCC from the connector, its source feeds the LDO, its gate sits on GND."""
+    guard = netlist([PMOS], [("VCC", [("Q3", "3", "D", "passive")]), ("Net-(Q1-S)", [("Q3", "2", "S", "passive")]), ("GND", [("Q3", "1", "G", "input")])])
+    assert rules(guard) == []
+    via_resistor = netlist([PMOS, ("R1", "100k", "Device", "R", "Resistor")],
+                           [("VCC", [("Q3", "3", "D", "passive")]), ("Net-(Q1-S)", [("Q3", "2", "S", "passive")]),
+                            ("Net-(Q3-G)", [("Q3", "1", "G", "input"), ("R1", "1", "", "passive")]), ("GND", [("R1", "2", "", "passive")])])
+    assert rules(via_resistor) == []
+    nmos = ("Q4", "AO3400A", "Transistor_FET", "AO3400A", "N-Channel MOSFET")
+    low_side_guard = netlist([nmos], [("GND", [("Q4", "3", "D", "passive")]), ("BAT-", [("Q4", "2", "S", "passive")]), ("+BATT", [("Q4", "1", "G", "input")])])
+    assert rules(low_side_guard) == []

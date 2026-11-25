@@ -287,7 +287,11 @@ def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[s
                 # FET's source shares this source net) and a load-sharing power path (the gate sits on a supply such as VBUS).
                 paired = any(n["ref"] != ref and n["function"].upper() in ("S", "SOURCE") for n in nets.get(s, []))
                 power_path = kind == "pmos" and g is not None and SUPPLY.search(g)
-                if rail.search(d) and not rail.search(s) and not paired and not power_path:
+                # Reverse-polarity protection runs the body diode on purpose: a P-channel with its gate held at ground, or an
+                # N-channel in the return with its gate held at a supply (rs485-moist-sensor's Q1).
+                held = {"pmos": GROUND, "nmos": SUPPLY}[kind]
+                polarity_guard = g is not None and (held.search(g) or resistor_to(g, held))
+                if rail.search(d) and not rail.search(s) and not paired and not power_path and not polarity_guard:
                     where = "supply" if kind == "pmos" else "ground"
                     finding("warning", "mosfet_source_drain", f"{ref} ({comp['part']}) has its drain on the {where} net {d} and its source on {s}. "
                             f"A {'P' if kind == 'pmos' else 'N'}-channel switch normally has its source on the {where}; reversed, the body diode conducts and it cannot switch off.",
