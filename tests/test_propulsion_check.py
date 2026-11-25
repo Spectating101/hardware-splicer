@@ -119,7 +119,10 @@ def test_motor_rating_comes_from_the_table_when_the_spec_has_none():
 
     assert "motor_over_rating" in rules(check_propulsion(F450, SUNNYSKY))
     assert "motor_over_rating" not in rules(check_propulsion(dict(F450, prop="APC1038 3S"), SUNNYSKY))
-    assert "motor_over_rating" not in rules(check_propulsion(dict(F450, motor_max_current_a=16), SUNNYSKY))
+    # A higher rating typed into the spec does not loosen the maker's: the error stays and the disagreement is reported.
+    raised = rules(check_propulsion(dict(F450, motor_max_current_a=18), SUNNYSKY))
+    assert {"motor_over_rating", "motor_rating_above_maker"} <= raised
+    assert "motor_over_rating" in rules(check_propulsion(dict(F450, prop="APC1038 3S", motor_max_current_a=14), SUNNYSKY))
 
 
 def test_maker_table_rows_are_consistent():

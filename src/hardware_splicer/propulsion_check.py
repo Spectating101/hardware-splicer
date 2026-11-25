@@ -172,8 +172,12 @@ def check_propulsion(spec: Any, table: Any = None) -> dict[str, Any]:
     c_burst = _num(battery["c_burst"], "battery.c_burst") if battery.get("c_burst") is not None else None
     esc_a = _num(spec.get("esc_continuous_a"), "esc_continuous_a")
     motor_a = _num(spec["motor_max_current_a"], "motor_max_current_a") if spec.get("motor_max_current_a") is not None else None
-    if motor_a is None and isinstance(table, dict) and table.get("motor_max_current_a") is not None:
-        motor_a = _num(table["motor_max_current_a"], "thrust_table.motor_max_current_a")  # the maker's rating, from the table's source
+    # The maker's rating, carried by the table from its source. A spec may tighten it but not loosen it: a higher figure typed
+    # into the spec would otherwise silence the over-rating check.
+    maker_a = _num(table["motor_max_current_a"], "thrust_table.motor_max_current_a") if isinstance(table, dict) and table.get("motor_max_current_a") is not None else None
+    rating_raised = motor_a is not None and maker_a is not None and motor_a > maker_a
+    if maker_a is not None:
+        motor_a = maker_a if motor_a is None else min(motor_a, maker_a)
 
     assumptions: dict[str, Any] = {}
     v_cell = _value(spec, "nominal_cell_v", assumptions)
@@ -266,6 +270,9 @@ def check_propulsion(spec: Any, table: Any = None) -> dict[str, Any]:
         finding("error", "thrust_to_weight_low", f"Thrust-to-weight {effective_tw:.2f} is under {min_tw}.")
     if esc_a / full["current_a"] < esc_margin_min:
         finding("error", "esc_undersized", f"The ESC's {esc_a:g} A continuous is under {esc_margin_min}x the motor's {full['current_a']:g} A at full throttle.")
+    if rating_raised:
+        finding("warning", "motor_rating_above_maker", f"The spec rates the motor at {spec['motor_max_current_a']:g} A but the table's source rates it at "
+                f"{maker_a:g} A; the check uses the maker's {maker_a:g} A.")
     if motor_a is not None and full["current_a"] > motor_a:
         finding("error", "motor_over_rating", f"The table reaches {full['current_a']:g} A per motor, above the motor's {motor_a:g} A rating.")
 
