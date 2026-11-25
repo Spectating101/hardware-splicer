@@ -160,3 +160,9 @@ The full record is [`examples/head_to_head/agent_tools_20261126.json`](../exampl
 - read briefs as well as it checks them;
 - add supply-current, runtime and printability checks;
 - fix the part-library errors this run exposed.
+
+**Follow-up the same day.**
+- **The "HS from the brief" column above is HS's offline fallback picker.** Its normal path asks Qwen, and every call failed. One cause was an HS bug, now fixed: HS stopped at the first missing model name instead of trying the next. The other is the account itself: it has no usable model and its free quota is exhausted, which needs the owner.
+- **The fallback picker now gets 5/5 on these briefs** (was 2/5) and 8/8 held out (was 4/8).
+- **HS now fails E2 and E3 with cited current arithmetic** against a 500 mA USB port.
+- **For E5, `hardware_splicer.battery_runtime` estimates 196–368 days.** That spans the self-discharge range up to the no-self-discharge ceiling, from datasheet figures.

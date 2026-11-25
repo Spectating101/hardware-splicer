@@ -89,5 +89,20 @@
   "Given the wiring, HS's checks catch the logic-level and servo-supply traps but not supply current, bare-chip pull-ups or runtime.",
   "On geometry no single tool covers the set: Replicator alone checks tipping, text-to-cad alone checks printable wall thickness, HS and text-to-cad catch clashes, HS alone sweeps joint limits.",
   "HS library errors found: WS2812B strip 5V typed power_out, no strip current, SG90 stall understated."
- ]
+ ],
+ "follow_up_20261126": {
+  "model_path": "HS's normal brief reader sends the brief to Qwen. Every call failed: the first model name (qwen3.5-flash) is not on DashScope intl and HS stopped instead of trying the next (fixed). The account then answers 'Model not exist' for every candidate and 'The free quota has been exhausted' for qwen-turbo, so the model path needs the owner's payment details or another provider. The 'HS from the brief' column above is the offline fallback picker.",
+  "offline_picker_after": {
+   "head_to_head_briefs": "5/5 (was 2/5)",
+   "held_out_briefs": "8/8 (was 4/8); h1-h5 are Formwright's published examples, h6-h8 were written by HS's operator",
+   "changes": "LED strip, LoRa, battery, RTC and servo-arm hints; an LED no longer adds an OLED; named part numbers with counts"
+  },
+  "supply_current": "E2 and E3 now fail HS's check with cited arithmetic: 60 x 60 mA = 3600 mA and 4 x 500 mA = 2000 mA on a 500 mA USB port.",
+  "runtime": "E5: hardware_splicer.battery_runtime gives 327-368 days ceiling, 196-239 days with self-discharge, for 0.5 s at 120 mA plus 3 s at 31 mA every 10 minutes and 10 uA asleep (chip figure; a dev board sleeps higher).",
+  "still_open": [
+   "'no breakout boards' is not understood by the offline picker",
+   "no discrete LED part in the library",
+   "no printable-wall or tip-over check in HS"
+  ]
+ }
 }
