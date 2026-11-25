@@ -1,0 +1,209 @@
+{
+ "schema": "hardware_splicer.capability_trial.v1",
+ "captured": "2026-11-26",
+ "question": "How do HS's designs for a FieldDeck handheld, a camera rover, a small drone and a desktop arm compare with published products and open designs, in function and in design quality?",
+ "method": "Reference figures are quoted from each maker's page or repository on 2026-11-26 (URL per figure); 'not stated' means the page gave none. HS's side is HS's own existing design or a design HS produced today. Design quality uses HS's own checks; references are judged on published facts only.",
+ "products": {
+  "fielddeck": {
+   "hs_design": {
+    "source": "projects/cyberdeck-real-trial-20261020/digital_v1 (registered digital case fielddeck-7)",
+    "compute": "Raspberry Pi 4B 2 GB",
+    "display": "Raspberry Pi Touch Display 2, 7 in, 720 x 1280",
+    "battery": "Anker A1259 power bank 10000 mAh (removable)",
+    "runtime_h": 2.78,
+    "runtime_basis": "conservative work scenario, computed",
+    "case_mm": [
+     310,
+     285,
+     64
+    ],
+    "parts_cost_usd": 336.73,
+    "keyboard": "Adafruit 1736 mini chiclet USB",
+    "cooling": "Noctua 40 mm fan",
+    "custom_pcb": false,
+    "checks": "runtime, supply margin, USB current, print bed fit, display-post bending all pass its own limits; scene_fit: 0 overlaps, designed 0.3 mm seams, keyboard held by unmodelled pads",
+    "not_done": "no thermal or drop validation; nothing built"
+   },
+   "references": {
+    "MNT Pocket Reform": {
+     "url": "https://shop.mntre.com/products/mnt-pocket-reform",
+     "display": "7\" 1920 x 1200",
+     "compute": "RK3588 (4x A76 2.4 GHz + 4x A55) or QCS6490",
+     "battery": "2x Li-Ion cells (8000 mAh total)",
+     "runtime": "approx. 4 hours",
+     "weight_g": 1100,
+     "dimensions_cm": [
+      20,
+      12.6,
+      4.5
+     ],
+     "price": "from EUR 1,099",
+     "open": "fully open source hardware (schematics and design files public)"
+    },
+    "ClockworkPi uConsole": {
+     "url": "https://www.clockworkpi.com/uconsole",
+     "display": "5.0\" 1280 x 720",
+     "compute": "swappable cores incl. RPi CM4 4 GB",
+     "battery": "18650 cells (count and runtime not stated)",
+     "weight": "not stated",
+     "open": "GPL v3 (schematics, firmware, 3D files)"
+    },
+    "azlan-works/Argo (CM5 carrier)": {
+     "url": "https://github.com/azlan-works/Argo",
+     "power": "BQ25895 charger with power path, TPS61022 5 V boost up to 3 A",
+     "open": "CERN-OHL-S-2.0 label; README forbids commercial reproduction without agreement",
+     "hs_review": "0 errors, 0 warnings (examples/reference_designs)"
+    }
+   },
+   "comparison": [
+    "Footprint: 310 x 285 mm (883 cm2) against Pocket Reform's 200 x 126 mm (252 cm2): 3.5x the area for the same screen size, 64 vs 45 mm thick.",
+    "Runtime: 2.8 h computed against Pocket Reform's stated ~4 h.",
+    "Compute and screen: Pi 4B 2 GB and 720p against RK3588 (16 GB option) and 1920 x 1200.",
+    "Cost: about US$337 in parts against EUR 1,099+ assembled; every part off the shelf and replaceable, no custom PCB.",
+    "Open designs in this class (Argo, PiUPS, Beepy) use a charger with power path and a boost converter; HS buys that function as a power bank, simpler and larger."
+   ],
+   "verdict": "A working, checked digital design of a bulky budget cyberdeck. It is not competitive with Pocket Reform in size, runtime or screen; it wins on cost and repairability."
+  },
+  "drone": {
+   "hs_design": {
+    "source": "examples/drone_proving_ground (HS-3G-B)",
+    "class": "3-inch GPS quad, carbon frame",
+    "auw_g": 221.99,
+    "parts": "SpeedyBee F405 Mini stack, 4x F1404 3800KV, HQ T3x3x3, M10Q-5883 GPS, 4S 650 mAh",
+    "hover_min": "7.1 (extrapolated; 10.4 upper bound)",
+    "thrust_to_weight": "about 5:1 from the maker's thrust table",
+    "payload_allowance_g": 13.0,
+    "parts_cost_usd": 354.07,
+    "checks": "mass with density sensitivity, T/W, hover current, battery C-rating, ESC margin, arm stiffness vs rotor band, PyBullet hover/gust/motor-failure scenarios; scene_fit: no real clashes (13 overlaps are stand-in grommets and strap)",
+    "not_done": "nothing built or thrust-stand tested; flight time is an extrapolation"
+   },
+   "references": {
+    "DJI Mini 4 Pro": {
+     "url": "https://www.dji.com/mini-4-pro/specs",
+     "weight": "under 249 g",
+     "flight_time_min": 34,
+     "max_speed_m_s": 16,
+     "gps": "GPS + Galileo + BeiDou",
+     "video": "4K, O4 link, 20 km FCC",
+     "open": "not stated (closed)"
+    },
+    "Bitcraze Crazyflie 2.1 Brushless": {
+     "url": "https://www.bitcraze.io/products/crazyflie-2-1-brushless/",
+     "weight_g": 34,
+     "flight_time_min": 10,
+     "open": "open source"
+    },
+    "Holybro X500 v2 PX4 kit (from HS's own cited survey)": {
+     "take_off_g": 610,
+     "flight_time_min": 18,
+     "price_usd": 609.0
+    }
+   },
+   "comparison": [
+    "Against DJI Mini 4 Pro in the same 250 g class: 7-10 min against 34 min, no camera gimbal or long-range link, but an open stack with a 5:1 thrust margin a camera drone does not have.",
+    "Its real peer class is 3-inch GPS FPV quads; their maker pages could not be read today (Flywoo 403, BetaFPV 429), so that comparison is still open."
+   ],
+   "verdict": "The most complete HS design (CAD, fabrication files, cited sizing, simulation). Functionally an FPV-class quad, far from a camera drone's endurance; it needs a thrust-stand and a flight to stand behind its numbers."
+  },
+  "robotic_arm": {
+   "hs_design": {
+    "source": "robot_arm_design with DeepSeek on the benchmark's blind requirements (380 mm, 0.5 kg, safety factor 1.5)",
+    "joints": "6 revolute: base yaw, shoulder, elbow, wrist pitch, wrist roll, tool roll; links 80/150/150/60/40/20 mm (500 mm chain)",
+    "actuators": "generic inventory entries (4.0 / 2.5 / 1.0 Nm), not named servos",
+    "checks": "reach upper bound pass; payload-only torque with 1.5x factor pass at every joint (wrist pitch margin 0.12 Nm); link self-weight, workspace, joint limits unresolved",
+    "second_request": "550 mm / 0.75 kg: rejected by HS's schema because the model gave a wrist joint a 0 mm link",
+    "motion_check_on_a_real_arm": "motion_sweep on SO-101: elbow clear to 84 of its 96.8 degree limit"
+   },
+   "references": {
+    "SO-101": {
+     "url": "https://github.com/TheRobotStudio/SO-ARM100",
+     "dof": "5 + gripper (6 STS3215)",
+     "servo": "STS3215, 16.5 kg.cm stall at 6 V (7.4 V version)",
+     "parts_cost_usd": "121.94 per follower",
+     "open": "Apache-2.0"
+    },
+    "ROBOTIS OpenMANIPULATOR-X": {
+     "url": "https://emanual.robotis.com/docs/en/platform/openmanipulator_x/specification/",
+     "dof": "4 + 1 gripper",
+     "reach_mm": 380,
+     "payload_g": 500,
+     "repeatability_mm": "< 0.2",
+     "weight_kg": 0.7,
+     "note": "figures from a model-extracted page summary; verify on the page"
+    },
+    "PAROL6": {
+     "url": "https://github.com/PCrnjak/PAROL6-Desktop-robot-arm",
+     "axes": 6,
+     "reach_mm": 408,
+     "payload_kg": "0.5 to 1",
+     "repeatability_mm": 0.1,
+     "weight_kg": 5.5,
+     "open": "CERN-OHL-S-2.0 hardware, GPL-3.0 firmware"
+    },
+    "Seeed reBot DevArm": {
+     "url": "https://github.com/Seeed-Projects/reBot-DevArm",
+     "dof": "6 + gripper",
+     "reach_mm": "754-767",
+     "payload_kg": "1.5-2.5",
+     "open": "CERN-OHL-W-2.0 / Apache-2.0"
+    },
+    "UFACTORY Lite 6": {
+     "url": "https://www.ufactory.cc/lite-6-collaborative-robot/",
+     "dof": 6,
+     "reach_mm": 440,
+     "payload_g": 600,
+     "repeatability_mm": "+/-0.5",
+     "weight_kg": 8,
+     "price": "from US$2,999"
+    }
+   },
+   "comparison": [
+    "Every reference names its actuators and publishes reach, payload and repeatability from a built arm; HS's design names generic torque classes and cannot claim repeatability.",
+    "HS's torque check ignores link and servo weight; for SO-101-class arms that weight (about 0.63 kg modelled in its URDF) is comparable to the 0.5 kg payload, so the real margin is smaller than reported (HS says so: LINK_SELF_WEIGHT_TORQUE_UNRESOLVED).",
+    "HS's strongest arm capability today is checking an existing arm (the SO-101 joint sweep), not designing one."
+   ],
+   "verdict": "Proposal stage: the shape is reasonable, the checks are honest about what they skip, but it is not buildable until it picks real actuators and counts self-weight."
+  },
+  "cctv_rover": {
+   "hs_design": {
+    "source": "robot_reference_e2e on its indoor inspection rover case (14 selected references from 51)",
+    "what_it_produced": "source graph (47 claims, 0 conflicts), 2-wheel differential topology with lidar, manufacturing cross-checks (pin/firmware identity), 15-step operator guide",
+    "engineering_numbers": "runtime 102 min from a declared 96 Wh battery and 45 W load; 4 A supply margin from declared 15 A / 11 A",
+    "status": "blocked by design (9 blockers): parts and dimensions are declared inputs, not chosen by HS",
+    "camera": "none: the case is a lidar rover, so the CCTV brief has not been run"
+   },
+   "references": {
+    "NVIDIA JetBot": {
+     "url": "https://github.com/NVIDIA-AI-IOT/jetbot",
+     "compute": "Jetson Nano",
+     "price": "less than $150 add-on to Jetson Nano",
+     "open": "MIT"
+    },
+    "OpenBot": {
+     "url": "https://github.com/isl-org/OpenBot",
+     "compute": "Android smartphone",
+     "price": "about $50 vehicle",
+     "open": "MIT"
+    },
+    "linorobot2": {
+     "url": "https://github.com/linorobot/linorobot2",
+     "drive": "2WD, 4WD or mecanum",
+     "open": "Apache-2.0"
+    },
+    "Waveshare UGV Rover": {
+     "note": "spec page refused automated reading (403)"
+    }
+   },
+   "comparison": [
+    "The open rovers publish architectures and prices but almost no runtime, speed or camera figures, so the functional comparison has little to compare against yet.",
+    "HS's rover planner is strong on traceability and weak on design: it checks declared numbers rather than choosing motors, battery and camera."
+   ],
+   "verdict": "Least ready of the four for a CCTV rover: no camera, video-streaming or drive sizing yet."
+  }
+ },
+ "overall": [
+  "Drone and FieldDeck: complete, checked digital designs, functionally behind the best products (endurance, size) and ahead on openness and cost.",
+  "Arm and rover: HS plans and checks but does not yet choose real actuators, motors, cameras or batteries, so their designs are not buildable.",
+  "No HS design in this trial has been built or measured."
+ ]
+}
