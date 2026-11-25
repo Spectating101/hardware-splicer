@@ -205,5 +205,73 @@
   "Drone and FieldDeck: complete, checked digital designs, functionally behind the best products (endurance, size) and ahead on openness and cost.",
   "Arm and rover: HS plans and checks but does not yet choose real actuators, motors, cameras or batteries, so their designs are not buildable.",
   "No HS design in this trial has been built or measured."
- ]
+ ],
+ "follow_up_datasets_20261126": {
+  "procured": {
+   "committed": [
+    "src/hardware_splicer/data/actuators/cited_servos_20261126.json: Dynamixel XL330/XL430/XM430/XM540 (checked word for word against each ROBOTIS e-manual page), STS3215 (from the SO-ARM100 README; Feetech and Waveshare pages unreadable), MG996R",
+    "src/hardware_splicer/data/drive/pololu_gearmotors_20261126.json: Pololu micro metal HP 6V, 25D HP/MP 12V, 37D 12V, every ratio, with the maker's torque limits and the 25% of stall current rule (spot-checked against the raw pages)",
+    "src/hardware_splicer/data/actuators/joint_actuator_comparison/: 87 families of robot joint actuators, CC BY 4.0, copied unchanged with attribution"
+   ],
+   "local_only": [
+    "UIUC Propeller Database zip (90.9 MB, 264 static files): its pages state no licence, so HS reads it from where the user downloads it"
+   ],
+   "not_obtained": [
+    "Feetech's own STS3215 page and Waveshare's ST3215 wiki (403)",
+    "ESP32-CAM camera specs (AI-Thinker page had none)",
+    "getfpv.com (403)"
+   ]
+  },
+  "new_tools": [
+   "arm_actuator_sizing (static stretched-arm torque with actuator weight; pick from cited servos or joint actuators)",
+   "drive_sizing (rover gearmotor ratio against Pololu limits)",
+   "prop_static (hover rpm and shaft power from UIUC data)",
+   "robot_arm_design now accepts a 0 mm wrist link"
+  ],
+  "results": {
+   "robotic_arm": {
+    "hs_design_with_real_servos": "HS's 500 mm / 0.5 kg / SF 1.5 design passed the old payload-only check. With cited Dynamixels and their weight counted (50% of stall, assumed), no Dynamixel X holds the base: it needs 5.66 N m, 1.32 of it from the actuators above it. Shoulder to wrist pick XM540, XM540, XM430, XL430, XL430.",
+    "with_joint_actuators": "From the CC BY dataset at 24 V, by rated torque: feasible, 1.43 kg of actuators (base and shoulder 10.5 N m rated units).",
+    "lighter_payload": "At 0.2 kg the same arm is feasible with Dynamixels alone: XM540, XM540, XM430, XL430 x3, 0.58 kg of actuators.",
+    "calibration": "ROBOTIS rates OpenMANIPULATOR-X (XM430 joints, 380 mm) at 500 g. Stretched, that needs 53% of an XM430's stall torque at the shoulder (58% with its URDF link masses) at SF 1.0. HS's rule (SF 1.5 and 50% of stall) is about 1.6-1.7x stricter than the maker's own rating.",
+    "verdict_change": "The arm designer's earlier 'pass' was optimistic; with real parts it now names actuators, mass and where the design breaks."
+   },
+   "cctv_rover": {
+    "drive": "2.5 kg, 80 mm wheels, 2WD, 0.6 m/s, 15 degree slope (rolling resistance 0.03 and 0.3 m/s2 assumed): 17 of 38 Pololu options pass. Lowest current: 25D MP 12V 47:1, 0.68 m/s at cruise, 0.16 A per motor cruising, 0.51 A on the slope.",
+    "camera": "Raspberry Pi Camera Module 3: Sony IMX708 12 MP, 1080p50, 75 degree diagonal (120 degree Wide), NoIR variants without IR filter, from US$25 (raspberrypi.com product page).",
+    "still_missing": "No end-to-end CCTV rover run yet (compute, streaming, battery runtime, chassis)."
+   },
+   "drone": {
+    "prop_check": "UIUC GWS 3x2 (2-blade, 3 in) at HS-3G's 55.5 g hover thrust: 18,554 rpm, 6.35 W shaft, figure of merit 0.60. HS-3G's 15.26 W per motor hover estimate would mean 42% motor and ESC efficiency on that prop; its 10.06 W upper bound would mean 63%. Neither is ruled out. Lossless motors would cap hover at about 15.7 min, so the 7.1-10.4 min range is physically possible.",
+    "three_inch_class_peers": {
+     "GEPRC Cinelog30 V3 O4 Pro": {
+      "url": "https://geprc.com/product/geprc-cinelog30-v3-o4-pro-quadcopter/",
+      "weight": "187 +/- 2 g (TBS Nano RX version)",
+      "motor": "SPEEDX2 1404 3850KV",
+      "battery": "LiHV 4S 660-720 mAh",
+      "flight_time": "8'10\" (slow cruising)",
+      "gps": "not stated",
+      "price": "US$399.99-434.99"
+     },
+     "GEPRC DarkStar25 O4 Pro (2.5 in)": {
+      "url": "https://geprc.com/product/geprc-darkstar25-o4-pro-cinewhoop-quadcopter/",
+      "weight": "180 g (ELRS)",
+      "motor": "SPEEDX2 1404 4600KV",
+      "battery": "LiPo 4S 700-850 mAh",
+      "flight_time": "6 min 20 s - 8 min 30 s",
+      "gps": "optional GEP-M10 Nano",
+      "price": "US$419.99-459.99"
+     },
+     "Happymodel Crux35": {
+      "url": "https://www.happymodel.cn/index.php/2021/08/30/happymodel-crux35-crux35-digital-hd-3-5-inch-4s-micro-freestyle-fpv-racing-drone/",
+      "weight": "87 g analog / 108 g HD",
+      "motor": "EX1404 3500KV",
+      "flight_time": "9-15 min on 4S 750 mAh",
+      "gps": "not stated"
+     }
+    },
+    "verdict_change": "Against its real class, HS-3G is on par: same 1404 motors and 4S packs, 7.1 min against 6-8.5 min for the GEPRC quads, heavier (222 g) because it carries GPS, and cheaper than the US$400+ ready-to-fly versions."
+   }
+  }
+ }
 }
