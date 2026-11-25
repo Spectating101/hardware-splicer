@@ -1,818 +1,1344 @@
 {
- "schema_version": "hardware_splicer.schematic_checker_benchmark.v1",
- "run_at": "2026-11-25",
- "method": "Real schematic fix commits found in public KiCad projects (selected from the project list of aklofas/kicad-happy-testharness, only names used) and judged by hand. Each checker ran on the parent (buggy) and the fix; a bug counts as caught only when a finding about that bug is present before and gone after. KiCad ERC from kicad-cli 9.0.2; kicad-happy at a pinned commit with --only-deterministic, network-isolated; HS via kicad-cli netlist export into hardware_splicer.netlist.import_kicad and netlist.erc.",
+ "schema": "hardware_splicer.fix_commit_benchmark.v2",
+ "captured": "2026-11-25",
+ "method": "Fix commits found in public KiCad repositories; every checker runs on the project's root sheet at the fix's parent and at the fix (scripts/schematic_checker_benchmark.py). A checker catches a bug when a finding about it is present before and gone after, judged by hand. kicad-happy (MIT, deterministic mode) runs network-isolated; KiCad ERC is kicad-cli 9.0.2, or 10.0.8 for KiCad 10 files.",
  "tools": {
-  "kicad_cli": "9.0.2",
+  "kicad_cli": "9.0.2, and 10.0.8 (kicad/kicad:10.0.8 container) for KiCad 10 files",
   "kicad_happy_commit": "6b9767e19979cdef91631573753b1547efdbeab9",
-  "hs_review": "hardware_splicer.kicad_design_review (general KiCad netlist review, added after the first run)"
+  "hs_review_frozen": "2fc56f24",
+  "hs_review_current": "hardware_splicer.kicad_design_review at this commit"
  },
- "caveats": [
-  "24 cases is a small sample.",
-  "Fix commits often bundle unrelated changes; only the named bug was judged.",
-  "kicad-happy ran without its datasheet download and AI layers.",
-  "Projects keep their own licences; this file holds only names, commits and messages.",
-  "The USB-C findings on bitaxeGamma are left unjudged: kicad-cli's netlist shows the CC pins unwired on both sides of the fix commits while kicad-happy's single-pin-net findings disappear; the board would have to be opened in KiCad to settle it.",
-  "A declared mate is one line of design intent (which board a connector plugs into); it names no bug. The pinout comes from Black Wire."
- ],
+ "honesty": "hs_review_frozen is HS as it stood before these cases were examined (commit 2fc56f24). hs_review_current includes rules and fixes these same cases prompted, so its extra catches are not independent evidence. Earlier versions of this file exported sub-sheets instead of root sheets for 40 of 73 cases; every verdict here comes from root-sheet runs.",
+ "cases_judged": 70,
  "tally": {
   "kicad_erc": {
-   "caught": 3,
-   "possible": 2,
-   "missed": 19,
-   "did_not_run": 0
+   "caught": 5,
+   "partial": 2
   },
   "kicad_happy": {
-   "caught": 4,
-   "possible": 0,
-   "missed": 20,
-   "did_not_run": 0
+   "caught": 10,
+   "partial": 1
   },
-  "hs": {
-   "caught": 1,
-   "possible": 0,
-   "missed": 22,
-   "did_not_run": 1
+  "hs_review_frozen": {
+   "caught": 8,
+   "partial": 2
   },
-  "hs_review": {
-   "caught": 1,
-   "caught_with_declared_mate": 1,
-   "missed": 22
+  "hs_review_current": {
+   "caught": 14,
+   "partial": 4
   }
  },
- "missed_by_every_checker": [
-  "83f5246d",
-  "28a57dc0",
-  "7749c902",
-  "45985bcd",
-  "8154a0a0",
-  "8725590c",
-  "1a5a9041",
-  "7b0be433",
-  "13485ee3",
-  "e14b09d1",
-  "95b240bc",
-  "30015fc5",
-  "0383e97d",
-  "3b5716db",
-  "13fb744f",
-  "e9cfe4fd",
-  "1d1d5d94"
- ],
+ "caught_by_any_frozen_checker": 14,
+ "missed_by_every_checker_even_current": 53,
+ "what_no_checker_sees": "Pin swaps against a part or connector pinout, signal swaps, wrong values, supply-domain intent, and pull resistors needed for a power-up or boot state. Each needs a pinout, a value rule or the designer's intent; the mating-board declaration is the one such input HS accepts so far.",
+ "held_out_false_positives": {
+  "boards": 10,
+  "rules": "frozen (2fc56f24)",
+  "hs_findings": 6,
+  "true": 2,
+  "false": 4,
+  "detail": "Zektopic/ESP32S3-mini-DATALOGGER: 4066 power unit placed but VDD and VSS unwired (true, KiCad ERC agrees); two alternative CAN transceivers on shared RXD/TXD read as UART errors (false). CIRCUITSTATE/AQEYE-SB-D1: pull-ups behind a solder jumper read as missing (false). Both false patterns are fixed in current HS; the held-out set is no longer held out."
+ },
  "cases": [
   {
    "repo": "cardonabits/haxo-hw",
-   "stars": 675,
-   "license": "NOASSERTION",
    "fix_commit": "83f5246d0f7a92fb96a4dcdced43ce8ae4c35762",
-   "buggy_parent": "e56ee5a4de36197508161f2c93f8dfa28a903eed",
-   "schematic": "haxophone001.kicad_sch",
+   "parent": "e56ee5a4de36197508161f2c93f8dfa28a903eed",
    "message": "Fix incorrect cap part 1uF -> 0.1uF",
-   "bug_class": "wrong_value",
+   "root_sheet": "haxophone001.kicad_sch",
+   "bug_class": "component value",
    "verdict": {
-    "kicad_erc": "missed",
-    "kicad_happy": "missed",
-    "hs": "missed",
-    "hs_review": "missed"
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
    },
-   "note": "",
-   "finding_counts": {
-    "kicad_erc": {
-     "before": 137,
-     "after": 137
-    },
-    "kicad_happy": {
-     "before": 18,
-     "after": 18
-    },
-    "hs": {
-     "before": 20,
-     "after": 20
-    }
-   }
+   "note": "1 uF vs 0.1 uF: values are not checked"
   },
   {
    "repo": "cardonabits/haxo-hw",
-   "stars": 675,
-   "license": "NOASSERTION",
    "fix_commit": "28a57dc0c2ac25278607cefc5118acb0723f45b3",
-   "buggy_parent": "a450af897ceca8d61887b87e84f53ccb7065362d",
-   "schematic": "haxophone001.kicad_sch",
+   "parent": "a450af897ceca8d61887b87e84f53ccb7065362d",
    "message": "Add external pull-up resistors to COL lines",
-   "bug_class": "missing_pullup",
+   "root_sheet": "haxophone001.kicad_sch",
+   "bug_class": "missing pull-up (design intent)",
    "verdict": {
-    "kicad_erc": "missed",
-    "kicad_happy": "missed",
-    "hs": "missed",
-    "hs_review": "missed"
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
    },
-   "note": "",
-   "finding_counts": {
-    "kicad_erc": {
-     "before": 133,
-     "after": 137
-    },
-    "kicad_happy": {
-     "before": 18,
-     "after": 18
-    },
-    "hs": {
-     "before": 20,
-     "after": 20
-    }
-   }
+   "note": "keyboard COL lines; internal pulls were the alternative"
   },
   {
    "repo": "Wren6991/RISCBoy",
-   "stars": 515,
-   "license": "NONE",
    "fix_commit": "7749c902e1680b56a4fd5feca571e547198e84b6",
-   "buggy_parent": "e4f4cddfa0988ab9e00c00cfa562112701647e6d",
-   "schematic": "board/riscboy_revb0/riscboy.kicad_sch",
+   "parent": "e4f4cddfa0988ab9e00c00cfa562112701647e6d",
    "message": "Fix a couple of pin assignment issues found during review. Add 3V3A testpoint.",
-   "bug_class": "pin_assignment",
+   "root_sheet": "riscboy.kicad_sch",
+   "bug_class": "pin assignment",
    "verdict": {
-    "kicad_erc": "missed",
-    "kicad_happy": "missed",
-    "hs": "did_not_run",
-    "hs_review": "missed"
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
    },
-   "note": "HS netlist import failed: KiCad net node requires a component ref and pin",
-   "finding_counts": {
-    "kicad_erc": {
-     "before": 290,
-     "after": 292
-    },
-    "kicad_happy": {
-     "before": 37,
-     "after": 39
-    }
-   }
+   "note": ""
   },
   {
    "repo": "ebastler/zmk-designguide",
-   "stars": 498,
-   "license": "NOASSERTION",
    "fix_commit": "1b4583ed1fe225307f807862ee2afc1a4a0c8ec5",
-   "buggy_parent": "e374dc62df8a1e081de5cc5543394d486fe01e5c",
-   "schematic": "designguide-schematic/designguide-schematic.kicad_sch",
+   "parent": "e374dc62df8a1e081de5cc5543394d486fe01e5c",
    "message": "fixed wrong rotation of p-ch FET in underglow supply",
-   "bug_class": "fet_orientation",
+   "root_sheet": "designguide-schematic.kicad_sch",
+   "bug_class": "MOSFET orientation",
    "verdict": {
-    "kicad_erc": "missed",
-    "kicad_happy": "missed",
-    "hs": "missed",
-    "hs_review": "caught"
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "C",
+    "hs_review_current": "C"
    },
-   "note": "HS review mosfet_source_drain on Q3 (drain on +VSW, source on the load); not caught by KiCad ERC or kicad-happy",
-   "finding_counts": {
-    "kicad_erc": {
-     "before": 349,
-     "after": 349
-    },
-    "kicad_happy": {
-     "before": 145,
-     "after": 147
-    },
-    "hs": {
-     "before": 89,
-     "after": 89
-    }
-   }
+   "note": "P-channel drain on +VSW"
   },
   {
    "repo": "Chrismettal/flipper-zero-backpacks",
-   "stars": 458,
-   "license": "NOASSERTION",
    "fix_commit": "ff3dc03bb29b67af53f2f2c6ea80519ccb5eb467",
-   "buggy_parent": "70bd25a34ea05b5b392ca23df20b22353f464100",
-   "schematic": "pcb/ESP32/ESP32.kicad_sch",
+   "parent": "70bd25a34ea05b5b392ca23df20b22353f464100",
    "message": "[ESP32] Fix RX/TX swapped",
-   "bug_class": "swapped_signals",
+   "root_sheet": "ESP32.kicad_sch",
+   "bug_class": "UART direction across a connector",
    "verdict": {
-    "kicad_erc": "missed",
-    "kicad_happy": "missed",
-    "hs": "missed",
-    "hs_review": "caught_with_declared_mate"
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "C*",
+    "hs_review_current": "C*"
    },
-   "note": "HS review with one declared mate (J20 plugs into the Flipper Zero GPIO header; offset 8 inferred from 5 pins): uart_tx_to_tx and uart_rx_to_rx across J20 on the buggy side, nothing after the fix",
-   "finding_counts": {
-    "kicad_erc": {
-     "before": 146,
-     "after": 146
-    },
-    "kicad_happy": {
-     "before": 56,
-     "after": 56
-    },
-    "hs": {
-     "before": 6,
-     "after": 6
-    }
-   },
-   "mates_declared": {
-    "J20": {
-     "board": "flipper-devices-gpio-device-flipper-zero"
-    }
-   }
+   "note": "*with one declared mate: J20 is the Flipper Zero GPIO header (Black Wire pinout)"
   },
   {
    "repo": "baldengineer/bit-preserve",
-   "stars": 446,
-   "license": "NOASSERTION",
    "fix_commit": "45985bcdf16f61417e88bbfa046e1f7d7646b15c",
-   "buggy_parent": "412180d4e0db5885be15d8a22702ce5ac6b06243",
-   "schematic": "Apple/Apple II+/AppleII+/CPU.kicad_sch",
+   "parent": "412180d4e0db5885be15d8a22702ce5ac6b06243",
    "message": "flipped Q5, fixes #124",
-   "bug_class": "transistor_orientation",
+   "root_sheet": "AppleII+.kicad_sch",
+   "bug_class": "transistor orientation",
    "verdict": {
-    "kicad_erc": "missed",
-    "kicad_happy": "missed",
-    "hs": "missed",
-    "hs_review": "missed"
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
    },
-   "note": "",
-   "finding_counts": {
-    "kicad_erc": {
-     "before": 396,
-     "after": 396
-    },
-    "kicad_happy": {
-     "before": 74,
-     "after": 74
-    },
-    "hs": {
-     "before": 27,
-     "after": 27
-    }
-   }
+   "note": "flipped Q5"
   },
   {
    "repo": "bitaxeorg/bitaxeGamma",
-   "stars": 440,
-   "license": "CERN-OHL-S-2.0",
    "fix_commit": "8154a0a00baff17b0a75b3dd6bce8e8a641957b0",
-   "buggy_parent": "dd7b218cc2cffe65cbb8b5c70c340563d2fa2776",
-   "schematic": "esp32.kicad_sch",
+   "parent": "dd7b218cc2cffe65cbb8b5c70c340563d2fa2776",
    "message": "Fix BAP port GPIO pins",
-   "bug_class": "pin_assignment",
+   "root_sheet": "bitaxeSupra.kicad_sch",
+   "bug_class": "pin assignment",
    "verdict": {
-    "kicad_erc": "possible",
-    "kicad_happy": "missed",
-    "hs": "missed",
-    "hs_review": "missed"
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
    },
-   "note": "ERC wire_dangling near the BAP connector; not confirmed to be the fixed pins",
-   "finding_counts": {
-    "kicad_erc": {
-     "before": 119,
-     "after": 112
-    },
-    "kicad_happy": {
-     "before": 63,
-     "after": 63
-    },
-    "hs": {
-     "before": 6,
-     "after": 6
-    }
-   }
+   "note": ""
   },
   {
    "repo": "bitaxeorg/bitaxeGamma",
-   "stars": 440,
-   "license": "CERN-OHL-S-2.0",
    "fix_commit": "8725590cb1eed0f03d39430a81da19f0bf278c13",
-   "buggy_parent": "ccdd1ee25f0026dc26fb79425a5bfc9502913d4c",
-   "schematic": "esp32.kicad_sch",
+   "parent": "ccdd1ee25f0026dc26fb79425a5bfc9502913d4c",
    "message": "fix GND",
-   "bug_class": "ground",
+   "root_sheet": "bitaxeUltra.kicad_sch",
+   "bug_class": "ground connection",
    "verdict": {
-    "kicad_erc": "missed",
-    "kicad_happy": "missed",
-    "hs": "missed",
-    "hs_review": "missed"
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
    },
-   "note": "",
-   "finding_counts": {
-    "kicad_erc": {
-     "before": 172,
-     "after": 172
-    },
-    "kicad_happy": {
-     "before": 94,
-     "after": 94
-    },
-    "hs": {
-     "before": 6,
-     "after": 6
-    }
-   }
+   "note": ""
   },
   {
    "repo": "bitaxeorg/bitaxeGamma",
-   "stars": 440,
-   "license": "CERN-OHL-S-2.0",
    "fix_commit": "0950fcef7bf7e225e176c3cccc6cb960c43af009",
-   "buggy_parent": "0d2778afd52b6420258db5fbeb675f2fe50d1817",
-   "schematic": "esp32.kicad_sch",
+   "parent": "0d2778afd52b6420258db5fbeb675f2fe50d1817",
    "message": "fixed up USB-C wiring. added CC pulldown resistors. added LCD display to play with",
-   "bug_class": "usb_wiring",
+   "root_sheet": "bitaxeUltra.kicad_sch",
+   "bug_class": "USB-C CC termination",
    "verdict": {
-    "kicad_erc": "missed",
-    "kicad_happy": "caught",
-    "hs": "missed",
-    "hs_review": "missed"
+    "kicad_erc": "-",
+    "kicad_happy": "C",
+    "hs_review_frozen": "C",
+    "hs_review_current": "C"
    },
-   "note": "kicad-happy UC-003: CC1/CC2 missing 5.1k pull-down at J8",
-   "finding_counts": {
-    "kicad_erc": {
-     "before": 165,
-     "after": 192
-    },
-    "kicad_happy": {
-     "before": 95,
-     "after": 105
-    },
-    "hs": {
-     "before": 2,
-     "after": 5
-    }
-   }
+   "note": "5.1k Rd added; current rules also see D+/D- joined on both rows"
   },
   {
    "repo": "bitaxeorg/bitaxeGamma",
-   "stars": 440,
-   "license": "CERN-OHL-S-2.0",
    "fix_commit": "4ee16e005d68af93fd0f5c319af368e902b0bbca",
-   "buggy_parent": "826061a2c5e5222e9c3c9e68571c07245c9f4fc3",
-   "schematic": "esp32.kicad_sch",
+   "parent": "826061a2c5e5222e9c3c9e68571c07245c9f4fc3",
    "message": "Fix USB wiring",
-   "bug_class": "usb_wiring",
+   "root_sheet": "bitaxeUltra.kicad_sch",
+   "bug_class": "USB connector unwired",
    "verdict": {
-    "kicad_erc": "caught",
-    "kicad_happy": "caught",
-    "hs": "missed",
-    "hs_review": "missed"
+    "kicad_erc": "C",
+    "kicad_happy": "C",
+    "hs_review_frozen": "-",
+    "hs_review_current": "P"
    },
-   "note": "ERC pin_not_connected on J8 CC1/D-; kicad-happy NT-001 single-pin nets on J8 D+/D-/CC1/CC2",
-   "finding_counts": {
-    "kicad_erc": {
-     "before": 175,
-     "after": 164
-    },
-    "kicad_happy": {
-     "before": 101,
-     "after": 95
-    },
-    "hs": {
-     "before": 2,
-     "after": 2
-    }
-   }
+   "note": "ERC/kicad-happy: unconnected J8 pins; HS current: only the one-sided D- (CC still lacks Rd after this fix)"
   },
   {
    "repo": "bitaxeorg/bitaxeGamma",
-   "stars": 440,
-   "license": "CERN-OHL-S-2.0",
    "fix_commit": "a75fdfd7fdc1b42147d8948947cf16f4b2206589",
-   "buggy_parent": "517793b2227401259830a971085794d99d2a6bd7",
-   "schematic": "esp32.kicad_sch",
+   "parent": "517793b2227401259830a971085794d99d2a6bd7",
    "message": "more routing. fixed SDA/SCL short",
-   "bug_class": "short",
+   "root_sheet": "bitaxeMax.kicad_sch",
+   "bug_class": "I2C SDA/SCL short",
    "verdict": {
-    "kicad_erc": "missed",
-    "kicad_happy": "caught",
-    "hs": "missed",
-    "hs_review": "missed"
+    "kicad_erc": "C",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "C"
    },
-   "note": "kicad-happy LB-001: net SCL has labels SCL and SDA",
-   "finding_counts": {
-    "kicad_erc": {
-     "before": 226,
-     "after": 230
-    },
-    "kicad_happy": {
-     "before": 79,
-     "after": 79
-    },
-    "hs": {
-     "before": 2,
-     "after": 2
-    }
-   }
+   "note": "ERC: two labels on one net; HS current: SDA and SCL pins on one net"
   },
   {
    "repo": "bitaxeorg/bitaxeGamma",
-   "stars": 440,
-   "license": "CERN-OHL-S-2.0",
    "fix_commit": "1a5a9041df45160444aeca990c4180ae83b29032",
-   "buggy_parent": "bdb0fc71a813a3b86264e8412373b8f63b0d21bb",
-   "schematic": "esp32.kicad_sch",
+   "parent": "bdb0fc71a813a3b86264e8412373b8f63b0d21bb",
    "message": "fixed TX/RX mixup",
-   "bug_class": "swapped_signals",
+   "root_sheet": "bitaxeMax.kicad_sch",
+   "bug_class": "UART direction",
    "verdict": {
-    "kicad_erc": "missed",
-    "kicad_happy": "missed",
-    "hs": "missed",
-    "hs_review": "missed"
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
    },
-   "note": "",
-   "finding_counts": {
-    "kicad_erc": {
-     "before": 95,
-     "after": 95
-    },
-    "kicad_happy": {
-     "before": 87,
-     "after": 87
-    },
-    "hs": {
-     "before": 3,
-     "after": 3
-    }
-   }
+   "note": "no TX/RX-named pins on both ends"
   },
   {
    "repo": "bschwind/key-ripper",
-   "stars": 288,
-   "license": "Apache-2.0",
    "fix_commit": "7b0be433561c4b08f0d143b6468d7dd146c27a9c",
-   "buggy_parent": "94c0edf5c2218364d5242e540d04119d0c4375a0",
-   "schematic": "pcb/key-ripper.kicad_sch",
+   "parent": "94c0edf5c2218364d5242e540d04119d0c4375a0",
    "message": "Add a pullup resistor the the RUN pin",
-   "bug_class": "missing_pullup",
+   "root_sheet": "key-ripper.kicad_sch",
+   "bug_class": "missing pull-up (RUN pin)",
    "verdict": {
-    "kicad_erc": "missed",
-    "kicad_happy": "missed",
-    "hs": "missed",
-    "hs_review": "missed"
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
    },
-   "note": "",
-   "finding_counts": {
-    "kicad_erc": {
-     "before": 445,
-     "after": 444
-    },
-    "kicad_happy": {
-     "before": 24,
-     "after": 24
-    },
-    "hs": {
-     "before": 0,
-     "after": 0
-    }
-   }
+   "note": ""
   },
   {
    "repo": "LibreSolar/bms-c1",
-   "stars": 284,
-   "license": "NOASSERTION",
    "fix_commit": "13485ee3315776861d500324442db5cf8893d2f3",
-   "buggy_parent": "24033fa86f239aaabd0f209f86e4758324fe9423",
-   "schematic": "kicad/power-part.kicad_sch",
+   "parent": "24033fa86f239aaabd0f209f86e4758324fe9423",
    "message": "Swap D and S of Q12",
-   "bug_class": "swapped_transistor_pins",
+   "root_sheet": "bms-c1.kicad_sch",
+   "bug_class": "symbol pin numbering vs package",
    "verdict": {
-    "kicad_erc": "missed",
-    "kicad_happy": "missed",
-    "hs": "missed",
-    "hs_review": "missed"
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
    },
-   "note": "",
-   "finding_counts": {
-    "kicad_erc": {
-     "before": 104,
-     "after": 104
-    },
-    "kicad_happy": {
-     "before": 20,
-     "after": 20
-    },
-    "hs": {
-     "before": 6,
-     "after": 6
-    }
-   }
+   "note": "Q_PMOS_GSD to GDS: connectivity identical, needs the package pinout"
   },
   {
    "repo": "amachronic/echoplayer",
-   "stars": 280,
-   "license": "CERN-OHL-S-2.0",
    "fix_commit": "e14b09d176ed4ae50ebee3c8a1b28d569ed9379b",
-   "buggy_parent": "1f5e0d3807479b5f61620142f56374aea73be908",
-   "schematic": "r1-rev1.1/audio.kicad_sch",
+   "parent": "1f5e0d3807479b5f61620142f56374aea73be908",
    "message": "Fix incorrect 3.5mm jack pinout",
-   "bug_class": "wrong_pinout",
+   "root_sheet": "echo-r1-rev1.1.kicad_sch",
+   "bug_class": "connector pinout",
    "verdict": {
-    "kicad_erc": "possible",
-    "kicad_happy": "missed",
-    "hs": "missed",
-    "hs_review": "missed"
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
    },
-   "note": "ERC wire_dangling near the jack; not confirmed to be the pinout error",
-   "finding_counts": {
-    "kicad_erc": {
-     "before": 73,
-     "after": 73
-    },
-    "kicad_happy": {
-     "before": 102,
-     "after": 102
-    },
-    "hs": {
-     "before": 11,
-     "after": 11
-    }
-   }
+   "note": "3.5 mm jack"
   },
   {
    "repo": "AzonInc/Doorman",
-   "stars": 258,
-   "license": "GPL-3.0",
    "fix_commit": "95b240bc18cfddcf0055a2c8662dd8d23773f6da",
-   "buggy_parent": "c463df5eb75e7b3633ba6ac5d88db9e6ff52f2ba",
-   "schematic": "pcb/doorman.kicad_sch",
+   "parent": "c463df5eb75e7b3633ba6ac5d88db9e6ff52f2ba",
    "message": "Prevent short circuit when using a terminal as power source",
-   "bug_class": "power_short",
+   "root_sheet": "doorman.kicad_sch",
+   "bug_class": "power path short (design intent)",
    "verdict": {
-    "kicad_erc": "missed",
-    "kicad_happy": "missed",
-    "hs": "missed",
-    "hs_review": "missed"
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
    },
-   "note": "",
-   "finding_counts": {
-    "kicad_erc": {
-     "before": 86,
-     "after": 88
-    },
-    "kicad_happy": {
-     "before": 41,
-     "after": 41
-    },
-    "hs": {
-     "before": 26,
-     "after": 26
-    }
-   }
+   "note": ""
   },
   {
    "repo": "eddyem/stm32samples",
-   "stars": 209,
-   "license": "NONE",
    "fix_commit": "30015fc56ec3ebb66cdb49c495d1e58adad4c70e",
-   "buggy_parent": "07353b6111cb9acf8b7bcfa9d41f1832d9794ac0",
-   "schematic": "F0:F030,F042,F072/CANbus4BTA/kicad/stm32.kicad_sch",
+   "parent": "07353b6111cb9acf8b7bcfa9d41f1832d9794ac0",
    "message": "fixed bug with dc-dc polarity in CANbus4BTA",
-   "bug_class": "polarity",
+   "root_sheet": "stm32.kicad_sch",
+   "bug_class": "DC-DC polarity",
    "verdict": {
-    "kicad_erc": "missed",
-    "kicad_happy": "missed",
-    "hs": "missed",
-    "hs_review": "missed"
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
    },
-   "note": "",
-   "finding_counts": {
-    "kicad_erc": {
-     "before": 1078,
-     "after": 1078
-    },
-    "kicad_happy": {
-     "before": 107,
-     "after": 107
-    },
-    "hs": {
-     "before": 14,
-     "after": 14
-    }
-   }
+   "note": ""
   },
   {
    "repo": "bitaxeorg/ultraHex",
-   "stars": 191,
-   "license": "CERN-OHL-S-2.0",
    "fix_commit": "e1f5f9df12838989923a0870ae64b7d478213308",
-   "buggy_parent": "1fd460b92828304397633fb44fa7647b8866cf82",
-   "schematic": "bitaxeHex.kicad_sch",
+   "parent": "1fd460b92828304397633fb44fa7647b8866cf82",
    "message": "fix OP-AMP power supply, connect to GND,+5V",
-   "bug_class": "opamp_supply",
+   "root_sheet": "bitaxeHex.kicad_sch",
+   "bug_class": "supply domain (design intent)",
    "verdict": {
-    "kicad_erc": "caught",
-    "kicad_happy": "missed",
-    "hs": "missed",
-    "hs_review": "missed"
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
    },
-   "note": "ERC power_pin_not_driven on U15/U21 V+",
-   "finding_counts": {
-    "kicad_erc": {
-     "before": 497,
-     "after": 444
-    },
-    "kicad_happy": {
-     "before": 154,
-     "after": 158
-    },
-    "hs": {
-     "before": 29,
-     "after": 29
-    }
-   }
+   "note": "op-amp on the wrong rails; rails exist, intent decides"
   },
   {
    "repo": "bitaxeorg/ultraHex",
-   "stars": 191,
-   "license": "CERN-OHL-S-2.0",
    "fix_commit": "0383e97d321204c91682facf98daae5b12419188",
-   "buggy_parent": "30ecbdffddefeeda2fd37585da01a5557c36549c",
-   "schematic": "bitaxeHex.kicad_sch",
+   "parent": "30ecbdffddefeeda2fd37585da01a5557c36549c",
    "message": "fixed the floating gnd net issue. started placement",
-   "bug_class": "floating_ground",
+   "root_sheet": "bitaxeHex.kicad_sch",
+   "bug_class": "floating ground net",
    "verdict": {
-    "kicad_erc": "missed",
-    "kicad_happy": "missed",
-    "hs": "missed",
-    "hs_review": "missed"
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
    },
-   "note": "",
-   "finding_counts": {
-    "kicad_erc": {
-     "before": 1593,
-     "after": 1412
-    },
-    "kicad_happy": {
-     "before": 127,
-     "after": 93
-    },
-    "hs": {
-     "before": 63,
-     "after": 41
-    }
-   }
+   "note": ""
   },
   {
    "repo": "anyshake/explorer",
-   "stars": 101,
-   "license": "NOASSERTION",
    "fix_commit": "3b5716dbca55e94d42f8e841ed3b16ff447e7558",
-   "buggy_parent": "b8cbedd9f33427c42c939ccc824bacc6a38e2b74",
-   "schematic": "hardware/sensors.kicad_sch",
+   "parent": "b8cbedd9f33427c42c939ccc824bacc6a38e2b74",
    "message": "fix: Fix pinout of MMBD1503A",
-   "bug_class": "wrong_pinout",
+   "root_sheet": "Explorer.kicad_sch",
+   "bug_class": "part pinout",
    "verdict": {
-    "kicad_erc": "missed",
-    "kicad_happy": "missed",
-    "hs": "missed",
-    "hs_review": "missed"
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
    },
-   "note": "",
-   "finding_counts": {
-    "kicad_erc": {
-     "before": 222,
-     "after": 222
-    },
-    "kicad_happy": {
-     "before": 141,
-     "after": 141
-    },
-    "hs": {
-     "before": 8,
-     "after": 8
-    }
-   }
+   "note": "MMBD1503A"
   },
   {
    "repo": "Allegra42/ZEReader-KiCad",
-   "stars": 71,
-   "license": "CERN-OHL-S-2.0",
    "fix_commit": "13fb744f9022173749d4321b0fdedc3afffe3662",
-   "buggy_parent": "b4670a6a746f894859719f20fe82390be55ea90e",
-   "schematic": "01_mcu.kicad_sch",
+   "parent": "b4670a6a746f894859719f20fe82390be55ea90e",
    "message": "Added CC line pulldown resistors",
-   "bug_class": "missing_pulldown",
+   "root_sheet": "ZEReader-Pico.kicad_sch",
+   "bug_class": "USB-C CC termination",
    "verdict": {
-    "kicad_erc": "missed",
-    "kicad_happy": "missed",
-    "hs": "missed",
-    "hs_review": "missed"
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "C"
    },
-   "note": "",
-   "finding_counts": {
-    "kicad_erc": {
-     "before": 39,
-     "after": 39
-    },
-    "kicad_happy": {
-     "before": 29,
-     "after": 29
-    },
-    "hs": {
-     "before": 17,
-     "after": 17
-    }
-   }
+   "note": "CUI UJ20-C named only by part number; frozen HS did not know it as USB-C"
   },
   {
    "repo": "btb/DiskII",
-   "stars": 71,
-   "license": "Apache-2.0",
    "fix_commit": "e9cfe4fd5fd6835f551df074f75d248558bcec09",
-   "buggy_parent": "4f827a48faae4890c3ba386f170331b494838f7f",
-   "schematic": "DiskII.kicad_sch",
+   "parent": "4f827a48faae4890c3ba386f170331b494838f7f",
    "message": "fix misrouted data lines to shift register",
-   "bug_class": "misrouted_data",
+   "root_sheet": "DiskII.kicad_sch",
+   "bug_class": "misrouted data lines",
    "verdict": {
-    "kicad_erc": "missed",
-    "kicad_happy": "missed",
-    "hs": "missed",
-    "hs_review": "missed"
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
    },
-   "note": "",
-   "finding_counts": {
-    "kicad_erc": {
-     "before": 80,
-     "after": 80
-    },
-    "kicad_happy": {
-     "before": 17,
-     "after": 17
-    },
-    "hs": {
-     "before": 27,
-     "after": 27
-    }
-   }
+   "note": ""
   },
   {
    "repo": "DuPAL-PAL-DUmper/DuPAL_Board",
-   "stars": 57,
-   "license": "CC-BY-SA-4.0",
    "fix_commit": "218f80b818fb6d9fd730289319c32854df563710",
-   "buggy_parent": "d793ee65c3aeebef6e3d14501bc548dcc05646ab",
-   "schematic": "board/DuPal_V3/DuPal_V3.kicad_sch",
+   "parent": "d793ee65c3aeebef6e3d14501bc548dcc05646ab",
    "message": "Fix missing connection on a shifter",
-   "bug_class": "missing_connection",
+   "root_sheet": "DuPal_V3.kicad_sch",
+   "bug_class": "floating logic input",
    "verdict": {
-    "kicad_erc": "caught",
-    "kicad_happy": "caught",
-    "hs": "caught",
-    "hs_review": "missed"
+    "kicad_erc": "C",
+    "kicad_happy": "C",
+    "hs_review_frozen": "-",
+    "hs_review_current": "C"
    },
-   "note": "ERC pin_not_connected U9 CE; kicad-happy NT-001 and PU-001 on U9 CE; HS erc-floating-pin on U9 CE",
-   "finding_counts": {
-    "kicad_erc": {
-     "before": 189,
-     "after": 187
-    },
-    "kicad_happy": {
-     "before": 67,
-     "after": 65
-    },
-    "hs": {
-     "before": 7,
-     "after": 6
-    }
-   }
+   "note": "74HCT166 CE left open"
   },
   {
    "repo": "alvarop/debugotron",
-   "stars": 52,
-   "license": "BSD-3-Clause",
    "fix_commit": "1d1d5d9499a104057f3a0733bd38b5f53a03c946",
-   "buggy_parent": "e72b385271d1f844c22af42c81592bcd8ac95e93",
-   "schematic": "hw/swd_over_c/swd_over_c.kicad_sch",
+   "parent": "e72b385271d1f844c22af42c81592bcd8ac95e93",
    "message": "Somehow got the values for R4 and R5 swapped...",
-   "bug_class": "wrong_value",
+   "root_sheet": "swd_over_c.kicad_sch",
+   "bug_class": "component value",
    "verdict": {
-    "kicad_erc": "missed",
-    "kicad_happy": "missed",
-    "hs": "missed",
-    "hs_review": "missed"
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
    },
-   "note": "",
-   "finding_counts": {
-    "kicad_erc": {
-     "before": 36,
-     "after": 36
-    },
-    "kicad_happy": {
-     "before": 17,
-     "after": 17
-    },
-    "hs": {
-     "before": 16,
-     "after": 16
-    }
-   }
+   "note": "R4/R5 values swapped"
+  },
+  {
+   "repo": "SPIRIT-org/SPIRIT",
+   "fix_commit": "f33be23afb5ecb5fbdf7df9b23a54094b023076d",
+   "parent": "26cb97d94f0e8abe632cd5ea7873d9ea2eaaf029",
+   "message": "fix STAT pin LED, connect USB POW, remove d3",
+   "root_sheet": "cm5-carrier.kicad_sch",
+   "bug_class": "unconnected power and part",
+   "verdict": {
+    "kicad_erc": "C",
+    "kicad_happy": "C",
+    "hs_review_frozen": "P",
+    "hs_review_current": "P"
+   },
+   "note": "ERC: USB POW label dangling; kicad-happy and HS: unwired LED D3 (removed by the fix)"
+  },
+  {
+   "repo": "dawsonjon/PicoRX",
+   "fix_commit": "f1dcdf7ff34e706574814fc1eb37af94a76b218c",
+   "parent": "66e1d123148aeebe694e06b07e0573554771b2bb",
+   "message": "Fix error in schematic",
+   "root_sheet": "concept.kicad_sch",
+   "bug_class": "unspecified schematic error",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
+  },
+  {
+   "repo": "bitaxeorg/bitaxeGamma",
+   "fix_commit": "fcc3bbe5ebdfd8d03f8f7f56c9b0859e6ab2281a",
+   "parent": "d7ad715d67ab4af7707a567543ce04c6afce6db5",
+   "message": "Fixed usb symbol, mounting holes",
+   "root_sheet": "bitaxeUltra.kicad_sch",
+   "bug_class": "wrong connector symbol",
+   "verdict": {
+    "kicad_erc": "P",
+    "kicad_happy": "P",
+    "hs_review_frozen": "P",
+    "hs_review_current": "P"
+   },
+   "note": "symbol replaced under a new reference, so findings vanish with the part; unclear"
+  },
+  {
+   "repo": "cheyao/icepi-sbc",
+   "fix_commit": "2f939f5fe7321cd607be8f98eb48270f9132e24e",
+   "parent": "21f3d1b6e8383965a65d2a51d1ba757a9829448e",
+   "message": "Changed crystal and fix USB data lines",
+   "root_sheet": "cm0.kicad_sch",
+   "bug_class": "USB data lines",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
+  },
+  {
+   "repo": "butterstick-fpga/butterstick-hardware",
+   "fix_commit": "fac6a8348bb7db2818e91e38345124d05ca0039d",
+   "parent": "3a45b19e4130355be5552e34cc4e072c1e7afb3d",
+   "message": "Fix RGB G/B signals",
+   "root_sheet": "ButterStick.kicad_sch",
+   "bug_class": "signal swap (G/B)",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
+  },
+  {
+   "repo": "anyshake/explorer",
+   "fix_commit": "4daca963e1d449a75016fa40e871b718bce5e7c7",
+   "parent": "aa650759aaeca810817532461ef975ebc28d3a1d",
+   "message": "fix: Fix for +2.5V power",
+   "root_sheet": "Explorer.kicad_sch",
+   "bug_class": "regulator ground on a rail",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "C",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": "kicad-happy PP-001: LDO GND pin on A-2V5"
+  },
+  {
+   "repo": "anyshake/explorer",
+   "fix_commit": "56c3c0404d1281e2b9e9c6ec4e38c0ab5b03b5ff",
+   "parent": "2b3baa13222b227f191b60e043733dd588aea1ec",
+   "message": "fix: Leave TPS5430 pin 5 floating",
+   "root_sheet": "Explorer.kicad_sch",
+   "bug_class": "pin that must float",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
+  },
+  {
+   "repo": "anyshake/explorer",
+   "fix_commit": "713bf48d4afa49f363eaaf35170d92fe00b18286",
+   "parent": "e69e1543f6ed13d5fed325357b521c7120fd1da0",
+   "message": "fix: Connect C68 to AVSS",
+   "root_sheet": "Explorer.kicad_sch",
+   "bug_class": "ground domain",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": "C68 to AVSS"
+  },
+  {
+   "repo": "bitaxeorg/BitaxeGT",
+   "fix_commit": "199960753a539a87a7bacfa21bfce3a9d9f417f4",
+   "parent": "b626d1b1122fad1acd62f5825720294c794f6788",
+   "message": "fixed 12V / VIN net descrepancy",
+   "root_sheet": "BitaxeGT.kicad_sch",
+   "bug_class": "unconnected supply",
+   "verdict": {
+    "kicad_erc": "C",
+    "kicad_happy": "C",
+    "hs_review_frozen": "C",
+    "hs_review_current": "C"
+   },
+   "note": "XT30 +V on VIN, everything else on 12V"
+  },
+  {
+   "repo": "bitaxeorg/BitaxeGT",
+   "fix_commit": "41c19eadd24b4f909b869d6cc8227d8f51a85e92",
+   "parent": "a69e5de800e99260ed2beab4baafa1c5bea8d0a7",
+   "message": "fixed unused input on level shifter. Attached Vcore to ADC pin on the ESP32 for monitoring.",
+   "root_sheet": "BitaxeGT.kicad_sch",
+   "bug_class": "floating level-shifter input",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
+  },
+  {
+   "repo": "bitaxeorg/BitaxeGT",
+   "fix_commit": "1b80ecae90dc122b8800b819cd27bc6e4b2ca7a3",
+   "parent": "645bfd1ef1d8f2f17143982e2cc8b83c28630a6b",
+   "message": "added USB CC pulldown resistors for #7",
+   "root_sheet": "BitaxeGT.kicad_sch",
+   "bug_class": "USB-C CC termination",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "C",
+    "hs_review_frozen": "C",
+    "hs_review_current": "C"
+   },
+   "note": ""
+  },
+  {
+   "repo": "CDFER/Auckland-LED-Train-Map",
+   "fix_commit": "7ec957dcb1752e62b7fea4adda159266e9c2510c",
+   "parent": "f1e4a3c2e17f1272349583a361c51ec88ed32e25",
+   "message": "Fix charlieplexed LEDs D10 and D11",
+   "root_sheet": "Auckland-LED-Train-Map.kicad_sch",
+   "bug_class": "LED orientation (charlieplex)",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
+  },
+  {
+   "repo": "0xCB-dev/0xCB-Pluto",
+   "fix_commit": "04f583d1b7e090234cccf6bc161efbac6b0a9d48",
+   "parent": "71ad543f3691e3d8e5c3558e8a6bc7992ba3c4a3",
+   "message": "fixed VCC, removed GND plane. wired GND individually, removed ISP",
+   "root_sheet": "pluto.kicad_sch",
+   "bug_class": "supply connection",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
+  },
+  {
+   "repo": "DuPAL-PAL-DUmper/DuPAL_Board",
+   "fix_commit": "d793ee65c3aeebef6e3d14501bc548dcc05646ab",
+   "parent": "a683937cc3ac6bd21cdbc125cc7216f9331dea8c",
+   "message": "Add external pullup on /RELAY_ENABLE pin to avoid triggering at powerup",
+   "root_sheet": "DuPal_V3.kicad_sch",
+   "bug_class": "missing pull-up (power-up state)",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
+  },
+  {
+   "repo": "0xjmux/ESP-PROG-Adapter",
+   "fix_commit": "6a5bd4f410acebc7d0b34c9bb4f944c8898c38be",
+   "parent": "bc0d806223b7dc59c0100cb39cc4d3931a93139f",
+   "message": "v1.5 TC2050 pinout change",
+   "root_sheet": "ESPPROG-Adapter.kicad_sch",
+   "bug_class": "connector pinout",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": "TC2050"
+  },
+  {
+   "repo": "atomic14/esp32-zxspectrum-hardware",
+   "fix_commit": "ff13bd2de1f7f5d923d38ba24959aa1ddd3bc649",
+   "parent": "efb9f50adb53df4601b1c729035ed6244e6ade9c",
+   "message": "Fixes speaker driver and USB connection",
+   "root_sheet": "esp32-s3-spectrum.kicad_sch",
+   "bug_class": "transistor driver wiring",
+   "verdict": {
+    "kicad_erc": "P",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": "ERC pin_to_pin warnings on Q2 vanish"
+  },
+  {
+   "repo": "beagleboard/capes",
+   "fix_commit": "be6f302b934d7debc3e2b5dac71d4a9f55ca2581",
+   "parent": "edbcdf7cbb877f0232a9db213498b5697b0bd6f8",
+   "message": "Fix 3pin JST SH 1.00 port pinout",
+   "root_sheet": "TechLab.kicad_sch",
+   "bug_class": "connector pinout",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": "frozen HS raised a false missing-pull-up warning here (since fixed)"
+  },
+  {
+   "repo": "beagleboard/capes",
+   "fix_commit": "8f5a4f374f8359d6afb7f9a2ba53da295fffd15a",
+   "parent": "7f8af83b40f3946354bd38c36e995fc334f36e03",
+   "message": "TechLab: add some missing nets to schematic symbols",
+   "root_sheet": "TechLab.kicad_sch",
+   "bug_class": "missing nets in symbols",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
+  },
+  {
+   "repo": "M4a1x/TPS5430",
+   "fix_commit": "fd8af0d99b00d8b7e58aa25f09d8118a33a80ed2",
+   "parent": "e024ccc1fa430ccfe0d76d37ba564d37b0c67b0e",
+   "message": "Add status LED & fix reverse polarity protection",
+   "root_sheet": "TPS5430.kicad_sch",
+   "bug_class": "reverse polarity protection",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
+  },
+  {
+   "repo": "bornhack/badge2023",
+   "fix_commit": "ac4f09913fe92c03b6d60300dfdac04f19e89094",
+   "parent": "20b0998e0a3b82a990d6c0e38b14fe371ea64b4b",
+   "message": "Fixed I2C I/O Expander design",
+   "root_sheet": "io_expander.kicad_sch",
+   "bug_class": "I2C expander design",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
+  },
+  {
+   "repo": "antmicro/dc-scm-osm-l-carrier-card",
+   "fix_commit": "fa431c553ff38b38a792713f46ed10eb6d2f8590",
+   "parent": "b5efe58d51717ffe3f8fa9cbbce69d3d262c80b7",
+   "message": "[#83338] Fixed HS connection AC caps and TX/RX swaps",
+   "root_sheet": "bmc-reference-carrier-board.kicad_sch",
+   "bug_class": "high-speed TX/RX swaps",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
+  },
+  {
+   "repo": "brenocq/bldc-motor",
+   "fix_commit": "526db53ddb01956709698a67711eb35d700113b6",
+   "parent": "1c500130fc3f57199255b8f5d38589fd0d1ec51e",
+   "message": "Fix(pcb): Add missing USB CC1 pull-down",
+   "root_sheet": "BLDCM-Power.kicad_sch",
+   "bug_class": "USB-C CC termination",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "C",
+    "hs_review_frozen": "-",
+    "hs_review_current": "C"
+   },
+   "note": "receptacle named by part number; CC2 still open after the fix"
+  },
+  {
+   "repo": "antmicro/osm-l-bmc-som",
+   "fix_commit": "d755ff2ebc05ffdf9b53e978a9e7f9160d5edd4a",
+   "parent": "f5fe6843b7746e25822dd5ed39fe0529a59f481f",
+   "message": "[#82808] Fix swapped SCL and SDA lines",
+   "root_sheet": "bmc-reference-osm.kicad_sch",
+   "bug_class": "I2C SDA/SCL swap",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": "swap at a connector"
+  },
+  {
+   "repo": "antmicro/osm-l-bmc-som",
+   "fix_commit": "785ec8188f443710b06f529304f76de31e32043a",
+   "parent": "b585ad9b8159cb6429def4617b1f88d3b5053b98",
+   "message": "Fix DQS P/N swap",
+   "root_sheet": "bmc-reference-osm.kicad_sch",
+   "bug_class": "differential pair swap",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": "DQS P/N"
+  },
+  {
+   "repo": "antmicro/osm-l-bmc-som",
+   "fix_commit": "7dedeb5fbe443cec2bbc0f4c5406ebc27e402459",
+   "parent": "7983cd2d80ca4fcfb1f2600da7b0b7b11c8fbf85",
+   "message": "Fix bootmode pull-up",
+   "root_sheet": "bmc-reference-osm.kicad_sch",
+   "bug_class": "missing pull-up (boot mode)",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
+  },
+  {
+   "repo": "2sayle/USB_Dongle_KiCad",
+   "fix_commit": "695209a3116d4458dbc83126771e55d60fea4696",
+   "parent": "341905a84d871f926e7d65e453cea1b9f2b16f09",
+   "message": "Added: Pull-down resistors for CCx pins (USB-C port)",
+   "root_sheet": "USB_Dongle_KiCad.kicad_sch",
+   "bug_class": "USB-C CC termination",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "C",
+    "hs_review_frozen": "C",
+    "hs_review_current": "C"
+   },
+   "note": ""
+  },
+  {
+   "repo": "antmicro/cm4-baseboard-lvds-adapter",
+   "fix_commit": "7386dbd3d96b334bd89cad275fd4550cf1348b3d",
+   "parent": "a096f2f5212f534bf67ff94e8b68ab44ae66e5ac",
+   "message": "[#58132] Fix SN65DSI84 I2C connection",
+   "root_sheet": "cm4-lvds-adapter.kicad_sch",
+   "bug_class": "I2C connection",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
+  },
+  {
+   "repo": "FPGA-Research/FABulous_board",
+   "fix_commit": "c64a369c04bd3e0258062f32b3a34f919df472fc",
+   "parent": "5b40425d908339f69de9758c97e6331e270def6f",
+   "message": "fix: add a connection to the addtional D+ and D- terminals to allow a reversible plugging of the connector, route the USB data line using an impedance matched d",
+   "root_sheet": "FABulous_board.kicad_sch",
+   "bug_class": "USB-C data on one row",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "C"
+   },
+   "note": ""
+  },
+  {
+   "repo": "Every-Flavor-Robotics/motorgo-plink-hardware",
+   "fix_commit": "2179d08fc884f61922824e12b4d26b228ed7ac8a",
+   "parent": "a93b9a751611817c6110ae8655c3348db2f6ae73",
+   "message": "updated schematic to fix IMU i2c mismatch, silkscreen readability, schottky backpower diode, and added RC Servo pins",
+   "root_sheet": "motorgo_plink.kicad_sch",
+   "bug_class": "I2C SDA/SCL crossed",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "C"
+   },
+   "note": "IMU SDA to the other part's SCL"
+  },
+  {
+   "repo": "MarcelMo/MPPT_Kicad_Schematics",
+   "fix_commit": "8d382b67925372a954f765e0a9fb8678c44f09ae",
+   "parent": "0d7bb382713e589173d519e37aa3f3d69e07859c",
+   "message": "RxD TxD were wrong :-(",
+   "root_sheet": "MPPT_Charger.kicad_sch",
+   "bug_class": "UART direction",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "C",
+    "hs_review_current": "C"
+   },
+   "note": "RXD to RXD and TXD to TXD"
+  },
+  {
+   "repo": "diondokter/induction-heater",
+   "fix_commit": "dd3852c91620a45853c705c91c71fef43ed4b0ef",
+   "parent": "bb19dea3371bc1f5938ba8b65ea69fc3c8297739",
+   "message": "Fixed the mosfet driver grounds",
+   "root_sheet": "induction-heater-powerstage.kicad_sch",
+   "bug_class": "gate-driver ground",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
+  },
+  {
+   "repo": "elkel53930/extraice4",
+   "fix_commit": "1c2461b814122684ed885a648f61a695b38f4bc8",
+   "parent": "e981af3511ca925947b7f7c94fedb0615c680f75",
+   "message": "Add a pull-up register to the CHIP-PU pin.",
+   "root_sheet": "extraice.kicad_sch",
+   "bug_class": "missing pull-up (ESP32 CHIP_PU)",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
+  },
+  {
+   "repo": "barbeque/sg1000",
+   "fix_commit": "da89489dd34947086cec48f99414d0cc73368fb7",
+   "parent": "a2061601f3364872623ff89d610373cd5a299a3f",
+   "message": "Pull-up for /NMI",
+   "root_sheet": "sg1000.kicad_sch",
+   "bug_class": "missing pull-up (/NMI)",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
+  },
+  {
+   "repo": "FyraLabs/suzyqboard",
+   "fix_commit": "49381acd25123d37132beaa8b2bc1e70f2b45f5a",
+   "parent": "d6dded3ae743b77e2584152a922123499c663b96",
+   "message": "fix: add pulldown resistors from host to GND",
+   "root_sheet": "suzyqboard.kicad_sch",
+   "bug_class": "USB-C CC termination",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "C",
+    "hs_review_frozen": "C",
+    "hs_review_current": "C"
+   },
+   "note": ""
+  },
+  {
+   "repo": "StuartF303/vandaemon",
+   "fix_commit": "0f5083faf18028bc3389033492ccf887aafb4d19",
+   "parent": "32695c984eb1983cfc423d76f8b14e59a28f8e67",
+   "message": "Fix six drill defects, fit the I2C pull-ups, add the board ID",
+   "root_sheet": "VANDIMMER-4CH2A.kicad_sch",
+   "bug_class": "missing I2C pull-ups",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "P"
+   },
+   "note": "named bus to a header: current HS gives a note, not a warning"
+  },
+  {
+   "repo": "256foundation/emberone00-pcb",
+   "fix_commit": "2df927cf180b987a2fa86dae9dafc9bba1d29f0a",
+   "parent": "6706f810376098c6509cdf2a5ee4264ef3f6aeca",
+   "message": "added RI pullup resistors for #16. updated BOM. bumped version number to 3",
+   "root_sheet": "emberone.kicad_sch",
+   "bug_class": "missing pull-up (RI)",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
+  },
+  {
+   "repo": "benjamin-wilson/NerdNOS",
+   "fix_commit": "6518a803ed6728fb490b79569aa6f24f0fe6e659",
+   "parent": "9e590b79cd61ba490dec6f7f2820149ba86f63ff",
+   "message": "BI pulldown",
+   "root_sheet": "NerdNOS.kicad_sch",
+   "bug_class": "missing pull-down (BI)",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
+  },
+  {
+   "repo": "antmicro/dc-scm-osm-l-carrier-card",
+   "fix_commit": "5f320f746ffb0c5a097714fb786b8a22195103b5",
+   "parent": "eb89472b6449609e5207aefb372f3e3bc850cf25",
+   "message": "[#83767] Add MDIO pullup",
+   "root_sheet": "bmc-reference-carrier-board.kicad_sch",
+   "bug_class": "missing pull-up (MDIO)",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
+  },
+  {
+   "repo": "Miceuz/paper-wifi",
+   "fix_commit": "79503c2136293bf171402b1daaef6b8305626f1b",
+   "parent": "2c95cd9e15efd8c8241a5f644d3683028e264daa",
+   "message": "Add cutout in the PCB to decouple SHT40, fix GND connection",
+   "root_sheet": "sensor-epaper.kicad_sch",
+   "bug_class": "ground connection",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
+  },
+  {
+   "repo": "cspang1/jcap",
+   "fix_commit": "49bdc6849e913a21bea9bdecdff061dece5e1faa",
+   "parent": "ffd30fe5bdb0760ae6e49f7fd8f302de40e31c5e",
+   "message": "Swapped H/VSync pins",
+   "root_sheet": "jcap.kicad_sch",
+   "bug_class": "signal swap (H/VSync)",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
+  },
+  {
+   "repo": "0xCB-dev/SL-060-PCB",
+   "fix_commit": "64d9506577aa646d9f0a6ca25e148f19c434c37d",
+   "parent": "7664f7f7b876775447b11e29ebe360e7b5309b03",
+   "message": "Swap VCC and GND lines for all PCBs (universal pin out)",
+   "root_sheet": "daughterboard.kicad_sch",
+   "bug_class": "connector pinout (VCC/GND)",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
+  },
+  {
+   "repo": "Black-FX/RP2040_Mouse_KiCAD",
+   "fix_commit": "439a2a0cbd8b9b0392e0888c966d667a0e6af2ee",
+   "parent": "c975f0e75ac4f5a4550da5b1f0e140f480ee101e",
+   "message": "Rev 4, swap the USB pins around to match the requirements of Tinyusb.",
+   "root_sheet": "RP2040_Mouse.kicad_sch",
+   "bug_class": "USB pin order",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
+  },
+  {
+   "repo": "blazjerman/ESP32-Based-Sensor-PCB",
+   "fix_commit": "54d4380a100fec065fcedcb7c920eaa58e469490",
+   "parent": "247b7a5068d54a51f00180d1085d42743dae78ff",
+   "message": "Added top gnd plane and fixed rgb led power problem.",
+   "root_sheet": "ESP32-Based Sensor PCB.kicad_sch",
+   "bug_class": "LED power",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
+  },
+  {
+   "repo": "bkw777/aDIPters",
+   "fix_commit": "cbf8f5fbce0e97418c88a23f7ae6b8cffcc15d67",
+   "parent": "d9e8489362bfe2692b91fd4c0df02cff8abc3e69",
+   "message": "Fix wrong pinout on FlashROM_100 TSOPgit add -A!",
+   "root_sheet": "28C256_to_27C256.kicad_sch",
+   "bug_class": "part pinout (TSOP)",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
+  },
+  {
+   "repo": "byungyoonc/TrueStrike42",
+   "fix_commit": "06762bf47ae985183e5b11d8754d31b3359caa9d",
+   "parent": "617ad3688495d7d2110eb2a9e58c1828892d122f",
+   "message": "Add logo, fixed wrong pinouts for sensors",
+   "root_sheet": "TrueStrike42.kicad_sch",
+   "bug_class": "sensor pinouts",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
+  },
+  {
+   "repo": "StuartF303/vandaemon",
+   "fix_commit": "5f2076fd0c72e799606fe2cdcb682916e806d8a2",
+   "parent": "93176258fd9f72119a8bf15457f8d30abbd90c1b",
+   "message": "Route the addressable section; swap U5 ch3/ch4 and U1's CLK/STATUS pins",
+   "root_sheet": "VANDIMMER-4CH2A.kicad_sch",
+   "bug_class": "pin swaps",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
   }
  ],
- "caught_by_any": [
-  "0950fcef",
-  "1b4583ed",
-  "218f80b8",
-  "4ee16e00",
-  "a75fdfd7",
-  "e1f5f9df",
-  "ff3dc03b"
+ "excluded": [
+  {
+   "repo": "SPIRIT-org/SPIRIT",
+   "fix_commit": "6dfc1a8e6bd57ae0a2b9b34f79bdd99127081c03",
+   "parent": "38ea0f681c8629a9d9d6cd85912684a0aa75a196",
+   "message": "added polarity detection",
+   "root_sheet": "cm5-carrier.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "Wren6991/RISCBoy",
+   "fix_commit": "c0c1e98ad7d943d53ae29551deb45f2df5784388",
+   "parent": "7fff395501cca6b4ff385c5d9005988f247188c6",
+   "message": "Add missing start/select buttons, and move LCD reset control to uC to make room for FPGA IOs.",
+   "root_sheet": "riscboy.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "bitaxeorg/bitaxeGamma",
+   "fix_commit": "311201d69ec74f7de81a532d8193b9c0097f030a",
+   "parent": "ce3921c5b21acadad493f953945df0473270d8a7",
+   "message": "fixed fan default speed, got rid of ESP32 FAN_ALERT signal. DRC",
+   "root_sheet": "bitaxeUltra.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "bitaxeorg/bitaxeGamma",
+   "fix_commit": "9b045048843e028a3f91debcfc9f0620ba5c0a09",
+   "parent": "97c92239133b2f1337ba478aed4ae6016d4f1347",
+   "message": "swapped some parts numbers and packages for #169, DFM Improvements",
+   "root_sheet": "bitaxeSupra.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "bitaxeorg/bitaxeGamma",
+   "fix_commit": "af549152d688861c63a1ee37169b3a8d9f0315c2",
+   "parent": "5c2ab1c7622f0fa64e518a489e1ab3d8c8a52a60",
+   "message": "added polarity marker for #82",
+   "root_sheet": "bitaxeUltra.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "Twisted-Fields/rp2040-motor-controller",
+   "fix_commit": "fe258709d6af7f94e3f05dce24b83f31a74fe9b0",
+   "parent": "58fb8b505bd3aa64b4d311a3eefcafc857e90a47",
+   "message": "Debugger: Separated target power, added led switch, fix firmware buffered pins issue .",
+   "root_sheet": "RP2040_debugger.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "LibreSolar/bms-c1",
+   "fix_commit": "a0d5743dbbdbb726f75ec7a23e205214f2573f99",
+   "parent": "4d6dd562c60438f3ac5c51d266313a4a10a33877",
+   "message": "Add 10mm electrolytic cap to fix overvoltage spikes (#74)",
+   "root_sheet": "bms-c1.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "AzonInc/Doorman",
+   "fix_commit": "071390662a5cd0c404492867c0ff75cadc8a2a92",
+   "parent": "53940e41ddebe19848a34dcc93fdb7923874fa20",
+   "message": "Add missing sensors & update examples",
+   "root_sheet": "doorman.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "Neotron-Compute/Neotron-Pico",
+   "fix_commit": "605e0a45962bf0ef15ba47d367c4d1aa79bcb8ab",
+   "parent": "90beb86e31dce085fe96595a2a75b5dff918a6c2",
+   "message": "Swap video buffer to DIO2663",
+   "root_sheet": "neotron-pico.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "Neotron-Compute/Neotron-Pico",
+   "fix_commit": "a936e3782ddbd7a4697aa488e2c6c27904d4efc4",
+   "parent": "9d52325232ebf71063ab23da9f1c5e0ed9ecd0cd",
+   "message": "Fix net-tie metadata.",
+   "root_sheet": "neotron-pico.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "bitaxeorg/ultraHex",
+   "fix_commit": "1fd460b92828304397633fb44fa7647b8866cf82",
+   "parent": "20dc80c1528db7aa2a6b089aeb745a48e7efa27a",
+   "message": "swap out electrolytic output capacitor, add XT30 power connector",
+   "root_sheet": "bitaxeHex.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "bitaxeorg/ultraHex",
+   "fix_commit": "e78c26693d1b891cf40c039263e3f0ddfdae575c",
+   "parent": "e1f5f9df12838989923a0870ae64b7d478213308",
+   "message": "swap adjustable LDOs for fixed voltage LDOs",
+   "root_sheet": "bitaxeHex.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "Board-Folk/Neptune",
+   "fix_commit": "375377d1a187db68ca5a5e8c6f0e4b2378f7ebcf",
+   "parent": "458c12576fec84e40306334d9d03ed100b3dc4e5",
+   "message": "Add missing/extra decoupling on 32X side.",
+   "root_sheet": "Neptune.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "Board-Folk/Neptune",
+   "fix_commit": "16437ba93b86551cfe8463fcd8d34b65f1041a4f",
+   "parent": "2b16409074010b4e8767d94641fd816601cff9c4",
+   "message": "Spec resistors for RGB LPF to avoid accidental short.",
+   "root_sheet": "Neptune.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "Board-Folk/Neptune",
+   "fix_commit": "819b14c9686d418fda01b34cd728c9403eca02bd",
+   "parent": "79e4358ed79300155185db080f3a45ca6828a36d",
+   "message": "Swap order of R544 and CE512 to avoid ringing in composite video output. (zaxour)",
+   "root_sheet": "Neptune.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "antmicro/hdmi-mipi-bridge",
+   "fix_commit": "62d7ed02f998856d546ca72eda5e2edd563b3a5e",
+   "parent": "bc2cf7b4167f441150e2157b3e962427762ed282",
+   "message": "[#58304] Fix power flags orientation",
+   "root_sheet": "antmicro-hdmi-mipi-bridge-hw.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "dededecline/SST60",
+   "fix_commit": "ed6689a033aebf1f192844420d53e70eefa5240a",
+   "parent": "e9cbc8e45b4ed67e4b505465dbc2af8c30eddefe",
+   "message": "fixed LED routing error",
+   "root_sheet": "SST60.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "anyshake/explorer",
+   "fix_commit": "a2e166f5382455145e3ccc478dc591313e3b15f8",
+   "parent": "38780be43dddd9c2b1adbe85b34f3320fffe894d",
+   "message": "fix: remove redundant I2C pull-up resistors",
+   "root_sheet": "Explorer.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "anyshake/explorer",
+   "fix_commit": "0ff443706a0bb72094c475b5ac9a01f1d0589697",
+   "parent": "e4f5ef97dd9c77bc82178d510d3dddbcfc0cbf7c",
+   "message": "fix: Fixed LDO model for +2.5V rail",
+   "root_sheet": "Explorer.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "AndersBNielsen/abn6502",
+   "fix_commit": "86f91fd31a27b1a769102800facd04330ba1329c",
+   "parent": "f402c45a80627aa079a3ed150d6197ff16433b65",
+   "message": "Tape interface upgrade - still missing housekeeping bits",
+   "root_sheet": "6502.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "anthony-bernaert/ftdi-jtag-programmer",
+   "fix_commit": "0776de188c6fbab63ca9d1ea1db0210289fdecae",
+   "parent": "c41a7110b640010d678ecef23a4d14a52cfceaa3",
+   "message": "Fix wrong comment in schematic on UART VREF/5V mounting options",
+   "root_sheet": "JTAGProgrammer.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "electrified/rc2014-ym2149",
+   "fix_commit": "2128038a27aaac66a3e3368ffd8aaeb5b10357ea",
+   "parent": "b4937c67a9eec6633311af067fa3060663af6a3b",
+   "message": "fix component mapping",
+   "root_sheet": "rc2014-ym2149.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "Miceuz/rs485-moist-sensor",
+   "fix_commit": "95c106a3cbc2f53c0bd31299f98fe77c5819a5ef",
+   "parent": "3107c6bb15411cdaaa79817a9fc4a70bd2b23212",
+   "message": "Add cable pinout to sensor schematics",
+   "root_sheet": "rs485-moist-sensor.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "bitaxeorg/BitaxeGT",
+   "fix_commit": "c7c416b0e5a49bad18aa0257ab0174cfbfee65a1",
+   "parent": "cde8b698c20a2bb4427c5389cbafc6cb651b00a8",
+   "message": "swap XT30 to front",
+   "root_sheet": "BitaxeGT.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "brer-rabbit/zoxnoxious",
+   "fix_commit": "eab5b722b9823ac25914c784b3b2ca5ed809e02a",
+   "parent": "d03e69ff0333266f00e2285e1047781860ba9fef",
+   "message": "swap some instances around for better routing",
+   "root_sheet": "poledancer.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "brer-rabbit/zoxnoxious",
+   "fix_commit": "ec83a2087eff7ecb8a44dfac8ebdcb732cf64c00",
+   "parent": "ecc462aa07d2098a410f1b2b45de15b15f632b69",
+   "message": "checkpoint before changing some direction on this.  The resonance compensation is completely bonkers wrong.  Need to address that.",
+   "root_sheet": "poledancer.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "0xCB-dev/0xCB-Pluto",
+   "fix_commit": "373ec65a41ff6a7db5b97ecda93769352cea621c",
+   "parent": "04f583d1b7e090234cccf6bc161efbac6b0a9d48",
+   "message": "added rest button that might fit and fixed skew of data lines",
+   "root_sheet": "pluto.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "EvanKrall/pipad",
+   "fix_commit": "e4b584b6b133fc77c50dc128bdf41a6785670619",
+   "parent": "b4b6b35096cdea6321e56e343f2e6c5faf91b2ae",
+   "message": "add usb otg connector for testing usb wiring; fix more ERC/DRC",
+   "root_sheet": "pipad.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "DuPAL-PAL-DUmper/DuPAL_Board",
+   "fix_commit": "5ad83faf09835482ba841e9ab7b11c68a76f9257",
+   "parent": "75d9249f2ebc158563d6b64b8caf2a9e17d7c575",
+   "message": "Change pulldown res on switched VCC value",
+   "root_sheet": "DuPal_V3.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "DuPAL-PAL-DUmper/DuPAL_Board",
+   "fix_commit": "75d9249f2ebc158563d6b64b8caf2a9e17d7c575",
+   "parent": "a392d26db444f2a71f23217a4bd5cf724810ca33",
+   "message": "Add pulldown resistors for socket",
+   "root_sheet": "DuPal_V3.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  },
+  {
+   "repo": "XenGi/darling",
+   "fix_commit": "ff8e08d192a68b18a33e5473283a862d0ab5de6a",
+   "parent": "72bbb9a21a465a6307fba11ee07fa6b64713c36b",
+   "message": "Add missing CC resistors",
+   "root_sheet": "darling.kicad_sch",
+   "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
+  }
  ]
 }
