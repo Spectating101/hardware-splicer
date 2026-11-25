@@ -3293,6 +3293,161 @@
           }
         ]
       }
+    },
+    {
+      "id": "adafruit-scd41-stemma-qt",
+      "name": "Adafruit SCD-41 CO2, temperature and humidity sensor, STEMMA QT (product 5190)",
+      "kind": "i2c_breakout",
+      "chips": [
+        {
+          "marking": "SCD41",
+          "role": "photoacoustic CO2, temperature and humidity sensor on the module",
+          "source": "https://www.adafruit.com/product/5190"
+        }
+      ],
+      "summary": "Adafruit's STEMMA QT board for the Sensirion SCD-41 true CO2 sensor, with a 3.3 V regulator and I2C level shifting.",
+      "frame": "Top view, origin at the board's top-left corner, from the maker's board file.",
+      "pcb_mm": {
+        "x": 25.4,
+        "y": 22.86,
+        "z": 1.6
+      },
+      "above_board_mm": 6.5,
+      "below_board_mm": 8.5,
+      "pin_pitch_mm": 2.54,
+      "header_face": "above",
+      "pins": [
+        {
+          "id": "VCC",
+          "name": "VCC",
+          "roles": [
+            "power_in"
+          ],
+          "x": 7.62,
+          "y": 20.32,
+          "side": "top"
+        },
+        {
+          "id": "3.3V",
+          "name": "3.3V",
+          "roles": [
+            "power_3v3"
+          ],
+          "x": 10.16,
+          "y": 20.32,
+          "side": "top"
+        },
+        {
+          "id": "GND",
+          "name": "GND",
+          "roles": [
+            "ground"
+          ],
+          "x": 12.7,
+          "y": 20.32,
+          "side": "top"
+        },
+        {
+          "id": "SCL",
+          "name": "SCL",
+          "roles": [
+            "i2c_scl"
+          ],
+          "x": 15.24,
+          "y": 20.32,
+          "side": "top"
+        },
+        {
+          "id": "SDA",
+          "name": "SDA",
+          "roles": [
+            "i2c_sda"
+          ],
+          "x": 17.78,
+          "y": 20.32,
+          "side": "top"
+        }
+      ],
+      "pin_order_varies": false,
+      "i2c": {
+        "addresses": [
+          "0x62"
+        ],
+        "address_basis": "Adafruit product 5190: I2C digital interface address 0x62 (a fixed address)."
+      },
+      "electrical": {
+        "supply_note": "Adafruit says the sensor runs from 3.3 to 5 V and that the board adds a 3.3 V regulator and level shifters. Cut-and-solder back traces change whether the regulator is used and the I2C logic level, so check the jumpers on your board. Prefer the {controller}'s 3.3 V pin.",
+        "pullups_note": "Adafruit's board file has 10 kOhm pull-ups on SDA and SCL to a net set by a solder jumper (the I2C logic level), so the bus may sit at Vin. Check the jumper and any other pull-ups on the bus.",
+        "onboard_pullups": true
+      },
+      "dimension_basis": {
+        "pcb": "Board file outline 25.4 x 22.86 mm. Thickness 1.6 mm is the usual stock, not in the file.",
+        "pins": "Header pad positions and net names from the board file. Names are the board's net names (VCC, 3.3V); the silkscreen may print VIN and 3Vo. Connect by the printed names.",
+        "holes": "Mounting holes at (2.54, 2.54), (22.86, 2.54), (2.54, 20.32), (22.86, 20.32) mm.",
+        "heights": "Adafruit lists the product at 25.5 x 22.8 x 7.7 mm and the sensor element at 10.1 x 10.1 x 6.5 mm; HS takes 6.5 mm above the board, the larger reading. Header length below the board is typical, not published. Measure yours."
+      },
+      "sources": [
+        {
+          "label": "Adafruit product 5190 (address, regulator, current, size)",
+          "url": "https://www.adafruit.com/product/5190",
+          "as_of": "2026-11-25"
+        },
+        {
+          "label": "Adafruit SCD-4x board file, commit c839954 (outline, header, holes, pull-ups)",
+          "url": "https://github.com/adafruit/Adafruit-SCD-4x-PCB/blob/c83995482b4c830a835caef158e6196a507025b3/Adafruit%20SCD-41.brd",
+          "as_of": "2026-11-25"
+        }
+      ],
+      "notes": [
+        "The sensor needs airflow to its opening; do not seal it inside a case without vents.",
+        "Geometry drafted by hardware_splicer.eagle_board_import from the board file and checked by hand."
+      ],
+      "quotes": [
+        {
+          "claim": "Regulator and level shifters",
+          "quote": "we've added a 3.3V regulator and level shifters",
+          "source": "https://www.adafruit.com/product/5190"
+        },
+        {
+          "claim": "Supply range",
+          "quote": "This sensor can run from 3.3 to 5V",
+          "source": "https://www.adafruit.com/product/5190"
+        },
+        {
+          "claim": "I2C address",
+          "quote": "I2C digital interface address 0x62",
+          "source": "https://www.adafruit.com/product/5190"
+        },
+        {
+          "claim": "Size",
+          "quote": "Product Dimensions: 25.5mm x 22.8mm x 7.7mm",
+          "source": "https://www.adafruit.com/product/5190"
+        }
+      ],
+      "engineering": {
+        "loads": [
+          {
+            "mode": "periodic measurement every 5 s",
+            "kind": "sustained",
+            "typical_ma": 17,
+            "rail_v": 3.3,
+            "conditions": "Adafruit's figure; the rail is not stated, so 3.3 V (the regulator's output) is assumed",
+            "quote": "Current consumption: 17 mA (meas. rate = 5 s)",
+            "locator": "Adafruit product 5190, specifications",
+            "source": "https://www.adafruit.com/product/5190"
+          }
+        ],
+        "gaps": [
+          {
+            "field": "operating_temp_c",
+            "reason": "Adafruit's page gives no operating range; Sensirion's datasheet is not cited here yet."
+          },
+          {
+            "field": "loads.max_ma",
+            "reason": "Only the average at a 5 s rate is published here; the measurement peak is not."
+          }
+        ]
+      }
     }
   ]
 }

@@ -76,3 +76,19 @@ def test_the_device_api_serves_the_catalogue_and_the_wiring_check(tmp_path, monk
     assert checked["ok"] and checked["library"] == "engine"
     refused = client.post("/v1/devices/check-wiring", json={"modules": []})
     assert refused.status_code == 422
+
+
+def test_a_promoted_engine_part_gains_a_cited_planner_board():
+    """The SCD-41 was promoted from the engine library with geometry from Adafruit's board file and cited electrical text."""
+    from hardware_splicer.device_plan import build_device_plan, module_library
+
+    entry = next(m for m in module_library()["modules"] if m["id"] == "adafruit-scd41-stemma-qt")
+    assert entry["pcb_mm"] == {"x": 25.4, "y": 22.86, "z": 1.6} and entry["i2c"]["addresses"] == ["0x62"]
+    assert any("blob/c83995482b4c830a835caef158e6196a507025b3" in s["url"] for s in entry["sources"])
+    assert {p["id"]: p["roles"] for p in entry["pins"]} == {"VCC": ["power_in"], "3.3V": ["power_3v3"], "GND": ["ground"],
+                                                            "SCL": ["i2c_scl"], "SDA": ["i2c_sda"]}
+    by_id = {p["id"]: p for p in unified_catalog()["parts"]}
+    assert by_id["scd41-co2"]["cited_boards_with_this_chip"] == ["adafruit-scd41-stemma-qt"]
+    plan = build_device_plan(draft_device_spec({"controller": "esp32-devkitc-v4",
+                                                "parts": ["adafruit-oled-1.3-128x64-stemma-qt", "adafruit-scd41-stemma-qt"]})["spec"])
+    assert plan["counts"]["errors"] == 0 and plan["counts"]["warnings"] == 0

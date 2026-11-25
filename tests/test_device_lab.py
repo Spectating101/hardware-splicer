@@ -88,12 +88,14 @@ def test_cli(tmp_path, capsys):
 
 def test_what_can_i_build_from_the_parts_on_the_bench():
     from hardware_splicer.device_lab import what_can_i_build
+    from hardware_splicer.device_plan import module_library
 
     result = what_can_i_build(["esp32-devkitc-v4", "adafruit-bme280-stemma-qt"])
     assert result["ready"] == [{"controller": "esp32-devkitc-v4", "parts": ["adafruit-bme280-stemma-qt"], "missing": []}]
     assert all(len(row["missing"]) == 1 for row in result["one_part_away"])
     assert ("adafruit-oled-1.3-128x64-stemma-qt", 2) in result["best_single_addition"]
     total = len(result["ready"]) + len(result["one_part_away"]) + result["needs_two_or_more"]
-    assert total == 2 * 3 * 7 - 2  # two controllers, no/two displays, no/six sensors, less the two with nothing attached
+    sensors = sum(1 for m in module_library()["modules"] if m["kind"] == "i2c_breakout")
+    assert total == 2 * 3 * (sensors + 1) - 2  # two controllers, no/two displays, no/each sensor, less the two with nothing attached
     with pytest.raises(DeviceLabError, match="not in the module library"):
         what_can_i_build(["esp32-devkitc-v4", "flux-capacitor"])
