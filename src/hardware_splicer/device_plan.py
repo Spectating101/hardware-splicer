@@ -1264,7 +1264,9 @@ def build_device_plan(spec: Any, *, donor_modules=None) -> dict[str, Any]:
         offset = panel.get("center_offset_mm", {"x": 0.0, "y": 0.0})
         centre = display.point(display.pcb["x"] / 2 + offset["x"], display.pcb["y"] / 2 + offset["y"], display.pcb["z"] + display.above)
         window = {"x": centre["x"], "z": centre["z"], "width_mm": _r(active["x"] + 2 * WINDOW_MARGIN_MM), "depth_mm": _r(active["y"] + 2 * WINDOW_MARGIN_MM),
-                  "basis": "the active area plus a margin all round, centred where this module type usually has its glass; the offset is not published, so measure yours before printing"}
+                  "basis": "the active area plus a margin all round, centred where the maker's board file puts the active area; glass is placed by hand, so check yours before printing"
+                  if panel.get("center_offset_published") else
+                  "the active area plus a margin all round, centred where this module type usually has its glass; the offset is not published, so measure yours before printing"}
 
     if window is not None:
         half_x, half_z = inner_x / 2 + wall, inner_z / 2 + wall
