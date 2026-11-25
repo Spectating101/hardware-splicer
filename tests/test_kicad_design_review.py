@@ -80,3 +80,33 @@ def test_usb_c_cc_pins_need_a_pulldown_even_when_unwired():
 def test_not_a_netlist_is_refused():
     with pytest.raises(KicadReviewError):
         parse_netlist("(kicad_sch (version 1))")
+
+
+FLIPPER = {"J20": {"board": "flipper-devices-gpio-device-flipper-zero"}}
+ESP = ("U1", "ESP32-C3", "RF_Module", "ESP32-C3-MINI-1", "module")
+HEADER = ("J20", "Conn_01x10", "Connector_Generic", "Conn_01x10", "Generic connector")
+
+
+def _backpack(tx_function, rx_function):
+    """The ten pins a Flipper Zero backpack (Chrismettal/flipper-zero-backpacks) puts on header positions 9-18."""
+    return netlist([ESP, HEADER], [
+        ("Ext_+3.3V", [("J20", "1", "Pin_1", "passive")]), ("SWCLK", [("J20", "2", "Pin_2", "passive")]),
+        ("GND", [("J20", "3", "Pin_3", "passive"), ("J20", "10", "Pin_10", "passive")]), ("SWDIO", [("J20", "4", "Pin_4", "passive")]),
+        ("TX", [("J20", "5", "Pin_5", "passive"), ("U1", "37", tx_function, "bidirectional")]),
+        ("RX", [("J20", "6", "Pin_6", "passive"), ("U1", "38", rx_function, "bidirectional")]),
+    ])
+
+
+def test_a_declared_mate_catches_tx_wired_to_tx_across_the_connector():
+    swapped = review(_backpack("TXD0", "RXD0"), FLIPPER)
+    found = {f["rule"] for f in swapped["findings"]}
+    assert found == {"uart_tx_to_tx_across_connector", "uart_rx_to_rx_across_connector"}
+    assert all("pin offset 8, inferred from" in f["basis"] and "Black Wire" in f["basis"] for f in swapped["findings"])
+    assert review(_backpack("RXD0", "TXD0"), FLIPPER)["findings"] == []
+
+
+def test_without_a_declaration_or_an_alignment_nothing_is_guessed():
+    assert review(_backpack("TXD0", "RXD0"))["findings"] == []
+    lone = netlist([ESP, HEADER], [("TX", [("J20", "5", "Pin_5", "passive"), ("U1", "37", "TXD0", "bidirectional")])])
+    assert [f["rule"] for f in review(lone, FLIPPER)["findings"]] == ["mate_unaligned"]
+    assert [f["rule"] for f in review(lone, {"J20": {"board": "no-such-board"}})["findings"]] == ["mate_unknown"]

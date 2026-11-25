@@ -97,7 +97,82 @@ def _kind(comp: dict[str, Any]) -> str:
     return "other"
 
 
-def review(model: dict[str, Any]) -> dict[str, Any]:
+REF_TX = re.compile(r"(^|[\s./_])((LP)?U(S)?ART\d*[._])?TXD?\d?($|\b)", re.I)
+REF_RX = re.compile(r"(^|[\s./_])((LP)?U(S)?ART\d*[._])?RXD?\d?($|\b)", re.I)
+
+
+def _volts(label: str) -> float | None:
+    m = re.search(r"(\d+(?:[.V]\d+)?)\s*V", label.upper())
+    if re.fullmatch(r"\+?3V3|3\.3V", label.strip(), re.I):
+        return 3.3
+    return float(m.group(1).replace("V", ".")) if m else None
+
+
+def _align(local: dict[int, str], reference: list[dict[str, Any]]) -> tuple[int | None, int]:
+    """The offset that lines a connector's pins up with a reference header, scored on ground, supply and debug pins."""
+    best, best_score, tie = None, 0, False
+    for offset in range(0, max(1, len(reference) - len(local) + 1) + 1):
+        score = 0
+        for k, net in local.items():
+            ref = next((p for p in reference if p["position"] == k + offset), None)
+            if ref is None:
+                score -= 1
+                continue
+            label = ref["label"].upper()
+            if GROUND.search(net) and label == "GND":
+                score += 1
+            elif SUPPLY.search(net) and _volts(label) is not None and _volts(label) == _volts(net.split("/")[-1].lstrip("+").replace("Ext_", "")):
+                score += 1
+            elif any(f.upper() in net.upper() for f in [label, *ref.get("functions", [])] if len(f) >= 4):
+                score += 1
+        if score > best_score:
+            best, best_score, tie = offset, score, False
+        elif score == best_score and score > 0:
+            tie = True
+    return (None if tie else best), best_score
+
+
+def _mated_findings(comps, nets, pin_net, mates, finding) -> None:
+    from .blackwire_bridge import snapshot as black_wire
+
+    boards = black_wire()["boards"]
+    for ref, mate in (mates or {}).items():
+        board = boards.get(mate.get("board", ""))
+        if board is None or ref not in comps:
+            finding("info", "mate_unknown", f"{ref}: no Black Wire board {mate.get('board')!r}, so the mating check did not run.", "mates declaration", [ref])
+            continue
+        connector = next((c for c in board["connectors"] if c["name"] == mate.get("connector")), board["connectors"][0] if board["connectors"] else None)
+        if connector is None:
+            continue
+        local = {int(p): net for (r, p), net in pin_net.items() if r == ref and p.isdigit()}
+        offset, score = (int(mate["offset"]), -1) if "offset" in mate else _align(local, connector["pins"])
+        source = f"Black Wire pinout of {mate['board']} / {connector['name']} ({board.get('review')}, CC-BY-4.0, (c) Valleytech Solutions)"
+        if offset is None or (score != -1 and score < 2):
+            finding("info", "mate_unaligned", f"{ref} could not be lined up with {mate['board']} {connector['name']}: give the pin offset in the mates declaration.", source, [ref])
+            continue
+        how = f"pin offset {offset}" + (f", inferred from {score} matching ground/supply/debug pins" if score >= 0 else ", as declared")
+        for k, net in sorted(local.items()):
+            pin = next((p for p in connector["pins"] if p["position"] == k + offset), None)
+            if pin is None:
+                continue
+            roles = " ".join(pin.get("functions") or []) + " " + pin["label"]
+            theirs = "TX" if REF_TX.search(roles) and not REF_RX.search(roles) else "RX" if REF_RX.search(roles) and not REF_TX.search(roles) else None
+            for n in nets.get(net, []):
+                if n["ref"] == ref or n["type"] == "passive":
+                    continue
+                ours = "TX" if TX.search(n["function"]) and not RX.search(n["function"]) else "RX" if RX.search(n["function"]) and not TX.search(n["function"]) else None
+                if theirs and ours == theirs:
+                    finding("error", f"uart_{ours.lower()}_to_{ours.lower()}_across_connector",
+                            f"{ref} pin {k} is {mate['board']} pin {k + offset} ({pin['label']}: {theirs}), wired to {n['ref']}.{n['function']} ({ours}) on net {net}. "
+                            "A UART links TX to RX.", f"{source}; {how}", [ref, n["ref"]], net)
+            label = pin["label"].upper()
+            if label == "GND" and SUPPLY.search(net):
+                finding("error", "mate_ground_on_supply", f"{ref} pin {k} meets {mate['board']}'s GND but is on supply net {net}.", f"{source}; {how}", [ref], net)
+            elif _volts(label) is not None and GROUND.search(net):
+                finding("error", "mate_supply_on_ground", f"{ref} pin {k} meets {mate['board']}'s {pin['label']} but is on ground net {net}.", f"{source}; {how}", [ref], net)
+
+
+def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[str, Any]:
     comps, nets = model["components"], model["nets"]
     pin_net: dict[tuple[str, str], str] = {}
     for name, nodes in nets.items():
@@ -162,29 +237,35 @@ def review(model: dict[str, Any]) -> dict[str, Any]:
                 if net is None or not resistor_to(net, GROUND):
                     finding("warning", "usb_c_cc_no_pulldown", f"{ref} {fn} {'is not connected' if net is None else 'has no resistor to ground'}. A USB-C sink needs Rd (5.1 kOhm) on each CC pin or a "
                             "source will not supply 5 V.", "USB Type-C specification, sink termination Rd = 5.1 kOhm (cited by section, not quoted here)", [ref], net)
+    _mated_findings(comps, nets, pin_net, mates, finding)
     counts = {s: sum(f["severity"] == s for f in findings) for s in ("error", "warning", "info")}
     return {"schema_version": SCHEMA, "claim_boundary": BOUNDARY, "components": len(comps), "nets": len(nets), "findings": findings, "counts": counts}
 
 
-def review_schematic(path: Path) -> dict[str, Any]:
+def review_schematic(path: Path, mates: dict[str, Any] | None = None) -> dict[str, Any]:
     if path.suffix == ".net":
-        return review(parse_netlist(path.read_text(encoding="utf-8", errors="replace")))
+        return review(parse_netlist(path.read_text(encoding="utf-8", errors="replace")), mates)
     with tempfile.TemporaryDirectory() as tmp:
         out = Path(tmp) / "board.net"
         run = subprocess.run(["kicad-cli", "sch", "export", "netlist", "--format", "kicadsexpr", "--output", str(out), str(path)],
                              capture_output=True, text=True, timeout=300, check=False)
         if not out.exists():
             raise KicadReviewError(f"kicad-cli could not export a netlist: {run.stderr.strip()[:300]}")
-        return review(parse_netlist(out.read_text(encoding="utf-8", errors="replace")))
+        return review(parse_netlist(out.read_text(encoding="utf-8", errors="replace")), mates)
 
 
 def main(argv: list[str] | None = None) -> int:
     args = sys.argv[1:] if argv is None else argv
+    mates = None
+    if "--mates" in args:
+        i = args.index("--mates")
+        mates = json.loads(Path(args[i + 1]).read_text(encoding="utf-8"))
+        args = args[:i] + args[i + 2:]
     if len(args) != 1:
         print(__doc__, file=sys.stderr)
         return 2
     try:
-        print(json.dumps(review_schematic(Path(args[0])), indent=2))
+        print(json.dumps(review_schematic(Path(args[0]), mates), indent=2))
     except (KicadReviewError, OSError, subprocess.SubprocessError) as exc:
         print(json.dumps({"error": str(exc)}), file=sys.stderr)
         return 2
