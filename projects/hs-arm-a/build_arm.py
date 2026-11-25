@@ -12,7 +12,7 @@ Geometry basis
 * Idler horn on the back face: 4 mm thick, same diameter (assumed; ROBOTIS's hinge frames need an idler horn per its
   e-manual, but its drawing could not be downloaded).
 * Horn bolt circle and servo side-screw positions are NOT modelled: printed parts carry no holes for them. Drill or
-  add them from the real horn (a printed test coupon is generated for that).
+  add them from the real horn before printing.
 
 Everything printed is PLA. Its mass uses a density of 1.24 g/cm3 and a 60 % effective fill (both assumed). Servo masses
 are the cited ones.
