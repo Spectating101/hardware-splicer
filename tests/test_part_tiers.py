@@ -126,3 +126,34 @@ def test_an_led_strip_takes_power_rather_than_supplying_it():
              "connections": [{"from": "strip.5V", "to": "mcu.VIN"}, {"from": "strip.GND", "to": "mcu.GND"}, {"from": "strip.DIN", "to": "mcu.GPIO18"}]}
     rules = {f["rule"] for f in check_any_wiring(strip)["findings"]}
     assert "logicLow" in rules and "noSource" in rules  # two power inputs joined: nothing on that wire supplies the strip
+
+
+MCU = {"id": "mcu", "module": "esp32-devkit"}
+
+
+def _servos(n):
+    pins = ["GPIO16", "GPIO17", "GPIO18", "GPIO23"]
+    return {"modules": [MCU, *({"id": f"s{i}", "module": "sg90"} for i in range(n))],
+            "connections": [c for i in range(n) for c in ({"from": f"s{i}.VCC", "to": "mcu.VIN"}, {"from": f"s{i}.GND", "to": "mcu.GND"},
+                                                           {"from": f"s{i}.SIG", "to": f"mcu.{pins[i]}"})]}
+
+
+def _strip(count=None):
+    row = {"id": "strip", "module": "ws2812b_strip", **({"count": count} if count else {})}
+    return {"modules": [MCU, row], "connections": [{"from": "strip.5V", "to": "mcu.VIN"}, {"from": "strip.GND", "to": "mcu.GND"},
+                                                   {"from": "strip.DIN", "to": "mcu.GPIO18"}]}
+
+
+def _budget(spec):
+    return [(f["severity"], f["rule"]) for f in check_any_wiring(spec)["findings"] if f["rule"].startswith("usbBudget")]
+
+
+def test_loads_on_the_controller_5v_pin_are_added_up_against_a_usb_port():
+    """The head-to-head traps: four SG90s, and 60 WS2812B pixels, on a DevKit's 5 V pin fed from USB (cited figures)."""
+    assert _budget(_servos(4)) == [("error", "usbBudget")]
+    assert _budget(_servos(1)) == [("warning", "usbBudget")]  # 500 mA: the whole port before the board's own draw
+    assert _budget(_strip(60)) == [("error", "usbBudget")]
+    assert _budget(_strip(4)) == []  # 240 mA
+    assert _budget(_strip()) == [("warning", "usbBudgetUnsized")]
+    message = next(f["message"] for f in check_any_wiring(_strip(60))["findings"] if f["rule"] == "usbBudget")
+    assert "60 x 60 mA = 3600 mA" in message and "learn.adafruit.com" in message

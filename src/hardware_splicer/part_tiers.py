@@ -168,7 +168,8 @@ def check_any_wiring(spec: Any) -> dict[str, Any]:
     for ref, mod in chosen:
         if find_module(mod) is None:
             errors.append(f"{ref}: no part {mod!r} in either library")
-        nodes.append({"id": ref, "moduleId": mod})
+        count = next((row.get("count") for row in spec["modules"] if row.get("id") == ref), None)
+        nodes.append({"id": ref, "moduleId": mod, **({"count": int(count)} if isinstance(count, int) and count > 0 else {})})
     wires = []
     for index, wire in enumerate(spec.get("connections", [])):
         ends = []

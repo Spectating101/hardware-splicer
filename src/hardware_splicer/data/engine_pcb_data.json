@@ -1051,6 +1051,8 @@
     },
     {
       "id": "sg90",
+      "peakCurrentMa": 500,
+      "peakCurrentSource": {"url": "http://www.towerpro.com.tw/product/sg90-7/", "accessed": "2026-11-26", "quote": "The operation current for our SG90 is about 0.5A – 2A.", "note": "A TowerPro staff reply in the product page's Q&A (2021-11-07), not the specification, which gives no current; 500 mA is its lower end."},
       "label": "SG90 servo",
       "category": "actuator",
       "summary": "Small hobby servo, 180° range, 5V PWM.",
@@ -7983,6 +7985,9 @@
     },
     {
       "id": "ws2812b_strip",
+      "peakCurrentMaPerUnit": 60,
+      "currentUnit": "pixel",
+      "peakCurrentSource": {"url": "https://learn.adafruit.com/adafruit-neopixel-uberguide/powering-neopixels", "accessed": "2026-11-26", "quote": "Each individual NeoPixel draws up to 60 milliamps at maximum brightness white (red + green + blue).", "note": "Worst case; the same page uses 20 mA per pixel as a rule of thumb for mixed colours."},
       "label": "WS2812B Addressable RGB LED Strip",
       "category": "display",
       "summary": "WS2812B Addressable RGB LED Strip",

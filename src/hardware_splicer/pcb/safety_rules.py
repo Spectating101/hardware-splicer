@@ -330,7 +330,7 @@ def analyze_build(graph: BuildGraph) -> List[BuildWarning]:
                 }
             )
 
-        if module_spec["id"] in ("sg90", "l298n"):
+        if module_spec["id"] == "l298n":  # its load is the motors it drives; parts with a cited peak current go through the budget below
             powered_from_mcu = False
             for w in graph.get("wires") or []:
                 ends = [w["from"], w["to"]]
@@ -357,7 +357,63 @@ def analyze_build(graph: BuildGraph) -> List[BuildWarning]:
                     }
                 )
 
+    warnings.extend(_controller_5v_budget(graph))
+
     from ..i2c_bus_analysis import i2c_findings
 
     warnings.extend(i2c_findings(graph))
     return warnings
+
+
+USB2_PORT_MA = 500  # USB 2.0 specification, section 7.2.1: a high-power port supplies five unit loads of 100 mA
+
+
+def _controller_5v_budget(graph: BuildGraph) -> List[BuildWarning]:
+    """Add up the cited peak current of every part powered from a controller board's 5 V pin, which a USB port feeds."""
+    out: List[BuildWarning] = []
+    nodes = {n["id"]: n for n in graph.get("nodes") or []}
+    loads: Dict[str, list] = {}
+    for w in graph.get("wires") or []:
+        for mine, other in ((w["from"], w["to"]), (w["to"], w["from"])):
+            node, peer = nodes.get(mine["nodeId"]), nodes.get(other["nodeId"])
+            spec = find_module(str((node or {}).get("moduleId") or ""))
+            peer_spec = find_module(str((peer or {}).get("moduleId") or ""))
+            if not spec or not peer_spec or peer_spec.get("category") != "mcu":
+                continue
+            pin, peer_pin = find_pin(spec, mine["pinId"]), find_pin(peer_spec, other["pinId"])
+            if not pin or not peer_pin or _effective_pin_role(graph, node, pin) != "power_in":
+                continue
+            if not re.search(r"^(VIN|5V|VBUS|V5)$", str(peer_pin.get("id") or ""), re.I):
+                continue
+            if any(entry[0] == node["id"] for entry in loads.get(peer["id"], [])):
+                continue
+            loads.setdefault(peer["id"], []).append((node["id"], spec, node.get("count")))
+    for mcu_id, rows in loads.items():
+        total, parts, unsized = 0.0, [], []
+        for node_id, spec, count in rows:
+            source = spec.get("peakCurrentSource") or {}
+            if spec.get("peakCurrentMa"):
+                total += float(spec["peakCurrentMa"])
+                parts.append(f"{node_id} {spec['peakCurrentMa']:g} mA ({source.get('url', 'uncited')})")
+            elif spec.get("peakCurrentMaPerUnit"):
+                if not count:
+                    unsized.append(f"{node_id} ({spec['peakCurrentMaPerUnit']:g} mA per {spec.get('currentUnit', 'unit')}: give its count)")
+                    continue
+                ma = float(spec["peakCurrentMaPerUnit"]) * int(count)
+                total += ma
+                parts.append(f"{node_id} {count} x {spec['peakCurrentMaPerUnit']:g} mA = {ma:g} mA ({source.get('url', 'uncited')})")
+        mcu_label = (find_module(str(nodes[mcu_id].get("moduleId"))) or {}).get("label", mcu_id)
+        if total > USB2_PORT_MA:
+            out.append({"id": f"{mcu_id}-usbBudget", "level": "error", "nodeId": mcu_id,
+                        "message": f"{mcu_label}'s 5 V pin would feed up to {total:g} mA peak: {'; '.join(parts)}. A USB 2.0 port supplies "
+                                   f"{USB2_PORT_MA} mA. Power these loads from their own 5 V supply."})
+        elif total >= USB2_PORT_MA / 2:
+            # The board itself draws from the same port (an ESP32's radio bursts), and the library has no cited figure for it.
+            out.append({"id": f"{mcu_id}-usbBudget", "level": "warn", "nodeId": mcu_id,
+                        "message": f"{mcu_label}'s 5 V pin would feed up to {total:g} mA peak: {'; '.join(parts)}. That is half or more of the "
+                                   f"{USB2_PORT_MA} mA a USB 2.0 port supplies, before the board's own draw. Expect brownouts; a separate 5 V "
+                                   "supply is safer."})
+        if unsized:
+            out.append({"id": f"{mcu_id}-usbBudgetUnsized", "level": "warn", "nodeId": mcu_id,
+                        "message": f"{mcu_label}'s 5 V pin feeds {', '.join(unsized)}, so its USB budget cannot be checked."})
+    return out
