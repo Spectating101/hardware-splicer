@@ -36,7 +36,8 @@ BOUNDARY = "Static checks of KiCad netlist data against stated conventions. Not 
 UM10204 = "NXP UM10204 I2C-bus specification: SDA and SCL are connected to a positive supply through pull-up resistors"
 GROUND = re.compile(r"(^|[/_])(A|D|P|S)?GND\w*$|^/?(GND|VSS|0V)\w*$", re.I)
 # KiCad power symbols name their nets with a leading + (+5V, +VSW, +BATT); other supply names are matched by pattern.
-SUPPLY = re.compile(r"^\+|(^|[/_])(\d+V\d*\w*|V(CC|DD|IN|BUS|BAT|SYS)\w*|3V3\w*|1V8\w*|VBATT?\w*)$", re.I)
+# A rail by name: +5V, VCC_IO, 3V3, VBAT; also 3.3V and 1.8V written with a point, and an embedded 3V3 or 1V8 (D+3V3, P3V3).
+SUPPLY = re.compile(r"^\+|(^|[/_])(\d+V\d*\w*|V(CC|DD|IN|BUS|BAT|SYS)\w*|3V3\w*|1V8\w*|VBATT?\w*)$|(^|[^A-Za-z0-9.])\d+\.\d+V\w*$|\dV\d+\w*$", re.I)
 TX = re.compile(r"(^|[/_])(U\d?TXD?\d?|TXD?\d?|UART\d?_TX)($|[/_])", re.I)
 RX = re.compile(r"(^|[/_])(U\d?RXD?\d?|RXD?\d?|UART\d?_RX)($|[/_])", re.I)
 I2C = re.compile(r"(^|[/_])(I2C\d?_)?(SDA|SCL)\d?($|[/_])", re.I)

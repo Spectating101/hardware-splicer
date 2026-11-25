@@ -197,3 +197,13 @@ def test_a_pull_up_to_a_regulator_output_counts_whatever_the_net_is_called():
     assert rules(pulled) == []
     floating = netlist([ldo, *imu, pull], [("GPIO2", bus), ("VREF", [("R41", "1", "1_1", "unspecified"), ("U13", "1", "IN_1", "unspecified")])])
     assert rules(floating) == ["i2c_no_pullup"]
+
+
+def test_rails_written_with_a_point_or_an_embedded_3v3_count_as_supplies():
+    """beagleboard/capes pulls I2C up to 3.3V and anyshake/explorer to D+3V3; both were read as missing pull-ups."""
+    from hardware_splicer.kicad_design_review import SUPPLY
+
+    for name in ("3.3V", "/3.3V", "1.8V", "/MCU Controller/D+3V3", "P3V3", "+3.3V", "VCC_IO"):
+        assert SUPPLY.search(name), name
+    for name in ("P1.26(I2C2.SDA)", "GPIO3", "/USB/CC1", "MOTOR_A", "IO12_20"):
+        assert not SUPPLY.search(name), name
