@@ -1,0 +1,288 @@
+{
+  "family_id": "dy-phyarc",
+  "family_name": "动易 PhyArc",
+  "shared": {
+    "manufacturer": "动易",
+    "manufacturer_en": "PHYBOT",
+    "electrical": {
+      "voltage_v": 72,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "motor_encoder_bits": 22
+    },
+    "transmission": {
+      "type": "cycloidal",
+      "backdrivable": false
+    }
+  },
+  "variants": [
+    {
+      "id": "dy-phyarc-102-25-48",
+      "model": "PhyArc 102",
+      "base_id": "DY-PhyArc-102-25-48",
+      "electrical": {
+        "peak_current_a": 80,
+        "continuous_current_a": 15,
+        "rated_input_power_w": 1080,
+        "peak_input_power_w": 5760
+      },
+      "mechanical": {
+        "rated_torque_nm": 60,
+        "peak_torque_nm": 244,
+        "start_stop_peak_torque_nm": 244,
+        "max_allow_instant_load_nm": 244,
+        "peak_output_power_w": 484,
+        "rated_speed_rpm": 100,
+        "max_speed_rpm": 124.2,
+        "weight_kg": 1,
+        "outer_diameter_mm": 102,
+        "output_encoder_bits": 27,
+        "torque_density_nm_per_kg": 244.0
+      },
+      "transmission": {
+        "reduction_ratio": 25
+      },
+      "options": {
+        "bus_types": [
+          "CANFD",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 54.8,
+        "length_mm_max": 54.8,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/5_动易_PhyArc模组.png"
+    },
+    {
+      "id": "dy-phyarc-150-25-48",
+      "model": "PhyArc 150",
+      "base_id": "DY-PhyArc-150-25-48",
+      "electrical": {
+        "peak_current_a": 200,
+        "continuous_current_a": 30,
+        "rated_input_power_w": 2160,
+        "peak_input_power_w": 14400
+      },
+      "mechanical": {
+        "rated_torque_nm": 180,
+        "peak_torque_nm": 590,
+        "start_stop_peak_torque_nm": 590,
+        "max_allow_instant_load_nm": 590,
+        "peak_output_power_w": 2508.1,
+        "rated_speed_rpm": 80,
+        "max_speed_rpm": 138.5,
+        "weight_kg": 3.5,
+        "outer_diameter_mm": 150,
+        "output_encoder_bits": 27,
+        "torque_density_nm_per_kg": 168.57
+      },
+      "transmission": {
+        "reduction_ratio": 25
+      },
+      "options": {
+        "bus_types": [
+          "CANFD",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 79,
+        "length_mm_max": 79,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/5_动易_PhyArc模组.png"
+    },
+    {
+      "id": "dy-phyarc-47-25-48",
+      "model": "PhyArc 47",
+      "base_id": "DY-PhyArc-47-25-48",
+      "electrical": {
+        "peak_current_a": 12,
+        "continuous_current_a": 3,
+        "rated_input_power_w": 216,
+        "peak_input_power_w": 864
+      },
+      "mechanical": {
+        "rated_torque_nm": 3,
+        "peak_torque_nm": 12,
+        "start_stop_peak_torque_nm": 12,
+        "max_allow_instant_load_nm": 12,
+        "peak_output_power_w": 31.8,
+        "rated_speed_rpm": 100,
+        "max_speed_rpm": 343.8,
+        "weight_kg": 0.343,
+        "outer_diameter_mm": 47,
+        "torque_density_nm_per_kg": 34.99
+      },
+      "transmission": {
+        "reduction_ratio": 25
+      },
+      "options": {
+        "bus_types": [
+          "CANFD"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 47,
+        "length_mm_max": 47
+      },
+      "datasheet_url": "datasheets/5_动易_PhyArc模组.png"
+    },
+    {
+      "id": "dy-phyarc-68-25-48",
+      "model": "PhyArc 68",
+      "base_id": "DY-PhyArc-68-25-48",
+      "electrical": {
+        "peak_current_a": 64,
+        "continuous_current_a": 10,
+        "rated_input_power_w": 720,
+        "peak_input_power_w": 4608
+      },
+      "mechanical": {
+        "rated_torque_nm": 28,
+        "peak_torque_nm": 96,
+        "start_stop_peak_torque_nm": 96,
+        "max_allow_instant_load_nm": 96,
+        "peak_output_power_w": 874,
+        "rated_speed_rpm": 100,
+        "max_speed_rpm": 181.5,
+        "weight_kg": 0.73,
+        "outer_diameter_mm": 68,
+        "torque_density_nm_per_kg": 131.51
+      },
+      "transmission": {
+        "reduction_ratio": 25
+      },
+      "options": {
+        "bus_types": [
+          "CANFD"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 75,
+        "length_mm_max": 75
+      },
+      "datasheet_url": "datasheets/5_动易_PhyArc模组.png"
+    },
+    {
+      "id": "dy-phyarc-78-25-48",
+      "model": "PhyArc 78",
+      "base_id": "DY-PhyArc-78-25-48",
+      "electrical": {
+        "peak_current_a": 64,
+        "continuous_current_a": 10,
+        "rated_input_power_w": 720,
+        "peak_input_power_w": 4608
+      },
+      "mechanical": {
+        "rated_torque_nm": 40,
+        "peak_torque_nm": 136,
+        "start_stop_peak_torque_nm": 136,
+        "max_allow_instant_load_nm": 136,
+        "peak_output_power_w": 936,
+        "rated_speed_rpm": 100,
+        "max_speed_rpm": 120,
+        "weight_kg": 0.98,
+        "outer_diameter_mm": 78,
+        "torque_density_nm_per_kg": 138.78
+      },
+      "transmission": {
+        "reduction_ratio": 25
+      },
+      "options": {
+        "bus_types": [
+          "CANFD"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 79,
+        "length_mm_max": 79
+      },
+      "datasheet_url": "datasheets/5_动易_PhyArc模组.png"
+    },
+    {
+      "id": "dy-phyarc-95-21-48",
+      "model": "PhyArc 95",
+      "base_id": "DY-PhyArc-95-21-48",
+      "electrical": {
+        "peak_current_a": 80,
+        "continuous_current_a": 20,
+        "rated_input_power_w": 1440,
+        "peak_input_power_w": 5760
+      },
+      "mechanical": {
+        "rated_torque_nm": 75,
+        "peak_torque_nm": 228,
+        "start_stop_peak_torque_nm": 228,
+        "max_allow_instant_load_nm": 228,
+        "peak_output_power_w": 1416.1,
+        "rated_speed_rpm": 80,
+        "max_speed_rpm": 124.2,
+        "weight_kg": 1.68,
+        "outer_diameter_mm": 95,
+        "output_encoder_bits": 27,
+        "torque_density_nm_per_kg": 135.71
+      },
+      "transmission": {
+        "reduction_ratio": 21
+      },
+      "options": {
+        "bus_types": [
+          "CANFD",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 85.3,
+        "length_mm_max": 85.3,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/5_动易_PhyArc模组.png"
+    }
+  ]
+}

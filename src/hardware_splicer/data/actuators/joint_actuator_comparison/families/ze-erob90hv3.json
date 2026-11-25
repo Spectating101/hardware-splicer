@@ -1,0 +1,173 @@
+{
+  "family_id": "ze-erob90hv3",
+  "family_name": "零差云控 eRob90HV3",
+  "shared": {
+    "manufacturer": "零差云控",
+    "manufacturer_en": "ZeroErr",
+    "electrical": {
+      "voltage_v": 48,
+      "rated_input_power_w": 300,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "weight_kg": 1.75,
+      "outer_diameter_mm": 90,
+      "hollow_shaft_diameter_mm": 18,
+      "absolute_accuracy_deg": 0.002776,
+      "repeatability_deg": 0.0028,
+      "output_encoder_bits": 19,
+      "ip_rating": "IP54",
+      "weight_kg_max": 1.87
+    },
+    "transmission": {
+      "type": "harmonic",
+      "backdrivable": false
+    }
+  },
+  "variants": [
+    {
+      "id": "ze-erob90hv3-100-48",
+      "model": "eRob90HV3",
+      "base_id": "ZE-eRob90HV3-100-48",
+      "mechanical": {
+        "rated_torque_nm": 52,
+        "peak_torque_nm": 107,
+        "start_stop_peak_torque_nm": 107,
+        "max_allow_avg_load_nm": 64,
+        "max_allow_instant_load_nm": 191,
+        "rated_speed_rpm": 30,
+        "max_speed_rpm": 30,
+        "torque_density_nm_per_kg": 61.14
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/27_零差云控_eRob系列关节模组.xlsx"
+    },
+    {
+      "id": "ze-erob90hv3-120-48",
+      "model": "eRob90HV3",
+      "base_id": "ZE-eRob90HV3-120-48",
+      "mechanical": {
+        "rated_torque_nm": 52,
+        "peak_torque_nm": 113,
+        "start_stop_peak_torque_nm": 113,
+        "max_allow_avg_load_nm": 64,
+        "max_allow_instant_load_nm": 191,
+        "rated_speed_rpm": 25,
+        "max_speed_rpm": 25,
+        "torque_density_nm_per_kg": 64.57
+      },
+      "transmission": {
+        "reduction_ratio": 120
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/27_零差云控_eRob系列关节模组.xlsx"
+    },
+    {
+      "id": "ze-erob90hv3-50-48",
+      "model": "eRob90HV3",
+      "base_id": "ZE-eRob90HV3-50-48",
+      "mechanical": {
+        "rated_torque_nm": 33,
+        "peak_torque_nm": 73,
+        "start_stop_peak_torque_nm": 73,
+        "max_allow_avg_load_nm": 44,
+        "max_allow_instant_load_nm": 127,
+        "rated_speed_rpm": 60,
+        "max_speed_rpm": 60,
+        "torque_density_nm_per_kg": 41.71
+      },
+      "transmission": {
+        "reduction_ratio": 50
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/27_零差云控_eRob系列关节模组.xlsx"
+    },
+    {
+      "id": "ze-erob90hv3-80-48",
+      "model": "eRob90HV3",
+      "base_id": "ZE-eRob90HV3-80-48",
+      "mechanical": {
+        "rated_torque_nm": 44,
+        "peak_torque_nm": 96,
+        "start_stop_peak_torque_nm": 96,
+        "max_allow_avg_load_nm": 61,
+        "max_allow_instant_load_nm": 165,
+        "rated_speed_rpm": 37.5,
+        "max_speed_rpm": 37.5,
+        "torque_density_nm_per_kg": 54.86
+      },
+      "transmission": {
+        "reduction_ratio": 80
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/27_零差云控_eRob系列关节模组.xlsx"
+    }
+  ]
+}

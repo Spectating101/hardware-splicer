@@ -1,0 +1,89 @@
+{
+  "family_id": "dr-j60",
+  "family_name": "云深处 J60",
+  "shared": {
+    "manufacturer": "云深处",
+    "manufacturer_en": "DeepRobotics",
+    "electrical": {
+      "voltage_v": 24,
+      "peak_current_a": 30,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "outer_diameter_mm": 76.5,
+      "output_encoder_bits": 14
+    },
+    "transmission": {
+      "type": "planetary",
+      "backdrivable": true
+    }
+  },
+  "variants": [
+    {
+      "id": "dr-j60-10-24",
+      "model": "J60-10",
+      "base_id": "DR-J60-10-24",
+      "mechanical": {
+        "peak_torque_nm": 30.5,
+        "start_stop_peak_torque_nm": 30.5,
+        "max_allow_instant_load_nm": 30.5,
+        "max_speed_rpm": 148,
+        "weight_kg": 0.54,
+        "torque_density_nm_per_kg": 56.48
+      },
+      "transmission": {
+        "reduction_ratio": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 72.5,
+        "length_mm_max": 72.5
+      },
+      "datasheet_url": "datasheets/29_云深处_关节单页.pdf"
+    },
+    {
+      "id": "dr-j60-6-24",
+      "model": "J60-6",
+      "base_id": "DR-J60-6-24",
+      "mechanical": {
+        "peak_torque_nm": 19.94,
+        "start_stop_peak_torque_nm": 19.94,
+        "max_allow_instant_load_nm": 19.94,
+        "max_speed_rpm": 231,
+        "weight_kg": 0.48,
+        "torque_density_nm_per_kg": 41.54
+      },
+      "transmission": {
+        "reduction_ratio": 6
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 63,
+        "length_mm_max": 63
+      },
+      "datasheet_url": "datasheets/29_云深处_关节单页.pdf"
+    }
+  ]
+}

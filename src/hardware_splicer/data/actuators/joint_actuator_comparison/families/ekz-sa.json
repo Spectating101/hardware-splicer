@@ -1,0 +1,287 @@
+{
+  "family_id": "ekz-sa",
+  "family_name": "埃斯顿酷卓 SA",
+  "shared": {
+    "manufacturer": "埃斯顿酷卓",
+    "manufacturer_en": "Estun Codroid",
+    "electrical": {
+      "voltage_v": 48,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "absolute_accuracy_deg": 0.01,
+      "output_encoder_bits": 19,
+      "ip_rating": "IP54"
+    },
+    "transmission": {
+      "type": "harmonic",
+      "backdrivable": false
+    }
+  },
+  "variants": [
+    {
+      "id": "ekz-sa-14-101-48",
+      "model": "SA14",
+      "base_id": "EKZ-SA-14-101-48",
+      "electrical": {
+        "peak_current_a": 13.6,
+        "continuous_current_a": 4.4,
+        "rated_input_power_w": 159
+      },
+      "mechanical": {
+        "rated_torque_nm": 10,
+        "peak_torque_nm": 36,
+        "start_stop_peak_torque_nm": 36,
+        "max_allow_avg_load_nm": 14,
+        "max_allow_instant_load_nm": 70,
+        "rated_speed_rpm": 37.5,
+        "max_speed_rpm": 46.5,
+        "weight_kg": 1.24,
+        "hollow_shaft_diameter_mm": 8,
+        "weight_kg_max": 1.77,
+        "torque_density_nm_per_kg": 29.03
+      },
+      "transmission": {
+        "reduction_ratio": 101
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 122,
+        "length_mm_max": 154.6,
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/3_埃斯顿酷卓_刚性关节SA系列_20241029.pdf"
+    },
+    {
+      "id": "ekz-sa-17-101-48",
+      "model": "SA17",
+      "base_id": "EKZ-SA-17-101-48",
+      "electrical": {
+        "peak_current_a": 15,
+        "continuous_current_a": 5,
+        "rated_input_power_w": 183
+      },
+      "mechanical": {
+        "rated_torque_nm": 31,
+        "peak_torque_nm": 70,
+        "start_stop_peak_torque_nm": 70,
+        "max_allow_avg_load_nm": 51,
+        "max_allow_instant_load_nm": 143,
+        "rated_speed_rpm": 34.6,
+        "max_speed_rpm": 47.4,
+        "weight_kg": 1.6,
+        "hollow_shaft_diameter_mm": 11,
+        "weight_kg_max": 2.35,
+        "torque_density_nm_per_kg": 43.75
+      },
+      "transmission": {
+        "reduction_ratio": 101
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 128,
+        "length_mm_max": 152.6,
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/3_埃斯顿酷卓_刚性关节SA系列_20241029.pdf"
+    },
+    {
+      "id": "ekz-sa-20-101-48",
+      "model": "SA20",
+      "base_id": "EKZ-SA-20-101-48",
+      "electrical": {
+        "peak_current_a": 29.1,
+        "continuous_current_a": 9.7,
+        "rated_input_power_w": 366
+      },
+      "mechanical": {
+        "rated_torque_nm": 52,
+        "peak_torque_nm": 107,
+        "start_stop_peak_torque_nm": 107,
+        "max_allow_avg_load_nm": 64,
+        "max_allow_instant_load_nm": 191,
+        "rated_speed_rpm": 34.6,
+        "max_speed_rpm": 43,
+        "weight_kg": 2.06,
+        "hollow_shaft_diameter_mm": 8,
+        "weight_kg_max": 2.97,
+        "torque_density_nm_per_kg": 51.94
+      },
+      "transmission": {
+        "reduction_ratio": 101
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 139,
+        "length_mm_max": 165,
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/3_埃斯顿酷卓_刚性关节SA系列_20241029.pdf"
+    },
+    {
+      "id": "ekz-sa-25-121-48",
+      "model": "SA25",
+      "base_id": "EKZ-SA-25-121-48",
+      "electrical": {
+        "peak_current_a": 48,
+        "continuous_current_a": 16,
+        "rated_input_power_w": 732
+      },
+      "mechanical": {
+        "rated_torque_nm": 87,
+        "peak_torque_nm": 217,
+        "start_stop_peak_torque_nm": 217,
+        "max_allow_avg_load_nm": 140,
+        "max_allow_instant_load_nm": 395,
+        "rated_speed_rpm": 28.9,
+        "max_speed_rpm": 32.9,
+        "weight_kg": 3.37,
+        "hollow_shaft_diameter_mm": 12,
+        "weight_kg_max": 4.48,
+        "torque_density_nm_per_kg": 64.39
+      },
+      "transmission": {
+        "reduction_ratio": 121
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 145.6,
+        "length_mm_max": 176,
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/3_埃斯顿酷卓_刚性关节SA系列_20241029.pdf"
+    },
+    {
+      "id": "ekz-sa-32-121-48",
+      "model": "SA32",
+      "base_id": "EKZ-SA-32-121-48",
+      "electrical": {
+        "peak_current_a": 89,
+        "continuous_current_a": 27,
+        "rated_input_power_w": 1000
+      },
+      "mechanical": {
+        "rated_torque_nm": 178,
+        "peak_torque_nm": 459,
+        "start_stop_peak_torque_nm": 459,
+        "max_allow_avg_load_nm": 281,
+        "max_allow_instant_load_nm": 892,
+        "rated_speed_rpm": 24.79,
+        "max_speed_rpm": 31,
+        "weight_kg": 6.16,
+        "hollow_shaft_diameter_mm": 16,
+        "weight_kg_max": 8.67,
+        "torque_density_nm_per_kg": 74.51
+      },
+      "transmission": {
+        "reduction_ratio": 121
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 160,
+        "length_mm_max": 203,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/3_埃斯顿酷卓_刚性关节SA系列_20241029.pdf"
+    },
+    {
+      "id": "ekz-sa-40-161-48",
+      "model": "SA40",
+      "base_id": "EKZ-SA-40-161-48",
+      "electrical": {
+        "peak_current_a": 72,
+        "continuous_current_a": 27,
+        "rated_input_power_w": 1257
+      },
+      "mechanical": {
+        "rated_torque_nm": 382,
+        "peak_torque_nm": 841,
+        "start_stop_peak_torque_nm": 841,
+        "max_allow_avg_load_nm": 586,
+        "max_allow_instant_load_nm": 1530,
+        "rated_speed_rpm": 18.63,
+        "max_speed_rpm": 20.5,
+        "weight_kg": 9.72,
+        "hollow_shaft_diameter_mm": 16,
+        "weight_kg_max": 13.55,
+        "torque_density_nm_per_kg": 86.52
+      },
+      "transmission": {
+        "reduction_ratio": 161
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 192,
+        "length_mm_max": 236,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/3_埃斯顿酷卓_刚性关节SA系列_20241029.pdf"
+    }
+  ]
+}

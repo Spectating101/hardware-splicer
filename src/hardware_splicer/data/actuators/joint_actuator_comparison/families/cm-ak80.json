@@ -1,0 +1,57 @@
+{
+  "family_id": "cm-ak80",
+  "family_name": "酷德 AK80",
+  "shared": {
+    "manufacturer": "酷德",
+    "manufacturer_en": "Cubemars",
+    "electrical": {
+      "voltage_v": 48,
+      "peak_current_a": 23.8,
+      "continuous_current_a": 6.25,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "rated_torque_nm": 8.5,
+      "peak_torque_nm": 29.2,
+      "start_stop_peak_torque_nm": 29.2,
+      "rated_speed_rpm": 260,
+      "max_speed_rpm": 320,
+      "weight_kg": 0.54,
+      "outer_diameter_mm": 98,
+      "absolute_accuracy_deg": 15,
+      "motor_encoder_bits": 14,
+      "torque_density_nm_per_kg": 54.07
+    },
+    "transmission": {
+      "type": "planetary",
+      "reduction_ratio": 9,
+      "backdrivable": true,
+      "backlash_arcsec": 1080
+    }
+  },
+  "variants": [
+    {
+      "id": "cm-ak80-9-48",
+      "model": "AK80-9 V3.0",
+      "base_id": "CM-AK80-9-48",
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 38.5,
+        "length_mm_max": 38.5,
+        "inertia_g_cm2": 450
+      },
+      "datasheet_url": "datasheets/25_酷德Cubemars.pdf"
+    }
+  ]
+}

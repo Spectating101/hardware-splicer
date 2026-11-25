@@ -1,0 +1,48 @@
+{
+  "family_id": "ut-a1",
+  "family_name": "宇树 A1",
+  "shared": {
+    "manufacturer": "宇树",
+    "manufacturer_en": "Unitree",
+    "electrical": {
+      "voltage_v": 30,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "peak_torque_nm": 33.5,
+      "start_stop_peak_torque_nm": 33.5,
+      "max_allow_instant_load_nm": 33.5,
+      "max_speed_rpm": 200.6,
+      "weight_kg": 0.605,
+      "output_encoder_bits": 15,
+      "torque_density_nm_per_kg": 55.37
+    },
+    "transmission": {
+      "type": "planetary",
+      "reduction_ratio": 9,
+      "backdrivable": true
+    }
+  },
+  "variants": [
+    {
+      "id": "ut-a1-9-30",
+      "model": "A1 Motor",
+      "base_id": "UT-A1-9-30",
+      "options": {
+        "bus_types": [
+          "RS485"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/26_宇树_关节模组.pdf"
+    }
+  ]
+}

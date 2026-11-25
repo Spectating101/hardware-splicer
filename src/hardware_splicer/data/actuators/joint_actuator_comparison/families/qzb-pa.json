@@ -1,0 +1,538 @@
+{
+  "family_id": "qzb-pa",
+  "family_name": "泉智博 PA",
+  "shared": {
+    "manufacturer": "泉智博",
+    "manufacturer_en": "MOTOREVO",
+    "electrical": {
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "absolute_accuracy_deg": 0.3,
+      "motor_encoder_bits": 14
+    },
+    "transmission": {
+      "type": "planetary"
+    }
+  },
+  "variants": [
+    {
+      "id": "qzb-pa-100-10-24",
+      "model": "RR-PA-100-1010",
+      "base_id": "QZB-PA-100-10-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 31,
+        "continuous_current_a": 10
+      },
+      "mechanical": {
+        "rated_torque_nm": 20,
+        "peak_torque_nm": 63,
+        "start_stop_peak_torque_nm": 63,
+        "weight_kg": 0.9,
+        "outer_diameter_mm": 113,
+        "torque_density_nm_per_kg": 70.0
+      },
+      "transmission": {
+        "reduction_ratio": 10,
+        "backdrivable": true
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-pa-100-10-48",
+      "model": "RR-PA-100-1010",
+      "base_id": "QZB-PA-100-10-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 31,
+        "continuous_current_a": 10
+      },
+      "mechanical": {
+        "rated_torque_nm": 20,
+        "peak_torque_nm": 63,
+        "start_stop_peak_torque_nm": 63,
+        "weight_kg": 0.9,
+        "outer_diameter_mm": 113,
+        "torque_density_nm_per_kg": 70.0
+      },
+      "transmission": {
+        "reduction_ratio": 10,
+        "backdrivable": true
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-pa-100-12-24",
+      "model": "RR-PA-100-2012",
+      "base_id": "QZB-PA-100-12-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 68,
+        "continuous_current_a": 20
+      },
+      "mechanical": {
+        "rated_torque_nm": 48,
+        "peak_torque_nm": 151,
+        "start_stop_peak_torque_nm": 151,
+        "weight_kg": 1.26,
+        "outer_diameter_mm": 113,
+        "torque_density_nm_per_kg": 119.84
+      },
+      "transmission": {
+        "reduction_ratio": 12,
+        "backdrivable": false
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-pa-100-12-48",
+      "model": "RR-PA-100-2012",
+      "base_id": "QZB-PA-100-12-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 68,
+        "continuous_current_a": 20
+      },
+      "mechanical": {
+        "rated_torque_nm": 48,
+        "peak_torque_nm": 151,
+        "start_stop_peak_torque_nm": 151,
+        "weight_kg": 1.26,
+        "outer_diameter_mm": 113,
+        "torque_density_nm_per_kg": 119.84
+      },
+      "transmission": {
+        "reduction_ratio": 12,
+        "backdrivable": false
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-pa-100-20-24",
+      "model": "RR-PA-100-2020",
+      "base_id": "QZB-PA-100-20-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 68,
+        "continuous_current_a": 20
+      },
+      "mechanical": {
+        "rated_torque_nm": 80,
+        "peak_torque_nm": 250,
+        "start_stop_peak_torque_nm": 250,
+        "weight_kg": 1.95,
+        "outer_diameter_mm": 119,
+        "torque_density_nm_per_kg": 128.21
+      },
+      "transmission": {
+        "reduction_ratio": 20,
+        "backdrivable": false
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-pa-100-20-48",
+      "model": "RR-PA-100-2020",
+      "base_id": "QZB-PA-100-20-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 68,
+        "continuous_current_a": 20
+      },
+      "mechanical": {
+        "rated_torque_nm": 80,
+        "peak_torque_nm": 250,
+        "start_stop_peak_torque_nm": 250,
+        "weight_kg": 1.95,
+        "outer_diameter_mm": 119,
+        "torque_density_nm_per_kg": 128.21
+      },
+      "transmission": {
+        "reduction_ratio": 20,
+        "backdrivable": false
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-pa-70-15-24",
+      "model": "RR-PA-70-1015",
+      "base_id": "QZB-PA-70-15-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 15,
+        "continuous_current_a": 2.2
+      },
+      "mechanical": {
+        "rated_torque_nm": 12,
+        "peak_torque_nm": 45,
+        "start_stop_peak_torque_nm": 45,
+        "weight_kg": 0.65,
+        "outer_diameter_mm": 89.9,
+        "torque_density_nm_per_kg": 69.23
+      },
+      "transmission": {
+        "reduction_ratio": 15,
+        "backdrivable": false
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-pa-70-15-48",
+      "model": "RR-PA-70-1015",
+      "base_id": "QZB-PA-70-15-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 15,
+        "continuous_current_a": 2.2
+      },
+      "mechanical": {
+        "rated_torque_nm": 12,
+        "peak_torque_nm": 45,
+        "start_stop_peak_torque_nm": 45,
+        "weight_kg": 0.65,
+        "outer_diameter_mm": 89.9,
+        "torque_density_nm_per_kg": 69.23
+      },
+      "transmission": {
+        "reduction_ratio": 15,
+        "backdrivable": false
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-pa-80-35-24",
+      "model": "RR-PA-80-1835",
+      "base_id": "QZB-PA-80-35-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 36,
+        "continuous_current_a": 10
+      },
+      "mechanical": {
+        "rated_torque_nm": 70,
+        "peak_torque_nm": 170,
+        "start_stop_peak_torque_nm": 170,
+        "weight_kg": 0.95,
+        "outer_diameter_mm": 93,
+        "torque_density_nm_per_kg": 178.95
+      },
+      "transmission": {
+        "reduction_ratio": 35,
+        "backdrivable": false
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-pa-80-35-48",
+      "model": "RR-PA-80-1835",
+      "base_id": "QZB-PA-80-35-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 36,
+        "continuous_current_a": 10
+      },
+      "mechanical": {
+        "rated_torque_nm": 70,
+        "peak_torque_nm": 170,
+        "start_stop_peak_torque_nm": 170,
+        "weight_kg": 0.95,
+        "outer_diameter_mm": 93,
+        "torque_density_nm_per_kg": 178.95
+      },
+      "transmission": {
+        "reduction_ratio": 35,
+        "backdrivable": false
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-pa-81-10-24",
+      "model": "RR-PA-81-1010",
+      "base_id": "QZB-PA-81-10-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 24,
+        "continuous_current_a": 5.4
+      },
+      "mechanical": {
+        "rated_torque_nm": 10,
+        "peak_torque_nm": 39,
+        "start_stop_peak_torque_nm": 39,
+        "weight_kg": 0.7,
+        "outer_diameter_mm": 94.5,
+        "torque_density_nm_per_kg": 55.71
+      },
+      "transmission": {
+        "reduction_ratio": 10,
+        "backdrivable": true
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-pa-81-10-24-v2",
+      "model": "RR-PA-81-1210",
+      "base_id": "QZB-PA-81-10-24-V2",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 29,
+        "continuous_current_a": 5.5
+      },
+      "mechanical": {
+        "rated_torque_nm": 12,
+        "peak_torque_nm": 45,
+        "start_stop_peak_torque_nm": 45,
+        "weight_kg": 0.75,
+        "outer_diameter_mm": 94.5,
+        "torque_density_nm_per_kg": 60.0
+      },
+      "transmission": {
+        "reduction_ratio": 10,
+        "backdrivable": true
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-pa-81-10-48",
+      "model": "RR-PA-81-1010",
+      "base_id": "QZB-PA-81-10-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 24,
+        "continuous_current_a": 5.4
+      },
+      "mechanical": {
+        "rated_torque_nm": 10,
+        "peak_torque_nm": 39,
+        "start_stop_peak_torque_nm": 39,
+        "weight_kg": 0.7,
+        "outer_diameter_mm": 94.5,
+        "torque_density_nm_per_kg": 55.71
+      },
+      "transmission": {
+        "reduction_ratio": 10,
+        "backdrivable": true
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-pa-81-10-48-v2",
+      "model": "RR-PA-81-1210",
+      "base_id": "QZB-PA-81-10-48-V2",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 29,
+        "continuous_current_a": 5.5
+      },
+      "mechanical": {
+        "rated_torque_nm": 12,
+        "peak_torque_nm": 45,
+        "start_stop_peak_torque_nm": 45,
+        "weight_kg": 0.75,
+        "outer_diameter_mm": 94.5,
+        "torque_density_nm_per_kg": 60.0
+      },
+      "transmission": {
+        "reduction_ratio": 10,
+        "backdrivable": true
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    }
+  ]
+}

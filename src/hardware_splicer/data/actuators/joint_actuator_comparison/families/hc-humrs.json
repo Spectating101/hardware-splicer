@@ -1,0 +1,220 @@
+{
+  "family_id": "hc-humrs",
+  "family_name": "禾川 HuMRS",
+  "shared": {
+    "manufacturer": "禾川",
+    "manufacturer_en": "HCFA",
+    "electrical": {
+      "voltage_v": 48,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "rated_speed_rpm": 30,
+      "max_speed_rpm": 40,
+      "output_encoder_bits": 17,
+      "motor_encoder_bits": 17
+    },
+    "transmission": {
+      "type": "harmonic",
+      "reduction_ratio": 101,
+      "backdrivable": false
+    }
+  },
+  "variants": [
+    {
+      "id": "hc-humrs-110-101-48",
+      "model": "Hu-MRS230N",
+      "base_id": "HC-HuMRS-110-101-48",
+      "electrical": {
+        "rated_input_power_w": 587
+      },
+      "mechanical": {
+        "rated_torque_nm": 120,
+        "peak_torque_nm": 220,
+        "start_stop_peak_torque_nm": 220,
+        "weight_kg": 2,
+        "outer_diameter_mm": 110,
+        "hollow_shaft_diameter_mm": 10.8,
+        "torque_density_nm_per_kg": 110.0
+      },
+      "transmission": {
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CANFD",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 72.1,
+        "length_mm_max": 72.1,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/7_禾川_HuMRS模组.png"
+    },
+    {
+      "id": "hc-humrs-52-101-48",
+      "model": "Hu-MRS012N",
+      "base_id": "HC-HuMRS-52-101-48",
+      "electrical": {
+        "rated_input_power_w": 38
+      },
+      "mechanical": {
+        "rated_torque_nm": 8,
+        "peak_torque_nm": 12,
+        "start_stop_peak_torque_nm": 12,
+        "weight_kg": 0.275,
+        "outer_diameter_mm": 52,
+        "hollow_shaft_diameter_mm": 6.5,
+        "torque_density_nm_per_kg": 43.64
+      },
+      "transmission": {
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CANFD",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 52.1,
+        "length_mm_max": 52.1,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/7_禾川_HuMRS模组.png"
+    },
+    {
+      "id": "hc-humrs-70-101-48",
+      "model": "Hu-MRS040N",
+      "base_id": "HC-HuMRS-70-101-48",
+      "electrical": {
+        "rated_input_power_w": 70
+      },
+      "mechanical": {
+        "rated_torque_nm": 15,
+        "peak_torque_nm": 40,
+        "start_stop_peak_torque_nm": 40,
+        "weight_kg": 0.7,
+        "outer_diameter_mm": 70,
+        "hollow_shaft_diameter_mm": 10.8,
+        "torque_density_nm_per_kg": 57.14
+      },
+      "transmission": {
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CANFD",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 64.3,
+        "length_mm_max": 64.3,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/7_禾川_HuMRS模组.png"
+    },
+    {
+      "id": "hc-humrs-80-101-48",
+      "model": "Hu-MRS070N",
+      "base_id": "HC-HuMRS-80-101-48",
+      "electrical": {
+        "rated_input_power_w": 268
+      },
+      "mechanical": {
+        "rated_torque_nm": 40,
+        "peak_torque_nm": 70,
+        "start_stop_peak_torque_nm": 70,
+        "weight_kg": 0.907,
+        "outer_diameter_mm": 80,
+        "hollow_shaft_diameter_mm": 10.8,
+        "torque_density_nm_per_kg": 77.18
+      },
+      "transmission": {
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CANFD",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 73,
+        "length_mm_max": 73,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/7_禾川_HuMRS模组.png"
+    },
+    {
+      "id": "hc-humrs-90-101-48",
+      "model": "Hu-MRS120N",
+      "base_id": "HC-HuMRS-90-101-48",
+      "electrical": {
+        "rated_input_power_w": 301
+      },
+      "mechanical": {
+        "rated_torque_nm": 60,
+        "peak_torque_nm": 120,
+        "start_stop_peak_torque_nm": 120,
+        "weight_kg": 1.41,
+        "outer_diameter_mm": 90,
+        "hollow_shaft_diameter_mm": 10.8,
+        "torque_density_nm_per_kg": 85.11
+      },
+      "transmission": {
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CANFD",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 71.63,
+        "length_mm_max": 71.63,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/7_禾川_HuMRS模组.png"
+    }
+  ]
+}

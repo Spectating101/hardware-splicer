@@ -1,0 +1,146 @@
+{
+  "family_id": "mx-hej",
+  "family_name": "Maxon HEJ",
+  "shared": {
+    "manufacturer": "Maxon",
+    "manufacturer_en": "Maxon",
+    "electrical": {
+      "voltage_v": 48,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "rated_speed_rpm": 19.1,
+      "absolute_accuracy_deg": 0.6
+    },
+    "transmission": {
+      "type": "harmonic",
+      "backdrivable": false,
+      "backlash_arcsec": 1800
+    }
+  },
+  "variants": [
+    {
+      "id": "mx-hej-50-x-48",
+      "model": "HEJ 50-48-30",
+      "base_id": "MX-HEJ-50-X-48",
+      "electrical": {
+        "continuous_current_a": 4.7
+      },
+      "mechanical": {
+        "rated_torque_nm": 11,
+        "peak_torque_nm": 30,
+        "start_stop_peak_torque_nm": 30,
+        "max_allow_instant_load_nm": 40,
+        "max_speed_rpm": 248.4,
+        "weight_kg": 0.57,
+        "outer_diameter_mm": 71.5,
+        "output_encoder_bits": 14,
+        "ip_rating": "IP00",
+        "radial_load_kn": 0.5,
+        "axial_load_kn": 0.5,
+        "bending_moment_nm": 35,
+        "torque_density_nm_per_kg": 52.63
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 65,
+        "length_mm_max": 65,
+        "inertia_g_cm2": 56
+      },
+      "datasheet_url": "datasheets/23_Maxon_HEJ_50_48_30_rev0.92.pdf"
+    },
+    {
+      "id": "mx-hej-70-x-48",
+      "model": "HEJ 70-48-60",
+      "base_id": "MX-HEJ-70-X-48",
+      "electrical": {
+        "continuous_current_a": 8
+      },
+      "mechanical": {
+        "rated_torque_nm": 27,
+        "peak_torque_nm": 62,
+        "start_stop_peak_torque_nm": 62,
+        "max_allow_instant_load_nm": 90,
+        "max_speed_rpm": 210.2,
+        "weight_kg": 1.05,
+        "outer_diameter_mm": 88,
+        "output_encoder_bits": 14,
+        "ip_rating": "IP67",
+        "radial_load_kn": 0.9,
+        "axial_load_kn": 0.9,
+        "bending_moment_nm": 120,
+        "torque_density_nm_per_kg": 59.05
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 77,
+        "length_mm_max": 77,
+        "inertia_g_cm2": 112
+      },
+      "datasheet_url": "datasheets/23_Maxon_HEJ_70_48_60_rev1.1.pdf"
+    },
+    {
+      "id": "mx-hej-90-x-48",
+      "model": "HEJ 90-48-140",
+      "base_id": "MX-HEJ-90-X-48",
+      "electrical": {
+        "continuous_current_a": 8
+      },
+      "mechanical": {
+        "rated_torque_nm": 75,
+        "peak_torque_nm": 140,
+        "start_stop_peak_torque_nm": 140,
+        "max_allow_instant_load_nm": 240,
+        "max_speed_rpm": 124.2,
+        "weight_kg": 2.006,
+        "outer_diameter_mm": 108,
+        "output_encoder_bits": 12,
+        "ip_rating": "IP67",
+        "radial_load_kn": 1,
+        "axial_load_kn": 1,
+        "bending_moment_nm": 170,
+        "torque_density_nm_per_kg": 69.79
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 90,
+        "length_mm_max": 90,
+        "inertia_g_cm2": 500
+      },
+      "datasheet_url": "datasheets/23_Maxon_HEJ_90_48_140_rev2.2.pdf"
+    }
+  ]
+}

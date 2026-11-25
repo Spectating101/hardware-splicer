@@ -1,0 +1,302 @@
+{
+  "family_id": "tc-tcp",
+  "family_name": "同川精密 TCP",
+  "shared": {
+    "manufacturer": "同川精密",
+    "manufacturer_en": "TC Drive",
+    "electrical": {
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "repeatability_deg": 0.01,
+      "output_encoder_bits": 18,
+      "motor_encoder_bits": 17
+    },
+    "transmission": {
+      "type": "planetary",
+      "backdrivable": false
+    }
+  },
+  "variants": [
+    {
+      "id": "tc-tcp-124-20-48",
+      "model": "TCP-124-20-FL-DC48-X02-HISC",
+      "base_id": "TC-TCP-124-20-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 100,
+        "continuous_current_a": 30,
+        "rated_input_power_w": 1000
+      },
+      "mechanical": {
+        "rated_torque_nm": 100,
+        "peak_torque_nm": 320,
+        "start_stop_peak_torque_nm": 320,
+        "rated_speed_rpm": 100,
+        "max_speed_rpm": 125,
+        "weight_kg": 2.6,
+        "outer_diameter_mm": 124,
+        "hollow_shaft_diameter_mm": 12.6,
+        "radial_load_kn": 5,
+        "axial_load_kn": 4.5,
+        "torque_density_nm_per_kg": 123.08
+      },
+      "transmission": {
+        "reduction_ratio": 20,
+        "backlash_arcsec": 600
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC",
+          "RS485"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "inertia_g_cm2": 12900,
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/15_同川精密_机器人关节模组_20250921 .pdf"
+    },
+    {
+      "id": "tc-tcp-166-20-72",
+      "model": "TCP-166-20-FL-DC72-X02-HISC",
+      "base_id": "TC-TCP-166-20-72",
+      "electrical": {
+        "voltage_v": 72,
+        "peak_current_a": 69.2,
+        "continuous_current_a": 25,
+        "rated_input_power_w": 1124
+      },
+      "mechanical": {
+        "rated_torque_nm": 145,
+        "peak_torque_nm": 450,
+        "start_stop_peak_torque_nm": 450,
+        "rated_speed_rpm": 74,
+        "max_speed_rpm": 93,
+        "weight_kg": 3.6,
+        "outer_diameter_mm": 166,
+        "hollow_shaft_diameter_mm": 21.5,
+        "radial_load_kn": 6,
+        "axial_load_kn": 5.4,
+        "torque_density_nm_per_kg": 125.0
+      },
+      "transmission": {
+        "reduction_ratio": 20.25,
+        "backlash_arcsec": 600
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC",
+          "RS485"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "inertia_g_cm2": 31600,
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/15_同川精密_机器人关节模组_20250921 .pdf"
+    },
+    {
+      "id": "tc-tcp-44-28-24",
+      "model": "TCP-44-28-FL-DC24-X02-SISC",
+      "base_id": "TC-TCP-44-28-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 8.1,
+        "continuous_current_a": 3,
+        "rated_input_power_w": 37
+      },
+      "mechanical": {
+        "rated_torque_nm": 2.5,
+        "peak_torque_nm": 7,
+        "start_stop_peak_torque_nm": 7,
+        "rated_speed_rpm": 142,
+        "max_speed_rpm": 178,
+        "weight_kg": 0.25,
+        "outer_diameter_mm": 44,
+        "radial_load_kn": 1,
+        "axial_load_kn": 0.25,
+        "torque_density_nm_per_kg": 28.0
+      },
+      "transmission": {
+        "reduction_ratio": 28.17,
+        "backlash_arcsec": 720
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC",
+          "RS485"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "inertia_g_cm2": 170,
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/15_同川精密_机器人关节模组_20250921 .pdf"
+    },
+    {
+      "id": "tc-tcp-55-36-24",
+      "model": "TCP-55-36-FL-DC24-X02-SISC",
+      "base_id": "TC-TCP-55-36-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 21.5,
+        "continuous_current_a": 6.1,
+        "rated_input_power_w": 100
+      },
+      "mechanical": {
+        "rated_torque_nm": 11.5,
+        "peak_torque_nm": 34,
+        "start_stop_peak_torque_nm": 34,
+        "rated_speed_rpm": 83,
+        "max_speed_rpm": 111,
+        "weight_kg": 0.36,
+        "outer_diameter_mm": 55,
+        "radial_load_kn": 1.5,
+        "axial_load_kn": 1.3,
+        "torque_density_nm_per_kg": 94.44
+      },
+      "transmission": {
+        "reduction_ratio": 36,
+        "backlash_arcsec": 600
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC",
+          "RS485"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "inertia_g_cm2": 300,
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/15_同川精密_机器人关节模组_20250921 .pdf"
+    },
+    {
+      "id": "tc-tcp-80-20-48",
+      "model": "TCP-80-20-FL-DC48-X02-HISC",
+      "base_id": "TC-TCP-80-20-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 29.1,
+        "continuous_current_a": 9.5,
+        "rated_input_power_w": 320
+      },
+      "mechanical": {
+        "rated_torque_nm": 20,
+        "peak_torque_nm": 60,
+        "start_stop_peak_torque_nm": 60,
+        "rated_speed_rpm": 153,
+        "max_speed_rpm": 176,
+        "weight_kg": 0.82,
+        "outer_diameter_mm": 80,
+        "hollow_shaft_diameter_mm": 8.6,
+        "radial_load_kn": 2,
+        "axial_load_kn": 0.8,
+        "torque_density_nm_per_kg": 73.17
+      },
+      "transmission": {
+        "reduction_ratio": 19.612,
+        "backlash_arcsec": 600
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC",
+          "RS485"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "inertia_g_cm2": 660,
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/15_同川精密_机器人关节模组_20250921 .pdf"
+    },
+    {
+      "id": "tc-tcp-96-20-48",
+      "model": "TCP-96-20-FL-DC48-X02-HISC",
+      "base_id": "TC-TCP-96-20-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 43.8,
+        "continuous_current_a": 17.6,
+        "rated_input_power_w": 574
+      },
+      "mechanical": {
+        "rated_torque_nm": 43,
+        "peak_torque_nm": 110,
+        "start_stop_peak_torque_nm": 110,
+        "rated_speed_rpm": 127,
+        "max_speed_rpm": 158,
+        "weight_kg": 1.4,
+        "outer_diameter_mm": 96,
+        "hollow_shaft_diameter_mm": 12.6,
+        "radial_load_kn": 4.5,
+        "axial_load_kn": 1,
+        "torque_density_nm_per_kg": 78.57
+      },
+      "transmission": {
+        "reduction_ratio": 19.612,
+        "backlash_arcsec": 600
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC",
+          "RS485"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "inertia_g_cm2": 1500,
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/15_同川精密_机器人关节模组_20250921 .pdf"
+    }
+  ]
+}

@@ -1,0 +1,209 @@
+{
+  "family_id": "ze-erob142h",
+  "family_name": "零差云控 eRob142H",
+  "shared": {
+    "manufacturer": "零差云控",
+    "manufacturer_en": "ZeroErr",
+    "electrical": {
+      "voltage_v": 48,
+      "rated_input_power_w": 1000,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "weight_kg": 6.49,
+      "outer_diameter_mm": 142,
+      "hollow_shaft_diameter_mm": 18,
+      "absolute_accuracy_deg": 0.002776,
+      "repeatability_deg": 0.0028,
+      "output_encoder_bits": 19,
+      "ip_rating": "IP54",
+      "weight_kg_max": 6.7
+    },
+    "transmission": {
+      "type": "harmonic",
+      "backdrivable": false
+    }
+  },
+  "variants": [
+    {
+      "id": "ze-erob142h-100-48",
+      "model": "eRob142H",
+      "base_id": "ZE-eRob142H-100-48",
+      "mechanical": {
+        "rated_torque_nm": 178,
+        "peak_torque_nm": 433,
+        "start_stop_peak_torque_nm": 433,
+        "max_allow_avg_load_nm": 281,
+        "max_allow_instant_load_nm": 841,
+        "rated_speed_rpm": 20,
+        "max_speed_rpm": 20,
+        "torque_density_nm_per_kg": 66.72
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/27_零差云控_eRob系列关节模组.xlsx"
+    },
+    {
+      "id": "ze-erob142h-120-48",
+      "model": "eRob142H",
+      "base_id": "ZE-eRob142H-120-48",
+      "mechanical": {
+        "rated_torque_nm": 178,
+        "peak_torque_nm": 459,
+        "start_stop_peak_torque_nm": 459,
+        "max_allow_avg_load_nm": 281,
+        "max_allow_instant_load_nm": 892,
+        "rated_speed_rpm": 16.7,
+        "max_speed_rpm": 16.7,
+        "torque_density_nm_per_kg": 70.72
+      },
+      "transmission": {
+        "reduction_ratio": 120
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/27_零差云控_eRob系列关节模组.xlsx"
+    },
+    {
+      "id": "ze-erob142h-160-48",
+      "model": "eRob142H",
+      "base_id": "ZE-eRob142H-160-48",
+      "mechanical": {
+        "rated_torque_nm": 178,
+        "peak_torque_nm": 484,
+        "start_stop_peak_torque_nm": 484,
+        "max_allow_avg_load_nm": 281,
+        "max_allow_instant_load_nm": 892,
+        "rated_speed_rpm": 12.5,
+        "max_speed_rpm": 12.5,
+        "torque_density_nm_per_kg": 74.58
+      },
+      "transmission": {
+        "reduction_ratio": 160
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/27_零差云控_eRob系列关节模组.xlsx"
+    },
+    {
+      "id": "ze-erob142h-50-48",
+      "model": "eRob142H",
+      "base_id": "ZE-eRob142H-50-48",
+      "mechanical": {
+        "rated_torque_nm": 99,
+        "peak_torque_nm": 281,
+        "start_stop_peak_torque_nm": 281,
+        "max_allow_avg_load_nm": 140,
+        "max_allow_instant_load_nm": 497,
+        "rated_speed_rpm": 40,
+        "max_speed_rpm": 40,
+        "torque_density_nm_per_kg": 43.3
+      },
+      "transmission": {
+        "reduction_ratio": 50
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/27_零差云控_eRob系列关节模组.xlsx"
+    },
+    {
+      "id": "ze-erob142h-80-48",
+      "model": "eRob142H",
+      "base_id": "ZE-eRob142H-80-48",
+      "mechanical": {
+        "rated_torque_nm": 153,
+        "peak_torque_nm": 395,
+        "start_stop_peak_torque_nm": 395,
+        "max_allow_avg_load_nm": 217,
+        "max_allow_instant_load_nm": 738,
+        "rated_speed_rpm": 25,
+        "max_speed_rpm": 25,
+        "torque_density_nm_per_kg": 60.86
+      },
+      "transmission": {
+        "reduction_ratio": 80
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/27_零差云控_eRob系列关节模组.xlsx"
+    }
+  ]
+}

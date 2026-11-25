@@ -1,0 +1,280 @@
+{
+  "family_id": "dm-jp",
+  "family_name": "达妙 JP",
+  "shared": {
+    "manufacturer": "达妙",
+    "manufacturer_en": "DAMIAO",
+    "electrical": {
+      "motor_topology": "radial flux"
+    },
+    "transmission": {
+      "type": "planetary"
+    }
+  },
+  "variants": [
+    {
+      "id": "dm-jp-57-40-24",
+      "model": "DM-J4340P-2EC",
+      "base_id": "DM-JP-57-40-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 8,
+        "continuous_current_a": 3,
+        "rated_input_power_w": 33
+      },
+      "mechanical": {
+        "rated_torque_nm": 9,
+        "peak_torque_nm": 27,
+        "start_stop_peak_torque_nm": 27,
+        "rated_speed_rpm": 36,
+        "max_speed_rpm": 52.5,
+        "weight_kg": 0.375,
+        "outer_diameter_mm": 57,
+        "torque_density_nm_per_kg": 72.0
+      },
+      "transmission": {
+        "reduction_ratio": 40,
+        "backdrivable": false
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 56.5,
+        "length_mm_max": 56.5,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/4_达妙_关节电机_20250630.pdf"
+    },
+    {
+      "id": "dm-jp-57-40-48",
+      "model": "DM-J4340P-2EC(48V)",
+      "base_id": "DM-JP-57-40-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 9,
+        "continuous_current_a": 2.5,
+        "rated_input_power_w": 33
+      },
+      "mechanical": {
+        "rated_torque_nm": 9,
+        "peak_torque_nm": 27,
+        "start_stop_peak_torque_nm": 27,
+        "rated_speed_rpm": 36,
+        "max_speed_rpm": 100,
+        "weight_kg": 0.375,
+        "outer_diameter_mm": 57,
+        "torque_density_nm_per_kg": 72.0
+      },
+      "transmission": {
+        "reduction_ratio": 40,
+        "backdrivable": false
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 56.5,
+        "length_mm_max": 56.5,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/4_达妙_关节电机_20250630.pdf"
+    },
+    {
+      "id": "dm-jp-76-48-24",
+      "model": "DM-J6248P-2EC",
+      "base_id": "DM-JP-76-48-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 38.7,
+        "continuous_current_a": 11.3,
+        "rated_input_power_w": 125
+      },
+      "mechanical": {
+        "rated_torque_nm": 30,
+        "peak_torque_nm": 97,
+        "start_stop_peak_torque_nm": 97,
+        "rated_speed_rpm": 40,
+        "max_speed_rpm": 60,
+        "weight_kg": 0.628,
+        "outer_diameter_mm": 76,
+        "torque_density_nm_per_kg": 154.46
+      },
+      "transmission": {
+        "reduction_ratio": 48,
+        "backdrivable": false
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 62.5,
+        "length_mm_max": 62.5,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/4_达妙_关节电机_20250630.pdf"
+    },
+    {
+      "id": "dm-jp-76-48-48",
+      "model": "DM-J6248P-2EC",
+      "base_id": "DM-JP-76-48-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 38.7,
+        "continuous_current_a": 11.3,
+        "rated_input_power_w": 125
+      },
+      "mechanical": {
+        "rated_torque_nm": 30,
+        "peak_torque_nm": 97,
+        "start_stop_peak_torque_nm": 97,
+        "rated_speed_rpm": 40,
+        "max_speed_rpm": 60,
+        "weight_kg": 0.628,
+        "outer_diameter_mm": 76,
+        "torque_density_nm_per_kg": 154.46
+      },
+      "transmission": {
+        "reduction_ratio": 48,
+        "backdrivable": false
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 62.5,
+        "length_mm_max": 62.5,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/4_达妙_关节电机_20250630.pdf"
+    },
+    {
+      "id": "dm-jp-98-9-24",
+      "model": "DM-J8009P-2EC",
+      "base_id": "DM-JP-98-9-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 40,
+        "continuous_current_a": 18.6,
+        "rated_input_power_w": 209
+      },
+      "mechanical": {
+        "rated_torque_nm": 20,
+        "peak_torque_nm": 40,
+        "start_stop_peak_torque_nm": 40,
+        "rated_speed_rpm": 100,
+        "max_speed_rpm": 168,
+        "weight_kg": 0.921,
+        "outer_diameter_mm": 98,
+        "torque_density_nm_per_kg": 43.43
+      },
+      "transmission": {
+        "reduction_ratio": 9,
+        "backdrivable": true
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 61.7,
+        "length_mm_max": 61.7,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/4_达妙_关节电机_20250630.pdf"
+    },
+    {
+      "id": "dm-jp-98-9-48",
+      "model": "DM-J8009P-2EC",
+      "base_id": "DM-JP-98-9-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 40,
+        "continuous_current_a": 18.6,
+        "rated_input_power_w": 209
+      },
+      "mechanical": {
+        "rated_torque_nm": 20,
+        "peak_torque_nm": 40,
+        "start_stop_peak_torque_nm": 40,
+        "rated_speed_rpm": 200,
+        "max_speed_rpm": 335,
+        "weight_kg": 0.921,
+        "outer_diameter_mm": 98,
+        "torque_density_nm_per_kg": 43.43
+      },
+      "transmission": {
+        "reduction_ratio": 9,
+        "backdrivable": true
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 61.7,
+        "length_mm_max": 61.7,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/4_达妙_关节电机_20250630.pdf"
+    }
+  ]
+}

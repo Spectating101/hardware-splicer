@@ -1,0 +1,47 @@
+{
+  "family_id": "bdi-stridecore",
+  "family_name": "蓝门开物 StrideCore",
+  "shared": {
+    "manufacturer": "蓝门开物",
+    "manufacturer_en": "BDI",
+    "electrical": {
+      "voltage_v": 48
+    },
+    "mechanical": {
+      "rated_torque_nm": 120,
+      "peak_torque_nm": 360,
+      "start_stop_peak_torque_nm": 360,
+      "weight_kg": 2.3,
+      "hollow_shaft_diameter_mm": 8,
+      "torque_density_nm_per_kg": 156.52
+    },
+    "transmission": {
+      "type": "planetary",
+      "reduction_ratio": 24,
+      "backdrivable": false
+    }
+  },
+  "variants": [
+    {
+      "id": "bdi-stridecore-125-24-48",
+      "model": "StrideCore-125-24-48",
+      "base_id": "BDI-StrideCore-125-24-48",
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 85,
+        "length_mm_max": 85
+      }
+    }
+  ]
+}

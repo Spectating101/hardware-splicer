@@ -1,0 +1,324 @@
+{
+  "family_id": "xx-setz120ci",
+  "family_name": "小象 SETZ120CI",
+  "shared": {
+    "manufacturer": "小象",
+    "manufacturer_en": "SEmotor",
+    "electrical": {
+      "peak_current_a": 141.42,
+      "motor_topology": "axial flux"
+    },
+    "mechanical": {
+      "outer_diameter_mm": 131
+    },
+    "transmission": {
+      "type": "planetary"
+    }
+  },
+  "variants": [
+    {
+      "id": "xx-setz120ci-10-48",
+      "model": "SETZ120CI-1HD",
+      "base_id": "XX-SETZ120CI-10-48",
+      "electrical": {
+        "voltage_v": 48,
+        "continuous_current_a": 16.97,
+        "rated_input_power_w": 480,
+        "peak_input_power_w": 2000
+      },
+      "mechanical": {
+        "rated_torque_nm": 30,
+        "peak_torque_nm": 200,
+        "start_stop_peak_torque_nm": 200,
+        "rated_speed_rpm": 155,
+        "max_speed_rpm": 220,
+        "weight_kg": 2.3,
+        "torque_density_nm_per_kg": 86.96
+      },
+      "transmission": {
+        "reduction_ratio": 10,
+        "backdrivable": true
+      },
+      "options": {
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 78,
+        "length_mm_max": 78
+      },
+      "datasheet_url": "datasheets/24_小象SEmotor.pdf"
+    },
+    {
+      "id": "xx-setz120ci-16-48",
+      "model": "SEAF120A16NG01",
+      "base_id": "XX-SETZ120CI-16-48",
+      "electrical": {
+        "voltage_v": 48,
+        "continuous_current_a": 16.97,
+        "rated_input_power_w": 480,
+        "peak_input_power_w": 2000
+      },
+      "mechanical": {
+        "rated_torque_nm": 48,
+        "peak_torque_nm": 320,
+        "start_stop_peak_torque_nm": 320,
+        "rated_speed_rpm": 96.5,
+        "max_speed_rpm": 137.5,
+        "weight_kg": 2.3,
+        "torque_density_nm_per_kg": 139.13
+      },
+      "transmission": {
+        "reduction_ratio": 16,
+        "backdrivable": false
+      },
+      "options": {
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 78,
+        "length_mm_max": 78
+      },
+      "datasheet_url": "datasheets/24_小象SEmotor.pdf"
+    },
+    {
+      "id": "xx-setz120ci-16-72",
+      "model": "SETZ120CI-1IF",
+      "base_id": "XX-SETZ120CI-16-72",
+      "electrical": {
+        "voltage_v": 72,
+        "continuous_current_a": 29.42,
+        "rated_input_power_w": 1200,
+        "peak_input_power_w": 6500
+      },
+      "mechanical": {
+        "rated_torque_nm": 83.5,
+        "peak_torque_nm": 352,
+        "start_stop_peak_torque_nm": 352,
+        "rated_speed_rpm": 137.5,
+        "max_speed_rpm": 203,
+        "weight_kg": 2.95,
+        "torque_density_nm_per_kg": 119.32
+      },
+      "transmission": {
+        "reduction_ratio": 16,
+        "backdrivable": false
+      },
+      "options": {
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 86,
+        "length_mm_max": 86
+      },
+      "datasheet_url": "datasheets/24_小象SEmotor.pdf"
+    },
+    {
+      "id": "xx-setz120ci-18-72",
+      "model": "SETZ120CI-1QF",
+      "base_id": "XX-SETZ120CI-18-72",
+      "electrical": {
+        "voltage_v": 72,
+        "continuous_current_a": 29.42,
+        "rated_input_power_w": 1200,
+        "peak_input_power_w": 6500
+      },
+      "mechanical": {
+        "rated_torque_nm": 93.5,
+        "peak_torque_nm": 396,
+        "start_stop_peak_torque_nm": 396,
+        "rated_speed_rpm": 122,
+        "max_speed_rpm": 180.5,
+        "weight_kg": 3.05,
+        "torque_density_nm_per_kg": 129.84
+      },
+      "transmission": {
+        "reduction_ratio": 18,
+        "backdrivable": false
+      },
+      "options": {
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 86,
+        "length_mm_max": 86
+      },
+      "datasheet_url": "datasheets/24_小象SEmotor.pdf"
+    },
+    {
+      "id": "xx-setz120ci-21-48",
+      "model": "SETZ120CI-1JD",
+      "base_id": "XX-SETZ120CI-21-48",
+      "electrical": {
+        "voltage_v": 48,
+        "continuous_current_a": 16.97,
+        "rated_input_power_w": 480,
+        "peak_input_power_w": 2000
+      },
+      "mechanical": {
+        "rated_torque_nm": 63,
+        "peak_torque_nm": 420,
+        "start_stop_peak_torque_nm": 420,
+        "rated_speed_rpm": 73.5,
+        "max_speed_rpm": 104.5,
+        "weight_kg": 2.4,
+        "torque_density_nm_per_kg": 175.0
+      },
+      "transmission": {
+        "reduction_ratio": 21,
+        "backdrivable": false
+      },
+      "options": {
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 86,
+        "length_mm_max": 86
+      },
+      "datasheet_url": "datasheets/24_小象SEmotor.pdf"
+    },
+    {
+      "id": "xx-setz120ci-26-48",
+      "model": "SETZ120CI-1LD",
+      "base_id": "XX-SETZ120CI-26-48",
+      "electrical": {
+        "voltage_v": 48,
+        "continuous_current_a": 16.97,
+        "rated_input_power_w": 480,
+        "peak_input_power_w": 2000
+      },
+      "mechanical": {
+        "rated_torque_nm": 78,
+        "peak_torque_nm": 520,
+        "start_stop_peak_torque_nm": 520,
+        "rated_speed_rpm": 59.5,
+        "max_speed_rpm": 84.5,
+        "weight_kg": 2.6,
+        "torque_density_nm_per_kg": 200.0
+      },
+      "transmission": {
+        "reduction_ratio": 26,
+        "backdrivable": false
+      },
+      "options": {
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 86,
+        "length_mm_max": 86
+      },
+      "datasheet_url": "datasheets/24_小象SEmotor.pdf"
+    },
+    {
+      "id": "xx-setz120ci-35-48",
+      "model": "SETZ120CI-1KD",
+      "base_id": "XX-SETZ120CI-35-48",
+      "electrical": {
+        "voltage_v": 48,
+        "continuous_current_a": 16.97,
+        "rated_input_power_w": 480,
+        "peak_input_power_w": 2000
+      },
+      "mechanical": {
+        "rated_torque_nm": 105,
+        "peak_torque_nm": 700,
+        "start_stop_peak_torque_nm": 700,
+        "rated_speed_rpm": 44.5,
+        "max_speed_rpm": 62.5,
+        "weight_kg": 2.6,
+        "torque_density_nm_per_kg": 269.23
+      },
+      "transmission": {
+        "reduction_ratio": 35,
+        "backdrivable": false
+      },
+      "options": {
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 86,
+        "length_mm_max": 86
+      },
+      "datasheet_url": "datasheets/24_小象SEmotor.pdf"
+    },
+    {
+      "id": "xx-setz120ci-70-48",
+      "model": "SETZ120CI-1PD",
+      "base_id": "XX-SETZ120CI-70-48",
+      "electrical": {
+        "voltage_v": 48,
+        "continuous_current_a": 16.97,
+        "rated_input_power_w": 480,
+        "peak_input_power_w": 2000
+      },
+      "mechanical": {
+        "rated_torque_nm": 140,
+        "peak_torque_nm": 1400,
+        "start_stop_peak_torque_nm": 1400,
+        "rated_speed_rpm": 22,
+        "max_speed_rpm": 31,
+        "weight_kg": 3.95,
+        "torque_density_nm_per_kg": 354.43
+      },
+      "transmission": {
+        "reduction_ratio": 70,
+        "backdrivable": false
+      },
+      "options": {
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 116,
+        "length_mm_max": 116
+      },
+      "datasheet_url": "datasheets/24_小象SEmotor.pdf"
+    }
+  ]
+}

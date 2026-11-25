@@ -1,0 +1,55 @@
+{
+  "family_id": "cm-ake60",
+  "family_name": "酷德 AKE60",
+  "shared": {
+    "manufacturer": "酷德",
+    "manufacturer_en": "Cubemars",
+    "electrical": {
+      "voltage_v": 24,
+      "peak_current_a": 12,
+      "continuous_current_a": 4.8,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "rated_torque_nm": 5,
+      "peak_torque_nm": 12.5,
+      "start_stop_peak_torque_nm": 12.5,
+      "rated_speed_rpm": 180,
+      "max_speed_rpm": 240,
+      "weight_kg": 0.26,
+      "outer_diameter_mm": 69,
+      "torque_density_nm_per_kg": 48.08
+    },
+    "transmission": {
+      "type": "planetary",
+      "reduction_ratio": 8,
+      "backdrivable": true,
+      "backlash_arcsec": 540
+    }
+  },
+  "variants": [
+    {
+      "id": "cm-ake60-8-24",
+      "model": "AKE60-8",
+      "base_id": "CM-AKE60-8-24",
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 25,
+        "length_mm_max": 25,
+        "inertia_g_cm2": 32
+      },
+      "datasheet_url": "datasheets/25_酷德Cubemars.pdf"
+    }
+  ]
+}

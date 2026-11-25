@@ -1,0 +1,55 @@
+{
+  "family_id": "cm-ak10",
+  "family_name": "酷德 AK10",
+  "shared": {
+    "manufacturer": "酷德",
+    "manufacturer_en": "Cubemars",
+    "electrical": {
+      "voltage_v": 48,
+      "peak_current_a": 53,
+      "continuous_current_a": 10.7,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "rated_torque_nm": 18,
+      "peak_torque_nm": 60,
+      "start_stop_peak_torque_nm": 60,
+      "rated_speed_rpm": 235,
+      "max_speed_rpm": 248,
+      "weight_kg": 0.94,
+      "outer_diameter_mm": 98,
+      "absolute_accuracy_deg": 15,
+      "motor_encoder_bits": 21,
+      "torque_density_nm_per_kg": 63.83
+    },
+    "transmission": {
+      "type": "planetary",
+      "reduction_ratio": 9,
+      "backdrivable": true
+    }
+  },
+  "variants": [
+    {
+      "id": "cm-ak10-9-48",
+      "model": "AK10-9 V3.0",
+      "base_id": "CM-AK10-9-48",
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 61.7,
+        "length_mm_max": 61.7
+      },
+      "datasheet_url": "datasheets/25_酷德Cubemars.pdf"
+    }
+  ]
+}

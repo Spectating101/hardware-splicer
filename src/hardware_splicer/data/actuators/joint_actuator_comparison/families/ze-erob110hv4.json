@@ -1,0 +1,209 @@
+{
+  "family_id": "ze-erob110hv4",
+  "family_name": "零差云控 eRob110HV4",
+  "shared": {
+    "manufacturer": "零差云控",
+    "manufacturer_en": "ZeroErr",
+    "electrical": {
+      "voltage_v": 48,
+      "rated_input_power_w": 750,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "weight_kg": 2.88,
+      "outer_diameter_mm": 110,
+      "hollow_shaft_diameter_mm": 18,
+      "absolute_accuracy_deg": 0.002776,
+      "repeatability_deg": 0.0028,
+      "output_encoder_bits": 19,
+      "ip_rating": "IP54",
+      "weight_kg_max": 3.06
+    },
+    "transmission": {
+      "type": "harmonic",
+      "backdrivable": false
+    }
+  },
+  "variants": [
+    {
+      "id": "ze-erob110hv4-100-48",
+      "model": "eRob110HV4",
+      "base_id": "ZE-eRob110HV4-100-48",
+      "mechanical": {
+        "rated_torque_nm": 87,
+        "peak_torque_nm": 204,
+        "start_stop_peak_torque_nm": 204,
+        "max_allow_avg_load_nm": 140,
+        "max_allow_instant_load_nm": 369,
+        "rated_speed_rpm": 30,
+        "max_speed_rpm": 30,
+        "torque_density_nm_per_kg": 70.83
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/27_零差云控_eRob系列关节模组.xlsx"
+    },
+    {
+      "id": "ze-erob110hv4-120-48",
+      "model": "eRob110HV4",
+      "base_id": "ZE-eRob110HV4-120-48",
+      "mechanical": {
+        "rated_torque_nm": 87,
+        "peak_torque_nm": 217,
+        "start_stop_peak_torque_nm": 217,
+        "max_allow_avg_load_nm": 140,
+        "max_allow_instant_load_nm": 395,
+        "rated_speed_rpm": 25,
+        "max_speed_rpm": 25,
+        "torque_density_nm_per_kg": 75.35
+      },
+      "transmission": {
+        "reduction_ratio": 120
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/27_零差云控_eRob系列关节模组.xlsx"
+    },
+    {
+      "id": "ze-erob110hv4-160-48",
+      "model": "eRob110HV4",
+      "base_id": "ZE-eRob110HV4-160-48",
+      "mechanical": {
+        "rated_torque_nm": 87,
+        "peak_torque_nm": 229,
+        "start_stop_peak_torque_nm": 229,
+        "max_allow_avg_load_nm": 140,
+        "max_allow_instant_load_nm": 408,
+        "rated_speed_rpm": 18.75,
+        "max_speed_rpm": 18.75,
+        "torque_density_nm_per_kg": 79.51
+      },
+      "transmission": {
+        "reduction_ratio": 160
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/27_零差云控_eRob系列关节模组.xlsx"
+    },
+    {
+      "id": "ze-erob110hv4-50-48",
+      "model": "eRob110HV4",
+      "base_id": "ZE-eRob110HV4-50-48",
+      "mechanical": {
+        "rated_torque_nm": 51,
+        "peak_torque_nm": 127,
+        "start_stop_peak_torque_nm": 127,
+        "max_allow_avg_load_nm": 72,
+        "max_allow_instant_load_nm": 242,
+        "rated_speed_rpm": 60,
+        "max_speed_rpm": 60,
+        "torque_density_nm_per_kg": 44.1
+      },
+      "transmission": {
+        "reduction_ratio": 50
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/27_零差云控_eRob系列关节模组.xlsx"
+    },
+    {
+      "id": "ze-erob110hv4-80-48",
+      "model": "eRob110HV4",
+      "base_id": "ZE-eRob110HV4-80-48",
+      "mechanical": {
+        "rated_torque_nm": 82,
+        "peak_torque_nm": 178,
+        "start_stop_peak_torque_nm": 178,
+        "max_allow_avg_load_nm": 113,
+        "max_allow_instant_load_nm": 332,
+        "rated_speed_rpm": 37.5,
+        "max_speed_rpm": 37.5,
+        "torque_density_nm_per_kg": 61.81
+      },
+      "transmission": {
+        "reduction_ratio": 80
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/27_零差云控_eRob系列关节模组.xlsx"
+    }
+  ]
+}

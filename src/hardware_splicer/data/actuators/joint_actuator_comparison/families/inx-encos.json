@@ -1,0 +1,807 @@
+{
+  "family_id": "inx-encos",
+  "family_name": "因克斯 ENCOS",
+  "shared": {
+    "manufacturer": "因克斯",
+    "manufacturer_en": "ENCOS",
+    "electrical": {
+      "voltage_v": 48,
+      "motor_topology": "radial flux"
+    },
+    "transmission": {
+      "backdrivable": false
+    }
+  },
+  "variants": [
+    {
+      "id": "inx-encos-105-18-48",
+      "model": "EC-A8112-P1-18",
+      "base_id": "INX-ENCOS-105-18-48",
+      "electrical": {
+        "peak_current_a": 60,
+        "continuous_current_a": 15.9,
+        "rated_input_power_w": 638.4
+      },
+      "mechanical": {
+        "rated_torque_nm": 30,
+        "peak_torque_nm": 90,
+        "start_stop_peak_torque_nm": 90,
+        "rated_speed_rpm": 155,
+        "max_speed_rpm": 157,
+        "weight_kg": 0.868,
+        "outer_diameter_mm": 105,
+        "torque_density_nm_per_kg": 103.69
+      },
+      "transmission": {
+        "type": "planetary",
+        "reduction_ratio": 18
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/20_因克斯_ENCOS电机数据手册_V3.13.pdf"
+    },
+    {
+      "id": "inx-encos-105-18-48-h",
+      "model": "EC-A8112-P1-18H",
+      "base_id": "INX-ENCOS-105-18-48-H",
+      "electrical": {
+        "peak_current_a": 60,
+        "continuous_current_a": 15.9,
+        "rated_input_power_w": 638.4
+      },
+      "mechanical": {
+        "rated_torque_nm": 30,
+        "peak_torque_nm": 90,
+        "start_stop_peak_torque_nm": 90,
+        "rated_speed_rpm": 155,
+        "max_speed_rpm": 157,
+        "weight_kg": 0.883,
+        "outer_diameter_mm": 105,
+        "hollow_shaft_diameter_mm": 5,
+        "torque_density_nm_per_kg": 101.93
+      },
+      "transmission": {
+        "type": "planetary",
+        "reduction_ratio": 18
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/20_因克斯_ENCOS电机数据手册_V3.13.pdf"
+    },
+    {
+      "id": "inx-encos-105-18-48-h-v2",
+      "model": "EC-A8116-P1-18H",
+      "base_id": "INX-ENCOS-105-18-48-H-V2",
+      "electrical": {
+        "peak_current_a": 70,
+        "continuous_current_a": 21,
+        "rated_input_power_w": 931.2
+      },
+      "mechanical": {
+        "rated_torque_nm": 40,
+        "peak_torque_nm": 130,
+        "start_stop_peak_torque_nm": 130,
+        "rated_speed_rpm": 132,
+        "max_speed_rpm": 140,
+        "weight_kg": 0.968,
+        "outer_diameter_mm": 105,
+        "hollow_shaft_diameter_mm": 5,
+        "torque_density_nm_per_kg": 134.3
+      },
+      "transmission": {
+        "type": "planetary",
+        "reduction_ratio": 18
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/20_因克斯_ENCOS电机数据手册_V3.13.pdf"
+    },
+    {
+      "id": "inx-encos-105-18-48-v2",
+      "model": "EC-A8116-P1-18",
+      "base_id": "INX-ENCOS-105-18-48-V2",
+      "electrical": {
+        "peak_current_a": 70,
+        "continuous_current_a": 21,
+        "rated_input_power_w": 931.2
+      },
+      "mechanical": {
+        "rated_torque_nm": 40,
+        "peak_torque_nm": 130,
+        "start_stop_peak_torque_nm": 130,
+        "rated_speed_rpm": 132,
+        "max_speed_rpm": 140,
+        "weight_kg": 0.961,
+        "outer_diameter_mm": 105,
+        "torque_density_nm_per_kg": 135.28
+      },
+      "transmission": {
+        "type": "planetary",
+        "reduction_ratio": 18
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/20_因克斯_ENCOS电机数据手册_V3.13.pdf"
+    },
+    {
+      "id": "inx-encos-124-12-48",
+      "model": "EC-A10020-P1-12",
+      "base_id": "INX-ENCOS-124-12-48",
+      "electrical": {
+        "peak_current_a": 70,
+        "continuous_current_a": 21.04,
+        "rated_input_power_w": 880
+      },
+      "mechanical": {
+        "rated_torque_nm": 50,
+        "peak_torque_nm": 150,
+        "start_stop_peak_torque_nm": 150,
+        "rated_speed_rpm": 127,
+        "max_speed_rpm": 140,
+        "weight_kg": 1.373,
+        "outer_diameter_mm": 124,
+        "torque_density_nm_per_kg": 109.25
+      },
+      "transmission": {
+        "type": "planetary",
+        "reduction_ratio": 12
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/20_因克斯_ENCOS电机数据手册_V3.13.pdf"
+    },
+    {
+      "id": "inx-encos-124-24-48-h",
+      "model": "EC-A10020-P2-24",
+      "base_id": "INX-ENCOS-124-24-48-H",
+      "electrical": {
+        "peak_current_a": 140,
+        "continuous_current_a": 44.05,
+        "rated_input_power_w": 1686
+      },
+      "mechanical": {
+        "rated_torque_nm": 100,
+        "peak_torque_nm": 330,
+        "start_stop_peak_torque_nm": 330,
+        "rated_speed_rpm": 115,
+        "max_speed_rpm": 123,
+        "weight_kg": 2.19,
+        "outer_diameter_mm": 124,
+        "hollow_shaft_diameter_mm": 8,
+        "torque_density_nm_per_kg": 150.68
+      },
+      "transmission": {
+        "type": "planetary",
+        "reduction_ratio": 24
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/20_因克斯_ENCOS电机数据手册_V3.13.pdf"
+    },
+    {
+      "id": "inx-encos-170-11-48",
+      "model": "EC-A13720-P1-11.4",
+      "base_id": "INX-ENCOS-170-11-48",
+      "electrical": {
+        "peak_current_a": 220,
+        "continuous_current_a": 46.7,
+        "rated_input_power_w": 1756.8
+      },
+      "mechanical": {
+        "rated_torque_nm": 120,
+        "peak_torque_nm": 400,
+        "start_stop_peak_torque_nm": 400,
+        "rated_speed_rpm": 126,
+        "max_speed_rpm": 139,
+        "weight_kg": 3.16,
+        "outer_diameter_mm": 170,
+        "torque_density_nm_per_kg": 126.58
+      },
+      "transmission": {
+        "type": "planetary",
+        "reduction_ratio": 11.4
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/20_因克斯_ENCOS电机数据手册_V3.13.pdf"
+    },
+    {
+      "id": "inx-encos-170-13-48",
+      "model": "EC-A13715-P1-12.67",
+      "base_id": "INX-ENCOS-170-13-48",
+      "electrical": {
+        "peak_current_a": 220,
+        "continuous_current_a": 43.5,
+        "rated_input_power_w": 1872
+      },
+      "mechanical": {
+        "rated_torque_nm": 110,
+        "peak_torque_nm": 320,
+        "start_stop_peak_torque_nm": 320,
+        "rated_speed_rpm": 119,
+        "max_speed_rpm": 135,
+        "weight_kg": 2.695,
+        "outer_diameter_mm": 170,
+        "torque_density_nm_per_kg": 118.74
+      },
+      "transmission": {
+        "type": "planetary",
+        "reduction_ratio": 12.67
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/20_因克斯_ENCOS电机数据手册_V3.13.pdf"
+    },
+    {
+      "id": "inx-encos-44-36-48",
+      "model": "EC-A2806-P2-36",
+      "base_id": "INX-ENCOS-44-36-48",
+      "electrical": {
+        "peak_current_a": 10,
+        "continuous_current_a": 2.4,
+        "rated_input_power_w": 101
+      },
+      "mechanical": {
+        "rated_torque_nm": 3,
+        "peak_torque_nm": 12,
+        "start_stop_peak_torque_nm": 12,
+        "rated_speed_rpm": 207,
+        "max_speed_rpm": 220,
+        "weight_kg": 0.162,
+        "outer_diameter_mm": 44,
+        "torque_density_nm_per_kg": 74.07
+      },
+      "transmission": {
+        "type": "planetary",
+        "reduction_ratio": 36
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/20_因克斯_ENCOS电机数据手册_V3.13.pdf"
+    },
+    {
+      "id": "inx-encos-53-107-48",
+      "model": "EC-A3814-H14-107",
+      "base_id": "INX-ENCOS-53-107-48",
+      "electrical": {
+        "peak_current_a": 10,
+        "continuous_current_a": 4,
+        "rated_input_power_w": 134.4
+      },
+      "mechanical": {
+        "rated_torque_nm": 20,
+        "peak_torque_nm": 60,
+        "start_stop_peak_torque_nm": 60,
+        "rated_speed_rpm": 47,
+        "max_speed_rpm": 52,
+        "weight_kg": 0.434,
+        "outer_diameter_mm": 53,
+        "hollow_shaft_diameter_mm": 8,
+        "torque_density_nm_per_kg": 138.25
+      },
+      "transmission": {
+        "type": "harmonic",
+        "reduction_ratio": 107
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/20_因克斯_ENCOS电机数据手册_V3.13.pdf"
+    },
+    {
+      "id": "inx-encos-56-36-48",
+      "model": "EC-A4310-P2-36",
+      "base_id": "INX-ENCOS-56-36-48",
+      "electrical": {
+        "peak_current_a": 30,
+        "continuous_current_a": 7.8,
+        "rated_input_power_w": 156
+      },
+      "mechanical": {
+        "rated_torque_nm": 12,
+        "peak_torque_nm": 36,
+        "start_stop_peak_torque_nm": 36,
+        "rated_speed_rpm": 75,
+        "max_speed_rpm": 89,
+        "weight_kg": 0.382,
+        "outer_diameter_mm": 56,
+        "torque_density_nm_per_kg": 94.24
+      },
+      "transmission": {
+        "type": "planetary",
+        "reduction_ratio": 36
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/20_因克斯_ENCOS电机数据手册_V3.13.pdf"
+    },
+    {
+      "id": "inx-encos-56-36-48-v2",
+      "model": "EC-A4315-P2-36",
+      "base_id": "INX-ENCOS-56-36-48-V2",
+      "electrical": {
+        "peak_current_a": 30,
+        "continuous_current_a": 10.22,
+        "rated_input_power_w": 397
+      },
+      "mechanical": {
+        "rated_torque_nm": 25,
+        "peak_torque_nm": 75,
+        "start_stop_peak_torque_nm": 75,
+        "rated_speed_rpm": 109,
+        "max_speed_rpm": 117,
+        "weight_kg": 0.485,
+        "outer_diameter_mm": 56,
+        "torque_density_nm_per_kg": 154.64
+      },
+      "transmission": {
+        "type": "planetary",
+        "reduction_ratio": 36
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/20_因克斯_ENCOS电机数据手册_V3.13.pdf"
+    },
+    {
+      "id": "inx-encos-60-36-48-h",
+      "model": "EC-A4310-P2-36H",
+      "base_id": "INX-ENCOS-60-36-48-H",
+      "electrical": {
+        "peak_current_a": 30,
+        "continuous_current_a": 7.8,
+        "rated_input_power_w": 156
+      },
+      "mechanical": {
+        "rated_torque_nm": 12,
+        "peak_torque_nm": 36,
+        "start_stop_peak_torque_nm": 36,
+        "rated_speed_rpm": 75,
+        "max_speed_rpm": 89,
+        "weight_kg": 0.414,
+        "outer_diameter_mm": 60,
+        "hollow_shaft_diameter_mm": 4,
+        "torque_density_nm_per_kg": 86.96
+      },
+      "transmission": {
+        "type": "planetary",
+        "reduction_ratio": 36
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/20_因克斯_ENCOS电机数据手册_V3.13.pdf"
+    },
+    {
+      "id": "inx-encos-63-100-48",
+      "model": "EC-A5013-H17-100",
+      "base_id": "INX-ENCOS-63-100-48",
+      "electrical": {
+        "peak_current_a": 20,
+        "continuous_current_a": 3,
+        "rated_input_power_w": 120
+      },
+      "mechanical": {
+        "rated_torque_nm": 30,
+        "peak_torque_nm": 90,
+        "start_stop_peak_torque_nm": 90,
+        "rated_speed_rpm": 33,
+        "max_speed_rpm": 38,
+        "weight_kg": 0.63,
+        "outer_diameter_mm": 63,
+        "hollow_shaft_diameter_mm": 8,
+        "torque_density_nm_per_kg": 142.86
+      },
+      "transmission": {
+        "type": "harmonic",
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/20_因克斯_ENCOS电机数据手册_V3.13.pdf"
+    },
+    {
+      "id": "inx-encos-73-100-48",
+      "model": "EC-A6013-H20-100",
+      "base_id": "INX-ENCOS-73-100-48",
+      "electrical": {
+        "peak_current_a": 25,
+        "continuous_current_a": 5.2,
+        "rated_input_power_w": 206.4
+      },
+      "mechanical": {
+        "rated_torque_nm": 40,
+        "peak_torque_nm": 130,
+        "start_stop_peak_torque_nm": 130,
+        "rated_speed_rpm": 45,
+        "max_speed_rpm": 47,
+        "weight_kg": 0.906,
+        "outer_diameter_mm": 73,
+        "hollow_shaft_diameter_mm": 11,
+        "torque_density_nm_per_kg": 143.49
+      },
+      "transmission": {
+        "type": "harmonic",
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/20_因克斯_ENCOS电机数据手册_V3.13.pdf"
+    },
+    {
+      "id": "inx-encos-88-16-48-h",
+      "model": "EC-A6408-P2-16H",
+      "base_id": "INX-ENCOS-88-16-48-H",
+      "electrical": {
+        "peak_current_a": 30,
+        "continuous_current_a": 6.51,
+        "rated_input_power_w": 230.88
+      },
+      "mechanical": {
+        "rated_torque_nm": 14,
+        "peak_torque_nm": 45,
+        "start_stop_peak_torque_nm": 45,
+        "rated_speed_rpm": 105,
+        "max_speed_rpm": 130,
+        "weight_kg": 0.8,
+        "outer_diameter_mm": 88,
+        "hollow_shaft_diameter_mm": 14,
+        "torque_density_nm_per_kg": 56.25
+      },
+      "transmission": {
+        "type": "planetary",
+        "reduction_ratio": 16
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/20_因克斯_ENCOS电机数据手册_V3.13.pdf"
+    },
+    {
+      "id": "inx-encos-88-25-48",
+      "model": "EC-A6408-P2-25",
+      "base_id": "INX-ENCOS-88-25-48",
+      "electrical": {
+        "peak_current_a": 60,
+        "continuous_current_a": 11.83,
+        "rated_input_power_w": 332
+      },
+      "mechanical": {
+        "rated_torque_nm": 20,
+        "peak_torque_nm": 60,
+        "start_stop_peak_torque_nm": 60,
+        "rated_speed_rpm": 133,
+        "max_speed_rpm": 149,
+        "weight_kg": 0.625,
+        "outer_diameter_mm": 88,
+        "torque_density_nm_per_kg": 96.0
+      },
+      "transmission": {
+        "type": "planetary",
+        "reduction_ratio": 25
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/20_因克斯_ENCOS电机数据手册_V3.13.pdf"
+    },
+    {
+      "id": "inx-encos-88-25-48-v2",
+      "model": "EC-A6416-P2-25",
+      "base_id": "INX-ENCOS-88-25-48-V2",
+      "electrical": {
+        "peak_current_a": 60,
+        "continuous_current_a": 17.5,
+        "rated_input_power_w": 624
+      },
+      "mechanical": {
+        "rated_torque_nm": 40,
+        "peak_torque_nm": 120,
+        "start_stop_peak_torque_nm": 120,
+        "rated_speed_rpm": 107,
+        "max_speed_rpm": 120,
+        "weight_kg": 0.805,
+        "outer_diameter_mm": 88,
+        "torque_density_nm_per_kg": 149.07
+      },
+      "transmission": {
+        "type": "planetary",
+        "reduction_ratio": 25
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/20_因克斯_ENCOS电机数据手册_V3.13.pdf"
+    },
+    {
+      "id": "inx-encos-88-30-48-h",
+      "model": "EC-A6408-P2-30.25H",
+      "base_id": "INX-ENCOS-88-30-48-H",
+      "electrical": {
+        "peak_current_a": 30,
+        "continuous_current_a": 10.3,
+        "rated_input_power_w": 392.16
+      },
+      "mechanical": {
+        "rated_torque_nm": 20,
+        "peak_torque_nm": 70,
+        "start_stop_peak_torque_nm": 70,
+        "rated_speed_rpm": 122.8,
+        "max_speed_rpm": 128,
+        "weight_kg": 0.846,
+        "outer_diameter_mm": 88,
+        "hollow_shaft_diameter_mm": 7,
+        "torque_density_nm_per_kg": 82.74
+      },
+      "transmission": {
+        "type": "planetary",
+        "reduction_ratio": 30.25
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/20_因克斯_ENCOS电机数据手册_V3.13.pdf"
+    },
+    {
+      "id": "inx-encos-88-30-48-h-v2",
+      "model": "EC-A6416-P2-30.25H",
+      "base_id": "INX-ENCOS-88-30-48-H-V2",
+      "electrical": {
+        "peak_current_a": 60,
+        "continuous_current_a": 9.4,
+        "rated_input_power_w": 392.64
+      },
+      "mechanical": {
+        "rated_torque_nm": 25,
+        "peak_torque_nm": 132,
+        "start_stop_peak_torque_nm": 132,
+        "rated_speed_rpm": 97,
+        "max_speed_rpm": 119,
+        "weight_kg": 1.013,
+        "outer_diameter_mm": 88,
+        "hollow_shaft_diameter_mm": 7,
+        "torque_density_nm_per_kg": 130.31
+      },
+      "transmission": {
+        "type": "planetary",
+        "reduction_ratio": 30.25
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/20_因克斯_ENCOS电机数据手册_V3.13.pdf"
+    }
+  ]
+}

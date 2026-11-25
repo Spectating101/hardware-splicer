@@ -1,0 +1,201 @@
+{
+  "family_id": "tsino-rjm",
+  "family_name": "清能德创 RJM",
+  "shared": {
+    "manufacturer": "清能德创",
+    "manufacturer_en": "TSINO DYNATRON",
+    "electrical": {
+      "voltage_v": 48,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "absolute_accuracy_deg": 0.1,
+      "repeatability_deg": 0.001,
+      "output_encoder_bits": 19,
+      "motor_encoder_bits": 20,
+      "ip_rating": "IP54"
+    },
+    "transmission": {
+      "type": "harmonic",
+      "reduction_ratio": 100,
+      "backdrivable": false
+    }
+  },
+  "variants": [
+    {
+      "id": "tsino-rjm-14-100-48",
+      "model": "RJM-14-100-A000",
+      "base_id": "TSINO-RJM-14-100-48",
+      "electrical": {
+        "peak_current_a": 3.5,
+        "continuous_current_a": 1.6
+      },
+      "mechanical": {
+        "rated_torque_nm": 13.5,
+        "peak_torque_nm": 29,
+        "start_stop_peak_torque_nm": 29,
+        "max_allow_avg_load_nm": 13.5,
+        "rated_speed_rpm": 35,
+        "max_speed_rpm": 41,
+        "weight_kg": 1.7,
+        "hollow_shaft_diameter_mm": 9,
+        "torque_density_nm_per_kg": 17.06
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/1_清能德创_RJM机器人关节_20251016.pdf"
+    },
+    {
+      "id": "tsino-rjm-17-100-48",
+      "model": "RJM-17-100-A000",
+      "base_id": "TSINO-RJM-17-100-48",
+      "electrical": {
+        "peak_current_a": 6,
+        "continuous_current_a": 4.5
+      },
+      "mechanical": {
+        "rated_torque_nm": 36,
+        "peak_torque_nm": 66,
+        "start_stop_peak_torque_nm": 66,
+        "max_allow_avg_load_nm": 48.5,
+        "rated_speed_rpm": 27,
+        "max_speed_rpm": 32,
+        "weight_kg": 2.4,
+        "hollow_shaft_diameter_mm": 9,
+        "torque_density_nm_per_kg": 27.5
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/1_清能德创_RJM机器人关节_20251016.pdf"
+    },
+    {
+      "id": "tsino-rjm-20-100-48",
+      "model": "RJM-20-100-A000",
+      "base_id": "TSINO-RJM-20-100-48",
+      "electrical": {
+        "peak_current_a": 9,
+        "continuous_current_a": 5.5
+      },
+      "mechanical": {
+        "rated_torque_nm": 61,
+        "peak_torque_nm": 102,
+        "start_stop_peak_torque_nm": 102,
+        "max_allow_avg_load_nm": 61,
+        "rated_speed_rpm": 26,
+        "max_speed_rpm": 30,
+        "weight_kg": 2.9,
+        "hollow_shaft_diameter_mm": 11,
+        "torque_density_nm_per_kg": 35.17
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/1_清能德创_RJM机器人关节_20251016.pdf"
+    },
+    {
+      "id": "tsino-rjm-25-100-48",
+      "model": "RJM-25-100-A000",
+      "base_id": "TSINO-RJM-25-100-48",
+      "electrical": {
+        "peak_current_a": 16.5,
+        "continuous_current_a": 11.5
+      },
+      "mechanical": {
+        "rated_torque_nm": 81,
+        "peak_torque_nm": 194,
+        "start_stop_peak_torque_nm": 194,
+        "max_allow_avg_load_nm": 133,
+        "rated_speed_rpm": 26,
+        "max_speed_rpm": 30,
+        "weight_kg": 4.7,
+        "hollow_shaft_diameter_mm": 13,
+        "torque_density_nm_per_kg": 41.28
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/1_清能德创_RJM机器人关节_20251016.pdf"
+    },
+    {
+      "id": "tsino-rjm-32-100-48",
+      "model": "RJM-32-100-A000",
+      "base_id": "TSINO-RJM-32-100-48",
+      "electrical": {
+        "peak_current_a": 30,
+        "continuous_current_a": 20
+      },
+      "mechanical": {
+        "rated_torque_nm": 180,
+        "peak_torque_nm": 411,
+        "start_stop_peak_torque_nm": 411,
+        "max_allow_avg_load_nm": 267,
+        "rated_speed_rpm": 16,
+        "max_speed_rpm": 27,
+        "weight_kg": 8.2,
+        "hollow_shaft_diameter_mm": 15,
+        "torque_density_nm_per_kg": 50.12
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/1_清能德创_RJM机器人关节_20251016.pdf"
+    }
+  ]
+}

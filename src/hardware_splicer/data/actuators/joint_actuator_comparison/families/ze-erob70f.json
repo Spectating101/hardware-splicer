@@ -1,0 +1,137 @@
+{
+  "family_id": "ze-erob70f",
+  "family_name": "零差云控 eRob70F",
+  "shared": {
+    "manufacturer": "零差云控",
+    "manufacturer_en": "ZeroErr",
+    "electrical": {
+      "voltage_v": 48,
+      "rated_input_power_w": 75,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "weight_kg": 0.77,
+      "outer_diameter_mm": 70,
+      "hollow_shaft_diameter_mm": 18,
+      "absolute_accuracy_deg": 0.002776,
+      "repeatability_deg": 0.0028,
+      "output_encoder_bits": 19,
+      "ip_rating": "IP54",
+      "weight_kg_max": 0.83
+    },
+    "transmission": {
+      "type": "harmonic",
+      "backdrivable": false
+    }
+  },
+  "variants": [
+    {
+      "id": "ze-erob70f-100-48",
+      "model": "eRob70F",
+      "base_id": "ZE-eRob70F-100-48",
+      "mechanical": {
+        "rated_torque_nm": 5.4,
+        "peak_torque_nm": 19,
+        "start_stop_peak_torque_nm": 19,
+        "max_allow_avg_load_nm": 7.7,
+        "max_allow_instant_load_nm": 35,
+        "rated_speed_rpm": 30,
+        "max_speed_rpm": 30,
+        "torque_density_nm_per_kg": 24.68
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/27_零差云控_eRob系列关节模组.xlsx"
+    },
+    {
+      "id": "ze-erob70f-50-48",
+      "model": "eRob70F",
+      "base_id": "ZE-eRob70F-50-48",
+      "mechanical": {
+        "rated_torque_nm": 3.7,
+        "peak_torque_nm": 12,
+        "start_stop_peak_torque_nm": 12,
+        "max_allow_avg_load_nm": 4.8,
+        "max_allow_instant_load_nm": 23,
+        "rated_speed_rpm": 60,
+        "max_speed_rpm": 60,
+        "torque_density_nm_per_kg": 15.58
+      },
+      "transmission": {
+        "reduction_ratio": 50
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/27_零差云控_eRob系列关节模组.xlsx"
+    },
+    {
+      "id": "ze-erob70f-80-48",
+      "model": "eRob70F",
+      "base_id": "ZE-eRob70F-80-48",
+      "mechanical": {
+        "rated_torque_nm": 5.4,
+        "peak_torque_nm": 16,
+        "start_stop_peak_torque_nm": 16,
+        "max_allow_avg_load_nm": 7.7,
+        "max_allow_instant_load_nm": 35,
+        "rated_speed_rpm": 37.5,
+        "max_speed_rpm": 37.5,
+        "torque_density_nm_per_kg": 20.78
+      },
+      "transmission": {
+        "reduction_ratio": 80
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/27_零差云控_eRob系列关节模组.xlsx"
+    }
+  ]
+}

@@ -1,0 +1,1309 @@
+{
+  "family_id": "ls-hj2t",
+  "family_name": "雷赛 HJ2T",
+  "shared": {
+    "manufacturer": "雷赛",
+    "manufacturer_en": "LeadShine",
+    "electrical": {
+      "voltage_v": 48,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "motor_encoder_bits": 17
+    },
+    "transmission": {
+      "type": "harmonic",
+      "backdrivable": false
+    }
+  },
+  "variants": [
+    {
+      "id": "ls-hj2t-110-101-48",
+      "model": "HJ2T-110FXD17",
+      "base_id": "LS-HJ2T-110-101-48",
+      "electrical": {
+        "peak_current_a": 10.4,
+        "continuous_current_a": 9,
+        "rated_input_power_w": 750
+      },
+      "mechanical": {
+        "rated_torque_nm": 84,
+        "peak_torque_nm": 194,
+        "start_stop_peak_torque_nm": 194,
+        "max_allow_avg_load_nm": 133,
+        "max_speed_rpm": 36,
+        "weight_kg": 2.1,
+        "outer_diameter_mm": 110,
+        "hollow_shaft_diameter_mm": 27,
+        "weight_kg_max": 2.6,
+        "torque_density_nm_per_kg": 92.38
+      },
+      "transmission": {
+        "reduction_ratio": 101,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 82.4,
+        "length_mm_max": 102.4,
+        "inertia_g_cm2": 1349.5,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hj2t-110-121-48",
+      "model": "HJ2T-110FXD17",
+      "base_id": "LS-HJ2T-110-121-48",
+      "electrical": {
+        "peak_current_a": 10.4,
+        "continuous_current_a": 9,
+        "rated_input_power_w": 750
+      },
+      "mechanical": {
+        "rated_torque_nm": 84,
+        "peak_torque_nm": 207,
+        "start_stop_peak_torque_nm": 207,
+        "max_allow_avg_load_nm": 133,
+        "max_speed_rpm": 23,
+        "weight_kg": 2.1,
+        "outer_diameter_mm": 110,
+        "hollow_shaft_diameter_mm": 27,
+        "weight_kg_max": 2.6,
+        "torque_density_nm_per_kg": 98.57
+      },
+      "transmission": {
+        "reduction_ratio": 121,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 82.4,
+        "length_mm_max": 102.4,
+        "inertia_g_cm2": 1349.5,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hj2t-110-161-48",
+      "model": "HJ2T-110FXD17",
+      "base_id": "LS-HJ2T-110-161-48",
+      "electrical": {
+        "peak_current_a": 10.4,
+        "continuous_current_a": 9,
+        "rated_input_power_w": 750
+      },
+      "mechanical": {
+        "rated_torque_nm": 84,
+        "peak_torque_nm": 217,
+        "start_stop_peak_torque_nm": 217,
+        "max_allow_avg_load_nm": 133,
+        "max_speed_rpm": 17,
+        "weight_kg": 2.1,
+        "outer_diameter_mm": 110,
+        "hollow_shaft_diameter_mm": 27,
+        "weight_kg_max": 2.6,
+        "torque_density_nm_per_kg": 103.33
+      },
+      "transmission": {
+        "reduction_ratio": 161,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 82.4,
+        "length_mm_max": 102.4,
+        "inertia_g_cm2": 1349.5,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hj2t-110-51-48",
+      "model": "HJ2T-110FXD17",
+      "base_id": "LS-HJ2T-110-51-48",
+      "electrical": {
+        "peak_current_a": 10.4,
+        "continuous_current_a": 9,
+        "rated_input_power_w": 750
+      },
+      "mechanical": {
+        "rated_torque_nm": 48,
+        "peak_torque_nm": 121,
+        "start_stop_peak_torque_nm": 121,
+        "max_allow_avg_load_nm": 68.5,
+        "max_speed_rpm": 65,
+        "weight_kg": 2.1,
+        "outer_diameter_mm": 110,
+        "hollow_shaft_diameter_mm": 27,
+        "weight_kg_max": 2.6,
+        "torque_density_nm_per_kg": 57.62
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 82.4,
+        "length_mm_max": 102.4,
+        "inertia_g_cm2": 1349.5,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hj2t-110-81-48",
+      "model": "HJ2T-110FXD17",
+      "base_id": "LS-HJ2T-110-81-48",
+      "electrical": {
+        "peak_current_a": 10.4,
+        "continuous_current_a": 9,
+        "rated_input_power_w": 750
+      },
+      "mechanical": {
+        "rated_torque_nm": 78,
+        "peak_torque_nm": 169,
+        "start_stop_peak_torque_nm": 169,
+        "max_allow_avg_load_nm": 107,
+        "max_speed_rpm": 43,
+        "weight_kg": 2.1,
+        "outer_diameter_mm": 110,
+        "hollow_shaft_diameter_mm": 27,
+        "weight_kg_max": 2.6,
+        "torque_density_nm_per_kg": 80.48
+      },
+      "transmission": {
+        "reduction_ratio": 81,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 82.4,
+        "length_mm_max": 102.4,
+        "inertia_g_cm2": 1349.5,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hj2t-142-101-48",
+      "model": "HJ2T-142FXD17",
+      "base_id": "LS-HJ2T-142-101-48",
+      "electrical": {
+        "peak_current_a": 16.9,
+        "continuous_current_a": 15.8,
+        "rated_input_power_w": 1000
+      },
+      "mechanical": {
+        "rated_torque_nm": 169,
+        "peak_torque_nm": 411,
+        "start_stop_peak_torque_nm": 411,
+        "max_allow_avg_load_nm": 267,
+        "max_speed_rpm": 29,
+        "weight_kg": 3.6,
+        "outer_diameter_mm": 142,
+        "hollow_shaft_diameter_mm": 32,
+        "weight_kg_max": 4.5,
+        "torque_density_nm_per_kg": 114.17
+      },
+      "transmission": {
+        "reduction_ratio": 101,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 95.7,
+        "length_mm_max": 115.7,
+        "inertia_g_cm2": 3919.0,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hj2t-142-121-48",
+      "model": "HJ2T-142FXD17",
+      "base_id": "LS-HJ2T-142-121-48",
+      "electrical": {
+        "peak_current_a": 16.9,
+        "continuous_current_a": 15.8,
+        "rated_input_power_w": 1000
+      },
+      "mechanical": {
+        "rated_torque_nm": 169,
+        "peak_torque_nm": 436,
+        "start_stop_peak_torque_nm": 436,
+        "max_allow_avg_load_nm": 267,
+        "max_speed_rpm": 24,
+        "weight_kg": 3.6,
+        "outer_diameter_mm": 142,
+        "hollow_shaft_diameter_mm": 32,
+        "weight_kg_max": 4.5,
+        "torque_density_nm_per_kg": 121.11
+      },
+      "transmission": {
+        "reduction_ratio": 121,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 95.7,
+        "length_mm_max": 115.7,
+        "inertia_g_cm2": 3919.0,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hj2t-142-161-48",
+      "model": "HJ2T-142FXD17",
+      "base_id": "LS-HJ2T-142-161-48",
+      "electrical": {
+        "peak_current_a": 16.9,
+        "continuous_current_a": 15.8,
+        "rated_input_power_w": 1000
+      },
+      "mechanical": {
+        "rated_torque_nm": 169,
+        "peak_torque_nm": 459,
+        "start_stop_peak_torque_nm": 459,
+        "max_allow_avg_load_nm": 267,
+        "max_speed_rpm": 18,
+        "weight_kg": 3.6,
+        "outer_diameter_mm": 142,
+        "hollow_shaft_diameter_mm": 32,
+        "weight_kg_max": 4.5,
+        "torque_density_nm_per_kg": 127.5
+      },
+      "transmission": {
+        "reduction_ratio": 161,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 95.7,
+        "length_mm_max": 115.7,
+        "inertia_g_cm2": 3919.0,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hj2t-142-51-48",
+      "model": "HJ2T-142FXD17",
+      "base_id": "LS-HJ2T-142-51-48",
+      "electrical": {
+        "peak_current_a": 16.9,
+        "continuous_current_a": 15.8,
+        "rated_input_power_w": 1000
+      },
+      "mechanical": {
+        "rated_torque_nm": 94,
+        "peak_torque_nm": 267,
+        "start_stop_peak_torque_nm": 267,
+        "max_allow_avg_load_nm": 120,
+        "max_speed_rpm": 55,
+        "weight_kg": 3.6,
+        "outer_diameter_mm": 142,
+        "hollow_shaft_diameter_mm": 32,
+        "weight_kg_max": 4.5,
+        "torque_density_nm_per_kg": 74.17
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 95.7,
+        "length_mm_max": 115.7,
+        "inertia_g_cm2": 3919.0,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hj2t-142-81-48",
+      "model": "HJ2T-142FXD17",
+      "base_id": "LS-HJ2T-142-81-48",
+      "electrical": {
+        "peak_current_a": 16.9,
+        "continuous_current_a": 15.8,
+        "rated_input_power_w": 1000
+      },
+      "mechanical": {
+        "rated_torque_nm": 146,
+        "peak_torque_nm": 376,
+        "start_stop_peak_torque_nm": 376,
+        "max_allow_avg_load_nm": 185,
+        "max_speed_rpm": 37,
+        "weight_kg": 3.6,
+        "outer_diameter_mm": 142,
+        "hollow_shaft_diameter_mm": 32,
+        "weight_kg_max": 4.5,
+        "torque_density_nm_per_kg": 104.44
+      },
+      "transmission": {
+        "reduction_ratio": 81,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 95.7,
+        "length_mm_max": 115.7,
+        "inertia_g_cm2": 3919.0,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hj2t-170-121-48",
+      "model": "HJ2T-170FXD17",
+      "base_id": "LS-HJ2T-170-121-48",
+      "electrical": {
+        "peak_current_a": 30.2,
+        "continuous_current_a": 14.1,
+        "rated_input_power_w": 1500
+      },
+      "mechanical": {
+        "rated_torque_nm": 363,
+        "peak_torque_nm": 802,
+        "start_stop_peak_torque_nm": 802,
+        "max_allow_avg_load_nm": 586,
+        "max_speed_rpm": 14,
+        "weight_kg": 6.85,
+        "outer_diameter_mm": 170,
+        "hollow_shaft_diameter_mm": 40,
+        "weight_kg_max": 7.5,
+        "torque_density_nm_per_kg": 117.08
+      },
+      "transmission": {
+        "reduction_ratio": 121,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 119.7,
+        "length_mm_max": 144.7,
+        "inertia_g_cm2": 10496.5,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hj2t-170-161-48",
+      "model": "HJ2T-170FXD17",
+      "base_id": "LS-HJ2T-170-161-48",
+      "electrical": {
+        "peak_current_a": 30.2,
+        "continuous_current_a": 14.1,
+        "rated_input_power_w": 1500
+      },
+      "mechanical": {
+        "rated_torque_nm": 363,
+        "peak_torque_nm": 841,
+        "start_stop_peak_torque_nm": 841,
+        "max_allow_avg_load_nm": 586,
+        "max_speed_rpm": 10,
+        "weight_kg": 6.85,
+        "outer_diameter_mm": 170,
+        "hollow_shaft_diameter_mm": 40,
+        "weight_kg_max": 7.5,
+        "torque_density_nm_per_kg": 122.77
+      },
+      "transmission": {
+        "reduction_ratio": 161,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 119.7,
+        "length_mm_max": 144.7,
+        "inertia_g_cm2": 10496.5,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hj2t-170-51-48",
+      "model": "HJ2T-170FXD17",
+      "base_id": "LS-HJ2T-170-51-48",
+      "electrical": {
+        "peak_current_a": 30.2,
+        "continuous_current_a": 14.1,
+        "rated_input_power_w": 1500
+      },
+      "mechanical": {
+        "rated_torque_nm": 169,
+        "peak_torque_nm": 523,
+        "start_stop_peak_torque_nm": 523,
+        "max_allow_avg_load_nm": 255,
+        "max_speed_rpm": 34,
+        "weight_kg": 6.85,
+        "outer_diameter_mm": 170,
+        "hollow_shaft_diameter_mm": 40,
+        "weight_kg_max": 7.5,
+        "torque_density_nm_per_kg": 76.35
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 119.7,
+        "length_mm_max": 144.7,
+        "inertia_g_cm2": 10496.5,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hj2t-40-101-48",
+      "model": "HJ2T-40HXD17",
+      "base_id": "LS-HJ2T-40-101-48",
+      "electrical": {
+        "peak_current_a": 2,
+        "continuous_current_a": 1,
+        "rated_input_power_w": 36
+      },
+      "mechanical": {
+        "rated_torque_nm": 2.8,
+        "peak_torque_nm": 4.8,
+        "start_stop_peak_torque_nm": 4.8,
+        "max_allow_avg_load_nm": 3.3,
+        "max_speed_rpm": 59,
+        "weight_kg": 0.16,
+        "outer_diameter_mm": 40,
+        "hollow_shaft_diameter_mm": 5,
+        "weight_kg_max": 0.23,
+        "torque_density_nm_per_kg": 30.0
+      },
+      "transmission": {
+        "reduction_ratio": 101,
+        "backlash_arcsec": 40
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 55.3,
+        "length_mm_max": 72.3,
+        "inertia_g_cm2": 34.5,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hj2t-40-51-48",
+      "model": "HJ2T-40HXD17",
+      "base_id": "LS-HJ2T-40-51-48",
+      "electrical": {
+        "peak_current_a": 2,
+        "continuous_current_a": 1,
+        "rated_input_power_w": 36
+      },
+      "mechanical": {
+        "rated_torque_nm": 1.8,
+        "peak_torque_nm": 3.3,
+        "start_stop_peak_torque_nm": 3.3,
+        "max_allow_avg_load_nm": 2.3,
+        "max_speed_rpm": 118,
+        "weight_kg": 0.16,
+        "outer_diameter_mm": 40,
+        "hollow_shaft_diameter_mm": 5,
+        "weight_kg_max": 0.23,
+        "torque_density_nm_per_kg": 20.62
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 40
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 55.3,
+        "length_mm_max": 72.3,
+        "inertia_g_cm2": 34.5,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hj2t-52-101-48",
+      "model": "HJ2T-52HXD17",
+      "base_id": "LS-HJ2T-52-101-48",
+      "electrical": {
+        "peak_current_a": 3,
+        "continuous_current_a": 2,
+        "rated_input_power_w": 90
+      },
+      "mechanical": {
+        "rated_torque_nm": 6.5,
+        "peak_torque_nm": 11,
+        "start_stop_peak_torque_nm": 11,
+        "max_allow_avg_load_nm": 8.9,
+        "max_speed_rpm": 59,
+        "weight_kg": 0.3,
+        "outer_diameter_mm": 52,
+        "hollow_shaft_diameter_mm": 12,
+        "weight_kg_max": 0.38,
+        "torque_density_nm_per_kg": 36.67
+      },
+      "transmission": {
+        "reduction_ratio": 101,
+        "backlash_arcsec": 30
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 60.3,
+        "length_mm_max": 76.1,
+        "inertia_g_cm2": 104.5,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hj2t-52-51-48",
+      "model": "HJ2T-52HXD17",
+      "base_id": "LS-HJ2T-52-51-48",
+      "electrical": {
+        "peak_current_a": 3,
+        "continuous_current_a": 2,
+        "rated_input_power_w": 90
+      },
+      "mechanical": {
+        "rated_torque_nm": 4,
+        "peak_torque_nm": 8.3,
+        "start_stop_peak_torque_nm": 8.3,
+        "max_allow_avg_load_nm": 5.5,
+        "max_speed_rpm": 118,
+        "weight_kg": 0.3,
+        "outer_diameter_mm": 52,
+        "hollow_shaft_diameter_mm": 12,
+        "weight_kg_max": 0.38,
+        "torque_density_nm_per_kg": 27.67
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 40
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 60.3,
+        "length_mm_max": 76.1,
+        "inertia_g_cm2": 104.5,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hj2t-70-101-48",
+      "model": "HJ2T-70FXD17",
+      "base_id": "LS-HJ2T-70-101-48",
+      "electrical": {
+        "peak_current_a": 5,
+        "continuous_current_a": 3.6,
+        "rated_input_power_w": 150
+      },
+      "mechanical": {
+        "rated_torque_nm": 9.6,
+        "peak_torque_nm": 34,
+        "start_stop_peak_torque_nm": 34,
+        "max_allow_avg_load_nm": 13.5,
+        "max_speed_rpm": 49,
+        "weight_kg": 0.63,
+        "outer_diameter_mm": 70,
+        "hollow_shaft_diameter_mm": 12,
+        "weight_kg_max": 0.8,
+        "torque_density_nm_per_kg": 53.97
+      },
+      "transmission": {
+        "reduction_ratio": 101,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 60,
+        "length_mm_max": 81.7,
+        "inertia_g_cm2": 135.5,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hj2t-70-51-48",
+      "model": "HJ2T-70FXD17",
+      "base_id": "LS-HJ2T-70-51-48",
+      "electrical": {
+        "peak_current_a": 5,
+        "continuous_current_a": 3.6,
+        "rated_input_power_w": 150
+      },
+      "mechanical": {
+        "rated_torque_nm": 6.6,
+        "peak_torque_nm": 23,
+        "start_stop_peak_torque_nm": 23,
+        "max_allow_avg_load_nm": 8.6,
+        "max_speed_rpm": 97,
+        "weight_kg": 0.63,
+        "outer_diameter_mm": 70,
+        "hollow_shaft_diameter_mm": 12,
+        "weight_kg_max": 0.8,
+        "torque_density_nm_per_kg": 36.51
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 60,
+        "length_mm_max": 81.7,
+        "inertia_g_cm2": 135.5,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hj2t-70-81-48",
+      "model": "HJ2T-70FXD17",
+      "base_id": "LS-HJ2T-70-81-48",
+      "electrical": {
+        "peak_current_a": 5,
+        "continuous_current_a": 3.6,
+        "rated_input_power_w": 150
+      },
+      "mechanical": {
+        "rated_torque_nm": 9.6,
+        "peak_torque_nm": 29,
+        "start_stop_peak_torque_nm": 29,
+        "max_allow_avg_load_nm": 13.5,
+        "max_speed_rpm": 61,
+        "weight_kg": 0.63,
+        "outer_diameter_mm": 70,
+        "hollow_shaft_diameter_mm": 12,
+        "weight_kg_max": 0.8,
+        "torque_density_nm_per_kg": 46.03
+      },
+      "transmission": {
+        "reduction_ratio": 81,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 60,
+        "length_mm_max": 81.7,
+        "inertia_g_cm2": 135.5,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hj2t-80-101-48",
+      "model": "HJ2T-80FXD17",
+      "base_id": "LS-HJ2T-80-101-48",
+      "electrical": {
+        "peak_current_a": 6.7,
+        "continuous_current_a": 5,
+        "rated_input_power_w": 300
+      },
+      "mechanical": {
+        "rated_torque_nm": 30,
+        "peak_torque_nm": 66,
+        "start_stop_peak_torque_nm": 66,
+        "max_allow_avg_load_nm": 49,
+        "max_speed_rpm": 41,
+        "weight_kg": 1.01,
+        "outer_diameter_mm": 80,
+        "hollow_shaft_diameter_mm": 15,
+        "weight_kg_max": 1.17,
+        "torque_density_nm_per_kg": 65.35
+      },
+      "transmission": {
+        "reduction_ratio": 101,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 70.4,
+        "length_mm_max": 92.9,
+        "inertia_g_cm2": 518.0,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hj2t-80-121-48",
+      "model": "HJ2T-80FXD17",
+      "base_id": "LS-HJ2T-80-121-48",
+      "electrical": {
+        "peak_current_a": 6.7,
+        "continuous_current_a": 5,
+        "rated_input_power_w": 300
+      },
+      "mechanical": {
+        "rated_torque_nm": 30,
+        "peak_torque_nm": 66,
+        "start_stop_peak_torque_nm": 66,
+        "max_allow_avg_load_nm": 49,
+        "max_speed_rpm": 32,
+        "weight_kg": 1.01,
+        "outer_diameter_mm": 80,
+        "hollow_shaft_diameter_mm": 15,
+        "weight_kg_max": 1.17,
+        "torque_density_nm_per_kg": 65.35
+      },
+      "transmission": {
+        "reduction_ratio": 121,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 70.4,
+        "length_mm_max": 92.9,
+        "inertia_g_cm2": 518.0,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hj2t-80-51-48",
+      "model": "HJ2T-80FXD17",
+      "base_id": "LS-HJ2T-80-51-48",
+      "electrical": {
+        "peak_current_a": 6.7,
+        "continuous_current_a": 5,
+        "rated_input_power_w": 300
+      },
+      "mechanical": {
+        "rated_torque_nm": 19.8,
+        "peak_torque_nm": 42,
+        "start_stop_peak_torque_nm": 42,
+        "max_allow_avg_load_nm": 32,
+        "max_speed_rpm": 82,
+        "weight_kg": 1.01,
+        "outer_diameter_mm": 80,
+        "hollow_shaft_diameter_mm": 15,
+        "weight_kg_max": 1.17,
+        "torque_density_nm_per_kg": 41.58
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 70.4,
+        "length_mm_max": 92.9,
+        "inertia_g_cm2": 518.0,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hj2t-80-81-48",
+      "model": "HJ2T-80FXD17",
+      "base_id": "LS-HJ2T-80-81-48",
+      "electrical": {
+        "peak_current_a": 6.7,
+        "continuous_current_a": 5,
+        "rated_input_power_w": 300
+      },
+      "mechanical": {
+        "rated_torque_nm": 27.5,
+        "peak_torque_nm": 53,
+        "start_stop_peak_torque_nm": 53,
+        "max_allow_avg_load_nm": 33,
+        "max_speed_rpm": 51,
+        "weight_kg": 1.01,
+        "outer_diameter_mm": 80,
+        "hollow_shaft_diameter_mm": 15,
+        "weight_kg_max": 1.17,
+        "torque_density_nm_per_kg": 52.48
+      },
+      "transmission": {
+        "reduction_ratio": 81,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 70.4,
+        "length_mm_max": 92.9,
+        "inertia_g_cm2": 518.0,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hj2t-90-101-48",
+      "model": "HJ2T-90FXD17",
+      "base_id": "LS-HJ2T-90-101-48",
+      "electrical": {
+        "peak_current_a": 8.4,
+        "continuous_current_a": 6.1,
+        "rated_input_power_w": 500
+      },
+      "mechanical": {
+        "rated_torque_nm": 50,
+        "peak_torque_nm": 102,
+        "start_stop_peak_torque_nm": 102,
+        "max_allow_avg_load_nm": 61,
+        "max_speed_rpm": 40,
+        "weight_kg": 1.3,
+        "outer_diameter_mm": 90,
+        "hollow_shaft_diameter_mm": 14.5,
+        "weight_kg_max": 1.6,
+        "torque_density_nm_per_kg": 78.46
+      },
+      "transmission": {
+        "reduction_ratio": 101,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 71.9,
+        "length_mm_max": 97.4,
+        "inertia_g_cm2": 638.0,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hj2t-90-121-48",
+      "model": "HJ2T-90FXD17",
+      "base_id": "LS-HJ2T-90-121-48",
+      "electrical": {
+        "peak_current_a": 8.4,
+        "continuous_current_a": 6.1,
+        "rated_input_power_w": 500
+      },
+      "mechanical": {
+        "rated_torque_nm": 50,
+        "peak_torque_nm": 108,
+        "start_stop_peak_torque_nm": 108,
+        "max_allow_avg_load_nm": 61,
+        "max_speed_rpm": 30,
+        "weight_kg": 1.3,
+        "outer_diameter_mm": 90,
+        "hollow_shaft_diameter_mm": 14.5,
+        "weight_kg_max": 1.6,
+        "torque_density_nm_per_kg": 83.08
+      },
+      "transmission": {
+        "reduction_ratio": 121,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 71.9,
+        "length_mm_max": 97.4,
+        "inertia_g_cm2": 638.0,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hj2t-90-51-48",
+      "model": "HJ2T-90FXD17",
+      "base_id": "LS-HJ2T-90-51-48",
+      "electrical": {
+        "peak_current_a": 8.4,
+        "continuous_current_a": 6.1,
+        "rated_input_power_w": 500
+      },
+      "mechanical": {
+        "rated_torque_nm": 32,
+        "peak_torque_nm": 63,
+        "start_stop_peak_torque_nm": 63,
+        "max_allow_avg_load_nm": 42,
+        "max_speed_rpm": 77,
+        "weight_kg": 1.3,
+        "outer_diameter_mm": 90,
+        "hollow_shaft_diameter_mm": 14.5,
+        "weight_kg_max": 1.6,
+        "torque_density_nm_per_kg": 48.46
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 71.9,
+        "length_mm_max": 97.4,
+        "inertia_g_cm2": 638.0,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hj2t-90-81-48",
+      "model": "HJ2T-90FXD17",
+      "base_id": "LS-HJ2T-90-81-48",
+      "electrical": {
+        "peak_current_a": 8.4,
+        "continuous_current_a": 6.1,
+        "rated_input_power_w": 500
+      },
+      "mechanical": {
+        "rated_torque_nm": 42,
+        "peak_torque_nm": 91,
+        "start_stop_peak_torque_nm": 91,
+        "max_allow_avg_load_nm": 58,
+        "max_speed_rpm": 48,
+        "weight_kg": 1.3,
+        "outer_diameter_mm": 90,
+        "hollow_shaft_diameter_mm": 14.5,
+        "weight_kg_max": 1.6,
+        "torque_density_nm_per_kg": 70.0
+      },
+      "transmission": {
+        "reduction_ratio": 81,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 71.9,
+        "length_mm_max": 97.4,
+        "inertia_g_cm2": 638.0,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    }
+  ]
+}

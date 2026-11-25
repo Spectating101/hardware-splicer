@@ -1,0 +1,234 @@
+{
+  "family_id": "zdl-h",
+  "family_name": "智动力 H",
+  "shared": {
+    "manufacturer": "智动力",
+    "manufacturer_en": "ZDL",
+    "electrical": {
+      "voltage_v": 48,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "absolute_accuracy_deg": 0.0833,
+      "repeatability_deg": 0.01667,
+      "ip_rating": "IP40"
+    },
+    "transmission": {
+      "type": "harmonic",
+      "backdrivable": false,
+      "backlash_arcsec": 20
+    }
+  },
+  "variants": [
+    {
+      "id": "zdl-h-110-101-48",
+      "model": "谐波25模组",
+      "base_id": "ZDL-H-110-101-48",
+      "electrical": {
+        "peak_current_a": 37,
+        "continuous_current_a": 18,
+        "rated_input_power_w": 680
+      },
+      "mechanical": {
+        "rated_torque_nm": 140,
+        "peak_torque_nm": 204,
+        "start_stop_peak_torque_nm": 204,
+        "max_allow_instant_load_nm": 369,
+        "rated_speed_rpm": 34,
+        "max_speed_rpm": 42,
+        "weight_kg": 2.9,
+        "outer_diameter_mm": 110,
+        "hollow_shaft_diameter_mm": 20,
+        "torque_density_nm_per_kg": 70.34
+      },
+      "transmission": {
+        "reduction_ratio": 101
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 122,
+        "length_mm_max": 122
+      },
+      "datasheet_url": "datasheets/21_智动力_关节模组.docx"
+    },
+    {
+      "id": "zdl-h-142-101-48",
+      "model": "谐波32模组",
+      "base_id": "ZDL-H-142-101-48",
+      "electrical": {
+        "peak_current_a": 53,
+        "continuous_current_a": 23.2,
+        "rated_input_power_w": 1000
+      },
+      "mechanical": {
+        "rated_torque_nm": 281,
+        "peak_torque_nm": 433,
+        "start_stop_peak_torque_nm": 433,
+        "max_allow_instant_load_nm": 841,
+        "rated_speed_rpm": 20,
+        "max_speed_rpm": 25,
+        "weight_kg": 6.7,
+        "outer_diameter_mm": 142,
+        "hollow_shaft_diameter_mm": 22,
+        "torque_density_nm_per_kg": 64.63
+      },
+      "transmission": {
+        "reduction_ratio": 101
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 153,
+        "length_mm_max": 153
+      },
+      "datasheet_url": "datasheets/21_智动力_关节模组.docx"
+    },
+    {
+      "id": "zdl-h-52-101-48",
+      "model": "谐波11模组",
+      "base_id": "ZDL-H-52-101-48",
+      "electrical": {
+        "peak_current_a": 8,
+        "continuous_current_a": 2.5,
+        "rated_input_power_w": 90
+      },
+      "mechanical": {
+        "rated_torque_nm": 6.5,
+        "peak_torque_nm": 8.5,
+        "start_stop_peak_torque_nm": 8.5,
+        "max_allow_instant_load_nm": 16,
+        "rated_speed_rpm": 34,
+        "max_speed_rpm": 50,
+        "weight_kg": 0.4,
+        "outer_diameter_mm": 52,
+        "hollow_shaft_diameter_mm": 6,
+        "torque_density_nm_per_kg": 21.25
+      },
+      "transmission": {
+        "reduction_ratio": 101
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 80,
+        "length_mm_max": 80
+      },
+      "datasheet_url": "datasheets/21_智动力_关节模组.docx"
+    },
+    {
+      "id": "zdl-h-70-81-48",
+      "model": "谐波14模组",
+      "base_id": "ZDL-H-70-81-48",
+      "electrical": {
+        "peak_current_a": 5.5,
+        "continuous_current_a": 3.7,
+        "rated_input_power_w": 120
+      },
+      "mechanical": {
+        "rated_torque_nm": 14,
+        "peak_torque_nm": 30,
+        "start_stop_peak_torque_nm": 30,
+        "max_allow_instant_load_nm": 61,
+        "rated_speed_rpm": 43,
+        "max_speed_rpm": 52,
+        "weight_kg": 1.1,
+        "outer_diameter_mm": 70,
+        "hollow_shaft_diameter_mm": 9.8,
+        "torque_density_nm_per_kg": 27.27
+      },
+      "transmission": {
+        "reduction_ratio": 81
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 88.5,
+        "length_mm_max": 88.5
+      },
+      "datasheet_url": "datasheets/21_智动力_关节模组.docx"
+    },
+    {
+      "id": "zdl-h-80-101-48",
+      "model": "谐波17模组",
+      "base_id": "ZDL-H-80-101-48",
+      "electrical": {
+        "peak_current_a": 14,
+        "continuous_current_a": 6.5,
+        "rated_input_power_w": 240
+      },
+      "mechanical": {
+        "rated_torque_nm": 46,
+        "peak_torque_nm": 70,
+        "start_stop_peak_torque_nm": 70,
+        "max_allow_instant_load_nm": 138,
+        "rated_speed_rpm": 34,
+        "max_speed_rpm": 42,
+        "weight_kg": 1.4,
+        "outer_diameter_mm": 80,
+        "hollow_shaft_diameter_mm": 12,
+        "torque_density_nm_per_kg": 50.0
+      },
+      "transmission": {
+        "reduction_ratio": 101
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 91.5,
+        "length_mm_max": 91.5
+      },
+      "datasheet_url": "datasheets/21_智动力_关节模组.docx"
+    }
+  ]
+}

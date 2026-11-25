@@ -1,0 +1,574 @@
+{
+  "family_id": "ls-hrv2",
+  "family_name": "雷赛 HRV2",
+  "shared": {
+    "manufacturer": "雷赛",
+    "manufacturer_en": "LeadShine",
+    "electrical": {
+      "voltage_v": 48,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "motor_encoder_bits": 19
+    },
+    "transmission": {
+      "type": "cycloidal",
+      "backdrivable": false
+    }
+  },
+  "variants": [
+    {
+      "id": "ls-hrv2-108-21-48",
+      "model": "HRV2-108FXD19",
+      "base_id": "LS-HRV2-108-21-48",
+      "electrical": {
+        "continuous_current_a": 20,
+        "rated_input_power_w": 500
+      },
+      "mechanical": {
+        "rated_torque_nm": 90,
+        "peak_torque_nm": 250,
+        "start_stop_peak_torque_nm": 250,
+        "max_speed_at_half_torque_rpm": 50,
+        "weight_kg": 3.2,
+        "outer_diameter_mm": 108,
+        "torque_density_nm_per_kg": 78.12
+      },
+      "transmission": {
+        "reduction_ratio": 21,
+        "backlash_arcsec": 40
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hrv2-108-31-48",
+      "model": "HRV2-108FXD19",
+      "base_id": "LS-HRV2-108-31-48",
+      "electrical": {
+        "continuous_current_a": 20,
+        "rated_input_power_w": 600
+      },
+      "mechanical": {
+        "rated_torque_nm": 125,
+        "peak_torque_nm": 330,
+        "start_stop_peak_torque_nm": 330,
+        "max_speed_at_half_torque_rpm": 35,
+        "weight_kg": 3.2,
+        "outer_diameter_mm": 108,
+        "torque_density_nm_per_kg": 103.12
+      },
+      "transmission": {
+        "reduction_ratio": 31,
+        "backlash_arcsec": 40
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hrv2-108-51-48",
+      "model": "HRV2-108FXD19",
+      "base_id": "LS-HRV2-108-51-48",
+      "electrical": {
+        "continuous_current_a": 19,
+        "rated_input_power_w": 520
+      },
+      "mechanical": {
+        "rated_torque_nm": 180,
+        "peak_torque_nm": 390,
+        "start_stop_peak_torque_nm": 390,
+        "max_speed_at_half_torque_rpm": 20,
+        "weight_kg": 3.2,
+        "outer_diameter_mm": 108,
+        "torque_density_nm_per_kg": 121.88
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 40
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hrv2-123-15-48",
+      "model": "HRV2-123FXD19",
+      "base_id": "LS-HRV2-123-15-48",
+      "electrical": {
+        "continuous_current_a": 20,
+        "rated_input_power_w": 500
+      },
+      "mechanical": {
+        "rated_torque_nm": 65,
+        "peak_torque_nm": 250,
+        "start_stop_peak_torque_nm": 250,
+        "max_speed_at_half_torque_rpm": 85,
+        "weight_kg": 3,
+        "outer_diameter_mm": 123,
+        "torque_density_nm_per_kg": 83.33
+      },
+      "transmission": {
+        "reduction_ratio": 15,
+        "backlash_arcsec": 40
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hrv2-123-21-48",
+      "model": "HRV2-123FXD19",
+      "base_id": "LS-HRV2-123-21-48",
+      "electrical": {
+        "continuous_current_a": 19,
+        "rated_input_power_w": 500
+      },
+      "mechanical": {
+        "rated_torque_nm": 90,
+        "peak_torque_nm": 250,
+        "start_stop_peak_torque_nm": 250,
+        "max_speed_at_half_torque_rpm": 50,
+        "weight_kg": 3,
+        "outer_diameter_mm": 123,
+        "torque_density_nm_per_kg": 83.33
+      },
+      "transmission": {
+        "reduction_ratio": 21,
+        "backlash_arcsec": 40
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hrv2-123-31-48",
+      "model": "HRV2-123FXD19",
+      "base_id": "LS-HRV2-123-31-48",
+      "electrical": {
+        "continuous_current_a": 20,
+        "rated_input_power_w": 500
+      },
+      "mechanical": {
+        "rated_torque_nm": 125,
+        "peak_torque_nm": 330,
+        "start_stop_peak_torque_nm": 330,
+        "max_speed_at_half_torque_rpm": 35,
+        "weight_kg": 3,
+        "outer_diameter_mm": 123,
+        "torque_density_nm_per_kg": 110.0
+      },
+      "transmission": {
+        "reduction_ratio": 31,
+        "backlash_arcsec": 40
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hrv2-123-51-48",
+      "model": "HRV2-123FXD19",
+      "base_id": "LS-HRV2-123-51-48",
+      "electrical": {
+        "continuous_current_a": 20,
+        "rated_input_power_w": 500
+      },
+      "mechanical": {
+        "rated_torque_nm": 180,
+        "peak_torque_nm": 390,
+        "start_stop_peak_torque_nm": 390,
+        "max_speed_at_half_torque_rpm": 20,
+        "weight_kg": 3,
+        "outer_diameter_mm": 123,
+        "torque_density_nm_per_kg": 130.0
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 40
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hrv2-64-100-48",
+      "model": "HRV2-64FXD19",
+      "base_id": "LS-HRV2-64-100-48",
+      "electrical": {
+        "rated_input_power_w": 130
+      },
+      "mechanical": {
+        "rated_torque_nm": 6,
+        "peak_torque_nm": 13.2,
+        "start_stop_peak_torque_nm": 13.2,
+        "max_speed_at_half_torque_rpm": 50,
+        "weight_kg": 0.495,
+        "outer_diameter_mm": 64,
+        "torque_density_nm_per_kg": 26.67
+      },
+      "transmission": {
+        "reduction_ratio": 100,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hrv2-64-50-48",
+      "model": "HRV2-64FXD19",
+      "base_id": "LS-HRV2-64-50-48",
+      "electrical": {
+        "rated_input_power_w": 150
+      },
+      "mechanical": {
+        "rated_torque_nm": 4.6,
+        "peak_torque_nm": 10,
+        "start_stop_peak_torque_nm": 10,
+        "max_speed_at_half_torque_rpm": 100,
+        "weight_kg": 0.495,
+        "outer_diameter_mm": 64,
+        "torque_density_nm_per_kg": 20.2
+      },
+      "transmission": {
+        "reduction_ratio": 50,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hrv2-70-15-48",
+      "model": "HRV2-70FXD19",
+      "base_id": "LS-HRV2-70-15-48",
+      "electrical": {
+        "continuous_current_a": 14,
+        "rated_input_power_w": 230
+      },
+      "mechanical": {
+        "rated_torque_nm": 10,
+        "peak_torque_nm": 35,
+        "start_stop_peak_torque_nm": 35,
+        "max_speed_at_half_torque_rpm": 120,
+        "weight_kg": 0.79,
+        "outer_diameter_mm": 70,
+        "torque_density_nm_per_kg": 44.3
+      },
+      "transmission": {
+        "reduction_ratio": 15,
+        "backlash_arcsec": 40
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hrv2-70-21-48",
+      "model": "HRV2-70FXD19",
+      "base_id": "LS-HRV2-70-21-48",
+      "electrical": {
+        "continuous_current_a": 13,
+        "rated_input_power_w": 230
+      },
+      "mechanical": {
+        "rated_torque_nm": 20,
+        "peak_torque_nm": 45,
+        "start_stop_peak_torque_nm": 45,
+        "max_speed_at_half_torque_rpm": 100,
+        "weight_kg": 0.79,
+        "outer_diameter_mm": 70,
+        "torque_density_nm_per_kg": 56.96
+      },
+      "transmission": {
+        "reduction_ratio": 21,
+        "backlash_arcsec": 40
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hrv2-70-41-48",
+      "model": "HRV2-70FXD19",
+      "base_id": "LS-HRV2-70-41-48",
+      "electrical": {
+        "continuous_current_a": 12.5,
+        "rated_input_power_w": 230
+      },
+      "mechanical": {
+        "rated_torque_nm": 40,
+        "peak_torque_nm": 60,
+        "start_stop_peak_torque_nm": 60,
+        "max_speed_at_half_torque_rpm": 50,
+        "weight_kg": 0.79,
+        "outer_diameter_mm": 70,
+        "torque_density_nm_per_kg": 75.95
+      },
+      "transmission": {
+        "reduction_ratio": 41,
+        "backlash_arcsec": 40
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hrv2-90-31-48",
+      "model": "HRV2-90FXD19",
+      "base_id": "LS-HRV2-90-31-48",
+      "electrical": {
+        "continuous_current_a": 20,
+        "rated_input_power_w": 650
+      },
+      "mechanical": {
+        "rated_torque_nm": 50,
+        "peak_torque_nm": 120,
+        "start_stop_peak_torque_nm": 120,
+        "max_speed_at_half_torque_rpm": 90,
+        "weight_kg": 1.65,
+        "outer_diameter_mm": 90,
+        "torque_density_nm_per_kg": 72.73
+      },
+      "transmission": {
+        "reduction_ratio": 31,
+        "backlash_arcsec": 40
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hrv2-90-51-48",
+      "model": "HRV2-90FXD19",
+      "base_id": "LS-HRV2-90-51-48",
+      "electrical": {
+        "continuous_current_a": 19,
+        "rated_input_power_w": 520
+      },
+      "mechanical": {
+        "rated_torque_nm": 65,
+        "peak_torque_nm": 140,
+        "start_stop_peak_torque_nm": 140,
+        "max_speed_at_half_torque_rpm": 65,
+        "weight_kg": 1.65,
+        "outer_diameter_mm": 90,
+        "torque_density_nm_per_kg": 84.85
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 40
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hrv2-90-81-48",
+      "model": "HRV2-90FXD19",
+      "base_id": "LS-HRV2-90-81-48",
+      "electrical": {
+        "continuous_current_a": 15,
+        "rated_input_power_w": 600
+      },
+      "mechanical": {
+        "rated_torque_nm": 80,
+        "peak_torque_nm": 160,
+        "start_stop_peak_torque_nm": 160,
+        "max_speed_at_half_torque_rpm": 45,
+        "weight_kg": 1.65,
+        "outer_diameter_mm": 90,
+        "torque_density_nm_per_kg": 96.97
+      },
+      "transmission": {
+        "reduction_ratio": 81,
+        "backlash_arcsec": 40
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    }
+  ]
+}

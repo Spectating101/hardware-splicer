@@ -1,0 +1,148 @@
+{
+  "family_id": "xn-hr",
+  "family_name": "曦诺未来 HR",
+  "shared": {
+    "manufacturer": "曦诺未来",
+    "manufacturer_en": "XYNOVA",
+    "electrical": {
+      "voltage_v": 48,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "rated_speed_rpm": 45,
+      "max_speed_rpm": 45,
+      "repeatability_deg": 0.1,
+      "output_encoder_bits": 14,
+      "motor_encoder_bits": 14,
+      "ip_rating": "IP54"
+    },
+    "transmission": {
+      "type": "harmonic",
+      "reduction_ratio": 100,
+      "backdrivable": false,
+      "backlash_arcsec": 600
+    }
+  },
+  "variants": [
+    {
+      "id": "xn-hr-43-100-48",
+      "model": "HR100-43-20",
+      "base_id": "XN-HR-43-100-48",
+      "electrical": {
+        "peak_current_a": 5,
+        "continuous_current_a": 1.65,
+        "rated_input_power_w": 32
+      },
+      "mechanical": {
+        "rated_torque_nm": 6.7,
+        "peak_torque_nm": 20,
+        "start_stop_peak_torque_nm": 20,
+        "max_allow_instant_load_nm": 20,
+        "weight_kg": 0.24,
+        "outer_diameter_mm": 43,
+        "radial_load_kn": 0.003,
+        "axial_load_kn": 0.0047,
+        "torque_density_nm_per_kg": 83.33
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 62.9,
+        "length_mm_max": 62.9,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/17_曦诺未来_谐波关节模组.png"
+    },
+    {
+      "id": "xn-hr-64-100-48",
+      "model": "HR100-64-110",
+      "base_id": "XN-HR-64-100-48",
+      "electrical": {
+        "peak_current_a": 18.7,
+        "continuous_current_a": 6.2,
+        "rated_input_power_w": 170
+      },
+      "mechanical": {
+        "rated_torque_nm": 36,
+        "peak_torque_nm": 110,
+        "start_stop_peak_torque_nm": 110,
+        "max_allow_instant_load_nm": 110,
+        "weight_kg": 0.64,
+        "outer_diameter_mm": 64,
+        "radial_load_kn": 0.006,
+        "axial_load_kn": 0.007,
+        "torque_density_nm_per_kg": 171.88
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 79.65,
+        "length_mm_max": 79.65,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/17_曦诺未来_谐波关节模组.png"
+    },
+    {
+      "id": "xn-hr-80-100-48",
+      "model": "HR100-80-110",
+      "base_id": "XN-HR-80-100-48",
+      "electrical": {
+        "peak_current_a": 17,
+        "continuous_current_a": 5.5,
+        "rated_input_power_w": 165
+      },
+      "mechanical": {
+        "rated_torque_nm": 36,
+        "peak_torque_nm": 110,
+        "start_stop_peak_torque_nm": 110,
+        "max_allow_instant_load_nm": 110,
+        "weight_kg": 0.86,
+        "outer_diameter_mm": 80,
+        "radial_load_kn": 0.0075,
+        "axial_load_kn": 0.015,
+        "torque_density_nm_per_kg": 127.91
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 74.8,
+        "length_mm_max": 74.8,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/17_曦诺未来_谐波关节模组.png"
+    }
+  ]
+}

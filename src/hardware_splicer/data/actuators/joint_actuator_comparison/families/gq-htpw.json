@@ -1,0 +1,59 @@
+{
+  "family_id": "gq-htpw",
+  "family_name": "高擎 HTPW",
+  "shared": {
+    "manufacturer": "高擎",
+    "manufacturer_en": "HighTorque",
+    "electrical": {
+      "voltage_v": 24,
+      "peak_current_a": 20,
+      "continuous_current_a": 5.6,
+      "rated_input_power_w": 92,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "rated_torque_nm": 4,
+      "peak_torque_nm": 12,
+      "start_stop_peak_torque_nm": 12,
+      "rated_speed_rpm": 250,
+      "max_speed_rpm": 270,
+      "weight_kg": 0.39,
+      "outer_diameter_mm": 75,
+      "absolute_accuracy_deg": 0.25,
+      "repeatability_deg": 0.2,
+      "output_encoder_bits": 14,
+      "motor_encoder_bits": 14,
+      "torque_density_nm_per_kg": 30.77
+    },
+    "transmission": {
+      "type": "planetary",
+      "reduction_ratio": 7,
+      "backdrivable": true,
+      "backlash_arcsec": 600
+    }
+  },
+  "variants": [
+    {
+      "id": "gq-htpw-75-7-24",
+      "model": "HTPW-7507-02-DNE",
+      "base_id": "GQ-HTPW-75-7-24",
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 35,
+        "length_mm_max": 35
+      },
+      "datasheet_url": "datasheets/6_高擎_关节模组_20241203.pdf"
+    }
+  ]
+}

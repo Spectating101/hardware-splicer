@@ -1,0 +1,135 @@
+{
+  "family_id": "ls-hp2",
+  "family_name": "雷赛 HP2",
+  "shared": {
+    "manufacturer": "雷赛",
+    "manufacturer_en": "LeadShine",
+    "electrical": {
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "motor_encoder_bits": 17
+    },
+    "transmission": {
+      "type": "planetary",
+      "backdrivable": false,
+      "backlash_arcsec": 10
+    }
+  },
+  "variants": [
+    {
+      "id": "ls-hp2-105-18-48",
+      "model": "HP2-105FXD17",
+      "base_id": "LS-HP2-105-18-48",
+      "electrical": {
+        "voltage_v": 48,
+        "rated_input_power_w": 576
+      },
+      "mechanical": {
+        "rated_torque_nm": 30,
+        "peak_torque_nm": 90,
+        "start_stop_peak_torque_nm": 90,
+        "max_speed_at_half_torque_rpm": 142,
+        "weight_kg": 0.63,
+        "outer_diameter_mm": 105,
+        "torque_density_nm_per_kg": 142.86
+      },
+      "transmission": {
+        "reduction_ratio": 18
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 53,
+        "length_mm_max": 53
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hp2-56-36-24",
+      "model": "HP2-56FXD17",
+      "base_id": "LS-HP2-56-36-24",
+      "electrical": {
+        "voltage_v": 24,
+        "rated_input_power_w": 146
+      },
+      "mechanical": {
+        "rated_torque_nm": 12,
+        "peak_torque_nm": 36,
+        "start_stop_peak_torque_nm": 36,
+        "max_speed_at_half_torque_rpm": 78,
+        "weight_kg": 0.377,
+        "outer_diameter_mm": 56,
+        "torque_density_nm_per_kg": 95.49
+      },
+      "transmission": {
+        "reduction_ratio": 36
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 60.5,
+        "length_mm_max": 60.5
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    },
+    {
+      "id": "ls-hp2-88-25-48",
+      "model": "HP2-88FXD17",
+      "base_id": "LS-HP2-88-25-48",
+      "electrical": {
+        "voltage_v": 48,
+        "rated_input_power_w": 365
+      },
+      "mechanical": {
+        "rated_torque_nm": 20,
+        "peak_torque_nm": 60,
+        "start_stop_peak_torque_nm": 60,
+        "max_speed_at_half_torque_rpm": 126,
+        "weight_kg": 0.604,
+        "outer_diameter_mm": 88,
+        "torque_density_nm_per_kg": 99.34
+      },
+      "transmission": {
+        "reduction_ratio": 25
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 59.5,
+        "length_mm_max": 59.5
+      },
+      "datasheet_url": "datasheets/9_雷赛_人形关节模组_202507.pdf"
+    }
+  ]
+}

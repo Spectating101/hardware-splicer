@@ -1,0 +1,199 @@
+{
+  "family_id": "mt-xv2",
+  "family_name": "脉塔 XV2",
+  "shared": {
+    "manufacturer": "脉塔",
+    "manufacturer_en": "Myactuator",
+    "electrical": {
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "motor_encoder_bits": 16
+    },
+    "transmission": {
+      "type": "planetary"
+    }
+  },
+  "variants": [
+    {
+      "id": "mt-xv2-40-6-24",
+      "model": "RMD-X4-P6-3",
+      "base_id": "MT-XV2-40-6-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 4,
+        "continuous_current_a": 2,
+        "rated_input_power_w": 30,
+        "peak_input_power_w": 29.16
+      },
+      "mechanical": {
+        "rated_torque_nm": 1.5,
+        "peak_torque_nm": 3,
+        "start_stop_peak_torque_nm": 3,
+        "rated_speed_rpm": 200,
+        "weight_kg": 0.3,
+        "outer_diameter_mm": 40,
+        "radial_load_kn": 0.55,
+        "axial_load_kn": 0.3,
+        "torque_density_nm_per_kg": 10.0
+      },
+      "transmission": {
+        "reduction_ratio": 6,
+        "backdrivable": true,
+        "backlash_arcsec": 600
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "RS485"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/12_脉塔_XV2行星模组.pdf"
+    },
+    {
+      "id": "mt-xv2-60-36-48",
+      "model": "RMD-X6-P36-40",
+      "base_id": "MT-XV2-60-36-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 10.5,
+        "continuous_current_a": 5.2,
+        "rated_input_power_w": 170,
+        "peak_input_power_w": 236.63
+      },
+      "mechanical": {
+        "rated_torque_nm": 18,
+        "peak_torque_nm": 40,
+        "start_stop_peak_torque_nm": 40,
+        "rated_speed_rpm": 90,
+        "weight_kg": 0.59,
+        "outer_diameter_mm": 60,
+        "radial_load_kn": 1.25,
+        "axial_load_kn": 0.775,
+        "torque_density_nm_per_kg": 67.8
+      },
+      "transmission": {
+        "reduction_ratio": 36,
+        "backdrivable": false,
+        "backlash_arcsec": 900
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "RS485"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/12_脉塔_XV2行星模组.pdf"
+    },
+    {
+      "id": "mt-xv2-60-6-48",
+      "model": "RMD-X6-P6-7",
+      "base_id": "MT-XV2-60-6-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 9,
+        "continuous_current_a": 4,
+        "rated_input_power_w": 150,
+        "peak_input_power_w": 280.59
+      },
+      "mechanical": {
+        "rated_torque_nm": 3.5,
+        "peak_torque_nm": 7,
+        "start_stop_peak_torque_nm": 7,
+        "rated_speed_rpm": 400,
+        "weight_kg": 0.35,
+        "outer_diameter_mm": 60,
+        "radial_load_kn": 1.25,
+        "axial_load_kn": 0.775,
+        "torque_density_nm_per_kg": 20.0
+      },
+      "transmission": {
+        "reduction_ratio": 6,
+        "backdrivable": true,
+        "backlash_arcsec": 600
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "RS485"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/12_脉塔_XV2行星模组.pdf"
+    },
+    {
+      "id": "mt-xv2-80-9-48",
+      "model": "RMD-X8-P9-25",
+      "base_id": "MT-XV2-80-9-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 8,
+        "continuous_current_a": 3.2,
+        "rated_input_power_w": 125,
+        "peak_input_power_w": 340.97
+      },
+      "mechanical": {
+        "rated_torque_nm": 10,
+        "peak_torque_nm": 25,
+        "start_stop_peak_torque_nm": 25,
+        "rated_speed_rpm": 110,
+        "weight_kg": 0.71,
+        "outer_diameter_mm": 80,
+        "radial_load_kn": 1.25,
+        "axial_load_kn": 0.985,
+        "torque_density_nm_per_kg": 35.21
+      },
+      "transmission": {
+        "reduction_ratio": 9,
+        "backdrivable": true,
+        "backlash_arcsec": 600
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "RS485"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/12_脉塔_XV2行星模组.pdf"
+    }
+  ]
+}
