@@ -37,15 +37,21 @@ def call_qwen_module_pick(
     if not qwen_module_pick_enabled():
         return {"ok": False, "skipped": True, "reason": "disabled_or_no_key"}
 
-    try:
-        trace = semantic_module_selection_pipeline(goal, constraints=constraints)
-    except SemanticSelectionError as exc:
-        return {
-            "ok": False,
-            "skipped": False,
-            "error": "semantic_module_selection_failed",
-            "message": str(exc),
-        }
+    # A model's JSON sometimes misses the schema once and fits it on the next call (1 of 13 briefs per DeepSeek run,
+    # 26 Nov 2026); one retry for that case only. Selection rules (invented parts, wrong requirements) are not retried.
+    for attempt in range(2):
+        try:
+            trace = semantic_module_selection_pipeline(goal, constraints=constraints)
+            break
+        except SemanticSelectionError as exc:
+            if attempt == 0 and "validation error" in str(exc):
+                continue
+            return {
+                "ok": False,
+                "skipped": False,
+                "error": "semantic_module_selection_failed",
+                "message": str(exc),
+            }
 
     selection = trace.selection
     if len(selection.selected_module_ids) < 2:
