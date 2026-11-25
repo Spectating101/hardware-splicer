@@ -1,0 +1,256 @@
+{
+ "schema": "hardware_splicer.cited_gearmotors.v1",
+ "source_note": "Pololu category tables, verbatim, accessed 2026-11-26. Stall torque and current are Pololu's theoretical extrapolations.",
+ "families": [
+  {
+   "id": "pololu-micro-metal-hp-6v",
+   "url": "https://www.pololu.com/category/60/micro-metal-gearmotors",
+   "voltage_v": 6,
+   "stall_current_a": 1.6,
+   "no_load_current_a": 0.1,
+   "limits": {
+    "instantaneous_torque_kg_cm": 2.0,
+    "instantaneous_torque_kg_cm_380_1000": 2.5,
+    "quote": "The recommended upper limit for instantaneous torque is 2.5 kg⋅cm (35 oz⋅in) for the 380:1 and 1000:1 gearboxes, and 2 kg⋅cm (25 oz⋅in) for all the other gear ratios"
+   },
+   "ratios": [
+    {
+     "ratio": 5,
+     "no_load_rpm": 6100,
+     "stall_torque_kg_cm": 0.11
+    },
+    {
+     "ratio": 10,
+     "no_load_rpm": 3100,
+     "stall_torque_kg_cm": 0.22
+    },
+    {
+     "ratio": 15,
+     "no_load_rpm": 2000,
+     "stall_torque_kg_cm": 0.3
+    },
+    {
+     "ratio": 30,
+     "no_load_rpm": 1000,
+     "stall_torque_kg_cm": 0.57
+    },
+    {
+     "ratio": 50,
+     "no_load_rpm": 590,
+     "stall_torque_kg_cm": 0.86
+    },
+    {
+     "ratio": 75,
+     "no_load_rpm": 410,
+     "stall_torque_kg_cm": 1.3
+    },
+    {
+     "ratio": 100,
+     "no_load_rpm": 310,
+     "stall_torque_kg_cm": 1.7
+    },
+    {
+     "ratio": 150,
+     "no_load_rpm": 210,
+     "stall_torque_kg_cm": 2.4
+    },
+    {
+     "ratio": 210,
+     "no_load_rpm": 150,
+     "stall_torque_kg_cm": 3.0
+    },
+    {
+     "ratio": 250,
+     "no_load_rpm": 120,
+     "stall_torque_kg_cm": 3.4
+    },
+    {
+     "ratio": 298,
+     "no_load_rpm": 100,
+     "stall_torque_kg_cm": 4.0
+    },
+    {
+     "ratio": 380,
+     "no_load_rpm": 84,
+     "stall_torque_kg_cm": 5.5
+    },
+    {
+     "ratio": 1000,
+     "no_load_rpm": 31,
+     "stall_torque_kg_cm": 12
+    }
+   ]
+  },
+  {
+   "id": "pololu-25d-hp-12v",
+   "url": "https://www.pololu.com/category/115/25d-metal-gearmotors",
+   "voltage_v": 12,
+   "stall_current_a": 5.0,
+   "no_load_current_a": 0.25,
+   "limits": {
+    "continuous_torque_kg_cm": 4.0,
+    "intermittent_torque_kg_cm": 8.0,
+    "quote": "The recommended upper limit for continuously applied loads is 4 kg⋅cm (55 oz⋅in), and the recommended upper limit for intermittently permissible torque is 8 kg⋅cm (110 oz⋅in)"
+   },
+   "ratios": [
+    {
+     "ratio": 4.4,
+     "no_load_rpm": 2200,
+     "stall_torque_kg_cm": 1.7
+    },
+    {
+     "ratio": 9.7,
+     "no_load_rpm": 1000,
+     "stall_torque_kg_cm": 3.9
+    },
+    {
+     "ratio": 20.4,
+     "no_load_rpm": 500,
+     "stall_torque_kg_cm": 7.4
+    },
+    {
+     "ratio": 34,
+     "no_load_rpm": 300,
+     "stall_torque_kg_cm": 11
+    },
+    {
+     "ratio": 47,
+     "no_load_rpm": 220,
+     "stall_torque_kg_cm": 15
+    },
+    {
+     "ratio": 75,
+     "no_load_rpm": 130,
+     "stall_torque_kg_cm": 22
+    },
+    {
+     "ratio": 99,
+     "no_load_rpm": 100,
+     "stall_torque_kg_cm": 29
+    }
+   ]
+  },
+  {
+   "id": "pololu-25d-mp-12v",
+   "url": "https://www.pololu.com/category/115/25d-metal-gearmotors",
+   "voltage_v": 12,
+   "stall_current_a": 1.8,
+   "no_load_current_a": 0.08,
+   "limits": {
+    "continuous_torque_kg_cm": 4.0,
+    "intermittent_torque_kg_cm": 8.0,
+    "quote": "same 25D page limits"
+   },
+   "ratios": [
+    {
+     "ratio": 4.4,
+     "no_load_rpm": 1800,
+     "stall_torque_kg_cm": 0.71
+    },
+    {
+     "ratio": 9.7,
+     "no_load_rpm": 800,
+     "stall_torque_kg_cm": 1.7
+    },
+    {
+     "ratio": 20.4,
+     "no_load_rpm": 380,
+     "stall_torque_kg_cm": 3.2
+    },
+    {
+     "ratio": 34,
+     "no_load_rpm": 230,
+     "stall_torque_kg_cm": 4.7
+    },
+    {
+     "ratio": 47,
+     "no_load_rpm": 170,
+     "stall_torque_kg_cm": 6.4
+    },
+    {
+     "ratio": 75,
+     "no_load_rpm": 100,
+     "stall_torque_kg_cm": 8.5
+    },
+    {
+     "ratio": 99,
+     "no_load_rpm": 79,
+     "stall_torque_kg_cm": 11
+    },
+    {
+     "ratio": 172,
+     "no_load_rpm": 46,
+     "stall_torque_kg_cm": 18
+    },
+    {
+     "ratio": 227,
+     "no_load_rpm": 35,
+     "stall_torque_kg_cm": 24
+    }
+   ]
+  },
+  {
+   "id": "pololu-37d-12v",
+   "url": "https://www.pololu.com/category/116/37d-metal-gearmotors",
+   "voltage_v": 12,
+   "stall_current_a": 5.5,
+   "no_load_current_a": 0.2,
+   "limits": {
+    "continuous_torque_kg_cm": 10.0,
+    "instantaneous_torque_kg_cm": 25.0,
+    "quote": "The recommended upper limit for continuously applied loads is 10 kg-cm (150 oz-in), and the recommended upper limit for instantaneous torque is 25 kg-cm (350 oz-in)"
+   },
+   "ratios": [
+    {
+     "ratio": 6.3,
+     "no_load_rpm": 1600,
+     "stall_torque_kg_cm": 3.0
+    },
+    {
+     "ratio": 10,
+     "no_load_rpm": 1000,
+     "stall_torque_kg_cm": 4.9
+    },
+    {
+     "ratio": 19,
+     "no_load_rpm": 530,
+     "stall_torque_kg_cm": 8.5
+    },
+    {
+     "ratio": 30,
+     "no_load_rpm": 330,
+     "stall_torque_kg_cm": 14
+    },
+    {
+     "ratio": 50,
+     "no_load_rpm": 200,
+     "stall_torque_kg_cm": 21
+    },
+    {
+     "ratio": 70,
+     "no_load_rpm": 150,
+     "stall_torque_kg_cm": 27
+    },
+    {
+     "ratio": 100,
+     "no_load_rpm": 100,
+     "stall_torque_kg_cm": 34
+    },
+    {
+     "ratio": 131,
+     "no_load_rpm": 76,
+     "stall_torque_kg_cm": 45
+    },
+    {
+     "ratio": 150,
+     "no_load_rpm": 67,
+     "stall_torque_kg_cm": 49
+    }
+   ]
+  }
+ ],
+ "current_rule": {
+  "quote": "a general recommendation for brushed DC motor operation is 25% or less of the stall current",
+  "url": "https://www.pololu.com/category/116/37d-metal-gearmotors"
+ }
+}
