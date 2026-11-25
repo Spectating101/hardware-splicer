@@ -90,7 +90,10 @@ def _is_connector(comp: dict[str, Any]) -> bool:
     return bool(re.search(r"connector|header|receptacle|socket", f"{comp.get('lib', '')} {comp.get('part', '')}", re.I))
 
 
-def _kind(comp: dict[str, Any]) -> str:
+RESISTANCE = re.compile(r"^\d+(\.\d+)?\s*[RkKM]?\d*\s*(Ω|ohms?)?$", re.I)
+
+
+def _kind(comp: dict[str, Any], ref: str = "") -> str:
     text = f"{comp['lib']}:{comp['part']} {comp['description']}".lower()
     if re.search(r"pmos|p-?ch|q_p\w*mos|pfet", text):
         return "pmos"
@@ -98,7 +101,9 @@ def _kind(comp: dict[str, Any]) -> str:
         return "nmos"
     if re.search(r"usb_?c|type-?c", text):
         return "usb_c"
-    if re.search(r"(^|[:_ ])r($|[_ ])|resistor|r_small|r_us", text) or comp["part"] in ("R", "R_Small", "R_US"):
+    # Imported designs (EasyEDA, Altium) carry a manufacturer part number instead of Device:R: judge those by designator and value.
+    by_value = bool(re.fullmatch(r"R\d+", ref)) and bool(RESISTANCE.match(str(comp.get("value", "")).strip()))
+    if re.search(r"(^|[:_ ])r($|[_ ])|resistor|r_small|r_us", text) or comp["part"] in ("R", "R_Small", "R_US") or by_value:
         return "resistor"
     return "other"
 
@@ -199,7 +204,7 @@ def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[s
 
     def resistor_to(net_name: str, pattern: re.Pattern) -> bool:
         for n in nets.get(net_name, []):
-            if _kind(comps.get(n["ref"], {"lib": "", "part": "", "description": ""})) != "resistor":
+            if _kind(comps.get(n["ref"], {"lib": "", "part": "", "description": ""}), n["ref"]) != "resistor":
                 continue
             other = [pin_net.get((n["ref"], p)) for p in ("1", "2") if p != n["pin"]]
             if any(o and pattern.search(o) for o in other):
@@ -239,7 +244,7 @@ def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[s
                         UM10204, sorted(i2c_parts), name)
 
     for ref, comp in comps.items():
-        kind = _kind(comp)
+        kind = _kind(comp, ref)
         if kind in ("pmos", "nmos"):
             pins = {}
             for (r, p), net in pin_net.items():

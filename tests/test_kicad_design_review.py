@@ -169,3 +169,19 @@ def test_a_newer_schematic_than_kicad_cli_reads_says_which_kicad_it_needs(tmp_pa
     sch.write_text('(kicad_sch\n\t(version 20260306)\n\t(generator "eeschema")\n)\n')
     with pytest.raises(KicadReviewError, match="needs KiCad 10"):
         review_schematic(sch)
+
+
+def test_imported_resistors_count_by_designator_and_value():
+    """azlan-works/Argo (EasyEDA Pro import): 5.1k Rd parts carry only a manufacturer part number."""
+    usb = ("PWR", "TYPEC-304J-BCP16", "argo-v2-easyedapro", "TYPEC-304J-BCP16", "")
+    pins = [("argo-v2-easyedapro", "TYPEC-304J-BCP16", [("A5", "CC1", "unspecified"), ("B5", "CC2", "unspecified")])]
+    rd = [("R6", "5.1kΩ", "argo-v2-easyedapro", "0402WGF5101TCE", ""), ("R7", "5.1kΩ", "argo-v2-easyedapro", "0402WGF5101TCE", "")]
+    board = netlist([usb, *rd], [("Net-(PWR-CC1)", [("PWR", "A5", "CC1_A5", "bidirectional"), ("R6", "1", "1_1", "passive")]),
+                                 ("Net-(PWR-CC2)", [("PWR", "B5", "CC2_B5", "bidirectional"), ("R7", "1", "1_1", "passive")]),
+                                 ("GND", [("R6", "2", "2_2", "passive"), ("R7", "2", "2_2", "passive")])], pins)
+    assert rules(board) == []
+    capacitors = [("R6", "100nF", "argo-v2-easyedapro", "CL05B104KO5NNNC", ""), ("R7", "100nF", "argo-v2-easyedapro", "CL05B104KO5NNNC", "")]
+    wrong = netlist([usb, *capacitors], [("Net-(PWR-CC1)", [("PWR", "A5", "CC1_A5", "bidirectional"), ("R6", "1", "1_1", "passive")]),
+                                         ("Net-(PWR-CC2)", [("PWR", "B5", "CC2_B5", "bidirectional"), ("R7", "1", "1_1", "passive")]),
+                                         ("GND", [("R6", "2", "2_2", "passive"), ("R7", "2", "2_2", "passive")])], pins)
+    assert rules(wrong) == ["usb_c_cc_no_pulldown"] * 2
