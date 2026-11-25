@@ -1,0 +1,5951 @@
+[
+ {
+  "repo": "earthtojake/text-to-cad",
+  "stars": 27435,
+  "license": "MIT",
+  "created": "2026-04-22",
+  "pushed": "2026-11-25",
+  "desc": "Design physical products with AI",
+  "homepage": "https://www.texttocad.dev",
+  "queries": [
+   "text to cad"
+  ]
+ },
+ {
+  "repo": "arjun988/blender-skills",
+  "stars": 4904,
+  "license": "MIT",
+  "created": "2026-07-05",
+  "pushed": "2026-11-06",
+  "desc": "94 specialist Blender skills for Cursor, Claude Code, Kiro & Codex -> MCP-powered production pipeline from blockout to engine export.",
+  "homepage": "https://blender-skills.vercel.app",
+  "queries": [
+   "blender agent claude",
+   "blender mcp"
+  ]
+ },
+ {
+  "repo": "NVIDIA/skills",
+  "stars": 4147,
+  "license": "Apache-2.0",
+  "created": "2026-02-25",
+  "pushed": "2026-11-25",
+  "desc": "Agent Skills and plugins for NVIDIA products \u2014 install into Claude Code, Codex, and other coding agents to run Physical AI, robotics, simulation, CUDA, and RAG workflows end to end.",
+  "homepage": "https://docs.nvidia.com/skills",
+  "queries": [
+   "robot simulation agent claude"
+  ]
+ },
+ {
+  "repo": "scenario-labs/skills",
+  "stars": 4022,
+  "license": "MIT",
+  "created": "2026-08-12",
+  "pushed": "2026-11-25",
+  "desc": "Get production-ready images, video, audio, and 3D from any AI agent: skills that pick the right model, price before spending, and keep characters and brands consistent through the Scenario MCP, plus e",
+  "homepage": "https://www.skills.sh/scenario-labs/skills",
+  "queries": [
+   "blender mcp"
+  ]
+ },
+ {
+  "repo": "EL4CTEO/blender-skills",
+  "stars": 2898,
+  "license": "MIT",
+  "created": "2026-10-14",
+  "pushed": "2026-11-21",
+  "desc": "Professional Blender 5.3 workflows as Agent Skills for Claude Code, Codex, Gemini CLI, Copilot and Cursor: modeling, UVs, PBR, baking, rigging, animation, export and QA.",
+  "homepage": "",
+  "queries": [
+   "blender agent claude",
+   "blender mcp"
+  ]
+ },
+ {
+  "repo": "wzyn20051216/solidworks-automation-skill",
+  "stars": 2705,
+  "license": "MIT",
+  "created": "2026-03-17",
+  "pushed": "2026-11-22",
+  "desc": "Reliable AI Skill + MCP toolkit for agent-driven desktop CAD automation.",
+  "homepage": "",
+  "queries": [
+   "solidworks mcp"
+  ]
+ },
+ {
+  "repo": "HermannBjorgvin/Clawdmeter",
+  "stars": 2368,
+  "license": null,
+  "created": "2026-05-11",
+  "pushed": "2026-11-22",
+  "desc": "ESP32 display that shows you your Claude Code usage",
+  "homepage": "",
+  "queries": [
+   "esp32 claude code"
+  ]
+ },
+ {
+  "repo": "viettranx/3dviz-pro-max",
+  "stars": 1496,
+  "license": "MIT",
+  "created": "2026-09-10",
+  "pushed": "2026-09-11",
+  "desc": "Agent skill for creative 3D visualization: turn an idea into a Three.js/Blender scene worth exploring. Claude Code + Codex plugin, 223 recipes, 440 knowledge records, 22 proved kits, 37 runnable studi",
+  "homepage": "https://3dviz.dev",
+  "queries": [
+   "blender agent claude"
+  ]
+ },
+ {
+  "repo": "mixelpixx/Konnect",
+  "stars": 1464,
+  "license": "AGPL-3.0",
+  "created": "2026-07-05",
+  "pushed": "2026-11-02",
+  "desc": "AI-assisted PCB design for KiCAD 10. Native KiCAD plugin \u2014 a single Rust binary exposing 217 schematic, layout, routing, placement, design-review, and manufacturing tools to Claude, or the LLM of your",
+  "homepage": "",
+  "queries": [
+   "pcb llm"
+  ]
+ },
+ {
+  "repo": "Pan-Chera/Multi-Agent-CAD",
+  "stars": 1088,
+  "license": "MIT",
+  "created": "2026-07-30",
+  "pushed": "2026-11-04",
+  "desc": "MAC (Multi-Agent CAD): A decoupled multi-agent framework for text-to-CAD generation via constrained test-time compute",
+  "homepage": "",
+  "queries": [
+   "build123d llm",
+   "build123d agent",
+   "text to cad",
+   "llm cad generation",
+   "urdf llm"
+  ]
+ },
+ {
+  "repo": "scenario-labs/blender-plugin",
+  "stars": 1080,
+  "license": "GPL-3.0",
+  "created": "2026-08-30",
+  "pushed": "2026-11-20",
+  "desc": "Scenario for Blender: AI images, video, 3D and PBR materials in the viewport, plus a local MCP server for agents. Blender 5.0+ extension, GPL-3.0-or-later.",
+  "homepage": "https://blender.scenario.com/",
+  "queries": [
+   "blender mcp"
+  ]
+ },
+ {
+  "repo": "codepawl/crucible",
+  "stars": 1008,
+  "license": "MIT",
+  "created": "2026-10-08",
+  "pushed": "2026-11-25",
+  "desc": "3D engine that AI agents drive",
+  "homepage": "https://crucible.codepawl.com",
+  "queries": [
+   "blender mcp"
+  ]
+ },
+ {
+  "repo": "zhinkgit/embeddedskills",
+  "stars": 813,
+  "license": "MIT",
+  "created": "2026-04-10",
+  "pushed": "2026-11-18",
+  "desc": "An open-source collection of embedded development and debugging skills for Claude Code, Copilot, TRAE, and other AI coding assistants that support the Skill protocol. Once installed, the AI assistant ",
+  "homepage": "",
+  "queries": [
+   "hardware claude code skills"
+  ]
+ },
+ {
+  "repo": "islandmed/SculptForge",
+  "stars": 784,
+  "license": "GPL-3.0",
+  "created": "2026-10-21",
+  "pushed": "2026-11-25",
+  "desc": "Free, open-source 3D sculpting for Linux, macOS and Windows: dense meshes, remeshing, painting, built-in AI (image/text to 3D), Send to Unreal, game-ready LODs, Gaussian splats and OpenUSD.",
+  "homepage": "https://islandmed.github.io/SculptForge/",
+  "queries": [
+   "blender mcp"
+  ]
+ },
+ {
+  "repo": "ghbalf/freecad-ai",
+  "stars": 642,
+  "license": "LGPL-2.1",
+  "created": "2026-02-20",
+  "pushed": "2026-11-25",
+  "desc": "AI-powered assistant workbench for FreeCAD \u2014 generate 3D models from natural language",
+  "homepage": "",
+  "queries": [
+   "freecad mcp"
+  ]
+ },
+ {
+  "repo": "SonicloudTech/mouse-mcp",
+  "stars": 600,
+  "license": "MIT",
+  "created": "2026-10-20",
+  "pushed": "2026-10-31",
+  "desc": "Hardware mouse MCP server for AI agents on Windows x64. USB HID control and voice dictation; requires compatible uMouse hardware and firmware. \u9762\u5411 AI \u667a\u80fd\u4f53\u7684\u786c\u4ef6\u9f20\u6807 MCP\uff1aUSB HID \u63a7\u5236\u4e0e\u8bed\u97f3\u542c\u5199\uff0c\u9700\u8981\u517c\u5bb9\u7684 uMouse \u8bbe\u5907\u4e0e\u56fa\u4ef6\u3002",
+  "homepage": "https://sinicloud.com/",
+  "queries": [
+   "firmware agent hardware"
+  ]
+ },
+ {
+  "repo": "Kai-Jungsthoefel/SOMA",
+  "stars": 564,
+  "license": "GPL-3.0",
+  "created": "2026-10-10",
+  "pushed": "2026-11-22",
+  "desc": "Desktop app for designing parametric 3D models in CadQuery together with the coding agent of your choice",
+  "homepage": "https://somacad.app/",
+  "queries": [
+   "cadquery llm",
+   "cadquery agent",
+   "fem llm agent"
+  ]
+ },
+ {
+  "repo": "credoksopho1984/blender-ai-copilot-studio",
+  "stars": 517,
+  "license": "MIT",
+  "created": "2026-11-12",
+  "pushed": "2026-11-15",
+  "desc": "An AI copilot and MCP server for Blender that turns plain-language briefs into scene operations\u2014inside a visual chat studio with multi-agent teams, your choice of AI models, and 27 built-in scene tool",
+  "homepage": "",
+  "queries": [
+   "blender mcp"
+  ]
+ },
+ {
+  "repo": "tiobeharxi1987/blender-ai-copilot-flow",
+  "stars": 516,
+  "license": "MIT",
+  "created": "2026-11-12",
+  "pushed": "2026-11-18",
+  "desc": "A controlled AI workflow for Blender: every copilot edit is a supervised tool call\u2014proposed, approved, executed in sequence, cancellable after the current step and undoable by name\u2014inside a visual stu",
+  "homepage": "",
+  "queries": [
+   "blender mcp"
+  ]
+ },
+ {
+  "repo": "zovulrira1974/blender-ai-copilot-assets",
+  "stars": 510,
+  "license": "MIT",
+  "created": "2026-11-12",
+  "pushed": "2026-11-18",
+  "desc": "An asset-savvy AI copilot for Blender\u2014search Poly Haven, Sketchfab and Poly Pizza mid-conversation, check what fits, import after your confirmation, with 27 scene tools and a built-in MCP server along",
+  "homepage": "",
+  "queries": [
+   "blender mcp"
+  ]
+ },
+ {
+  "repo": "Doug-218/blender-ai-copilot-forge",
+  "stars": 510,
+  "license": "MIT",
+  "created": "2026-11-12",
+  "pushed": "2026-11-15",
+  "desc": "A scene-forging AI copilot for Blender\u2014describe the layout and watch primitives, cameras, lights, materials and parenting assemble in ordered steps, with approvals, named undo and a built-in MCP serve",
+  "homepage": "",
+  "queries": [
+   "blender mcp"
+  ]
+ },
+ {
+  "repo": "fumbdendade19718/blender-ai-copilot-desk",
+  "stars": 507,
+  "license": "MIT",
+  "created": "2026-11-12",
+  "pushed": "2026-11-15",
+  "desc": "A visual AI desk for Blender\u2014chat, scene objects, viewport snapshots, approvals and a live task board in one companion window, backed by your choice of models and a built-in MCP server. \u00b7 blender-ai-c",
+  "homepage": "",
+  "queries": [
+   "blender mcp"
+  ]
+ },
+ {
+  "repo": "precygtrucqui1981/blender-ai-copilot-lab",
+  "stars": 506,
+  "license": "MIT",
+  "created": "2026-11-12",
+  "pushed": "2026-11-15",
+  "desc": "An AI lab for Blender where manager\u2013worker\u2013reviewer agent teams run multi-step scene briefs as supervised experiments\u2014a live task board, review findings, one correction attempt per blocked task, named",
+  "homepage": "",
+  "queries": [
+   "blender mcp"
+  ]
+ },
+ {
+  "repo": "baiblinocun1986/blender-ai-copilot-hub",
+  "stars": 501,
+  "license": "MIT",
+  "created": "2026-11-12",
+  "pushed": "2026-11-15",
+  "desc": "A multi-provider AI copilot hub for Blender\u2014bring OpenAI, Anthropic Claude, Google Gemini, OpenRouter, OpenCode Zen, Ollama and custom endpoints into one hub of saved connections, with 27 supervised s",
+  "homepage": "",
+  "queries": [
+   "blender mcp"
+  ]
+ },
+ {
+  "repo": "findavoulot1973/Blender-AI-MCP-Suite",
+  "stars": 495,
+  "license": "MIT",
+  "created": "2026-11-12",
+  "pushed": "2026-11-15",
+  "desc": "Blender AI MCP Suite is an AI assistant and built-in Model Context Protocol MCP server for Blender that turns plain-language briefs into inspected, approved and reversible 3D scene operations \u2014 with a",
+  "homepage": "",
+  "queries": [
+   "blender mcp"
+  ]
+ },
+ {
+  "repo": "benzgasfuncring197110/blender-ai-copilot-bridge",
+  "stars": 493,
+  "license": "MIT",
+  "created": "2026-11-12",
+  "pushed": "2026-11-15",
+  "desc": "An MCP bridge for Blender that exposes 27 supervised scene tools to OpenCode and any compatible client\u2014authenticated Streamable HTTP on a local endpoint, with the visual chat studio and agent teams on",
+  "homepage": "",
+  "queries": [
+   "blender mcp"
+  ]
+ },
+ {
+  "repo": "DMontgomery40/bambu-printer-mcp",
+  "stars": 374,
+  "license": "GPL-2.0",
+  "created": "2026-03-16",
+  "pushed": "2026-11-24",
+  "desc": "MCP server for Bambu Lab 3D printers \u2014 STL manipulation, BambuStudio  or FULU/orca slicing, Blender MCP integration, and direct printer control",
+  "homepage": "https://dmontgomery40.github.io/bambu-printer-mcp/",
+  "queries": [
+   "slicer mcp"
+  ]
+ },
+ {
+  "repo": "spkane/freecad-addon-robust-mcp-server",
+  "stars": 281,
+  "license": "Apache-2.0",
+  "created": "2026-01-03",
+  "pushed": "2026-11-24",
+  "desc": "The FreeCAD Robust MCP server and MCP Bridge Workbench/Addon",
+  "homepage": "https://spkane.github.io/freecad-addon-robust-mcp-server/",
+  "queries": [
+   "freecad mcp"
+  ]
+ },
+ {
+  "repo": "codeofaxel/Kiln",
+  "stars": 259,
+  "license": "AGPL-3.0",
+  "created": "2026-02-10",
+  "pushed": "2026-11-25",
+  "desc": "From idea to object, and every version in between. Kiln is the open-source MCP server for 3D printing: AI agents (ChatGPT, Claude, Gemini, GitHub Copilot, Codex, Cursor, Grok, Hermes Agent, or any MCP",
+  "homepage": "https://kiln3d.com/?utm_source=github&utm_medium=repo-about",
+  "queries": [
+   "openscad agent",
+   "slicer mcp"
+  ]
+ },
+ {
+  "repo": "Dyalwayshappy/Spice",
+  "stars": 247,
+  "license": "NOASSERTION",
+  "created": "2026-03-06",
+  "pushed": "2026-06-19",
+  "desc": "A decision brain for agentic systems: perceive context, compare options, and control execution.",
+  "homepage": "https://pypi.org/project/spice-runtime/",
+  "queries": [
+   "spice llm"
+  ]
+ },
+ {
+  "repo": "oaslananka/kicad-mcp-pro",
+  "stars": 237,
+  "license": "AGPL-3.0",
+  "created": "2026-05-31",
+  "pushed": "2026-11-25",
+  "desc": "MCP server for KiCad, connecting AI agents to schematic and PCB workflows, ERC/DRC validation, DFM checks, BOM analysis, and manufacturing preparation\u2014with controlled edits and human-gated release wor",
+  "homepage": "https://oaslananka.github.io/kicad-mcp-pro/",
+  "queries": [
+   "electronics llm agent",
+   "pcb llm"
+  ]
+ },
+ {
+  "repo": "CodingFeng101/CanvasAnvil",
+  "stars": 231,
+  "license": "MIT",
+  "created": "2026-01-24",
+  "pushed": "2026-11-23",
+  "desc": "CanvasAnvil is an open source AI diagram maker and flowchart generator - an infinite-canvas diagram editor and self-hosted drawio alternative that writes editable .drawio files. Text to diagram, then ",
+  "homepage": "https://canvasanvil.codingfgd.asia",
+  "queries": [
+   "text to cad"
+  ]
+ },
+ {
+  "repo": "EthanXiang777/circuit-framework",
+  "stars": 231,
+  "license": "Apache-2.0",
+  "created": "2026-07-16",
+  "pushed": "2026-07-16",
+  "desc": "Circuit Framework \u2014 multi-agent LLM trading research system",
+  "homepage": "",
+  "queries": [
+   "circuit llm agent"
+  ]
+ },
+ {
+  "repo": "S4US/Roqer",
+  "stars": 223,
+  "license": "AGPL-3.0",
+  "created": "2026-09-25",
+  "pushed": "2026-11-23",
+  "desc": "An open-source AI agent for Roblox Studio. Builds, scripts, and playtests in your place using your ChatGPT/Claude subscription or custom API.",
+  "homepage": "",
+  "queries": [
+   "blender agent claude"
+  ]
+ },
+ {
+  "repo": "niclasvestlund-YT/vibepulse",
+  "stars": 223,
+  "license": "MIT",
+  "created": "2026-08-12",
+  "pushed": "2026-10-28",
+  "desc": "ESP32-S3 AMOLED for Claude Code & Codex usage, live agent activity, and answerable NEEDS YOU alerts. Local-first macOS/Windows host; optional encrypted relays.",
+  "homepage": "https://vibeonchip.com",
+  "queries": [
+   "esp32 claude code"
+  ]
+ },
+ {
+  "repo": "jdilla1277/agentcad",
+  "stars": 221,
+  "license": "Apache-2.0",
+  "created": "2026-06-02",
+  "pushed": "2026-11-25",
+  "desc": "CAD CLI and MCP server for AI agents",
+  "homepage": "https://agentcad.dev",
+  "queries": [
+   "cadquery agent",
+   "build123d agent"
+  ]
+ },
+ {
+  "repo": "alisamsam/Solidworks-MCP",
+  "stars": 219,
+  "license": "MIT",
+  "created": "2026-03-22",
+  "pushed": "2026-03-23",
+  "desc": "MCP server to automate SolidWorks using Claude AI \u2014 22 tools for parts, sketches & features",
+  "homepage": "",
+  "queries": [
+   "solidworks mcp"
+  ]
+ },
+ {
+  "repo": "majidmanzarpour/blender-game-skills",
+  "stars": 201,
+  "license": "MIT",
+  "created": "2026-09-24",
+  "pushed": "2026-09-24",
+  "desc": "Claude Code agent skills for game dev in Blender. Turn concept art into rigged, game-ready 3D assets, measured against your references.",
+  "homepage": "",
+  "queries": [
+   "blender agent claude"
+  ]
+ },
+ {
+  "repo": "Cai-aa/CAD-Agent-Hub",
+  "stars": 196,
+  "license": "MIT",
+  "created": "2026-07-28",
+  "pushed": "2026-11-04",
+  "desc": "MCP servers and automation bridges for CATIA, SolidWorks, Siemens NX, and Autodesk Fusion",
+  "homepage": "",
+  "queries": [
+   "solidworks mcp"
+  ]
+ },
+ {
+  "repo": "daishuge/pcb-skill",
+  "stars": 191,
+  "license": "MIT",
+  "created": "2026-09-08",
+  "pushed": "2026-09-29",
+  "desc": "Agent skill for taking a hardware idea to a manufacturable PCB: concept, schematic, sourcing, layout, routing, verification, and a purchase staged to the pre-payment page. Drives EasyEDA Pro over MCP ",
+  "homepage": "",
+  "queries": [
+   "hardware claude code skills"
+  ]
+ },
+ {
+  "repo": "ReshefElisha/jarvis-onshape-mcp",
+  "stars": 178,
+  "license": "NOASSERTION",
+  "created": "2026-04-17",
+  "pushed": "2026-04-22",
+  "desc": "Jarvis Onshape MCP \u2014 Claude Code plugin for driving real Onshape CAD. Vision-decomposition skill + truth-telling + parametric iteration + FeatureScript.",
+  "homepage": "",
+  "queries": [
+   "onshape mcp"
+  ]
+ },
+ {
+  "repo": "op7418/m5-paper-buddy",
+  "stars": 166,
+  "license": "NOASSERTION",
+  "created": "2026-04-18",
+  "pushed": "2026-04-19",
+  "desc": "\ud83d\udcdf Claude Code physical companion on M5Paper V1.1 e-ink. Multi-session dashboard, hardware approval (buttons + touch), AskUserQuestion option cards, CJK, USB/BLE, installable as a Claude Code plugin. /",
+  "homepage": "https://github.com/op7418/m5-paper-buddy",
+  "queries": [
+   "esp32 claude code"
+  ]
+ },
+ {
+  "repo": "faust-machines/fusion360-mcp-server",
+  "stars": 158,
+  "license": "MIT",
+  "created": "2026-02-02",
+  "pushed": "2026-10-06",
+  "desc": "MCP Server for Autodesk Fusion 360",
+  "homepage": "",
+  "queries": [
+   "fusion 360 mcp"
+  ]
+ },
+ {
+  "repo": "emirmrkaljevic/mesh2cad",
+  "stars": 153,
+  "license": "MIT",
+  "created": "2026-10-13",
+  "pushed": "2026-11-20",
+  "desc": "Convert STL/OBJ/PLY meshes into editable CAD (STEP + parametric CadQuery/OpenSCAD/FreeCAD) with primitive fitting. CLI + MCP server",
+  "homepage": "",
+  "queries": [
+   "freecad mcp"
+  ]
+ },
+ {
+  "repo": "Ssbullock/pcb-layout-llm",
+  "stars": 151,
+  "license": null,
+  "created": "2026-11-17",
+  "pushed": "2026-11-17",
+  "desc": "Fine-tuned Qwen2.5-Coder-32B (SFT + GRPO) for KiCad PCB architectural layout planning, routing strategy, and 23-board frontier benchmark",
+  "homepage": "",
+  "queries": [
+   "pcb llm"
+  ]
+ },
+ {
+  "repo": "zacharyinserra/deskhub",
+  "stars": 149,
+  "license": "MIT",
+  "created": "2026-11-17",
+  "pushed": "2026-11-24",
+  "desc": "A desk display for the Waveshare ESP32-S3-Touch-LCD-4.3B: PC stats, Claude Code usage, calendar, media, Steam and 3D printer, fed by a Windows companion",
+  "homepage": "",
+  "queries": [
+   "esp32 claude code"
+  ]
+ },
+ {
+  "repo": "iancanderson/openscad-agent",
+  "stars": 132,
+  "license": null,
+  "created": "2026-02-03",
+  "pushed": "2026-02-03",
+  "desc": "A Claude Code-powered 3D modeling agent environment for creating 3D printable designs using OpenSCAD.",
+  "homepage": "",
+  "queries": [
+   "openscad agent"
+  ]
+ },
+ {
+  "repo": "ABC12345anouys/EvoBot",
+  "stars": 129,
+  "license": "Apache-2.0",
+  "created": "2026-09-23",
+  "pushed": "2026-10-01",
+  "desc": "Agent + reusable skill library for LIBERO manipulation tasks (no RL / VLA / world model; no LLM calls at runtime)",
+  "homepage": "https://github.com/Lifelong-Robot-Learning/LIBERO",
+  "queries": [
+   "mujoco llm agent"
+  ]
+ },
+ {
+  "repo": "sno-ai/llmix",
+  "stars": 128,
+  "license": "Apache-2.0",
+  "created": "2026-05-09",
+  "pushed": "2026-11-21",
+  "desc": "Production LLM call layer for AI agents and tools: keep OpenAI/Anthropic/AI SDK/LiteLLM, hot-swap models with MDA presets, and add cache, retries, circuit breakers, key rotation, singleflight, and Pyt",
+  "homepage": "https://github.com/sno-ai/llmix",
+  "queries": [
+   "circuit llm agent"
+  ]
+ },
+ {
+  "repo": "ifBars/blender-agent-studio",
+  "stars": 127,
+  "license": "MIT",
+  "created": "2026-07-25",
+  "pushed": "2026-11-22",
+  "desc": "Free, open-source Blender AI plugin for the tools you already use. Codex and Claude Code installers, local MCP tools, editable .blend files and Python source.",
+  "homepage": "https://ifbars.github.io/blender-agent-studio/",
+  "queries": [
+   "blender agent claude"
+  ]
+ },
+ {
+  "repo": "oauramos/claude-usage-stick",
+  "stars": 126,
+  "license": "MIT",
+  "created": "2026-04-23",
+  "pushed": "2026-11-06",
+  "desc": "Real-time Claude Code rate-limit monitor on ESP32 boards!",
+  "homepage": "",
+  "queries": [
+   "esp32 claude code"
+  ]
+ },
+ {
+  "repo": "venkatapgummadi/agentflow",
+  "stars": 126,
+  "license": "NOASSERTION",
+  "created": "2026-04-11",
+  "pushed": "2026-09-20",
+  "desc": "Online-adaptive multi-agent framework for enterprise API orchestration. Adaptive circuit breakers, SLA-driven routing, hybrid LLM+rule intent parser. Apache 2.0.",
+  "homepage": "https://github.com/venkatapgummadi/agentflow",
+  "queries": [
+   "circuit llm agent"
+  ]
+ },
+ {
+  "repo": "SlavaSexton/ComfyUI-Agent-Kit",
+  "stars": 125,
+  "license": "Apache-2.0",
+  "created": "2026-06-20",
+  "pushed": "2026-11-02",
+  "desc": "One ComfyUI skill for every AI coding agent (Claude Code, Codex, Gemini CLI, Qwen Code): drives a local ComfyUI end to end. 75 model prompt recipes, 581 templates, plus standalone Seedance, Krea and M",
+  "homepage": "https://chronicleofbrothers.com/",
+  "queries": [
+   "hardware claude code skills"
+  ]
+ },
+ {
+  "repo": "Hebbian-Robotics/rua",
+  "stars": 123,
+  "license": "MIT",
+  "created": "2026-11-14",
+  "pushed": "2026-11-25",
+  "desc": "Hebbian Robot-Use Agents (RUA)",
+  "homepage": "https://hebbianrobotics.com/",
+  "queries": [
+   "lerobot agent"
+  ]
+ },
+ {
+  "repo": "MaxEllis/orcaslicer-mcp",
+  "stars": 121,
+  "license": "AGPL-3.0",
+  "created": "2026-07-18",
+  "pushed": "2026-11-24",
+  "desc": "OrcaSlicer MCP \u2014 drive OrcaSlicer from Claude or any MCP client: load models, tune settings, slice, analyze",
+  "homepage": "",
+  "queries": [
+   "slicer mcp"
+  ]
+ },
+ {
+  "repo": "andrewbartels1/SolidworksMCP-python",
+  "stars": 117,
+  "license": "MIT",
+  "created": "2026-03-17",
+  "pushed": "2026-11-25",
+  "desc": "Python MCP server for SolidWorks: lets Claude and other AI agents build parts, assemblies and drawings through the SolidWorks COM API (pywin32).",
+  "homepage": "https://andrewbartels1.com/SolidworksMCP-python/",
+  "queries": [
+   "solidworks mcp"
+  ]
+ },
+ {
+  "repo": "xueyouluo/fridge_tracker",
+  "stars": 117,
+  "license": "NOASSERTION",
+  "created": "2026-07-06",
+  "pushed": "2026-11-01",
+  "desc": "\u9c9c\u77e5\u8d34\uff1a\u53ef\u590d\u523b\u7684 ESP32 \u58a8\u6c34\u5c4f\u98df\u6750\u4fdd\u9c9c\u63d0\u9192\u5668\uff0c\u5305\u542b H5/Node.js/SQLite \u670d\u52a1\u7aef\u3001C3/S3 \u56fa\u4ef6\u3001\u4e09\u8272/\u56db\u8272\u5c4f\u6e32\u67d3\u548c 3D \u6253\u5370\u5916\u58f3\uff0c\u652f\u6301\u516c\u5171\u6258\u7ba1\u3001\u672c\u5730\u4e0e\u81ea\u6258\u7ba1\u90e8\u7f72\u3002",
+  "homepage": "https://fridge.followllm.online/",
+  "queries": [
+   "arduino mcp"
+  ]
+ },
+ {
+  "repo": "robium-ai/robium",
+  "stars": 111,
+  "license": "MIT",
+  "created": "2026-08-03",
+  "pushed": "2026-10-07",
+  "desc": "Physical AI skills for coding agents, with field-tested robotics guidance, the robium-ai CLI, and a learning engine.",
+  "homepage": "https://robium.ai",
+  "queries": [
+   "lerobot agent"
+  ]
+ },
+ {
+  "repo": "EESJGong/Graph-CAD",
+  "stars": 107,
+  "license": null,
+  "created": "2026-03-26",
+  "pushed": "2026-03-30",
+  "desc": "Learning Hierarchical and Geometry-Aware Graph Representations for Text-to-CAD",
+  "homepage": "",
+  "queries": [
+   "text to cad"
+  ]
+ },
+ {
+  "repo": "HurtzDonutStudios/ai-forge-mcp",
+  "stars": 102,
+  "license": null,
+  "created": "2026-03-25",
+  "pushed": "2026-04-09",
+  "desc": "565 AI-callable tools across 16 MCP servers. Full-pipeline AAA game asset production. Controls Blender, Substance Suite, Maya, Houdini, and Unreal Engine 5. 50 specialized AI agents. One prompt in, ga",
+  "homepage": "https://hurtzdonut.com/ai-forge-mcp",
+  "queries": [
+   "blender agent claude"
+  ]
+ },
+ {
+  "repo": "armpro24-blip/cad-cae-copilot",
+  "stars": 99,
+  "license": "MIT",
+  "created": "2026-05-26",
+  "pushed": "2026-11-05",
+  "desc": "CAD/CAE Copilot \u2014 an AI-native CAD/CAE/CAX workbench for AI agents. Text-to-CAD, text-to-CAE, real build123d/OpenCASCADE geometry, editable parameters, stable topology pointers, deterministic critique",
+  "homepage": "",
+  "queries": [
+   "build123d agent",
+   "text to cad"
+  ]
+ },
+ {
+  "repo": "embedded-society/altium-designer-mcp",
+  "stars": 99,
+  "license": "GPL-3.0",
+  "created": "2026-01-17",
+  "pushed": "2026-11-22",
+  "desc": "MCP server for AI-assisted management of Altium Designer component libraries",
+  "homepage": "https://github.com/embedded-society/altium-designer-mcp",
+  "queries": [
+   "pcb llm"
+  ]
+ },
+ {
+  "repo": "Kemerd/claude-hardware-in-the-loop",
+  "stars": 98,
+  "license": "NOASSERTION",
+  "created": "2026-11-03",
+  "pushed": "2026-11-18",
+  "desc": "Agent-driven hardware-in-the-loop engineering method: Claude Code skill, swarm orchestration, generator-first KiCad PCB pipeline, CadQuery CAD, firmware-in-the-loop, web CAD/PCB viewer. Source-availab",
+  "homepage": "",
+  "queries": [
+   "cadquery agent",
+   "firmware agent hardware",
+   "hardware claude code skills"
+  ]
+ },
+ {
+  "repo": "Frank-ZY-Dou/awesome-ai-3d-modeling-robotics",
+  "stars": 98,
+  "license": null,
+  "created": "2026-09-19",
+  "pushed": "2026-11-04",
+  "desc": "Source-linked examples of AI models used for 3D modeling, industrial design and CAD, and robot control, with archived media and the model named for every case",
+  "homepage": "https://frank-zy-dou.github.io/awesome-ai-3d-modeling-robotics/",
+  "queries": [
+   "robot design llm"
+  ]
+ },
+ {
+  "repo": "sorryhumans/clawdmeter-plus",
+  "stars": 95,
+  "license": "NOASSERTION",
+  "created": "2026-07-15",
+  "pushed": "2026-07-15",
+  "desc": "A round AMOLED desk display for your live Claude Code usage, weather, background-agent health, and a daily voice greeting. ESP32-S3 + macOS BLE daemon. Fork of Clawdmeter.",
+  "homepage": "",
+  "queries": [
+   "esp32 claude code"
+  ]
+ },
+ {
+  "repo": "zubair-trabzada/scroll-cinematic-claude",
+  "stars": 89,
+  "license": null,
+  "created": "2026-06-10",
+  "pushed": "2026-06-10",
+  "desc": "Award-winning 3D scroll websites from ONE prompt \u2014 Claude Code + Higgsfield MCP. Generates cinematic hero shots & 3D clips (360\u00b0 spins, fly-throughs, explosions), slices them into scroll-scrubbed fram",
+  "homepage": "",
+  "queries": [
+   "slicer mcp"
+  ]
+ },
+ {
+  "repo": "Cognitohazard/ltspice-mcp",
+  "stars": 86,
+  "license": "GPL-3.0",
+  "created": "2026-03-02",
+  "pushed": "2026-11-25",
+  "desc": "MCP server giving LLMs the ability to design, simulate, and analyze SPICE circuits via LTSpice and NGspice",
+  "homepage": "",
+  "queries": [
+   "spice llm"
+  ]
+ },
+ {
+  "repo": "liuchunwei732-cmyk/loopbuster",
+  "stars": 83,
+  "license": "MIT",
+  "created": "2026-05-30",
+  "pushed": "2026-06-05",
+  "desc": "A unified anti-dead-loop toolkit for LLM agents \u2014 loop detection, budget ceiling, state stasis guard, and circuit breaker in one library.",
+  "homepage": "",
+  "queries": [
+   "circuit llm agent"
+  ]
+ },
+ {
+  "repo": "agodianel/esp32-claude-workbench",
+  "stars": 82,
+  "license": "MIT",
+  "created": "2026-03-26",
+  "pushed": "2026-11-14",
+  "desc": "Deterministic AI workflow for ESP32 firmware development \u2014 structured missions, implementation contracts, debug playbooks, testing-first approach, and Claude Code skills for safe, repeatable embedded ",
+  "homepage": "",
+  "queries": [
+   "esp32 claude code"
+  ]
+ },
+ {
+  "repo": "matinsizen/ai-3d-animator-skill",
+  "stars": 80,
+  "license": "MIT",
+  "created": "2026-11-04",
+  "pushed": "2026-11-04",
+  "desc": "\ud83c\udfac AI Agent Skill that turns any LLM into a professional 3D artist & animator \u2014 Three.js + Blender pipelines, 14 art styles, 5 rigged example models (human, cat, jet, robot, car), film-grade animation ",
+  "homepage": "https://matinsizen.github.io/ai-3d-animator-skill/",
+  "queries": [
+   "robot design llm"
+  ]
+ },
+ {
+  "repo": "AallamR/RobloxForge-Intelligence",
+  "stars": 75,
+  "license": null,
+  "created": "2026-09-22",
+  "pushed": "2026-11-25",
+  "desc": "RobloxForge Docs 2026: Official MCP Vertical Slice Verification Layer for Studio",
+  "homepage": "",
+  "queries": [
+   "slicer mcp"
+  ]
+ },
+ {
+  "repo": "blwfish/freecad-mcp",
+  "stars": 69,
+  "license": "LGPL-2.1",
+  "created": "2026-02-20",
+  "pushed": "2026-11-23",
+  "desc": "MCP server for FreeCAD \u2014 32 tools for AI-assisted 3D CAD modeling",
+  "homepage": "",
+  "queries": [
+   "freecad mcp"
+  ]
+ },
+ {
+  "repo": "vanyu0710/Varen-AI-CAD",
+  "stars": 66,
+  "license": "AGPL-3.0",
+  "created": "2026-08-03",
+  "pushed": "2026-11-23",
+  "desc": "AI CAD \u5efa\u6a21 Agent\uff1a\u4e00\u53e5\u8bdd\u9700\u6c42\u8fdb\u6765\uff0c\u8c03\u7814\u3001\u63d0\u95ee\u3001\u51fa BOM\uff0c\u9010\u4ef6\u5b8c\u6210\u771f\u5b9e CAD \u5efa\u6a21\u5e76\u5bfc\u51fa\u88c5\u914d STEP\uff08\u53c2\u6570\u5316 BRep\uff0c\u4e0d\u662f\u56fe\u7247\u6216\u7f51\u683c\uff09\uff1b\u51e0\u4f55\u4e0e\u78b0\u649e\u68c0\u67e5\u4e0d\u8fc7\u5173\u5c31\u4e0d\u4ea4\u4ed8\u3002Windows \u5c01\u95ed Beta\u3002An AI CAD modeling agent: real parametric geometry from a one-line brief, gated by geometry",
+  "homepage": "https://vanyu0710.github.io/Varen-AI-CAD/",
+  "queries": [
+   "cadquery llm",
+   "cadquery agent",
+   "build123d llm",
+   "build123d agent"
+  ]
+ },
+ {
+  "repo": "device-context-protocol/dcp",
+  "stars": 62,
+  "license": "MIT",
+  "created": "2026-05-18",
+  "pushed": "2026-05-27",
+  "desc": "Device Context Protocol \u2014 bridge LLM agents to physical devices. Sub-50-byte frames, 27.6KB flash / 0.6KB RAM measured on ESP32, capability-scoped and safe by design. Complementary to MCP. Paper: arXi",
+  "homepage": "",
+  "queries": [
+   "arduino mcp"
+  ]
+ },
+ {
+  "repo": "Svetlana-DAO-LLC/cad-agent",
+  "stars": 61,
+  "license": "NOASSERTION",
+  "created": "2026-01-24",
+  "pushed": "2026-02-17",
+  "desc": "AI-driven CAD modeling for 3D printing (build123d + MCP)",
+  "homepage": "",
+  "queries": [
+   "build123d agent"
+  ]
+ },
+ {
+  "repo": "digailab/PCB-Bench",
+  "stars": 59,
+  "license": null,
+  "created": "2026-02-28",
+  "pushed": "2026-03-03",
+  "desc": "Official implementation of PCB-Bench (ICLR 2026): A benchmark for evaluating LLMs on printed circuit board placement and routing reasoning.",
+  "homepage": "",
+  "queries": [
+   "pcb llm"
+  ]
+ },
+ {
+  "repo": "ylongw/embedded-review",
+  "stars": 56,
+  "license": "MIT",
+  "created": "2026-02-28",
+  "pushed": "2026-03-13",
+  "desc": "Embedded/firmware code review skill for AI agents. Memory safety, interrupt correctness, RTOS pitfalls, hardware interfaces, C/C++ traps. STM32/Cortex-M/FreeRTOS focused.",
+  "homepage": "",
+  "queries": [
+   "firmware agent hardware"
+  ]
+ },
+ {
+  "repo": "Ormus-Solutions/LibreEmbed-Claude-Code",
+  "stars": 54,
+  "license": "MIT",
+  "created": "2026-02-25",
+  "pushed": "2026-10-09",
+  "desc": "15 Claude Code plugins for embedded systems, firmware, and IoT development",
+  "homepage": "",
+  "queries": [
+   "esp32 claude code"
+  ]
+ },
+ {
+  "repo": "fcavalcantirj/claude-code-eyes",
+  "stars": 52,
+  "license": "MIT",
+  "created": "2026-07-21",
+  "pushed": "2026-08-21",
+  "desc": "Give Claude Code eyes \ud83d\udc41\ufe0f \u2014 a camera skill so it can SEE real hardware, displays and wiring: verify a rendered panel, check wiring before power-on, and catch bugs that live on the glass, not the logs.",
+  "homepage": "",
+  "queries": [
+   "esp32 claude code",
+   "hardware claude code skills"
+  ]
+ },
+ {
+  "repo": "LGAI-Research/PCBWorld",
+  "stars": 52,
+  "license": "BSD-3-Clause",
+  "created": "2026-08-29",
+  "pushed": "2026-11-13",
+  "desc": "A reinforcement learning environment for PCB autorouting, built on KiCad's push-and-shove router. Includes a decoder-only PPO/GRPO agent, LLM tool-calling and rule-based baselines, and a uniform 3-sta",
+  "homepage": "",
+  "queries": [
+   "pcb llm"
+  ]
+ },
+ {
+  "repo": "joebentham/desk-buddy",
+  "stars": 51,
+  "license": "MIT",
+  "created": "2026-11-12",
+  "pushed": "2026-11-12",
+  "desc": "Lump: a little desk buddy on an ESP32-S3 glass prism display that shows what your Claude sessions are up to. Built with Claude Code.",
+  "homepage": "",
+  "queries": [
+   "esp32 claude code"
+  ]
+ },
+ {
+  "repo": "geer1895/rfauto",
+  "stars": 51,
+  "license": "GPL-3.0",
+  "created": "2026-09-21",
+  "pushed": "2026-11-17",
+  "desc": "RF/microwave design automation + LLM orchestration: 16 EM/EDA engines behind one interface, 75 parameterized template families, 340 deterministic calculators, 87 calibration anchors; AI agents drive e",
+  "homepage": "",
+  "queries": [
+   "electronics llm agent"
+  ]
+ },
+ {
+  "repo": "decoded-cipher/nodrix",
+  "stars": 48,
+  "license": "MIT",
+  "created": "2026-05-17",
+  "pushed": "2026-11-17",
+  "desc": "The IoT platform Cloudflare didn't build. Telemetry, realtime dashboards, and automations on Workers + D1 + R2 + Durable Objects \u2014 in your own Cloudflare account.",
+  "homepage": "https://nodrix.live",
+  "queries": [
+   "arduino mcp"
+  ]
+ },
+ {
+  "repo": "hjbaard/SolidWorks-MCP",
+  "stars": 47,
+  "license": "MIT",
+  "created": "2026-06-25",
+  "pushed": "2026-11-19",
+  "desc": "MCP server that lets AI agents build, measure and verify parametric parts and assemblies in a running SolidWorks (Windows, COM).",
+  "homepage": "",
+  "queries": [
+   "solidworks mcp"
+  ]
+ },
+ {
+  "repo": "VLab-Software/easyeda_mcp",
+  "stars": 47,
+  "license": "MIT",
+  "created": "2026-05-25",
+  "pushed": "2026-11-05",
+  "desc": "Turn EasyEDA Pro into an AI-native EDA suite. Bridge LLMs and AI agents to schematics, PCB layout, DRC/ERC rules, component libraries, and manufacturing exports via Model Context Protocol (MCP).",
+  "homepage": "http://vlabsoft.org/easyeda_mcp/",
+  "queries": [
+   "electronics llm agent",
+   "pcb llm"
+  ]
+ },
+ {
+  "repo": "cedrickchee/text-to-cad",
+  "stars": 45,
+  "license": "MIT",
+  "created": "2026-05-10",
+  "pushed": "2026-05-11",
+  "desc": "An open source harness for generating CAD models [forked of https://github.com/earthtojake/text-to-cad]",
+  "homepage": "https://text-to-cad.earthtojake.com/",
+  "queries": [
+   "text to cad"
+  ]
+ },
+ {
+  "repo": "shefq/blendrelay-mcp",
+  "stars": 44,
+  "license": "MIT",
+  "created": "2026-09-10",
+  "pushed": "2026-11-21",
+  "desc": "Open-source Blender AI add-on and MCP server for prompt-based 3D modeling, scene generation, Edit Mode changes, reference images, viewport sketches, and AI agents including Codex, Claude Code, and Ant",
+  "homepage": "https://shefq.github.io/blendrelay-mcp/",
+  "queries": [
+   "blender agent claude"
+  ]
+ },
+ {
+  "repo": "lizaixi01/AgentCAD",
+  "stars": 44,
+  "license": null,
+  "created": "2026-10-28",
+  "pushed": "2026-11-19",
+  "desc": "The CAD runtime built for AI agents: 2D drawings (DXF/DWG) and parametric 3D parts (FreeCAD, STEP) through MCP, CLI and Python, with undo, independent validation and a live viewer.",
+  "homepage": "",
+  "queries": [
+   "freecad agent",
+   "freecad mcp"
+  ]
+ },
+ {
+  "repo": "frankhommers/autodesk-fusion-mcp",
+  "stars": 42,
+  "license": "MIT",
+  "created": "2026-03-19",
+  "pushed": "2026-11-10",
+  "desc": "MCP server that runs inside Autodesk Fusion (formerly Autodesk Fusion 360) as an add-in, letting AI agents drive your CAD session over Streamable HTTP. Zero external dependencies.",
+  "homepage": "",
+  "queries": [
+   "fusion 360 mcp"
+  ]
+ },
+ {
+  "repo": "luccacerfz/character-factory-skills",
+  "stars": 41,
+  "license": "MIT",
+  "created": "2026-11-14",
+  "pushed": "2026-11-25",
+  "desc": "7 Claude Code skills that take a game character from a one-page brief to an animated, measured Unity prefab: Tripo, Blender (Rigify), critic agents, Unity.",
+  "homepage": "",
+  "queries": [
+   "blender agent claude"
+  ]
+ },
+ {
+  "repo": "nanassound/mnft",
+  "stars": 41,
+  "license": "Apache-2.0",
+  "created": "2026-10-12",
+  "pushed": "2026-11-11",
+  "desc": "Text-to-CAD tools in Elixir with build123d, OpenSCAD, replicad, and smlibpy.",
+  "homepage": "https://www.nanas.build",
+  "queries": [
+   "build123d llm",
+   "openscad llm",
+   "text to cad",
+   "cnc llm"
+  ]
+ },
+ {
+  "repo": "thaitop/tamaclaude",
+  "stars": 41,
+  "license": "MIT",
+  "created": "2026-07-27",
+  "pushed": "2026-08-10",
+  "desc": "Desk device that mirrors live Claude Code session state onto a Cheap Yellow Display over BLE",
+  "homepage": "",
+  "queries": [
+   "esp32 claude code"
+  ]
+ },
+ {
+  "repo": "jabarkle/CADSmith",
+  "stars": 40,
+  "license": null,
+  "created": "2026-03-25",
+  "pushed": "2026-06-20",
+  "desc": "CADSmith (formerly AutoFab) is a multi-agent system that generates manufacturing-ready CAD models from natural language by combining LLM code generation with programmatic geometric validation from the",
+  "homepage": "",
+  "queries": [
+   "llm cad generation"
+  ]
+ },
+ {
+  "repo": "HarrierPigeon/Solidworks-MCP-Server",
+  "stars": 40,
+  "license": "MIT",
+  "created": "2026-07-29",
+  "pushed": "2026-08-14",
+  "desc": "Ever wanted Claude to do your CAD for you?",
+  "homepage": "",
+  "queries": [
+   "solidworks mcp"
+  ]
+ },
+ {
+  "repo": "marcvermeeren/clawy",
+  "stars": 40,
+  "license": "MIT",
+  "created": "2026-02-14",
+  "pushed": "2026-02-21",
+  "desc": "A cute pixel companion for Claude Code sessions.",
+  "homepage": "https://clawy.lol",
+  "queries": [
+   "esp32 claude code"
+  ]
+ },
+ {
+  "repo": "nvrooijen/KiLeidoscope",
+  "stars": 40,
+  "license": "GPL-3.0",
+  "created": "2026-09-26",
+  "pushed": "2026-11-24",
+  "desc": "Live two-way bridge between KiCad and Blender: real-time 3D view, X-ray/cut-planes, flex folding, multi-board assemblies, LLM-visualizer, solder checks, Cycles renders of your PCB, and more!",
+  "homepage": "",
+  "queries": [
+   "pcb llm"
+  ]
+ },
+ {
+  "repo": "lewtheegg/voxel-flight",
+  "stars": 39,
+  "license": "MIT",
+  "created": "2026-11-18",
+  "pushed": "2026-11-19",
+  "desc": "An endless procedural voxel flight sim on a 64x64 OLED and an ESP32-C3 SuperMini. Vibe coded with Claude as a hardware stress test.",
+  "homepage": "",
+  "queries": [
+   "esp32 claude code"
+  ]
+ },
+ {
+  "repo": "filippofinke/cad-studio",
+  "stars": 38,
+  "license": "MIT",
+  "created": "2026-10-06",
+  "pushed": "2026-10-10",
+  "desc": "\ud83d\udcd0 Describe a part, get a printable model: a native macOS CAD studio powered by Claude Code / Codex and build123d.",
+  "homepage": "https://filippofinke.github.io/cad-studio/",
+  "queries": [
+   "build123d llm"
+  ]
+ },
+ {
+  "repo": "theosib/FreeCAD-MCP-Server",
+  "stars": 38,
+  "license": null,
+  "created": "2026-03-05",
+  "pushed": "2026-03-05",
+  "desc": "MCP server that allows Claude Code to talk directly to FreeCAD to inspect and modify state",
+  "homepage": "",
+  "queries": [
+   "freecad mcp"
+  ]
+ },
+ {
+  "repo": "su5176/Mklink-AI-Probe",
+  "stars": 38,
+  "license": "MIT",
+  "created": "2026-05-26",
+  "pushed": "2026-09-16",
+  "desc": " MKLink AI Probe is an all-in-one embedded debugging CLI for Cortex-M microcontrollers. It bridges the MKLink/MicroLink    hardware probe with AI agents (Claude, OpenAI) to enable natural-language dri",
+  "homepage": "",
+  "queries": [
+   "firmware agent hardware"
+  ]
+ },
+ {
+  "repo": "ForestHubAI/boardsmith",
+  "stars": 38,
+  "license": "AGPL-3.0",
+  "created": "2026-03-11",
+  "pushed": "2026-03-11",
+  "desc": "Text prompt \u2192 KiCad schematic, BOM, and firmware. No templates \u2014 real wired circuits with computed values.",
+  "homepage": "https://github.com/ForestHubAI/boardsmith#quick-start",
+  "queries": [
+   "pcb llm"
+  ]
+ },
+ {
+  "repo": "arthurle3210/swapi-pilot-solidworks-mcp",
+  "stars": 37,
+  "license": null,
+  "created": "2026-02-20",
+  "pushed": "2026-07-05",
+  "desc": "SolidWorks API MCP server \u2014 search API docs, examples, and enums directly from any MCP-compatible AI tool.",
+  "homepage": "",
+  "queries": [
+   "solidworks mcp"
+  ]
+ },
+ {
+  "repo": "CREATeNG/freecad-mcp-bridge",
+  "stars": 36,
+  "license": "MIT",
+  "created": "2026-06-22",
+  "pushed": "2026-11-21",
+  "desc": "MCP Bridge gives AI tools access to your open FreeCAD session. A flexible, light, and direct bridge.",
+  "homepage": "",
+  "queries": [
+   "freecad mcp"
+  ]
+ },
+ {
+  "repo": "DocSlicer/DocSlicer",
+  "stars": 36,
+  "license": "AGPL-3.0",
+  "created": "2026-03-17",
+  "pushed": "2026-09-01",
+  "desc": "Fast, deterministic document parser and chunker for RAG and agent pipelines. Ships an MCP server for agents navigating long documents with precision.",
+  "homepage": "https://www.docslicer.ai/docs",
+  "queries": [
+   "slicer mcp"
+  ]
+ },
+ {
+  "repo": "Xuan-BOMS/soildworks-mcp",
+  "stars": 35,
+  "license": "MIT",
+  "created": "2026-04-24",
+  "pushed": "2026-04-24",
+  "desc": "Packaged SolidWorks MCP server for Codex and local stdio deployment",
+  "homepage": "",
+  "queries": [
+   "solidworks mcp"
+  ]
+ },
+ {
+  "repo": "sandraschi/freecad-mcp",
+  "stars": 34,
+  "license": "MIT",
+  "created": "2026-05-07",
+  "pushed": "2026-11-06",
+  "desc": "FreeCAD 3D CAD automation via FastMCP \u2014 headless document/export plus FluidX3D/OpenFOAM CFD extensions. For Cursor / Claude Desktop. Webapp.",
+  "homepage": "",
+  "queries": [
+   "freecad mcp"
+  ]
+ },
+ {
+  "repo": "almightyshui/Mechanical-AI-Skill",
+  "stars": 34,
+  "license": "MIT",
+  "created": "2026-06-12",
+  "pushed": "2026-06-17",
+  "desc": "AI-powered Mechanical Engineering Review Skill for CAD, FEA, DFM, DFA and Assembly Analysis.",
+  "homepage": "",
+  "queries": [
+   "solidworks mcp"
+  ]
+ },
+ {
+  "repo": "alexex1993/mcu-skills",
+  "stars": 34,
+  "license": "MIT",
+  "created": "2026-08-21",
+  "pushed": "2026-10-30",
+  "desc": "Claude Code skills for microcontrollers (MCU): STM32, ESP32, RP2040, nRF52840, AVR board-specific Agent Skills (SKILL.md) for embedded firmware",
+  "homepage": "https://habr.com/ru/articles/1076082/",
+  "queries": [
+   "esp32 claude code"
+  ]
+ },
+ {
+  "repo": "salatmaster/keenetic-mcp",
+  "stars": 34,
+  "license": "MIT",
+  "created": "2026-08-07",
+  "pushed": "2026-11-24",
+  "desc": "Keenetic and Netcraze router control for Claude Code, Codex, Cursor and any MCP agent. An MCP server over the router's own RCI API, plus plugins whose skills teach the agent how the hardware really be",
+  "homepage": "https://www.npmjs.com/package/keenetic-mcp",
+  "queries": [
+   "hardware claude code skills"
+  ]
+ },
+ {
+  "repo": "atechdotdev/prompt-to-product",
+  "stars": 33,
+  "license": "GPL-3.0",
+  "created": "2026-10-03",
+  "pushed": "2026-11-20",
+  "desc": "Atech AI CAD (formerly Atech Atelier) \u2014 describe a part, an agent builds it as a real, measured solid. Powered by FreeCAD.",
+  "homepage": "https://atech.dev",
+  "queries": [
+   "freecad agent"
+  ]
+ },
+ {
+  "repo": "just1step/solidworks-mcp",
+  "stars": 33,
+  "license": "MIT",
+  "created": "2026-03-30",
+  "pushed": "2026-04-10",
+  "desc": " A Model Context Protocol (MCP) server for SolidWorks, enabling AI assistants to interact with CAD models, automate design workflows, and bridge LLMs with SolidWorks API. \u57fa\u4e8e Model Context Protocol (MC",
+  "homepage": "",
+  "queries": [
+   "solidworks mcp"
+  ]
+ },
+ {
+  "repo": "agentic-hil/agentic-hil",
+  "stars": 33,
+  "license": "Apache-2.0",
+  "created": "2026-06-23",
+  "pushed": "2026-11-25",
+  "desc": "Let your coding agent develop firmware on the real board, with the hardware as the gate.",
+  "homepage": "https://agentic-hil.github.io",
+  "queries": [
+   "firmware agent hardware"
+  ]
+ },
+ {
+  "repo": "ig-shadow-walker/BlenderXAlpha-3DGenSkill",
+  "stars": 32,
+  "license": "MIT",
+  "created": "2026-07-07",
+  "pushed": "2026-07-21",
+  "desc": "Agent Skill that turns plain-English scene descriptions into AI-generated 3D models built live in Blender, via Alpha3D + Blender MCP. Works with Claude Code, Cursor, and OpenAI Codex.",
+  "homepage": "",
+  "queries": [
+   "blender agent claude"
+  ]
+ },
+ {
+  "repo": "mwdandoms/swforge",
+  "stars": 32,
+  "license": "MIT",
+  "created": "2026-11-03",
+  "pushed": "2026-11-18",
+  "desc": "Drive SolidWorks from Python / CLI / MCP: early-binding modeling, GB material library, assembly mates, exact interference, and GB-standard drawings - verified at every step.",
+  "homepage": "",
+  "queries": [
+   "solidworks mcp"
+  ]
+ },
+ {
+  "repo": "akiselev/datasheet-cli",
+  "stars": 32,
+  "license": "GPL-3.0",
+  "created": "2026-01-27",
+  "pushed": "2026-09-17",
+  "desc": "Search electronic parts, download datasheets, and extract structured data for LLM agents \u2014 Mouser & DigiKey CLI in Rust",
+  "homepage": "",
+  "queries": [
+   "electronics llm agent"
+  ]
+ },
+ {
+  "repo": "tian-yu200/dsh-solidworks",
+  "stars": 31,
+  "license": "AGPL-3.0",
+  "created": "2026-08-17",
+  "pushed": "2026-11-24",
+  "desc": "DeepSeek Harness integration for safe, high-level SolidWorks automation, built on SolidPilot.",
+  "homepage": "",
+  "queries": [
+   "solidworks mcp"
+  ]
+ },
+ {
+  "repo": "SnowWarri0r/cc-buddy-bridge",
+  "stars": 31,
+  "license": "MIT",
+  "created": "2026-04-21",
+  "pushed": "2026-10-18",
+  "desc": "Bridge Claude Code CLI sessions to the claude-desktop-buddy BLE hardware without the desktop app.",
+  "homepage": "",
+  "queries": [
+   "esp32 claude code"
+  ]
+ },
+ {
+  "repo": "MonetiseBG/circuit-breaker",
+  "stars": 31,
+  "license": "Apache-2.0",
+  "created": "2026-05-05",
+  "pushed": "2026-06-23",
+  "desc": "Runtime economic governance for AI agents. Circuit Breaker adds risk-managed execution, cost ceilings, and kill switches to autonomous AI workflows.",
+  "homepage": "https://circuitbreaker.dev",
+  "queries": [
+   "circuit llm agent"
+  ]
+ },
+ {
+  "repo": "pubalisen/ai-ml-interview-deep-dives",
+  "stars": 30,
+  "license": null,
+  "created": "2026-07-15",
+  "pushed": "2026-08-04",
+  "desc": "AI & ML Engineering Interview Questions \u2014 Deep Technical Breakdowns. 300+ real interview questions with detailed mechanical answers for AI Engineer, LLM Engineer, Gen AI Engineer, and MLOps roles.",
+  "homepage": "",
+  "queries": [
+   "mechanical engineering llm"
+  ]
+ },
+ {
+  "repo": "ra100/blender-claude-plugin",
+  "stars": 29,
+  "license": "MIT",
+  "created": "2026-02-13",
+  "pushed": "2026-04-29",
+  "desc": "Plugin for blender to be used in coding agents as claude, opencode, kilocode, ...",
+  "homepage": "",
+  "queries": [
+   "blender agent claude"
+  ]
+ },
+ {
+  "repo": "moellere/WireStudio",
+  "stars": 29,
+  "license": "MIT",
+  "created": "2026-05-03",
+  "pushed": "2026-11-23",
+  "desc": "Agent-driven hardware design tool for ESP32 and ESP8266 devices: firmware for ESPHome, Tasmota, WLED, LoRaWAN, Meshtastic, CircuitPython and MicroPython, plus KiCad schematic/PCB, a printable enclosur",
+  "homepage": "https://wirestudio.io",
+  "queries": [
+   "openscad agent",
+   "firmware agent hardware"
+  ]
+ },
+ {
+  "repo": "keyuraghao/chipwhisperer-studio",
+  "stars": 29,
+  "license": "Apache-2.0",
+  "created": "2026-09-30",
+  "pushed": "2026-11-02",
+  "desc": "Desktop app for ChipWhisperer side-channel and fault-injection hardware: live waveforms, capture, CPA, glitch sweeps, UART/SPI/JTAG/SWD interfaces, a logic analyser with protocol decoders, firmware co",
+  "homepage": "https://github.com/keyuraghao/chipwhisperer-studio/wiki",
+  "queries": [
+   "firmware agent hardware"
+  ]
+ },
+ {
+  "repo": "thom-heinrich/twinr",
+  "stars": 29,
+  "license": "MIT",
+  "created": "2026-03-12",
+  "pushed": "2026-04-15",
+  "desc": "Support your (grand) parents! TWINR is a physical AI companion for senior citizens, designed with one simple goal: to be as little digital, as tactile, and as accessible as possible",
+  "homepage": "https://twinr.com",
+  "queries": [
+   "physical ai agent design"
+  ]
+ },
+ {
+  "repo": "ozanzeng/blender-LPM-skill",
+  "stars": 28,
+  "license": "MIT",
+  "created": "2026-08-28",
+  "pushed": "2026-08-29",
+  "desc": "Blender Low Poly Modelling Skill \u2014 AI agent skill (Claude Code) that builds flat-shaded, palette-textured, budgeted low-poly game assets in Blender from a one-line brief and exports Unity-ready FBX",
+  "homepage": "",
+  "queries": [
+   "blender agent claude"
+  ]
+ },
+ {
+  "repo": "LBurny/cadpilot",
+  "stars": 28,
+  "license": "MIT",
+  "created": "2026-07-30",
+  "pushed": "2026-10-06",
+  "desc": "CADPilot is an MCP server that lets AI clients (ClaudeCode, OpenCode, DSH, ZCode) pilot FreeCAD, building constrained sketches, parametric features, and persistent-joint assemblies from natural langua",
+  "homepage": "",
+  "queries": [
+   "freecad mcp"
+  ]
+ },
+ {
+  "repo": "adsumnetworks/Adsum-IoT-Coder",
+  "stars": 28,
+  "license": "Apache-2.0",
+  "created": "2026-02-03",
+  "pushed": "2026-10-22",
+  "desc": "AI coding agent for embedded IoT firmware in VS Code: Espressif ESP32 (ESP-IDF) and Nordic nRF52/53/54/91 (nRF Connect SDK, Zephyr). Builds, flashes and debugs on real hardware (RTT, UART, BLE sniffer",
+  "homepage": "https://www.adsumnetworks.com",
+  "queries": [
+   "firmware agent hardware"
+  ]
+ },
+ {
+  "repo": "ndoo/fusion360-mcp-bridge",
+  "stars": 27,
+  "license": "MIT",
+  "created": "2026-03-27",
+  "pushed": "2026-03-27",
+  "desc": "Connect Claude Code to Fusion 360 via MCP \u2014 read/create/update/delete CAD geometry through natural language",
+  "homepage": "",
+  "queries": [
+   "fusion 360 mcp"
+  ]
+ },
+ {
+  "repo": "hardware-mcp/arduino-mcp-server",
+  "stars": 27,
+  "license": "MIT",
+  "created": "2026-02-28",
+  "pushed": "2026-08-22",
+  "desc": "An open source Arduino MCP server that enables AI assistants to interact with Arduino using structured tool access via the Model Context Protocol.",
+  "homepage": "",
+  "queries": [
+   "arduino mcp"
+  ]
+ },
+ {
+  "repo": "es617/serial-mcp-server",
+  "stars": 27,
+  "license": "MIT",
+  "created": "2026-02-16",
+  "pushed": "2026-03-07",
+  "desc": "Serial port MCP server for Claude Code and other MCP-compatible agents.",
+  "homepage": "",
+  "queries": [
+   "firmware agent hardware"
+  ]
+ },
+ {
+  "repo": "Romanok2805/formwright",
+  "stars": 27,
+  "license": "NOASSERTION",
+  "created": "2026-11-02",
+  "pushed": "2026-11-05",
+  "desc": "Hardware R&D from a sentence: a real board, a printed case and tested firmware, then an order. An agent on Meta's models, built for the Meta Global AI Developer Hackathon.",
+  "homepage": "https://formwright.axo.kz",
+  "queries": [
+   "firmware agent hardware"
+  ]
+ },
+ {
+  "repo": "zombocoder/OpenHSM",
+  "stars": 27,
+  "license": "Apache-2.0",
+  "created": "2026-05-30",
+  "pushed": "2026-10-22",
+  "desc": "USB-connected Hardware Security Module on an STM32U585 (Cortex-M33): bare-metal firmware with secure boot, encrypted key store and a tamper-evident audit log, plus host-side PKCS#11 provider, CLI, SSH",
+  "homepage": "",
+  "queries": [
+   "firmware agent hardware"
+  ]
+ },
+ {
+  "repo": "Kevoyuan/AgentSCAD",
+  "stars": 26,
+  "license": "MIT",
+  "created": "2026-04-25",
+  "pushed": "2026-11-23",
+  "desc": "AI-native CAD agent converting natural-language requests into validated OpenSCAD artifacts with automated geometry repair and manufacturing validation.",
+  "homepage": "https://agentscad.vercel.app",
+  "queries": [
+   "openscad agent"
+  ]
+ },
+ {
+  "repo": "ziyarago/RisalDash",
+  "stars": 26,
+  "license": "MIT",
+  "created": "2026-06-26",
+  "pushed": "2026-10-09",
+  "desc": "Beautiful real-time web dashboards for ESP32 / ESP8266 in a few lines of C++ \u2014 a modern ESP UI & ESPUI alternative. Offline-first AP + captive portal, WebSocket, 26 widgets, i18n (EN/RU/AR), and AI co",
+  "homepage": "https://dash.risal.io",
+  "queries": [
+   "arduino mcp"
+  ]
+ },
+ {
+  "repo": "LilithSemi/claude-for-hardware",
+  "stars": 26,
+  "license": "Apache-2.0",
+  "created": "2026-06-09",
+  "pushed": "2026-08-02",
+  "desc": "Claude Code skills for hardware design, validation, and bring-up",
+  "homepage": "",
+  "queries": [
+   "hardware claude code skills"
+  ]
+ },
+ {
+  "repo": "soheil-mp/solidworks-mcp",
+  "stars": 25,
+  "license": "MIT",
+  "created": "2026-10-23",
+  "pushed": "2026-11-05",
+  "desc": "MCP server that lets AI agents drive SOLIDWORKS: parts, sketches, features, assemblies, drawings, export and simulation, with every change verified (C#, .NET 10, official COM API)",
+  "homepage": "",
+  "queries": [
+   "solidworks mcp"
+  ]
+ },
+ {
+  "repo": "T-Crypt/replicator",
+  "stars": 25,
+  "license": "MIT",
+  "created": "2026-11-13",
+  "pushed": "2026-11-15",
+  "desc": "You specify it, you build it. A workshop where a sentence becomes a validated build program, an exact solid, a measured report and a STEP, DXF, STL or URDF file. Any OpenAI-compatible model; agents ov",
+  "homepage": "",
+  "queries": [
+   "urdf llm"
+  ]
+ },
+ {
+  "repo": "ccpopy/codesign-mcp",
+  "stars": 24,
+  "license": "MIT",
+  "created": "2026-05-19",
+  "pushed": "2026-08-31",
+  "desc": "MCP server for Tencent CoDesign sharing links, exposing artboards, specs, preview images, and designer-exported slices for design-to-code workflows.",
+  "homepage": "https://www.npmjs.com/package/codesign-mcp",
+  "queries": [
+   "slicer mcp"
+  ]
+ },
+ {
+  "repo": "EdwinIsCoding/Auxin_Automata",
+  "stars": 24,
+  "license": "NOASSERTION",
+  "created": "2026-04-13",
+  "pushed": "2026-09-08",
+  "desc": "The proposed platform is an AI-native middleware designed to integrate physical infrastructure into the Agentic Economy. This toolkit allows any hardware entity, from robotic arms to autonomous drones",
+  "homepage": "",
+  "queries": [
+   "drone design ai",
+   "physical ai agent design"
+  ]
+ },
+ {
+  "repo": "ppak10/RocketSmith",
+  "stars": 23,
+  "license": "MIT",
+  "created": "2026-03-23",
+  "pushed": "2026-04-22",
+  "desc": "Use agents to design and build high powered rockets",
+  "homepage": "https://arxiv.org/abs/2606.00097",
+  "queries": [
+   "build123d agent"
+  ]
+ },
+ {
+  "repo": "ghadinehme/StepCAD",
+  "stars": 23,
+  "license": null,
+  "created": "2026-10-01",
+  "pushed": "2026-11-18",
+  "desc": "Official code repository of \"StepCAD: Mesh-to-CAD Code Generation via LLM Policy and Geometry-Guided Search\" @ NeurIPS 2026",
+  "homepage": "https://ghadinehme.com/stepcad.github.io/",
+  "queries": [
+   "llm cad generation"
+  ]
+ },
+ {
+  "repo": "GLechevalier/OpenGalatea",
+  "stars": 23,
+  "license": "MIT",
+  "created": "2026-03-22",
+  "pushed": "2026-04-03",
+  "desc": "An open-source MCP server that gives Claude full control over your Prusa 3D printer \u2014 from finding a model online to slicing and printing it, entirely hands-free. Future works include orchestrating N ",
+  "homepage": "",
+  "queries": [
+   "slicer mcp"
+  ]
+ },
+ {
+  "repo": "carlosh7/blender-mcp",
+  "stars": 22,
+  "license": "MIT",
+  "created": "2026-05-10",
+  "pushed": "2026-11-19",
+  "desc": "The most complete MCP server for Blender \ud83e\uddca \u2014 223 tools so any AI agent (Claude Code, Cursor, opencode, Antigravity) can model, texture, light, animate & render 3D scenes by natural language. Windows/m",
+  "homepage": "https://github.com/carlosh7/blender-mcp/releases/latest",
+  "queries": [
+   "blender agent claude"
+  ]
+ },
+ {
+  "repo": "JohanStackk/FutureCAD",
+  "stars": 22,
+  "license": "MIT",
+  "created": "2026-04-26",
+  "pushed": "2026-10-16",
+  "desc": "Code and Dataset for Paper \"Towards High-Fidelity CAD Generation via LLM-Driven Program Generation and Text-Based B-Rep Primitive Grounding\"",
+  "homepage": "https://arxiv.org/abs/2603.11831",
+  "queries": [
+   "llm cad generation"
+  ]
+ },
+ {
+  "repo": "TMHSDigital/Blender-Developer-Tools",
+  "stars": 21,
+  "license": "NOASSERTION",
+  "created": "2026-04-26",
+  "pushed": "2026-11-22",
+  "desc": "Correct bpy for AI agents: Blender Python skills, rules and smoke-tested examples for Blender 5.2 LTS and 4.5 LTS, installable as a Claude Code and Cursor plugin.",
+  "homepage": "https://tmhsdigital.github.io/Blender-Developer-Tools/",
+  "queries": [
+   "blender agent claude"
+  ]
+ },
+ {
+  "repo": "sideshowroberto/vfx-agent-toolkit",
+  "stars": 21,
+  "license": "MIT",
+  "created": "2026-07-02",
+  "pushed": "2026-11-09",
+  "desc": "Claude Code plugin marketplace + MCP connectors for VFX production - Nuke, Houdini, Unreal, Blender, ComfyUI, Maya, Magnific, Seedance (MIT)",
+  "homepage": "",
+  "queries": [
+   "blender agent claude"
+  ]
+ },
+ {
+  "repo": "altendky/onshape-mcp",
+  "stars": 21,
+  "license": "Apache-2.0",
+  "created": "2026-01-29",
+  "pushed": "2026-11-25",
+  "desc": "AI-assisted access to your Onshape CAD documents",
+  "homepage": "",
+  "queries": [
+   "onshape mcp"
+  ]
+ },
+ {
+  "repo": "qarnet/serial-mcp",
+  "stars": 21,
+  "license": "MIT",
+  "created": "2026-05-23",
+  "pushed": "2026-11-15",
+  "desc": "Serial port MCP server for Claude Code, Codex, Opencode and AI agents. Reliable UART/USB-serial access for embedded development.",
+  "homepage": "",
+  "queries": [
+   "arduino mcp"
+  ]
+ },
+ {
+  "repo": "yaoyuxiang-gnn/agent-guard",
+  "stars": 21,
+  "license": "MIT",
+  "created": "2026-09-28",
+  "pushed": "2026-10-02",
+  "desc": "Budget caps, runaway-loop detection and circuit breakers for AI agents. Zero dependencies, framework agnostic.",
+  "homepage": "https://pypi.org/project/agent-budget-guard-py/",
+  "queries": [
+   "circuit llm agent"
+  ]
+ },
+ {
+  "repo": "zhao818/TextToCAD",
+  "stars": 20,
+  "license": null,
+  "created": "2026-05-28",
+  "pushed": "2026-07-05",
+  "desc": "\u7528\u81ea\u7136\u8bed\u8a00\u64cd\u4f5c Office \u548c AutoCAD",
+  "homepage": "",
+  "queries": [
+   "text to cad"
+  ]
+ },
+ {
+  "repo": "dimitrismallis/CADTestBench",
+  "stars": 20,
+  "license": "MIT",
+  "created": "2026-05-08",
+  "pushed": "2026-05-22",
+  "desc": "[NeurIPS2026] Code for our paper \"Text-to-CAD Evaluation with CADTests.\"",
+  "homepage": "",
+  "queries": [
+   "text to cad"
+  ]
+ },
+ {
+  "repo": "cyberchitta/cad-khana",
+  "stars": 19,
+  "license": "Apache-2.0",
+  "created": "2026-04-19",
+  "pushed": "2026-11-10",
+  "desc": "Agent-first assembly and test layer for build123d: compose parts into mechanisms, hold claims about them, and export, draw and render the result.",
+  "homepage": "https://www.cyberchitta.cc/articles/cad-khana.html",
+  "queries": [
+   "build123d agent"
+  ]
+ },
+ {
+  "repo": "Aaronjacobs000/sophos-mcp",
+  "stars": 19,
+  "license": "MIT",
+  "created": "2026-03-01",
+  "pushed": "2026-11-24",
+  "desc": "Unofficial MCP server for the Sophos Fusion and Sophos Central APIs. Not a Sophos product and not supported by Sophos. 360 tools across 25 API namespaces, as a Claude Desktop extension or via npx.",
+  "homepage": "",
+  "queries": [
+   "fusion 360 mcp"
+  ]
+ },
+ {
+  "repo": "afonsoft/skills",
+  "stars": 19,
+  "license": "MIT",
+  "created": "2026-08-24",
+  "pushed": "2026-10-27",
+  "desc": "Spec Driven \u2014 orchestrator-first Agent Skills for spec-driven development. The orchestrator skill turns a PRD or idea into approved SPECs, tracked GitHub Issues, TDD-implemented slices, QA gates, and ",
+  "homepage": "https://skills.sh/afonsoft/skills",
+  "queries": [
+   "slicer mcp"
+  ]
+ },
+ {
+  "repo": "MicroKeen/Mklink-AI-Probe",
+  "stars": 19,
+  "license": "MIT",
+  "created": "2026-08-31",
+  "pushed": "2026-11-25",
+  "desc": "MKLink AI Probe is an all-in-one embedded debugging CLI for Cortex-M microcontrollers. It bridges the MKLink/MicroLink hardware probe with AI agents (Claude, OpenAI) to enable natural-language driven ",
+  "homepage": "",
+  "queries": [
+   "firmware agent hardware"
+  ]
+ },
+ {
+  "repo": "djfksjd/castor",
+  "stars": 19,
+  "license": "MIT",
+  "created": "2026-08-04",
+  "pushed": "2026-10-06",
+  "desc": "CASTOR: an engineering gate skill for AI agents (Claude Code + Codex CLI). Code, firmware, HDL and hardware design. Formerly ironcode.",
+  "homepage": "",
+  "queries": [
+   "firmware agent hardware",
+   "hardware claude code skills"
+  ]
+ },
+ {
+  "repo": "nrl-ai/edgevox",
+  "stars": 18,
+  "license": "Apache-2.0",
+  "created": "2026-04-11",
+  "pushed": "2026-08-09",
+  "desc": "Offline voice agent framework for robots \u2014 agents, skills, workflows, sub-second voice pipeline, 2D/3D simulation (IR-SIM + MuJoCo), 16 languages, 56 voices, ROS2-native. Runs on CPU/CUDA/Metal, no cl",
+  "homepage": "https://edgevox.nrl.ai",
+  "queries": [
+   "mujoco llm agent"
+  ]
+ },
+ {
+  "repo": "marceloribeiro/turnstile",
+  "stars": 18,
+  "license": "MIT",
+  "created": "2026-06-09",
+  "pushed": "2026-10-13",
+  "desc": "Session-layer circuit breaker for LLM & agent traffic \u2014 a transparent streaming proxy that meters every session and kills the one that goes rogue, without taking down your app.",
+  "homepage": "https://turnstileguard.com",
+  "queries": [
+   "circuit llm agent"
+  ]
+ },
+ {
+  "repo": "antares-io-C/ltspice-llm",
+  "stars": 18,
+  "license": "GPL-3.0",
+  "created": "2026-10-28",
+  "pushed": "2026-11-20",
+  "desc": "Run LTspice from Python and from LLMs: headless simulation, .meas results and waveform summaries as JSON, spec checks with guard bands, loop stability margins, KiCad trace parasitics, circuit diff, CS",
+  "homepage": "",
+  "queries": [
+   "spice llm"
+  ]
+ },
+ {
+  "repo": "BenCaunt/SynthCAD",
+  "stars": 17,
+  "license": "MIT",
+  "created": "2026-05-04",
+  "pushed": "2026-05-12",
+  "desc": "Skills and tools which enable coding agents like Codex to CAD",
+  "homepage": "",
+  "queries": [
+   "build123d agent"
+  ]
+ },
+ {
+  "repo": "alchaincyf/huashu-cad",
+  "stars": 17,
+  "license": "MIT",
+  "created": "2026-10-20",
+  "pushed": "2026-10-20",
+  "desc": "\u7528\u81ea\u7136\u8bed\u8a00\u51fa\u53ef\u7f16\u8f91CAD\uff1a\u6237\u578b\u4e0e\u5e73\u9762\u5e03\u7f6e\uff08DXF\uff09\u3001\u9f7f\u8f6e\u51cf\u901f\u5668\u5173\u8282\u6a21\u7ec4\u7b49\u673a\u68b0\u88c5\u914d\uff08STEP\uff09\uff0c\u81ea\u52a8\u6821\u9a8c\u5e72\u6d89\u4e0e\u556e\u5408\uff0c\u51fa\u4ea4\u4e92\u7206\u70b8\u56fe\u3001\u8fd0\u8f6c\u89c6\u9891\u548c\u88c5\u914d\u5de5\u7a0b\u56fe\u3002Agent skill.",
+  "homepage": "https://www.huasheng.ai/cad/",
+  "queries": [
+   "build123d agent"
+  ]
+ },
+ {
+  "repo": "27painter/dsh-sw-cad",
+  "stars": 17,
+  "license": "MIT",
+  "created": "2026-10-23",
+  "pushed": "2026-11-25",
+  "desc": "DSH/Codex \u00d7 AutoCAD & SolidWorks \u00b7 MCP servers + skills, a deliver check that reads the drawing back, and a half-delivery mode that rejects values outside a standards table (Windows, COM)",
+  "homepage": "",
+  "queries": [
+   "solidworks mcp"
+  ]
+ },
+ {
+  "repo": "nevenfo/kicad-agentic-mcp",
+  "stars": 17,
+  "license": "AGPL-3.0",
+  "created": "2026-08-12",
+  "pushed": "2026-11-09",
+  "desc": "MCP server and agentic control layer for KiCad 10, combining LLM-based planning where useful with deterministic execution, state tracking, evidence, rollback, and KiCad validation.",
+  "homepage": "https://github.com/nevenfo/kicad-agentic-mcp/releases/latest",
+  "queries": [
+   "electronics llm agent",
+   "pcb llm"
+  ]
+ },
+ {
+  "repo": "fafaniuniu/awesome-make-money-projects",
+  "stars": 17,
+  "license": "MIT",
+  "created": "2026-05-25",
+  "pushed": "2026-05-26",
+  "desc": "\u5e02\u9762\u4e0a\u6240\u6709\u5e38\u89c1\u7684\u9879\u76ee\uff0c\u516c\u53f8\u82b1\u767e\u4e07\u7814\u53d1\u7684\u9879\u76ee\uff0c\u73b0\u5728\u7edf\u7edf\u514d\u8d39\u83b7\u53d6\uff01\uff01\uff01\u5305\u62ec\u65e0\u4eba\u673a\u667a\u80fd\u5de1\u68c0\u5e73\u53f0\uff0c\u6570\u5b57\u5b6a\u751f\u4f4e\u4ee3\u7801\u5e73\u53f0\uff0cAI\u519c\u4e1a\uff0cMES\uff0cIOT\uff0c\u7269\u8054\u7f51\uff0cERP\uff0cAI\u76d1\u63a7\u7cfb\u7edf\uff0cAI\u533b\u7597\uff0c\u6a21\u578b\u8bad\u7ec3\uff0cYOLO\u68c0\u6d4b\uff0c\u8206\u60c5\u7cfb\u7edf\uff0c\u6570\u636e\u4e2d\u53f0\uff0cBI\u7cfb\u7edf\uff0cCRM\uff0c\u4f01\u4e1a\u7ea7\u667a\u80fd\u4f53\uff0cAI\u8bad\u7ec3\u5e73\u53f0\uff0c\u6570\u636e\u6807\u6ce8\uff0c\u6c11\u5bbf\u7ba1\u7406\u7cfb\u7edf\uff0c\u667a\u80fd\u5236\u9020\u7cfb\u7edf\uff0c\u5e94\u6025\u7ba1\u7406\u6307\u6325\u7cfb\u7edf\uff0cAI\u77ed\u5267\u5e73\u53f0\uff0cAI\u5c0f\u8bf4\uff0c\u4f01\u4e1a\u62a5\u8868\u3001\u8d22\u52a1\uff0c\u667a\u6167\u5de5\u5730\uff0c\u667a\u6167\u5de5\u5355\uff0c\u667a\u6167\u77ff\u5c71\uff0c\u5b89\u5168\u68c0\u6d4b",
+  "homepage": "",
+  "queries": [
+   "pcb llm"
+  ]
+ },
+ {
+  "repo": "yangwinnietang/Agent-Skill-Automated-circuit-diagram-synthesis",
+  "stars": 17,
+  "license": null,
+  "created": "2026-02-15",
+  "pushed": "2026-09-12",
+  "desc": "Developed an AI agent skill for automated circuit diagram synthesis, enabling LLM-based agents to generate electrical schematics from textual descriptions or photos",
+  "homepage": "",
+  "queries": [
+   "circuit llm agent"
+  ]
+ },
+ {
+  "repo": "Jizai-inc/palmimo-devkit",
+  "stars": 17,
+  "license": "Apache-2.0",
+  "created": "2026-09-02",
+  "pushed": "2026-11-25",
+  "desc": "Give AI agents a body. Palmimo DevKit is a six-legged tabletop AI robot you drive with your own Python \u2014 open-source SDK, MCP server, and agent examples by Jizai Inc.",
+  "homepage": "https://palmimo.dev",
+  "queries": [
+   "lerobot agent"
+  ]
+ },
+ {
+  "repo": "neuronaline/local-ai-cad-agent",
+  "stars": 16,
+  "license": "MIT",
+  "created": "2026-08-02",
+  "pushed": "2026-11-21",
+  "desc": "Design 3D-printable parametric CAD models through conversational AI. Runs 100% locally with Ollama or cloud LLMs, featuring sandboxed OpenSCAD builds and real-time 3D inspection.",
+  "homepage": "",
+  "queries": [
+   "openscad llm",
+   "openscad agent"
+  ]
+ },
+ {
+  "repo": "tonylook/managents",
+  "stars": 16,
+  "license": "MIT",
+  "created": "2026-10-09",
+  "pushed": "2026-11-22",
+  "desc": "USB desk display showing what your AI coding agents (Claude Code, OpenCode, Codex) are doing \u2014 ESP32 firmware, Go helper, 3D-printable enclosure",
+  "homepage": "",
+  "queries": [
+   "openscad agent"
+  ]
+ },
+ {
+  "repo": "hughminhphan/agentic-hardware-stack",
+  "stars": 16,
+  "license": "MIT",
+  "created": "2026-10-20",
+  "pushed": "2026-10-23",
+  "desc": "the agentic hardware stack and Claude Code skills i used to design two soccer robots in one night: fusion 360 mcp, python netlists to kicad, agentic sourcing",
+  "homepage": "",
+  "queries": [
+   "fusion 360 mcp",
+   "hardware claude code skills"
+  ]
+ },
+ {
+  "repo": "Erfouni/solidworks-GPT-plugin",
+  "stars": 16,
+  "license": "MIT",
+  "created": "2026-07-18",
+  "pushed": "2026-11-14",
+  "desc": "Knowledge-backed SolidWorks design and validation plugin for OpenAI Codex",
+  "homepage": "https://erfouni.ir",
+  "queries": [
+   "solidworks mcp"
+  ]
+ },
+ {
+  "repo": "ProductOfAmerica/mcp-server-kicad",
+  "stars": 16,
+  "license": "GPL-3.0",
+  "created": "2026-03-09",
+  "pushed": "2026-11-19",
+  "desc": "Maintenance mode: security and KiCad compatibility fixes only (see README for why). KiCad MCP server: 100+ Model Context Protocol tools that let an AI assistant do schematic capture and PCB layout, ru",
+  "homepage": "https://pypi.org/project/mcp-server-kicad",
+  "queries": [
+   "pcb llm"
+  ]
+ },
+ {
+  "repo": "TheWind-upBird/Analogagent",
+  "stars": 16,
+  "license": "MIT",
+  "created": "2026-06-06",
+  "pushed": "2026-06-08",
+  "desc": "Training-free agentic framework for analog circuit design automation: an LLM multi-agent system with self-evolving memory. KDD 2026 (AI4Science, Oral).",
+  "homepage": "https://arxiv.org/abs/2603.23910",
+  "queries": [
+   "circuit llm agent"
+  ]
+ },
+ {
+  "repo": "EmergentMatter/emergent-matter-sdm",
+  "stars": 16,
+  "license": "Apache-2.0",
+  "created": "2026-10-02",
+  "pushed": "2026-11-22",
+  "desc": "Software Defined Matter (SDM) is an engineering framework designed for agentic AI systems: the entire path from specification to working machine is designed and executed by software, and the final out",
+  "homepage": "www.emergentmatter.com",
+  "queries": [
+   "physical ai agent design"
+  ]
+ },
+ {
+  "repo": "BoYuanVisionary/Pro-CAD",
+  "stars": 15,
+  "license": null,
+  "created": "2026-01-29",
+  "pushed": "2026-04-30",
+  "desc": "This is the official repo of paper: Clarify Before You Draw: Proactive Agents for Robust Text-to-CAD Generation",
+  "homepage": "",
+  "queries": [
+   "text to cad"
+  ]
+ },
+ {
+  "repo": "LARi-UQAC/ResearchTools",
+  "stars": 15,
+  "license": "NOASSERTION",
+  "created": "2026-06-12",
+  "pushed": "2026-11-17",
+  "desc": "AI-assisted toolbox for work auditing (LaTeX, Scopus validation, paper/thesis/report auditing), software design, CAD design, PCB design, local LLM with observer and tracker, built on Claude Code agent",
+  "homepage": "",
+  "queries": [
+   "pcb llm"
+  ]
+ },
+ {
+  "repo": "Oli97430/UNIFICATION",
+  "stars": 14,
+  "license": null,
+  "created": "2026-05-04",
+  "pushed": "2026-05-24",
+  "desc": "Local-LLM bridge for Blender \u2014 runs entirely on your machine via Ollama, with no paid APIs. One-click addon installer, auto-fix on errors, render preview, vision, persistent history.",
+  "homepage": "",
+  "queries": [
+   "blender llm machine"
+  ]
+ },
+ {
+  "repo": "jmwright/cadquery-llm-skill",
+  "stars": 14,
+  "license": "Apache-2.0",
+  "created": "2026-04-20",
+  "pushed": "2026-05-19",
+  "desc": "A skill to help LLMs understand CadQuery and BRep modelling better",
+  "homepage": "",
+  "queries": [
+   "cadquery llm"
+  ]
+ },
+ {
+  "repo": "gchen19/AnkusDrive",
+  "stars": 14,
+  "license": "Apache-2.0",
+  "created": "2026-04-24",
+  "pushed": "2026-11-25",
+  "desc": "CLI + MCP server that turns FreeCAD into a mechanical-design workbench for LLM agents \u2014 parametric CAD, drawings, FEM/CFD simulation, and manufacturing checks",
+  "homepage": "https://pypi.org/project/ankusdrive/",
+  "queries": [
+   "freecad agent",
+   "freecad mcp",
+   "fem llm agent"
+  ]
+ },
+ {
+  "repo": "yaminbkk/NexusMem",
+  "stars": 14,
+  "license": "MIT",
+  "created": "2026-08-08",
+  "pushed": "2026-09-27",
+  "desc": "Your agent can read git log. It can't read the shell commands you tried that failed. NexusMem indexes shell history with exit codes, git commits and diffs, and project docs into a local SQLite databas",
+  "homepage": "https://nexus-mem.vercel.app",
+  "queries": [
+   "slicer mcp"
+  ]
+ },
+ {
+  "repo": "NijoP/pcbflow",
+  "stars": 14,
+  "license": "MIT",
+  "created": "2026-07-12",
+  "pushed": "2026-07-14",
+  "desc": "PCB Flow \u2014 autonomous, AI-assisted PCB design workflow that takes a hardware project from requirements to manufacturing-ready files. AI-driven schematic generation, placement, and routing with human-i",
+  "homepage": "",
+  "queries": [
+   "electronics llm agent",
+   "pcb llm"
+  ]
+ },
+ {
+  "repo": "outerreaches/talkcad",
+  "stars": 13,
+  "license": "MIT",
+  "created": "2026-01-07",
+  "pushed": "2026-11-01",
+  "desc": "Conversational CAD: an LLM agent writes parametric OpenSCAD, renders it, verifies the geometry and exports STL.",
+  "homepage": "https://talkcad.app",
+  "queries": [
+   "openscad llm",
+   "openscad agent"
+  ]
+ },
+ {
+  "repo": "ubicomplab/embedded-arena",
+  "stars": 13,
+  "license": "NOASSERTION",
+  "created": "2026-06-02",
+  "pushed": "2026-07-08",
+  "desc": "Hardware-in-the-loop benchmark for agentic embedded AI deployment. Agents iteratively edit model or firmware artifacts, the framework compiles and flashes them, and the score comes from real hardware ",
+  "homepage": "https://ubicomplab.github.io/embedded-arena/",
+  "queries": [
+   "firmware agent hardware"
+  ]
+ },
+ {
+  "repo": "walcew/herdr-assist",
+  "stars": 13,
+  "license": "MIT",
+  "created": "2026-08-10",
+  "pushed": "2026-11-16",
+  "desc": "Physical desk panel for Herdr, the terminal multiplexer for AI coding agents \u2014 shows session state in color and rings a bell when an agent stops to ask for a decision. ESP32-S3 + LVGL, prebuilt firmwa",
+  "homepage": "",
+  "queries": [
+   "firmware agent hardware"
+  ]
+ },
+ {
+  "repo": "ericshang98/hw-review",
+  "stars": 13,
+  "license": "MIT",
+  "created": "2026-06-01",
+  "pushed": "2026-06-01",
+  "desc": "\u786c\u4ef6\u5f00\u53d1\u52a9\u624b \u2014 \u4e00\u4e2a\u4e3a Claude Code \u6253\u9020\u7684 Skill\uff1a\u9010\u5f15\u811a\u3001\u9010\u5668\u4ef6\u3001\u6709\u8bc1\u636e\u5730\u5ba1\u67e5\u4ece\u539f\u7406\u56fe\u5230\u56fa\u4ef6\u7684\u8bbe\u8ba1\u3002Evidence before claims.",
+  "homepage": "",
+  "queries": [
+   "hardware claude code skills"
+  ]
+ },
+ {
+  "repo": "retospect/precis-mcp",
+  "stars": 13,
+  "license": "GPL-3.0",
+  "created": "2026-03-11",
+  "pushed": "2026-11-25",
+  "desc": "Untiring, token-efficient research collaborator: reads papers and patents, cites the paragraph, writes the paper, designs and simulates what it proposes.",
+  "homepage": "https://pypi.org/project/precis-mcp/",
+  "queries": [
+   "pcb llm"
+  ]
+ },
+ {
+  "repo": "clay-good/anvilate",
+  "stars": 12,
+  "license": "MIT",
+  "created": "2026-07-08",
+  "pushed": "2026-11-24",
+  "desc": "Anvilate is an open-source, local-first design agent for mechanical engineers. Describe a part in plain English and receive a physics-validated, parametric STEP or DXF file that drops straight into CA",
+  "homepage": "",
+  "queries": [
+   "build123d agent"
+  ]
+ },
+ {
+  "repo": "nelsonjchen/unofficial-makerworld-parametric-model-maker-openscad-docs",
+  "stars": 12,
+  "license": null,
+  "created": "2026-04-21",
+  "pushed": "2026-09-03",
+  "desc": "Agent-first reference docs, patterns, and evidence-backed changelog for MakerWorld's OpenSCAD Parametric Model Maker (PMM).",
+  "homepage": "",
+  "queries": [
+   "openscad agent"
+  ]
+ },
+ {
+  "repo": "yoshikouki/freecad-cli",
+  "stars": 12,
+  "license": "LGPL-2.1",
+  "created": "2026-03-14",
+  "pushed": "2026-11-25",
+  "desc": "CLI tool for controlling FreeCAD from AI Agents via XML-RPC",
+  "homepage": "",
+  "queries": [
+   "freecad agent"
+  ]
+ },
+ {
+  "repo": "qdaia/Auto-SolidWorks",
+  "stars": 12,
+  "license": "MIT",
+  "created": "2026-09-06",
+  "pushed": "2026-11-20",
+  "desc": "\u9762\u5411 Codex/MCP \u7684\u672c\u5730 SolidWorks \u53c2\u6570\u5316\u5efa\u6a21\u63d2\u4ef6\uff1a\u5de5\u7a0b\u56fe\u4e0e\u5c3a\u5bf8\u8f93\u5165\uff0c\u539f\u751f\u96f6\u4ef6\u3001\u88c5\u914d\u3001\u66f2\u9762\u548c\u5de5\u7a0b\u56fe\u8f93\u51fa\u3002 | Local SolidWorks CAD for Codex/MCP: drawings and dimensions to parametric parts, assemblies, surfaces and drafting.",
+  "homepage": "https://github.com/qdaia/Auto-SolidWorks/releases/latest",
+  "queries": [
+   "freecad mcp"
+  ]
+ },
+ {
+  "repo": "Creative-Inertia/OSCAR_Public",
+  "stars": 12,
+  "license": "Apache-2.0",
+  "created": "2026-03-25",
+  "pushed": "2026-04-09",
+  "desc": "Open-source build    package for creating an MCP server that gives Claude Code full control over Autodesk Fusion 360. Localhost-only,    no bloat, no binaries.",
+  "homepage": "",
+  "queries": [
+   "fusion 360 mcp"
+  ]
+ },
+ {
+  "repo": "confused-ai/personaforge",
+  "stars": 12,
+  "license": "MIT",
+  "created": "2026-02-01",
+  "pushed": "2026-09-25",
+  "desc": "TypeScript AI agent framework \u2014 40+ LLM providers, 100+ tools, multi-agent orchestration, RAG, guardrails, circuit breakers, HITL, budget enforcement. Open-source CrewAI / LangChain alternative. \u2014 For",
+  "homepage": "https://confused-ai.github.io/personaforge/",
+  "queries": [
+   "circuit llm agent"
+  ]
+ },
+ {
+  "repo": "playground-systems/playground-serve",
+  "stars": 12,
+  "license": "Apache-2.0",
+  "created": "2026-11-14",
+  "pushed": "2026-11-18",
+  "desc": "Open source serving for robot policies and LLM agents: run VLAs on serverless GPUs or robot-use language models through OpenRouter.",
+  "homepage": "",
+  "queries": [
+   "lerobot agent"
+  ]
+ },
+ {
+  "repo": "Dyalwayshappy/Spice_personal",
+  "stars": 12,
+  "license": "NOASSERTION",
+  "created": "2026-03-19",
+  "pushed": "2026-04-10",
+  "desc": "An AI decision assistant that helps you think, decide, and act \u2014 powered by Spice.",
+  "homepage": "",
+  "queries": [
+   "spice llm"
+  ]
+ },
+ {
+  "repo": "2836048681/cad-operations-skill",
+  "stars": 11,
+  "license": "MIT",
+  "created": "2026-05-28",
+  "pushed": "2026-05-28",
+  "desc": "Portable Codex skill for CAD operations, DXF/PDF generation, AutoCAD/FreeCAD notes, and SolidWorks MCP workflows",
+  "homepage": "",
+  "queries": [
+   "freecad mcp"
+  ]
+ },
+ {
+  "repo": "Kali-Uga/DiffLC-Differentiable-Liquid-Crystals",
+  "stars": 11,
+  "license": "MIT",
+  "created": "2026-04-28",
+  "pushed": "2026-07-04",
+  "desc": "DiffLC is a differentiable simulation framework built on JAX for liquid crystal research. It turns traditional optical and physical simulations into \"AI-ready\" differentiable layers. This allows resea",
+  "homepage": "",
+  "queries": [
+   "physical ai agent design"
+  ]
+ },
+ {
+  "repo": "ostenjap/LLM-Agent-generated-Quadcopter-Prop",
+  "stars": 10,
+  "license": "MIT",
+  "created": "2026-06-16",
+  "pushed": "2026-06-26",
+  "desc": "Autonomous multi-agent parametric design + CFD optimization using free local LLMs (Ollama), CadQuery, and OpenFOAM. $0 API cost.",
+  "homepage": "",
+  "queries": [
+   "cadquery llm",
+   "cadquery agent",
+   "quadcopter llm"
+  ]
+ },
+ {
+  "repo": "forgent3d/forgent3d-skills",
+  "stars": 10,
+  "license": null,
+  "created": "2026-07-27",
+  "pushed": "2026-10-13",
+  "desc": "Agent skill for 3D CAD: parametric parts and OpenSCAD files built, measured, rendered and exported to STEP/STL/3MF by one CLI.",
+  "homepage": "https://www.forgent3d.com/en/skills",
+  "queries": [
+   "build123d agent",
+   "openscad agent"
+  ]
+ },
+ {
+  "repo": "feroxes/pytaichenko",
+  "stars": 10,
+  "license": "MIT",
+  "created": "2026-10-31",
+  "pushed": "2026-11-13",
+  "desc": "DIY AI voice speaker: an ESP32-S3 hears its wake word on board and talks with the OpenAI Realtime API by itself. 3D-printed case, step-by-step soldering and assembly, firmware install from the browser",
+  "homepage": "https://feroxes.github.io/pytaichenko/",
+  "queries": [
+   "openscad llm"
+  ]
+ },
+ {
+  "repo": "SmartAI/Chamfer",
+  "stars": 10,
+  "license": "NOASSERTION",
+  "created": "2026-07-06",
+  "pushed": "2026-07-25",
+  "desc": "A reliable text/image to CAD Agent harness that supports different MCPs and LLMs",
+  "homepage": "https://chamferonline.com",
+  "queries": [
+   "text to cad"
+  ]
+ },
+ {
+  "repo": "sergiudanstan/freecad-mcp",
+  "stars": 10,
+  "license": "MIT",
+  "created": "2026-03-07",
+  "pushed": "2026-03-08",
+  "desc": "freecad-mcp",
+  "homepage": "",
+  "queries": [
+   "freecad mcp"
+  ]
+ },
+ {
+  "repo": "BEEMB/Industrial-GPIO-Expander-MCP23017",
+  "stars": 10,
+  "license": "MIT",
+  "created": "2026-07-21",
+  "pushed": "2026-07-22",
+  "desc": "Industrial DIN-rail GPIO expander with MCP23017 providing 16 I/O channels via I\u00b2C. Features optoisolated inputs, high-current outputs, selectable 5V/24V power, and hardware address configuration with ",
+  "homepage": "",
+  "queries": [
+   "arduino mcp"
+  ]
+ },
+ {
+  "repo": "medinstech/perfboard-studio",
+  "stars": 10,
+  "license": "Apache-2.0",
+  "created": "2026-08-07",
+  "pushed": "2026-11-25",
+  "desc": "Free desktop app for laying out circuits on perfboard, stripboard (veroboard) and breadboards: draw the schematic, auto-place and route it, check it with DRC and LVS, and get a step-by-step soldering ",
+  "homepage": "https://medinstech.com",
+  "queries": [
+   "arduino mcp"
+  ]
+ },
+ {
+  "repo": "jensenYan233/LeRobot-Claw",
+  "stars": 10,
+  "license": null,
+  "created": "2026-03-16",
+  "pushed": "2026-03-16",
+  "desc": "An Embodied AI Agent project built on Large Language/Vision Models (LLM/VLM) and the underlying robotic control framework.",
+  "homepage": "",
+  "queries": [
+   "lerobot agent"
+  ]
+ },
+ {
+  "repo": "Agent-Field/roboscribe-af",
+  "stars": 10,
+  "license": "Apache-2.0",
+  "created": "2026-05-16",
+  "pushed": "2026-06-01",
+  "desc": "Annotate any LeRobot dataset with a swarm of agents. Turn raw demos into training-ready data for robotic foundation models.",
+  "homepage": "https://agentfield.ai",
+  "queries": [
+   "lerobot agent"
+  ]
+ },
+ {
+  "repo": "superWorldSavior/mcp-build123d",
+  "stars": 9,
+  "license": "MIT",
+  "created": "2026-07-30",
+  "pushed": "2026-10-05",
+  "desc": "MCP server for build123d \u2014 parametric CAD as code (Python/OCCT) driven by AI agents. Exact mass properties, STEP/STL/GLTF export",
+  "homepage": "",
+  "queries": [
+   "build123d agent"
+  ]
+ },
+ {
+  "repo": "SSSSSia/CadAgent",
+  "stars": 9,
+  "license": "MIT",
+  "created": "2026-05-21",
+  "pushed": "2026-11-14",
+  "desc": "\u4e00\u4e2aFreeCad\u63d2\u4ef6\uff0c\u4f7f\u7528AI Agent\u8f85\u52a9cad\u5efa\u6a21\uff08text-to-cad\uff09",
+  "homepage": "",
+  "queries": [
+   "text to cad",
+   "freecad agent"
+  ]
+ },
+ {
+  "repo": "tomo1230/freecad_mcp_server",
+  "stars": 9,
+  "license": "MIT",
+  "created": "2026-04-01",
+  "pushed": "2026-04-09",
+  "desc": "",
+  "homepage": "",
+  "queries": [
+   "freecad mcp"
+  ]
+ },
+ {
+  "repo": "Travor278/OmniMCP",
+  "stars": 9,
+  "license": "MIT",
+  "created": "2026-02-18",
+  "pushed": "2026-03-13",
+  "desc": "54-tool MCP server for multimodal automation  the only open-source MCP with full PPTX/DOCX/PDF lifecycle, plus FFmpeg, GIMP, Inkscape, Blender, FreeCAD, MATLAB, Godot integration. 7 MCP services orche",
+  "homepage": "",
+  "queries": [
+   "freecad mcp"
+  ]
+ },
+ {
+  "repo": "fozzfut/FusionMCP",
+  "stars": 9,
+  "license": null,
+  "created": "2026-04-04",
+  "pushed": "2026-04-05",
+  "desc": "Fusion 360 MCP Server - Control Autodesk Fusion 360 from Claude Code and other MCP clients",
+  "homepage": "",
+  "queries": [
+   "fusion 360 mcp"
+  ]
+ },
+ {
+  "repo": "Global-Slice/claude-plugin",
+  "stars": 9,
+  "license": "MIT",
+  "created": "2026-04-25",
+  "pushed": "2026-11-18",
+  "desc": "Claude Code plugin marketplace for Slice \u2014 cap table, equity, compliance, and MCP integrations.",
+  "homepage": "",
+  "queries": [
+   "slicer mcp"
+  ]
+ },
+ {
+  "repo": "oaktreegames/aseprite-live-mcp",
+  "stars": 9,
+  "license": "MIT",
+  "created": "2026-07-13",
+  "pushed": "2026-07-29",
+  "desc": "Unity-first MCP server for the live Aseprite editor (and headless batch): an AI agent draws in your running editor, one named undo per edit, with Unity .meta sprite export (named slices carry pivots),",
+  "homepage": "https://oaktree-games.com",
+  "queries": [
+   "slicer mcp"
+  ]
+ },
+ {
+  "repo": "ctresb/hardware-design-toolkit",
+  "stars": 9,
+  "license": "MIT",
+  "created": "2026-11-08",
+  "pushed": "2026-11-08",
+  "desc": "Claude Code skills that take an idea for an electronic device to a design that is ready to build: real parts, real battery, routed KiCad board, STEP enclosure, renders, costs, certifications.",
+  "homepage": "",
+  "queries": [
+   "hardware claude code skills"
+  ]
+ },
+ {
+  "repo": "IsmaelMartinez/delegate-local",
+  "stars": 9,
+  "license": "MIT",
+  "created": "2026-04-28",
+  "pushed": "2026-11-24",
+  "desc": "Claude Code skill that delegates summarisation, log triage, and bulk-text tasks to local models. Saves API tokens, keeps content on-device, hardware-aware model auditing.",
+  "homepage": "",
+  "queries": [
+   "hardware claude code skills"
+  ]
+ },
+ {
+  "repo": "cagataycali/scout-the-rover",
+  "stars": 9,
+  "license": "MIT",
+  "created": "2026-06-19",
+  "pushed": "2026-10-01",
+  "desc": "\ud83d\udede scout; a Strands agent that sees, thinks, talks & drives a FrodoBots Earth Rover Mini+. Vision \u00b7 language \u00b7 action. ECoT dataset on \ud83e\udd17 cagataydev/scout-earthrover-ecot",
+  "homepage": "https://cagataycali.github.io/scout-the-rover/",
+  "queries": [
+   "lerobot agent"
+  ]
+ },
+ {
+  "repo": "fa-mc/vibe-cading",
+  "stars": 8,
+  "license": "AGPL-3.0",
+  "created": "2026-03-11",
+  "pushed": "2026-10-13",
+  "desc": "3D model generators with CadQuery for humans and LLM agents",
+  "homepage": "https://vibe-cading.ai",
+  "queries": [
+   "cadquery llm",
+   "cadquery agent"
+  ]
+ },
+ {
+  "repo": "luckiday/vibe-hardware",
+  "stars": 8,
+  "license": "MIT",
+  "created": "2026-06-18",
+  "pushed": "2026-09-17",
+  "desc": "Vibe-code real hardware: agent skills that take a device from a plain-language idea to firmware, a KiCad PCB, an enclosure, and a fab order.",
+  "homepage": "",
+  "queries": [
+   "build123d agent"
+  ]
+ },
+ {
+  "repo": "luisg0nc/torno",
+  "stars": 8,
+  "license": "Apache-2.0",
+  "created": "2026-10-15",
+  "pushed": "2026-11-20",
+  "desc": "A desktop workbench for making CAD parts with an AI coding agent. You point at the part, Claude Code writes the build123d code, torno builds it on every save.",
+  "homepage": "https://torno.luisg.me",
+  "queries": [
+   "build123d agent"
+  ]
+ },
+ {
+  "repo": "arielmiki/phyx3d",
+  "stars": 8,
+  "license": "MIT",
+  "created": "2026-09-24",
+  "pushed": "2026-09-25",
+  "desc": "Pre-print simulator for Bambu Lab 3D printers: printability, stability, strength (FEA), physics and robot/mechanism simulation \u2014 web app + MCP server for AI agents",
+  "homepage": "https://github.com/arielmiki/phyx3d#readme",
+  "queries": [
+   "build123d agent",
+   "robot simulation agent claude"
+  ]
+ },
+ {
+  "repo": "neoscad/neoscad",
+  "stars": 8,
+  "license": "GPL-2.0",
+  "created": "2026-09-29",
+  "pushed": "2026-11-13",
+  "desc": "A fast, OpenSCAD-compatible CAD engine for people and AI agents. Supported by @the-ned-workshop.",
+  "homepage": "https://neoscad.org",
+  "queries": [
+   "openscad agent"
+  ]
+ },
+ {
+  "repo": "cholan2100/rf-agent",
+  "stars": 8,
+  "license": null,
+  "created": "2026-09-08",
+  "pushed": "2026-10-10",
+  "desc": "Containerized Linux engineering platform for automated RF/microwave design, KiCad 10, openEMS, Qucs-S, FreeCAD, and AI-driven hardware synthesis.",
+  "homepage": "",
+  "queries": [
+   "freecad agent"
+  ]
+ },
+ {
+  "repo": "miaooo0000OOOO/freecad-automation-skill",
+  "stars": 8,
+  "license": "MIT",
+  "created": "2026-05-04",
+  "pushed": "2026-05-06",
+  "desc": "FreeCAD \u81ea\u52a8\u5316\u6280\u80fd \u2014 \u63d0\u4f9b FreeCAD \u5b8f\u811a\u672c\u548c Hermes Agent MCP \u5de5\u5177\u96c6\u6210\uff0c\u652f\u6301 Part/PartDesign \u96f6\u4ef6\u5efa\u6a21\u3001\u88c5\u914d\u4f53\u3001TechDraw \u5de5\u7a0b\u56fe\u3001STEP/STL \u5bfc\u51fa\u3001Spreadsheet \u53c2\u6570\u5316\u9a71\u52a8\u3002\u57fa\u4e8e solidworks-automation-skill \u91cd\u6784\u3002",
+  "homepage": "",
+  "queries": [
+   "freecad agent"
+  ]
+ },
+ {
+  "repo": "aws-samples/sample-rfm-simulation-on-aws",
+  "stars": 8,
+  "license": "MIT-0",
+  "created": "2026-04-21",
+  "pushed": "2026-11-19",
+  "desc": "1-click robot foundation model (VLA, world action model, LLM agent) simulation and evaluation on AWS GPU instances with AWS CDK",
+  "homepage": "",
+  "queries": [
+   "mujoco llm agent",
+   "lerobot agent"
+  ]
+ },
+ {
+  "repo": "darkzOGx/darkzloop",
+  "stars": 8,
+  "license": "MIT",
+  "created": "2026-01-13",
+  "pushed": "2026-01-14",
+  "desc": "Terminal-based agent runner that turns any LLM into a disciplined software engineer. FSM control, circuit breakers, model-agnostic. Bring Your Own Auth.",
+  "homepage": "",
+  "queries": [
+   "circuit llm agent"
+  ]
+ },
+ {
+  "repo": "auraguardhq/aura-guard",
+  "stars": 8,
+  "license": "Apache-2.0",
+  "created": "2026-02-09",
+  "pushed": "2026-03-13",
+  "desc": "Exactly-once + circuit breaker for agent tool calls (loops, retries, duplicate side effects)",
+  "homepage": "",
+  "queries": [
+   "circuit llm agent"
+  ]
+ },
+ {
+  "repo": "ENDEVSOLS/LongGuard",
+  "stars": 8,
+  "license": "MIT",
+  "created": "2026-09-05",
+  "pushed": "2026-11-23",
+  "desc": "In-flight circuit breaker & loop recovery for LangGraph, LangChain, OpenAI & Anthropic agents. Catches reasoning loops, prevents runaway LLM costs with budget hard caps, and auto-injects Reflect & Piv",
+  "homepage": "https://endevsols.github.io/LongGuard/",
+  "queries": [
+   "circuit llm agent"
+  ]
+ },
+ {
+  "repo": "Phant0Meow/femo-plugin",
+  "stars": 8,
+  "license": "Apache-2.0",
+  "created": "2026-08-28",
+  "pushed": "2026-10-14",
+  "desc": "FEMO\u63d2\u4ef6\u7248 \u2014 \u53ef\u63a5\u5165dsh\u7684\u591a\u667a\u80fd\u4f53\u5f15\u64ce\uff0c\u5dee\u4e0d\u591a\u80fd\u505a\u6240\u6709\u4e8b\uff1a\u6211\u5df2\u7ecf\u7528femo\u548c\u6211\u7684\u4e3bagent\u73a9\u4e86\u597d\u51e0\u5c40\u72fc\u4eba\u6740\u4e86\uff0c\u4ed6\u62bd\u5230\u72fc\u4ed6\u8fd8\u5200\u6211\uff01 \u6211\u5728b\u7ad9\u7684\u5ba3\u4f20\u89c6\u9891\u4e5f\u662f\u7528femo\u526a\u7684\u3002 coding\u7684\u65f6\u5019\uff0c\u7279\u522b\u96be\u627e\u7684bug\u3001\u4ee3\u7801\u91cd\u6784\uff0c\u6211\u90fd\u4f1a\u7528femo\u6765\u505a\u3002 \u6211\u751a\u81f3\u7528femo\u6a21\u5f0f\u7ed9\u6211\u7684\u4e3bagent\u517b\u4e86\u53ea\u5ba0\u7269\uff0c\u5979\u5f88\u5f00\u5fc3\u3002",
+  "homepage": "",
+  "queries": [
+   "fem llm agent"
+  ]
+ },
+ {
+  "repo": "parhamdb/3d-print-skill",
+  "stars": 7,
+  "license": "MIT",
+  "created": "2026-04-15",
+  "pushed": "2026-04-15",
+  "desc": "AI agent skill for parametric 3D model design and printing with CadQuery",
+  "homepage": "",
+  "queries": [
+   "cadquery agent"
+  ]
+ },
+ {
+  "repo": "hamzaabduljabbar/autoconst-cad-to-excel-claude",
+  "stars": 7,
+  "license": "NOASSERTION",
+  "created": "2026-07-28",
+  "pushed": "2026-08-02",
+  "desc": "Turn a construction CAD file (DWG/DXF) into a structured Excel takeoff. A Claude skill: block counts grouped into line items, layer-based classification, annotation quarantine, MEP nearest-text specs,",
+  "homepage": "",
+  "queries": [
+   "text to cad"
+  ]
+ },
+ {
+  "repo": "MLYengineering/Text2CAD",
+  "stars": 7,
+  "license": "MIT",
+  "created": "2026-01-09",
+  "pushed": "2026-01-09",
+  "desc": "Contract-driven, agentic system for deterministic CAD generation from natural language using headless CAD",
+  "homepage": "",
+  "queries": [
+   "llm cad generation"
+  ]
+ },
+ {
+  "repo": "S2mon123/FEP-Agent-Hub",
+  "stars": 7,
+  "license": "MIT",
+  "created": "2026-08-13",
+  "pushed": "2026-08-14",
+  "desc": "Evidence-first FreeCAD, Elmer FEM, and ParaView MCP automation stack with verified CAE workflows and Codex Skill.",
+  "homepage": "",
+  "queries": [
+   "freecad agent"
+  ]
+ },
+ {
+  "repo": "gpambrozio/onshape-mcp",
+  "stars": 7,
+  "license": "MIT",
+  "created": "2026-09-21",
+  "pushed": "2026-11-01",
+  "desc": "MCP server for Onshape CAD \u2014 87 tools for modelling, assemblies and export, with zero-config browser sign-in",
+  "homepage": "https://www.npmjs.com/package/@gpambrozio/onshape-mcp",
+  "queries": [
+   "onshape mcp"
+  ]
+ },
+ {
+  "repo": "ershui2500/UniRoboGui",
+  "stars": 7,
+  "license": "MIT",
+  "created": "2026-08-04",
+  "pushed": "2026-11-17",
+  "desc": "Open-source Unitree G1\u3001R1\u3001GO2 and A2 Web GUI & SDK2 dashboard for telemetry, robot control, SLAM/navigation, Mid-360 point clouds, D435i, 29DoF joint debugging, ASR/TTS and LLM.",
+  "homepage": "",
+  "queries": [
+   "urdf llm"
+  ]
+ },
+ {
+  "repo": "faraz-369/SafeLite",
+  "stars": 7,
+  "license": "NOASSERTION",
+  "created": "2026-08-02",
+  "pushed": "2026-10-20",
+  "desc": "Language-Conditioned Robotic Manipulation via Lightweight LLM Agents.The repository is designed to support experimentation around planning, safety reasoning, execution, simulation, and evaluation with",
+  "homepage": "",
+  "queries": [
+   "robot design llm"
+  ]
+ },
+ {
+  "repo": "shauryagangrade/GCode",
+  "stars": 7,
+  "license": "Apache-2.0",
+  "created": "2026-07-15",
+  "pushed": "2026-11-01",
+  "desc": "A local, AI-powered CLI that lets you chat with free LLMs (via OpenRouter) to edit files, run shell commands, and manage git\u2014all from your terminal.",
+  "homepage": "",
+  "queries": [
+   "gcode llm"
+  ]
+ },
+ {
+  "repo": "ThalesMMS/dicom-viewer-mcp-app",
+  "stars": 7,
+  "license": "MIT",
+  "created": "2026-01-28",
+  "pushed": "2026-11-25",
+  "desc": "MCP app/server that renders local DICOM series into server-side PNG slices with window/level handling, then embeds an interactive viewer with slice navigation, zoom, pan, and metadata inside LLM chat ",
+  "homepage": "",
+  "queries": [
+   "slicer mcp"
+  ]
+ },
+ {
+  "repo": "NotADevIAmaMeatPopsicle/Echo-Assistant",
+  "stars": 7,
+  "license": "GPL-3.0",
+  "created": "2026-09-18",
+  "pushed": "2026-10-08",
+  "desc": "An open-source ESP32-S3 smart speaker with a round AMOLED touchscreen, local speech, Hermes, Home Assistant, Spotify Connect, and a configurable web UI. Alpha.",
+  "homepage": "",
+  "queries": [
+   "arduino mcp"
+  ]
+ },
+ {
+  "repo": "JoelJohnsonThomas/ForgeFlow",
+  "stars": 7,
+  "license": "Apache-2.0",
+  "created": "2026-05-19",
+  "pushed": "2026-07-02",
+  "desc": "Production-grade multi-agent workflow orchestrator built with LangGraph, MCP (Model Context Protocol), A2A protocol, and PostgreSQL+pgvector. Features supervisor hub-and-spoke routing, human-in-the-lo",
+  "homepage": "",
+  "queries": [
+   "circuit llm agent"
+  ]
+ },
+ {
+  "repo": "wwwwwwwwwwwwwwy/dsh-thinking-breaker",
+  "stars": 7,
+  "license": "MIT",
+  "created": "2026-10-05",
+  "pushed": "2026-10-08",
+  "desc": "DSH host plugin: two circuit breakers \u2014 abort a runaway reasoning (thinking) loop and force a fresh no-think retry, and stop/steer repeated tool failures before they are re-run.",
+  "homepage": "",
+  "queries": [
+   "circuit llm agent"
+  ]
+ },
+ {
+  "repo": "Foadsf/jev-for-engineers",
+  "stars": 7,
+  "license": "MIT",
+  "created": "2026-09-16",
+  "pushed": "2026-09-16",
+  "desc": "Eight minimal working examples of TypeSafe's Jev (a System One model) applied to mechanical and electrical engineering: CAD/CAE/CAM routing, FEM result triage, DFM screening, BOM alignment, hallucinat",
+  "homepage": "",
+  "queries": [
+   "mechanical engineering llm"
+  ]
+ },
+ {
+  "repo": "aws-samples/sample-remote-aws-development-station",
+  "stars": 7,
+  "license": "MIT-0",
+  "created": "2026-07-30",
+  "pushed": "2026-09-09",
+  "desc": "This sample demonstrates self-service cloud development workstations on AWS, designed for AI-native and Physical AI development: per-developer Linux/Windows EC2 instances with Amazon DCV remote deskto",
+  "homepage": "",
+  "queries": [
+   "physical ai agent design"
+  ]
+ },
+ {
+  "repo": "Hashtag-Robotics/so101-tic-tac-toe",
+  "stars": 7,
+  "license": "Apache-2.0",
+  "created": "2026-08-17",
+  "pushed": "2026-08-18",
+  "desc": "End-to-end SO-101 tic-tac-toe: printable hardware, local UI, LeRobot dataset, SmolVLA policy and guarded Strands agent",
+  "homepage": "https://labs.hashtagrobotics.tr/so101-tic-tac-toe",
+  "queries": [
+   "lerobot agent"
+  ]
+ },
+ {
+  "repo": "oniondas/SpiceMCP",
+  "stars": 7,
+  "license": "MIT",
+  "created": "2026-08-16",
+  "pushed": "2026-11-09",
+  "desc": "LTspice MCP server where the server owns the optimization state, not the LLM.",
+  "homepage": "",
+  "queries": [
+   "spice llm"
+  ]
+ },
+ {
+  "repo": "harisharandangi/textocad",
+  "stars": 6,
+  "license": "NOASSERTION",
+  "created": "2026-11-02",
+  "pushed": "2026-11-02",
+  "desc": "Text to CAD: describe a part in plain English, get an editable parametric CadQuery/OpenSCAD model. Exports STEP, STL, 3MF and URDF. Runs locally with your own AI key.",
+  "homepage": "https://textocad.com",
+  "queries": [
+   "cadquery llm",
+   "openscad llm",
+   "text to cad",
+   "urdf llm"
+  ]
+ },
+ {
+  "repo": "vvzvlad/hammerola",
+  "stars": 6,
+  "license": null,
+  "created": "2026-09-02",
+  "pushed": "2026-11-25",
+  "desc": "Build system and viewer for parts an agent models in CadQuery: the hub computes the geometry, shows it in a browser, and takes comments pinned to the model for the agent's next revision. Push mirror o",
+  "homepage": "",
+  "queries": [
+   "cadquery agent"
+  ]
+ },
+ {
+  "repo": "Lucasfrit/onshape-fsgen",
+  "stars": 6,
+  "license": "MIT",
+  "created": "2026-10-01",
+  "pushed": "2026-10-11",
+  "desc": "Describe a part in words \u2192 parametric, editable Onshape feature tree. LLM + FeatureScript + local OpenCascade builder, built for Onshape's API limits.",
+  "homepage": "",
+  "queries": [
+   "build123d llm"
+  ]
+ },
+ {
+  "repo": "joaorura/openscad-skills",
+  "stars": 6,
+  "license": "MIT",
+  "created": "2026-04-22",
+  "pushed": "2026-04-22",
+  "desc": " This repository contains a collection of Agent Skills for AI coding assistants. These skills teach agents how to properly structure, plan, and execute modern OpenSCAD modeling tasks using the intent-",
+  "homepage": "",
+  "queries": [
+   "openscad agent"
+  ]
+ },
+ {
+  "repo": "Farukes/TokenJar",
+  "stars": 6,
+  "license": "NOASSERTION",
+  "created": "2026-09-23",
+  "pushed": "2026-11-10",
+  "desc": "Zero-cost token optimization engine for AI coding assistants (Claude Code, Cursor, Antigravity, Windsurf). Saves 70-95% tokens via AST skeletons, differential cache, and line slicing.",
+  "homepage": "https://github.com/Farukes/TokenJar",
+  "queries": [
+   "slicer mcp"
+  ]
+ },
+ {
+  "repo": "AhmedShaalan/Egypt-Electronics-Parts-Search",
+  "stars": 6,
+  "license": "AGPL-3.0",
+  "created": "2026-09-17",
+  "pushed": "2026-10-14",
+  "desc": "Search 21 Egyptian electronics shops at once: live in-stock prices, part-number matching, and parts-list totals. Free static site on GitHub Pages.",
+  "homepage": "http://parts.ahmedshaalan.com/",
+  "queries": [
+   "arduino mcp"
+  ]
+ },
+ {
+  "repo": "roomi-fields/electra-one-mcp",
+  "stars": 6,
+  "license": "MIT",
+  "created": "2026-05-25",
+  "pushed": "2026-06-28",
+  "desc": "MCP server + Claude Code skill + indexed docs for developing Electra One MK2/Mini widgets and presets",
+  "homepage": "https://roomi-fields.github.io/electra-one-mcp/",
+  "queries": [
+   "hardware claude code skills"
+  ]
+ },
+ {
+  "repo": "danieltyukov/aispice",
+  "stars": 6,
+  "license": "MIT",
+  "created": "2026-03-15",
+  "pushed": "2026-11-22",
+  "desc": "AI agent for analog and mixed-signal circuits: board-level schematics and IC blocks on the IHP SG13G2 open PDK, sized at every corner, simulated on ngspice, Xyce, LTspice or Spectre, laid out, checked",
+  "homepage": "https://danieltyukov.github.io/aispice/",
+  "queries": [
+   "electronics llm agent",
+   "spice llm"
+  ]
+ },
+ {
+  "repo": "dilidin2/tic",
+  "stars": 6,
+  "license": null,
+  "created": "2026-07-16",
+  "pushed": "2026-07-16",
+  "desc": "TIC (Taken In Consideration) is a skill for AI agents that forces systematic cascade-thinking: atomic decomposition, recursive consequence analysis, spatial/reality stress-testing, and gap identificat",
+  "homepage": "",
+  "queries": [
+   "physical ai agent design"
+  ]
+ },
+ {
+  "repo": "SamuelGong/RobiAgent",
+  "stars": 6,
+  "license": "Apache-2.0",
+  "created": "2026-04-08",
+  "pushed": "2026-06-04",
+  "desc": "An embodied agent framework for orchestrating long-horizon, multi-module tasks in real-world robotics.",
+  "homepage": "",
+  "queries": [
+   "lerobot agent"
+  ]
+ },
+ {
+  "repo": "oloapiu/plainsolid",
+  "stars": 5,
+  "license": "Apache-2.0",
+  "created": "2026-09-14",
+  "pushed": "2026-10-09",
+  "desc": "Parametric CAD as a Python file: a browser GUI, a CLI and an MCP server over one engine. Press / to ask a model for the next edit.",
+  "homepage": "",
+  "queries": [
+   "build123d llm"
+  ]
+ },
+ {
+  "repo": "DavideFantasia/HaptyHub",
+  "stars": 5,
+  "license": null,
+  "created": "2026-03-20",
+  "pushed": "2026-09-22",
+  "desc": "Un'applicazione desktop basata sull'IA che traduce diagrammi 2D in modelli 3D tattili e interattivi per studenti non vedenti e ipovedenti (BLV). Include feedback Text-to-Speech tramite hardware NanoVN",
+  "homepage": "https://icities26.unibs.it/papers/paper-5.pdf",
+  "queries": [
+   "openscad llm"
+  ]
+ },
+ {
+  "repo": "madrobotnet/3dprint-scout",
+  "stars": 5,
+  "license": "MIT",
+  "created": "2026-10-16",
+  "pushed": "2026-11-01",
+  "desc": "Agent skill that designs 3D-printable parts reference-first: finds existing models, builds in Fusion, OpenSCAD or Python, verifies the mesh, and delivers STL/3MF (Bambu Studio projects included).",
+  "homepage": "",
+  "queries": [
+   "openscad agent"
+  ]
+ },
+ {
+  "repo": "lachlanchen/AgInTi-LabCanvas",
+  "stars": 5,
+  "license": null,
+  "created": "2026-06-02",
+  "pushed": "2026-11-17",
+  "desc": "AgInTi LabCanvas: agentic studio for editable scientific figures, CAD devices, and experiment design.",
+  "homepage": "https://lazying.art",
+  "queries": [
+   "openscad agent"
+  ]
+ },
+ {
+  "repo": "ReverseZoom2151/harnesscad",
+  "stars": 5,
+  "license": null,
+  "created": "2026-07-05",
+  "pushed": "2026-08-19",
+  "desc": "The verifier-first text-to-CAD agent harness, with a CUA for 3D CAD generation in real GUIs and Parts-Driven Development.",
+  "homepage": "",
+  "queries": [
+   "text to cad"
+  ]
+ },
+ {
+  "repo": "nasdomak/freecad-agent",
+  "stars": 5,
+  "license": "NOASSERTION",
+  "created": "2026-07-05",
+  "pushed": "2026-09-06",
+  "desc": "Local-AI copilot for FreeCAD \u2014 natural language to real modeling actions (MVP)",
+  "homepage": "",
+  "queries": [
+   "freecad agent"
+  ]
+ },
+ {
+  "repo": "Getopir/AgentCAD",
+  "stars": 5,
+  "license": "LGPL-2.1",
+  "created": "2026-07-31",
+  "pushed": "2026-07-31",
+  "desc": "Independent agent-oriented parametric CAD platform based on FreeCAD, with a typed MCP gateway, controlled workers, CAD-IR, verification, and human-adoptable upstream candidate fixes.",
+  "homepage": "",
+  "queries": [
+   "freecad agent"
+  ]
+ },
+ {
+  "repo": "CADSwarm/cadswarm",
+  "stars": 5,
+  "license": null,
+  "created": "2026-10-24",
+  "pushed": "2026-11-08",
+  "desc": "Your team's AI agents (Claude Code, Codex) building one live FreeCAD model together",
+  "homepage": "https://www.cadswarm.design/",
+  "queries": [
+   "freecad agent"
+  ]
+ },
+ {
+  "repo": "Leaveing00001/dsh-fusion360",
+  "stars": 5,
+  "license": "MIT",
+  "created": "2026-09-27",
+  "pushed": "2026-10-01",
+  "desc": "Drive Autodesk Fusion 360 from DeepSeek Harness (DSH) - 13 MCP tools including arbitrary Fusion API Python. Vibe-coded end to end by DSH; every modelling command measured against closed-form volumes.",
+  "homepage": "",
+  "queries": [
+   "fusion 360 mcp"
+  ]
+ },
+ {
+  "repo": "Omakase-Robotics-Org/omakase-bench",
+  "stars": 5,
+  "license": "Apache-2.0",
+  "created": "2026-11-23",
+  "pushed": "2026-11-23",
+  "desc": "Benchmark harness: name a model, run practical robot tasks in simulation, get a scored report",
+  "homepage": "",
+  "queries": [
+   "urdf llm"
+  ]
+ },
+ {
+  "repo": "drelishiahjmiller/en665715-embodied-ai",
+  "stars": 5,
+  "license": null,
+  "created": "2026-09-09",
+  "pushed": "2026-10-31",
+  "desc": "Companion repository for EN.665.715 at Johns Hopkins University. Students design, build, and evaluate AI agents that convert natural language into autonomous robot control. Covers ROS 2, Ollama LLMs, ",
+  "homepage": "",
+  "queries": [
+   "robot design llm",
+   "physical ai agent design"
+  ]
+ },
+ {
+  "repo": "UnicornGraveyard/SlicerBridge",
+  "stars": 5,
+  "license": "GPL-3.0",
+  "created": "2026-10-26",
+  "pushed": "2026-11-24",
+  "desc": "Any multicolor 3MF project in (Bambu Studio, OrcaSlicer or a maker's fork), a ready, checked file for every multicolor printer out: Bambu Lab, Creality, Elegoo, Anycubic, Flashforge, QIDI, Prusa, Snap",
+  "homepage": "",
+  "queries": [
+   "slicer mcp"
+  ]
+ },
+ {
+  "repo": "MohamedGamal045/Ai-powered-drone-aerial-image-detection",
+  "stars": 5,
+  "license": null,
+  "created": "2026-11-22",
+  "pushed": "2026-11-24",
+  "desc": "Second-Year Mechatronics project at the Faculty of Industry and Energy Technology, New Cairo Technological University. Mohamed Gamal's work on drone electronics, wireless communication, IoT, PCB desig",
+  "homepage": "",
+  "queries": [
+   "drone design ai"
+  ]
+ },
+ {
+  "repo": "ptai-eng/OpenSerial-Studio",
+  "stars": 5,
+  "license": null,
+  "created": "2026-07-07",
+  "pushed": "2026-11-11",
+  "desc": "Universal Web Serial & MCP hardware telemetry workstation. Real-time multi-protocol parsing, Radix-2 FFT spectral metrology, 2D/3D binary framebuffer, and MCU controls.",
+  "homepage": "",
+  "queries": [
+   "arduino mcp"
+  ]
+ },
+ {
+  "repo": "Seeed-Studio/xiao-assistant",
+  "stars": 5,
+  "license": "MIT",
+  "created": "2026-04-20",
+  "pushed": "2026-08-18",
+  "desc": "",
+  "homepage": "",
+  "queries": [
+   "arduino mcp"
+  ]
+ },
+ {
+  "repo": "yuno009/ESP32S3-USB-Keyboard-To-BLE",
+  "stars": 5,
+  "license": null,
+  "created": "2026-01-18",
+  "pushed": "2026-10-14",
+  "desc": "\ud83d\udd04 Transform any USB keyboard into a Bluetooth device with ESP32-S3, allowing seamless connections to multiple gadgets. Enjoy universal compatibility and low latency.",
+  "homepage": "https://yuno009.github.io",
+  "queries": [
+   "arduino mcp"
+  ]
+ },
+ {
+  "repo": "Neuro-Circuit/embedded-safety-engineer",
+  "stars": 5,
+  "license": "MIT",
+  "created": "2026-09-04",
+  "pushed": "2026-09-04",
+  "desc": "**Smart Claude Code Skill for secure, reliable, and hardware-aware embedded firmware development.**",
+  "homepage": "",
+  "queries": [
+   "hardware claude code skills"
+  ]
+ },
+ {
+  "repo": "dungnotnull/ar-vr-graphics-hardware-tuning-agent-skill",
+  "stars": 5,
+  "license": "MIT",
+  "created": "2026-07-29",
+  "pushed": "2026-07-29",
+  "desc": "\ud83e\udd7d\ud83c\udfae XR Graphics & Hardware Performance Tuning Engine | Production-grade Claude Code skill & Python harness (v1.0.0) for VR/AR optimization. Features <20ms motion-to-photon latency math, foveated render",
+  "homepage": "",
+  "queries": [
+   "hardware claude code skills"
+  ]
+ },
+ {
+  "repo": "FCkulite/MechDesignCopilot",
+  "stars": 5,
+  "license": "MIT",
+  "created": "2026-03-15",
+  "pushed": "2026-10-13",
+  "desc": "Simplify mechanical design by guiding users from requirements to BOM with AI-powered support for calculations, 3D modeling, and documentation.",
+  "homepage": "",
+  "queries": [
+   "mechanical engineering llm"
+  ]
+ },
+ {
+  "repo": "grmkris/robo-harness",
+  "stars": 5,
+  "license": null,
+  "created": "2026-09-07",
+  "pushed": "2026-09-23",
+  "desc": "SO-101 robot-arm agent workbench: Bun/Effect coordinator, React workbench, Python LeRobot motor owner",
+  "homepage": "",
+  "queries": [
+   "lerobot agent"
+  ]
+ },
+ {
+  "repo": "YidaYang/embodify",
+  "stars": 5,
+  "license": "Apache-2.0",
+  "created": "2026-10-01",
+  "pushed": "2026-10-02",
+  "desc": "Give your agent a body: Embodify lets it control robots directly and become your embodied agent. Your best embodied agent is your favorite agent \u2014 with its memory, its tools and everything it knows ab",
+  "homepage": "",
+  "queries": [
+   "lerobot agent"
+  ]
+ },
+ {
+  "repo": "monoxide-xen/microcap-mcp",
+  "stars": 5,
+  "license": "MIT",
+  "created": "2026-07-26",
+  "pushed": "2026-07-26",
+  "desc": "MCP server for Micro-Cap 12 circuit simulation \u2014 headless SPICE analyses, sweeps and plots for LLM agents, via Micro-Cap's documented batch interface",
+  "homepage": "",
+  "queries": [
+   "spice llm"
+  ]
+ },
+ {
+  "repo": "ashishpatel26/CNCF-LLM-Observability-Multi-Agent-Demo",
+  "stars": 5,
+  "license": "MIT",
+  "created": "2026-09-04",
+  "pushed": "2026-09-14",
+  "desc": "Meridian Claims: a real multi-agent health-insurance claims-adjudication system (CrewAI + MCP + Langfuse) demonstrating production-grade LLM observability",
+  "homepage": "https://ashishpatel26.github.io/CNCF-LLM-Observability-Multi-Agent-Demo/",
+  "queries": [
+   "cnc llm"
+  ]
+ },
+ {
+  "repo": "YuGu0358/hardware-foundry",
+  "stars": 4,
+  "license": "Apache-2.0",
+  "created": "2026-05-15",
+  "pushed": "2026-05-29",
+  "desc": "LLM multi-agent platform that turns natural-language hardware ideas into manufacturable artifacts: BOM, 3D-print files, KiCad PCB, ESP32 firmware, mobile app, assembly docs.",
+  "homepage": "https://hardware-foundry-4ke2.vercel.app",
+  "queries": [
+   "cadquery llm",
+   "cadquery agent"
+  ]
+ },
+ {
+  "repo": "YuewanSun/LLM4CAD-DSL",
+  "stars": 4,
+  "license": null,
+  "created": "2026-02-02",
+  "pushed": "2026-11-06",
+  "desc": "LLM4CAD-DSL, an LLM-friendly domain-specific language for CAD generation and editing that features explicit semantics and a symbolic geometry selection mechanism with unique, interpretable entity name",
+  "homepage": "",
+  "queries": [
+   "llm cad generation"
+  ]
+ },
+ {
+  "repo": "reyk/freecad-ai-skill",
+  "stars": 4,
+  "license": "ISC",
+  "created": "2026-03-26",
+  "pushed": "2026-03-26",
+  "desc": "AI Agent skill for FreeCAD",
+  "homepage": "",
+  "queries": [
+   "freecad agent"
+  ]
+ },
+ {
+  "repo": "V0v1kkk/freecad-engineering",
+  "stars": 4,
+  "license": "MIT",
+  "created": "2026-08-12",
+  "pushed": "2026-08-12",
+  "desc": "Editable, evidence-backed FreeCAD engineering skills and MCP configuration for AI agents.",
+  "homepage": "",
+  "queries": [
+   "freecad agent"
+  ]
+ },
+ {
+  "repo": "Sunwood-ai-labs/aurora-a1-freecad",
+  "stars": 4,
+  "license": null,
+  "created": "2026-09-26",
+  "pushed": "2026-09-26",
+  "desc": "AURORA A1 \u2014 F1 concept car built in FreeCAD by an AI agent (Claude Code + FreeCAD MCP): assembly model, STEP, drawings, making-of videos",
+  "homepage": "",
+  "queries": [
+   "freecad agent"
+  ]
+ },
+ {
+  "repo": "3DCreationsByChad/fusion360-cam-assistant",
+  "stars": 4,
+  "license": "NOASSERTION",
+  "created": "2026-02-05",
+  "pushed": "2026-02-13",
+  "desc": "AI-powered CAM workflow assistant for Fusion 360. Built on Fusion-360-MCP-Server by AuraFriday.",
+  "homepage": "",
+  "queries": [
+   "fusion 360 mcp"
+  ]
+ },
+ {
+  "repo": "artapo/fusion360-mcp",
+  "stars": 4,
+  "license": "Apache-2.0",
+  "created": "2026-09-04",
+  "pushed": "2026-11-18",
+  "desc": "MCP bridge between Claude Code and Fusion 360: runs Python scripts in the active Fusion session",
+  "homepage": "",
+  "queries": [
+   "fusion 360 mcp"
+  ]
+ },
+ {
+  "repo": "shimmerjordan/self-host-fusion360-MCP",
+  "stars": 4,
+  "license": "MIT",
+  "created": "2026-06-27",
+  "pushed": "2026-11-16",
+  "desc": "\u53ef\u5feb\u901f\u81ea\u642d\u5efa\u7684Fusion MCP\u670d\u52a1\u63d2\u4ef6\uff0c\u5e26\u524d\u7aef\u53ef\u914d\u7f6e",
+  "homepage": "",
+  "queries": [
+   "fusion 360 mcp"
+  ]
+ },
+ {
+  "repo": "prim-design/fusion-mcp",
+  "stars": 4,
+  "license": "MIT",
+  "created": "2026-03-22",
+  "pushed": "2026-03-23",
+  "desc": "Open-source MCP server for controlling Autodesk Fusion 360 from Claude",
+  "homepage": "",
+  "queries": [
+   "fusion 360 mcp"
+  ]
+ },
+ {
+  "repo": "ByTymr/CadAI",
+  "stars": 4,
+  "license": "LGPL-2.1",
+  "created": "2026-10-07",
+  "pushed": "2026-10-10",
+  "desc": "AI-assisted CAD: point at a part, describe the change, let AI edit it. FreeCAD and Fusion 360 adapters via MCP",
+  "homepage": "",
+  "queries": [
+   "fusion 360 mcp"
+  ]
+ },
+ {
+  "repo": "Nafiz001/logarithm-techathon",
+  "stars": 4,
+  "license": null,
+  "created": "2026-07-10",
+  "pushed": "2026-07-10",
+  "desc": "Browser-based 6-DOF robot arm simulation & control suite \u2014 one safety-gated motion pipeline driven six ways: joystick, keyboard, voice (Whisper), autonomous PIN entry, an LLM agent, and webcam hand ge",
+  "homepage": "https://logarithm-techathon.vercel.app",
+  "queries": [
+   "urdf llm"
+  ]
+ },
+ {
+  "repo": "damione1/maslow-desktop",
+  "stars": 4,
+  "license": "GPL-3.0",
+  "created": "2026-06-27",
+  "pushed": "2026-07-13",
+  "desc": "Friendly desktop, tablet control panel for the Maslow CNC running FluidNC: guided calibration wizard, state-machine-aware controls, and a local HTTP/gRPC/MCP API to drive the machine from scripts or a",
+  "homepage": "https://damione1.github.io/maslow-desktop/",
+  "queries": [
+   "gcode llm",
+   "cnc llm"
+  ]
+ },
+ {
+  "repo": "ashwithachandru/Adversarial_Patch_Detection_for_Military_Drones",
+  "stars": 4,
+  "license": null,
+  "created": "2026-03-16",
+  "pushed": "2026-04-15",
+  "desc": "A system that detects adversarial patches designed to trick AI vision systems in military drones and alerts operators to prevent incorrect decisions.",
+  "homepage": "",
+  "queries": [
+   "drone design ai"
+  ]
+ },
+ {
+  "repo": "BStandage/AI-GrandPrix",
+  "stars": 4,
+  "license": null,
+  "created": "2026-06-05",
+  "pushed": "2026-09-24",
+  "desc": "Technical debrief from the Anduril AI Grand Prix. Top 15 of 3,300+ teams. Autonomous drone racing: training environment design, synthetic camera modeling, and where the simulator diverged from the rea",
+  "homepage": "",
+  "queries": [
+   "drone design ai"
+  ]
+ },
+ {
+  "repo": "basicmicro/basicmicro_arduino",
+  "stars": 4,
+  "license": "MIT",
+  "created": "2026-02-09",
+  "pushed": "2026-02-09",
+  "desc": "Official Arduino library for RoboClaw and MCP brushed DC motor controllers. Packet serial, PID control, encoder feedback. Arduino, ESP32, ESP8266.",
+  "homepage": "https://www.basicmicro.com/motor-controller",
+  "queries": [
+   "arduino mcp"
+  ]
+ },
+ {
+  "repo": "ThanabordeeN/MCP-U",
+  "stars": 4,
+  "license": "NOASSERTION",
+  "created": "2026-03-17",
+  "pushed": "2026-05-15",
+  "desc": "The Unified Interface for AI-Ready Microcontrollers. Turn any Arduino MCU into an AI-controllable device via MCP.",
+  "homepage": "https://mcp-u.vercel.app",
+  "queries": [
+   "arduino mcp"
+  ]
+ },
+ {
+  "repo": "ajmcastro/langgraph-vla-agent",
+  "stars": 4,
+  "license": "MIT",
+  "created": "2026-08-26",
+  "pushed": "2026-09-01",
+  "desc": "Agentic planning for Vision-Language-Action robotics \u2014 orchestrating SmolVLA/LeRobot policies with LangGraph for multi-step robot manipulation.",
+  "homepage": "",
+  "queries": [
+   "lerobot agent"
+  ]
+ },
+ {
+  "repo": "Hashtag-Robotics/so101-dashboard",
+  "stars": 4,
+  "license": "Apache-2.0",
+  "created": "2026-08-17",
+  "pushed": "2026-08-17",
+  "desc": "Local-first SO-101 control plane and agent-safe robotics dashboard",
+  "homepage": "https://labs.hashtagrobotics.tr/#acik-kaynak",
+  "queries": [
+   "lerobot agent"
+  ]
+ },
+ {
+  "repo": "RobertMalczyk/emc-assist",
+  "stars": 4,
+  "license": "Apache-2.0",
+  "created": "2026-06-03",
+  "pushed": "2026-06-08",
+  "desc": "Local, deterministic conducted-EMI pre-compliance analysis for power converters on LTspice \u2014 with an opt-in LLM assistance layer. Part of the Open EMC project.",
+  "homepage": "",
+  "queries": [
+   "spice llm"
+  ]
+ },
+ {
+  "repo": "dancher00/agentic-cad",
+  "stars": 3,
+  "license": "Apache-2.0",
+  "created": "2026-08-11",
+  "pushed": "2026-09-11",
+  "desc": "Agentic CAD \u2014 text and photos to editable STEP, STL and CadQuery. CLI, Python integration and an offline model workspace.",
+  "homepage": "https://dancher00.github.io/agentic-cad/",
+  "queries": [
+   "cadquery agent"
+  ]
+ },
+ {
+  "repo": "chaudharyvivek1/forge3d",
+  "stars": 3,
+  "license": "NOASSERTION",
+  "created": "2026-11-01",
+  "pushed": "2026-11-18",
+  "desc": "3D model creation for AI agents \u2014 MCP server + agent skill: 6 geometry engines (procedural, image, OpenSCAD, Blender, CadQuery, hosted), 15 equation-defined shape families, a procedural planet generat",
+  "homepage": "",
+  "queries": [
+   "cadquery agent"
+  ]
+ },
+ {
+  "repo": "religa/halloween-candy-dispenser",
+  "stars": 3,
+  "license": "Apache-2.0",
+  "created": "2026-10-24",
+  "pushed": "2026-11-01",
+  "desc": "Talking AI Halloween candy dispenser: a 3D-printed witch chats with trick-or-treaters (Claude + ElevenLabs) and drops candy. Arduino, parametric build123d, fits a Bambu A1 mini.",
+  "homepage": "https://www.youtube.com/watch?v=f7yGwlmqU8s",
+  "queries": [
+   "build123d llm"
+  ]
+ },
+ {
+  "repo": "usman7384/scriber",
+  "stars": 3,
+  "license": "Apache-2.0",
+  "created": "2026-11-04",
+  "pushed": "2026-11-15",
+  "desc": "Open-source design agent for mechanical CAD: text, specs, sketches and meshes in; parametric, editable B-rep parts out. Runs offline on local models.",
+  "homepage": "",
+  "queries": [
+   "build123d llm"
+  ]
+ },
+ {
+  "repo": "alos-source/openSCADSkill",
+  "stars": 3,
+  "license": "MIT",
+  "created": "2026-07-27",
+  "pushed": "2026-10-25",
+  "desc": "An Agent for creating 3D-Models using OpenSCAD",
+  "homepage": "",
+  "queries": [
+   "openscad agent"
+  ]
+ },
+ {
+  "repo": "archimedes-market/mcp-openscad-render-loop",
+  "stars": 3,
+  "license": "MIT",
+  "created": "2026-05-19",
+  "pushed": "2026-05-19",
+  "desc": "OpenSCAD wrapped as an MCP server. Render .scad source with parameter overrides, run parametric sweeps, validate syntax, extract module signatures, and compute STL metrics (bounding box, volume, surfa",
+  "homepage": "",
+  "queries": [
+   "openscad agent"
+  ]
+ },
+ {
+  "repo": "drdecurto/LLMforge",
+  "stars": 3,
+  "license": null,
+  "created": "2026-03-15",
+  "pushed": "2026-03-15",
+  "desc": "Foundation Models for Automatic CAD Generation",
+  "homepage": "",
+  "queries": [
+   "llm cad generation"
+  ]
+ },
+ {
+  "repo": "VedaCAD/v-code",
+  "stars": 3,
+  "license": "MIT",
+  "created": "2026-07-25",
+  "pushed": "2026-08-04",
+  "desc": "An experimental 256-Token Hexadecimal Instruction Set Architecture (ISA) for deterministic LLM-driven CAD geometry generation.",
+  "homepage": "",
+  "queries": [
+   "llm cad generation"
+  ]
+ },
+ {
+  "repo": "201002200303/NL-FreeCAD-Agent",
+  "stars": 3,
+  "license": "MIT",
+  "created": "2026-05-09",
+  "pushed": "2026-09-11",
+  "desc": "NL-FreeCAD-Agent \u662f\u4e00\u4e2a Windows \u539f\u751f\u5de5\u5177\uff0c\u5141\u8bb8\u7528\u6237\u4f7f\u7528\u81ea\u7136\u8bed\u8a00\u64cd\u63a7 FreeCAD \u7684\u7279\u5f81\u6811\u8fdb\u884c\u53c2\u6570\u5316\u5efa\u6a21\u3002\u5b83\u4e0d\u662f\u4e00\u4e2a\u7aef\u5230\u7aef\u7684 STL \u751f\u6210\u5668\uff0c\u800c\u662f\u4e00\u4e2a**\u53d7\u63a7\u7684 CAD Tool \u7f16\u6392\u7cfb\u7edf**\uff1a\u7528\u6237\u63cf\u8ff0\u5efa\u6a21\u610f\u56fe \u2192 Agent \u751f\u6210\u53ef\u89e3\u91ca\u7684\u591a\u6b65\u9aa4\u5efa\u6a21\u8ba1\u5212 \u2192 FreeCAD \u63d2\u4ef6\u5728\u5f53\u524d\u6587\u6863\u4e2d\u9010\u6b65\u6267\u884c CAD Tool \u2192 \u7279\u5f81\u6811\u5b9e\u65f6\u53cd\u6620\u53d8\u66f4\u3002",
+  "homepage": "",
+  "queries": [
+   "freecad agent"
+  ]
+ },
+ {
+  "repo": "avez1999/Fusion360-AgenticCAD",
+  "stars": 3,
+  "license": "MIT",
+  "created": "2026-02-19",
+  "pushed": "2026-03-04",
+  "desc": "Fusion MCP Integration bridges AI assistants with Autodesk Fusion 360 through the Model Context Protocol (MCP).",
+  "homepage": "",
+  "queries": [
+   "fusion 360 mcp"
+  ]
+ },
+ {
+  "repo": "Chocksy/fusion-agent-kit",
+  "stars": 3,
+  "license": "MIT",
+  "created": "2026-05-20",
+  "pushed": "2026-05-20",
+  "desc": "AI-driven parametric Fusion 360 modeling: re-runnable build scripts + helper library + skill for Claude Code / Codex via the Fusion MCP bridge.",
+  "homepage": "",
+  "queries": [
+   "fusion 360 mcp"
+  ]
+ },
+ {
+  "repo": "Naksh7Gupta/ThinkNet-Prototype-2",
+  "stars": 3,
+  "license": "Apache-2.0",
+  "created": "2026-10-23",
+  "pushed": "2026-10-30",
+  "desc": "ThinkNet is an AI research and engineering platform to design, train, and experiment with LLMs, traditional ML, Agents training, multimodal AI, and robotics through a GUI. With AI agents, custom data ",
+  "homepage": "",
+  "queries": [
+   "robot design llm"
+  ]
+ },
+ {
+  "repo": "aj-dev-smith/microduck-mcp",
+  "stars": 3,
+  "license": "Apache-2.0",
+  "created": "2026-08-27",
+  "pushed": "2026-09-01",
+  "desc": "Drive the Pollen Robotics Microduck (sim) from any MCP client \u2014 with a live Agent Experience debug page",
+  "homepage": "",
+  "queries": [
+   "robot simulation agent claude"
+  ]
+ },
+ {
+  "repo": "catesworks/bambu-cli-mcp",
+  "stars": 3,
+  "license": "MIT",
+  "created": "2026-05-10",
+  "pushed": "2026-11-20",
+  "desc": "AI-native 3D printing pipelines via MCP. Mesh splitting, dowel connectors, and BambuStudio project export as LLM-callable tools.",
+  "homepage": "https://bambu-cli-mcp.catesworks.dev/",
+  "queries": [
+   "3d printing llm"
+  ]
+ },
+ {
+  "repo": "hookprobe/naval-ai",
+  "stars": 3,
+  "license": "AGPL-3.0",
+  "created": "2026-08-04",
+  "pushed": "2026-09-04",
+  "desc": "Naval-AI is an open-source AI-driven naval design platform. Generate parametric hulls, run physics-based CFD, evaluate stability and performance, and evolve optimized vessels with AI\u2014from sustainable ",
+  "homepage": "",
+  "queries": [
+   "drone design ai"
+  ]
+ },
+ {
+  "repo": "RIVALHIDE/Multi-Drone-GCS-Dashboard-MAVLink-WebSockets-",
+  "stars": 3,
+  "license": null,
+  "created": "2026-04-16",
+  "pushed": "2026-04-20",
+  "desc": "Drone Mission Control is an AI-powered UAV surveillance and anomaly detection system designed to monitor aerial video feeds in real time. It detects unusual activities, tracks objects, and generates i",
+  "homepage": "",
+  "queries": [
+   "drone design ai"
+  ]
+ },
+ {
+  "repo": "Nikhil-creat/minecraft-ai-ecosystem",
+  "stars": 3,
+  "license": "MIT",
+  "created": "2026-10-17",
+  "pushed": "2026-10-17",
+  "desc": "NEXUS: agentic AI for Minecraft - Groq multi-agent planner/executor/critic with self-correction, RAG, CNN vision, threat radar and an undo-capable building drone. Fabric mod + FastAPI/Docker backend. ",
+  "homepage": "https://nikhil-creat.github.io/minecraft-ai-ecosystem/",
+  "queries": [
+   "drone design ai"
+  ]
+ },
+ {
+  "repo": "S7alker777/agentic-electronics-store",
+  "stars": 3,
+  "license": "MIT",
+  "created": "2026-04-19",
+  "pushed": "2026-04-19",
+  "desc": "Portfolio project showcasing tool-calling, memory, and multi-agent LLM architectures for a small electronics store",
+  "homepage": "",
+  "queries": [
+   "electronics llm agent"
+  ]
+ },
+ {
+  "repo": "wogokoro/Agentic-Mechanical-Engineering",
+  "stars": 3,
+  "license": "Apache-2.0",
+  "created": "2026-08-13",
+  "pushed": "2026-08-13",
+  "desc": "AI agents across the whole mechanical design workflow, from requirements to a manufacturable part. Umbrella index for the Agentic engineering collection by WOGO.",
+  "homepage": "https://www.wogo.ai/en/",
+  "queries": [
+   "mechanical engineering llm"
+  ]
+ },
+ {
+  "repo": "vicfei/RoboHarness",
+  "stars": 3,
+  "license": "MIT",
+  "created": "2026-11-14",
+  "pushed": "2026-11-16",
+  "desc": "A general robotic harness \u2014 LLM agents operate real arms via deterministic primitives with a current-feedback safety layer. Zero training. Hardware: CreateBlock 5-DOF today, mainstream arms next.",
+  "homepage": "",
+  "queries": [
+   "lerobot agent"
+  ]
+ },
+ {
+  "repo": "Sunwood-ai-labs/cad-agent-sandbox",
+  "stars": 2,
+  "license": "MIT",
+  "created": "2026-04-29",
+  "pushed": "2026-07-25",
+  "desc": "Windows-first CAD-as-code benchmark workspace for repeatable furniture cases.",
+  "homepage": "https://sunwood-ai-labs.github.io/cad-agent-sandbox/",
+  "queries": [
+   "cadquery agent"
+  ]
+ },
+ {
+  "repo": "gfleming1992/CadCove-FRC",
+  "stars": 2,
+  "license": "MIT",
+  "created": "2026-10-05",
+  "pushed": "2026-10-26",
+  "desc": "Agent-assisted native CadQuery CAD, robot code, and Rapier simulation for VS Code and WPILib. MIT open source.",
+  "homepage": "",
+  "queries": [
+   "cadquery agent"
+  ]
+ },
+ {
+  "repo": "bjsi/openworkshop",
+  "stars": 2,
+  "license": "MIT",
+  "created": "2026-10-06",
+  "pushed": "2026-10-08",
+  "desc": "The workshop around build123d/CadQuery: live persistent viewer, animations, gallery, an agent's eyes, PCB layout from the CAD",
+  "homepage": "https://bjsi.github.io/openworkshop/",
+  "queries": [
+   "cadquery agent"
+  ]
+ },
+ {
+  "repo": "LAU-MARS/cadorange",
+  "stars": 2,
+  "license": "MIT",
+  "created": "2026-10-09",
+  "pushed": "2026-10-29",
+  "desc": "Agent-native CAD runtime in TypeScript, powered by occt.ts (OCCT/WASM). Headless, embeddable, in-process: snapshots & rollback, structured errors, headless rendering. Zero Python, just npm i. Plugs in",
+  "homepage": "",
+  "queries": [
+   "cadquery agent"
+  ]
+ },
+ {
+  "repo": "Youssef-RAPCorp/cad-agent",
+  "stars": 2,
+  "license": null,
+  "created": "2026-05-28",
+  "pushed": "2026-07-10",
+  "desc": "LLM-powered CAD model generation from natural-language specs (build123d backend)",
+  "homepage": "",
+  "queries": [
+   "build123d llm",
+   "llm cad generation"
+  ]
+ },
+ {
+  "repo": "alaskai/InterCraft",
+  "stars": 2,
+  "license": null,
+  "created": "2026-11-11",
+  "pushed": "2026-11-21",
+  "desc": "Watch an LLM build a parametric CAD model live, one feature at a time. Rust (egui + wgpu) viewer, build123d geometry worker, MCP server.",
+  "homepage": "",
+  "queries": [
+   "build123d llm"
+  ]
+ },
+ {
+  "repo": "mary-jeon/realcad",
+  "stars": 2,
+  "license": "MIT",
+  "created": "2026-10-27",
+  "pushed": "2026-11-04",
+  "desc": "Prompt \u2192 CAD that actually assembles: Meta Muse Spark writes the part, the OpenCascade kernel measures bolt holes, interference, thread engagement and printability, and sends failures back for repair.",
+  "homepage": "",
+  "queries": [
+   "build123d llm"
+  ]
+ },
+ {
+  "repo": "jasalt/cow-factory",
+  "stars": 2,
+  "license": null,
+  "created": "2026-07-05",
+  "pushed": "2026-07-10",
+  "desc": "OpenSCAD 3D model generation & refinement pipeline with a silly website for comparing open-weight LLMs.",
+  "homepage": "https://jasalt.github.io/cow-factory/",
+  "queries": [
+   "openscad llm"
+  ]
+ },
+ {
+  "repo": "tonykoop/makerbench-hwe",
+  "stars": 2,
+  "license": "Apache-2.0",
+  "created": "2026-06-05",
+  "pushed": "2026-10-22",
+  "desc": "An agentic benchmark for the physical world: spatial reasoning, design-for-manufacturing (DFM), and 3D-maker capability. Math-graded, not LLM-judged. MakerBench is to physical design what SWE-bench is",
+  "homepage": "",
+  "queries": [
+   "openscad llm"
+  ]
+ },
+ {
+  "repo": "AugustZhang1/AI-Builder-Minecraft",
+  "stars": 2,
+  "license": "MIT",
+  "created": "2026-09-29",
+  "pushed": "2026-11-10",
+  "desc": "Free, open-source AI builder for Minecraft: type a prompt or paste a picture and AI (Claude or Gemini) designs and builds it on your server. Text to build, image to statue, pixel art, and an MCP serve",
+  "homepage": "",
+  "queries": [
+   "openscad llm"
+  ]
+ },
+ {
+  "repo": "jfdasher/snowman",
+  "stars": 2,
+  "license": null,
+  "created": "2026-02-03",
+  "pushed": "2026-02-04",
+  "desc": "One-shot LLM generation of CAD using image analysis for verification.",
+  "homepage": "",
+  "queries": [
+   "llm cad generation"
+  ]
+ },
+ {
+  "repo": "infinition/BeamForge",
+  "stars": 2,
+  "license": null,
+  "created": "2026-03-05",
+  "pushed": "2026-08-26",
+  "desc": "BeamForge  is an experimental text generation engine coded in Rust from scratch. Unlike modern LLMs that use extremely demanding deep neural networks, BeamForge relies on a stochastic semantic graph c",
+  "homepage": "https://infinition.github.io/BeamForge/",
+  "queries": [
+   "llm cad generation"
+  ]
+ },
+ {
+  "repo": "YBalan/onshape-jamcp",
+  "stars": 2,
+  "license": "MIT",
+  "created": "2026-11-14",
+  "pushed": "2026-11-21",
+  "desc": "Just Another MCP server for Onshape CAD.",
+  "homepage": "",
+  "queries": [
+   "onshape mcp"
+  ]
+ },
+ {
+  "repo": "kevinxqiu/debate2create",
+  "stars": 2,
+  "license": "Apache-2.0",
+  "created": "2026-05-16",
+  "pushed": "2026-10-14",
+  "desc": "[ICML 2026] Debate2Create: Robot Co-design via Multi-Agent LLM Debate",
+  "homepage": "https://debate2create.github.io/",
+  "queries": [
+   "robot design llm",
+   "mujoco llm agent"
+  ]
+ },
+ {
+  "repo": "srimayeebhattacharyya/Golu-Chan",
+  "stars": 2,
+  "license": "MIT",
+  "created": "2026-03-20",
+  "pushed": "2026-03-22",
+  "desc": "Golu-chan is a Python-based AI assistant robot featuring voice interaction, emotion-driven responses, music playback, and command processing, designed to run on Raspberry Pi with plans for local LLM i",
+  "homepage": "",
+  "queries": [
+   "robot design llm"
+  ]
+ },
+ {
+  "repo": "SuperdeMan/embodied-agent",
+  "stars": 2,
+  "license": "Apache-2.0",
+  "created": "2026-08-04",
+  "pushed": "2026-11-22",
+  "desc": "Safety-bounded, embodiment-agnostic agent runtime for LLM planning, deterministic skills, execution verification, and sim-to-real robotics with MuJoCo.",
+  "homepage": "",
+  "queries": [
+   "mujoco llm agent"
+  ]
+ },
+ {
+  "repo": "SourceBox-LLC/PrintPal",
+  "stars": 2,
+  "license": "MIT",
+  "created": "2026-07-18",
+  "pushed": "2026-09-08",
+  "desc": "An agentic 3D printing harness that integrates with PrintMCP. Download, slice, and print 3D files with or without an AI agent.",
+  "homepage": "",
+  "queries": [
+   "3d printing llm"
+  ]
+ },
+ {
+  "repo": "010zx00x1/Gcode-cnc-converter-llm",
+  "stars": 2,
+  "license": null,
+  "created": "2026-03-30",
+  "pushed": "2026-03-30",
+  "desc": "",
+  "homepage": "",
+  "queries": [
+   "gcode llm",
+   "cnc llm"
+  ]
+ },
+ {
+  "repo": "Sibi-Chakravarthi/Agro-Vision",
+  "stars": 2,
+  "license": null,
+  "created": "2026-03-06",
+  "pushed": "2026-08-29",
+  "desc": "A comprehensive AI system designed for detecting and analyzing crop diseases from drone imagery. This project enables precision agriculture through pixel-level disease identification, detailed affecte",
+  "homepage": "",
+  "queries": [
+   "drone design ai"
+  ]
+ },
+ {
+  "repo": "HydranceAK/9inch-VTOL-Aircraft",
+  "stars": 2,
+  "license": null,
+  "created": "2026-05-15",
+  "pushed": "2026-09-16",
+  "desc": "This is a custom designed 7\" drone that can transform into plane. Im using a rather unique approach to this VTOL aircraft by designing the motors to switch into forward flight position, however the mo",
+  "homepage": "",
+  "queries": [
+   "drone design ai"
+  ]
+ },
+ {
+  "repo": "deepak-gupta-git/brainpi_lab",
+  "stars": 2,
+  "license": null,
+  "created": "2026-04-24",
+  "pushed": "2026-08-27",
+  "desc": "BrainPi Innovation Lab is a high-performance, It serves as a digital gateway for an innovation hub specializing in Robotics, Drone Technology, and AI training for schools. The site features a futurist",
+  "homepage": "",
+  "queries": [
+   "drone design ai"
+  ]
+ },
+ {
+  "repo": "gowrisankaran25/Railway-Track-Fault-Detection",
+  "stars": 2,
+  "license": "MIT",
+  "created": "2026-08-04",
+  "pushed": "2026-08-29",
+  "desc": "Railway Command Center (RCC) is a modern, AI-powered infrastructure monitoring platform designed to detect and manage railway track faults. It uses automated drone fleets and predictive machine learni",
+  "homepage": "https://gowrisankaran25.github.io/Railway-Track-Fault-Detection/",
+  "queries": [
+   "drone design ai"
+  ]
+ },
+ {
+  "repo": "Arihant3704/agentic-ros-drone-studio",
+  "stars": 2,
+  "license": null,
+  "created": "2026-05-23",
+  "pushed": "2026-05-23",
+  "desc": "A high-fidelity Agentic ROS 2 quadcopter simulation and control dashboard. Integrates a local Ollama LLM running a ReAct cognitive loop for autonomous mission-oriented flight plans with obstacle avoid",
+  "homepage": "",
+  "queries": [
+   "quadcopter llm"
+  ]
+ },
+ {
+  "repo": "mo9652962-ai/circuit-agent",
+  "stars": 2,
+  "license": "MIT",
+  "created": "2026-10-01",
+  "pushed": "2026-11-22",
+  "desc": "Prompt \u2192 Schematic \u2192 Layout \u2192 3D Enclosure: AI Hardware Synthesis, CircuitBlocks DSL, and MCP Server for KiCad/JLCPCB manufacturing",
+  "homepage": "https://github.com/mo9652962-ai/circuit-agent",
+  "queries": [
+   "electronics llm agent"
+  ]
+ },
+ {
+  "repo": "Naam/boardwright",
+  "stars": 2,
+  "license": "MIT",
+  "created": "2026-06-01",
+  "pushed": "2026-06-01",
+  "desc": "JSON-described perfboard / stripboard / breadboard layout for humans and AI agents \u2014 auto-routes nets, runs an ERC (electrical-rule check), and renders a two-sided, self-documenting HTML/SVG board. He",
+  "homepage": "",
+  "queries": [
+   "electronics llm agent"
+  ]
+ },
+ {
+  "repo": "VarunKesarwani/VarunKesarwani",
+  "stars": 2,
+  "license": null,
+  "created": "2026-10-09",
+  "pushed": "2026-10-09",
+  "desc": "run Gupta  Senior Technical Lead \u00b7 Enterprise Solution Architect  C# / .NET \u00b7 Distributed Systems \u00b7 Azure \u00b7 Edge & Cloud Platforms \u00b7 AI Systems  \ud83d\udccd Chennai, India \u00b7 \ud83c\udf0d Open to relocation LinkedIn \u00b7 GitH",
+  "homepage": "",
+  "queries": [
+   "electronics llm agent"
+  ]
+ },
+ {
+  "repo": "wogokoro/Agentic-CAD-Skills",
+  "stars": 2,
+  "license": "Apache-2.0",
+  "created": "2026-08-13",
+  "pushed": "2026-08-13",
+  "desc": "The tool layer for CAD agents: skill definitions, MCP interfaces, typed tools and post-condition checks. Part of the Agentic Mechanical Engineering collection by WOGO.",
+  "homepage": "https://www.wogo.ai/en/",
+  "queries": [
+   "mechanical engineering llm"
+  ]
+ },
+ {
+  "repo": "spandanamotapothula0/AI-water-monitoring-agent",
+  "stars": 2,
+  "license": null,
+  "created": "2026-10-13",
+  "pushed": "2026-10-13",
+  "desc": "AI Water Monitoring Agent is a software-based project that simulates smart water tank monitoring, water-quality insights, and automatic motor control. It features a dashboard for tank levels, TDS, pH,",
+  "homepage": "",
+  "queries": [
+   "physical ai agent design"
+  ]
+ },
+ {
+  "repo": "Matt-Thom/TripleT-KiCad-Agent",
+  "stars": 2,
+  "license": null,
+  "created": "2026-01-03",
+  "pushed": "2026-06-11",
+  "desc": "The TripleT KiCad Agent is an AI-powered engineering assistant designed to bridge the gap between high-level system requirements and physical PCB design. Unlike a simple chatbot, this agent acts as a ",
+  "homepage": "",
+  "queries": [
+   "physical ai agent design"
+  ]
+ },
+ {
+  "repo": "wizdroid/comfyui-wizdroid-tools",
+  "stars": 2,
+  "license": "MIT",
+  "created": "2026-07-29",
+  "pushed": "2026-11-06",
+  "desc": "ComfyUI custom nodes for local Ollama LLMs: image prompt generator (spice/fantasy/detail), character prompt builder (AI or template), ACE-Step 1.5 lyrics + tags, and mode-based text rewriter. Edit pro",
+  "homepage": "",
+  "queries": [
+   "spice llm"
+  ]
+ },
+ {
+  "repo": "afanjul/MiniMilliMicroNanoPicoFemtoAttoZeptoYoctoClaw",
+  "stars": 2,
+  "license": null,
+  "created": "2026-02-09",
+  "pushed": "2026-02-09",
+  "desc": "The absolute physical limit of LLM orchestration. A revolutionary, sub-atomic, post-quantical clone of OpenClaw so small it doesn't even exist. $10^{-27}$ lines of code. Zero overhead. Zero features. ",
+  "homepage": "",
+  "queries": [
+   "fem llm agent"
+  ]
+ },
+ {
+  "repo": "SanjeevBedi/cnc_llm",
+  "stars": 2,
+  "license": null,
+  "created": "2026-02-17",
+  "pushed": "2026-02-17",
+  "desc": "CNC LLM",
+  "homepage": "",
+  "queries": [
+   "cnc llm"
+  ]
+ },
+ {
+  "repo": "JaxsunLee/KG-CM-LLM",
+  "stars": 2,
+  "license": null,
+  "created": "2026-06-08",
+  "pushed": "2026-06-29",
+  "desc": "KGCM is an open and extensible research codebase for knowledge-guided cross-modal learning in CNC predictive maintenance.",
+  "homepage": "",
+  "queries": [
+   "cnc llm"
+  ]
+ },
+ {
+  "repo": "gdhAgent/CNC_AgentCore",
+  "stars": 2,
+  "license": "MIT",
+  "created": "2026-09-02",
+  "pushed": "2026-09-14",
+  "desc": "CNC \u673a\u53f0\u667a\u80fd\u77e5\u8bc6\u5e93\u540e\u7aef\uff08.NET 10 / ASP.NET Core \u00b7 \u5de5\u4e1a RAG + Agent\uff09",
+  "homepage": "",
+  "queries": [
+   "cnc llm"
+  ]
+ },
+ {
+  "repo": "SnazzyGaz/photo-to-cnc-svg",
+  "stars": 2,
+  "license": "MIT",
+  "created": "2026-11-01",
+  "pushed": "2026-11-06",
+  "desc": "LLM agent skill pack (Grok Bot, Claude, ChatGPT-style agents): photo -> bold B/W artwork -> CNC-ready V-carve SVG, with tracer script, previews and prompt templates.",
+  "homepage": "",
+  "queries": [
+   "cnc llm"
+  ]
+ },
+ {
+  "repo": "poita66/CadQueryAgent",
+  "stars": 1,
+  "license": null,
+  "created": "2026-03-06",
+  "pushed": "2026-03-06",
+  "desc": "LLM-powered CLI agent for iterative CadQuery CAD design",
+  "homepage": "",
+  "queries": [
+   "cadquery llm"
+  ]
+ },
+ {
+  "repo": "kumar1441/LLM-FEA-Bench",
+  "stars": 1,
+  "license": null,
+  "created": "2026-08-26",
+  "pushed": "2026-08-28",
+  "desc": "Automated daily harness stress-testing LLM code against real physics with CadQuery + CalculiX (ccx)",
+  "homepage": "",
+  "queries": [
+   "cadquery llm"
+  ]
+ },
+ {
+  "repo": "Blueshadow0107/prompt-to-cad",
+  "stars": 1,
+  "license": null,
+  "created": "2026-05-08",
+  "pushed": "2026-11-10",
+  "desc": "CLI that turns natural-language prompts into executable CadQuery CAD models, using a fine-tuned Qwen3-VL-2B.",
+  "homepage": "",
+  "queries": [
+   "cadquery llm"
+  ]
+ },
+ {
+  "repo": "numinousmuses/genesiss",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-05-19",
+  "pushed": "2026-05-20",
+  "desc": "Local text-to-CAD suite: finetuned LLMs serve CADQuery code through Ollama into an Electron viewer, driven by the genesiss CLI.",
+  "homepage": "",
+  "queries": [
+   "cadquery llm"
+  ]
+ },
+ {
+  "repo": "mikhail-angelov/easycad",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-07-23",
+  "pushed": "2026-10-01",
+  "desc": "LLM chat that builds simple 3D-printable CAD models",
+  "homepage": "https://text2part.bconf.com",
+  "queries": [
+   "cadquery llm"
+  ]
+ },
+ {
+  "repo": "jakmot12/drawing2cad",
+  "stars": 1,
+  "license": null,
+  "created": "2026-11-23",
+  "pushed": "2026-11-24",
+  "desc": "[WIP] Prototyp konwertera rysunk\u00f3w technicznych 2D (wektorowy PDF z Autodesk Inventor) na zweryfikowane modele 3D (STEP) \u2014 AI + CadQuery + OpenCASCADE, 0 cichych b\u0142\u0119d\u00f3w.",
+  "homepage": "",
+  "queries": [
+   "cadquery llm"
+  ]
+ },
+ {
+  "repo": "wogokoro/Agentic-CAD",
+  "stars": 1,
+  "license": "Apache-2.0",
+  "created": "2026-08-13",
+  "pushed": "2026-08-13",
+  "desc": "Agent-driven 3D CAD modeling: parametric features, geometry kernels and scripting APIs. Part of the Agentic Mechanical Engineering collection by WOGO.",
+  "homepage": "https://www.wogo.ai/en/",
+  "queries": [
+   "cadquery llm",
+   "mechanical engineering llm"
+  ]
+ },
+ {
+  "repo": "tilakpatel22/kitty",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-11-07",
+  "pushed": "2026-11-07",
+  "desc": "Kitty: open-source wearable AI assistant for your forearm. 3D-printable, parametric CadQuery design built on an ESP32-S3 with a 3.5\" touchscreen, camera, mic, speaker, haptics and heart-rate sensor. S",
+  "homepage": "",
+  "queries": [
+   "cadquery llm"
+  ]
+ },
+ {
+  "repo": "TomekChen/ai-cad-studio",
+  "stars": 1,
+  "license": null,
+  "created": "2026-07-23",
+  "pushed": "2026-08-14",
+  "desc": "\u81ea\u7136\u8bed\u8a00\u9a71\u52a8\u7684\u53c2\u6570\u5316CAD\u5efa\u6a21\u7cfb\u7edf | LLM + build123d + React + Docker",
+  "homepage": "",
+  "queries": [
+   "build123d llm"
+  ]
+ },
+ {
+  "repo": "vishwa573/Intent-Grounded-CAD",
+  "stars": 1,
+  "license": null,
+  "created": "2026-02-25",
+  "pushed": "2026-06-26",
+  "desc": "A agent to make out off the shelf LLMs better at 3D CAD generation in build123d framework. No fine tuning required",
+  "homepage": "",
+  "queries": [
+   "build123d llm",
+   "llm cad generation"
+  ]
+ },
+ {
+  "repo": "sagarshedage7/text-to-cad",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-07-27",
+  "pushed": "2026-07-31",
+  "desc": "Generate 3D CAD geometry from text, images, or PDF drawings using a local LLM. Self-correcting build123d generation with sandboxed execution and STEP validation.",
+  "homepage": "",
+  "queries": [
+   "build123d llm"
+  ]
+ },
+ {
+  "repo": "Misaka0x26FE/Awesome-Agentic-CAD",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-11-08",
+  "pushed": "2026-11-08",
+  "desc": "A technical index of open/closed tools, MCP interfaces, benchmarks, and failure modes for LLM-driven CAD/CAE.",
+  "homepage": "",
+  "queries": [
+   "build123d llm"
+  ]
+ },
+ {
+  "repo": "ThatEmbeddedGuy/llm2openscad",
+  "stars": 1,
+  "license": null,
+  "created": "2026-07-12",
+  "pushed": "2026-07-12",
+  "desc": "",
+  "homepage": "",
+  "queries": [
+   "openscad llm"
+  ]
+ },
+ {
+  "repo": "rushikeshgarad2024-dev/llm-cad-copilot-engine",
+  "stars": 1,
+  "license": null,
+  "created": "2026-09-08",
+  "pushed": "2026-09-10",
+  "desc": "Natural Language to 3D Parametric CAD Generation Engine (Text-to-CAD via OpenSCAD & Three.js)",
+  "homepage": "",
+  "queries": [
+   "openscad llm",
+   "llm cad generation"
+  ]
+ },
+ {
+  "repo": "rnmourao/llm-3dprint-anything",
+  "stars": 1,
+  "license": null,
+  "created": "2026-05-01",
+  "pushed": "2026-06-14",
+  "desc": "Generic LLM-driven 3D printing skill: describe any object, validate its physical viability, generate OpenSCAD, slice to G-code, send over USB serial.",
+  "homepage": "",
+  "queries": [
+   "openscad llm",
+   "3d printing llm"
+  ]
+ },
+ {
+  "repo": "rx290/polyforge",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-08-13",
+  "pushed": "2026-11-07",
+  "desc": "Offline text-to-CAD: describe a part, get checked OpenSCAD, FreeCAD or Blender geometry. Optional local LLM, photogrammetry, printability checks",
+  "homepage": "",
+  "queries": [
+   "openscad llm"
+  ]
+ },
+ {
+  "repo": "xiiiii422/AI-3D-Forge",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-10-18",
+  "pushed": "2026-10-18",
+  "desc": "Turn one sentence into a printable 3D model: DeepSeek + OpenSCAD + STL, with real geometry checks. Windows desktop app.",
+  "homepage": "",
+  "queries": [
+   "openscad llm"
+  ]
+ },
+ {
+  "repo": "DanNixon/the-phantasm-press",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-04-24",
+  "pushed": "2026-08-19",
+  "desc": "A physical card driven AI storyteller, that prints onto receipt paper.",
+  "homepage": "",
+  "queries": [
+   "openscad llm"
+  ]
+ },
+ {
+  "repo": "BoweyLou/llm-to-3dprint",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-04-13",
+  "pushed": "2026-07-15",
+  "desc": "LLM-guided parametric CAD generation with fit checks and experimental Bambu 3MF handoff",
+  "homepage": "",
+  "queries": [
+   "llm cad generation"
+  ]
+ },
+ {
+  "repo": "prashantkul366/textcad-bench",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-05-29",
+  "pushed": "2026-05-29",
+  "desc": "Unified benchmark for LLM-based text-to-CAD generation \u2014 frozen test sets, unified metrics, 7 models",
+  "homepage": "",
+  "queries": [
+   "llm cad generation"
+  ]
+ },
+ {
+  "repo": "Mbvjdev/onshape-mcp",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-06-16",
+  "pushed": "2026-09-24",
+  "desc": "Secure, rate-limited MCP server for controlling Onshape CAD from Hermes Agent.",
+  "homepage": "",
+  "queries": [
+   "onshape mcp"
+  ]
+ },
+ {
+  "repo": "AnasShaheen2012/onshape-mcp",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-11-17",
+  "pushed": "2026-11-17",
+  "desc": "MCP server that connects Claude to Onshape CAD: browse, edit, render and export your models",
+  "homepage": "",
+  "queries": [
+   "onshape mcp"
+  ]
+ },
+ {
+  "repo": "Bennyco86/ultron-onshape-mcp",
+  "stars": 1,
+  "license": "NOASSERTION",
+  "created": "2026-07-10",
+  "pushed": "2026-10-02",
+  "desc": "Performance-tuned fork of jarvis-onshape-mcp: Claude drives real Onshape CAD. 3.2x faster verify loop, ~46% fewer tokens, working circular patterns. MIT.",
+  "homepage": "https://bennyco86.github.io/ultron-onshape-mcp/",
+  "queries": [
+   "onshape mcp"
+  ]
+ },
+ {
+  "repo": "saltyeg/cadkit-mcp",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-06-24",
+  "pushed": "2026-06-25",
+  "desc": "cadkit + onshape MCP servers for driving Onshape from an LLM \u2014 idiomatic, fully-defined, variable-driven CAD authoring",
+  "homepage": "",
+  "queries": [
+   "onshape mcp"
+  ]
+ },
+ {
+  "repo": "ricokahler/onshape-cadscript",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-07-09",
+  "pushed": "2026-09-10",
+  "desc": "A local-first, script-driven Onshape CAD workflow for Codex and printable parts.",
+  "homepage": "https://ricokahler.github.io/onshape-cadscript/",
+  "queries": [
+   "onshape mcp"
+  ]
+ },
+ {
+  "repo": "pat-gc/H2-cad-mcp",
+  "stars": 1,
+  "license": null,
+  "created": "2026-11-14",
+  "pushed": "2026-11-15",
+  "desc": "FSGen-based semantic CAD planning and experimental browser-native Onshape integration",
+  "homepage": "",
+  "queries": [
+   "onshape mcp"
+  ]
+ },
+ {
+  "repo": "ARES-23247/ares-onshape-local",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-10-07",
+  "pushed": "2026-10-09",
+  "desc": "Local MCP tools and shared skills for native Onshape CAD through a signed-in session, avoiding the annual API allowance.",
+  "homepage": "",
+  "queries": [
+   "onshape mcp"
+  ]
+ },
+ {
+  "repo": "whydumb/urdf_LLM",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-01-07",
+  "pushed": "2026-02-16",
+  "desc": "Render URDF/MJCF/USD robots instantly in your browser",
+  "homepage": "https://render.mechaverse.dev",
+  "queries": [
+   "urdf llm"
+  ]
+ },
+ {
+  "repo": "maoyuecong682/Blender-LLM-Robot-Simulator-stilluploading",
+  "stars": 1,
+  "license": null,
+  "created": "2026-07-16",
+  "pushed": "2026-07-24",
+  "desc": "A Blender-based LLM-driven robot behavior simulation platform. Currently using Unitree G1 as the test body, and in the future, it will be replaced with a new robot urdf via robot/robot_description.jso",
+  "homepage": "",
+  "queries": [
+   "urdf llm"
+  ]
+ },
+ {
+  "repo": "arcueil/jaynes-robot",
+  "stars": 1,
+  "license": "Apache-2.0",
+  "created": "2026-07-02",
+  "pushed": "2026-07-17",
+  "desc": "Jaynes's reasoning robot \u2014 an LLM consultant that reads the M\u00e9moires. Design phase.",
+  "homepage": "",
+  "queries": [
+   "robot design llm"
+  ]
+ },
+ {
+  "repo": "suuuhululu/co-human-robot-LEGO-assembly",
+  "stars": 1,
+  "license": null,
+  "created": "2026-10-03",
+  "pushed": "2026-11-16",
+  "desc": "Conversational block design and human-robot collaborative assembly with Doosan M0609",
+  "homepage": "https://suuuhululu.github.io/co-assembly/",
+  "queries": [
+   "robot design llm"
+  ]
+ },
+ {
+  "repo": "fra-cir06/Smarrtino_llm_FineTuning",
+  "stars": 1,
+  "license": null,
+  "created": "2026-10-17",
+  "pushed": "2026-10-17",
+  "desc": "Official repository for SMARRtino LLM. A fine-tuned Gemma 3 (4B) model via Unsloth (QLoRA) designed for the 3D-printed educational social robot by Robotics 3D. Includes training scripts and Ollama (GG",
+  "homepage": "",
+  "queries": [
+   "robot design llm"
+  ]
+ },
+ {
+  "repo": "DiegoMaioneVallarino/humanText.js",
+  "stars": 1,
+  "license": null,
+  "created": "2026-11-03",
+  "pushed": "2026-11-05",
+  "desc": "Unrobot is a lightweight tool designed to strip away predictable LLM syntax, corporate buzzwords, and robotic sentence structures, replacing them with authentic, human-like phrasing.",
+  "homepage": "",
+  "queries": [
+   "robot design llm"
+  ]
+ },
+ {
+  "repo": "rbaddam/humanizer",
+  "stars": 1,
+  "license": "NOASSERTION",
+  "created": "2026-04-30",
+  "pushed": "2026-04-30",
+  "desc": "AI agent skill for Claude Code and opencode. Finds and removes AI, LLM and robotic writing patterns and rewrites text to sound like human. Works across design docs, READMEs, code comments, and emails.",
+  "homepage": "",
+  "queries": [
+   "robot design llm"
+  ]
+ },
+ {
+  "repo": "LuciusNwakamma/vsu-spot-dog",
+  "stars": 1,
+  "license": null,
+  "created": "2026-04-24",
+  "pushed": "2026-05-06",
+  "desc": "Our project, VSU Spot, is an innovative robotic dog designed to serve as a campus tour guide for Virginia State University. Powered by Jetson Nano and a Large Language Model (LLM), spot combines artif",
+  "homepage": "https://vsu-spot-dog.onrender.com/",
+  "queries": [
+   "robot design llm"
+  ]
+ },
+ {
+  "repo": "Elon-Jiang/robo-agent-bench",
+  "stars": 1,
+  "license": "Apache-2.0",
+  "created": "2026-11-09",
+  "pushed": "2026-11-11",
+  "desc": "Can an LLM agent actually tidy a table? Physics-scored household manipulation benchmark for LLM/VLM agents driving a simulated robot arm (MuJoCo).",
+  "homepage": "",
+  "queries": [
+   "mujoco llm agent"
+  ]
+ },
+ {
+  "repo": "kouroshSA/xarm6-digital-twin-v5",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-05-26",
+  "pushed": "2026-11-15",
+  "desc": "UFACTORY xArm6 on a 700mm rail \u2014 MuJoCo digital twin in two flavors: manual interactive control (basic v5) and Claude-driven LLM agent (LLM v5).",
+  "homepage": "",
+  "queries": [
+   "mujoco llm agent"
+  ]
+ },
+ {
+  "repo": "kashaffnoor/g1-assembly-multiagent",
+  "stars": 1,
+  "license": null,
+  "created": "2026-08-05",
+  "pushed": "2026-08-05",
+  "desc": "Multi-agent LLM pipeline (Planner/Verifier/Inspector) for a simulated G1 humanoid pick-and-place assembly cell in MuJoCo, with RAG-grounded safety reasoning",
+  "homepage": "",
+  "queries": [
+   "mujoco llm agent"
+  ]
+ },
+ {
+  "repo": "lizimo061/robo_mj_bench",
+  "stars": 1,
+  "license": null,
+  "created": "2026-10-21",
+  "pushed": "2026-10-23",
+  "desc": "A vision-first MuJoCo robotics benchmark for LLM agents, featuring a standard YAM arm, eight tabletop tasks, camera-based control, and private ground-truth scoring.",
+  "homepage": "",
+  "queries": [
+   "mujoco llm agent"
+  ]
+ },
+ {
+  "repo": "Xeon87/Agentic_Robot_Sim2Real_Experiment_Platform",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-10-26",
+  "pushed": "2026-11-24",
+  "desc": "LLM-agent-driven manipulation on the NERO 7-DOF arm. A GPT agent plans and executes egg pick-and-place in MuJoCo, using ROS2 Humble, MoveIt (BioIK) and cuRobo GPU motion planning. Sim-to-real with a R",
+  "homepage": "",
+  "queries": [
+   "mujoco llm agent"
+  ]
+ },
+ {
+  "repo": "ApurvK032/dex-coder",
+  "stars": 1,
+  "license": null,
+  "created": "2026-10-27",
+  "pushed": "2026-11-01",
+  "desc": "Agentic AI for robotics: an LLM agent writes the vision-based controller for a humanoid hand (Unitree G1 + Dex3, MuJoCo). 92-100% on unseen layouts and conditions, ~$2.60 per controller.",
+  "homepage": "",
+  "queries": [
+   "mujoco llm agent"
+  ]
+ },
+ {
+  "repo": "chaowang111/microduck-sim2real",
+  "stars": 1,
+  "license": "NOASSERTION",
+  "created": "2026-11-23",
+  "pushed": "2026-11-23",
+  "desc": "\u53cc\u8db3\u5c0f\u9e2d\u673a\u5668\u4eba\u7684\u5f3a\u5316\u5b66\u4e60\u63a7\u5236\u3001Sim-to-Real \u90e8\u7f72\u4e0e\u8bed\u97f3\u5927\u6a21\u578b Agent\uff08\u4e2a\u4eba\u9879\u76ee\uff0c\u57fa\u4e8e\u5f00\u6e90 Microduck \u5e73\u53f0\uff1bPPO / mjlab / ONNX / LLM tool calling\uff09",
+  "homepage": "",
+  "queries": [
+   "mujoco llm agent"
+  ]
+ },
+ {
+  "repo": "xthomaswang/ahc",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-10-07",
+  "pushed": "2026-11-18",
+  "desc": "Agentic Hardware Control (AHC): MCP server and Claude Code plugin for agent-driven lab robots (Hamilton STARlet, Opentrons OT-2; simulation first)",
+  "homepage": "",
+  "queries": [
+   "robot simulation agent claude"
+  ]
+ },
+ {
+  "repo": "cplanow/Canterbury-Press",
+  "stars": 1,
+  "license": "GPL-3.0",
+  "created": "2026-03-22",
+  "pushed": "2026-04-04",
+  "desc": "Project to use LLM/AI models to help build and design models for 3D printing",
+  "homepage": "",
+  "queries": [
+   "3d printing llm"
+  ]
+ },
+ {
+  "repo": "ruslan-nesterov/gcode-tokenizer",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-04-20",
+  "pushed": "2026-08-15",
+  "desc": "Custom BPE tokenizer for G-Code (CNC/3D Printing). Standard LLM tokenizers waste context window on machine commands. This gcode-tokenizer optimizes this by treating coordinates and G/M codes as unifie",
+  "homepage": "",
+  "queries": [
+   "3d printing llm",
+   "gcode llm",
+   "cnc llm"
+  ]
+ },
+ {
+  "repo": "huangxiantao666666-dot/LLM-Gcode-Eval",
+  "stars": 1,
+  "license": null,
+  "created": "2026-01-27",
+  "pushed": "2026-01-27",
+  "desc": "LLM-GCode-Eval is a framework designed to benchmark and evaluate the ability of Large Language Models (LLMs) to generate functional CNC G-code.",
+  "homepage": "",
+  "queries": [
+   "gcode llm",
+   "cnc llm"
+  ]
+ },
+ {
+  "repo": "feodor-ra/printables-mcp",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-11-01",
+  "pushed": "2026-11-01",
+  "desc": "MCP server for Printables.com: search 3D models, read model cards, list files and get download links",
+  "homepage": "https://pypi.org/project/printables-mcp/",
+  "queries": [
+   "gcode llm"
+  ]
+ },
+ {
+  "repo": "MundaPlus/printwright",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-10-13",
+  "pushed": "2026-10-19",
+  "desc": "Describe a part, see it on the printer bed, print it. Claude Code + text-to-cad + OrcaSlicer + Klipper.",
+  "homepage": "https://munda.si",
+  "queries": [
+   "gcode llm"
+  ]
+ },
+ {
+  "repo": "Damzy-23/AI-DRONE-DESIGN-SIMULATOR",
+  "stars": 1,
+  "license": null,
+  "created": "2026-03-06",
+  "pushed": "2026-03-06",
+  "desc": "HVN LABS ASSIST",
+  "homepage": "",
+  "queries": [
+   "drone design ai"
+  ]
+ },
+ {
+  "repo": "chethangowdakn7-hue/nexxera--drone-designer",
+  "stars": 1,
+  "license": null,
+  "created": "2026-03-21",
+  "pushed": "2026-05-22",
+  "desc": "\"AI-powered drone design and simulation engine. Features a proprietary sLLM for generative 3D modeling and autonomous flight physics validation.\"",
+  "homepage": "",
+  "queries": [
+   "drone design ai"
+  ]
+ },
+ {
+  "repo": "zakiuhh/deckyDocu",
+  "stars": 1,
+  "license": null,
+  "created": "2026-04-20",
+  "pushed": "2026-08-08",
+  "desc": "Next-gen autonomous aerial combat drone concept. Covers hypersonic propulsion (Mach 6\u20138), adaptive stealth, AI fire control, swarm warfare, and multi-domain mission profiles. Researched by Umar Khatta",
+  "homepage": "https://decky-docu.vercel.app",
+  "queries": [
+   "drone design ai"
+  ]
+ },
+ {
+  "repo": "pratikdotdev/AI_DRONE_SIMULATOR",
+  "stars": 1,
+  "license": null,
+  "created": "2026-08-31",
+  "pushed": "2026-08-31",
+  "desc": "A robust, simulation-driven environment designed for developing, testing, and visualizing flight control algorithms, embedded firmware logic, and autonomous navigation systems. Built with a focus on r",
+  "homepage": "",
+  "queries": [
+   "drone design ai"
+  ]
+ },
+ {
+  "repo": "bartlomiejszozda/ros2-drone-autonomy",
+  "stars": 1,
+  "license": "AGPL-3.0",
+  "created": "2026-11-13",
+  "pushed": "2026-11-16",
+  "desc": " Autonomous quadcopter in simulation: ROS 2, ArduPilot SITL, Gazebo; visual servoing, YOLO detection, LLM camera assistant",
+  "homepage": "",
+  "queries": [
+   "quadcopter llm"
+  ]
+ },
+ {
+  "repo": "ANetResearch/ANet-Relay",
+  "stars": 1,
+  "license": "NOASSERTION",
+  "created": "2026-11-06",
+  "pushed": "2026-11-25",
+  "desc": "Ground control for agent swarms: fly MAVLink drone fleets with people, LLM agents and 50 Hz onboard programs. Gamepad possession and hand-back, Gazebo-style rotor sim, LAN dogfights and leaderboard, M",
+  "homepage": "https://github.com/ANetResearch/ANet-Relay/wiki",
+  "queries": [
+   "quadcopter llm"
+  ]
+ },
+ {
+  "repo": "akaalias/airloom",
+  "stars": 1,
+  "license": "GPL-3.0",
+  "created": "2026-07-13",
+  "pushed": "2026-07-30",
+  "desc": "Autonomous Research with AI: evolving quadcopter frame geometry for Wh/km \u2014 an autoresearch loop of a genetic algorithm over the open-source Source One V6 plate drawings, six simulated weather scenari",
+  "homepage": "http://alexisrondeau.me/airloom/",
+  "queries": [
+   "quadcopter llm"
+  ]
+ },
+ {
+  "repo": "PranavAchar01/etch",
+  "stars": 1,
+  "license": null,
+  "created": "2026-10-17",
+  "pushed": "2026-10-27",
+  "desc": "1st overall, Recursive Agents Hackathon ($14K). Describe a circuit, get a routed and checked PCB.",
+  "homepage": "https://etch.chat",
+  "queries": [
+   "electronics llm agent"
+  ]
+ },
+ {
+  "repo": "AlexanderJ-Carter/AlexanderJ-Carter",
+  "stars": 1,
+  "license": null,
+  "created": "2026-03-17",
+  "pushed": "2026-11-25",
+  "desc": "Personal profile hub: LLM agents & executable social science, plus projects across software, electronics, Linux, and Verilog.",
+  "homepage": "https://alexander.xin",
+  "queries": [
+   "electronics llm agent"
+  ]
+ },
+ {
+  "repo": "Mirzokhidbek/storeAiAgent",
+  "stars": 1,
+  "license": null,
+  "created": "2026-11-20",
+  "pushed": "2026-11-20",
+  "desc": "AI shopping assistant for a fictional Uzbek electronics store. RAG over store policies, hybrid product search, LangGraph agent with MCP tools, Gemini and Streamlit.",
+  "homepage": "",
+  "queries": [
+   "electronics llm agent"
+  ]
+ },
+ {
+  "repo": "Serena371/Generative-Retrieval-for-Next-Item-Recommendation-on-Amazon-Electronics",
+  "stars": 1,
+  "license": null,
+  "created": "2026-11-23",
+  "pushed": "2026-11-23",
+  "desc": "Next-item recommendation on 1M Amazon Electronics interactions comparing Popularity, NCF and TIGER generative retrieval (semantic IDs via RQ-VAE + T5; HR@10 0.594 vs. 0.528 NCF), plus a grounded shopp",
+  "homepage": "",
+  "queries": [
+   "electronics llm agent"
+  ]
+ },
+ {
+  "repo": "YoussufWagih/YoussufWagih",
+  "stars": 1,
+  "license": null,
+  "created": "2026-07-17",
+  "pushed": "2026-07-30",
+  "desc": "AI Automation Consultant | B.Sc. Mechanical Design Engineering | Python \u00b7 LLMs \u00b7 Workflow Automation",
+  "homepage": "",
+  "queries": [
+   "mechanical engineering llm"
+  ]
+ },
+ {
+  "repo": "ricardo-yos/shaft-design-agent",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-08-14",
+  "pushed": "2026-08-20",
+  "desc": "LLM-powered mechanical engineering agent for shaft fatigue design using deterministic calculation tools and function calling.",
+  "homepage": "",
+  "queries": [
+   "mechanical engineering llm"
+  ]
+ },
+ {
+  "repo": "Coddyum/context-engineering",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-09-21",
+  "pushed": "2026-09-21",
+  "desc": "How I run coding agents on large projects: routed memory, rules loaded on demand, mechanical guardrails, and copy-paste-ready Go and Next.js templates. Built on one idea \u2014 an agent's cost is what it h",
+  "homepage": "",
+  "queries": [
+   "mechanical engineering llm"
+  ]
+ },
+ {
+  "repo": "andrewnakas/decomp-harness",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-09-15",
+  "pushed": "2026-09-15",
+  "desc": "Reverse engineering with an AI model in the loop, where the model is asked only for judgment and everything else is mechanical.",
+  "homepage": "",
+  "queries": [
+   "mechanical engineering llm"
+  ]
+ },
+ {
+  "repo": "prgazevedo/claude-code-workflows",
+  "stars": 1,
+  "license": "GPL-3.0",
+  "created": "2026-08-04",
+  "pushed": "2026-08-04",
+  "desc": "Workflow Manager for Claude Code \u2014 phase-gated engineering workflow with mechanical hook enforcement, eval-tested agent prompts, and a script-verdict prose judge",
+  "homepage": "",
+  "queries": [
+   "mechanical engineering llm"
+  ]
+ },
+ {
+  "repo": "TYF009/AI-agent-terminal",
+  "stars": 1,
+  "license": "NOASSERTION",
+  "created": "2026-09-14",
+  "pushed": "2026-09-14",
+  "desc": "Give LLMs physical-world perception & control via MCP \u2014 self-designed ESP32-S3 hardware, end-to-end solo build",
+  "homepage": "",
+  "queries": [
+   "physical ai agent design"
+  ]
+ },
+ {
+  "repo": "akeelbuilds/print-book-design",
+  "stars": 1,
+  "license": null,
+  "created": "2026-07-28",
+  "pushed": "2026-07-28",
+  "desc": "An advanced AI Agent Skill for automating print book design, typesetting, and production. Built for KDP and physical publishing.",
+  "homepage": "",
+  "queries": [
+   "physical ai agent design"
+  ]
+ },
+ {
+  "repo": "S-SUJAN-S/rtl2gds",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-08-05",
+  "pushed": "2026-10-10",
+  "desc": "\ud83d\ude80 SiliconFlow-AI: Autonomous RTL-to-GDSII Physical Design Framework uniting LLM Agents with native EDA engines (Verilator, Yosys, OpenSTA, OpenLane) on SkyWater 130nm PDK.",
+  "homepage": "https://github.com/S-SUJAN-S/rtl2gds",
+  "queries": [
+   "physical ai agent design"
+  ]
+ },
+ {
+  "repo": "XVTSN1/XVTSN",
+  "stars": 1,
+  "license": null,
+  "created": "2026-06-21",
+  "pushed": "2026-06-21",
+  "desc": "XVTSN is a sovereign, physical gold backed cryptocurrency on the Ethereum network designed to serve as a decentralized bearer asset for both humans and AI agents. ",
+  "homepage": "",
+  "queries": [
+   "physical ai agent design"
+  ]
+ },
+ {
+  "repo": "mokshtheverma-max/signoff-gym",
+  "stars": 1,
+  "license": "Apache-2.0",
+  "created": "2026-10-11",
+  "pushed": "2026-10-24",
+  "desc": "Graded chip physical-design tasks for AI agents. The agent must make a small design meet its clock, power and area limits in the open OpenROAD flow (SkyWater 130 nm), then a hidden grader rebuilds and",
+  "homepage": "",
+  "queries": [
+   "physical ai agent design"
+  ]
+ },
+ {
+  "repo": "0noxtackore/RRSmart",
+  "stars": 1,
+  "license": null,
+  "created": "2026-08-04",
+  "pushed": "2026-08-05",
+  "desc": "An AI-driven agent framework designed for Consorcio RR to bridge physical inventory reception with fiscal ledger systems, eliminating manual data entry bottlenecks through real-time OCR parsing, autom",
+  "homepage": "",
+  "queries": [
+   "physical ai agent design"
+  ]
+ },
+ {
+  "repo": "JIAlonglong/robot-llm-align",
+  "stars": 1,
+  "license": null,
+  "created": "2026-03-11",
+  "pushed": "2026-03-16",
+  "desc": "This project builds domain-specific datasets for robot control (PID, path planning, EKF, arm kinematics, etc.), trains aligned models via SFT \u2192 DPO, and integrates PythonRobotics tools to build a Robo",
+  "homepage": "",
+  "queries": [
+   "robot arm llm build"
+  ]
+ },
+ {
+  "repo": "jvc24/Autonomous-Robot-LLM-DRL",
+  "stars": 1,
+  "license": null,
+  "created": "2026-03-21",
+  "pushed": "2026-04-04",
+  "desc": "Autonomous robotic manipulation framework combining teleoperation data, deep reinforcement learning, and Large Language Models (LLMs) to enable sequential and multitask execution from natural language",
+  "homepage": "",
+  "queries": [
+   "teleoperation llm"
+  ]
+ },
+ {
+  "repo": "abxn4r/atlas-agent",
+  "stars": 1,
+  "license": null,
+  "created": "2026-11-18",
+  "pushed": "2026-11-18",
+  "desc": "ATLAS-3B: Edge-Native Ambient AI Agent. Deterministic JSON Function Calling & PC Teleoperation in a 1.92 GB Footprint.",
+  "homepage": "https://huggingface.co/abxn4r/Atlas-Qwen2.5-3B-Instruct-GGUF",
+  "queries": [
+   "teleoperation llm"
+  ]
+ },
+ {
+  "repo": "ferrite-systems/spice-rs",
+  "stars": 1,
+  "license": "BSD-3-Clause",
+  "created": "2026-04-08",
+  "pushed": "2026-05-11",
+  "desc": "Experimental LLM-assisted port of ngspice to Rust",
+  "homepage": "",
+  "queries": [
+   "spice llm"
+  ]
+ },
+ {
+  "repo": "pavannithin224-abcd/TinySPICE",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-11-06",
+  "pushed": "2026-11-06",
+  "desc": "Budget-aware, reliability-driven LLM agent for reproducible MOSFET characterization (ngspice + SKY130). Pre-registered experiments, honest negative results.",
+  "homepage": "",
+  "queries": [
+   "spice llm"
+  ]
+ },
+ {
+  "repo": "authzed/langchain-spicedb",
+  "stars": 1,
+  "license": "Apache-2.0",
+  "created": "2026-01-16",
+  "pushed": "2026-11-12",
+  "desc": "Authorization library for RAG (Retrieval-Augmented Generation) pipelines using SpiceDB. Designed for LangChain and LangGraph integrations with support for any vector store",
+  "homepage": "https://pypi.org/project/langchain-spicedb/",
+  "queries": [
+   "spice llm"
+  ]
+ },
+ {
+  "repo": "monickverma/cursor-electronics",
+  "stars": 1,
+  "license": "AGPL-3.0",
+  "created": "2026-06-03",
+  "pushed": "2026-11-16",
+  "desc": "Circuit OS: AI hardware compiler. Plain English to validated schematic, Arduino firmware, SPICE simulation and BOM. Runs on AMD ROCm via vLLM.",
+  "homepage": "https://circuit-os-ecru.vercel.app",
+  "queries": [
+   "spice llm"
+  ]
+ },
+ {
+  "repo": "nithingovindugari/phychip",
+  "stars": 1,
+  "license": "Apache-2.0",
+  "created": "2026-06-15",
+  "pushed": "2026-11-18",
+  "desc": "An RL environment where a physics simulator (ngspice) is the verifiable reward \u2014 training a 3B LLM to design analog circuits. RLVR/GRPO, 2 decontaminated benchmarks, reward-hacking audit.",
+  "homepage": "https://huggingface.co/NithinReddyG",
+  "queries": [
+   "spice llm"
+  ]
+ },
+ {
+  "repo": "yymqd/kicad-pcb-agent-skills",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-08-18",
+  "pushed": "2026-09-04",
+  "desc": "AI Agent (Hermes) \u9a71\u52a8\u7684 KiCad PCB \u8bbe\u8ba1\u81ea\u52a8\u5316\u6280\u80fd\u96c6\uff1a\u4e09\u6761\u7ba1\u7ebf\uff08kicad-cli / MCP-KiCad / kcaa\uff09\u9636\u6bb5\u5207\u6362\u5de5\u4f5c\u6d41",
+  "homepage": "",
+  "queries": [
+   "spice llm"
+  ]
+ },
+ {
+  "repo": "grgevansdwy/femm-automation",
+  "stars": 1,
+  "license": null,
+  "created": "2026-09-24",
+  "pushed": "2026-10-24",
+  "desc": "LLM agent that turns plain-English design goals into autonomous FEMM simulation searches, testing coil geometry changes and returning the best three-coil 6.78 MHz wireless power transfer design.",
+  "homepage": "",
+  "queries": [
+   "fem llm agent"
+  ]
+ },
+ {
+  "repo": "ThomasSchmiegelt/ema-motor-analysis",
+  "stars": 1,
+  "license": "NOASSERTION",
+  "created": "2026-06-04",
+  "pushed": "2026-10-31",
+  "desc": "CAE toolchain for IPM traction motors: geometry \u2192 EM field \u2192 structural FEM \u2192 thermal \u2192 drive cycle \u2192 PDF report. Every number records which method produced it. CalculiX + Z88Aurora cross-check, topol",
+  "homepage": "",
+  "queries": [
+   "fem llm agent"
+  ]
+ },
+ {
+  "repo": "k1ruxaK/RAG-llm-for-CNC-machine",
+  "stars": 1,
+  "license": null,
+  "created": "2026-05-09",
+  "pushed": "2026-05-09",
+  "desc": "\u041f\u0440\u043e\u0435\u043a\u0442 \u043f\u043e \u043f\u0440\u0435\u0434\u043c\u0435\u0442\u0443 \u0422\u0435\u0445\u043d\u043e\u043b\u043e\u0433\u0438\u0438 \u0438\u043d\u0434\u0443\u0441\u0442\u0440\u0438\u0438 4.0",
+  "homepage": "",
+  "queries": [
+   "cnc llm"
+  ]
+ },
+ {
+  "repo": "gdhAgent/CNC_Agent",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-09-02",
+  "pushed": "2026-09-09",
+  "desc": "CNC \u673a\u53f0\u667a\u80fd\u77e5\u8bc6\u5e93\u540e\u7aef\uff08Python/FastAPI \u00b7 \u5de5\u4e1a RAG + Agent\uff09",
+  "homepage": "",
+  "queries": [
+   "cnc llm"
+  ]
+ },
+ {
+  "repo": "Timo2026/union-export-replica",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-09-28",
+  "pushed": "2026-09-28",
+  "desc": "NVIDIA DGX Spark \u5168\u6808 \u00d7 \u5236\u9020\u8be2\u76d8/\u62a5\u4ef7 Agent \u590d\u523b\u5305 (Nemotron + vLLM + NIM + OpenClaw skills; LLM \u53ea\u63d0\u8bae, \u786e\u5b9a\u6027 CNC \u5f15\u64ce\u5b9a\u4ef7)",
+  "homepage": "",
+  "queries": [
+   "cnc llm"
+  ]
+ },
+ {
+  "repo": "glj401-tech/cam-cloud-api",
+  "stars": 1,
+  "license": "MIT",
+  "created": "2026-06-13",
+  "pushed": "2026-06-21",
+  "desc": "Fusion360 CAM \u00d7 \u901a\u4e49\u5343\u95ee \u667a\u80fd\u6570\u63a7\u5de5\u827a\u63a8\u8350\u7cfb\u7edf | FastAPI\u4e2d\u8f6c + qwen2.5-14b AI\u5207\u524a\u53c2\u6570\u751f\u6210",
+  "homepage": "",
+  "queries": [
+   "cnc llm"
+  ]
+ },
+ {
+  "repo": "homgorn/blender-mcp-ai-wiki",
+  "stars": 0,
+  "license": "MIT",
+  "created": "2026-10-12",
+  "pushed": "2026-11-12",
+  "desc": "Knowledge base for driving Blender from scripts and MCP servers: prompts, setups, workflows and worked cases, published as a static site and as machine-readable JSON.",
+  "homepage": "https://blender-mcp-wiki.refertur.net",
+  "queries": [
+   "blender llm machine"
+  ]
+ },
+ {
+  "repo": "MuditAtrey/onshape-mcp",
+  "stars": 0,
+  "license": "NOASSERTION",
+  "created": "2026-11-12",
+  "pushed": "2026-11-12",
+  "desc": "Model Context Protocol (MCP) server for inspecting, generating, and editing parametric 3D CAD models in Onshape.",
+  "homepage": "",
+  "queries": [
+   "onshape mcp"
+  ]
+ },
+ {
+  "repo": "wenyen-hsu/onshape-mcp",
+  "stars": 0,
+  "license": null,
+  "created": "2026-04-21",
+  "pushed": "2026-04-21",
+  "desc": "",
+  "homepage": "",
+  "queries": [
+   "onshape mcp"
+  ]
+ },
+ {
+  "repo": "WilliamSamson/onshape-mcp",
+  "stars": 0,
+  "license": "MIT",
+  "created": "2026-09-03",
+  "pushed": "2026-09-11",
+  "desc": "Visual agentic MCP server for Onshape, driven by Gemini web vision.",
+  "homepage": "",
+  "queries": [
+   "onshape mcp"
+  ]
+ },
+ {
+  "repo": "mohamedgabal1995-afk/onshape-mcp",
+  "stars": 0,
+  "license": null,
+  "created": "2026-03-06",
+  "pushed": "2026-03-07",
+  "desc": "",
+  "homepage": "",
+  "queries": [
+   "onshape mcp"
+  ]
+ },
+ {
+  "repo": "RoloChoo/urdf_LLM_web",
+  "stars": 0,
+  "license": "MIT",
+  "created": "2026-01-10",
+  "pushed": "2026-02-23",
+  "desc": "Render URDF/MJCF/USD robots instantly in your browser",
+  "homepage": "",
+  "queries": [
+   "urdf llm"
+  ]
+ },
+ {
+  "repo": "cine1052rene/jointsweep",
+  "stars": 0,
+  "license": "Apache-2.0",
+  "created": "2026-09-28",
+  "pushed": "2026-09-28",
+  "desc": "Measure robot descriptions (URDF/MJCF): self-collision inside joint limits, actuator ranges past joint ranges, drift from the source model. No LLM.",
+  "homepage": "",
+  "queries": [
+   "urdf llm"
+  ]
+ },
+ {
+  "repo": "Wangshuo-Arch/Ranger_Mini_4WIS_Chassis_llm-contral_pid",
+  "stars": 0,
+  "license": null,
+  "created": "2026-04-09",
+  "pushed": "2026-04-29",
+  "desc": "\u57fa\u4e8eranger_mini_3\u5e95\u76d8\u7684urdf\u6a21\u578b\uff0c\u5c06\u5176\u63a7\u5236\u5668\u62c6\u89e3\u4e3a8\u4e2a\u53d8\u91cf\uff0c\u5b8c\u6210\u4e00\u7bc7\u8bba\u6587\u7684\u4e5d\u79cd\u8fd0\u52a8\u6a21\u5f0f\u7684\u63a2\u7a76\u3002\u52a0\u5165\u4e86llm\u8c03\u8282pid\u7684\u53c2\u6570",
+  "homepage": "",
+  "queries": [
+   "urdf llm"
+  ]
+ },
+ {
+  "repo": "amirhpd/mechlint",
+  "stars": 0,
+  "license": "Apache-2.0",
+  "created": "2026-09-06",
+  "pushed": "2026-11-20",
+  "desc": "reads a robot's CAD and URDF, computes the physics (mass, inertia, joint torque), checks them against actuator and printing limits, and exposes all of it to an LLM ",
+  "homepage": "",
+  "queries": [
+   "urdf llm"
+  ]
+ },
+ {
+  "repo": "myseiv/eddy",
+  "stars": 0,
+  "license": "Apache-2.0",
+  "created": "2026-11-13",
+  "pushed": "2026-11-23",
+  "desc": "One controller, any robot. Eddy attaches to a robot's existing ROS 2, serial or TCP interface, works out how to drive it with nothing configured by hand, and checks its moves against odometry and, whe",
+  "homepage": "",
+  "queries": [
+   "urdf llm"
+  ]
+ },
+ {
+  "repo": "Hermod-Robotics/Hermod",
+  "stars": 0,
+  "license": null,
+  "created": "2026-06-24",
+  "pushed": "2026-07-01",
+  "desc": "AI-native infrastructure for robot engineering. Generate firmware, URDF, ROS drivers, simulation & BOM from one hardware description file, with hardware-aware AI agents operating within safety boundar",
+  "homepage": "",
+  "queries": [
+   "urdf generate agent"
+  ]
+ },
+ {
+  "repo": "wonsukHeo1025/LLM-Guided-Robot-Arm-Control",
+  "stars": 0,
+  "license": null,
+  "created": "2026-03-10",
+  "pushed": "2026-03-10",
+  "desc": "Built an LLM-based instruction-to-motion-target translation pipeline using prompt design",
+  "homepage": "",
+  "queries": [
+   "robot design llm"
+  ]
+ },
+ {
+  "repo": "ivas-catalin/robot_planning_and_control_by_llm",
+  "stars": 0,
+  "license": null,
+  "created": "2026-05-12",
+  "pushed": "2026-05-12",
+  "desc": "This is an initial stage experimental project designed for controlling a so-101 robot arm by an llm agen.",
+  "homepage": "",
+  "queries": [
+   "robot design llm"
+  ]
+ },
+ {
+  "repo": "sherry-yuhsuan-lin/llm-robot-agent",
+  "stars": 0,
+  "license": null,
+  "created": "2026-07-21",
+  "pushed": "2026-08-13",
+  "desc": "",
+  "homepage": "",
+  "queries": [
+   "mujoco llm agent"
+  ]
+ },
+ {
+  "repo": "SVish1/llm-arm-agent",
+  "stars": 0,
+  "license": "MIT",
+  "created": "2026-11-20",
+  "pushed": "2026-11-23",
+  "desc": "LLM agent that turns natural-language commands into ROS 2 / MoveIt 2 motions on a MuJoCo-simulated Franka Panda, with a 15-task success/latency benchmark",
+  "homepage": "",
+  "queries": [
+   "mujoco llm agent"
+  ]
+ },
+ {
+  "repo": "anish-01/simtoreal-agent",
+  "stars": 0,
+  "license": "MIT",
+  "created": "2026-10-08",
+  "pushed": "2026-10-17",
+  "desc": "Test before you touch: LLM-generated robot plans tested in parallel MuJoCo sims on AMD MI300X",
+  "homepage": "",
+  "queries": [
+   "mujoco llm agent"
+  ]
+ },
+ {
+  "repo": "ATR-Lab/agentic-robotics-workshop",
+  "stars": 0,
+  "license": "MIT",
+  "created": "2026-11-05",
+  "pushed": "2026-11-06",
+  "desc": "Workshop material: agentic workflows for robotics with Codex and Claude Code, from a point-cloud bug to a bounded TurtleBot3 simulation",
+  "homepage": "https://www.atr.cs.kent.edu/",
+  "queries": [
+   "robot simulation agent claude"
+  ]
+ },
+ {
+  "repo": "johannstark/GeminiRobotics-Skills",
+  "stars": 0,
+  "license": "Apache-2.0",
+  "created": "2026-10-15",
+  "pushed": "2026-10-28",
+  "desc": "Agent Skills (Claude Code, Antigravity) for Gemini Robotics-ER 2, MuJoCo and Three.js robot simulation",
+  "homepage": "",
+  "queries": [
+   "robot simulation agent claude"
+  ]
+ },
+ {
+  "repo": "j0n5m1th/frc-agent-toolkit",
+  "stars": 0,
+  "license": "AGPL-3.0",
+  "created": "2026-11-15",
+  "pushed": "2026-11-22",
+  "desc": "MCP servers and Claude Code skills that let an AI assistant debug FRC robots: live NetworkTables, match logs, simulation, Systemcore and CTRE devices.",
+  "homepage": "",
+  "queries": [
+   "robot simulation agent claude"
+  ]
+ },
+ {
+  "repo": "gustavouhlein/llm-arm-sim",
+  "stars": 0,
+  "license": "MIT",
+  "created": "2026-04-19",
+  "pushed": "2026-04-19",
+  "desc": "3D simulation of a 4-DOF robotic arm controlled by an LLM agent (Claude or GPT). The model receives only camera frames plus proprioception and must plan pick-and-place tasks from scratch: look, reason",
+  "homepage": "",
+  "queries": [
+   "robot simulation agent claude"
+  ]
+ },
+ {
+  "repo": "julianjone5/OpenScad",
+  "stars": 0,
+  "license": "MIT",
+  "created": "2026-07-18",
+  "pushed": "2026-07-18",
+  "desc": "Optimized SCAD for 3d printing using LLMs",
+  "homepage": "",
+  "queries": [
+   "3d printing llm"
+  ]
+ },
+ {
+  "repo": "pedropagl/jarvis-voice-assistant",
+  "stars": 0,
+  "license": null,
+  "created": "2026-06-24",
+  "pushed": "2026-09-09",
+  "desc": "Voice assistant for 3D printing lab \u2014 Python, LLM, MCP, real-time dashboard",
+  "homepage": "",
+  "queries": [
+   "3d printing llm"
+  ]
+ },
+ {
+  "repo": "WayMakerSchool/2026_VerSlicer_Checkered",
+  "stars": 0,
+  "license": "MIT",
+  "created": "2026-10-01",
+  "pushed": "2026-10-01",
+  "desc": "AI-powered 3D printing slicer with a local LLM agent. Control slicing, presets, plate setup, and printing using natural language.",
+  "homepage": "https://hsu-lee.github.io/VerSlicer_Web/",
+  "queries": [
+   "3d printing llm"
+  ]
+ },
+ {
+  "repo": "kernelsrinivas/si-llm",
+  "stars": 0,
+  "license": null,
+  "created": "2026-11-03",
+  "pushed": "2026-11-08",
+  "desc": "SI-LLM \u2014 Super Intelligence Large Language Model for complete PCB, CAD, CAM, 3D printing, and simulation. Text, voice, and vision studio to train, improve, and analyze hardware designs.",
+  "homepage": "",
+  "queries": [
+   "3d printing llm"
+  ]
+ },
+ {
+  "repo": "vinodkumarvr26/AI-Based-Assistant",
+  "stars": 0,
+  "license": null,
+  "created": "2026-08-20",
+  "pushed": "2026-08-22",
+  "desc": "AI-powered technical knowledge assistant for industrial 3D printing using RAG, FAISS, embeddings, and local LLMs.",
+  "homepage": "",
+  "queries": [
+   "3d printing llm"
+  ]
+ },
+ {
+  "repo": "SangHun-Kimvalue/Model_Forge",
+  "stars": 0,
+  "license": null,
+  "created": "2026-07-11",
+  "pushed": "2026-11-10",
+  "desc": "AI-assisted 3D printing workflow orchestration prototype \u2014 CAD generation, validation, human approval gate, slicing, artifact tracking",
+  "homepage": "",
+  "queries": [
+   "3d printing llm"
+  ]
+ },
+ {
+  "repo": "RoldCC/de_chatbot_orders_local",
+  "stars": 0,
+  "license": null,
+  "created": "2026-06-15",
+  "pushed": "2026-06-15",
+  "desc": "AI-powered customer service agent for a 3D printing business (Costa Rica) \u2014 Telegram bot, FastAPI, DeepSeek LLM, PostgreSQL, Redis",
+  "homepage": "",
+  "queries": [
+   "3d printing llm"
+  ]
+ },
+ {
+  "repo": "srinjoychinargoswami/ThinkPrintWeb",
+  "stars": 0,
+  "license": "Apache-2.0",
+  "created": "2026-06-20",
+  "pushed": "2026-08-11",
+  "desc": "LLM to CAD tool, use natural language to describe CAD Design and get a ready file for 3D printing using React",
+  "homepage": "https://thinkprintweb.onrender.com/",
+  "queries": [
+   "3d printing llm"
+  ]
+ },
+ {
+  "repo": "enzozanatta-eng/simly",
+  "stars": 0,
+  "license": "MIT",
+  "created": "2026-11-20",
+  "pushed": "2026-11-20",
+  "desc": "Describe a part, get a verified simulation explained like in class. FEA for makers and 3D printing (CalculiX, Gmsh, React, three.js, LLM).",
+  "homepage": "",
+  "queries": [
+   "3d printing llm"
+  ]
+ },
+ {
+  "repo": "ManiBharathy-k/ManiBharathy-k",
+  "stars": 0,
+  "license": null,
+  "created": "2026-07-16",
+  "pushed": "2026-07-16",
+  "desc": "AI & Systems Builder | Full-Stack Developer | AI Agents & Local LLMs | Cloud & DevOps | Server Infrastructure | System Architecture | Networking | IoT & Embedded Systems | Hardware Prototyping | Solid",
+  "homepage": "",
+  "queries": [
+   "3d printing llm"
+  ]
+ },
+ {
+  "repo": "harryhung35/llm-pruning-gcode",
+  "stars": 0,
+  "license": null,
+  "created": "2026-06-26",
+  "pushed": "2026-06-27",
+  "desc": "LLM pruning + QLoRA healing for laser CAM G-code generation",
+  "homepage": "",
+  "queries": [
+   "gcode llm"
+  ]
+ },
+ {
+  "repo": "vicky0619/gcode-llm-compression",
+  "stars": 0,
+  "license": null,
+  "created": "2026-08-27",
+  "pushed": "2026-08-27",
+  "desc": "",
+  "homepage": "",
+  "queries": [
+   "gcode llm"
+  ]
+ },
+ {
+  "repo": "immazella/llm-cad-gcode-platform",
+  "stars": 0,
+  "license": null,
+  "created": "2026-11-14",
+  "pushed": "2026-11-14",
+  "desc": "LLM-based CAD modeling and G-code generation, editing, and validation platform with interactive 3D visualization and MCP integration.",
+  "homepage": "",
+  "queries": [
+   "gcode llm"
+  ]
+ },
+ {
+  "repo": "pgrinste/haas-gcode-optimizer",
+  "stars": 0,
+  "license": "MIT",
+  "created": "2026-09-14",
+  "pushed": "2026-09-19",
+  "desc": "Local LLM agent that iteratively rewrites Haas VF-2 G-code until every block fits the machine real torque and acceleration limits",
+  "homepage": "",
+  "queries": [
+   "gcode llm"
+  ]
+ },
+ {
+  "repo": "sarasamiee/nl2gcode-cnc-thesis",
+  "stars": 0,
+  "license": null,
+  "created": "2026-03-15",
+  "pushed": "2026-03-19",
+  "desc": "Natural language to G-code translation for CNC grinding using NLU and LLM approaches",
+  "homepage": "",
+  "queries": [
+   "gcode llm"
+  ]
+ },
+ {
+  "repo": "cat-huahua/ai-slice",
+  "stars": 0,
+  "license": "MIT",
+  "created": "2026-07-08",
+  "pushed": "2026-07-11",
+  "desc": "AI-optimized 3D slicing for your printer: analyzes an STL, asks an LLM to tune slicing parameters, then slices to G-code via CuraEngine. Electron + multi-LLM (Claude/OpenAI/Ollama).",
+  "homepage": "",
+  "queries": [
+   "gcode llm"
+  ]
+ },
+ {
+  "repo": "Burtle-useless/bambu-x2d-agent-notes",
+  "stars": 0,
+  "license": "MIT",
+  "created": "2026-08-27",
+  "pushed": "2026-08-27",
+  "desc": "Field notes and reference code for driving a Bambu Lab X2D from an LLM agent: official Traditional Chinese HMS error text, toolpath parsing as a queryable structure, and a survey of what eight existin",
+  "homepage": "",
+  "queries": [
+   "gcode llm"
+  ]
+ },
+ {
+  "repo": "bunseflorian/multi-agent-reward-gen",
+  "stars": 0,
+  "license": null,
+  "created": "2026-11-24",
+  "pushed": "2026-11-24",
+  "desc": "A multi-agent pipeline that automatically generates and validates reward functions for quadcopter reinforcement learning environments in IsaacLab. A local LLM served via vLLM powers four specialized a",
+  "homepage": "",
+  "queries": [
+   "quadcopter llm"
+  ]
+ },
+ {
+  "repo": "tadeyeye716/llm-benchmarking-engineering",
+  "stars": 0,
+  "license": null,
+  "created": "2026-09-19",
+  "pushed": "2026-09-19",
+  "desc": "Gold-standard prompt framework for benchmarking LLMs on mechanical engineering tasks",
+  "homepage": "",
+  "queries": [
+   "mechanical engineering llm"
+  ]
+ },
+ {
+  "repo": "gomdan133-ux/llm-mechanical-eval",
+  "stars": 0,
+  "license": "MIT",
+  "created": "2026-11-11",
+  "pushed": "2026-11-11",
+  "desc": "Benchmark grading ChatGPT, Claude and Gemini on 20 applied mechanical and automotive engineering problems. All three scored 9.85 to 10 out of 10; the differences came from shop judgment, not math.",
+  "homepage": "",
+  "queries": [
+   "mechanical engineering llm"
+  ]
+ },
+ {
+  "repo": "kevinfajardo25/mecheng-llm-eval",
+  "stars": 0,
+  "license": "MIT",
+  "created": "2026-11-11",
+  "pushed": "2026-11-11",
+  "desc": "Evaluation set and auto-grader for AI models on mechanical and hardware engineering problems, with unit conversion, error diagnosis, and a reviewer rubric",
+  "homepage": "",
+  "queries": [
+   "mechanical engineering llm"
+  ]
+ },
+ {
+  "repo": "jacobastorga/mech-agent-eval-harness",
+  "stars": 0,
+  "license": null,
+  "created": "2026-10-15",
+  "pushed": "2026-10-15",
+  "desc": "Autonomous Mechanical Agent Benchmarking Harness: Automated Physics Audits & Anti-Gaming Verification for Engineering LLMs",
+  "homepage": "",
+  "queries": [
+   "mechanical engineering llm"
+  ]
+ },
+ {
+  "repo": "stephanieyenyu/LLM_RobotArm_Capstone",
+  "stars": 0,
+  "license": null,
+  "created": "2026-10-10",
+  "pushed": "2026-11-07",
+  "desc": "Natural-language pick-and-place on a UR3e arm. Builds the same system at three levels of planner constraint so the division between model and code can be examined. Every batch is verified in simulatio",
+  "homepage": "",
+  "queries": [
+   "robot arm llm build"
+  ]
+ },
+ {
+  "repo": "mgore/RoboArchitect-AI",
+  "stars": 0,
+  "license": null,
+  "created": "2026-07-19",
+  "pushed": "2026-08-26",
+  "desc": "The first program to help the user build and develop an AI integrated rover, arm, or wheeled robot driven by a unique LLM brain. Through the AI agent and the user inputs, the user can set a budget on ",
+  "homepage": "",
+  "queries": [
+   "robot arm llm build"
+  ]
+ },
+ {
+  "repo": "Shoaibhayat90/humanoidroid",
+  "stars": 0,
+  "license": "MIT",
+  "created": "2026-10-04",
+  "pushed": "2026-10-04",
+  "desc": "HUMANOIDROID \u2014 offline AI assistant. Chat in your browser via WebLLM + WebGPU, or connect local Ollama. Private by design.",
+  "homepage": "https://shoaibhayat90.github.io/humanoidroid/",
+  "queries": [
+   "humanoid design llm"
+  ]
+ },
+ {
+  "repo": "nickjaimes/QUENNE-MED-BIO-FACTORY-LLM",
+  "stars": 0,
+  "license": "MIT",
+  "created": "2026-01-16",
+  "pushed": "2026-01-16",
+  "desc": "QUENNE-MED BIO-FACTORY LLM is a 175B parameter multimodal medical foundation model specifically designed for surgical robotics, biological manufacturing, and clinical reasoning. This model serves as t",
+  "homepage": "",
+  "queries": [
+   "humanoid design llm"
+  ]
+ },
+ {
+  "repo": "gy-gere/afribot-2063",
+  "stars": 0,
+  "license": null,
+  "created": "2026-05-07",
+  "pushed": "2026-05-15",
+  "desc": "AfriBot-2063 is a hybrid AI-powered educational humanoid robot system designed for offline and online learning support in English and Amharic. It integrates RAG-based PDF knowledge retrieval, Ollama l",
+  "homepage": "",
+  "queries": [
+   "humanoid design llm"
+  ]
+ },
+ {
+  "repo": "TheSman122333/VITAV2-Personal-Project",
+  "stars": 0,
+  "license": "Apache-2.0",
+  "created": "2026-03-27",
+  "pushed": "2026-07-12",
+  "desc": "VITA (Vital Interactive Task Assistant) is an AI-powered healthcare assistant designed to improve patient safety and reduce hospital workloads. Built on the InMoov humanoid robotics platform, VITA int",
+  "homepage": "",
+  "queries": [
+   "humanoid design llm"
+  ]
+ },
+ {
+  "repo": "SoroushK93/teleoperation-multimodal-control",
+  "stars": 0,
+  "license": "MIT",
+  "created": "2026-03-22",
+  "pushed": "2026-03-22",
+  "desc": "Unified framework for comparing teleoperation modalities including vision-based hand tracking, keyboard control, and LLM-based natural language interfaces for robotic manipulation.",
+  "homepage": "",
+  "queries": [
+   "teleoperation llm"
+  ]
+ },
+ {
+  "repo": "santapong/RoboLLM",
+  "stars": 0,
+  "license": "Apache-2.0",
+  "created": "2026-07-13",
+  "pushed": "2026-10-27",
+  "desc": "Learning-first robotics workbench \u2014 ROS 2 teleoperation, humanoid mirroring, and language-guided manipulation with fail-closed safety",
+  "homepage": "https://resume.draveniq.dev",
+  "queries": [
+   "teleoperation llm"
+  ]
+ },
+ {
+  "repo": "MustafaOrhon/franka-llm-pick-and-place",
+  "stars": 0,
+  "license": null,
+  "created": "2026-08-09",
+  "pushed": "2026-08-09",
+  "desc": "LLM-commanded pick-and-place on a real Franka Panda (ROS 1, MoveIt, local Qwen3-4B) and dual-arm webcam teleoperation (ROS 2, MuJoCo)",
+  "homepage": "",
+  "queries": [
+   "teleoperation llm"
+  ]
+ },
+ {
+  "repo": "Tathagata2006/SOR-Project-SmartBOT-LLM-Powered-Autonomous-Exploration-Bot",
+  "stars": 0,
+  "license": null,
+  "created": "2026-07-21",
+  "pushed": "2026-07-21",
+  "desc": "ROS 2 Jazzy SmartBot featuring keyboard teleoperation, autonomous navigation with obstacle avoidance, frontier exploration (SLAM), dynamic obstacle tracking, and LLM-based natural language navigation ",
+  "homepage": "",
+  "queries": [
+   "teleoperation llm"
+  ]
+ },
+ {
+  "repo": "TauSang/VR_form_Robot_Data_Agent",
+  "stars": 0,
+  "license": null,
+  "created": "2026-05-03",
+  "pushed": "2026-05-03",
+  "desc": "A LLM-powered autonomous data augmentation agent that starts from a small amount of VR teleoperation demonstration data and automatically generates diverse, simulation-verified training trajectory dat",
+  "homepage": "",
+  "queries": [
+   "teleoperation llm"
+  ]
+ },
+ {
+  "repo": "anm-ranjan/llm-steered-adaptive-fem",
+  "stars": 0,
+  "license": "MIT",
+  "created": "2026-04-26",
+  "pushed": "2026-04-26",
+  "desc": "An integrated local LLM and Newton-solver loop codebase to explore agentic actions during FE solve",
+  "homepage": "",
+  "queries": [
+   "fem llm agent"
+  ]
+ },
+ {
+  "repo": "eschmitt88/agentic-solid-mechanics",
+  "stars": 0,
+  "license": null,
+  "created": "2026-06-16",
+  "pushed": "2026-11-18",
+  "desc": "Can an LLM agent operate solid-mechanics simulators \u2014 write/run/debug FEM decks and drive inverse-design loops \u2014 well enough for autonomous engineering analysis?",
+  "homepage": "",
+  "queries": [
+   "fem llm agent"
+  ]
+ },
+ {
+  "repo": "JunhongZhuDev/sci-agent",
+  "stars": 0,
+  "license": "MIT",
+  "created": "2026-10-22",
+  "pushed": "2026-10-22",
+  "desc": "Agentic research assistant for ML in CFD/FEM simulation: arXiv paper collection, hybrid RAG over text, figures and tables, a tool-choosing LLM agent with citation verification, a Burgers surrogate-vs-",
+  "homepage": "",
+  "queries": [
+   "fem llm agent"
+  ]
+ },
+ {
+  "repo": "celikgo/souxmar",
+  "stars": 0,
+  "license": "Apache-2.0",
+  "created": "2026-05-11",
+  "pushed": "2026-10-09",
+  "desc": "Open-source CAE platform: parametric CAD, meshing, FEM/CFD and post-processing, with a stable C plugin ABI and an agentic AI that can drive the pipeline.",
+  "homepage": "https://celikgo.github.io/souxmar/",
+  "queries": [
+   "fem llm agent"
+  ]
+ },
+ {
+  "repo": "NAVNAV221/llms-cnc",
+  "stars": 0,
+  "license": null,
+  "created": "2026-05-08",
+  "pushed": "2026-09-19",
+  "desc": "Command center for local Claude Code sessions",
+  "homepage": "",
+  "queries": [
+   "cnc llm"
+  ]
+ }
+]
