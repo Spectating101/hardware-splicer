@@ -94,3 +94,14 @@ def test_a_promoted_engine_part_gains_a_cited_planner_board():
     plan = build_device_plan(draft_device_spec({"controller": "esp32-devkitc-v4",
                                                 "parts": ["adafruit-oled-1.3-128x64-stemma-qt", "adafruit-scd41-stemma-qt"]})["spec"])
     assert plan["counts"]["errors"] == 0 and plan["counts"]["warnings"] == 0
+
+
+def test_the_vl53l0x_was_promoted_with_the_current_board_outline():
+    from hardware_splicer.device_plan import build_device_plan, module_library
+
+    entry = next(m for m in module_library()["modules"] if m["id"] == "adafruit-vl53l0x-stemma-qt")
+    assert entry["pcb_mm"]["x"] == 25.4 and entry["i2c"]["addresses"] == ["0x29"]
+    assert "July 2020" in entry["dimension_basis"]["heights"]  # the product page's size is the old board
+    assert {"vl53l0x_tof"} <= {p["id"] for p in unified_catalog("vl53")["parts"]}
+    plan = build_device_plan(draft_device_spec({"controller": "raspberry-pi-pico", "parts": ["adafruit-vl53l0x-stemma-qt"]})["spec"])
+    assert plan["counts"]["errors"] == 0 and plan["counts"]["warnings"] == 0
