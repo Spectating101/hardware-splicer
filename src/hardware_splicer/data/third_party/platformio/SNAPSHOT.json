@@ -4,11 +4,19 @@
   "platform-espressif32": "f92849ee8b178ac4b6419d1c5c89e3e05d836eb5",
   "platform-raspberrypi": "6fc5dce8ef6a98a7d3a37414e29b688bdba9ddf9",
   "platform-espressif8266": "668c2a2e4f16bd83b6c812f1ee0605c62b3ce2d2",
-  "platform-atmelavr": "5da4930a978700ecc9bffcf56c5fbeb930c25611"
+  "platform-atmelavr": "5da4930a978700ecc9bffcf56c5fbeb930c25611",
+  "platform-seeedboards": "a6fd41debbbcda13b5340fff50c9092ed3289194"
+ },
+ "orgs": {
+  "platform-espressif32": "platformio",
+  "platform-raspberrypi": "platformio",
+  "platform-espressif8266": "platformio",
+  "platform-atmelavr": "platformio",
+  "platform-seeedboards": "Seeed-Studio"
  },
  "license": "Apache-2.0 (see LICENSE in this folder)",
  "counts": {
-  "boards": 585
+  "boards": 609
  },
  "note": "PlatformIO's board definitions, reduced to the fields HS reads; values unchanged. memory_type qio_opi or opi_opi means an Octal SPI PSRAM module, as PlatformIO's Arduino build settings declare it."
 }

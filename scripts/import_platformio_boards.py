@@ -1,6 +1,6 @@
 """Refresh HS's snapshot of PlatformIO board definitions (Apache-2.0, github.com/platformio/platform-*).
 
-    python scripts/import_platformio_boards.py <dir holding platform-* source trees> <SHAS file: "platform commit" lines>
+    python scripts/import_platformio_boards.py <dir holding platform-* source trees> <SHAS file: "platform commit [github org]" lines>
 
 Each board JSON is reduced to the fields HS uses (chip, clock, flash, RAM, radios, frameworks, maker link, PSRAM memory type)
 without changing their values, and written with the Apache licence and the commit of each platform.
@@ -38,7 +38,13 @@ def main(argv: list[str]) -> int:
     if len(argv) != 2:
         print(__doc__, file=sys.stderr)
         return 2
-    root, shas = Path(argv[0]), dict(line.split() for line in Path(argv[1]).read_text().splitlines() if line.strip())
+    root = Path(argv[0])
+    shas, orgs = {}, {}
+    for line in Path(argv[1]).read_text().splitlines():
+        if line.strip():
+            fields = line.split()
+            shas[fields[0]] = fields[1]
+            orgs[fields[0]] = fields[2] if len(fields) > 2 else "platformio"
     boards: dict[str, dict] = {}
     for platform in sorted(shas):
         if not re.fullmatch(r"[0-9a-f]{40}", shas[platform]):
@@ -50,7 +56,7 @@ def main(argv: list[str]) -> int:
     shutil.copyfile(root / sorted(shas)[0] / "LICENSE", OUT / "LICENSE")
     (OUT / "boards.json").write_text(json.dumps(boards, indent=1, sort_keys=True) + "\n", encoding="utf-8")
     (OUT / "SNAPSHOT.json").write_text(json.dumps({
-        "source": "https://github.com/platformio", "commits": shas, "license": "Apache-2.0 (see LICENSE in this folder)",
+        "source": "https://github.com/platformio", "commits": shas, "orgs": orgs, "license": "Apache-2.0 (see LICENSE in this folder)",
         "counts": {"boards": len(boards)},
         "note": "PlatformIO's board definitions, reduced to the fields HS reads; values unchanged. memory_type qio_opi or opi_opi "
                 "means an Octal SPI PSRAM module, as PlatformIO's Arduino build settings declare it.",

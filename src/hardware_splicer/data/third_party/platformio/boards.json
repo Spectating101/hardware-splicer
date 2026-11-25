@@ -12241,5 +12241,494 @@
   "platform": "platform-raspberrypi",
   "url": "https://www.raspberrypi.org/products/raspberry-pi-pico/",
   "vendor": "Raspberry Pi"
+ },
+ "seeedboards:seeed-xiao-afruitnrf52-nrf52840": {
+  "connectivity": [
+   "bluetooth"
+  ],
+  "declares_psram": false,
+  "f_cpu_hz": 64000000,
+  "flash_size": null,
+  "frameworks": [
+   "arduino"
+  ],
+  "id": "seeed-xiao-afruitnrf52-nrf52840",
+  "max_flash_bytes": 811008,
+  "max_ram_bytes": 237568,
+  "mcu": "nrf52840",
+  "memory_type": null,
+  "name": "Seeed Studio XIAO nRF52840",
+  "platform": "platform-seeedboards",
+  "url": "https://wiki.seeedstudio.com/XIAO_BLE",
+  "vendor": "Seeed Studio"
+ },
+ "seeedboards:seeed-xiao-afruitnrf52-nrf52840-plus": {
+  "connectivity": [
+   "bluetooth"
+  ],
+  "declares_psram": false,
+  "f_cpu_hz": 64000000,
+  "flash_size": null,
+  "frameworks": [
+   "arduino"
+  ],
+  "id": "seeed-xiao-afruitnrf52-nrf52840-plus",
+  "max_flash_bytes": 811008,
+  "max_ram_bytes": 237568,
+  "mcu": "nrf52840",
+  "memory_type": null,
+  "name": "Seeed Studio XIAO nRF52840 Plus",
+  "platform": "platform-seeedboards",
+  "url": "https://wiki.seeedstudio.com/XIAO_BLE",
+  "vendor": "Seeed Studio"
+ },
+ "seeedboards:seeed-xiao-afruitnrf52-nrf52840-sense": {
+  "connectivity": [
+   "bluetooth"
+  ],
+  "declares_psram": false,
+  "f_cpu_hz": 64000000,
+  "flash_size": null,
+  "frameworks": [
+   "arduino"
+  ],
+  "id": "seeed-xiao-afruitnrf52-nrf52840-sense",
+  "max_flash_bytes": 811008,
+  "max_ram_bytes": 237568,
+  "mcu": "nrf52840",
+  "memory_type": null,
+  "name": "Seeed Studio XIAO nRF52840 Sense",
+  "platform": "platform-seeedboards",
+  "url": "https://wiki.seeedstudio.com/XIAO_BLE",
+  "vendor": "Seeed Studio"
+ },
+ "seeedboards:seeed-xiao-afruitnrf52-nrf52840-sense-plus": {
+  "connectivity": [
+   "bluetooth"
+  ],
+  "declares_psram": false,
+  "f_cpu_hz": 64000000,
+  "flash_size": null,
+  "frameworks": [
+   "arduino"
+  ],
+  "id": "seeed-xiao-afruitnrf52-nrf52840-sense-plus",
+  "max_flash_bytes": 811008,
+  "max_ram_bytes": 237568,
+  "mcu": "nrf52840",
+  "memory_type": null,
+  "name": "Seeed Studio XIAO nRF52840 Sense Plus",
+  "platform": "platform-seeedboards",
+  "url": "https://wiki.seeedstudio.com/XIAO_BLE",
+  "vendor": "Seeed Studio"
+ },
+ "seeedboards:seeed-xiao-esp32-c3": {
+  "connectivity": [
+   "wifi"
+  ],
+  "declares_psram": false,
+  "f_cpu_hz": 160000000,
+  "flash_size": "4MB",
+  "frameworks": [
+   "arduino",
+   "espidf"
+  ],
+  "id": "seeed-xiao-esp32-c3",
+  "max_flash_bytes": 4194304,
+  "max_ram_bytes": 327680,
+  "mcu": "esp32c3",
+  "memory_type": null,
+  "name": "Seeed Studio XIAO ESP32C3",
+  "platform": "platform-seeedboards",
+  "url": "https://wiki.seeedstudio.com/xiao_esp32c3_getting_started/",
+  "vendor": "Seeed Studio"
+ },
+ "seeedboards:seeed-xiao-esp32-c5": {
+  "connectivity": [
+   "wifi",
+   "bluetooth",
+   "zigbee",
+   "thread"
+  ],
+  "declares_psram": true,
+  "f_cpu_hz": 240000000,
+  "flash_size": "8MB",
+  "frameworks": [
+   "arduino",
+   "espidf"
+  ],
+  "id": "seeed-xiao-esp32-c5",
+  "max_flash_bytes": 8388608,
+  "max_ram_bytes": 327680,
+  "mcu": "esp32c5",
+  "memory_type": null,
+  "name": "Seeed Studio XIAO ESP32C5",
+  "platform": "platform-seeedboards",
+  "url": "https://wiki.seeedstudio.com/xiao_esp32c5_getting_started/",
+  "vendor": "Seeed Studio"
+ },
+ "seeedboards:seeed-xiao-esp32-c6": {
+  "connectivity": [
+   "wifi",
+   "bluetooth",
+   "zigbee",
+   "thread"
+  ],
+  "declares_psram": false,
+  "f_cpu_hz": 160000000,
+  "flash_size": "4MB",
+  "frameworks": [
+   "arduino",
+   "espidf"
+  ],
+  "id": "seeed-xiao-esp32-c6",
+  "max_flash_bytes": 4194304,
+  "max_ram_bytes": 327680,
+  "mcu": "esp32c6",
+  "memory_type": null,
+  "name": "Seeed Studio XIAO ESP32C6",
+  "platform": "platform-seeedboards",
+  "url": "https://wiki.seeedstudio.com/xiao_esp32c6_getting_started/",
+  "vendor": "Seeed Studio"
+ },
+ "seeedboards:seeed-xiao-esp32-s3-plus": {
+  "connectivity": [
+   "bluetooth",
+   "wifi"
+  ],
+  "declares_psram": true,
+  "f_cpu_hz": 240000000,
+  "flash_size": "16MB",
+  "frameworks": [
+   "arduino",
+   "espidf"
+  ],
+  "id": "seeed-xiao-esp32-s3-plus",
+  "max_flash_bytes": 16777216,
+  "max_ram_bytes": 327680,
+  "mcu": "esp32s3",
+  "memory_type": "qio_opi",
+  "name": "Seeed Studio XIAO ESP32S3 Plus",
+  "platform": "platform-seeedboards",
+  "url": "https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/",
+  "vendor": "Seeed Studio"
+ },
+ "seeedboards:seeed-xiao-esp32-s3-sense": {
+  "connectivity": [
+   "bluetooth",
+   "wifi"
+  ],
+  "declares_psram": true,
+  "f_cpu_hz": 240000000,
+  "flash_size": "8MB",
+  "frameworks": [
+   "arduino",
+   "espidf"
+  ],
+  "id": "seeed-xiao-esp32-s3-sense",
+  "max_flash_bytes": 8388608,
+  "max_ram_bytes": 327680,
+  "mcu": "esp32s3",
+  "memory_type": "qio_opi",
+  "name": "Seeed Studio XIAO ESP32S3 Sense",
+  "platform": "platform-seeedboards",
+  "url": "https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/",
+  "vendor": "Seeed Studio"
+ },
+ "seeedboards:seeed-xiao-mbed-nrf52840": {
+  "connectivity": [
+   "bluetooth"
+  ],
+  "declares_psram": false,
+  "f_cpu_hz": 64000000,
+  "flash_size": null,
+  "frameworks": [
+   "arduino"
+  ],
+  "id": "seeed-xiao-mbed-nrf52840",
+  "max_flash_bytes": 811008,
+  "max_ram_bytes": 237568,
+  "mcu": "nrf52840",
+  "memory_type": null,
+  "name": "Seeed Studio XIAO nRF52840 mbed",
+  "platform": "platform-seeedboards",
+  "url": "https://wiki.seeedstudio.com/XIAO_BLE",
+  "vendor": "Seeed Studio"
+ },
+ "seeedboards:seeed-xiao-mbed-nrf52840-plus": {
+  "connectivity": [
+   "bluetooth"
+  ],
+  "declares_psram": false,
+  "f_cpu_hz": 64000000,
+  "flash_size": null,
+  "frameworks": [
+   "arduino"
+  ],
+  "id": "seeed-xiao-mbed-nrf52840-plus",
+  "max_flash_bytes": 811008,
+  "max_ram_bytes": 237568,
+  "mcu": "nrf52840",
+  "memory_type": null,
+  "name": "Seeed Studio XIAO nRF52840 Plus mbed",
+  "platform": "platform-seeedboards",
+  "url": "https://wiki.seeedstudio.com/XIAO_BLE",
+  "vendor": "Seeed Studio"
+ },
+ "seeedboards:seeed-xiao-mbed-nrf52840-sense": {
+  "connectivity": [
+   "bluetooth"
+  ],
+  "declares_psram": false,
+  "f_cpu_hz": 64000000,
+  "flash_size": null,
+  "frameworks": [
+   "arduino"
+  ],
+  "id": "seeed-xiao-mbed-nrf52840-sense",
+  "max_flash_bytes": 811008,
+  "max_ram_bytes": 237568,
+  "mcu": "nrf52840",
+  "memory_type": null,
+  "name": "Seeed Studio XIAO nRF52840 Sense mbed",
+  "platform": "platform-seeedboards",
+  "url": "https://wiki.seeedstudio.com/XIAO_BLE",
+  "vendor": "Seeed Studio"
+ },
+ "seeedboards:seeed-xiao-mbed-nrf52840-sense-plus": {
+  "connectivity": [
+   "bluetooth"
+  ],
+  "declares_psram": false,
+  "f_cpu_hz": 64000000,
+  "flash_size": null,
+  "frameworks": [
+   "arduino"
+  ],
+  "id": "seeed-xiao-mbed-nrf52840-sense-plus",
+  "max_flash_bytes": 811008,
+  "max_ram_bytes": 237568,
+  "mcu": "nrf52840",
+  "memory_type": null,
+  "name": "Seeed Studio XIAO nRF52840 Sense Plus mbed",
+  "platform": "platform-seeedboards",
+  "url": "https://wiki.seeedstudio.com/XIAO_BLE",
+  "vendor": "Seeed Studio"
+ },
+ "seeedboards:seeed-xiao-mg24": {
+  "connectivity": [
+   "bluetooth",
+   "thread",
+   "wifi",
+   "zigbee"
+  ],
+  "declares_psram": false,
+  "f_cpu_hz": 39000000,
+  "flash_size": "5767168",
+  "frameworks": [
+   "arduino"
+  ],
+  "id": "seeed-xiao-mg24",
+  "max_flash_bytes": 5767168,
+  "max_ram_bytes": 262144,
+  "mcu": "cortex-m33",
+  "memory_type": null,
+  "name": "Seeed Studio MG24",
+  "platform": "platform-seeedboards",
+  "url": "https://wiki.seeedstudio.com/xiao_mg24_getting_started/",
+  "vendor": "Seeed Studio"
+ },
+ "seeedboards:seeed-xiao-mg24-sense": {
+  "connectivity": [
+   "bluetooth",
+   "thread",
+   "wifi",
+   "zigbee"
+  ],
+  "declares_psram": false,
+  "f_cpu_hz": 39000000,
+  "flash_size": "5767168",
+  "frameworks": [
+   "arduino"
+  ],
+  "id": "seeed-xiao-mg24-sense",
+  "max_flash_bytes": 5767168,
+  "max_ram_bytes": 262144,
+  "mcu": "cortex-m33",
+  "memory_type": null,
+  "name": "Seeed Studio MG24 SENSE",
+  "platform": "platform-seeedboards",
+  "url": "https://wiki.seeedstudio.com/xiao_mg24_getting_started/",
+  "vendor": "Seeed Studio"
+ },
+ "seeedboards:seeed-xiao-nrf54l15": {
+  "connectivity": [
+   "bluetooth"
+  ],
+  "declares_psram": false,
+  "f_cpu_hz": 128000000,
+  "flash_size": null,
+  "frameworks": [
+   "zephyr"
+  ],
+  "id": "seeed-xiao-nrf54l15",
+  "max_flash_bytes": 1572864,
+  "max_ram_bytes": 262144,
+  "mcu": "nrf54l15",
+  "memory_type": null,
+  "name": "Seeed Studio XIAO nRF54L15",
+  "platform": "platform-seeedboards",
+  "url": "https://wiki.seeedstudio.com/xiao_nrf54l15_sense_getting_started",
+  "vendor": "Seeed Studio"
+ },
+ "seeedboards:seeed-xiao-nrf54lm20a": {
+  "connectivity": [
+   "bluetooth"
+  ],
+  "declares_psram": false,
+  "f_cpu_hz": 128000000,
+  "flash_size": null,
+  "frameworks": [
+   "zephyr"
+  ],
+  "id": "seeed-xiao-nrf54lm20a",
+  "max_flash_bytes": 2084864,
+  "max_ram_bytes": 524288,
+  "mcu": "nrf54lm20a",
+  "memory_type": null,
+  "name": "Seeed Studio XIAO nRF54LM20A",
+  "platform": "platform-seeedboards",
+  "url": "https://wiki.seeedstudio.com/XIAO_BLE",
+  "vendor": "Seeed Studio"
+ },
+ "seeedboards:seeed-xiao-nrf54lm20a-v2": {
+  "connectivity": [
+   "bluetooth"
+  ],
+  "declares_psram": false,
+  "f_cpu_hz": 128000000,
+  "flash_size": null,
+  "frameworks": [
+   "zephyr"
+  ],
+  "id": "seeed-xiao-nrf54lm20a-v2",
+  "max_flash_bytes": 2084864,
+  "max_ram_bytes": 524288,
+  "mcu": "nrf54lm20a",
+  "memory_type": null,
+  "name": "Seeed Studio XIAO nRF54LM20A V2",
+  "platform": "platform-seeedboards",
+  "url": "https://wiki.seeedstudio.com/XIAO_BLE",
+  "vendor": "Seeed Studio"
+ },
+ "seeedboards:seeed-xiao-nrf54lm20b": {
+  "connectivity": [
+   "bluetooth"
+  ],
+  "declares_psram": false,
+  "f_cpu_hz": 128000000,
+  "flash_size": null,
+  "frameworks": [
+   "zephyr"
+  ],
+  "id": "seeed-xiao-nrf54lm20b",
+  "max_flash_bytes": 2084864,
+  "max_ram_bytes": 524288,
+  "mcu": "nrf54lm20b",
+  "memory_type": null,
+  "name": "Seeed Studio XIAO nRF54LM20B",
+  "platform": "platform-seeedboards",
+  "url": "https://wiki.seeedstudio.com/XIAO_BLE",
+  "vendor": "Seeed Studio"
+ },
+ "seeedboards:seeed-xiao-ra4m1": {
+  "connectivity": [],
+  "declares_psram": false,
+  "f_cpu_hz": 48000000,
+  "flash_size": null,
+  "frameworks": [
+   "arduino"
+  ],
+  "id": "seeed-xiao-ra4m1",
+  "max_flash_bytes": 262144,
+  "max_ram_bytes": 32768,
+  "mcu": "ra4m1",
+  "memory_type": null,
+  "name": "Seeed Studio XIAO RA4M1",
+  "platform": "platform-seeedboards",
+  "url": "https://wiki.seeedstudio.com/getting_started_xiao_ra4m1/",
+  "vendor": "Seeed Studio"
+ },
+ "seeedboards:seeed-xiao-rp2040": {
+  "connectivity": [],
+  "declares_psram": false,
+  "f_cpu_hz": 133000000,
+  "flash_size": null,
+  "frameworks": [
+   "arduino"
+  ],
+  "id": "seeed-xiao-rp2040",
+  "max_flash_bytes": 2097152,
+  "max_ram_bytes": 262144,
+  "mcu": "rp2040",
+  "memory_type": null,
+  "name": "Seeed Studio XIAO RP2040",
+  "platform": "platform-seeedboards",
+  "url": "https://wiki.seeedstudio.com/XIAO-RP2040/",
+  "vendor": "Seeed Studio"
+ },
+ "seeedboards:seeed-xiao-rp2350": {
+  "connectivity": [],
+  "declares_psram": false,
+  "f_cpu_hz": 150000000,
+  "flash_size": null,
+  "frameworks": [
+   "arduino"
+  ],
+  "id": "seeed-xiao-rp2350",
+  "max_flash_bytes": 2097152,
+  "max_ram_bytes": 524288,
+  "mcu": "rp2350",
+  "memory_type": null,
+  "name": "Seeed Studio XIAO RP2350",
+  "platform": "platform-seeedboards",
+  "url": "https://wiki.seeedstudio.com/getting-started-xiao-rp2350/",
+  "vendor": "Seeed Studio"
+ },
+ "seeedboards:seeed-xiao-samd": {
+  "connectivity": [],
+  "declares_psram": false,
+  "f_cpu_hz": 48000000,
+  "flash_size": null,
+  "frameworks": [
+   "arduino"
+  ],
+  "id": "seeed-xiao-samd",
+  "max_flash_bytes": 262144,
+  "max_ram_bytes": 32768,
+  "mcu": "samd21g18a",
+  "memory_type": null,
+  "name": "Seeed Studio XIAO SAMD21",
+  "platform": "platform-seeedboards",
+  "url": "https://wiki.seeedstudio.com/Seeeduino-XIAO/",
+  "vendor": "Seeed Studio"
+ },
+ "seeedboards:seeed-xiao-stm32c5": {
+  "connectivity": [],
+  "declares_psram": false,
+  "f_cpu_hz": 144000000,
+  "flash_size": null,
+  "frameworks": [
+   "zephyr"
+  ],
+  "id": "seeed-xiao-stm32c5",
+  "max_flash_bytes": 1048576,
+  "max_ram_bytes": 262144,
+  "mcu": "stm32c5a3cg",
+  "memory_type": null,
+  "name": "Seeed Studio XIAO STM32C5",
+  "platform": "platform-seeedboards",
+  "url": "https://wiki.seeedstudio.com/xiao_stm32c5_getting_started",
+  "vendor": "Seeed Studio"
  }
 }

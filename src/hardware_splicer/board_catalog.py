@@ -79,7 +79,8 @@ def catalog_rows() -> list[dict[str, Any]]:
         rows.append({
             "id": f"platformio:{key}", "label": board.get("name") or board["id"], "library": "platformio", "category": "board",
             "capabilities": ["board_metadata"], "i2c_addresses": [],
-            "sources": [u for u in (board.get("url"), f"https://github.com/platformio/{platform}/blob/{meta['commits'][platform]}/boards/{board['id']}.json") if u],
+            "sources": [u for u in (board.get("url"),
+                                    f"https://github.com/{meta.get('orgs', {}).get(platform, 'platformio')}/{platform}/blob/{meta['commits'][platform]}/boards/{board['id']}.json") if u],
             "evidence": "PlatformIO's board definition (toolchain settings), imported unchanged (Apache-2.0)",
             "mcu": board.get("mcu"), **({"octal_psram": True} if octal_psram(board) else {}),
         })
