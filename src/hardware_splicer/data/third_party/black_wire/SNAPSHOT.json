@@ -1,0 +1,12 @@
+{
+ "source": "https://github.com/valleytechsolutions/black-wire-pinouts",
+ "commit": "5b96da1ff54c7adcb6907fbcb1698e367de79ecc",
+ "license": "CC-BY-4.0 (see LICENSE in this folder)",
+ "attribution": "Black Wire Maker's Technical Reference Guide pinout collection, (c) Valleytech Solutions, CC BY 4.0. Reduced by Hardware-Splicer to pin data, review levels and image hashes; images not included.",
+ "counts": {
+  "boards": 595,
+  "pin_rows": 20363,
+  "parts": 600
+ },
+ "scope_note": "Connector lists transcribed from cited pinout images. single-entry means one image reading with source-hash and structural checks; double-entry means two agreeing readings. Neither is electrical verification; match the exact board revision."
+}
