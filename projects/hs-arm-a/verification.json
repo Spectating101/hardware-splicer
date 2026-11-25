@@ -1,0 +1,249 @@
+{
+ "schema": "hardware_splicer.arm_build_verification.v1",
+ "parameters": {
+  "upper_arm_mm": 110.0,
+  "forearm_mm": 100.0,
+  "wrist_mm": 72.0,
+  "wall": 3.0,
+  "plate": 4.0,
+  "clear": 0.3,
+  "hub_r": 20.0,
+  "ring_r": 44.0,
+  "payload_kg": 0.15,
+  "safety_factor": 1.5,
+  "max_stall_share": 0.5,
+  "pla_g_cm3": 1.24,
+  "fill": 0.6,
+  "bed_mm": [
+   220.0,
+   220.0,
+   250.0
+  ]
+ },
+ "servos": {
+  "base_yaw": "XM430-W350-T",
+  "shoulder": "XM430-W350-T",
+  "elbow": "XM430-W350-T",
+  "wrist_pitch": "XL430-W250-T",
+  "wrist_roll": "XL430-W250-T",
+  "gripper": "XL430-W250-T"
+ },
+ "parts": {
+  "base_housing": {
+   "volume_cm3": 190.33,
+   "mass_g": 141.6,
+   "bbox_mm": [
+    150.0,
+    150.0,
+    45.5
+   ],
+   "fits_bed": true,
+   "valid_solid": true,
+   "single_body": true
+  },
+  "turntable": {
+   "volume_cm3": 44.53,
+   "mass_g": 33.1,
+   "bbox_mm": [
+    88.2,
+    88.0,
+    31.7
+   ],
+   "fits_bed": true,
+   "valid_solid": true,
+   "single_body": true
+  },
+  "upper_arm": {
+   "volume_cm3": 53.79,
+   "mass_g": 40.0,
+   "bbox_mm": [
+    118.0,
+    52.5,
+    40.1
+   ],
+   "fits_bed": true,
+   "valid_solid": true,
+   "single_body": true
+  },
+  "forearm": {
+   "volume_cm3": 49.09,
+   "mass_g": 36.5,
+   "bbox_mm": [
+    108.0,
+    52.5,
+    40.1
+   ],
+   "fits_bed": true,
+   "valid_solid": true,
+   "single_body": true
+  },
+  "wrist": {
+   "volume_cm3": 38.67,
+   "mass_g": 28.8,
+   "bbox_mm": [
+    78.0,
+    52.5,
+    58.6
+   ],
+   "fits_bed": true,
+   "valid_solid": true,
+   "single_body": true
+  },
+  "gripper_base": {
+   "volume_cm3": 32.96,
+   "mass_g": 24.5,
+   "bbox_mm": [
+    95.6,
+    40.6,
+    59.6
+   ],
+   "fits_bed": true,
+   "valid_solid": true,
+   "single_body": true
+  },
+  "gripper_jaw": {
+   "volume_cm3": 23.94,
+   "mass_g": 17.8,
+   "bbox_mm": [
+    73.0,
+    52.5,
+    40.1
+   ],
+   "fits_bed": true,
+   "valid_solid": true,
+   "single_body": true
+  }
+ },
+ "mass_kg": {
+  "base_link": 0.2236,
+  "turntable_link": 0.1151,
+  "upper_arm_link": 0.122,
+  "forearm_link": 0.0937,
+  "wrist_link": 0.086,
+  "gripper_link": 0.0817,
+  "jaw_link": 0.0178
+ },
+ "moving_mass_kg": 0.5163,
+ "reach_mm": {
+  "tool_from_yaw_axis": 375.9,
+  "tool_height_mm": 90.0
+ },
+ "static_torque": {
+  "shoulder": {
+   "static_nm": 1.3475,
+   "with_safety_factor_nm": 2.0213,
+   "servo": "XM430-W350-T",
+   "stall_nm": 4.1,
+   "stall_share": 0.493,
+   "pass": true
+  },
+  "elbow": {
+   "static_nm": 0.7872,
+   "with_safety_factor_nm": 1.1808,
+   "servo": "XM430-W350-T",
+   "stall_nm": 4.1,
+   "stall_share": 0.288,
+   "pass": true
+  },
+  "wrist_pitch": {
+   "static_nm": 0.3939,
+   "with_safety_factor_nm": 0.5908,
+   "servo": "XL430-W250-T",
+   "stall_nm": 1.5,
+   "stall_share": 0.394,
+   "pass": true
+  }
+ },
+ "base_yaw_overturning": {
+  "moment_nm": 1.348,
+  "servo_side_load_rating_nm": 0.4,
+  "ratio_if_horn_carried_it": 3.37,
+  "design_response": "support ring r=44.0 mm under the turntable with a 1 mm PTFE washer carries it",
+  "basis": "XM430 e-manual 'Radial Load 40 [N] (10 [mm] away from the horn)' taken as a moment"
+ },
+ "tip_over": {
+  "arm_moment_nm": 1.348,
+  "base_kg": 0.224,
+  "base_restoring_nm": 0.164,
+  "free_standing_stable": false,
+  "basis": "worst case: arm stretched over a base edge 75 mm from the yaw axis; the restoring moment is the base's own weight"
+ },
+ "power": {
+  "holding_a_stretched": 1.57,
+  "all_stalled_a": 11.1,
+  "basis": "current proportional to torque up to the cited stall current at 12 V (approximation)"
+ },
+ "unmodelled": [
+  "horn bolt circle and servo side screws",
+  "idler horn thickness (4 mm assumed)",
+  "cables, screws, horns' own mass",
+  "print strength (no FEM on the links yet)"
+ ],
+ "pick_workspace": {
+  "grasp_height_mm": 20.0,
+  "wrist_to_grasp_mm": 165.9,
+  "by_approach": {
+   "top_down": {
+    "approach_deg_below_horizontal": 90,
+    "radius_mm": [
+     125,
+     180
+    ],
+    "example": {
+     "125": {
+      "shoulder": -76.5,
+      "elbow": 82.9,
+      "wrist_pitch": 83.6
+     },
+     "180": {
+      "shoulder": -41.2,
+      "elbow": 27.6,
+      "wrist_pitch": 103.6
+     }
+    }
+   },
+   "angled_45": {
+    "approach_deg_below_horizontal": 45,
+    "radius_mm": [
+     265,
+     320
+    ],
+    "example": {
+     "265": {
+      "shoulder": -57.7,
+      "elbow": 84.9,
+      "wrist_pitch": 17.8
+     },
+     "320": {
+      "shoulder": -5.9,
+      "elbow": -15.3,
+      "wrist_pitch": 66.1
+     }
+    }
+   },
+   "horizontal": {
+    "approach_deg_below_horizontal": 0,
+    "radius_mm": [
+     305,
+     360
+    ],
+    "example": {
+     "305": {
+      "shoulder": -13.0,
+      "elbow": 84.4,
+      "wrist_pitch": -71.4
+     },
+     "360": {
+      "shoulder": 9.6,
+      "elbow": 21.5,
+      "wrist_pitch": -31.1
+     }
+    }
+   }
+  },
+  "any_approach_radius_mm": [
+   125,
+   365
+  ]
+ }
+}
