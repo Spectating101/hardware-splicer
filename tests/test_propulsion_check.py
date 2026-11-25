@@ -12,6 +12,7 @@ from hardware_splicer.propulsion_check import PropulsionCheckError, check_propul
 
 ROOT = Path(__file__).resolve().parents[1]
 TABLE = json.loads((ROOT / "examples/drone_proving_ground/inputs/motor_f1404_3800kv_thrust.json").read_text())
+SUNNYSKY = json.loads((ROOT / "examples/drone_proving_ground/inputs/motor_sunnysky_x2212_980kv_thrust.json").read_text())
 RESULTS = json.loads((ROOT / "examples/drone_proving_ground/generated/results.json").read_text())
 
 # The HS-3G inputs: four F1404 motors with HQ 3x3x3 props on a 4S 650 mAh 70C/140C pack and a 35 A ESC stack.
@@ -94,6 +95,39 @@ def test_parts_must_sum_to_the_stated_mass():
     spec = dict(HS3G, parts=[{"name": "frame", "mass_g": 100}, {"name": "motor", "mass_g": 20, "qty": 4}])
     with pytest.raises(PropulsionCheckError, match="sum to 180"):
         check_propulsion(spec, TABLE)
+
+
+# The product trial's F450 camera quad: 1283 g on four 2212-class motors with 10 x 4.7 props and a 3S 5000 mAh 30C pack.
+F450 = {"rotors": 4, "prop": "APC1047 3S", "all_up_mass_g": 1283, "prop_diameter_mm": 254, "esc_continuous_a": 30,
+        "battery": {"cells": 3, "capacity_mah": 5000, "c_continuous": 30}, "frame": {"wheelbase_mm": 450}}
+
+
+def test_maker_table_without_a_throttle_column():
+    """SunnySky steps its table by thrust; hover is interpolated between the 300 g and 400 g rows."""
+
+    report = check_propulsion(F450, SUNNYSKY)
+    got = report["results"]
+    assert report["table"]["verified"] is True
+    assert got["hover_power_method"] == "interpolated" and "throttle_pct" not in got
+    assert 33.3 < got["hover_power_per_rotor_w"] < 51.06
+    assert got["hover_power_per_rotor_w"] == 36.78 and got["hover_time_min"] == 17.6
+    assert got["thrust_to_weight"] == 2.84
+
+
+def test_motor_rating_comes_from_the_table_when_the_spec_has_none():
+    """At full throttle the APC1047 on 3S draws 15.5 A; SunnySky rates the motor 15 A for 30 s."""
+
+    assert "motor_over_rating" in rules(check_propulsion(F450, SUNNYSKY))
+    assert "motor_over_rating" not in rules(check_propulsion(dict(F450, prop="APC1038 3S"), SUNNYSKY))
+    assert "motor_over_rating" not in rules(check_propulsion(dict(F450, motor_max_current_a=16), SUNNYSKY))
+
+
+def test_maker_table_rows_are_consistent():
+    for prop, rows in SUNNYSKY["props"].items():
+        for thrust, volts, amps, watts, eff in rows:
+            assert abs(volts * amps - watts) < 0.02, prop
+            assert abs(thrust / watts - eff) < 0.01, prop
+            assert volts == (11.1 if prop.endswith("3S") else 14.8)
 
 
 def test_cli_exit_codes(tmp_path, capsys):
