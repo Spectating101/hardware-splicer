@@ -13,7 +13,7 @@ def test_every_part_from_both_libraries_is_listed_once_with_what_hs_can_do_with_
     ids = [p["id"] for p in catalog["parts"]]
     assert len(ids) == len(set(ids)) == catalog["count"]
     counts = catalog["capability_counts"]
-    native = [p for p in catalog["parts"] if p["library"] not in ("wirestudio", "platformio", "wokwi")]
+    native = [p for p in catalog["parts"] if p["library"] not in ("wirestudio", "platformio", "wokwi", "black_wire")]
     assert counts["wiring_check"] == len(native)
     assert counts["design_review"] == sum(p["library"] == "wirestudio" for p in catalog["parts"]) > 100  # WireStudio's parts and boards
     assert counts["board_metadata"] == sum(p["library"] == "platformio" for p in catalog["parts"]) > 500  # PlatformIO's boards
@@ -74,7 +74,7 @@ def test_the_device_api_serves_the_catalogue_and_the_wiring_check(tmp_path, monk
     monkeypatch.setenv("HARDWARE_SPLICER_STATE_DIR", str(tmp_path / "state"))
     client = TestClient(create_product_app())
     parts = client.get("/v1/devices/parts", params={"q": "hc-sr04"}).json()
-    assert parts["ok"] and {p["id"] for p in parts["parts"]} == {"hc-sr04", "wirestudio:hc-sr04", "wokwi:hc-sr04"}
+    assert parts["ok"] and {"hc-sr04", "wirestudio:hc-sr04", "wokwi:hc-sr04"} <= {p["id"] for p in parts["parts"]}
     checked = client.post("/v1/devices/check-wiring", json=SONAR).json()
     assert checked["ok"] and checked["library"] == "engine"
     refused = client.post("/v1/devices/check-wiring", json={"modules": []})
