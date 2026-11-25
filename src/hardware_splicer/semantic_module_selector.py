@@ -162,17 +162,32 @@ def parse_semantic_module_selection(
         raise SemanticSelectionError(
             "selection referenced unknown requirement IDs: " + ", ".join(unknown_requirements)
         )
+    allowed_by_requirement = {
+        requirement_id: {str(row.get("module_id") or "") for row in rows if row.get("module_id")}
+        for requirement_id, rows in candidate_set.candidates_by_requirement.items()
+    }
+    # A model may list a real candidate under the wrong requirement (a level shifter, a candidate for "signal levels", filed
+    # under "LED data"). Rejecting the whole selection for that threw away good picks. The deterministic retrieval decides
+    # which requirement a module satisfies: move it there, or drop it from a requirement it does not satisfy, and say so.
+    coverage: Dict[str, list[str]] = {requirement_id: [] for requirement_id in selection.requirement_coverage}
+    notes: list[str] = []
     for requirement_id, module_ids in selection.requirement_coverage.items():
-        allowed = {
-            str(row.get("module_id") or "")
-            for row in candidate_set.candidates_by_requirement.get(requirement_id, [])
-            if row.get("module_id")
-        }
-        invalid = sorted(set(module_ids) - allowed)
-        if invalid:
-            raise SemanticSelectionError(
-                f"requirement {requirement_id!r} coverage contains non-candidates: " + ", ".join(invalid)
-            )
+        for module_id in module_ids:
+            if module_id in allowed_by_requirement.get(requirement_id, set()):
+                coverage[requirement_id].append(module_id)
+                continue
+            homes = sorted(r for r, allowed in allowed_by_requirement.items() if module_id in allowed)
+            if homes:
+                coverage.setdefault(homes[0], []).append(module_id)
+                notes.append(f"{module_id} was listed under {requirement_id!r} but the catalog matches it to {homes[0]!r}; moved there.")
+            else:
+                notes.append(f"{module_id} was listed under {requirement_id!r}, which it does not satisfy; not counted there.")
+    for requirement_id, module_ids in coverage.items():
+        if not module_ids and selection.requirement_coverage.get(requirement_id):
+            notes.append(f"Requirement {requirement_id!r} has no module the catalog matches to it.")
+    if notes:
+        selection.requirement_coverage = {r: list(dict.fromkeys(ids)) for r, ids in coverage.items() if ids}
+        selection.assumptions = [*selection.assumptions, *notes][:24]
 
     covered = {
         module_id
