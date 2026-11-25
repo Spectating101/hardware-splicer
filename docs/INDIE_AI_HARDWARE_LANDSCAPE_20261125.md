@@ -51,3 +51,17 @@ Also seen: [ESP-Mosaico](https://www.producthunt.com/products/esp-mosaico) (an E
    - a missing USB-C CC pull-down.
 3. **Orcamaker's published Room-Nav numbers are a small worked case.** It quotes 2.1 h runtime from a 5.2 Ah 11.1 V pack at 18 W peak and 14 W average. That holds only with roughly 80% depth of discharge and about 80% converter efficiency at peak load, and the page states neither. HS's runtime model makes that assumption explicit.
 4. **Robots are a separate track.** Tnkr's projects are off-the-shelf builds (bus servos, adapter boards, a Pi or Jetson) with no KiCad files, except Aero Hand. The test there is HS's wiring and power checks against the problems builders report on GitHub (brownouts, servo resets).
+
+## Mechanisms in 3D: AnyMachine
+
+[AnyMachine](https://github.com/apekshik/anymachine) (MIT, 1,205 stars, created 4 Nov 2026, by Apekshik Panigrahi) has an AI agent (Claude in Claude Code) build moving machines in Blender with a person approving each stage. Its sister projects are AnyScene, AnyKit and AnyShot; anymachine.ai is only a "coming soon" page.
+
+Its outputs are game and film assets, not engineering: the "hydraulics" are animation, with no masses, forces, materials or electronics.
+
+What is worth taking, all of it MIT:
+
+1. **Range-of-motion clash sweep.** Every joint becomes a 0-1 control with limits. Each control, and listed pairs of controls, is swept in small steps, and the sweep reports overlapping triangles, penetration depth and minimum clearance. Parts that touch by design (a strap on fabric) pass if they penetrate no more than a set tolerance. Reported results: laptop lid 0 overlaps over 0-135°, minimum clearance 0.32 mm; quadruped 0 overlaps and 0.014 mm foot slip.
+2. **Export round trip.** The GLB is re-imported and checked against the Blender pose.
+3. **Reference beside model.** Every stage is rendered next to its reference image, with a second pass where the model came out plainer, and a per-experiment status that says plainly what only partly works.
+
+HS already measures static interference (`scene_fit.py`) and imports URDF/SDF/MJCF joints (`robot_model_import.py`), but it never moves the joints. Combining the two gives the missing check: sweep each joint of a robot's own model through its limits and report clashes and minimum clearance. SO-101, Open Duck Mini and other Tnkr-hosted robots publish URDFs, and FieldDeck's clamshell lid and the pan-tilt head are the same problem.
