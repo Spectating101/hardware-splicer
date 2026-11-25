@@ -18,6 +18,26 @@ def _pin_accepts_peer_logic(pin: Mapping[str, Any], peer_logic_v: float) -> bool
     return False
 
 
+# Pin roles are from the module's own side. A role that can only receive (an input) cannot push its voltage onto the wire; an
+# unknown or bidirectional role is treated as able to do both, so an unclassified pin never silences the logic check.
+# analog_in is not here: the engine library labels an analog sensor's OUTPUT (MQ-2 A0) analog_in, after the MCU pin it needs.
+_RECEIVE_ONLY = {"digital_in", "uart_rx"}
+_DRIVE_ONLY = {"digital_out", "uart_tx", "pwm"}
+
+
+def _can_drive(role: str) -> bool:
+    return role not in _RECEIVE_ONLY
+
+
+def _can_receive(role: str) -> bool:
+    return role not in _DRIVE_ONLY
+
+
+def _usb_fed(pin: Mapping[str, Any]) -> bool:
+    text = f"{pin.get('voltage') or ''} {pin.get('notes') or ''} {pin.get('label') or ''} {pin.get('id') or ''}"
+    return bool(re.search(r"\bVBUS\b|from USB|\(USB\)", text, re.I))
+
+
 def _resolve(graph: BuildGraph, node_id: str, pin_id: str) -> Optional[Dict[str, Any]]:
     node = next((n for n in graph.get("nodes") or [] if n.get("id") == node_id), None)
     if not node:
@@ -116,14 +136,30 @@ def analyze_build(graph: BuildGraph) -> List[BuildWarning]:
             continue
 
         if a_role == "power_in" and b_role == "power_in":
-            warnings.append(
-                {
-                    "id": f"{w['id']}-noSource",
-                    "level": "warn",
-                    "message": "Both ends of this wire are power inputs — nothing actually sources power. Connect to a power_out pin.",
-                    "wireId": w["id"],
-                }
-            )
+            usb_fed = next((e for e in (a, b) if _usb_fed(e["pin"])), None)
+            if usb_fed is not None:
+                # A board's USB pin (VBUS) is its input from USB, and the same net carries USB 5 V out to the header while
+                # the board is plugged in. The pin's own data says so; the wire is a supply only while USB is connected.
+                warnings.append(
+                    {
+                        "id": f"{w['id']}-usbFed",
+                        "level": "info",
+                        "message": (
+                            f"{usb_fed['moduleSpec']['label']}:{usb_fed['pin']['id']} carries USB 5 V while the board is plugged in "
+                            "and is an input otherwise. This wire is powered only from USB; with another supply, check which way power flows."
+                        ),
+                        "wireId": w["id"],
+                    }
+                )
+            else:
+                warnings.append(
+                    {
+                        "id": f"{w['id']}-noSource",
+                        "level": "warn",
+                        "message": "Both ends of this wire are power inputs — nothing actually sources power. Connect to a power_out pin.",
+                        "wireId": w["id"],
+                    }
+                )
         if a_role == "power_out" and b_role == "power_out":
             warnings.append(
                 {
@@ -188,17 +224,36 @@ def analyze_build(graph: BuildGraph) -> List[BuildWarning]:
 
         if is_digital(a_role) and is_digital(b_role) and a_lv and b_lv and a_lv != b_lv:
             if not (_pin_accepts_peer_logic(a["pin"], float(b_lv)) or _pin_accepts_peer_logic(b["pin"], float(a_lv))):
-                warnings.append(
-                    {
-                        "id": f"{w['id']}-logic",
-                        "level": "error",
-                        "message": (
-                            f"{a['moduleSpec']['label']} uses {a_lv}V logic, "
-                            f"{b['moduleSpec']['label']} uses {b_lv}V logic. Add a level shifter."
-                        ),
-                        "wireId": w["id"],
-                    }
-                )
+                high, low = (a, b) if float(a_lv) > float(b_lv) else (b, a)
+                high_role, low_role = (a_role, b_role) if high is a else (b_role, a_role)
+                high_v, low_v = max(float(a_lv), float(b_lv)), min(float(a_lv), float(b_lv))
+                if _can_drive(high_role) and _can_receive(low_role):
+                    warnings.append(
+                        {
+                            "id": f"{w['id']}-logic",
+                            "level": "error",
+                            "message": (
+                                f"{a['moduleSpec']['label']} uses {a_lv}V logic, "
+                                f"{b['moduleSpec']['label']} uses {b_lv}V logic. Add a level shifter."
+                            ),
+                            "wireId": w["id"],
+                        }
+                    )
+                else:
+                    # Only the lower-voltage side drives this wire, so nothing is over-driven. Whether a high is read as a
+                    # high depends on the higher-voltage part's input threshold, which this library does not record.
+                    warnings.append(
+                        {
+                            "id": f"{w['id']}-logicLow",
+                            "level": "warn",
+                            "message": (
+                                f"{low['moduleSpec']['label']}:{low['pin']['id']} drives {high['moduleSpec']['label']}:{high['pin']['id']} "
+                                f"with {low_v:g}V logic. That cannot over-drive the {high_v:g}V part, but its high may be below that part's "
+                                "input-high threshold. Check its datasheet; add a level shifter if it needs more."
+                            ),
+                            "wireId": w["id"],
+                        }
+                    )
 
         if any(r in (a_role, b_role) for r in ("i2c_sda", "i2c_scl")):
             any_builtin = any(re.search(r"pull", (e["pin"].get("notes") or ""), re.I) for e in (a, b))
