@@ -36,6 +36,41 @@ class ModuleHint:
 # configured model selector on normal product paths.
 MODULE_HINTS: list[ModuleHint] = [
     ModuleHint(
+        patterns=[re.compile(r"robot(?:ic)? arm|gripper|pan.?tilt", re.I)],
+        label="servo arm",
+        requires_any=[["mechanical_motion"]],
+        prefer_id="sg90",
+        priority=9,
+    ),
+    ModuleHint(
+        patterns=[re.compile(r"led strip|strip of \d+|addressable|ws281\d|sk6812|neopixel strip", re.I)],
+        label="addressable LED strip",
+        requires_any=[["led_or_light"]],
+        prefer_id="ws2812b_strip",
+        priority=9,
+    ),
+    ModuleHint(
+        patterns=[re.compile(r"\blora\b|lorawan|sx12[67]\d", re.I)],
+        label="LoRa radio",
+        requires_any=[["wireless"]],
+        prefer_id="lora_sx1278",
+        priority=9,
+    ),
+    ModuleHint(
+        patterns=[re.compile(r"18650|\blipo\b|li-?ion|battery|rechargeable cell", re.I)],
+        label="battery charging",
+        requires_any=[["battery"]],
+        prefer_id="tp4056",
+        priority=7,
+    ),
+    ModuleHint(
+        patterns=[re.compile(r"real.?time clock|\brtc\b|ds3231|ds1307", re.I)],
+        label="real-time clock",
+        requires_any=[["connector"]],
+        prefer_id="ds3231_rtc",
+        priority=8,
+    ),
+    ModuleHint(
         patterns=[re.compile(r"ds18b20|one.?wire temp|digital temp probe", re.I)],
         label="1-wire temperature",
         requires_any=[["sensor_or_adc"]],
@@ -120,7 +155,7 @@ MODULE_HINTS: list[ModuleHint] = [
         priority=8,
     ),
     ModuleHint(
-        patterns=[re.compile(r"robot|rover|drives around|rc car|mobile base|wheel bot", re.I)],
+        patterns=[re.compile(r"\brobot\b(?!\s+arm)|rover|drives around|rc car|mobile base|wheel bot", re.I)],  # a robot arm has no wheels
         label="robot drive",
         requires_any=[["motor_or_load", "actuator_driver"]],
         prefer_id="l298n",
@@ -199,7 +234,8 @@ MODULE_HINTS: list[ModuleHint] = [
     ModuleHint(
         patterns=[re.compile(r"\bleds?\b|indicator light|status light|blink", re.I)],  # whole word: not the "led" in "oled"
         label="indicator LED",
-        requires_any=[["led_or_light", "display_or_ui"]],
+        # Only a light: asking for "any display" here put an OLED into every brief that mentioned an LED.
+        requires_any=[["led_or_light"]],
         priority=5,
     ),
     ModuleHint(
@@ -361,7 +397,7 @@ def _pick_modules_regex(text: str) -> ModulePick:
     )
     needs_usb_power = (
         needs_brain
-        and not re.search(r"battery|lipo|li.?ion", t)
+        and not re.search(r"battery|lipo|li.?ion|18650", t)
         and not needs_barrel_rail
     )
 
