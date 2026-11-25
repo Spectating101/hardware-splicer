@@ -186,7 +186,14 @@ def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[s
             pin_net[(n["ref"], n["pin"])] = name
     findings: list[dict[str, Any]] = []
 
+    unannotated = sorted(r for r in comps if "?" in r)
+    skipped: list[str] = []
+
     def finding(severity: str, rule: str, message: str, basis: str, refs: list[str], net: str | None = None) -> None:
+        # An unannotated designator ("R?") names several parts at once, so nothing traced through one can be trusted.
+        if any("?" in r for r in refs) or (net and any("?" in n["ref"] for n in nets.get(net, []))):
+            skipped.append(rule)
+            return
         findings.append({"severity": severity, "rule": rule, "message": message, "basis": basis, "components": sorted(set(refs)),
                          **({"net": net} if net else {})})
 
@@ -270,6 +277,10 @@ def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[s
                     finding("warning", "usb_c_cc_no_pulldown", f"{ref} {fn} {'is not connected' if net is None else 'has no resistor to ground'}. A USB-C sink needs Rd (5.1 kOhm) on each CC pin or a "
                             "source will not supply 5 V.", "USB Type-C specification, sink termination Rd = 5.1 kOhm (cited by section, not quoted here)", [ref], net)
     _mated_findings(comps, nets, pin_net, mates, finding)
+    if unannotated:
+        findings.append({"severity": "info", "rule": "unannotated", "components": unannotated,
+                         "message": f"{len(unannotated)} designator(s) still end in '?' ({', '.join(unannotated[:5])}). Annotate the schematic and review again: "
+                                    f"{len(skipped)} check(s) touching those parts were not reported.", "basis": "KiCad annotation; the netlist keys parts by designator"})
     counts = {s: sum(f["severity"] == s for f in findings) for s in ("error", "warning", "info")}
     return {"schema_version": SCHEMA, "claim_boundary": BOUNDARY, "components": len(comps), "nets": len(nets), "findings": findings, "counts": counts}
 

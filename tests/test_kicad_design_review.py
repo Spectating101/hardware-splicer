@@ -148,3 +148,13 @@ def test_a_repeated_connector_supply_pin_may_stay_open_when_its_twin_is_wired():
     assert rules(board) == []
     alone = netlist([reg], [("unconnected-(U6-VIN-Pad1)", [("U6", "1", "VIN", "power_in")])])
     assert rules(alone) == ["power_pin_unconnected"]
+
+
+def test_unannotated_parts_give_one_note_instead_of_findings():
+    """bschwind/key-ripper: every resistor is 'R?', so the CC resistors cannot be traced."""
+    usb = ("U?", "TYPE-C-31-M-12", "Connector", "USB_C_Receptacle", "USB Type-C receptacle")
+    pins = [("Connector", "USB_C_Receptacle", [("A5", "CC1", "bidirectional"), ("B5", "CC2", "bidirectional")])]
+    board = netlist([usb, ("R?", "10k", "Device", "R", "Resistor")], [("CC1", [("U?", "A5", "CC1", "bidirectional"), ("R?", "1", "", "passive")]),
+                                                                    ("CC2", [("U?", "B5", "CC2", "bidirectional"), ("R?", "1", "", "passive")])], pins)
+    found = review(board)["findings"]
+    assert [f["rule"] for f in found] == ["unannotated"] and "2 check(s)" in found[0]["message"]
