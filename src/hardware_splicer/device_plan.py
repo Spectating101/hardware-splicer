@@ -382,7 +382,12 @@ def device_spec_json_schema(*, include_project_donors: bool = False) -> dict[str
         "properties": {
             "schema_version": {"const": DEVICE_SPEC_SCHEMA},
             "name": {"type": "string", "minLength": 1, "maxLength": MAX_NAME},
-            "power": {"type": "object", "properties": {"source": {"enum": ["usb"]}}, "additionalProperties": False},
+            "power": {"type": "object", "properties": {
+                "source": {"enum": list(POWER_SOURCES)},
+                "capacity_mah": {"type": "number", "description": "usb_power_bank only: the rated capacity printed on the bank."},
+                "cell_v": {"type": "number", "description": "usb_power_bank only: the cell voltage the rating is quoted at, usually 3.6 or 3.7 V."},
+                "min_runtime_h": {"type": "number", "description": "usb_power_bank only: the runtime the device must reach."}},
+                "additionalProperties": False},
             "modules": {
                 "type": "array", "minItems": 1, "maxItems": MAX_MODULES,
                 "description": "Exactly one microcontroller board and at most one display, plus any I2C breakouts.",
@@ -482,6 +487,7 @@ def _validate_spec(spec: Any, *, donor_modules=None) -> dict[str, Any]:
     power = spec.get("power", {"source": "usb"})
     if not isinstance(power, dict) or not isinstance(power.get("source", "usb"), str):
         raise DevicePlanError("power must be an object with a source")
+    clean_power = _clean_power(power)
     modules = spec.get("modules")
     if not isinstance(modules, list) or not 1 <= len(modules) <= MAX_MODULES:
         raise DevicePlanError(f"modules must be a list of 1 to {MAX_MODULES}")
@@ -541,10 +547,36 @@ def _validate_spec(spec: Any, *, donor_modules=None) -> dict[str, Any]:
     with_stops = case.get("board_stops", True)
     if not isinstance(with_stops, bool):
         raise DevicePlanError("case.board_stops must be true or false")
-    return {"name": name.strip(), "power": {"source": power.get("source", "usb")}, "modules": clean_modules, "connections": clean_connections, "wall": wall, "clearance": clearance, "antenna_clearance": keep_antenna_clear, "board_stops": with_stops}
+    return {"name": name.strip(), "power": clean_power, "modules": clean_modules, "connections": clean_connections, "wall": wall, "clearance": clearance, "antenna_clearance": keep_antenna_clear, "board_stops": with_stops}
 
 
 # --- geometry -------------------------------------------------------------------------------------------------------------
+
+
+POWER_SOURCES = ("usb", "usb_power_bank")
+
+
+def _clean_power(power: dict[str, Any]) -> dict[str, Any]:
+    """USB from a computer or charger, or a USB power bank in the same port. A bank needs its rated capacity for a runtime estimate."""
+
+    source = power.get("source", "usb")
+    if source != "usb_power_bank":
+        if set(power) - {"source"}:
+            raise DevicePlanError("power.capacity_mah, cell_v and min_runtime_h apply only to a usb_power_bank")
+        return {"source": source}
+    if set(power) - {"source", "capacity_mah", "cell_v", "min_runtime_h"}:
+        raise DevicePlanError("a usb_power_bank takes only capacity_mah, cell_v and min_runtime_h")
+    clean: dict[str, Any] = {"source": source}
+    for key, low, high, required in (("capacity_mah", 100, 100000, True), ("cell_v", 3.0, 4.0, False), ("min_runtime_h", 0.01, 10000, False)):
+        if key not in power:
+            if required:
+                raise DevicePlanError(f"a usb_power_bank needs power.{key}: the rated capacity printed on the bank")
+            continue
+        value = power[key]
+        if isinstance(value, bool) or finite_number(value) is None or not low <= value <= high:
+            raise DevicePlanError(f"power.{key} must be a number from {low:g} to {high:g}")
+        clean[key] = float(value)
+    return clean
 
 
 def _r(value: float) -> float:
@@ -1208,7 +1240,11 @@ def build_device_plan(spec: Any, *, donor_modules=None) -> dict[str, Any]:
             findings.append(_finding("info", "antenna_keepout", f"{keep_clear['what']} The gap from the antenna end to the inside case wall in this layout is {gap:g} mm; that is this layout's clearance, not a keepout verdict.", f"{keep_clear.get('basis', 'the controller datasheet')}; {keep_clear['source']}"))
     plug_w, plug_h = PLUG_CUTOUT_MM
     findings.append(_finding("info", "kit_fit", f"Unless you entered your own, the case uses typical values, not measurements: {WIRE_CONNECTOR_HEIGHT_MM:g} mm jumper housing height, {WIRE_BEND_ALLOWANCE_MM:g} mm wire bend allowance, {plug_w:g} x {plug_h:g} mm USB overmold, {mcu.pcb['z']:g} mm PCB thickness and {mcu.below:g} mm under-board header length. Check these against your actual kit. Female-to-female jumpers require male pins on both ends. General practice, not from the datasheet.", "typical case and jumper assumptions; general practice, not from the datasheet"))
-    if clean["power"]["source"] != "usb":
+    if clean["power"]["source"] == "usb_power_bank":
+        findings.append(_finding("info", "power_bank", f"A USB power bank plugs into the board's USB port, the same supply path as a computer port. {supply_note} "
+                                 "Runtime is estimated in the engineering review from the modules' published currents; a bank's own label and auto-off behaviour decide the rest.",
+                                 supply_basis))
+    elif clean["power"]["source"] != "usb":
         findings.append(_finding("error", "power_source_not_supported", f"Power source {clean['power']['source']!r} is not supported yet. {supply_note} This source label does not describe a supply wire or its voltage.", supply_basis))
     for module in placed.values():
         if module.pin_order:
