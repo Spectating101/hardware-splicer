@@ -90,6 +90,19 @@ def hs_erc(root, work):
     return [f"{v.get('rule')}|{v.get('message', '')[:140]}" for v in data.get("violations", [])]
 
 
+def hs_review(root, work):
+    """HS's general KiCad review (hardware_splicer.kicad_design_review) on the same exported netlist."""
+    net = work / "netlist.net"
+    if not net.exists() or HS_SRC is None:
+        return None
+    code = ("import json,sys;sys.path.insert(0,sys.argv[1]);from pathlib import Path;"
+            "from hardware_splicer.kicad_design_review import review_schematic;print(json.dumps(review_schematic(Path(sys.argv[2]))))")
+    run = subprocess.run(["python3", "-c", code, str(HS_SRC), str(net)], capture_output=True, text=True, timeout=300)
+    if run.returncode != 0:
+        return {"error": run.stderr.strip().splitlines()[-1][:300] if run.stderr.strip() else "failed"}
+    return [f"{f['rule']}|{f.get('net', '')}|{','.join(f['components'])}" for f in json.loads(run.stdout)["findings"]]
+
+
 def main():
     cases = json.loads(Path(sys.argv[1]).read_text())
     out_dir = Path(sys.argv[2]).resolve()
@@ -103,7 +116,7 @@ def main():
                 work = out_dir / name / side
                 work.mkdir(parents=True, exist_ok=True)
                 roots[side] = (fetch(case["repo"], sha, case["schematic"], work / "src"), work)
-            for checker, fn in (("kicad_erc", kicad_erc), ("kicad_happy", kicad_happy), ("hs", hs_erc)):
+            for checker, fn in (("kicad_erc", kicad_erc), ("kicad_happy", kicad_happy), ("hs", hs_erc), ("hs_review", hs_review)):
                 before, after = (fn(*roots[s]) for s in ("before", "after"))
                 if not isinstance(before, list) or not isinstance(after, list):
                     row["checkers"][checker] = {"ran": False, "detail": before if isinstance(before, dict) else after}
