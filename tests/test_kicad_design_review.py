@@ -185,3 +185,15 @@ def test_imported_resistors_count_by_designator_and_value():
                                          ("Net-(PWR-CC2)", [("PWR", "B5", "CC2_B5", "bidirectional"), ("R7", "1", "1_1", "passive")]),
                                          ("GND", [("R6", "2", "2_2", "passive"), ("R7", "2", "2_2", "passive")])], pins)
     assert rules(wrong) == ["usb_c_cc_no_pulldown"] * 2
+
+
+def test_a_pull_up_to_a_regulator_output_counts_whatever_the_net_is_called():
+    """azlan-works/Argo pulls its I2C bus up to VREF, the output of a TLV70430 whose pins carry no power type."""
+    ldo = ("U13", "TLV70430DBVR", "argo-v2-easyedapro", "TLV70430DBVR", "")
+    imu = [("U23", "LSM6DSV16XTR", "argo-v2-easyedapro", "LSM6DSV16XTR", ""), ("U24", "LIS3MDLTR", "argo-v2-easyedapro", "LIS3MDLTR", "")]
+    pull = ("R41", "10kΩ", "argo-v2-easyedapro", "RC0201FR-0710KL", "")
+    bus = [("U23", "14", "SDA_14", "unspecified"), ("U24", "11", "SDA/SDI/SDO_11", "unspecified"), ("R41", "2", "2_2", "unspecified")]
+    pulled = netlist([ldo, *imu, pull], [("GPIO2", bus), ("VREF", [("R41", "1", "1_1", "unspecified"), ("U13", "3", "OUT_3", "unspecified")])])
+    assert rules(pulled) == []
+    floating = netlist([ldo, *imu, pull], [("GPIO2", bus), ("VREF", [("R41", "1", "1_1", "unspecified"), ("U13", "1", "IN_1", "unspecified")])])
+    assert rules(floating) == ["i2c_no_pullup"]

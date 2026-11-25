@@ -90,6 +90,8 @@ def _is_connector(comp: dict[str, Any]) -> bool:
     return bool(re.search(r"connector|header|receptacle|socket", f"{comp.get('lib', '')} {comp.get('part', '')}", re.I))
 
 
+# Common linear-regulator families, for imported designs whose pins carry no power-output type.
+LDO = re.compile(r"(TLV7\d|AMS1117|AP2112|AP7\d{3}|XC62\d|MCP17\d|RT90\d|ME62\d|LM1117|LD1117|LDL\d|SPX\d|NCP1\d{2}|HT7\d|LP29\d|LP59\d|TPS7\d|MIC5\d)", re.I)
 RESISTANCE = re.compile(r"^\d+(\.\d+)?\s*[RkKM]?\d*\s*(Ω|ohms?)?$", re.I)
 
 
@@ -202,12 +204,23 @@ def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[s
         findings.append({"severity": severity, "rule": rule, "message": message, "basis": basis, "components": sorted(set(refs)),
                          **({"net": net} if net else {})})
 
+    def driven_supply(net_name: str) -> bool:
+        """A net a power-output pin or a linear regulator's output drives, whatever it is called (Argo's VREF)."""
+        for n in nets.get(net_name, []):
+            comp = comps.get(n["ref"], {})
+            if n["type"] == "power_out":
+                return True
+            if re.fullmatch(r"V?OUT\d*(_\d+)?|VO", n["function"], re.I) and (
+                    re.search(r"regulator|ldo", f"{comp.get('lib', '')} {comp.get('description', '')}", re.I) or LDO.match(str(comp.get("value", "")))):
+                return True
+        return False
+
     def resistor_to(net_name: str, pattern: re.Pattern) -> bool:
         for n in nets.get(net_name, []):
             if _kind(comps.get(n["ref"], {"lib": "", "part": "", "description": ""}), n["ref"]) != "resistor":
                 continue
             other = [pin_net.get((n["ref"], p)) for p in ("1", "2") if p != n["pin"]]
-            if any(o and pattern.search(o) for o in other):
+            if any(o and (pattern.search(o) or (pattern is SUPPLY and driven_supply(o))) for o in other):
                 return True
         return False
 
