@@ -159,6 +159,49 @@ def build_lab(spec: Any, out: Path, *, host_test: bool = False) -> dict[str, Any
     return lab
 
 
+def what_can_i_build(have: list[str]) -> dict[str, Any]:
+    """From the parts on your bench: every controller + display + sensor combination that plans with no errors or warnings,
+    split into ready to build, one part away, and further. A combination counts once whatever order the parts were named in."""
+
+    from .device_draft import draft_device_spec
+
+    lib = {m["id"]: m for m in module_library()["modules"]}
+    unknown = sorted(set(have) - set(lib))
+    if unknown:
+        raise DeviceLabError(f"not in the module library: {', '.join(unknown)}")
+    controllers = [i for i, m in lib.items() if m["kind"] == "mcu_board"]
+    displays = [None] + [i for i, m in lib.items() if m["kind"] == "display"]
+    sensors = [None] + [i for i, m in lib.items() if m["kind"] == "i2c_breakout"]
+    owned = set(have)
+    ready, one_away, further = [], [], 0
+    for controller in controllers:
+        for display in displays:
+            for sensor in sensors:
+                parts = [p for p in (display, sensor) if p]
+                if not parts:
+                    continue
+                try:
+                    plan = build_device_plan(draft_device_spec({"controller": controller, "parts": parts})["spec"])
+                except DevicePlanError:
+                    continue
+                if plan["counts"]["errors"] or plan["counts"]["warnings"]:
+                    continue
+                missing = [p for p in (controller, *parts) if p not in owned]
+                row = {"controller": controller, "parts": parts, "missing": missing}
+                if not missing:
+                    ready.append(row)
+                elif len(missing) == 1:
+                    one_away.append(row)
+                else:
+                    further += 1
+    adds: dict[str, int] = {}
+    for row in one_away:
+        adds[row["missing"][0]] = adds.get(row["missing"][0], 0) + 1
+    return {"have": sorted(owned), "ready": ready, "one_part_away": one_away, "needs_two_or_more": further,
+            "best_single_addition": sorted(adds.items(), key=lambda kv: (-kv[1], kv[0]))[:5],
+            "note": "Planned without errors or warnings; nothing here has been built."}
+
+
 def _load(lab_dir: Path) -> tuple[dict[str, Any], dict[str, Any]]:
     try:
         return json.loads((lab_dir / "lab.json").read_text()), json.loads((lab_dir / "spec.json").read_text())
@@ -216,7 +259,16 @@ def main(argv=None) -> int:
     r.add_argument("--case-fit")
     r.add_argument("--minutes", type=float)
     r.add_argument("--note", default="")
+    w = sub.add_parser("bench", help="what you can build from the parts you have")
+    w.add_argument("have", nargs="+", help="module library ids")
     args = ap.parse_args(argv)
+    if args.command == "bench":
+        try:
+            print(json.dumps(what_can_i_build(args.have), indent=2))
+        except DeviceLabError as exc:
+            print(json.dumps({"error": str(exc)}), file=sys.stderr)
+            return 2
+        return 0
     try:
         if args.command == "build":
             lab = build_lab(json.loads(args.spec.read_text(encoding="utf-8")), args.out, host_test=args.host_test)
