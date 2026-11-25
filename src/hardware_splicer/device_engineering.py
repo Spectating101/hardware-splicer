@@ -320,6 +320,9 @@ def _power_bank(plan: dict[str, Any], library: dict[str, Any]) -> dict[str, Any]
     status = ADVISORY
     if load["missing"]:
         summary += f" {', '.join(load['missing'])} publish{'es' if len(load['missing']) == 1 else ''} no current and {'is' if len(load['missing']) == 1 else 'are'} not counted."
+    if load["peak_only"]:
+        summary += f" {', '.join(load['peak_only'])} publish{'es' if len(load['peak_only']) == 1 else ''} only peak currents, which are not in this sustained sum."
+        quantities["modules_with_only_peak_figures"] = load["peak_only"]
     if sustained < keep_high:
         summary += (f" The sourced load is under {keep_high:g} mA; many banks switch off below {keep_low:g} to {keep_high:g} mA, so check this bank "
                     "keeps a light load powered, or choose one with an always-on mode.")
