@@ -31,6 +31,7 @@ CAPABILITIES = {
     "device_plan": "wired plan, printable case, firmware, lab pack and engineering review (cited outline and pins)",
     "pcb_compose": "placed on a KiCad schematic and PCB (has a footprint)",
     "wiring_check": "wiring checked by pin role and voltage (no outline, so no case)",
+    "design_review": "WireStudio part or board: HS reviews WireStudio designs that use it (wirestudio_bridge)",
 }
 
 
@@ -66,6 +67,18 @@ def unified_catalog(query: str | None = None) -> dict[str, Any]:
             "evidence": "engine library data: pin roles and voltages, not cited figure by figure",
             **({"cited_boards_with_this_chip": boards} if boards else {}),
         })
+    from .wirestudio_bridge import PART_FILE_ERRATA, snapshot
+
+    ws = snapshot()
+    for kind, items in (("component", ws["components"]), ("board", ws["boards"])):
+        for ws_id, item in items.items():
+            rows.append({
+                "id": f"wirestudio:{ws_id}", "label": item.get("name", ws_id), "library": "wirestudio",
+                "category": item.get("category") or ("board" if kind == "board" else None), "capabilities": ["design_review"],
+                "i2c_addresses": [], "sources": [f"{ws['meta']['source']}/tree/{ws['meta']['commit']}"],
+                "evidence": "WireStudio's part data, imported unchanged (MIT); HS has not cited it figure by figure",
+                **({"known_part_file_error": PART_FILE_ERRATA[ws_id]["maker_value"]} if ws_id in PART_FILE_ERRATA else {}),
+            })
     # Engine entries that name the same part twice (an id with and without "_board", hyphen and underscore spellings).
     by_number: dict[str, list[str]] = defaultdict(list)
     for part in engine:

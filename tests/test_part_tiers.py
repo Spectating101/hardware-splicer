@@ -13,7 +13,9 @@ def test_every_part_from_both_libraries_is_listed_once_with_what_hs_can_do_with_
     ids = [p["id"] for p in catalog["parts"]]
     assert len(ids) == len(set(ids)) == catalog["count"]
     counts = catalog["capability_counts"]
-    assert counts["wiring_check"] == catalog["count"]
+    native = [p for p in catalog["parts"] if p["library"] != "wirestudio"]
+    assert counts["wiring_check"] == len(native)
+    assert counts["design_review"] == catalog["count"] - len(native) > 100  # WireStudio's parts and boards
     assert counts["device_plan"] == sum(1 for p in catalog["parts"] if p["library"] == "device_planner")
     assert 0 < counts["device_plan"] < counts["pcb_compose"] < counts["wiring_check"]
     # Only planner modules can be planned into a case; an engine part never claims it.
@@ -71,7 +73,7 @@ def test_the_device_api_serves_the_catalogue_and_the_wiring_check(tmp_path, monk
     monkeypatch.setenv("HARDWARE_SPLICER_STATE_DIR", str(tmp_path / "state"))
     client = TestClient(create_product_app())
     parts = client.get("/v1/devices/parts", params={"q": "hc-sr04"}).json()
-    assert parts["ok"] and [p["id"] for p in parts["parts"]] == ["hc-sr04"]
+    assert parts["ok"] and [p["id"] for p in parts["parts"]] == ["hc-sr04", "wirestudio:hc-sr04"]
     checked = client.post("/v1/devices/check-wiring", json=SONAR).json()
     assert checked["ok"] and checked["library"] == "engine"
     refused = client.post("/v1/devices/check-wiring", json={"modules": []})
