@@ -3070,6 +3070,229 @@
         ]
       },
       "engineering_sources": []
+    },
+    {
+      "id": "adafruit-oled-1.3-128x64-stemma-qt",
+      "name": "Adafruit Monochrome 1.3 inch 128 x 64 OLED, STEMMA QT (product 938)",
+      "kind": "display",
+      "chips": [
+        {
+          "marking": "SSD1306",
+          "role": "display controller on the module",
+          "source": "https://cdn-shop.adafruit.com/datasheets/SSD1306.pdf"
+        }
+      ],
+      "summary": "Adafruit's 1.3 inch 128 x 64 white OLED on a 35.6 x 33 mm board with an 8-pin header, a 3.3 V regulator, level shifting and two STEMMA QT sockets. Default interface I2C.",
+      "frame": "Front view (looking at the screen), origin at the board's top-left corner, header along the top edge. Positions come from Adafruit's board file, mirrored because the file draws the component side.",
+      "pcb_mm": {
+        "x": 35.56,
+        "y": 33.02,
+        "z": 1.6
+      },
+      "above_board_mm": 1.65,
+      "below_board_mm": 2.95,
+      "pin_pitch_mm": 2.54,
+      "pins": [
+        {
+          "id": "Data",
+          "name": "Data",
+          "function": "I2C data (SDA); also SPI data",
+          "roles": [
+            "i2c_sda"
+          ],
+          "x": 8.89,
+          "y": 2.54,
+          "side": "top"
+        },
+        {
+          "id": "Clk",
+          "name": "Clk",
+          "function": "I2C clock (SCL); also SPI clock",
+          "roles": [
+            "i2c_scl"
+          ],
+          "x": 11.43,
+          "y": 2.54,
+          "side": "top"
+        },
+        {
+          "id": "DC",
+          "name": "DC",
+          "function": "SPI data/command; in I2C mode the SA0 address select",
+          "roles": [],
+          "x": 13.97,
+          "y": 2.54,
+          "side": "top"
+        },
+        {
+          "id": "Rst",
+          "name": "Rst",
+          "function": "display reset; optional, the board has an auto-reset circuit",
+          "roles": [],
+          "x": 16.51,
+          "y": 2.54,
+          "side": "top"
+        },
+        {
+          "id": "CS",
+          "name": "CS",
+          "function": "SPI chip select; unused in I2C mode",
+          "roles": [],
+          "x": 19.05,
+          "y": 2.54,
+          "side": "top"
+        },
+        {
+          "id": "3v3",
+          "name": "3v3",
+          "function": "3.3 V output of the on-board regulator",
+          "roles": [
+            "power_3v3"
+          ],
+          "x": 21.59,
+          "y": 2.54,
+          "side": "top"
+        },
+        {
+          "id": "Vin",
+          "name": "Vin",
+          "function": "power in, 3 V to 5 V; sets the I2C logic level",
+          "roles": [
+            "power_in"
+          ],
+          "x": 24.13,
+          "y": 2.54,
+          "side": "top"
+        },
+        {
+          "id": "GND",
+          "name": "GND",
+          "function": "ground",
+          "roles": [
+            "ground"
+          ],
+          "x": 26.67,
+          "y": 2.54,
+          "side": "top"
+        }
+      ],
+      "pin_order_varies": false,
+      "panel": {
+        "active_mm": {
+          "x": 29.42,
+          "y": 14.7
+        },
+        "glass_mm": {
+          "x": 34.5,
+          "y": 23.0
+        },
+        "center_offset_mm": {
+          "x": 0.0,
+          "y": -2.11
+        },
+        "center_offset_basis": "Adafruit's board file: the active area's centre is 2.11 mm from the board centre towards the header, and centred across. Glass placement by hand varies; check yours.",
+        "center_offset_published": true
+      },
+      "i2c": {
+        "addresses": [
+          "0x3D",
+          "0x3C"
+        ],
+        "address_basis": "Adafruit product 938: 7-bit address 0x3C or 0x3D, selectable with jumpers. Adafruit's example uses 0x3D for the 128x64 displays."
+      },
+      "electrical": {
+        "supply_note": "Adafruit states a 3.3 V regulator and level shifting on all pins, for 3 V or 5 V systems. The board file shows 10 kOhm pull-ups from SDA and SCL to Vin, so the I2C lines sit at whatever Vin is: 5 V on Vin puts 5 V on SDA and SCL. Power Vin from the {controller}'s 3.3 V pin. This plan does not establish that 5 V is safe for the {controller}.",
+        "pullups_note": "The board has 10 kOhm pull-ups on SDA and SCL to Vin (resistor pack R3 in Adafruit's board file). Another board's pull-ups on the same bus add in parallel; check the total.",
+        "onboard_pullups": true
+      },
+      "dimension_basis": {
+        "pcb": "Adafruit's board file: outline 35.56 x 33.02 mm. Adafruit product page: PCB 35.6mm x 33mm x 6.2mm. Board thickness 1.6 mm is the usual Adafruit stock, not stated.",
+        "active_area": "Adafruit product page: active area 29.420 x 14.70 mm; panel 34.50 x 23.00 x 1.45 mm. The board file draws the same outlines.",
+        "pins": "Adafruit's board file: an 8-pin 0.1 inch header 2.54 mm from the top edge, Data at the left seen from the screen side, then Clk, DC, Rst, CS, 3v3, Vin, GND. Connect by the printed names: Adafruit relabelled the silkscreen in 2024.",
+        "heights": "The 6.2 mm overall thickness is Adafruit's figure. HS splits it as 1.65 mm of glass and tape in front (1.45 mm panel plus an assumed 0.2 mm tape) and 2.95 mm of STEMMA QT sockets behind; that split is not published. Measure yours.",
+        "holes": "Adafruit's board file: four 2.5 mm plated holes at 2.54 mm and 33.02 mm across and 2.54 mm and 30.48 mm down (30.5 x 28 mm on centres, as the product page lists)."
+      },
+      "sources": [
+        {
+          "label": "Adafruit product 938 (sizes, active area, address, regulator, current)",
+          "url": "https://www.adafruit.com/product/938",
+          "as_of": "2026-11-25"
+        },
+        {
+          "label": "Adafruit board file for the STEMMA QT version (outline, header, holes, panel, pull-ups), commit 02c953a",
+          "url": "https://github.com/adafruit/Adafruit-1.3inch-128x64-Mono-OLED-PCB/blob/02c953af3a9c7c53d0c33faaa98a8aa1bffca5be/Adafruit%201.3in%20128x64%20OLED%20STEMMA%20QT.brd",
+          "as_of": "2026-11-25"
+        },
+        {
+          "label": "Adafruit OLED guide, wiring 128x64 OLEDs (Vin, example address)",
+          "url": "https://learn.adafruit.com/monochrome-oled-breakouts/wiring-128x64-oleds",
+          "as_of": "2026-11-25"
+        },
+        {
+          "label": "SSD1306 datasheet (controller)",
+          "url": "https://cdn-shop.adafruit.com/datasheets/SSD1306.pdf",
+          "as_of": "2026-11-25"
+        }
+      ],
+      "notes": [
+        "Default interface is I2C. SPI needs two jumpers cut; this plan does not cover SPI.",
+        "The board file is the 2020 STEMMA QT revision. Adafruit's 2024 update changed the silkscreen; the layout figures here are from the 2020 file."
+      ],
+      "quotes": [
+        {
+          "claim": "Regulator and level shifting",
+          "quote": "we include a 3.3V regulator and all pins are fully level shifted so you can use with 3V or 5V devices!",
+          "source": "https://www.adafruit.com/product/938"
+        },
+        {
+          "claim": "Board size",
+          "quote": "PCB: 35.6mm x 33mm x 6.2mm",
+          "source": "https://www.adafruit.com/product/938"
+        },
+        {
+          "claim": "I2C address",
+          "quote": "This board/chip uses I2C 7-bit address between 0x3C-0x3D, selectable with jumpers",
+          "source": "https://www.adafruit.com/product/938"
+        },
+        {
+          "claim": "Active area",
+          "quote": "Active Area (mm)\uff1a29.420 x 14.70",
+          "source": "https://www.adafruit.com/product/938"
+        },
+        {
+          "claim": "Power pin",
+          "quote": "Vin goes to 5V",
+          "source": "https://learn.adafruit.com/monochrome-oled-breakouts/wiring-128x64-oleds"
+        }
+      ],
+      "engineering": {
+        "operating_temp_c": {
+          "min": -40,
+          "max": 85,
+          "kind": "absolute_maximum",
+          "quote": "TA Operating Temperature -40 to +85 \u00baC",
+          "locator": "SSD1306 datasheet, Maximum Ratings table, TA operating temperature (the controller chip, not the module)",
+          "source": "https://cdn-shop.adafruit.com/datasheets/SSD1306.pdf"
+        },
+        "loads": [
+          {
+            "mode": "display on, average content",
+            "kind": "sustained",
+            "typical_ma": 40,
+            "rail_v": 3.3,
+            "conditions": "Adafruit's average; current rises with the number of lit pixels",
+            "quote": "on average the display uses about 40mA from the 3.3V supply",
+            "locator": "Adafruit product 938, description",
+            "source": "https://www.adafruit.com/product/938"
+          }
+        ],
+        "gaps": [
+          {
+            "field": "loads.max_ma",
+            "reason": "Adafruit gives an average only; an all-white screen draws more. Measure it at full white."
+          }
+        ]
+      }
     }
   ]
 }

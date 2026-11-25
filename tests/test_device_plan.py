@@ -62,8 +62,8 @@ def test_the_library_names_a_source_for_every_module_and_says_what_is_typical() 
     library = module_library()
     ids = [m["id"] for m in library["modules"]]
     assert ids[:2] == ["esp32-devkitc-v4", "ssd1306-096-i2c"]
-    assert list(BREAKOUT_IDS) == ids[2:-1]
-    assert ids[-1] == "raspberry-pi-pico"  # a second controller, added as data
+    assert list(BREAKOUT_IDS) == ids[2:-2]
+    assert ids[-2:] == ["raspberry-pi-pico", "adafruit-oled-1.3-128x64-stemma-qt"]  # a second controller and a larger display, added as data
     for module in library["modules"]:
         assert module["sources"] and all(s["url"].startswith("https://") and s["as_of"] for s in module["sources"])
         assert module["dimension_basis"]
@@ -104,6 +104,7 @@ def test_only_the_sourced_chip_roles_are_published() -> None:
         ("adafruit-mpu-6050-stemma-qt", "MPU-6050", "6-DoF accelerometer and gyro on the module"),
         ("adafruit-ads1115-stemma-qt", "ADS1115", "16-bit ADC on the module"),
         ("raspberry-pi-pico", "RP2040", "microcontroller on the board"),
+        ("adafruit-oled-1.3-128x64-stemma-qt", "SSD1306", "display controller on the module"),
     ]
     for module in library["modules"]:
         assert all(c["source"] in [s["url"] for s in module["sources"]] for c in module["chips"])
