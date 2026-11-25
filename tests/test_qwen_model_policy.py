@@ -98,3 +98,13 @@ def test_blocks_video_and_image_models() -> None:
     assert is_blocked_chat_model("wan2.6-t2v")
     assert is_blocked_chat_model("qwen-image-max")
     assert not is_blocked_chat_model("qwen3.5-flash")
+
+
+def test_a_model_name_the_endpoint_does_not_have_moves_on_to_the_next():
+    """DashScope intl answers 404 model_not_found for qwen3.5-flash; without rotation every module pick failed (26 Nov 2026)."""
+    from hardware_splicer.integrations.qwen_model_policy import should_rotate_qwen_model
+
+    detail = '{"error":{"message":"Model not exist.","type":"invalid_request_error","code":"model_not_found"}}'
+    assert should_rotate_qwen_model(status=404, detail=detail, has_more_candidates=True)
+    assert not should_rotate_qwen_model(status=404, detail=detail, has_more_candidates=False)
+    assert not should_rotate_qwen_model(status=404, detail='{"error":{"message":"route not found"}}', has_more_candidates=True)

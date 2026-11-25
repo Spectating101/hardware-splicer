@@ -9,6 +9,7 @@ Stage profiles follow docs/DASHSCOPE_MODEL_GUIDE.md (llm_automation repo).
 from __future__ import annotations
 
 import os
+import re
 from typing import Dict, List, Literal, Set, Tuple
 
 from ..env_local import load_env_local
@@ -329,6 +330,10 @@ def should_rotate_qwen_model(*, status: int, detail: str, has_more_candidates: b
     if status == 429:
         return True
     if status == 403 and is_qwen_free_quota_exhausted(detail):
+        return True
+    # A retired or region-missing model name (DashScope intl answers 404 "model_not_found" for qwen3.5-flash):
+    # the next candidate may exist, so stopping here would disable every model call.
+    if status == 404 and re.search(r"model_not_found|model not exist|does not exist", detail or "", re.I):
         return True
     return False
 
