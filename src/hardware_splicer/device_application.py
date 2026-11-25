@@ -12,7 +12,7 @@ from typing import Any
 
 from .device_firmware import PLATFORM, resolve_shared_i2c_bus, _json, _sha
 from .device_parts import available_parts, render_fixtures, render_traits
-from .device_plan import DevicePlanError, build_device_plan, module_library
+from .device_plan import DevicePlanError, build_device_plan, module_library, ssd1306_display_ids
 from .device_vendor_profiles import vendor_files, vendor_profile
 
 SCHEMA = "hardware_splicer.device_application_proposal.v1"
@@ -203,7 +203,8 @@ def build_device_application(spec: Any, *, donor_modules=None) -> tuple[dict[str
     parts = available_parts()
     i2c_placed = [m for m in plan["modules"] if library[m["module"]].get("i2c")]
     sensors = [m for m in i2c_placed if m["module"] in parts]
-    other = [m for m in i2c_placed if m["module"] not in parts and m["module"] != SSD1306_ID]
+    displays = ssd1306_display_ids()
+    other = [m for m in i2c_placed if m["module"] not in parts and m["module"] not in displays]
     names = " or ".join(part["chip"] for part in parts.values())
     if not sensors:
         raise DevicePlanError(
@@ -232,7 +233,7 @@ def build_device_application(spec: Any, *, donor_modules=None) -> tuple[dict[str
     sensor = next(d for d in declarations if d["library_id"] == part["library_id"])
     if list(sensor["possible_addresses"]) != list(part["addresses"]):
         raise DevicePlanError("the part descriptor's addresses disagree with the catalog; refusing to export")
-    display = next((d for d in declarations if d["library_id"] == SSD1306_ID), None)
+    display = next((d for d in declarations if d["library_id"] in displays), None)
     sensor_addrs = ", ".join(sensor["possible_addresses"])
     if display:
         display_decl = "static const uint8_t kDisplayAddrs[] = { " + ", ".join(display["possible_addresses"]) + " };\n"

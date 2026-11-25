@@ -64,3 +64,32 @@ def test_the_regulator_output_is_not_a_second_supply():
     spec = draft_device_spec({"controller": "esp32-devkitc-v4", "parts": [OLED13]})["spec"]
     spec["connections"] = spec["connections"] + [{"from": "display.3v3", "to": "mcu.3V3"}]
     assert "supplies_joined" in _findings(build_device_plan(spec), "error")
+
+
+def _logger_spec():
+    return draft_device_spec({"controller": "esp32-devkitc-v4", "parts": [OLED13, "adafruit-bme280-stemma-qt"]})["spec"]
+
+
+def test_the_application_drives_any_sourced_ssd1306_display():
+    import io
+    import zipfile
+
+    from hardware_splicer.device_application import build_device_application
+    from hardware_splicer.device_plan import ssd1306_display_ids
+
+    assert ssd1306_display_ids() == {"ssd1306-096-i2c", OLED13}
+    _meta, archive = build_device_application(_logger_spec())
+    main = zipfile.ZipFile(io.BytesIO(archive)).read("src/main.cpp").decode()
+    # Adafruit's 1.3 inch board defaults to 0x3D, so the library lists it first and the application probes it first.
+    assert "static const uint8_t kDisplayAddrs[] = { 0x3D, 0x3C };" in main
+
+
+def test_bench_output_from_the_larger_display_is_read_as_a_presence_check():
+    from hardware_splicer.device_observations import check_device_observations
+
+    text = "BOOT sensor=0x77 display=0x3D\n"
+    by_id = {m["id"]: m for m in check_device_observations(_logger_spec(), text)["modules"]}
+    assert by_id["display"]["status"] == "acknowledged" and by_id["display"]["evidence"] == "application_presence_check"
+    assert "not a display identity" in by_id["display"]["note"]
+    missing = {m["id"]: m for m in check_device_observations(_logger_spec(), "DISPLAY MISSING\nBOOT sensor=0x77 display=NONE\n")["modules"]}
+    assert missing["display"]["status"] == "no_acknowledge"

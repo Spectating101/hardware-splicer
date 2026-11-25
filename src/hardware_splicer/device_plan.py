@@ -256,6 +256,12 @@ def _library() -> dict[str, Any]:
     return data
 
 
+def ssd1306_display_ids() -> frozenset[str]:
+    """Display modules whose sourced controller chip is an SSD1306: the generated application drives any of them the same way."""
+
+    return frozenset(m["id"] for m in _library()["modules"] if m["kind"] == "display" and any(c["marking"] == "SSD1306" for c in m.get("chips", [])))
+
+
 def module_library() -> dict[str, Any]:
     """The module library as published: sources, dimension basis, pins and optional chip roles."""
 
