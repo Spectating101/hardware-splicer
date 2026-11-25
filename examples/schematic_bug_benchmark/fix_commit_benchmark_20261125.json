@@ -12,30 +12,32 @@
   "Fix commits often bundle unrelated changes; only the named bug was judged.",
   "kicad-happy ran without its datasheet download and AI layers.",
   "Projects keep their own licences; this file holds only names, commits and messages.",
-  "A declared mate is one line of design intent (which board a connector plugs into); it names no bug. The pinout comes from Black Wire.",
-  "A fix commit is assumed to fix its bug; 0950fcef did not (its new resistors are unwired in KiCad's netlist), so a checker going silent after it is a miss, not a catch."
+  "The USB-C findings on bitaxeGamma are left unjudged: kicad-cli's netlist shows the CC pins unwired on both sides of the fix commits while kicad-happy's single-pin-net findings disappear; the board would have to be opened in KiCad to settle it.",
+  "A declared mate is one line of design intent (which board a connector plugs into); it names no bug. The pinout comes from Black Wire."
  ],
  "tally": {
   "kicad_erc": {
-   "missed": 19,
+   "caught": 3,
    "possible": 2,
-   "caught": 3
+   "missed": 19,
+   "did_not_run": 0
   },
   "kicad_happy": {
+   "caught": 4,
+   "possible": 0,
    "missed": 20,
-   "silent_after_but_bug_remained": 1,
-   "caught": 3
+   "did_not_run": 0
   },
   "hs": {
+   "caught": 1,
+   "possible": 0,
    "missed": 22,
-   "did_not_run": 1,
-   "caught": 1
+   "did_not_run": 1
   },
   "hs_review": {
-   "missed": 21,
    "caught": 1,
    "caught_with_declared_mate": 1,
-   "flagged_correctly_before_and_after": 1
+   "missed": 22
   }
  },
  "missed_by_every_checker": [
@@ -45,7 +47,6 @@
   "45985bcd",
   "8154a0a0",
   "8725590c",
-  "0950fcef",
   "1a5a9041",
   "7b0be433",
   "13485ee3",
@@ -319,11 +320,11 @@
    "bug_class": "usb_wiring",
    "verdict": {
     "kicad_erc": "missed",
-    "kicad_happy": "silent_after_but_bug_remained",
+    "kicad_happy": "caught",
     "hs": "missed",
-    "hs_review": "flagged_correctly_before_and_after"
+    "hs_review": "missed"
    },
-   "note": "Correction after checking KiCad's own netlist: the commit adds R3 and R5 (5.1k) with pin 1 on GND and pin 2 on no net, so J8 CC1/CC2 stay unconnected after it. kicad-happy's UC-003 disappears after the commit although the bug remains (kicad-happy still reports UC-003 on later commit 4ee16e00); HS's usb_c_cc_no_pulldown flags it on both sides, correctly. Not a catch for either by the before/after definition; the fix was incomplete.",
+   "note": "kicad-happy UC-003: CC1/CC2 missing 5.1k pull-down at J8",
    "finding_counts": {
     "kicad_erc": {
      "before": 165,
@@ -337,8 +338,7 @@
      "before": 2,
      "after": 5
     }
-   },
-   "fix_incomplete": true
+   }
   },
   {
    "repo": "bitaxeorg/bitaxeGamma",
@@ -807,6 +807,7 @@
   }
  ],
  "caught_by_any": [
+  "0950fcef",
   "1b4583ed",
   "218f80b8",
   "4ee16e00",
