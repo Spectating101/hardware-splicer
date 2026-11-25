@@ -4777,7 +4777,15 @@
       "source": "ingested-component-db",
       "capabilityTags": [
         "sensor_or_adc"
-      ]
+      ],
+      "logicVoltage": 3.3,
+      "logicVoltageSource": {
+        "url": "https://www.nxp.com/docs/en/data-sheet/MFRC522.pdf",
+        "accessed": "2026-11-25",
+        "locator": "Operating conditions table, VDDD digital supply voltage",
+        "quote": "VDDD digital supply voltage VSSA = VSSD = VSS(PVSS) = VSS(TVSS) = 0 V 2.5 3.3 3.6 V",
+        "note": "A 3.3 V part: 5 V logic from an Arduino Uno or Nano exceeds its supply."
+      }
     },
     {
       "id": "dc_motor_3v_6v",
@@ -6758,7 +6766,15 @@
       "source": "ingested-component-db",
       "capabilityTags": [
         "display_or_ui"
-      ]
+      ],
+      "logicVoltage": 5,
+      "logicVoltageSource": {
+        "url": "https://www.ti.com/lit/ds/symlink/pcf8574.pdf",
+        "accessed": "2026-11-25",
+        "locator": "Recommended Operating Conditions, VCC and VIH (the I2C backpack's PCF8574)",
+        "quote": "VIH High-level input voltage 0.7 × VCC VCC + 0.5",
+        "note": "The backpack's PCF8574 runs from the module's 5 V, so its I2C logic is 5 V; any pull-ups on the backpack pull SDA and SCL to 5 V."
+      }
     },
     {
       "id": "lcd_16x2_parallel",
@@ -8003,7 +8019,15 @@
       "capabilityTags": [
         "display_or_ui",
         "led_or_light"
-      ]
+      ],
+      "logicVoltage": 5,
+      "logicVoltageSource": {
+        "url": "https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf",
+        "accessed": "2026-11-25",
+        "locator": "Electrical Characteristics, DIN input high voltage, at VDD = 4.5 to 5.5 V",
+        "quote": "VIH DIN，SET 0.7VDD",
+        "note": "The strip is powered at 5 V, so its data input needs 0.7 x 5 = 3.5 V for a high; a 3.3 V GPIO is below that."
+      }
     },
     {
       "id": "neopixel_ring",
