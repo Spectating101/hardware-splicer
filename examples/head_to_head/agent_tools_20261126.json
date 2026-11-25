@@ -103,6 +103,21 @@
    "'no breakout boards' is not understood by the offline picker",
    "no discrete LED part in the library",
    "no printable-wall or tip-over check in HS"
-  ]
+  ],
+  "deepseek_model_path": {
+   "setup": "HS's Qwen client pointed at DeepSeek's OpenAI-compatible API by settings only (base URL https://api.deepseek.com/v1, model deepseek-chat); 6-8 s per brief.",
+   "runs": {
+    "as_found_x3": "8/13, 10/13, 9/13: three picks rejected whole because a real candidate was filed under the wrong requirement; an Arduino Nano for an 'ESP32' brief; no HC-SR04 level shifter",
+    "after_fixes_x3": "12/13 each: one schema miss per run",
+    "after_retry_x2": "13/13 and 12/13"
+   },
+   "fixes": [
+    "misfiled candidates are moved to the requirement the catalog matches (semantic_module_selector)",
+    "the brief's named parts, counts, controller family and level-shift rule correct model picks (apply_brief_rules)",
+    "one retry when the model's JSON misses the schema"
+   ],
+   "remaining_miss": "the LiPo dice brief sometimes gets a USB 5 V input as well; debatable, left as is",
+   "better_than_offline_at": "reading 'bare module' (bare ESP32 chip, LDO, USB-serial) and a water-leak alarm (water sensor, buzzer)"
+  }
  }
 }
