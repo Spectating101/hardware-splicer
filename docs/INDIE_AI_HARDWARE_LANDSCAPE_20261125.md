@@ -131,3 +131,32 @@ Only MIT, Apache or BSD code can be copied into HS; for GPL, AGPL, LGPL and unli
    HS's `scene_fit.py` covers static clearance only.
 4. **One evidence ledger.** Replicator's measured, inferred and unknown, and AgentSCAD's delivered versus accepted, match HS's authority states. Using the same words would make HS easier to compare.
 5. **Same-brief benchmark.** Formwright's live app, Replicator, AgentSCAD and text-to-cad can take the same briefs as the hosted tools above, graded on the same traps.
+
+## Head-to-head, 26 Nov 2026
+
+The full record is [`examples/head_to_head/agent_tools_20261126.json`](../examples/head_to_head/agent_tools_20261126.json). It was one run per brief, so it is a snapshot, not a score.
+
+**Electronics.** The same five briefs went to Formwright and to HS, each with a known trap.
+
+| Brief (trap) | Formwright | HS from the brief | HS checks, given the wiring |
+|---|---|---|---|
+| E1 HC-SR04 (5 V echo) | caught: a 1k/2k divider | caught: a level shifter | caught |
+| E2 60 x WS2812B (data level, 3.6 A) | caught both: level shifter, capped brightness, a charger of 2 A or more | no LED strip picked | data level only |
+| E3 4 x SG90 on USB (stall current) | inconclusive at 10 minutes | wrong parts | caught |
+| E4 bare ESP32-C3 + chips (pull-ups, strap pins) | caught | ignored "no breakouts" | a generic note only |
+| E5 LoRa on 18650 (runtime) | caught: ~260 days ideal, 4-6 months realistic | missed | not assessed |
+
+**Mechanical.** Seeded defects were built into each tool's own format.
+
+| Defect | Replicator | text-to-cad | HS |
+|---|---|---|---|
+| Tips over | caught | not checked | not checked |
+| Floating part | caught | missed | missed; added the same day (`loose_parts`) |
+| Parts clash | missed (under its 25% threshold) | caught | caught |
+| Wall too thin to print | not checked | caught (cited 0.8 mm minimum) | not checked |
+| Joint limit past a clash | not checked | has `ranges` (not exercised) | caught (`motion_sweep`) |
+
+**Verdict.** Formwright is ahead of HS at turning a brief into a sound device. HS's checks hold up once the parts are right. No geometry tool covers every defect. The work for HS:
+- read briefs as well as it checks them;
+- add supply-current, runtime and printability checks;
+- fix the part-library errors this run exposed.

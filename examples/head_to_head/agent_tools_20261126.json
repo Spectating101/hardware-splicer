@@ -1,0 +1,93 @@
+{
+ "schema": "hardware_splicer.head_to_head.v1",
+ "captured": "2026-11-26",
+ "honesty": "Each tool ran on the same inputs on 26 Nov 2026. HS 'current' includes checks added the same day after seeing these cases (loose_parts, motion_sweep), so its extra catches are not independent. Formwright is a hosted app judged from the page it showed; its projects are private to the browser session, so each result is the last capture before a 10-minute limit.",
+ "electronics_briefs": {
+  "E1": "ESP32 + HC-SR04 + OLED on USB (trap: 5 V echo into a 3.3 V pin)",
+  "E2": "ESP32 + 60 WS2812B on a USB charger (traps: 3.3 V data into a 5 V strip; up to 3.6 A)",
+  "E3": "ESP32 + four SG90 servos on a computer USB port (trap: servo stall current)",
+  "E4": "bare ESP32-C3 module + BME280 chip + SSD1306, no breakouts (traps: I2C pull-ups, enable and boot-strap pins)",
+  "E5": "LoRa soil sensor on one 18650, every 10 minutes (trap: a realistic runtime)"
+ },
+ "electronics_results": {
+  "formwright": {
+   "tool": "https://formwright.axo.kz (Axo; Muse Spark 1.3, Medium effort; no account needed)",
+   "E1": "caught: 1k/2k divider on ECHO (to 3.3 V), I2C pull-ups; ~2 min",
+   "E2": "caught: strip level shifter, brightness capped by default, states charger >= 2 A and that full-white current is untested; USB-C CC pull-downs",
+   "E3": "inconclusive: a servo-rail bulk capacitor; no current budget visible at the 10-minute capture (still reworking the case)",
+   "E4": "caught: EN pull-up, GPIO8 boot-strap pull-up, SDA/SCL pull-ups, USB-C Rd, LDO (still refining at 10 minutes)",
+   "E5": "caught: ~260 days ideal (2600 mAh / 0.41 mA), 4-6 months realistic; says radio current was not measured"
+  },
+  "hs_from_brief": {
+   "tool": "module_picker.pick_modules_for_goal",
+   "E1": "right parts incl. a level shifter",
+   "E2": "missed: no LED strip picked",
+   "E3": "wrong: an L298N motor driver and one SG90",
+   "E4": "wrong: a DevKit and breakouts despite 'no breakout boards'",
+   "E5": "missed: no LoRa, no battery, no runtime"
+  },
+  "hs_checks_given_the_wiring": {
+   "tool": "part_tiers.check_any_wiring on naive trap wiring",
+   "E1": "caught (error: 5 V logic into 3.3 V); plus a spurious 'nothing sources power' warning",
+   "E2": "caught the data level (warning); missed the 3.6 A: the library has no strip current and types its 5V pin as an output",
+   "E3": "caught (error: servos on the MCU 5 V pin), though the rule says >200 mA where stall exceeds 600 mA",
+   "E4": "weak: a generic 'confirm pull-ups' note repeated four times; cannot tell chips from breakouts",
+   "E5": "not assessed: no runtime model for engine parts"
+  }
+ },
+ "mechanical": {
+  "defects": {
+   "D1_tips_over": "desk lamp: 0.6 kg with its centre of gravity 148 mm out from a 60 mm base",
+   "D2_floating_part": "shelf bracket gusset modelled 3 mm short of the wall plate",
+   "D3_part_clash": "52 mm board in a 50 mm cavity: 44.8 mm^3 into each wall",
+   "D4_thin_wall": "printed box with 0.4 mm walls (one nozzle line)",
+   "D5_joint_range": "a joint whose stated limit runs past a clash (SO-101 elbow; swing test)"
+  },
+  "results": {
+   "replicator": {
+    "D1": "caught",
+    "D2": "caught",
+    "D3": "missed (overlap under its 25% share threshold)",
+    "D4": "not checked (thin-wall rule covers tube ops only)",
+    "D5": "not checked (no joints)",
+    "false_alarms": "tips on a wall bracket (it does not know wall mounting); a 'knowledge card' wants a desk lamp arm at 35-80 degrees"
+   },
+   "text_to_cad": {
+    "D1": "not checked (no centre-of-gravity rule found)",
+    "D2": "missed",
+    "D3": "caught (44.8 mm^3 per wall)",
+    "D4": "caught (cited 0.8 mm minimum, Protolabs Network)",
+    "D5": "has `ranges` (joint stops from geometry); not exercised here",
+    "false_alarms": "flags deliberately overlapping parts (post/arm) unless named as a fit"
+   },
+   "hs_frozen": {
+    "D1": "not checked",
+    "D2": "missed",
+    "D3": "caught (44.8 mm^3 per wall)",
+    "D4": "not checked for arbitrary geometry",
+    "D5": "not checked before motion_sweep"
+   },
+   "hs_current": {
+    "D1": "not checked",
+    "D2": "caught (loose_parts, added after this test)",
+    "D3": "caught",
+    "D4": "not checked",
+    "D5": "caught (motion_sweep: SO-101 elbow clear to 84 of 96.8 degrees)"
+   }
+  },
+  "not_run": {
+   "agentscad": "needs its Node app and OpenSCAD, which are not installed here; claims manifold, wall-thickness, bounds, hole and clearance checks"
+  }
+ },
+ "not_compared": {
+  "agentscad": "Node app plus OpenSCAD not installed here",
+  "text_to_cad_electronics": "its KiCad checks wrap KiCad ERC/DRC plus two wire-span checks; it would score like KiCad ERC on the schematic benchmark",
+  "text_to_cad_stress_and_ranges": "`cad step solve` (CalculiX) and `cad step ranges` exist but their extras were not installed or exercised"
+ },
+ "takeaways": [
+  "Formwright beats HS from a brief: it resolved 4 of 5 traps itself, where HS picked wrong parts for 4 of 5.",
+  "Given the wiring, HS's checks catch the logic-level and servo-supply traps but not supply current, bare-chip pull-ups or runtime.",
+  "On geometry no single tool covers the set: Replicator alone checks tipping, text-to-cad alone checks printable wall thickness, HS and text-to-cad catch clashes, HS alone sweeps joint limits.",
+  "HS library errors found: WS2812B strip 5V typed power_out, no strip current, SG90 stall understated."
+ ]
+}
