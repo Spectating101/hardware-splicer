@@ -102,3 +102,14 @@ def test_a_parts_list_reports_salvage_and_needs_a_reason_when_nothing_is_reused(
     assert any("must name its donor" in p for p in mixed["problems"])
     s = mixed["result"]["salvage"]
     assert s["salvaged_lines"] == 2 and s["new_spend_usd"] == 3.0 and s["mass_diverted_g"] == 170 and s["new_equivalent_replaced_usd"] == 25
+
+
+def test_junk_lookup_names_donors_for_a_rover_and_flags_what_junk_cannot_give():
+    env = tb.call("hs_junk_lookup", {"needs": ["drive_motors", "camera", "wifi_compute", "battery_cells"]})
+    plan = env["result"]["donor_plan"]
+    assert {c for d in plan for c in d["covers"]} == {"drive_motors", "camera", "wifi_compute", "battery_cells"}
+    assert plan[0]["device"] == "phone-android-cracked" and len(plan) <= 3
+    assert all(d["device"] != "microwave-oven" for d in plan)
+    assert env["ok"] and env["claim_boundary"]
+    bad = tb.call("hs_junk_lookup", {"needs": ["teleporter"]})
+    assert not bad["ok"] and "unknown capabilities" in bad["problems"][0]

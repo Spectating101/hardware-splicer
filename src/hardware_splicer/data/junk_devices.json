@@ -1,0 +1,156 @@
+{
+ "schema_version": "hardware_splicer.junk_devices.v1",
+ "rule": "Whole discarded devices and the working modules they usually give. Typical contents, not a promise: a donor's parts are unknown until it is opened and tested. Prices are what was seen on the date given, unopened and untested listings.",
+ "capabilities": {
+  "drive_motors": "small DC gearmotors with wheels or tracks",
+  "drive_motors_encoded": "gearmotors with wheel encoders",
+  "high_power_drive": "brushless hub motors for a person-sized load",
+  "camera": "a working camera",
+  "wifi_compute": "a computer with Wi-Fi that can run an app or a program",
+  "battery_cells": "rechargeable lithium cells",
+  "battery_pack": "a ready lithium pack with its protection board",
+  "charger_5v": "a 5 V charger or USB power path",
+  "power_supply_mains": "a mains-powered DC supply",
+  "stepper_linear": "stepper motors, lead screws, rails or belts for straight-line motion",
+  "bump_cliff_sensors": "bump switches and floor (cliff) sensors",
+  "display": "a screen",
+  "speaker_mic": "speaker and microphone",
+  "router_linux": "a network box that can run Linux"
+ },
+ "devices": [
+  {
+   "id": "phone-android-cracked",
+   "name": "Android phone with a cracked screen or dead touch, still powers up",
+   "search_tw": ["二手手機 螢幕破", "手機 故障機", "零件機"],
+   "gives": {"camera": "rear camera, used through a streaming app", "wifi_compute": "the whole phone", "battery_cells": "its pouch cell, only inside the phone", "charger_5v": "its own USB charging", "display": "if the screen still shows", "speaker_mic": "yes"},
+   "hazards": ["a swollen battery (case bulging, screen lifting): do not charge, do not use, take it to a battery recycling point"],
+   "first_tests": ["charges and boots", "camera app shows a picture", "joins Wi-Fi", "can install a streaming app (older Android versions may be refused by current apps)"],
+   "skip_if": ["will not power up", "battery swollen", "Android too old for any streaming app"],
+   "price_seen": {"ntd": [100, 250], "where": "Ruten", "date": "2026-11-26", "note": "a phone sold as confirmed booting was NT$700"}
+  },
+  {
+   "id": "robot-vacuum",
+   "name": "Robot vacuum that powers up but will not run, or has a dead battery",
+   "search_tw": ["掃地機器人 二手", "掃地機器人 零件機", "掃地機器人 故障"],
+   "gives": {"drive_motors_encoded": "two drive-wheel modules with gearmotor, encoder and suspension spring", "bump_cliff_sensors": "front bumper switches and downward floor sensors", "battery_pack": "its pack, if not worn out", "charger_5v": "no; it comes with its own dock"},
+   "interfaces": ["iRobot Roomba 500 and 600 series take serial commands on a mini-DIN port (iRobot Open Interface); ArduRoomba (MIT, ESP32 support) and PyRoombaAdapter (MIT) speak it"],
+   "reuse": ["https://github.com/pkyanam/ArduRoomba", "https://github.com/AtsushiSakai/PyRoombaAdapter"],
+   "hazards": ["old NiMH or Li-ion pack: check for leaks or swelling before charging", "brush and suction motors draw high current; leave them disconnected"],
+   "first_tests": ["each wheel turns by hand and with power", "on a Roomba, the Open Interface answers on the serial port", "pack voltage under load"],
+   "skip_if": ["wheel modules missing or seized", "main board burnt (smell, scorched area)"],
+   "price_seen": {"ntd": [230, 800], "where": "Ruten", "date": "2026-11-26", "note": "Roomba 571 sold as powers up, will not run: NT$800"}
+  },
+  {
+   "id": "rc-toy-car",
+   "name": "Broken toy RC car or tank",
+   "search_tw": ["遙控車 故障", "遙控坦克 履帶"],
+   "gives": {"drive_motors": "one or two small brushed motors with gearbox, wheels or tracks, chassis"},
+   "hazards": ["original NiMH or lithium pack may be damaged"],
+   "first_tests": ["measure the original battery's voltage: it sets the motors' safe voltage", "each motor spins on that voltage", "gears not stripped"],
+   "skip_if": ["only one motor and you need tank steering", "gearbox stripped"],
+   "price_seen": {"ntd": [100, 200], "where": "Ruten", "date": "2026-11-26", "note": "a new mini tracked tank was NT$396-542"}
+  },
+  {
+   "id": "laptop-battery-pack",
+   "name": "Dead laptop battery pack (older, cylindrical-cell packs)",
+   "search_tw": ["筆電電池 拆機 18650", "18650 鋰電池 拆機"],
+   "gives": {"battery_cells": "usually 4 to 9 cylindrical 18650 cells; newer packs use flat pouch cells instead"},
+   "hazards": ["cutting the case can short or puncture a cell: work slowly, no metal blades into cells", "cells below about 2.0 V may be damaged inside: recycle, do not revive", "never charge a cell that got hot, smells or is dented"],
+   "first_tests": ["resting voltage of each cell", "charge in a charger that shows capacity, then measure capacity", "self-discharge: voltage after a week"],
+   "skip_if": ["any cell under about 2.0 V", "dents, leaks, rust"],
+   "price_seen": {"ntd": [99, 128], "where": "Ruten", "date": "2026-11-26", "note": "sold as lots of dead packs"}
+  },
+  {
+   "id": "power-bank",
+   "name": "Dead or broken power bank",
+   "search_tw": ["行動電源 故障"],
+   "gives": {"battery_cells": "18650 or pouch cells", "charger_5v": "a USB charge and 5 V boost board, if it still works"},
+   "hazards": ["swollen pouch cells: recycle", "cheap packs may hold fewer or worse cells than labelled"],
+   "first_tests": ["cell voltages", "does the board still charge and give 5 V"],
+   "skip_if": ["swollen", "burn marks"],
+   "price_seen": null
+  },
+  {
+   "id": "hoverboard",
+   "name": "Broken self-balancing hoverboard",
+   "search_tw": ["平衡車 故障", "平衡車 二手"],
+   "gives": {"high_power_drive": "two brushless hub motors with tyres and hall sensors", "battery_pack": "usually a 36 V (10-cell) lithium pack", "power_supply_mains": "its charger"},
+   "interfaces": ["hoverboard-firmware-hack-FOC (GPL-3.0) re-flashes many of the original controller boards to take commands over serial; run it as its own program, never copy its code into HS"],
+   "reuse": ["https://github.com/EFeru/hoverboard-firmware-hack-FOC"],
+   "hazards": ["36 V pack holds a lot of energy: a short can start a fire", "re-flashing needs an ST-Link and care"],
+   "first_tests": ["pack voltage and cell balance", "each wheel spins freely", "which controller board it has (supported by the open firmware or not)"],
+   "skip_if": ["pack swollen or damaged", "controller board not supported and you cannot drive the motors otherwise"],
+   "price_seen": {"ntd": [2000, 2000], "where": "Ruten", "date": "2026-11-26", "note": "one listing"}
+  },
+  {
+   "id": "inkjet-printer",
+   "name": "Broken inkjet printer or all-in-one",
+   "search_tw": ["印表機 故障機"],
+   "gives": {"stepper_linear": "carriage rod, belt, pulleys, DC motors with optical encoder strips (some have steppers)", "display": "small panel on some models", "power_supply_mains": "internal supply on many models"},
+   "hazards": ["ink is messy; mains supply inside: unplug and wait before opening"],
+   "first_tests": ["motor type and voltage from its label", "encoder strip intact"],
+   "skip_if": ["you need precision: printer DC motors need encoder feedback to position"],
+   "price_seen": null
+  },
+  {
+   "id": "flatbed-scanner",
+   "name": "Old flatbed scanner",
+   "search_tw": ["掃描器 故障"],
+   "gives": {"stepper_linear": "a stepper motor, gearbox, smooth rod and belt over the bed length"},
+   "hazards": ["glass bed: handle with care"],
+   "first_tests": ["stepper coils by resistance"],
+   "skip_if": [],
+   "price_seen": null
+  },
+  {
+   "id": "optical-drive",
+   "name": "DVD or CD drive (computer)",
+   "search_tw": ["光碟機 拆機"],
+   "gives": {"stepper_linear": "a tiny stepper with a lead screw and sled (about 4 cm travel)"},
+   "hazards": [],
+   "first_tests": ["stepper coils by resistance"],
+   "skip_if": [],
+   "price_seen": null
+  },
+  {
+   "id": "wifi-router",
+   "name": "Old Wi-Fi router",
+   "search_tw": ["路由器 二手"],
+   "gives": {"router_linux": "many models run OpenWrt", "power_supply_mains": "its 12 V or 5 V adapter"},
+   "hazards": [],
+   "first_tests": ["model is on OpenWrt's supported list", "adapter voltage and current from its label"],
+   "skip_if": ["not supported by OpenWrt and you need custom software"],
+   "price_seen": null
+  },
+  {
+   "id": "laptop",
+   "name": "Dead laptop",
+   "search_tw": ["筆電 零件機"],
+   "gives": {"display": "eDP panel (needs a controller board to reuse)", "camera": "USB webcam module (often usable with a USB lead)", "wifi_compute": "if the board still boots", "battery_cells": "see laptop battery pack", "power_supply_mains": "its charger (often 19-20 V)"},
+   "hazards": ["battery: see laptop battery pack", "panel backlight inverter on old models carries high voltage"],
+   "first_tests": ["boots with charger only", "webcam module pinout read from the cable or board marking"],
+   "skip_if": [],
+   "price_seen": null
+  },
+  {
+   "id": "pc-power-supply",
+   "name": "ATX computer power supply",
+   "search_tw": ["電源供應器 二手"],
+   "gives": {"power_supply_mains": "12 V, 5 V and 3.3 V rails with high current; fans"},
+   "hazards": ["mains voltage and charged capacitors inside: do not open; use it closed through its connectors only"],
+   "first_tests": ["turns on with the green PS_ON wire to ground, output voltages correct under a small load"],
+   "skip_if": ["burnt smell", "bulging capacitors visible through the vents"],
+   "price_seen": null
+  },
+  {
+   "id": "microwave-oven",
+   "name": "Microwave oven",
+   "search_tw": [],
+   "gives": {},
+   "hazards": ["its high-voltage capacitor and transformer can kill even when unplugged; not a salvage donor for HS projects"],
+   "first_tests": [],
+   "skip_if": ["always"],
+   "price_seen": null
+  }
+ ]
+}

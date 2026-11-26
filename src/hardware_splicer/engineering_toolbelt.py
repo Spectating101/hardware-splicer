@@ -189,6 +189,19 @@ def _github_code(query: str, extension: str, limit: int) -> list[dict[str, Any]]
     return out
 
 
+def _junk_lookup(args, _project):
+    from . import junk_catalogue
+    needs = [str(n) for n in (args.get("needs") or [])]
+    if not needs:
+        raise ValueError("needs is required: capabilities such as drive_motors, camera, wifi_compute, battery_cells")
+    res = junk_catalogue.lookup(needs)
+    plan = ", ".join(f"{d['device']} ({'/'.join(d['covers'])})" for d in res["donor_plan"]) or "none"
+    problems = [f"no junk in the catalogue gives {n}: buy or build it" for n in res["not_covered_by_junk"]]
+    sources = sorted({u for d in res["donor_plan"] for u in d.get("reuse", [])})
+    return _envelope(True, f"donors: {plan}", res, problems=problems, sources=sources,
+                     boundary="Typical contents of discarded devices; a donor's parts are unknown until it is opened and tested.")
+
+
 def _prior_art(args, _project):
     query = str(args.get("query") or "").strip()
     if not query:
@@ -394,6 +407,10 @@ TOOLS: dict[str, ToolSpec] = {t.name: t for t in [
              category="artifact"),
     ToolSpec("hs_project_status", "Where a project stands: software-checked items, open problems, what only a physical build "
              "can show, decisions, research and artifacts.", _obj({}, ["project_id"]), _project_status),
+    ToolSpec("hs_junk_lookup", "Salvage first: which discarded devices (phones, robot vacuums, toy cars, laptop batteries, "
+             "hoverboards, printers...) give the modules a design needs, the fewest donors that cover them, what to test first, "
+             "hazards and prices last seen in Taiwan.",
+             _obj({"needs": {"type": "array", "items": {"type": "string"}}}, ["needs"]), _junk_lookup, category="research"),
     ToolSpec("hs_prior_art_search", "Search existing open designs before building: BoardRepo (public KiCad boards, searchable by "
              "part) and GitHub KiCad files with their licences.",
              _obj({"query": {"type": "string"}, "limit": {"type": "integer"}, "sources": {"type": "array", "items": {"type": "string"}},
