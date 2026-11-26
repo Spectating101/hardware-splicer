@@ -542,7 +542,13 @@ def call(name: str, args: dict[str, Any] | None) -> dict[str, Any]:
     if spec is None:
         raise KeyError(f"unknown tool {name}")
     project = ObjectiveProject.load(args["project_id"]) if args.get("project_id") else None
+    missing = [k for k in spec.schema.get("required", []) if k != "project_id" and args.get(k) in (None, "", [])]
     try:
+        if missing:
+            # say which inputs are missing and what they are, instead of a bare KeyError from inside the tool
+            props = spec.schema.get("properties", {})
+            raise ValueError("missing required input " + ", ".join(
+                f"{k}" + (f" ({props[k].get('description')})" if props.get(k, {}).get("description") else "") for k in missing))
         env = spec.handler(args, project)
     except Exception as exc:  # noqa: BLE001 - reported to the agent, and recorded as an open problem
         env = _envelope(False, f"{type(exc).__name__}: {exc}", None, problems=[f"{type(exc).__name__}: {exc}"])

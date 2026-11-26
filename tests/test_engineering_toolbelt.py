@@ -128,3 +128,9 @@ def test_prior_art_finds_what_hs_already_recorded():
     env = tb.call("hs_prior_art_search", {"query": "smartphone robot rover", "sources": ["hs_own"], "limit": 20})
     urls = [u.lower() for h in env["result"]["hs_own"] for u in h["urls"]]
     assert any("openbot" in u for u in urls)
+
+
+def test_a_missing_required_input_is_named_not_a_crash():
+    env = tb.call("hs_size_arm_actuators", {"links_mm": [150, 150], "payload_kg": 0.2})
+    assert not env["ok"] and "missing required input" in env["problems"][0]
+    assert "supply_v" in env["problems"][0] and "max_stall_share" in env["problems"][0]
