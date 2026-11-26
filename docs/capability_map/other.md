@@ -13,7 +13,7 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `jobs` | 664 | 9 | product | MRC | (no description) |
 | `module_picker` | 584 | 8 | product | TMRC | Concrete module selection with an explicitly isolated legacy regex picker. ``MODULE_HINTS`` remains for offline/regression compatibility, but model-enabled product paths must not compute or prefer the... |
 | `codex_exec_trace` | 567 | 2 | script | - | Normalize Codex exec JSONL into Hardware-Splicer's external MCP audit shape. |
-| `engineering_status` | 520 | 7 | product | MRC | Compile one coherent engineering status and ranked next-action surface. |
+| `engineering_status` | 520 | 7 | product | TMRC | Compile one coherent engineering status and ranked next-action surface. |
 | `compiler` | 505 | 2 | product | TMRC | (no description) |
 | `build_compiler` | 479 | 19 | product | TMRC | (no description) |
 | `codex_astra_preflight` | 402 | 1 | script | - | Zero-inference preflight and launch planning for Codex/Astra HS experiments. |
@@ -45,7 +45,7 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `engineering_execution_plan_update` | 106 | 0 | product | MRC | Apply one bounded execution manifest to a guided engineering plan. |
 | `integration_stack` | 97 | 1 | product | TMRC | (no description) |
 | `file_digest` | 78 | 1 | product | MRC | SHA-256 of a file, remembered while the file is unchanged. Digital study reads re-verify every artifact against its sealed hash. The check itself never changes: a file's bytes must hash to the sealed ... |
-| `integrations.wireviz` | 77 | 1 | product | MRC | Optional offline WireViz CLI boundary; accepts only HS-generated documents. |
+| `integrations.wireviz` | 77 | 1 | product | TMRC | Optional offline WireViz CLI boundary; accepts only HS-generated documents. |
 | `build_files_security` | 75 | 1 | product | TMRC | Path and size guards for /v1/build-files/* (local file viewer boundary). |
 | `operator_hypothesis_cycle` | 73 | 1 | tests-only | - | Two-stage advisory hypothesis evaluation over independent HS findings. |
 | `integrations.kikit_bridge` | 66 | 2 | product | MRC | KiKit glue — opt-in manufacturer fab preset export. |
@@ -57,16 +57,16 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `golden_intakes` | 35 | 2 | script | - | Golden intake compile manifest for engine CI. |
 | `env_local` | 28 | 0 | product | TMRC | Load repo .env.local into os.environ (never log values). |
 | `text_safety` | 26 | 0 | product | TMRC | Small checks on text a person types, shared by the planners that accept it. |
-| `file_integrity` | 9 | 0 | product | MRC | File digests for on-disk engineering artifacts. |
-| `engineering_plan_store` (plumbing) | 358 | 5 | product | MRC | Persistence helpers for enriched guided engineering plans. |
+| `file_integrity` | 9 | 0 | product | TMRC | File digests for on-disk engineering artifacts. |
+| `engineering_plan_store` (plumbing) | 358 | 5 | product | TMRC | Persistence helpers for enriched guided engineering plans. |
 | `cli_entry` (plumbing) | 260 | 6 | product | C | Console entrypoints for pip-installed Hardware-Splicer. |
-| `manufacturing_closure_compat` (plumbing) | 208 | 0 | product | MRC | Compatibility corrections for manufacturing collection and identity collisions. Guided planning supplies both the raw intake and its normalized copy, so exact rows are deduplicated before evaluation. ... |
+| `manufacturing_closure_compat` (plumbing) | 208 | 0 | product | TMRC | Compatibility corrections for manufacturing collection and identity collisions. Guided planning supplies both the raw intake and its normalized copy, so exact rows are deduplicated before evaluation. ... |
 | `engineering_execution_api` (plumbing) | 182 | 0 | product | MRC | Product API for bounded software-only engineering execution. |
 | `engineering_status_api` (plumbing) | 70 | 0 | product | MRC | Product API for unified engineering status and ranked next actions. |
 | `engineering_action_api` (plumbing) | 64 | 0 | product | MRC | Product API for preparing ranked engineering next actions. |
 | `manufacturing_api` (plumbing) | 62 | 0 | product | MRC | HTTP surface for cross-domain manufacturing closure. |
-| `engineering_status_revalidation_compat` (plumbing) | 32 | 0 | product | MRC | Install fresh physical-authorization revalidation before status compilation. |
+| `engineering_status_revalidation_compat` (plumbing) | 32 | 0 | product | TMRC | Install fresh physical-authorization revalidation before status compilation. |
 | `engineering_toolbelt_api` (plumbing) | 27 | 1 | product | MRC | REST surface for the engineering toolbelt: the same tools and envelope as the MCP server. |
 | `backends` (plumbing) | 15 | 1 | product | TMRC | (no description) |
 | `bench` (plumbing) | 15 | 1 | product | TMRC | (no description) |
-| `tool_workers` (plumbing) | 0 | 0 | product | MRC | (no description) |
+| `tool_workers` (plumbing) | 0 | 0 | product | TMRC | (no description) |

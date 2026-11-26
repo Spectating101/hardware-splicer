@@ -84,6 +84,23 @@ class ObjectiveProject:
     def objective(self) -> dict[str, Any]:
         return json.loads((self.root / "objective.json").read_text())
 
+    # ------------------------------------------------------------------ design link
+
+    def link_design(self, design_project_id: str) -> dict[str, Any]:
+        """Point this objective at a stored machine project (the engineering design spine in the project store).
+
+        The link only reports: the design's release state is recomputed from the stored design on every status call, and
+        nothing here edits the design or upgrades its authority."""
+        summary = design_summary(design_project_id)
+        if summary.get("error"):
+            raise ValueError(summary["error"])
+        obj = self.objective()
+        obj["design_project_id"] = design_project_id
+        (self.root / "objective.json").write_text(json.dumps(obj, indent=1, ensure_ascii=False))
+        self.record("note", f"linked design {design_project_id}", {"design_project_id": design_project_id,
+                                                                   "revision": summary.get("revision")})
+        return summary
+
     # ------------------------------------------------------------------ ledger
 
     def record(self, kind: str, title: str, payload: dict[str, Any]) -> dict[str, Any]:
@@ -140,8 +157,45 @@ class ObjectiveProject:
                                     for s in steps if s["kind"] == "research"]
         artifacts = sorted(str(p.relative_to(self.root)) for p in self.artifacts_dir.rglob("*") if p.is_file())
         obj = self.objective()
+        design = design_summary(obj["design_project_id"]) if obj.get("design_project_id") else None
+        if design is not None:
+            if design.get("error"):
+                open_items.append({"check": f"design:{obj['design_project_id']}", "seq": None, "problems": [design["error"]]})
+            elif design.get("release_blockers"):
+                open_items.append({"check": f"design:{design['project_id']}", "seq": None,
+                                   "problems": [f"design release blocker {b['code']}: {b['message']}" for b in design["release_blockers"][:10]]})
         return {"schema": SCHEMA, "project_id": self.project_id, "objective": obj["objective"],
                 "acceptance": obj.get("acceptance", []), "steps": len(steps), "research": research, "decisions": decisions,
                 "software_checked": checked, "open": open_items, "physical_required": physical, "deliverables": deliverables,
-                "artifacts": artifacts,
+                "artifacts": artifacts, "design": design,
                 "authority": "software checks only; no fabrication, power-on, flight or release is authorised by this record"}
+
+
+def design_summary(design_project_id: str) -> dict[str, Any]:
+    """A stored machine project's release state, recomputed from the stored design (never from caller input)."""
+    from .engineering_plan_store import _persisted_machine_project
+    from .machine_project import MachineProject
+    from .project_store import ProjectStore, ProjectStoreError
+
+    try:
+        envelope = ProjectStore().load(design_project_id)
+    except (ProjectStoreError, ValueError, OSError) as exc:
+        return {"project_id": design_project_id, "error": f"design project {design_project_id!r} not found: {exc}"}
+    snapshot = envelope["snapshot"]
+    project = _persisted_machine_project(snapshot)
+    if project is None and isinstance(snapshot.get("machine_project"), dict):
+        try:
+            project = MachineProject.model_validate(snapshot["machine_project"])
+        except ValueError:
+            project = None
+    if project is None:
+        return {"project_id": design_project_id, "revision": envelope["revision"],
+                "error": f"design project {design_project_id!r} has no valid machine project in revision {envelope['revision']}"}
+    assessment = project.assess_release()
+    return {"project_id": design_project_id, "revision": envelope["revision"], "name": project.name,
+            "requested_state": str(assessment.requested_state.value if hasattr(assessment.requested_state, "value") else assessment.requested_state),
+            "achieved_state": str(assessment.achieved_state.value if hasattr(assessment.achieved_state, "value") else assessment.achieved_state),
+            "release_blockers": [b.model_dump(mode="json") for b in assessment.blockers],
+            "release_warnings": len(assessment.warnings),
+            "counts": {k: len(getattr(project, k)) for k in ("requirements", "components", "verifications", "evidence")},
+            "authority": "reported from the stored design; this link changes no design and grants no release"}

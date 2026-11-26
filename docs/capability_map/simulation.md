@@ -6,7 +6,7 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | Module | Lines | Tests | Status | Reach | What it says it does |
 |---|---|---|---|---|---|
 | `workshop_operator` | 630 | 3 | script | - | Small real HS operator, composing existing *vetted* engineering capabilities. This is NOT a replacement for the canonical project/AI engines. It closes a specific workflow gap: tool selection -> a bou... |
-| `physical_evidence` | 561 | 15 | product | MRC | Calibrated physical evidence and explicitly scoped human authorization. This module never grants authority from planning, simulation, software execution, or a passing calculation. It validates a human... |
+| `physical_evidence` | 561 | 15 | product | TMRC | Calibrated physical evidence and explicitly scoped human authorization. This module never grants authority from planning, simulation, software execution, or a passing calculation. It validates a human... |
 | `digital_project` | 560 | 11 | product | MRC | Saved digital studies using the existing project store and native job queue. The HS-3G-B is a registered proving case. Artifacts belong to a project/run, are immutable after publication, and are check... |
 | `vendor_model_validation` | 269 | 1 | script | - | Bound syntax-validation wrappers for captured manufacturer IBIS and Verilog models. These validators deliberately stop short of signal-integrity or protocol simulation. They prove that exact captured ... |
 | `adaptive_diagnosis` | 84 | 1 | script | - | Adaptive, bounded diagnostic simulation with hidden outcome oracles. The operator never receives the hidden fault or outcome table. Simulated observations are not measurements, and cannot grant hardwa... |

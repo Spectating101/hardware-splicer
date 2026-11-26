@@ -7,31 +7,31 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 |---|---|---|---|---|---|
 | `project_intake` | 1882 | 33 | product | TMRC | (no description) |
 | `mechatronics_authority` | 1080 | 4 | product | TMRC | (no description) |
-| `finding_provenance` | 692 | 5 | product | MRC | Read-only projection of how persisted findings were established. Provenance is never guessed or flattering. If stored fields do not say how a finding was established, the kind is ``unknown``. This mod... |
+| `finding_provenance` | 692 | 5 | product | TMRC | Read-only projection of how persisted findings were established. Provenance is never guessed or flattering. If stored fields do not say how a finding was established, the kind is ``unknown``. This mod... |
 | `evidence_extractor` | 639 | 2 | product | TMRC | (no description) |
 | `platform_derivative_metrics` | 554 | 1 | product | MRC | Deterministic evaluator for platform-to-derivative evidence. The evaluator prefers frozen inventories, explicit task-hour logs, and externally supplied invalidation scoring over manually typed headlin... |
 | `mcp_backend_gateway` | 540 | 9 | product | MC | Canonical FastAPI-to-MCP gateway primitives. This module deliberately contains no MCP SDK dependency. It treats the canonical ``product_api`` OpenAPI document as the discovery contract, then dispatche... |
 | `production_release_metrics` | 484 | 3 | product | TMRC | (no description) |
-| `manufacturing_projection` | 419 | 1 | product | MRC | Project manufacturing identities into the canonical MachineProject graph. |
+| `manufacturing_projection` | 419 | 1 | product | TMRC | Project manufacturing identities into the canonical MachineProject graph. |
 | `cleanroom_perturbations` | 396 | 1 | script | - | Controlled perturbation builders for cleanroom replay. These helpers mutate only declared test inputs. They never encode an expected engineering answer. Equivalent perturbations preserve evidence iden... |
 | `bench_capture_bridge` | 389 | 6 | product | TMRC | Bridge bench_topology_capture.v1 packets into splice bench gate submissions. |
 | `cleanroom_retrospective` | 355 | 2 | script | - | Outer-engineer retrospective over cleanroom replay evidence. The classifier does not decide whether an engineering architecture is correct. It only maps observable cleanroom failures and controlled pe... |
-| `physical_evidence_ledger` | 342 | 19 | product | MRC | Tamper-evident envelopes and authorization ledger for physical evidence. |
-| `physical_evidence_attestation` | 331 | 5 | product | MRC | Server attestations for raw physical-evidence file references. A SHA-256 digest detects later byte changes but does not prove which service observed the bytes. This module adds an HMAC-SHA256 attestat... |
+| `physical_evidence_ledger` | 342 | 19 | product | TMRC | Tamper-evident envelopes and authorization ledger for physical evidence. |
+| `physical_evidence_attestation` | 331 | 5 | product | TMRC | Server attestations for raw physical-evidence file references. A SHA-256 digest detects later byte changes but does not prove which service observed the bytes. This module adds an HMAC-SHA256 attestat... |
 | `paired_evaluation` | 327 | 1 | script | - | Matched constrained vs reference/advisory request envelopes for paired evaluation. This module does not call a provider and does not score a treatment effect. It exists so Condition A (reference/advis... |
 | `machine_project_edit` | 302 | 1 | product | MRC | Authority-limited authoring operations for canonical machine projects. |
-| `evidence_impact` | 294 | 2 | product | MRC | Selective evidence invalidation for platform-to-derivative engineering. The impact engine answers one deliberately narrow question: Given an explicit dependency graph and an explicit change set, which... |
-| `engineering_review_identity` | 288 | 3 | product | MRC | Resolve external engineering findings to canonical Hardware Splicer identity. External analyzers commonly report display references such as ``R12`` or ``VBUS``. Those strings are useful evidence locat... |
-| `engineering_execution_plan` | 284 | 1 | product | MRC | Compile preview-only execution checks from an engineering plan. |
-| `finding_ledger` | 280 | 5 | product | MRC | Write-time ledger of deterministic findings on a project snapshot. Only deterministic producers may record entries. Provenance is captured at write time and is never guessed later. A finding is an obs... |
-| `audited_physical_evidence` | 273 | 4 | product | MRC | Audited physical authorization using hashed evidence envelopes and ledger history. |
+| `evidence_impact` | 294 | 2 | product | TMRC | Selective evidence invalidation for platform-to-derivative engineering. The impact engine answers one deliberately narrow question: Given an explicit dependency graph and an explicit change set, which... |
+| `engineering_review_identity` | 288 | 3 | product | TMRC | Resolve external engineering findings to canonical Hardware Splicer identity. External analyzers commonly report display references such as ``R12`` or ``VBUS``. Those strings are useful evidence locat... |
+| `engineering_execution_plan` | 284 | 1 | product | TMRC | Compile preview-only execution checks from an engineering plan. |
+| `finding_ledger` | 280 | 5 | product | TMRC | Write-time ledger of deterministic findings on a project snapshot. Only deterministic producers may record entries. Provenance is captured at write time and is never guessed later. A finding is an obs... |
+| `audited_physical_evidence` | 273 | 4 | product | TMRC | Audited physical authorization using hashed evidence envelopes and ledger history. |
 | `bench_capture_evidence` | 255 | 1 | product | MRC | Strict projection of bench_topology_capture.v1 packets into machine evidence. Rows are never matched by fuzzy prose. A measurement must either carry an exact known engineering-object identifier or be ... |
 | `engineering_execution_evidence` | 240 | 1 | product | MRC | Bridge bounded execution manifests into MachineProject verification evidence. A passing software/design check can verify that specific check. It is always marked as software-only evidence so it cannot... |
-| `physical_evidence_plan_update` | 236 | 1 | product | MRC | Apply calibrated physical evidence to a guided plan without broad authority flags. |
-| `audited_physical_evidence_plan_update` | 196 | 3 | product | MRC | Apply tamper-evident physical evidence and ledger history to guided plans. |
+| `physical_evidence_plan_update` | 236 | 1 | product | TMRC | Apply calibrated physical evidence to a guided plan without broad authority flags. |
+| `audited_physical_evidence_plan_update` | 196 | 3 | product | TMRC | Apply tamper-evident physical evidence and ledger history to guided plans. |
 | `build_evidence` | 196 | 1 | product | TMRC | (no description) |
 | `project_events` | 177 | 1 | product | MRC | Filesystem-derived live change summaries for a machine project. A state is a cheap directory listing. It never reads snapshot bytes, never follows symlinks, and never upgrades authority. The stream th... |
-| `engineering_verification_bridge` | 170 | 2 | product | MRC | Project engineering analyses and regression scope into MachineProject evidence gates. |
+| `engineering_verification_bridge` | 170 | 2 | product | TMRC | Project engineering analyses and regression scope into MachineProject evidence gates. |
 | `evidence.model` | 169 | 0 | product | TMRC | (no description) |
 | `operator_identity` | 165 | 11 | product | MRC | Server-issued operator tokens for review-thread authorship. A matching token proves only that the caller held a secret issued by whoever controls the local registry. It does not upgrade engineering au... |
 | `intent_clarifier` | 156 | 1 | product | TMRC | Lightweight pre-flight clarifications for vague hardware intents. Clarification answers are user-declared observations, not engineering truth. This module deliberately does not translate prose into vo... |
@@ -40,15 +40,15 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `commercial_outcomes` | 118 | 1 | tests-only | - | Measured commercial outcomes: append-only evidence, separate from screening estimates. |
 | `golden_loop` | 117 | 1 | product | MRC | Polished splice golden loop: build → bench template → capture submit → authority verdict. |
 | `project_package` | 113 | 4 | product | TMRC | Closure wrapper around the mature project-package generator. The underlying package generation logic remains byte-for-byte preserved in :mod:`hardware_splicer.project_package_core`. This compatibility... |
-| `attested_audited_physical_evidence` | 100 | 1 | product | MRC | Strict audited physical authorization with server-attested raw file references. |
-| `scoped_release` | 100 | 1 | product | MRC | Strict release assessment for physical operations. MachineProject release assessment remains useful for traceability and verification closure. This layer deliberately requires an applicable human auth... |
-| `physical_evidence_bytes` | 96 | 1 | product | MRC | Bounded hashing of raw physical-evidence bytes. The helper accepts base64 only as a transport encoding, computes SHA-256 over the decoded bytes, and returns an EvidenceFileRef. Raw bytes are never ret... |
+| `attested_audited_physical_evidence` | 100 | 1 | product | TMRC | Strict audited physical authorization with server-attested raw file references. |
+| `scoped_release` | 100 | 1 | product | TMRC | Strict release assessment for physical operations. MachineProject release assessment remains useful for traceability and verification closure. This layer deliberately requires an applicable human auth... |
+| `physical_evidence_bytes` | 96 | 1 | product | TMRC | Bounded hashing of raw physical-evidence bytes. The helper accepts base64 only as a transport encoding, computes SHA-256 over the decoded bytes, and returns an EvidenceFileRef. Raw bytes are never ret... |
 | `standard_bench_gates` | 94 | 1 | product | TMRC | Rossmann-style standard safety gates injected into splice bench sessions. |
 | `operator_investigation` | 92 | 1 | tests-only | - | Bounded model investigation with HS-owned read-only tools. No model-requested arbitrary code, URLs, files, releases, or measurements. |
 | `machine_release` | 33 | 2 | product | MRC | Release-state ordering for canonical machine projects. Release authority is monotonic: evidence supporting a higher state also satisfies lower requested states. Blockers always win. Keep this policy s... |
 | `_exports` | 15 | 0 | product | TMRC | Resolve a package re-export without importing unrelated engine subsystems. |
 | `document_evidence_api` (plumbing) | 439 | 0 | product | MRC | Canonical API for hash-bound PDF reading and anchored claim proposals. |
-| `project_store` (plumbing) | 420 | 112 | product | TMRC | (no description) |
+| `project_store` (plumbing) | 420 | 113 | product | TMRC | (no description) |
 | `project_scene_api` (plumbing) | 355 | 5 | product | MRC | Read-only manifests and assets for project scenes. |
 | `project_pre_fabrication_plan_api` (plumbing) | 346 | 1 | product | MRC | Persist evidence-bounded pre-fabrication engineering plans without physical authority. |
 | `engineering_assurance_api` (plumbing) | 302 | 3 | product | MRC | Product API for derived engineering assurance and evidence-delta analysis. |
@@ -63,7 +63,7 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `engineering_package_download_api` (plumbing) | 87 | 1 | product | MRC | Verified download route for persisted Engineering Package ZIP files. |
 | `physical_evidence_hash_api` (plumbing) | 87 | 0 | product | MRC | API for server-computed and optionally attested raw evidence hashes. |
 | `policy_layer_cli` (plumbing) | 86 | 1 | product | C | Export saved HS engineering evidence or validate Policy Lab feedback. |
-| `physical_evidence_ledger_compat` (plumbing) | 73 | 0 | product | MRC | Compatibility hardening for authorization ledger chronology. |
+| `physical_evidence_ledger_compat` (plumbing) | 73 | 0 | product | TMRC | Compatibility hardening for authorization ledger chronology. |
 | `project_wiring_api` (plumbing) | 64 | 1 | product | MRC | Canonical project wiring API backed by the shared headless engine. |
 | `materials_cli` (plumbing) | 63 | 1 | product | C | Operate project materials and the read-only InvenTree integration headlessly. |
 | `engineering_review_api` (plumbing) | 61 | 0 | product | MRC | Product routes for optional external engineering review adapters. |

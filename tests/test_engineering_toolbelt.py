@@ -244,3 +244,19 @@ def test_plan_circuit_runs_the_named_planner_without_a_model_call(monkeypatch):
     assert not env["ok"] and any("switch_current_rating" in p for p in env["problems"])
     bad = tb.call("hs_plan_circuit", {"intent": intent, "planner": "flux_capacitor"})
     assert not bad["ok"] and "battery_power" in bad["problems"][0]
+
+
+def test_an_objective_links_to_a_stored_design_and_reports_its_release_state(tmp_path, monkeypatch):
+    from hardware_splicer.project_store import ProjectStore
+    monkeypatch.setenv("HARDWARE_SPLICER_PROJECT_ROOT", str(tmp_path / "designs"))
+    ProjectStore().save("robot-arm", {"machineProject": {"project_id": "robot-arm", "name": "Desk arm", "purpose": "pick parts"}})
+    pid = tb.call("hs_project_open", {"objective": "desk arm"})["result"]["project_id"]
+    assert not tb.call("hs_project_link_design", {"project_id": pid, "design_project_id": "no-such-design"})["ok"]
+    env = tb.call("hs_project_link_design", {"project_id": pid, "design_project_id": "robot-arm"})
+    assert env["ok"] and env["result"]["revision"] == 1
+    status = tb.call("hs_project_status", {"project_id": pid})["result"]
+    assert status["design"]["project_id"] == "robot-arm" and status["design"]["name"] == "Desk arm"
+    if status["design"]["release_blockers"]:  # the design's own blockers are on the objective's open list
+        assert any(o["check"] == "design:robot-arm" for o in status["open"])
+    # the link reports only: the stored design is unchanged
+    assert ProjectStore().load("robot-arm")["revision"] == 1

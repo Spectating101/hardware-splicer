@@ -7,7 +7,7 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 |---|---|---|---|---|---|
 | `vision_evidence_assistant` | 731 | 4 | product | TMRC | (no description) |
 | `auto_wire` | 709 | 23 | product | TMRC | Heuristic auto-wiring for inventory-composed module sets (Python engine port). |
-| `ai_project_orchestrator` | 618 | 8 | product | MRC | Bounded, project-revision-pinned AI engineering proposal orchestration. The orchestrator is intentionally proposal-only. It assembles a sanitized project context, asks the configured text model for sc... |
+| `ai_project_orchestrator` | 618 | 8 | product | TMRC | Bounded, project-revision-pinned AI engineering proposal orchestration. The orchestrator is intentionally proposal-only. It assembles a sanitized project context, asks the configured text model for sc... |
 | `integrations.qwen_model_policy` | 593 | 1 | product | TMRC | Qwen Model Studio policy — per-stage models, per-model 1M free pools, rotation. Each enabled Singapore model has its own free-token pool (typically 1M). Pools are shared across workspaces and API keys... |
 | `codex_mission_progress` | 556 | 1 | script | - | Deterministic mission-progress audit for Codex/Astra Hardware-Splicer runs. This does not grade engineering correctness. It prevents a transport-valid no-op from being mistaken for a meaningful experi... |
 | `ai_project_conversation` | 520 | 2 | product | MRC | Revision-pinned conversational continuation for AI engineering sessions. A turn answers one project question from the exact current revision and persisted session trace. Any suggested project change i... |
@@ -15,22 +15,22 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `cleanroom_dut_experiment` | 448 | 2 | script | - | First real dual-agent cleanroom experiment: semiconductor DUT interface fixture. The scenario deliberately has one hard engineering fact without prescribing a golden architecture: a 3.3 V controller-s... |
 | `policy_layer` | 437 | 2 | product | MRC | Revision-bound exchange between saved HS studies and Policy Lab. The exporter observes the existing digital engine. It never executes a native build or upgrades modeled results into measurements. Feed... |
 | `engineering_revision_diff` | 382 | 7 | product | MRC | Canonical diff between two guided engineering plan revisions. |
-| `compose_dispatch` | 376 | 4 | product | MRC | Unified compose dispatch — single spine for API, CLI, and SDK. |
-| `integrations.llm_workshop` | 375 | 1 | product | MRC | Step-by-step LLM workshop trace — compare heuristic vs Qwen at each stage. |
+| `compose_dispatch` | 376 | 4 | product | TMRC | Unified compose dispatch — single spine for API, CLI, and SDK. |
+| `integrations.llm_workshop` | 375 | 1 | product | TMRC | Step-by-step LLM workshop trace — compare heuristic vs Qwen at each stage. |
 | `bench_capture_vision` | 373 | 1 | product | MRC | Camera-assisted bench capture template drafting. Vision suggests test points and attaches photos to BENCH_CAPTURE_TEMPLATE rows. It does **not** close splice bench gates — operators must submit instru... |
-| `machine_project_diff` | 368 | 2 | product | MRC | Semantic diffs for canonical machine projects. The diff is identity-aware rather than line-oriented. It highlights engineering object additions/removals, field changes, and authority transitions so hu... |
+| `machine_project_diff` | 368 | 2 | product | TMRC | Semantic diffs for canonical machine projects. The diff is identity-aware rather than line-oriented. It highlights engineering object additions/removals, field changes, and authority transitions so hu... |
 | `mission_runner` | 360 | 3 | tests-only | - | Drive one accepted fabrication mission to a terminal state. This is an agent with no privileged path; it may only read the mission (get_mission, read_run), propose events (propose with the given agent... |
 | `codex_progress_provenance` | 357 | 1 | script | - | Operation-to-state provenance for Codex/Astra mission-progress claims. A project-scoped mutation sharing the final revision is not enough: an administrative mutation could otherwise take credit for en... |
 | `change_dossier` | 327 | 2 | script | - | Hand a reviewed requirement change to a downstream dossier, bound to its revisions. base revision -> Policy Lab review -> HS-validated proposal -> new revision ``build_change_evidence`` packages what ... |
 | `project_presence` | 324 | 1 | product | MRC | Ephemeral, information-only presence for a machine project. Presence never changes a snapshot, revision, review, thread, or authority field. Names are self-declared unless an operator token verifies t... |
-| `project_materials` | 319 | 3 | product | MRC | Revision-bound material requirements and inventory reconciliation. Assessments live beside the existing project, without advancing its design revision or altering its engineering/physical authority. |
+| `project_materials` | 319 | 3 | product | TMRC | Revision-bound material requirements and inventory reconciliation. Assessments live beside the existing project, without advancing its design revision or altering its engineering/physical authority. |
 | `capability_manifest` | 289 | 4 | product | MRC | Revisioned capability manifests for measured platform reuse. A capability manifest freezes the dependency identities that make a validated hardware/software capability what it is. Comparing a baseline... |
 | `semantic_module_selector` | 281 | 2 | product | TMRC | Concrete module proposal over a validated semantic capability intent. Stage 1 (semantic_module_intent) is blind to module IDs. Stage 2 receives only the candidate modules returned by deterministic cap... |
 | `bench_loop` | 259 | 2 | product | MRC | Bench loop closure — capture template → submit → gate verdict (compose + splice builds). |
 | `identity_perturbations` | 246 | 1 | tests-only | - | Identity-aware perturbations for outer-agent adversarial replay. A useful invariance test must preserve the engineering evidence it claims to preserve. Hardware labels are tricky because a human-facin... |
 | `change_history` | 235 | 1 | product | MRC | Revision-bound record of a project's Policy Lab changes, read back for the bench. Three things are recorded, each as an immutable JSON file under the project's ``change-history`` directory, at the poi... |
 | `study_evidence` | 216 | 1 | product | MRC | Bind digital study checks to the revision and sealed run that produced them. A digital study revision owns one sealed run. Its checks are evidence for that revision only. When a later revision changes... |
-| `project_wiring` | 201 | 1 | product | MRC | Immutable, revision-bound harness assessments using the existing materials. |
+| `project_wiring` | 201 | 1 | product | TMRC | Immutable, revision-bound harness assessments using the existing materials. |
 | `integrations.llm_text_client` | 182 | 1 | product | TMRC | Unified text LLM entry: disk cache, usage ledger, Qwen + agy provider chain. |
 | `text_usage_ledger` | 163 | 1 | product | TMRC | Local token ledger for text LLM calls (Qwen, agy/Gemini, etc.). |
 | `integrations.qwen_text_client` | 155 | 3 | product | TMRC | Shared Qwen compatible-mode text client (no vision). |
@@ -41,7 +41,7 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `integrations.llm_policy` | 122 | 15 | product | TMRC | Central LLM-first vs offline policy for Hardware-Splicer. |
 | `captured_model_materialization` | 101 | 1 | script | - | Materialize one exact model member from a captured vendor payload in memory. No archive member is written by this layer. The outer payload and requested member must both match the immutable capture ma... |
 | `llm_response_cache` | 95 | 1 | product | TMRC | Disk cache for text LLM responses (repeat dev runs, benchmarks). |
-| `compose_failure` | 90 | 1 | product | MRC | Structured compose failure payloads (gate 3.9). |
+| `compose_failure` | 90 | 1 | product | TMRC | Structured compose failure payloads (gate 3.9). |
 | `build_verdict` | 88 | 2 | product | MRC | A compact verdict for an agent: what a build found and what can be done about it. A full build result is tens of kilobytes. An agent reads it through one tool call, so the full result costs more than ... |
 | `project_compatibility` | 85 | 1 | product | MRC | Compatibility boundary for durable project envelopes. The filesystem store deliberately remains small and strict. This module wraps its envelope validation so schema evolution is explicit, determinist... |
 | `operator_review_bridge` | 82 | 1 | script | - | Provider-neutral LLM review over HS-generated, non-authoritative engineering checks. The operator is an advisory reader: it cannot mutate measurements, confer release status, or substitute a model jud... |
@@ -49,7 +49,7 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `_version` | 3 | 2 | product | MRC | Hardware-Splicer Splice Agent. |
 | `mission_store` (plumbing) | 1977 | 11 | product | MRC | Append-only fabrication missions anchored beside a project. The agent proposes; Hardware-Splicer decides what is recorded. Evaluations are written only by HS itself. State is replayed from the event l... |
 | `project_thread_store` (plumbing) | 681 | 6 | product | MRC | Append-only review threads anchored to a project object, finding, or artifact. Threads are discussion only. They never alter a project snapshot, revision, staged review, or any authority or release fi... |
-| `project_review_store` (plumbing) | 514 | 15 | product | MRC | Staged, append-only review workflow for persistent project revisions. Candidate snapshots are stored outside revision history until explicitly accepted. A review decision never upgrades engineering au... |
+| `project_review_store` (plumbing) | 514 | 15 | product | TMRC | Staged, append-only review workflow for persistent project revisions. Candidate snapshots are stored outside revision history until explicitly accepted. A review decision never upgrades engineering au... |
 | `model_first_truth_audit` (plumbing) | 457 | 2 | script | - | Cross-surface audit for model-first semantic authority leakage. The individual Hardware Splicer boundaries intentionally preserve some legacy data for explicit offline compatibility and for audit/debu... |
 | `project_events_api` (plumbing) | 454 | 2 | product | MRC | HTTP surface for the live project change stream and ephemeral presence. Both are information only. They never change a snapshot, revision, review, thread, or authority field, and nothing is gated on p... |
 | `ai_project_tool_executor_api` (plumbing) | 409 | 2 | product | MRC | API for explicitly accepted, allowlisted AI project preview actions. |

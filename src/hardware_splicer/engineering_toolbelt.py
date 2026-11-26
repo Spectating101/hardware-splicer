@@ -108,6 +108,14 @@ def _project_record(args, project):
     return _envelope(True, f"recorded step {step['seq']}", step)
 
 
+def _project_link_design(args, project):
+    if project is None:
+        raise ValueError("project_id is required")
+    summary = project.link_design(str(args.get("design_project_id") or ""))
+    return _envelope(True, f"linked {summary['project_id']} rev {summary['revision']}: achieved {summary['achieved_state']}, "
+                     f"{len(summary['release_blockers'])} release blockers", summary, boundary=summary["authority"])
+
+
 def _write_artifact(args, project):
     """A text deliverable the agent wrote (firmware, config, wiring list, procedure), kept on the project."""
     if project is None:
@@ -717,6 +725,11 @@ TOOLS: dict[str, ToolSpec] = {t.name: t for t in [
                    "sources": {"type": "array", "items": {"type": "string"}}, "claim_boundary": {"type": "string"}},
                   ["project_id", "path", "content"]), _write_artifact, check_key=lambda a: f"artifact:{a.get('path')}",
              category="artifact"),
+    ToolSpec("hs_project_link_design", "Link this objective to a stored machine project (HS's engineering design spine, saved "
+             "through the product API): hs_project_status then shows the design's revision, achieved release state and "
+             "release blockers beside the objective's own checks. Read-only on the design.",
+             _obj({"design_project_id": {"type": "string"}}, ["project_id", "design_project_id"]), _project_link_design,
+             category="research"),
     ToolSpec("hs_project_status", "Where a project stands: software-checked items, open problems, what only a physical build "
              "can show, decisions, research and artifacts.", _obj({}, ["project_id"]), _project_status),
     ToolSpec("hs_junk_lookup", "Salvage first: which discarded devices (phones, robot vacuums, toy cars, laptop batteries, "
@@ -845,7 +858,7 @@ def call(name: str, args: dict[str, Any] | None) -> dict[str, Any]:
     except Exception as exc:  # noqa: BLE001 - reported to the agent, and recorded as an open problem
         env = _envelope(False, f"{type(exc).__name__}: {exc}", None, problems=[f"{type(exc).__name__}: {exc}"])
     env = {"tool": name, **env}
-    if project and name not in ("hs_project_open", "hs_project_record", "hs_project_status"):
+    if project and name not in ("hs_project_open", "hs_project_record", "hs_project_status", "hs_project_link_design"):
         inputs = {k: v for k, v in args.items() if k != "project_id"}
         step = project.record("tool", name, {"check_key": spec.check_key(args) if spec.check_key else name, "category": spec.category,
                                              "ok": env["ok"],
