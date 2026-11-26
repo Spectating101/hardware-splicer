@@ -1087,3 +1087,24 @@ def test_rejects_one_graphic_standing_in_for_its_duplicate() -> None:
     engine = _TextEngine(lambda text: text.replace(GRAPHIC_A + GRAPHIC_A + GRAPHIC_B, GRAPHIC_A + GRAPHIC_B + GRAPHIC_B))
     with pytest.raises(RoutingError, match=r"routing changed more than copper tracks"):
         route_pcb(board, engine=engine)
+
+
+class _ProjectRecordingEngine:
+    name = "recording"
+
+    def __init__(self) -> None:
+        self.project_text: str | None = "unset"
+
+    def route(self, pcb_text: str, *, timeout_s: float, max_passes: int, keep_existing_tracks: bool,
+              project_text: str | None = None) -> str:
+        del timeout_s, max_passes, keep_existing_tracks
+        self.project_text = project_text
+        return pcb_text
+
+
+def test_route_pcb_hands_the_project_rules_to_the_engine_only_when_given() -> None:
+    engine = _ProjectRecordingEngine()
+    route_pcb(MINIMAL_PCB, engine=engine, project_text='{"net_settings": {"classes": []}}')
+    assert engine.project_text == '{"net_settings": {"classes": []}}'
+    # Engines written before the parameter existed keep working when no project is given.
+    route_pcb(MINIMAL_PCB, engine=_IdentityEngine())

@@ -134,8 +134,12 @@ def route_pcb(
     timeout_s: float = 300,
     max_passes: int = 20,
     keep_existing_tracks: bool = False,
+    project_text: str | None = None,
 ) -> RoutingResult:
-    """Route PCB text into a reviewable candidate. Never writes a project."""
+    """Route PCB text into a reviewable candidate. Never writes a project.
+
+    ``project_text`` is the board's ``.kicad_pro``. KiCad keeps net classes (clearances, track widths) there, not in the
+    board file, so without it the router works to KiCad's default rules rather than the project's."""
 
     if not isinstance(pcb_text, str):
         raise RoutingError("invalid KiCad PCB text")
@@ -149,11 +153,13 @@ def route_pcb(
             raise RoutingUnavailable(probe["reason"] or "routing unavailable")
         engine = FreeRoutingEngine()
 
+    extra = {"project_text": project_text} if project_text is not None else {}
     raw = engine.route(
         pcb_text,
         timeout_s=timeout_s,
         max_passes=max_passes,
         keep_existing_tracks=keep_existing_tracks,
+        **extra,
     )
     output = raw if isinstance(raw, EngineOutput) else EngineOutput(text=raw)
     routed = output.text
@@ -204,6 +210,7 @@ class FreeRoutingEngine:
         timeout_s: float,
         max_passes: int,
         keep_existing_tracks: bool,
+        project_text: str | None = None,
     ) -> EngineOutput:
         del keep_existing_tracks  # enforced by route_pcb after import
         python = _require_kicad_python()
@@ -222,6 +229,8 @@ class FreeRoutingEngine:
             ses_path = work / "board.ses"
             routed_path = work / "routed.kicad_pcb"
             board_path.write_text(pcb_text, encoding="utf-8")
+            if project_text is not None:
+                (work / "board.kicad_pro").write_text(project_text, encoding="utf-8")
             env = _minimal_env(work)
             export = _run_process(
                 [python, str(EXPORT_DSN_HELPER), str(board_path), str(dsn_path)],
