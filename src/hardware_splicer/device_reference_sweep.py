@@ -49,6 +49,38 @@ CATEGORIES: dict[str, list[str]] = {
     "delivery_agv": ["delivery robot open source", "agv open source hardware"],
     "machine_3dprinter_cnc": ["open source 3d printer", "diy cnc machine open source"],
 }
+# Projects tag themselves with topics, and long keyword phrases miss the best-known repositories (OpenMower, Crazyflie,
+# Pupper and SO-ARM100 were not found by keywords on 2026-11-27), so each category also searches its topics.
+TOPICS: dict[str, list[str]] = {
+    "robot_vacuum": ["robot-vacuum", "vacuum-cleaner", "roomba"],
+    "mopping_floor_robot": ["cleaning-robot", "floor-cleaning"],
+    "window_pool_cleaner": ["pool-cleaner", "window-cleaning"],
+    "lawn_mower": ["lawn-mower", "robotic-lawn-mower", "lawnmower"],
+    "multirotor_drone": ["quadcopter", "drone-hardware", "flight-controller"],
+    "fixed_wing_vtol": ["fixed-wing", "vtol"],
+    "underwater_rov": ["rov", "underwater-robotics", "auv"],
+    "surface_vessel": ["usv", "autonomous-boat"],
+    "ground_rover": ["rover", "mobile-robot"],
+    "camera_security_robot": ["telepresence-robot", "security-robot"],
+    "robot_arm": ["robot-arm", "robotic-arm"],
+    "quadruped": ["quadruped", "robot-dog"],
+    "humanoid_biped": ["humanoid-robot", "biped"],
+    "balance_desktop_robot": ["self-balancing-robot", "desktop-robot"],
+    "robotic_hand_gripper": ["robotic-hand", "gripper"],
+    "delivery_agv": ["agv", "delivery-robot"],
+    "machine_3dprinter_cnc": ["3d-printer", "cnc-machine"],
+}
+# Flagship open designs that are always probed, whatever the searches return; extend with a reason, never silently.
+SEEDS: dict[str, list[str]] = {
+    "robot_vacuum": ["Hypfer/Valetudo"],
+    "lawn_mower": ["ClemensElflein/OpenMower"],
+    "multirotor_drone": ["bitcraze/crazyflie-firmware", "bitcraze/crazyflie-electronics"],
+    "underwater_rov": ["bluerobotics/ardusub"],
+    "ground_rover": ["nasa-jpl/open-source-rover", "Roger-random/Sawppy_Rover", "isl-org/OpenBot"],
+    "robot_arm": ["TheRobotStudio/SO-ARM100", "huggingface/lerobot", "enactic/openarm"],
+    "quadruped": ["stanfordroboticsclub/StanfordQuadruped", "PetoiCamp/OpenCat-Quadruped-Robot"],
+    "machine_3dprinter_cnc": ["prusa3d/Original-Prusa-i3", "VoronDesign/Voron-2"],
+}
 FILE_RULES: dict[str, re.Pattern[str]] = {
     "cad": re.compile(r"\.(step|stp|stl|3mf|f3d|f3z|fcstd|scad|sldprt|sldasm|iges|igs|dxf)$", re.I),
     "pcb": re.compile(r"\.(kicad_pcb|kicad_sch|brd|pcbdoc|schdoc|gbr|gtl|gbl)$|easyeda|gerber", re.I),
@@ -77,7 +109,7 @@ def completeness(counts: dict[str, int]) -> int:
 def search_categories(per_query: int, fetch: Callable[[list[str]], Any] = _gh, pause_s: float = 2.5) -> dict[str, dict[str, Any]]:
     found: dict[str, dict[str, Any]] = {}
     for category, queries in CATEGORIES.items():
-        for query in queries:
+        for query in list(queries) + [f"topic:{t}" for t in TOPICS.get(category, [])]:
             data = fetch(["-X", "GET", "search/repositories", "-f", f"q={query}", "-f", "sort=stars", "-f", f"per_page={per_query}"])
             for item in data.get("items", []):
                 entry = found.setdefault(item["full_name"], {"repo": item, "categories": set(), "queries": set()})
@@ -85,6 +117,16 @@ def search_categories(per_query: int, fetch: Callable[[list[str]], Any] = _gh, p
                 entry["queries"].add(query)
             if pause_s:
                 time.sleep(pause_s)  # GitHub's search API allows 30 requests a minute
+    for category, names in SEEDS.items():
+        for name in names:
+            try:
+                item = fetch(["-X", "GET", f"repos/{name}"])
+            except Exception:  # noqa: BLE001 - a renamed or removed seed is skipped, not fatal
+                continue
+            entry = found.setdefault(item["full_name"], {"repo": item, "categories": set(), "queries": set()})
+            entry["categories"].add(category)
+            entry["queries"].add("seed")
+            entry["seed"] = True
     return found
 
 
@@ -106,14 +148,16 @@ def build(found: dict[str, dict[str, Any]], *, probe_top: int, now: datetime,
         row = {"repo": name, "url": repo.get("html_url"), "stars": repo.get("stargazers_count"), "pushed": repo.get("pushed_at"),
                "licence": spdx, "licence_class": licence_class(spdx), "archived": bool(repo.get("archived")),
                "default_branch": repo.get("default_branch") or "main", "description": (repo.get("description") or "")[:200],
-               "categories": sorted(entry["categories"]), "score": score(repo, len(entry["queries"]), now)}
+               "categories": sorted(entry["categories"]), "score": score(repo, len(entry["queries"]), now),
+               "seed": bool(entry.get("seed"))}
         rows[name] = row
         for c in entry["categories"]:
             by_category[c].append(row)
     probed: set[str] = set()
     for c, members in by_category.items():
         members.sort(key=lambda r: (-r["score"], r["repo"]))
-        for row in members[:probe_top]:
+        seeds = [r for r in members if found[r["repo"]].get("seed")]
+        for row in seeds + [r for r in members[:probe_top] if r not in seeds]:
             if row["repo"] in probed:
                 continue
             probed.add(row["repo"])
