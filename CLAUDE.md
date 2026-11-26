@@ -76,7 +76,7 @@ A published board is a starting point, not evidence that it was built or works.
 targets resolve `$(PYTHON)` to `.venv/bin/python` on their own and need no
 prefix.
 
-The full Python suite takes ~6.5 minutes. While iterating, prefer the focused
+The full Python suite took 31.5 minutes serially on 2026-11-26 (7,106 tests). While iterating, prefer the focused
 test lists at the end of each architecture doc.
 
 Scratch output defaults to `.cache/hardware-splicer/` (see `HARDWARE_SPLICER_TMP_ROOT`
