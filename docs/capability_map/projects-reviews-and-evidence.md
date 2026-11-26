@@ -13,12 +13,12 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `mcp_backend_gateway` | 540 | 9 | product | MC | Canonical FastAPI-to-MCP gateway primitives. This module deliberately contains no MCP SDK dependency. It treats the canonical ``product_api`` OpenAPI document as the discovery contract, then dispatche... |
 | `production_release_metrics` | 484 | 3 | product | TMRC | (no description) |
 | `manufacturing_projection` | 419 | 1 | product | TMRC | Project manufacturing identities into the canonical MachineProject graph. |
-| `cleanroom_perturbations` | 396 | 1 | script | - | Controlled perturbation builders for cleanroom replay. These helpers mutate only declared test inputs. They never encode an expected engineering answer. Equivalent perturbations preserve evidence iden... |
+| `cleanroom_perturbations` | 396 | 1 | research | - | Controlled perturbation builders for cleanroom replay. These helpers mutate only declared test inputs. They never encode an expected engineering answer. Equivalent perturbations preserve evidence iden... |
 | `bench_capture_bridge` | 389 | 6 | product | TMRC | Bridge bench_topology_capture.v1 packets into splice bench gate submissions. |
-| `cleanroom_retrospective` | 355 | 2 | script | - | Outer-engineer retrospective over cleanroom replay evidence. The classifier does not decide whether an engineering architecture is correct. It only maps observable cleanroom failures and controlled pe... |
+| `cleanroom_retrospective` | 355 | 2 | research | - | Outer-engineer retrospective over cleanroom replay evidence. The classifier does not decide whether an engineering architecture is correct. It only maps observable cleanroom failures and controlled pe... |
 | `physical_evidence_ledger` | 342 | 19 | product | TMRC | Tamper-evident envelopes and authorization ledger for physical evidence. |
 | `physical_evidence_attestation` | 331 | 5 | product | TMRC | Server attestations for raw physical-evidence file references. A SHA-256 digest detects later byte changes but does not prove which service observed the bytes. This module adds an HMAC-SHA256 attestat... |
-| `paired_evaluation` | 327 | 1 | script | - | Matched constrained vs reference/advisory request envelopes for paired evaluation. This module does not call a provider and does not score a treatment effect. It exists so Condition A (reference/advis... |
+| `paired_evaluation` | 327 | 1 | research | - | Matched constrained vs reference/advisory request envelopes for paired evaluation. This module does not call a provider and does not score a treatment effect. It exists so Condition A (reference/advis... |
 | `machine_project_edit` | 302 | 1 | product | MRC | Authority-limited authoring operations for canonical machine projects. |
 | `evidence_impact` | 294 | 2 | product | TMRC | Selective evidence invalidation for platform-to-derivative engineering. The impact engine answers one deliberately narrow question: Given an explicit dependency graph and an explicit change set, which... |
 | `engineering_review_identity` | 288 | 3 | product | TMRC | Resolve external engineering findings to canonical Hardware Splicer identity. External analyzers commonly report display references such as ``R12`` or ``VBUS``. Those strings are useful evidence locat... |
@@ -35,16 +35,16 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `evidence.model` | 169 | 0 | product | TMRC | (no description) |
 | `operator_identity` | 165 | 11 | product | MRC | Server-issued operator tokens for review-thread authorship. A matching token proves only that the caller held a secret issued by whoever controls the local registry. It does not upgrade engineering au... |
 | `intent_clarifier` | 156 | 1 | product | TMRC | Lightweight pre-flight clarifications for vague hardware intents. Clarification answers are user-declared observations, not engineering truth. This module deliberately does not translate prose into vo... |
-| `cleanroom_extended_dut_experiment` | 147 | 1 | script | - | Extended adversarial corpus for the semiconductor DUT cleanroom experiment. The base experiment proves the evaluator itself can distinguish known synthetic operator failure classes. This layer keeps t... |
-| `provider_review` | 144 | 1 | script | - | (no description) |
-| `commercial_outcomes` | 118 | 1 | tests-only | - | Measured commercial outcomes: append-only evidence, separate from screening estimates. |
+| `cleanroom_extended_dut_experiment` | 147 | 1 | research | - | Extended adversarial corpus for the semiconductor DUT cleanroom experiment. The base experiment proves the evaluator itself can distinguish known synthetic operator failure classes. This layer keeps t... |
+| `provider_review` | 144 | 1 | research | - | (no description) |
+| `commercial_outcomes` | 118 | 1 | product | TMRC | Measured commercial outcomes: append-only evidence, separate from screening estimates. |
 | `golden_loop` | 117 | 1 | product | MRC | Polished splice golden loop: build → bench template → capture submit → authority verdict. |
 | `project_package` | 113 | 4 | product | TMRC | Closure wrapper around the mature project-package generator. The underlying package generation logic remains byte-for-byte preserved in :mod:`hardware_splicer.project_package_core`. This compatibility... |
 | `attested_audited_physical_evidence` | 100 | 1 | product | TMRC | Strict audited physical authorization with server-attested raw file references. |
 | `scoped_release` | 100 | 1 | product | TMRC | Strict release assessment for physical operations. MachineProject release assessment remains useful for traceability and verification closure. This layer deliberately requires an applicable human auth... |
 | `physical_evidence_bytes` | 96 | 1 | product | TMRC | Bounded hashing of raw physical-evidence bytes. The helper accepts base64 only as a transport encoding, computes SHA-256 over the decoded bytes, and returns an EvidenceFileRef. Raw bytes are never ret... |
 | `standard_bench_gates` | 94 | 1 | product | TMRC | Rossmann-style standard safety gates injected into splice bench sessions. |
-| `operator_investigation` | 92 | 1 | tests-only | - | Bounded model investigation with HS-owned read-only tools. No model-requested arbitrary code, URLs, files, releases, or measurements. |
+| `operator_investigation` | 92 | 1 | research | - | Bounded model investigation with HS-owned read-only tools. No model-requested arbitrary code, URLs, files, releases, or measurements. |
 | `machine_release` | 33 | 2 | product | MRC | Release-state ordering for canonical machine projects. Release authority is monotonic: evidence supporting a higher state also satisfies lower requested states. Blockers always win. Keep this policy s... |
 | `_exports` | 15 | 0 | product | TMRC | Resolve a package re-export without importing unrelated engine subsystems. |
 | `document_evidence_api` (plumbing) | 439 | 0 | product | MRC | Canonical API for hash-bound PDF reading and anchored claim proposals. |
@@ -75,4 +75,3 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `change_history_api` (plumbing) | 29 | 1 | product | MRC | Read-only HTTP view of a project's recorded Policy Lab changes. |
 | `extended_product_api` (plumbing) | 21 | 2 | tests-only | - | Compatibility alias for the canonical product API. Strict physical-evidence and scoped-release routes are now mounted directly by :mod:`hardware_splicer.product_api`. This module remains for deploymen... |
 | `evidence` (plumbing) | 19 | 1 | product | TMRC | (no description) |
-| `fielddeck_scene_api` (plumbing) | 3 | 1 | tests-only | - | Compatibility import for the Fielddeck display swap preview router. |

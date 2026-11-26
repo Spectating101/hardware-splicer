@@ -12,27 +12,27 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `scenario_runner` | 696 | 2 | product | TMRC | (no description) |
 | `jobs` | 664 | 9 | product | MRC | (no description) |
 | `module_picker` | 584 | 8 | product | TMRC | Concrete module selection with an explicitly isolated legacy regex picker. ``MODULE_HINTS`` remains for offline/regression compatibility, but model-enabled product paths must not compute or prefer the... |
-| `codex_exec_trace` | 567 | 2 | script | - | Normalize Codex exec JSONL into Hardware-Splicer's external MCP audit shape. |
+| `codex_exec_trace` | 567 | 2 | research | - | Normalize Codex exec JSONL into Hardware-Splicer's external MCP audit shape. |
 | `engineering_status` | 520 | 7 | product | TMRC | Compile one coherent engineering status and ranked next-action surface. |
 | `compiler` | 505 | 2 | product | TMRC | (no description) |
-| `build_compiler` | 479 | 19 | product | TMRC | (no description) |
-| `codex_astra_preflight` | 402 | 1 | script | - | Zero-inference preflight and launch planning for Codex/Astra HS experiments. |
-| `codex_astra_raw_document_adjudication` | 383 | 1 | script | - | Preregistered adjudication for the blinded raw-document Astra case. |
-| `frontier_operator_experiment` | 360 | 1 | script | - | Provider-neutral frontier-model experiment support for Hardware-Splicer. This module deliberately performs no network I/O. It constructs provider request templates, estimates text-token cost envelopes... |
+| `build_compiler` | 485 | 19 | product | TMRC | (no description) |
+| `codex_astra_preflight` | 402 | 1 | research | - | Zero-inference preflight and launch planning for Codex/Astra HS experiments. |
+| `codex_astra_raw_document_adjudication` | 383 | 1 | research | - | Preregistered adjudication for the blinded raw-document Astra case. |
+| `frontier_operator_experiment` | 360 | 1 | research | - | Provider-neutral frontier-model experiment support for Hardware-Splicer. This module deliberately performs no network I/O. It constructs provider request templates, estimates text-token cost envelopes... |
 | `fabrication_inspection` | 357 | 1 | product | TMRC | (no description) |
-| `codex_astra_runtime` | 355 | 4 | script | - | Fail-closed runtime planning for one Codex/Astra Hardware-Splicer case. |
-| `product_ecosystem_bridge` | 343 | 1 | script | - | Adapter layer from a verified HS product specimen to external engineering tools. Uses the existing product spec and SHA-256 receipt. Builds external-tool INPUTS only; verification levels are assigned ... |
+| `codex_astra_runtime` | 355 | 4 | research | - | Fail-closed runtime planning for one Codex/Astra Hardware-Splicer case. |
+| `product_ecosystem_bridge` | 343 | 1 | research | - | Adapter layer from a verified HS product specimen to external engineering tools. Uses the existing product spec and SHA-256 receipt. Builds external-tool INPUTS only; verification levels are assigned ... |
 | `derivative_economics` | 324 | 2 | product | MRC | Fail-closed economics evaluator for HS platform-to-derivative experiments. |
 | `engineering_action` | 275 | 6 | product | MRC | Prepare one ranked engineering action without performing physical operations. |
 | `runtime` | 273 | 5 | product | TMRC | (no description) |
-| `codex_astra_proof_bundle` | 270 | 1 | script | - | Publish a sanitized, hash-accounted Codex/Astra observer proof bundle. |
-| `codex_astra_case` | 257 | 3 | script | - | Build model-visible Codex/Astra case input without leaking outer evaluator labels. |
-| `codex_astra_context_profile` | 232 | 1 | script | - | Offline context-material profiling for durable Codex/Astra JSONL traces. The Codex usage report is authoritative for billed/reported tokens. This module only attributes serialized prompt material by b... |
+| `codex_astra_proof_bundle` | 270 | 1 | research | - | Publish a sanitized, hash-accounted Codex/Astra observer proof bundle. |
+| `codex_astra_case` | 257 | 3 | research | - | Build model-visible Codex/Astra case input without leaking outer evaluator labels. |
+| `codex_astra_context_profile` | 232 | 1 | research | - | Offline context-material profiling for durable Codex/Astra JSONL traces. The Codex usage report is authoritative for billed/reported tokens. This module only attributes serialized prompt material by b... |
 | `design_quality` | 211 | 11 | product | TMRC | (no description) |
 | `integrations.qwen_intake_normalize` | 209 | 1 | product | TMRC | Model-first intake normalization with explicit legacy/offline provenance. Natural-language archetype interpretation is semantic reasoning. On model-first paths a failed or unresolved model proposal mu... |
 | `schemas` | 205 | 5 | product | TMRC | (no description) |
-| `codex_astra_identity_conflict_adjudication` | 196 | 1 | script | - | Observer-only structural adjudication for the blinded DUT identity conflict case. |
-| `splice_manifest` | 182 | 2 | script | - | Splice demo manifest loading, execution metrics, and pass/fail evaluation. |
+| `codex_astra_identity_conflict_adjudication` | 196 | 1 | research | - | Observer-only structural adjudication for the blinded DUT identity conflict case. |
+| `splice_manifest` | 182 | 2 | research | - | Splice demo manifest loading, execution metrics, and pass/fail evaluation. |
 | `bounded_process` | 181 | 3 | product | TMRC | Bounded subprocess runner: cap captured output and always reap the group. A flooding child must not fill RAM. stdout/stderr are drained on background threads that keep only a small tail. Timeouts and ... |
 | `graph_pin_map` | 181 | 0 | product | TMRC | Extract MCU pin numbers from a build graph — mirrors frontend graph-pin-map.ts. |
 | `bench.model` | 173 | 0 | product | TMRC | (no description) |
@@ -47,14 +47,14 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `file_digest` | 78 | 1 | product | MRC | SHA-256 of a file, remembered while the file is unchanged. Digital study reads re-verify every artifact against its sealed hash. The check itself never changes: a file's bytes must hash to the sealed ... |
 | `integrations.wireviz` | 77 | 1 | product | TMRC | Optional offline WireViz CLI boundary; accepts only HS-generated documents. |
 | `build_files_security` | 75 | 1 | product | TMRC | Path and size guards for /v1/build-files/* (local file viewer boundary). |
-| `operator_hypothesis_cycle` | 73 | 1 | tests-only | - | Two-stage advisory hypothesis evaluation over independent HS findings. |
+| `operator_hypothesis_cycle` | 73 | 1 | research | - | Two-stage advisory hypothesis evaluation over independent HS findings. |
 | `integrations.kikit_bridge` | 66 | 2 | product | MRC | KiKit glue — opt-in manufacturer fab preset export. |
-| `hypothesis_discrimination` | 57 | 1 | script | - | Quantify which proposed diagnostic inspection splits competing fault causes. Outcome matrices are authored ground truth for synthetic fixtures only. No physical observation is inferred from a test rec... |
-| `geometry_snapshot` | 56 | 1 | script | - | Golden geometry snapshot helpers (gate 5.4). |
+| `hypothesis_discrimination` | 57 | 1 | research | - | Quantify which proposed diagnostic inspection splits competing fault causes. Outcome matrices are authored ground truth for synthetic fixtures only. No physical observation is inferred from a test rec... |
+| `geometry_snapshot` | 56 | 1 | research | - | Golden geometry snapshot helpers (gate 5.4). |
 | `backends.kibot` | 53 | 0 | product | TMRC | (no description) |
-| `scoring_summary` | 52 | 1 | script | - | (no description) |
+| `scoring_summary` | 52 | 1 | research | - | (no description) |
 | `compile_casefile` | 43 | 1 | product | TMRC | Write compile failure casefiles for engine debugging. |
-| `golden_intakes` | 35 | 2 | script | - | Golden intake compile manifest for engine CI. |
+| `golden_intakes` | 35 | 2 | research | - | Golden intake compile manifest for engine CI. |
 | `env_local` | 28 | 0 | product | TMRC | Load repo .env.local into os.environ (never log values). |
 | `text_safety` | 26 | 0 | product | TMRC | Small checks on text a person types, shared by the planners that accept it. |
 | `file_integrity` | 9 | 0 | product | TMRC | File digests for on-disk engineering artifacts. |

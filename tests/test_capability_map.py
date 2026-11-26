@@ -41,3 +41,10 @@ def test_find_ranks_name_matches_and_skips_unrelated_modules():
 def test_generated_capability_map_is_current():
     """Adding or removing a module changes the map: regenerate with python -m hardware_splicer.capability_map."""
     assert cm.main(["--check"]) == 0
+
+
+def test_every_engineering_module_is_shipped_or_in_a_declared_research_line():
+    """Nothing piles up disconnected: wire a new module into the toolbelt, MCP, REST or a console command, or declare its
+    line of work in capability_map.RESEARCH_LINES."""
+    undecided = [r["module"] for r in cm._unshipped(cm.build()["rows"])]
+    assert undecided == [], f"wire these or declare them in RESEARCH_LINES: {undecided}"

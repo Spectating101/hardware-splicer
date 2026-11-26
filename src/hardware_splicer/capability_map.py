@@ -54,9 +54,33 @@ SURFACES = {
     "mcp": ("mcp_server", "backend_mcp_server"),                 # hs-mcp, hs-backend-mcp
     "rest": ("product_api",),                                    # hs-serve
 }
-STATUS_ORDER = ("product", "script", "runnable", "tests-only", "unreached")
+# Lines of work deliberately kept off the shipped surfaces (decided 2026-11-27). A module that no shipped entry point
+# reaches and that matches none of these is listed as undecided: wire it, declare it here, or delete it.
+RESEARCH_LINES = [
+    ("keyboard splice board surgery", r"^(_pcbnew_helpers\.)?keyboard_splice"),
+    ("SPI-flash virtual lab and vendor models",
+     r"^(spi_|cleanroom_|vendor_model_|captured_model_materialization$|provider_review$|workshop_operator$)"),
+    ("legacy salvage-package CLI (scripts/hardware_splicer.py)", r"^salvage_revision$"),
+    ("donor intake from retained visual inspections (needs the inspection artifact store in a flow)", r"^visual_donor_intake$"),
+    ("Codex/Astra investigation runtime (Codex lane dropped 2026-11-24)", r"^codex_"),
+    ("repair investigator (captions, KiCad grounding, diagnosis)",
+     r"^(restoration_|repair_investigator|adaptive_diagnosis$|operator_review_bridge$)"),
+    ("evaluation and benchmark instruments",
+     r"(_benchmark$|^robot_reference_e2e$|^robot_guidance_|^robot_arm_experiment$|^paired_evaluation$|^scoring_summary$|"
+     r"^hypothesis_discrimination$|^golden_intakes$|^identity_perturbations$|^frontier_operator_experiment$|"
+     r"^operator_investigation$|^operator_hypothesis_cycle$|^public_web_bench$|^geometry_snapshot$|^splice_manifest$|^mission_runner$)"),
+    ("mechanics references and cross-project handoffs",
+     r"^mechanical_(kirsch_reference|unilateral_pin_contact|workflow_integration|fixture_handoff|portfolio_handoff)$"),
+    ("scheduled jobs and CI workers",
+     r"^(landscape_watch|github_data_sources|github_signal_\w+|local_kicad_worker|multicad_toolchain|discrete_electronics_truth)$"),
+    ("demonstrator builds run from scripts",
+     r"^(drone_\w+|aerial_product_generator|system_example_microdrone|cadclaw_dry_product|teardown_\w+|whole_product_sample|"
+     r"product_ecosystem_bridge|filter_\w+|function_\w+|part_scene|change_dossier|real_device_work_package)$"),
+]
+STATUS_ORDER = ("product", "research", "script", "runnable", "tests-only", "unreached")
 STATUS_MEANING = {
     "product": "reached from a shipped entry point (toolbelt, MCP, REST or a console command)",
+    "research": "not shipped on purpose: part of a declared research line (RESEARCH_LINES)",
     "script": "reached only from scripts/, projects/, eval/, experiments/, the Makefile or CI",
     "runnable": "has its own `python -m` main, and nothing shipped imports it",
     "tests-only": "only tests import it",
@@ -293,9 +317,12 @@ def build() -> dict[str, Any]:
         tests = sorted(test_refs.get(m, ()))
         status = ("product" if m in shipped else "script" if m in scripted else "runnable" if m in mains
                   else "tests-only" if tests else "unreached")
+        line = next((name for name, rx in RESEARCH_LINES if re.search(rx, short)), None)
+        if status != "product" and line:
+            status = "research"
         rows.append({
             "module": short, "area": area, "lines": _read(p).count("\n"), "plumbing": bool(PLUMBING.search(p.stem)),
-            "status": status, "direct": m in direct, "tool": m in tool_direct, "runnable": m in mains,
+            "status": status, "research_line": line if status == "research" else None, "direct": m in direct, "tool": m in tool_direct, "runnable": m in mains,
             "toolbelt": m in reach["toolbelt"], "mcp": m in reach["mcp"], "rest": m in reach["rest"],
             "console": m in reach["console"], "tests": len(tests), "test_files": tests,
             "importers": sorted(_short(x) for x in importers.get(m, ())),
@@ -376,11 +403,19 @@ def index_markdown(m: dict[str, Any]) -> str:
     for a, s in m["areas"].items():
         out.append(f"| {a} | {s['modules']} | {s['capability_modules']} | {s['lines']:,} | {s['tested']} | {s['product']} | "
                    f"{s['in_toolbelt']} | [{_slug(a)}](capability_map/{_slug(a)}.md) |")
+    lines: dict[str, list[int]] = {}
+    for r in rows:
+        if r["status"] == "research":
+            lines.setdefault(r["research_line"], [0, 0])
+            lines[r["research_line"]][0] += 1
+            lines[r["research_line"]][1] += r["lines"]
+    out += ["", "## Research lines (not shipped on purpose)", "", "| Line | Modules | Lines |", "|---|---|---|"]
+    out += [f"| {name} | {n} | {loc:,} |" for name, (n, loc) in sorted(lines.items(), key=lambda kv: -kv[1][1])]
     unshipped = _unshipped(rows)
-    out += ["", f"## Engineering modules no shipped entry point reaches ({len(unshipped)})", "",
+    out += ["", f"## Undecided: engineering modules nothing shipped reaches and no research line claims ({len(unshipped)})", "",
             "The 20 largest; all of them, with what reaches each, are in",
             "[capability_map/not-shipped.md](capability_map/not-shipped.md). Decide per module: wire it into the toolbelt,",
-            "keep it as a script tool, or delete it.", "",
+            "declare it in RESEARCH_LINES, or delete it.", "",
             "| Module | Status | Lines | Tests | What it says it does |", "|---|---|---|---|---|"]
     out += [f"| `{r['module']}` | {r['status']} | {r['lines']} | {r['tests']} | {_about(r, 90)} |" for r in unshipped[:20]]
     out += ["", "## Modules that look like copies of each other", "",
@@ -397,13 +432,15 @@ def index_markdown(m: dict[str, Any]) -> str:
 
 
 def _unshipped(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    return sorted((r for r in rows if r["status"] != "product" and not r["plumbing"]), key=lambda r: (-r["lines"], r["module"]))
+    """Engineering modules nothing shipped reaches and no research line claims: each needs a decision."""
+    return sorted((r for r in rows if r["status"] not in ("product", "research") and not r["plumbing"]),
+                  key=lambda r: (-r["lines"], r["module"]))
 
 
 def unshipped_markdown(m: dict[str, Any]) -> str:
-    out = ["# HS capability map: engineering modules no shipped entry point reaches (generated)", "",
-           "Generated by `python -m hardware_splicer.capability_map`. Each is a library only scripts use, a research spike,",
-           "or dead code. Status meanings: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md). Largest first.", "",
+    out = ["# HS capability map: undecided engineering modules (generated)", "",
+           "Generated by `python -m hardware_splicer.capability_map`. Nothing shipped reaches these and no declared research",
+           "line claims them: wire, declare or delete each. Status meanings: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).", "",
            "| Module | Status | Area | Lines | Tests | Reached from | What it says it does |", "|---|---|---|---|---|---|---|"]
     for r in _unshipped(m["rows"]):
         src = ", ".join(r["scripts"][:2]) or ", ".join(r["importers"][:2]) or "-"

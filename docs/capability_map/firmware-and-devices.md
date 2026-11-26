@@ -5,14 +5,14 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 
 | Module | Lines | Tests | Status | Reach | What it says it does |
 |---|---|---|---|---|---|
-| `device_plan` | 1480 | 34 | product | TMRC | An assembly plan for a whole gadget: modules, the wires between them, and a case to hold them. The input is a small device spec (which modules, which pin goes to which). The output is where everything... |
+| `device_plan` | 1480 | 35 | product | TMRC | An assembly plan for a whole gadget: modules, the wires between them, and a case to hold them. The input is a small device spec (which modules, which pin goes to which). The output is where everything... |
 | `firmware_scaffold` | 760 | 7 | product | TMRC | Deterministic firmware starter sketches for catalog build graphs. |
-| `device_observations` | 328 | 2 | product | MRC | Compare pasted bench output with a device plan's declared I2C addresses. Stateless and read-only: no hardware, project or file is touched, and nothing is stored. The text is supplied by the operator, ... |
-| `device_lab` | 287 | 1 | runnable | - | A lab pack: one folder a person can follow from parts on the desk to a device that runs, with honest status. It gathers what the device planner already produces (plan, engineering review, case files, ... |
-| `device_parts` | 284 | 7 | product | MRC | Per-part descriptors rendered into the generated application's part-specific headers. A descriptor states what is specific to one I2C part: its addresses, whether it can identify itself, the channels ... |
-| `device_application_execution` | 239 | 6 | product | MRC | Shared host execution for CLI and product modeled runs; no physical authority. |
+| `device_observations` | 328 | 2 | product | TMRC | Compare pasted bench output with a device plan's declared I2C addresses. Stateless and read-only: no hardware, project or file is touched, and nothing is stored. The text is supplied by the operator, ... |
+| `device_lab` | 287 | 1 | product | TMRC | A lab pack: one folder a person can follow from parts on the desk to a device that runs, with honest status. It gathers what the device planner already produces (plan, engineering review, case files, ... |
+| `device_parts` | 284 | 7 | product | TMRC | Per-part descriptors rendered into the generated application's part-specific headers. A descriptor states what is specific to one I2C part: its addresses, whether it can identify itself, the channels ... |
+| `device_application_execution` | 239 | 6 | product | TMRC | Shared host execution for CLI and product modeled runs; no physical authority. |
 | `integrations.esphome_export` | 161 | 1 | product | TMRC | ESPHome YAML stub from graph pin map — pin-true, no flash claim. |
 | `backends.platformio` | 120 | 0 | product | TMRC | (no description) |
-| `device_application_runtime` | 114 | 3 | product | MRC | Opt-in execution of HS-owned templates, never caller-supplied code or hardware. |
-| `device_vendor_profiles` | 71 | 3 | product | MRC | Which vendor-host files, libraries and scenarios belong to which part's Arduino adapter. A descriptor names a profile (``adapter.vendor_profile``); everything else here is fixed in code, so a descript... |
+| `device_application_runtime` | 114 | 3 | product | TMRC | Opt-in execution of HS-owned templates, never caller-supplied code or hardware. |
+| `device_vendor_profiles` | 71 | 3 | product | TMRC | Which vendor-host files, libraries and scenarios belong to which part's Arduino adapter. A descriptor names a profile (``adapter.vendor_profile``); everything else here is fixed in code, so a descript... |
 | `device_api` (plumbing) | 219 | 2 | product | MRC | HTTP surface for whole-device assembly plans. The plan is a proposal and a checklist. It is stateless: nothing is stored, no project, revision, pin or review is read or written, and it approves nothin... |
