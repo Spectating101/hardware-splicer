@@ -639,7 +639,8 @@ TOOLS: dict[str, ToolSpec] = {t.name: t for t in [
              "pull-ups, MOSFET orientation, USB-C CC).", _obj({"schematic": {"type": "string"}, "mates": {"type": "object"}}, ["schematic"]),
              _review_schematic),
     ToolSpec("hs_component_board", "Build a board from a component-level JSON design: schematic from the KiCad libraries with "
-             "read-back parity and ERC; optionally the placed, FreeRouted PCB with DRC and schematic parity, and fab files.",
+             "read-back parity and ERC; optionally the PCB (parts without pcb_xy are placed by HS by connectivity, steered by "
+             "board.placement_hints; FreeRouted, re-routed until DRC and schematic parity pass, up to 3 tries), and fab files.",
              _obj({"design": {"type": "object"}, "stages": {"type": "array", "items": {"type": "string", "enum": ["schematic", "pcb", "fab"]}}},
                   ["project_id", "design"]), _component_board, check_key=lambda a: f"board:{(a.get('design') or {}).get('name')}"),
     ToolSpec("hs_motion_sweep", "Sweep every joint of a URDF through its range and report collisions between links.",

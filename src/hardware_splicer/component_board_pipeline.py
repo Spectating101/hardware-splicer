@@ -15,7 +15,10 @@ Design JSON::
      "nets": {"VIN": ["J1.1", "R1.1"]}, "unused": ["U1.7"], "power_flag_nets": ["VIN", "GND"],
      "board": {"outline_mm": [100, 100, 150, 140], "rules": {...}, "netclasses": [...], "gnd_net": "GND"}}
 
-Each stage stops at the first failed check and says so. Placement is the design's: the pipeline does not invent it.
+Each stage stops at the first failed check and says so. A part with ``pcb_xy`` stays where the design puts it; a part
+without one is placed by ``_pcbnew_helpers/place_free_footprints.py`` (by connectivity, decoupling capacitors beside
+their IC's supply pin, clear of every other courtyard), optionally steered by ``board.placement_hints``
+(``{"C3": ["U1"]}`` to sit near a part, or ``{"U2": [x0, y0, x1, y1]}`` for a region).
 """
 from __future__ import annotations
 
@@ -24,6 +27,7 @@ import json
 import os
 import shutil
 import subprocess
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -31,6 +35,7 @@ from . import kicad_component_board as kb
 from .routing_engine import resolve_kicad_python, route_pcb
 
 HELPER = Path(__file__).resolve().parent / "_pcbnew_helpers" / "build_component_board.py"
+PLACER = Path(__file__).resolve().parent / "_pcbnew_helpers" / "place_free_footprints.py"
 DEFAULT_RULES = {"clearance": 0.15, "track": 0.2, "min_track": 0.2, "via_d": 0.6, "via_drill": 0.3, "edge_clearance": 0.3}
 
 
@@ -61,6 +66,26 @@ def _pcbnew(*args: str) -> str:
     return run.stdout
 
 
+def _place_free(board_path: Path, locked: list[str], hints: dict[str, Any] | None) -> dict[str, Any]:
+    """Run the placer on the built board in place; the design's own positions are locked."""
+    python = resolve_kicad_python() or "/usr/bin/python3"
+    out = board_path.with_name("free_placed.kicad_pcb")
+    argv = [python, str(PLACER), str(board_path), str(out), "--locked", ",".join(locked)]
+    if hints:
+        hints_path = board_path.with_name("placement_hints.json")
+        hints_path.write_text(json.dumps(hints))
+        argv += ["--hints", str(hints_path)]
+    run = subprocess.run(argv, capture_output=True, text=True, timeout=900)
+    if run.returncode != 0:
+        raise RuntimeError(f"placer failed: {run.stderr[-1500:]}")
+    report_path = Path(str(out) + ".placement.json")
+    report = json.loads(report_path.read_text()) if report_path.is_file() else {}
+    out.replace(board_path)
+    for tmp in (report_path, board_path.with_name("placement_hints.json")):
+        tmp.unlink(missing_ok=True)
+    return {"placed_by_hs": sorted(report.get("placed") or []), "decoupling": report.get("decoupling"), "locked": locked}
+
+
 def _netname(readback: dict, plain: str) -> str:
     return next(n for n in readback["nets"] if kb._plain(n) == plain)
 
@@ -85,9 +110,14 @@ def schematic_stage(design: kb.Design, out: Path, symbol_uuids: dict[str, str] |
             "erc": {"errors": erc["errors"], "warnings": erc["warnings"]}, "problems": problems}
 
 
-def pcb_stage(design: kb.Design, readback: dict, out: Path, board: dict[str, Any], *, route_timeout_s: int = 600) -> dict[str, Any]:
+def pcb_stage(design: kb.Design, readback: dict, out: Path, board: dict[str, Any], *, route_timeout_s: int = 600,
+              route_attempts: int = 3) -> dict[str, Any]:
     rules = {**DEFAULT_RULES, **(board.get("rules") or {})}
     outline = board["outline_mm"]
+    free = [p.ref for p in design.parts if p.pcb_xy is None]
+    if free:  # built at the board centre first; the placer then moves each one
+        centre = ((outline[0] + outline[2]) / 2, (outline[1] + outline[3]) / 2)
+        design = replace(design, parts=[replace(p, pcb_xy=centre) if p.pcb_xy is None else p for p in design.parts])
     spec = kb.pcb_spec(design, readback, outline_mm=outline, rules=rules, netclasses=board.get("netclasses") or [])
     gnd = _netname(readback, board.get("gnd_net", "GND")) if board.get("gnd_net", "GND") else None
     if gnd:
@@ -100,23 +130,31 @@ def pcb_stage(design: kb.Design, readback: dict, out: Path, board: dict[str, Any
     spec_path.write_text(json.dumps(spec, indent=1))
     placed = out / "placed.kicad_pcb"
     _pcbnew(str(spec_path), str(placed))
-    routed = route_pcb(placed.read_text(), timeout_s=route_timeout_s, max_passes=20,
-                       project_text=placed.with_suffix(".kicad_pro").read_text())
+    placement = _place_free(placed, [p.ref for p in design.parts if p.ref not in free], board.get("placement_hints")) if free else None
     routed_path = out / "routed.kicad_pcb"
-    routed_path.write_text(routed.text)
     pcb = out / f"{design.name}.kicad_pcb"
-    _pcbnew("--finish", str(spec_path), str(routed_path), str(pcb))
+    attempts = []
+    for _ in range(max(1, route_attempts)):  # FreeRouting differs between runs: keep the first clean result
+        routed = route_pcb(placed.read_text(), timeout_s=route_timeout_s, max_passes=20,
+                           project_text=placed.with_suffix(".kicad_pro").read_text())
+        routed_path.write_text(routed.text)
+        _pcbnew("--finish", str(spec_path), str(routed_path), str(pcb))
+        drc = kb.run_drc(pcb, out)
+        problems = [f"DRC {g}: {i['severity']}: {i['type']}: {'; '.join(w for w in i['where'] if w)}"
+                    for g in ("violations", "unconnected_items", "schematic_parity") for i in drc[g]["items"] if i["severity"] == "error"]
+        attempts.append(len(problems))
+        if not problems:
+            break
     for tmp in (placed, routed_path, placed.with_suffix(".kicad_pro"), placed.with_suffix(".kicad_prl"), spec_path):
         tmp.unlink(missing_ok=True)
-    drc = kb.run_drc(pcb, out)
-    problems = [f"DRC {g}: {i['severity']}: {i['type']}: {'; '.join(w for w in i['where'] if w)}"
-                for g in ("violations", "unconnected_items", "schematic_parity") for i in drc[g]["items"] if i["severity"] == "error"]
-    return {"ok": not problems, "stage": "pcb", "pcb": str(pcb), "routing": routed.stats,
+    return {"ok": not problems, "stage": "pcb", "pcb": str(pcb), "routing": routed.stats, "placement": placement,
+            "route_attempts": attempts,
             "drc": {g: {"errors": drc[g]["errors"], "warnings": drc[g]["warnings"]} for g in ("violations", "unconnected_items", "schematic_parity")},
             "drc_warnings": [f"{i['type']}: {'; '.join(w for w in i['where'] if w)}" for g in ("violations",) for i in drc[g]["items"]
                              if i["severity"] == "warning"],
             "problems": problems,
-            "note": "FreeRouting varies between runs; re-run this stage when a connection is left unrouted."}
+            "note": "FreeRouting varies between runs; the stage re-routes up to route_attempts times and reports each "
+                    "attempt's DRC error count."}
 
 
 def fab_stage(design: kb.Design, out: Path, models_dir: str | None = None) -> dict[str, Any]:
