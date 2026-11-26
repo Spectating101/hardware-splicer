@@ -107,5 +107,114 @@
   "new_equivalent_replaced_usd": 76.86,
   "salvage_rejected_because": null
  },
- "fx_twd_per_usd": 32.918193
+ "fx_twd_per_usd": 32.918193,
+ "openbot_path": {
+  "check": {
+   "ok": true,
+   "summary": "US$24.97 for 11 lines against US$45.57; 4 salvaged, US$5.55 new",
+   "problems": []
+  },
+  "lines": [
+   {
+    "item": "Broken Samsung Galaxy Note 5, boots and holds a charge, Android 7.0 (runs the OpenBot app) [NT$340]",
+    "qty": 1,
+    "unit_usd": 10.33,
+    "origin": "salvaged",
+    "source": "https://www.ruten.com.tw/item/show?22411057999920",
+    "mass_g": 171,
+    "new_equivalent_usd": 48.3,
+    "extended_usd": 10.33
+   },
+   {
+    "item": "Broken water-squirting RC car: motors, gearbox, wheels, chassis (untested) [NT$200]",
+    "qty": 1,
+    "unit_usd": 6.08,
+    "origin": "salvaged",
+    "source": "https://www.ruten.com.tw/item/show?21804648109553",
+    "extended_usd": 6.08
+   },
+   {
+    "item": "DRV8833 two-channel motor driver module [NT$22]",
+    "qty": 1,
+    "unit_usd": 0.67,
+    "origin": "new",
+    "source": "https://www.ruten.com.tw/item/show?21811761052554",
+    "extended_usd": 0.67
+   },
+   {
+    "item": "Classic ESP32 board (ESP-WROOM-32E), supported by OpenBot's firmware [NT$81]",
+    "qty": 1,
+    "unit_usd": 2.46,
+    "origin": "new",
+    "source": "https://www.ruten.com.tw/item/show?22416353755610",
+    "extended_usd": 2.46
+   },
+   {
+    "item": "18650 cells from dead laptop packs (sold as a lot, test and sort before use) [NT$99]",
+    "qty": 1,
+    "unit_usd": 3.01,
+    "origin": "salvaged",
+    "source": "https://www.ruten.com.tw/item/show?22510866531267",
+    "new_equivalent_usd": 28.56,
+    "extended_usd": 3.01
+   },
+   {
+    "item": "2-cell 18650 holder with leads [NT$4, lowest variant]",
+    "qty": 1,
+    "unit_usd": 0.12,
+    "origin": "new",
+    "source": "https://www.ruten.com.tw/item/show?21840725093078",
+    "extended_usd": 0.12
+   },
+   {
+    "item": "2S 18650 protection board, 5 A [NT$18]",
+    "qty": 1,
+    "unit_usd": 0.55,
+    "origin": "new",
+    "source": "https://www.ruten.com.tw/item/show?22627040291724",
+    "extended_usd": 0.55
+   },
+   {
+    "item": "TP5100 2-cell USB-C charger module [NT$25]",
+    "qty": 1,
+    "unit_usd": 0.76,
+    "origin": "new",
+    "source": "https://www.ruten.com.tw/item/show?22644045850820",
+    "extended_usd": 0.76
+   },
+   {
+    "item": "PLA 30 g for the phone and board mount at US$19.99/kg (search result)",
+    "qty": 1,
+    "unit_usd": 0.6,
+    "origin": "new",
+    "source": "https://asia.store.bambulab.com/collections/pla/products/pla-basic-filament",
+    "extended_usd": 0.6
+   },
+   {
+    "item": "MP1584 step-down module, set to 5.0 V for the ESP32 [NT$13]",
+    "qty": 1,
+    "unit_usd": 0.39,
+    "origin": "new",
+    "source": "https://www.ruten.com.tw/item/show?21707277367526",
+    "extended_usd": 0.39
+   },
+   {
+    "item": "Two resistors (100 kOhm, 33 kOhm) for the battery reading, from any junk circuit board",
+    "qty": 1,
+    "unit_usd": 0,
+    "origin": "salvaged",
+    "source": "donor:any discarded circuit board (or the toy car's own board)",
+    "extended_usd": 0.0
+   }
+  ],
+  "salvage": {
+   "salvaged_lines": 4,
+   "salvage_share_of_lines": 0.36,
+   "new_spend_usd": 5.55,
+   "mass_diverted_g": 171.0,
+   "new_equivalent_replaced_usd": 76.86,
+   "salvage_rejected_because": null
+  }
+ },
+ "fallback_path_note": "top-level lines: ESP32-C3 with this package's MicroPython firmware; any phone that streams video"
 }

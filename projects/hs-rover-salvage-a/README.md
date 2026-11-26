@@ -4,18 +4,34 @@
 tested on a computer against a simulated rover (`tests/test_rover_salvage_a.py`); everything physical is unproven.
 
 A phone with a cracked screen supplies the camera, Wi-Fi and video; a broken RC car supplies the motors, wheels and
-chassis; cells from dead laptop batteries supply the power. A NT$73 ESP32-C3 board drives the motors and serves a
-drive page that shows the phone's video. Compared with what is sold, see `../hs-rover-a/README.md`.
+chassis; cells from dead laptop batteries supply the power; an ESP32 board drives the motors. Compared with what is
+sold, see `../hs-rover-a/README.md`.
 
-## Parts: NT$574 in all, NT$175 of it new (`bom.json`, checked with `hs_bom_check`)
+## Use OpenBot for the software (prior art, checked 2026-11-26)
+
+[OpenBot](https://github.com/ob-f/OpenBot) (MIT, about 3,700 stars, active) already turns an old phone into a robot's
+brain on a cheap body: an Android app for driving, person following and autonomous navigation, and firmware for a
+"DIY" body on a classic ESP32 that drives each motor with two PWM inputs, the same way the DRV8833 here works. It also
+flashes from the browser (tools.openbot.org/firmware). So the recommended path is:
+
+* **Phone: Android 7.0 or newer** (OpenBot's app has `minSdkVersion 24`). A Galaxy Note 5 sold as boots and holds a
+  charge was NT$340 on Ruten; the Note 3 in the first parts list stops at Android 5 and cannot run it.
+* **Board: a classic ESP32 (ESP-WROOM-32), not the ESP32-C3**, because OpenBot's firmware supports the former (NT$81).
+* Wire the DRV8833 to OpenBot's left and right PWM pins and set the voltage divider factor in its settings.
+
+This package's own firmware (`firmware/`, MicroPython on the ESP32-C3, drive page in any browser) stays as the fallback
+for a phone too old for OpenBot: the phone then only streams video. Other builds of the same idea: an Instructables
+robot built inside a broken toy RC car with a phone holder, and the UCI and Hackaday phone-on-RC-car projects.
+
+## Parts: NT$574 (fallback) to NT$822 (OpenBot path) in all, under NT$200 of it new (`bom.json`, checked with `hs_bom_check`)
 
 | Part | Origin | Price (Ruten, 2026-11-26) |
 |---|---|---|
-| Android phone that powers up, cracked screen (one listing: Galaxy Note 3) | salvaged | NT$100 |
+| Android phone that powers up: Android 7.0+ for OpenBot (Galaxy Note 5, NT$340); any phone for the fallback (Note 3, NT$100) | salvaged | NT$100-340 |
 | Broken RC car with two working motors (or a NT$400 mini tracked tank if none works) | salvaged | NT$200 |
 | Dead laptop battery packs (a lot), for two 18650 cells | salvaged | NT$99 |
 | Two resistors, 100 kOhm and 33 kOhm, from any junk circuit board | salvaged | 0 |
-| ESP32-C3 PRO MINI board | new | NT$73 |
+| Classic ESP32 board for OpenBot (NT$81), or ESP32-C3 PRO MINI for the fallback (NT$73) | new | NT$73-81 |
 | DRV8833 two-motor driver module | new | NT$22 |
 | MP1584 step-down module (set to 5.0 V) | new | NT$13 |
 | Two-cell 18650 holder, 2S protection board, TP5100 two-cell charger | new | NT$47 |

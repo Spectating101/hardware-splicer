@@ -24,9 +24,10 @@
    "search_tw": ["二手手機 螢幕破", "手機 故障機", "零件機"],
    "gives": {"camera": "rear camera, used through a streaming app", "wifi_compute": "the whole phone", "battery_cells": "its pouch cell, only inside the phone", "charger_5v": "its own USB charging", "display": "if the screen still shows", "speaker_mic": "yes"},
    "hazards": ["a swollen battery (case bulging, screen lifting): do not charge, do not use, take it to a battery recycling point"],
-   "first_tests": ["charges and boots", "camera app shows a picture", "joins Wi-Fi", "can install a streaming app (older Android versions may be refused by current apps)"],
+   "first_tests": ["charges and boots", "camera app shows a picture", "joins Wi-Fi", "Android version: 7.0 or newer runs OpenBot (MIT phone-robot app, minSdkVersion 24); older phones can only stream video"],
+   "reuse": ["https://github.com/ob-f/OpenBot"],
    "skip_if": ["will not power up", "battery swollen", "Android too old for any streaming app"],
-   "price_seen": {"ntd": [100, 250], "where": "Ruten", "date": "2026-11-26", "note": "a phone sold as confirmed booting was NT$700"}
+   "price_seen": {"ntd": [100, 340], "where": "Ruten", "date": "2026-11-26", "note": "an Android 7 Galaxy Note 5 sold as boots and holds a charge: NT$340"}
   },
   {
    "id": "robot-vacuum",
