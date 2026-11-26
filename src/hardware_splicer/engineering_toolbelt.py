@@ -479,6 +479,144 @@ def _prop_hover(args, project):
                      sources=["https://m-selig.ae.illinois.edu/props/propDB.html"], boundary=res["claim_boundary"])
 
 
+def _plan_circuit(args, _project):
+    """A bounded circuit topology from structured intent. The calling agent picks the planner, so HS makes no model call
+    of its own (the model-first path would ask a paid provider); the planner is deterministic and blocks on missing facts."""
+    from .circuit_synthesis import SynthesisCandidate, evaluate_topology_authority
+    from .circuit_synthesis.semantic_planner_selector import PLANNER_REGISTRY, plan_circuit_from_semantic_selection
+    from .intent_clarifier import analyze_intent_clarifications, apply_clarification_answers
+    planner = str(args.get("planner") or "")
+    if planner not in PLANNER_REGISTRY:
+        raise ValueError("planner must be one of: " + "; ".join(f"{k} ({v['purpose']})" for k, v in PLANNER_REGISTRY.items()))
+    intent = dict(args["intent"])
+    clarifier = analyze_intent_clarifications(intent)
+    trace = plan_circuit_from_semantic_selection(apply_clarification_answers(intent), {
+        "selected_planner": planner, "rationale": str(args.get("rationale") or "chosen by the calling agent")})
+    candidate = dict(trace.candidate or {})
+    authority = evaluate_topology_authority(SynthesisCandidate.from_dict(candidate)) if candidate else None
+    blocked = [c for c in candidate.get("constraints", []) if c.get("status") == "blocked"]
+    problems = [f"{c.get('constraint_id')}: {c.get('requirement') or c.get('notes') or c.get('status')}" for c in blocked]
+    problems += [f"missing evidence: {m}" for m in candidate.get("missing_evidence", []) if isinstance(m, str)]
+    return _envelope(True, f"{planner}: {candidate.get('result')}, {len(candidate.get('selected_modules') or [])} modules, "
+                     f"{len(blocked)} blocked constraints", {"candidate": candidate, "topology_authority": authority,
+                                                              "clarifier": clarifier}, problems=problems,
+                     boundary="A reviewable topology from catalogue contracts; it compiles nothing and authorizes no build "
+                              "or power-on. Build it with hs_component_board or the catalogue compile path.")
+
+
+def _native_function(module: str, function: str, kwargs: dict[str, Any], timeout: int = 1800) -> Any:
+    """Call any HS function in the native interpreter through ``native_call`` (JSON in, JSON out)."""
+    import tempfile
+    with tempfile.TemporaryDirectory(prefix="hs-native-") as tmp:
+        out = Path(tmp) / "result.json"
+        run = subprocess.run([_native_python(), "-m", "hardware_splicer.native_call", f"hardware_splicer.{module}", function,
+                              "--out", str(out)], input=json.dumps(kwargs), capture_output=True, text=True, timeout=timeout,
+                             env={**os.environ, "PYTHONPATH": str(REPO / "src")}, cwd=str(REPO))
+        if run.returncode != 0 or not out.is_file():
+            # the exception line, not the whole traceback: that is what the agent can act on
+            last = [line for line in run.stderr.strip().splitlines() if line.strip()][-1:] or ["no output"]
+            raise RuntimeError(f"{module}.{function} failed: {last[0]}")
+        return json.loads(out.read_text(encoding="utf-8"))
+
+
+FEM_SUMMARY = ("status", "element_count", "node_count", "max_displacement_m", "max_von_mises_pa", "yield_safety_factor",
+               "screening_verdict", "conservative", "screening_blockers", "warnings", "force_equilibrium_residual_n")
+
+
+def _fem_screen(args, project):
+    """Linear-elastic screening of one CAD part under one load case; the full field goes to the project, not the agent."""
+    cad = _readable(str(args["cad_file"]), project)
+    planes = ("x_min", "x_max", "y_min", "y_max", "z_min", "z_max")
+    if args["fixed_plane"] not in planes or args["loaded_plane"] not in planes:
+        raise ValueError(f"fixed_plane and loaded_plane must be one of {', '.join(planes)}")
+    force = [float(x) for x in args["force_n"]]
+    if len(force) != 3:
+        raise ValueError("force_n is [Fx, Fy, Fz] in newtons")
+    common = {"path": str(cad), "stl_units": "mm" if cad.suffix.lower() == ".stl" else None,
+              "fixed_plane": args["fixed_plane"], "loaded_plane": args["loaded_plane"], "total_force_n": force,
+              "youngs_modulus_pa": float(args["youngs_pa"]), "poisson_ratio": float(args["poisson"]),
+              "yield_strength_pa": float(args["yield_pa"]) if args.get("yield_pa") is not None else None}
+    study = [float(x) for x in args.get("mesh_study_mm") or []]
+    if study:
+        res = _native_function("mechanical_cad_convergence", "run_cad_mesh_sensitivity", {**common, "mesh_sizes_mm": study})
+        blockers = list(res.get("sensitivity_blockers") or []) + list(res.get("screening_blockers") or [])
+        analysis = dict((res.get("levels") or [{}])[-1])  # the finest mesh
+        analysis["yield_safety_factor"] = analysis.get("raw_yield_safety_factor")
+    else:
+        try:
+            res = _native_function("mechanical_cad_fem", "run_cad_screening", {**common, "mesh_target_mm": float(args.get("mesh_size_mm") or 8.0)})
+        except RuntimeError as exc:
+            if "element count" in str(exc) or "node count" in str(exc):
+                raise RuntimeError(f"{exc}. This bounded solver takes up to 5,000 elements and 2,000 nodes: screen one "
+                                   "bracket, boss or plate cut from the part, or raise mesh_size_mm") from exc
+            raise
+        analysis = res.get("analysis") or {}
+        blockers = list(res.get("screening_blockers") or [])
+    full = None
+    if project is not None:
+        out = _project_path(project, "fem")
+        full = out / f"{cad.stem}-{'study' if study else 'screen'}.json"
+        full.write_text(json.dumps(res, indent=1, default=str))
+    summary = {k: analysis.get(k) for k in FEM_SUMMARY if k in analysis}
+    summary.update({"mesh_study": bool(study), "status": res.get("status"), "blockers": blockers,
+                    "full_result": str(full.relative_to(project.root)) if full and project else None})
+    sf = analysis.get("yield_safety_factor")
+    problems = [f"blocker: {b}" for b in blockers]
+    if isinstance(sf, (int, float)) and sf < float(args.get("min_safety_factor") or 2.0):
+        problems.append(f"yield safety factor {sf:.2f} is under {float(args.get('min_safety_factor') or 2.0):g}")
+    vm = analysis.get("max_von_mises_pa")
+    return _envelope(True, f"peak von Mises {vm / 1e6:.2f} MPa" + (f", yield safety factor {sf:.2f}" if isinstance(sf, (int, float)) else "")
+                     if isinstance(vm, (int, float)) else str(res.get("status")), summary, problems=problems,
+                     boundary="Linear-elastic screening of one load case on the given material values; printed parts are "
+                              "anisotropic and layer adhesion is weaker. Not a strength proof: test the part.")
+
+
+def _arm_kinematics(args, project):
+    """Typed arm proposal: reach and payload torque checks, a URDF on the project, and PyBullet FK/IK/workspace checks."""
+    from . import robot_arm_design as rad, robot_arm_kinematics as rak
+    proposal = rad.RobotArmDesignProposal.model_validate(dict(args["proposal"]))
+    inventory, sources = [], []
+    if args.get("supply_v") is not None and args.get("max_stall_share") is not None:
+        # the same cited servos and usable share of stall torque hs_size_arm_actuators picks from
+        from . import arm_actuator_sizing as aas
+        share = float(args["max_stall_share"])
+        for row in aas.cited_servo_rows(float(args["supply_v"])):
+            inventory.append({"component_id": row["component_id"], "continuous_torque_nm": round(row["stall_torque_nm"] * share, 4),
+                              "torque_basis": f"stall {row['stall_torque_nm']} N m x declared share {share:g}", "source": row["source"]})
+            sources.append(row["source"])
+    evaluation = rad.evaluate_robot_arm_design(proposal, requirements=dict(args.get("requirements") or {}), inventory=inventory)
+    urdf = rak.generate_robot_arm_urdf(proposal, robot_name=str(args.get("name") or "hs_arm"))
+    out = _project_path(project, "arm")
+    urdf_path = out / f"{args.get('name') or 'hs_arm'}.urdf"
+    urdf_path.write_text(urdf.text)
+    physical_only = {"PHYSICAL_VALIDATION_REQUIRED"}  # only a build closes it: reported in the boundary, not left open
+    problems = [f"{f.code}: {f.message}" for f in evaluation.findings if f.blocking and f.code not in physical_only]
+    try:
+        kin = _native_function("robot_arm_kinematics", "check_arm_proposal",
+                               {"proposal": proposal.model_dump(mode="json"), "urdf_path": str(urdf_path)})
+    except (RuntimeError, ValueError, OSError) as exc:  # no native interpreter: report, keep the static checks
+        kin = {"status": "not_run", "reason": str(exc)}
+        problems.append(f"kinematics not run: {exc}")
+    if kin.get("status") not in ("pass", "not_run"):
+        problems.append(f"kinematics: {kin.get('status')}")
+    required = (args.get("requirements") or {}).get("required_reach_mm")
+    sampled = kin.get("workspace_max_radius_m")
+    closed = []
+    if kin.get("status") == "pass" and required is not None and isinstance(sampled, (int, float)) and sampled * 1000 >= float(required):
+        # the link-length sum is only an upper bound; PyBullet's sampled workspace is the measured reach on the proxy model
+        problems = [p for p in problems if not p.startswith("WORKSPACE_NOT_VERIFIED")]
+        closed.append(f"WORKSPACE_NOT_VERIFIED closed by PyBullet workspace sampling: {sampled * 1000:.0f} mm >= {float(required):g} mm")
+    rel = str(urdf_path.relative_to(project.root))
+    result = {"evaluation": {"status": evaluation.status, "summary": evaluation.summary,
+                             "findings": [f.model_dump(mode="json") for f in evaluation.findings]},
+              "kinematics": kin, "urdf": rel, "closed_by_kinematics": closed, "actuator_inventory": inventory,
+              "next": f"hs_motion_sweep with urdf {rel} sweeps every joint for link collisions"}
+    return _envelope(True, f"{len(proposal.joints)} joints, reach {sum(j.link_length_mm for j in proposal.joints):g} mm; "
+                     f"evaluation {evaluation.status}, kinematics {kin.get('status')}", result, problems=problems, sources=sources,
+                     boundary="Kinematics on proxy links only: masses, stiffness, transmission and real collision meshes are "
+                              "not modelled, and nothing here authorizes motion.")
+
+
 def _native_tool(module: str, argv: list[str], timeout: int = 900) -> dict[str, Any]:
     run = subprocess.run([_native_python(), "-m", f"hardware_splicer.{module}", *argv], capture_output=True, text=True,
                          timeout=timeout, env={**os.environ, "PYTHONPATH": str(REPO / "src")}, cwd=str(REPO))
@@ -643,6 +781,40 @@ TOOLS: dict[str, ToolSpec] = {t.name: t for t in [
              "board.placement_hints; FreeRouted, re-routed until DRC and schematic parity pass, up to 3 tries), and fab files.",
              _obj({"design": {"type": "object"}, "stages": {"type": "array", "items": {"type": "string", "enum": ["schematic", "pcb", "fab"]}}},
                   ["project_id", "design"]), _component_board, check_key=lambda a: f"board:{(a.get('design') or {}).get('name')}"),
+    ToolSpec("hs_plan_circuit", "Bounded circuit topology from structured intent (supply rails, loads, signals, allowed "
+             "catalogue modules) with one of HS's deterministic planners: motor_driver, h_bridge, battery_power, power_rail, "
+             "level_shift, analog_conditioning, sensor_interface, relay_switch. Missing ratings stay blockers.",
+             _obj({"intent": {"type": "object", "description": "{goal, supply_rails, load_requirements, signal_requirements, "
+                              "allowed_modules, required_evidence}"},
+                   "planner": {"type": "string", "description": "motor_driver, h_bridge, battery_power, power_rail, "
+                               "level_shift, analog_conditioning, sensor_interface or relay_switch",
+                               "enum": ["motor_driver", "h_bridge", "battery_power", "power_rail", "level_shift",
+                                                          "analog_conditioning", "sensor_interface", "relay_switch"]},
+                   "rationale": {"type": "string"}}, ["intent", "planner"]), _plan_circuit,
+             check_key=lambda a: f"circuit:{a.get('planner')}"),
+    ToolSpec("hs_fem_screen", "Linear-elastic FEM screening of a STEP or STL part (from hs_rover_chassis or any CAD) for one "
+             "load case: fixed face, loaded face, force, material; optional mesh study (3-4 decreasing sizes) for convergence. "
+             "Returns peak stress, displacement and yield safety factor; the full field is saved on the project.",
+             _obj({"cad_file": {"type": "string"}, "fixed_plane": {"type": "string", "enum": ["x_min", "x_max", "y_min", "y_max", "z_min", "z_max"]},
+                   "loaded_plane": {"type": "string", "enum": ["x_min", "x_max", "y_min", "y_max", "z_min", "z_max"]},
+                   "force_n": {"type": "array", "items": {"type": "number"}, "description": "[Fx, Fy, Fz] N on the loaded face"},
+                   "youngs_pa": {"type": "number"}, "poisson": {"type": "number"}, "yield_pa": {"type": "number"},
+                   "mesh_size_mm": {"type": "number"}, "mesh_study_mm": {"type": "array", "items": {"type": "number"}},
+                   "min_safety_factor": {"type": "number", "description": "default 2"}},
+                  ["cad_file", "fixed_plane", "loaded_plane", "force_n", "youngs_pa", "poisson"]), _fem_screen,
+             check_key=lambda a: f"fem:{a.get('cad_file')}"),
+    ToolSpec("hs_arm_kinematics", "Check a typed robot-arm proposal (joints with axis, link length, limits, actuator): reach and "
+             "payload torque against requirements, a URDF saved on the project, and PyBullet forward/inverse kinematics, "
+             "workspace and self-collision. Feed the URDF to hs_motion_sweep.",
+             _obj({"proposal": {"type": "object", "description": "{joints: [{joint_id, axis, link_length_mm, lower_limit_deg, "
+                                "upper_limit_deg, actuator_part_id}], end_effector}"},
+                   "requirements": {"type": "object", "description": "{required_reach_mm, payload_mass_kg, "
+                                    "minimum_static_torque_safety_factor, max_joint_count}"},
+                   "supply_v": {"type": "number", "description": "with max_stall_share: joints may name the cited servos "
+                                "hs_size_arm_actuators picks (actuator_part_id)"},
+                   "max_stall_share": {"type": "number"},
+                   "name": {"type": "string"}}, ["project_id", "proposal"]), _arm_kinematics,
+             check_key=lambda a: f"arm:{a.get('name') or 'hs_arm'}"),
     ToolSpec("hs_motion_sweep", "Sweep every joint of a URDF through its range and report collisions between links.",
              _obj({"urdf": {"type": "string"}, "steps": {"type": "integer"}}, ["urdf"]), _motion),
     ToolSpec("hs_rover_chassis", "Parametric printable rover chassis around cited gearmotor and camera dimensions, with tip-over, "

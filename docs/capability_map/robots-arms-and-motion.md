@@ -8,7 +8,7 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `robotics_platform_geometry` | 1361 | 1 | product | TMRC | (no description) |
 | `robotics_actuation` | 729 | 3 | product | TMRC | (no description) |
 | `robotics_platform_authority` | 729 | 2 | product | TMRC | (no description) |
-| `robot_arm_design` | 691 | 2 | script | - | Typed robot-arm design proposals and conservative deterministic evaluation. This module is a specialized engineering surface for the model-first path. The model may propose a kinematic chain and refer... |
+| `robot_arm_design` | 691 | 2 | product | TMRC | Typed robot-arm design proposals and conservative deterministic evaluation. This module is a specialized engineering surface for the model-first path. The model may propose a kinematic chain and refer... |
 | `robotics_simulation` | 667 | 2 | product | TMRC | (no description) |
 | `engineering_planner` | 649 | 4 | product | MRC | Source-agnostic engineering planning built on Hardware Splicer's truth-bound intake. The canonical engineering path uses ``plan_project_from_intake_truthful`` so historical demo scaffolds cannot enter... |
 | `ai_project_tool_executor` | 619 | 9 | product | MRC | Execute explicitly accepted, software-side AI project previews. This module is deliberately narrower than the AI proposal vocabulary. It runs deterministic previews, imports registered sources and sta... |
@@ -21,7 +21,7 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `project_intake_truth` | 349 | 2 | product | MRC | Canonical project-intake truth boundary. The historical project-intake planner is intentionally rich in demo/compatibility scaffolding. It may synthesize controllers, rails, actuators, dimensions, mis... |
 | `engineering_execution` | 320 | 4 | product | MRC | Bounded execution for software-only engineering checks. This module intentionally supports no flashing, device access, power control, or physical motion. Commands are generated from named operations; ... |
 | `robot_arm_experiment` | 318 | 2 | script | - | Robot-arm engineering experiment for the model-first Hardware Splicer path. This experiment does not assert one golden arm architecture. It proves that a typed model proposal can be converted into can... |
-| `robot_arm_kinematics` | 308 | 1 | script | - | URDF projection and independent PyBullet kinematics checks for typed robot-arm proposals. This layer deliberately does not turn proposal geometry into physical truth. It emits a kinematics-only URDF w... |
+| `robot_arm_kinematics` | 318 | 1 | product | TMRC | URDF projection and independent PyBullet kinematics checks for typed robot-arm proposals. This layer deliberately does not turn proposal geometry into physical truth. It emits a kinematics-only URDF w... |
 | `manufacturing_reconciliation` | 277 | 1 | product | TMRC | Manufacturing consistency checks for Hardware Splicer project packages. The authority model prevents unsupported certainty claims, but it cannot detect a self-consistent quantitative error such as a B... |
 | `vendor_model_capture` | 261 | 17 | script | - | Capture and inventory manufacturer simulation-model bytes without authority promotion. |
 | `guided_engineering_planner` | 252 | 2 | product | MRC | Final planning composition for guided, evidence-governed robot engineering. |

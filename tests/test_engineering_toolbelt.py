@@ -179,3 +179,68 @@ def test_prop_hover_reads_the_given_database_and_refuses_extrapolation(tmp_path,
 def test_identify_part_says_why_when_there_is_nothing_to_match():
     env = tb.call("hs_identify_part", {"marking": "ab"})
     assert not env["ok"] and env["problems"]
+
+
+def _native_ready() -> bool:
+    import os
+    import subprocess
+    py = os.environ.get("HARDWARE_SPLICER_DIGITAL_PYTHON")
+    return bool(py) and subprocess.run([py, "-c", "import cadquery, gmsh, pybullet"], capture_output=True).returncode == 0
+
+
+ARM = {"joints": [{"joint_id": "base_yaw", "axis": [0, 0, 1], "link_length_mm": 60, "lower_limit_deg": -150, "upper_limit_deg": 150,
+                   "actuator_part_id": "dynamixel-xl430-w250-t"},
+                  {"joint_id": "shoulder", "axis": [0, 1, 0], "link_length_mm": 150, "lower_limit_deg": -90, "upper_limit_deg": 90,
+                   "actuator_part_id": "dynamixel-xl430-w250-t"},
+                  {"joint_id": "elbow", "axis": [0, 1, 0], "link_length_mm": 140, "lower_limit_deg": -120, "upper_limit_deg": 120,
+                   "actuator_part_id": "dynamixel-xl430-w250-t"}],
+       "end_effector": "gripper"}
+
+
+@pytest.mark.skipif(not _native_ready(), reason="needs HARDWARE_SPLICER_DIGITAL_PYTHON with cadquery, gmsh and pybullet")
+def test_arm_chain_sizing_kinematics_then_motion_sweep():
+    pid = tb.call("hs_project_open", {"objective": "desk arm"})["result"]["project_id"]
+    env = tb.call("hs_arm_kinematics", {"project_id": pid, "proposal": ARM, "name": "desk", "supply_v": 12, "max_stall_share": 0.5,
+                                        "requirements": {"required_reach_mm": 300, "payload_mass_kg": 0.1,
+                                                         "minimum_static_torque_safety_factor": 2}})
+    res = env["result"]
+    assert res["kinematics"]["status"] == "pass" and res["closed_by_kinematics"]
+    assert not any(p.startswith(("WORKSPACE_NOT_VERIFIED", "ACTUATOR_IDENTITY_UNRESOLVED")) for p in env["problems"])
+    assert any(f["code"] == "PAYLOAD_ONLY_TORQUE_BOUND" for f in res["evaluation"]["findings"])  # cited servos were used
+    sweep = tb.call("hs_motion_sweep", {"project_id": pid, "urdf": res["urdf"], "steps": 7})
+    assert sweep["ok"], sweep["problems"]
+
+
+@pytest.mark.skipif(not _native_ready(), reason="needs HARDWARE_SPLICER_DIGITAL_PYTHON with cadquery, gmsh and pybullet")
+def test_fem_screen_runs_in_the_native_interpreter_and_keeps_the_field_on_the_project(tmp_path):
+    import os
+    import subprocess
+    pid = tb.call("hs_project_open", {"objective": "bracket"})["result"]["project_id"]
+    project = ObjectiveProject.load(pid)
+    step = project.artifacts_dir / "bar.step"
+    step.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run([os.environ["HARDWARE_SPLICER_DIGITAL_PYTHON"], "-c",
+                    f"import cadquery as cq; cq.exporters.export(cq.Workplane().box(60, 10, 10), {str(step)!r})"], check=True)
+    env = tb.call("hs_fem_screen", {"project_id": pid, "cad_file": str(step.relative_to(project.root)), "fixed_plane": "x_min",
+                                    "loaded_plane": "x_max", "force_n": [100, 0, 0], "youngs_pa": 2.0e9, "poisson": 0.35,
+                                    "yield_pa": 40e6, "mesh_size_mm": 5})
+    res = env["result"]
+    assert res["max_von_mises_pa"] > 0 and (project.root / res["full_result"]).is_file()
+    assert "nodal_displacements_m" not in res  # the field stays in the file, not in the agent's context
+    assert any("blocker" in p for p in env["problems"])  # linear tetrahedra are not conservative: the check stays open
+
+
+def test_plan_circuit_runs_the_named_planner_without_a_model_call(monkeypatch):
+    import hardware_splicer.circuit_synthesis.semantic_planner_selector as sel
+    monkeypatch.setattr(sel, "select_semantic_circuit_planner", lambda *a, **k: (_ for _ in ()).throw(AssertionError("model called")))
+    intent = {"goal": "drive a small DC pump from a microcontroller GPIO",
+              "supply_rails": [{"name": "+5V", "voltage_v": 5.0, "max_current_a": 1.0}],
+              "load_requirements": [{"name": "pump", "type": "dc_motor", "voltage_v": 5.0, "current_a": 0.45}],
+              "signal_requirements": [{"name": "control", "type": "pwm", "voltage_v": 3.3}],
+              "allowed_modules": ["usb-power-5v", "esp32-devkit", "mosfet-irlz44n", "water_pump_5v"]}
+    env = tb.call("hs_plan_circuit", {"intent": intent, "planner": "motor_driver"})
+    assert env["result"]["candidate"]["metadata"]["dispatch"]["selected_planner"] == "motor_driver"
+    # the catalogue has no current rating for this MOSFET: the planner blocks instead of guessing
+    assert not env["ok"] and any("switch_current_rating" in p for p in env["problems"])
+    bad = tb.call("hs_plan_circuit", {"intent": intent, "planner": "flux_capacitor"})
+    assert not bad["ok"] and "battery_power" in bad["problems"][0]
