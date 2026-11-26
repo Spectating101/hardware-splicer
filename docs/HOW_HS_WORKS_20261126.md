@@ -26,7 +26,7 @@ objective ─► 1 what exists? ─► 2 which junk? ─► 3 decide ─► 4 en
 | 6. Package | `hs_project_write_artifact`: guides, firmware, wiring, self-tests | Files are deliverables, never counted as checks |
 | 7. Verify | `hs_project_status` separates software-checked, open, physical-required | Nothing here grants fabrication or release; a software check is never physical proof |
 
-Any agent can drive this: the tools are on HS's MCP server and REST API (`/v1/toolbelt/<tool>`).
+Any agent can drive this: the tools are on HS's MCP server and REST API (`/v1/toolbelt/<tool>`). The tool chains (parts on hand to a device lab, arm sizing to kinematics to collision sweep, chassis to FEM, circuit plan to board to LCSC check, estimates to measured outcomes) are listed in `docs/CAPABILITY_CONSOLIDATION.md` §5.
 
 ## What keeps HS informed
 
