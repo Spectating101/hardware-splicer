@@ -37,9 +37,13 @@ def wifi(cfg):
                 return sta.ifconfig()[0]
             time.sleep(0.25)
     sta.active(False)
-    ap = network.WLAN(network.AP_IF)
+    # current MicroPython names the access point WLAN.IF_AP and its name "ssid"; older builds use AP_IF and "essid"
+    ap = network.WLAN(getattr(network.WLAN, "IF_AP", None) or network.AP_IF)
     ap.active(True)
-    ap.config(essid="hs-rover", password=cfg["ap_password"])
+    try:
+        ap.config(ssid="hs-rover", key=cfg["ap_password"])
+    except (TypeError, ValueError, OSError):
+        ap.config(essid="hs-rover", password=cfg["ap_password"])
     print("own network hs-rover, open http://%s/" % ap.ifconfig()[0])
     return ap.ifconfig()[0]
 
