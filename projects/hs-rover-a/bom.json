@@ -1,0 +1,80 @@
+[
+ {
+  "item": "Pololu 47:1 Metal Gearmotor 25Dx52L mm MP 12V (#3229)",
+  "qty": 2,
+  "unit_usd": 29.95,
+  "source": "https://www.pololu.com/product/3229"
+ },
+ {
+  "item": "Pololu 25D mm Metal Gearmotor Bracket Pair (#2676)",
+  "qty": 1,
+  "unit_usd": 10.95,
+  "source": "https://www.pololu.com/product/2676"
+ },
+ {
+  "item": "Pololu DRV8874 Single Brushed DC Motor Driver Carrier (#4035)",
+  "qty": 2,
+  "unit_usd": 11.94,
+  "source": "https://www.pololu.com/product/4035"
+ },
+ {
+  "item": "Pololu 5V 2.5A Step-Down Regulator D24V22F5 (#2858)",
+  "qty": 1,
+  "unit_usd": 26.95,
+  "source": "https://www.pololu.com/product/2858"
+ },
+ {
+  "item": "Pololu Wheel 90x10mm Pair (#1435)",
+  "qty": 1,
+  "unit_usd": 9.49,
+  "source": "https://www.pololu.com/product/1435"
+ },
+ {
+  "item": "Pololu Universal Aluminum Mounting Hub 4mm, 2-pack (#1081)",
+  "qty": 1,
+  "unit_usd": 10.95,
+  "source": "https://www.pololu.com/product/1081"
+ },
+ {
+  "item": "Pololu Ball Caster with 1in Plastic Ball and Ball Bearings (#2692)",
+  "qty": 1,
+  "unit_usd": 9.95,
+  "source": "https://www.pololu.com/product/2692"
+ },
+ {
+  "item": "Raspberry Pi Zero 2 W",
+  "qty": 1,
+  "unit_usd": 19.05,
+  "source": "https://www.adafruit.com/product/5291"
+ },
+ {
+  "item": "Raspberry Pi Camera Module 3 Standard",
+  "qty": 1,
+  "unit_usd": 29.25,
+  "source": "https://www.adafruit.com/product/5657"
+ },
+ {
+  "item": "Raspberry Pi Zero camera cable",
+  "qty": 1,
+  "unit_usd": 5.95,
+  "source": "https://www.adafruit.com/product/3157"
+ },
+ {
+  "item": "3S Li-ion 18650 pack 2.5 Ah with BMS + charger",
+  "qty": 1,
+  "unit_usd": 25.0,
+  "source": "declared"
+ },
+ {
+  "item": "microSD 16 GB",
+  "qty": 1,
+  "unit_usd": 6.0,
+  "source": "declared"
+ },
+ {
+  "item": "PLA (72 g) + M3/M2.5 screws and standoffs",
+  "qty": 1,
+  "unit_usd": 5.0,
+  "source": "declared"
+ }
+]
