@@ -45,6 +45,13 @@ class OperatorIdentity:
     kind: str
 
 
+def header_token(value: str | None) -> str | None:
+    """The X-HS-Operator-Token header as given, or None when it is absent or empty."""
+    if value is not None and value != "":
+        return value
+    return None
+
+
 def hash_operator_token(token: str) -> str:
     digest = hashlib.sha256(token.encode("utf-8")).hexdigest()
     return f"{_HASH_PREFIX}{digest}"

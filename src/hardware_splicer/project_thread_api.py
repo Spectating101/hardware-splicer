@@ -26,6 +26,7 @@ from .project_thread_store import (
     ThreadValidationError,
     reject_authority_keys,
 )
+from .operator_identity import header_token as _operator_token
 
 
 def _thread_error(exc: Exception) -> HTTPException:
@@ -81,12 +82,6 @@ def _as_request_object(payload: Any, *, label: str) -> Dict[str, Any]:
     request = dict(payload)
     reject_authority_keys(request, label=label)
     return request
-
-
-def _operator_token(x_hs_operator_token: str | None) -> str | None:
-    if x_hs_operator_token is not None and x_hs_operator_token != "":
-        return x_hs_operator_token
-    return None
 
 
 def _reject_author_conflict(author: Any, identity: OperatorIdentity) -> None:

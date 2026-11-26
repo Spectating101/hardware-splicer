@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import urllib.error
 import urllib.request
 from typing import Any, Dict, List, Optional
@@ -143,3 +144,12 @@ def call_qwen_chat(
         timeout_s=timeout_s,
         system=system,
     )
+
+
+def extract_json_object(text: str) -> Dict[str, Any]:
+    """Parse a model reply that should be one JSON object, tolerating a ``` or ```json fence around it."""
+    text = text.strip()
+    if text.startswith("```"):
+        text = re.sub(r"^```(?:json)?\s*", "", text)
+        text = re.sub(r"\s*```$", "", text)
+    return json.loads(text)

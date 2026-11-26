@@ -37,6 +37,7 @@ from .project_presence import (
     put_presence,
 )
 from .project_store import InvalidProjectId, ProjectNotFound, ProjectStore, validate_project_id
+from .operator_identity import header_token as _operator_token
 
 _POLL_ENV = "HARDWARE_SPLICER_EVENT_POLL_SECONDS"
 _KEEPALIVE_ENV = "HARDWARE_SPLICER_EVENT_KEEPALIVE_SECONDS"
@@ -149,12 +150,6 @@ def acquire_slot_lease(
         raise TooManyProjectStreams("too many live streams for this project")
     now = clock or time.monotonic
     return SlotLease(stream_key, float(now()))
-
-
-def _operator_token(x_hs_operator_token: str | None) -> str | None:
-    if x_hs_operator_token is not None and x_hs_operator_token != "":
-        return x_hs_operator_token
-    return None
 
 
 def _events_error(exc: Exception) -> HTTPException:

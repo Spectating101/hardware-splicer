@@ -7,12 +7,12 @@ from __future__ import annotations
 
 import json
 import os
-import re
 from typing import Any, Dict, List, Mapping
 
 from ..pcb.module_registry import find_module
 from .catalog_context import build_salvage_catalog_context
 from .qwen_text_client import call_qwen_chat, qwen_configured
+from .qwen_text_client import extract_json_object as _extract_json_object
 
 SCHEMA_VERSION = "hardware_splicer.qwen_workshop_review.v1"
 
@@ -38,14 +38,6 @@ def workshop_review_enabled() -> bool:
         return qwen_configured()
     # Default on when Qwen is keyed (same spirit as llm_first salvage).
     return qwen_configured()
-
-
-def _extract_json_object(text: str) -> Dict[str, Any]:
-    text = text.strip()
-    if text.startswith("```"):
-        text = re.sub(r"^```(?:json)?\s*", "", text)
-        text = re.sub(r"\s*```$", "", text)
-    return json.loads(text)
 
 
 def _valid_module_id(module_id: str | None) -> bool:
