@@ -30,8 +30,9 @@ def test_a_decision_needs_its_reason_and_research_keeps_sources():
 
 def test_tool_runs_are_recorded_and_a_problem_stays_open_until_the_same_check_passes():
     pid = tb.call("hs_project_open", {"objective": "rover"})["result"]["project_id"]
+    tb.call("hs_project_record", {"project_id": pid, "kind": "research", "title": "prior art", "sources": ["https://example.org/rover"]})
     failing = tb.call("hs_size_rover_drive", {"project_id": pid, "mass_kg": 60, "wheel_mm": 80, "speed_m_s": 3.0, "slope_deg": 30})
-    assert not failing["ok"] and failing["problems"] and failing["project_step"] == 1
+    assert not failing["ok"] and failing["problems"] and failing["project_step"] == 2
     assert ObjectiveProject.load(pid).status()["open"][0]["check"] == "hs_size_rover_drive"
     passing = tb.call("hs_size_rover_drive", {"project_id": pid, "mass_kg": 1.2, "wheel_mm": 80, "speed_m_s": 0.4, "slope_deg": 10})
     assert passing["ok"], passing["problems"]
@@ -113,3 +114,17 @@ def test_junk_lookup_names_donors_for_a_rover_and_flags_what_junk_cannot_give():
     assert env["ok"] and env["claim_boundary"]
     bad = tb.call("hs_junk_lookup", {"needs": ["teleporter"]})
     assert not bad["ok"] and "unknown capabilities" in bad["problems"][0]
+
+
+def test_a_project_that_checks_or_writes_without_prior_art_keeps_it_open():
+    pid = tb.call("hs_project_open", {"objective": "rover"})["result"]["project_id"]
+    tb.call("hs_size_rover_drive", {"project_id": pid, "mass_kg": 1.2, "wheel_mm": 80, "speed_m_s": 0.4, "slope_deg": 10})
+    assert any(o["check"] == "prior_art" for o in ObjectiveProject.load(pid).status()["open"])
+    tb.call("hs_prior_art_search", {"project_id": pid, "query": "rover", "sources": ["hs_own"]})
+    assert not any(o["check"] == "prior_art" for o in ObjectiveProject.load(pid).status()["open"])
+
+
+def test_prior_art_finds_what_hs_already_recorded():
+    env = tb.call("hs_prior_art_search", {"query": "smartphone robot rover", "sources": ["hs_own"], "limit": 20})
+    urls = [u.lower() for h in env["result"]["hs_own"] for u in h["urls"]]
+    assert any("openbot" in u for u in urls)

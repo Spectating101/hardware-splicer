@@ -125,6 +125,15 @@ class ObjectiveProject:
                 open_items.append({"check": key, "seq": s["seq"], "problems": s.get("problems") or [s.get("error") or "failed"]})
             if s.get("claim_boundary"):
                 physical.append({"check": key, "boundary": s["claim_boundary"]})
+        # Reuse before building: a project that has run checks or written files without any prior-art research on
+        # record keeps that open (on 2026-11-26 a rover package was written while OpenBot sat in HS's own records).
+        searched = any(s["kind"] == "research" for s in steps) or any(
+            s["kind"] == "tool" and (s.get("category") == "research" or s["title"] in ("hs_prior_art_search", "hs_read_board", "hs_junk_lookup"))
+            for s in steps)
+        if steps and not searched and (checked or open_items or deliverables):
+            open_items.append({"check": "prior_art", "seq": None,
+                               "problems": ["no prior-art search recorded: run hs_prior_art_search (and hs_junk_lookup for "
+                                            "donors) or record the research, before relying on this design"]})
         decisions = [{"seq": s["seq"], "title": s["title"], "choice": s.get("choice"), "because": s.get("because")}
                      for s in steps if s["kind"] == "decision"]
         research = tool_research + [{"seq": s["seq"], "title": s["title"], "sources": s.get("sources", [])}
