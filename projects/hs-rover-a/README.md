@@ -7,7 +7,7 @@
 This is the first objective carried from a plain brief to a build package entirely through Hardware-Splicer's MCP server,
 the interface any outside agent uses. An agent (Claude Code, on 2026-11-26) made the engineering decisions; every
 calculation, CAD build, check and file came from an HS tool over MCP, and HS kept the whole record on one project
-(`project/ledger.jsonl`, 32 steps, each tool call with its inputs).
+(`project/ledger.jsonl`, 34 steps, each tool call with its inputs).
 
 ## Objective and acceptance (set before any design)
 
@@ -70,6 +70,11 @@ home or pet camera product**. What it has that the toy does not: video that stay
 cloud, about 5 h runtime, 15 degree ramps, 30 mm clearance, and open, replaceable parts. The step 1 prior-art search
 missed this whole consumer class (it looked at open boards and US$750-1,025 patrol robots); prior art now has to include
 consumer marketplaces. Ledger steps 31-32.
+
+**Salvaged instead (2026-11-26):** a broken phone plus a broken toy car, an ESP32-C3, a motor driver and 18650 cells
+from dead laptop packs comes to NT$561 (US$17) on Ruten listings, NT$162 of it new; a broken Roomba 571 driven over its
+serial port instead of the toy car comes to NT$1,139. Both pass `hs_bom_check` under the Blinky Bot's price (ledger
+steps 33-34). Donors untested; shipping and assembly hours not counted. Sources: `docs/SALVAGE_SOURCING_TW_20261126.md`.
 
 ## Needs a physical test
 

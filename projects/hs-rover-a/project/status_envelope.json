@@ -10,7 +10,7 @@
   "battery runs at least 1 h of patrol",
   "every remaining risk listed as needing a physical test"
  ],
- "steps": 32,
+ "steps": 34,
  "research": [
   {
    "search": "hs_prior_art_search",
@@ -122,17 +122,14 @@
    "check": "hs_energy_budget",
    "seq": 28,
    "summary": "0 errors, 0 warnings"
-  }
- ],
- "open": [
+  },
   {
    "check": "bom_check",
-   "seq": 30,
-   "problems": [
-    "total US$263.44 is over the US$250.00 budget"
-   ]
+   "seq": 34,
+   "summary": "US$34.60 for 8 lines against US$45.57; 3 salvaged, US$4.25 new"
   }
  ],
+ "open": [],
  "physical_required": [
   {
    "check": "hs_size_rover_drive",
@@ -148,7 +145,7 @@
   },
   {
    "check": "bom_check",
-   "boundary": "Shop prices on the day they were read; shipping, tax and stock change."
+   "boundary": "Shop prices on the day they were read; shipping, tax and stock change. A salvaged part is assumed to work until the donor is opened and the part is tested."
   }
  ],
  "deliverables": [
