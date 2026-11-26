@@ -146,3 +146,17 @@ Sources: [VentureBeat on Quilter](https://venturebeat.com/ai/quilters-ai-just-de
 [Diode Series A](https://technews180.com/funding-news/diode-raises-11-4m-to-end-circuit-board-design-frustrations/),
 [Leo AI](https://www.engineering.com/leo-ai-can-now-generate-full-cad-assemblies/), [Zoo Zookeeper](https://www.digitalengineering247.com/article/zoo-introduces-zookeeper-agent-for-cad-design/products),
 [JLCPCB KiCad MCP guide](https://jlcpcb.com/blog/kicad-mcp-how-to-design-a-pcb-with-claude-code), [FreeCAD MCP guide](https://mcp.directory/blog/freecad-mcp-complete-guide-2026).
+
+## 9. Done the same day: toolbelt and the first objective run over MCP
+
+- `engineering_toolbelt` (MCP + `POST /v1/toolbelt/<tool>`): 16 tools with one envelope (problems, sources, claim
+  boundary), each recorded on an `objective_project` whose status keeps software checks, open problems, physical-only
+  items, research and untested deliverables apart. `component_board_pipeline` runs any JSON board design to fab files;
+  `rover_chassis` builds a printable chassis from cited drawings.
+- `projects/hs-rover-a`: the inspection-rover objective worked entirely over MCP in 24 recorded steps. The tools caught
+  and drove four real design changes: wheel-to-plate gap, a 3 mm vs 4 mm shaft mismatch, a US$323.66 vs US$250 budget
+  overrun (to 2WD + caster), and the Pi Zero's different camera cable. Result: US$242.32 with three prices still
+  uncited, all checks passing in software, nothing built.
+- Still not done: an agent inside HS that drives the loop without an outside agent; the drone and arm objectives
+  through the toolbelt (the drone package exists from earlier scripts); the head-to-head against open tools; any
+  physical build.
