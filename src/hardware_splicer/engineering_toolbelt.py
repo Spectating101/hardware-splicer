@@ -445,13 +445,138 @@ def _device_review(args, _project):
         spec = examples[args["example"]]
     if spec is None:
         raise ValueError("spec (a device spec) or example is required; examples: " + ", ".join(sorted(device_plan.example_specs())))
+    repaired = []
+    plan = device_plan.build_device_plan(spec)
+    if plan["counts"]["errors"]:
+        # the planner's own suggestions are candidate repairs: apply the first of each, re-plan, and hand the result back
+        from .device_suggestions import apply_first_suggestions
+        candidate = spec
+        for _ in range(6):
+            errors = [f"{f['rule']}: {f.get('message', '')}" for f in plan["findings"] if f["severity"] == "error"]
+            if not errors:
+                break
+            repaired.append(errors)
+            candidate, changed = apply_first_suggestions(candidate, plan)
+            if not changed:
+                break
+            plan = device_plan.build_device_plan(candidate)
+        if plan["counts"]["errors"]:
+            raise ValueError("the device plan has errors the planner's suggestions do not fix: "
+                             + "; ".join(f"{f['rule']}: {f.get('message', '')}" for f in plan["findings"] if f["severity"] == "error"))
+        spec = candidate
     res = device_engineering.build_engineering_review(spec)
     over = [c for d in res["domains"] for c in d["checks"] if c["status"] == device_engineering.EXCEEDS]
+    if repaired:
+        res = {**res, "suggested_spec": spec, "repaired_errors": repaired[0]}
     counts = res["counts"]
     return _envelope(True, ", ".join(f"{v} {k}" for k, v in counts.items()), res,
-                     problems=[f"{c['title']}: {c['summary']}" for c in over],
+                     problems=[f"{c['title']}: {c['summary']}" for c in over]
+                     + ([f"the given spec had {len(repaired[0])} plan errors; this review is of suggested_spec, the planner's "
+                         "first suggestions applied: re-run with it as spec to accept it"] if repaired else []),
                      sources=[i.get("url") or i.get("source") or "" for i in res["sourced_inputs"] if i.get("url") or i.get("source")],
                      boundary=device_engineering.AUTHORITY)
+
+
+def _route_economics(args, _project):
+    """Per-unit expected value of each route for one candidate asset (salvage and resell, refurbish, part out...)."""
+    from . import commercial_value_routing as cvr
+    res = cvr.evaluate_commercial_case(dict(args["case"]))
+    routes = res.get("routes") or []
+    problems = [f"{r.get('route_id')}: {e}" for r in routes for e in (r.get("errors") or [])]
+    best = res.get("best_screening_route")
+    priced = {r.get("route_id"): r.get("net_value") for r in routes}
+    return _envelope(True, f"best screening route {best}; net value per unit {priced}", res, problems=problems,
+                     boundary="Screening only: unconfirmed prices and success probabilities stay HYPOTHESIS; no purchase, "
+                              "build or sale is authorized, and currencies are never converted.")
+
+
+def _what_can_i_build(args, _project):
+    """Salvage first, at bench scale: which devices the parts already on hand make, and the one part that unlocks most."""
+    from . import device_lab
+    have = [str(h) for h in (args.get("have") or [])]
+    if not have:
+        raise ValueError("have is required: device-planner module ids such as esp32-devkitc-v4, adafruit-bh1750-stemma-qt")
+    res = device_lab.what_can_i_build(have)
+    return _envelope(True, f"{len(res['ready'])} ready to build, {len(res['one_part_away'])} one part away", res,
+                     boundary="Plans with no errors or warnings in software; a salvaged module works only once tested.")
+
+
+def _device_lab(args, project):
+    """Pack a device spec into a lab folder on the project: plan, engineering review, case files, firmware, status ladder."""
+    from . import device_lab, device_plan
+    spec = args.get("spec")
+    if spec is None and args.get("example"):
+        spec = device_plan.example_specs()[str(args["example"])]
+    if spec is None:
+        raise ValueError("spec (a device spec, e.g. hs_device_review's suggested_spec) or example is required")
+    name = re.sub(r"[^a-z0-9_-]+", "-", str(args.get("name") or "device").lower())
+    out = _project_path(project, f"lab/{name}")
+    res = device_lab.build_lab(spec, out, host_test=bool(args.get("host_test")))
+    files = sorted(str(p.relative_to(project.root)) for p in out.rglob("*") if p.is_file())
+    return _envelope(True, f"lab pack with {len(files)} files; status {res.get('status')}", {**res, "files_in_project": files},
+                     boundary=res.get("claim_boundary"))
+
+
+def _check_board_parts(args, project):
+    """Every LCSC-coded part on a KiCad board against LCSC's own listing: package and value mismatches, missing codes."""
+    from . import distributor_check
+    from .state_paths import scratch_dir
+    path = _readable(str(args["board"]), project)
+    if path.suffix not in (".net", ".kicad_sch"):
+        raise ValueError("board must be a KiCad netlist (.net) or schematic (.kicad_sch)")
+    cache = scratch_dir() / "lcsc-records.json"
+    cache.parent.mkdir(parents=True, exist_ok=True)
+    res = distributor_check.check_netlist(path, distributor_check.lcsc_fetcher(cache, offline=bool(args.get("offline"))))
+    problems = [f"{f['rule']}: {', '.join(f['components'])}: {f['message']}" for f in res["findings"] if f["severity"] == "error"]
+    return _envelope(True, f"{res['parts_with_codes']} parts with LCSC codes checked, {len(problems)} errors", res, problems=problems,
+                     sources=["https://www.lcsc.com"], boundary=res.get("claim_boundary"))
+
+
+def _import_eagle_module(args, project):
+    """Draft a device-planner module from a maker's Eagle board, pinned to the commit it was read from."""
+    from . import eagle_board_import
+    path = _readable(str(args["brd"]), project)
+    draft = eagle_board_import.draft_entry(path.read_bytes(), module_id=str(args["module_id"]), url=str(args["url"]),
+                                           name=str(args.get("name") or ""), kind=str(args.get("kind") or "i2c_breakout"),
+                                           mirror=bool(args.get("mirror")))
+    gaps = (draft.get("draft") or {}).get("gaps") or []
+    return _envelope(True, f"draft {args['module_id']}: geometry from the board file, {len(gaps)} gaps", draft,
+                     problems=[f"fill from a cited page: {g['field']}: {g['reason']}" for g in gaps],
+                     sources=[str(args["url"])], boundary="Geometry only, from the maker's file; electrical facts must be cited "
+                                                           "before the entry joins the module library.")
+
+
+def _record_outcome(args, project):
+    """A measured sale or job on the project's append-only outcome ledger, beside hs_route_economics' estimates."""
+    from . import commercial_outcomes as co
+    if project is None:
+        raise ValueError("project_id is required: the outcome ledger is kept on the project")
+    path = _project_path(project, "commercial") / "outcomes.json"
+    ledger = json.loads(path.read_text()) if path.is_file() else {"schema_version": co.SCHEMA, "transactions": []}
+    res = co.append_outcome(ledger, dict(args["transaction"]))
+    if res.get("status") == "RECORDED":
+        path.write_text(json.dumps(res["ledger"], indent=1, ensure_ascii=False))
+    return _envelope(res.get("status") == "RECORDED", f"{res.get('status')}: {len((res.get('ledger') or ledger)['transactions'])} "
+                     "transactions on the ledger", res, problems=list(res.get("errors") or []),
+                     boundary="Only receipts and settled payments count as measured; estimates are never upgraded.")
+
+
+def _salvage_resources(args, project):
+    """Donors on the linked design project and the bench tools at hand, side by side by stable id."""
+    from .project_store import ProjectStore
+    from .salvage_resource_graph import build_salvage_resource_graph, resource_index
+    design_id = args.get("design_project_id") or (project.objective().get("design_project_id") if project else None)
+    if not design_id:
+        raise ValueError("link a design first (hs_project_link_design) or give design_project_id")
+    graph = build_salvage_resource_graph(project_store=ProjectStore(), project_id=str(design_id),
+                                         donor_references=list(args.get("donors") or []),
+                                         fabrication_resources=list(args.get("lab_tools") or []))
+    index = resource_index(graph)
+    unready = [k for k, v in index.items() if k.startswith("donor:") and not v.get("verified_for_ready")]
+    return _envelope(True, f"{len(index)} resources; {len(unready)} donors not yet verified", graph,
+                     problems=[f"{k}: not verified for ready (contract {index[k].get('contract_state')})" for k in unready],
+                     boundary="A donor is usable only once its contract is evidenced on the design project; lab tools are "
+                              "caller-described and never confirmed.")
 
 
 def _identify_part(args, _project):
@@ -751,6 +876,42 @@ TOOLS: dict[str, ToolSpec] = {t.name: t for t in [
              "case): I2C bus, supply and power-bank runtime, thermal, antenna, mechanical fit and printing, every figure "
              "sourced or a listed assumption. Give spec, or example for a built-in device.",
              _obj({"spec": {"type": "object"}, "example": {"type": "string"}}), _device_review),
+    ToolSpec("hs_route_economics", "Expected value per unit of each commercial route for one candidate asset (repair and "
+             "sell, part out, refurbish...): success probability, failure proceeds and every expense class, break-even and "
+             "bid ceiling at a target margin. A missing expense stays missing, never zero.",
+             _obj({"case": {"type": "object", "description": "{candidate_id, currency, market, routes: [{route_id, action, "
+                            "currency, success_probability, probability_evidence, sale_proceeds, failure_proceeds, expenses: "
+                            "{acquisition, material_and_fab, engineering, labor, quality, freight_and_tax, sales_and_payment, "
+                            "warranty_and_returns}}]}; money is {amount, evidence_class}"}}, ["case"]), _route_economics),
+    ToolSpec("hs_what_can_i_build", "From the modules already on the bench (salvaged or owned): every controller, display and "
+             "sensor combination that plans cleanly, the ones one part away, and the single part that unlocks the most.",
+             _obj({"have": {"type": "array", "items": {"type": "string"}, "description": "device-planner module ids"}}, ["have"]),
+             _what_can_i_build, category="research"),
+    ToolSpec("hs_device_lab", "Pack a device spec into a lab folder on the project a person can build from: plan, engineering "
+             "review, printable case, firmware (optionally host-tested) and a status ladder HS ticks only as far as software goes.",
+             _obj({"spec": {"type": "object"}, "example": {"type": "string"}, "name": {"type": "string"},
+                   "host_test": {"type": "boolean"}}, ["project_id"]), _device_lab,
+             check_key=lambda a: f"lab:{a.get('name') or 'device'}", category="artifact"),
+    ToolSpec("hs_check_board_parts", "Check every LCSC-coded part on a KiCad schematic or netlist (e.g. from hs_component_board) "
+             "against LCSC's listing: package and value mismatches, codes not found, out of stock.",
+             _obj({"board": {"type": "string"}, "offline": {"type": "boolean"}}, ["board"]), _check_board_parts,
+             check_key=lambda a: f"board_parts:{a.get('board')}"),
+    ToolSpec("hs_import_eagle_module", "Draft a device-planner module (outline, header pads, nets, mounting holes) from a maker's "
+             "Eagle .brd file pinned to a GitHub commit URL; electrical facts are listed as gaps to fill from a cited page.",
+             _obj({"brd": {"type": "string"}, "url": {"type": "string", "description": "https://github.com/<o>/<r>/blob/<commit>/..."},
+                   "module_id": {"type": "string"}, "name": {"type": "string"}, "kind": {"type": "string"},
+                   "mirror": {"type": "boolean"}}, ["brd", "url", "module_id"]), _import_eagle_module, category="research"),
+    ToolSpec("hs_record_outcome", "Record a measured sale or job (acceptance, settled payment, receipted revenue and costs) on "
+             "the project's append-only outcome ledger, separate from hs_route_economics' estimates.",
+             _obj({"transaction": {"type": "object", "description": "{transaction_id, candidate_id, route_id, currency, "
+                                   "acceptance_status, acceptance_reference, payment_status, payment_reference, revenue, costs}"}},
+                  ["project_id", "transaction"]), _record_outcome, check_key=lambda a: "commercial_outcome", category="artifact"),
+    ToolSpec("hs_salvage_resources", "Donors on the linked design project and the bench tools at hand (printer, meter...) as one "
+             "graph by stable id: each donor's contract state, what it can do, and whether it is verified for a build.",
+             _obj({"donors": {"type": "array", "items": {"type": "object"}, "description": "[{donor_id, label}]"},
+                   "lab_tools": {"type": "array", "items": {"type": "object"}, "description": "[{operator_id, kind, display_name, "
+                                 "capabilities, limits, available, simulated_only}]"},
+                   "design_project_id": {"type": "string"}}, ["project_id"]), _salvage_resources, category="research"),
     ToolSpec("hs_identify_part", "Look a chip or module marking up in KiCad's ~20,000 library symbols (offline): exact, "
              "variant and family matches with datasheet links and default footprints. For salvaged boards.",
              _obj({"marking": {"type": "string"}, "limit": {"type": "integer"}}, ["marking"]), _identify_part, category="research"),

@@ -260,3 +260,96 @@ def test_an_objective_links_to_a_stored_design_and_reports_its_release_state(tmp
         assert any(o["check"] == "design:robot-arm" for o in status["open"])
     # the link reports only: the stored design is unchanged
     assert ProjectStore().load("robot-arm")["revision"] == 1
+
+
+def test_device_review_repairs_a_broken_spec_with_the_planners_suggestions():
+    import copy
+    from hardware_splicer.device_plan import build_device_plan, example_specs
+    spec = copy.deepcopy(example_specs()["esp32_oled_bme280_usb"])
+    spec["connections"] = [c for c in spec["connections"] if c["from"] != "display.GND"]  # a broken ground wire
+    assert build_device_plan(spec)["counts"]["errors"]
+    env = tb.call("hs_device_review", {"spec": spec})
+    assert not env["ok"] and "suggested_spec" in env["problems"][-1]
+    fixed = env["result"]["suggested_spec"]
+    assert any(c["from"] == "display.GND" for c in fixed["connections"])
+    again = tb.call("hs_device_review", {"spec": fixed})
+    assert "suggested_spec" not in again["result"]  # the repaired spec plans cleanly and is reviewed as given
+
+
+def test_route_economics_prices_routes_and_keeps_missing_costs_missing():
+    money = lambda a, c="ESTIMATED": {"amount": a, "evidence_class": c}  # noqa: E731
+    route = {"route_id": "repair-and-sell", "action": "refurbish", "currency": "TWD", "success_probability": 0.8,
+             "probability_evidence": "HYPOTHESIS", "sale_proceeds": money(600, "HYPOTHESIS"), "failure_proceeds": money(20),
+             "expenses": {k: money(v) for k, v in {"acquisition": 100, "material_and_fab": 100, "engineering": 50, "labor": 20,
+                                                   "quality": 10, "freight_and_tax": 10, "sales_and_payment": 10,
+                                                   "warranty_and_returns": 10}.items()}}
+    case = {"schema_version": "hardware_splicer.commercial_value_case.v1", "candidate_id": "TW-USED-001", "currency": "TWD",
+            "market": "Taiwan", "routes": [route]}
+    env = tb.call("hs_route_economics", {"case": case})
+    assert env["ok"] and env["result"]["routes"][0]["net_value"] == 174.0
+    del route["expenses"]["quality"]
+    gap = tb.call("hs_route_economics", {"case": case})
+    assert not gap["ok"] and any("expenses.quality" in p for p in gap["problems"])
+
+
+def test_bench_parts_lead_to_a_lab_pack_on_the_project():
+    have = tb.call("hs_what_can_i_build", {"have": ["esp32-devkitc-v4", "adafruit-bh1750-stemma-qt"]})
+    assert have["ok"] and have["result"]["ready"]
+    pid = tb.call("hs_project_open", {"objective": "light logger from parts on hand"})["result"]["project_id"]
+    lab = tb.call("hs_device_lab", {"project_id": pid, "example": "esp32_oled_usb", "name": "logger"})
+    assert lab["ok"] and any(f.endswith("LAB.md") for f in lab["result"]["files_in_project"])
+    assert lab["result"]["power_on_authorized"] is False
+    st = ObjectiveProject.load(pid).status()
+    assert any(d["artifact"].startswith("lab:") for d in st["deliverables"])
+
+
+def test_eagle_board_draft_lists_what_must_still_be_cited(tmp_path):
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("eagle_fixture", Path(__file__).with_name("test_eagle_board_import.py"))
+    fixture = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(fixture)
+    pid = tb.call("hs_project_open", {"objective": "reuse a breakout"})["result"]["project_id"]
+    brd = ObjectiveProject.load(pid).artifacts_dir / "board.brd"
+    brd.write_bytes(fixture.BOARD)
+    env = tb.call("hs_import_eagle_module", {"project_id": pid, "brd": "artifacts/board.brd", "url": fixture.URL, "module_id": "test-breakout"})
+    assert env["result"]["draft"]["status"] == "GEOMETRY_ONLY_DRAFT"
+    assert env["problems"] and all(p.startswith("fill from a cited page") for p in env["problems"])
+
+
+def test_board_parts_are_checked_against_the_distributor_listing(monkeypatch):
+    import shutil as _sh
+    from hardware_splicer import distributor_check
+    if not _sh.which("kicad-cli"):
+        pytest.skip("needs kicad-cli to export the netlist")
+    monkeypatch.setattr(distributor_check, "lcsc_fetcher", lambda *a, **k: (
+        lambda code: {"code": code, "found": True, "package": "QFN-56", "name": "QFN-56 part", "model": "X", "stock": 5}))
+    env = tb.call("hs_check_board_parts", {"board": "projects/hs-bus-a/kicad/hs_bus_a.kicad_sch"})
+    assert env["result"]["parts_with_codes"] > 0
+    assert any("package_mismatch" in p for p in env["problems"])  # every 0603 part is not a QFN-56
+
+
+def test_measured_outcomes_append_to_the_project_ledger_once():
+    money = lambda a: {"amount": a, "evidence_class": "MEASURED", "reference": "receipt-1"}  # noqa: E731
+    tx = {"transaction_id": "sale-001", "candidate_id": "refurb-laptop", "route_id": "refurbish", "currency": "TWD",
+          "acceptance_status": "ACCEPTED", "acceptance_reference": "signed-1", "payment_status": "SETTLED",
+          "payment_reference": "bank-1", "revenue": money(10000),
+          "costs": {k: money(100) for k in ("acquisition", "materials", "engineering", "labor", "quality", "logistics_and_tax",
+                                            "fees", "warranty_cash_spent")}}
+    pid = tb.call("hs_project_open", {"objective": "refurbish and sell"})["result"]["project_id"]
+    assert tb.call("hs_record_outcome", {"project_id": pid, "transaction": tx})["ok"]
+    again = tb.call("hs_record_outcome", {"project_id": pid, "transaction": tx})
+    assert not again["ok"] and "duplicate_transaction_id" in again["problems"]
+
+
+def test_salvage_resources_need_a_linked_design_and_never_mark_unevidenced_donors_ready(tmp_path, monkeypatch):
+    from hardware_splicer.project_store import ProjectStore
+    monkeypatch.setenv("HARDWARE_SPLICER_PROJECT_ROOT", str(tmp_path / "designs"))
+    pid = tb.call("hs_project_open", {"objective": "radio buttons"})["result"]["project_id"]
+    assert "hs_project_link_design" in tb.call("hs_salvage_resources", {"project_id": pid})["problems"][0]
+    ProjectStore().save("monitor", {"machineProject": {"project_id": "monitor", "name": "Monitor", "purpose": "watch"}})
+    tb.call("hs_project_link_design", {"project_id": pid, "design_project_id": "monitor"})
+    env = tb.call("hs_salvage_resources", {"project_id": pid, "donors": [{"donor_id": "donor:radio:buttons", "label": "Buttons"}],
+                                           "lab_tools": [{"operator_id": "printer-1", "kind": "printer", "display_name": "FDM",
+                                                          "capabilities": ["fdm.print"], "limits": {}, "available": True,
+                                                          "simulated_only": False}]})
+    assert any("donor:radio:buttons" in p for p in env["problems"])
