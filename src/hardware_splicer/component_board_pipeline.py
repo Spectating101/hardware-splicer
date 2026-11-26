@@ -111,7 +111,7 @@ def schematic_stage(design: kb.Design, out: Path, symbol_uuids: dict[str, str] |
 
 
 def pcb_stage(design: kb.Design, readback: dict, out: Path, board: dict[str, Any], *, route_timeout_s: int = 600,
-              route_attempts: int = 3) -> dict[str, Any]:
+              route_attempts: int = 6) -> dict[str, Any]:
     rules = {**DEFAULT_RULES, **(board.get("rules") or {})}
     outline = board["outline_mm"]
     free = [p.ref for p in design.parts if p.pcb_xy is None]
@@ -134,7 +134,9 @@ def pcb_stage(design: kb.Design, readback: dict, out: Path, board: dict[str, Any
     routed_path = out / "routed.kicad_pcb"
     pcb = out / f"{design.name}.kicad_pcb"
     attempts = []
-    for _ in range(max(1, route_attempts)):  # FreeRouting differs between runs: keep the first clean result
+    # FreeRouting differs between runs: on HS-BUS-A 5 of 14 attempts came back DRC-clean (2026-11-27), so keep the first
+    # clean result of up to six
+    for _ in range(max(1, route_attempts)):
         routed = route_pcb(placed.read_text(), timeout_s=route_timeout_s, max_passes=20,
                            project_text=placed.with_suffix(".kicad_pro").read_text())
         routed_path.write_text(routed.text)

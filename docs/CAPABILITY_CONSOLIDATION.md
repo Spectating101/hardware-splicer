@@ -93,7 +93,7 @@ next as a project file, so work on an objective builds on itself instead of star
 | Parts on hand to a buildable device | `hs_what_can_i_build` → `hs_device_review` (applies the planner's own repair suggestions to a broken spec and returns `suggested_spec`) → `hs_device_lab` (plan, review, case, firmware, status ladder on the project) | `device_lab`, `device_suggestions`, `device_engineering` |
 | Arm | `hs_size_arm_actuators` → `hs_arm_kinematics` (same cited servos and stall share; URDF on the project; PyBullet FK/IK/workspace; closes the workspace finding only when the sampled reach covers the requirement) → `hs_motion_sweep` | `arm_actuator_sizing`, `robot_arm_design`, `robot_arm_kinematics`, `motion_sweep` |
 | Printed part | `hs_rover_chassis` (or any STEP/STL) → `hs_fem_screen` (full field saved on the project, summary to the agent; optional mesh study) | `mechanical_cad_fem`, `mechanical_cad_convergence` |
-| Board | `hs_plan_circuit` (agent names the planner: HS makes no model call) → `hs_component_board` (unplaced parts placed by HS, re-routed up to 3 times until DRC is clean) → `hs_check_board_parts` (LCSC listing vs footprint and value) → `hs_price_parts` / `hs_bom_check` | `circuit_synthesis`, `component_board_pipeline`, `_pcbnew_helpers.place_free_footprints`, `distributor_check` |
+| Board | `hs_plan_circuit` (agent names the planner: HS makes no model call) → `hs_component_board` (unplaced parts placed by HS, re-routed up to 6 times until DRC is clean) → `hs_check_board_parts` (LCSC listing vs footprint and value) → `hs_price_parts` / `hs_bom_check` | `circuit_synthesis`, `component_board_pipeline`, `_pcbnew_helpers.place_free_footprints`, `distributor_check` |
 | Salvaged modules | `hs_identify_part`, `hs_import_eagle_module` (geometry from the maker's board, electrical gaps listed) | `part_lookup`, `eagle_board_import` |
 | Design spine | `hs_project_link_design` → `hs_project_status` shows the stored machine project's release blockers beside the objective's checks; `hs_salvage_resources` lists the design's donors and the bench tools | `machine_project`, `project_store`, `salvage_resource_graph` |
 | Money | `hs_route_economics` (estimates per route) → `hs_record_outcome` (receipted sales on an append-only ledger) | `commercial_value_routing`, `commercial_outcomes` |
@@ -115,5 +115,6 @@ and PyBullet; not scikit-fem). Board layout needs `HARDWARE_SPLICER_FREEROUTING_
    a 40 mm mesh. Screen a bracket or boss cut from a part, or add a sparse solver.
 3. **FEM stays open.** Linear tetrahedra are not conservative in bending, so every `hs_fem_screen` result keeps an open
    blocker; installing scikit-fem in the native venv would let `mechanical_quadratic_fem` (second order) be wired next.
-4. **Routing varies.** FreeRouting failed DRC on HS-BUS-A's own placement once in three runs; the board tool now
-   retries, and reports each attempt's error count.
+4. **Routing varies.** On HS-BUS-A only 5 of 14 FreeRouting attempts came back DRC-clean (leftover stubs, clearance to
+   stitching vias), including on the board's own hand placement. The board tool now retries up to six times and reports
+   each attempt's error count; a router that closes its own leftovers is the real fix.
