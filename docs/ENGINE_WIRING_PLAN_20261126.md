@@ -1,5 +1,9 @@
 # Engine wiring plan: connect what HS already has before building anything new (2026-11-26)
 
+**Superseded the same day by `docs/CAPABILITY_CONSOLIDATION.md`.** The counts below came from a map that matched modules
+by bare file name; resolved by full import path, 453 modules are shipped and none is reached by nothing. Device review,
+part lookup, battery runtime and propeller data are now toolbelt tools; §5 of the consolidation page lists what is next.
+
 Read `docs/CAPABILITY_MAP.md` (generated) first. On 2026-11-26 the engine toolbelt reached 21 of HS's 607 modules
 (transitively); the REST product API reached 321; 262 engineering modules (65,000 lines) were reached by no entry point.
 The benchmark's "missing features" were largely features HS had but the engine did not call.

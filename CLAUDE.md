@@ -30,11 +30,19 @@ before editing engine or API code:
 
 ## Know what HS already has
 
-Before calling any capability missing or writing a new tool, read `docs/CAPABILITY_MAP.md` (generated from the code by
-`python -m hardware_splicer.capability_map`; regenerate it after adding modules) and search with
-`hs_prior_art_search` (source `hs_own` reads every module's description). HS has 600+ modules; on 2026-11-26 an agent
+HS has 600+ modules; do not read them, the area pages or the 130 docs to find something. Search first:
+
+```bash
+PYTHONPATH=src python -m hardware_splicer.capability_map find <words>   # matches with status, reach and tests
+PYTHONPATH=src python -m hardware_splicer.capability_map show <module>  # importers, imports, tests of one module
+```
+
+(the `hs_capability_search` tool does the same over MCP/REST). Then read `docs/CAPABILITY_MAP.md` (generated, ~120
+lines) and `docs/CAPABILITY_CONSOLIDATION.md` (which module is canonical for each job). New agent tools go in
+`engineering_toolbelt` as thin adapters over existing modules. After adding or deleting a module, regenerate with
+`python -m hardware_splicer.capability_map`; `tests/test_capability_map.py` fails until you do. On 2026-11-26 an agent
 rebuilt pieces of `machine_project`, `sdk` and `device_lab` and called FEM, thermal review and arm kinematics missing
-because it never looked. `docs/ENGINE_WIRING_PLAN_20261126.md` lists what to connect before building anything new.
+because it never looked.
 
 ## Salvage first: HS turns junk into working hardware
 
