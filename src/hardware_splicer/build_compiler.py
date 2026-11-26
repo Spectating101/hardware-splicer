@@ -163,9 +163,10 @@ def compile_from_netlist(
     quality = artifact["quality"]
     pcb_path = graph_stage.paths.kicad_pcb
     if pcb_path and Path(pcb_path).is_file():
-        # KiCad's --schematic-parity cannot judge generated boards; compare the connectivity itself (reported, not gating)
+        # KiCad's --schematic-parity cannot judge generated boards; compare the connectivity itself. Reported, not gating
+        # yet: netlists imported from KiCad name pins by number, which the module tables cannot map (2026-11-27).
         from .pcb.netlist_pcb_parity import netlist_pcb_parity
-        parity = netlist_pcb_parity(circuit, Path(pcb_path).read_text(encoding="utf-8"))
+        parity = netlist_pcb_parity(circuit, Path(pcb_path).read_text(encoding="utf-8"), pad_names="pin_id")
         quality["netlist_pcb_parity"] = json.loads(json.dumps(parity))
     fab_zip = _write_fab_package(build_dir, quality, artifact["bom_paths"], artifact["gerber_dir"])
     if fab_zip:
@@ -173,7 +174,15 @@ def compile_from_netlist(
     quality_path = Path(quality.get("design_quality_file") or build_dir / "DESIGN_QUALITY.json")
     quality_path.write_text(json.dumps(quality, indent=2), encoding="utf-8")
 
+    parity = quality.get("netlist_pcb_parity")
+    parity_error = None
+    if parity is not None and not parity.get("pass"):
+        dropped = sorted({pin for sig in parity.get("missing_on_pcb", []) for fp, pin in sig if str(pin).startswith("missing:")})
+        parity_error = ("netlist-to-PCB parity failed: the board does not carry every netlist connection"
+                        + (f" (no pad for {', '.join(dropped)})" if dropped else ""))
     ok = graph_stage.ok
+    if parity_error:
+        quality.setdefault("warnings", []).append(parity_error)
     result = BuildCompileResult(
         ok=ok,
         build_id=build_id,

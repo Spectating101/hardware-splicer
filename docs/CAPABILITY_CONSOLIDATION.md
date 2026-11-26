@@ -108,9 +108,11 @@ and PyBullet; not scikit-fem). Board layout needs `HARDWARE_SPLICER_FREEROUTING_
 
 ## 6. Open issues found by connecting things
 
-1. **Netlist-compile pads.** `compile_from_netlist` now reports `netlist_pcb_parity`, and it fails on a two-part board:
-   the generated PCB names pads by pin id (`GND`) while the module pad tables put ground on pad `2`. One side is wrong;
-   check against the real footprints before fabricating from the catalogue netlist path.
+1. **Netlist-to-PCB parity (corrected 2026-11-27).** The first "pad mismatch" was the checker's: a board compiled from a
+   netlist names pads by pin id on purpose (`build_to_geometry`), and the check now follows that. Across the 17 example
+   netlists, 15 match exactly; two drop a connection and still compile "ok": `usb_esp_audio_amp` (the MAX98357A module
+   has no `GAIN` pad) and `usb_esp_ch340` (the CH340 module has no `USB` pin). Parity is a warning, not a blocker,
+   because netlists imported from KiCad name pins by number (`esp32_servo_netlist`) and the check cannot map those yet.
 2. **FEM size.** The bounded solver takes up to 5,000 elements and 2,000 nodes; the rover chassis is too large even at
    a 40 mm mesh. Screen a bracket or boss cut from a part, or add a sparse solver.
 3. **FEM stays open.** Linear tetrahedra are not conservative in bending, so every `hs_fem_screen` result keeps an open

@@ -155,6 +155,17 @@ def test_netlist_compile_reports_netlist_to_pcb_connectivity_parity(tmp_path):
     assert set(parity) >= {"pass", "missing_on_pcb", "extra_on_pcb"}
     stored = _json.loads(open(result.design_quality_file, encoding="utf-8").read())
     assert stored["netlist_pcb_parity"] == parity
-    # Known open issue (2026-11-27): the netlist-compile PCB names pads by pin id ("GND") while the module pad tables
-    # number them ("2"), so parity reports this board as mismatched. It is reported, not hidden; fix one side, then
-    # assert parity["pass"] here.
+    assert parity["pass"], parity  # a netlist-compiled board names pads by pin id; parity follows that convention
+
+
+def test_a_netlist_pin_with_no_pad_is_reported(tmp_path):
+    """usb_esp_audio_amp wires the MAX98357A GAIN pin, which its module has no pad for: the board drops that connection.
+    Reported as a warning; it blocks nothing until imported KiCad netlists (numbered pins) can be mapped too."""
+    import json as _json
+    from pathlib import Path as _Path
+    from hardware_splicer.build_compiler import compile_from_netlist
+    fixture = _Path(__file__).resolve().parents[1] / "examples" / "netlist_fixtures" / "json" / "usb_esp_audio_amp.json"
+    data = _json.loads(fixture.read_text(encoding="utf-8"))
+    result = compile_from_netlist(data.get("netlist", data), tmp_path, export_gerber=False)
+    assert result.design_quality["netlist_pcb_parity"]["pass"] is False
+    assert any("missing:GAIN" in w for w in result.design_quality["warnings"])
