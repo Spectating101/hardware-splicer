@@ -32,7 +32,20 @@ ASSUMED = {"crr": 0.03, "accel_m_s2": 0.3}  # small rubber wheels on floor or pa
 
 
 def families(path: Path | None = None) -> dict[str, Any]:
-    return json.loads((path or sorted(DATA.glob("pololu_gearmotors_*.json"))[-1]).read_text())
+    """Every cited gearmotor family: the newest file of each maker set (Pololu, hobby TT motors), merged."""
+    if path:
+        return json.loads(path.read_text())
+    newest: dict[str, Path] = {}
+    for f in sorted(DATA.glob("*_gearmotors_*.json")):
+        newest[f.name.rsplit("_", 1)[0]] = f
+    merged: dict[str, Any] = {"families": [], "sources": []}
+    for f in newest.values():
+        d = json.loads(f.read_text())
+        merged["families"] += d["families"]
+        merged["sources"].append(f.name)
+        if d.get("current_rule"):
+            merged["current_rule"] = d["current_rule"]
+    return merged
 
 
 def size(mass_kg: float, wheel_mm: float, driven: int, speed_m_s: float, slope_deg: float,
@@ -49,26 +62,29 @@ def size(mass_kg: float, wheel_mm: float, driven: int, speed_m_s: float, slope_d
         limits = fam["limits"]
         cont = limits.get("continuous_torque_kg_cm")
         peak = limits.get("intermittent_torque_kg_cm") or limits.get("instantaneous_torque_kg_cm")
-        i0, i_s = fam["no_load_current_a"], fam["stall_current_a"]
+        i0, i_s = fam["no_load_current_a"], fam.get("stall_current_a")
         for row in fam["ratios"]:
             ts = row["stall_torque_kg_cm"] * KGCM_TO_NM
             rpm_flat = row["no_load_rpm"] * max(0.0, 1 - flat_t / ts)
-            i_flat = i0 + (i_s - i0) * min(1.0, flat_t / ts)
-            i_slope = i0 + (i_s - i0) * min(1.0, slope_t / ts)
+            # no published stall current (hobby TT motors): the current is unknown, not small
+            i_flat = i0 + (i_s - i0) * min(1.0, flat_t / ts) if i_s else None
+            i_slope = i0 + (i_s - i0) * min(1.0, slope_t / ts) if i_s else None
             checks = {
                 "reaches_speed": rpm_flat >= need_rpm,
-                "flat_torque_within_continuous_limit": cont is None or flat_t <= cont * KGCM_TO_NM,
-                "flat_current_within_25pct_stall": i_flat <= 0.25 * i_s,
-                "slope_torque_within_peak_limit": peak is None or slope_t <= peak * KGCM_TO_NM,
+                # a limit the maker or seller does not publish is unknown, not met
+                "flat_torque_within_continuous_limit": (flat_t <= cont * KGCM_TO_NM) if cont is not None else None,
+                "flat_current_within_25pct_stall": (i_flat <= 0.25 * i_s) if i_s else None,
+                "slope_torque_within_peak_limit": (slope_t <= peak * KGCM_TO_NM) if peak is not None else None,
                 "slope_torque_below_stall": slope_t < ts,
             }
-            if fam["id"].startswith("pololu-micro") and cont is None:
-                checks["flat_torque_within_continuous_limit"] = None  # the page gives only an instantaneous limit
             options.append({"family": fam["id"], "ratio": row["ratio"], "url": fam["url"], "passes": all(v is not False for v in checks.values()),
                             "checks": checks, "rpm_at_cruise": round(rpm_flat), "speed_at_cruise_m_s": round(rpm_flat / 60 * math.pi * wheel_mm / 1000, 3),
-                            "current_a": {"cruise_per_motor": round(i_flat, 3), "slope_per_motor": round(i_slope, 3), "stall": i_s},
+                            "current_a": {"cruise_per_motor": round(i_flat, 3) if i_flat is not None else None,
+                                          "slope_per_motor": round(i_slope, 3) if i_slope is not None else None, "stall": i_s},
                             "slope_torque_share_of_stall": round(slope_t / ts, 3)})
-    passing = sorted((o for o in options if o["passes"]), key=lambda o: (o["current_a"]["cruise_per_motor"], -o["speed_at_cruise_m_s"]))
+    passing = sorted((o for o in options if o["passes"]),
+                     key=lambda o: (o["current_a"]["cruise_per_motor"] is None, o["current_a"]["cruise_per_motor"] or 0.0,
+                                    -o["speed_at_cruise_m_s"]))
     return {
         "schema_version": SCHEMA,
         "required": {"wheel_rpm": round(need_rpm, 1), "torque_per_motor_nm": {"cruise": round(flat_t, 4), "slope": round(slope_t, 4)}},

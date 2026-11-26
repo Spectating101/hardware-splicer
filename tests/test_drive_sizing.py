@@ -30,3 +30,16 @@ def test_every_passing_option_meets_the_maker_limits() -> None:
 def test_a_steep_heavy_case_rules_out_the_micro_motors() -> None:
     r = size(6.0, 100, 2, 0.5, 20)
     assert not any(o["family"].startswith("pololu-micro") for o in r["passing"])
+
+
+def test_hobby_tt_motor_is_sized_with_unknowns_left_unknown():
+    """OpenBot's TT gearmotor (Adafruit 3777) can now be picked; its unpublished stall current and limits stay unknown."""
+    from hardware_splicer import drive_sizing as ds
+    res = ds.size(0.9, 65, 4, 0.3, 10)
+    tt = [o for o in res["passing"] if o["family"].startswith("adafruit-tt")]
+    assert tt, "a 0.9 kg four-wheel rover at 0.3 m/s is within a TT motor's cited stall torque and speed"
+    checks = tt[0]["checks"]
+    assert checks["reaches_speed"] is True and checks["slope_torque_below_stall"] is True
+    assert checks["flat_current_within_25pct_stall"] is None and checks["flat_torque_within_continuous_limit"] is None
+    assert tt[0]["current_a"]["cruise_per_motor"] is None
+    assert res["passing"][-1]["current_a"]["cruise_per_motor"] is None  # unknown current sorts after every known one
