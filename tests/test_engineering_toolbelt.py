@@ -141,3 +141,41 @@ def test_prior_art_finds_capabilities_hs_already_has_in_its_own_source():
     assert "mechanical_cad_fem" in {h.get("module") for h in env["result"]["hs_own"]}
     env = tb.call("hs_prior_art_search", {"query": "thermal device review", "sources": ["hs_own"], "limit": 30})
     assert "device_engineering" in {h.get("module") for h in env["result"]["hs_own"]}
+
+
+def test_capability_search_reports_status_and_wiring_of_hs_own_modules():
+    env = tb.call("hs_capability_search", {"query": "fem screening"})
+    hits = {h["module"]: h for h in env["result"]["matches"]}
+    assert env["ok"] and "mechanical_cad_fem" in hits and hits["mechanical_cad_fem"]["status"] == "product"
+    one = tb.call("hs_capability_search", {"module": "battery_runtime"})["result"]
+    assert one["tool"] and "engineering_toolbelt" in one["importers"]
+    assert not tb.call("hs_capability_search", {"module": "no_such_module"})["ok"]
+
+
+def test_existing_device_review_and_battery_runtime_are_tools():
+    env = tb.call("hs_device_review", {"example": "esp32_oled_bme280_usb"})
+    assert env["ok"] and env["result"]["physical_correctness"] == "UNPROVEN" and env["claim_boundary"]
+    missing = tb.call("hs_device_review", {})
+    assert not missing["ok"] and "esp32_oled_usb" in missing["problems"][0]  # names the built-in examples
+    run = tb.call("hs_battery_runtime", {"capacity_mah": 2600, "period_s": 600, "sleep_ua": 10,
+                                         "phases": [{"label": "LoRa transmit", "ma": 120, "seconds": 0.5}]})
+    low, high = run["result"]["runtime_days"]["with_self_discharge"]
+    assert run["ok"] and 0 < low <= high
+
+
+def test_prop_hover_reads_the_given_database_and_refuses_extrapolation(tmp_path, monkeypatch):
+    import zipfile
+    db = tmp_path / "db.zip"
+    with zipfile.ZipFile(db, "w") as z:
+        z.writestr("UIUC-propDB/volume-2/data/test_3x2_static_0001rd.txt",
+                   "RPM CT CP\n" + "\n".join(f"{r} 0.1 0.05" for r in (5000, 10000, 15000, 20000)) + "\n")
+    assert "HARDWARE_SPLICER_UIUC_PROPDB" in tb.call("hs_prop_hover", {"prop": "test_3x2", "thrust_g": 20})["problems"][0]
+    monkeypatch.setenv("HARDWARE_SPLICER_UIUC_PROPDB", str(db))
+    assert tb.call("hs_prop_hover", {"prop": "test_3x2", "thrust_g": 20})["ok"]
+    far = tb.call("hs_prop_hover", {"prop": "test_3x2", "thrust_g": 5000})
+    assert not far["ok"] and "not extrapolated" in far["problems"][0]
+
+
+def test_identify_part_says_why_when_there_is_nothing_to_match():
+    env = tb.call("hs_identify_part", {"marking": "ab"})
+    assert not env["ok"] and env["problems"]

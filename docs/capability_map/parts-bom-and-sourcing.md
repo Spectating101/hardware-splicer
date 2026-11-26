@@ -6,9 +6,9 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | Module | Lines | Tests | Status | Reach | What it says it does |
 |---|---|---|---|---|---|
 | `engineering_assurance` | 724 | 2 | product | MRC | Read-only engineering assurance projections over canonical project state. The assurance layer does not own evidence and cannot promote authority. It projects the existing source graph, project plan, b... |
+| `engineering_toolbelt` | 687 | 2 | product | TMRC | HS's engineering tools for any agent, over MCP or REST, each working on one objective project. Every tool returns the same envelope: {"tool", "ok", "summary", "problems": [...], "result": {...}, "sour... |
 | `part_substitution` | 635 | 3 | product | MRC | Bounded, declaration-based part substitution across an explicit assembly. The evaluator checks supplied facts; it does not identify parts, infer missing ratings, insert adapters, generate wiring, or g... |
 | `capability_runtime` | 611 | 2 | product | MRC | Canonical runtime and project-use capability truth. A catalog entry, an installed executable, a configured adapter, a compatible version, a successful machine run, and use on the current project are d... |
-| `engineering_toolbelt` | 586 | 2 | product | TMRC | HS's engineering tools for any agent, over MCP or REST, each working on one objective project. Every tool returns the same envelope: {"tool", "ok", "summary", "problems": [...], "result": {...}, "sour... |
 | `source_upload_session` | 527 | 2 | product | MRC | Project-scoped resumable upload sessions for bounded engineering sources. |
 | `engineering_source_ingestion` | 511 | 12 | product | MRC | Bounded, content-addressed ingestion for engineering project sources. This module accepts raw bytes through canonical base64 transport, computes the file identity on the server, classifies the source ... |
 | `scratch_pipeline` | 483 | 5 | product | TMRC | Scratch compose pipeline: NL/parts → module merge → auto-wire → prove (+ retries). |

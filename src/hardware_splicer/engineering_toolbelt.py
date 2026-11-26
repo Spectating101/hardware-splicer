@@ -223,6 +223,12 @@ OWN_DIRS = ("docs", "examples", "projects")
 URL_RX = re.compile(r"https?://[^\s\"'<>)\]]+")
 
 
+def _generated_map(f: Path, root: Path) -> bool:
+    """The generated capability map repeats every module description, so it would match every query; modules are searched below."""
+    rel = f.relative_to(root).as_posix() if root in f.parents else ""
+    return rel in ("docs/CAPABILITY_MAP.md", "docs/capability_map.json") or rel.startswith("docs/capability_map/")
+
+
 def _hs_own(query: str, limit: int) -> list[dict[str, Any]]:
     """What HS has already found: its own docs, examples and project records, and the weekly landscape register.
     Prior findings are worthless if the next project cannot see them (OpenBot was recorded on 2026-11-26 and then
@@ -232,7 +238,7 @@ def _hs_own(query: str, limit: int) -> list[dict[str, Any]]:
         return []
     root = REPO
     files = [f for d in OWN_DIRS for f in (root / d).rglob("*") if f.suffix in (".md", ".json", ".jsonl") and f.is_file()
-             and f.stat().st_size < 2_000_000]
+             and f.stat().st_size < 2_000_000 and not _generated_map(f, root)]
     register = Path(os.path.expanduser("~/.local/share/hs-landscape/register.json"))
     if register.is_file():
         files.append(register)
@@ -399,6 +405,80 @@ def _component_board(args, project):
                      boundary="Schematic, layout and files checked in software only; nothing fabricated, assembled or powered.")
 
 
+def _capability_search(args, _project):
+    """HS's own modules, from the generated capability map: search by words, or show one module's wiring."""
+    from . import capability_map as cmap
+    m = cmap.build()
+    if args.get("module"):
+        rows = {r["module"]: r for r in m["rows"]}
+        row = rows.get(str(args["module"]))
+        if row is None:
+            raise ValueError(f"no module {args['module']}; search with query first")
+        keep = ("module", "area", "status", "direct", "tool", "lines", "tests", "test_files", "importers", "imports", "scripts", "about")
+        return _envelope(True, f"{row['module']}: {row['status']}, {row['tests']} tests", {k: row[k] for k in keep})
+    words = re.findall(r"[A-Za-z0-9_]{2,}", str(args.get("query") or ""))
+    if not words:
+        raise ValueError("query (words) or module is required")
+    hits = [{k: r[k] for k in ("module", "area", "status", "tool", "tests", "lines", "about")}
+            for r in cmap.find(m, words, int(args.get("limit") or 15))]
+    unshipped = [h["module"] for h in hits if h["status"] != "product"]
+    return _envelope(True, f"{len(hits)} HS modules match" + (f"; {len(unshipped)} not reached by any shipped entry point" if unshipped else ""),
+                     {"matches": hits, "status_meaning": cmap.STATUS_MEANING},
+                     boundary="A module's description is its author's claim; tests and reach are measured from the code.")
+
+
+def _device_review(args, _project):
+    from . import device_engineering, device_plan
+    spec = args.get("spec")
+    if spec is None and args.get("example"):
+        examples = device_plan.example_specs()
+        if args["example"] not in examples:
+            raise ValueError(f"no example {args['example']!r}; examples: {', '.join(sorted(examples))}")
+        spec = examples[args["example"]]
+    if spec is None:
+        raise ValueError("spec (a device spec) or example is required; examples: " + ", ".join(sorted(device_plan.example_specs())))
+    res = device_engineering.build_engineering_review(spec)
+    over = [c for d in res["domains"] for c in d["checks"] if c["status"] == device_engineering.EXCEEDS]
+    counts = res["counts"]
+    return _envelope(True, ", ".join(f"{v} {k}" for k, v in counts.items()), res,
+                     problems=[f"{c['title']}: {c['summary']}" for c in over],
+                     sources=[i.get("url") or i.get("source") or "" for i in res["sourced_inputs"] if i.get("url") or i.get("source")],
+                     boundary=device_engineering.AUTHORITY)
+
+
+def _identify_part(args, _project):
+    from . import part_lookup
+    res = part_lookup.lookup_part(args.get("marking"), int(args.get("limit") or part_lookup.MAX_MATCHES))
+    problems = [] if res["matches"] else [res.get("reason") or "no KiCad library part matches this marking"]
+    return _envelope(bool(res["matches"]), f"{len(res['matches'])} KiCad library parts for {res['query']}", res, problems=problems,
+                     sources=[u for u in [(res.get("source") or {}).get("url")] if u],
+                     boundary="A library name match, not an identification: confirm with the package, pin count and datasheet.")
+
+
+def _battery_runtime(args, _project):
+    from . import battery_runtime
+    phases = [{"label": str(p.get("label") or f"phase {i + 1}"), "ma": float(p["ma"]), "seconds": float(p["seconds"]), "basis": "given"}
+              for i, p in enumerate(args.get("phases") or [])]
+    sd = args.get("self_discharge_pct_month")
+    res = battery_runtime.runtime(float(args["capacity_mah"]), float(args["period_s"]), phases, float(args["sleep_ua"]),
+                                  tuple(float(x) for x in sd) if sd else None)
+    low, high = res["runtime_days"]["with_self_discharge"]
+    return _envelope(True, f"average {res['average_ma']} mA; {low}-{high} days with self-discharge", res,
+                     sources=[c["source"] for c in battery_runtime.CITED.values()], boundary=res["claim_boundary"])
+
+
+def _prop_hover(args, project):
+    from . import prop_static
+    path = args.get("propdb_zip") or os.environ.get("HARDWARE_SPLICER_UIUC_PROPDB")
+    if not path:
+        raise ValueError("give propdb_zip or set HARDWARE_SPLICER_UIUC_PROPDB to the UIUC Propeller Database zip "
+                         "(download from https://m-selig.ae.illinois.edu/props/propDB.html; it is not redistributed)")
+    zip_path = Path(os.path.expanduser(str(path))) if not args.get("propdb_zip") else _readable(str(path), project)
+    res = prop_static.hover(zip_path, str(args["prop"]), float(args["thrust_g"]))
+    return _envelope(True, f"{res['prop']}: {res['rpm']} rpm, {res['shaft_power_w']} W shaft for {res['thrust_g']} g", res,
+                     sources=["https://m-selig.ae.illinois.edu/props/propDB.html"], boundary=res["claim_boundary"])
+
+
 def _native_tool(module: str, argv: list[str], timeout: int = 900) -> dict[str, Any]:
     run = subprocess.run([_native_python(), "-m", f"hardware_splicer.{module}", *argv], capture_output=True, text=True,
                          timeout=timeout, env={**os.environ, "PYTHONPATH": str(REPO / "src")}, cwd=str(REPO))
@@ -512,6 +592,27 @@ TOOLS: dict[str, ToolSpec] = {t.name: t for t in [
                    "extension": {"type": "string"}}, ["query"]), _prior_art, category="research"),
     ToolSpec("hs_read_board", "Read a public BoardRepo board (README, size, layers, contents) as markdown.",
              _obj({"board": {"type": "string"}, "max_chars": {"type": "integer"}}, ["board"]), _read_board, category="research"),
+    ToolSpec("hs_capability_search", "Search HS's own 600+ modules before building anything: each match's status (shipped, "
+             "script-only, tests-only), tests and what it says it does; or give module to see what imports it and what it imports.",
+             _obj({"query": {"type": "string"}, "module": {"type": "string"}, "limit": {"type": "integer"}}), _capability_search,
+             category="research"),
+    ToolSpec("hs_device_review", "Quantified review of a device plan (one microcontroller board, sensors, display, power, "
+             "case): I2C bus, supply and power-bank runtime, thermal, antenna, mechanical fit and printing, every figure "
+             "sourced or a listed assumption. Give spec, or example for a built-in device.",
+             _obj({"spec": {"type": "object"}, "example": {"type": "string"}}), _device_review),
+    ToolSpec("hs_identify_part", "Look a chip or module marking up in KiCad's ~20,000 library symbols (offline): exact, "
+             "variant and family matches with datasheet links and default footprints. For salvaged boards.",
+             _obj({"marking": {"type": "string"}, "limit": {"type": "integer"}}, ["marking"]), _identify_part, category="research"),
+    ToolSpec("hs_battery_runtime", "How long a device that sleeps and wakes runs on a battery: average current from its "
+             "phases (mA and seconds per wake-up) and sleep current, as a range with cited self-discharge.",
+             _obj({"capacity_mah": {"type": "number"}, "period_s": {"type": "number"},
+                   "phases": {"type": "array", "items": {"type": "object"}, "description": "[{label, ma, seconds}] per wake-up"},
+                   "sleep_ua": {"type": "number"}, "self_discharge_pct_month": {"type": "array", "items": {"type": "number"}}},
+                  ["capacity_mah", "period_s", "phases", "sleep_ua"]), _battery_runtime),
+    ToolSpec("hs_prop_hover", "Static thrust and shaft power of a small propeller at a target thrust from the UIUC "
+             "Propeller Database's measured coefficients (refuses to extrapolate past the measured range).",
+             _obj({"prop": {"type": "string", "description": "UIUC name such as gwsdd_3x3"}, "thrust_g": {"type": "number"},
+                   "propdb_zip": {"type": "string"}}, ["prop", "thrust_g"]), _prop_hover),
     ToolSpec("hs_size_arm_actuators", "Pick the lightest cited servo per arm joint for a payload, counting the servos' own weight, "
              "against a stated share of stall torque.",
              _obj({"links_mm": {"type": "array", "items": {"type": "number"}}, "payload_kg": {"type": "number"},

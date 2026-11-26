@@ -6,13 +6,13 @@ their reach and tests; `... show <module>` gives one module's importers, imports
 tables are in `docs/capability_map/`; the job-level map (which module is canonical for which job) is
 `docs/CAPABILITY_CONSOLIDATION.md`.
 
-**615 modules, 176,387 lines; 535 referenced by a test; 12 called by an engine tool.**
+**615 modules, 176,488 lines; 535 referenced by a test; 18 called by an engine tool.**
 
 | Status | Modules | Lines | Meaning |
 |---|---|---|---|
-| product | 450 | 136,088 | reached from a shipped entry point (toolbelt, MCP, REST or a console command) |
+| product | 453 | 136,873 | reached from a shipped entry point (toolbelt, MCP, REST or a console command) |
 | script | 117 | 31,594 | reached only from scripts/, projects/, eval/, experiments/, the Makefile or CI |
-| runnable | 11 | 2,361 | has its own `python -m` main, and nothing shipped imports it |
+| runnable | 8 | 1,677 | has its own `python -m` main, and nothing shipped imports it |
 | tests-only | 37 | 6,344 | only tests import it |
 | unreached | 0 | 0 | nothing imports it, not even a test |
 
@@ -20,12 +20,12 @@ tables are in `docs/capability_map/`; the job-level map (which module is canonic
 
 | Surface | Entry modules | Modules reached |
 |---|---|---|
-| toolbelt | `engineering_toolbelt` | 163 |
-| mcp | `backend_mcp_server`, `mcp_server` | 443 |
-| rest | `product_api` | 440 |
-| console | `cli_entry`, `digital_engine_cli`, `materials_cli`, `open_repair_candidates`, `policy_layer_cli`, `wiring_cli` | 450 |
+| toolbelt | `engineering_toolbelt` | 169 |
+| mcp | `backend_mcp_server`, `mcp_server` | 446 |
+| rest | `product_api` | 443 |
+| console | `cli_entry`, `digital_engine_cli`, `materials_cli`, `open_repair_candidates`, `policy_layer_cli`, `wiring_cli` | 453 |
 
-Toolbelt tools (17): `hs_project_open`, `hs_project_record`, `hs_project_write_artifact`, `hs_project_status`, `hs_junk_lookup`, `hs_prior_art_search`, `hs_read_board`, `hs_size_arm_actuators`, `hs_size_rover_drive`, `hs_check_propulsion`, `hs_energy_budget`, `hs_price_parts`, `hs_bom_check`, `hs_review_kicad_schematic`, `hs_component_board`, `hs_motion_sweep`, `hs_rover_chassis`.
+Toolbelt tools (22): `hs_project_open`, `hs_project_record`, `hs_project_write_artifact`, `hs_project_status`, `hs_junk_lookup`, `hs_prior_art_search`, `hs_read_board`, `hs_capability_search`, `hs_device_review`, `hs_identify_part`, `hs_battery_runtime`, `hs_prop_hover`, `hs_size_arm_actuators`, `hs_size_rover_drive`, `hs_check_propulsion`, `hs_energy_budget`, `hs_price_parts`, `hs_bom_check`, `hs_review_kicad_schematic`, `hs_component_board`, `hs_motion_sweep`, `hs_rover_chassis`.
 Console commands: `hs-doctor`, `hs-serve`, `hs-mcp`, `hs-backend-mcp`, `hs-capability-freeze`, `hs-derive`, `hs-mechanical`, `hs-open-repair`, `hs-digital`, `hs-policy`, `hs-materials`, `hs-wiring`.
 
 Reach codes in the area pages: **T** toolbelt, **M** MCP server, **R** REST product API, **C** console command.
@@ -34,20 +34,20 @@ Reach codes in the area pages: **T** toolbelt, **M** MCP server, **R** REST prod
 
 | Area | Modules | Engineering | Lines | Tested | Shipped | Called by a tool | Page |
 |---|---|---|---|---|---|---|---|
-| circuit boards and electronics | 136 | 118 | 38,343 | 109 | 116 | 3 | [circuit-boards-and-electronics](capability_map/circuit-boards-and-electronics.md) |
+| circuit boards and electronics | 136 | 118 | 38,343 | 109 | 116 | 5 | [circuit-boards-and-electronics](capability_map/circuit-boards-and-electronics.md) |
 | salvage, donors, repair | 114 | 103 | 28,740 | 108 | 50 | 1 | [salvage-donors-repair](capability_map/salvage-donors-repair.md) |
 | AI, agents and models | 60 | 42 | 19,358 | 55 | 51 | 0 | [ai-agents-and-models](capability_map/ai-agents-and-models.md) |
-| mechanical, CAD and FEM | 52 | 48 | 18,330 | 45 | 36 | 2 | [mechanical-cad-and-fem](capability_map/mechanical-cad-and-fem.md) |
+| mechanical, CAD and FEM | 52 | 48 | 18,330 | 45 | 37 | 3 | [mechanical-cad-and-fem](capability_map/mechanical-cad-and-fem.md) |
 | projects, reviews and evidence | 71 | 42 | 17,636 | 60 | 61 | 0 | [projects-reviews-and-evidence](capability_map/projects-reviews-and-evidence.md) |
 | other | 65 | 53 | 16,790 | 49 | 49 | 0 | [other](capability_map/other.md) |
-| parts, BOM and sourcing | 53 | 39 | 15,312 | 48 | 44 | 1 | [parts-bom-and-sourcing](capability_map/parts-bom-and-sourcing.md) |
+| parts, BOM and sourcing | 53 | 39 | 15,413 | 48 | 44 | 1 | [parts-bom-and-sourcing](capability_map/parts-bom-and-sourcing.md) |
 | robots, arms and motion | 29 | 27 | 11,850 | 28 | 20 | 2 | [robots-arms-and-motion](capability_map/robots-arms-and-motion.md) |
-| firmware and devices | 11 | 10 | 4,063 | 10 | 10 | 0 | [firmware-and-devices](capability_map/firmware-and-devices.md) |
-| drones, propulsion and power | 13 | 12 | 2,788 | 13 | 8 | 3 | [drones-propulsion-and-power](capability_map/drones-propulsion-and-power.md) |
+| firmware and devices | 11 | 10 | 4,063 | 10 | 10 | 1 | [firmware-and-devices](capability_map/firmware-and-devices.md) |
+| drones, propulsion and power | 13 | 12 | 2,788 | 13 | 10 | 5 | [drones-propulsion-and-power](capability_map/drones-propulsion-and-power.md) |
 | simulation | 8 | 6 | 2,366 | 7 | 5 | 0 | [simulation](capability_map/simulation.md) |
 | research and landscape | 3 | 3 | 811 | 3 | 0 | 0 | [research-and-landscape](capability_map/research-and-landscape.md) |
 
-## Engineering modules no shipped entry point reaches (149)
+## Engineering modules no shipped entry point reaches (146)
 
 The 20 largest; all of them, with what reaches each, are in
 [capability_map/not-shipped.md](capability_map/not-shipped.md). Decide per module: wire it into the toolbelt,
@@ -66,7 +66,6 @@ keep it as a script tool, or delete it.
 | `_pcbnew_helpers.keyboard_splice_islands` | script | 556 | 2 | Copper-island cut simulator with source-bounded partial connectivity. Executed by the syst... |
 | `codex_mission_progress` | script | 556 | 1 | Deterministic mission-progress audit for Codex/Astra Hardware-Splicer runs. This does not ... |
 | `cleanroom_unseen_spi_flash_experiment` | script | 545 | 7 | Fresh unseen cleanroom case: 1.8 V SPI flash programming/validation adapter. This corpus i... |
-| `capability_map` | runnable | 497 | 1 | What HS can already do, read from its own code: every module, what it says it does, its te... |
 | `cleanroom_replay` | script | 468 | 6 | Adversarial replay harness for the dual-agent cleanroom. This is an outer-engineer evaluat... |
 | `restoration_reasoning_agent` | tests-only | 460 | 11 | Evidence-bounded, free-text repair reasoning adapter for native HS intake. The provider is... |
 | `spi_checkpoint` | script | 457 | 1 | Resumable *within-job* native KiCad proof for the fixed HS SPI reference. No arbitrary com... |
@@ -75,6 +74,7 @@ keep it as a script tool, or delete it.
 | `robot_guidance_benchmark` | script | 435 | 3 | Measure whether Hardware Splicer can guide a real robot build or modification. The benchma... |
 | `discrete_electronics_truth` | script | 431 | 1 | Datasheet-backed truth contracts for discrete electronic designs. This is intentionally se... |
 | `visual_donor_intake` | tests-only | 413 | 2 | Typed donor-capture drafts derived from retained visual inspection artifacts. This is a pr... |
+| `github_signal_remote_dispatch` | script | 408 | 3 | A narrow HS-controlled remote engineering worker dispatcher over GitHub Actions. Not a dis... |
 
 ## Modules that look like copies of each other
 
