@@ -88,3 +88,61 @@ Sources: as in `COMMERCE_CONVERSION_RESEARCH_20261126.md`, plus ITRI's verificat
 ([Taiwan News](https://www.taiwannews.com.tw/news/6434577), [TaiwanPlus](https://www.taiwanplus.com/news/taiwan-news/taiwan-us-relations/260129021/taiwans-itri-joins-drone-security-framework),
 [Focus Taiwan](https://focustaiwan.tw/business/202606040018)) and Altium's KiCad import ([Altium migration guide](https://www.altium.com/altium-designer/migrate/kicad-pcb),
 [Altium interfacing docs](https://www.altium.com/documentation/altium-designer/design-tools-interfacing)).
+
+## 7. Correction: core mission first, business layer second (owner, same day)
+
+Sections 2 and 4 list features a paying client needs. They are a wrapper. HS's own purpose (`HARDWARE_SPLICER_MISSION_FREEZE.md`)
+is an engineering problem solver that takes an objective ("build an affordable and useful drone from obtainable parts"),
+researches existing work, chooses build/buy/salvage/repair/adapt, drives mature tools, produces deliverables, verifies and
+iterates on the same project, and keeps software evidence apart from physical proof. Business features are added only
+when a paid job needs them, on top of that core.
+
+## 8. Competitive check and functional state (2026-11-26)
+
+**Who else does this.** Funded generators: Diode Computers (US$11.4M, a16z; sells designed boards as a service to
+customers such as Physical Intelligence), Quilter (reinforcement-learning layout; an AI-laid-out computer booted), Flux
+(US$37M), Leo AI (US$9.7M, mechanical assemblies from text), Zoo (Zookeeper CAD agent), CopperPilot (US$390k), Schematik
+(US$4.6M). One-agent electronics + mechanical + firmware IDEs in beta or preview: Odem (macOS, free beta; demo USB-C desk
+clock with schematic, routed board, enclosure, firmware), iOrchestra, Autonomyware Electronics Forge. DIY: Claude or
+Gemini with KiCad, FreeCAD and Blender MCP servers.
+
+**Where HS has real value.** The documented failure of agent-driven hardware design is self-certification: an
+engineer's test of Gemini driving KiCad met 38 of 50 requirements while the agent graded itself 50 of 50. HS's design
+answers exactly that: KiCad read-back parity against the intent, cited checks (logic-level guarantees, current and
+voltage ratings, static torque, overturning, collision sweeps, propulsion), fail-closed authority. In this session those
+checks found real defects: the ROBOTIS reference buffer's unguaranteed logic level, the arm's yaw-bearing overload and
+tip-over, a terminal facing into the board, a wrong-colour LED from a keyword search. Generation is not where HS wins:
+funded tools and open MCP servers already generate.
+
+Diode's model (AI inside, boards sold as a service) supports the services-first route in this plan.
+
+**Functional state, checked in code.**
+- The engineering tools work: real outputs and tests for the arm, the bus board, sizing, pricing, routing.
+- **An outside agent cannot reach them.** HS's MCP server exposes 30 older compose and splice tools; none of
+  `kicad_component_board`, `jlcparts_lookup`, `route_pcb`, `arm_actuator_sizing`, `drive_sizing`, `prop_static`,
+  `propulsion_check`, `energy_budget`, `kicad_design_review`, `distributor_check`, `motion_sweep` or
+  `mechanical_cad_fem` has an MCP tool or REST route (`device_case` has one route). Today's arm and board were built by an
+  agent with a shell running Python, not through HS's agent interface.
+- **No objective-level loop.** `mission_runner` drives an accepted fabrication mission through device checks;
+  `ai_project_orchestrator` only proposes; `workshop_operator` is a single bounded action. Nothing takes the drone
+  objective and carries it to a build package with the artifacts kept on one project.
+- **No physical proof** of any design.
+
+**Core order of work, replacing the engineering half of section 6:**
+1. An engineering toolbelt on HS's MCP/REST surface for the tools above, each returning its evidence and refusals, so
+   any agent (Claude Code, a reseller model, a person) works through HS rather than around it.
+2. The drone objective run end to end through that surface on one project: prior art (BoardRepo, GitHub, PX4 and
+   Betaflight ecosystems), strategy, airframe CAD, propulsion and energy, flight-controller choice and configuration,
+   parts priced, build package, then a physical build with your approval.
+3. The same loop for the rover, the cost-down arm and the compact FieldDeck.
+4. A head-to-head on the same briefs against open tools that run locally (Formwright, WireStudio, KiCad MCP with a
+   general agent), graded on known traps and on whether the self-reported "done" matches the independent check.
+
+Sources: [VentureBeat on Quilter](https://venturebeat.com/ai/quilters-ai-just-designed-an-843-part-linux-computer-that-booted-on-the),
+[Odem on Product Hunt](https://www.producthunt.com/posts/1263017), [iOrchestra](https://www.producthunt.com/products/vibe-engineer-by-iorchestra/launches),
+[Autonomyware](https://www.producthunt.com/p/autonomyware/sneak-peek-electronics-forge-from-a-written-brief-to-a-routed-pcb),
+[CopperPilot](https://analyticsindiamag.com/ai-startups/this-bengaluru-startup-is-building-ai-agents-for-hardware-design),
+[Gemini + KiCad test](https://mx.linkedin.com/in/javierhzmbrpena), [Diode (YC)](https://ycombinator.com/companies/diode-computers-inc),
+[Diode Series A](https://technews180.com/funding-news/diode-raises-11-4m-to-end-circuit-board-design-frustrations/),
+[Leo AI](https://www.engineering.com/leo-ai-can-now-generate-full-cad-assemblies/), [Zoo Zookeeper](https://www.digitalengineering247.com/article/zoo-introduces-zookeeper-agent-for-cad-design/products),
+[JLCPCB KiCad MCP guide](https://jlcpcb.com/blog/kicad-mcp-how-to-design-a-pcb-with-claude-code), [FreeCAD MCP guide](https://mcp.directory/blog/freecad-mcp-complete-guide-2026).
