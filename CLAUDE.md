@@ -28,6 +28,15 @@ before editing engine or API code:
 | [`docs/MACHINE_PROJECT_SPINE.md`](docs/MACHINE_PROJECT_SPINE.md) | Canonical project model, durable revisions, staged review |
 | [`docs/INTEGRATION_STACK.md`](docs/INTEGRATION_STACK.md) | Evidence-first boundary to external tools, donor virtual modules |
 
+## Reuse before you build
+
+Before HS designs a board, mechanism or tool, search for one that already exists: BoardRepo (https://boardrepo.com,
+searchable by part; `https://boardrepo.com/{handle}/{slug}.md` reads any public board without an account), Kitspace,
+kicad.org/made-with-kicad, `gh search code "<part> extension:kicad_sch"`, and established open-source tools (atopile,
+SKiDL, tscircuit, FreeRouting, KiBot). Name what exists and its license, adopt it (MIT, Apache, BSD and CC BY with
+attribution; GPL/AGPL only as separate programs, never copied in), run HS's checks on it, and build only what is missing.
+A published board is a starting point, not evidence that it was built or works.
+
 ## Gotchas
 
 `src/` is not installed — run Python directly with `PYTHONPATH=src`. Makefile
