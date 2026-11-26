@@ -22,6 +22,7 @@ import uuid
 from pathlib import Path
 from typing import Any
 
+from .state_paths import scratch_dir
 SCHEMA = "hardware_splicer.objective_project.v1"
 STEP_KINDS = ("tool", "research", "decision", "artifact", "note")
 
@@ -31,8 +32,7 @@ def projects_root() -> Path:
     if root:
         path = Path(root)
     else:
-        base = os.environ.get("HARDWARE_SPLICER_TMP_ROOT") or str(Path(__file__).resolve().parents[2] / ".cache" / "hardware-splicer")
-        path = Path(base) / "objective-projects"
+        path = scratch_dir() / "objective-projects"
     path.mkdir(parents=True, exist_ok=True)
     return path
 

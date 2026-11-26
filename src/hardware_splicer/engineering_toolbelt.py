@@ -27,8 +27,9 @@ from pathlib import Path
 from typing import Any, Callable
 
 from .objective_project import ObjectiveProject
+from .state_paths import repo_root
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = repo_root()
 
 
 @dataclass(frozen=True)
@@ -229,7 +230,7 @@ def _hs_own(query: str, limit: int) -> list[dict[str, Any]]:
     words = [w.lower() for w in re.findall(r"[A-Za-z0-9][A-Za-z0-9+_-]{2,}", query)]
     if not words:
         return []
-    root = Path(__file__).resolve().parents[2]
+    root = REPO
     files = [f for d in OWN_DIRS for f in (root / d).rglob("*") if f.suffix in (".md", ".json", ".jsonl") and f.is_file()
              and f.stat().st_size < 2_000_000]
     register = Path(os.path.expanduser("~/.local/share/hs-landscape/register.json"))

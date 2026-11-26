@@ -15,19 +15,19 @@ from __future__ import annotations
 import argparse
 import gzip
 import json
-import os
 import sys
 import urllib.request
 from pathlib import Path
 from typing import Any, Iterable
+
+from .state_paths import scratch_dir
 
 BASE = "https://yaqwsx.github.io/jlcparts/data"
 SOURCE = "JLCPCB parts list via jlcparts (https://github.com/yaqwsx/jlcparts)"
 
 
 def cache_dir() -> Path:
-    root = os.environ.get("HARDWARE_SPLICER_TMP_ROOT") or str(Path(__file__).resolve().parents[2] / ".cache" / "hardware-splicer")
-    path = Path(root) / "jlcparts"
+    path = scratch_dir() / "jlcparts"
     path.mkdir(parents=True, exist_ok=True)
     return path
 
