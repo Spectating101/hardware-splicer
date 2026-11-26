@@ -139,3 +139,22 @@ def test_fan_mosfet_netlist_compiles_switched_load(tmp_path: Path) -> None:
         tmp_path,
         require={"level-shifter-4ch", "mosfet-irlz44n", "cooling_fan_5v"},
     )
+
+
+def test_netlist_compile_reports_netlist_to_pcb_connectivity_parity(tmp_path):
+    """The generated board's connectivity is compared with the netlist (KiCad's parity cannot judge generated boards)."""
+    import json as _json
+    from hardware_splicer.build_compiler import compile_from_netlist
+    netlist = {"components": [{"ref": "U1", "module_id": "usb-power-5v"}, {"ref": "U2", "module_id": "esp32-devkit"}],
+               "nets": [{"name": "GND", "pins": [{"component_ref": "U1", "pin": "GND"}, {"component_ref": "U2", "pin": "GND"}]}]}
+    result = compile_from_netlist(netlist, tmp_path, export_gerber=False)
+    if not result.kicad_pcb_file:
+        import pytest
+        pytest.skip("no PCB produced in this environment")
+    parity = result.design_quality["netlist_pcb_parity"]
+    assert set(parity) >= {"pass", "missing_on_pcb", "extra_on_pcb"}
+    stored = _json.loads(open(result.design_quality_file, encoding="utf-8").read())
+    assert stored["netlist_pcb_parity"] == parity
+    # Known open issue (2026-11-27): the netlist-compile PCB names pads by pin id ("GND") while the module pad tables
+    # number them ("2"), so parity reports this board as mismatched. It is reported, not hidden; fix one side, then
+    # assert parity["pass"] here.

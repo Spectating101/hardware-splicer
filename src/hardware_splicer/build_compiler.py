@@ -161,11 +161,17 @@ def compile_from_netlist(
         export_gerber_fn=_export_gerber_if_possible if export_gerber else None,
     )
     quality = artifact["quality"]
+    pcb_path = graph_stage.paths.kicad_pcb
+    if pcb_path and Path(pcb_path).is_file():
+        # KiCad's --schematic-parity cannot judge generated boards; compare the connectivity itself (reported, not gating)
+        from .pcb.netlist_pcb_parity import netlist_pcb_parity
+        parity = netlist_pcb_parity(circuit, Path(pcb_path).read_text(encoding="utf-8"))
+        quality["netlist_pcb_parity"] = json.loads(json.dumps(parity))
     fab_zip = _write_fab_package(build_dir, quality, artifact["bom_paths"], artifact["gerber_dir"])
     if fab_zip:
         quality["fab_package_zip"] = fab_zip
-        quality_path = Path(quality.get("design_quality_file") or build_dir / "DESIGN_QUALITY.json")
-        quality_path.write_text(json.dumps(quality, indent=2), encoding="utf-8")
+    quality_path = Path(quality.get("design_quality_file") or build_dir / "DESIGN_QUALITY.json")
+    quality_path.write_text(json.dumps(quality, indent=2), encoding="utf-8")
 
     ok = graph_stage.ok
     result = BuildCompileResult(
