@@ -28,6 +28,14 @@ before editing engine or API code:
 | [`docs/MACHINE_PROJECT_SPINE.md`](docs/MACHINE_PROJECT_SPINE.md) | Canonical project model, durable revisions, staged review |
 | [`docs/INTEGRATION_STACK.md`](docs/INTEGRATION_STACK.md) | Evidence-first boundary to external tools, donor virtual modules |
 
+## Know what HS already has
+
+Before calling any capability missing or writing a new tool, read `docs/CAPABILITY_MAP.md` (generated from the code by
+`python -m hardware_splicer.capability_map`; regenerate it after adding modules) and search with
+`hs_prior_art_search` (source `hs_own` reads every module's description). HS has 600+ modules; on 2026-11-26 an agent
+rebuilt pieces of `machine_project`, `sdk` and `device_lab` and called FEM, thermal review and arm kinematics missing
+because it never looked. `docs/ENGINE_WIRING_PLAN_20261126.md` lists what to connect before building anything new.
+
 ## Salvage first: HS turns junk into working hardware
 
 This is the core of HS and the basis of its business and grant case (owner, 2026-11-26). For every objective, try
