@@ -1,0 +1,12 @@
+{
+ "wifi_ssid": "your Wi-Fi name",
+ "wifi_password": "your Wi-Fi password",
+ "ap_password": "salvage-rover",
+ "pins": {"ain1": 4, "ain2": 5, "bin1": 6, "bin2": 7, "vbat_adc": 3},
+ "divider_ratio": 4.03,
+ "motor_v_max": 4.8,
+ "cutoff_v": 6.4,
+ "deadman_ms": 600,
+ "pwm_hz": 20000,
+ "phone_stream_url": "http://PHONE-ADDRESS:8080/video"
+}
