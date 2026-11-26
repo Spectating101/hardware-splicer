@@ -7,7 +7,7 @@
 This is the first objective carried from a plain brief to a build package entirely through Hardware-Splicer's MCP server,
 the interface any outside agent uses. An agent (Claude Code, on 2026-11-26) made the engineering decisions; every
 calculation, CAD build, check and file came from an HS tool over MCP, and HS kept the whole record on one project
-(`project/ledger.jsonl`, 24 steps, each tool call with its inputs).
+(`project/ledger.jsonl`, 30 steps, each tool call with its inputs).
 
 ## Objective and acceptance (set before any design)
 
@@ -16,11 +16,11 @@ calculation, CAD build, check and file came from an HS tool over MCP, and HS kep
 
 | Acceptance | Result | Step |
 |---|---|---|
-| Parts at or under US$250, every price cited | US$242.32; **3 of 13 lines declared, not cited** (battery pack and charger, microSD, PLA and screws: US$36) | 20, open |
+| Parts at or under US$250, every price cited | **Fails: US$263.44**, all 22 lines cited (quoted 2026-11-26); shipping not included | 30, open |
 | 0.4 m/s on the flat, 15 degree ramp within maker limits | 0.79 m/s at full duty; 0.10 A cruise and 6.7% of stall torque on 15 degrees per motor | 17 |
 | Prints on 220 mm, 15 mm ground clearance, no tip on 15 degrees | 180 x 120 x 64 mm part; 30.5 mm clearance; tips at 27 degrees (backward) at the earliest | 18 |
 | Camera sees the floor ahead, chassis out of view | Nose out of view; floor visible from 113 mm ahead | 18 |
-| At least 1 h patrol | 5.7 h at the average load (declared 2.8 W video, measured-model motor current); 0.6 A peak | 19 |
+| At least 1 h patrol | About 5.0 h on 2.2 Ah cells at the 4.0 W average load (declared 2.8 W video, measured-model motor current); 0.6 A peak | 28 |
 | Remaining risks listed for physical test | See below | status |
 
 ## How the design moved (all in the ledger)
@@ -45,7 +45,19 @@ calculation, CAD build, check and file came from an HS tool over MCP, and HS kep
 
 Pololu: 2 x 25D MP 12V 47:1 gearmotor (#3229), bracket pair (#2676), 2 x DRV8874 carrier (#4035), 5 V 2.5 A regulator
 D24V22F5 (#2858), 90 x 10 mm wheel pair (#1435), 4 mm universal hubs (#1081), ball caster (#2692). Adafruit: Raspberry Pi
-Zero 2 W, Camera Module 3, Zero camera cable. Declared: 3S Li-ion pack 2.5 Ah with charger, microSD, PLA and screws.
+Zero 2 W, Camera Module 3, Zero camera cable, M2.5 standoffs. Pololu fasteners: M3 x 10 mm screws and nuts (brackets,
+caster), M2.5 x 6 mm screws (Pi), #2-56 screws and nuts (camera, 2.2 mm holes).
+
+Power, bought in Taiwan because Li-ion cells cannot be air-freighted from US shops: iNeno 18650 2200 mAh cells (BSMI,
+4-pack, one spare), a KINYO two-slot USB charger (cells are charged one at a time, so no 3S balance charger) and a SanDisk
+32 GB microSD, all PChome 24h and in stock on 2026-11-26. A DFRobot 3 x 18650 holder (78 x 59 x 21 mm, fits the 80 x 60
+x 22 mm bay) and a 3S protection board (Core Electronics) come from abroad. NT$ and AU$ prices are converted at the
+2026-11-25 rate; the PLA price (Bambu Lab, US$19.99/kg) is from a search result, as the store page is not machine-readable.
+
+**Why it is over budget, and how to get under:** the three lines declared at US$36 actually cost US$57.12; fasteners in
+25-packs alone are US$14.04. Already owning a microSD card and an 18650 charger saves US$19.65 (to US$243.79), and
+screws from a local hardware shop cost less than the packs. Shipping from Pololu, Adafruit, DFRobot and Core
+Electronics to Taiwan is not quoted (it needs a cart and an address) and comes on top.
 Dimensions come from the makers' drawings: Pololu 25D datasheet rev 2.0, bracket bkt04c, caster cst05, Raspberry Pi
 Zero 2 W and Camera Module 3 mechanical drawings (listed in `rover_chassis.py`).
 
@@ -53,7 +65,7 @@ Zero 2 W and Camera Module 3 mechanical drawings (listed in `rover_chassis.py`).
 
 Traction, turning (skid and caster drag are not modelled), print strength, wheel/hub/bracket stack-up (hub offset is
 declared), real battery runtime and the declared 2.5 W video load, the drive page and MediaMTX config on a real Pi, the
-camera image, and the 3 A fuse choice. The three uncited prices need real quotes; the budget margin is US$7.68.
+camera image, and the 3 A fuse choice. The parts total is over budget by US$13.44 before shipping (see Parts).
 
 ## Reproduce
 
