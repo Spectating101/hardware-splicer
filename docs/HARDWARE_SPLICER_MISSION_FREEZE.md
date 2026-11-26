@@ -66,3 +66,20 @@ This charter specifies **future product direction and work selection**, not a cl
 ## Explicit project-selection tracks (2026-10-20)
 
 The [engineering opportunity portfolio](../projects/engineering-opportunity-portfolio/README.md) separates: (1) actual drone/cyberdeck engineering integration proof, (2) financially ranked repair/build/resale arbitrage, and (3) independently ranked practical-use and current-need engineering candidates. Never conflate profit with utility or imply that any listing spread is realized profit.
+
+## Amendment 2026-11-26: salvage is the core purpose
+
+The owner set the core: **HS exists to turn junk into working hardware.** Business and grant applications are built on
+that. This does not undo the 2026-10-20 rule above that the name "Splicer" must never force a donor substitution; it
+fixes the order of strategies and makes salvage visible:
+
+* Salvage and adaptation of discarded devices are tried first for every objective; buying a finished or used product
+  comes next when it is cheaper than salvage; new design and new parts cover only what remains.
+* Every parts list reports what was salvaged (donor, mass diverted, new-part value replaced) and the new spend. A list
+  with no salvaged part must record why salvage did not fit. (`hs_bom_check` enforces this.)
+* A donor is never forced where it makes the result unsafe or unworkable; that reason is recorded too.
+* Assembly hours per unit are recorded alongside cost, because labour decides whether a salvage design pays.
+
+Why: on 2026-11-26 the rover objective was worked entirely from new parts (US$263) and lost to a US$30-50 consumer robot,
+without HS's own salvage tools (`salvage_plan`, donor intake, teardown search) ever being called.
+

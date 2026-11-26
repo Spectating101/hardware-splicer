@@ -28,6 +28,23 @@ before editing engine or API code:
 | [`docs/MACHINE_PROJECT_SPINE.md`](docs/MACHINE_PROJECT_SPINE.md) | Canonical project model, durable revisions, staged review |
 | [`docs/INTEGRATION_STACK.md`](docs/INTEGRATION_STACK.md) | Evidence-first boundary to external tools, donor virtual modules |
 
+## Salvage first: HS turns junk into working hardware
+
+This is the core of HS and the basis of its business and grant case (owner, 2026-11-26). For every objective, try
+strategies in this order and record the reason each earlier one was dropped:
+
+1. **Salvage or adapt** what people already throw away: old phones (camera, Wi-Fi, battery, compute), broken toys and
+   RC cars (motors, gearboxes, wheels), dead laptops, routers, power tools, printers, chargers.
+2. **Buy** a finished or used product when one does the job for less than salvage would (check Shopee, AliExpress,
+   Amazon and Banggood, not only open hardware: a US$30 pet robot beat the new-parts rover).
+3. **Build new** only for what neither covers.
+
+`hs_bom_check` enforces this: lines carry `origin` (new, used, salvaged), a salvaged line names its donor, the result
+reports new spend, mass diverted and the new-part value replaced, and a list with no salvaged part stays open until
+`salvage_rejected_because` says why. Never force a donor where it makes the result unsafe or unworkable (a swollen
+battery, an unknown motor on a load path); say so and buy instead. Labour per unit, not materials, decides whether a
+salvage design pays, so record hours as well as cost.
+
 ## Reuse before you build
 
 Before HS designs a board, mechanism or tool, search for one that already exists: BoardRepo (https://boardrepo.com,
