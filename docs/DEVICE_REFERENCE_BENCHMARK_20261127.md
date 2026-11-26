@@ -64,11 +64,29 @@ SO-101's published URDF gives its shoulder 80% of its 7.4 V servo's stall with n
 rule is stricter than the reference that thousands of people run, and rev B keeps more margin than SO-101. HS's rule is
 left as it is; the two readings are reported side by side.
 
+## Second comparison: HS-ROVER-A against OpenBot and NASA-JPL's Open Source Rover
+
+| | HS-ROVER-A (HS, 26 Nov) | OpenBot (MIT, 3.7k stars) | Open Source Rover (Apache-2.0, 9.8k stars) |
+|---|---|---|---|
+| Cost | US$263.44, all lines cited (over its US$250 target) | "about $50" body, plus a smartphone (README) | "~$1600" (README) |
+| Drive | 2WD Pololu 25D MP 47:1 plus caster, sized against the maker's limits | 4 x TT gearmotors, L298N | 6 wheels, rocker-bogie, 10 motors |
+| Speed / runtime | 0.79 m/s; about 5 h on 2.2 Ah cells at 4.0 W | not stated | ~1.6 m/s; "at least 3 hours" on 7.2 Ah, rough terrain |
+| Brain | ESP32 + camera | the phone | Raspberry Pi |
+
+HS-ROVER-A sits between the two: five times OpenBot's body cost for sized motors and a stated runtime, a sixth of the
+OSR's for flat-floor inspection only. HS's salvage rover (HS-ROVER-SALVAGE-A) already builds on OpenBot.
+
+**What the comparison changed in HS.** As with the arm, HS could not pick the cheap tier: its drive table held only
+Pololu gearmotors. Adafruit's TT gearmotor (product 3777: 200 rpm and 0.8 kg.cm stall at 6 V, 150 mA no-load, 30.6 g)
+is now in it, and passes HS-ROVER-A's speed and torque requirements. The seller publishes no stall current or torque
+limits, so those checks read unknown rather than passed, and a TT option is listed after every option with a known
+current.
+
 ## Next
 
 1. Done: HS-ARM-A rev B (above). Still open: horn bolt circle and servo screw holes, the leader arm SO-101 pairs with.
-2. Rover: HS-ROVER-A (US$263.44, 2WD, 0.79 m/s, ~5 h) and the salvage rover (built on OpenBot) against OpenBot and
-   NASA-JPL's Open Source Rover, subsystem by subsystem.
+2. Done: rover (above). Still open: a TT-motor variant of HS-ROVER-A priced and re-checked end to end; the OSR's
+   rocker-bogie (Apache-2.0) as HS's rough-terrain option.
 3. Drone: HS-3G against the open multirotor designs once the sweep's drone results are read file by file (none passed
    the completeness floor; Crazyflie splits firmware and electronics across repositories).
 4. Robot vacuum and mopping: no complete open design was found; Valetudo (Apache-2.0) is firmware for commercial
