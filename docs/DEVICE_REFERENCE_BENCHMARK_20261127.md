@@ -54,12 +54,19 @@ skipped it and HS-ARM-A got three XM430s at US$269.90 each. With Feetech's liste
 each under 30% of stall, inside HS-ARM-A's own 50% rule: the three joint servos drop from about US$810 to about US$42
 and from 82 g to 55 g each. The 7.4 V version is kept off 12 V supplies.
 
-Not yet done: HS-ARM-A's printed parts are shaped around the XM430 body and horn (from ROBOTIS's OpenMANIPULATOR-X CAD).
-A revision around the STS3215 needs its mounting geometry; SO-ARM100's CAD (Apache-2.0) carries it.
+**Rev B built (same day).** `projects/hs-arm-a/rev-b`: the arm rebuilt around the STS3215, its geometry measured from
+SO-ARM100's own servo model. Printed cheek bosses keep every joint clash-free over rev A's ranges. Parts US$206.49
+against US$1,089.50; moving mass 0.459 kg against 0.516; reach 370.5 mm against 375.9.
+
+The full CAD check (link and bracket masses included, which the quick sizing tool leaves out) puts rev B's shoulder at
+66% of stall with 150 g and safety factor 1.5: over HS's own 50% rule (about 63 g at the rule). The same method on
+SO-101's published URDF gives its shoulder 80% of its 7.4 V servo's stall with no payload and 136% with 150 g, so HS's
+rule is stricter than the reference that thousands of people run, and rev B keeps more margin than SO-101. HS's rule is
+left as it is; the two readings are reported side by side.
 
 ## Next
 
-1. HS-ARM-A rev B on STS3215 using SO-ARM100's servo geometry; compare reach, payload and cost with SO-ARM101 again.
+1. Done: HS-ARM-A rev B (above). Still open: horn bolt circle and servo screw holes, the leader arm SO-101 pairs with.
 2. Rover: HS-ROVER-A (US$263.44, 2WD, 0.79 m/s, ~5 h) and the salvage rover (built on OpenBot) against OpenBot and
    NASA-JPL's Open Source Rover, subsystem by subsystem.
 3. Drone: HS-3G against the open multirotor designs once the sweep's drone results are read file by file (none passed

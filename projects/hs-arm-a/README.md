@@ -63,3 +63,25 @@ $NATIVE -I projects/hs-arm-a/render.py                          # renders/HS_ARM
 
 Servo geometry: body dimensions from the ROBOTIS e-manual; horn diameter and its 12 mm offset measured from the XM430 in
 ROBOTIS's OpenMANIPULATOR-X model (`link1.stl`, Apache-2.0). The arm itself is HS's own design, not a copy of that kit.
+
+## Rev B: the same arm on Feetech STS3215 servos (2026-11-27)
+
+Built by `build_arm.py --servo sts3215 --out rev-b`. The STS3215 is the SO-ARM100/101's servo. Its geometry is measured
+from SO-ARM100's `STS3215_03a.step` (Apache-2.0, commit 141aea7b): body 45.4 x 24.8 x 35.4 mm, horn axis 12.5 mm from
+the body centre, horn 10 mm radius and only 1.0 mm proud. Because the horn is nearly flush, each cheek plate is held out
+by a printed boss (3 mm horn side, 4 mm idler side) so it clears the next link's cradle as in rev A; without it the
+collision sweep found clashes at the elbow, wrist and gripper.
+
+| | Rev A (X430) | Rev B (STS3215) |
+|---|---|---|
+| Reach | 375.9 mm | 370.5 mm |
+| Moving mass | 0.516 kg | 0.459 kg |
+| Shoulder, 150 g payload, safety factor 1.5 | 49% of stall | 66% of stall (over the 50% rule; about 63 g at the rule) |
+| Elbow / wrist pitch | 29% / 39% | 39% / 19% |
+| Joint ranges, collision sweep | clash-free | clash-free over the same ranges |
+| Parts | US$1,089.50 | US$206.49 (`rev-b/BOM.json`) |
+
+The 50% rule is HS's own design assumption, not a published rating. The SO-101 follower, built in large numbers, needs
+80% of its 7.4 V STS3215's stall at the shoulder with no payload by the same method (worst pose over its joint ranges,
+safety factor 1.5, masses from its URDF), so rev B keeps more margin than the reference design does. Nothing has been
+printed or built.

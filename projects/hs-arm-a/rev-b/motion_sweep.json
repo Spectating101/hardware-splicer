@@ -1,0 +1,149 @@
+{
+ "schema_version": "motion-sweep.v1",
+ "urdf": "hs_arm_a_rev_b.urdf",
+ "units": "joint values in radians (metres for prismatic); volumes mm^3; gaps mm",
+ "start_pose": {
+  "base_yaw": 0.0,
+  "shoulder": 0.0,
+  "elbow": 0.0,
+  "wrist_pitch": 0.0,
+  "wrist_roll": 0.0,
+  "gripper": 0.0
+ },
+ "meshes": 7,
+ "claim_boundary": "Geometry from the URDF's own meshes and joint limits, one joint (or listed pair) at a time from the start pose. Not a dynamics, strength or wiring check; a clash in a simplified mesh may not exist on real parts, and a pose not sampled is not checked.",
+ "sweeps": [
+  {
+   "joints": [
+    "base_yaw"
+   ],
+   "range": [
+    [
+     -2.61799,
+     2.61799
+    ]
+   ],
+   "steps": 31,
+   "clash_steps": 0,
+   "worst_clash": null,
+   "clashing_pairs": [],
+   "clear_range": [
+    -2.618,
+    2.618
+   ],
+   "min_clearance_mm": null,
+   "min_clearance_pair": null,
+   "min_clearance_at": null
+  },
+  {
+   "joints": [
+    "shoulder"
+   ],
+   "range": [
+    [
+     -2.61799,
+     0.2618
+    ]
+   ],
+   "steps": 31,
+   "clash_steps": 0,
+   "worst_clash": null,
+   "clashing_pairs": [],
+   "clear_range": [
+    -2.618,
+    0.2618
+   ],
+   "min_clearance_mm": null,
+   "min_clearance_pair": null,
+   "min_clearance_at": null
+  },
+  {
+   "joints": [
+    "elbow"
+   ],
+   "range": [
+    [
+     -1.8326,
+     1.48353
+    ]
+   ],
+   "steps": 31,
+   "clash_steps": 0,
+   "worst_clash": null,
+   "clashing_pairs": [],
+   "clear_range": [
+    -1.8326,
+    1.4835
+   ],
+   "min_clearance_mm": null,
+   "min_clearance_pair": null,
+   "min_clearance_at": null
+  },
+  {
+   "joints": [
+    "wrist_pitch"
+   ],
+   "range": [
+    [
+     -1.8326,
+     1.8326
+    ]
+   ],
+   "steps": 31,
+   "clash_steps": 0,
+   "worst_clash": null,
+   "clashing_pairs": [],
+   "clear_range": [
+    -1.8326,
+    1.8326
+   ],
+   "min_clearance_mm": null,
+   "min_clearance_pair": null,
+   "min_clearance_at": null
+  },
+  {
+   "joints": [
+    "wrist_roll"
+   ],
+   "range": [
+    [
+     -2.61799,
+     2.61799
+    ]
+   ],
+   "steps": 31,
+   "clash_steps": 0,
+   "worst_clash": null,
+   "clashing_pairs": [],
+   "clear_range": [
+    -2.618,
+    2.618
+   ],
+   "min_clearance_mm": null,
+   "min_clearance_pair": null,
+   "min_clearance_at": null
+  },
+  {
+   "joints": [
+    "gripper"
+   ],
+   "range": [
+    [
+     0.0,
+     1.22173
+    ]
+   ],
+   "steps": 31,
+   "clash_steps": 0,
+   "worst_clash": null,
+   "clashing_pairs": [],
+   "clear_range": [
+    0.0,
+    1.2217
+   ],
+   "min_clearance_mm": null,
+   "min_clearance_pair": null,
+   "min_clearance_at": null
+  }
+ ]
+}

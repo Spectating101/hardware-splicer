@@ -59,3 +59,34 @@ def test_urdf_limits_are_the_swept_ones(built) -> None:
 def test_committed_sweep_found_no_clash_inside_the_limits() -> None:
     sweep = json.loads((PROJECT / "motion_sweep.json").read_text())
     assert len(sweep["sweeps"]) == 6 and all(s["clash_steps"] == 0 for s in sweep["sweeps"])
+
+
+@pytest.fixture(scope="module")
+def built_rev_b(tmp_path_factory):
+    python = native_python()
+    if subprocess.run([python, "-c", "import cadquery, trimesh"], capture_output=True).returncode:
+        pytest.skip("native CAD interpreter lacks cadquery or trimesh")
+    out = tmp_path_factory.mktemp("arm_b")
+    shutil.copy(PROJECT / "joint_limits.json", out / "joint_limits.json")
+    subprocess.run([python, "-I", str(PROJECT / "build_arm.py"), "--servo", "sts3215", "--out", str(out)], check=True,
+                   capture_output=True, timeout=600)
+    return out
+
+
+def test_rev_b_is_built_around_the_measured_sts3215_and_reports_its_shoulder_honestly(built_rev_b) -> None:
+    v = json.loads((built_rev_b / "verification.json").read_text())
+    assert v["servo_geometry"]["body_mm"] == [45.4, 24.8, 35.4] and v["servo_geometry"]["horn_offset_mm"] == 12.5
+    assert v["servo_geometry"]["cheek_boss_mm"] == {"horn_side": 3.0, "idler_side": 4.0}
+    assert all(p["single_body"] and p["valid_solid"] and p["fits_bed"] for p in v["parts"].values())
+    t = v["static_torque"]
+    assert t["elbow"]["pass"] and t["wrist_pitch"]["pass"]
+    assert not t["shoulder"]["pass"] and 0.5 < t["shoulder"]["stall_share"] < 0.8  # over HS's rule, under SO-101's practice
+    assert v["reach_mm"]["tool_from_yaw_axis"] >= 300
+
+
+def test_committed_rev_b_sweep_is_clash_free_over_rev_a_ranges_and_cheaper() -> None:
+    sweep = json.loads((PROJECT / "rev-b" / "motion_sweep.json").read_text())
+    assert len(sweep["sweeps"]) == 6 and all(s["clash_steps"] == 0 for s in sweep["sweeps"])
+    bom_a = json.loads((PROJECT / "BOM.json").read_text())
+    bom_b = json.loads((PROJECT / "rev-b" / "BOM.json").read_text())
+    assert bom_b["total"] < bom_a["total"] / 5

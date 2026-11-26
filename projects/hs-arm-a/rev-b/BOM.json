@@ -1,0 +1,57 @@
+{
+ "schema": "hardware_splicer.bom.v1",
+ "project": "hs-arm-a rev B",
+ "currency": "USD",
+ "priced": "2026-11-27",
+ "lines": [
+  {
+   "item": "Feetech STS3215 12 V (ST-3215-C018), all six joints",
+   "qty": 6,
+   "unit_price": 21.99,
+   "line_total": 131.94,
+   "source": "https://www.waveshare.com/st3215-servo.htm",
+   "basis": "cited range: Waveshare lists US$16.99-21.99 for its 30 kg.cm@12V / 19.5 kg.cm@7.4V options; the upper figure is taken for the 12 V"
+  },
+  {
+   "item": "Waveshare bus servo adapter board (USB to STS serial bus)",
+   "qty": 1,
+   "unit_price": 10.6,
+   "line_total": 10.6,
+   "source": "https://github.com/TheRobotStudio/SO-ARM100",
+   "basis": "cited (SO-ARM100 README BOM, US column)"
+  },
+  {
+   "item": "ROBOTIS SMPS 12V 5A PS-10",
+   "qty": 1,
+   "unit_price": 28.95,
+   "line_total": 28.95,
+   "source": "https://www.robotshop.com/products/robotis-power-supply-smps-12v-5a-ps-10",
+   "basis": "cited (RobotShop), kept from rev A"
+  },
+  {
+   "item": "PLA filament, 1 kg spool (parts use 322 g at 60% fill)",
+   "qty": 1,
+   "unit_price": 20.0,
+   "line_total": 20.0,
+   "source": null,
+   "basis": "assumed"
+  },
+  {
+   "item": "Fastener kit M2/M2.5/M3 and 1 mm PTFE sheet for the turntable washer",
+   "qty": 1,
+   "unit_price": 15.0,
+   "line_total": 15.0,
+   "source": null,
+   "basis": "assumed"
+  }
+ ],
+ "total": 206.49,
+ "cited_share": 171.49,
+ "assumed_share": 35.0,
+ "notes": [
+  "Servo cables come with the STS3215 (assumed, not priced).",
+  "The STS3215's rear idler disc is part of the servo, so no idler horn sets are needed.",
+  "Shoulder needs 66% of stall with a 150 g payload and safety factor 1.5: over HS's 50% rule; at that rule rev B carries about 63 g. SO-101 runs the same servo class at its shoulder at 80% of its own servo's stall with no payload (same method, its URDF), see docs/DEVICE_REFERENCE_BENCHMARK_20261127.md.",
+  "Shipping, tax and lead times not included."
+ ]
+}

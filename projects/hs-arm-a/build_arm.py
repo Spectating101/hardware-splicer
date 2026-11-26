@@ -3,6 +3,12 @@
 the assembly, a URDF with CAD-derived masses, and the checks that close the design loop.
 
     .cache/hardware-splicer/digital-native-venv/bin/python projects/hs-arm-a/build_arm.py [--out projects/hs-arm-a]
+    .cache/hardware-splicer/digital-native-venv/bin/python projects/hs-arm-a/build_arm.py --servo sts3215 --out projects/hs-arm-a/rev-b
+
+Rev B (``--servo sts3215``) is the same arm on Feetech STS3215 servos, the SO-ARM100/101's actuator: 55 g each and about
+US$14 against US$270 for an XM430. Its geometry is measured from SO-ARM100's STS3215_03a.step (Apache-2.0, commit
+141aea7b): body 45.4 x 24.8 mm and 35.4 mm along the horn axis (Feetech lists 45.2*24.7*35), horn axis 12.5 mm from the
+body centre, horn radius 10.0 mm and 1.0 mm proud of the body envelope, rear idler disc inside the envelope.
 
 Geometry basis
 * Servo body 46.5 x 28.5 x 34 mm (ROBOTIS e-manual, XM430-W350 and XL430-W250 "Dimensions (W x H x D)").
@@ -32,12 +38,25 @@ import numpy as np
 HERE = Path(__file__).resolve().parent
 
 # --- cited and measured servo geometry (mm) -------------------------------------------------------------------------
-BODY_L, BODY_W, BODY_D = 46.5, 28.5, 34.0
+FAMILIES = {
+    "x430": {"body": (46.5, 28.5, 34.0), "horn_off": 12.0, "horn_r": 9.75, "horn_h": 6.4, "idler_h": 4.0,
+             "joints": {"base_yaw": "XM430-W350-T", "shoulder": "XM430-W350-T", "elbow": "XM430-W350-T",
+                        "wrist_pitch": "XL430-W250-T", "wrist_roll": "XL430-W250-T", "gripper": "XL430-W250-T"},
+             "name": "hs_arm_a", "yaw_servo": "XM430-W350-T"},
+    "sts3215": {"body": (45.4, 24.8, 35.4), "horn_off": 12.5, "horn_r": 10.0, "horn_h": 1.0, "idler_h": 0.0,
+                "joints": {j: "STS3215-12V" for j in ("base_yaw", "shoulder", "elbow", "wrist_pitch", "wrist_roll", "gripper")},
+                "name": "hs_arm_a_rev_b", "yaw_servo": "STS3215-12V"},
+}
+BODY_L, BODY_W, BODY_D = FAMILIES["x430"]["body"]
 HORN_OFF = 12.0          # horn axis from body centre, along the length
 HORN_R, HORN_H = 9.75, 6.4
 IDLER_H = 4.0            # assumed
 SERVOS = {"XM430-W350-T": {"mass_kg": 0.082, "stall_nm_12v": 4.1, "stall_a_12v": 2.3, "radial_load_n_at_10mm": 40.0},
-          "XL430-W250-T": {"mass_kg": 0.0572, "stall_nm_12v": 1.5, "stall_a_12v": 1.4, "radial_load_n_at_10mm": None}}
+          "XL430-W250-T": {"mass_kg": 0.0572, "stall_nm_12v": 1.5, "stall_a_12v": 1.4, "radial_load_n_at_10mm": None},
+          # Feetech listing ST-3215-C018 (55 g, 30 kg.cm at 12 V) and Waveshare's wiki (2.7 A locked-rotor); no side-load rating
+          "STS3215-12V": {"mass_kg": 0.055, "stall_nm_12v": 2.942, "stall_a_12v": 2.7, "radial_load_n_at_10mm": None}}
+NAME = "hs_arm_a"
+YAW_SERVO = "XM430-W350-T"
 
 # --- design parameters ----------------------------------------------------------------------------------------------
 P = {
@@ -48,14 +67,30 @@ P = {
     "ring_r": 44.0, "payload_kg": 0.15, "safety_factor": 1.5, "max_stall_share": 0.5,
     "pla_g_cm3": 1.24, "fill": 0.6, "bed_mm": (220.0, 220.0, 250.0),
 }
-JOINT_SERVO = {"base_yaw": "XM430-W350-T", "shoulder": "XM430-W350-T", "elbow": "XM430-W350-T",
-               "wrist_pitch": "XL430-W250-T", "wrist_roll": "XL430-W250-T", "gripper": "XL430-W250-T"}
+JOINT_SERVO = dict(FAMILIES["x430"]["joints"])
 
 C = P["clear"]
-HALF_IN = BODY_D / 2 + C                 # cradle inner half-width across the body depth
-HALF_OUT = HALF_IN + P["wall"]
-CHEEK_POS = (BODY_D / 2 + HORN_H, BODY_D / 2 + HORN_H + P["plate"])          # horn-side cheek, along the axis
-CHEEK_NEG = (-(BODY_D / 2 + IDLER_H + P["plate"]), -(BODY_D / 2 + IDLER_H))  # idler-side cheek
+
+
+def use_servo(family: str) -> None:
+    """Set the servo geometry every part is built around (module globals, so the part functions read one source)."""
+    global BODY_L, BODY_W, BODY_D, HORN_OFF, HORN_R, HORN_H, IDLER_H, JOINT_SERVO, NAME, YAW_SERVO
+    global HALF_IN, HALF_OUT, CHEEK_POS, CHEEK_NEG, HORN_GAP, IDLER_GAP
+    f = FAMILIES[family]
+    BODY_L, BODY_W, BODY_D = f["body"]
+    HORN_OFF, HORN_R, HORN_H, IDLER_H = f["horn_off"], f["horn_r"], f["horn_h"], f["idler_h"]
+    JOINT_SERVO, NAME, YAW_SERVO = dict(f["joints"]), f["name"], f["yaw_servo"]
+    HALF_IN = BODY_D / 2 + C                 # cradle inner half-width across the body depth
+    HALF_OUT = HALF_IN + P["wall"]
+    # A cheek plate must clear the next link's cradle wall (rev A's X430 horn and idler give 0.7 mm). A servo whose horn
+    # sits nearly flush (STS3215, 1.0 mm) needs the cheek held out by a boss of horn radius, printed with the cheek.
+    HORN_GAP = max(HORN_H, round(HALF_OUT + 0.7 - BODY_D / 2, 2))
+    IDLER_GAP = max(IDLER_H, round(HALF_OUT + 0.7 - BODY_D / 2, 2))
+    CHEEK_POS = (BODY_D / 2 + HORN_GAP, BODY_D / 2 + HORN_GAP + P["plate"])          # horn-side cheek, along the axis
+    CHEEK_NEG = (-(BODY_D / 2 + IDLER_GAP + P["plate"]), -(BODY_D / 2 + IDLER_GAP))  # idler-side cheek
+
+
+use_servo("x430")
 
 
 def box(x0, x1, y0, y1, z0, z1):
@@ -90,8 +125,10 @@ def place(shape, rot, origin):
 def servo(point, axis, body_dir):
     """Servo envelope with the axis through `point`, the body centred on point along the axis."""
     body = box(-HORN_OFF - BODY_L / 2, -HORN_OFF + BODY_L / 2, -BODY_W / 2, BODY_W / 2, -BODY_D / 2, BODY_D / 2)
-    solid = body.fuse(cyl(HORN_R, "z", BODY_D / 2, BODY_D / 2 + HORN_H, (0, 0, 0)),
-                      cyl(HORN_R, "z", -BODY_D / 2 - IDLER_H, -BODY_D / 2, (0, 0, 0))).clean()
+    extras = [cyl(HORN_R, "z", BODY_D / 2, BODY_D / 2 + HORN_H, (0, 0, 0))]
+    if IDLER_H > 0:  # an idler inside the body envelope (STS3215) adds nothing
+        extras.append(cyl(HORN_R, "z", -BODY_D / 2 - IDLER_H, -BODY_D / 2, (0, 0, 0)))
+    solid = body.fuse(*extras).clean()
     return place(solid, frame(axis, body_dir), point)
 
 
@@ -109,6 +146,10 @@ def cheeks_y(px, pz, x_end):
     parts = []
     for y0, y1 in (CHEEK_POS, CHEEK_NEG):
         parts += [cyl(r, "y", y0, y1, (px, 0, pz)), box(px, x_end, y0, y1, pz - r, pz + r)]
+    if HORN_GAP > HORN_H:   # boss from the horn face out to the cheek
+        parts.append(cyl(HORN_R, "y", BODY_D / 2 + HORN_H, CHEEK_POS[0] + 0.01, (px, 0, pz)))
+    if IDLER_GAP > IDLER_H:  # boss from the idler face out to the cheek
+        parts.append(cyl(HORN_R, "y", CHEEK_NEG[1] - 0.01, -(BODY_D / 2 + IDLER_H), (px, 0, pz)))
     return parts
 
 
@@ -254,7 +295,9 @@ def sha(path):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--out", type=Path, default=HERE)
+    parser.add_argument("--servo", choices=sorted(FAMILIES), default="x430")
     args = parser.parse_args(argv)
+    use_servo(args.servo)
     out = args.out
     for sub in ("print", "cad", "urdf/meshes"):
         (out / sub).mkdir(parents=True, exist_ok=True)
@@ -287,7 +330,7 @@ def main(argv=None):
         mm = m.copy()
         mm.visual.face_colors = [60, 60, 66, 255] if name.startswith("servo_") else [214, 120, 52, 255]
         scene.add_geometry(mm, node_name=name, geom_name=name)
-    scene.export(out / "cad" / "HS_ARM_A_ASSEMBLY.glb")
+    scene.export(out / "cad" / f"{NAME.upper()}_ASSEMBLY.glb")
 
     # URDF: link frames are world-aligned and sit at their parent joint; meshes are moved into those frames.
     origin = {"base_link": np.zeros(3)}
@@ -309,7 +352,7 @@ def main(argv=None):
         # box inertia from the combined extents, about the CoM (a proxy, stated in the URDF comment)
         e = combined.extents / 1000
         inertial[link] = [total / 12 * (e[1] ** 2 + e[2] ** 2), total / 12 * (e[0] ** 2 + e[2] ** 2), total / 12 * (e[0] ** 2 + e[1] ** 2)]
-    lines = ['<?xml version="1.0"?>', '<robot name="hs_arm_a">',
+    lines = ['<?xml version="1.0"?>', f'<robot name="{NAME}">',
              "  <!-- Generated by projects/hs-arm-a/build_arm.py. Masses: printed PLA at assumed density and fill plus cited servo "
              "masses. Inertia: box proxy from mesh extents. Joint limits come from motion_sweep (see verification.json). -->"]
     limits = json.loads((out / "joint_limits.json").read_text()) if (out / "joint_limits.json").is_file() else {}
@@ -330,7 +373,7 @@ def main(argv=None):
                   f'    <origin xyz="{rel[0]:.5f} {rel[1]:.5f} {rel[2]:.5f}" rpy="0 0 0"/><axis xyz="{axis[0]} {axis[1]} {axis[2]}"/>',
                   f'    <limit lower="{math.radians(lo):.5f}" upper="{math.radians(hi):.5f}" effort="{servo_spec["stall_nm_12v"]}" velocity="1.0"/></joint>']
     lines.append("</robot>")
-    (out / "urdf" / "hs_arm_a.urdf").write_text("\n".join(lines) + "\n")
+    (out / "urdf" / f"{NAME}.urdf").write_text("\n".join(lines) + "\n")
 
     # static torque at each pitch joint, arm stretched horizontally, from CAD centres of mass
     g = 9.80665
@@ -348,7 +391,8 @@ def main(argv=None):
     # base yaw: overturning moment of everything above the yaw horn, against the horn's rated side load
     above = chain
     moment = sum(mass[l] * g * (com_world[l][0]) / 1000 for l in above) + P["payload_kg"] * g * tool[0] / 1000
-    yaw_rating = SERVOS["XM430-W350-T"]["radial_load_n_at_10mm"] * 0.010
+    side_load = SERVOS[YAW_SERVO]["radial_load_n_at_10mm"]
+    yaw_rating = side_load * 0.010 if side_load else None
     base_kg = mass["base_link"]
     tip = {"arm_moment_nm": round(moment, 3), "base_kg": round(base_kg, 3),
            "base_restoring_nm": round(base_kg * g * 0.075, 3),
@@ -361,14 +405,18 @@ def main(argv=None):
     verification = {
         "schema": "hardware_splicer.arm_build_verification.v1",
         "parameters": P | {"bed_mm": list(P["bed_mm"])}, "servos": JOINT_SERVO,
+        "servo_geometry": {"body_mm": [BODY_L, BODY_W, BODY_D], "horn_offset_mm": HORN_OFF, "horn_r_mm": HORN_R,
+                           "horn_proud_mm": HORN_H, "idler_mm": IDLER_H,
+                           "cheek_boss_mm": {"horn_side": round(HORN_GAP - HORN_H, 2), "idler_side": round(IDLER_GAP - IDLER_H, 2)}},
         "parts": report["parts"],
         "mass_kg": {l: round(m, 4) for l, m in mass.items()}, "moving_mass_kg": round(sum(mass[l] for l in chain), 4),
         "reach_mm": {"tool_from_yaw_axis": round(reach, 1), "tool_height_mm": round(tool[2], 1)},
         "static_torque": torque,
         "base_yaw_overturning": {"moment_nm": round(moment, 3), "servo_side_load_rating_nm": yaw_rating,
-                                 "ratio_if_horn_carried_it": round(moment / yaw_rating, 2),
+                                 "ratio_if_horn_carried_it": round(moment / yaw_rating, 2) if yaw_rating else None,
                                  "design_response": f"support ring r={P['ring_r']} mm under the turntable with a 1 mm PTFE washer carries it",
-                                 "basis": "XM430 e-manual 'Radial Load 40 [N] (10 [mm] away from the horn)' taken as a moment"},
+                                 "basis": ("XM430 e-manual 'Radial Load 40 [N] (10 [mm] away from the horn)' taken as a moment"
+                                           if yaw_rating else f"{YAW_SERVO}: no published side-load rating; the support ring carries it")},
         "tip_over": tip,
         "power": {"holding_a_stretched": round(holding_a, 2), "all_stalled_a": round(stall_all_a, 2),
                   "basis": "current proportional to torque up to the cited stall current at 12 V (approximation)"},
