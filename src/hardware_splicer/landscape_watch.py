@@ -39,6 +39,7 @@ TOPICS = {
     "eda_tooling": r"\bkicad\b|freerouting|autorout|\bskidl\b|atopile|tscircuit|\bmcp\b.{0,40}(kicad|cad|freecad|pcb)",
     "cad_tooling": r"text[- ]to[- ]cad|cadquery|build123d|freecad|openscad|parametric cad",
     "physical_ai": r"physical ai|embodied ai|humanoid",
+    "salvage_reuse": r"salvag|e-?waste|recycl|repurpos|upcycl|hoverboard|robot vacuum|roomba|vacuum|old (phone|android|laptop)|smartphone|second.?hand",
 }
 RSS = {
     "hackaday": "https://hackaday.com/feed/",
@@ -51,6 +52,10 @@ HN_QUERIES = ["kicad", "pcb ai", "hardware agent", "ai cad", "robot arm", "open 
               "circuit board ai", "text to cad"]
 GITHUB_QUERIES = ["kicad mcp", "ai pcb", "ai hardware design", "robot arm open source", "text to cad", "pcb agent",
                   "drone flight controller kicad", "open source rover", "freecad mcp", "electronics agent"]
+# Established projects, most-starred first, by GitHub topic: new-only searches never surface a 2020 staple such as
+# OpenBot, which HS then rebuilt by hand on 2026-11-26.
+ESTABLISHED_TOPICS = [["smartphone", "robot"], ["robot", "vacuum"], ["hoverboard"], ["roomba"], ["robot-arm"], ["rover"],
+                      ["drone", "open-source"], ["kicad"], ["openwrt"], ["e-waste"], ["upcycling"], ["salvage"], ["lerobot"]]
 REDDIT: list[str] = []  # Reddit refuses unauthenticated readers (403/404 on JSON and RSS); not worked around
 
 
@@ -98,6 +103,25 @@ def github(since: datetime) -> list[dict[str, Any]]:
             out.append({"source": "github", "title": f"{r['fullName']}: {_clean(r.get('description') or '', 140)}", "url": r["url"],
                         "date": (r.get("createdAt") or "")[:10], "stars": r.get("stargazersCount"),
                         "licence": (r.get("license") or {}).get("key")})
+        time.sleep(1.0)
+    return out
+
+
+def github_established(_since: datetime) -> list[dict[str, Any]]:
+    gh = shutil.which("gh")
+    if not gh:
+        return []
+    out = []
+    for topics in ESTABLISHED_TOPICS:
+        run = subprocess.run([gh, "search", "repos", "--sort", "stars", "--limit", "15", "--json",
+                              "fullName,description,url,stargazersCount,pushedAt,license"] + [a for t in topics for a in ("--topic", t)],
+                             capture_output=True, text=True, timeout=60)
+        if run.returncode != 0:
+            continue
+        for r in json.loads(run.stdout or "[]"):
+            out.append({"source": "github_established", "title": f"{r['fullName']}: {_clean(r.get('description') or '', 140)} [{' '.join(topics)}]",
+                        "url": r["url"], "date": (r.get("pushedAt") or "")[:10], "stars": r.get("stargazersCount"),
+                        "licence": (r.get("license") or {}).get("key"), "established": True})
         time.sleep(1.0)
     return out
 
@@ -167,7 +191,7 @@ def run(days: int, state: Path) -> dict[str, Any]:
     register_path = state / "register.json"
     register = json.loads(register_path.read_text()) if register_path.is_file() else {"items": {}}
     items, errors = [], []
-    for fetch in (hacker_news, github, rss, reddit):
+    for fetch in (hacker_news, github, github_established, rss, reddit):
         try:
             for it in fetch(since):
                 (errors if it.get("error") else items).append(it)

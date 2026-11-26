@@ -8,7 +8,7 @@ def test_new_items_are_matched_registered_once_and_written_to_the_digest(tmp_pat
     feed = [{"source": "hacker_news", "title": "Show HN: an AI agent that lays out KiCad PCBs", "url": "https://example.org/a?ref=hn", "date": "2026-11-20"},
             {"source": "github", "title": "someone/robot-arm-kit: open source robot arm with Feetech servos", "url": "https://github.com/someone/robot-arm-kit", "stars": 40},
             {"source": "hackster", "title": "A cake recipe", "url": "https://example.org/cake"}]
-    for name in ("hacker_news", "github", "rss", "reddit"):
+    for name in ("hacker_news", "github", "github_established", "rss", "reddit"):
         monkeypatch.setattr(lw, name, (lambda items: (lambda since: list(items)))(feed if name == "hacker_news" else []))
     first = lw.run(8, tmp_path)
     assert first["new"] == 2 and set(first["by_topic"]) <= set(lw.TOPICS)
