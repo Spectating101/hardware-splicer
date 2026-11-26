@@ -31,7 +31,9 @@ SOURCES = {
     "pololu_2676": "https://www.pololu.com/file/0J825/2676-bracket-dimensions.pdf (bkt04c, 21 Oct 2014)",
     "rpi_zero2w": "https://datasheets.raspberrypi.com/rpizero2/raspberry-pi-zero-2-w-mechanical-drawing.pdf",
     "rpi_cam3": "https://datasheets.raspberrypi.com/camera/camera-module-3-standard-mechanical-drawing.pdf",
+    "pololu_2692": "https://www.pololu.com/file/0J959/2692-dimensions.pdf (cst05, 18 Sept 2015)",
 }
+CASTER = {"height": 29.0, "base_d": 34.0, "hole_d": 3.2, "hole_circle_d": 14.0}
 MOTOR = {"gearbox_d": 25.0, "motor_d": 24.4, "gearbox_l_47": 21.0, "motor_l": 30.8, "rear_l": 1.5 + 4.2, "shaft_d": 4.0,
          "shaft_l": 12.5, "mass_g_max": 100.0}
 BRACKET = {"base_l": 52.0, "base_w": 21.7, "base_t": 2.0, "face_h": 27.0, "axis_from_base": 14.5, "hole_d": 3.3,
@@ -42,7 +44,7 @@ DEFAULTS = {
     "wheel_d": 80.0, "wheel_w": 10.0, "plate_l": 180.0, "plate_w": 120.0, "plate_t": 4.0, "wheelbase": 120.0,
     "battery_mass_g": 150.0, "battery_box": [80.0, 60.0, 22.0], "electronics_mass_g": 60.0, "wheel_mass_g": 25.0,
     "mast_h": 60.0, "camera_tilt_down_deg": 15.0, "pla_density_g_cm3": 1.24, "infill_fraction": 0.6,
-    "design_slope_deg": 15.0, "hub_offset": 2.0, "bed": [220.0, 220.0, 250.0], "min_ground_clearance": 15.0, "min_wheel_gap": 3.0,
+    "design_slope_deg": 15.0, "hub_offset": 2.0, "drive": "4wd", "caster_mass_g": 15.0, "bed": [220.0, 220.0, 250.0], "min_ground_clearance": 15.0, "min_wheel_gap": 3.0,
 }
 
 
@@ -51,7 +53,7 @@ def build(p: dict) -> dict:
     plate = cq.Workplane("XY").box(l, w, t).translate((0, 0, t / 2)).edges("|Z").fillet(6)
     # Each bracket hangs under the plate with its upright face flush with the plate's side edge; its 52 mm base (and the
     # motor lying on it) runs inward across the chassis, and the shaft passes out through the face to the wheel.
-    axle_x = [-p["wheelbase"] / 2, p["wheelbase"] / 2]
+    axle_x = [-p["wheelbase"] / 2, p["wheelbase"] / 2] if p["drive"] == "4wd" else [-p["wheelbase"] / 2]
     face_y = w / 2  # outer surface of each bracket's upright face
     if 2 * BRACKET["base_l"] > w:
         raise ValueError(f"plate_w {w} mm cannot take two {BRACKET['base_l']} mm brackets facing each other")
@@ -73,7 +75,20 @@ def build(p: dict) -> dict:
     mast = mast.faces(">X").workplane(centerOption="CenterOfBoundBox").pushPoints(
         [(sy * 10.5, cam_z - (t + p["mast_h"] / 2) + dz) for sy in (-1, 1) for dz in (-6.25, 6.25)]).hole(CAM["hole_d"])
     body = plate.union(mast)
-    return {"body": body, "axle_x": axle_x, "face_y": face_y, "mast_x": mast_x, "cam_z": cam_z}
+    caster_x = None
+    boss_t = 0.0
+    if p["drive"] == "2wd_caster":
+        # Pololu #2692 at the front: three 3.2 mm holes on a 14 mm circle, on a printed boss that makes up the difference
+        # between the plate's underside height (wheel radius - 14.5 mm bracket drop) and the caster's 29 mm.
+        caster_x = p["wheelbase"] / 2
+        boss_t = (p["wheel_d"] / 2 - BRACKET["axis_from_base"]) - CASTER["height"]
+        pts = [(caster_x + CASTER["hole_circle_d"] / 2 * math.cos(math.radians(90 + 120 * k)),
+                CASTER["hole_circle_d"] / 2 * math.sin(math.radians(90 + 120 * k))) for k in range(3)]
+        if boss_t > 0.2:
+            boss = cq.Workplane("XY").circle(CASTER["base_d"] / 2 + 2).extrude(-boss_t).translate((caster_x, 0, 0))
+            body = body.union(boss)
+        body = body.faces(">Z").workplane().pushPoints(pts).hole(CASTER["hole_d"])
+    return {"body": body, "axle_x": axle_x, "face_y": face_y, "mast_x": mast_x, "cam_z": cam_z, "caster_x": caster_x, "boss_t": boss_t}
 
 
 def check(p: dict, g: dict) -> dict:
@@ -92,16 +107,34 @@ def check(p: dict, g: dict) -> dict:
     track = 2 * (wheel_inner_y + p["wheel_w"] / 2)
     # Centre of gravity: printed body, four motors on their axes, battery on top behind the Pi, electronics, wheels.
     masses = [(printed_g, plate_bottom_z + bb.zmax / 2, 0.0)]
-    masses += [(MOTOR["mass_g_max"], r, x) for x in g["axle_x"] for _ in (0, 1)]
+    masses += [(MOTOR["mass_g_max"], r, x) for x in g["axle_x"] for _ in (0, 1)]  # two motors per driven axle
     masses += [(p["wheel_mass_g"], r, x) for x in g["axle_x"] for _ in (0, 1)]
     masses += [(p["battery_mass_g"], plate_bottom_z + p["plate_t"] + p["battery_box"][2] / 2, -p["plate_l"] / 2 + 55)]
     masses += [(p["electronics_mass_g"], plate_bottom_z + p["plate_t"] + 8, -10.0)]
     total = sum(m for m, _, _ in masses)
     cg_z = sum(m * z for m, z, _ in masses) / total
     cg_x = sum(m * x for m, _, x in masses) / total
-    tip_fwd = math.degrees(math.atan2(p["wheelbase"] / 2 - cg_x, cg_z))
-    tip_back = math.degrees(math.atan2(p["wheelbase"] / 2 + cg_x, cg_z))
-    tip_side = math.degrees(math.atan2(track / 2, cg_z))
+    if g["caster_x"] is not None:
+        masses.append((p["caster_mass_g"], 15.0, g["caster_x"]))
+        total = sum(m for m, _, _ in masses)
+        cg_z = sum(m * z for m, z, _ in masses) / total
+        cg_x = sum(m * x for m, _, x in masses) / total
+    # Support polygon from the ground contacts; the static tip angle over each edge is atan(distance from the centre of
+    # gravity's ground projection to the edge / CG height).
+    half = track / 2
+    if g["caster_x"] is None:
+        support = [(g["axle_x"][0], -half), (g["axle_x"][1], -half), (g["axle_x"][1], half), (g["axle_x"][0], half)]
+    else:
+        support = [(g["axle_x"][0], -half), (g["caster_x"], 0.0), (g["axle_x"][0], half)]
+    edges = {}
+    for (ax, ay), (bx, by) in zip(support, support[1:] + support[:1]):
+        dist = abs((bx - ax) * (ay - 0.0) - (ax - cg_x) * (by - ay)) / math.hypot(bx - ax, by - ay)
+        side = "backward" if ax == bx and ax < cg_x else ("forward" if ax == bx else "sideways")
+        edges[side] = min(edges.get(side, 1e9), math.degrees(math.atan2(dist, cg_z)))
+    if g["caster_x"] is not None:  # the two edges to the caster are the forward-sideways tipping lines
+        edges["forward"] = edges.pop("sideways")
+        edges["sideways"] = edges["forward"]
+    tip_fwd, tip_back, tip_side = edges.get("forward"), edges.get("backward"), edges.get("sideways")
     # Camera: lower edge of the vertical field of view must clear the chassis nose.
     cam_z_abs = plate_bottom_z + g["cam_z"]
     lower_ray = math.radians(p["camera_tilt_down_deg"] + CAM["vfov_deg"] / 2)
@@ -122,6 +155,8 @@ def check(p: dict, g: dict) -> dict:
     for name, ang in (("forward", tip_fwd), ("backward", tip_back), ("sideways", tip_side)):
         if ang < p["design_slope_deg"]:
             problems.append(f"tips {name} at {ang:.1f} deg, below the {p['design_slope_deg']} deg design slope")
+    if g["caster_x"] is not None and g["boss_t"] < -0.2:
+        problems.append(f"the 29 mm caster is {-g['boss_t']:.1f} mm taller than the plate's height above ground: the rover rocks on it")
     if shaft_reach < -p["wheel_w"] / 2:
         problems.append(f"the 12.5 mm shaft does not reach half way through the wheel ({shaft_reach:.1f} mm): use a narrower wheel or smaller hub offset")
     if nose_in_view:
@@ -130,8 +165,9 @@ def check(p: dict, g: dict) -> dict:
         "printed_part_mm": [round(bb.xlen, 1), round(bb.ylen, 1), round(bb.zlen, 1)], "fits_bed": fits,
         "printed_mass_g": round(printed_g, 1), "all_up_mass_g": round(total, 1),
         "mass_basis": {"motors": "Pololu max 100 g each (cited)", "battery_g": f"{p['battery_mass_g']} declared",
-                       "electronics_g": f"{p['electronics_mass_g']} declared", "wheels_g": f"{p['wheel_mass_g']} each declared",
+                       "electronics_g": f"{p['electronics_mass_g']} declared", "wheels_g": f"{p['wheel_mass_g']} each declared", "caster_g": f"{p['caster_mass_g']} declared" if g["caster_x"] is not None else None,
                        "print": f"PLA {p['pla_density_g_cm3']} g/cm3 x {p['infill_fraction']} effective fill (assumed)"},
+        "drive": p["drive"], "caster_boss_mm": round(g["boss_t"], 1) if g["caster_x"] is not None else None,
         "ground_clearance_mm": round(ground_clearance, 1), "wheel_to_plate_gap_mm": round(wheel_gap, 1), "shaft_reach_beyond_wheel_mm": round(shaft_reach, 1), "track_mm": round(track, 1),
         "cg_mm": {"x": round(cg_x, 1), "z": round(cg_z, 1)},
         "static_tip_angle_deg": {"forward": round(tip_fwd, 1), "backward": round(tip_back, 1), "sideways": round(tip_side, 1)},
