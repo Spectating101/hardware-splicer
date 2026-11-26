@@ -321,28 +321,55 @@ def _rover_chassis(args, project):
 
 
 def _bom_check(args, _project):
-    """A parts list against a budget: every line must name where its price came from."""
+    """A parts list against a budget: every line must name where its price came from, and the list must show what was
+    salvaged. HS exists to turn junk into working hardware, so a list with no reused part needs a recorded reason."""
     lines = list(args.get("lines") or [])
     if not lines:
-        raise ValueError("lines are required: [{item, qty, unit_usd, source}]")
+        raise ValueError("lines are required: [{item, qty, unit_usd, source, origin?}]")
     budget = args.get("budget_usd")
     problems, rows, total = [], [], 0.0
+    new_spend, salvaged, diverted_g, replaced_usd = 0.0, [], 0.0, 0.0
     for i, line in enumerate(lines):
         qty, unit = float(line.get("qty", 1)), line.get("unit_usd")
+        origin = str(line.get("origin") or "new").lower()
+        if origin not in ("new", "used", "salvaged"):
+            problems.append(f"{line.get('item', i)}: origin must be new, used or salvaged")
+            origin = "new"
         if unit is None:
-            problems.append(f"{line.get('item', i)}: no price")
+            problems.append(f"{line.get('item', i)}: no price (a salvaged part is priced at what it costs to get, often 0)")
             continue
         ext = qty * float(unit)
         total += ext
-        if not str(line.get("source") or "").startswith(("http://", "https://")):
-            problems.append(f"{line.get('item', i)}: price has no source URL (declared, not cited)")
-        rows.append({**line, "extended_usd": round(ext, 2)})
+        source = str(line.get("source") or "")
+        if origin == "salvaged":
+            # a salvaged part is cited by the donor it comes out of, not a shop page
+            if not source.startswith(("donor:", "http://", "https://")):
+                problems.append(f"{line.get('item', i)}: a salvaged part must name its donor (source 'donor:<what it comes out of>')")
+            salvaged.append(line.get("item", i))
+            diverted_g += qty * float(line.get("mass_g") or 0)
+            replaced_usd += qty * float(line.get("new_equivalent_usd") or 0)
+        else:
+            new_spend += ext
+            if not source.startswith(("http://", "https://")):
+                problems.append(f"{line.get('item', i)}: price has no source URL (declared, not cited)")
+        rows.append({**line, "origin": origin, "extended_usd": round(ext, 2)})
     if budget is not None and total > float(budget):
         problems.append(f"total US${total:.2f} is over the US${float(budget):.2f} budget")
-    return _envelope(True, f"US${total:.2f} for {len(rows)} lines" + (f" against US${float(budget):.2f}" if budget is not None else ""),
-                     {"lines": rows, "total_usd": round(total, 2), "budget_usd": budget}, problems=problems,
+    reason = str(args.get("salvage_rejected_because") or "").strip()
+    if not salvaged and not reason:
+        problems.append("no salvaged part: HS's first strategy is reuse, so name the donors, or say why salvage does not fit "
+                        "(salvage_rejected_because)")
+    share = len(salvaged) / len(rows) if rows else 0.0
+    salvage = {"salvaged_lines": len(salvaged), "salvage_share_of_lines": round(share, 2), "new_spend_usd": round(new_spend, 2),
+               "mass_diverted_g": round(diverted_g, 1), "new_equivalent_replaced_usd": round(replaced_usd, 2),
+               "salvage_rejected_because": reason or None}
+    summary = (f"US${total:.2f} for {len(rows)} lines" + (f" against US${float(budget):.2f}" if budget is not None else "")
+               + f"; {len(salvaged)} salvaged, US${new_spend:.2f} new")
+    return _envelope(True, summary, {"lines": rows, "total_usd": round(total, 2), "budget_usd": budget, "salvage": salvage},
+                     problems=problems,
                      sources=[str(l.get("source")) for l in lines if str(l.get("source") or "").startswith("http")],
-                     boundary="Shop prices on the day they were read; shipping, tax and stock change.")
+                     boundary="Shop prices on the day they were read; shipping, tax and stock change. A salvaged part is "
+                              "assumed to work until the donor is opened and the part is tested.")
 
 
 # ---------------------------------------------------------------------------------------------------- registry
@@ -389,8 +416,11 @@ TOOLS: dict[str, ToolSpec] = {t.name: t for t in [
     ToolSpec("hs_price_parts", "JLCPCB/LCSC parts, stock and price breaks (jlcparts), for one query or a whole parts list.",
              _obj({"query": {"type": "string"}, "lines": {"type": "array"}, "boards": {"type": "integer"},
                    "qty": {"type": "integer"}, "limit": {"type": "integer"}}), _price),
-    ToolSpec("hs_bom_check", "Total a parts list against a budget; every line needs a price and the URL it came from.",
-             _obj({"lines": {"type": "array"}, "budget_usd": {"type": "number"}}, ["lines"]), _bom_check,
+    ToolSpec("hs_bom_check", "Total a parts list against a budget and report what was salvaged: every bought line needs a price "
+             "and the URL it came from, every salvaged line (origin 'salvaged') the donor it comes out of; a list with no "
+             "salvaged part needs salvage_rejected_because.",
+             _obj({"lines": {"type": "array"}, "budget_usd": {"type": "number"}, "salvage_rejected_because": {"type": "string"}},
+                  ["lines"]), _bom_check,
              check_key=lambda a: "bom_check"),
     ToolSpec("hs_review_kicad_schematic", "Review any KiCad schematic from KiCad's own netlist (UART crossings, power pins, I2C "
              "pull-ups, MOSFET orientation, USB-C CC).", _obj({"schematic": {"type": "string"}, "mates": {"type": "object"}}, ["schematic"]),

@@ -87,3 +87,18 @@ def test_writing_a_file_or_searching_is_not_counted_as_a_check():
     st = ObjectiveProject.load(pid).status()
     assert st["deliverables"][0]["artifact"] == "software/a.py"
     assert not st["software_checked"] and st["open"][0]["check"] == "artifact:../escape.txt"
+
+
+def test_a_parts_list_reports_salvage_and_needs_a_reason_when_nothing_is_reused():
+    new = {"item": "ESP32-C3 board", "qty": 1, "unit_usd": 3.0, "source": "https://example.org/esp32c3"}
+    plain = tb.call("hs_bom_check", {"lines": [new], "budget_usd": 50})
+    assert any("no salvaged part" in p for p in plain["problems"])
+    reasoned = tb.call("hs_bom_check", {"lines": [new], "budget_usd": 50, "salvage_rejected_because": "no donor has a 3.3 V MCU"})
+    assert not reasoned["problems"]
+    mixed = tb.call("hs_bom_check", {"budget_usd": 50, "lines": [new,
+        {"item": "camera, Wi-Fi and battery", "qty": 1, "unit_usd": 0, "origin": "salvaged", "source": "donor:cracked Android phone",
+         "mass_g": 170, "new_equivalent_usd": 25},
+        {"item": "gearmotors and wheels", "qty": 1, "unit_usd": 0, "origin": "salvaged", "source": "a toy car"}]})
+    assert any("must name its donor" in p for p in mixed["problems"])
+    s = mixed["result"]["salvage"]
+    assert s["salvaged_lines"] == 2 and s["new_spend_usd"] == 3.0 and s["mass_diverted_g"] == 170 and s["new_equivalent_replaced_usd"] == 25
