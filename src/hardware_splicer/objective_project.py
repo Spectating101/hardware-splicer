@@ -109,8 +109,16 @@ class ObjectiveProject:
         for s in steps:
             if s["kind"] == "tool":
                 latest[s.get("check_key") or s["title"]] = s
-        checked, open_items, physical = [], [], []
+        checked, open_items, physical, deliverables, tool_research = [], [], [], [], []
         for key, s in latest.items():
+            category = s.get("category") or ("artifact" if key.startswith("artifact:") else
+                                             "research" if s["title"] in ("hs_prior_art_search", "hs_read_board") else "check")
+            if s.get("ok") and not s.get("problems") and category == "artifact":
+                deliverables.append({"artifact": key.removeprefix("artifact:"), "seq": s["seq"], "untested": s.get("claim_boundary")})
+                continue
+            if s.get("ok") and not s.get("problems") and category == "research":
+                tool_research.append({"search": key, "seq": s["seq"], "summary": s.get("summary"), "sources": s.get("sources", [])})
+                continue
             if s.get("ok") and not s.get("problems"):
                 checked.append({"check": key, "seq": s["seq"], "summary": s.get("summary")})
             else:
@@ -119,10 +127,12 @@ class ObjectiveProject:
                 physical.append({"check": key, "boundary": s["claim_boundary"]})
         decisions = [{"seq": s["seq"], "title": s["title"], "choice": s.get("choice"), "because": s.get("because")}
                      for s in steps if s["kind"] == "decision"]
-        research = [{"seq": s["seq"], "title": s["title"], "sources": s.get("sources", [])} for s in steps if s["kind"] == "research"]
+        research = tool_research + [{"seq": s["seq"], "title": s["title"], "sources": s.get("sources", [])}
+                                    for s in steps if s["kind"] == "research"]
         artifacts = sorted(str(p.relative_to(self.root)) for p in self.artifacts_dir.rglob("*") if p.is_file())
         obj = self.objective()
         return {"schema": SCHEMA, "project_id": self.project_id, "objective": obj["objective"],
                 "acceptance": obj.get("acceptance", []), "steps": len(steps), "research": research, "decisions": decisions,
-                "software_checked": checked, "open": open_items, "physical_required": physical, "artifacts": artifacts,
+                "software_checked": checked, "open": open_items, "physical_required": physical, "deliverables": deliverables,
+                "artifacts": artifacts,
                 "authority": "software checks only; no fabrication, power-on, flight or release is authorised by this record"}

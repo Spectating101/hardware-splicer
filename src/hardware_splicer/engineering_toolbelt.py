@@ -38,6 +38,7 @@ class ToolSpec:
     schema: dict[str, Any]
     handler: Callable[[dict[str, Any], ObjectiveProject | None], dict[str, Any]]
     check_key: Callable[[dict[str, Any]], str] | None = None
+    category: str = "check"  # check: verifies something; research: finds information; artifact: writes a deliverable
 
 
 def _obj(props: dict[str, Any], required: list[str] | None = None) -> dict[str, Any]:
@@ -104,6 +105,24 @@ def _project_record(args, project):
     payload = {k: args[k] for k in ("sources", "choice", "because", "alternatives", "details") if k in args}
     step = project.record(kind, str(args.get("title") or kind), payload)
     return _envelope(True, f"recorded step {step['seq']}", step)
+
+
+def _write_artifact(args, project):
+    """A text deliverable the agent wrote (firmware, config, wiring list, procedure), kept on the project."""
+    if project is None:
+        raise ValueError("project_id is required")
+    rel = Path(str(args.get("path") or ""))
+    if not str(rel) or rel.is_absolute() or ".." in rel.parts:
+        raise ValueError("path must be relative inside the project's artifacts")
+    content = str(args.get("content") or "")
+    if len(content.encode()) > 512_000:
+        raise ValueError("artifact over 512 kB; write it in parts")
+    target = project.artifacts_dir / rel
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(content, encoding="utf-8")
+    return _envelope(True, f"wrote artifacts/{rel} ({len(content)} chars)", {"path": f"artifacts/{rel}", "purpose": args.get("purpose")},
+                     sources=list(args.get("sources") or []),
+                     boundary=args.get("claim_boundary") or "Written, not run on hardware.")
 
 
 def _project_status(args, project):
@@ -301,6 +320,31 @@ def _rover_chassis(args, project):
                      sources=res.get("sources", []), boundary=res.get("claim_boundary"))
 
 
+def _bom_check(args, _project):
+    """A parts list against a budget: every line must name where its price came from."""
+    lines = list(args.get("lines") or [])
+    if not lines:
+        raise ValueError("lines are required: [{item, qty, unit_usd, source}]")
+    budget = args.get("budget_usd")
+    problems, rows, total = [], [], 0.0
+    for i, line in enumerate(lines):
+        qty, unit = float(line.get("qty", 1)), line.get("unit_usd")
+        if unit is None:
+            problems.append(f"{line.get('item', i)}: no price")
+            continue
+        ext = qty * float(unit)
+        total += ext
+        if not str(line.get("source") or "").startswith(("http://", "https://")):
+            problems.append(f"{line.get('item', i)}: price has no source URL (declared, not cited)")
+        rows.append({**line, "extended_usd": round(ext, 2)})
+    if budget is not None and total > float(budget):
+        problems.append(f"total US${total:.2f} is over the US${float(budget):.2f} budget")
+    return _envelope(True, f"US${total:.2f} for {len(rows)} lines" + (f" against US${float(budget):.2f}" if budget is not None else ""),
+                     {"lines": rows, "total_usd": round(total, 2), "budget_usd": budget}, problems=problems,
+                     sources=[str(l.get("source")) for l in lines if str(l.get("source") or "").startswith("http")],
+                     boundary="Shop prices on the day they were read; shipping, tax and stock change.")
+
+
 # ---------------------------------------------------------------------------------------------------- registry
 
 
@@ -315,14 +359,20 @@ TOOLS: dict[str, ToolSpec] = {t.name: t for t in [
                    "sources": {"type": "array", "items": {"type": "string"}}, "choice": {"type": "string"},
                    "because": {"type": "string"}, "alternatives": {"type": "array"}, "details": {"type": "object"}},
                   ["project_id", "kind", "title"]), _project_record),
+    ToolSpec("hs_project_write_artifact", "Save a text deliverable (software, config, wiring list, procedure) on the project, "
+             "with its purpose, sources and what it has not been tested on.",
+             _obj({"path": {"type": "string"}, "content": {"type": "string"}, "purpose": {"type": "string"},
+                   "sources": {"type": "array", "items": {"type": "string"}}, "claim_boundary": {"type": "string"}},
+                  ["project_id", "path", "content"]), _write_artifact, check_key=lambda a: f"artifact:{a.get('path')}",
+             category="artifact"),
     ToolSpec("hs_project_status", "Where a project stands: software-checked items, open problems, what only a physical build "
              "can show, decisions, research and artifacts.", _obj({}, ["project_id"]), _project_status),
     ToolSpec("hs_prior_art_search", "Search existing open designs before building: BoardRepo (public KiCad boards, searchable by "
              "part) and GitHub KiCad files with their licences.",
              _obj({"query": {"type": "string"}, "limit": {"type": "integer"}, "sources": {"type": "array", "items": {"type": "string"}},
-                   "extension": {"type": "string"}}, ["query"]), _prior_art),
+                   "extension": {"type": "string"}}, ["query"]), _prior_art, category="research"),
     ToolSpec("hs_read_board", "Read a public BoardRepo board (README, size, layers, contents) as markdown.",
-             _obj({"board": {"type": "string"}, "max_chars": {"type": "integer"}}, ["board"]), _read_board),
+             _obj({"board": {"type": "string"}, "max_chars": {"type": "integer"}}, ["board"]), _read_board, category="research"),
     ToolSpec("hs_size_arm_actuators", "Pick the lightest cited servo per arm joint for a payload, counting the servos' own weight, "
              "against a stated share of stall torque.",
              _obj({"links_mm": {"type": "array", "items": {"type": "number"}}, "payload_kg": {"type": "number"},
@@ -339,6 +389,9 @@ TOOLS: dict[str, ToolSpec] = {t.name: t for t in [
     ToolSpec("hs_price_parts", "JLCPCB/LCSC parts, stock and price breaks (jlcparts), for one query or a whole parts list.",
              _obj({"query": {"type": "string"}, "lines": {"type": "array"}, "boards": {"type": "integer"},
                    "qty": {"type": "integer"}, "limit": {"type": "integer"}}), _price),
+    ToolSpec("hs_bom_check", "Total a parts list against a budget; every line needs a price and the URL it came from.",
+             _obj({"lines": {"type": "array"}, "budget_usd": {"type": "number"}}, ["lines"]), _bom_check,
+             check_key=lambda a: "bom_check"),
     ToolSpec("hs_review_kicad_schematic", "Review any KiCad schematic from KiCad's own netlist (UART crossings, power pins, I2C "
              "pull-ups, MOSFET orientation, USB-C CC).", _obj({"schematic": {"type": "string"}, "mates": {"type": "object"}}, ["schematic"]),
              _review_schematic),
@@ -372,7 +425,8 @@ def call(name: str, args: dict[str, Any] | None) -> dict[str, Any]:
     env = {"tool": name, **env}
     if project and name not in ("hs_project_open", "hs_project_record", "hs_project_status"):
         inputs = {k: v for k, v in args.items() if k != "project_id"}
-        step = project.record("tool", name, {"check_key": spec.check_key(args) if spec.check_key else name, "ok": env["ok"],
+        step = project.record("tool", name, {"check_key": spec.check_key(args) if spec.check_key else name, "category": spec.category,
+                                             "ok": env["ok"],
                                              "summary": env["summary"], "problems": env["problems"], "sources": env["sources"],
                                              "claim_boundary": env["claim_boundary"],
                                              "inputs": json.loads(json.dumps(inputs, default=str))})

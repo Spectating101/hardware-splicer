@@ -77,3 +77,13 @@ def test_every_toolbelt_tool_is_on_the_mcp_server_and_the_rest_api():
     opened = client.post("/v1/toolbelt/hs_project_open", json={"objective": "via REST"}).json()
     assert opened["ok"] and opened["result"]["project_id"]
     assert client.post("/v1/toolbelt/nope", json={}).status_code == 404
+
+
+def test_writing_a_file_or_searching_is_not_counted_as_a_check():
+    pid = tb.call("hs_project_open", {"objective": "x"})["result"]["project_id"]
+    tb.call("hs_project_write_artifact", {"project_id": pid, "path": "software/a.py", "content": "print(1)\n"})
+    bad = tb.call("hs_project_write_artifact", {"project_id": pid, "path": "../escape.txt", "content": "no"})
+    assert not bad["ok"]
+    st = ObjectiveProject.load(pid).status()
+    assert st["deliverables"][0]["artifact"] == "software/a.py"
+    assert not st["software_checked"] and st["open"][0]["check"] == "artifact:../escape.txt"
