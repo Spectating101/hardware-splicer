@@ -43,3 +43,12 @@ def test_joint_actuator_dataset_sizes_the_arm_the_servos_cannot() -> None:
     result = pick([80, 150, 150, 60, 40, 20], 0.5, 1.5, rows, 1.0, torque_key="rated_torque_nm")
     assert result["feasible"]
     assert all(j["rating_share"] <= 1.0 for j in result["joints"])
+
+
+def test_the_sts3215_can_be_picked_now_its_cited_mass_is_known():
+    """With no mass it was skipped, so a 12 V arm always got Dynamixels; its 7.4 V version must never go on a 12 V bus."""
+    from hardware_splicer import arm_actuator_sizing as aas
+    rows = {r["component_id"]: r for r in aas.cited_servo_rows(12.0)}
+    assert rows["feetech-sts3215-12v"]["mass_kg"] == 0.055 and "feetech-sts3215-7v4" not in rows
+    res = aas.pick([110, 100, 72], 0.15, 1.5, list(rows.values()), 0.5)
+    assert res["feasible"] and res["joints"][0]["actuator"] == "feetech-sts3215-12v"

@@ -13,7 +13,8 @@ probed through the git tree API for the files a whole device needs:
 * ``assembly``: build, assembly or instructions documents
 * ``sim``: URDF, Xacro, SDF or MJCF robot models
 
-``completeness`` counts the first five. A repository with all five is an open design HS can measure its own device designs
+``completeness`` counts the first five. It is a floor: parts kept in git submodules (listed under ``submodules``) or in
+sibling repositories of the same organisation (OpenArm, Petoi, NASA's rover software) are not counted. A repository with all five is an open design HS can measure its own device designs
 against, subsystem by subsystem; one with only firmware is a software project. Stars and pushes say what is popular, not
 what works; files present say a design was published, not that it was built.
 """
@@ -133,9 +134,11 @@ def search_categories(per_query: int, fetch: Callable[[list[str]], Any] = _gh, p
 def probe(full_name: str, branch: str, fetch: Callable[[list[str]], Any] = _gh) -> dict[str, Any]:
     tree = fetch(["-X", "GET", f"repos/{full_name}/git/trees/{branch}", "-f", "recursive=1"])
     paths = [t["path"] for t in tree.get("tree", []) if t.get("type") == "blob"]
+    # hardware and firmware often live in git submodules (OpenMower): listed here, not counted, so the score is a floor
+    submodules = [t["path"] for t in tree.get("tree", []) if t.get("type") == "commit"]
     counts = classify_files(paths)
     return {"files": len(paths), "truncated": bool(tree.get("truncated")), "counts": counts, "completeness": completeness(counts),
-            "tree_sha": tree.get("sha")}
+            "submodules": submodules[:20], "tree_sha": tree.get("sha")}
 
 
 def build(found: dict[str, dict[str, Any]], *, probe_top: int, now: datetime,

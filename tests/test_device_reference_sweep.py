@@ -31,3 +31,10 @@ def test_an_unlicensed_repository_never_counts_as_an_open_design():
     tree = {"tree": [{"type": "blob", "path": p} for p in ("a.step", "b.kicad_pcb", "platformio.ini", "bom.csv", "assembly.md")]}
     report = drs.build(found, probe_top=3, now=datetime(2026, 11, 27, tzinfo=timezone.utc), fetch=lambda args: tree)
     assert report["summary"]["robot_vacuum"]["open_designs"] == 0
+
+
+def test_submodules_are_listed_so_a_split_design_is_not_read_as_empty():
+    tree = {"tree": [{"type": "commit", "path": "hardware"}, {"type": "commit", "path": "firmware"},
+                     {"type": "blob", "path": "README.md"}]}
+    design = drs.probe("x/mower", "main", fetch=lambda args: tree)
+    assert design["completeness"] == 0 and design["submodules"] == ["hardware", "firmware"]
