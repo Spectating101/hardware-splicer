@@ -1,0 +1,92 @@
+{
+ "schema": "hardware_splicer.fab_quote.v1",
+ "as_of": "2026-11-26",
+ "board": "HS-BUS-A rev A, 70 x 56 mm, 2 layers, all parts top side",
+ "order": {
+  "boards": 5,
+  "service": "JLCPCB Economic PCBA, single side"
+ },
+ "fees_usd": {
+  "pcb_5pcs_2layer_under_100x100": 2.0,
+  "setup_economic": 8.18,
+  "stencil_economic": 1.53,
+  "smt_joints": 0.86,
+  "manual_joints": 1.39,
+  "hand_soldering_labor": 3.58,
+  "feeder_loading_extended": 42.98,
+  "parts": 45.92
+ },
+ "total_usd": 106.44,
+ "per_board_usd": 21.29,
+ "with_basic_swaps": {
+  "swaps": {
+   "C1": "C1779 CL21A475KAQNNNE 4.7uF 25V X5R 0805",
+   "R9": "C22808 0603WAF1500T5E 150R 1% 0603",
+   "C8": "C24497 CL31B104KBCNNNC 100nF 50V X7R 1206"
+  },
+  "total_usd": 97.23,
+  "per_board_usd": 19.45,
+  "note": "each swap removes one US$3.07 extended-part loading fee; part prices differ by under US$0.10"
+ },
+ "bare_boards_only_usd": 2.0,
+ "basis": {
+  "fee_table": "https://jlcpcb.com/help/article/pcb-assembly-price (read 2026-11-26)",
+  "pcb_offer": "https://jlcpcb.com/ ('From $2.00 / 5 pcs', read 2026-11-26)",
+  "parts": "jlcparts prices at 5-board quantity (2026-11-26T03:01:58+00:00)",
+  "joints": "pad count from hs_bus_a.kicad_pcb: 107 SMD, 17 through-hole (J1 shell, J2-J5, C7)",
+  "extended_types": [
+   [
+    "J1"
+   ],
+   [
+    "U4"
+   ],
+   [
+    "U1"
+   ],
+   [
+    "C1"
+   ],
+   [
+    "U2"
+   ],
+   [
+    "U3"
+   ],
+   [
+    "D2"
+   ],
+   [
+    "D3"
+   ],
+   [
+    "R9"
+   ],
+   [
+    "D5"
+   ],
+   [
+    "TH1"
+   ],
+   [
+    "D1"
+   ],
+   [
+    "C8"
+   ],
+   [
+    "F1",
+    "F2",
+    "F3"
+   ]
+  ]
+ },
+ "not_included": [
+  "shipping to Taiwan",
+  "import tax",
+  "any 'Preferred Extended' exemption (would lower feeder fees; not in jlcparts data)",
+  "JLCPCB minimum-order or attrition quantities",
+  "the cart's live quote, which is authoritative"
+ ],
+ "claim_boundary": "Computed from the published fee table, not a cart quote. Nothing was ordered."
+}
