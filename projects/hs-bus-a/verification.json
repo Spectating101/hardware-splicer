@@ -1,0 +1,945 @@
+{
+ "schema_version": "hardware_splicer.hs_bus_a.verification.v1",
+ "design": {
+  "name": "hs_bus_a",
+  "title": "HS-BUS-A USB to DYNAMIXEL TTL bus, 12 V distribution",
+  "revision": "A",
+  "parts": 39,
+  "nets": 22
+ },
+ "schematic": {
+  "pins_checked": 119,
+  "every_pin_connected_or_declared_unused": true,
+  "kicad_readback_matches_design": true,
+  "nets_compared": 22,
+  "erc_errors": 0,
+  "erc_warnings": 0,
+  "erc_warning_types": []
+ },
+ "routing": {
+  "engine": "freerouting (earlier run of this build)",
+  "reused_board": true
+ },
+ "drc": {
+  "violations": {
+   "errors": 0,
+   "warnings": 2,
+   "items": [
+    "warning: silk_edge_clearance: Segment on Edge.Cuts; Segment of J1 on F.Silkscreen",
+    "warning: silk_edge_clearance: Segment on Edge.Cuts; Segment of J1 on F.Silkscreen"
+   ]
+  },
+  "unconnected_items": {
+   "errors": 0,
+   "warnings": 0,
+   "items": []
+  },
+  "schematic_parity": {
+   "errors": 0,
+   "warnings": 0,
+   "items": []
+  }
+ },
+ "kicad_version": "9.0.2",
+ "board": {
+  "size_mm": [
+   70.0,
+   56.0
+  ],
+  "copper_layers": 2,
+  "footprints": 39,
+  "track_segments": 310,
+  "track_widths_mm": [
+   0.2,
+   1.2,
+   2.5
+  ],
+  "vias": 141,
+  "rules": {
+   "clearance": 0.15,
+   "track": 0.2,
+   "min_track": 0.2,
+   "via_d": 0.6,
+   "via_drill": 0.3,
+   "edge_clearance": 0.3
+  },
+  "port_track_mm": 1.2,
+  "vin_track_mm": 2.5,
+  "copper_weight": "1 oz assumed (board-house default)"
+ },
+ "electrical": {
+  "logic_levels": [
+   {
+    "link": "TXD: FT232R -> 74AHCT1G126 A",
+    "driver": "FT232R TXD/CBUS2 at VCCIO 5 V",
+    "receiver": "74AHCT1G125/126 input at VCC 4.5-5.5 V",
+    "high_margin_v": 1.2,
+    "low_margin_v": 0.2,
+    "guaranteed": true,
+    "driver_load_in_spec": "2 mA",
+    "sources": [
+     "FTDI DS_FT232R v2.07, Table 5.3 (VCCIO = 5.0 V) and Table 5.2; read from https://cdn-shop.adafruit.com/datasheets/DS_FT232R.pdf",
+     "TI SCLS378P (SN74AHCT1G125), 5.3 and 5.5; https://www.ti.com/lit/ds/symlink/sn74ahct1g125.pdf"
+    ]
+   },
+   {
+    "link": "TXDEN: FT232R CBUS2 -> 74AHCT1G126 OE, 74AHCT1G125 OE#",
+    "driver": "FT232R TXD/CBUS2 at VCCIO 5 V",
+    "receiver": "74AHCT1G125/126 input at VCC 4.5-5.5 V",
+    "high_margin_v": 1.2,
+    "low_margin_v": 0.2,
+    "guaranteed": true,
+    "driver_load_in_spec": "2 mA",
+    "sources": [
+     "FTDI DS_FT232R v2.07, Table 5.3 (VCCIO = 5.0 V) and Table 5.2; read from https://cdn-shop.adafruit.com/datasheets/DS_FT232R.pdf",
+     "TI SCLS378P (SN74AHCT1G125), 5.3 and 5.5; https://www.ti.com/lit/ds/symlink/sn74ahct1g125.pdf"
+    ]
+   },
+   {
+    "link": "RXD: 74AHCT1G125 Y -> FT232R RXD",
+    "driver": "74AHCT1G125/126 Y at VCC 4.5 V",
+    "receiver": "FT232R RXD at VCCIO 5 V (switching threshold max)",
+    "high_margin_v": 2.44,
+    "low_margin_v": 0.56,
+    "guaranteed": true,
+    "driver_load_in_spec": "8 mA",
+    "sources": [
+     "FTDI DS_FT232R v2.07, Table 5.3 (VCCIO = 5.0 V) and Table 5.2; read from https://cdn-shop.adafruit.com/datasheets/DS_FT232R.pdf",
+     "TI SCLS378P (SN74AHCT1G125), 5.3 and 5.5; https://www.ti.com/lit/ds/symlink/sn74ahct1g125.pdf"
+    ]
+   },
+   {
+    "link": "ROBOTIS reference: FT232R TXD -> 74LVC2G241 A2 at 5 V",
+    "driver": "FT232R TXD/CBUS2 at VCCIO 5 V",
+    "receiver": "74LVC2G241 input at VCC 5 V (ROBOTIS reference)",
+    "high_margin_v": -0.3,
+    "low_margin_v": 0.9,
+    "guaranteed": false,
+    "driver_load_in_spec": "2 mA",
+    "sources": [
+     "FTDI DS_FT232R v2.07, Table 5.3 (VCCIO = 5.0 V) and Table 5.2; read from https://cdn-shop.adafruit.com/datasheets/DS_FT232R.pdf",
+     "TI SN74LVC2G241, Recommended Operating Conditions; https://www.ti.com/lit/ds/symlink/sn74lvc2g241.pdf"
+    ]
+   }
+  ],
+  "logic_levels_pass": true,
+  "currents": {
+   "per_port": {
+    "connector_rating_a": 3.0,
+    "fuse_hold_a": 2.5,
+    "fuse_trip_a": 5.0,
+    "fuse_hold_within_connector_rating": true,
+    "note": "Between 2.5 A and 5.0 A the fuse may or may not trip (Bourns: hold and trip at 23 C); the JST contact is rated 3 A. A sustained load in that band is not guaranteed to be cut.",
+    "track_mm": 1.2,
+    "track_rise_c_at_hold": 8.2,
+    "track_rise_c_at_trip": 39.6,
+    "track_basis": "IPC-2221 outer-layer fit, 1 oz (35 um) copper assumed",
+    "fuse_drop_v_at_hold_max": 0.25,
+    "sources": [
+     "JST EH catalogue: 'Current rating: 3 A AC/DC (AWG #22)'; https://www.jst-mfg.com/product/pdf/eng/eEH.pdf",
+     "Bourns MF-MSMF series rev. BE: MF-MSMF250/16X Vmax 16 V, Ihold 2.50 A, Itrip 5.00 A, R1max 0.100 ohm; https://www.bourns.com/docs/Product-Datasheets/mfmsmf.pdf"
+    ]
+   },
+   "input_trunk": {
+    "track_mm": 2.5,
+    "supply_a": 5.0,
+    "supply_basis": "BOM supply: ROBOTIS SMPS 12 V 5 A",
+    "track_rise_c_at_supply_max": 11.8,
+    "track_basis": "IPC-2221 outer-layer fit, 1 oz (35 um) copper assumed"
+   },
+   "arm": {
+    "holding_stretched_a": 1.57,
+    "all_stalled_a": 11.1,
+    "one_port_holds_arm": true,
+    "ports_needed_for_all_stalled": 5,
+    "advice": "Run the arm on two ports (base yaw + shoulder + elbow on one, the wrist and gripper on another) so a chain's normal current stays well under 2.5 A; a full stall of every joint trips the fuses, which is the intended protection. ROBOTIS servos also have their own overload shutdown.",
+    "source": "projects/hs-arm-a/verification.json power"
+   }
+  },
+  "voltages": {
+   "servo_window_v": {
+    "xm430": [
+     10.0,
+     14.8
+    ],
+    "xl430": [
+     6.5,
+     12.0
+    ],
+    "common": [
+     10.0,
+     12.0
+    ],
+    "source": "src/hardware_splicer/data/actuators/cited_servos_20261126.json (ROBOTIS e-manual figures)"
+   },
+   "supply_v": 12.0,
+   "supply_inside_window": true,
+   "supply_at_window_edge": true,
+   "supply_note": "12 V is the XL430's maximum input; a supply that regulates high (or a 3S pack at 12.6 V full charge) exceeds it. Use a supply set to 12.0 V or below, or 11.1 V nominal.",
+   "tvs": {
+    "part": "SMBJ15CA",
+    "standoff_v": 15.0,
+    "clamp_v_at_ippm": 24.4,
+    "standoff_above_supply": true,
+    "clamps_below_servo_max": false,
+    "note": "The TVS absorbs fast surges (hot-plug, regeneration spikes); it clamps above every servo's rated input, so it is not overvoltage protection for a wrong supply.",
+    "source": "Vishay SMBJ series doc. 88392 (09-Jan-2024): SMBJ15(C)A VWM 15 V, VBR 16.7-18.5 V, VC 24.4 V at IPPM 24.6 A; https://www.vishay.com/docs/88392/smbj.pdf"
+   },
+   "fuse_vmax_v": 16.0,
+   "fuse_vmax_ok": true,
+   "bulk_cap_v": 25.0,
+   "bulk_cap_derating": 2.08,
+   "usb_esd": {
+    "part": "TPD2E2U06",
+    "vrwm_v": 5.5,
+    "ok_for_usb_data": true,
+    "source": "TI SLLSEG9C (TPD2E2U06): VRWM 5.5 V; https://www.ti.com/lit/ds/symlink/tpd2e2u06.pdf"
+   },
+   "reverse_polarity": "not protected: the screw terminal is unkeyed. Check polarity before connecting the supply."
+  },
+  "half_duplex_circuit": {
+   "basis": "ROBOTIS TTL communication circuit (ttl_circuit.png, X-series e-manual)",
+   "kept": "two tri-state buffers on one DATA line, direction from a transmit-enable line (high = transmit), 10 kOhm pull-ups to 5 V on DATA and RXD, 10 kOhm pull-down on the enable",
+   "changed": "74LVC2G241 -> 74AHCT1G126 (transmit) + 74AHCT1G125 (receive), because the FT232R's guaranteed 3.2 V high is below the LVC part's 3.5 V input high at 5 V",
+   "added_from_pollen": "Data-line protection as in Pollen Robotics' production converter (github.com/pollen-robotics/elec_grabette, Apache-2.0): 150 ohm series, 5.1 V Zener clamp, 100 ohm PTC (Murata PRG18BB101MB1RB, 24 V) toward the connectors, so 12 V on the data pin cannot reach the buffers",
+   "direction_source": "FT232R CBUS2, factory default TXDEN (DS_FT232R Table 3.x: 'Factory default configuration is TXDEN'), so no EEPROM programming"
+  }
+ },
+ "bom_pricing": {
+  "1_boards": {
+   "boards": 1,
+   "lines": [
+    {
+     "refs": [
+      "J1"
+     ],
+     "lcsc": "C165948",
+     "mpn_wanted": "HRO TYPE-C-31-M-12",
+     "qty": 1,
+     "mpn": "TYPE-C-31-M-12",
+     "stock": 367975,
+     "match": "lcsc_code",
+     "unit_usd": 0.1872,
+     "extended_usd": 0.1872,
+     "description": "-30\u2103~+80\u2103 1 10,000 cycles 16P 20V 5A 7.35mm Female Surface Mount, Right Angle Type-C SMD USB Connectors ROHS"
+    },
+    {
+     "refs": [
+      "U4"
+     ],
+     "lcsc": "C915089",
+     "mpn_wanted": "TPD2E2U06QDCKRQ1",
+     "qty": 1,
+     "mpn": "TPD2E2U06QDCKRQ1",
+     "stock": 4550,
+     "match": "lcsc_code",
+     "unit_usd": 0.2684,
+     "extended_usd": 0.2684,
+     "description": "-40\u2103~+125\u2103 1.5pF 10nA 2 4V\u300112.4V 5.5A@8/20us 5.5V 75W@8/20us 8.5V ESD IEC 61000-4-2 SC-70-3 ESD and Surge Protection (TV"
+    },
+    {
+     "refs": [
+      "R1",
+      "R2"
+     ],
+     "query": "0603 5.1k 1%",
+     "mpn_wanted": "0603 5.1k 1%",
+     "qty": 2,
+     "lcsc": "C23186",
+     "mpn": "0603WAF5101T5E",
+     "stock": 23749760,
+     "match": "keyword, check the description",
+     "unit_usd": 0.0015,
+     "extended_usd": 0.003,
+     "description": "-55\u2103~+155\u2103 100mW 5.1k\u03a9 75V Thick Film Resistor \u00b11% \u00b1100ppm/\u2103 0603 Chip Resistor - Surface Mount ROHS"
+    },
+    {
+     "refs": [
+      "U1"
+     ],
+     "lcsc": "C8690",
+     "mpn_wanted": "FT232RL-REEL",
+     "qty": 1,
+     "mpn": "FT232RL-REEL",
+     "stock": 9832,
+     "match": "lcsc_code",
+     "unit_usd": 7.3104,
+     "extended_usd": 7.3104,
+     "description": "-40\u2103~+85\u2103 15mA 3.3V~5.25V 3Mbps 70uA USB 2.0 USB to UART SSOP-28-208mil USB Converters ROHS"
+    },
+    {
+     "refs": [
+      "C1"
+     ],
+     "query": "0805 4.7uF 16V X5R",
+     "mpn_wanted": "0805 4.7uF 16V X5R",
+     "qty": 1,
+     "lcsc": "C1746",
+     "mpn": "CL21A475KOFNNNE",
+     "stock": 34531,
+     "match": "keyword, check the description",
+     "unit_usd": 0.0451,
+     "extended_usd": 0.0451,
+     "description": "16V 4.7uF X5R \u00b110% 0805 Multilayer Ceramic Capacitors MLCC - SMD/SMT ROHS"
+    },
+    {
+     "refs": [
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C6"
+     ],
+     "query": "0603 100nF 50V X7R",
+     "mpn_wanted": "0603 100nF 50V X7R",
+     "qty": 5,
+     "lcsc": "C14663",
+     "mpn": "CC0603KRX7R9BB104",
+     "stock": 50349394,
+     "match": "keyword, check the description",
+     "unit_usd": 0.0141,
+     "extended_usd": 0.0705,
+     "description": "100nF 50V X7R \u00b110% 0603 Multilayer Ceramic Capacitors MLCC - SMD/SMT ROHS"
+    },
+    {
+     "refs": [
+      "U2"
+     ],
+     "lcsc": "C163712",
+     "mpn_wanted": "SN74AHCT1G126DBVR",
+     "qty": 1,
+     "mpn": "SN74AHCT1G126DBVR",
+     "stock": 8687,
+     "match": "lcsc_code",
+     "unit_usd": 0.0979,
+     "extended_usd": 0.0979,
+     "description": "-40\u2103~+125\u2103 1 1 10uA 4.5V~5.5V 5.5ns@5V,15pF 74AHCT 8mA 8mA Tri-State Unidirectional SOT-23-5 Buffers, Drivers, Receivers"
+    },
+    {
+     "refs": [
+      "U3"
+     ],
+     "lcsc": "C7484",
+     "mpn_wanted": "SN74AHCT1G125DBVR",
+     "qty": 1,
+     "mpn": "SN74AHCT1G125DBVR",
+     "stock": 49011,
+     "match": "lcsc_code",
+     "unit_usd": 0.1007,
+     "extended_usd": 0.1007,
+     "description": "-40\u2103~+125\u2103 1 1 10uA 4.5V~5.5V 6.5ns@5V,15pF 74AHCT 8mA 8mA Output enable Tri-State Unidirectional SOT-23-5 Buffers, Driv"
+    },
+    {
+     "refs": [
+      "R3",
+      "R4",
+      "R5"
+     ],
+     "query": "0603 10k 1%",
+     "mpn_wanted": "0603 10k 1%",
+     "qty": 3,
+     "lcsc": "C25804",
+     "mpn": "0603WAF1002T5E",
+     "stock": 32380385,
+     "match": "keyword, check the description",
+     "unit_usd": 0.0052,
+     "extended_usd": 0.0156,
+     "description": "-55\u2103~+155\u2103 100mW 10k\u03a9 75V Thick Film Resistor \u00b11% \u00b1100ppm/\u2103 0603 Chip Resistor - Surface Mount ROHS"
+    },
+    {
+     "refs": [
+      "R6",
+      "R7"
+     ],
+     "query": "0603 1k 1%",
+     "mpn_wanted": "0603 1k 1%",
+     "qty": 2,
+     "lcsc": "C21190",
+     "mpn": "0603WAF1001T5E",
+     "stock": 24277749,
+     "match": "keyword, check the description",
+     "unit_usd": 0.002,
+     "extended_usd": 0.004,
+     "description": "-55\u2103~+155\u2103 100mW 1k\u03a9 75V Thick Film Resistor \u00b11% \u00b1100ppm/\u2103 0603 Chip Resistor - Surface Mount ROHS"
+    },
+    {
+     "refs": [
+      "D2"
+     ],
+     "lcsc": "C12624",
+     "mpn_wanted": "KT-0603G",
+     "qty": 1,
+     "mpn": "KT-0603G",
+     "stock": 524136,
+     "match": "lcsc_code",
+     "unit_usd": 0.0117,
+     "extended_usd": 0.0117,
+     "description": "-40\u2103~+85\u2103 1.6mm x 0.8mm square LED 100mW 120\u00b0 3.1V 430mcd 513nm~528nm 525nm 5mA Discrete Diode Emerald Green Water Clear"
+    },
+    {
+     "refs": [
+      "D3"
+     ],
+     "lcsc": "C2287",
+     "mpn_wanted": "KT-0603Y",
+     "qty": 1,
+     "mpn": "KT-0603Y",
+     "stock": 134386,
+     "match": "lcsc_code",
+     "unit_usd": 0.0104,
+     "extended_usd": 0.0104,
+     "description": "-40\u2103~+85\u2103 120\u00b0 175mcd 2.4V 40mW 584nm~594nm 596nm Discrete Diode Water Clear Yellow 0603 LED Indication - Discrete ROHS"
+    },
+    {
+     "refs": [
+      "R9"
+     ],
+     "query": "0603 150R 1%",
+     "mpn_wanted": "0603 150R 1%",
+     "qty": 1,
+     "lcsc": "C114608",
+     "mpn": "RC0603FR-07150RL",
+     "stock": 506592,
+     "match": "keyword, check the description",
+     "unit_usd": 0.0026,
+     "extended_usd": 0.0026,
+     "description": "-55\u2103~+155\u2103 100mW 150\u03a9 75V Thick Film Resistor \u00b11% \u00b1100ppm/\u2103 0603 Chip Resistor - Surface Mount ROHS"
+    },
+    {
+     "refs": [
+      "D5"
+     ],
+     "lcsc": "C2903905",
+     "mpn_wanted": "BZT52C5V1S",
+     "qty": 1,
+     "mpn": "BZT52C5V1S",
+     "stock": 236641,
+     "match": "lcsc_code",
+     "unit_usd": 0.0162,
+     "extended_usd": 0.0162,
+     "description": "1 Independent 200mW 2uA@2V 4.8V~5.4V 480\u03a9 5.1V 60\u03a9 SOD-323 Zener Diodes ROHS"
+    },
+    {
+     "refs": [
+      "TH1"
+     ],
+     "lcsc": "C913703",
+     "mpn_wanted": "PRG18BB101MB1RB",
+     "qty": 1,
+     "mpn": "PRG18BB101MB1RB",
+     "stock": 3255,
+     "match": "lcsc_code",
+     "unit_usd": 0.2199,
+     "extended_usd": 0.2199,
+     "description": "0.8mm 0.8mm 1.6mm 100\u03a9 21mA 24V 300mA 45mA 0603 PTC Thermistors ROHS"
+    },
+    {
+     "refs": [
+      "J2"
+     ],
+     "lcsc": "C8465",
+     "mpn_wanted": "WJ500V-5.08-2P",
+     "qty": 1,
+     "mpn": "WJ500V-5.08-2P",
+     "stock": 248579,
+     "match": "lcsc_code",
+     "unit_usd": 0.1348,
+     "extended_usd": 0.1348,
+     "description": "-40\u2103~+105\u2103 1 14~30 18A 1x2P 2 2.5 250V 2P 5.08mm Green M2.5 Through Hole \u63d2\u4ef6,P=5.08mm Screw Terminal Blocks ROHS"
+    },
+    {
+     "refs": [
+      "D1"
+     ],
+     "lcsc": "C169449",
+     "mpn_wanted": "SMBJ15CA",
+     "qty": 1,
+     "mpn": "SMBJ15CA",
+     "stock": 179918,
+     "match": "lcsc_code",
+     "unit_usd": 0.0389,
+     "extended_usd": 0.0389,
+     "description": "-65\u2103~+150\u2103 15V 18.5V 1uA 24.4V 24.6A@10/1000us 390pF 600W@10/1000us Bidirectional IEC 61000-4-2 TVS SMB ESD and Surge Pr"
+    },
+    {
+     "refs": [
+      "C7"
+     ],
+     "lcsc": "C160162",
+     "mpn_wanted": "220uF 25V radial 8 mm",
+     "qty": 1,
+     "mpn": "ERS1EM221F12OT",
+     "stock": 630810,
+     "match": "lcsc_code",
+     "unit_usd": 0.0356,
+     "extended_usd": 0.0356,
+     "description": "12mm 220uF 25V 3.5mm 7000hrs@105\u2103 8mm \u00b120% \u63d2\u4ef6,D8xL12mm Aluminum Electrolytic Capacitors - Leaded ROHS"
+    },
+    {
+     "refs": [
+      "C8"
+     ],
+     "query": "1206 100nF 50V X7R",
+     "mpn_wanted": "1206 100nF 50V X7R",
+     "qty": 1,
+     "lcsc": "C82601",
+     "mpn": "CC1206KRX7R9BB104",
+     "stock": 1699230,
+     "match": "keyword, check the description",
+     "unit_usd": 0.0173,
+     "extended_usd": 0.0173,
+     "description": "100nF 50V X7R \u00b110% 1206 Multilayer Ceramic Capacitors MLCC - SMD/SMT ROHS"
+    },
+    {
+     "refs": [
+      "R8"
+     ],
+     "query": "1206 4.7k 1%",
+     "mpn_wanted": "1206 4.7k 1%",
+     "qty": 1,
+     "lcsc": "C17936",
+     "mpn": "1206W4F4701T5E",
+     "stock": 3096459,
+     "match": "keyword, check the description",
+     "unit_usd": 0.0084,
+     "extended_usd": 0.0084,
+     "description": "-55\u2103~+155\u2103 200V 250mW 4.7k\u03a9 Thick Film Resistor \u00b11% \u00b1100ppm/\u2103 1206 Chip Resistor - Surface Mount ROHS"
+    },
+    {
+     "refs": [
+      "D4"
+     ],
+     "lcsc": "C2286",
+     "mpn_wanted": "KT-0603R",
+     "qty": 1,
+     "mpn": "KT-0603R",
+     "stock": 7858146,
+     "match": "lcsc_code",
+     "unit_usd": 0.0077,
+     "extended_usd": 0.0077,
+     "description": "-40\u2103~+85\u2103 1.6mm x 0.8mm square LED 1.8V~2.4V 120\u00b0 20mA 300mcd 40mW 615nm~630nm 645nm Discrete Diode Red Water Clear 0603"
+    },
+    {
+     "refs": [
+      "F1",
+      "F2",
+      "F3"
+     ],
+     "lcsc": "C210838",
+     "mpn_wanted": "MF-MSMF250/16X",
+     "qty": 3,
+     "mpn": "MF-MSMF250/16X-2",
+     "stock": 10210,
+     "match": "lcsc_code",
+     "unit_usd": 0.1428,
+     "extended_usd": 0.4284,
+     "description": "-40\u2103~+85\u2103 1.2W 100A 100m\u03a9 15m\u03a9 16V 2.5A 5A 5s 1812 Resettable Fuses ROHS"
+    },
+    {
+     "refs": [
+      "J3",
+      "J4",
+      "J5"
+     ],
+     "lcsc": "C160259",
+     "mpn_wanted": "JST B3B-EH-A",
+     "qty": 3,
+     "mpn": "B3B-EH-A(LF)(SN)",
+     "stock": 89449,
+     "match": "lcsc_code",
+     "unit_usd": 0.0496,
+     "extended_usd": 0.1488,
+     "description": "-25\u2103~+85\u2103 1 10mm 1x3P 2.5mm 250V 3 3.8mm 3A 3P 6mm Brass EH K Pin PA66 Through Hole Tin UL94V-0 White \u63d2\u4ef6,P=2.5mm Wire To"
+    }
+   ],
+   "parts_total_usd": 9.18,
+   "per_board_usd": 9.18,
+   "not_found": [],
+   "source": "JLCPCB parts list via jlcparts (https://github.com/yaqwsx/jlcparts)",
+   "prices_as_of": "2026-11-26T03:01:58+00:00",
+   "claim_boundary": "JLCPCB unit prices for the parts only: no PCB, assembly, setup, shipping or tax."
+  },
+  "10_boards": {
+   "boards": 10,
+   "lines": [
+    {
+     "refs": [
+      "J1"
+     ],
+     "lcsc": "C165948",
+     "mpn_wanted": "HRO TYPE-C-31-M-12",
+     "qty": 10,
+     "mpn": "TYPE-C-31-M-12",
+     "stock": 367975,
+     "match": "lcsc_code",
+     "unit_usd": 0.1872,
+     "extended_usd": 1.872,
+     "description": "-30\u2103~+80\u2103 1 10,000 cycles 16P 20V 5A 7.35mm Female Surface Mount, Right Angle Type-C SMD USB Connectors ROHS"
+    },
+    {
+     "refs": [
+      "U4"
+     ],
+     "lcsc": "C915089",
+     "mpn_wanted": "TPD2E2U06QDCKRQ1",
+     "qty": 10,
+     "mpn": "TPD2E2U06QDCKRQ1",
+     "stock": 4550,
+     "match": "lcsc_code",
+     "unit_usd": 0.2684,
+     "extended_usd": 2.684,
+     "description": "-40\u2103~+125\u2103 1.5pF 10nA 2 4V\u300112.4V 5.5A@8/20us 5.5V 75W@8/20us 8.5V ESD IEC 61000-4-2 SC-70-3 ESD and Surge Protection (TV"
+    },
+    {
+     "refs": [
+      "R1",
+      "R2"
+     ],
+     "query": "0603 5.1k 1%",
+     "mpn_wanted": "0603 5.1k 1%",
+     "qty": 20,
+     "lcsc": "C23186",
+     "mpn": "0603WAF5101T5E",
+     "stock": 23749760,
+     "match": "keyword, check the description",
+     "unit_usd": 0.0015,
+     "extended_usd": 0.03,
+     "description": "-55\u2103~+155\u2103 100mW 5.1k\u03a9 75V Thick Film Resistor \u00b11% \u00b1100ppm/\u2103 0603 Chip Resistor - Surface Mount ROHS"
+    },
+    {
+     "refs": [
+      "U1"
+     ],
+     "lcsc": "C8690",
+     "mpn_wanted": "FT232RL-REEL",
+     "qty": 10,
+     "mpn": "FT232RL-REEL",
+     "stock": 9832,
+     "match": "lcsc_code",
+     "unit_usd": 6.4958,
+     "extended_usd": 64.958,
+     "description": "-40\u2103~+85\u2103 15mA 3.3V~5.25V 3Mbps 70uA USB 2.0 USB to UART SSOP-28-208mil USB Converters ROHS"
+    },
+    {
+     "refs": [
+      "C1"
+     ],
+     "query": "0805 4.7uF 16V X5R",
+     "mpn_wanted": "0805 4.7uF 16V X5R",
+     "qty": 10,
+     "lcsc": "C1746",
+     "mpn": "CL21A475KOFNNNE",
+     "stock": 34531,
+     "match": "keyword, check the description",
+     "unit_usd": 0.0451,
+     "extended_usd": 0.451,
+     "description": "16V 4.7uF X5R \u00b110% 0805 Multilayer Ceramic Capacitors MLCC - SMD/SMT ROHS"
+    },
+    {
+     "refs": [
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C6"
+     ],
+     "query": "0603 100nF 50V X7R",
+     "mpn_wanted": "0603 100nF 50V X7R",
+     "qty": 50,
+     "lcsc": "C14663",
+     "mpn": "CC0603KRX7R9BB104",
+     "stock": 50349394,
+     "match": "keyword, check the description",
+     "unit_usd": 0.0141,
+     "extended_usd": 0.705,
+     "description": "100nF 50V X7R \u00b110% 0603 Multilayer Ceramic Capacitors MLCC - SMD/SMT ROHS"
+    },
+    {
+     "refs": [
+      "U2"
+     ],
+     "lcsc": "C163712",
+     "mpn_wanted": "SN74AHCT1G126DBVR",
+     "qty": 10,
+     "mpn": "SN74AHCT1G126DBVR",
+     "stock": 8687,
+     "match": "lcsc_code",
+     "unit_usd": 0.0979,
+     "extended_usd": 0.979,
+     "description": "-40\u2103~+125\u2103 1 1 10uA 4.5V~5.5V 5.5ns@5V,15pF 74AHCT 8mA 8mA Tri-State Unidirectional SOT-23-5 Buffers, Drivers, Receivers"
+    },
+    {
+     "refs": [
+      "U3"
+     ],
+     "lcsc": "C7484",
+     "mpn_wanted": "SN74AHCT1G125DBVR",
+     "qty": 10,
+     "mpn": "SN74AHCT1G125DBVR",
+     "stock": 49011,
+     "match": "lcsc_code",
+     "unit_usd": 0.1007,
+     "extended_usd": 1.007,
+     "description": "-40\u2103~+125\u2103 1 1 10uA 4.5V~5.5V 6.5ns@5V,15pF 74AHCT 8mA 8mA Output enable Tri-State Unidirectional SOT-23-5 Buffers, Driv"
+    },
+    {
+     "refs": [
+      "R3",
+      "R4",
+      "R5"
+     ],
+     "query": "0603 10k 1%",
+     "mpn_wanted": "0603 10k 1%",
+     "qty": 30,
+     "lcsc": "C25804",
+     "mpn": "0603WAF1002T5E",
+     "stock": 32380385,
+     "match": "keyword, check the description",
+     "unit_usd": 0.0052,
+     "extended_usd": 0.156,
+     "description": "-55\u2103~+155\u2103 100mW 10k\u03a9 75V Thick Film Resistor \u00b11% \u00b1100ppm/\u2103 0603 Chip Resistor - Surface Mount ROHS"
+    },
+    {
+     "refs": [
+      "R6",
+      "R7"
+     ],
+     "query": "0603 1k 1%",
+     "mpn_wanted": "0603 1k 1%",
+     "qty": 20,
+     "lcsc": "C21190",
+     "mpn": "0603WAF1001T5E",
+     "stock": 24277749,
+     "match": "keyword, check the description",
+     "unit_usd": 0.002,
+     "extended_usd": 0.04,
+     "description": "-55\u2103~+155\u2103 100mW 1k\u03a9 75V Thick Film Resistor \u00b11% \u00b1100ppm/\u2103 0603 Chip Resistor - Surface Mount ROHS"
+    },
+    {
+     "refs": [
+      "D2"
+     ],
+     "lcsc": "C12624",
+     "mpn_wanted": "KT-0603G",
+     "qty": 10,
+     "mpn": "KT-0603G",
+     "stock": 524136,
+     "match": "lcsc_code",
+     "unit_usd": 0.0117,
+     "extended_usd": 0.117,
+     "description": "-40\u2103~+85\u2103 1.6mm x 0.8mm square LED 100mW 120\u00b0 3.1V 430mcd 513nm~528nm 525nm 5mA Discrete Diode Emerald Green Water Clear"
+    },
+    {
+     "refs": [
+      "D3"
+     ],
+     "lcsc": "C2287",
+     "mpn_wanted": "KT-0603Y",
+     "qty": 10,
+     "mpn": "KT-0603Y",
+     "stock": 134386,
+     "match": "lcsc_code",
+     "unit_usd": 0.0104,
+     "extended_usd": 0.104,
+     "description": "-40\u2103~+85\u2103 120\u00b0 175mcd 2.4V 40mW 584nm~594nm 596nm Discrete Diode Water Clear Yellow 0603 LED Indication - Discrete ROHS"
+    },
+    {
+     "refs": [
+      "R9"
+     ],
+     "query": "0603 150R 1%",
+     "mpn_wanted": "0603 150R 1%",
+     "qty": 10,
+     "lcsc": "C114608",
+     "mpn": "RC0603FR-07150RL",
+     "stock": 506592,
+     "match": "keyword, check the description",
+     "unit_usd": 0.0026,
+     "extended_usd": 0.026,
+     "description": "-55\u2103~+155\u2103 100mW 150\u03a9 75V Thick Film Resistor \u00b11% \u00b1100ppm/\u2103 0603 Chip Resistor - Surface Mount ROHS"
+    },
+    {
+     "refs": [
+      "D5"
+     ],
+     "lcsc": "C2903905",
+     "mpn_wanted": "BZT52C5V1S",
+     "qty": 10,
+     "mpn": "BZT52C5V1S",
+     "stock": 236641,
+     "match": "lcsc_code",
+     "unit_usd": 0.0162,
+     "extended_usd": 0.162,
+     "description": "1 Independent 200mW 2uA@2V 4.8V~5.4V 480\u03a9 5.1V 60\u03a9 SOD-323 Zener Diodes ROHS"
+    },
+    {
+     "refs": [
+      "TH1"
+     ],
+     "lcsc": "C913703",
+     "mpn_wanted": "PRG18BB101MB1RB",
+     "qty": 10,
+     "mpn": "PRG18BB101MB1RB",
+     "stock": 3255,
+     "match": "lcsc_code",
+     "unit_usd": 0.2199,
+     "extended_usd": 2.199,
+     "description": "0.8mm 0.8mm 1.6mm 100\u03a9 21mA 24V 300mA 45mA 0603 PTC Thermistors ROHS"
+    },
+    {
+     "refs": [
+      "J2"
+     ],
+     "lcsc": "C8465",
+     "mpn_wanted": "WJ500V-5.08-2P",
+     "qty": 10,
+     "mpn": "WJ500V-5.08-2P",
+     "stock": 248579,
+     "match": "lcsc_code",
+     "unit_usd": 0.1348,
+     "extended_usd": 1.348,
+     "description": "-40\u2103~+105\u2103 1 14~30 18A 1x2P 2 2.5 250V 2P 5.08mm Green M2.5 Through Hole \u63d2\u4ef6,P=5.08mm Screw Terminal Blocks ROHS"
+    },
+    {
+     "refs": [
+      "D1"
+     ],
+     "lcsc": "C169449",
+     "mpn_wanted": "SMBJ15CA",
+     "qty": 10,
+     "mpn": "SMBJ15CA",
+     "stock": 179918,
+     "match": "lcsc_code",
+     "unit_usd": 0.0389,
+     "extended_usd": 0.389,
+     "description": "-65\u2103~+150\u2103 15V 18.5V 1uA 24.4V 24.6A@10/1000us 390pF 600W@10/1000us Bidirectional IEC 61000-4-2 TVS SMB ESD and Surge Pr"
+    },
+    {
+     "refs": [
+      "C7"
+     ],
+     "lcsc": "C160162",
+     "mpn_wanted": "220uF 25V radial 8 mm",
+     "qty": 10,
+     "mpn": "ERS1EM221F12OT",
+     "stock": 630810,
+     "match": "lcsc_code",
+     "unit_usd": 0.0356,
+     "extended_usd": 0.356,
+     "description": "12mm 220uF 25V 3.5mm 7000hrs@105\u2103 8mm \u00b120% \u63d2\u4ef6,D8xL12mm Aluminum Electrolytic Capacitors - Leaded ROHS"
+    },
+    {
+     "refs": [
+      "C8"
+     ],
+     "query": "1206 100nF 50V X7R",
+     "mpn_wanted": "1206 100nF 50V X7R",
+     "qty": 10,
+     "lcsc": "C82601",
+     "mpn": "CC1206KRX7R9BB104",
+     "stock": 1699230,
+     "match": "keyword, check the description",
+     "unit_usd": 0.0173,
+     "extended_usd": 0.173,
+     "description": "100nF 50V X7R \u00b110% 1206 Multilayer Ceramic Capacitors MLCC - SMD/SMT ROHS"
+    },
+    {
+     "refs": [
+      "R8"
+     ],
+     "query": "1206 4.7k 1%",
+     "mpn_wanted": "1206 4.7k 1%",
+     "qty": 10,
+     "lcsc": "C17936",
+     "mpn": "1206W4F4701T5E",
+     "stock": 3096459,
+     "match": "keyword, check the description",
+     "unit_usd": 0.0084,
+     "extended_usd": 0.084,
+     "description": "-55\u2103~+155\u2103 200V 250mW 4.7k\u03a9 Thick Film Resistor \u00b11% \u00b1100ppm/\u2103 1206 Chip Resistor - Surface Mount ROHS"
+    },
+    {
+     "refs": [
+      "D4"
+     ],
+     "lcsc": "C2286",
+     "mpn_wanted": "KT-0603R",
+     "qty": 10,
+     "mpn": "KT-0603R",
+     "stock": 7858146,
+     "match": "lcsc_code",
+     "unit_usd": 0.0077,
+     "extended_usd": 0.077,
+     "description": "-40\u2103~+85\u2103 1.6mm x 0.8mm square LED 1.8V~2.4V 120\u00b0 20mA 300mcd 40mW 615nm~630nm 645nm Discrete Diode Red Water Clear 0603"
+    },
+    {
+     "refs": [
+      "F1",
+      "F2",
+      "F3"
+     ],
+     "lcsc": "C210838",
+     "mpn_wanted": "MF-MSMF250/16X",
+     "qty": 30,
+     "mpn": "MF-MSMF250/16X-2",
+     "stock": 10210,
+     "match": "lcsc_code",
+     "unit_usd": 0.1428,
+     "extended_usd": 4.284,
+     "description": "-40\u2103~+85\u2103 1.2W 100A 100m\u03a9 15m\u03a9 16V 2.5A 5A 5s 1812 Resettable Fuses ROHS"
+    },
+    {
+     "refs": [
+      "J3",
+      "J4",
+      "J5"
+     ],
+     "lcsc": "C160259",
+     "mpn_wanted": "JST B3B-EH-A",
+     "qty": 30,
+     "mpn": "B3B-EH-A(LF)(SN)",
+     "stock": 89449,
+     "match": "lcsc_code",
+     "unit_usd": 0.0496,
+     "extended_usd": 1.488,
+     "description": "-25\u2103~+85\u2103 1 10mm 1x3P 2.5mm 250V 3 3.8mm 3A 3P 6mm Brass EH K Pin PA66 Through Hole Tin UL94V-0 White \u63d2\u4ef6,P=2.5mm Wire To"
+    }
+   ],
+   "parts_total_usd": 83.69,
+   "per_board_usd": 8.37,
+   "not_found": [],
+   "source": "JLCPCB parts list via jlcparts (https://github.com/yaqwsx/jlcparts)",
+   "prices_as_of": "2026-11-26T03:01:58+00:00",
+   "claim_boundary": "JLCPCB unit prices for the parts only: no PCB, assembly, setup, shipping or tax."
+  }
+ },
+ "fab": {
+  "files": [
+   "fab/gerbers/hs_bus_a-B_Cu.gbl",
+   "fab/gerbers/hs_bus_a-B_Mask.gbs",
+   "fab/gerbers/hs_bus_a-B_Paste.gbp",
+   "fab/gerbers/hs_bus_a-B_Silkscreen.gbo",
+   "fab/gerbers/hs_bus_a-Edge_Cuts.gm1",
+   "fab/gerbers/hs_bus_a-F_Cu.gtl",
+   "fab/gerbers/hs_bus_a-F_Mask.gts",
+   "fab/gerbers/hs_bus_a-F_Paste.gtp",
+   "fab/gerbers/hs_bus_a-F_Silkscreen.gto",
+   "fab/gerbers/hs_bus_a-NPTH-drl_map.gbr",
+   "fab/gerbers/hs_bus_a-NPTH.drl",
+   "fab/gerbers/hs_bus_a-PTH-drl_map.gbr",
+   "fab/gerbers/hs_bus_a-PTH.drl",
+   "fab/gerbers/hs_bus_a-job.gbrjob",
+   "fab/hs_bus_a_bom.csv",
+   "fab/hs_bus_a_gerbers.zip",
+   "fab/hs_bus_a_pos.csv",
+   "fab/hs_bus_a_schematic.pdf"
+  ],
+  "zip_sha256": "902b8bfc487a83cc33cacdbf0b2284cd046c63a136716d9cba3fd0eec0c4588c"
+ },
+ "not_checked": [
+  "Signal integrity and USB 2.0 full-speed impedance (12 Mb/s over short tracks; no controlled impedance asked for)",
+  "Thermal behaviour of the fuses and pour under load (only the IPC-2221 track rise is computed)",
+  "Firmware or host software; the board appears as an FTDI serial port and works with the DYNAMIXEL SDK by assumption",
+  "Nothing has been fabricated or powered"
+ ]
+}
