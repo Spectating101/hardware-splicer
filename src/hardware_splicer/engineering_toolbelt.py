@@ -189,6 +189,73 @@ def _github_code(query: str, extension: str, limit: int) -> list[dict[str, Any]]
     return out
 
 
+def _github_repos(query: str, limit: int) -> list[dict[str, Any]]:
+    """Whole projects (apps, firmware, robot platforms), most-starred first: prior art that has no KiCad file. GitHub's
+    repository search matches description words exactly ("smartphone" misses "smartphones"), so the query's words are
+    also tried as topics, which is how OpenBot (topics smartphone, robot) is found."""
+    gh = shutil.which("gh")
+    if not gh:
+        return [{"error": "gh CLI not available"}]
+    fields = "fullName,description,stargazersCount,license,pushedAt,url"
+    words = [w.lower() for w in re.findall(r"[A-Za-z][A-Za-z0-9-]{3,}", query)][:3]
+    runs = [[gh, "search", "repos", query, "--sort", "stars", "--limit", str(limit), "--json", fields]]
+    if words:
+        runs.append([gh, "search", "repos", "--sort", "stars", "--limit", str(limit), "--json", fields]
+                    + [a for w in words for a in ("--topic", w)])
+    found: dict[str, dict[str, Any]] = {}
+    errors = []
+    for cmd in runs:
+        run = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+        if run.returncode != 0:
+            errors.append(run.stderr.strip()[:200]); continue
+        for r in json.loads(run.stdout or "[]"):
+            found.setdefault(r["fullName"], {"repo": r["fullName"], "stars": r.get("stargazersCount"),
+                                             "licence": (r.get("license") or {}).get("key") or "none", "pushed": (r.get("pushedAt") or "")[:10],
+                                             "description": (r.get("description") or "")[:200], "url": r["url"]})
+    out = sorted(found.values(), key=lambda r: -(r["stars"] or 0))[:limit]
+    if not out and errors:
+        return [{"error": "; ".join(errors)}]
+    return out
+
+
+OWN_DIRS = ("docs", "examples", "projects")
+URL_RX = re.compile(r"https?://[^\s\"'<>)\]]+")
+
+
+def _hs_own(query: str, limit: int) -> list[dict[str, Any]]:
+    """What HS has already found: its own docs, examples and project records, and the weekly landscape register.
+    Prior findings are worthless if the next project cannot see them (OpenBot was recorded on 2026-11-26 and then
+    missed the same day)."""
+    words = [w.lower() for w in re.findall(r"[A-Za-z0-9][A-Za-z0-9+_-]{2,}", query)]
+    if not words:
+        return []
+    root = Path(__file__).resolve().parents[2]
+    files = [f for d in OWN_DIRS for f in (root / d).rglob("*") if f.suffix in (".md", ".json", ".jsonl") and f.is_file()
+             and f.stat().st_size < 2_000_000]
+    register = Path(os.path.expanduser("~/.local/share/hs-landscape/register.json"))
+    if register.is_file():
+        files.append(register)
+    hits = []
+    for f in files:
+        try:
+            text = f.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        low = text.lower()
+        matched = [w for w in words if w in low]
+        if not matched:
+            continue
+        urls = []
+        for m in URL_RX.finditer(text):
+            window = low[max(0, m.start() - 300): m.end() + 300]
+            if any(w in window for w in matched) and m.group(0) not in urls:
+                urls.append(m.group(0))
+        name = str(f.relative_to(root)) if root in f.parents else str(f)
+        hits.append({"file": name, "matched": matched, "score": len(matched) / len(words), "urls": urls[:12]})
+    hits.sort(key=lambda h: (-h["score"], -len(h["urls"])))
+    return hits[:limit]
+
+
 def _junk_lookup(args, _project):
     from . import junk_catalogue
     needs = [str(n) for n in (args.get("needs") or [])]
@@ -207,18 +274,27 @@ def _prior_art(args, _project):
     if not query:
         raise ValueError("query is required")
     limit = int(args.get("limit") or 8)
-    sources = args.get("sources") or ["boardrepo", "github"]
+    sources = args.get("sources") or ["hs_own", "github_repos", "boardrepo", "github"]
     result: dict[str, Any] = {"query": query}
+    if "hs_own" in sources:
+        result["hs_own"] = _hs_own(query, limit)
+    if "github_repos" in sources:
+        result["github_repos"] = _github_repos(query, limit)
     if "boardrepo" in sources:
         result["boardrepo"] = _boardrepo(query, limit)
     if "github" in sources:
         result["github_kicad"] = _github_code(query, str(args.get("extension") or "kicad_sch"), limit)
-    reusable = [g for g in result.get("github_kicad", []) if g.get("licence") in ("MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "CC-BY-4.0")]
-    result["reuse_note"] = ("MIT, Apache, BSD and CC BY designs can be adopted with attribution; GPL/AGPL/CERN-OHL-S and "
-                            "unlicensed ones are reference only. A published board is not evidence that it was built or works.")
-    return _envelope(True, f"{len(result.get('boardrepo', []))} BoardRepo boards, {len(result.get('github_kicad', []))} GitHub files "
+    ok_lic = ("MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "CC-BY-4.0", "mit", "apache-2.0", "bsd-2-clause", "bsd-3-clause", "cc-by-4.0")
+    reusable = [g for g in result.get("github_kicad", []) + result.get("github_repos", []) if g.get("licence") in ok_lic]
+    result["reuse_note"] = ("MIT, Apache, BSD and CC BY work can be adopted with attribution; GPL/AGPL/CERN-OHL-S and "
+                            "unlicensed ones are reference only or run as separate programs. A published design is not evidence "
+                            "that it was built or works. Consumer marketplaces (Shopee, AliExpress, Amazon) are not searched "
+                            "here: check them for a finished product too.")
+    seen = [u for h in result.get("hs_own", []) for u in h["urls"]]
+    return _envelope(True, f"{len(result.get('hs_own', []))} of HS's own records, {len(result.get('github_repos', []))} GitHub projects, "
+                     f"{len(result.get('boardrepo', []))} BoardRepo boards, {len(result.get('github_kicad', []))} GitHub KiCad files "
                      f"({len(reusable)} with a reusable licence)", result,
-                     sources=["https://boardrepo.com/browse?q=" + urllib.parse.quote(query)])
+                     sources=["https://boardrepo.com/browse?q=" + urllib.parse.quote(query)] + [g["url"] for g in result.get("github_repos", []) if g.get("url")] + seen[:10])
 
 
 def _read_board(args, _project):
@@ -411,8 +487,9 @@ TOOLS: dict[str, ToolSpec] = {t.name: t for t in [
              "hoverboards, printers...) give the modules a design needs, the fewest donors that cover them, what to test first, "
              "hazards and prices last seen in Taiwan.",
              _obj({"needs": {"type": "array", "items": {"type": "string"}}}, ["needs"]), _junk_lookup, category="research"),
-    ToolSpec("hs_prior_art_search", "Search existing open designs before building: BoardRepo (public KiCad boards, searchable by "
-             "part) and GitHub KiCad files with their licences.",
+    ToolSpec("hs_prior_art_search", "Search what already exists before building: HS's own past findings (docs, examples, "
+             "project records, the weekly landscape register), GitHub projects by stars, BoardRepo boards and GitHub KiCad files, "
+             "with licences.",
              _obj({"query": {"type": "string"}, "limit": {"type": "integer"}, "sources": {"type": "array", "items": {"type": "string"}},
                    "extension": {"type": "string"}}, ["query"]), _prior_art, category="research"),
     ToolSpec("hs_read_board", "Read a public BoardRepo board (README, size, layers, contents) as markdown.",
