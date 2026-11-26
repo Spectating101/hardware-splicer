@@ -70,7 +70,7 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `compose_agent_loop` | 222 | 3 | product | MRC | Agent-facing compose orchestration — manual DRC retry rounds on top of engine fix loop. |
 | `pcb.geometry_compile` | 219 | 3 | product | TMRC | Compile build_graph.json → geometry, DRC, KiCad, design quality (Python engine). |
 | `part_tiers` | 211 | 1 | product | MRC | One catalogue over every part HS knows, saying what HS can do with each. HS keeps parts in two libraries that grew apart: * the device planner's library (``data/device_modules.json``): few parts, each... |
-| `component_board_pipeline` | 206 | 1 | product | TMRC | Any component-level board, from a JSON design to checked KiCad files and fab outputs. The pipeline HS-BUS-A proved, for any design an agent writes: schematic symbols from the KiCad libraries, pin cove... |
+| `component_board_pipeline` | 208 | 1 | product | TMRC | Any component-level board, from a JSON design to checked KiCad files and fab outputs. The pipeline HS-BUS-A proved, for any design an agent writes: schematic symbols from the KiCad libraries, pin cove... |
 | `circuit_synthesis.common` | 201 | 0 | product | TMRC | Shared helpers for bounded circuit-synthesis planners. Shared helpers may parse declared structured fields, but they do not inject representative USB/barrel currents, preferred MCU identities, or volt... |
 | `semantic_impact_scope` | 201 | 3 | product | TMRC | Bounded semantic scope proposal for cross-domain change impact. Natural-language change descriptions may imply mechanical, electrical, firmware, software, control, safety, sourcing, assembly, and veri... |
 | `distributor_check` | 198 | 2 | product | TMRC | Does every part on a KiCad board resolve, at its distributor, to the part the board assumes? python -m hardware_splicer.distributor_check BOARD.net/BOARD.kicad_sch [--cache FILE] [--offline] For each ... |
@@ -104,10 +104,10 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `integrations.ibom_bridge` | 97 | 2 | product | TMRC | InteractiveHtmlBom glue — best-effort HTML BOM from .kicad_pcb. |
 | `netlist.ir` | 97 | 8 | product | TMRC | Circuit netlist intermediate representation. |
 | `backends.tscircuit` | 93 | 0 | product | TMRC | (no description) |
+| `pcb.netlist_pcb_parity` | 93 | 1 | product | TMRC | Netlist-to-PCB connectivity parity. KiCad's own ``--schematic-parity`` cannot judge generated boards (reference designators and footprint ids are assigned independently of the schematic symbols), so t... |
 | `board_catalog` | 87 | 1 | product | MRC | Microcontroller boards from PlatformIO's board definitions (Apache-2.0, pinned snapshot), and checks that use them. PlatformIO describes several hundred ESP32, ESP8266, AVR and RP2040 boards: chip, cl... |
 | `integrations.circuit_json_adapter` | 87 | 2 | product | TMRC | Adapter: CircuitNetlist / build graph → tscircuit circuit-json subset. |
 | `ai_project_action_inputs` | 85 | 1 | product | TMRC | Typed data inputs for deterministic AI project tools. Executable inputs must be preserved exactly or rejected. The prose/context sanitizer may truncate collections, which is inappropriate for circuit ... |
-| `pcb.netlist_pcb_parity` | 85 | 1 | product | TMRC | Netlist-to-PCB connectivity parity. KiCad's own ``--schematic-parity`` cannot judge generated boards (reference designators and footprint ids are assigned independently of the schematic symbols), so t... |
 | `blackwire_bridge` | 84 | 1 | product | TMRC | The Black Wire pinout collection (CC-BY-4.0, (c) Valleytech Solutions) in HS: boards, parts, and a second opinion on pins. Black Wire transcribes board connectors from cited pinout images and lists ma... |
 | `netlist.passives` | 79 | 1 | product | TMRC | Suggest missing passives on netlist IR (rule-based, GNN-ready hook). |
 | `capability_policy` | 77 | 3 | product | MRC | Product policy over raw runtime capability discovery. Runtime discovery answers what is present. Product policy answers what is required for the supported Hardware Splicer workflow. Optional specialis... |

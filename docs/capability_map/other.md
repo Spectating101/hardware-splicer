@@ -15,7 +15,7 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `codex_exec_trace` | 567 | 2 | research | - | Normalize Codex exec JSONL into Hardware-Splicer's external MCP audit shape. |
 | `engineering_status` | 520 | 7 | product | TMRC | Compile one coherent engineering status and ranked next-action surface. |
 | `compiler` | 505 | 2 | product | TMRC | (no description) |
-| `build_compiler` | 485 | 19 | product | TMRC | (no description) |
+| `build_compiler` | 494 | 19 | product | TMRC | (no description) |
 | `codex_astra_preflight` | 402 | 1 | research | - | Zero-inference preflight and launch planning for Codex/Astra HS experiments. |
 | `codex_astra_raw_document_adjudication` | 383 | 1 | research | - | Preregistered adjudication for the blinded raw-document Astra case. |
 | `frontier_operator_experiment` | 360 | 1 | research | - | Provider-neutral frontier-model experiment support for Hardware-Splicer. This module deliberately performs no network I/O. It constructs provider request templates, estimates text-token cost envelopes... |

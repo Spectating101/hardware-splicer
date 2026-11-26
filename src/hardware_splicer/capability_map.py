@@ -72,7 +72,7 @@ RESEARCH_LINES = [
     ("mechanics references and cross-project handoffs",
      r"^mechanical_(kirsch_reference|unilateral_pin_contact|workflow_integration|fixture_handoff|portfolio_handoff)$"),
     ("scheduled jobs and CI workers",
-     r"^(landscape_watch|github_data_sources|github_signal_\w+|local_kicad_worker|multicad_toolchain|discrete_electronics_truth)$"),
+     r"^(landscape_watch|github_data_sources|device_reference_sweep|github_signal_\w+|local_kicad_worker|multicad_toolchain|discrete_electronics_truth)$"),
     ("demonstrator builds run from scripts",
      r"^(drone_\w+|aerial_product_generator|system_example_microdrone|cadclaw_dry_product|teardown_\w+|whole_product_sample|"
      r"product_ecosystem_bridge|filter_\w+|function_\w+|part_scene|change_dossier|real_device_work_package)$"),

@@ -6,12 +6,12 @@ their reach and tests; `... show <module>` gives one module's importers, imports
 tables are in `docs/capability_map/`; the job-level map (which module is canonical for which job) is
 `docs/CAPABILITY_CONSOLIDATION.md`.
 
-**615 modules, 177,036 lines; 535 referenced by a test; 32 called by an engine tool.**
+**616 modules, 177,209 lines; 536 referenced by a test; 32 called by an engine tool.**
 
 | Status | Modules | Lines | Meaning |
 |---|---|---|---|
-| product | 467 | 140,360 | reached from a shipped entry point (toolbelt, MCP, REST or a console command) |
-| research | 140 | 34,927 | not shipped on purpose: part of a declared research line (RESEARCH_LINES) |
+| product | 467 | 140,379 | reached from a shipped entry point (toolbelt, MCP, REST or a console command) |
+| research | 141 | 35,081 | not shipped on purpose: part of a declared research line (RESEARCH_LINES) |
 | script | 5 | 1,475 | reached only from scripts/, projects/, eval/, experiments/, the Makefile or CI |
 | runnable | 0 | 0 | has its own `python -m` main, and nothing shipped imports it |
 | tests-only | 3 | 274 | only tests import it |
@@ -35,14 +35,14 @@ Reach codes in the area pages: **T** toolbelt, **M** MCP server, **R** REST prod
 
 | Area | Modules | Engineering | Lines | Tested | Shipped | Called by a tool | Page |
 |---|---|---|---|---|---|---|---|
-| circuit boards and electronics | 136 | 118 | 38,381 | 110 | 122 | 10 | [circuit-boards-and-electronics](capability_map/circuit-boards-and-electronics.md) |
+| circuit boards and electronics | 136 | 118 | 38,391 | 110 | 122 | 10 | [circuit-boards-and-electronics](capability_map/circuit-boards-and-electronics.md) |
 | salvage, donors, repair | 114 | 103 | 28,740 | 108 | 53 | 3 | [salvage-donors-repair](capability_map/salvage-donors-repair.md) |
 | AI, agents and models | 60 | 42 | 19,358 | 55 | 51 | 0 | [ai-agents-and-models](capability_map/ai-agents-and-models.md) |
 | mechanical, CAD and FEM | 53 | 49 | 18,426 | 45 | 38 | 4 | [mechanical-cad-and-fem](capability_map/mechanical-cad-and-fem.md) |
 | projects, reviews and evidence | 70 | 42 | 17,633 | 59 | 62 | 3 | [projects-reviews-and-evidence](capability_map/projects-reviews-and-evidence.md) |
-| other | 65 | 53 | 16,796 | 49 | 49 | 0 | [other](capability_map/other.md) |
+| other | 65 | 53 | 16,805 | 49 | 49 | 0 | [other](capability_map/other.md) |
 | parts, BOM and sourcing | 53 | 39 | 15,760 | 48 | 44 | 1 | [parts-bom-and-sourcing](capability_map/parts-bom-and-sourcing.md) |
-| robots, arms and motion | 29 | 27 | 11,860 | 28 | 22 | 4 | [robots-arms-and-motion](capability_map/robots-arms-and-motion.md) |
+| robots, arms and motion | 30 | 28 | 12,014 | 29 | 22 | 4 | [robots-arms-and-motion](capability_map/robots-arms-and-motion.md) |
 | firmware and devices | 11 | 10 | 4,063 | 10 | 11 | 2 | [firmware-and-devices](capability_map/firmware-and-devices.md) |
 | drones, propulsion and power | 13 | 12 | 2,842 | 13 | 10 | 5 | [drones-propulsion-and-power](capability_map/drones-propulsion-and-power.md) |
 | simulation | 8 | 6 | 2,366 | 7 | 5 | 0 | [simulation](capability_map/simulation.md) |
@@ -58,7 +58,7 @@ Reach codes in the area pages: **T** toolbelt, **M** MCP server, **R** REST prod
 | demonstrator builds run from scripts | 17 | 4,215 |
 | keyboard splice board surgery | 15 | 3,398 |
 | repair investigator (captions, KiCad grounding, diagnosis) | 19 | 3,329 |
-| scheduled jobs and CI workers | 7 | 2,488 |
+| scheduled jobs and CI workers | 8 | 2,642 |
 | mechanics references and cross-project handoffs | 5 | 1,831 |
 | donor intake from retained visual inspections (needs the inspection artifact store in a flow) | 1 | 413 |
 | legacy salvage-package CLI (scripts/hardware_splicer.py) | 1 | 129 |
