@@ -134,3 +134,10 @@ def test_a_missing_required_input_is_named_not_a_crash():
     env = tb.call("hs_size_arm_actuators", {"links_mm": [150, 150], "payload_kg": 0.2})
     assert not env["ok"] and "missing required input" in env["problems"][0]
     assert "supply_v" in env["problems"][0] and "max_stall_share" in env["problems"][0]
+
+
+def test_prior_art_finds_capabilities_hs_already_has_in_its_own_source():
+    env = tb.call("hs_prior_art_search", {"query": "fem screening", "sources": ["hs_own"], "limit": 30})
+    assert "mechanical_cad_fem" in {h.get("module") for h in env["result"]["hs_own"]}
+    env = tb.call("hs_prior_art_search", {"query": "thermal device review", "sources": ["hs_own"], "limit": 30})
+    assert "device_engineering" in {h.get("module") for h in env["result"]["hs_own"]}

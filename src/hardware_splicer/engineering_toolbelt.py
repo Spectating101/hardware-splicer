@@ -252,7 +252,24 @@ def _hs_own(query: str, limit: int) -> list[dict[str, Any]]:
                 urls.append(m.group(0))
         name = str(f.relative_to(root)) if root in f.parents else str(f)
         hits.append({"file": name, "matched": matched, "score": len(matched) / len(words), "urls": urls[:12]})
-    hits.sort(key=lambda h: (-h["score"], -len(h["urls"])))
+    # HS's own source: every module's name and description, so a capability HS already has is found before it is
+    # rebuilt (on 2026-11-26 FEM, thermal review and arm kinematics were called "missing" while 600 modules sat unread)
+    pkg = Path(__file__).resolve().parent
+    for f in pkg.rglob("*.py"):
+        if "__pycache__" in f.parts or f.name == "__init__.py":
+            continue
+        try:
+            head = f.read_text(encoding="utf-8", errors="replace")[:3000]
+        except OSError:
+            continue
+        m = re.search(r'^\s*(?:"""|\'\'\')(.*?)(?:"""|\'\'\')', head, re.S)
+        doc = (m.group(1) if m else "").strip()
+        text = (f.stem.replace("_", " ") + " " + doc).lower()
+        matched = [w for w in words if w in text]
+        if matched:
+            hits.append({"file": str(f.relative_to(root)) if root in f.parents else str(f), "matched": matched,
+                         "score": len(matched) / len(words), "urls": [], "module": f.stem, "about": " ".join(doc.split())[:240]})
+    hits.sort(key=lambda h: (-h["score"], -len(h["urls"]), "module" in h))
     return hits[:limit]
 
 
