@@ -10,7 +10,7 @@
   "battery runs at least 1 h of patrol",
   "every remaining risk listed as needing a physical test"
  ],
- "steps": 30,
+ "steps": 32,
  "research": [
   {
    "search": "hs_prior_art_search",
@@ -53,6 +53,14 @@
     "https://www.adafruit.com/product/2336",
     "https://open.er-api.com/v6/latest/USD"
    ]
+  },
+  {
+   "seq": 31,
+   "title": "Consumer prior art missed: US$30-50 wheeled pet camera (2026-11-26)",
+   "sources": [
+    "https://www.cnx-software.com/2025/08/12/low-cost-mobile-robot-and-security-camera-monitors-your-home-and-pets/",
+    "https://www.walmart.com/ip/Blinky-Bot-Camera-Blinky-Bot-Pro-360-Camera-Wheels-1080p-Dual-Lens-Indoor-Movable-Security-Cameras-2-Way-Talk-App-Control-Night-Vision-4G-Version/16876760502"
+   ]
   }
  ],
  "decisions": [
@@ -91,6 +99,12 @@
    "title": "battery",
    "choice": "3 x iNeno 18650 2200 mAh (BSMI) in a DFRobot 3-cell holder with a 3S protection board, charged cell by cell in a USB charger",
    "because": "cheapest in-stock BSMI cells sold in Taiwan; a removable-cell holder needs no 3S balance charger; protection board guards over-discharge"
+  },
+  {
+   "seq": 32,
+   "title": "build vs buy, revisited",
+   "choice": "Do not sell HS-ROVER-A as a home or pet camera; keep it only where the cheap robot cannot go",
+   "because": "the OEM robot costs about one sixth of HS-ROVER-A's US$263 parts and adds night vision, audio, pan/tilt and an app; HS-ROVER-A's only advantages are open local-only video (no vendor cloud), 5 h runtime, 15 degree ramps, 30 mm clearance and full hackability"
   }
  ],
  "software_checked": [

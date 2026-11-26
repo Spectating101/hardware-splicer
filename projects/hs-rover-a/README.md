@@ -7,7 +7,7 @@
 This is the first objective carried from a plain brief to a build package entirely through Hardware-Splicer's MCP server,
 the interface any outside agent uses. An agent (Claude Code, on 2026-11-26) made the engineering decisions; every
 calculation, CAD build, check and file came from an HS tool over MCP, and HS kept the whole record on one project
-(`project/ledger.jsonl`, 30 steps, each tool call with its inputs).
+(`project/ledger.jsonl`, 32 steps, each tool call with its inputs).
 
 ## Objective and acceptance (set before any design)
 
@@ -60,6 +60,16 @@ screws from a local hardware shop cost less than the packs. Shipping from Pololu
 Electronics to Taiwan is not quoted (it needs a cart and an address) and comes on top.
 Dimensions come from the makers' drawings: Pololu 25D datasheet rev 2.0, bracket bkt04c, caster cst05, Raspberry Pi
 Zero 2 W and Camera Module 3 mechanical drawings (listed in `rover_chassis.py`).
+
+## Against what is already sold (2026-11-26)
+
+An unbranded wheeled pet camera ("Blinky Bot", V360 Pro app) sells for US$30-50, about NT$1,500 on Shopee: tracked,
+1080p with pan and tilt, night vision, two-way audio, microSD and cloud ([CNX Software review](https://www.cnx-software.com/2025/08/12/low-cost-mobile-robot-and-security-camera-monitors-your-home-and-pets/)).
+HS-ROVER-A's parts alone cost about six times that and it has no night vision, audio or pan/tilt, so it is **not a
+home or pet camera product**. What it has that the toy does not: video that stays on the local network with no vendor
+cloud, about 5 h runtime, 15 degree ramps, 30 mm clearance, and open, replaceable parts. The step 1 prior-art search
+missed this whole consumer class (it looked at open boards and US$750-1,025 patrol robots); prior art now has to include
+consumer marketplaces. Ledger steps 31-32.
 
 ## Needs a physical test
 
