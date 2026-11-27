@@ -76,6 +76,31 @@ from dead laptop packs comes to NT$561 (US$17) on Ruten listings, NT$162 of it n
 serial port instead of the toy car comes to NT$1,139. Both pass `hs_bom_check` under the Blinky Bot's price (ledger
 steps 33-34). Donors untested; shipping and assembly hours not counted. Sources: `docs/SALVAGE_SOURCING_TW_20261126.md`.
 
+## TT-motor variant (2026-11-27, `tt-variant/`)
+
+The same rover on OpenBot's drive tier, worked through the same tools on its own project record
+(`tt-variant/project/ledger.jsonl`): two Adafruit TT gearmotors (#3777, 48:1) on 65 mm wheels, one DRV8833 for both, a
+6 V step-down for the motor rail, and Pololu's 1/2 in ball caster. The chassis tool now builds this layout
+(`motor: "tt"`): each motor lies fore-aft under the plate and bolts with two M3 x 25 screws through its gearbox to a
+printed rib, from Adafruit's dimension drawing.
+
+| | Pololu 25D (as built) | TT variant |
+|---|---|---|
+| Parts | US$263.44, fails the US$250 target | **US$187.50**, passes; 22 lines, all cited |
+| All-up mass (chassis tool) | 564 g | 438 g |
+| Ground clearance / first tip | 30.5 mm / 27 deg | 21.3 mm / 41 deg |
+| Speed at cruise | 0.79 m/s | 0.64 m/s |
+| Current per motor, cruise / 15 deg ramp | 0.10 A / 0.25 A at 12 V | 0.22 A / 0.53 A at 6 V |
+| Runtime at the same 1 h duty | about 5.0 h | about 4.7 h |
+| Unknown | none | the TT's torque limits (not published) |
+
+Why each part: the pack is 3S (up to 12.6 V), above both the TT's 3-6 V and the DRV8833's 10.8 V, so the motors get
+their own 6 V regulator, not the Pi's 5 V rail. Running them on PWM from the pack would save that regulator's US$27.95,
+but drives them outside their rating. The 65 mm wheels put the plate 21.3 mm up, below the 29 mm caster, so the
+13.5 mm caster sits on a 7.8 mm printed boss. The TT's stall current is Adafruit's measurement of one motor (1.5 A at
+6 V); two stalled motors (3 A) exceed the 6 V regulator's 2.5 A, which then limits current. A stall test on the bench
+settles it.
+
 ## Needs a physical test
 
 Traction, turning (skid and caster drag are not modelled), print strength, wheel/hub/bracket stack-up (hub offset is
