@@ -31,10 +31,11 @@ really there. Results: `examples/device_references/sweep_20261127.json`.
 
 **Complete open designs are rare.** Most repositories are software (ROS stacks, simulations, firmware for commercial
 hardware such as Valetudo for robot vacuums) or a single part of a device. Categories with no complete, licensed open
-design in the checked set are open ground for HS, not a sign HS is behind.
+design in the checked set are open ground for HS, not a sign HS is behind; but read the top results by hand before
+saying so (the robot vacuum row below was wrong until OOMWOO was read).
 
 Limits: the file check is a floor. Projects that keep hardware in git submodules (OpenMower) or sibling repositories
-(OpenArm, Petoi, NASA's rover software, Stanford Pupper) score low here although the design exists; their submodules are
+(OpenArm, Petoi, NASA's rover software, Stanford Pupper, OOMWOO) score low here although the design exists; their submodules are
 listed. Files present show a design was published, not that it was built. An unlicensed repository (Ardumower, several
 mowers) is listed, never absorbed.
 
@@ -126,6 +127,39 @@ controller; HS-3G-B buys one.
   thrust-to-weight is 5.0 on a full pack and about 3.9 at nominal voltage. A table from a smaller pack (3S on 4S) is still
   refused.
 
+## Fourth comparison: robot vacuums, and OOMWOO
+
+**Correction.** This page first said no open robot vacuum design exists. The sweep's top vacuum result, makerspet/OOMWOO
+(Apache-2.0, 13.2k stars, pushed 27 Nov), is one; it scored 3 of 5 only because its CAD (oomwoo-cad: Fusion and STEP),
+boards (oomwoo-pcb: KiCad main, side, front and dock boards) and ROS2 simulation (oomwoo-one) live in sibling
+repositories. Its own README says it is not buildable yet: simulation runs today, the bill of materials is rough and
+awaiting validation on real hardware. Everything else in the category is software for commercial robots (Valetudo,
+Home Assistant integrations, Roomba Open Interface libraries) or a teardown (remakeai, Apache-2.0).
+
+OOMWOO's design choice is HS's: it builds the robot from robot-vacuum spare parts (Roborock drive wheel modules,
+Dreame and Nidec suction fans, Xiaomi and Dreame laser scanners, Roborock battery packs), printed parts and its own I/O
+board, aiming at about US$200 of parts plus a Raspberry Pi to match a US$500-600 commercial robot.
+
+| | OOMWOO One (in development) | HS today |
+|---|---|---|
+| Parts route | buy each spare module (wheel pair US$24-33, fan US$10-28, scanner US$13-32, pack US$16-30) | buy one faulty LiDAR vacuum that holds all of them (Ruten, 27 Nov: NT$1,000-2,625 for a 1st-gen Xiaomi) |
+| Mechanical | 3D-scanned part library, Fusion design | none for a vacuum; OOMWOO's scanned envelopes now in HS |
+| Electronics | own CH32V307 + CH32L103 I/O board (KiCad) | none for a vacuum |
+| Software | ROS2 / Nav2, Gazebo | none for a vacuum |
+| Built | not yet | not yet |
+
+HS should not start a rival vacuum. OOMWOO is ahead on every layer but sourcing, and its sourcing is exactly HS's
+salvage step done part by part. HS's gap was that its catalogue knew a robot vacuum only as wheels, bump sensors and a
+pack, with no laser scanner and no suction fan.
+
+**What the comparison changed in HS.** OOMWOO's module list (which vacuum models each wheel module, fan, scanner and
+pack fits) is in `data/third_party/oomwoo/` with its licence and pinned commits, with envelopes HS measured from
+OOMWOO's scanned STEP models (wheel module 72.7 x 111.2 x 60.4 mm with a 72 mm tire; LDS02RR 107.7 x 86.5 x 54.1 mm with
+a 76 mm turret; pack 44.4 x 142.8 x 43.5 mm). The junk catalogue gained `lidar_2d` and `suction_fan` and two donors:
+Xiaomi/Roborock LDS vacuums and Neato, each priced on Ruten. `hs_junk_lookup` for a mapping rover (scanner, encoded
+drive, pack, camera, compute) now returns two donors, a faulty Xiaomi vacuum and a cracked Android phone, listed at
+NT$1,100-2,965 together. A mapping rover built from those, on OOMWOO's open software, is the build this opens.
+
 ## Next
 
 1. Done: HS-ARM-A rev B (above). Still open: horn bolt circle and servo screw holes, the leader arm SO-101 pairs with.
@@ -133,5 +167,6 @@ controller; HS-3G-B buys one.
    rocker-bogie (Apache-2.0) as HS's rough-terrain option.
 3. Done: drone (above). Still open: a brushless calibration aircraft, Crazyflie's motor mass, and more cited tables
    (1S brushless, 2 in, 5 in).
-4. Robot vacuum and mopping: no complete open design was found; Valetudo (Apache-2.0) is firmware for commercial
-   robots. HS's junk catalogue already treats robot vacuums as donors: an open, salvage-built vacuum is uncontested.
+4. Done: robot vacuum (above); the earlier "uncontested" was wrong, OOMWOO is the open design. Still open: the drive
+   module's motor ratings (not in OOMWOO's BOM; measure one), and the mapping rover from a faulty Xiaomi vacuum and a
+   phone, sized and drawn around OOMWOO's scanned parts. Mopping robots: OOMWOO's mop modules are on its RFC board.
