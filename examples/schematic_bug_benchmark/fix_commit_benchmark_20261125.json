@@ -56,7 +56,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": "1 uF vs 0.1 uF: values are not checked"
   },
@@ -88,7 +89,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": ""
   },
@@ -103,7 +105,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "C",
-    "hs_review_current": "C"
+    "hs_review_current": "C",
+    "hs_review_20261127": "C"
    },
    "note": "P-channel drain on +VSW"
   },
@@ -118,7 +121,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "C*",
-    "hs_review_current": "C*"
+    "hs_review_current": "C*",
+    "hs_review_20261127": "C*"
    },
    "note": "*with one declared mate: J20 is the Flipper Zero GPIO header (Black Wire pinout)"
   },
@@ -133,7 +137,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": "flipped Q5"
   },
@@ -148,7 +153,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": ""
   },
@@ -163,7 +169,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": ""
   },
@@ -178,7 +185,8 @@
     "kicad_erc": "-",
     "kicad_happy": "C",
     "hs_review_frozen": "C",
-    "hs_review_current": "C"
+    "hs_review_current": "C",
+    "hs_review_20261127": "C"
    },
    "note": "5.1k Rd added; current rules also see D+/D- joined on both rows"
   },
@@ -193,7 +201,8 @@
     "kicad_erc": "C",
     "kicad_happy": "C",
     "hs_review_frozen": "-",
-    "hs_review_current": "P"
+    "hs_review_current": "P",
+    "hs_review_20261127": "P"
    },
    "note": "ERC/kicad-happy: unconnected J8 pins; HS current: only the one-sided D- (CC still lacks Rd after this fix)"
   },
@@ -208,7 +217,8 @@
     "kicad_erc": "C",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "C"
+    "hs_review_current": "C",
+    "hs_review_20261127": "C"
    },
    "note": "ERC: two labels on one net; HS current: SDA and SCL pins on one net"
   },
@@ -223,7 +233,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": "no TX/RX-named pins on both ends"
   },
@@ -255,7 +266,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": "Q_PMOS_GSD to GDS: connectivity identical, needs the package pinout"
   },
@@ -270,7 +282,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": "3.5 mm jack"
   },
@@ -285,7 +298,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": ""
   },
@@ -300,7 +314,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": ""
   },
@@ -315,7 +330,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": "op-amp on the wrong rails; rails exist, intent decides"
   },
@@ -330,7 +346,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": ""
   },
@@ -345,7 +362,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": "MMBD1503A"
   },
@@ -360,7 +378,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "C"
+    "hs_review_current": "C",
+    "hs_review_20261127": "C"
    },
    "note": "CUI UJ20-C named only by part number; frozen HS did not know it as USB-C"
   },
@@ -392,7 +411,8 @@
     "kicad_erc": "C",
     "kicad_happy": "C",
     "hs_review_frozen": "-",
-    "hs_review_current": "C"
+    "hs_review_current": "C",
+    "hs_review_20261127": "C"
    },
    "note": "74HCT166 CE left open"
   },
@@ -407,7 +427,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": "R4/R5 values swapped"
   },
@@ -422,7 +443,8 @@
     "kicad_erc": "C",
     "kicad_happy": "C",
     "hs_review_frozen": "P",
-    "hs_review_current": "P"
+    "hs_review_current": "P",
+    "hs_review_20261127": "P"
    },
    "note": "ERC: USB POW label dangling; kicad-happy and HS: unwired LED D3 (removed by the fix)"
   },
@@ -437,7 +459,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": ""
   },
@@ -452,7 +475,8 @@
     "kicad_erc": "P",
     "kicad_happy": "P",
     "hs_review_frozen": "P",
-    "hs_review_current": "P"
+    "hs_review_current": "P",
+    "hs_review_20261127": "P"
    },
    "note": "symbol replaced under a new reference, so findings vanish with the part; unclear"
   },
@@ -501,7 +525,8 @@
     "kicad_erc": "-",
     "kicad_happy": "C",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": "kicad-happy PP-001: LDO GND pin on A-2V5"
   },
@@ -516,7 +541,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": ""
   },
@@ -531,7 +557,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": "C68 to AVSS"
   },
@@ -546,7 +573,8 @@
     "kicad_erc": "C",
     "kicad_happy": "C",
     "hs_review_frozen": "C",
-    "hs_review_current": "C"
+    "hs_review_current": "C",
+    "hs_review_20261127": "C"
    },
    "note": "XT30 +V on VIN, everything else on 12V"
   },
@@ -561,7 +589,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": ""
   },
@@ -576,7 +605,8 @@
     "kicad_erc": "-",
     "kicad_happy": "C",
     "hs_review_frozen": "C",
-    "hs_review_current": "C"
+    "hs_review_current": "C",
+    "hs_review_20261127": "C"
    },
    "note": ""
   },
@@ -591,7 +621,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": ""
   },
@@ -606,7 +637,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": ""
   },
@@ -638,7 +670,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": "TC2050"
   },
@@ -653,7 +686,8 @@
     "kicad_erc": "P",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": "ERC pin_to_pin warnings on Q2 vanish"
   },
@@ -668,7 +702,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": "frozen HS raised a false missing-pull-up warning here (since fixed)"
   },
@@ -683,7 +718,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": ""
   },
@@ -698,7 +734,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": ""
   },
@@ -713,7 +750,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": ""
   },
@@ -745,7 +783,8 @@
     "kicad_erc": "-",
     "kicad_happy": "C",
     "hs_review_frozen": "-",
-    "hs_review_current": "C"
+    "hs_review_current": "C",
+    "hs_review_20261127": "C"
    },
    "note": "receptacle named by part number; CC2 still open after the fix"
   },
@@ -811,7 +850,8 @@
     "kicad_erc": "-",
     "kicad_happy": "C",
     "hs_review_frozen": "C",
-    "hs_review_current": "C"
+    "hs_review_current": "C",
+    "hs_review_20261127": "C"
    },
    "note": ""
   },
@@ -826,7 +866,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": ""
   },
@@ -841,7 +882,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "C"
+    "hs_review_current": "C",
+    "hs_review_20261127": "C"
    },
    "note": ""
   },
@@ -856,7 +898,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "C"
+    "hs_review_current": "C",
+    "hs_review_20261127": "C"
    },
    "note": "IMU SDA to the other part's SCL"
   },
@@ -871,7 +914,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "C",
-    "hs_review_current": "C"
+    "hs_review_current": "C",
+    "hs_review_20261127": "C"
    },
    "note": "RXD to RXD and TXD to TXD"
   },
@@ -886,7 +930,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": ""
   },
@@ -935,7 +980,8 @@
     "kicad_erc": "-",
     "kicad_happy": "C",
     "hs_review_frozen": "C",
-    "hs_review_current": "C"
+    "hs_review_current": "C",
+    "hs_review_20261127": "C"
    },
    "note": ""
   },
@@ -1018,7 +1064,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": ""
   },
@@ -1050,7 +1097,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": ""
   },
@@ -1082,7 +1130,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": ""
   },
@@ -1097,7 +1146,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": ""
   },
@@ -1112,7 +1162,8 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
    "note": ""
   },
