@@ -206,12 +206,12 @@ def test_pick_counts_each_motors_own_mass_and_prop_fit():
     sunny = [r for r in loose["passing"] if r["table"] == "sunnysky-x2212-980kv"]
     assert sunny and all(r["all_up_mass_g"] == round(197.5 + 4 * 58.5, 1) for r in sunny)
     framed = pick(dict(spec, frame={"wheelbase_mm": 137}))
-    assert framed["passing"] and {r["table"] for r in framed["passing"]} == {"tmotor-f1404-3800kv-4s"}
+    assert {r["table"] for r in framed["passing"]} == {"tmotor-f1404-3800kv-4s", "tmotor-f1404-2900kv-4s"}
     reasons = {(r["table"], r["prop"]): r["reasons"] for r in framed["failing"]}
     assert "props_overlap" in reasons[("sunnysky-x2212-980kv", "APC9047 4S")]
     assert reasons[("crazyflie-2.0-coreless-1s", "CF2 45mm")] == ["motor_mass_unknown"]
-    # HS-3G-B's own table was measured on a full 16.8 V pack; the general check holds it to the 4S nominal voltage
-    assert "bench_voltage_mismatch" in reasons[("tmotor-f1404-2900kv-4s", "GF3028-3")]
+    rev_b = next(r for r in framed["passing"] if r["table"] == "tmotor-f1404-2900kv-4s")
+    assert "bench_on_charged_pack" in rev_b["warnings"]
     capped = pick(dict(spec, max_prop_diameter_mm=100))
     assert all(r["prop_diameter_mm"] <= 100 for r in capped["passing"])
 
@@ -219,3 +219,29 @@ def test_pick_counts_each_motors_own_mass_and_prop_fit():
 def test_pick_needs_the_mass_without_motors():
     with pytest.raises(PropulsionCheckError, match="mass_without_motors_g"):
         pick({"rotors": 4, "battery": {"cells": 4, "capacity_mah": 850, "c_continuous": 70}, "esc_continuous_a": 35})
+
+
+REV_B = json.loads((ROOT / "examples/drone_proving_ground/revision_b/reference/results.json").read_text())
+
+
+def test_reproduces_hs3g_b_from_its_full_pack_table():
+    # The maker ran the F1404 2900KV on a charged 4S pack (16.8 V). Hover power carries over, so the general check matches
+    # HS-3G-B's own design script; full-throttle thrust is scaled to nominal voltage, so thrust-to-weight reads lower.
+    spec = {"rotors": 4, "prop": "GF3028-3", "all_up_mass_g": REV_B["mass"]["auw_g"], "prop_diameter_mm": 77.06,
+            "battery": {"cells": 4, "capacity_mah": 850, "c_continuous": 70, "c_burst": 140}, "esc_continuous_a": 35}
+    report = check_propulsion(spec, "tmotor-f1404-2900kv-4s")
+    got, want = report["results"], REV_B["propulsion"]
+    assert report["summary"]["errors"] == 0 and "bench_on_charged_pack" in rules(report)
+    assert got["hover_time_min"] == want["hover_time_min"]
+    assert got["hover_time_upper_bound_min"] == want["hover_time_upper_bound_min"]
+    assert got["hover_current_a"] == want["hover_current_a"]
+    assert got["full_throttle_current_a"] == want["max_current_a"]
+    assert got["bench_max_thrust_total_g"] == want["max_thrust_total_g"]
+    assert abs(got["max_thrust_total_g"] - want["max_thrust_total_g"] * (14.8 / got["bench_voltage_v"]) ** 2) < 1.0
+    assert 3.8 < got["thrust_to_weight"] < 4.0
+
+
+def test_a_table_from_a_smaller_pack_still_does_not_apply():
+    spec = {"rotors": 4, "prop": "APC9047 3S", "all_up_mass_g": 900, "battery": {"cells": 4, "capacity_mah": 3000, "c_continuous": 25},
+            "esc_continuous_a": 30}
+    assert "bench_voltage_mismatch" in rules(check_propulsion(spec, SUNNYSKY))

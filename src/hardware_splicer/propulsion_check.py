@@ -43,6 +43,7 @@ DEFAULTS = {
     "esc_margin": (1.2, "ESC continuous rating over the motor's full-throttle current; a common rule of thumb."),
     "min_tip_gap_mm": (10.0, "Gap between neighbouring prop discs."),
     "bench_voltage_tolerance": (0.10, "Largest relative difference between bench and pack voltage before the table stops applying."),
+    "charged_cell_v": (4.2, "LiPo cell at full charge (LiHV packs reach 4.35 V); a bench run on a charged pack is inside the pack's range."),
 }
 G = 9.80665
 # Where bench data may come from. Anything else (a shop listing, a hand transcription, a model's memory) is reported as
@@ -210,6 +211,7 @@ def check_propulsion(spec: Any, table: Any = None) -> dict[str, Any]:
     esc_margin_min = _value(spec, "esc_margin", assumptions)
     tip_gap_min = _value(spec, "min_tip_gap_mm", assumptions)
     v_tol = _value(spec, "bench_voltage_tolerance", assumptions)
+    v_charged = _value(spec, "charged_cell_v", assumptions)
 
     findings: list[dict[str, Any]] = []
 
@@ -226,10 +228,22 @@ def check_propulsion(spec: Any, table: Any = None) -> dict[str, Any]:
 
     v_pack = cells * v_cell
     v_bench = sum(r["voltage_v"] for r in rows) / len(rows)
+    thrust_scale = 1.0  # applied to full-throttle thrust only
     if abs(v_bench - v_pack) / v_pack > v_tol:
-        finding("error", "bench_voltage_mismatch",
-                f"The table was measured at about {v_bench:.1f} V but a {cells}S pack is about {v_pack:.1f} V. Thrust and current do not "
-                "carry across voltages; use a table measured on this cell count.")
+        if v_pack < v_bench <= cells * v_charged * 1.01:
+            # Measured on a charged pack of this cell count. At a given thrust the prop needs the same rpm and torque whatever
+            # the supply, so hover power carries over (ESC losses make the higher-voltage figure, if anything, the larger).
+            # Full-throttle thrust does not: it falls roughly with the square of the voltage, so it is scaled down to nominal.
+            # Full-throttle current is kept at the bench figure, which is the higher one. Each choice errs on the safe side.
+            thrust_scale = (v_pack / v_bench) ** 2
+            finding("warning", "bench_on_charged_pack",
+                    f"The table was measured at about {v_bench:.1f} V, a charged {cells}S pack, against {v_pack:.1f} V nominal. Hover power "
+                    f"is taken from the table; full-throttle thrust is scaled by {thrust_scale:.2f} to nominal voltage, and full-throttle "
+                    "current is kept at the bench figure.")
+        else:
+            finding("error", "bench_voltage_mismatch",
+                    f"The table was measured at about {v_bench:.1f} V but a {cells}S pack is about {v_pack:.1f} V. Thrust and current do not "
+                    "carry across voltages; use a table measured on this cell count.")
 
     hover_g = auw / rotors
     results: dict[str, Any] = {"all_up_mass_g": round(auw, 1), "rotors": rotors, "hover_thrust_per_rotor_g": round(hover_g, 1),
@@ -270,9 +284,11 @@ def check_propulsion(spec: Any, table: Any = None) -> dict[str, Any]:
             finding("error", "hover_time_short", f"Hover time {hover_min:.1f} min is under the required {need} min.")
 
     i_full = rotors * full["current_a"] + avionics_w / v_pack
-    tw = rotors * full["thrust_g"] / auw
+    tw = rotors * full["thrust_g"] * thrust_scale / auw
     i_cont = c_cont * capacity_ah
-    results.update({"max_thrust_total_g": round(rotors * full["thrust_g"], 1), "thrust_to_weight": round(tw, 2),
+    if thrust_scale != 1.0:
+        results.update({"bench_max_thrust_total_g": round(rotors * full["thrust_g"], 1), "max_thrust_voltage_scale": round(thrust_scale, 3)})
+    results.update({"max_thrust_total_g": round(rotors * full["thrust_g"] * thrust_scale, 1), "thrust_to_weight": round(tw, 2),
                     "full_throttle_current_a": round(i_full, 1), "battery_continuous_a": round(i_cont, 1),
                     "motor_full_throttle_current_a": full["current_a"], "esc_margin": round(esc_a / full["current_a"], 2)})
     if i_full > i_cont:
@@ -280,7 +296,7 @@ def check_propulsion(spec: Any, table: Any = None) -> dict[str, Any]:
         if limit:
             top = max(limit, key=lambda r: r["thrust_g"])
             results.update({"battery_limited_throttle_pct": top.get("throttle_pct"), "battery_limited_thrust_per_rotor_g": top["thrust_g"],
-                            "battery_limited_thrust_to_weight": round(rotors * top["thrust_g"] / auw, 2)})
+                            "battery_limited_thrust_to_weight": round(rotors * top["thrust_g"] * thrust_scale / auw, 2)})
         burst_note = ""
         if c_burst is not None:
             results["battery_burst_a"] = round(c_burst * capacity_ah, 1)

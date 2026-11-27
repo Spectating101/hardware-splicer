@@ -1,13 +1,13 @@
 {
  "schema": "hardware_splicer.capability_map.v2",
  "modules": 616,
- "lines": 177364,
+ "lines": 177380,
  "tested": 536,
  "in_toolbelt": 32,
  "status": {
   "product": {
    "modules": 467,
-   "lines": 140487
+   "lines": 140503
   },
   "research": {
    "modules": 141,
@@ -188,7 +188,7 @@
   "drones, propulsion and power": {
    "modules": 13,
    "capability_modules": 12,
-   "lines": 2919,
+   "lines": 2935,
    "tested": 13,
    "product": 10,
    "in_toolbelt": 5
@@ -1275,7 +1275,7 @@
 {"module":"project_wiring","area":"AI, agents and models","lines":201,"plumbing":false,"status":"product","research_line":null,"direct":true,"tool":false,"runnable":false,"toolbelt":true,"mcp":true,"rest":true,"console":true,"tests":1,"test_files":["test_project_wiring.py"],"importers":["project_part_substitutions","project_wiring_api","sdk","wiring_cli"],"imports":["integrations.wireviz","project_materials","project_store","stored_source_parser","wiring_harness"],"scripts":[],"about":"Immutable, revision-bound harness assessments using the existing materials."},
 {"module":"project_wiring_api","area":"projects, reviews and evidence","lines":64,"plumbing":true,"status":"product","research_line":null,"direct":true,"tool":false,"runnable":false,"toolbelt":false,"mcp":true,"rest":true,"console":true,"tests":1,"test_files":["test_project_wiring.py"],"importers":["product_api"],"imports":["integrations.wireviz","project_api","project_store","project_wiring","wiring_harness"],"scripts":[],"about":"Canonical project wiring API backed by the shared headless engine."},
 {"module":"prop_static","area":"drones, propulsion and power","lines":79,"plumbing":false,"status":"product","research_line":null,"direct":true,"tool":true,"runnable":true,"toolbelt":true,"mcp":true,"rest":true,"console":true,"tests":1,"test_files":["test_prop_static.py"],"importers":["engineering_toolbelt"],"imports":[],"scripts":[],"about":"Static (hover) thrust and shaft power of a small propeller from the UIUC Propeller Database's measured coefficients. python -m hardware_splicer.prop_static UIUC-propDB.zip gwsdd_3x3 --thrust-g 55.5 The UIUC files give CT and CP against rpm, measured on a load cell (static, no forward speed). With n in rev/s and D the diameter: T = CT rho n^2 D^4, P = CP rho n^3 D^5. The rpm where T equals the targ"},
-{"module":"propulsion_check","area":"drones, propulsion and power","lines":389,"plumbing":false,"status":"product","research_line":null,"direct":true,"tool":true,"runnable":true,"toolbelt":true,"mcp":true,"rest":true,"console":true,"tests":1,"test_files":["test_propulsion_check.py"],"importers":["engineering_toolbelt"],"imports":[],"scripts":[],"about":"Multirotor propulsion check from a cited motor bench table. Given the all-up mass, a rotor count, a motor and propeller bench table and the battery and ESC ratings, this works out hover power and current, hover time, thrust-to-weight, the battery's current limit, ESC and motor margins and, when the frame is given, whether neighbouring props overlap. It generalises the 3-inch proving-ground calcula"},
+{"module":"propulsion_check","area":"drones, propulsion and power","lines":405,"plumbing":false,"status":"product","research_line":null,"direct":true,"tool":true,"runnable":true,"toolbelt":true,"mcp":true,"rest":true,"console":true,"tests":1,"test_files":["test_propulsion_check.py"],"importers":["engineering_toolbelt"],"imports":[],"scripts":[],"about":"Multirotor propulsion check from a cited motor bench table. Given the all-up mass, a rotor count, a motor and propeller bench table and the battery and ESC ratings, this works out hover power and current, hover time, thrust-to-weight, the battery's current limit, ESC and motor margins and, when the frame is given, whether neighbouring props overlap. It generalises the 3-inch proving-ground calcula"},
 {"module":"provider_review","area":"projects, reviews and evidence","lines":144,"plumbing":false,"status":"research","research_line":"SPI-flash virtual lab and vendor models","direct":false,"tool":false,"runnable":false,"toolbelt":false,"mcp":false,"rest":false,"console":false,"tests":1,"test_files":["test_provider_review.py"],"importers":[],"imports":[],"scripts":["scripts/evaluate_spi_provider_review.py"],"about":""},
 {"module":"public_web_bench","area":"salvage, donors, repair","lines":398,"plumbing":false,"status":"research","research_line":"evaluation and benchmark instruments","direct":false,"tool":false,"runnable":false,"toolbelt":false,"mcp":false,"rest":false,"console":false,"tests":1,"test_files":["test_public_web_bench.py"],"importers":[],"imports":["bench_capture_bridge","board_vision_salvage","splice_bench","state_paths"],"scripts":["scripts/public_web_bench_capture.py"],"about":"Build bench_topology_capture packets from public-web DMM photos. Uses Creative-Commons bench photos + live Qwen VL to read meter LCDs. Provenance is explicit: this is **public reference evidence**, not a claim that the readings were taken on the current donor board under test."},
 {"module":"real_device_work_package","area":"salvage, donors, repair","lines":53,"plumbing":false,"status":"research","research_line":"demonstrator builds run from scripts","direct":false,"tool":false,"runnable":false,"toolbelt":false,"mcp":false,"rest":false,"console":false,"tests":1,"test_files":["test_real_device_work_package.py"],"importers":[],"imports":[],"scripts":["scripts/compile_real_device_work_packages.py"],"about":"Compile bounded real-device repair/build work packages from unverified reviews. Only source pointers, required deliverables and explicit acceptance gates are promoted to structured work items. Model prose is never component certification."},

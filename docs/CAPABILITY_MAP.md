@@ -6,11 +6,11 @@ their reach and tests; `... show <module>` gives one module's importers, imports
 tables are in `docs/capability_map/`; the job-level map (which module is canonical for which job) is
 `docs/CAPABILITY_CONSOLIDATION.md`.
 
-**616 modules, 177,364 lines; 536 referenced by a test; 32 called by an engine tool.**
+**616 modules, 177,380 lines; 536 referenced by a test; 32 called by an engine tool.**
 
 | Status | Modules | Lines | Meaning |
 |---|---|---|---|
-| product | 467 | 140,487 | reached from a shipped entry point (toolbelt, MCP, REST or a console command) |
+| product | 467 | 140,503 | reached from a shipped entry point (toolbelt, MCP, REST or a console command) |
 | research | 141 | 35,128 | not shipped on purpose: part of a declared research line (RESEARCH_LINES) |
 | script | 5 | 1,475 | reached only from scripts/, projects/, eval/, experiments/, the Makefile or CI |
 | runnable | 0 | 0 | has its own `python -m` main, and nothing shipped imports it |
@@ -44,7 +44,7 @@ Reach codes in the area pages: **T** toolbelt, **M** MCP server, **R** REST prod
 | parts, BOM and sourcing | 53 | 39 | 15,775 | 48 | 44 | 1 | [parts-bom-and-sourcing](capability_map/parts-bom-and-sourcing.md) |
 | robots, arms and motion | 30 | 28 | 12,077 | 29 | 22 | 4 | [robots-arms-and-motion](capability_map/robots-arms-and-motion.md) |
 | firmware and devices | 11 | 10 | 4,063 | 10 | 11 | 2 | [firmware-and-devices](capability_map/firmware-and-devices.md) |
-| drones, propulsion and power | 13 | 12 | 2,919 | 13 | 10 | 5 | [drones-propulsion-and-power](capability_map/drones-propulsion-and-power.md) |
+| drones, propulsion and power | 13 | 12 | 2,935 | 13 | 10 | 5 | [drones-propulsion-and-power](capability_map/drones-propulsion-and-power.md) |
 | simulation | 8 | 6 | 2,366 | 7 | 5 | 0 | [simulation](capability_map/simulation.md) |
 | research and landscape | 3 | 3 | 811 | 3 | 0 | 0 | [research-and-landscape](capability_map/research-and-landscape.md) |
 
