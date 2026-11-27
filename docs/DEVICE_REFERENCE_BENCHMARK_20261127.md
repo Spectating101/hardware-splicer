@@ -79,9 +79,8 @@ OSR's for flat-floor inspection only. HS's salvage rover (HS-ROVER-SALVAGE-A) al
 
 **What the comparison changed in HS.** As with the arm, HS could not pick the cheap tier: its drive table held only
 Pololu gearmotors. Adafruit's TT gearmotor (product 3777: 200 rpm and 0.8 kg.cm stall at 6 V, 150 mA no-load, 30.6 g)
-is now in it, and passes HS-ROVER-A's speed and torque requirements. The seller publishes no stall current or torque
-limits, so those checks read unknown rather than passed, and a TT option is listed after every option with a known
-current.
+is now in it, and passes HS-ROVER-A's speed and torque requirements. The seller publishes no torque limits, so those checks read unknown rather than passed. (This page first said no
+stall current either; Adafruit's page has a one-motor bench measurement, 1.5 A at 6 V, now used.)
 
 ## Third comparison: HS-3G-B against the open multirotors
 
@@ -163,8 +162,9 @@ NT$1,100-2,965 together. A mapping rover built from those, on OOMWOO's open soft
 ## Next
 
 1. Done: HS-ARM-A rev B (above), screw holes included. Still open: the leader arm SO-101 pairs with.
-2. Done: rover (above). Still open: a TT-motor variant of HS-ROVER-A priced and re-checked end to end; the OSR's
-   rocker-bogie (Apache-2.0) as HS's rough-terrain option.
+2. Done: rover (above), and HS-ROVER-A's TT variant priced and re-checked end to end: US$187.50 against US$263.44,
+   438 g, 4.7 h (`projects/hs-rover-a/tt-variant`). Adafruit does publish a one-motor stall measurement (1.5 A at 6 V),
+   now in HS's table; the "no stall current" above was wrong. Still open: the OSR's rocker-bogie (Apache-2.0).
 3. Done: drone (above). Still open: a brushless calibration aircraft, Crazyflie's motor mass, and more cited tables
    (1S brushless, 2 in, 5 in).
 4. Done: robot vacuum (above); the earlier "uncontested" was wrong, OOMWOO is the open design. Still open: the drive
