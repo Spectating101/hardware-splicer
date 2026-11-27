@@ -10,7 +10,7 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `part_lookup` | 979 | 6 | product | TMRC | Look a marking up in KiCad's own libraries, offline. KiCad ships about twenty thousand symbols with a description, a datasheet link, a default footprint and every pin's name and type, and thousands of... |
 | `kicad_edit` | 949 | 2 | product | TMRC | Pure, span-preserving KiCad schematic/PCB edit operations. This engine only transforms text into a candidate. It never writes files, never touches a project, and never promotes an engineering claim. A... |
 | `circuit_synthesis.operator_lowering` | 901 | 1 | product | TMRC | Lower bounded topology operators into graph terminal semantics. This is intentionally narrow. It does not replace the existing auto-wire or netlist compiler. It adds the first bridge from `TopologyOpe... |
-| `routing_engine` | 845 | 4 | product | TMRC | Capability-gated autoroute engine. Routing produces candidate PCB text for review. It never writes into a project, never touches a revision, and never treats a routed board as verified. DRC results, i... |
+| `routing_engine` | 845 | 5 | product | TMRC | Capability-gated autoroute engine. Routing produces candidate PCB text for review. It never writes into a project, never touches a revision, and never treats a routed board as verified. DRC results, i... |
 | `integrations.engineering_review` | 743 | 1 | product | MRC | Read-only external engineering review adapters. The first supported adapter is kicad-happy. It is intentionally executed as an optional sidecar: Hardware Splicer owns build identity, evidence, review ... |
 | `parts_intel` | 739 | 1 | product | MRC | Parts intelligence for a retained schematic revision. Extracts the components the design actually carries. Lifecycle, stock, and alternates are filled only by a configured provider, with source and as... |
 | `local_kicad_worker` | 737 | 2 | research | - | An opt-in, source-pinned KiCad ERC worker with Ed25519 evidence receipts. Separate from the GitHub Actions dispatcher: registering this read-only worker does NOT authorize a GitHub self-hosted runner ... |
@@ -30,7 +30,7 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `model3d` | 495 | 6 | product | TMRC | Server-side GLB views of retained PCB bytes. A rendered model is a view of retained bytes. It carries no engineering authority and never rewrites a snapshot, revision, pin, review, or thread. |
 | `circuit_synthesis.power_rail_planner` | 478 | 0 | product | TMRC | Bounded power-rail conversion planner using structured electrical contracts. |
 | `circuit_synthesis.h_bridge_planner` | 471 | 0 | product | TMRC | Bounded bidirectional DC motor H-bridge topology planner. |
-| `kicad_component_board` | 456 | 2 | product | TMRC | Component-level KiCad boards: real library symbols and footprints, and the checks that close the loop. A design is a list of parts (each a KiCad library symbol and footprint) and named nets of ``REF.P... |
+| `kicad_component_board` | 463 | 3 | product | TMRC | Component-level KiCad boards: real library symbols and footprints, and the checks that close the loop. A design is a list of parts (each a KiCad library symbol and footprint) and named nets of ``REF.P... |
 | `machine_project_compile_adapter` | 453 | 1 | product | MRC | Projection of existing HardwareCompileSpec-shaped payloads into MachineProject. The adapter preserves the full legacy compile payload and exposes its major cross-discipline objects for traceability. I... |
 | `circuit_synthesis.planner` | 450 | 2 | product | TMRC | Dispatcher for bounded circuit synthesis planners. Model-first routing uses the typed semantic planner registry and never falls back to natural-language keyword selection when semantic selection fails... |
 | `circuit_synthesis.ir` | 438 | 0 | product | TMRC | Circuit synthesis intermediate representation. This is not a full schematic engine. It is the first bounded language for representing user intent, parts, ports, topology operators, constraints, and ca... |
@@ -63,11 +63,11 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `integrations.qwen_netlist_compose` | 243 | 3 | product | TMRC | Qwen text → hardware_splicer.netlist.v1 for arbitrary compose (not vision). |
 | `restoration_schematic_grounding` | 243 | 1 | research | - | Physical-architecture evidence from actual revision-pinned KiCad netlists. The source is Gekkio's CC BY 4.0 reverse-engineered Game Boy DMG-CPU-06 schematics, NOT a fictitious model-provided pinout or... |
 | `electrical_design_edit` | 241 | 1 | product | MRC | Deterministic authoring operations for canonical electrical designs. |
+| `component_board_pipeline` | 240 | 2 | product | TMRC | Any component-level board, from a JSON design to checked KiCad files and fab outputs. The pipeline HS-BUS-A proved, for any design an agent writes: schematic symbols from the KiCad libraries, pin cove... |
 | `wirestudio_bridge` | 233 | 2 | product | MRC | Review WireStudio designs with HS's electrical checks, using WireStudio's own part data (MIT, pinned snapshot). WireStudio (github.com/moellere/WireStudio) turns a design.json into firmware, wiring, K... |
 | `electronics_foundation_benchmark` | 232 | 2 | research | - | Catalog-backed electronics benchmark for HS electrical truth boundaries. The benchmark separates component/pin identity, signal-domain safety, translator topology, and later KiCad geometry. PCB DRC mu... |
 | `circuit_synthesis.level_shift_planner` | 230 | 0 | product | TMRC | Bounded logic-level translation planner. |
 | `netlist.erc` | 230 | 1 | product | TMRC | Electrical rule check on circuit netlist IR. |
-| `component_board_pipeline` | 225 | 1 | product | TMRC | Any component-level board, from a JSON design to checked KiCad files and fab outputs. The pipeline HS-BUS-A proved, for any design an agent writes: schematic symbols from the KiCad libraries, pin cove... |
 | `compose_agent_loop` | 222 | 3 | product | MRC | Agent-facing compose orchestration — manual DRC retry rounds on top of engine fix loop. |
 | `pcb.geometry_compile` | 219 | 3 | product | TMRC | Compile build_graph.json → geometry, DRC, KiCad, design quality (Python engine). |
 | `part_tiers` | 211 | 1 | product | MRC | One catalogue over every part HS knows, saying what HS can do with each. HS keeps parts in two libraries that grew apart: * the device planner's library (``data/device_modules.json``): few parts, each... |
@@ -120,6 +120,7 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `tool_workers.pcb_carrier_worker` | 59 | 0 | product | TMRC | Parametric board-only carrier: a fabricated-design CANDIDATE, not approved fit. |
 | `restoration_board_action_correction` | 53 | 1 | research | - | One explicit source-preserving correction of unverified-board pin advice. |
 | `pcb.arbitrary_placement` | 52 | 0 | product | TMRC | Place components that are not in the module catalog (KiCad netlist / arbitrary IR). |
+| `_pcbnew_helpers.decoupling_report` | 50 | 0 | product | TMRC | Distance from each IC supply pad to its nearest small capacitor on the same net (KiCad's pcbnew; KiCad 9 or 10). <kicad python> decoupling_report.py board.kicad_pcb [--max-mm 5] Prints JSON: one row p... |
 | `pcb.placement_hpwl` | 44 | 0 | product | TMRC | Reorder build-graph nodes to shorten approximate HPWL before grid placement. |
 | `_pcbnew_helpers.import_ses` | 39 | 0 | product | TMRC | Import a Specctra SES into a KiCad board. Runs under a pcbnew-capable interpreter. |
 | `pcb.footprint_sizes` | 38 | 0 | product | TMRC | Infer footprint body size from KiCad library name (minimal engine port). |
