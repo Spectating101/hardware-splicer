@@ -440,7 +440,8 @@ def _price(args, _project):
 
 def _review_schematic(args, project):
     from . import kicad_design_review
-    res = kicad_design_review.review_schematic(_readable(str(args["schematic"]), project), args.get("mates"))
+    also = tuple(a for a in (args.get("also") or []) if a in kicad_design_review.ALSO)
+    res = kicad_design_review.review_schematic(_readable(str(args["schematic"]), project), args.get("mates"), also)
     findings = res.get("findings", [])
     problems = [f"{f.get('rule')}: {f.get('message') or f.get('detail')}" for f in findings if f.get("severity", "error") == "error"]
     return _envelope(True, f"{len(findings)} findings", res, problems=problems)
@@ -1011,7 +1012,9 @@ TOOLS: dict[str, ToolSpec] = {t.name: t for t in [
              check_key=lambda a: "bom_check"),
     ToolSpec("hs_review_kicad_schematic", "Review any KiCad schematic from KiCad's own netlist (UART crossings, power pins on the "
              "wrong rail, I2C pull-ups and SDA/SCL names, MOSFET and BJT orientation, diodes across rails, USB-C CC, datasheet "
-             "pull-ups, pinouts against KiCad's library).", _obj({"schematic": {"type": "string"}, "mates": {"type": "object"}}, ["schematic"]),
+             "pull-ups, pinouts against KiCad's library). also: [\"kicad_erc\", \"kicad_happy\"] adds their findings beside HS's.",
+             _obj({"schematic": {"type": "string"}, "mates": {"type": "object"},
+                   "also": {"type": "array", "items": {"type": "string", "enum": ["kicad_erc", "kicad_happy"]}}}, ["schematic"]),
              _review_schematic),
     ToolSpec("hs_component_board", "Build a board from a component-level JSON design: schematic from the KiCad libraries with "
              "read-back parity and ERC; optionally the PCB (parts without pcb_xy are placed by HS by connectivity, steered by "

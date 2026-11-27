@@ -534,3 +534,16 @@ def test_a_breakout_module_is_not_compared_with_its_chips_pinout():
     pins = ("meteo", "BME280", [("1", "VIN", "power_in"), ("2", "GND", "power_in"), ("3", "SCL", "bidirectional"), ("4", "SDA", "bidirectional")])
     board = netlist([module], [("3V3", [("U5", "1", "VIN", "power_in"), ("C1", "1", "", "passive")]), ("GND", [("U5", "2", "GND", "power_in")])], [pins])
     assert "pinout_differs_from_kicad_library" not in rules(board)
+
+
+def test_also_runs_kicad_erc_beside_hs_on_a_real_schematic():
+    import shutil
+    from pathlib import Path
+
+    if not shutil.which("kicad-cli"):
+        pytest.skip("kicad-cli is not installed")
+    sch = Path(__file__).resolve().parents[1] / "projects" / "hs-bus-a" / "kicad" / "hs_bus_a.kicad_sch"
+    res = review_schematic(sch, also=("kicad_erc", "kicad_happy"))
+    assert res["also"]["kicad_erc"]["ran"] and "counts" in res["also"]["kicad_erc"]
+    assert res["also"]["kicad_happy"]["ran"] or "HARDWARE_SPLICER_KICAD_HAPPY_ROOT" in res["also"]["kicad_happy"]["why"]
+    assert "findings" in res  # HS's own findings stay where they were

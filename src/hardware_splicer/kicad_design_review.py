@@ -37,6 +37,7 @@ from either end, so names never decide a direction. A name may still say which s
 end), and a rail's name gives its voltage for the diode and supply-pin checks.
 
     PYTHONPATH=src python -m hardware_splicer.kicad_design_review board.kicad_sch   # or a .net file
+    PYTHONPATH=src python -m hardware_splicer.kicad_design_review board.kicad_sch --also   # with KiCad ERC and kicad-happy
 """
 from __future__ import annotations
 
@@ -712,7 +713,68 @@ def review(model: dict[str, Any], mates: dict[str, Any] | None = None, library_c
     return {"schema_version": SCHEMA, "claim_boundary": BOUNDARY, "components": len(comps), "nets": len(nets), "findings": findings, "counts": counts}
 
 
-def review_schematic(path: Path, mates: dict[str, Any] | None = None) -> dict[str, Any]:
+# On 35 held-out bugs (examples/schematic_bug_benchmark/heldout_benchmark_20261127.json) KiCad ERC caught 9, kicad-happy 9 and HS 5;
+# together 14. ``also`` runs the other two next to HS's rules so one call gets all three.
+ALSO = ("kicad_erc", "kicad_happy")
+
+
+def _kicad_erc(sch: Path, cli: str, work: Path) -> dict[str, Any]:
+    sch = sch.resolve()
+    report = work / "erc.json"
+    subprocess.run([cli, "sch", "erc", "--format", "json", "--severity-all", "--output", str(report), str(sch)],
+                   capture_output=True, text=True, timeout=600, check=False, cwd=str(sch.parent))
+    if not report.exists():
+        return {"ran": False, "why": "kicad-cli wrote no ERC report"}
+    data = json.loads(report.read_text(encoding="utf-8"))
+    rows = [{"type": v.get("type"), "severity": v.get("severity"), "message": v.get("description"),
+             "where": [i.get("description") for i in v.get("items", [])][:4]} for sheet in data.get("sheets", []) for v in sheet.get("violations", [])]
+    return {"ran": True, "kicad_version": data.get("kicad_version"), "findings": rows,
+            "counts": {s: sum(r["severity"] == s for r in rows) for s in ("error", "warning")}}
+
+
+def _kicad_happy(sch: Path, work: Path) -> dict[str, Any]:
+    import os
+    import shutil
+
+    root = os.environ.get("HARDWARE_SPLICER_KICAD_HAPPY_ROOT")
+    script = Path(root) / "skills/kicad/scripts/analyze_schematic.py" if root else None
+    if script is None or not script.exists():
+        return {"ran": False, "why": "kicad-happy (MIT, aklofas/kicad-happy) is not set up: clone it and set HARDWARE_SPLICER_KICAD_HAPPY_ROOT"}
+    out = work / "kicad_happy.json"
+    cmd = [sys.executable, "-I", str(script), str(sch.resolve()), "--only-deterministic", "--compact", "-o", str(out)]
+    if shutil.which("bwrap"):  # no network for an outside tool reading the user's design
+        cmd = ["bwrap", "--unshare-net", "--ro-bind", "/", "/", "--bind", str(work), str(work), "--dev", "/dev", "--proc", "/proc", *cmd]
+    subprocess.run(cmd, capture_output=True, text=True, timeout=600, check=False)
+    if not out.exists():
+        return {"ran": False, "why": "kicad-happy wrote no report"}
+    data = json.loads(out.read_text(encoding="utf-8"))
+    rows = [{"rule": f.get("rule_id") or f.get("detector"), "severity": f.get("severity"), "message": str(f.get("summary", ""))[:300],
+             "components": f.get("components") or f.get("refs") or []} for f in data.get("findings", [])]
+    return {"ran": True, "findings": rows, "counts": {s: sum(r["severity"] == s for r in rows) for s in ("error", "warning", "info")}}
+
+
+def review_schematic(path: Path, mates: dict[str, Any] | None = None, also: tuple[str, ...] = ()) -> dict[str, Any]:
+    result = _review_schematic(path, mates)
+    if also:
+        if path.suffix == ".net":
+            result["also"] = {name: {"ran": False, "why": "needs the .kicad_sch, not a netlist"} for name in also}
+            return result
+        from .model3d import resolve_kicad_cli
+
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp)
+            result["also"] = {}
+            if "kicad_erc" in also:
+                cli = resolve_kicad_cli()
+                result["also"]["kicad_erc"] = _kicad_erc(path, cli, work) if cli else {"ran": False, "why": "kicad-cli not found"}
+            if "kicad_happy" in also:
+                result["also"]["kicad_happy"] = _kicad_happy(path, work)
+        result["also_note"] = ("KiCad ERC and kicad-happy findings are theirs, reported unchanged beside HS's own; on held-out bugs the three "
+                               "together caught 14 of 35, each alone at most 9.")
+    return result
+
+
+def _review_schematic(path: Path, mates: dict[str, Any] | None = None) -> dict[str, Any]:
     if path.suffix == ".net":
         return review(parse_netlist(path.read_text(encoding="utf-8", errors="replace")), mates)
     with tempfile.TemporaryDirectory() as tmp:
@@ -734,6 +796,10 @@ def review_schematic(path: Path, mates: dict[str, Any] | None = None) -> dict[st
 def main(argv: list[str] | None = None) -> int:
     args = sys.argv[1:] if argv is None else argv
     mates = None
+    also = ()
+    if "--also" in args:
+        also = ALSO
+        args = [a for a in args if a != "--also"]
     if "--mates" in args:
         i = args.index("--mates")
         mates = json.loads(Path(args[i + 1]).read_text(encoding="utf-8"))
@@ -742,7 +808,7 @@ def main(argv: list[str] | None = None) -> int:
         print(__doc__, file=sys.stderr)
         return 2
     try:
-        print(json.dumps(review_schematic(Path(args[0]), mates), indent=2))
+        print(json.dumps(review_schematic(Path(args[0]), mates, also), indent=2))
     except (KicadReviewError, OSError, subprocess.SubprocessError) as exc:
         print(json.dumps({"error": str(exc)}), file=sys.stderr)
         return 2
