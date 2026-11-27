@@ -4,7 +4,7 @@ The pipeline HS-BUS-A proved, for any design an agent writes:
 
     schematic   symbols from the KiCad libraries, pin coverage, KiCad's read-back netlist == design, ERC
     pcb         footprints placed where the design says, every net routed by FreeRouting in one pass (net classes set
-                the power widths), router leftovers removed, ground stitching and pours, reference labels moved off copper
+                the power widths; if every attempt fails, KiCadRoutingTools with the same widths, then Copper), router leftovers removed, ground stitching and pours, reference labels moved off copper
                 and other parts' outlines, DRC with schematic parity
     fab         Gerbers + drill (zipped), pick-and-place, BOM, schematic PDF, 3D renders
 
@@ -194,9 +194,34 @@ def pcb_stage(design: kb.Design, readback: dict, out: Path, board: dict[str, Any
         attempts.append(len(problems))
         if not problems:
             break
+    routing_stats, krt = routed.stats, None
+    if problems:
+        # Every FreeRouting attempt left errors: KiCadRoutingTools (MIT) next, with the board's net-class widths passed
+        # explicitly (its autorouter caps power nets at 0.3 mm). Its board goes through the same finish, label and DRC steps,
+        # and replaces the FreeRouting board only if it comes back with no DRC error.
+        from . import krt_route
+        widths = {pat: float(nc["track"]) for nc in spec.get("netclasses", []) for pat in nc.get("patterns", []) if nc.get("track")}
+        krt_routed, krt_pcb = out / "krt_routed.kicad_pcb", out / "krt.kicad_pcb"
+        try:
+            krt = krt_route.route_with_krt(placed, krt_routed, power_widths=widths, rules=rules, timeout_s=route_timeout_s * 2)
+            _pcbnew("--finish", str(spec_path), str(krt_routed), str(krt_pcb))
+            krt_labels = clear_silk_labels(krt_pcb)
+            krt_drc = kb.run_drc(krt_pcb, out)
+            krt_problems = [f"DRC {g}: {i['severity']}: {i['type']}: {'; '.join(w for w in i['where'] if w)}"
+                            for g in ("violations", "unconnected_items", "schematic_parity") for i in krt_drc[g]["items"] if i["severity"] == "error"]
+            krt["drc_problems"] = len(krt_problems)
+            attempts.append(len(krt_problems))
+            if not krt_problems:
+                shutil.move(str(krt_pcb), str(pcb))
+                problems, drc, labels = [], krt_drc, krt_labels
+                routing_stats = {"engine": "KiCadRoutingTools", "seconds": krt["seconds"], "power_widths_mm": krt["power_widths_mm"]}
+        except (krt_route.KrtRouteError, subprocess.SubprocessError) as exc:
+            krt = {"complete": False, "error": str(exc)}
+        for tmp in (krt_routed, krt_pcb, krt_routed.with_suffix(".kicad_pro"), krt_pcb.with_suffix(".kicad_pro")):
+            tmp.unlink(missing_ok=True)
     copper = None
     if problems:
-        # Every FreeRouting attempt left errors: hand the same placement to Copper (copper-kicad-mcp, MIT) when it is
+        # FreeRouting and KiCadRoutingTools both left errors: hand the same placement to Copper (copper-kicad-mcp, MIT) when it is
         # configured. Its result is a KiCad 10 board, judged by KiCad 10's DRC; the KiCad 9 board above is kept.
         from . import copper_route
         try:
@@ -216,8 +241,8 @@ def pcb_stage(design: kb.Design, readback: dict, out: Path, board: dict[str, Any
     decoupling = decoupling_report(pcb)
     far = [r for r in (decoupling or {}).get("pads", []) if r["over_limit"]]
     trace_current = _trace_current(pcb, board)
-    return {"ok": not problems, "stage": "pcb", "pcb": str(pcb), "routing": routed.stats, "placement": placement,
-            "copper": copper, "decoupling": decoupling, "trace_current": trace_current, "silk_labels": labels,
+    return {"ok": not problems, "stage": "pcb", "pcb": str(pcb), "routing": routing_stats, "placement": placement,
+            "krt": krt, "copper": copper, "decoupling": decoupling, "trace_current": trace_current, "silk_labels": labels,
             "trace_current_warnings": [f["message"] for f in (trace_current or {}).get("findings", []) if f["severity"] == "warning"],
             "decoupling_warnings": [f"{r['ic']} pad {r['pad']} ({r['net']}): nearest capacitor {r['nearest_cap']} is {r['distance_mm']} mm away"
                                     for r in far],

@@ -1,0 +1,108 @@
+{
+ "schema": "hardware_splicer.routing_reference_benchmark.v1",
+ "captured": "2026-11-28",
+ "question": "Does KiCadRoutingTools route the same placements better than Copper?",
+ "method": "Same stripped boards as copper_vs_designer_reference_boards_20261127.json; KiCadRoutingTools 0.24 (commit 192216e, prebuilt Rust router) autoroute.py; both routers' boards judged by KiCad 10.0.8 DRC with --refill-zones, errors compared by type with the designer's own board.",
+ "boards": [
+  {
+   "board": "jaisor/SNAP_Power_Controller",
+   "copper": {
+    "drc_errors": 0,
+    "unconnected": 0,
+    "vias": 12,
+    "track_length_mm": 450.3
+   },
+   "krt": {
+    "drc_errors": 0,
+    "unconnected": 0,
+    "vias": 24,
+    "track_length_mm": 320.6,
+    "seconds": 15
+   },
+   "designer": {
+    "vias": 39,
+    "track_length_mm": 395.0
+   }
+  },
+  {
+   "board": "YC-Lam/IP5328P-powerbank_design",
+   "copper": {
+    "drc_errors": 30,
+    "unconnected": 2,
+    "vias": 48,
+    "track_length_mm": 1075.7,
+    "added_vs_designer": {}
+   },
+   "krt": {
+    "drc_errors": 13,
+    "unconnected": 0,
+    "vias": 110,
+    "track_length_mm": 999.6,
+    "added_vs_designer": {},
+    "seconds": 47
+   },
+   "designer": {
+    "drc_errors": 70
+   }
+  },
+  {
+   "board": "diminDDL/PiUPS",
+   "copper": {
+    "drc_errors": 134,
+    "unconnected": 0,
+    "added_vs_designer": {
+     "shorting_items": 7,
+     "solder_mask_bridge": 30
+    }
+   },
+   "krt": {
+    "drc_errors": 57,
+    "unconnected": 0,
+    "vias": 159,
+    "track_length_mm": 1846.8,
+    "added_vs_designer": {
+     "shorting_items": 1,
+     "clearance": 1
+    },
+    "seconds": 107
+   },
+   "designer": {
+    "drc_errors": 121
+   }
+  }
+ ],
+ "hs_bus_a": {
+  "placement": "HS-BUS-A as placed for copper_vs_hs_bus_a_20261127.json",
+  "autoroute": {
+   "drc_errors": 0,
+   "unconnected": 0,
+   "seconds": 17,
+   "track_widths_mm": {
+    "VIN_12V": 0.3,
+    "DXL_VDD*": 0.127
+   },
+   "track_check": "VIN 389 C and DXL_VDD 332 C rise at 5 A and 2.5 A: unsafe"
+  },
+  "autoroute_board_rules": {
+   "drc_errors": 0,
+   "unconnected": 0,
+   "track_widths_mm": {
+    "VIN_12V": 0.3,
+    "DXL_VDD*": 0.2
+   },
+   "track_check": "still unsafe (389 C, 157 C)"
+  },
+  "route_py_with_widths": {
+   "drc_errors": 0,
+   "unconnected": 0,
+   "seconds": 49,
+   "track_widths_mm": {
+    "VIN_12V": 2.5,
+    "DXL_VDD*": 1.2
+   },
+   "track_check": "11.8 C and 8.2 C: the same as HS's own board"
+  }
+ },
+ "result": "KiCadRoutingTools finished every board: SNAP clean, IP5328P with every connection made (Copper left 2), PiUPS adding 1 short and 1 clearance error against Copper's 7 shorts and 30 mask bridges, all in under 2 minutes. Its whole-board autorouter caps power nets at 0.3 mm, which passes DRC but would overheat HS-BUS-A's 5 A rail; called through route.py with the net-class widths it matches HS's own tracks. HS uses it that way, after FreeRouting and before Copper.",
+ "limits": "Three 2-layer boards and one HS board; default settings otherwise; DRC-clean is not signal-integrity or thermal sign-off."
+}
