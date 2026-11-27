@@ -5988,7 +5988,7 @@
 		(descr "Capacitor SMD 0603 (1608 Metric), square (rectangular) end terminal, IPC-7351 nominal, (Body size source: IPC-SM-782 page 76, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf), generated with kicad-footprint-generator")
 		(tags "capacitor")
 		(property "Reference" "C4"
-			(at 0 -1.43 90)
+			(at -3.004201 0 0)
 			(layer "F.SilkS")
 			(uuid "850294e1-c9ce-4810-a74a-5792ccf54965")
 			(effects
@@ -9775,7 +9775,7 @@
 		(descr "SOT, 5 Pin (JEDEC MO-178 Var AA https://www.jedec.org/document_search?search_api_views_fulltext=MO-178), generated with kicad-footprint-generator ipc_gullwing_generator.py")
 		(tags "SOT TO_SOT_SMD")
 		(property "Reference" "U3"
-			(at 0 -2.4 0)
+			(at 0 4.2465 0)
 			(layer "F.SilkS")
 			(uuid "2490affc-7224-4218-94e4-82c58f66917e")
 			(effects
