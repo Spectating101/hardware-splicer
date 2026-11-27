@@ -124,6 +124,9 @@ and PyBullet; not scikit-fem). Board layout needs `HARDWARE_SPLICER_FREEROUTING_
    a 40 mm mesh. Screen a bracket or boss cut from a part, or add a sparse solver.
 3. **FEM stays open.** Linear tetrahedra are not conservative in bending, so every `hs_fem_screen` result keeps an open
    blocker; installing scikit-fem in the native venv would let `mechanical_quadratic_fem` (second order) be wired next.
-4. **Routing varies.** On HS-BUS-A only 5 of 14 FreeRouting attempts came back DRC-clean (leftover stubs, clearance to
-   stitching vias), including on the board's own hand placement. The board tool now retries up to six times and reports
-   each attempt's error count; a router that closes its own leftovers is the real fix.
+4. **Routing varies; a finisher now exists (2026-11-27).** On HS-BUS-A only 5 of 14 FreeRouting attempts came back
+   DRC-clean, and 2 of 5 on one fixed placement in a rerun; the board tool retries up to six times. Copper
+   (copper-kicad-mcp, MIT) routed that placement 5 of 5 with 0 DRC errors: Freerouting 2.2.3 leaves 6 connections and its
+   guided router closes them. HS calls it as a separate program in KiCad 10's container (`copper_route`, tool
+   `hs_route_copper`; record in `examples/routing_trial/`). Still open: its output is KiCad 10 while HS's board pipeline
+   is KiCad 9, so it is not yet the pipeline's default finisher.
