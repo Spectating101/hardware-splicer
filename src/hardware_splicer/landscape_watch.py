@@ -3,7 +3,8 @@
     python -m hardware_splicer.landscape_watch [--days 8] [--state DIR]
 
 Free sources only, no keys, no paid APIs: Hacker News search (Algolia API), GitHub repository search (gh CLI), RSS feeds
-(Hackaday, Hackster.io, The Robot Report, TechniaHQRobot, Product Hunt). CNX Software and Reddit refuse automated readers
+(Hackaday, Hackster.io, The Robot Report, TechniaHQRobot, Product Hunt), and Cite-Refinery's atlas of mapped open-source
+products, read from its local working data (``HS_ATLAS_DIR``, default ~/.local/share/atlas-discovery). CNX Software and Reddit refuse automated readers
 and are not worked around. Items are matched against topic keywords, deduplicated against a running register, and the new ones
 written to a dated digest. Fetched text is treated as untrusted data: only titles, links, dates and short summaries are
 kept, nothing is executed or followed further.
@@ -39,6 +40,8 @@ TOPICS = {
     "eda_tooling": r"\bkicad\b|freerouting|autorout|\bskidl\b|atopile|tscircuit|\bmcp\b.{0,40}(kicad|cad|freecad|pcb)",
     "cad_tooling": r"text[- ]to[- ]cad|cadquery|build123d|freecad|openscad|parametric cad",
     "physical_ai": r"physical ai|embodied ai|humanoid",
+    "embedded_device": r"\besp32\b|\besp8266\b|\brp2040\b|\brp2350\b|raspberry pi|\bpico\b|microcontroller|\bm5stack\b",
+    "other_robot": r"quadruped|walking robot|legged robot|humanoid robot|mobile manipulator|desk(top)? robot|robot (kit|pet|toy)",
     "salvage_reuse": r"salvag|e-?waste|recycl|repurpos|upcycl|hoverboard|robot vacuum|roomba|vacuum|old (phone|android|laptop)|smartphone|second.?hand",
 }
 RSS = {
@@ -56,6 +59,9 @@ GITHUB_QUERIES = ["kicad mcp", "ai pcb", "ai hardware design", "robot arm open s
 # OpenBot, which HS then rebuilt by hand on 2026-11-26.
 ESTABLISHED_TOPICS = [["smartphone", "robot"], ["robot", "vacuum"], ["hoverboard"], ["roomba"], ["robot-arm"], ["rover"],
                       ["drone", "open-source"], ["kicad"], ["openwrt"], ["e-waste"], ["upcycling"], ["salvage"], ["lerobot"]]
+# Cite-Refinery's atlas: open-source products from the Signals feed, each mapped to its purpose, inputs and outputs from its
+# own source. Read locally from that project's published working data; nothing is fetched or run.
+ATLAS_DIR = Path(os.environ.get("HS_ATLAS_DIR") or os.path.expanduser("~/.local/share/atlas-discovery"))
 REDDIT: list[str] = []  # Reddit refuses unauthenticated readers (403/404 on JSON and RSS); not worked around
 
 
@@ -126,6 +132,28 @@ def github_established(_since: datetime) -> list[dict[str, Any]]:
     return out
 
 
+def atlas(_since: datetime, root: Path | None = None) -> list[dict[str, Any]]:
+    """Every product in Cite-Refinery's atlas (its newly-possible products.json files, newest run last so it wins); the topic
+    filter in ``run`` keeps the hardware ones."""
+    root = root or ATLAS_DIR
+    files = sorted(root.glob("signals-*/newly-possible*/products.json"), key=lambda p: p.stat().st_mtime) if root.is_dir() else []
+    seen: dict[str, dict[str, Any]] = {}
+    for path in files:
+        try:
+            products = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        for p in products if isinstance(products, list) else []:
+            cid = str(p.get("catalog_id") or "")
+            if not cid.startswith("github:"):
+                continue
+            slug = cid.split(":", 1)[1]
+            seen[slug] = {"source": "cite_refinery_atlas", "title": f"{slug}: {_clean(str(p.get('purpose') or ''), 160)}",
+                          "url": f"https://github.com/{slug}", "date": "", "stars": int(p.get("stars") or 0) if str(p.get("stars") or "0").isdigit() else None,
+                          "summary": _clean(f"in: {p.get('inputs', '')} out: {p.get('outputs', '')}", 240), "atlas_post": p.get("post")}
+    return list(seen.values())
+
+
 def rss(since: datetime) -> list[dict[str, Any]]:
     out = []
     for name, url in RSS.items():
@@ -191,7 +219,7 @@ def run(days: int, state: Path) -> dict[str, Any]:
     register_path = state / "register.json"
     register = json.loads(register_path.read_text()) if register_path.is_file() else {"items": {}}
     items, errors = [], []
-    for fetch in (hacker_news, github, github_established, rss, reddit):
+    for fetch in (hacker_news, github, github_established, rss, reddit, atlas):
         try:
             for it in fetch(since):
                 (errors if it.get("error") else items).append(it)
