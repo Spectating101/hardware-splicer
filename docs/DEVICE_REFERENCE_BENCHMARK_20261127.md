@@ -165,7 +165,8 @@ NT$1,100-2,965 together. A mapping rover built from those, on OOMWOO's open soft
 
 ## Next
 
-1. Done: HS-ARM-A rev B (above), screw holes included. Still open: the leader arm SO-101 pairs with.
+1. Done: HS-ARM-A rev B (above), screw holes included, and its leader arm (`projects/hs-arm-a/leader`, US$125.71;
+   follower plus leader US$332.20 against SO-101's US$229.88 kit).
 2. Done: rover (above), and HS-ROVER-A's TT variant priced and re-checked end to end: US$187.50 against US$263.44,
    438 g, 4.7 h (`projects/hs-rover-a/tt-variant`). Adafruit does publish a one-motor stall measurement (1.5 A at 6 V),
    now in HS's table; the "no stall current" above was wrong. Still open: the OSR's rocker-bogie (Apache-2.0).
