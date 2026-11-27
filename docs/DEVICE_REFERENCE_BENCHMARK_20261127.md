@@ -169,7 +169,11 @@ NT$1,100-2,965 together. A mapping rover built from those, on OOMWOO's open soft
    follower plus leader US$332.20 against SO-101's US$229.88 kit).
 2. Done: rover (above), and HS-ROVER-A's TT variant priced and re-checked end to end: US$187.50 against US$263.44,
    438 g, 4.7 h (`projects/hs-rover-a/tt-variant`). Adafruit does publish a one-motor stall measurement (1.5 A at 6 V),
-   now in HS's table; the "no stall current" above was wrong. Still open: the OSR's rocker-bogie (Apache-2.0).
+   now in HS's table; the "no stall current" above was wrong. The OSR's rocker-bogie is now an HS tool
+   (`rocker_bogie`, `hs_rocker_bogie`: wheel load split, step climb up to one wheel radius, drive ranked by step margin),
+   with goBILDA's 5203 gearmotors (the OSR's drive, all nine ratios from goBILDA's pages) in the drive table; at the
+   OSR's 1.6 m/s on its 144 mm wheels HS ranks the OSR's own 26.9:1 first. OSR publishes neither its mass nor fixed
+   link positions, so the model is not yet checked against a measured OSR.
 3. Done: drone (above), with a brushless calibration. Still open: a brushless bench table with a flown aircraft
    (the X500 V2 needs its takeoff mass), the brushed Crazyflie's motor mass, and more cited tables
    (1S brushless, 2 in, 5 in).
