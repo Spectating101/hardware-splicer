@@ -128,7 +128,7 @@
     "bump_cliff_sensors": "front bumper switches and downward cliff sensors"
    },
    "interfaces": [
-    "Valetudo (Apache-2.0) replaces the cloud firmware on supported Xiaomi/Roborock models: the robot keeps working as a whole, locally controlled",
+    "Valetudo (Apache-2.0) supports the 1st-gen ('Xiaomi V1'), but it 'never received firmware updates that enable persistent maps' and units made after 2020-03 need full disassembly to root (supported-robots page); the Roborock S5 family is better served",
     "the LDS02RR streams scans over a serial line; kaiaai/LDS (Apache-2.0, Arduino/ESP32) and kaiaai/lds2d (Apache-2.0, Python) decode it",
     "OOMWOO's scanned STEP models give the wheel module (72.7 x 111.2 x 60.4 mm), the LDS02RR (107.7 x 86.5 x 54.1 mm, 76 mm turret) and the pack (44.4 x 142.8 x 43.5 mm); see data/third_party/oomwoo"
    ],
@@ -203,6 +203,59 @@
     "date": "2026-11-27",
     "note": "XV-11 (will not hold charge) NT$1,600; XV-21 NT$2,500; Botvac D-series NT$1,999-3,500"
    }
+  },
+  {
+   "id": "robot-vacuum-mop-crl200s",
+   "name": "Xiaomi Vacuum-Mop P / Mijia STYJ02YM (3irobotix CRL-200S inside; Viomi V6/V7 are the same platform) with a fault",
+   "search_tw": [
+    "米家掃拖機器人 零件機",
+    "STYJ02YM 故障",
+    "掃拖機器人 無法使用"
+   ],
+   "gives": {
+    "lidar_2d": "its LDS (OOMWOO lists the 3irobotix Delta-2 for the Mijia Mop family; Ruten sells STYJ02YM 'LDS laser navigation' replacements)",
+    "drive_motors_encoded": "two drive wheel modules (not measured; the Roborock S5-family figures do not apply)",
+    "battery_pack": "its Li-ion pack: 3200 mAh (Xiaomi's spec page), 14.8 V rated (user manual)",
+    "pump": "the 2-in-1 water tank: retail listings describe electronic water-flow control; Xiaomi's spec page names only the tank, so confirm the pump when opened",
+    "suction_fan": "its suction fan (rating not published)",
+    "bump_cliff_sensors": "front bumper and cliff sensors"
+   },
+   "interfaces": [
+    "Valetudo (Apache-2.0) supports it: 'Rooting is pretty easy, only requiring a Linux Laptop and a micro USB cable' (supported-robots page; do not root a viomi.vacuum.v8)",
+    "the CRL-200S already has an open low-level driver (codetiger/VacuumTiger, MIT; kaiaai's SangamIO fork) and a ROS2 bridge (remakeai/vacuum_ros2_bridge, Apache-2.0), so a dead cloud or app does not end it"
+   ],
+   "reuse": [
+    "https://github.com/Hypfer/Valetudo/blob/master/docs/pages/general/supported-robots.md",
+    "https://github.com/codetiger/VacuumTiger",
+    "https://github.com/kaiaai/VacuumTiger",
+    "https://github.com/remakeai/vacuum_ros2_bridge"
+   ],
+   "hazards": [
+    "Li-ion pack: check for swelling before charging",
+    "empty and dry the water tank before opening: water near the main board"
+   ],
+   "first_tests": [
+    "boots and creates its Wi-Fi access point (the SSID shows whether it is a v8, which Valetudo warns bricks when rooted)",
+    "the LDS spins",
+    "the tank pumps water when the mop mode is run"
+   ],
+   "skip_if": [
+    "it is a viomi.vacuum.v8 and you meant to root it",
+    "pack swollen"
+   ],
+   "price_seen": {
+    "ntd": [
+     1400,
+     1400
+    ],
+    "where": "Ruten",
+    "date": "2026-11-27",
+    "note": "one STYJ02YM sold as not working: NT$1,400; mops, brushes and filters for it list at NT$41-370"
+   },
+   "sources": [
+    "https://github.com/Hypfer/Valetudo/blob/master/docs/pages/general/supported-robots.md",
+    "https://www.mi.com/in/mi-robot-vacuum-mop-p/specs"
+   ]
   },
   {
    "id": "rc-toy-car",

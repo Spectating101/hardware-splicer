@@ -64,6 +64,9 @@ on the MOSFET module from 5 V, its data line into an ESP32 UART.
 1. Whether a 1st-gen Xiaomi's wheel modules match the measured S5-family module. Measure on the donor with
    @IKsares's method: locked-rotor voltage at three currents, then the encoder frequency at 12 V.
 2. The scanner's power draw (2.0 W declared) and the phone's while streaming.
-3. Valetudo's support for the exact donor model and firmware before buying for route A.
+3. Route A on this donor is weak: Valetudo's page says the 1st-gen Xiaomi ("Xiaomi V1") never got persistent maps, so
+   it maps afresh every run, and units made after 2020-03 need full disassembly to root. A Vacuum-Mop P (STYJ02YM,
+   3irobotix CRL-200S inside; NT$1,400 faulty on Ruten) roots over micro USB and already has an open driver and a ROS2
+   bridge, and it mops: the junk catalogue now lists it (`robot-vacuum-mop-crl200s`).
 4. The phone clamp: a printed part not yet drawn; the top cover's dimensions need measuring on the donor.
 5. Every donor is untested until opened: check the pack for swelling before charging it.
