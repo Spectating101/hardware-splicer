@@ -108,7 +108,11 @@ controller; HS-3G-B buys one.
   propulsion check on that table predicts 7.1 min for the 27 g, 240 mAh Crazyflie 2.0 when the whole pack is used, against
   Bitcraze's 7 min, and 5.7 min with HS's default of landing at 80% of capacity. Cutting the table's low rows to force
   the extrapolation HS-3G-B relies on (up to 1.7 times below the lowest row) moves the hover power by under 12%. Both are
-  now tests. One aircraft, brushed motors: a brushless calibration is still to find.
+  now tests. A brushless aircraft agrees: the Crazyflie 2.1 Brushless (34 g, 350 mAh, "10 minutes", at least 5 g/W at
+  hover by Bitcraze's own figure) comes out at 10.0 min on the whole pack and 8.0 at HS's default. The same aircraft
+  shows why the check takes the more pessimistic extrapolation: the ideal 1.5-power law from its motor's peak point
+  (30 g at 7.2 W) would claim about 7.8 g/W at hover, over 50% better than measured. Holybro's X500 V2 states 18 min but
+  not its takeoff mass, so it cannot calibrate anything yet (`data/propulsion/calibration_aircraft_20261127.json`).
 - *Rules against practice.* Bitcraze's 42 g maximum takeoff is a thrust-to-weight of 1.4; HS's default floor is 2.0, so
   HS is again stricter than the maker. HS-3G-B (5.0) is unaffected; the floor is left as it is.
 - *Motor choice.* HS's four cited thrust tables sat in the proving-ground folders and the check needed one passed in.
@@ -165,7 +169,8 @@ NT$1,100-2,965 together. A mapping rover built from those, on OOMWOO's open soft
 2. Done: rover (above), and HS-ROVER-A's TT variant priced and re-checked end to end: US$187.50 against US$263.44,
    438 g, 4.7 h (`projects/hs-rover-a/tt-variant`). Adafruit does publish a one-motor stall measurement (1.5 A at 6 V),
    now in HS's table; the "no stall current" above was wrong. Still open: the OSR's rocker-bogie (Apache-2.0).
-3. Done: drone (above). Still open: a brushless calibration aircraft, Crazyflie's motor mass, and more cited tables
+3. Done: drone (above), with a brushless calibration. Still open: a brushless bench table with a flown aircraft
+   (the X500 V2 needs its takeoff mass), the brushed Crazyflie's motor mass, and more cited tables
    (1S brushless, 2 in, 5 in).
 4. Done: robot vacuum (above); the earlier "uncontested" was wrong, OOMWOO is the open design. Still open: the drive
    module's motor ratings (not in OOMWOO's BOM; measure one), and the mapping rover from a faulty Xiaomi vacuum and a
