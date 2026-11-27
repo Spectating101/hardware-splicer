@@ -85,3 +85,17 @@ Canonical interface contracts are translated into the existing splice Bench sess
 6. KiBot readiness means a manufacturing backend is available, not that fabrication has been authorized.
 7. Physical power-on remains a separate Bench authority transition.
 8. Legacy catalog modules remain available only as a compatibility graph projection; `authority_resolved_modules` contains canonical `donor:*` identities.
+
+## Plugged-in tools (registry)
+
+`src/hardware_splicer/data/external_tools.json` (`hs_external_tools`, `python -m hardware_splicer.external_tools`) lists
+every outside tool and dataset HS plugs in: role (routing, checking, CAD, interface, fab, data, direction), licence, how
+HS uses it (copied in, run as a separate program, or read only), status (integrated, measuring, installing, candidate,
+reference) and what it measured, with the record that holds the numbers. Copyleft tools run only as separate programs;
+a project with no licence is read and cited, never copied. Routing now tries FreeRouting, then KiCadRoutingTools with
+the board's net-class widths (`krt_route`), then Copper (`copper_route`); each result is judged by HS's own finish, DRC
+and track-current check, never by the router's report.
+
+Agents on other machines reach the toolbelt over MCP through SSH: `ssh optiplex
+/home/phyrexian/.local/share/hardware-splicer/hs-mcp.sh` runs the MCP server from a clean copy of `main` with the
+routers configured (set up 28 Nov 2026 for Backplane on the laptop).
