@@ -121,8 +121,8 @@
     "掃地機器人 雷射頭損壞"
    ],
    "gives": {
-    "lidar_2d": "its LDS laser scanner (Xiaomi LDS02RR/LDS01RR family on Mi 1S and Roborock S5/S6); kaiaai/LDS reads the LDS02RR from an ESP32",
-    "drive_motors_encoded": "two Roborock-type drive wheel modules: motor, encoder, suspension, about 72 mm tire, wheel-drop switch",
+    "lidar_2d": "its LDS laser scanner: the LDS02RR on the 1st-gen Mi (kaiaai/LDS lists it as 'Xiaomi Roborock Mi 1st gen'), LDS02RR/LDS01RR on the 1S and Roborock S5/S6; kaiaai/LDS reads it from an ESP32 with an external motor driver",
+    "drive_motors_encoded": "two drive wheel modules: brushed gearmotor, single-channel Hall encoder, suspension, wheel-drop switch. Measured figures exist for the Roborock S5-family module (OOMWOO part-spec by @IKsares: 65.36:1, 71.5 mm wheel, 2.46 A stall at 14.4 V); whether a 1st-gen Xiaomi's modules match is not verified",
     "suction_fan": "a 2-2.5 kPa Nidec 20N704-series suction fan (Roborock S5/S6 family)",
     "battery_pack": "BRR-2P4S-5200: 14.4 V Li-ion 4S2P, about 5.2 Ah / 75 Wh, BMS inside the pack, if not worn out",
     "bump_cliff_sensors": "front bumper switches and downward cliff sensors"
