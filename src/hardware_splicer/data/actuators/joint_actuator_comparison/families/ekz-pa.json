@@ -1,0 +1,85 @@
+{
+  "family_id": "ekz-pa",
+  "family_name": "埃斯顿酷卓 PA",
+  "shared": {
+    "manufacturer": "埃斯顿酷卓",
+    "manufacturer_en": "Estun Codroid",
+    "electrical": {
+      "motor_topology": "radial flux"
+    },
+    "transmission": {
+      "type": "planetary",
+      "backdrivable": true
+    }
+  },
+  "variants": [
+    {
+      "id": "ekz-pa-116-10-48",
+      "model": "PA100",
+      "base_id": "EKZ-PA-116-10-48",
+      "mechanical": {
+        "rated_torque_nm": 40,
+        "peak_torque_nm": 80,
+        "start_stop_peak_torque_nm": 80,
+        "max_allow_instant_load_nm": 120,
+        "rated_speed_rpm": 118,
+        "max_speed_rpm": 158
+      },
+      "transmission": {
+        "reduction_ratio": 10
+      },
+      "datasheet_url": "datasheets/3_埃斯顿酷卓_准直驱关节PA系列_20241029.pdf"
+    },
+    {
+      "id": "ekz-pa-53-10-48",
+      "model": "PA40",
+      "base_id": "EKZ-PA-53-10-48",
+      "mechanical": {
+        "rated_torque_nm": 2,
+        "peak_torque_nm": 4,
+        "start_stop_peak_torque_nm": 4,
+        "max_allow_instant_load_nm": 6,
+        "rated_speed_rpm": 60,
+        "max_speed_rpm": 170
+      },
+      "transmission": {
+        "reduction_ratio": 10
+      },
+      "datasheet_url": "datasheets/3_埃斯顿酷卓_准直驱关节PA系列_20241029.pdf"
+    },
+    {
+      "id": "ekz-pa-76-6-48",
+      "model": "PA60",
+      "base_id": "EKZ-PA-76-6-48",
+      "mechanical": {
+        "rated_torque_nm": 3,
+        "peak_torque_nm": 6,
+        "start_stop_peak_torque_nm": 6,
+        "max_allow_instant_load_nm": 9,
+        "rated_speed_rpm": 252,
+        "max_speed_rpm": 400
+      },
+      "transmission": {
+        "reduction_ratio": 6
+      },
+      "datasheet_url": "datasheets/3_埃斯顿酷卓_准直驱关节PA系列_20241029.pdf"
+    },
+    {
+      "id": "ekz-pa-96-6-48",
+      "model": "PA80",
+      "base_id": "EKZ-PA-96-6-48",
+      "mechanical": {
+        "rated_torque_nm": 11,
+        "peak_torque_nm": 22,
+        "start_stop_peak_torque_nm": 22,
+        "max_allow_instant_load_nm": 33,
+        "rated_speed_rpm": 140,
+        "max_speed_rpm": 330
+      },
+      "transmission": {
+        "reduction_ratio": 6
+      },
+      "datasheet_url": "datasheets/3_埃斯顿酷卓_准直驱关节PA系列_20241029.pdf"
+    }
+  ]
+}

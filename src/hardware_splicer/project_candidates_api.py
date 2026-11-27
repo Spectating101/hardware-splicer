@@ -41,12 +41,7 @@ from .project_candidates import (
 )
 from .project_review_store import ProjectReviewStore
 from .project_store import ProjectStore
-
-
-def _operator_token(x_hs_operator_token: str | None) -> str | None:
-    if x_hs_operator_token is not None and x_hs_operator_token != "":
-        return x_hs_operator_token
-    return None
+from .operator_identity import header_token as _operator_token
 
 
 class OperatorTokenRequired(Exception):

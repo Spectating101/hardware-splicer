@@ -1,0 +1,181 @@
+{
+  "family_id": "hc-hugrs",
+  "family_name": "禾川 HuGRS",
+  "shared": {
+    "manufacturer": "禾川",
+    "manufacturer_en": "HCFA",
+    "electrical": {
+      "voltage_v": 48,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "motor_encoder_bits": 17
+    },
+    "transmission": {
+      "type": "planetary",
+      "backdrivable": false
+    }
+  },
+  "variants": [
+    {
+      "id": "hc-hugrs-105-13-48",
+      "model": "Hu-GRS090N",
+      "base_id": "HC-HuGRS-105-13-48",
+      "electrical": {
+        "rated_input_power_w": 565
+      },
+      "mechanical": {
+        "rated_torque_nm": 25,
+        "peak_torque_nm": 90,
+        "start_stop_peak_torque_nm": 90,
+        "rated_speed_rpm": 144,
+        "max_speed_rpm": 160,
+        "weight_kg": 0.93,
+        "outer_diameter_mm": 105,
+        "hollow_shaft_diameter_mm": 6,
+        "torque_density_nm_per_kg": 96.77
+      },
+      "transmission": {
+        "reduction_ratio": 13.19,
+        "backlash_arcsec": 900
+      },
+      "options": {
+        "bus_types": [
+          "CANFD"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 53,
+        "length_mm_max": 53
+      },
+      "datasheet_url": "datasheets/7_禾川_HuGRS模组.png"
+    },
+    {
+      "id": "hc-hugrs-124-12-48",
+      "model": "Hu-GRS150N",
+      "base_id": "HC-HuGRS-124-12-48",
+      "electrical": {
+        "rated_input_power_w": 880
+      },
+      "mechanical": {
+        "rated_torque_nm": 40,
+        "peak_torque_nm": 150,
+        "start_stop_peak_torque_nm": 150,
+        "rated_speed_rpm": 125,
+        "max_speed_rpm": 138,
+        "weight_kg": 1.66,
+        "outer_diameter_mm": 124,
+        "hollow_shaft_diameter_mm": 11.5,
+        "torque_density_nm_per_kg": 90.36
+      },
+      "transmission": {
+        "reduction_ratio": 12.25,
+        "backlash_arcsec": 900
+      },
+      "options": {
+        "bus_types": [
+          "CANFD"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 66,
+        "length_mm_max": 66
+      },
+      "datasheet_url": "datasheets/7_禾川_HuGRS模组.png"
+    },
+    {
+      "id": "hc-hugrs-56-36-48",
+      "model": "Hu-GRS036N",
+      "base_id": "HC-HuGRS-56-36-48",
+      "electrical": {
+        "rated_input_power_w": 138
+      },
+      "mechanical": {
+        "rated_torque_nm": 9,
+        "peak_torque_nm": 37.6,
+        "start_stop_peak_torque_nm": 37.6,
+        "rated_speed_rpm": 77,
+        "max_speed_rpm": 100,
+        "weight_kg": 0.385,
+        "outer_diameter_mm": 56,
+        "hollow_shaft_diameter_mm": 0,
+        "torque_density_nm_per_kg": 97.66
+      },
+      "transmission": {
+        "reduction_ratio": 36,
+        "backlash_arcsec": 720
+      },
+      "options": {
+        "bus_types": [
+          "CANFD"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 59.5,
+        "length_mm_max": 59.5
+      },
+      "datasheet_url": "datasheets/7_禾川_HuGRS模组.png"
+    },
+    {
+      "id": "hc-hugrs-88-19-48",
+      "model": "Hu-GRS060N",
+      "base_id": "HC-HuGRS-88-19-48",
+      "electrical": {
+        "rated_input_power_w": 366
+      },
+      "mechanical": {
+        "rated_torque_nm": 20,
+        "peak_torque_nm": 60,
+        "start_stop_peak_torque_nm": 60,
+        "rated_speed_rpm": 126,
+        "max_speed_rpm": 160,
+        "weight_kg": 0.604,
+        "outer_diameter_mm": 88,
+        "hollow_shaft_diameter_mm": 7,
+        "torque_density_nm_per_kg": 99.34
+      },
+      "transmission": {
+        "reduction_ratio": 18.8,
+        "backlash_arcsec": 600
+      },
+      "options": {
+        "bus_types": [
+          "CANFD"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 59.5,
+        "length_mm_max": 59.5
+      },
+      "datasheet_url": "datasheets/7_禾川_HuGRS模组.png"
+    }
+  ]
+}

@@ -1,0 +1,992 @@
+{
+ "schema": "hardware_splicer.distributor_check_evidence.v1",
+ "captured": "2026-11-26",
+ "method": "hardware_splicer.distributor_check on KiCad netlists exported from the benchmark and reference boards (root sheets), against LCSC product records fetched 2026-11-26.",
+ "summary": {
+  "boards_with_lcsc_codes": 28,
+  "parts_checked": 2201,
+  "boards_with_errors": 5,
+  "judged_by_hand": "Every error was read against the schematic fields and the LCSC record. All 55 remaining errors are real: codes for another value or package (17 resistors on brer-rabbit/zoxnoxious marked 10k 0603 carry C17936, a 4.7k 1206 part; 8 100 nF capacitors on ebastler/zmk-designguide carry a 1 uF code; Samsung CL32 1210 capacitors on LibreSolar/bms-c1 1206 pads).",
+  "false_positives_fixed_before_this_record": "LCSC's SOT-23-6L and SC-70-6 names for SOT-23-6 and SOT-363 outlines (5 findings); a listing whose package field contradicts its own name (C552486) is now a note; spaced values such as '22 µF' (88 findings).",
+  "code_not_found": "18 codes return no product at LCSC on the day: delisted or never valid; the boards cannot be ordered under them."
+ },
+ "boards": [
+  {
+   "board": "0xjmux_ESP-PROG-Adapter",
+   "netlist_from": "examples/schematic_bug_benchmark (fix commit, after side) or examples/reference_designs",
+   "parts_with_codes": 6,
+   "counts": {
+    "error": 0,
+    "warning": 1,
+    "info": 0
+   },
+   "errors_and_warnings": [
+    {
+     "severity": "warning",
+     "rule": "code_not_found",
+     "components": [
+      "J2"
+     ],
+     "message": "J2: LCSC has no product C5298392. The part cannot be ordered under this code.",
+     "basis": "LCSC product record C5298392 (None), fetched 2026-11-26"
+    }
+   ]
+  },
+  {
+   "board": "256foundation_emberone00-pcb",
+   "netlist_from": "examples/schematic_bug_benchmark (fix commit, after side) or examples/reference_designs",
+   "parts_with_codes": 27,
+   "counts": {
+    "error": 0,
+    "warning": 0,
+    "info": 25
+   },
+   "errors_and_warnings": []
+  },
+  {
+   "board": "AzonInc_Doorman",
+   "netlist_from": "examples/schematic_bug_benchmark (fix commit, after side) or examples/reference_designs",
+   "parts_with_codes": 30,
+   "counts": {
+    "error": 0,
+    "warning": 1,
+    "info": 1
+   },
+   "errors_and_warnings": [
+    {
+     "severity": "warning",
+     "rule": "code_not_found",
+     "components": [
+      "L1"
+     ],
+     "message": "L1: LCSC has no product C96899. The part cannot be ordered under this code.",
+     "basis": "LCSC product record C96899 (None), fetched 2026-11-26"
+    }
+   ]
+  },
+  {
+   "board": "CDFER_Auckland-LED-Train-Map",
+   "netlist_from": "examples/schematic_bug_benchmark (fix commit, after side) or examples/reference_designs",
+   "parts_with_codes": 239,
+   "counts": {
+    "error": 0,
+    "warning": 5,
+    "info": 8
+   },
+   "errors_and_warnings": [
+    {
+     "severity": "warning",
+     "rule": "code_not_found",
+     "components": [
+      "L1"
+     ],
+     "message": "L1: LCSC has no product C14033. The part cannot be ordered under this code.",
+     "basis": "LCSC product record C14033 (None), fetched 2026-11-26"
+    },
+    {
+     "severity": "warning",
+     "rule": "code_not_found",
+     "components": [
+      "L2"
+     ],
+     "message": "L2: LCSC has no product C14033. The part cannot be ordered under this code.",
+     "basis": "LCSC product record C14033 (None), fetched 2026-11-26"
+    },
+    {
+     "severity": "warning",
+     "rule": "code_not_found",
+     "components": [
+      "L3"
+     ],
+     "message": "L3: LCSC has no product C14033. The part cannot be ordered under this code.",
+     "basis": "LCSC product record C14033 (None), fetched 2026-11-26"
+    },
+    {
+     "severity": "warning",
+     "rule": "code_not_found",
+     "components": [
+      "L4"
+     ],
+     "message": "L4: LCSC has no product C14033. The part cannot be ordered under this code.",
+     "basis": "LCSC product record C14033 (None), fetched 2026-11-26"
+    },
+    {
+     "severity": "warning",
+     "rule": "code_not_found",
+     "components": [
+      "L5"
+     ],
+     "message": "L5: LCSC has no product C27143. The part cannot be ordered under this code.",
+     "basis": "LCSC product record C27143 (None), fetched 2026-11-26"
+    }
+   ]
+  },
+  {
+   "board": "Caped-Crussader_VENDETTAFC",
+   "netlist_from": "examples/schematic_bug_benchmark (fix commit, after side) or examples/reference_designs",
+   "parts_with_codes": 126,
+   "counts": {
+    "error": 0,
+    "warning": 0,
+    "info": 3
+   },
+   "errors_and_warnings": []
+  },
+  {
+   "board": "Chrismettal_flipper-zero-backpacks",
+   "netlist_from": "examples/schematic_bug_benchmark (fix commit, after side) or examples/reference_designs",
+   "parts_with_codes": 47,
+   "counts": {
+    "error": 0,
+    "warning": 0,
+    "info": 1
+   },
+   "errors_and_warnings": []
+  },
+  {
+   "board": "FPGA-Research_FABulous_board",
+   "netlist_from": "examples/schematic_bug_benchmark (fix commit, after side) or examples/reference_designs",
+   "parts_with_codes": 12,
+   "counts": {
+    "error": 0,
+    "warning": 0,
+    "info": 0
+   },
+   "errors_and_warnings": []
+  },
+  {
+   "board": "LibreSolar_bms-c1",
+   "netlist_from": "examples/schematic_bug_benchmark (fix commit, after side) or examples/reference_designs",
+   "parts_with_codes": 116,
+   "counts": {
+    "error": 5,
+    "warning": 4,
+    "info": 15
+   },
+   "errors_and_warnings": [
+    {
+     "severity": "error",
+     "rule": "package_mismatch",
+     "components": [
+      "C17"
+     ],
+     "message": "C17: footprint LibreSolar:C_1206_3216 is 1206, but C525654 (CL32A476KPJNNNE) is 1210. The part will not fit the pads.",
+     "basis": "LCSC product record C525654 (CL32A476KPJNNNE), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "package_mismatch",
+     "components": [
+      "C18"
+     ],
+     "message": "C18: footprint LibreSolar:C_1206_3216 is 1206, but C525654 (CL32A476KPJNNNE) is 1210. The part will not fit the pads.",
+     "basis": "LCSC product record C525654 (CL32A476KPJNNNE), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "package_mismatch",
+     "components": [
+      "C22"
+     ],
+     "message": "C22: footprint LibreSolar:C_1206_3216 is 1206, but C55151 (CL32B225KCJSNNE) is 1210. The part will not fit the pads.",
+     "basis": "LCSC product record C55151 (CL32B225KCJSNNE), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "package_mismatch",
+     "components": [
+      "C23"
+     ],
+     "message": "C23: footprint LibreSolar:C_1206_3216 is 1206, but C55151 (CL32B225KCJSNNE) is 1210. The part will not fit the pads.",
+     "basis": "LCSC product record C55151 (CL32B225KCJSNNE), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "package_mismatch",
+     "components": [
+      "D22"
+     ],
+     "message": "D22: footprint LibreSolar:D_SMC is SMC, but C388245 (MURS360) is SMB. The part will not fit the pads.",
+     "basis": "LCSC product record C388245 (MURS360), fetched 2026-11-26"
+    },
+    {
+     "severity": "warning",
+     "rule": "code_not_found",
+     "components": [
+      "P1"
+     ],
+     "message": "P1: LCSC has no product C3217898. The part cannot be ordered under this code.",
+     "basis": "LCSC product record C3217898 (None), fetched 2026-11-26"
+    },
+    {
+     "severity": "warning",
+     "rule": "code_not_found",
+     "components": [
+      "P2"
+     ],
+     "message": "P2: LCSC has no product C3217898. The part cannot be ordered under this code.",
+     "basis": "LCSC product record C3217898 (None), fetched 2026-11-26"
+    },
+    {
+     "severity": "warning",
+     "rule": "code_not_found",
+     "components": [
+      "P3"
+     ],
+     "message": "P3: LCSC has no product C3217898. The part cannot be ordered under this code.",
+     "basis": "LCSC product record C3217898 (None), fetched 2026-11-26"
+    },
+    {
+     "severity": "warning",
+     "rule": "code_not_found",
+     "components": [
+      "P4"
+     ],
+     "message": "P4: LCSC has no product C3217898. The part cannot be ordered under this code.",
+     "basis": "LCSC product record C3217898 (None), fetched 2026-11-26"
+    }
+   ]
+  },
+  {
+   "board": "M4a1x_TPS5430",
+   "netlist_from": "examples/schematic_bug_benchmark (fix commit, after side) or examples/reference_designs",
+   "parts_with_codes": 31,
+   "counts": {
+    "error": 0,
+    "warning": 1,
+    "info": 3
+   },
+   "errors_and_warnings": [
+    {
+     "severity": "warning",
+     "rule": "code_not_found",
+     "components": [
+      "L1"
+     ],
+     "message": "L1: LCSC has no product C408491. The part cannot be ordered under this code.",
+     "basis": "LCSC product record C408491 (None), fetched 2026-11-26"
+    }
+   ]
+  },
+  {
+   "board": "Miceuz_paper-wifi",
+   "netlist_from": "examples/schematic_bug_benchmark (fix commit, after side) or examples/reference_designs",
+   "parts_with_codes": 74,
+   "counts": {
+    "error": 0,
+    "warning": 3,
+    "info": 5
+   },
+   "errors_and_warnings": [
+    {
+     "severity": "warning",
+     "rule": "code_not_found",
+     "components": [
+      "L1"
+     ],
+     "message": "L1: LCSC has no product C38117. The part cannot be ordered under this code.",
+     "basis": "LCSC product record C38117 (None), fetched 2026-11-26"
+    },
+    {
+     "severity": "warning",
+     "rule": "code_not_found",
+     "components": [
+      "L2"
+     ],
+     "message": "L2: LCSC has no product C79272. The part cannot be ordered under this code.",
+     "basis": "LCSC product record C79272 (None), fetched 2026-11-26"
+    },
+    {
+     "severity": "warning",
+     "rule": "code_not_found",
+     "components": [
+      "Q1"
+     ],
+     "message": "Q1: LCSC has no product C699302. The part cannot be ordered under this code.",
+     "basis": "LCSC product record C699302 (None), fetched 2026-11-26"
+    }
+   ]
+  },
+  {
+   "board": "OpenDrone-hw_OpenAIO",
+   "netlist_from": "examples/schematic_bug_benchmark (fix commit, after side) or examples/reference_designs",
+   "parts_with_codes": 277,
+   "counts": {
+    "error": 0,
+    "warning": 0,
+    "info": 16
+   },
+   "errors_and_warnings": []
+  },
+  {
+   "board": "OpenDrone-hw_OpenAIO-Whoop",
+   "netlist_from": "examples/schematic_bug_benchmark (fix commit, after side) or examples/reference_designs",
+   "parts_with_codes": 227,
+   "counts": {
+    "error": 0,
+    "warning": 1,
+    "info": 11
+   },
+   "errors_and_warnings": [
+    {
+     "severity": "warning",
+     "rule": "code_not_found",
+     "components": [
+      "U13"
+     ],
+     "message": "U13: LCSC has no product C53467986. The part cannot be ordered under this code.",
+     "basis": "LCSC product record C53467986 (None), fetched 2026-11-26"
+    }
+   ]
+  },
+  {
+   "board": "OpenDrone-hw_OpenESC-20x20",
+   "netlist_from": "examples/schematic_bug_benchmark (fix commit, after side) or examples/reference_designs",
+   "parts_with_codes": 161,
+   "counts": {
+    "error": 0,
+    "warning": 0,
+    "info": 8
+   },
+   "errors_and_warnings": []
+  },
+  {
+   "board": "StuartF303_vandaemon",
+   "netlist_from": "examples/schematic_bug_benchmark (fix commit, after side) or examples/reference_designs",
+   "parts_with_codes": 80,
+   "counts": {
+    "error": 0,
+    "warning": 0,
+    "info": 2
+   },
+   "errors_and_warnings": []
+  },
+  {
+   "board": "Twisted-Fields_rp2040-motor-controller",
+   "netlist_from": "examples/schematic_bug_benchmark (fix commit, after side) or examples/reference_designs",
+   "parts_with_codes": 56,
+   "counts": {
+    "error": 0,
+    "warning": 1,
+    "info": 3
+   },
+   "errors_and_warnings": [
+    {
+     "severity": "warning",
+     "rule": "code_not_found",
+     "components": [
+      "Q1"
+     ],
+     "message": "Q1: LCSC has no product C400505. The part cannot be ordered under this code.",
+     "basis": "LCSC product record C400505 (None), fetched 2026-11-26"
+    }
+   ]
+  },
+  {
+   "board": "amachronic_echoplayer",
+   "netlist_from": "examples/schematic_bug_benchmark (fix commit, after side) or examples/reference_designs",
+   "parts_with_codes": 132,
+   "counts": {
+    "error": 0,
+    "warning": 0,
+    "info": 15
+   },
+   "errors_and_warnings": []
+  },
+  {
+   "board": "anthony-bernaert_ftdi-jtag-programmer",
+   "netlist_from": "examples/schematic_bug_benchmark (fix commit, after side) or examples/reference_designs",
+   "parts_with_codes": 35,
+   "counts": {
+    "error": 0,
+    "warning": 0,
+    "info": 2
+   },
+   "errors_and_warnings": []
+  },
+  {
+   "board": "anticitizn_p4eregrine",
+   "netlist_from": "examples/schematic_bug_benchmark (fix commit, after side) or examples/reference_designs",
+   "parts_with_codes": 305,
+   "counts": {
+    "error": 4,
+    "warning": 0,
+    "info": 37
+   },
+   "errors_and_warnings": [
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "R40"
+     ],
+     "message": "R40: the schematic says 10k, but C473585 is 30.9kΩ (RES 30.9kΩ ±1% 50mW 0201).",
+     "basis": "LCSC product record C473585 (0201WMF3092TEE), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "R52"
+     ],
+     "message": "R52: the schematic says 10k, but C473585 is 30.9kΩ (RES 30.9kΩ ±1% 50mW 0201).",
+     "basis": "LCSC product record C473585 (0201WMF3092TEE), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "R53"
+     ],
+     "message": "R53: the schematic says 10k, but C473585 is 30.9kΩ (RES 30.9kΩ ±1% 50mW 0201).",
+     "basis": "LCSC product record C473585 (0201WMF3092TEE), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "R54"
+     ],
+     "message": "R54: the schematic says 10k, but C473585 is 30.9kΩ (RES 30.9kΩ ±1% 50mW 0201).",
+     "basis": "LCSC product record C473585 (0201WMF3092TEE), fetched 2026-11-26"
+    }
+   ]
+  },
+  {
+   "board": "atomic14_esp32-zxspectrum-hardware",
+   "netlist_from": "examples/schematic_bug_benchmark (fix commit, after side) or examples/reference_designs",
+   "parts_with_codes": 5,
+   "counts": {
+    "error": 0,
+    "warning": 0,
+    "info": 1
+   },
+   "errors_and_warnings": []
+  },
+  {
+   "board": "bitaxeorg_BitaxeGT",
+   "netlist_from": "examples/schematic_bug_benchmark (fix commit, after side) or examples/reference_designs",
+   "parts_with_codes": 2,
+   "counts": {
+    "error": 0,
+    "warning": 0,
+    "info": 2
+   },
+   "errors_and_warnings": []
+  },
+  {
+   "board": "bitaxeorg_ultraHex",
+   "netlist_from": "examples/schematic_bug_benchmark (fix commit, after side) or examples/reference_designs",
+   "parts_with_codes": 3,
+   "counts": {
+    "error": 0,
+    "warning": 0,
+    "info": 0
+   },
+   "errors_and_warnings": []
+  },
+  {
+   "board": "brer-rabbit_zoxnoxious",
+   "netlist_from": "examples/schematic_bug_benchmark (fix commit, after side) or examples/reference_designs",
+   "parts_with_codes": 136,
+   "counts": {
+    "error": 36,
+    "warning": 0,
+    "info": 0
+   },
+   "errors_and_warnings": [
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "C44"
+     ],
+     "message": "C44: the schematic says 150p, but C14663 is 100nF (CAP CER 100nF 50V X7R 0603).",
+     "basis": "LCSC product record C14663 (CC0603KRX7R9BB104), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "package_mismatch",
+     "components": [
+      "R17"
+     ],
+     "message": "R17: footprint Resistor_SMD:R_0603_1608Metric is 0603, but C17936 (1206W4F4701T5E) is 1206. The part will not fit the pads.",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "R17"
+     ],
+     "message": "R17: the schematic says 10k, but C17936 is 4.7kΩ (RES 4.7kΩ ±1% 250mW 1206).",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "package_mismatch",
+     "components": [
+      "R18"
+     ],
+     "message": "R18: footprint Resistor_SMD:R_0603_1608Metric is 0603, but C17936 (1206W4F4701T5E) is 1206. The part will not fit the pads.",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "R18"
+     ],
+     "message": "R18: the schematic says 10k, but C17936 is 4.7kΩ (RES 4.7kΩ ±1% 250mW 1206).",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "package_mismatch",
+     "components": [
+      "R19"
+     ],
+     "message": "R19: footprint Resistor_SMD:R_0603_1608Metric is 0603, but C17936 (1206W4F4701T5E) is 1206. The part will not fit the pads.",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "R19"
+     ],
+     "message": "R19: the schematic says 10k, but C17936 is 4.7kΩ (RES 4.7kΩ ±1% 250mW 1206).",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "package_mismatch",
+     "components": [
+      "R20"
+     ],
+     "message": "R20: footprint Resistor_SMD:R_0603_1608Metric is 0603, but C17936 (1206W4F4701T5E) is 1206. The part will not fit the pads.",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "R20"
+     ],
+     "message": "R20: the schematic says 10k, but C17936 is 4.7kΩ (RES 4.7kΩ ±1% 250mW 1206).",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "package_mismatch",
+     "components": [
+      "R21"
+     ],
+     "message": "R21: footprint Resistor_SMD:R_0603_1608Metric is 0603, but C17936 (1206W4F4701T5E) is 1206. The part will not fit the pads.",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "R21"
+     ],
+     "message": "R21: the schematic says 10k, but C17936 is 4.7kΩ (RES 4.7kΩ ±1% 250mW 1206).",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "package_mismatch",
+     "components": [
+      "R35"
+     ],
+     "message": "R35: footprint Resistor_SMD:R_0603_1608Metric is 0603, but C17936 (1206W4F4701T5E) is 1206. The part will not fit the pads.",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "R35"
+     ],
+     "message": "R35: the schematic says 10k, but C17936 is 4.7kΩ (RES 4.7kΩ ±1% 250mW 1206).",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "package_mismatch",
+     "components": [
+      "R4"
+     ],
+     "message": "R4: footprint Resistor_SMD:R_0603_1608Metric is 0603, but C17936 (1206W4F4701T5E) is 1206. The part will not fit the pads.",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "R4"
+     ],
+     "message": "R4: the schematic says 10k, but C17936 is 4.7kΩ (RES 4.7kΩ ±1% 250mW 1206).",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "package_mismatch",
+     "components": [
+      "R43"
+     ],
+     "message": "R43: footprint Resistor_SMD:R_0603_1608Metric is 0603, but C17936 (1206W4F4701T5E) is 1206. The part will not fit the pads.",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "R43"
+     ],
+     "message": "R43: the schematic says 10k, but C17936 is 4.7kΩ (RES 4.7kΩ ±1% 250mW 1206).",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "package_mismatch",
+     "components": [
+      "R46"
+     ],
+     "message": "R46: footprint Resistor_SMD:R_0603_1608Metric is 0603, but C17936 (1206W4F4701T5E) is 1206. The part will not fit the pads.",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "R46"
+     ],
+     "message": "R46: the schematic says 10k, but C17936 is 4.7kΩ (RES 4.7kΩ ±1% 250mW 1206).",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "package_mismatch",
+     "components": [
+      "R50"
+     ],
+     "message": "R50: footprint Resistor_SMD:R_0603_1608Metric is 0603, but C17936 (1206W4F4701T5E) is 1206. The part will not fit the pads.",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "R50"
+     ],
+     "message": "R50: the schematic says 10k, but C17936 is 4.7kΩ (RES 4.7kΩ ±1% 250mW 1206).",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "package_mismatch",
+     "components": [
+      "R53"
+     ],
+     "message": "R53: footprint Resistor_SMD:R_0603_1608Metric is 0603, but C17936 (1206W4F4701T5E) is 1206. The part will not fit the pads.",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "R53"
+     ],
+     "message": "R53: the schematic says 10k, but C17936 is 4.7kΩ (RES 4.7kΩ ±1% 250mW 1206).",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "package_mismatch",
+     "components": [
+      "R58"
+     ],
+     "message": "R58: footprint Resistor_SMD:R_0603_1608Metric is 0603, but C17936 (1206W4F4701T5E) is 1206. The part will not fit the pads.",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "R58"
+     ],
+     "message": "R58: the schematic says 10k, but C17936 is 4.7kΩ (RES 4.7kΩ ±1% 250mW 1206).",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "package_mismatch",
+     "components": [
+      "R61"
+     ],
+     "message": "R61: footprint Resistor_SMD:R_0603_1608Metric is 0603, but C17936 (1206W4F4701T5E) is 1206. The part will not fit the pads.",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "R61"
+     ],
+     "message": "R61: the schematic says 10k, but C17936 is 4.7kΩ (RES 4.7kΩ ±1% 250mW 1206).",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "package_mismatch",
+     "components": [
+      "R67"
+     ],
+     "message": "R67: footprint Resistor_SMD:R_0603_1608Metric is 0603, but C17936 (1206W4F4701T5E) is 1206. The part will not fit the pads.",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "R67"
+     ],
+     "message": "R67: the schematic says 10k, but C17936 is 4.7kΩ (RES 4.7kΩ ±1% 250mW 1206).",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "package_mismatch",
+     "components": [
+      "R68"
+     ],
+     "message": "R68: footprint Resistor_SMD:R_0603_1608Metric is 0603, but C17936 (1206W4F4701T5E) is 1206. The part will not fit the pads.",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "R68"
+     ],
+     "message": "R68: the schematic says 10k, but C17936 is 4.7kΩ (RES 4.7kΩ ±1% 250mW 1206).",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "package_mismatch",
+     "components": [
+      "R84"
+     ],
+     "message": "R84: footprint Resistor_SMD:R_0603_1608Metric is 0603, but C17936 (1206W4F4701T5E) is 1206. The part will not fit the pads.",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "R84"
+     ],
+     "message": "R84: the schematic says 10k, but C17936 is 4.7kΩ (RES 4.7kΩ ±1% 250mW 1206).",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "package_mismatch",
+     "components": [
+      "R86"
+     ],
+     "message": "R86: footprint Resistor_SMD:R_0603_1608Metric is 0603, but C17936 (1206W4F4701T5E) is 1206. The part will not fit the pads.",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "R86"
+     ],
+     "message": "R86: the schematic says 10k, but C17936 is 4.7kΩ (RES 4.7kΩ ±1% 250mW 1206).",
+     "basis": "LCSC product record C17936 (1206W4F4701T5E), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "package_mismatch",
+     "components": [
+      "U4"
+     ],
+     "message": "U4: footprint Package_SO:TSSOP-24_4.4x7.8mm_P0.65mm is TSSOP-24, but C23184 (0603WAF4992T5E) is 0603. The part will not fit the pads.",
+     "basis": "LCSC product record C23184 (0603WAF4992T5E), fetched 2026-11-26"
+    }
+   ]
+  },
+  {
+   "board": "bschwind_key-ripper",
+   "netlist_from": "examples/schematic_bug_benchmark (fix commit, after side) or examples/reference_designs",
+   "parts_with_codes": 1,
+   "counts": {
+    "error": 0,
+    "warning": 0,
+    "info": 0
+   },
+   "errors_and_warnings": []
+  },
+  {
+   "board": "cardonabits_haxo-hw",
+   "netlist_from": "examples/schematic_bug_benchmark (fix commit, after side) or examples/reference_designs",
+   "parts_with_codes": 37,
+   "counts": {
+    "error": 2,
+    "warning": 1,
+    "info": 1
+   },
+   "errors_and_warnings": [
+    {
+     "severity": "error",
+     "rule": "package_mismatch",
+     "components": [
+      "C2"
+     ],
+     "message": "C2: footprint Capacitor_SMD:C_0603_1608Metric is 0603, but C28323 (CL21B105KBFNNNE) is 0805. The part will not fit the pads.",
+     "basis": "LCSC product record C28323 (CL21B105KBFNNNE), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "C2"
+     ],
+     "message": "C2: the schematic says 0.1uF, but C28323 is 1uF (CAP CER 1uF 50V X7R 0805).",
+     "basis": "LCSC product record C28323 (CL21B105KBFNNNE), fetched 2026-11-26"
+    },
+    {
+     "severity": "warning",
+     "rule": "code_not_found",
+     "components": [
+      "FB1"
+     ],
+     "message": "FB1: LCSC has no product C1017. The part cannot be ordered under this code.",
+     "basis": "LCSC product record C1017 (None), fetched 2026-11-26"
+    }
+   ]
+  },
+  {
+   "board": "ebastler_zmk-designguide",
+   "netlist_from": "examples/schematic_bug_benchmark (fix commit, after side) or examples/reference_designs",
+   "parts_with_codes": 12,
+   "counts": {
+    "error": 8,
+    "warning": 0,
+    "info": 2
+   },
+   "errors_and_warnings": [
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "C12"
+     ],
+     "message": "C12: the schematic says 100 nF, but C52923 is 1uF (CAP CER 1uF 25V X5R 0402).",
+     "basis": "LCSC product record C52923 (CL05A105KA5NQNC), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "C13"
+     ],
+     "message": "C13: the schematic says 100 nF, but C52923 is 1uF (CAP CER 1uF 25V X5R 0402).",
+     "basis": "LCSC product record C52923 (CL05A105KA5NQNC), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "C14"
+     ],
+     "message": "C14: the schematic says 100 nF, but C52923 is 1uF (CAP CER 1uF 25V X5R 0402).",
+     "basis": "LCSC product record C52923 (CL05A105KA5NQNC), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "C15"
+     ],
+     "message": "C15: the schematic says 100 nF, but C52923 is 1uF (CAP CER 1uF 25V X5R 0402).",
+     "basis": "LCSC product record C52923 (CL05A105KA5NQNC), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "C16"
+     ],
+     "message": "C16: the schematic says 100 nF, but C52923 is 1uF (CAP CER 1uF 25V X5R 0402).",
+     "basis": "LCSC product record C52923 (CL05A105KA5NQNC), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "C17"
+     ],
+     "message": "C17: the schematic says 100 nF, but C52923 is 1uF (CAP CER 1uF 25V X5R 0402).",
+     "basis": "LCSC product record C52923 (CL05A105KA5NQNC), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "C18"
+     ],
+     "message": "C18: the schematic says 100 nF, but C52923 is 1uF (CAP CER 1uF 25V X5R 0402).",
+     "basis": "LCSC product record C52923 (CL05A105KA5NQNC), fetched 2026-11-26"
+    },
+    {
+     "severity": "error",
+     "rule": "value_mismatch",
+     "components": [
+      "C19"
+     ],
+     "message": "C19: the schematic says 100 nF, but C52923 is 1uF (CAP CER 1uF 25V X5R 0402).",
+     "basis": "LCSC product record C52923 (CL05A105KA5NQNC), fetched 2026-11-26"
+    }
+   ]
+  },
+  {
+   "board": "h0lad_SolarMeshtasticNode",
+   "netlist_from": "examples/schematic_bug_benchmark (fix commit, after side) or examples/reference_designs",
+   "parts_with_codes": 3,
+   "counts": {
+    "error": 0,
+    "warning": 0,
+    "info": 0
+   },
+   "errors_and_warnings": []
+  },
+  {
+   "board": "piecol_CM5_MINIMA_REV2",
+   "netlist_from": "examples/schematic_bug_benchmark (fix commit, after side) or examples/reference_designs",
+   "parts_with_codes": 7,
+   "counts": {
+    "error": 0,
+    "warning": 0,
+    "info": 0
+   },
+   "errors_and_warnings": []
+  },
+  {
+   "board": "sqfmi_beepy-hardware",
+   "netlist_from": "examples/schematic_bug_benchmark (fix commit, after side) or examples/reference_designs",
+   "parts_with_codes": 14,
+   "counts": {
+    "error": 0,
+    "warning": 0,
+    "info": 8
+   },
+   "errors_and_warnings": []
+  }
+ ]
+}

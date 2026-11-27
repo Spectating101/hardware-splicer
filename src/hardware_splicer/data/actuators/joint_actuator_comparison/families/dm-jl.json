@@ -1,0 +1,91 @@
+{
+  "family_id": "dm-jl",
+  "family_name": "达妙 JL",
+  "shared": {
+    "manufacturer": "达妙",
+    "manufacturer_en": "DAMIAO",
+    "electrical": {
+      "peak_current_a": 95,
+      "continuous_current_a": 23.5,
+      "rated_input_power_w": 418,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "rated_torque_nm": 40,
+      "peak_torque_nm": 120,
+      "start_stop_peak_torque_nm": 120,
+      "weight_kg": 1.375,
+      "outer_diameter_mm": 120,
+      "torque_density_nm_per_kg": 87.27
+    },
+    "transmission": {
+      "type": "planetary",
+      "reduction_ratio": 10,
+      "backdrivable": true
+    }
+  },
+  "variants": [
+    {
+      "id": "dm-jl-120-10-24",
+      "model": "DM-J10010L-2EC",
+      "base_id": "DM-JL-120-10-24",
+      "electrical": {
+        "voltage_v": 24
+      },
+      "mechanical": {
+        "rated_speed_rpm": 70,
+        "max_speed_rpm": 100
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 53,
+        "length_mm_max": 53,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/4_达妙_关节电机_20250630.pdf"
+    },
+    {
+      "id": "dm-jl-120-10-48",
+      "model": "DM-J10010L-2EC",
+      "base_id": "DM-JL-120-10-48",
+      "electrical": {
+        "voltage_v": 48
+      },
+      "mechanical": {
+        "rated_speed_rpm": 100,
+        "max_speed_rpm": 200
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 53,
+        "length_mm_max": 53,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/4_达妙_关节电机_20250630.pdf"
+    }
+  ]
+}

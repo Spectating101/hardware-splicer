@@ -1,0 +1,55 @@
+{
+  "family_id": "cm-aka60",
+  "family_name": "酷德 AKA60",
+  "shared": {
+    "manufacturer": "酷德",
+    "manufacturer_en": "Cubemars",
+    "electrical": {
+      "voltage_v": 48,
+      "peak_current_a": 11.2,
+      "continuous_current_a": 4,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "rated_torque_nm": 3,
+      "peak_torque_nm": 9,
+      "start_stop_peak_torque_nm": 9,
+      "rated_speed_rpm": 400,
+      "max_speed_rpm": 640,
+      "weight_kg": 0.46,
+      "outer_diameter_mm": 80,
+      "torque_density_nm_per_kg": 19.57
+    },
+    "transmission": {
+      "type": "planetary",
+      "reduction_ratio": 6,
+      "backdrivable": true,
+      "backlash_arcsec": 540
+    }
+  },
+  "variants": [
+    {
+      "id": "cm-aka60-6-48",
+      "model": "AKA60-6",
+      "base_id": "CM-AKA60-6-48",
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 51.2,
+        "length_mm_max": 51.2,
+        "inertia_g_cm2": 331.91
+      },
+      "datasheet_url": "datasheets/25_酷德Cubemars.pdf"
+    }
+  ]
+}

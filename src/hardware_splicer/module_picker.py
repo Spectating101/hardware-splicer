@@ -9,7 +9,8 @@ candidate validation; failure stays unresolved rather than falling through to re
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from functools import lru_cache
 from typing import Optional
 
 from .pcb.module_registry import find_module, find_modules_by_capabilities
@@ -21,6 +22,7 @@ class ModulePick:
     module_ids: list[str]
     labels: list[str]
     hints: list[str]
+    quantities: dict[str, int] = field(default_factory=dict)  # "four SG90 servos" -> {"sg90": 4}
 
 
 @dataclass
@@ -35,6 +37,41 @@ class ModuleHint:
 # Legacy/offline semantic compatibility table. This table must never run ahead of a
 # configured model selector on normal product paths.
 MODULE_HINTS: list[ModuleHint] = [
+    ModuleHint(
+        patterns=[re.compile(r"robot(?:ic)? arm|gripper|pan.?tilt", re.I)],
+        label="servo arm",
+        requires_any=[["mechanical_motion"]],
+        prefer_id="sg90",
+        priority=9,
+    ),
+    ModuleHint(
+        patterns=[re.compile(r"led strip|strip of \d+|addressable|ws281\d|sk6812|neopixel strip", re.I)],
+        label="addressable LED strip",
+        requires_any=[["led_or_light"]],
+        prefer_id="ws2812b_strip",
+        priority=9,
+    ),
+    ModuleHint(
+        patterns=[re.compile(r"\blora\b|lorawan|sx12[67]\d", re.I)],
+        label="LoRa radio",
+        requires_any=[["wireless"]],
+        prefer_id="lora_sx1278",
+        priority=9,
+    ),
+    ModuleHint(
+        patterns=[re.compile(r"18650|\blipo\b|li-?ion|battery|rechargeable cell", re.I)],
+        label="battery charging",
+        requires_any=[["battery"]],
+        prefer_id="tp4056",
+        priority=7,
+    ),
+    ModuleHint(
+        patterns=[re.compile(r"real.?time clock|\brtc\b|ds3231|ds1307", re.I)],
+        label="real-time clock",
+        requires_any=[["connector"]],
+        prefer_id="ds3231_rtc",
+        priority=8,
+    ),
     ModuleHint(
         patterns=[re.compile(r"ds18b20|one.?wire temp|digital temp probe", re.I)],
         label="1-wire temperature",
@@ -120,7 +157,7 @@ MODULE_HINTS: list[ModuleHint] = [
         priority=8,
     ),
     ModuleHint(
-        patterns=[re.compile(r"robot|rover|drives around|rc car|mobile base|wheel bot", re.I)],
+        patterns=[re.compile(r"\brobot\b(?!\s+arm)|rover|drives around|rc car|mobile base|wheel bot", re.I)],  # a robot arm has no wheels
         label="robot drive",
         requires_any=[["motor_or_load", "actuator_driver"]],
         prefer_id="l298n",
@@ -197,9 +234,10 @@ MODULE_HINTS: list[ModuleHint] = [
         priority=5,
     ),
     ModuleHint(
-        patterns=[re.compile(r"led|indicator light|status light|blink", re.I)],
+        patterns=[re.compile(r"\bleds?\b|indicator light|status light|blink", re.I)],  # whole word: not the "led" in "oled"
         label="indicator LED",
-        requires_any=[["led_or_light", "display_or_ui"]],
+        # Only a light: asking for "any display" here put an OLED into every brief that mentioned an LED.
+        requires_any=[["led_or_light"]],
         priority=5,
     ),
     ModuleHint(
@@ -316,11 +354,11 @@ def pick_modules_for_goal(text: str) -> ModulePick:
     if qwen_module_pick_enabled() and not offline_compose_enabled():
         picked = call_qwen_module_pick(goal)
         if picked.get("ok"):
-            return ModulePick(
+            return apply_brief_rules(goal, ModulePick(
                 module_ids=list(picked.get("module_ids") or []),
                 labels=[],
                 hints=[str(picked.get("reasoning") or "semantic_model_selection")],
-            )
+            ))
         reason = str(
             picked.get("message")
             or picked.get("reason")
@@ -330,6 +368,44 @@ def pick_modules_for_goal(text: str) -> ModulePick:
         return ModulePick(module_ids=[], labels=[], hints=[f"unresolved:{reason}"])
 
     return _pick_modules_regex(goal)
+
+
+# family, how a brief names it, how a library id shows it, the controller used when the model chose another family
+_CONTROLLER_FAMILIES = (("esp32", r"\besp32\b", r"esp32", "esp32-devkit"), ("rp2040", r"\b(?:rp2040|raspberry pi pico|pico w?)\b", r"pico|rp2040", "rpi-pico"),
+                        ("arduino", r"\barduino\b", r"arduino", "arduino-nano"))
+
+
+def apply_brief_rules(text: str, pick: ModulePick) -> ModulePick:
+    """Deterministic corrections to a model's pick: what the brief states outranks what the model chose.
+
+    * a part named by its number is included, with its count ("four SG90");
+    * a controller family the brief names replaces a controller from another family (a brief that says ESP32 gets no Nano);
+    * a 5 V-logic sensor on a 3.3 V controller gets a level shifter.
+    Each change is noted in the pick's hints.
+    """
+    ids = list(dict.fromkeys(pick.module_ids))
+    notes: list[str] = []
+    lowered = text.lower()
+    named = next((row for row in _CONTROLLER_FAMILIES if re.search(row[1], lowered)), None)
+    controllers = [m for m in ids if (find_module(m) or {}).get("category") == "mcu"]
+    if named and controllers and not any(re.search(named[2], m) for m in controllers):
+        named_family, replacement = named[0], named[3]
+        if find_module(replacement):
+            ids = [m for m in ids if m not in controllers] + [replacement]
+            notes.append(f"brief names {named_family}: replaced {', '.join(controllers)} with {replacement}")
+    quantities = dict(pick.quantities)
+    for module_id, count in _explicit_parts(text).items():
+        if module_id not in ids:
+            ids.append(module_id)
+            notes.append(f"brief names {module_id}")
+        if count > 1:
+            quantities[module_id] = count
+    controller_v = [(find_module(m) or {}).get("logicVoltage") for m in ids if (find_module(m) or {}).get("category") == "mcu"]
+    five_v = [m for m in ids if m in {"hc-sr04"}]
+    if five_v and 3.3 in controller_v and "level-shifter-4ch" not in ids:
+        ids.append("level-shifter-4ch")
+        notes.append(f"{', '.join(five_v)} has 5 V logic on a 3.3 V controller: added a level shifter")
+    return ModulePick(module_ids=ids, labels=pick.labels, hints=[*pick.hints, *notes], quantities=quantities)
 
 
 def _pick_modules_regex(text: str) -> ModulePick:
@@ -361,7 +437,7 @@ def _pick_modules_regex(text: str) -> ModulePick:
     )
     needs_usb_power = (
         needs_brain
-        and not re.search(r"battery|lipo|li.?ion", t)
+        and not re.search(r"battery|lipo|li.?ion|18650", t)
         and not needs_barrel_rail
     )
 
@@ -380,8 +456,25 @@ def _pick_modules_regex(text: str) -> ModulePick:
         labels.append(mcu.get("label") if mcu else "ESP32 DevKit")
 
     sensor_picks: set[str] = set()
+    infrastructure = {"esp32-devkit", "usb-power-5v", "dc-barrel-12v", "buck-lm2596"}
+
+    def already_covered(group: list[str]) -> bool:
+        # One display satisfies every hint that needs a display; a second is added only when a hint names it (prefer_id).
+        return any(set(group) & set((find_module(m) or {}).get("capabilityTags") or []) for m in module_ids - infrastructure)
+
+    # First the parts the matched hints name, so a generic group below does not fill a slot with something else first.
+    for hint in matched_hints:
+        preferred = find_module(hint.prefer_id) if hint.prefer_id else None
+        tags = set((preferred or {}).get("capabilityTags") or [])
+        if preferred and hint.prefer_id not in module_ids and any(set(group) & tags for group in hint.requires_any):
+            if hint.prefer_id in SENSOR_PREFER_IDS:
+                sensor_picks.add(hint.prefer_id)
+            module_ids.add(hint.prefer_id)
+            labels.append(str(preferred.get("label") or hint.prefer_id))
     for hint in matched_hints:
         for group in hint.requires_any:
+            if already_covered(group):
+                continue
             pick = _pick_from_capabilities(group, module_ids, hint.prefer_id)
             if not pick:
                 continue
@@ -421,11 +514,60 @@ def _pick_modules_regex(text: str) -> ModulePick:
         mod = find_module("level-shifter-4ch")
         labels.append(mod.get("label") if mod else "Level shifter")
 
+    # A part the brief names by its number (SG90, WS2812B, SX1278) is that part, whatever the hints chose.
+    quantities: dict[str, int] = {}
+    for module_id, count in _explicit_parts(text).items():
+        if module_id not in module_ids:
+            module_ids.add(module_id)
+            mod = find_module(module_id)
+            labels.append(str((mod or {}).get("label") or module_id))
+        if count > 1:
+            quantities[module_id] = count
+
     return ModulePick(
         module_ids=list(module_ids),
         labels=list(dict.fromkeys(labels)),
         hints=hints,
+        quantities=quantities,
     )
+
+
+_NUMBER_WORDS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10, "twelve": 12}
+_NOT_NAMED = {"esp32-devkit", "esp32-devkitc-v4", "usb-power-5v", "dc-barrel-12v"}  # the controller and power are chosen separately
+
+
+@lru_cache(maxsize=1)
+def _part_number_index() -> dict[str, str]:
+    """Normalized part number -> module id, from each engine part's partNumber, id and leading label word."""
+    import json
+    from pathlib import Path
+
+    library = json.loads((Path(__file__).resolve().parent / "data" / "engine_pcb_data.json").read_text(encoding="utf-8"))["module_library"]
+    index: dict[str, str] = {}
+    for module in sorted(library, key=lambda m: m["id"]):
+        if module["id"] in _NOT_NAMED or not find_module(module["id"]):
+            continue
+        for raw in (module.get("partNumber"), module["id"].split("_")[0], str(module.get("label", "")).split(" ")[0]):
+            key = re.sub(r"[^A-Z0-9]", "", str(raw or "").upper())
+            # Part-number-like only (letters and digits, 4+ chars): never a plain word such as "servo" or "relay".
+            if len(key) >= 4 and re.search(r"\d", key) and re.search(r"[A-Z]", key) and not key.startswith("ESP32"):
+                index.setdefault(key, module["id"])
+    return index
+
+
+def _explicit_parts(text: str) -> dict[str, int]:
+    """Parts named by number in the brief, with a count when one precedes them ("four SG90", "60 WS2812B")."""
+    found: dict[str, int] = {}
+    index = _part_number_index()
+    pattern = r"(?:(\d+|" + "|".join(_NUMBER_WORDS) + r")\s+(?:x\s+)?)?\b([A-Za-z]+[-_]?[A-Za-z]*\d[\w-]*)"  # no space inside a part number
+    for match in re.finditer(pattern, text, re.I):
+        module_id = index.get(re.sub(r"[^A-Z0-9]", "", match.group(2).upper()))
+        if not module_id:
+            continue
+        count = match.group(1)
+        n = int(count) if count and count.isdigit() else _NUMBER_WORDS.get((count or "").lower(), 1)
+        found[module_id] = max(found.get(module_id, 1), n)
+    return found
 
 
 def wants_module_composition(text: str) -> bool:

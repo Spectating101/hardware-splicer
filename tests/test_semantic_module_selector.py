@@ -135,3 +135,26 @@ def test_valid_selection_remains_proposal_only() -> None:
     assert trace.selection.authority_effect == "none"
     assert trace.selection.automatic_execution is False
     assert set(trace.selection.selected_module_ids) == {sense_id, drive_id}
+
+
+def test_a_real_candidate_filed_under_the_wrong_requirement_is_moved_not_fatal() -> None:
+    """DeepSeek filed level-shifter-4ch under 'led-data-driver' and ds3231_rtc under 'rtc-timekeeping' where HS's retrieval
+    matched them to other requirements; the whole selection used to be rejected (26 Nov 2026)."""
+    candidate_set = candidate_modules_for_intent(_intent())
+    sense_id = candidate_set.candidates_by_requirement["sense"][0]["module_id"]
+    drive_id = candidate_set.candidates_by_requirement["drive"][0]["module_id"]
+    assert sense_id not in {row["module_id"] for row in candidate_set.candidates_by_requirement["drive"]}
+    selection = parse_semantic_module_selection(
+        {
+            "selected_module_ids": [sense_id, drive_id],
+            "requirement_coverage": {"drive": [drive_id, sense_id]},
+            "rationale": "sensor filed under the driver requirement",
+            "unresolved_questions": [],
+            "assumptions": [],
+            "authority_effect": "none",
+            "automatic_execution": False,
+        },
+        candidate_set=candidate_set,
+    )
+    assert selection.requirement_coverage == {"drive": [drive_id], "sense": [sense_id]}
+    assert any("moved there" in note for note in selection.assumptions)

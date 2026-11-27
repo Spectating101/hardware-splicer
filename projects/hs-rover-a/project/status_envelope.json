@@ -1,0 +1,178 @@
+{
+ "schema": "hardware_splicer.objective_project.v1",
+ "project_id": "project",
+ "objective": "Build an affordable, useful CCTV/inspection rover from obtainable parts: drives on indoor floors and gentle ramps, streams live video over Wi-Fi to a phone or laptop, and can be printed and assembled by one person.",
+ "acceptance": [
+  "parts total at or under US$250 with every price cited",
+  "drive holds 0.4 m/s on the flat and climbs 15 degrees within the motor maker limits",
+  "chassis prints on a 220 mm bed, clears the ground by 15 mm and does not tip on a 15 degree slope",
+  "camera sees the floor ahead without the chassis in view",
+  "battery runs at least 1 h of patrol",
+  "every remaining risk listed as needing a physical test"
+ ],
+ "steps": 34,
+ "research": [
+  {
+   "search": "hs_prior_art_search",
+   "seq": 1,
+   "summary": "8 BoardRepo boards, 8 GitHub files (5 with a reusable licence)",
+   "sources": [
+    "https://boardrepo.com/browse?q=rover"
+   ]
+  },
+  {
+   "search": "hs_read_board",
+   "seq": 2,
+   "summary": "read stephendade/roverbase",
+   "sources": [
+    "https://boardrepo.com/stephendade/roverbase"
+   ]
+  },
+  {
+   "seq": 3,
+   "title": "Prior art: open rover boards and finished products",
+   "sources": [
+    "https://boardrepo.com/stephendade/roverbase",
+    "https://github.com/nasa-jpl/open-source-rover",
+    "https://github.com/nsi1409/tinyrover",
+    "https://pulse2.com/ring-launches-with-249-99-drone-cam-and-999-99-rover-cam-for-autonomous-security/",
+    "https://www.pcworld.com/article/2924138/switchbot-k20-plus-pro-patrol-kit-review.html",
+    "https://www.staples.com/enabot-ebo-x-home-robot-black-ebo-x/product_24617639"
+   ]
+  },
+  {
+   "seq": 25,
+   "title": "Quotes for the three uncited lines (2026-11-26)",
+   "sources": [
+    "https://24h.pchome.com.tw/prod/DGCE2E-A900FSJZI",
+    "https://24h.pchome.com.tw/prod/DYBE49-A900J83X6",
+    "https://24h.pchome.com.tw/prod/DSBC0V-A900GRQ1Y",
+    "https://www.dfrobot.com/product-1694.html",
+    "https://core-electronics.com.au/3-cell-18650-bms-module.html",
+    "https://www.pololu.com/category/101/nuts-and-screws",
+    "https://www.adafruit.com/product/2336",
+    "https://open.er-api.com/v6/latest/USD"
+   ]
+  },
+  {
+   "seq": 31,
+   "title": "Consumer prior art missed: US$30-50 wheeled pet camera (2026-11-26)",
+   "sources": [
+    "https://www.cnx-software.com/2025/08/12/low-cost-mobile-robot-and-security-camera-monitors-your-home-and-pets/",
+    "https://www.walmart.com/ip/Blinky-Bot-Camera-Blinky-Bot-Pro-360-Camera-Wheels-1080p-Dual-Lens-Indoor-Movable-Security-Cameras-2-Way-Talk-App-Control-Night-Vision-4G-Version/16876760502"
+   ]
+  }
+ ],
+ "decisions": [
+  {
+   "seq": 4,
+   "title": "Strategy: buy proven modules, print the chassis, no custom board",
+   "choice": "Raspberry Pi Zero 2 W + Camera Module 3 for Wi-Fi video, two Pololu DRV8874 carriers (one per side), Pololu 5 V step-down regulator, four Pololu 25D gearmotors on #2676 brackets, printed chassis",
+   "because": "Every module has a maker datasheet and a price; at one unit a custom board adds fabrication cost and delay for no gain, and the only close open board (roverbase) is GPL and unfinished. Finished patrol robots cost US$750-1,025; cheap robot cameras cannot drive ramps."
+  },
+  {
+   "seq": 7,
+   "title": "Gearmotor: Pololu 25D MP 12V 47:1 (#3229)",
+   "choice": "Pololu 47:1 Metal Gearmotor 25Dx52L mm MP 12V, four, skid steer",
+   "because": "hs_size_rover_drive (step 6): 0.71 m/s full-voltage cruise vs 0.40 needed (75:1 reaches only 0.416, no margin for battery sag); 0.095 A cruise and 0.157 A on 15 degrees per motor, 4.5% of stall torque on the ramp. Speed is set by PWM."
+  },
+  {
+   "seq": 12,
+   "title": "Wheels: Pololu 90x10 mm pair (#1435) on 4 mm universal hubs (#1081)",
+   "choice": "Two pairs of Pololu Wheel 90x10mm on four Pololu Universal Aluminum Mounting Hubs for 4 mm shaft (two 2-packs)",
+   "because": "The 25D output shaft is 4 mm; #1435 press-fits only 3 mm D shafts, but Pololu states its six #4/M3 holes match the universal hubs, which adapt to 4 mm. 90 mm replaces the assumed 80 mm, so drive and chassis are re-checked."
+  },
+  {
+   "seq": 16,
+   "title": "Layout: two-wheel drive with a front ball caster (Pololu #2692)",
+   "choice": "Rear-drive 2WD, one Pololu #2692 1-inch ball caster at the front on a printed 1.5 mm boss",
+   "because": "hs_bom_check (step 15): the 4WD parts list is US$323.66 against a US$250 budget. 2WD removes two motors, a bracket pair, a wheel pair and a hub pack (about US$91) and adds a US$9.95 caster. The 29 mm caster height matches the 30.5 mm plate height with a 1.5 mm boss; about 80% of the weight then sits on the driven axle."
+  },
+  {
+   "seq": 21,
+   "title": "Software: reuse MediaMTX for video, gpiozero for the drivers",
+   "choice": "MediaMTX (MIT) publishing the Camera Module 3 as WebRTC to a browser; a 70-line Python page with gpiozero PhaseEnableMotor for drive",
+   "because": "MediaMTX reads Raspberry Pi cameras directly and serves WebRTC to any phone or laptop browser; gpiozero's PhaseEnableMotor matches the DRV8874 phase/enable mode. Nothing to write but glue."
+  },
+  {
+   "seq": 26,
+   "title": "battery",
+   "choice": "3 x iNeno 18650 2200 mAh (BSMI) in a DFRobot 3-cell holder with a 3S protection board, charged cell by cell in a USB charger",
+   "because": "cheapest in-stock BSMI cells sold in Taiwan; a removable-cell holder needs no 3S balance charger; protection board guards over-discharge"
+  },
+  {
+   "seq": 32,
+   "title": "build vs buy, revisited",
+   "choice": "Do not sell HS-ROVER-A as a home or pet camera; keep it only where the cheap robot cannot go",
+   "because": "the OEM robot costs about one sixth of HS-ROVER-A's US$263 parts and adds night vision, audio, pan/tilt and an app; HS-ROVER-A's only advantages are open local-only video (no vendor cloud), 5 h runtime, 15 degree ramps, 30 mm clearance and full hackability"
+  }
+ ],
+ "software_checked": [
+  {
+   "check": "hs_size_rover_drive",
+   "seq": 17,
+   "summary": "28 of 38 gearmotor options pass; best pololu-25d-mp-12v 75:1"
+  },
+  {
+   "check": "rover_chassis",
+   "seq": 27,
+   "summary": "564 g, clearance 30.5 mm, tips at 27 deg, 0 problems"
+  },
+  {
+   "check": "hs_energy_budget",
+   "seq": 28,
+   "summary": "0 errors, 0 warnings"
+  },
+  {
+   "check": "bom_check",
+   "seq": 34,
+   "summary": "US$34.60 for 8 lines against US$45.57; 3 salvaged, US$4.25 new"
+  }
+ ],
+ "open": [],
+ "physical_required": [
+  {
+   "check": "hs_size_rover_drive",
+   "boundary": "Linear DC-motor model between the maker's no-load and (extrapolated) stall points at nominal voltage; Pololu says units stall well before the listed point as they heat. No battery sag, wheel slip or turning losses."
+  },
+  {
+   "check": "rover_chassis",
+   "boundary": "CAD and static calculations only. Print strength, traction, wheel slip, battery life and the camera image need a printed, driven rover."
+  },
+  {
+   "check": "hs_energy_budget",
+   "boundary": "Sizing calculation from stated loads and ratings. Nothing was built or measured. Runtime and surge must be tested with the real loads, and AC wiring, residual current protection and earthing need a qualified electrician."
+  },
+  {
+   "check": "bom_check",
+   "boundary": "Shop prices on the day they were read; shipping, tax and stock change. A salvaged part is assumed to work until the donor is opened and the part is tested."
+  }
+ ],
+ "deliverables": [
+  {
+   "artifact": "software/rover_drive.py",
+   "seq": 22,
+   "untested": "Not run on a Pi or with motors."
+  },
+  {
+   "artifact": "software/mediamtx.yml",
+   "seq": 23,
+   "untested": "Not run; MediaMTX option names to confirm against its docs on the Pi."
+  },
+  {
+   "artifact": "wiring.md",
+   "seq": 24,
+   "untested": "Wiring not built or powered."
+  }
+ ],
+ "artifacts": [
+  "artifacts/cad/rover_chassis/chassis_checks.json",
+  "artifacts/cad/rover_chassis/params.json",
+  "artifacts/cad/rover_chassis/rover_chassis.step",
+  "artifacts/cad/rover_chassis/rover_chassis.stl",
+  "artifacts/software/mediamtx.yml",
+  "artifacts/software/rover_drive.py",
+  "artifacts/wiring.md"
+ ],
+ "authority": "software checks only; no fabrication, power-on, flight or release is authorised by this record"
+}

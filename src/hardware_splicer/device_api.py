@@ -82,6 +82,23 @@ def create_device_router() -> APIRouter:
     def get_modules() -> Dict[str, Any]:
         return {"ok": True, "library": module_library()}
 
+    @router.get("/parts", summary="Every part HS knows, from both libraries, with what HS can do with each", description="The device planner's cited modules and the engine library's parts in one list. Each part says whether it can be planned into a case (device_plan), placed on a KiCad board (pcb_compose) or only wiring-checked (wiring_check). `q` filters by id or label.")
+    def get_parts(q: str | None = None) -> Dict[str, Any]:
+        from .part_tiers import unified_catalog
+
+        return {"ok": True, **unified_catalog(q)}
+
+    @router.post("/check-wiring", summary="Check a spec's wiring with parts from either library", description="A spec of planner modules gets the full plan; a spec of engine parts gets the engine's wiring rules and a plain statement that no case can be made without measured outlines. Mixing the two libraries is refused.", openapi_extra=body)
+    async def post_check_wiring(request: Request) -> Dict[str, Any]:
+        from .part_tiers import PartCheckError, check_any_wiring
+
+        body = await _read_body(request, error_type="invalid_device_spec", label="spec")
+        spec = body.get("spec") if isinstance(body, dict) and "spec" in body and "modules" not in body else body
+        try:
+            return {"ok": True, **check_any_wiring(spec)}
+        except PartCheckError as exc:
+            raise _unprocessable(str(exc)) from None
+
     @router.get("/spec-schema", summary="JSON Schema and catalogue for writing a device spec", description="The schema a spec must satisfy (built from the library, so the module ids and ranges are the planner's), and a catalogue of each module's pins and roles. Use it to constrain or check a spec before planning.")
     def get_spec_schema() -> Dict[str, Any]:
         return {"ok": True, "schema": device_spec_json_schema(), "modules": device_catalog()}

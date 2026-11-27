@@ -1,0 +1,240 @@
+{
+  "family_id": "mt-xv3",
+  "family_name": "脉塔 XV3",
+  "shared": {
+    "manufacturer": "脉塔",
+    "manufacturer_en": "Myactuator",
+    "electrical": {
+      "voltage_v": 48,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "output_encoder_bits": 14,
+      "motor_encoder_bits": 16
+    },
+    "transmission": {
+      "type": "planetary"
+    }
+  },
+  "variants": [
+    {
+      "id": "mt-xv3-100-35-48",
+      "model": "RMD-X10-P35-100",
+      "base_id": "MT-XV3-100-35-48",
+      "electrical": {
+        "peak_current_a": 13.5,
+        "continuous_current_a": 6.7,
+        "rated_input_power_w": 265,
+        "peak_input_power_w": 264.38
+      },
+      "mechanical": {
+        "rated_torque_nm": 50,
+        "peak_torque_nm": 100,
+        "start_stop_peak_torque_nm": 100,
+        "rated_speed_rpm": 50,
+        "weight_kg": 1.7,
+        "outer_diameter_mm": 100,
+        "radial_load_kn": 2.25,
+        "axial_load_kn": 1.625,
+        "torque_density_nm_per_kg": 58.82
+      },
+      "transmission": {
+        "reduction_ratio": 35,
+        "backdrivable": false,
+        "backlash_arcsec": 900
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "RS485"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/12_脉塔_XV3行星模组.pdf"
+    },
+    {
+      "id": "mt-xv3-100-7-48",
+      "model": "RMD-X10-P7-40",
+      "base_id": "MT-XV3-100-7-48",
+      "electrical": {
+        "peak_current_a": 15,
+        "continuous_current_a": 6.5,
+        "rated_input_power_w": 265,
+        "peak_input_power_w": 336.93
+      },
+      "mechanical": {
+        "rated_torque_nm": 15,
+        "peak_torque_nm": 40,
+        "start_stop_peak_torque_nm": 40,
+        "rated_speed_rpm": 165,
+        "weight_kg": 1.15,
+        "outer_diameter_mm": 100,
+        "radial_load_kn": 2.25,
+        "axial_load_kn": 1.625,
+        "torque_density_nm_per_kg": 34.78
+      },
+      "transmission": {
+        "reduction_ratio": 7,
+        "backdrivable": true,
+        "backlash_arcsec": 600
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "RS485"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/12_脉塔_XV3行星模组.pdf"
+    },
+    {
+      "id": "mt-xv3-60-8-48",
+      "model": "RMD-X6-P8-8",
+      "base_id": "MT-XV3-60-8-48",
+      "electrical": {
+        "peak_current_a": 7.2,
+        "continuous_current_a": 3.6,
+        "rated_input_power_w": 135,
+        "peak_input_power_w": 162.39
+      },
+      "mechanical": {
+        "rated_torque_nm": 4.5,
+        "peak_torque_nm": 8,
+        "start_stop_peak_torque_nm": 8,
+        "rated_speed_rpm": 310,
+        "weight_kg": 0.49,
+        "outer_diameter_mm": 60,
+        "radial_load_kn": 1.04,
+        "axial_load_kn": 0.775,
+        "torque_density_nm_per_kg": 16.33
+      },
+      "transmission": {
+        "reduction_ratio": 8,
+        "backdrivable": true,
+        "backlash_arcsec": 600
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "RS485"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/12_脉塔_XV3行星模组.pdf"
+    },
+    {
+      "id": "mt-xv3-80-36-48",
+      "model": "RMD-X8-P36-60",
+      "base_id": "MT-XV3-80-36-48",
+      "electrical": {
+        "peak_current_a": 8,
+        "continuous_current_a": 4,
+        "rated_input_power_w": 130,
+        "peak_input_power_w": 178.69
+      },
+      "mechanical": {
+        "rated_torque_nm": 30,
+        "peak_torque_nm": 60,
+        "start_stop_peak_torque_nm": 60,
+        "rated_speed_rpm": 40,
+        "weight_kg": 0.9,
+        "outer_diameter_mm": 80,
+        "radial_load_kn": 1.25,
+        "axial_load_kn": 0.985,
+        "torque_density_nm_per_kg": 66.67
+      },
+      "transmission": {
+        "reduction_ratio": 36,
+        "backdrivable": false,
+        "backlash_arcsec": 900
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "RS485"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/12_脉塔_XV3行星模组.pdf"
+    },
+    {
+      "id": "mt-xv3-80-6-48",
+      "model": "RMD-X8-P6-20",
+      "base_id": "MT-XV3-80-6-48",
+      "electrical": {
+        "peak_current_a": 10.5,
+        "continuous_current_a": 5.2,
+        "rated_input_power_w": 200
+      },
+      "mechanical": {
+        "rated_torque_nm": 10,
+        "peak_torque_nm": 20,
+        "start_stop_peak_torque_nm": 20,
+        "rated_speed_rpm": 190,
+        "weight_kg": 0.78,
+        "outer_diameter_mm": 80,
+        "radial_load_kn": 1.25,
+        "axial_load_kn": 0.985,
+        "torque_density_nm_per_kg": 25.64
+      },
+      "transmission": {
+        "reduction_ratio": 6,
+        "backdrivable": true,
+        "backlash_arcsec": 600
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "RS485"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/12_脉塔_XV3行星模组.pdf"
+    }
+  ]
+}

@@ -1,0 +1,134 @@
+[
+ {
+  "item": "Pololu 47:1 Metal Gearmotor 25Dx52L mm MP 12V (#3229)",
+  "qty": 2,
+  "unit_usd": 29.95,
+  "source": "https://www.pololu.com/product/3229"
+ },
+ {
+  "item": "Pololu 25D mm Metal Gearmotor Bracket Pair (#2676)",
+  "qty": 1,
+  "unit_usd": 10.95,
+  "source": "https://www.pololu.com/product/2676"
+ },
+ {
+  "item": "Pololu DRV8874 Single Brushed DC Motor Driver Carrier (#4035)",
+  "qty": 2,
+  "unit_usd": 11.94,
+  "source": "https://www.pololu.com/product/4035"
+ },
+ {
+  "item": "Pololu 5V 2.5A Step-Down Regulator D24V22F5 (#2858)",
+  "qty": 1,
+  "unit_usd": 26.95,
+  "source": "https://www.pololu.com/product/2858"
+ },
+ {
+  "item": "Pololu Wheel 90x10mm Pair (#1435)",
+  "qty": 1,
+  "unit_usd": 9.49,
+  "source": "https://www.pololu.com/product/1435"
+ },
+ {
+  "item": "Pololu Universal Aluminum Mounting Hub 4mm, 2-pack (#1081)",
+  "qty": 1,
+  "unit_usd": 10.95,
+  "source": "https://www.pololu.com/product/1081"
+ },
+ {
+  "item": "Pololu Ball Caster with 1in Plastic Ball and Ball Bearings (#2692)",
+  "qty": 1,
+  "unit_usd": 9.95,
+  "source": "https://www.pololu.com/product/2692"
+ },
+ {
+  "item": "Raspberry Pi Zero 2 W",
+  "qty": 1,
+  "unit_usd": 19.05,
+  "source": "https://www.adafruit.com/product/5291"
+ },
+ {
+  "item": "Raspberry Pi Camera Module 3 Standard",
+  "qty": 1,
+  "unit_usd": 29.25,
+  "source": "https://www.adafruit.com/product/5657"
+ },
+ {
+  "item": "Raspberry Pi Zero camera cable",
+  "qty": 1,
+  "unit_usd": 5.95,
+  "source": "https://www.adafruit.com/product/3157"
+ },
+ {
+  "item": "iNeno 18650 2200 mAh Li-ion, BSMI, 4-pack (3 used, 1 spare) [NT$598]",
+  "qty": 1,
+  "unit_usd": 18.17,
+  "source": "https://24h.pchome.com.tw/prod/DGCE2E-A900FSJZI"
+ },
+ {
+  "item": "KINYO two-slot USB 18650 charger [NT$249]",
+  "qty": 1,
+  "unit_usd": 7.56,
+  "source": "https://24h.pchome.com.tw/prod/DYBE49-A900J83X6"
+ },
+ {
+  "item": "SanDisk Ultra microSDHC 32 GB [NT$398]",
+  "qty": 1,
+  "unit_usd": 12.09,
+  "source": "https://24h.pchome.com.tw/prod/DSBC0V-A900GRQ1Y"
+ },
+ {
+  "item": "DFRobot 3 x 18650 holder with DC 2.1 jack (78 x 59 x 21 mm, 30 g)",
+  "qty": 1,
+  "unit_usd": 2.4,
+  "source": "https://www.dfrobot.com/product-1694.html"
+ },
+ {
+  "item": "3-cell 18650 protection (BMS) board CE09207 [AU$2.10]",
+  "qty": 1,
+  "unit_usd": 1.39,
+  "source": "https://core-electronics.com.au/3-cell-18650-bms-module.html"
+ },
+ {
+  "item": "Pololu M3 x 10 mm screws, 25-pack (#2695): 4 bracket + 3 caster",
+  "qty": 1,
+  "unit_usd": 2.38,
+  "source": "https://www.pololu.com/product/2695"
+ },
+ {
+  "item": "Pololu M3 hex nuts, 25-pack (#1069)",
+  "qty": 1,
+  "unit_usd": 2.97,
+  "source": "https://www.pololu.com/product/1069"
+ },
+ {
+  "item": "Pololu M2.5 x 6 mm screws, 25-pack (#1968): Pi standoffs",
+  "qty": 1,
+  "unit_usd": 1.85,
+  "source": "https://www.pololu.com/product/1968"
+ },
+ {
+  "item": "Adafruit M2.5 x 11 mm brass standoffs with nuts, 2-pack (#2336)",
+  "qty": 2,
+  "unit_usd": 0.75,
+  "source": "https://www.adafruit.com/product/2336"
+ },
+ {
+  "item": "Pololu #2-56 x 5/16 in screws, 25-pack (#1956): camera (2.2 mm holes)",
+  "qty": 1,
+  "unit_usd": 1.85,
+  "source": "https://www.pololu.com/product/1956"
+ },
+ {
+  "item": "Pololu #2-56 hex nuts, 25-pack (#1067)",
+  "qty": 1,
+  "unit_usd": 3.49,
+  "source": "https://www.pololu.com/product/1067"
+ },
+ {
+  "item": "PLA 73.5 g (hs_rover_chassis printed mass) at Bambu Lab PLA Basic refill US$19.99/kg (price from a search result; the store page is not machine-readable)",
+  "qty": 1,
+  "unit_usd": 1.47,
+  "source": "https://asia.store.bambulab.com/collections/pla/products/pla-basic-filament"
+ }
+]

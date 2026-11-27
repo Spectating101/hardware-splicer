@@ -1,0 +1,345 @@
+{
+  "family_id": "gq-htdw",
+  "family_name": "高擎 HTDW",
+  "shared": {
+    "manufacturer": "高擎",
+    "manufacturer_en": "HighTorque",
+    "electrical": {
+      "voltage_v": 24,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "absolute_accuracy_deg": 0.25,
+      "repeatability_deg": 0.2,
+      "output_encoder_bits": 14,
+      "motor_encoder_bits": 14
+    },
+    "transmission": {
+      "type": "planetary",
+      "backdrivable": false,
+      "backlash_arcsec": 600
+    }
+  },
+  "variants": [
+    {
+      "id": "gq-htdw-44-30-24",
+      "model": "HTDW-4438-30-NE",
+      "base_id": "GQ-HTDW-44-30-24",
+      "electrical": {
+        "peak_current_a": 10,
+        "continuous_current_a": 0.7,
+        "rated_input_power_w": 8.5
+      },
+      "mechanical": {
+        "rated_torque_nm": 2,
+        "peak_torque_nm": 10,
+        "start_stop_peak_torque_nm": 10,
+        "rated_speed_rpm": 40,
+        "max_speed_rpm": 160,
+        "weight_kg": 0.237,
+        "outer_diameter_mm": 44,
+        "torque_density_nm_per_kg": 42.19
+      },
+      "transmission": {
+        "reduction_ratio": 30
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 43.4,
+        "length_mm_max": 43.4
+      },
+      "datasheet_url": "datasheets/6_高擎_关节模组_20241203.pdf"
+    },
+    {
+      "id": "gq-htdw-44-30-24-c",
+      "model": "HTDW-4438-30-NE-JC",
+      "base_id": "GQ-HTDW-44-30-24-C",
+      "electrical": {
+        "peak_current_a": 10,
+        "continuous_current_a": 0.7,
+        "rated_input_power_w": 8.5
+      },
+      "mechanical": {
+        "rated_torque_nm": 2,
+        "peak_torque_nm": 10,
+        "start_stop_peak_torque_nm": 10,
+        "rated_speed_rpm": 40,
+        "max_speed_rpm": 160,
+        "weight_kg": 0.237,
+        "outer_diameter_mm": 44,
+        "torque_density_nm_per_kg": 42.19
+      },
+      "transmission": {
+        "reduction_ratio": 30
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 44.9,
+        "length_mm_max": 44.9
+      },
+      "datasheet_url": "datasheets/6_高擎_关节模组_20241203.pdf"
+    },
+    {
+      "id": "gq-htdw-50-22-24",
+      "model": "HTDW-5022-02-DNE",
+      "base_id": "GQ-HTDW-50-22-24",
+      "electrical": {
+        "peak_current_a": 10,
+        "continuous_current_a": 2,
+        "rated_input_power_w": 30
+      },
+      "mechanical": {
+        "rated_torque_nm": 3.5,
+        "peak_torque_nm": 13,
+        "start_stop_peak_torque_nm": 13,
+        "rated_speed_rpm": 82,
+        "max_speed_rpm": 123,
+        "weight_kg": 0.322,
+        "outer_diameter_mm": 50,
+        "torque_density_nm_per_kg": 40.37
+      },
+      "transmission": {
+        "reduction_ratio": 22
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 47.4,
+        "length_mm_max": 47.4
+      },
+      "datasheet_url": "datasheets/6_高擎_关节模组_20241203.pdf"
+    },
+    {
+      "id": "gq-htdw-50-36-24",
+      "model": "HTDW-5036-02-DNE",
+      "base_id": "GQ-HTDW-50-36-24",
+      "electrical": {
+        "peak_current_a": 10,
+        "continuous_current_a": 2,
+        "rated_input_power_w": 30
+      },
+      "mechanical": {
+        "rated_torque_nm": 6,
+        "peak_torque_nm": 21,
+        "start_stop_peak_torque_nm": 21,
+        "rated_speed_rpm": 50,
+        "max_speed_rpm": 75,
+        "weight_kg": 0.323,
+        "outer_diameter_mm": 50,
+        "torque_density_nm_per_kg": 65.02
+      },
+      "transmission": {
+        "reduction_ratio": 36
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 47.4,
+        "length_mm_max": 47.4
+      },
+      "datasheet_url": "datasheets/6_高擎_关节模组_20241203.pdf"
+    },
+    {
+      "id": "gq-htdw-50-36-24-c",
+      "model": "HTDW-5036-02-CNE",
+      "base_id": "GQ-HTDW-50-36-24-C",
+      "electrical": {
+        "peak_current_a": 10,
+        "continuous_current_a": 2,
+        "rated_input_power_w": 30
+      },
+      "mechanical": {
+        "rated_torque_nm": 6,
+        "peak_torque_nm": 21,
+        "start_stop_peak_torque_nm": 21,
+        "rated_speed_rpm": 50,
+        "max_speed_rpm": 75,
+        "weight_kg": 0.345,
+        "outer_diameter_mm": 50,
+        "torque_density_nm_per_kg": 60.87
+      },
+      "transmission": {
+        "reduction_ratio": 36
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 47.4,
+        "length_mm_max": 47.4
+      },
+      "datasheet_url": "datasheets/6_高擎_关节模组_20241203.pdf"
+    },
+    {
+      "id": "gq-htdw-60-36-24",
+      "model": "HTDW-6036-02-DNE",
+      "base_id": "GQ-HTDW-60-36-24",
+      "electrical": {
+        "peak_current_a": 15,
+        "continuous_current_a": 3,
+        "rated_input_power_w": 52
+      },
+      "mechanical": {
+        "rated_torque_nm": 10,
+        "peak_torque_nm": 36,
+        "start_stop_peak_torque_nm": 36,
+        "rated_speed_rpm": 50,
+        "max_speed_rpm": 60,
+        "weight_kg": 0.565,
+        "outer_diameter_mm": 60,
+        "torque_density_nm_per_kg": 63.72
+      },
+      "transmission": {
+        "reduction_ratio": 36
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 56,
+        "length_mm_max": 56
+      },
+      "datasheet_url": "datasheets/6_高擎_关节模组_20241203.pdf"
+    },
+    {
+      "id": "gq-htdw-60-36-24-c",
+      "model": "HTDW-6036-02-CNE",
+      "base_id": "GQ-HTDW-60-36-24-C",
+      "electrical": {
+        "peak_current_a": 15,
+        "continuous_current_a": 3,
+        "rated_input_power_w": 52
+      },
+      "mechanical": {
+        "rated_torque_nm": 10,
+        "peak_torque_nm": 36,
+        "start_stop_peak_torque_nm": 36,
+        "rated_speed_rpm": 50,
+        "max_speed_rpm": 60,
+        "weight_kg": 0.57,
+        "outer_diameter_mm": 60,
+        "torque_density_nm_per_kg": 63.16
+      },
+      "transmission": {
+        "reduction_ratio": 36
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 56,
+        "length_mm_max": 56
+      },
+      "datasheet_url": "datasheets/6_高擎_关节模组_20241203.pdf"
+    },
+    {
+      "id": "gq-htdw-75-35-24",
+      "model": "HTDW-7535-02-CNE",
+      "base_id": "GQ-HTDW-75-35-24",
+      "electrical": {
+        "peak_current_a": 20,
+        "continuous_current_a": 4.2,
+        "rated_input_power_w": 94
+      },
+      "mechanical": {
+        "rated_torque_nm": 18,
+        "peak_torque_nm": 60,
+        "start_stop_peak_torque_nm": 60,
+        "rated_speed_rpm": 50,
+        "max_speed_rpm": 60,
+        "weight_kg": 0.85,
+        "outer_diameter_mm": 75,
+        "torque_density_nm_per_kg": 70.59
+      },
+      "transmission": {
+        "reduction_ratio": 35
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 56,
+        "length_mm_max": 56
+      },
+      "datasheet_url": "datasheets/6_高擎_关节模组_20241203.pdf"
+    }
+  ]
+}

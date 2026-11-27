@@ -1,0 +1,1605 @@
+{
+ "schema_version": "hardware_splicer.github_data_source_sweep.v1",
+ "swept_at": "2026-11-25T09:55:59.836525+00:00",
+ "queries": {
+  "pinouts": [
+   "esp32 pinout",
+   "microcontroller pinout reference",
+   "rp2040 pinout"
+  ],
+  "board_definitions": [
+   "platformio boards",
+   "arduino board definitions variants",
+   "esp32 board definitions"
+  ],
+  "component_libraries": [
+   "electronic component library json",
+   "kicad library",
+   "kicad symbols footprints",
+   "fritzing parts"
+  ],
+  "device_configurations": [
+   "esphome devices",
+   "tasmota templates",
+   "esphome configs collection"
+  ],
+  "breakout_board_files": [
+   "breakout board eagle pcb",
+   "open source hardware pcb sensor breakout",
+   "qwiic stemma pcb"
+  ],
+  "part_databases": [
+   "electronic parts database",
+   "i2c address list",
+   "sensor database datasheet"
+  ],
+  "simulator_parts": [
+   "wokwi",
+   "circuit simulator parts library",
+   "breadboard simulator components"
+  ],
+  "example_projects": [
+   "esp32 projects collection",
+   "arduino projects wiring diagrams",
+   "home assistant diy sensors"
+  ]
+ },
+ "repositories_found": 470,
+ "top_50": [
+  {
+   "repository": "CDFER/JLCPCB-Kicad-Library",
+   "score": 5.246,
+   "stars": 627,
+   "pushed_at": "2026-09-21T06:17:05Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "component_libraries"
+   ],
+   "queries": [
+    "kicad library",
+    "kicad symbols footprints"
+   ],
+   "description": "A set of symbols, footprints and 3d models of the basic components from JLCPCB's smt assembly",
+   "default_branch": "main"
+  },
+  {
+   "repository": "devbisme/skidl",
+   "score": 4.858,
+   "stars": 1732,
+   "pushed_at": "2026-11-09T19:03:03Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "component_libraries"
+   ],
+   "queries": [
+    "kicad library"
+   ],
+   "description": "SKiDL is a library that lets you design electronic circuits using Python.",
+   "default_branch": "master"
+  },
+  {
+   "repository": "swiftlang/swift-embedded-examples",
+   "score": 4.531,
+   "stars": 1048,
+   "pushed_at": "2026-11-22T00:18:24Z",
+   "license_spdx_id": "Apache-2.0",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "example_projects"
+   ],
+   "queries": [
+    "esp32 projects collection"
+   ],
+   "description": "A collection of example projects using Embedded Swift",
+   "default_branch": "main"
+  },
+  {
+   "repository": "agharsallah/esp-labs-web",
+   "score": 4.501,
+   "stars": 1000,
+   "pushed_at": "2026-11-23T02:40:36Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "pinouts"
+   ],
+   "queries": [
+    "esp32 pinout"
+   ],
+   "description": "The ESP32-S3 bench guide as a React app: live pinout, lessons with interactive simulators, a code reader for the esp-labs firmware, and the bench log. In 11 languages.",
+   "default_branch": "main"
+  },
+  {
+   "repository": "HuskerMinion/techo5",
+   "score": 4.403,
+   "stars": 861,
+   "pushed_at": "2026-11-24T23:10:27Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "device_configurations"
+   ],
+   "queries": [
+    "esphome devices"
+   ],
+   "description": "Open firmware for the Echo Show 5, 1st and 2nd gen: Alpine Linux instead of Android, no Alexa. A local Home Assistant voice satellite with its own touch screen, on-device wake word, SSH and A/B over-t",
+   "default_branch": "main"
+  },
+  {
+   "repository": "RealDeco/xiaozhi-esphome",
+   "score": 4.396,
+   "stars": 852,
+   "pushed_at": "2026-11-18T18:51:34Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "device_configurations"
+   ],
+   "queries": [
+    "esphome devices"
+   ],
+   "description": "Alternative code to use xiaozhi ai devices in esphome/home assistant.",
+   "default_branch": "main"
+  },
+  {
+   "repository": "wokwi/rp2040js",
+   "score": 4.095,
+   "stars": 536,
+   "pushed_at": "2026-11-14T10:14:21Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "simulator_parts"
+   ],
+   "queries": [
+    "wokwi"
+   ],
+   "description": "A Raspberry Pi Pico Emulator in JavaScript",
+   "default_branch": "main"
+  },
+  {
+   "repository": "TousstNicolas/JLC2KiCad_lib",
+   "score": 4.042,
+   "stars": 494,
+   "pushed_at": "2026-09-11T21:53:40Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "component_libraries"
+   ],
+   "queries": [
+    "kicad library"
+   ],
+   "description": "JLC2KICAD_lib is a python script that generate a component library (schematic, footprint and 3D model ) for KiCad from the JLCPCB/easyEDA library.",
+   "default_branch": "master"
+  },
+  {
+   "repository": "francescopace/espectre",
+   "score": 3.995,
+   "stars": 9879,
+   "pushed_at": "2026-11-25T03:15:36Z",
+   "license_spdx_id": "GPL-3.0",
+   "licence_class": "review_only",
+   "archived": false,
+   "categories": [
+    "device_configurations"
+   ],
+   "queries": [
+    "esphome devices"
+   ],
+   "description": "Wi-Fi motion sensing platform for ESP32. C++ SDK, ESPHome, Native, and Matter frontends, browser tools, and a CLI for the full device lifecycle. GPLv3 and commercial licensing.",
+   "default_branch": "main"
+  },
+  {
+   "repository": "attermann/microReticulum",
+   "score": 3.965,
+   "stars": 439,
+   "pushed_at": "2026-11-11T00:42:15Z",
+   "license_spdx_id": "Apache-2.0",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "board_definitions"
+   ],
+   "queries": [
+    "platformio boards"
+   ],
+   "description": "C++ port of the Reticulum Network Stack \u2014 a cryptographic mesh networking library that runs on both 32-bit+ microcontrollers (ESP32, nRF52, LoRa boards) and native platforms (Linux, macOS), with Platf",
+   "default_branch": "master"
+  },
+  {
+   "repository": "salitronic/eda-agent",
+   "score": 3.905,
+   "stars": 400,
+   "pushed_at": "2026-11-25T09:16:02Z",
+   "license_spdx_id": "Apache-2.0",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "component_libraries"
+   ],
+   "queries": [
+    "kicad library"
+   ],
+   "description": "Open-source MCP server that lets an AI drive a live session of Altium Designer, and optionally KiCad or EasyEDA Pro, editing the open design in place while you watch. 560+ tools: schematic, PCB, libra",
+   "default_branch": "main"
+  },
+  {
+   "repository": "valleytechsolutions/BWM-Technical-Reference-Guide",
+   "score": 3.898,
+   "stars": 53,
+   "pushed_at": "2026-11-08T01:15:14Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "pinouts"
+   ],
+   "queries": [
+    "esp32 pinout",
+    "microcontroller pinout reference",
+    "rp2040 pinout"
+   ],
+   "description": "Free pinout diagrams & GPIO reference for 2,700+ dev boards and 575 modules: ESP32, ESP8266, Arduino, Raspberry Pi, RP2040, RP2350, Teensy, displays and sensors. Datasheets and source links for every ",
+   "default_branch": "main"
+  },
+  {
+   "repository": "weirded/fleet-for-esphome",
+   "score": 3.72,
+   "stars": 301,
+   "pushed_at": "2026-11-23T16:55:12Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "device_configurations"
+   ],
+   "queries": [
+    "esphome devices"
+   ],
+   "description": "Fleet for ESPHome \u2014 Home Assistant add-on for managing fleets of ESPHome devices: distributed compile workers, version pinning, scheduled upgrades, fleet tags, and config history.",
+   "default_branch": "main"
+  },
+  {
+   "repository": "wokwi/wokwi-elements",
+   "score": 3.657,
+   "stars": 273,
+   "pushed_at": "2026-10-25T05:57:31Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "simulator_parts"
+   ],
+   "queries": [
+    "wokwi"
+   ],
+   "description": "Web Components for Electronics and IoT Parts",
+   "default_branch": "main"
+  },
+  {
+   "repository": "crides/kleeb",
+   "score": 3.559,
+   "stars": 235,
+   "pushed_at": "2026-09-14T04:35:36Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "component_libraries"
+   ],
+   "queries": [
+    "kicad symbols footprints"
+   ],
+   "description": "Collection of Kicad 6.0 symbols, footprints and 3D models useful in keyboard creation",
+   "default_branch": "master"
+  },
+  {
+   "repository": "wokwi/wokwi-docs",
+   "score": 3.496,
+   "stars": 213,
+   "pushed_at": "2026-11-16T09:25:12Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "simulator_parts"
+   ],
+   "queries": [
+    "wokwi"
+   ],
+   "description": "Documentation for the Wokwi Simulator",
+   "default_branch": "main"
+  },
+  {
+   "repository": "MichalZaniewicz/esphome-guition-jc3636k718c-va",
+   "score": 3.372,
+   "stars": 176,
+   "pushed_at": "2026-11-02T07:56:46Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "device_configurations"
+   ],
+   "queries": [
+    "esphome devices"
+   ],
+   "description": "Full Home Assistant voice assistant on the Guition JC3636K718C round knob display, in pure ESPHome: on-device wake word, music player, timers, addressable LED ring, device control and two built-in gam",
+   "default_branch": "main"
+  },
+  {
+   "repository": "Alarm-Siren/arduino-kicad-library",
+   "score": 3.321,
+   "stars": 453,
+   "pushed_at": "2026-11-18T23:01:57Z",
+   "license_spdx_id": "CC-BY-SA-4.0",
+   "licence_class": "review_only",
+   "archived": false,
+   "categories": [
+    "component_libraries"
+   ],
+   "queries": [
+    "kicad library",
+    "kicad symbols footprints"
+   ],
+   "description": "KiCad Symbol & Footprint Library for Arduino Modules (Shields, Sockets and Tiles)",
+   "default_branch": "master"
+  },
+  {
+   "repository": "byte4geek/weatherstation",
+   "score": 3.298,
+   "stars": 157,
+   "pushed_at": "2026-11-06T17:46:29Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "example_projects"
+   ],
+   "queries": [
+    "home assistant diy sensors"
+   ],
+   "description": "A feature-rich, high-precision ESP8266-based Smart Weather Station with a modern responsive Web Dashboard, dynamic sensor detection, customizable moving-average filters, Home Assistant MQTT Auto-Disco",
+   "default_branch": "main"
+  },
+  {
+   "repository": "esphome/device-builder",
+   "score": 3.264,
+   "stars": 149,
+   "pushed_at": "2026-11-25T07:13:58Z",
+   "license_spdx_id": "Apache-2.0",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "device_configurations"
+   ],
+   "queries": [
+    "esphome devices"
+   ],
+   "description": "ESPHome Device Builder Dashboard",
+   "default_branch": "main"
+  },
+  {
+   "repository": "nuttytree/ESPHome-Devices",
+   "score": 3.161,
+   "stars": 127,
+   "pushed_at": "2026-11-24T04:09:03Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "device_configurations"
+   ],
+   "queries": [
+    "esphome devices"
+   ],
+   "description": "A collection of ESPHome custom components, package files, and device configuration files for my various ESP8266/ESP32 devices that integrate with Home Assistant.",
+   "default_branch": "master"
+  },
+  {
+   "repository": "huizebruin/s0tool",
+   "score": 3.038,
+   "stars": 105,
+   "pushed_at": "2026-11-24T18:09:36Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "device_configurations"
+   ],
+   "queries": [
+    "esphome devices"
+   ],
+   "description": "Professional S0 & water meter measurement tool from huizebruin.nl and s0tool.nl. \ud83c\udf1f Star this repo for updates! A hobby project - flash your device and start monitoring in minutes! \u26a1",
+   "default_branch": "main"
+  },
+  {
+   "repository": "MichalZaniewicz/esphome-waveshare-esp32-s3-audio-va",
+   "score": 3.019,
+   "stars": 102,
+   "pushed_at": "2026-11-21T20:35:06Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "device_configurations"
+   ],
+   "queries": [
+    "esphome devices"
+   ],
+   "description": "Home Assistant voice satellite on the Waveshare ESP32-S3-AUDIO-Board, in pure ESPHome: on-device wake word, simultaneous music and announcements, voice timers, and a configurable RGB status ring, all ",
+   "default_branch": "main"
+  },
+  {
+   "repository": "laberning/home_io_control",
+   "score": 3.0,
+   "stars": 99,
+   "pushed_at": "2026-11-24T13:59:55Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "device_configurations"
+   ],
+   "queries": [
+    "esphome devices"
+   ],
+   "description": "ESPHome component for IO-Homecontrol devices",
+   "default_branch": "main"
+  },
+  {
+   "repository": "alkove-ai/alkove",
+   "score": 2.924,
+   "stars": 88,
+   "pushed_at": "2026-11-23T12:51:18Z",
+   "license_spdx_id": "Apache-2.0",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "device_configurations"
+   ],
+   "queries": [
+    "esphome devices"
+   ],
+   "description": "On-device voice models and SDK: voice isolation, wake words, voice activity and voiceprints. In the browser (WebAssembly), Python, Android and iOS, with plugins for LiveKit Agents, Pipecat and Home As",
+   "default_branch": "main"
+  },
+  {
+   "repository": "21cncstudio/project_aura",
+   "score": 2.904,
+   "stars": 801,
+   "pushed_at": "2026-11-17T21:49:25Z",
+   "license_spdx_id": "GPL-3.0",
+   "licence_class": "review_only",
+   "archived": false,
+   "categories": [
+    "example_projects"
+   ],
+   "queries": [
+    "home assistant diy sensors"
+   ],
+   "description": "ESP32\u2011S3 air\u2011quality station with LVGL UI, MQTT, Home Assistant",
+   "default_branch": "main"
+  },
+  {
+   "repository": "hlord2000/nordic-lib-kicad",
+   "score": 2.895,
+   "stars": 206,
+   "pushed_at": "2026-11-23T22:06:01Z",
+   "license_spdx_id": "CERN-OHL-P-2.0",
+   "licence_class": "review_only",
+   "archived": false,
+   "categories": [
+    "component_libraries"
+   ],
+   "queries": [
+    "kicad library",
+    "kicad symbols footprints"
+   ],
+   "description": "A KiCad Symbol + Footprint Library for all Modern Nordic Semiconductor Parts",
+   "default_branch": "main"
+  },
+  {
+   "repository": "hulryung/kicad-lcsc-manager",
+   "score": 2.886,
+   "stars": 83,
+   "pushed_at": "2026-10-23T01:00:27Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "component_libraries"
+   ],
+   "queries": [
+    "kicad symbols footprints"
+   ],
+   "description": "KiCad plugin for importing LCSC/EasyEDA components with symbols, footprints, and 3D models directly into your projects",
+   "default_branch": "main"
+  },
+  {
+   "repository": "afkiwers/inventree_kicad",
+   "score": 2.879,
+   "stars": 82,
+   "pushed_at": "2026-11-14T23:05:41Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "component_libraries"
+   ],
+   "queries": [
+    "kicad symbols footprints"
+   ],
+   "description": "KiCad EDA conform API endpoint for KiCad's parts library tool. This plugin provides metadata only and requires matching symbol and footprint libraries within the KiCad EDA.",
+   "default_branch": "main"
+  },
+  {
+   "repository": "rzeldent/esp32-smartdisplay",
+   "score": 2.849,
+   "stars": 706,
+   "pushed_at": "2026-11-06T18:27:25Z",
+   "license_spdx_id": "GPL-3.0",
+   "licence_class": "review_only",
+   "archived": false,
+   "categories": [
+    "board_definitions"
+   ],
+   "queries": [
+    "platformio boards"
+   ],
+   "description": "PlatformIO library LVGL Drivers for Sunton Smart display boards (CYD Cheap Yellow Display). This library supports these boards without any effort. ESP32-2432S024N/R/C, ESP32-2432S028R/C, ESP32-3248S03",
+   "default_branch": "main"
+  },
+  {
+   "repository": "wokwi/wokwi-cli",
+   "score": 2.813,
+   "stars": 74,
+   "pushed_at": "2026-10-23T14:32:36Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "simulator_parts"
+   ],
+   "queries": [
+    "wokwi"
+   ],
+   "description": "Wokwi Command Line Interface (for CI use cases)",
+   "default_branch": "main"
+  },
+  {
+   "repository": "yellobyte/ESP32-DevBoards-Getting-Started",
+   "score": 2.758,
+   "stars": 68,
+   "pushed_at": "2026-11-11T00:20:22Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "board_definitions"
+   ],
+   "queries": [
+    "platformio boards"
+   ],
+   "description": "Getting started with various ESP32 development boards. Lots of examples.",
+   "default_branch": "main"
+  },
+  {
+   "repository": "wokwi/wokwi-vscode-micropython",
+   "score": 2.719,
+   "stars": 64,
+   "pushed_at": "2026-10-22T11:41:24Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "simulator_parts"
+   ],
+   "queries": [
+    "wokwi"
+   ],
+   "description": "MicroPython in Wokwi for VS Code",
+   "default_branch": "main"
+  },
+  {
+   "repository": "atomic14/esp32-s3-pinouts",
+   "score": 2.682,
+   "stars": 480,
+   "pushed_at": "2026-06-16T17:41:41Z",
+   "license_spdx_id": "CC-BY-SA-4.0",
+   "licence_class": "review_only",
+   "archived": false,
+   "categories": [
+    "pinouts"
+   ],
+   "queries": [
+    "esp32 pinout"
+   ],
+   "description": "ESP32-S3 Pinout Quick Guide",
+   "default_branch": "main"
+  },
+  {
+   "repository": "Seeed-Studio/OPL_Kicad_Library",
+   "score": 2.6,
+   "stars": 397,
+   "pushed_at": "2026-06-23T06:54:09Z",
+   "license_spdx_id": "CC-BY-SA-4.0",
+   "licence_class": "review_only",
+   "archived": false,
+   "categories": [
+    "component_libraries"
+   ],
+   "queries": [
+    "kicad library"
+   ],
+   "description": "Open Parts Library (OPL) shares the supply chain with you",
+   "default_branch": "master"
+  },
+  {
+   "repository": "blakadder/templates",
+   "score": 2.56,
+   "stars": 362,
+   "pushed_at": "2026-07-06T08:00:50Z",
+   "license_spdx_id": "EPL-2.0",
+   "licence_class": "review_only",
+   "archived": false,
+   "categories": [
+    "device_configurations"
+   ],
+   "queries": [
+    "tasmota templates"
+   ],
+   "description": "Tasmota Device Templates Repository. Your one stop shop to get templates for devices running Tasmota!",
+   "default_branch": "master"
+  },
+  {
+   "repository": "esphome/devices.esphome.io",
+   "score": 2.539,
+   "stars": 345,
+   "pushed_at": "2026-11-24T03:54:15Z",
+   "license_spdx_id": "GPL-3.0",
+   "licence_class": "review_only",
+   "archived": false,
+   "categories": [
+    "device_configurations"
+   ],
+   "queries": [
+    "esphome devices"
+   ],
+   "description": "ESPHome Device Configurations Repository - A database of user submitted configurations for a variety of devices which can be flashed to run ESPHome.io firmware.",
+   "default_branch": "main"
+  },
+  {
+   "repository": "platima/Board-Taxonomies",
+   "score": 2.535,
+   "stars": 48,
+   "pushed_at": "2026-08-01T09:03:23Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "board_definitions"
+   ],
+   "queries": [
+    "esp32 board definitions"
+   ],
+   "description": "Definitions and examples for different categories of embedded computing boards",
+   "default_branch": "main"
+  },
+  {
+   "repository": "MallocArray/airgradient_esphome",
+   "score": 2.529,
+   "stars": 337,
+   "pushed_at": "2026-06-09T21:26:48Z",
+   "license_spdx_id": "GPL-3.0",
+   "licence_class": "review_only",
+   "archived": false,
+   "categories": [
+    "device_configurations"
+   ],
+   "queries": [
+    "esphome devices"
+   ],
+   "description": "ESPHome definition for an AirGradient DIY device to send data to HomeAssistant and AirGradient servers",
+   "default_branch": "main"
+  },
+  {
+   "repository": "Seeed-Studio/platform-seeedboards",
+   "score": 2.45,
+   "stars": 42,
+   "pushed_at": "2026-11-09T08:42:52Z",
+   "license_spdx_id": "Apache-2.0",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "board_definitions"
+   ],
+   "queries": [
+    "platformio boards"
+   ],
+   "description": "Seeed Boards: development platform for PlatformIO",
+   "default_branch": "main"
+  },
+  {
+   "repository": "Steffen-W/Import-LIB-KiCad-Plugin",
+   "score": 2.444,
+   "stars": 277,
+   "pushed_at": "2026-10-20T13:25:36Z",
+   "license_spdx_id": "GPL-3.0",
+   "licence_class": "review_only",
+   "archived": false,
+   "categories": [
+    "component_libraries"
+   ],
+   "queries": [
+    "kicad library"
+   ],
+   "description": "Helps to import KiCad component libraries imported from ultralibrarian and snapeda zipfiles.",
+   "default_branch": "master"
+  },
+  {
+   "repository": "setha-maker/levo-tcu-protocol",
+   "score": 2.419,
+   "stars": 40,
+   "pushed_at": "2026-10-28T15:31:50Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "pinouts"
+   ],
+   "queries": [
+    "esp32 pinout"
+   ],
+   "description": "CAN protocol, connector pinouts and an ESP32 reference TCU for a 2021 Specialized Turbo Levo.",
+   "default_branch": "main"
+  },
+  {
+   "repository": "god233012yamil/ESP32-IoT-Projects",
+   "score": 2.403,
+   "stars": 39,
+   "pushed_at": "2026-07-23T21:19:26Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "example_projects"
+   ],
+   "queries": [
+    "esp32 projects collection"
+   ],
+   "description": "A growing collection of ESP32 IoT projects showcasing connectivity, peripherals, and real-world applications. Explore examples from networking to hardware control, designed to help developers learn, p",
+   "default_branch": "main"
+  },
+  {
+   "repository": "pol-valero/openrover-robotic-platform",
+   "score": 2.403,
+   "stars": 39,
+   "pushed_at": "2026-10-12T10:13:44Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "board_definitions"
+   ],
+   "queries": [
+    "platformio boards"
+   ],
+   "description": "3D-printed Mars Rover robot inspired by NASA\u2019s Perseverance rover. Built using Raspberry Pi, ESP32, and Arduino boards. It includes a web dashboard and a remote control with a touchscreen for monitori",
+   "default_branch": "main"
+  },
+  {
+   "repository": "sparkmicro/Ki-nTree",
+   "score": 2.403,
+   "stars": 252,
+   "pushed_at": "2026-07-09T16:15:21Z",
+   "license_spdx_id": "GPL-3.0",
+   "licence_class": "review_only",
+   "archived": false,
+   "categories": [
+    "component_libraries"
+   ],
+   "queries": [
+    "kicad library"
+   ],
+   "description": "Fast part creation for KiCad and InvenTree",
+   "default_branch": "main"
+  },
+  {
+   "repository": "rzeldent/platformio-espressif32-sunton",
+   "score": 2.378,
+   "stars": 238,
+   "pushed_at": "2026-11-03T23:19:25Z",
+   "license_spdx_id": "GPL-3.0",
+   "licence_class": "review_only",
+   "archived": false,
+   "categories": [
+    "board_definitions"
+   ],
+   "queries": [
+    "platformio boards"
+   ],
+   "description": "Board definitions for the Sunton Smart display boards (CYD Cheap Yellow Display). These definitions contain not only contain the CPU information but also the connections and devices present on the boa",
+   "default_branch": "main"
+  },
+  {
+   "repository": "Grey-Lancaster/CYD-PhotoFrame",
+   "score": 2.334,
+   "stars": 35,
+   "pushed_at": "2026-11-03T16:27:35Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "board_definitions"
+   ],
+   "queries": [
+    "platformio boards"
+   ],
+   "description": "Photo frame firmware for the ESP32 \"Cheap Yellow Display\" (CYD) 2.8\", 3.5\" and Freenove 4\" boards: slideshow from an SD card, touch controls, on-screen WiFi setup, web page for photos and settings (En",
+   "default_branch": "main"
+  },
+  {
+   "repository": "XenGi/teensy_library",
+   "score": 2.269,
+   "stars": 331,
+   "pushed_at": "2025-11-18T12:11:34Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "component_libraries"
+   ],
+   "queries": [
+    "kicad library"
+   ],
+   "description": "KiCAD library for Teensy microcontrollers",
+   "default_branch": "master"
+  },
+  {
+   "repository": "IoT-ThingsCloud/thingscloud-esp-sdk",
+   "score": 2.237,
+   "stars": 30,
+   "pushed_at": "2026-11-05T03:51:27Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "board_definitions"
+   ],
+   "queries": [
+    "platformio boards"
+   ],
+   "description": "ThingsCloud IoT Platform WiFi and MQTT client library for ESP8266/ESP32 based boards using arduino framework.",
+   "default_branch": "main"
+  },
+  {
+   "repository": "lshariprasad/IoT-LAB",
+   "score": 2.216,
+   "stars": 29,
+   "pushed_at": "2026-10-27T13:24:11Z",
+   "license_spdx_id": "MIT",
+   "licence_class": "absorb",
+   "archived": false,
+   "categories": [
+    "example_projects"
+   ],
+   "queries": [
+    "esp32 projects collection"
+   ],
+   "description": "Collection of real-world IoT projects using Arduino and ESP32, focused on embedded systems, automation, and hardware-software integration.",
+   "default_branch": "main"
+  }
+ ],
+ "feed": {
+  "schema_version": "hardware_splicer.github_signal_feed.v1",
+  "source": "github_repository_search",
+  "candidates": [
+   {
+    "repository": "CDFER/JLCPCB-Kicad-Library",
+    "commit_sha": "de4e6c46525568f1f4212707a12ff830eb1f63dc",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "component_libraries"
+   },
+   {
+    "repository": "devbisme/skidl",
+    "commit_sha": "efff5d71fe1297c48497266071b27043be476f06",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "component_libraries"
+   },
+   {
+    "repository": "swiftlang/swift-embedded-examples",
+    "commit_sha": "d606e60c703f2ba5ac4acb4406f6ab08b6c22ac0",
+    "license_spdx_id": "Apache-2.0",
+    "intended_use": "absorb_data",
+    "research_role": "example_projects"
+   },
+   {
+    "repository": "agharsallah/esp-labs-web",
+    "commit_sha": "8661f1b2d493423913e2571a4cc76fa282cf8c65",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "pinouts"
+   },
+   {
+    "repository": "HuskerMinion/techo5",
+    "commit_sha": "6b19103bba40e7e83a504a64a4ad00a680890472",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "device_configurations"
+   },
+   {
+    "repository": "RealDeco/xiaozhi-esphome",
+    "commit_sha": "82c8514f2ccfa36e314bcd3747532137bfe9bc34",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "device_configurations"
+   },
+   {
+    "repository": "wokwi/rp2040js",
+    "commit_sha": "cab5fae8d72f44dc300dc139fb6e600f95e8031e",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "simulator_parts"
+   },
+   {
+    "repository": "TousstNicolas/JLC2KiCad_lib",
+    "commit_sha": "e7815b619af6e7fce308441ad508aa6e8ad1e9ac",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "component_libraries"
+   },
+   {
+    "repository": "francescopace/espectre",
+    "commit_sha": "3bacdb786a39e269e2f3b27ed7f4ae47a780ad83",
+    "license_spdx_id": "GPL-3.0",
+    "intended_use": "review_in_place",
+    "research_role": "device_configurations"
+   },
+   {
+    "repository": "attermann/microReticulum",
+    "commit_sha": "5dd9af9c0559271c0efba97ed24cf4d8600c90a6",
+    "license_spdx_id": "Apache-2.0",
+    "intended_use": "absorb_data",
+    "research_role": "board_definitions"
+   },
+   {
+    "repository": "salitronic/eda-agent",
+    "commit_sha": "33f8a597a9bcb10b337727c8d2c21fed1276f21a",
+    "license_spdx_id": "Apache-2.0",
+    "intended_use": "absorb_data",
+    "research_role": "component_libraries"
+   },
+   {
+    "repository": "valleytechsolutions/BWM-Technical-Reference-Guide",
+    "commit_sha": "71f3344906d5b5376dbac20b26a8102bc52ca98b",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "pinouts"
+   },
+   {
+    "repository": "weirded/fleet-for-esphome",
+    "commit_sha": "9eea409f59fc96c50bcc84e7b82bd907d4edd029",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "device_configurations"
+   },
+   {
+    "repository": "wokwi/wokwi-elements",
+    "commit_sha": "5178c0cc1b455719fdf562169293797e29d73dac",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "simulator_parts"
+   },
+   {
+    "repository": "crides/kleeb",
+    "commit_sha": "9399fe34b4567043663cb70f294a475a7f4d64b9",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "component_libraries"
+   },
+   {
+    "repository": "wokwi/wokwi-docs",
+    "commit_sha": "291be17cc9304ac618b74c33f6a1b1e84aa5575a",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "simulator_parts"
+   },
+   {
+    "repository": "MichalZaniewicz/esphome-guition-jc3636k718c-va",
+    "commit_sha": "8ffed08013312bf52d72bb2bf78dc208abf8db34",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "device_configurations"
+   },
+   {
+    "repository": "Alarm-Siren/arduino-kicad-library",
+    "commit_sha": "f0e315cf6d1dde62d85594f7c34ab02cac9cc0fb",
+    "license_spdx_id": "CC-BY-SA-4.0",
+    "intended_use": "review_in_place",
+    "research_role": "component_libraries"
+   },
+   {
+    "repository": "byte4geek/weatherstation",
+    "commit_sha": "1127814431e45522613933548368db60c22f3154",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "example_projects"
+   },
+   {
+    "repository": "esphome/device-builder",
+    "commit_sha": "fa342c93a4a0930ed67e496698c78e697db535f0",
+    "license_spdx_id": "Apache-2.0",
+    "intended_use": "absorb_data",
+    "research_role": "device_configurations"
+   },
+   {
+    "repository": "nuttytree/ESPHome-Devices",
+    "commit_sha": "6c0b00f2ca35d677a99d790f004cf28a1e497c53",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "device_configurations"
+   },
+   {
+    "repository": "huizebruin/s0tool",
+    "commit_sha": "761b3de580767e6f6a24a0b0da9871c3ec291db1",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "device_configurations"
+   },
+   {
+    "repository": "MichalZaniewicz/esphome-waveshare-esp32-s3-audio-va",
+    "commit_sha": "542c471f9237ea38720f536f2a54aefec7e47418",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "device_configurations"
+   },
+   {
+    "repository": "laberning/home_io_control",
+    "commit_sha": "5807f8ac6bc45d410fab5ccd40d1cae621833ece",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "device_configurations"
+   },
+   {
+    "repository": "alkove-ai/alkove",
+    "commit_sha": "084523e0abdd3f0ea44d57ff27e40e8eadf3f60f",
+    "license_spdx_id": "Apache-2.0",
+    "intended_use": "absorb_data",
+    "research_role": "device_configurations"
+   },
+   {
+    "repository": "21cncstudio/project_aura",
+    "commit_sha": "1f0b0373007f46cc810cec12781b4a0c0cc442d3",
+    "license_spdx_id": "GPL-3.0",
+    "intended_use": "review_in_place",
+    "research_role": "example_projects"
+   },
+   {
+    "repository": "hlord2000/nordic-lib-kicad",
+    "commit_sha": "05a4dae2427fde6be0e190d6c9169eae1b3dae51",
+    "license_spdx_id": "CERN-OHL-P-2.0",
+    "intended_use": "review_in_place",
+    "research_role": "component_libraries"
+   },
+   {
+    "repository": "hulryung/kicad-lcsc-manager",
+    "commit_sha": "741ee3d4d3e6bcfaf2df3c64bce8c2ced463a59b",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "component_libraries"
+   },
+   {
+    "repository": "afkiwers/inventree_kicad",
+    "commit_sha": "583f52e876d323d99d68a3de661e0f9bcbafd71e",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "component_libraries"
+   },
+   {
+    "repository": "rzeldent/esp32-smartdisplay",
+    "commit_sha": "38e9ebabe3e4044159c4e95192d432607ed70588",
+    "license_spdx_id": "GPL-3.0",
+    "intended_use": "review_in_place",
+    "research_role": "board_definitions"
+   },
+   {
+    "repository": "wokwi/wokwi-cli",
+    "commit_sha": "f23ed6fe2a8df332a9020fafb3c82b6ca95aa61c",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "simulator_parts"
+   },
+   {
+    "repository": "yellobyte/ESP32-DevBoards-Getting-Started",
+    "commit_sha": "14350e373979df8ed540bb4666b0325aa11ef6c7",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "board_definitions"
+   },
+   {
+    "repository": "wokwi/wokwi-vscode-micropython",
+    "commit_sha": "b03004b2cc00859c20f8d077bf4acbced8ad46dd",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "simulator_parts"
+   },
+   {
+    "repository": "atomic14/esp32-s3-pinouts",
+    "commit_sha": "f6e7b949f538572066596de4c48190d80cb1809b",
+    "license_spdx_id": "CC-BY-SA-4.0",
+    "intended_use": "review_in_place",
+    "research_role": "pinouts"
+   },
+   {
+    "repository": "Seeed-Studio/OPL_Kicad_Library",
+    "commit_sha": "b0035c51eb0348bb3e165fdb2f2765fa3d1d17bd",
+    "license_spdx_id": "CC-BY-SA-4.0",
+    "intended_use": "review_in_place",
+    "research_role": "component_libraries"
+   },
+   {
+    "repository": "blakadder/templates",
+    "commit_sha": "30d9c9b16014817641f83a0cf8f2f266a0dbaef2",
+    "license_spdx_id": "EPL-2.0",
+    "intended_use": "review_in_place",
+    "research_role": "device_configurations"
+   },
+   {
+    "repository": "esphome/devices.esphome.io",
+    "commit_sha": "e1667deb22a75b9c662278abb78b71801b1f66ec",
+    "license_spdx_id": "GPL-3.0",
+    "intended_use": "review_in_place",
+    "research_role": "device_configurations"
+   },
+   {
+    "repository": "platima/Board-Taxonomies",
+    "commit_sha": "498d1b4e5b2fd5abcf09c2f7b14d6e6515e3b951",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "board_definitions"
+   },
+   {
+    "repository": "MallocArray/airgradient_esphome",
+    "commit_sha": "63f702b3e8849374ab6087b5f45c11a9d86f8cb7",
+    "license_spdx_id": "GPL-3.0",
+    "intended_use": "review_in_place",
+    "research_role": "device_configurations"
+   },
+   {
+    "repository": "Seeed-Studio/platform-seeedboards",
+    "commit_sha": "a6fd41debbbcda13b5340fff50c9092ed3289194",
+    "license_spdx_id": "Apache-2.0",
+    "intended_use": "absorb_data",
+    "research_role": "board_definitions"
+   },
+   {
+    "repository": "Steffen-W/Import-LIB-KiCad-Plugin",
+    "commit_sha": "98275a73d31365a8294661ff254fc60c43826d3c",
+    "license_spdx_id": "GPL-3.0",
+    "intended_use": "review_in_place",
+    "research_role": "component_libraries"
+   },
+   {
+    "repository": "setha-maker/levo-tcu-protocol",
+    "commit_sha": "22761936c9f0e52f5d889eaec40959320218071d",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "pinouts"
+   },
+   {
+    "repository": "god233012yamil/ESP32-IoT-Projects",
+    "commit_sha": "3b1aa37e568a5739a3127de3e4d8cc54cc1f6962",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "example_projects"
+   },
+   {
+    "repository": "pol-valero/openrover-robotic-platform",
+    "commit_sha": "d06a0a3f22445778f651a09fdff5587914710af1",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "board_definitions"
+   },
+   {
+    "repository": "sparkmicro/Ki-nTree",
+    "commit_sha": "e64b141618efcd6f5b6ba9c46f7ada8232e9fed1",
+    "license_spdx_id": "GPL-3.0",
+    "intended_use": "review_in_place",
+    "research_role": "component_libraries"
+   },
+   {
+    "repository": "rzeldent/platformio-espressif32-sunton",
+    "commit_sha": "e49cbfed45800d22e3d38c3dfd7b4a1e5a3b3e47",
+    "license_spdx_id": "GPL-3.0",
+    "intended_use": "review_in_place",
+    "research_role": "board_definitions"
+   },
+   {
+    "repository": "Grey-Lancaster/CYD-PhotoFrame",
+    "commit_sha": "241634e201a8aff363317d1e5e7558f87fb37f1b",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "board_definitions"
+   },
+   {
+    "repository": "XenGi/teensy_library",
+    "commit_sha": "eb3293ef8c7f6fa1923ad48828c38822c2791e61",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "component_libraries"
+   },
+   {
+    "repository": "IoT-ThingsCloud/thingscloud-esp-sdk",
+    "commit_sha": "13c6bca8e953d04ac9edd08d5aabfe16252f064d",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "board_definitions"
+   },
+   {
+    "repository": "lshariprasad/IoT-LAB",
+    "commit_sha": "05b3e36b4a1a42b8d13523f7df009d9f3d8d7fd6",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "example_projects"
+   },
+   {
+    "repository": "xreef/PCF8575_library",
+    "commit_sha": "e6afdb4cbc9fb13484a05ae4c0a580f4a1adca84",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "pinouts"
+   },
+   {
+    "repository": "luc-github/ESP3DLib",
+    "commit_sha": "bfe08bf28d66d7564850e57ec337da6e73691e3c",
+    "license_spdx_id": "GPL-3.0",
+    "intended_use": "review_in_place",
+    "research_role": "board_definitions"
+   },
+   {
+    "repository": "valleytechsolutions/black-wire-pinouts",
+    "commit_sha": "5b96da1ff54c7adcb6907fbcb1698e367de79ecc",
+    "license_spdx_id": "CC-BY-4.0",
+    "intended_use": "review_in_place",
+    "research_role": "pinouts"
+   },
+   {
+    "repository": "iamankushpandit/Gume",
+    "commit_sha": "2c0a46467f220e18180f08fcb823a0b735ccf978",
+    "license_spdx_id": "GPL-3.0",
+    "intended_use": "review_in_place",
+    "research_role": "board_definitions"
+   },
+   {
+    "repository": "adamgreig/agg-kicad",
+    "commit_sha": "b63f3d578a8f0c9d4194372211aa746c77bb166a",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "component_libraries"
+   },
+   {
+    "repository": "uPesy/easyeda2kicad.py",
+    "commit_sha": "fff10a38619963d7cb1c57d779655a9ea4572e95",
+    "license_spdx_id": "AGPL-3.0",
+    "intended_use": "review_in_place",
+    "research_role": "component_libraries"
+   },
+   {
+    "repository": "jaromeyer/mipurifier-esphome",
+    "commit_sha": "b319976282e794e2378f57ed013efb6e7c3bd75f",
+    "license_spdx_id": "Unlicense",
+    "intended_use": "absorb_data",
+    "research_role": "device_configurations"
+   },
+   {
+    "repository": "wichers/esphome-comfoair",
+    "commit_sha": "0a52f3eaa9fcb0e5bd5a7ccea6fa9eba10afa6e9",
+    "license_spdx_id": "GPL-3.0",
+    "intended_use": "review_in_place",
+    "research_role": "device_configurations"
+   },
+   {
+    "repository": "Jozott00/wokwi-intellij",
+    "commit_sha": "b02ab04fba3dd8501e89946649b4047b877dcb0b",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "simulator_parts"
+   },
+   {
+    "repository": "wokwi/wokwi-ci-action",
+    "commit_sha": "1b443f7f3828afa9ba8fbd241cbadba1cdb5b62a",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "simulator_parts"
+   },
+   {
+    "repository": "energy-club-outr/30-Days-30-Wokwi-Projects",
+    "commit_sha": "e8487c1f4da28cffa2b684fa5c7dd3aa1f15bcaa",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "simulator_parts"
+   },
+   {
+    "repository": "hubertciebiada/open-ambient-sensor",
+    "commit_sha": "0dc4ba3e15b7ca3c501d51521c54ee53f4cef2f1",
+    "license_spdx_id": "GPL-3.0",
+    "intended_use": "review_in_place",
+    "research_role": "example_projects"
+   },
+   {
+    "repository": "Robotips/uConfig",
+    "commit_sha": "f9e9ded9ddc573777820ad90e7bfbf2e4b740459",
+    "license_spdx_id": "GPL-3.0",
+    "intended_use": "review_in_place",
+    "research_role": "component_libraries"
+   },
+   {
+    "repository": "Infineon/platformio-infineonxmc",
+    "commit_sha": "67fccf2f3130ff112be43031ea7134b8aa0a10d8",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "board_definitions"
+   },
+   {
+    "repository": "Fabian-Schmidt/esphome-victron_ble",
+    "commit_sha": "3e317e637735e36115bdb415e373200929f89bb3",
+    "license_spdx_id": "GPL-3.0",
+    "intended_use": "review_in_place",
+    "research_role": "device_configurations"
+   },
+   {
+    "repository": "yemreeke/Arduino-Projeleri",
+    "commit_sha": "2839d0978df9fde6e1b4308f77cd35b1f259da11",
+    "license_spdx_id": "GPL-3.0",
+    "intended_use": "review_in_place",
+    "research_role": "simulator_parts"
+   },
+   {
+    "repository": "Seeed-Studio/xiao-assistant",
+    "commit_sha": "4b79d5e225630597d352389df43ae5a9db83f6b3",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "pinouts"
+   },
+   {
+    "repository": "AlexeiakaTechnik/DIY-esp32-esphome-homeassistant-sensors_cams",
+    "commit_sha": "dca99b5be529390a2d543dbc9b40bd4eedcbe9cd",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "example_projects"
+   },
+   {
+    "repository": "wokwi/wokwigw",
+    "commit_sha": "21453cb38a7d35bc70beb4c9f6221d3a7903c151",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "simulator_parts"
+   },
+   {
+    "repository": "syauqibilfaqih/ESP32-DevKit-V1-DOIT",
+    "commit_sha": "80365a4280304afcf2eb4fc615585154636d32ea",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "component_libraries"
+   },
+   {
+    "repository": "swdee/radxa-cm5-kicad",
+    "commit_sha": "33add7f768b313ddef58c81eca8f2d1c8004ac66",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "component_libraries"
+   },
+   {
+    "repository": "trombik/esp-adf-component-ai-thinker-esp32-a1s",
+    "commit_sha": "7f997f4f3398d4470c8e14edad46b66cb5caee58",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "board_definitions"
+   },
+   {
+    "repository": "cx693/Rust_ESP32_Dome",
+    "commit_sha": "52741b5edd0e2eb727223db90d531fe8598a1573",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "example_projects"
+   },
+   {
+    "repository": "SukunDev/ESP32-Pet-Robot",
+    "commit_sha": "7f565070de75afdda690253501372306a6230249",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "simulator_parts"
+   },
+   {
+    "repository": "iot-forge/m5stack-skills",
+    "commit_sha": "b56afab4dafc08e241962d1634981ae44650f74a",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "pinouts"
+   },
+   {
+    "repository": "wokwi/esp32-idf-hello-wifi",
+    "commit_sha": "f25ecc97960fed9b04676bf2626309bcfccb0b98",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "simulator_parts"
+   },
+   {
+    "repository": "SciCraft9/DIY-Security-CAM",
+    "commit_sha": "e73a6783d551dcfa995c2ca0e429206d9222ac80",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "example_projects"
+   },
+   {
+    "repository": "MakerIO-Hub/ESP32-S3-n16r8-Retro-Go-Console",
+    "commit_sha": "d2e4f24919ca1a014c725c34921d62747ed95350",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "pinouts"
+   },
+   {
+    "repository": "RobertWCarey/esp-halow-examples",
+    "commit_sha": "1ab3aa07c6bcd11539ade4d666feda472a97ae5b",
+    "license_spdx_id": "Apache-2.0",
+    "intended_use": "absorb_data",
+    "research_role": "example_projects"
+   },
+   {
+    "repository": "Gtwizzy/ESP32-S3-Co2-Monitor-For-ESPHome-and-Home-Assistant",
+    "commit_sha": "60e617cc00cfad4b78af809f63083f9057bc48aa",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "example_projects"
+   },
+   {
+    "repository": "StingraySA/TankSensorHA",
+    "commit_sha": "993cc0a5c6cdcdee926a3fa2420fa5cc57337616",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "example_projects"
+   },
+   {
+    "repository": "xtoolbox/lc_kicad_lib",
+    "commit_sha": "16be49523bc21a9e09606fbc5769ee557aaea255",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "component_libraries"
+   },
+   {
+    "repository": "devenderkg/esp32-pinout",
+    "commit_sha": "af35a08338ecdb285e95f8453ea8d09d51bc2d62",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "pinouts"
+   },
+   {
+    "repository": "mark-mega/AVR8js-Falstad",
+    "commit_sha": "79e736eafec463e0aeaa819640433725fba53201",
+    "license_spdx_id": "GPL-2.0",
+    "intended_use": "review_in_place",
+    "research_role": "simulator_parts"
+   },
+   {
+    "repository": "joshuawiebe/esp-fingerprint-doorbell",
+    "commit_sha": "0fc6b832897e91f3a3617aa15b3473c3805b4662",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "example_projects"
+   },
+   {
+    "repository": "Swif7ify/KiCad-ESP32-CP2102-38Pin",
+    "commit_sha": "edea371eab23b40091246952dfdf6444584dae08",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "pinouts"
+   },
+   {
+    "repository": "k3ldar/PowerControlHub",
+    "commit_sha": "df03ad6fbbb8cbe2eedb41b3b6888d61de0c4873",
+    "license_spdx_id": "GPL-3.0",
+    "intended_use": "review_in_place",
+    "research_role": "example_projects"
+   },
+   {
+    "repository": "ai03-2725/MX_Alps_Hybrid",
+    "commit_sha": "cdbfc72a211525b4e024d4cd312ce8b922918018",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "component_libraries"
+   },
+   {
+    "repository": "sidharthmohannair/Tutorial-ESP32-C3-Super-Mini",
+    "commit_sha": "e75855da25c82374ba79406848c0de5a95a95ca3",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "pinouts"
+   },
+   {
+    "repository": "ai03-2725/MX_V2",
+    "commit_sha": "0b379eebbeb66c7fd6e82e400b47958ad695614e",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "component_libraries"
+   },
+   {
+    "repository": "DaradiciLevente/jc3248w535c-esphome-termostat",
+    "commit_sha": "eeaf9d908cfaee418616e66f5de8915318e8e763",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "example_projects"
+   },
+   {
+    "repository": "lnlp/LMIC-node",
+    "commit_sha": "a135a30e403c43b3878ee5d6a9bfb8b387a53ca0",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "board_definitions"
+   },
+   {
+    "repository": "a7md0/WakeOnLan",
+    "commit_sha": "c59d433f8127d6901da4761855acf9af68f2c28a",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "board_definitions"
+   },
+   {
+    "repository": "antonin-lfv/DataScience_IoT_projects",
+    "commit_sha": "c35ef99a1a0fe07be05b40abdc6a98b9b6ae896b",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "example_projects"
+   },
+   {
+    "repository": "lora-aprs/LoRa_APRS_iGate",
+    "commit_sha": "26789abeb6b546beef7eaf33aca18edb0caa7932",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "board_definitions"
+   },
+   {
+    "repository": "shehab199888/A320-Cockpit-HomeBuild",
+    "commit_sha": "e85865dbe657b0a65e0eccc5c8d6d55ba19c55d0",
+    "license_spdx_id": "AGPL-3.0",
+    "intended_use": "review_in_place",
+    "research_role": "example_projects"
+   },
+   {
+    "repository": "YuKitAs/arduino-projects",
+    "commit_sha": "4fd8f32bffe40bc3752e543cbb873fb048812544",
+    "license_spdx_id": "GPL-3.0",
+    "intended_use": "review_in_place",
+    "research_role": "example_projects"
+   },
+   {
+    "repository": "lora-aprs/LoRa_APRS_Tracker",
+    "commit_sha": "d97a929848eea0d75bb98b62a659032a0bff9ec6",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "board_definitions"
+   },
+   {
+    "repository": "XenGi/teensy.pretty",
+    "commit_sha": "126e054a2a02426f455ef2397ee5f6cb1ae80057",
+    "license_spdx_id": "MIT",
+    "intended_use": "absorb_data",
+    "research_role": "component_libraries"
+   }
+  ]
+ },
+ "note": "Stars and pushes are popularity and activity, not quality or correctness. The feed lists the top 100 with a usable licence, each pinned to the commit its default branch had at the sweep. One candidate whose name the pipeline refuses (a dotfile repository) was dropped."
+}

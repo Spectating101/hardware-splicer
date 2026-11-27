@@ -1,0 +1,1130 @@
+{
+  "family_id": "zy-jrm",
+  "family_name": "卓誉 JRM",
+  "shared": {
+    "manufacturer": "卓誉",
+    "manufacturer_en": "Joy-Motion",
+    "electrical": {
+      "voltage_v": 48,
+      "motor_topology": "radial flux"
+    },
+    "transmission": {
+      "type": "harmonic",
+      "backdrivable": false
+    }
+  },
+  "variants": [
+    {
+      "id": "zy-jrm-110-100-48",
+      "model": "JRM-110-100",
+      "base_id": "ZY-JRM-110-100-48",
+      "electrical": {
+        "peak_current_a": 48,
+        "continuous_current_a": 22.17
+      },
+      "mechanical": {
+        "rated_torque_nm": 120,
+        "peak_torque_nm": 288,
+        "start_stop_peak_torque_nm": 288,
+        "max_allow_instant_load_nm": 288,
+        "rated_speed_rpm": 30,
+        "max_speed_rpm": 30,
+        "outer_diameter_mm": 110
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-110-120-48",
+      "model": "JRM-110-120",
+      "base_id": "ZY-JRM-110-120-48",
+      "electrical": {
+        "peak_current_a": 48,
+        "continuous_current_a": 18.98
+      },
+      "mechanical": {
+        "rated_torque_nm": 133,
+        "peak_torque_nm": 336.384,
+        "start_stop_peak_torque_nm": 336.384,
+        "max_allow_instant_load_nm": 336.384,
+        "rated_speed_rpm": 25,
+        "max_speed_rpm": 25,
+        "outer_diameter_mm": 110
+      },
+      "transmission": {
+        "reduction_ratio": 120
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-110-160-48",
+      "model": "JRM-110-160",
+      "base_id": "ZY-JRM-110-160-48",
+      "electrical": {
+        "peak_current_a": 43.3,
+        "continuous_current_a": 14.84
+      },
+      "mechanical": {
+        "rated_torque_nm": 133,
+        "peak_torque_nm": 388,
+        "start_stop_peak_torque_nm": 388,
+        "max_allow_instant_load_nm": 388,
+        "rated_speed_rpm": 18.75,
+        "max_speed_rpm": 18.75,
+        "outer_diameter_mm": 110
+      },
+      "transmission": {
+        "reduction_ratio": 160
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-110-50-48",
+      "model": "JRM-110-50",
+      "base_id": "ZY-JRM-110-50-48",
+      "electrical": {
+        "peak_current_a": 48,
+        "continuous_current_a": 20
+      },
+      "mechanical": {
+        "rated_torque_nm": 61.6,
+        "peak_torque_nm": 147.84,
+        "start_stop_peak_torque_nm": 147.84,
+        "max_allow_instant_load_nm": 147.84,
+        "rated_speed_rpm": 60,
+        "max_speed_rpm": 60,
+        "outer_diameter_mm": 110
+      },
+      "transmission": {
+        "reduction_ratio": 50
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-110-80-48",
+      "model": "JRM-110-80",
+      "base_id": "ZY-JRM-110-80-48",
+      "electrical": {
+        "peak_current_a": 48,
+        "continuous_current_a": 20
+      },
+      "mechanical": {
+        "rated_torque_nm": 96,
+        "peak_torque_nm": 230.4,
+        "start_stop_peak_torque_nm": 230.4,
+        "max_allow_instant_load_nm": 230.4,
+        "rated_speed_rpm": 37.5,
+        "max_speed_rpm": 37.5,
+        "outer_diameter_mm": 110
+      },
+      "transmission": {
+        "reduction_ratio": 80
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-142-100-48",
+      "model": "JRM-142-100",
+      "base_id": "ZY-JRM-142-100-48",
+      "electrical": {
+        "peak_current_a": 90.63,
+        "continuous_current_a": 28.7
+      },
+      "mechanical": {
+        "rated_torque_nm": 267,
+        "peak_torque_nm": 800,
+        "start_stop_peak_torque_nm": 800,
+        "max_allow_instant_load_nm": 800,
+        "rated_speed_rpm": 35,
+        "max_speed_rpm": 35,
+        "outer_diameter_mm": 142
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-142-120-48",
+      "model": "JRM-142-120",
+      "base_id": "ZY-JRM-142-120-48",
+      "electrical": {
+        "peak_current_a": 82.25,
+        "continuous_current_a": 24.57
+      },
+      "mechanical": {
+        "rated_torque_nm": 267,
+        "peak_torque_nm": 848,
+        "start_stop_peak_torque_nm": 848,
+        "max_allow_instant_load_nm": 848,
+        "rated_speed_rpm": 29.17,
+        "max_speed_rpm": 29.17,
+        "outer_diameter_mm": 142
+      },
+      "transmission": {
+        "reduction_ratio": 120
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-142-160-48",
+      "model": "JRM-142-160",
+      "base_id": "ZY-JRM-142-160-48",
+      "electrical": {
+        "peak_current_a": 64.33,
+        "continuous_current_a": 19.22
+      },
+      "mechanical": {
+        "rated_torque_nm": 267,
+        "peak_torque_nm": 848,
+        "start_stop_peak_torque_nm": 848,
+        "max_allow_instant_load_nm": 848,
+        "rated_speed_rpm": 21.88,
+        "max_speed_rpm": 21.88,
+        "outer_diameter_mm": 142
+      },
+      "transmission": {
+        "reduction_ratio": 160
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-142-50-48",
+      "model": "JRM-142-50",
+      "base_id": "ZY-JRM-142-50-48",
+      "electrical": {
+        "peak_current_a": 100,
+        "continuous_current_a": 32
+      },
+      "mechanical": {
+        "rated_torque_nm": 133,
+        "peak_torque_nm": 453.145,
+        "start_stop_peak_torque_nm": 453.145,
+        "max_allow_instant_load_nm": 453.145,
+        "rated_speed_rpm": 70,
+        "max_speed_rpm": 70,
+        "outer_diameter_mm": 142
+      },
+      "transmission": {
+        "reduction_ratio": 50
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-142-80-48",
+      "model": "JRM-142-80",
+      "base_id": "ZY-JRM-142-80-48",
+      "electrical": {
+        "peak_current_a": 99.41,
+        "continuous_current_a": 32
+      },
+      "mechanical": {
+        "rated_torque_nm": 206,
+        "peak_torque_nm": 702,
+        "start_stop_peak_torque_nm": 702,
+        "max_allow_instant_load_nm": 702,
+        "rated_speed_rpm": 43.75,
+        "max_speed_rpm": 43.75,
+        "outer_diameter_mm": 142
+      },
+      "transmission": {
+        "reduction_ratio": 80
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-32-50-48",
+      "model": "JRM-32-50",
+      "base_id": "ZY-JRM-32-50-48",
+      "electrical": {
+        "peak_current_a": 14,
+        "continuous_current_a": 4.5
+      },
+      "mechanical": {
+        "rated_torque_nm": 1,
+        "peak_torque_nm": 6.65,
+        "start_stop_peak_torque_nm": 6.65,
+        "max_allow_instant_load_nm": 6.65,
+        "rated_speed_rpm": 130,
+        "max_speed_rpm": 200,
+        "outer_diameter_mm": 32
+      },
+      "transmission": {
+        "reduction_ratio": 50
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-32-80-48",
+      "model": "JRM-32-80",
+      "base_id": "ZY-JRM-32-80-48",
+      "electrical": {
+        "peak_current_a": 14,
+        "continuous_current_a": 4.5
+      },
+      "mechanical": {
+        "rated_torque_nm": 1.2,
+        "peak_torque_nm": 10.64,
+        "start_stop_peak_torque_nm": 10.64,
+        "max_allow_instant_load_nm": 10.64,
+        "rated_speed_rpm": 81.25,
+        "max_speed_rpm": 125,
+        "outer_diameter_mm": 32
+      },
+      "transmission": {
+        "reduction_ratio": 80
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-45-100-48",
+      "model": "JRM-45-100",
+      "base_id": "ZY-JRM-45-100-48",
+      "electrical": {
+        "peak_current_a": 18,
+        "continuous_current_a": 6
+      },
+      "mechanical": {
+        "rated_torque_nm": 3.95,
+        "peak_torque_nm": 44.8,
+        "start_stop_peak_torque_nm": 44.8,
+        "max_allow_instant_load_nm": 44.8,
+        "rated_speed_rpm": 35,
+        "max_speed_rpm": 85,
+        "outer_diameter_mm": 45
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-45-50-48",
+      "model": "JRM-45-50",
+      "base_id": "ZY-JRM-45-50-48",
+      "electrical": {
+        "peak_current_a": 20,
+        "continuous_current_a": 6.5
+      },
+      "mechanical": {
+        "rated_torque_nm": 2.75,
+        "peak_torque_nm": 11.2,
+        "start_stop_peak_torque_nm": 11.2,
+        "max_allow_instant_load_nm": 11.2,
+        "rated_speed_rpm": 70,
+        "max_speed_rpm": 170,
+        "outer_diameter_mm": 45
+      },
+      "transmission": {
+        "reduction_ratio": 50
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-45-80-48",
+      "model": "JRM-45-80",
+      "base_id": "ZY-JRM-45-80-48",
+      "electrical": {
+        "peak_current_a": 18,
+        "continuous_current_a": 6
+      },
+      "mechanical": {
+        "rated_torque_nm": 3.5,
+        "peak_torque_nm": 35.84,
+        "start_stop_peak_torque_nm": 35.84,
+        "max_allow_instant_load_nm": 35.84,
+        "rated_speed_rpm": 43.75,
+        "max_speed_rpm": 106.25,
+        "outer_diameter_mm": 45
+      },
+      "transmission": {
+        "reduction_ratio": 80
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-55-100-48",
+      "model": "JRM-55-100",
+      "base_id": "ZY-JRM-55-100-48",
+      "electrical": {
+        "peak_current_a": 18,
+        "continuous_current_a": 6
+      },
+      "mechanical": {
+        "rated_torque_nm": 7.3,
+        "peak_torque_nm": 33,
+        "start_stop_peak_torque_nm": 33,
+        "max_allow_instant_load_nm": 33,
+        "rated_speed_rpm": 35,
+        "max_speed_rpm": 80,
+        "outer_diameter_mm": 55
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-55-50-48",
+      "model": "JRM-55-50",
+      "base_id": "ZY-JRM-55-50-48",
+      "electrical": {
+        "peak_current_a": 18,
+        "continuous_current_a": 6
+      },
+      "mechanical": {
+        "rated_torque_nm": 4.6,
+        "peak_torque_nm": 19.2,
+        "start_stop_peak_torque_nm": 19.2,
+        "max_allow_instant_load_nm": 19.2,
+        "rated_speed_rpm": 70,
+        "max_speed_rpm": 160,
+        "outer_diameter_mm": 55
+      },
+      "transmission": {
+        "reduction_ratio": 50
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-55-80-48",
+      "model": "JRM-55-80",
+      "base_id": "ZY-JRM-55-80-48",
+      "electrical": {
+        "peak_current_a": 18,
+        "continuous_current_a": 6
+      },
+      "mechanical": {
+        "rated_torque_nm": 6.2,
+        "peak_torque_nm": 28.16,
+        "start_stop_peak_torque_nm": 28.16,
+        "max_allow_instant_load_nm": 28.16,
+        "rated_speed_rpm": 43.75,
+        "max_speed_rpm": 100,
+        "outer_diameter_mm": 55
+      },
+      "transmission": {
+        "reduction_ratio": 80
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-70-100-48",
+      "model": "JRM-70-100",
+      "base_id": "ZY-JRM-70-100-48",
+      "electrical": {
+        "peak_current_a": 12,
+        "continuous_current_a": 3.75
+      },
+      "mechanical": {
+        "rated_torque_nm": 21.45,
+        "peak_torque_nm": 60.45,
+        "start_stop_peak_torque_nm": 60.45,
+        "max_allow_instant_load_nm": 60.45,
+        "rated_speed_rpm": 35,
+        "max_speed_rpm": 60,
+        "outer_diameter_mm": 70
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-70-120-48",
+      "model": "JRM-70-120",
+      "base_id": "ZY-JRM-70-120-48",
+      "electrical": {
+        "peak_current_a": 11.08,
+        "continuous_current_a": 3.75
+      },
+      "mechanical": {
+        "rated_torque_nm": 25.74,
+        "peak_torque_nm": 67,
+        "start_stop_peak_torque_nm": 67,
+        "max_allow_instant_load_nm": 67,
+        "rated_speed_rpm": 29.17,
+        "max_speed_rpm": 50,
+        "outer_diameter_mm": 70
+      },
+      "transmission": {
+        "reduction_ratio": 120
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-70-50-48",
+      "model": "JRM-70-50",
+      "base_id": "ZY-JRM-70-50-48",
+      "electrical": {
+        "peak_current_a": 12,
+        "continuous_current_a": 3.75
+      },
+      "mechanical": {
+        "rated_torque_nm": 11.22,
+        "peak_torque_nm": 31.62,
+        "start_stop_peak_torque_nm": 31.62,
+        "max_allow_instant_load_nm": 31.62,
+        "rated_speed_rpm": 70,
+        "max_speed_rpm": 120,
+        "outer_diameter_mm": 70
+      },
+      "transmission": {
+        "reduction_ratio": 50
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-70-80-48",
+      "model": "JRM-70-80",
+      "base_id": "ZY-JRM-70-80-48",
+      "electrical": {
+        "peak_current_a": 12,
+        "continuous_current_a": 3.75
+      },
+      "mechanical": {
+        "rated_torque_nm": 17.16,
+        "peak_torque_nm": 48.36,
+        "start_stop_peak_torque_nm": 48.36,
+        "max_allow_instant_load_nm": 48.36,
+        "rated_speed_rpm": 43.75,
+        "max_speed_rpm": 75,
+        "outer_diameter_mm": 70
+      },
+      "transmission": {
+        "reduction_ratio": 80
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-80-100-48",
+      "model": "JRM-80-100",
+      "base_id": "ZY-JRM-80-100-48",
+      "electrical": {
+        "peak_current_a": 10
+      },
+      "mechanical": {
+        "rated_torque_nm": 49,
+        "peak_torque_nm": 134,
+        "start_stop_peak_torque_nm": 134,
+        "max_allow_instant_load_nm": 134,
+        "rated_speed_rpm": 36,
+        "max_speed_rpm": 36,
+        "outer_diameter_mm": 80
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-80-120-48",
+      "model": "JRM-80-120",
+      "base_id": "ZY-JRM-80-120-48",
+      "electrical": {
+        "peak_current_a": 7.77
+      },
+      "mechanical": {
+        "rated_torque_nm": 49,
+        "peak_torque_nm": 107,
+        "start_stop_peak_torque_nm": 107,
+        "max_allow_instant_load_nm": 107,
+        "rated_speed_rpm": 30,
+        "max_speed_rpm": 30,
+        "outer_diameter_mm": 80
+      },
+      "transmission": {
+        "reduction_ratio": 120
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-80-50-48",
+      "model": "JRM-80-50",
+      "base_id": "ZY-JRM-80-50-48",
+      "electrical": {
+        "peak_current_a": 10
+      },
+      "mechanical": {
+        "rated_torque_nm": 27.72,
+        "peak_torque_nm": 77,
+        "start_stop_peak_torque_nm": 77,
+        "max_allow_instant_load_nm": 77,
+        "rated_speed_rpm": 70,
+        "max_speed_rpm": 72,
+        "outer_diameter_mm": 80
+      },
+      "transmission": {
+        "reduction_ratio": 50
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-80-80-48",
+      "model": "JRM-80-80",
+      "base_id": "ZY-JRM-80-80-48",
+      "electrical": {
+        "peak_current_a": 10
+      },
+      "mechanical": {
+        "rated_torque_nm": 33,
+        "peak_torque_nm": 108,
+        "start_stop_peak_torque_nm": 108,
+        "max_allow_instant_load_nm": 108,
+        "rated_speed_rpm": 45,
+        "max_speed_rpm": 45,
+        "outer_diameter_mm": 80
+      },
+      "transmission": {
+        "reduction_ratio": 80
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-90-100-48",
+      "model": "JRM-90-100",
+      "base_id": "ZY-JRM-90-100-48",
+      "electrical": {
+        "peak_current_a": 31.38,
+        "continuous_current_a": 8.97
+      },
+      "mechanical": {
+        "rated_torque_nm": 61,
+        "peak_torque_nm": 182,
+        "start_stop_peak_torque_nm": 182,
+        "max_allow_instant_load_nm": 182,
+        "rated_speed_rpm": 30,
+        "max_speed_rpm": 30,
+        "outer_diameter_mm": 90
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-90-120-48",
+      "model": "JRM-90-120",
+      "base_id": "ZY-JRM-90-120-48",
+      "electrical": {
+        "peak_current_a": 26.87,
+        "continuous_current_a": 7.68
+      },
+      "mechanical": {
+        "rated_torque_nm": 61,
+        "peak_torque_nm": 182,
+        "start_stop_peak_torque_nm": 182,
+        "max_allow_instant_load_nm": 182,
+        "rated_speed_rpm": 25,
+        "max_speed_rpm": 25,
+        "outer_diameter_mm": 90
+      },
+      "transmission": {
+        "reduction_ratio": 120
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-90-160-48",
+      "model": "JRM-90-160",
+      "base_id": "ZY-JRM-90-160-48",
+      "electrical": {
+        "peak_current_a": 21.01,
+        "continuous_current_a": 6
+      },
+      "mechanical": {
+        "rated_torque_nm": 61,
+        "peak_torque_nm": 182,
+        "start_stop_peak_torque_nm": 182,
+        "max_allow_instant_load_nm": 182,
+        "rated_speed_rpm": 18.75,
+        "max_speed_rpm": 18.75,
+        "outer_diameter_mm": 90
+      },
+      "transmission": {
+        "reduction_ratio": 160
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-90-50-48",
+      "model": "JRM-90-50",
+      "base_id": "ZY-JRM-90-50-48",
+      "electrical": {
+        "peak_current_a": 40.64,
+        "continuous_current_a": 14
+      },
+      "mechanical": {
+        "rated_torque_nm": 42,
+        "peak_torque_nm": 121,
+        "start_stop_peak_torque_nm": 121,
+        "max_allow_instant_load_nm": 121,
+        "rated_speed_rpm": 60,
+        "max_speed_rpm": 60,
+        "outer_diameter_mm": 90
+      },
+      "transmission": {
+        "reduction_ratio": 50
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    },
+    {
+      "id": "zy-jrm-90-80-48",
+      "model": "JRM-90-80",
+      "base_id": "ZY-JRM-90-80-48",
+      "electrical": {
+        "peak_current_a": 34.05,
+        "continuous_current_a": 14
+      },
+      "mechanical": {
+        "rated_torque_nm": 58,
+        "peak_torque_nm": 158,
+        "start_stop_peak_torque_nm": 158,
+        "max_allow_instant_load_nm": 158,
+        "rated_speed_rpm": 37.5,
+        "max_speed_rpm": 37.5,
+        "outer_diameter_mm": 90
+      },
+      "transmission": {
+        "reduction_ratio": 80
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/28_卓誉_JRM系列.docx"
+    }
+  ]
+}

@@ -18,6 +18,26 @@ def _pin_accepts_peer_logic(pin: Mapping[str, Any], peer_logic_v: float) -> bool
     return False
 
 
+# Pin roles are from the module's own side. A role that can only receive (an input) cannot push its voltage onto the wire; an
+# unknown or bidirectional role is treated as able to do both, so an unclassified pin never silences the logic check.
+# analog_in is not here: the engine library labels an analog sensor's OUTPUT (MQ-2 A0) analog_in, after the MCU pin it needs.
+_RECEIVE_ONLY = {"digital_in", "uart_rx"}
+_DRIVE_ONLY = {"digital_out", "uart_tx", "pwm"}
+
+
+def _can_drive(role: str) -> bool:
+    return role not in _RECEIVE_ONLY
+
+
+def _can_receive(role: str) -> bool:
+    return role not in _DRIVE_ONLY
+
+
+def _usb_fed(pin: Mapping[str, Any]) -> bool:
+    text = f"{pin.get('voltage') or ''} {pin.get('notes') or ''} {pin.get('label') or ''} {pin.get('id') or ''}"
+    return bool(re.search(r"\bVBUS\b|from USB|\(USB\)", text, re.I))
+
+
 def _resolve(graph: BuildGraph, node_id: str, pin_id: str) -> Optional[Dict[str, Any]]:
     node = next((n for n in graph.get("nodes") or [] if n.get("id") == node_id), None)
     if not node:
@@ -116,14 +136,30 @@ def analyze_build(graph: BuildGraph) -> List[BuildWarning]:
             continue
 
         if a_role == "power_in" and b_role == "power_in":
-            warnings.append(
-                {
-                    "id": f"{w['id']}-noSource",
-                    "level": "warn",
-                    "message": "Both ends of this wire are power inputs — nothing actually sources power. Connect to a power_out pin.",
-                    "wireId": w["id"],
-                }
-            )
+            usb_fed = next((e for e in (a, b) if _usb_fed(e["pin"])), None)
+            if usb_fed is not None:
+                # A board's USB pin (VBUS) is its input from USB, and the same net carries USB 5 V out to the header while
+                # the board is plugged in. The pin's own data says so; the wire is a supply only while USB is connected.
+                warnings.append(
+                    {
+                        "id": f"{w['id']}-usbFed",
+                        "level": "info",
+                        "message": (
+                            f"{usb_fed['moduleSpec']['label']}:{usb_fed['pin']['id']} carries USB 5 V while the board is plugged in "
+                            "and is an input otherwise. This wire is powered only from USB; with another supply, check which way power flows."
+                        ),
+                        "wireId": w["id"],
+                    }
+                )
+            else:
+                warnings.append(
+                    {
+                        "id": f"{w['id']}-noSource",
+                        "level": "warn",
+                        "message": "Both ends of this wire are power inputs — nothing actually sources power. Connect to a power_out pin.",
+                        "wireId": w["id"],
+                    }
+                )
         if a_role == "power_out" and b_role == "power_out":
             warnings.append(
                 {
@@ -188,17 +224,36 @@ def analyze_build(graph: BuildGraph) -> List[BuildWarning]:
 
         if is_digital(a_role) and is_digital(b_role) and a_lv and b_lv and a_lv != b_lv:
             if not (_pin_accepts_peer_logic(a["pin"], float(b_lv)) or _pin_accepts_peer_logic(b["pin"], float(a_lv))):
-                warnings.append(
-                    {
-                        "id": f"{w['id']}-logic",
-                        "level": "error",
-                        "message": (
-                            f"{a['moduleSpec']['label']} uses {a_lv}V logic, "
-                            f"{b['moduleSpec']['label']} uses {b_lv}V logic. Add a level shifter."
-                        ),
-                        "wireId": w["id"],
-                    }
-                )
+                high, low = (a, b) if float(a_lv) > float(b_lv) else (b, a)
+                high_role, low_role = (a_role, b_role) if high is a else (b_role, a_role)
+                high_v, low_v = max(float(a_lv), float(b_lv)), min(float(a_lv), float(b_lv))
+                if _can_drive(high_role) and _can_receive(low_role):
+                    warnings.append(
+                        {
+                            "id": f"{w['id']}-logic",
+                            "level": "error",
+                            "message": (
+                                f"{a['moduleSpec']['label']} uses {a_lv}V logic, "
+                                f"{b['moduleSpec']['label']} uses {b_lv}V logic. Add a level shifter."
+                            ),
+                            "wireId": w["id"],
+                        }
+                    )
+                else:
+                    # Only the lower-voltage side drives this wire, so nothing is over-driven. Whether a high is read as a
+                    # high depends on the higher-voltage part's input threshold, which this library does not record.
+                    warnings.append(
+                        {
+                            "id": f"{w['id']}-logicLow",
+                            "level": "warn",
+                            "message": (
+                                f"{low['moduleSpec']['label']}:{low['pin']['id']} drives {high['moduleSpec']['label']}:{high['pin']['id']} "
+                                f"with {low_v:g}V logic. That cannot over-drive the {high_v:g}V part, but its high may be below that part's "
+                                "input-high threshold. Check its datasheet; add a level shifter if it needs more."
+                            ),
+                            "wireId": w["id"],
+                        }
+                    )
 
         if any(r in (a_role, b_role) for r in ("i2c_sda", "i2c_scl")):
             any_builtin = any(re.search(r"pull", (e["pin"].get("notes") or ""), re.I) for e in (a, b))
@@ -275,7 +330,7 @@ def analyze_build(graph: BuildGraph) -> List[BuildWarning]:
                 }
             )
 
-        if module_spec["id"] in ("sg90", "l298n"):
+        if module_spec["id"] == "l298n":  # its load is the motors it drives; parts with a cited peak current go through the budget below
             powered_from_mcu = False
             for w in graph.get("wires") or []:
                 ends = [w["from"], w["to"]]
@@ -302,7 +357,63 @@ def analyze_build(graph: BuildGraph) -> List[BuildWarning]:
                     }
                 )
 
+    warnings.extend(_controller_5v_budget(graph))
+
     from ..i2c_bus_analysis import i2c_findings
 
     warnings.extend(i2c_findings(graph))
     return warnings
+
+
+USB2_PORT_MA = 500  # USB 2.0 specification, section 7.2.1: a high-power port supplies five unit loads of 100 mA
+
+
+def _controller_5v_budget(graph: BuildGraph) -> List[BuildWarning]:
+    """Add up the cited peak current of every part powered from a controller board's 5 V pin, which a USB port feeds."""
+    out: List[BuildWarning] = []
+    nodes = {n["id"]: n for n in graph.get("nodes") or []}
+    loads: Dict[str, list] = {}
+    for w in graph.get("wires") or []:
+        for mine, other in ((w["from"], w["to"]), (w["to"], w["from"])):
+            node, peer = nodes.get(mine["nodeId"]), nodes.get(other["nodeId"])
+            spec = find_module(str((node or {}).get("moduleId") or ""))
+            peer_spec = find_module(str((peer or {}).get("moduleId") or ""))
+            if not spec or not peer_spec or peer_spec.get("category") != "mcu":
+                continue
+            pin, peer_pin = find_pin(spec, mine["pinId"]), find_pin(peer_spec, other["pinId"])
+            if not pin or not peer_pin or _effective_pin_role(graph, node, pin) != "power_in":
+                continue
+            if not re.search(r"^(VIN|5V|VBUS|V5)$", str(peer_pin.get("id") or ""), re.I):
+                continue
+            if any(entry[0] == node["id"] for entry in loads.get(peer["id"], [])):
+                continue
+            loads.setdefault(peer["id"], []).append((node["id"], spec, node.get("count")))
+    for mcu_id, rows in loads.items():
+        total, parts, unsized = 0.0, [], []
+        for node_id, spec, count in rows:
+            source = spec.get("peakCurrentSource") or {}
+            if spec.get("peakCurrentMa"):
+                total += float(spec["peakCurrentMa"])
+                parts.append(f"{node_id} {spec['peakCurrentMa']:g} mA ({source.get('url', 'uncited')})")
+            elif spec.get("peakCurrentMaPerUnit"):
+                if not count:
+                    unsized.append(f"{node_id} ({spec['peakCurrentMaPerUnit']:g} mA per {spec.get('currentUnit', 'unit')}: give its count)")
+                    continue
+                ma = float(spec["peakCurrentMaPerUnit"]) * int(count)
+                total += ma
+                parts.append(f"{node_id} {count} x {spec['peakCurrentMaPerUnit']:g} mA = {ma:g} mA ({source.get('url', 'uncited')})")
+        mcu_label = (find_module(str(nodes[mcu_id].get("moduleId"))) or {}).get("label", mcu_id)
+        if total > USB2_PORT_MA:
+            out.append({"id": f"{mcu_id}-usbBudget", "level": "error", "nodeId": mcu_id,
+                        "message": f"{mcu_label}'s 5 V pin would feed up to {total:g} mA peak: {'; '.join(parts)}. A USB 2.0 port supplies "
+                                   f"{USB2_PORT_MA} mA. Power these loads from their own 5 V supply."})
+        elif total >= USB2_PORT_MA / 2:
+            # The board itself draws from the same port (an ESP32's radio bursts), and the library has no cited figure for it.
+            out.append({"id": f"{mcu_id}-usbBudget", "level": "warn", "nodeId": mcu_id,
+                        "message": f"{mcu_label}'s 5 V pin would feed up to {total:g} mA peak: {'; '.join(parts)}. That is half or more of the "
+                                   f"{USB2_PORT_MA} mA a USB 2.0 port supplies, before the board's own draw. Expect brownouts; a separate 5 V "
+                                   "supply is safer."})
+        if unsized:
+            out.append({"id": f"{mcu_id}-usbBudgetUnsized", "level": "warn", "nodeId": mcu_id,
+                        "message": f"{mcu_label}'s 5 V pin feeds {', '.join(unsized)}, so its USB budget cannot be checked."})
+    return out

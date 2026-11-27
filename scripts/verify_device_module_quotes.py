@@ -38,6 +38,11 @@ SOURCE_FILES = {
     "https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf": "pico_datasheet.txt",
     "https://documentation.espressif.com/esp32-wroom-32e_esp32-wroom-32ue_datasheet_en.pdf": "esp32_wroom_32e.txt",
     "https://cdn-shop.adafruit.com/datasheets/SSD1306.pdf": "ssd1306.txt",
+    "https://www.adafruit.com/product/938": "ada_oled13_product.txt",
+    "https://www.adafruit.com/product/5190": "ada_scd41_product.txt",
+    "https://www.adafruit.com/product/3317": "ada_vl53l0x_product.txt",
+    "https://learn.adafruit.com/adafruit-vl53l0x-micro-lidar-distance-sensor-breakout/pinouts": "ada_vl53l0x_pinouts.txt",
+    "https://learn.adafruit.com/monochrome-oled-breakouts/wiring-128x64-oleds": "ada_oled_wiring.txt",
     "https://docs.espressif.com/projects/esp-hardware-design-guidelines/en/latest/esp32/pcb-layout-design.html": "esp_hw_design_pcb_layout.txt",
 }
 

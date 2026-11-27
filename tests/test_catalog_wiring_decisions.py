@@ -271,3 +271,17 @@ def test_bench_adapter_compiles_with_the_output_terminal_on_the_board(tmp_path: 
     assert result.ok is True, result.error
     assert result.design_quality.get("kicad_drc_pass") is True
     assert netlist_pcb_parity(netlist, pcb)["pass"] is True
+
+
+def test_every_catalog_pin_has_a_pad_or_says_why_not() -> None:
+    """A pin with no pad cannot be carried by a board; the catalogue must say why (offBoard) rather than drop it."""
+    library = json.loads((DATA / "engine_pcb_data.json").read_text(encoding="utf-8"))["module_library"]
+    unexplained = {}
+    for module in library:
+        pads = {p["pinId"] for p in resolve_module_pads(module["id"], find_module(module["id"]))}
+        missing = [p["id"] for p in module["pins"] if p["id"] not in pads and not p.get("offBoard")]
+        if missing:
+            unexplained[module["id"]] = missing
+    assert unexplained == {}
+    max_pads = {p["pinId"] for p in _pads("max98357a-i2s-amp")}
+    assert "GAIN" in max_pads

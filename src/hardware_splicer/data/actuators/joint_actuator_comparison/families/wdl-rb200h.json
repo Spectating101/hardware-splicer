@@ -1,0 +1,360 @@
+{
+  "family_id": "wdl-rb200h",
+  "family_name": "伟达立 RB200H",
+  "shared": {
+    "manufacturer": "伟达立",
+    "manufacturer_en": "WEDALI",
+    "electrical": {
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "output_encoder_bits": 17,
+      "motor_encoder_bits": 17
+    },
+    "transmission": {
+      "type": "harmonic",
+      "backdrivable": false
+    }
+  },
+  "variants": [
+    {
+      "id": "wdl-rb200h-110-101-48",
+      "model": "RB200-G11025",
+      "base_id": "WDL-RB200H-110-101-48",
+      "electrical": {
+        "voltage_v": 48,
+        "continuous_current_a": 13.5,
+        "rated_input_power_w": 650
+      },
+      "mechanical": {
+        "rated_torque_nm": 84,
+        "peak_torque_nm": 351,
+        "start_stop_peak_torque_nm": 351,
+        "max_allow_avg_load_nm": 133,
+        "rated_speed_rpm": 30,
+        "max_speed_rpm": 40,
+        "weight_kg": 3.2,
+        "outer_diameter_mm": 110,
+        "hollow_shaft_diameter_mm": 18,
+        "torque_density_nm_per_kg": 109.69
+      },
+      "transmission": {
+        "reduction_ratio": 101
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 121.6,
+        "length_mm_max": 121.6
+      },
+      "datasheet_url": "datasheets/16_伟达立_谐波关节模组.pdf"
+    },
+    {
+      "id": "wdl-rb200h-142-121-48",
+      "model": "RB200-G14232",
+      "base_id": "WDL-RB200H-142-121-48",
+      "electrical": {
+        "voltage_v": 48,
+        "continuous_current_a": 22,
+        "rated_input_power_w": 1000
+      },
+      "mechanical": {
+        "rated_torque_nm": 169,
+        "peak_torque_nm": 848,
+        "start_stop_peak_torque_nm": 848,
+        "max_allow_avg_load_nm": 267,
+        "rated_speed_rpm": 25,
+        "max_speed_rpm": 30,
+        "weight_kg": 6.1,
+        "outer_diameter_mm": 142,
+        "hollow_shaft_diameter_mm": 18,
+        "torque_density_nm_per_kg": 139.02
+      },
+      "transmission": {
+        "reduction_ratio": 121
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 118.5,
+        "length_mm_max": 118.5
+      },
+      "datasheet_url": "datasheets/16_伟达立_谐波关节模组.pdf"
+    },
+    {
+      "id": "wdl-rb200h-170-121-48",
+      "model": "RB200-G17040",
+      "base_id": "WDL-RB200H-170-121-48",
+      "electrical": {
+        "voltage_v": 48,
+        "continuous_current_a": 25,
+        "rated_input_power_w": 1200
+      },
+      "mechanical": {
+        "rated_torque_nm": 363,
+        "peak_torque_nm": 1458,
+        "start_stop_peak_torque_nm": 1458,
+        "max_allow_avg_load_nm": 557,
+        "rated_speed_rpm": 20,
+        "max_speed_rpm": 30,
+        "weight_kg": 9.3,
+        "outer_diameter_mm": 170,
+        "hollow_shaft_diameter_mm": 18,
+        "torque_density_nm_per_kg": 156.77
+      },
+      "transmission": {
+        "reduction_ratio": 121
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 143.9,
+        "length_mm_max": 143.9
+      },
+      "datasheet_url": "datasheets/16_伟达立_谐波关节模组.pdf"
+    },
+    {
+      "id": "wdl-rb200h-40-101-24",
+      "model": "RB200-I4008",
+      "base_id": "WDL-RB200H-40-101-24",
+      "electrical": {
+        "voltage_v": 24,
+        "continuous_current_a": 0.64,
+        "rated_input_power_w": 15
+      },
+      "mechanical": {
+        "rated_torque_nm": 2.4,
+        "peak_torque_nm": 9,
+        "start_stop_peak_torque_nm": 9,
+        "max_allow_avg_load_nm": 3.3,
+        "rated_speed_rpm": 40,
+        "max_speed_rpm": 55,
+        "weight_kg": 0.165,
+        "outer_diameter_mm": 40,
+        "hollow_shaft_diameter_mm": 5,
+        "torque_density_nm_per_kg": 54.55
+      },
+      "transmission": {
+        "reduction_ratio": 101
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 54,
+        "length_mm_max": 54
+      },
+      "datasheet_url": "datasheets/16_伟达立_谐波关节模组.pdf"
+    },
+    {
+      "id": "wdl-rb200h-52-101-48",
+      "model": "RB200-G5211",
+      "base_id": "WDL-RB200H-52-101-48",
+      "electrical": {
+        "voltage_v": 48,
+        "continuous_current_a": 3.5,
+        "rated_input_power_w": 63
+      },
+      "mechanical": {
+        "rated_torque_nm": 5,
+        "peak_torque_nm": 25,
+        "start_stop_peak_torque_nm": 25,
+        "max_allow_avg_load_nm": 8.9,
+        "rated_speed_rpm": 30,
+        "max_speed_rpm": 60,
+        "weight_kg": 0.465,
+        "outer_diameter_mm": 52,
+        "hollow_shaft_diameter_mm": 5,
+        "weight_kg_max": 0.58,
+        "torque_density_nm_per_kg": 53.76
+      },
+      "transmission": {
+        "reduction_ratio": 101
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 66.5,
+        "length_mm_max": 78.5,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/16_伟达立_谐波关节模组.pdf"
+    },
+    {
+      "id": "wdl-rb200h-70-101-48",
+      "model": "RB200-G7014",
+      "base_id": "WDL-RB200H-70-101-48",
+      "electrical": {
+        "voltage_v": 48,
+        "continuous_current_a": 2.55,
+        "rated_input_power_w": 100
+      },
+      "mechanical": {
+        "rated_torque_nm": 9.6,
+        "peak_torque_nm": 66,
+        "start_stop_peak_torque_nm": 66,
+        "max_allow_avg_load_nm": 13.5,
+        "rated_speed_rpm": 30,
+        "max_speed_rpm": 40,
+        "weight_kg": 0.99,
+        "outer_diameter_mm": 70,
+        "hollow_shaft_diameter_mm": 18,
+        "torque_density_nm_per_kg": 66.67
+      },
+      "transmission": {
+        "reduction_ratio": 101
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 88,
+        "length_mm_max": 88
+      },
+      "datasheet_url": "datasheets/16_伟达立_谐波关节模组.pdf"
+    },
+    {
+      "id": "wdl-rb200h-80-101-48",
+      "model": "RB200-G8017",
+      "base_id": "WDL-RB200H-80-101-48",
+      "electrical": {
+        "voltage_v": 48,
+        "continuous_current_a": 6.3,
+        "rated_input_power_w": 189
+      },
+      "mechanical": {
+        "rated_torque_nm": 30,
+        "peak_torque_nm": 134,
+        "start_stop_peak_torque_nm": 134,
+        "max_allow_avg_load_nm": 49,
+        "rated_speed_rpm": 30,
+        "max_speed_rpm": 40,
+        "weight_kg": 1.29,
+        "outer_diameter_mm": 80,
+        "hollow_shaft_diameter_mm": 18,
+        "torque_density_nm_per_kg": 103.88
+      },
+      "transmission": {
+        "reduction_ratio": 101
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 97,
+        "length_mm_max": 97
+      },
+      "datasheet_url": "datasheets/16_伟达立_谐波关节模组.pdf"
+    },
+    {
+      "id": "wdl-rb200h-90-101-48",
+      "model": "RB200-G9020",
+      "base_id": "WDL-RB200H-90-101-48",
+      "electrical": {
+        "voltage_v": 48,
+        "continuous_current_a": 13.5,
+        "rated_input_power_w": 650
+      },
+      "mechanical": {
+        "rated_torque_nm": 50,
+        "peak_torque_nm": 182,
+        "start_stop_peak_torque_nm": 182,
+        "max_allow_avg_load_nm": 61,
+        "rated_speed_rpm": 30,
+        "max_speed_rpm": 40,
+        "weight_kg": 2.09,
+        "outer_diameter_mm": 90,
+        "hollow_shaft_diameter_mm": 18,
+        "torque_density_nm_per_kg": 87.08
+      },
+      "transmission": {
+        "reduction_ratio": 101
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 101,
+        "length_mm_max": 101
+      },
+      "datasheet_url": "datasheets/16_伟达立_谐波关节模组.pdf"
+    }
+  ]
+}

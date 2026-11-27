@@ -1,0 +1,85 @@
+{
+ "schema": "hardware_splicer.objective_project.v1",
+ "project_id": "hs-rover-a-on-openbot-s-tt-gearmotors-th-e7b4cb",
+ "objective": "HS-ROVER-A on OpenBot's TT gearmotors: the same inspection rover at the cheap drive tier, under US$250 with every price cited, re-checked end to end.",
+ "acceptance": [],
+ "steps": 6,
+ "research": [
+  {
+   "search": "hs_prior_art_search",
+   "seq": 1,
+   "summary": "8 of HS's own records, 0 GitHub projects, 0 BoardRepo boards, 0 GitHub KiCad files (0 with a reusable licence)",
+   "sources": [
+    "https://boardrepo.com/browse?q=TT%20gearmotor%20robot%20car%20rover%20OpenBot",
+    "https://emanual.robotis.com/docs/en/platform/openmanipulator_x/specification/",
+    "https://github.com/NVIDIA-AI-IOT/jetbot",
+    "https://github.com/PCrnjak/PAROL6-Desktop-robot-arm",
+    "https://github.com/Seeed-Projects/reBot-DevArm",
+    "https://github.com/TheRobotStudio/SO-ARM100",
+    "https://github.com/azlan-works/Argo",
+    "https://github.com/isl-org/OpenBot",
+    "https://github.com/linorobot/linorobot2",
+    "https://www.clockworkpi.com/uconsole",
+    "https://www.ufactory.cc/lite-6-collaborative-robot/"
+   ]
+  }
+ ],
+ "decisions": [
+  {
+   "seq": 2,
+   "title": "drive tier",
+   "choice": "2 x Adafruit 3777 TT gearmotor 48:1 on 65 mm wheels",
+   "because": "OpenBot drives on TT motors; HS's drive table now carries the TT with the seller's measured stall current"
+  }
+ ],
+ "software_checked": [
+  {
+   "check": "rover_chassis",
+   "seq": 3,
+   "summary": "438 g, clearance 21.3 mm, tips at 41 deg, 0 problems"
+  },
+  {
+   "check": "hs_size_rover_drive",
+   "seq": 4,
+   "summary": "26 of 39 gearmotor options pass; best pololu-25d-mp-12v 47:1"
+  },
+  {
+   "check": "hs_energy_budget",
+   "seq": 5,
+   "summary": "0 errors, 0 warnings"
+  },
+  {
+   "check": "bom_check",
+   "seq": 6,
+   "summary": "US$187.50 for 22 lines against US$250.00; 0 salvaged, US$187.50 new"
+  }
+ ],
+ "open": [],
+ "physical_required": [
+  {
+   "check": "rover_chassis",
+   "boundary": "CAD and static calculations only. Print strength, traction, wheel slip, battery life and the camera image need a printed, driven rover."
+  },
+  {
+   "check": "hs_size_rover_drive",
+   "boundary": "Linear DC-motor model between the maker's no-load and (extrapolated) stall points at nominal voltage; Pololu says units stall well before the listed point as they heat. No battery sag, wheel slip or turning losses."
+  },
+  {
+   "check": "hs_energy_budget",
+   "boundary": "Sizing calculation from stated loads and ratings. Nothing was built or measured. Runtime and surge must be tested with the real loads, and AC wiring, residual current protection and earthing need a qualified electrician."
+  },
+  {
+   "check": "bom_check",
+   "boundary": "Shop prices on the day they were read; shipping, tax and stock change. A salvaged part is assumed to work until the donor is opened and the part is tested."
+  }
+ ],
+ "deliverables": [],
+ "artifacts": [
+  "artifacts/cad/rover_chassis/chassis_checks.json",
+  "artifacts/cad/rover_chassis/params.json",
+  "artifacts/cad/rover_chassis/rover_chassis.step",
+  "artifacts/cad/rover_chassis/rover_chassis.stl"
+ ],
+ "design": null,
+ "authority": "software checks only; no fabrication, power-on, flight or release is authorised by this record"
+}

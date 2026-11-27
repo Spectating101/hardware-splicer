@@ -144,3 +144,9 @@ def test_fit_route_errors_are_fixed_messages(client, monkeypatch):
     assert "/secret" not in failed.text and str(ROOT) not in failed.text
     assert client.get("/v1/scenes/esp32-servo-board/zz/fit").status_code == 404
     assert client.get("/v1/scenes/no-such-project/a/fit").status_code == 404
+
+
+def test_parts_that_touch_nothing_are_listed_as_loose(measured):
+    """Replicator's floating-part check: 'gap' sits 0.5 mm off A and 'far' is 50 mm away; the rest touch or overlap."""
+    _, report = measured
+    assert report["loose_parts"] == ["far", "gap"] and report["counts"]["loose"] == 2

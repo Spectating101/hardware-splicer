@@ -1,0 +1,290 @@
+{
+  "family_id": "xx-setz90ci",
+  "family_name": "小象 SETZ90CI",
+  "shared": {
+    "manufacturer": "小象",
+    "manufacturer_en": "SEmotor",
+    "electrical": {
+      "motor_topology": "axial flux"
+    },
+    "mechanical": {
+      "outer_diameter_mm": 99
+    },
+    "transmission": {
+      "type": "planetary"
+    }
+  },
+  "variants": [
+    {
+      "id": "xx-setz90ci-10-48",
+      "model": "SETZ90CI-1FC",
+      "base_id": "XX-SETZ90CI-10-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 70.71,
+        "continuous_current_a": 13.58,
+        "rated_input_power_w": 350,
+        "peak_input_power_w": 1050
+      },
+      "mechanical": {
+        "rated_torque_nm": 20,
+        "peak_torque_nm": 80,
+        "start_stop_peak_torque_nm": 80,
+        "rated_speed_rpm": 160,
+        "max_speed_rpm": 260,
+        "weight_kg": 1.4,
+        "torque_density_nm_per_kg": 57.14
+      },
+      "transmission": {
+        "reduction_ratio": 10,
+        "backdrivable": true
+      },
+      "options": {
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 72,
+        "length_mm_max": 72
+      },
+      "datasheet_url": "datasheets/24_小象SEmotor.pdf"
+    },
+    {
+      "id": "xx-setz90ci-16-48",
+      "model": "SEAF90A16NG01",
+      "base_id": "XX-SETZ90CI-16-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 70.71,
+        "continuous_current_a": 13.58,
+        "rated_input_power_w": 350,
+        "peak_input_power_w": 1050
+      },
+      "mechanical": {
+        "rated_torque_nm": 32,
+        "peak_torque_nm": 128,
+        "start_stop_peak_torque_nm": 128,
+        "rated_speed_rpm": 100,
+        "max_speed_rpm": 162.5,
+        "weight_kg": 1.4,
+        "torque_density_nm_per_kg": 91.43
+      },
+      "transmission": {
+        "reduction_ratio": 16,
+        "backdrivable": false
+      },
+      "options": {
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 72,
+        "length_mm_max": 72
+      },
+      "datasheet_url": "datasheets/24_小象SEmotor.pdf"
+    },
+    {
+      "id": "xx-setz90ci-16-72",
+      "model": "SETZ90CI-1GD",
+      "base_id": "XX-SETZ90CI-16-72",
+      "electrical": {
+        "voltage_v": 72,
+        "rated_input_power_w": 500,
+        "peak_input_power_w": 2000
+      },
+      "mechanical": {
+        "rated_torque_nm": 38.5,
+        "peak_torque_nm": 136,
+        "start_stop_peak_torque_nm": 136,
+        "rated_speed_rpm": 121,
+        "max_speed_rpm": 175,
+        "weight_kg": 1.6,
+        "torque_density_nm_per_kg": 85.0
+      },
+      "transmission": {
+        "reduction_ratio": 16,
+        "backdrivable": false
+      },
+      "options": {
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 81.5,
+        "length_mm_max": 81.5
+      },
+      "datasheet_url": "datasheets/24_小象SEmotor.pdf"
+    },
+    {
+      "id": "xx-setz90ci-18-48",
+      "model": "SETZ90CI-1FF",
+      "base_id": "XX-SETZ90CI-18-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 70.71,
+        "continuous_current_a": 13.58,
+        "rated_input_power_w": 350,
+        "peak_input_power_w": 1050
+      },
+      "mechanical": {
+        "rated_torque_nm": 36,
+        "peak_torque_nm": 144,
+        "start_stop_peak_torque_nm": 144,
+        "rated_speed_rpm": 89,
+        "max_speed_rpm": 144.5,
+        "weight_kg": 1.5,
+        "torque_density_nm_per_kg": 96.0
+      },
+      "transmission": {
+        "reduction_ratio": 18,
+        "backdrivable": false
+      },
+      "options": {
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 74.5,
+        "length_mm_max": 74.5
+      },
+      "datasheet_url": "datasheets/24_小象SEmotor.pdf"
+    },
+    {
+      "id": "xx-setz90ci-21-48",
+      "model": "SETZ90CI-1FH",
+      "base_id": "XX-SETZ90CI-21-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 70.71,
+        "continuous_current_a": 13.58,
+        "rated_input_power_w": 350,
+        "peak_input_power_w": 1050
+      },
+      "mechanical": {
+        "rated_torque_nm": 42,
+        "peak_torque_nm": 168,
+        "start_stop_peak_torque_nm": 168,
+        "rated_speed_rpm": 76,
+        "max_speed_rpm": 123.5,
+        "weight_kg": 1.5,
+        "torque_density_nm_per_kg": 112.0
+      },
+      "transmission": {
+        "reduction_ratio": 21,
+        "backdrivable": false
+      },
+      "options": {
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 74.5,
+        "length_mm_max": 74.5
+      },
+      "datasheet_url": "datasheets/24_小象SEmotor.pdf"
+    },
+    {
+      "id": "xx-setz90ci-30-48",
+      "model": "SETZ90CI-1FG",
+      "base_id": "XX-SETZ90CI-30-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 70.71,
+        "continuous_current_a": 13.58,
+        "rated_input_power_w": 350,
+        "peak_input_power_w": 1050
+      },
+      "mechanical": {
+        "rated_torque_nm": 60,
+        "peak_torque_nm": 240,
+        "start_stop_peak_torque_nm": 240,
+        "rated_speed_rpm": 53,
+        "max_speed_rpm": 86.5,
+        "weight_kg": 1.6,
+        "torque_density_nm_per_kg": 150.0
+      },
+      "transmission": {
+        "reduction_ratio": 30,
+        "backdrivable": false
+      },
+      "options": {
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 76.5,
+        "length_mm_max": 76.5
+      },
+      "datasheet_url": "datasheets/24_小象SEmotor.pdf"
+    },
+    {
+      "id": "xx-setz90ci-8-48",
+      "model": "SETZ90CI-1FE",
+      "base_id": "XX-SETZ90CI-8-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 70.71,
+        "continuous_current_a": 13.58,
+        "rated_input_power_w": 350,
+        "peak_input_power_w": 1050
+      },
+      "mechanical": {
+        "rated_torque_nm": 16,
+        "peak_torque_nm": 64,
+        "start_stop_peak_torque_nm": 64,
+        "rated_speed_rpm": 200,
+        "max_speed_rpm": 325,
+        "weight_kg": 1.4,
+        "torque_density_nm_per_kg": 45.71
+      },
+      "transmission": {
+        "reduction_ratio": 8,
+        "backdrivable": true
+      },
+      "options": {
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 72,
+        "length_mm_max": 72
+      },
+      "datasheet_url": "datasheets/24_小象SEmotor.pdf"
+    }
+  ]
+}

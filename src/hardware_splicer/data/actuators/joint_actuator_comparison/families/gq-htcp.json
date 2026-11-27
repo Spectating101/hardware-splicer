@@ -1,0 +1,99 @@
+{
+  "family_id": "gq-htcp",
+  "family_name": "高擎 HTCP",
+  "shared": {
+    "manufacturer": "高擎",
+    "manufacturer_en": "HighTorque",
+    "electrical": {
+      "voltage_v": 24,
+      "peak_current_a": 10,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "absolute_accuracy_deg": 0.25,
+      "repeatability_deg": 0.2,
+      "output_encoder_bits": 14,
+      "motor_encoder_bits": 14
+    },
+    "transmission": {
+      "type": "cycloidal",
+      "reduction_ratio": 31,
+      "backdrivable": false,
+      "backlash_arcsec": 600
+    }
+  },
+  "variants": [
+    {
+      "id": "gq-htcp-44-31-24",
+      "model": "HTCP-4531-06-CYC",
+      "base_id": "GQ-HTCP-44-31-24",
+      "electrical": {
+        "continuous_current_a": 0.7,
+        "rated_input_power_w": 8.5
+      },
+      "mechanical": {
+        "rated_torque_nm": 2,
+        "peak_torque_nm": 10,
+        "start_stop_peak_torque_nm": 10,
+        "rated_speed_rpm": 40,
+        "max_speed_rpm": 160,
+        "weight_kg": 0.237,
+        "outer_diameter_mm": 44,
+        "torque_density_nm_per_kg": 42.19
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 44.9,
+        "length_mm_max": 44.9
+      },
+      "datasheet_url": "datasheets/6_高擎_关节模组_20241203.pdf"
+    },
+    {
+      "id": "gq-htcp-50-31-24",
+      "model": "HTCP-5031-06-CYC",
+      "base_id": "GQ-HTCP-50-31-24",
+      "electrical": {
+        "continuous_current_a": 2,
+        "rated_input_power_w": 21
+      },
+      "mechanical": {
+        "rated_torque_nm": 4,
+        "peak_torque_nm": 16,
+        "start_stop_peak_torque_nm": 16,
+        "rated_speed_rpm": 50,
+        "max_speed_rpm": 103,
+        "weight_kg": 0.385,
+        "outer_diameter_mm": 50,
+        "torque_density_nm_per_kg": 41.56
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 53,
+        "length_mm_max": 53
+      },
+      "datasheet_url": "datasheets/6_高擎_关节模组_20241203.pdf"
+    }
+  ]
+}

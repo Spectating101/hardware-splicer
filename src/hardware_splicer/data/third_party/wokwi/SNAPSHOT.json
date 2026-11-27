@@ -1,0 +1,25 @@
+{
+ "source": "https://github.com/wokwi/wokwi-elements",
+ "commit": "5178c0cc1b455719fdf562169293797e29d73dac",
+ "license": "MIT (see LICENSE in this folder)",
+ "counts": {
+  "parts": 37,
+  "skipped_computed_pin_info": 13
+ },
+ "skipped": [
+  "wokwi-7segment",
+  "wokwi-biaxial-stepper",
+  "wokwi-ir-remote",
+  "wokwi-ks2e-m-dc5",
+  "wokwi-lcd1602",
+  "wokwi-lcd2004",
+  "wokwi-led-bar-graph",
+  "wokwi-led",
+  "wokwi-led-ring",
+  "wokwi-membrane-keypad",
+  "wokwi-neopixel-matrix",
+  "wokwi-slide-potentiometer",
+  "wokwi-stepper-motor"
+ ],
+ "note": "Wokwi's pin names and signals, unchanged. x and y are Wokwi drawing coordinates, not millimetres."
+}

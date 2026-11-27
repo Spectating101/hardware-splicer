@@ -1,0 +1,57 @@
+{
+  "family_id": "cm-ak60",
+  "family_name": "酷德 AK60",
+  "shared": {
+    "manufacturer": "酷德",
+    "manufacturer_en": "Cubemars",
+    "electrical": {
+      "voltage_v": 48,
+      "peak_current_a": 17,
+      "continuous_current_a": 4.5,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "rated_torque_nm": 24,
+      "peak_torque_nm": 72,
+      "start_stop_peak_torque_nm": 72,
+      "rated_speed_rpm": 70,
+      "max_speed_rpm": 98,
+      "weight_kg": 0.75,
+      "outer_diameter_mm": 79,
+      "absolute_accuracy_deg": 16,
+      "motor_encoder_bits": 16,
+      "torque_density_nm_per_kg": 96.0
+    },
+    "transmission": {
+      "type": "planetary",
+      "reduction_ratio": 39,
+      "backdrivable": false,
+      "backlash_arcsec": 900
+    }
+  },
+  "variants": [
+    {
+      "id": "cm-ak60-39-48",
+      "model": "AK60-39 V3.0",
+      "base_id": "CM-AK60-39-48",
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 48.5,
+        "length_mm_max": 48.5,
+        "inertia_g_cm2": 305
+      },
+      "datasheet_url": "datasheets/25_酷德Cubemars.pdf"
+    }
+  ]
+}

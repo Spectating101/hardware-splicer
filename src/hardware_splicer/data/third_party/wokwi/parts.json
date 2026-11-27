@@ -1,0 +1,3874 @@
+{
+ "wokwi-analog-joystick": {
+  "element": "wokwi-analog-joystick",
+  "file": "analog-joystick-element.ts",
+  "pins": [
+   {
+    "name": "VCC",
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power"
+     }
+    ],
+    "x": 33,
+    "y": 115.8
+   },
+   {
+    "name": "VERT",
+    "signals": [
+     {
+      "channel": 0,
+      "type": "analog"
+     }
+    ],
+    "x": 42.6012,
+    "y": 115.8
+   },
+   {
+    "name": "HORZ",
+    "signals": [
+     {
+      "channel": 1,
+      "type": "analog"
+     }
+    ],
+    "x": 52.2024,
+    "y": 115.8
+   },
+   {
+    "name": "SEL",
+    "signals": [],
+    "x": 61.8036,
+    "y": 115.8
+   },
+   {
+    "name": "GND",
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 71.4048,
+    "y": 115.8
+   }
+  ]
+ },
+ "wokwi-arduino-mega": {
+  "element": "wokwi-arduino-mega",
+  "file": "arduino-mega-element.ts",
+  "pins": [
+   {
+    "name": "SCL",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "SCL",
+      "type": "i2c"
+     }
+    ],
+    "x": 90,
+    "y": 9
+   },
+   {
+    "name": "SDA",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "SDA",
+      "type": "i2c"
+     }
+    ],
+    "x": 100,
+    "y": 9
+   },
+   {
+    "name": "AREF",
+    "signals": [],
+    "x": 109,
+    "y": 9
+   },
+   {
+    "name": "GND.1",
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 119,
+    "y": 9
+   },
+   {
+    "name": "13",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 129,
+    "y": 9
+   },
+   {
+    "name": "12",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 138,
+    "y": 9
+   },
+   {
+    "name": "11",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 148,
+    "y": 9
+   },
+   {
+    "name": "10",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 157.5,
+    "y": 9
+   },
+   {
+    "name": "9",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 167.5,
+    "y": 9
+   },
+   {
+    "name": "8",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 177,
+    "y": 9
+   },
+   {
+    "name": "7",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 190,
+    "y": 9
+   },
+   {
+    "name": "6",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 200,
+    "y": 9
+   },
+   {
+    "name": "5",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 209.5,
+    "y": 9
+   },
+   {
+    "name": "4",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 219,
+    "y": 9
+   },
+   {
+    "name": "3",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 228.5,
+    "y": 9
+   },
+   {
+    "name": "2",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 238,
+    "y": 9
+   },
+   {
+    "name": "1",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "TX",
+      "type": "usart"
+     }
+    ],
+    "x": 247.5,
+    "y": 9
+   },
+   {
+    "name": "0",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "RX",
+      "type": "usart"
+     }
+    ],
+    "x": 257.5,
+    "y": 9
+   },
+   {
+    "name": "14",
+    "signals": [
+     {
+      "bus": 3,
+      "signal": "TX",
+      "type": "usart"
+     }
+    ],
+    "x": 270.5,
+    "y": 9
+   },
+   {
+    "name": "15",
+    "signals": [
+     {
+      "bus": 3,
+      "signal": "RX",
+      "type": "usart"
+     }
+    ],
+    "x": 280,
+    "y": 9
+   },
+   {
+    "name": "16",
+    "signals": [
+     {
+      "bus": 2,
+      "signal": "TX",
+      "type": "usart"
+     }
+    ],
+    "x": 289.5,
+    "y": 9
+   },
+   {
+    "name": "17",
+    "signals": [
+     {
+      "bus": 2,
+      "signal": "RX",
+      "type": "usart"
+     }
+    ],
+    "x": 299,
+    "y": 9
+   },
+   {
+    "name": "18",
+    "signals": [
+     {
+      "bus": 1,
+      "signal": "TX",
+      "type": "usart"
+     }
+    ],
+    "x": 308.5,
+    "y": 9
+   },
+   {
+    "name": "19",
+    "signals": [
+     {
+      "bus": 1,
+      "signal": "RX",
+      "type": "usart"
+     }
+    ],
+    "x": 318.5,
+    "y": 9
+   },
+   {
+    "name": "20",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "SDA",
+      "type": "i2c"
+     }
+    ],
+    "x": 328,
+    "y": 9
+   },
+   {
+    "name": "21",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "SCL",
+      "type": "i2c"
+     }
+    ],
+    "x": 337.5,
+    "y": 9
+   },
+   {
+    "name": "5V.1",
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power",
+      "voltage": 5
+     }
+    ],
+    "x": 361,
+    "y": 8
+   },
+   {
+    "name": "5V.2",
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power",
+      "voltage": 5
+     }
+    ],
+    "x": 371,
+    "y": 8
+   },
+   {
+    "name": "22",
+    "signals": [],
+    "x": 361,
+    "y": 17.5
+   },
+   {
+    "name": "23",
+    "signals": [],
+    "x": 371,
+    "y": 17.5
+   },
+   {
+    "name": "24",
+    "signals": [],
+    "x": 361,
+    "y": 27.25
+   },
+   {
+    "name": "25",
+    "signals": [],
+    "x": 371,
+    "y": 27.25
+   },
+   {
+    "name": "26",
+    "signals": [],
+    "x": 361,
+    "y": 36.75
+   },
+   {
+    "name": "27",
+    "signals": [],
+    "x": 371,
+    "y": 36.75
+   },
+   {
+    "name": "28",
+    "signals": [],
+    "x": 361,
+    "y": 46.25
+   },
+   {
+    "name": "29",
+    "signals": [],
+    "x": 371,
+    "y": 46.25
+   },
+   {
+    "name": "30",
+    "signals": [],
+    "x": 361,
+    "y": 56
+   },
+   {
+    "name": "31",
+    "signals": [],
+    "x": 371,
+    "y": 56
+   },
+   {
+    "name": "32",
+    "signals": [],
+    "x": 361,
+    "y": 65.5
+   },
+   {
+    "name": "33",
+    "signals": [],
+    "x": 371,
+    "y": 65.5
+   },
+   {
+    "name": "34",
+    "signals": [],
+    "x": 361,
+    "y": 75
+   },
+   {
+    "name": "35",
+    "signals": [],
+    "x": 371,
+    "y": 75
+   },
+   {
+    "name": "36",
+    "signals": [],
+    "x": 361,
+    "y": 84.5
+   },
+   {
+    "name": "37",
+    "signals": [],
+    "x": 371,
+    "y": 84.5
+   },
+   {
+    "name": "38",
+    "signals": [],
+    "x": 361,
+    "y": 94.25
+   },
+   {
+    "name": "39",
+    "signals": [],
+    "x": 371,
+    "y": 94.25
+   },
+   {
+    "name": "40",
+    "signals": [],
+    "x": 361,
+    "y": 103.75
+   },
+   {
+    "name": "41",
+    "signals": [],
+    "x": 371,
+    "y": 103.75
+   },
+   {
+    "name": "42",
+    "signals": [],
+    "x": 361,
+    "y": 113.5
+   },
+   {
+    "name": "43",
+    "signals": [],
+    "x": 371,
+    "y": 113.5
+   },
+   {
+    "name": "44",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 361,
+    "y": 123
+   },
+   {
+    "name": "45",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 371,
+    "y": 123
+   },
+   {
+    "name": "46",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 361,
+    "y": 132.75
+   },
+   {
+    "name": "47",
+    "signals": [],
+    "x": 371,
+    "y": 132.75
+   },
+   {
+    "name": "48",
+    "signals": [],
+    "x": 361,
+    "y": 142.25
+   },
+   {
+    "name": "49",
+    "signals": [],
+    "x": 371,
+    "y": 142.25
+   },
+   {
+    "name": "50",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "MISO",
+      "type": "spi"
+     }
+    ],
+    "x": 361,
+    "y": 152
+   },
+   {
+    "name": "51",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "MOSI",
+      "type": "spi"
+     }
+    ],
+    "x": 371,
+    "y": 152
+   },
+   {
+    "name": "52",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "SCK",
+      "type": "spi"
+     }
+    ],
+    "x": 361,
+    "y": 161.5
+   },
+   {
+    "name": "53",
+    "signals": [],
+    "x": 371,
+    "y": 161.5
+   },
+   {
+    "name": "GND.4",
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 361,
+    "y": 171.25
+   },
+   {
+    "name": "GND.5",
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 371,
+    "y": 171.25
+   },
+   {
+    "name": "IOREF",
+    "signals": [],
+    "x": 136,
+    "y": 184.5
+   },
+   {
+    "name": "RESET",
+    "signals": [],
+    "x": 145.5,
+    "y": 184.5
+   },
+   {
+    "name": "3.3V",
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power",
+      "voltage": 3.3
+     }
+    ],
+    "x": 155,
+    "y": 184.5
+   },
+   {
+    "name": "5V",
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power",
+      "voltage": 5
+     }
+    ],
+    "x": 164.5,
+    "y": 184.5
+   },
+   {
+    "name": "GND.2",
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 174.25,
+    "y": 184.5
+   },
+   {
+    "name": "GND.3",
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 183.75,
+    "y": 184.5
+   },
+   {
+    "name": "VIN",
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power"
+     }
+    ],
+    "x": 193.5,
+    "y": 184.5
+   },
+   {
+    "name": "A0",
+    "signals": [
+     {
+      "channel": 0,
+      "type": "analog"
+     }
+    ],
+    "x": 208.5,
+    "y": 184.5
+   },
+   {
+    "name": "A1",
+    "signals": [
+     {
+      "channel": 1,
+      "type": "analog"
+     }
+    ],
+    "x": 218,
+    "y": 184.5
+   },
+   {
+    "name": "A2",
+    "signals": [
+     {
+      "channel": 2,
+      "type": "analog"
+     }
+    ],
+    "x": 227.5,
+    "y": 184.5
+   },
+   {
+    "name": "A3",
+    "signals": [
+     {
+      "channel": 3,
+      "type": "analog"
+     }
+    ],
+    "x": 237.25,
+    "y": 184.5
+   },
+   {
+    "name": "A4",
+    "signals": [
+     {
+      "channel": 4,
+      "type": "analog"
+     }
+    ],
+    "x": 246.75,
+    "y": 184.5
+   },
+   {
+    "name": "A5",
+    "signals": [
+     {
+      "channel": 5,
+      "type": "analog"
+     }
+    ],
+    "x": 256.25,
+    "y": 184.5
+   },
+   {
+    "name": "A6",
+    "signals": [
+     {
+      "channel": 6,
+      "type": "analog"
+     }
+    ],
+    "x": 266,
+    "y": 184.5
+   },
+   {
+    "name": "A7",
+    "signals": [
+     {
+      "channel": 7,
+      "type": "analog"
+     }
+    ],
+    "x": 275.5,
+    "y": 184.5
+   },
+   {
+    "name": "A8",
+    "signals": [
+     {
+      "channel": 8,
+      "type": "analog"
+     }
+    ],
+    "x": 290.25,
+    "y": 184.5
+   },
+   {
+    "name": "A9",
+    "signals": [
+     {
+      "channel": 9,
+      "type": "analog"
+     }
+    ],
+    "x": 300,
+    "y": 184.5
+   },
+   {
+    "name": "A10",
+    "signals": [
+     {
+      "channel": 10,
+      "type": "analog"
+     }
+    ],
+    "x": 309.5,
+    "y": 184.5
+   },
+   {
+    "name": "A11",
+    "signals": [
+     {
+      "channel": 11,
+      "type": "analog"
+     }
+    ],
+    "x": 319.25,
+    "y": 184.5
+   },
+   {
+    "name": "A12",
+    "signals": [
+     {
+      "channel": 12,
+      "type": "analog"
+     }
+    ],
+    "x": 328.75,
+    "y": 184.5
+   },
+   {
+    "name": "A13",
+    "signals": [
+     {
+      "channel": 13,
+      "type": "analog"
+     }
+    ],
+    "x": 338.5,
+    "y": 184.5
+   },
+   {
+    "name": "A14",
+    "signals": [
+     {
+      "channel": 14,
+      "type": "analog"
+     }
+    ],
+    "x": 348,
+    "y": 184.5
+   },
+   {
+    "name": "A15",
+    "signals": [
+     {
+      "channel": 15,
+      "type": "analog"
+     }
+    ],
+    "x": 357.75,
+    "y": 184.5
+   }
+  ]
+ },
+ "wokwi-arduino-nano": {
+  "element": "wokwi-arduino-nano",
+  "file": "arduino-nano-element.ts",
+  "pins": [
+   {
+    "name": "12",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "MISO",
+      "type": "spi"
+     }
+    ],
+    "x": 19.7,
+    "y": 4.8
+   },
+   {
+    "name": "11",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "MOSI",
+      "type": "spi"
+     },
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 29.3,
+    "y": 4.8
+   },
+   {
+    "name": "10",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "SS",
+      "type": "spi"
+     },
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 38.9,
+    "y": 4.8
+   },
+   {
+    "name": "9",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 48.5,
+    "y": 4.8
+   },
+   {
+    "name": "8",
+    "signals": [],
+    "x": 58.1,
+    "y": 4.8
+   },
+   {
+    "name": "7",
+    "signals": [],
+    "x": 67.7,
+    "y": 4.8
+   },
+   {
+    "name": "6",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 77.3,
+    "y": 4.8
+   },
+   {
+    "name": "5",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 86.9,
+    "y": 4.8
+   },
+   {
+    "name": "4",
+    "signals": [],
+    "x": 96.5,
+    "y": 4.8
+   },
+   {
+    "name": "3",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 106.1,
+    "y": 4.8
+   },
+   {
+    "name": "2",
+    "signals": [],
+    "x": 115.7,
+    "y": 4.8
+   },
+   {
+    "name": "GND.2",
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 125.3,
+    "y": 4.8
+   },
+   {
+    "name": "RESET.2",
+    "signals": [],
+    "x": 134.9,
+    "y": 4.8
+   },
+   {
+    "name": "0",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "TX",
+      "type": "usart"
+     }
+    ],
+    "x": 144.5,
+    "y": 4.8
+   },
+   {
+    "name": "1",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "RX",
+      "type": "usart"
+     }
+    ],
+    "x": 154.1,
+    "y": 4.8
+   },
+   {
+    "name": "13",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "SCK",
+      "type": "spi"
+     }
+    ],
+    "x": 19.7,
+    "y": 62.4
+   },
+   {
+    "name": "3.3V",
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power",
+      "voltage": 3.3
+     }
+    ],
+    "x": 29.3,
+    "y": 62.4
+   },
+   {
+    "name": "AREF",
+    "signals": [],
+    "x": 38.9,
+    "y": 62.4
+   },
+   {
+    "name": "A0",
+    "signals": [
+     {
+      "channel": 0,
+      "type": "analog"
+     }
+    ],
+    "x": 48.5,
+    "y": 62.4
+   },
+   {
+    "name": "A1",
+    "signals": [
+     {
+      "channel": 1,
+      "type": "analog"
+     }
+    ],
+    "x": 58.1,
+    "y": 62.4
+   },
+   {
+    "name": "A2",
+    "signals": [
+     {
+      "channel": 2,
+      "type": "analog"
+     }
+    ],
+    "x": 67.7,
+    "y": 62.4
+   },
+   {
+    "name": "A3",
+    "signals": [
+     {
+      "channel": 3,
+      "type": "analog"
+     }
+    ],
+    "x": 77.3,
+    "y": 62.4
+   },
+   {
+    "name": "A4",
+    "signals": [
+     {
+      "channel": 4,
+      "type": "analog"
+     },
+     {
+      "bus": 0,
+      "signal": "SDA",
+      "type": "i2c"
+     }
+    ],
+    "x": 86.9,
+    "y": 62.4
+   },
+   {
+    "name": "A5",
+    "signals": [
+     {
+      "channel": 5,
+      "type": "analog"
+     },
+     {
+      "bus": 0,
+      "signal": "SCL",
+      "type": "i2c"
+     }
+    ],
+    "x": 96.5,
+    "y": 62.4
+   },
+   {
+    "name": "A6",
+    "signals": [
+     {
+      "channel": 6,
+      "type": "analog"
+     }
+    ],
+    "x": 106.1,
+    "y": 62.4
+   },
+   {
+    "name": "A7",
+    "signals": [
+     {
+      "channel": 7,
+      "type": "analog"
+     }
+    ],
+    "x": 115.7,
+    "y": 62.4
+   },
+   {
+    "name": "5V",
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power",
+      "voltage": 5
+     }
+    ],
+    "x": 125.3,
+    "y": 62.4
+   },
+   {
+    "name": "RESET",
+    "signals": [],
+    "x": 134.9,
+    "y": 62.4
+   },
+   {
+    "name": "GND.1",
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 144.5,
+    "y": 62.4
+   },
+   {
+    "name": "VIN",
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power"
+     }
+    ],
+    "x": 154.1,
+    "y": 62.4
+   },
+   {
+    "name": "12.2",
+    "noBreadboard": true,
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "MISO",
+      "type": "spi"
+     }
+    ],
+    "x": 163.7,
+    "y": 43.2
+   },
+   {
+    "name": "5V.2",
+    "noBreadboard": true,
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power",
+      "voltage": 5
+     }
+    ],
+    "x": 154.1,
+    "y": 43.2
+   },
+   {
+    "name": "13.2",
+    "noBreadboard": true,
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "SCK",
+      "type": "spi"
+     }
+    ],
+    "x": 163.7,
+    "y": 33.6
+   },
+   {
+    "name": "11.2",
+    "noBreadboard": true,
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "MOSI",
+      "type": "spi"
+     },
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 154.1,
+    "y": 33.6
+   },
+   {
+    "name": "RESET.3",
+    "noBreadboard": true,
+    "signals": [],
+    "x": 163.7,
+    "y": 24
+   },
+   {
+    "name": "GND.3",
+    "noBreadboard": true,
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 154.1,
+    "y": 24
+   }
+  ]
+ },
+ "wokwi-arduino-uno": {
+  "element": "wokwi-arduino-uno",
+  "file": "arduino-uno-element.ts",
+  "pins": [
+   {
+    "name": "A5.2",
+    "signals": [
+     {
+      "channel": 5,
+      "type": "analog"
+     },
+     {
+      "bus": 0,
+      "signal": "SCL",
+      "type": "i2c"
+     }
+    ],
+    "x": 87,
+    "y": 9
+   },
+   {
+    "name": "A4.2",
+    "signals": [
+     {
+      "channel": 4,
+      "type": "analog"
+     },
+     {
+      "bus": 0,
+      "signal": "SDA",
+      "type": "i2c"
+     }
+    ],
+    "x": 97,
+    "y": 9
+   },
+   {
+    "name": "AREF",
+    "signals": [],
+    "x": 106,
+    "y": 9
+   },
+   {
+    "name": "GND.1",
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 115.5,
+    "y": 9
+   },
+   {
+    "name": "13",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "SCK",
+      "type": "spi"
+     }
+    ],
+    "x": 125,
+    "y": 9
+   },
+   {
+    "name": "12",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "MISO",
+      "type": "spi"
+     }
+    ],
+    "x": 134.5,
+    "y": 9
+   },
+   {
+    "name": "11",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "MOSI",
+      "type": "spi"
+     },
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 144,
+    "y": 9
+   },
+   {
+    "name": "10",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "SS",
+      "type": "spi"
+     },
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 153.5,
+    "y": 9
+   },
+   {
+    "name": "9",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 163,
+    "y": 9
+   },
+   {
+    "name": "8",
+    "signals": [],
+    "x": 173,
+    "y": 9
+   },
+   {
+    "name": "7",
+    "signals": [],
+    "x": 189,
+    "y": 9
+   },
+   {
+    "name": "6",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 198.5,
+    "y": 9
+   },
+   {
+    "name": "5",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 208,
+    "y": 9
+   },
+   {
+    "name": "4",
+    "signals": [],
+    "x": 217.5,
+    "y": 9
+   },
+   {
+    "name": "3",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 227,
+    "y": 9
+   },
+   {
+    "name": "2",
+    "signals": [],
+    "x": 236.5,
+    "y": 9
+   },
+   {
+    "name": "1",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "TX",
+      "type": "usart"
+     }
+    ],
+    "x": 246,
+    "y": 9
+   },
+   {
+    "name": "0",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "RX",
+      "type": "usart"
+     }
+    ],
+    "x": 255.5,
+    "y": 9
+   },
+   {
+    "name": "IOREF",
+    "signals": [],
+    "x": 131,
+    "y": 191.5
+   },
+   {
+    "name": "RESET",
+    "signals": [],
+    "x": 140.5,
+    "y": 191.5
+   },
+   {
+    "name": "3.3V",
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power",
+      "voltage": 3.3
+     }
+    ],
+    "x": 150,
+    "y": 191.5
+   },
+   {
+    "name": "5V",
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power",
+      "voltage": 5
+     }
+    ],
+    "x": 160,
+    "y": 191.5
+   },
+   {
+    "name": "GND.2",
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 169.5,
+    "y": 191.5
+   },
+   {
+    "name": "GND.3",
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 179,
+    "y": 191.5
+   },
+   {
+    "name": "VIN",
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power"
+     }
+    ],
+    "x": 188.5,
+    "y": 191.5
+   },
+   {
+    "name": "A0",
+    "signals": [
+     {
+      "channel": 0,
+      "type": "analog"
+     }
+    ],
+    "x": 208,
+    "y": 191.5
+   },
+   {
+    "name": "A1",
+    "signals": [
+     {
+      "channel": 1,
+      "type": "analog"
+     }
+    ],
+    "x": 217.5,
+    "y": 191.5
+   },
+   {
+    "name": "A2",
+    "signals": [
+     {
+      "channel": 2,
+      "type": "analog"
+     }
+    ],
+    "x": 227,
+    "y": 191.5
+   },
+   {
+    "name": "A3",
+    "signals": [
+     {
+      "channel": 3,
+      "type": "analog"
+     }
+    ],
+    "x": 236.5,
+    "y": 191.5
+   },
+   {
+    "name": "A4",
+    "signals": [
+     {
+      "channel": 4,
+      "type": "analog"
+     },
+     {
+      "bus": 0,
+      "signal": "SDA",
+      "type": "i2c"
+     }
+    ],
+    "x": 246,
+    "y": 191.5
+   },
+   {
+    "name": "A5",
+    "signals": [
+     {
+      "channel": 5,
+      "type": "analog"
+     },
+     {
+      "bus": 0,
+      "signal": "SCL",
+      "type": "i2c"
+     }
+    ],
+    "x": 255.5,
+    "y": 191.5
+   }
+  ]
+ },
+ "wokwi-big-sound-sensor": {
+  "element": "wokwi-big-sound-sensor",
+  "file": "big-sound-sensor-element.ts",
+  "pins": [
+   {
+    "name": "AOUT",
+    "number": 1,
+    "signals": [],
+    "x": 0,
+    "y": 11
+   },
+   {
+    "name": "GND",
+    "number": 2,
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 0,
+    "y": 20.5
+   },
+   {
+    "name": "VCC",
+    "number": 3,
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power"
+     }
+    ],
+    "x": 0,
+    "y": 30.5
+   },
+   {
+    "name": "DOUT",
+    "number": 4,
+    "signals": [],
+    "x": 0,
+    "y": 40.5
+   }
+  ]
+ },
+ "wokwi-buzzer": {
+  "element": "wokwi-buzzer",
+  "file": "buzzer-element.ts",
+  "pins": [
+   {
+    "name": "1",
+    "signals": [],
+    "x": 27,
+    "y": 84
+   },
+   {
+    "name": "2",
+    "signals": [],
+    "x": 37,
+    "y": 84
+   }
+  ]
+ },
+ "wokwi-dht22": {
+  "element": "wokwi-dht22",
+  "file": "dht22-element.ts",
+  "pins": [
+   {
+    "name": "VCC",
+    "number": 1,
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power"
+     }
+    ],
+    "x": 15,
+    "y": 114.9
+   },
+   {
+    "name": "SDA",
+    "number": 2,
+    "signals": [],
+    "x": 24.5,
+    "y": 114.9
+   },
+   {
+    "name": "NC",
+    "number": 3,
+    "signals": [],
+    "x": 34.1,
+    "y": 114.9
+   },
+   {
+    "name": "GND",
+    "number": 4,
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 43.8,
+    "y": 114.9
+   }
+  ]
+ },
+ "wokwi-dip-switch-8": {
+  "element": "wokwi-dip-switch-8",
+  "file": "dip-switch-8-element.ts",
+  "pins": [
+   {
+    "name": "1a",
+    "number": 1,
+    "signals": [],
+    "x": 8.1,
+    "y": 51.3
+   },
+   {
+    "name": "2a",
+    "number": 2,
+    "signals": [],
+    "x": 17.7,
+    "y": 51.3
+   },
+   {
+    "name": "3a",
+    "number": 3,
+    "signals": [],
+    "x": 27.3,
+    "y": 51.3
+   },
+   {
+    "name": "4a",
+    "number": 4,
+    "signals": [],
+    "x": 36.9,
+    "y": 51.3
+   },
+   {
+    "name": "5a",
+    "number": 5,
+    "signals": [],
+    "x": 46.5,
+    "y": 51.3
+   },
+   {
+    "name": "6a",
+    "number": 6,
+    "signals": [],
+    "x": 56.1,
+    "y": 51.3
+   },
+   {
+    "name": "7a",
+    "number": 7,
+    "signals": [],
+    "x": 65.7,
+    "y": 51.3
+   },
+   {
+    "name": "8a",
+    "number": 8,
+    "signals": [],
+    "x": 75.3,
+    "y": 51.3
+   },
+   {
+    "name": "8b",
+    "number": 9,
+    "signals": [],
+    "x": 75.3,
+    "y": 3
+   },
+   {
+    "name": "7b",
+    "number": 10,
+    "signals": [],
+    "x": 65.7,
+    "y": 3
+   },
+   {
+    "name": "6b",
+    "number": 11,
+    "signals": [],
+    "x": 56.1,
+    "y": 3
+   },
+   {
+    "name": "5b",
+    "number": 12,
+    "signals": [],
+    "x": 46.5,
+    "y": 3
+   },
+   {
+    "name": "4b",
+    "number": 13,
+    "signals": [],
+    "x": 36.9,
+    "y": 3
+   },
+   {
+    "name": "3b",
+    "number": 14,
+    "signals": [],
+    "x": 27.3,
+    "y": 3
+   },
+   {
+    "name": "2b",
+    "number": 15,
+    "signals": [],
+    "x": 17.7,
+    "y": 3
+   },
+   {
+    "name": "1b",
+    "number": 16,
+    "signals": [],
+    "x": 8.1,
+    "y": 3
+   }
+  ]
+ },
+ "wokwi-ds1307": {
+  "element": "wokwi-ds1307",
+  "file": "ds1307-element.ts",
+  "pins": [
+   {
+    "name": "GND",
+    "number": 1,
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 9.5,
+    "y": 15
+   },
+   {
+    "name": "5V",
+    "number": 2,
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power",
+      "voltage": 5
+     }
+    ],
+    "x": 9.5,
+    "y": 25
+   },
+   {
+    "name": "SDA",
+    "number": 3,
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "SDA",
+      "type": "i2c"
+     }
+    ],
+    "x": 9.5,
+    "y": 34.5
+   },
+   {
+    "name": "SCL",
+    "number": 4,
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "SCL",
+      "type": "i2c"
+     }
+    ],
+    "x": 9.5,
+    "y": 44
+   },
+   {
+    "name": "SQW",
+    "number": 5,
+    "signals": [],
+    "x": 9.5,
+    "y": 54
+   }
+  ]
+ },
+ "wokwi-esp32-devkit-v1": {
+  "element": "wokwi-esp32-devkit-v1",
+  "file": "esp32-devkit-v1-element.ts",
+  "pins": [
+   {
+    "name": "VIN",
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power"
+     }
+    ],
+    "x": 5,
+    "y": 158.5
+   },
+   {
+    "name": "GND.2",
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 5,
+    "y": 149
+   },
+   {
+    "name": "D13",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "MOSI",
+      "type": "spi"
+     },
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 5,
+    "y": 139.5
+   },
+   {
+    "name": "D12",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "MISO",
+      "type": "spi"
+     },
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 5,
+    "y": 130.4
+   },
+   {
+    "name": "D14",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "SCK",
+      "type": "spi"
+     },
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 5,
+    "y": 120
+   },
+   {
+    "name": "D27",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 5,
+    "y": 110.8
+   },
+   {
+    "name": "D26",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 5,
+    "y": 101
+   },
+   {
+    "name": "D25",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 5,
+    "y": 91.3
+   },
+   {
+    "name": "D33",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 5,
+    "y": 81.7
+   },
+   {
+    "name": "D32",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 5,
+    "y": 72.2
+   },
+   {
+    "name": "D35",
+    "signals": [],
+    "x": 5,
+    "y": 62.9
+   },
+   {
+    "name": "D34",
+    "signals": [],
+    "x": 5,
+    "y": 53.1
+   },
+   {
+    "name": "VN",
+    "signals": [],
+    "x": 5,
+    "y": 44
+   },
+   {
+    "name": "VP",
+    "signals": [],
+    "x": 5,
+    "y": 34
+   },
+   {
+    "name": "EN",
+    "signals": [],
+    "x": 5,
+    "y": 24
+   },
+   {
+    "name": "3V3",
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power",
+      "voltage": 3.3
+     }
+    ],
+    "x": 101.3,
+    "y": 158.5
+   },
+   {
+    "name": "GND.1",
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 101.3,
+    "y": 149
+   },
+   {
+    "name": "D15",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "SS",
+      "type": "spi"
+     },
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 101.3,
+    "y": 139.5
+   },
+   {
+    "name": "D2",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 101.3,
+    "y": 130.4
+   },
+   {
+    "name": "D4",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 101.3,
+    "y": 120
+   },
+   {
+    "name": "RX2",
+    "signals": [
+     {
+      "bus": 2,
+      "signal": "RX",
+      "type": "usart"
+     },
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 101.3,
+    "y": 110.8
+   },
+   {
+    "name": "TX2",
+    "signals": [
+     {
+      "bus": 2,
+      "signal": "TX",
+      "type": "usart"
+     },
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 101.3,
+    "y": 101
+   },
+   {
+    "name": "D5",
+    "signals": [
+     {
+      "bus": 1,
+      "signal": "SS",
+      "type": "spi"
+     },
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 101.3,
+    "y": 91.3
+   },
+   {
+    "name": "D18",
+    "signals": [
+     {
+      "bus": 1,
+      "signal": "SCK",
+      "type": "spi"
+     },
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 101.3,
+    "y": 81.7
+   },
+   {
+    "name": "D19",
+    "signals": [
+     {
+      "bus": 1,
+      "signal": "MISO",
+      "type": "spi"
+     },
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 101.3,
+    "y": 72.2
+   },
+   {
+    "name": "D21",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "SDA",
+      "type": "i2c"
+     },
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 101.3,
+    "y": 62.9
+   },
+   {
+    "name": "RX0",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "RX",
+      "type": "usart"
+     },
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 101.3,
+    "y": 53.1
+   },
+   {
+    "name": "TX0",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "TX",
+      "type": "usart"
+     },
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 101.3,
+    "y": 44
+   },
+   {
+    "name": "D22",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "SCL",
+      "type": "i2c"
+     },
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 101.3,
+    "y": 34
+   },
+   {
+    "name": "D23",
+    "signals": [
+     {
+      "bus": 1,
+      "signal": "MOSI",
+      "type": "spi"
+     },
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 101.3,
+    "y": 24
+   }
+  ]
+ },
+ "wokwi-flame-sensor": {
+  "element": "wokwi-flame-sensor",
+  "file": "flame-sensor-element.ts",
+  "pins": [
+   {
+    "name": "VCC",
+    "number": 1,
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power"
+     }
+    ],
+    "x": 199,
+    "y": 14.6
+   },
+   {
+    "name": "GND",
+    "number": 2,
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 199,
+    "y": 24.3
+   },
+   {
+    "name": "DOUT",
+    "number": 3,
+    "signals": [],
+    "x": 199,
+    "y": 34
+   },
+   {
+    "name": "AOUT",
+    "number": 4,
+    "signals": [],
+    "x": 199,
+    "y": 43.7
+   }
+  ]
+ },
+ "wokwi-franzininho": {
+  "element": "wokwi-franzininho",
+  "file": "franzininho-element.ts",
+  "pins": [
+   {
+    "name": "GND.1",
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 218.5,
+    "y": 23.3
+   },
+   {
+    "name": "VCC.1",
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power",
+      "voltage": 5
+     }
+    ],
+    "x": 218.5,
+    "y": 32.9
+   },
+   {
+    "name": "PB4",
+    "signals": [
+     {
+      "channel": 2,
+      "type": "analog"
+     },
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 218.5,
+    "y": 42.5
+   },
+   {
+    "name": "PB5",
+    "signals": [
+     {
+      "channel": 0,
+      "type": "analog"
+     }
+    ],
+    "x": 218.5,
+    "y": 52.2
+   },
+   {
+    "name": "PB3",
+    "signals": [
+     {
+      "channel": 3,
+      "type": "analog"
+     }
+    ],
+    "x": 218.5,
+    "y": 61.7
+   },
+   {
+    "name": "PB2",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "SCK",
+      "type": "spi"
+     },
+     {
+      "bus": 0,
+      "signal": "SCL",
+      "type": "i2c"
+     },
+     {
+      "channel": 1,
+      "type": "analog"
+     }
+    ],
+    "x": 218.5,
+    "y": 71.2
+   },
+   {
+    "name": "PB1",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "MISO",
+      "type": "spi"
+     },
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 218.5,
+    "y": 80.9
+   },
+   {
+    "name": "PB0",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "MOSI",
+      "type": "spi"
+     },
+     {
+      "bus": 0,
+      "signal": "SDA",
+      "type": "i2c"
+     },
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 218.5,
+    "y": 90.5
+   },
+   {
+    "name": "VIN",
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power"
+     }
+    ],
+    "x": 132.7,
+    "y": 8.1
+   },
+   {
+    "name": "GND.2",
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 142.9,
+    "y": 8.1
+   },
+   {
+    "name": "VCC.2",
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power",
+      "voltage": 5
+     }
+    ],
+    "x": 153,
+    "y": 8.1
+   }
+  ]
+ },
+ "wokwi-gas-sensor": {
+  "element": "wokwi-gas-sensor",
+  "file": "gas-sensor-element.ts",
+  "pins": [
+   {
+    "name": "AOUT",
+    "number": 1,
+    "signals": [],
+    "x": 137,
+    "y": 16.5
+   },
+   {
+    "name": "DOUT",
+    "number": 2,
+    "signals": [],
+    "x": 137,
+    "y": 26.4
+   },
+   {
+    "name": "GND",
+    "number": 3,
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 137,
+    "y": 36.5
+   },
+   {
+    "name": "VCC",
+    "number": 4,
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power"
+     }
+    ],
+    "x": 137,
+    "y": 46.2
+   }
+  ]
+ },
+ "wokwi-hc-sr04": {
+  "element": "wokwi-hc-sr04",
+  "file": "hc-sr04-element.ts",
+  "pins": [
+   {
+    "name": "VCC",
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power",
+      "voltage": 5
+     }
+    ],
+    "x": 71.3,
+    "y": 94.5
+   },
+   {
+    "name": "TRIG",
+    "signals": [],
+    "x": 81.3,
+    "y": 94.5
+   },
+   {
+    "name": "ECHO",
+    "signals": [],
+    "x": 91.3,
+    "y": 94.5
+   },
+   {
+    "name": "GND",
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 101.3,
+    "y": 94.5
+   }
+  ]
+ },
+ "wokwi-heart-beat-sensor": {
+  "element": "wokwi-heart-beat-sensor",
+  "file": "heart-beat-sensor-element.ts",
+  "pins": [
+   {
+    "name": "GND",
+    "number": 1,
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 87,
+    "y": 17.8
+   },
+   {
+    "name": "VCC",
+    "number": 2,
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power"
+     }
+    ],
+    "x": 87,
+    "y": 27.5
+   },
+   {
+    "name": "OUT",
+    "number": 3,
+    "signals": [],
+    "x": 87,
+    "y": 37.5
+   }
+  ]
+ },
+ "wokwi-hx711": {
+  "element": "wokwi-hx711",
+  "file": "hx711-element.ts",
+  "pins": [
+   {
+    "name": "VCC",
+    "number": 1,
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power"
+     }
+    ],
+    "x": 7,
+    "y": 55
+   },
+   {
+    "name": "DT",
+    "number": 2,
+    "signals": [],
+    "x": 7,
+    "y": 36.3
+   },
+   {
+    "name": "SCK",
+    "number": 3,
+    "signals": [],
+    "x": 7,
+    "y": 46.2
+   },
+   {
+    "name": "GND",
+    "number": 4,
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 7,
+    "y": 26.5
+   }
+  ]
+ },
+ "wokwi-ili9341": {
+  "element": "wokwi-ili9341",
+  "file": "ili9341-element.ts",
+  "pins": [
+   {
+    "name": "VCC",
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power"
+     }
+    ],
+    "x": 48.3,
+    "y": 287.2
+   },
+   {
+    "name": "GND",
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 57.9012,
+    "y": 287.2
+   },
+   {
+    "name": "CS",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "SS",
+      "type": "spi"
+     }
+    ],
+    "x": 67.5024,
+    "y": 287.2
+   },
+   {
+    "name": "RST",
+    "signals": [],
+    "x": 77.1036,
+    "y": 287.2
+   },
+   {
+    "name": "D/C",
+    "signals": [],
+    "x": 86.7048,
+    "y": 287.2
+   },
+   {
+    "name": "MOSI",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "MOSI",
+      "type": "spi"
+     }
+    ],
+    "x": 96.306,
+    "y": 287.2
+   },
+   {
+    "name": "SCK",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "SCK",
+      "type": "spi"
+     }
+    ],
+    "x": 105.9072,
+    "y": 287.2
+   },
+   {
+    "name": "LED",
+    "signals": [],
+    "x": 115.5084,
+    "y": 287.2
+   },
+   {
+    "name": "MISO",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "MISO",
+      "type": "spi"
+     }
+    ],
+    "x": 125.1096,
+    "y": 287.2
+   }
+  ]
+ },
+ "wokwi-ir-receiver": {
+  "element": "wokwi-ir-receiver",
+  "file": "ir-receiver-element.ts",
+  "pins": [
+   {
+    "name": "GND",
+    "number": 1,
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 20.977,
+    "y": 87.75
+   },
+   {
+    "name": "VCC",
+    "number": 2,
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power"
+     }
+    ],
+    "x": 30.578,
+    "y": 87.75
+   },
+   {
+    "name": "DAT",
+    "number": 3,
+    "signals": [],
+    "x": 40.18,
+    "y": 87.75
+   }
+  ]
+ },
+ "wokwi-ky-040": {
+  "element": "wokwi-ky-040",
+  "file": "ky-040-element.ts",
+  "pins": [
+   {
+    "name": "CLK",
+    "number": 1,
+    "signals": [],
+    "x": 116,
+    "y": 7.9
+   },
+   {
+    "name": "DT",
+    "number": 2,
+    "signals": [],
+    "x": 116,
+    "y": 17.4
+   },
+   {
+    "name": "SW",
+    "number": 3,
+    "signals": [],
+    "x": 116,
+    "y": 27
+   },
+   {
+    "name": "VCC",
+    "number": 4,
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power"
+     }
+    ],
+    "x": 116,
+    "y": 36.3
+   },
+   {
+    "name": "GND",
+    "number": 5,
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 116,
+    "y": 45.5
+   }
+  ]
+ },
+ "wokwi-microsd-card": {
+  "element": "wokwi-microsd-card",
+  "file": "microsd-card-element.ts",
+  "pins": [
+   {
+    "name": "CD",
+    "signals": [],
+    "x": 76.734,
+    "y": 9.3744
+   },
+   {
+    "name": "DO",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "MISO",
+      "type": "spi"
+     }
+    ],
+    "x": 76.734,
+    "y": 18.8622
+   },
+   {
+    "name": "GND",
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 76.734,
+    "y": 28.4634
+   },
+   {
+    "name": "SCK",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "SCK",
+      "type": "spi"
+     }
+    ],
+    "x": 76.734,
+    "y": 38.178
+   },
+   {
+    "name": "VCC",
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power"
+     }
+    ],
+    "x": 76.734,
+    "y": 47.628
+   },
+   {
+    "name": "DI",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "MOSI",
+      "type": "spi"
+     }
+    ],
+    "x": 76.734,
+    "y": 57.456
+   },
+   {
+    "name": "CS",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "SS",
+      "type": "spi"
+     }
+    ],
+    "x": 76.734,
+    "y": 66.906
+   }
+  ]
+ },
+ "wokwi-mpu6050": {
+  "element": "wokwi-mpu6050",
+  "file": "mpu6050-element.ts",
+  "pins": [
+   {
+    "name": "INT",
+    "signals": [],
+    "x": 7.28,
+    "y": 5.78
+   },
+   {
+    "name": "AD0",
+    "signals": [],
+    "x": 16.9,
+    "y": 5.78
+   },
+   {
+    "name": "XCL",
+    "signals": [],
+    "x": 26.4,
+    "y": 5.78
+   },
+   {
+    "name": "XDA",
+    "signals": [],
+    "x": 36.0,
+    "y": 5.78
+   },
+   {
+    "name": "SDA",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "SDA",
+      "type": "i2c"
+     }
+    ],
+    "x": 45.6,
+    "y": 5.78
+   },
+   {
+    "name": "SCL",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "SCL",
+      "type": "i2c"
+     }
+    ],
+    "x": 55.2,
+    "y": 5.78
+   },
+   {
+    "name": "GND",
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 64.8,
+    "y": 5.78
+   },
+   {
+    "name": "VCC",
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power"
+     }
+    ],
+    "x": 74.4,
+    "y": 5.78
+   }
+  ]
+ },
+ "wokwi-nano-rp2040-connect": {
+  "element": "wokwi-nano-rp2040-connect",
+  "file": "nano-rp2040-connect-element.ts",
+  "pins": [
+   {
+    "description": "GPIO04",
+    "name": "D12",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "MISO",
+      "type": "spi"
+     },
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 20.1,
+    "y": 1
+   },
+   {
+    "description": "GPIO07",
+    "name": "D11",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "MOSI",
+      "type": "spi"
+     },
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 29.8,
+    "y": 1
+   },
+   {
+    "description": "GPIO05",
+    "name": "D10",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 39.3,
+    "y": 1
+   },
+   {
+    "description": "GPIO21",
+    "name": "D9",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 48.9,
+    "y": 1
+   },
+   {
+    "description": "GPIO20",
+    "name": "D8",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 58.5,
+    "y": 1
+   },
+   {
+    "description": "GPIO19",
+    "name": "D7",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 68.1,
+    "y": 1
+   },
+   {
+    "description": "GPIO18",
+    "name": "D6",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 77.7,
+    "y": 1
+   },
+   {
+    "description": "GPIO17",
+    "name": "D5",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 87.3,
+    "y": 1
+   },
+   {
+    "description": "GPIO16",
+    "name": "D4",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 96.9,
+    "y": 1
+   },
+   {
+    "description": "GPIO15",
+    "name": "D3",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 106.5,
+    "y": 1
+   },
+   {
+    "description": "GPIO25",
+    "name": "D2",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 116.1,
+    "y": 1
+   },
+   {
+    "name": "GND.1",
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 125.2,
+    "y": 1
+   },
+   {
+    "name": "RESET",
+    "signals": [],
+    "x": 135.3,
+    "y": 1
+   },
+   {
+    "description": "GPIO1",
+    "name": "RX",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "RX",
+      "type": "usart"
+     }
+    ],
+    "x": 153.9,
+    "y": 1
+   },
+   {
+    "description": "GPIO0",
+    "name": "TX",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "TX",
+      "type": "usart"
+     }
+    ],
+    "x": 144.5,
+    "y": 1
+   },
+   {
+    "description": "GPIO6",
+    "name": "D13",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "SCK",
+      "type": "spi"
+     }
+    ],
+    "x": 20.1,
+    "y": 67.5
+   },
+   {
+    "name": "3.3V",
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power",
+      "voltage": 3.3
+     }
+    ],
+    "x": 29.7,
+    "y": 67.5
+   },
+   {
+    "name": "AREF",
+    "signals": [],
+    "x": 39.3,
+    "y": 67.5
+   },
+   {
+    "description": "GPIO26",
+    "name": "A0",
+    "signals": [
+     {
+      "channel": 0,
+      "type": "analog"
+     }
+    ],
+    "x": 48.8,
+    "y": 67.5
+   },
+   {
+    "description": "GPIO27",
+    "name": "A1",
+    "signals": [
+     {
+      "channel": 1,
+      "type": "analog"
+     }
+    ],
+    "x": 58.5,
+    "y": 67.5
+   },
+   {
+    "description": "GPIO28",
+    "name": "A2",
+    "signals": [
+     {
+      "channel": 2,
+      "type": "analog"
+     }
+    ],
+    "x": 68,
+    "y": 67.5
+   },
+   {
+    "description": "GPIO29",
+    "name": "A3",
+    "signals": [
+     {
+      "channel": 3,
+      "type": "analog"
+     }
+    ],
+    "x": 77.6,
+    "y": 67.5
+   },
+   {
+    "description": "GPIO12",
+    "name": "A4",
+    "signals": [
+     {
+      "channel": 4,
+      "type": "analog"
+     }
+    ],
+    "x": 87.3,
+    "y": 67.5
+   },
+   {
+    "description": "GPIO13",
+    "name": "A5",
+    "signals": [
+     {
+      "channel": 5,
+      "type": "analog"
+     }
+    ],
+    "x": 96.9,
+    "y": 67.5
+   },
+   {
+    "name": "A6",
+    "signals": [
+     {
+      "channel": 6,
+      "type": "analog"
+     }
+    ],
+    "x": 106.5,
+    "y": 67.5
+   },
+   {
+    "name": "A7",
+    "signals": [
+     {
+      "channel": 7,
+      "type": "analog"
+     }
+    ],
+    "x": 116.1,
+    "y": 67.5
+   },
+   {
+    "name": "5V",
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power",
+      "voltage": 5
+     }
+    ],
+    "x": 125.5,
+    "y": 67.5
+   },
+   {
+    "name": "RESET.2",
+    "signals": [],
+    "x": 134.9,
+    "y": 67.5
+   },
+   {
+    "name": "GND.2",
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 145.3,
+    "y": 67.5
+   },
+   {
+    "name": "VIN",
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power"
+     }
+    ],
+    "x": 154.1,
+    "y": 67.5
+   }
+  ]
+ },
+ "wokwi-neopixel": {
+  "element": "wokwi-neopixel",
+  "file": "neopixel-element.ts",
+  "pins": [
+   {
+    "name": "VDD",
+    "number": 1,
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power"
+     }
+    ],
+    "x": 1,
+    "y": 3.5
+   },
+   {
+    "name": "DOUT",
+    "number": 2,
+    "signals": [],
+    "x": 1,
+    "y": 14
+   },
+   {
+    "name": "VSS",
+    "number": 3,
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 21,
+    "y": 14
+   },
+   {
+    "name": "DIN",
+    "number": 4,
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 21,
+    "y": 3.5
+   }
+  ]
+ },
+ "wokwi-ntc-temperature-sensor": {
+  "element": "wokwi-ntc-temperature-sensor",
+  "file": "ntc-temperature-sensor-element.ts",
+  "pins": [
+   {
+    "name": "GND",
+    "number": 1,
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 135,
+    "y": 26.2
+   },
+   {
+    "name": "VCC",
+    "number": 2,
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power"
+     }
+    ],
+    "x": 135,
+    "y": 35.8
+   },
+   {
+    "name": "OUT",
+    "number": 3,
+    "signals": [
+     {
+      "channel": 0,
+      "type": "analog"
+     }
+    ],
+    "x": 135,
+    "y": 45.5
+   }
+  ]
+ },
+ "wokwi-photoresistor-sensor": {
+  "element": "wokwi-photoresistor-sensor",
+  "file": "photoresistor-sensor-element.ts",
+  "pins": [
+   {
+    "name": "VCC",
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power"
+     }
+    ],
+    "x": 172,
+    "y": 16
+   },
+   {
+    "name": "GND",
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 172,
+    "y": 26
+   },
+   {
+    "name": "DO",
+    "signals": [],
+    "x": 172,
+    "y": 35.8
+   },
+   {
+    "name": "AO",
+    "signals": [
+     {
+      "channel": 0,
+      "type": "analog"
+     }
+    ],
+    "x": 172,
+    "y": 45.5
+   }
+  ]
+ },
+ "wokwi-pir-motion-sensor": {
+  "element": "wokwi-pir-motion-sensor",
+  "file": "pir-motion-sensor-element.ts",
+  "pins": [
+   {
+    "name": "VCC",
+    "number": 1,
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power"
+     }
+    ],
+    "x": 36.178,
+    "y": 92
+   },
+   {
+    "name": "OUT",
+    "number": 2,
+    "signals": [],
+    "x": 45.9175,
+    "y": 92
+   },
+   {
+    "name": "GND",
+    "number": 3,
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 55.6415,
+    "y": 92
+   }
+  ]
+ },
+ "wokwi-potentiometer": {
+  "element": "wokwi-potentiometer",
+  "file": "potentiometer-element.ts",
+  "pins": [
+   {
+    "name": "GND",
+    "number": 1,
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 29,
+    "y": 68.5
+   },
+   {
+    "name": "SIG",
+    "number": 2,
+    "signals": [
+     {
+      "channel": 0,
+      "type": "analog"
+     }
+    ],
+    "x": 39,
+    "y": 68.5
+   },
+   {
+    "name": "VCC",
+    "number": 3,
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power"
+     }
+    ],
+    "x": 49,
+    "y": 68.5
+   }
+  ]
+ },
+ "wokwi-pushbutton": {
+  "element": "wokwi-pushbutton",
+  "file": "pushbutton-element.ts",
+  "pins": [
+   {
+    "name": "1.l",
+    "signals": [],
+    "x": 0,
+    "y": 13
+   },
+   {
+    "name": "2.l",
+    "signals": [],
+    "x": 0,
+    "y": 32
+   },
+   {
+    "name": "1.r",
+    "signals": [],
+    "x": 67,
+    "y": 13
+   },
+   {
+    "name": "2.r",
+    "signals": [],
+    "x": 67,
+    "y": 32
+   }
+  ]
+ },
+ "wokwi-pushbutton-6mm": {
+  "element": "wokwi-pushbutton-6mm",
+  "file": "pushbutton-6mm-element.ts",
+  "pins": [
+   {
+    "name": "1.l",
+    "signals": [],
+    "x": 0,
+    "y": 2.2
+   },
+   {
+    "name": "2.l",
+    "signals": [],
+    "x": 0,
+    "y": 21
+   },
+   {
+    "name": "1.r",
+    "signals": [],
+    "x": 28,
+    "y": 2.2
+   },
+   {
+    "name": "2.r",
+    "signals": [],
+    "x": 28,
+    "y": 21
+   }
+  ]
+ },
+ "wokwi-resistor": {
+  "element": "wokwi-resistor",
+  "file": "resistor-element.ts",
+  "pins": [
+   {
+    "name": "1",
+    "signals": [],
+    "x": 0,
+    "y": 5.65
+   },
+   {
+    "name": "2",
+    "signals": [],
+    "x": 58.8,
+    "y": 5.65
+   }
+  ]
+ },
+ "wokwi-rgb-led": {
+  "element": "wokwi-rgb-led",
+  "file": "rgb-led-element.ts",
+  "pins": [
+   {
+    "name": "R",
+    "signals": [],
+    "x": 8.5,
+    "y": 44
+   },
+   {
+    "name": "COM",
+    "signals": [],
+    "x": 18,
+    "y": 54
+   },
+   {
+    "name": "G",
+    "signals": [],
+    "x": 26.4,
+    "y": 44
+   },
+   {
+    "name": "B",
+    "signals": [],
+    "x": 35.7,
+    "y": 44
+   }
+  ]
+ },
+ "wokwi-rotary-dialer": {
+  "element": "wokwi-rotary-dialer",
+  "file": "rotary-dialer-element.ts",
+  "pins": [
+   {
+    "name": "GND",
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 122,
+    "y": 286
+   },
+   {
+    "name": "DIAL",
+    "signals": [],
+    "x": 131.6,
+    "y": 286
+   },
+   {
+    "name": "PULSE",
+    "signals": [],
+    "x": 141.2,
+    "y": 286
+   }
+  ]
+ },
+ "wokwi-servo": {
+  "element": "wokwi-servo",
+  "file": "servo-element.ts",
+  "pins": [
+   {
+    "name": "GND",
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 0,
+    "y": 50
+   },
+   {
+    "name": "V+",
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power"
+     }
+    ],
+    "x": 0,
+    "y": 59.5
+   },
+   {
+    "name": "PWM",
+    "signals": [
+     {
+      "type": "pwm"
+     }
+    ],
+    "x": 0,
+    "y": 69
+   }
+  ]
+ },
+ "wokwi-slide-switch": {
+  "element": "wokwi-slide-switch",
+  "file": "slide-switch-element.ts",
+  "pins": [
+   {
+    "name": "1",
+    "number": 1,
+    "signals": [],
+    "x": 6.5,
+    "y": 34
+   },
+   {
+    "name": "2",
+    "number": 2,
+    "signals": [],
+    "x": 16,
+    "y": 34
+   },
+   {
+    "name": "3",
+    "number": 3,
+    "signals": [],
+    "x": 25.5,
+    "y": 34
+   }
+  ]
+ },
+ "wokwi-small-sound-sensor": {
+  "element": "wokwi-small-sound-sensor",
+  "file": "small-sound-sensor-element.ts",
+  "pins": [
+   {
+    "name": "AOUT",
+    "number": 1,
+    "signals": [],
+    "x": 0,
+    "y": 11
+   },
+   {
+    "name": "GND",
+    "number": 2,
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 0,
+    "y": 20.5
+   },
+   {
+    "name": "VCC",
+    "number": 3,
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power"
+     }
+    ],
+    "x": 0,
+    "y": 30.5
+   },
+   {
+    "name": "DOUT",
+    "number": 4,
+    "signals": [],
+    "x": 0,
+    "y": 40.5
+   }
+  ]
+ },
+ "wokwi-ssd1306": {
+  "element": "wokwi-ssd1306",
+  "file": "ssd1306-element.ts",
+  "pins": [
+   {
+    "name": "DATA",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "SDA",
+      "type": "i2c"
+     }
+    ],
+    "x": 36.5,
+    "y": 12.5
+   },
+   {
+    "name": "CLK",
+    "signals": [
+     {
+      "bus": 0,
+      "signal": "SCL",
+      "type": "i2c"
+     }
+    ],
+    "x": 45.5,
+    "y": 12.5
+   },
+   {
+    "name": "DC",
+    "signals": [],
+    "x": 54.5,
+    "y": 12.5
+   },
+   {
+    "name": "RST",
+    "signals": [],
+    "x": 64.5,
+    "y": 12.5
+   },
+   {
+    "name": "CS",
+    "signals": [],
+    "x": 74.5,
+    "y": 12.5
+   },
+   {
+    "name": "3V3",
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power",
+      "voltage": 3.3
+     }
+    ],
+    "x": 83.5,
+    "y": 12.5
+   },
+   {
+    "name": "VIN",
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power"
+     }
+    ],
+    "x": 93.5,
+    "y": 12.5
+   },
+   {
+    "name": "GND",
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 103.5,
+    "y": 12
+   }
+  ]
+ },
+ "wokwi-tilt-switch": {
+  "element": "wokwi-tilt-switch",
+  "file": "tilt-switch-element.ts",
+  "pins": [
+   {
+    "name": "GND",
+    "number": 1,
+    "signals": [
+     {
+      "signal": "GND",
+      "type": "power"
+     }
+    ],
+    "x": 88,
+    "y": 18
+   },
+   {
+    "name": "VCC",
+    "number": 2,
+    "signals": [
+     {
+      "signal": "VCC",
+      "type": "power"
+     }
+    ],
+    "x": 88,
+    "y": 27.8
+   },
+   {
+    "name": "OUT",
+    "number": 3,
+    "signals": [],
+    "x": 88,
+    "y": 37.5
+   }
+  ]
+ }
+}

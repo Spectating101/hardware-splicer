@@ -1,0 +1,460 @@
+{
+  "family_id": "wdl-rb200p",
+  "family_name": "伟达立 RB200P",
+  "shared": {
+    "manufacturer": "伟达立",
+    "manufacturer_en": "WEDALI",
+    "electrical": {
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "output_encoder_bits": 17,
+      "motor_encoder_bits": 17
+    },
+    "transmission": {
+      "type": "planetary"
+    }
+  },
+  "variants": [
+    {
+      "id": "wdl-rb200p-105-18-48",
+      "model": "RB200-G3018-C1",
+      "base_id": "WDL-RB200P-105-18-48",
+      "electrical": {
+        "voltage_v": 48,
+        "continuous_current_a": 12
+      },
+      "mechanical": {
+        "rated_torque_nm": 30,
+        "peak_torque_nm": 94,
+        "start_stop_peak_torque_nm": 94,
+        "rated_speed_rpm": 142,
+        "max_speed_rpm": 150,
+        "weight_kg": 0.83,
+        "outer_diameter_mm": 105,
+        "torque_density_nm_per_kg": 113.25
+      },
+      "transmission": {
+        "reduction_ratio": 18,
+        "backdrivable": false
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 47.5,
+        "length_mm_max": 47.5
+      },
+      "datasheet_url": "datasheets/16_伟达立_行星关节模组.pdf"
+    },
+    {
+      "id": "wdl-rb200p-124-12-48",
+      "model": "RB200-G5012-C1",
+      "base_id": "WDL-RB200P-124-12-48",
+      "electrical": {
+        "voltage_v": 48,
+        "continuous_current_a": 24
+      },
+      "mechanical": {
+        "rated_torque_nm": 50,
+        "peak_torque_nm": 150,
+        "start_stop_peak_torque_nm": 150,
+        "rated_speed_rpm": 130,
+        "max_speed_rpm": 150,
+        "weight_kg": 1.4,
+        "outer_diameter_mm": 124,
+        "torque_density_nm_per_kg": 107.14
+      },
+      "transmission": {
+        "reduction_ratio": 12,
+        "backdrivable": false
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 61.5,
+        "length_mm_max": 61.5
+      },
+      "datasheet_url": "datasheets/16_伟达立_行星关节模组.pdf"
+    },
+    {
+      "id": "wdl-rb200p-124-21-48",
+      "model": "RB200-G10021-C1-10",
+      "base_id": "WDL-RB200P-124-21-48",
+      "electrical": {
+        "voltage_v": 48
+      },
+      "mechanical": {
+        "rated_torque_nm": 105.96,
+        "peak_torque_nm": 310,
+        "start_stop_peak_torque_nm": 310,
+        "rated_speed_rpm": 94.65,
+        "max_speed_rpm": 104.11,
+        "weight_kg": 2.3,
+        "outer_diameter_mm": 124,
+        "hollow_shaft_diameter_mm": 10,
+        "torque_density_nm_per_kg": 134.78
+      },
+      "transmission": {
+        "reduction_ratio": 21.13,
+        "backdrivable": false
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 92,
+        "length_mm_max": 92
+      },
+      "datasheet_url": "datasheets/16_伟达立_行星关节模组.pdf"
+    },
+    {
+      "id": "wdl-rb200p-124-24-48",
+      "model": "RB200-G10024-C1",
+      "base_id": "WDL-RB200P-124-24-48",
+      "electrical": {
+        "voltage_v": 48,
+        "continuous_current_a": 37
+      },
+      "mechanical": {
+        "rated_torque_nm": 100,
+        "peak_torque_nm": 360,
+        "start_stop_peak_torque_nm": 360,
+        "rated_speed_rpm": 102,
+        "max_speed_rpm": 150,
+        "weight_kg": 2.2,
+        "outer_diameter_mm": 124,
+        "torque_density_nm_per_kg": 163.64
+      },
+      "transmission": {
+        "reduction_ratio": 24,
+        "backdrivable": false
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 85,
+        "length_mm_max": 85
+      },
+      "datasheet_url": "datasheets/16_伟达立_行星关节模组.pdf"
+    },
+    {
+      "id": "wdl-rb200p-43-8-24",
+      "model": "RB200-G0108-C1",
+      "base_id": "WDL-RB200P-43-8-24",
+      "electrical": {
+        "voltage_v": 24,
+        "continuous_current_a": 2
+      },
+      "mechanical": {
+        "rated_torque_nm": 0.6,
+        "peak_torque_nm": 1.8,
+        "start_stop_peak_torque_nm": 1.8,
+        "rated_speed_rpm": 50,
+        "max_speed_rpm": 100,
+        "weight_kg": 0.19,
+        "outer_diameter_mm": 43,
+        "torque_density_nm_per_kg": 9.47
+      },
+      "transmission": {
+        "reduction_ratio": 7.9,
+        "backdrivable": true
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 32.5,
+        "length_mm_max": 32.5
+      },
+      "datasheet_url": "datasheets/16_伟达立_行星关节模组.pdf"
+    },
+    {
+      "id": "wdl-rb200p-56-36-48",
+      "model": "RB200-G1236-C1",
+      "base_id": "WDL-RB200P-56-36-48",
+      "electrical": {
+        "voltage_v": 48,
+        "continuous_current_a": 6
+      },
+      "mechanical": {
+        "rated_torque_nm": 12,
+        "peak_torque_nm": 36,
+        "start_stop_peak_torque_nm": 36,
+        "rated_speed_rpm": 78,
+        "max_speed_rpm": 85,
+        "weight_kg": 0.38,
+        "outer_diameter_mm": 56,
+        "torque_density_nm_per_kg": 94.74
+      },
+      "transmission": {
+        "reduction_ratio": 36,
+        "backdrivable": false
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 60,
+        "length_mm_max": 60
+      },
+      "datasheet_url": "datasheets/16_伟达立_行星关节模组.pdf"
+    },
+    {
+      "id": "wdl-rb200p-68-22-48",
+      "model": "RB200-G1221-C1-6",
+      "base_id": "WDL-RB200P-68-22-48",
+      "electrical": {
+        "voltage_v": 48
+      },
+      "mechanical": {
+        "rated_torque_nm": 12.89,
+        "peak_torque_nm": 36,
+        "start_stop_peak_torque_nm": 36,
+        "rated_speed_rpm": 115.36,
+        "max_speed_rpm": 124.59,
+        "weight_kg": 0.41,
+        "outer_diameter_mm": 68,
+        "hollow_shaft_diameter_mm": 6,
+        "torque_density_nm_per_kg": 87.8
+      },
+      "transmission": {
+        "reduction_ratio": 21.67,
+        "backdrivable": false
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 58,
+        "length_mm_max": 58
+      },
+      "datasheet_url": "datasheets/16_伟达立_行星关节模组.pdf"
+    },
+    {
+      "id": "wdl-rb200p-78-8-48",
+      "model": "RB200-G0608-C1",
+      "base_id": "WDL-RB200P-78-8-48",
+      "electrical": {
+        "voltage_v": 48,
+        "continuous_current_a": 7
+      },
+      "mechanical": {
+        "rated_torque_nm": 6,
+        "peak_torque_nm": 17,
+        "start_stop_peak_torque_nm": 17,
+        "rated_speed_rpm": 360,
+        "max_speed_rpm": 410,
+        "weight_kg": 0.4,
+        "outer_diameter_mm": 78.5,
+        "torque_density_nm_per_kg": 42.5
+      },
+      "transmission": {
+        "reduction_ratio": 7.75,
+        "backdrivable": true
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 45.5,
+        "length_mm_max": 45.5
+      },
+      "datasheet_url": "datasheets/16_伟达立_行星关节模组.pdf"
+    },
+    {
+      "id": "wdl-rb200p-80-15-48",
+      "model": "RB200-G2115-C1-8",
+      "base_id": "WDL-RB200P-80-15-48",
+      "electrical": {
+        "voltage_v": 48
+      },
+      "mechanical": {
+        "rated_torque_nm": 21,
+        "peak_torque_nm": 63,
+        "start_stop_peak_torque_nm": 63,
+        "rated_speed_rpm": 129.42,
+        "max_speed_rpm": 142.37,
+        "weight_kg": 0.81,
+        "outer_diameter_mm": 80,
+        "hollow_shaft_diameter_mm": 8,
+        "torque_density_nm_per_kg": 77.78
+      },
+      "transmission": {
+        "reduction_ratio": 15.45,
+        "backdrivable": false
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 66.8,
+        "length_mm_max": 66.8
+      },
+      "datasheet_url": "datasheets/16_伟达立_行星关节模组.pdf"
+    },
+    {
+      "id": "wdl-rb200p-88-25-48",
+      "model": "RB200-G2025-C1",
+      "base_id": "WDL-RB200P-88-25-48",
+      "electrical": {
+        "voltage_v": 48,
+        "continuous_current_a": 9
+      },
+      "mechanical": {
+        "rated_torque_nm": 20,
+        "peak_torque_nm": 60,
+        "start_stop_peak_torque_nm": 60,
+        "rated_speed_rpm": 131,
+        "max_speed_rpm": 135,
+        "weight_kg": 0.6,
+        "outer_diameter_mm": 88,
+        "torque_density_nm_per_kg": 100.0
+      },
+      "transmission": {
+        "reduction_ratio": 25,
+        "backdrivable": false
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 59.5,
+        "length_mm_max": 59.5
+      },
+      "datasheet_url": "datasheets/16_伟达立_行星关节模组.pdf"
+    },
+    {
+      "id": "wdl-rb200p-96-20-48",
+      "model": "RB200-G4019-C1-10",
+      "base_id": "WDL-RB200P-96-20-48",
+      "electrical": {
+        "voltage_v": 48
+      },
+      "mechanical": {
+        "rated_torque_nm": 45.17,
+        "peak_torque_nm": 120,
+        "start_stop_peak_torque_nm": 120,
+        "rated_speed_rpm": 127,
+        "max_speed_rpm": 137.16,
+        "weight_kg": 1.35,
+        "outer_diameter_mm": 96,
+        "hollow_shaft_diameter_mm": 10,
+        "torque_density_nm_per_kg": 88.89
+      },
+      "transmission": {
+        "reduction_ratio": 19.68,
+        "backdrivable": false
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 79,
+        "length_mm_max": 79
+      },
+      "datasheet_url": "datasheets/16_伟达立_行星关节模组.pdf"
+    }
+  ]
+}

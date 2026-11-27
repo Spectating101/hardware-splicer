@@ -1,0 +1,767 @@
+{
+  "family_id": "qzb-ha",
+  "family_name": "泉智博 HA",
+  "shared": {
+    "manufacturer": "泉智博",
+    "manufacturer_en": "MOTOREVO",
+    "electrical": {
+      "motor_topology": "radial flux"
+    },
+    "transmission": {
+      "type": "harmonic",
+      "backdrivable": false
+    }
+  },
+  "variants": [
+    {
+      "id": "qzb-ha-40-100-24",
+      "model": "RR-HA-40-100",
+      "base_id": "QZB-HA-40-100-24",
+      "electrical": {
+        "voltage_v": 24
+      },
+      "mechanical": {
+        "rated_torque_nm": 5.4,
+        "peak_torque_nm": 19,
+        "start_stop_peak_torque_nm": 19,
+        "weight_kg": 0.35,
+        "outer_diameter_mm": 56,
+        "hollow_shaft_diameter_mm": 9,
+        "absolute_accuracy_deg": 0.00278,
+        "motor_encoder_bits": 14,
+        "bending_moment_nm": 19,
+        "torque_density_nm_per_kg": 54.29
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-ha-40-100-48",
+      "model": "RR-HA-40-100",
+      "base_id": "QZB-HA-40-100-48",
+      "electrical": {
+        "voltage_v": 48
+      },
+      "mechanical": {
+        "rated_torque_nm": 5.4,
+        "peak_torque_nm": 19,
+        "start_stop_peak_torque_nm": 19,
+        "weight_kg": 0.35,
+        "outer_diameter_mm": 56,
+        "hollow_shaft_diameter_mm": 9,
+        "absolute_accuracy_deg": 0.00278,
+        "motor_encoder_bits": 14,
+        "bending_moment_nm": 19,
+        "torque_density_nm_per_kg": 54.29
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-ha-50-100-24",
+      "model": "RR-HA-50-100",
+      "base_id": "QZB-HA-50-100-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 37,
+        "continuous_current_a": 12.5
+      },
+      "mechanical": {
+        "rated_torque_nm": 16,
+        "peak_torque_nm": 37,
+        "start_stop_peak_torque_nm": 37,
+        "weight_kg": 0.5,
+        "outer_diameter_mm": 68.4,
+        "hollow_shaft_diameter_mm": 11,
+        "absolute_accuracy_deg": 0.00278,
+        "motor_encoder_bits": 14,
+        "bending_moment_nm": 34,
+        "torque_density_nm_per_kg": 74.0
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-ha-50-100-48",
+      "model": "RR-HA-50-100",
+      "base_id": "QZB-HA-50-100-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 37,
+        "continuous_current_a": 12.5
+      },
+      "mechanical": {
+        "rated_torque_nm": 16,
+        "peak_torque_nm": 37,
+        "start_stop_peak_torque_nm": 37,
+        "weight_kg": 0.5,
+        "outer_diameter_mm": 68.4,
+        "hollow_shaft_diameter_mm": 11,
+        "absolute_accuracy_deg": 0.00278,
+        "motor_encoder_bits": 14,
+        "bending_moment_nm": 34,
+        "torque_density_nm_per_kg": 74.0
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-ha-50-80-24",
+      "model": "RR-HA-50-80",
+      "base_id": "QZB-HA-50-80-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 37,
+        "continuous_current_a": 12.5
+      },
+      "mechanical": {
+        "rated_torque_nm": 16,
+        "peak_torque_nm": 34,
+        "start_stop_peak_torque_nm": 34,
+        "weight_kg": 0.5,
+        "outer_diameter_mm": 68.4,
+        "hollow_shaft_diameter_mm": 11,
+        "absolute_accuracy_deg": 0.00278,
+        "motor_encoder_bits": 14,
+        "bending_moment_nm": 34,
+        "torque_density_nm_per_kg": 68.0
+      },
+      "transmission": {
+        "reduction_ratio": 80
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-ha-50-80-48",
+      "model": "RR-HA-50-80",
+      "base_id": "QZB-HA-50-80-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 37,
+        "continuous_current_a": 12.5
+      },
+      "mechanical": {
+        "rated_torque_nm": 16,
+        "peak_torque_nm": 34,
+        "start_stop_peak_torque_nm": 34,
+        "weight_kg": 0.5,
+        "outer_diameter_mm": 68.4,
+        "hollow_shaft_diameter_mm": 11,
+        "absolute_accuracy_deg": 0.00278,
+        "motor_encoder_bits": 14,
+        "bending_moment_nm": 34,
+        "torque_density_nm_per_kg": 68.0
+      },
+      "transmission": {
+        "reduction_ratio": 80
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-ha-60-100-24",
+      "model": "RR-HA-60-100",
+      "base_id": "QZB-HA-60-100-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 28,
+        "continuous_current_a": 9
+      },
+      "mechanical": {
+        "rated_torque_nm": 28,
+        "peak_torque_nm": 57,
+        "start_stop_peak_torque_nm": 57,
+        "weight_kg": 0.65,
+        "outer_diameter_mm": 81,
+        "hollow_shaft_diameter_mm": 12.5,
+        "absolute_accuracy_deg": 0.00278,
+        "motor_encoder_bits": 14,
+        "bending_moment_nm": 44.8,
+        "torque_density_nm_per_kg": 87.69
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-ha-60-100-48",
+      "model": "RR-HA-60-100",
+      "base_id": "QZB-HA-60-100-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 28,
+        "continuous_current_a": 9
+      },
+      "mechanical": {
+        "rated_torque_nm": 28,
+        "peak_torque_nm": 57,
+        "start_stop_peak_torque_nm": 57,
+        "weight_kg": 0.65,
+        "outer_diameter_mm": 81,
+        "hollow_shaft_diameter_mm": 12.5,
+        "absolute_accuracy_deg": 0.00278,
+        "motor_encoder_bits": 14,
+        "bending_moment_nm": 44.8,
+        "torque_density_nm_per_kg": 87.69
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-ha-60-80-24",
+      "model": "RR-HA-60-80",
+      "base_id": "QZB-HA-60-80-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 28,
+        "continuous_current_a": 9
+      },
+      "mechanical": {
+        "rated_torque_nm": 28,
+        "peak_torque_nm": 53,
+        "start_stop_peak_torque_nm": 53,
+        "weight_kg": 0.65,
+        "outer_diameter_mm": 81,
+        "hollow_shaft_diameter_mm": 12.5,
+        "absolute_accuracy_deg": 0.00278,
+        "motor_encoder_bits": 14,
+        "bending_moment_nm": 44.8,
+        "torque_density_nm_per_kg": 81.54
+      },
+      "transmission": {
+        "reduction_ratio": 80
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-ha-60-80-48",
+      "model": "RR-HA-60-80",
+      "base_id": "QZB-HA-60-80-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 28,
+        "continuous_current_a": 9
+      },
+      "mechanical": {
+        "rated_torque_nm": 28,
+        "peak_torque_nm": 53,
+        "start_stop_peak_torque_nm": 53,
+        "weight_kg": 0.65,
+        "outer_diameter_mm": 81,
+        "hollow_shaft_diameter_mm": 12.5,
+        "absolute_accuracy_deg": 0.00278,
+        "motor_encoder_bits": 14,
+        "bending_moment_nm": 44.8,
+        "torque_density_nm_per_kg": 81.54
+      },
+      "transmission": {
+        "reduction_ratio": 80
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-ha-70-100-24",
+      "model": "RR-HA-70-100",
+      "base_id": "QZB-HA-70-100-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 26.1,
+        "continuous_current_a": 10
+      },
+      "mechanical": {
+        "rated_torque_nm": 40,
+        "peak_torque_nm": 82,
+        "start_stop_peak_torque_nm": 82,
+        "weight_kg": 1,
+        "outer_diameter_mm": 86,
+        "hollow_shaft_diameter_mm": 13,
+        "absolute_accuracy_deg": 0.00278,
+        "motor_encoder_bits": 15,
+        "bending_moment_nm": 44.8,
+        "torque_density_nm_per_kg": 82.0
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-ha-70-100-48",
+      "model": "RR-HA-70-100",
+      "base_id": "QZB-HA-70-100-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 26.1,
+        "continuous_current_a": 10
+      },
+      "mechanical": {
+        "rated_torque_nm": 40,
+        "peak_torque_nm": 82,
+        "start_stop_peak_torque_nm": 82,
+        "weight_kg": 1,
+        "outer_diameter_mm": 86,
+        "hollow_shaft_diameter_mm": 13,
+        "absolute_accuracy_deg": 0.00278,
+        "motor_encoder_bits": 15,
+        "bending_moment_nm": 44.8,
+        "torque_density_nm_per_kg": 82.0
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-ha-70-50-24",
+      "model": "RR-HA-70-50",
+      "base_id": "QZB-HA-70-50-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 26.1,
+        "continuous_current_a": 10
+      },
+      "mechanical": {
+        "rated_torque_nm": 25,
+        "peak_torque_nm": 56,
+        "start_stop_peak_torque_nm": 56,
+        "weight_kg": 1,
+        "outer_diameter_mm": 86,
+        "hollow_shaft_diameter_mm": 13,
+        "absolute_accuracy_deg": 0.00556,
+        "motor_encoder_bits": 15,
+        "bending_moment_nm": 44.8,
+        "torque_density_nm_per_kg": 56.0
+      },
+      "transmission": {
+        "reduction_ratio": 50
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-ha-70-50-48",
+      "model": "RR-HA-70-50",
+      "base_id": "QZB-HA-70-50-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 26.1,
+        "continuous_current_a": 10
+      },
+      "mechanical": {
+        "rated_torque_nm": 25,
+        "peak_torque_nm": 56,
+        "start_stop_peak_torque_nm": 56,
+        "weight_kg": 1,
+        "outer_diameter_mm": 86,
+        "hollow_shaft_diameter_mm": 13,
+        "absolute_accuracy_deg": 0.00556,
+        "motor_encoder_bits": 15,
+        "bending_moment_nm": 44.8,
+        "torque_density_nm_per_kg": 56.0
+      },
+      "transmission": {
+        "reduction_ratio": 50
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-ha-70-80-24",
+      "model": "RR-HA-70-80",
+      "base_id": "QZB-HA-70-80-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 26.1,
+        "continuous_current_a": 8.8
+      },
+      "mechanical": {
+        "rated_torque_nm": 34,
+        "peak_torque_nm": 74,
+        "start_stop_peak_torque_nm": 74,
+        "weight_kg": 1,
+        "outer_diameter_mm": 86,
+        "hollow_shaft_diameter_mm": 13,
+        "absolute_accuracy_deg": 0.00278,
+        "motor_encoder_bits": 15,
+        "bending_moment_nm": 44.8,
+        "torque_density_nm_per_kg": 74.0
+      },
+      "transmission": {
+        "reduction_ratio": 80
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-ha-70-80-48",
+      "model": "RR-HA-70-80",
+      "base_id": "QZB-HA-70-80-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 26.1,
+        "continuous_current_a": 8.8
+      },
+      "mechanical": {
+        "rated_torque_nm": 34,
+        "peak_torque_nm": 74,
+        "start_stop_peak_torque_nm": 74,
+        "weight_kg": 1,
+        "outer_diameter_mm": 86,
+        "hollow_shaft_diameter_mm": 13,
+        "absolute_accuracy_deg": 0.00278,
+        "motor_encoder_bits": 15,
+        "bending_moment_nm": 44.8,
+        "torque_density_nm_per_kg": 74.0
+      },
+      "transmission": {
+        "reduction_ratio": 80
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-ha-80-100-24",
+      "model": "RR-HA-80-100",
+      "base_id": "QZB-HA-80-100-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 28,
+        "continuous_current_a": 10
+      },
+      "mechanical": {
+        "rated_torque_nm": 67,
+        "peak_torque_nm": 157,
+        "start_stop_peak_torque_nm": 157,
+        "weight_kg": 1.1,
+        "outer_diameter_mm": 95,
+        "hollow_shaft_diameter_mm": 14,
+        "absolute_accuracy_deg": 0.00278,
+        "motor_encoder_bits": 14,
+        "torque_density_nm_per_kg": 142.73
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    },
+    {
+      "id": "qzb-ha-80-100-48",
+      "model": "RR-HA-80-100",
+      "base_id": "QZB-HA-80-100-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 28,
+        "continuous_current_a": 10
+      },
+      "mechanical": {
+        "rated_torque_nm": 67,
+        "peak_torque_nm": 157,
+        "start_stop_peak_torque_nm": 157,
+        "weight_kg": 1.1,
+        "outer_diameter_mm": 95,
+        "hollow_shaft_diameter_mm": 14,
+        "absolute_accuracy_deg": 0.00278,
+        "motor_encoder_bits": 14,
+        "torque_density_nm_per_kg": 142.73
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/13_泉智博_Motorevo机器人关节.pdf"
+    }
+  ]
+}

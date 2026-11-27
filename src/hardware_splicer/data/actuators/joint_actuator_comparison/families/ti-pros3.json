@@ -1,0 +1,1115 @@
+{
+  "family_id": "ti-pros3",
+  "family_name": "钛虎 PROS3",
+  "shared": {
+    "manufacturer": "钛虎",
+    "manufacturer_en": "TiS",
+    "electrical": {
+      "voltage_v": 48,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "repeatability_deg": 0.001,
+      "output_encoder_bits": 20,
+      "motor_encoder_bits": 20
+    },
+    "transmission": {
+      "type": "harmonic",
+      "backdrivable": false
+    }
+  },
+  "variants": [
+    {
+      "id": "ti-pros3-120-101-48",
+      "model": "CRA-RI100-120-PRO-3-101",
+      "base_id": "Ti-PROS3-120-101-48",
+      "electrical": {
+        "peak_current_a": 20.2,
+        "continuous_current_a": 15.8,
+        "rated_input_power_w": 1000
+      },
+      "mechanical": {
+        "rated_torque_nm": 169,
+        "peak_torque_nm": 411,
+        "start_stop_peak_torque_nm": 411,
+        "max_allow_avg_load_nm": 267,
+        "rated_speed_rpm": 22,
+        "max_speed_rpm": 29,
+        "weight_kg": 2.8,
+        "outer_diameter_mm": 120,
+        "hollow_shaft_diameter_mm": 32,
+        "radial_load_kn": 25.11,
+        "axial_load_kn": 57.06,
+        "bending_moment_nm": 1860,
+        "weight_kg_max": 3.2,
+        "torque_density_nm_per_kg": 146.79
+      },
+      "transmission": {
+        "reduction_ratio": 101,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 103.5,
+        "length_mm_max": 126.5,
+        "inertia_g_cm2": 6489.86,
+        "brake_torque_nm": 4,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组Pro3数据手册_20260104.pdf"
+    },
+    {
+      "id": "ti-pros3-120-121-48",
+      "model": "CRA-RI100-120-PRO-3-121",
+      "base_id": "Ti-PROS3-120-121-48",
+      "electrical": {
+        "peak_current_a": 20.2,
+        "continuous_current_a": 15.8,
+        "rated_input_power_w": 1000
+      },
+      "mechanical": {
+        "rated_torque_nm": 169,
+        "peak_torque_nm": 436,
+        "start_stop_peak_torque_nm": 436,
+        "max_allow_avg_load_nm": 267,
+        "rated_speed_rpm": 18,
+        "max_speed_rpm": 24,
+        "weight_kg": 2.8,
+        "outer_diameter_mm": 120,
+        "hollow_shaft_diameter_mm": 32,
+        "radial_load_kn": 25.11,
+        "axial_load_kn": 57.06,
+        "bending_moment_nm": 1860,
+        "weight_kg_max": 3.2,
+        "torque_density_nm_per_kg": 155.71
+      },
+      "transmission": {
+        "reduction_ratio": 121,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 103.5,
+        "length_mm_max": 126.5,
+        "inertia_g_cm2": 6489.86,
+        "brake_torque_nm": 4,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组Pro3数据手册_20260104.pdf"
+    },
+    {
+      "id": "ti-pros3-120-161-48",
+      "model": "CRA-RI100-120-PRO-3-161",
+      "base_id": "Ti-PROS3-120-161-48",
+      "electrical": {
+        "peak_current_a": 20.2,
+        "continuous_current_a": 15.8,
+        "rated_input_power_w": 1000
+      },
+      "mechanical": {
+        "rated_torque_nm": 169,
+        "peak_torque_nm": 459,
+        "start_stop_peak_torque_nm": 459,
+        "max_allow_avg_load_nm": 267,
+        "rated_speed_rpm": 12,
+        "max_speed_rpm": 18,
+        "weight_kg": 2.8,
+        "outer_diameter_mm": 120,
+        "hollow_shaft_diameter_mm": 32,
+        "radial_load_kn": 25.11,
+        "axial_load_kn": 57.06,
+        "bending_moment_nm": 1860,
+        "weight_kg_max": 3.2,
+        "torque_density_nm_per_kg": 163.93
+      },
+      "transmission": {
+        "reduction_ratio": 161,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 103.5,
+        "length_mm_max": 126.5,
+        "inertia_g_cm2": 6489.86,
+        "brake_torque_nm": 4,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组Pro3数据手册_20260104.pdf"
+    },
+    {
+      "id": "ti-pros3-120-51-48",
+      "model": "CRA-RI100-120-PRO-3-51",
+      "base_id": "Ti-PROS3-120-51-48",
+      "electrical": {
+        "peak_current_a": 20.2,
+        "continuous_current_a": 15.8,
+        "rated_input_power_w": 1000
+      },
+      "mechanical": {
+        "rated_torque_nm": 94,
+        "peak_torque_nm": 267,
+        "start_stop_peak_torque_nm": 267,
+        "max_allow_avg_load_nm": 133,
+        "rated_speed_rpm": 44,
+        "max_speed_rpm": 55,
+        "weight_kg": 2.8,
+        "outer_diameter_mm": 120,
+        "hollow_shaft_diameter_mm": 32,
+        "radial_load_kn": 25.11,
+        "axial_load_kn": 57.06,
+        "bending_moment_nm": 1860,
+        "weight_kg_max": 3.2,
+        "torque_density_nm_per_kg": 95.36
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 103.5,
+        "length_mm_max": 126.5,
+        "inertia_g_cm2": 6489.86,
+        "brake_torque_nm": 4,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组Pro3数据手册_20260104.pdf"
+    },
+    {
+      "id": "ti-pros3-120-81-48",
+      "model": "CRA-RI100-120-PRO-3-81",
+      "base_id": "Ti-PROS3-120-81-48",
+      "electrical": {
+        "peak_current_a": 20.2,
+        "continuous_current_a": 15.8,
+        "rated_input_power_w": 1000
+      },
+      "mechanical": {
+        "rated_torque_nm": 146,
+        "peak_torque_nm": 367,
+        "start_stop_peak_torque_nm": 367,
+        "max_allow_avg_load_nm": 206,
+        "rated_speed_rpm": 29,
+        "max_speed_rpm": 37,
+        "weight_kg": 2.8,
+        "outer_diameter_mm": 120,
+        "hollow_shaft_diameter_mm": 32,
+        "radial_load_kn": 25.11,
+        "axial_load_kn": 57.06,
+        "bending_moment_nm": 1860,
+        "weight_kg_max": 3.2,
+        "torque_density_nm_per_kg": 131.07
+      },
+      "transmission": {
+        "reduction_ratio": 81,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 103.5,
+        "length_mm_max": 126.5,
+        "inertia_g_cm2": 6489.86,
+        "brake_torque_nm": 4,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组Pro3数据手册_20260104.pdf"
+    },
+    {
+      "id": "ti-pros3-60-101-48",
+      "model": "CRA-RI50-60-PRO-3-101",
+      "base_id": "Ti-PROS3-60-101-48",
+      "electrical": {
+        "peak_current_a": 5,
+        "continuous_current_a": 3.6,
+        "rated_input_power_w": 150
+      },
+      "mechanical": {
+        "rated_torque_nm": 9.6,
+        "peak_torque_nm": 34,
+        "start_stop_peak_torque_nm": 34,
+        "max_allow_avg_load_nm": 13.5,
+        "rated_speed_rpm": 37,
+        "max_speed_rpm": 49,
+        "weight_kg": 0.48,
+        "outer_diameter_mm": 60,
+        "hollow_shaft_diameter_mm": 13,
+        "radial_load_kn": 6.8,
+        "axial_load_kn": 15.4,
+        "bending_moment_nm": 146,
+        "weight_kg_max": 0.6,
+        "torque_density_nm_per_kg": 70.83
+      },
+      "transmission": {
+        "reduction_ratio": 101,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 66.5,
+        "length_mm_max": 82,
+        "inertia_g_cm2": 193.42,
+        "brake_torque_nm": 0.3,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组Pro3数据手册_20260104.pdf"
+    },
+    {
+      "id": "ti-pros3-60-51-48",
+      "model": "CRA-RI50-60-PRO-3-51",
+      "base_id": "Ti-PROS3-60-51-48",
+      "electrical": {
+        "peak_current_a": 5,
+        "continuous_current_a": 3.6,
+        "rated_input_power_w": 150
+      },
+      "mechanical": {
+        "rated_torque_nm": 6.6,
+        "peak_torque_nm": 23,
+        "start_stop_peak_torque_nm": 23,
+        "max_allow_avg_load_nm": 8.6,
+        "rated_speed_rpm": 75,
+        "max_speed_rpm": 97,
+        "weight_kg": 0.48,
+        "outer_diameter_mm": 60,
+        "hollow_shaft_diameter_mm": 13,
+        "radial_load_kn": 6.8,
+        "axial_load_kn": 15.4,
+        "bending_moment_nm": 146,
+        "weight_kg_max": 0.6,
+        "torque_density_nm_per_kg": 47.92
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 66.5,
+        "length_mm_max": 82,
+        "inertia_g_cm2": 193.42,
+        "brake_torque_nm": 0.3,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组Pro3数据手册_20260104.pdf"
+    },
+    {
+      "id": "ti-pros3-60-81-48",
+      "model": "CRA-RI50-60-PRO-3-81",
+      "base_id": "Ti-PROS3-60-81-48",
+      "electrical": {
+        "peak_current_a": 5,
+        "continuous_current_a": 3.6,
+        "rated_input_power_w": 150
+      },
+      "mechanical": {
+        "rated_torque_nm": 9.6,
+        "peak_torque_nm": 29,
+        "start_stop_peak_torque_nm": 29,
+        "max_allow_avg_load_nm": 13.5,
+        "rated_speed_rpm": 46,
+        "max_speed_rpm": 61,
+        "weight_kg": 0.48,
+        "outer_diameter_mm": 60,
+        "hollow_shaft_diameter_mm": 13,
+        "radial_load_kn": 6.8,
+        "axial_load_kn": 15.4,
+        "bending_moment_nm": 146,
+        "weight_kg_max": 0.6,
+        "torque_density_nm_per_kg": 60.42
+      },
+      "transmission": {
+        "reduction_ratio": 81,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 66.5,
+        "length_mm_max": 82,
+        "inertia_g_cm2": 193.42,
+        "brake_torque_nm": 0.3,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组Pro3数据手册_20260104.pdf"
+    },
+    {
+      "id": "ti-pros3-70-101-48",
+      "model": "CRA-RI60-70-PRO-3-101",
+      "base_id": "Ti-PROS3-70-101-48",
+      "electrical": {
+        "peak_current_a": 6.7,
+        "continuous_current_a": 5,
+        "rated_input_power_w": 300
+      },
+      "mechanical": {
+        "rated_torque_nm": 30,
+        "peak_torque_nm": 66,
+        "start_stop_peak_torque_nm": 66,
+        "max_allow_avg_load_nm": 49,
+        "rated_speed_rpm": 34,
+        "max_speed_rpm": 41,
+        "weight_kg": 0.8,
+        "outer_diameter_mm": 70,
+        "hollow_shaft_diameter_mm": 15,
+        "radial_load_kn": 8.4,
+        "axial_load_kn": 19.1,
+        "bending_moment_nm": 218,
+        "weight_kg_max": 0.95,
+        "torque_density_nm_per_kg": 82.5
+      },
+      "transmission": {
+        "reduction_ratio": 101,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 73.5,
+        "length_mm_max": 89.5,
+        "inertia_g_cm2": 497.59,
+        "brake_torque_nm": 1,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组Pro3数据手册_20260104.pdf"
+    },
+    {
+      "id": "ti-pros3-70-121-48",
+      "model": "CRA-RI60-70-PRO-3-121",
+      "base_id": "Ti-PROS3-70-121-48",
+      "electrical": {
+        "peak_current_a": 6.7,
+        "continuous_current_a": 5,
+        "rated_input_power_w": 300
+      },
+      "mechanical": {
+        "rated_torque_nm": 30,
+        "peak_torque_nm": 66,
+        "start_stop_peak_torque_nm": 66,
+        "max_allow_avg_load_nm": 49,
+        "rated_speed_rpm": 24,
+        "max_speed_rpm": 32,
+        "weight_kg": 0.8,
+        "outer_diameter_mm": 70,
+        "hollow_shaft_diameter_mm": 15,
+        "radial_load_kn": 8.4,
+        "axial_load_kn": 19.1,
+        "bending_moment_nm": 218,
+        "weight_kg_max": 0.95,
+        "torque_density_nm_per_kg": 82.5
+      },
+      "transmission": {
+        "reduction_ratio": 121,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 73.5,
+        "length_mm_max": 89.5,
+        "inertia_g_cm2": 497.59,
+        "brake_torque_nm": 1,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组Pro3数据手册_20260104.pdf"
+    },
+    {
+      "id": "ti-pros3-70-51-48",
+      "model": "CRA-RI60-70-PRO-3-51",
+      "base_id": "Ti-PROS3-70-51-48",
+      "electrical": {
+        "peak_current_a": 6.7,
+        "continuous_current_a": 5,
+        "rated_input_power_w": 300
+      },
+      "mechanical": {
+        "rated_torque_nm": 19.8,
+        "peak_torque_nm": 42,
+        "start_stop_peak_torque_nm": 42,
+        "max_allow_avg_load_nm": 32,
+        "rated_speed_rpm": 68,
+        "max_speed_rpm": 82,
+        "weight_kg": 0.8,
+        "outer_diameter_mm": 70,
+        "hollow_shaft_diameter_mm": 15,
+        "radial_load_kn": 8.4,
+        "axial_load_kn": 19.1,
+        "bending_moment_nm": 218,
+        "weight_kg_max": 0.95,
+        "torque_density_nm_per_kg": 52.5
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 73.5,
+        "length_mm_max": 89.5,
+        "inertia_g_cm2": 497.59,
+        "brake_torque_nm": 1,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组Pro3数据手册_20260104.pdf"
+    },
+    {
+      "id": "ti-pros3-70-81-48",
+      "model": "CRA-RI60-70-PRO-3-81",
+      "base_id": "Ti-PROS3-70-81-48",
+      "electrical": {
+        "peak_current_a": 6.7,
+        "continuous_current_a": 5,
+        "rated_input_power_w": 300
+      },
+      "mechanical": {
+        "rated_torque_nm": 27.5,
+        "peak_torque_nm": 53,
+        "start_stop_peak_torque_nm": 53,
+        "max_allow_avg_load_nm": 33,
+        "rated_speed_rpm": 43,
+        "max_speed_rpm": 51,
+        "weight_kg": 0.8,
+        "outer_diameter_mm": 70,
+        "hollow_shaft_diameter_mm": 15,
+        "radial_load_kn": 8.4,
+        "axial_load_kn": 19.1,
+        "bending_moment_nm": 218,
+        "weight_kg_max": 0.95,
+        "torque_density_nm_per_kg": 66.25
+      },
+      "transmission": {
+        "reduction_ratio": 81,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 73.5,
+        "length_mm_max": 89.5,
+        "inertia_g_cm2": 497.59,
+        "brake_torque_nm": 1,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组Pro3数据手册_20260104.pdf"
+    },
+    {
+      "id": "ti-pros3-80-101-48",
+      "model": "CRA-RI70-80-PRO-3-101",
+      "base_id": "Ti-PROS3-80-101-48",
+      "electrical": {
+        "peak_current_a": 8.4,
+        "continuous_current_a": 6.1,
+        "rated_input_power_w": 500
+      },
+      "mechanical": {
+        "rated_torque_nm": 50,
+        "peak_torque_nm": 102,
+        "start_stop_peak_torque_nm": 102,
+        "max_allow_avg_load_nm": 61,
+        "rated_speed_rpm": 30,
+        "max_speed_rpm": 40,
+        "weight_kg": 1.03,
+        "outer_diameter_mm": 80,
+        "hollow_shaft_diameter_mm": 15,
+        "radial_load_kn": 10.42,
+        "axial_load_kn": 23.68,
+        "bending_moment_nm": 320,
+        "weight_kg_max": 1.21,
+        "torque_density_nm_per_kg": 99.03
+      },
+      "transmission": {
+        "reduction_ratio": 101,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 73,
+        "length_mm_max": 89,
+        "inertia_g_cm2": 704.35,
+        "brake_torque_nm": 1,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组Pro3数据手册_20260104.pdf"
+    },
+    {
+      "id": "ti-pros3-80-121-48",
+      "model": "CRA-RI70-80-PRO-3-121",
+      "base_id": "Ti-PROS3-80-121-48",
+      "electrical": {
+        "peak_current_a": 8.4,
+        "continuous_current_a": 6.1,
+        "rated_input_power_w": 500
+      },
+      "mechanical": {
+        "rated_torque_nm": 50,
+        "peak_torque_nm": 108,
+        "start_stop_peak_torque_nm": 108,
+        "max_allow_avg_load_nm": 61,
+        "rated_speed_rpm": 25,
+        "max_speed_rpm": 30,
+        "weight_kg": 1.03,
+        "outer_diameter_mm": 80,
+        "hollow_shaft_diameter_mm": 15,
+        "radial_load_kn": 10.42,
+        "axial_load_kn": 23.68,
+        "bending_moment_nm": 320,
+        "weight_kg_max": 1.21,
+        "torque_density_nm_per_kg": 104.85
+      },
+      "transmission": {
+        "reduction_ratio": 121,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 73,
+        "length_mm_max": 89,
+        "inertia_g_cm2": 704.35,
+        "brake_torque_nm": 1,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组Pro3数据手册_20260104.pdf"
+    },
+    {
+      "id": "ti-pros3-80-51-48",
+      "model": "CRA-RI70-80-PRO-3-51",
+      "base_id": "Ti-PROS3-80-51-48",
+      "electrical": {
+        "peak_current_a": 8.4,
+        "continuous_current_a": 6.1,
+        "rated_input_power_w": 500
+      },
+      "mechanical": {
+        "rated_torque_nm": 32,
+        "peak_torque_nm": 69,
+        "start_stop_peak_torque_nm": 69,
+        "max_allow_avg_load_nm": 42,
+        "rated_speed_rpm": 61,
+        "max_speed_rpm": 77,
+        "weight_kg": 1.03,
+        "outer_diameter_mm": 80,
+        "hollow_shaft_diameter_mm": 15,
+        "radial_load_kn": 10.42,
+        "axial_load_kn": 23.68,
+        "bending_moment_nm": 320,
+        "weight_kg_max": 1.21,
+        "torque_density_nm_per_kg": 66.99
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 73,
+        "length_mm_max": 89,
+        "inertia_g_cm2": 704.35,
+        "brake_torque_nm": 1,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组Pro3数据手册_20260104.pdf"
+    },
+    {
+      "id": "ti-pros3-80-81-48",
+      "model": "CRA-RI70-80-PRO-3-81",
+      "base_id": "Ti-PROS3-80-81-48",
+      "electrical": {
+        "peak_current_a": 8.4,
+        "continuous_current_a": 6.1,
+        "rated_input_power_w": 500
+      },
+      "mechanical": {
+        "rated_torque_nm": 42,
+        "peak_torque_nm": 91,
+        "start_stop_peak_torque_nm": 91,
+        "max_allow_avg_load_nm": 58,
+        "rated_speed_rpm": 38,
+        "max_speed_rpm": 48,
+        "weight_kg": 1.03,
+        "outer_diameter_mm": 80,
+        "hollow_shaft_diameter_mm": 15,
+        "radial_load_kn": 10.42,
+        "axial_load_kn": 23.68,
+        "bending_moment_nm": 320,
+        "weight_kg_max": 1.21,
+        "torque_density_nm_per_kg": 88.35
+      },
+      "transmission": {
+        "reduction_ratio": 81,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 73,
+        "length_mm_max": 89,
+        "inertia_g_cm2": 704.35,
+        "brake_torque_nm": 1,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组Pro3数据手册_20260104.pdf"
+    },
+    {
+      "id": "ti-pros3-97-101-48",
+      "model": "CRA-RI80-97-PRO-3-101",
+      "base_id": "Ti-PROS3-97-101-48",
+      "electrical": {
+        "peak_current_a": 11.1,
+        "continuous_current_a": 9.6,
+        "rated_input_power_w": 750
+      },
+      "mechanical": {
+        "rated_torque_nm": 84,
+        "peak_torque_nm": 194,
+        "start_stop_peak_torque_nm": 194,
+        "max_allow_avg_load_nm": 133,
+        "rated_speed_rpm": 27,
+        "max_speed_rpm": 36,
+        "weight_kg": 1.55,
+        "outer_diameter_mm": 97,
+        "hollow_shaft_diameter_mm": 27,
+        "radial_load_kn": 19.34,
+        "axial_load_kn": 43.95,
+        "bending_moment_nm": 710,
+        "weight_kg_max": 1.85,
+        "torque_density_nm_per_kg": 125.16
+      },
+      "transmission": {
+        "reduction_ratio": 101,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 86,
+        "length_mm_max": 104,
+        "inertia_g_cm2": 1616.07,
+        "brake_torque_nm": 2,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组Pro3数据手册_20260104.pdf"
+    },
+    {
+      "id": "ti-pros3-97-121-48",
+      "model": "CRA-RI80-97-PRO-3-121",
+      "base_id": "Ti-PROS3-97-121-48",
+      "electrical": {
+        "peak_current_a": 11.1,
+        "continuous_current_a": 9.6,
+        "rated_input_power_w": 750
+      },
+      "mechanical": {
+        "rated_torque_nm": 84,
+        "peak_torque_nm": 207,
+        "start_stop_peak_torque_nm": 207,
+        "max_allow_avg_load_nm": 133,
+        "rated_speed_rpm": 23,
+        "max_speed_rpm": 30,
+        "weight_kg": 1.55,
+        "outer_diameter_mm": 97,
+        "hollow_shaft_diameter_mm": 27,
+        "radial_load_kn": 19.34,
+        "axial_load_kn": 43.95,
+        "bending_moment_nm": 710,
+        "weight_kg_max": 1.85,
+        "torque_density_nm_per_kg": 133.55
+      },
+      "transmission": {
+        "reduction_ratio": 121,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 86,
+        "length_mm_max": 104,
+        "inertia_g_cm2": 1616.07,
+        "brake_torque_nm": 2,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组Pro3数据手册_20260104.pdf"
+    },
+    {
+      "id": "ti-pros3-97-161-48",
+      "model": "CRA-RI80-97-PRO-3-161",
+      "base_id": "Ti-PROS3-97-161-48",
+      "electrical": {
+        "peak_current_a": 11.1,
+        "continuous_current_a": 9.6,
+        "rated_input_power_w": 750
+      },
+      "mechanical": {
+        "rated_torque_nm": 84,
+        "peak_torque_nm": 217,
+        "start_stop_peak_torque_nm": 217,
+        "max_allow_avg_load_nm": 133,
+        "rated_speed_rpm": 17,
+        "max_speed_rpm": 22,
+        "weight_kg": 1.55,
+        "outer_diameter_mm": 97,
+        "hollow_shaft_diameter_mm": 27,
+        "radial_load_kn": 19.34,
+        "axial_load_kn": 43.95,
+        "bending_moment_nm": 710,
+        "weight_kg_max": 1.85,
+        "torque_density_nm_per_kg": 140.0
+      },
+      "transmission": {
+        "reduction_ratio": 161,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 86,
+        "length_mm_max": 104,
+        "inertia_g_cm2": 1616.07,
+        "brake_torque_nm": 2,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组Pro3数据手册_20260104.pdf"
+    },
+    {
+      "id": "ti-pros3-97-51-48",
+      "model": "CRA-RI80-97-PRO-3-51",
+      "base_id": "Ti-PROS3-97-51-48",
+      "electrical": {
+        "peak_current_a": 11.1,
+        "continuous_current_a": 9.6,
+        "rated_input_power_w": 750
+      },
+      "mechanical": {
+        "rated_torque_nm": 48,
+        "peak_torque_nm": 121,
+        "start_stop_peak_torque_nm": 121,
+        "max_allow_avg_load_nm": 68.5,
+        "rated_speed_rpm": 54,
+        "max_speed_rpm": 65,
+        "weight_kg": 1.55,
+        "outer_diameter_mm": 97,
+        "hollow_shaft_diameter_mm": 27,
+        "radial_load_kn": 19.34,
+        "axial_load_kn": 43.95,
+        "bending_moment_nm": 710,
+        "weight_kg_max": 1.85,
+        "torque_density_nm_per_kg": 78.06
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 86,
+        "length_mm_max": 104,
+        "inertia_g_cm2": 1616.07,
+        "brake_torque_nm": 2,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组Pro3数据手册_20260104.pdf"
+    },
+    {
+      "id": "ti-pros3-97-81-48",
+      "model": "CRA-RI80-97-PRO-3-81",
+      "base_id": "Ti-PROS3-97-81-48",
+      "electrical": {
+        "peak_current_a": 11.1,
+        "continuous_current_a": 9.6,
+        "rated_input_power_w": 750
+      },
+      "mechanical": {
+        "rated_torque_nm": 78,
+        "peak_torque_nm": 169,
+        "start_stop_peak_torque_nm": 169,
+        "max_allow_avg_load_nm": 107,
+        "rated_speed_rpm": 35,
+        "max_speed_rpm": 43,
+        "weight_kg": 1.55,
+        "outer_diameter_mm": 97,
+        "hollow_shaft_diameter_mm": 27,
+        "radial_load_kn": 19.34,
+        "axial_load_kn": 43.95,
+        "bending_moment_nm": 710,
+        "weight_kg_max": 1.85,
+        "torque_density_nm_per_kg": 109.03
+      },
+      "transmission": {
+        "reduction_ratio": 81,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 86,
+        "length_mm_max": 104,
+        "inertia_g_cm2": 1616.07,
+        "brake_torque_nm": 2,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组Pro3数据手册_20260104.pdf"
+    }
+  ]
+}

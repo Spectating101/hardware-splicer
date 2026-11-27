@@ -1,0 +1,209 @@
+{
+  "family_id": "ze-erob170h",
+  "family_name": "零差云控 eRob170H",
+  "shared": {
+    "manufacturer": "零差云控",
+    "manufacturer_en": "ZeroErr",
+    "electrical": {
+      "voltage_v": 48,
+      "rated_input_power_w": 1000,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "weight_kg": 9.29,
+      "outer_diameter_mm": 170,
+      "hollow_shaft_diameter_mm": 18,
+      "absolute_accuracy_deg": 0.002776,
+      "repeatability_deg": 0.0028,
+      "output_encoder_bits": 19,
+      "ip_rating": "IP54",
+      "weight_kg_max": 9.5
+    },
+    "transmission": {
+      "type": "harmonic",
+      "backdrivable": false
+    }
+  },
+  "variants": [
+    {
+      "id": "ze-erob170h-100-48",
+      "model": "eRob170H",
+      "base_id": "ZE-eRob170H-100-48",
+      "mechanical": {
+        "rated_torque_nm": 265,
+        "peak_torque_nm": 568,
+        "start_stop_peak_torque_nm": 568,
+        "max_allow_avg_load_nm": 372,
+        "max_allow_instant_load_nm": 1080,
+        "rated_speed_rpm": 20,
+        "max_speed_rpm": 20,
+        "torque_density_nm_per_kg": 61.14
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/27_零差云控_eRob系列关节模组.xlsx"
+    },
+    {
+      "id": "ze-erob170h-120-48",
+      "model": "eRob170H",
+      "base_id": "ZE-eRob170H-120-48",
+      "mechanical": {
+        "rated_torque_nm": 294,
+        "peak_torque_nm": 617,
+        "start_stop_peak_torque_nm": 617,
+        "max_allow_avg_load_nm": 451,
+        "max_allow_instant_load_nm": 1180,
+        "rated_speed_rpm": 16.7,
+        "max_speed_rpm": 16.7,
+        "torque_density_nm_per_kg": 66.42
+      },
+      "transmission": {
+        "reduction_ratio": 120
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/27_零差云控_eRob系列关节模组.xlsx"
+    },
+    {
+      "id": "ze-erob170h-160-48",
+      "model": "eRob170H",
+      "base_id": "ZE-eRob170H-160-48",
+      "mechanical": {
+        "rated_torque_nm": 294,
+        "peak_torque_nm": 647,
+        "start_stop_peak_torque_nm": 647,
+        "max_allow_avg_load_nm": 451,
+        "max_allow_instant_load_nm": 1180,
+        "rated_speed_rpm": 12.5,
+        "max_speed_rpm": 12.5,
+        "torque_density_nm_per_kg": 69.64
+      },
+      "transmission": {
+        "reduction_ratio": 160
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/27_零差云控_eRob系列关节模组.xlsx"
+    },
+    {
+      "id": "ze-erob170h-50-48",
+      "model": "eRob170H",
+      "base_id": "ZE-eRob170H-50-48",
+      "mechanical": {
+        "rated_torque_nm": 137,
+        "peak_torque_nm": 402,
+        "start_stop_peak_torque_nm": 402,
+        "max_allow_avg_load_nm": 196,
+        "max_allow_instant_load_nm": 686,
+        "rated_speed_rpm": 40,
+        "max_speed_rpm": 40,
+        "torque_density_nm_per_kg": 43.27
+      },
+      "transmission": {
+        "reduction_ratio": 50
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/27_零差云控_eRob系列关节模组.xlsx"
+    },
+    {
+      "id": "ze-erob170h-80-48",
+      "model": "eRob170H",
+      "base_id": "ZE-eRob170H-80-48",
+      "mechanical": {
+        "rated_torque_nm": 206,
+        "peak_torque_nm": 519,
+        "start_stop_peak_torque_nm": 519,
+        "max_allow_avg_load_nm": 284,
+        "max_allow_instant_load_nm": 980,
+        "rated_speed_rpm": 25,
+        "max_speed_rpm": 25,
+        "torque_density_nm_per_kg": 55.87
+      },
+      "transmission": {
+        "reduction_ratio": 80
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/27_零差云控_eRob系列关节模组.xlsx"
+    }
+  ]
+}

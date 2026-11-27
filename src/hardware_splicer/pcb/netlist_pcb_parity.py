@@ -31,7 +31,7 @@ _PAD_RE = re.compile(r'\(pad "([^"]+)"[^\n]*?\(net (\d+) "([^"]*)"\)\)')
 Signature = Tuple[Tuple[str, str], ...]
 
 
-def _netlist_signatures(netlist: CircuitNetlist) -> Counter:
+def _netlist_signatures(netlist: CircuitNetlist, pad_names: str = "index") -> Counter:
     comps = {c.ref: c for c in netlist.components}
     signatures: Counter = Counter()
     for net in netlist.nets:
@@ -40,6 +40,12 @@ def _netlist_signatures(netlist: CircuitNetlist) -> Counter:
             comp = comps.get(pin.component_ref)
             module_id = str(comp.module_id or "") if comp else ""
             spec = find_module(module_id) if module_id else None
+            if comp is not None and spec is None and pad_names == "pin_id":
+                # A part with no catalogue module (a raw chip from an imported KiCad netlist, or a synthesized support
+                # part such as a pull-up resistor) is drawn as a logical preview whose pads keep the netlist's own pin
+                # names; if the board has no such pad, the pair goes missing.
+                members.append((_PREVIEW, str(pin.pin)))
+                continue
             if spec is not None and resolve_module_body_mm(module_id) is None:
                 footprint = _PREVIEW
                 order = [str(p.get("id")) for p in spec.get("pins") or []]
@@ -48,7 +54,10 @@ def _netlist_signatures(netlist: CircuitNetlist) -> Counter:
                 pads = resolve_module_pads(module_id, spec) if module_id else None
                 footprint = resolve_module_footprint(module_id) if module_id else ""
                 index = next((i for i, p in enumerate(pads or []) if p["pinId"] == pin.pin), None)
-            members.append((footprint, str(index + 1) if index is not None else f"missing:{pin.pin}"))
+            if pad_names == "pin_id" and index is not None:
+                members.append((footprint, str(pin.pin)))  # build_to_geometry names netlist-identity pads by pin id
+            else:
+                members.append((footprint, str(index + 1) if index is not None else f"missing:{pin.pin}"))
         if len(members) >= 2:
             signatures[tuple(sorted(members))] += 1
     return signatures
@@ -71,10 +80,15 @@ def _pcb_signatures(pcb_text: str) -> Counter:
     return Counter(tuple(sorted(pads)) for pads in nets.values() if len(pads) >= 2)
 
 
-def netlist_pcb_parity(netlist: CircuitNetlist, pcb_text: str) -> Dict[str, Any]:
-    """Return ``{"pass", "missing_on_pcb", "extra_on_pcb"}`` for nets of two or more pads."""
+def netlist_pcb_parity(netlist: CircuitNetlist, pcb_text: str, *, pad_names: str = "index") -> Dict[str, Any]:
+    """Return ``{"pass", "missing_on_pcb", "extra_on_pcb"}`` for nets of two or more pads.
 
-    expected = _netlist_signatures(netlist)
+    ``pad_names`` follows the board's convention: ``index`` (catalogue builds number pads 1..n) or ``pin_id`` (a board
+    compiled from a netlist names each pad by its pin, see ``build_to_geometry``)."""
+
+    if pad_names not in ("index", "pin_id"):
+        raise ValueError("pad_names must be index or pin_id")
+    expected = _netlist_signatures(netlist, pad_names)
     actual = _pcb_signatures(pcb_text)
     missing = expected - actual
     extra = actual - expected

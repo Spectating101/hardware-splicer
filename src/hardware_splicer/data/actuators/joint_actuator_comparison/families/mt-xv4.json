@@ -1,0 +1,430 @@
+{
+  "family_id": "mt-xv4",
+  "family_name": "脉塔 XV4",
+  "shared": {
+    "manufacturer": "脉塔",
+    "manufacturer_en": "Myactuator",
+    "electrical": {
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "repeatability_deg": 0.01
+    },
+    "transmission": {
+      "type": "planetary"
+    }
+  },
+  "variants": [
+    {
+      "id": "mt-xv4-117-20-48",
+      "model": "RMD-X12-P20-320",
+      "base_id": "MT-XV4-117-20-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 100,
+        "continuous_current_a": 30,
+        "rated_input_power_w": 1000
+      },
+      "mechanical": {
+        "rated_torque_nm": 85,
+        "peak_torque_nm": 320,
+        "start_stop_peak_torque_nm": 320,
+        "rated_speed_rpm": 100,
+        "max_speed_rpm": 125,
+        "weight_kg": 2.4,
+        "outer_diameter_mm": 116.5,
+        "output_encoder_bits": 17,
+        "motor_encoder_bits": 17,
+        "radial_load_kn": 5,
+        "axial_load_kn": 4.5,
+        "torque_density_nm_per_kg": 133.33
+      },
+      "transmission": {
+        "reduction_ratio": 20,
+        "backdrivable": false,
+        "backlash_arcsec": 600
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/12_脉塔_XV4行星模组_260416.pdf"
+    },
+    {
+      "id": "mt-xv4-166-20-72",
+      "model": "RMD-X15-P20-450",
+      "base_id": "MT-XV4-166-20-72",
+      "electrical": {
+        "voltage_v": 72,
+        "peak_current_a": 69.2,
+        "continuous_current_a": 25,
+        "rated_input_power_w": 1480
+      },
+      "mechanical": {
+        "rated_torque_nm": 145,
+        "peak_torque_nm": 450,
+        "start_stop_peak_torque_nm": 450,
+        "rated_speed_rpm": 98,
+        "max_speed_rpm": 108,
+        "weight_kg": 3.5,
+        "outer_diameter_mm": 166,
+        "hollow_shaft_diameter_mm": 21.5,
+        "output_encoder_bits": 17,
+        "motor_encoder_bits": 17,
+        "radial_load_kn": 6,
+        "axial_load_kn": 5.4,
+        "torque_density_nm_per_kg": 128.57
+      },
+      "transmission": {
+        "reduction_ratio": 20.25,
+        "backdrivable": false,
+        "backlash_arcsec": 600
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/12_脉塔_XV4行星模组_260416.pdf"
+    },
+    {
+      "id": "mt-xv4-28-28-24",
+      "model": "RMD-X2-P28-7",
+      "base_id": "MT-XV4-28-28-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 4.3,
+        "continuous_current_a": 1,
+        "rated_input_power_w": 8.1
+      },
+      "mechanical": {
+        "rated_torque_nm": 2.5,
+        "peak_torque_nm": 7,
+        "start_stop_peak_torque_nm": 7,
+        "max_allow_instant_load_nm": 7.5,
+        "rated_speed_rpm": 142.8,
+        "max_speed_rpm": 178.6,
+        "weight_kg": 0.3,
+        "outer_diameter_mm": 28.17,
+        "output_encoder_bits": 18,
+        "motor_encoder_bits": 17,
+        "radial_load_kn": 0.25,
+        "axial_load_kn": 0.25,
+        "torque_density_nm_per_kg": 23.33
+      },
+      "transmission": {
+        "reduction_ratio": 28,
+        "backdrivable": false,
+        "backlash_arcsec": 720
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/12_脉塔_XV4行星模组_260416.pdf"
+    },
+    {
+      "id": "mt-xv4-55-13-24",
+      "model": "RMD-X4-P12-10",
+      "base_id": "MT-XV4-55-13-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 19.5,
+        "continuous_current_a": 7.8,
+        "rated_input_power_w": 100
+      },
+      "mechanical": {
+        "rated_torque_nm": 4,
+        "peak_torque_nm": 10,
+        "start_stop_peak_torque_nm": 10,
+        "rated_speed_rpm": 238,
+        "max_speed_rpm": 317,
+        "weight_kg": 0.33,
+        "outer_diameter_mm": 55,
+        "output_encoder_bits": 18,
+        "motor_encoder_bits": 17,
+        "radial_load_kn": 1.2,
+        "axial_load_kn": 1.2,
+        "torque_density_nm_per_kg": 30.3
+      },
+      "transmission": {
+        "reduction_ratio": 12.6,
+        "backdrivable": false,
+        "backlash_arcsec": 600
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/12_脉塔_XV4行星模组_260416.pdf"
+    },
+    {
+      "id": "mt-xv4-61-36-24",
+      "model": "RMD-X4-P36-36",
+      "base_id": "MT-XV4-61-36-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 21.5,
+        "continuous_current_a": 6.1,
+        "rated_input_power_w": 100
+      },
+      "mechanical": {
+        "rated_torque_nm": 10.5,
+        "peak_torque_nm": 34,
+        "start_stop_peak_torque_nm": 34,
+        "max_allow_instant_load_nm": 34.5,
+        "rated_speed_rpm": 83,
+        "max_speed_rpm": 111,
+        "weight_kg": 0.36,
+        "outer_diameter_mm": 61,
+        "output_encoder_bits": 18,
+        "motor_encoder_bits": 17,
+        "radial_load_kn": 1.5,
+        "axial_load_kn": 1.3,
+        "torque_density_nm_per_kg": 94.44
+      },
+      "transmission": {
+        "reduction_ratio": 36,
+        "backdrivable": false,
+        "backlash_arcsec": 600
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/12_脉塔_XV4行星模组_260416.pdf"
+    },
+    {
+      "id": "mt-xv4-64-8-48",
+      "model": "RMD-X6-P8-8",
+      "base_id": "MT-XV4-64-8-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 7.2,
+        "continuous_current_a": 3.6,
+        "rated_input_power_w": 135
+      },
+      "mechanical": {
+        "rated_torque_nm": 4.5,
+        "peak_torque_nm": 8,
+        "start_stop_peak_torque_nm": 8,
+        "max_allow_instant_load_nm": 13.5,
+        "rated_speed_rpm": 310,
+        "max_speed_rpm": 387,
+        "weight_kg": 0.49,
+        "outer_diameter_mm": 63.5,
+        "output_encoder_bits": 18,
+        "motor_encoder_bits": 17,
+        "radial_load_kn": 1.04,
+        "axial_load_kn": 0.85,
+        "torque_density_nm_per_kg": 16.33
+      },
+      "transmission": {
+        "reduction_ratio": 8,
+        "backdrivable": true,
+        "backlash_arcsec": 600
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/12_脉塔_XV4行星模组_260416.pdf"
+    },
+    {
+      "id": "mt-xv4-68-20-48",
+      "model": "RMD-X6-P20-60",
+      "base_id": "MT-XV4-68-20-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 29.1,
+        "continuous_current_a": 9.5,
+        "rated_input_power_w": 320
+      },
+      "mechanical": {
+        "rated_torque_nm": 20,
+        "peak_torque_nm": 60,
+        "start_stop_peak_torque_nm": 60,
+        "max_allow_instant_load_nm": 60,
+        "rated_speed_rpm": 153,
+        "max_speed_rpm": 176,
+        "weight_kg": 0.82,
+        "outer_diameter_mm": 67.5,
+        "hollow_shaft_diameter_mm": 8.6,
+        "output_encoder_bits": 17,
+        "motor_encoder_bits": 17,
+        "radial_load_kn": 2,
+        "axial_load_kn": 1.8,
+        "torque_density_nm_per_kg": 73.17
+      },
+      "transmission": {
+        "reduction_ratio": 19.612,
+        "backdrivable": false,
+        "backlash_arcsec": 600
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/12_脉塔_XV4行星模组_260416.pdf"
+    },
+    {
+      "id": "mt-xv4-69-9-24",
+      "model": "RMD-X8-P9-32",
+      "base_id": "MT-XV4-69-9-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 30,
+        "continuous_current_a": 6.2,
+        "rated_input_power_w": 204
+      },
+      "mechanical": {
+        "rated_torque_nm": 8,
+        "peak_torque_nm": 32,
+        "start_stop_peak_torque_nm": 32,
+        "rated_speed_rpm": 244,
+        "max_speed_rpm": 277,
+        "weight_kg": 0.55,
+        "outer_diameter_mm": 69,
+        "motor_encoder_bits": 18,
+        "radial_load_kn": 2,
+        "axial_load_kn": 0.6,
+        "torque_density_nm_per_kg": 58.18
+      },
+      "transmission": {
+        "reduction_ratio": 9,
+        "backdrivable": true,
+        "backlash_arcsec": 480
+      },
+      "options": {
+        "bus_types": [
+          "RS485"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/12_脉塔_XV4行星模组_260416.pdf"
+    },
+    {
+      "id": "mt-xv4-76-20-48",
+      "model": "RMD-X8-P20-120",
+      "base_id": "MT-XV4-76-20-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 43.8,
+        "continuous_current_a": 17.6,
+        "rated_input_power_w": 574
+      },
+      "mechanical": {
+        "rated_torque_nm": 43,
+        "peak_torque_nm": 120,
+        "start_stop_peak_torque_nm": 120,
+        "max_allow_instant_load_nm": 129,
+        "rated_speed_rpm": 127,
+        "max_speed_rpm": 158,
+        "weight_kg": 1.4,
+        "outer_diameter_mm": 76,
+        "output_encoder_bits": 17,
+        "motor_encoder_bits": 17,
+        "radial_load_kn": 4.5,
+        "axial_load_kn": 4,
+        "torque_density_nm_per_kg": 85.71
+      },
+      "transmission": {
+        "reduction_ratio": 19.612,
+        "backdrivable": false,
+        "backlash_arcsec": 600
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/12_脉塔_XV4行星模组_260416.pdf"
+    }
+  ]
+}

@@ -1,0 +1,208 @@
+{
+  "family_id": "tk-mja",
+  "family_name": "泰科 MJA",
+  "shared": {
+    "manufacturer": "泰科",
+    "manufacturer_en": "Techrobots",
+    "electrical": {
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "absolute_accuracy_deg": 0.0833,
+      "repeatability_deg": 0.0167,
+      "output_encoder_bits": 17,
+      "ip_rating": "IP40"
+    },
+    "transmission": {
+      "type": "harmonic",
+      "backdrivable": false,
+      "backlash_arcsec": 20
+    }
+  },
+  "variants": [
+    {
+      "id": "tk-mja-h-58-101-24",
+      "model": "MJA-H11",
+      "base_id": "TK-MJA-H-58-101-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 13.5,
+        "continuous_current_a": 6.5,
+        "rated_input_power_w": 115
+      },
+      "mechanical": {
+        "rated_torque_nm": 6.2,
+        "peak_torque_nm": 7.7,
+        "start_stop_peak_torque_nm": 7.7,
+        "max_allow_avg_load_nm": 6.2,
+        "max_allow_instant_load_nm": 11.5,
+        "rated_speed_rpm": 30,
+        "max_speed_rpm": 35,
+        "weight_kg": 0.31,
+        "outer_diameter_mm": 57.5,
+        "hollow_shaft_diameter_mm": 5,
+        "motor_encoder_bits": 14.617,
+        "bending_moment_nm": 16,
+        "torque_density_nm_per_kg": 24.84
+      },
+      "transmission": {
+        "reduction_ratio": 101
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 65,
+        "length_mm_max": 65
+      },
+      "datasheet_url": "datasheets/14_泰科_MJA-H系列关节模组参数表_20250417.xlsx"
+    },
+    {
+      "id": "tk-mja-h-76-100-48",
+      "model": "MJA-H17S",
+      "base_id": "TK-MJA-H-76-100-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 11.6,
+        "continuous_current_a": 3.8,
+        "rated_input_power_w": 100
+      },
+      "mechanical": {
+        "rated_torque_nm": 25,
+        "peak_torque_nm": 56,
+        "start_stop_peak_torque_nm": 56,
+        "max_allow_avg_load_nm": 25,
+        "max_allow_instant_load_nm": 80,
+        "rated_speed_rpm": 30,
+        "max_speed_rpm": 35,
+        "weight_kg": 0.75,
+        "outer_diameter_mm": 76,
+        "hollow_shaft_diameter_mm": 7,
+        "motor_encoder_bits": 14.966,
+        "bending_moment_nm": 30,
+        "torque_density_nm_per_kg": 74.67
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 78.5,
+        "length_mm_max": 78.5
+      },
+      "datasheet_url": "datasheets/14_泰科_MJA-H系列关节模组参数表_20250417.xlsx"
+    },
+    {
+      "id": "tk-mja-h-76-120-48",
+      "model": "MJA-H17T",
+      "base_id": "TK-MJA-H-76-120-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 14.5,
+        "continuous_current_a": 5,
+        "rated_input_power_w": 180
+      },
+      "mechanical": {
+        "rated_torque_nm": 48,
+        "peak_torque_nm": 56,
+        "start_stop_peak_torque_nm": 56,
+        "max_allow_avg_load_nm": 48,
+        "max_allow_instant_load_nm": 80,
+        "rated_speed_rpm": 25,
+        "max_speed_rpm": 29,
+        "weight_kg": 0.81,
+        "outer_diameter_mm": 76,
+        "hollow_shaft_diameter_mm": 7,
+        "motor_encoder_bits": 14.966,
+        "bending_moment_nm": 30,
+        "torque_density_nm_per_kg": 69.14
+      },
+      "transmission": {
+        "reduction_ratio": 120
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 85.5,
+        "length_mm_max": 85.5
+      },
+      "datasheet_url": "datasheets/14_泰科_MJA-H系列关节模组参数表_20250417.xlsx"
+    },
+    {
+      "id": "tk-mja-h-90-120-48",
+      "model": "MJA-H17Z",
+      "base_id": "TK-MJA-H-90-120-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 14.5,
+        "continuous_current_a": 5,
+        "rated_input_power_w": 180
+      },
+      "mechanical": {
+        "rated_torque_nm": 48,
+        "peak_torque_nm": 56,
+        "start_stop_peak_torque_nm": 56,
+        "max_allow_avg_load_nm": 48,
+        "max_allow_instant_load_nm": 80,
+        "rated_speed_rpm": 25,
+        "max_speed_rpm": 29,
+        "weight_kg": 0.81,
+        "outer_diameter_mm": 90,
+        "hollow_shaft_diameter_mm": 9.8,
+        "motor_encoder_bits": 14.966,
+        "bending_moment_nm": 30,
+        "torque_density_nm_per_kg": 69.14
+      },
+      "transmission": {
+        "reduction_ratio": 120
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 85.5,
+        "length_mm_max": 85.5
+      },
+      "datasheet_url": "datasheets/14_泰科_MJA-H系列关节模组参数表_20250417.xlsx"
+    }
+  ]
+}

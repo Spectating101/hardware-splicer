@@ -1,0 +1,103 @@
+{
+  "family_id": "cm-ak45",
+  "family_name": "酷德 AK45",
+  "shared": {
+    "manufacturer": "酷德",
+    "manufacturer_en": "Cubemars",
+    "electrical": {
+      "voltage_v": 24,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "motor_encoder_bits": 14
+    },
+    "transmission": {
+      "type": "planetary"
+    }
+  },
+  "variants": [
+    {
+      "id": "cm-ak45-10-24",
+      "model": "AK45-10",
+      "base_id": "CM-AK45-10-24",
+      "electrical": {
+        "peak_current_a": 5,
+        "continuous_current_a": 2.1
+      },
+      "mechanical": {
+        "rated_torque_nm": 2.5,
+        "peak_torque_nm": 7,
+        "start_stop_peak_torque_nm": 7,
+        "rated_speed_rpm": 150,
+        "weight_kg": 0.26,
+        "outer_diameter_mm": 53,
+        "torque_density_nm_per_kg": 26.92
+      },
+      "transmission": {
+        "reduction_ratio": 10,
+        "backdrivable": true,
+        "backlash_arcsec": 900
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 43,
+        "length_mm_max": 43,
+        "inertia_g_cm2": 89
+      },
+      "datasheet_url": "datasheets/25_酷德Cubemars.pdf"
+    },
+    {
+      "id": "cm-ak45-36-24",
+      "model": "AK45-36",
+      "base_id": "CM-AK45-36-24",
+      "electrical": {
+        "peak_current_a": 6.5,
+        "continuous_current_a": 2
+      },
+      "mechanical": {
+        "rated_torque_nm": 8,
+        "peak_torque_nm": 24,
+        "start_stop_peak_torque_nm": 24,
+        "rated_speed_rpm": 40,
+        "max_speed_rpm": 52,
+        "weight_kg": 0.705,
+        "outer_diameter_mm": 55,
+        "torque_density_nm_per_kg": 34.04
+      },
+      "transmission": {
+        "reduction_ratio": 36,
+        "backdrivable": false,
+        "backlash_arcsec": 720
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 54,
+        "length_mm_max": 54,
+        "inertia_g_cm2": 32
+      },
+      "datasheet_url": "datasheets/25_酷德Cubemars.pdf"
+    }
+  ]
+}

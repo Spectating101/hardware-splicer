@@ -25,7 +25,7 @@ except ImportError as exc:  # pragma: no cover - optional dependency
     )
     raise SystemExit(1) from exc
 
-from . import sdk
+from . import engineering_toolbelt, sdk
 
 app = Server("hardware-splicer")
 
@@ -36,6 +36,11 @@ def _tool_result(payload: Any) -> list[TextContent]:
 
 @app.list_tools()
 async def list_tools() -> list[Tool]:
+    return _core_tools() + [Tool(name=t.name, description=t.description, inputSchema=t.schema)
+                            for t in engineering_toolbelt.tool_specs()]
+
+
+def _core_tools() -> list[Tool]:
     return [
         Tool(
             name="hs_sdk_info",
@@ -747,6 +752,9 @@ async def call_tool(name: str, arguments: dict[str, Any] | None) -> Sequence[Tex
                 source=str(args.get("source") or "auto"),
             )
         )
+
+    if name in engineering_toolbelt.TOOLS:
+        return _tool_result(await asyncio.to_thread(engineering_toolbelt.call, name, args))
 
     raise ValueError(f"Unknown tool: {name}")
 

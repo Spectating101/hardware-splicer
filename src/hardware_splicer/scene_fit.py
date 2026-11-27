@@ -14,6 +14,7 @@ It reads the GLB the scene draws and the parts sidecar that names its nodes, and
   ``TIGHT_MM``) or ``near``. Gaps are the minimum distance between dense surface samples, so
   each is an upper bound with a ``precision_mm``: the true gap is at most ``gap_mm`` and at
   least ``gap_mm - precision_mm``.
+* ``loose_parts``: parts that neither touch nor overlap any other part, so nothing in the model holds them.
 * Each pair names both parts' ``basis`` (custom, vendor_step, envelope, unknown, ...) and is
   ``stand_in`` when either is an envelope or unknown shape: a clash there means the shape is not
   known well enough, not that real parts collide.
@@ -33,7 +34,7 @@ import sys
 from itertools import combinations
 from pathlib import Path
 
-VERSION = "scene-fit.v5"
+VERSION = "scene-fit.v6"
 NEAR_MM = 2.0          # pairs whose bounding boxes are farther apart than this are clear
 TIGHT_MM = 1.0         # a measured gap under this is reported as tight
 TOUCH_MM = 0.05        # below this, surfaces meet
@@ -233,6 +234,11 @@ def analyse(glb: Path, parts_path: Path, near: float = NEAR_MM) -> dict:
     result["counts"] = {kind: sum(row["kind"] == kind for row in result["pairs"]) for kind in order}
     result["counts"]["overlap_real"] = sum(row["kind"] == "overlap" and not row["stand_in"] for row in result["pairs"])
     result["counts"]["overlap_stand_in"] = sum(row["kind"] == "overlap" and row["stand_in"] for row in result["pairs"])
+    # A part that touches nothing is held by nothing in the model (Replicator's "floating" check): a gusset 3 mm short of
+    # its plate, a board off its standoffs. A fastener left out of the model, or a part meant to be loose, shows here too.
+    held = {name for row in result["pairs"] if row["kind"] in ("overlap", "touching") for name in (row["a"], row["b"])}
+    result["loose_parts"] = sorted({b["part"]["part_id"] for b in bodies} - held) if len(bodies) > 1 else []
+    result["counts"]["loose"] = len(result["loose_parts"])
     return result
 
 

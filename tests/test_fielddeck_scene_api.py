@@ -5,7 +5,7 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from hardware_splicer import fielddeck_scene_api, project_scene_api
+from hardware_splicer import project_scene_api
 
 
 @pytest.fixture
@@ -25,7 +25,7 @@ def client(tmp_path, monkeypatch):
     }))
     monkeypatch.setenv("HARDWARE_SPLICER_REPO_ROOT", str(tmp_path))
     app = FastAPI()
-    app.include_router(fielddeck_scene_api.fielddeck_router)
+    app.include_router(project_scene_api.fielddeck_router)
     with TestClient(app) as client:
         yield client, root
 

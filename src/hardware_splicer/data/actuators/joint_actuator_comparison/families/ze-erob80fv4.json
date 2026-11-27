@@ -1,0 +1,101 @@
+{
+  "family_id": "ze-erob80fv4",
+  "family_name": "零差云控 eRob80FV4",
+  "shared": {
+    "manufacturer": "零差云控",
+    "manufacturer_en": "ZeroErr",
+    "electrical": {
+      "voltage_v": 48,
+      "rated_input_power_w": 126,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "weight_kg": 0.89,
+      "outer_diameter_mm": 80,
+      "hollow_shaft_diameter_mm": 18,
+      "absolute_accuracy_deg": 0.002776,
+      "repeatability_deg": 0.0028,
+      "output_encoder_bits": 19,
+      "ip_rating": "IP54",
+      "weight_kg_max": 0.95
+    },
+    "transmission": {
+      "type": "harmonic",
+      "backdrivable": false
+    }
+  },
+  "variants": [
+    {
+      "id": "ze-erob80fv4-100-48",
+      "model": "eRob80FV4",
+      "base_id": "ZE-eRob80FV4-100-48",
+      "mechanical": {
+        "rated_torque_nm": 16,
+        "peak_torque_nm": 37,
+        "start_stop_peak_torque_nm": 37,
+        "max_allow_avg_load_nm": 27,
+        "max_allow_instant_load_nm": 71,
+        "rated_speed_rpm": 30,
+        "max_speed_rpm": 30,
+        "torque_density_nm_per_kg": 41.57
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/27_零差云控_eRob系列关节模组.xlsx"
+    },
+    {
+      "id": "ze-erob80fv4-50-48",
+      "model": "eRob80FV4",
+      "base_id": "ZE-eRob80FV4-50-48",
+      "mechanical": {
+        "rated_torque_nm": 11,
+        "peak_torque_nm": 23,
+        "start_stop_peak_torque_nm": 23,
+        "max_allow_avg_load_nm": 18,
+        "max_allow_instant_load_nm": 48,
+        "rated_speed_rpm": 60,
+        "max_speed_rpm": 60,
+        "torque_density_nm_per_kg": 25.84
+      },
+      "transmission": {
+        "reduction_ratio": 50
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 3
+      },
+      "datasheet_url": "datasheets/27_零差云控_eRob系列关节模组.xlsx"
+    }
+  ]
+}

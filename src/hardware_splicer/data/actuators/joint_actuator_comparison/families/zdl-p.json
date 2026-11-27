@@ -1,0 +1,95 @@
+{
+  "family_id": "zdl-p",
+  "family_name": "智动力 P",
+  "shared": {
+    "manufacturer": "智动力",
+    "manufacturer_en": "ZDL",
+    "electrical": {
+      "voltage_v": 48,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "rated_speed_rpm": 70,
+      "ip_rating": "IP40"
+    },
+    "transmission": {
+      "type": "planetary",
+      "reduction_ratio": 50,
+      "backdrivable": false
+    }
+  },
+  "variants": [
+    {
+      "id": "zdl-p-110-50-48",
+      "model": "行星250N·m",
+      "base_id": "ZDL-P-110-50-48",
+      "electrical": {
+        "peak_current_a": 60,
+        "continuous_current_a": 20,
+        "rated_input_power_w": 680
+      },
+      "mechanical": {
+        "rated_torque_nm": 88,
+        "peak_torque_nm": 250,
+        "start_stop_peak_torque_nm": 250,
+        "max_speed_rpm": 90,
+        "weight_kg": 2.1,
+        "outer_diameter_mm": 110,
+        "torque_density_nm_per_kg": 119.05
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 102,
+        "length_mm_max": 102
+      },
+      "datasheet_url": "datasheets/21_智动力_关节模组.docx"
+    },
+    {
+      "id": "zdl-p-90-50-48",
+      "model": "行星150N·m",
+      "base_id": "ZDL-P-90-50-48",
+      "electrical": {
+        "peak_current_a": 35,
+        "continuous_current_a": 11,
+        "rated_input_power_w": 420
+      },
+      "mechanical": {
+        "rated_torque_nm": 55,
+        "peak_torque_nm": 150,
+        "start_stop_peak_torque_nm": 150,
+        "max_speed_rpm": 100,
+        "weight_kg": 1.5,
+        "outer_diameter_mm": 90,
+        "torque_density_nm_per_kg": 100.0
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 108,
+        "length_mm_max": 108
+      },
+      "datasheet_url": "datasheets/21_智动力_关节模组.docx"
+    }
+  ]
+}

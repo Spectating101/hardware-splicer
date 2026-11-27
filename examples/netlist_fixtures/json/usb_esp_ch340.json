@@ -58,16 +58,39 @@
         {
           "component_ref": "U2",
           "pin": "VIN"
+        }
+      ]
+    },
+    {
+      "name": "UART2_TX",
+      "pins": [
+        {
+          "component_ref": "U2",
+          "pin": "GPIO17"
         },
         {
           "component_ref": "U3",
-          "pin": "USB"
+          "pin": "RX"
+        }
+      ]
+    },
+    {
+      "name": "UART2_RX",
+      "pins": [
+        {
+          "component_ref": "U3",
+          "pin": "TX"
+        },
+        {
+          "component_ref": "U2",
+          "pin": "GPIO16"
         }
       ]
     }
   ],
   "metadata": {
     "node_count": 3,
-    "wire_count": 4
+    "wire_count": 5,
+    "note": "The CH340 adapter takes power from its own USB plug (its catalog pin USB is off-board), shares ground and crosses TX/RX with the ESP32's UART2. Set the adapter's logic jumper to 3.3 V for the ESP32."
   }
 }

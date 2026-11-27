@@ -306,3 +306,13 @@ def run_pybullet_kinematics_oracle(
         }
     finally:
         p.disconnect(physicsClientId=client)
+
+
+def check_arm_proposal(proposal: Mapping[str, Any], urdf_path: str, *, workspace_samples: int = 256,
+                       collision_samples: int = 128) -> Dict[str, Any]:
+    """The kinematics oracle from plain JSON, for callers in another interpreter (``native_call``): the proposal is
+    validated here and the URDF at ``urdf_path`` must be the one generated from it."""
+
+    parsed = RobotArmDesignProposal.model_validate(dict(proposal))
+    return run_pybullet_kinematics_oracle(parsed, urdf_path=urdf_path, workspace_samples=workspace_samples,
+                                          collision_samples=collision_samples)

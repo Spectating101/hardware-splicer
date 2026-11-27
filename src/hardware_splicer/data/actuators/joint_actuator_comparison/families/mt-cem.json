@@ -1,0 +1,135 @@
+{
+  "family_id": "mt-cem",
+  "family_name": "脉塔 CEM",
+  "shared": {
+    "manufacturer": "脉塔",
+    "manufacturer_en": "Myactuator",
+    "electrical": {
+      "voltage_v": 48,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "repeatability_deg": 0.01,
+      "output_encoder_bits": 17,
+      "motor_encoder_bits": 17,
+      "radial_load_kn": 2,
+      "axial_load_kn": 1
+    },
+    "transmission": {
+      "type": "cycloidal",
+      "reduction_ratio": 30,
+      "backdrivable": false,
+      "backlash_arcsec": 300
+    }
+  },
+  "variants": [
+    {
+      "id": "mt-cem-53-30-48",
+      "model": "EPS-CEM-15-E-N",
+      "base_id": "MT-CEM-53-30-48",
+      "electrical": {
+        "peak_current_a": 6.5,
+        "continuous_current_a": 2.3
+      },
+      "mechanical": {
+        "rated_torque_nm": 9,
+        "peak_torque_nm": 15,
+        "start_stop_peak_torque_nm": 15,
+        "max_allow_instant_load_nm": 16.2,
+        "rated_speed_rpm": 140,
+        "max_speed_rpm": 170,
+        "weight_kg": 0.81,
+        "outer_diameter_mm": 53,
+        "torque_density_nm_per_kg": 18.52
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "inertia_g_cm2": 0.7
+      },
+      "datasheet_url": "datasheets/12_脉塔_CEM摆线模组_250928.pdf"
+    },
+    {
+      "id": "mt-cem-82-30-48",
+      "model": "EPS-CEM-25-E-N",
+      "base_id": "MT-CEM-82-30-48",
+      "electrical": {
+        "peak_current_a": 7.2,
+        "continuous_current_a": 2.6
+      },
+      "mechanical": {
+        "rated_torque_nm": 15,
+        "peak_torque_nm": 25,
+        "start_stop_peak_torque_nm": 25,
+        "max_allow_instant_load_nm": 25,
+        "rated_speed_rpm": 100,
+        "max_speed_rpm": 130,
+        "weight_kg": 0.94,
+        "outer_diameter_mm": 82,
+        "torque_density_nm_per_kg": 26.6
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "inertia_g_cm2": 0.7
+      },
+      "datasheet_url": "datasheets/12_脉塔_CEM摆线模组_250928.pdf"
+    },
+    {
+      "id": "mt-cem-87-30-48",
+      "model": "EPS-CEM-45-E-N",
+      "base_id": "MT-CEM-87-30-48",
+      "electrical": {
+        "peak_current_a": 16.8,
+        "continuous_current_a": 5.7
+      },
+      "mechanical": {
+        "rated_torque_nm": 25,
+        "peak_torque_nm": 45,
+        "start_stop_peak_torque_nm": 45,
+        "max_allow_instant_load_nm": 50,
+        "rated_speed_rpm": 80,
+        "max_speed_rpm": 100,
+        "weight_kg": 1.09,
+        "outer_diameter_mm": 87,
+        "torque_density_nm_per_kg": 41.28
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "inertia_g_cm2": 0.7
+      },
+      "datasheet_url": "datasheets/12_脉塔_CEM摆线模组_250928.pdf"
+    }
+  ]
+}

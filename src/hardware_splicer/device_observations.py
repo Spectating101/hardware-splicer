@@ -13,7 +13,7 @@ import re
 from typing import Any
 
 from .device_parts import available_parts
-from .device_plan import DevicePlanError, build_device_plan, module_library
+from .device_plan import DevicePlanError, build_device_plan, module_library, ssd1306_display_ids
 
 SCHEMA = "hardware_splicer.device_bus_observation.v1"
 MAX_TRANSCRIPT_CHARS = 48 * 1024
@@ -202,7 +202,7 @@ def _application_row(library_id: str, addresses: list[str], application: dict[st
                     "note": f"The application reported a successful initialization at {boot['sensor']}. "
                             f"The {part['chip']} has no ID register; this is an acknowledgement, not a chip identity."}
         return None
-    if library_id == SSD1306_ID:
+    if library_id in ssd1306_display_ids():
         if boot and boot["display"] in addresses:
             return {"status": "acknowledged", "acknowledged_at": [boot["display"]], "evidence": "application_presence_check",
                     "note": f"The application's presence check found something at {boot['display']}. That is an acknowledge, not a display identity."}

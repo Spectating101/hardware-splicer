@@ -1,0 +1,342 @@
+{
+ "schema": "hardware_splicer.cited_servos.v1",
+ "note": "Stall torque is the stall point, not a continuous rating. Use a fraction of it for design (the sizing checks say which). 2026-11-27: STS3215 mass (Feetech listing) and the 12 V version's input range (Waveshare wiki) added; with no mass the picker could never choose it.",
+ "servos": [
+  {
+   "id": "dynamixel-xl330-m288-t",
+   "maker": "ROBOTIS",
+   "kind": "smart_servo",
+   "source": {
+    "url": "https://emanual.robotis.com/docs/en/dxl/x/xl330-m288/",
+    "accessed": "2026-11-26",
+    "basis": "verbatim from the e-manual specification table"
+   },
+   "input_voltage_v": [
+    3.7,
+    6.0
+   ],
+   "stall": [
+    {
+     "voltage_v": 3.7,
+     "torque_nm": 0.42,
+     "current_a": 1.11
+    },
+    {
+     "voltage_v": 5.0,
+     "torque_nm": 0.52,
+     "current_a": 1.47
+    },
+    {
+     "voltage_v": 6.0,
+     "torque_nm": 0.6,
+     "current_a": 1.74
+    }
+   ],
+   "no_load_rpm": [
+    {
+     "voltage_v": 3.7,
+     "rpm": 76
+    },
+    {
+     "voltage_v": 5.0,
+     "rpm": 103
+    },
+    {
+     "voltage_v": 6.0,
+     "rpm": 123
+    }
+   ],
+   "mass_g": 18,
+   "dimensions_mm": [
+    20.0,
+    34.0,
+    26.0
+   ],
+   "gear_ratio": 288.4,
+   "feedback": "contactless absolute encoder, 12 bit (4096 pulse/rev)",
+   "interface": "TTL half-duplex serial"
+  },
+  {
+   "id": "dynamixel-xl430-w250-t",
+   "maker": "ROBOTIS",
+   "kind": "smart_servo",
+   "source": {
+    "url": "https://emanual.robotis.com/docs/en/dxl/x/xl430-w250/",
+    "accessed": "2026-11-26",
+    "basis": "verbatim from the e-manual specification table"
+   },
+   "input_voltage_v": [
+    6.5,
+    12.0
+   ],
+   "stall": [
+    {
+     "voltage_v": 9.0,
+     "torque_nm": 1.0,
+     "current_a": 1.0
+    },
+    {
+     "voltage_v": 11.1,
+     "torque_nm": 1.4,
+     "current_a": 1.3
+    },
+    {
+     "voltage_v": 12.0,
+     "torque_nm": 1.5,
+     "current_a": 1.4
+    }
+   ],
+   "no_load_rpm": [
+    {
+     "voltage_v": 9.0,
+     "rpm": 47
+    },
+    {
+     "voltage_v": 11.1,
+     "rpm": 57
+    },
+    {
+     "voltage_v": 12.0,
+     "rpm": 61
+    }
+   ],
+   "mass_g": 57.2,
+   "dimensions_mm": [
+    28.5,
+    46.5,
+    34
+   ],
+   "gear_ratio": 258.5,
+   "feedback": "contactless absolute encoder, 12 bit (4096 pulse/rev)",
+   "interface": "TTL half-duplex serial"
+  },
+  {
+   "id": "dynamixel-xm430-w350",
+   "maker": "ROBOTIS",
+   "kind": "smart_servo",
+   "source": {
+    "url": "https://emanual.robotis.com/docs/en/dxl/x/xm430-w350/",
+    "accessed": "2026-11-26",
+    "basis": "verbatim from the e-manual specification table"
+   },
+   "input_voltage_v": [
+    10.0,
+    14.8
+   ],
+   "stall": [
+    {
+     "voltage_v": 11.1,
+     "torque_nm": 3.8,
+     "current_a": 2.1
+    },
+    {
+     "voltage_v": 12.0,
+     "torque_nm": 4.1,
+     "current_a": 2.3
+    },
+    {
+     "voltage_v": 14.8,
+     "torque_nm": 4.8,
+     "current_a": 2.7
+    }
+   ],
+   "no_load_rpm": [
+    {
+     "voltage_v": 11.1,
+     "rpm": 43
+    },
+    {
+     "voltage_v": 12.0,
+     "rpm": 46
+    },
+    {
+     "voltage_v": 14.8,
+     "rpm": 57
+    }
+   ],
+   "mass_g": 82,
+   "dimensions_mm": [
+    28.5,
+    46.5,
+    34
+   ],
+   "gear_ratio": 353.5,
+   "feedback": "contactless absolute encoder, 12 bit (4096 pulse/rev)",
+   "interface": "RS-485 or TTL"
+  },
+  {
+   "id": "dynamixel-xm540-w270",
+   "maker": "ROBOTIS",
+   "kind": "smart_servo",
+   "source": {
+    "url": "https://emanual.robotis.com/docs/en/dxl/x/xm540-w270/",
+    "accessed": "2026-11-26",
+    "basis": "verbatim from the e-manual specification table"
+   },
+   "input_voltage_v": [
+    10.0,
+    14.8
+   ],
+   "stall": [
+    {
+     "voltage_v": 11.1,
+     "torque_nm": 10.0,
+     "current_a": 4.2
+    },
+    {
+     "voltage_v": 12.0,
+     "torque_nm": 10.6,
+     "current_a": 4.4
+    },
+    {
+     "voltage_v": 14.8,
+     "torque_nm": 12.9,
+     "current_a": 5.5
+    }
+   ],
+   "no_load_rpm": [
+    {
+     "voltage_v": 11.1,
+     "rpm": 28
+    },
+    {
+     "voltage_v": 12.0,
+     "rpm": 30
+    },
+    {
+     "voltage_v": 14.8,
+     "rpm": 37
+    }
+   ],
+   "mass_g": 165,
+   "dimensions_mm": [
+    33.5,
+    58.5,
+    44
+   ],
+   "gear_ratio": 272.5,
+   "feedback": "contactless absolute encoder, 12 bit (4096 pulse/rev)",
+   "interface": "RS-485 or TTL"
+  },
+  {
+   "id": "feetech-sts3215-7v4",
+   "maker": "Feetech",
+   "kind": "smart_servo",
+   "source": {
+    "url": "https://github.com/TheRobotStudio/SO-ARM100",
+    "accessed": "2026-11-26",
+    "basis": "SO-ARM100 README (the arm's maker), not Feetech: 'The 7.4V has a stall torque of 16.5kg.cm at 6V'"
+   },
+   "stall": [
+    {
+     "voltage_v": 6.0,
+     "torque_nm": 1.618
+    }
+   ],
+   "gear_ratio": 345,
+   "feedback": "magnetic encoder (SO-101 docs: 1/345 gearing)",
+   "interface": "TTL serial bus",
+   "mass_g": 55,
+   "dimensions_mm": [
+    45.2,
+    24.7,
+    35.0
+   ],
+   "input_voltage_v": [
+    5.0,
+    7.4
+   ],
+   "mass_source": {
+    "url": "https://www.feetechrc.com/products/sts_ttl_series%20servo-page-2",
+    "accessed": "2026-11-27",
+    "basis": "Feetech listing, ST-3215-C001: 'Product Weight：55± 1g', 'The Stall Torque：16.5kg.cm@6V'"
+   },
+   "electrical_source": {
+    "url": "https://github.com/TheRobotStudio/SO-ARM100",
+    "accessed": "2026-11-27",
+    "basis": "Not a maker range: Feetech names this the 7.4V version and the SO-ARM100 README powers it from a 5 V supply; HS keeps it inside 5-7.4 V so it is never put on a 12 V bus"
+   }
+  },
+  {
+   "id": "feetech-sts3215-12v",
+   "maker": "Feetech",
+   "kind": "smart_servo",
+   "source": {
+    "url": "https://github.com/TheRobotStudio/SO-ARM100",
+    "accessed": "2026-11-26",
+    "basis": "SO-ARM100 README: 'The 12V version has a stall torque of 30kg.cm'"
+   },
+   "stall": [
+    {
+     "voltage_v": 12.0,
+     "torque_nm": 2.942,
+     "current_a": 2.7
+    }
+   ],
+   "interface": "TTL serial bus",
+   "mass_g": 55,
+   "dimensions_mm": [
+    45.2,
+    24.7,
+    35.0
+   ],
+   "input_voltage_v": [
+    6.0,
+    12.6
+   ],
+   "mass_source": {
+    "url": "https://www.feetechrc.com/products/sts_ttl_series%20servo-page-2",
+    "accessed": "2026-11-27",
+    "basis": "Feetech listing, ST-3215-C018: 'Product Weight：55± 1g', 'Structure Size：45.2*24.7*35mm', 'The Stall Torque：30kg.cm@12V'"
+   },
+   "electrical_source": {
+    "url": "https://www.waveshare.com/wiki/ST3215_Servo",
+    "accessed": "2026-11-27",
+    "basis": "Waveshare wiki (distributor): 'Input Voltage: 6-12.6V', 'Locked-rotor Current: 2.7 A'"
+   }
+  },
+  {
+   "id": "towerpro-mg996r",
+   "maker": "TowerPro",
+   "kind": "hobby_servo",
+   "source": {
+    "url": "https://www.towerpro.com.tw/product/mg996r/",
+    "accessed": "2026-11-26",
+    "basis": "verbatim"
+   },
+   "input_voltage_v": [
+    4.8,
+    6.6
+   ],
+   "stall": [
+    {
+     "voltage_v": 4.8,
+     "torque_nm": 0.922
+    },
+    {
+     "voltage_v": 6.0,
+     "torque_nm": 1.079
+    }
+   ],
+   "stall_current_a": 1.4,
+   "speed_s_per_60deg": [
+    {
+     "voltage_v": 4.8,
+     "s": 0.19
+    },
+    {
+     "voltage_v": 6.0,
+     "s": 0.15
+    }
+   ],
+   "mass_g": 55,
+   "dimensions_mm": [
+    40.7,
+    19.7,
+    42.9
+   ],
+   "feedback": "none (PWM position servo)",
+   "note": "The page also lists 0.080 kg under additional information; 55 g is the spec line."
+  }
+ ]
+}

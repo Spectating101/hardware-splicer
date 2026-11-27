@@ -1,0 +1,55 @@
+{
+  "family_id": "cm-ake80",
+  "family_name": "酷德 AKE80",
+  "shared": {
+    "manufacturer": "酷德",
+    "manufacturer_en": "Cubemars",
+    "electrical": {
+      "voltage_v": 48,
+      "peak_current_a": 12,
+      "continuous_current_a": 4.8,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "rated_torque_nm": 12,
+      "peak_torque_nm": 30,
+      "start_stop_peak_torque_nm": 30,
+      "rated_speed_rpm": 150,
+      "max_speed_rpm": 195,
+      "weight_kg": 0.57,
+      "outer_diameter_mm": 87,
+      "torque_density_nm_per_kg": 52.63
+    },
+    "transmission": {
+      "type": "planetary",
+      "reduction_ratio": 8,
+      "backdrivable": true,
+      "backlash_arcsec": 540
+    }
+  },
+  "variants": [
+    {
+      "id": "cm-ake80-8-48",
+      "model": "AKE80-8",
+      "base_id": "CM-AKE80-8-48",
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 32,
+        "length_mm_max": 32,
+        "inertia_g_cm2": 143
+      },
+      "datasheet_url": "datasheets/25_酷德Cubemars.pdf"
+    }
+  ]
+}

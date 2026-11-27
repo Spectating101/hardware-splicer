@@ -1,0 +1,8 @@
+{
+ "schema": "hardware_splicer.objective_project.v1",
+ "project_id": "hs-rover-a-on-openbot-s-tt-gearmotors-th-e7b4cb",
+ "objective": "HS-ROVER-A on OpenBot's TT gearmotors: the same inspection rover at the cheap drive tier, under US$250 with every price cited, re-checked end to end.",
+ "constraints": {},
+ "acceptance": [],
+ "opened": "2026-11-27T14:37:29+0800"
+}

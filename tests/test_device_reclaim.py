@@ -35,6 +35,10 @@ def test_real_library_match_preserves_the_read_marking_and_relations():
     assert parts == original and module_library() == before
 
 
+def _chip_matches(marking, listed):
+    return marking.lower() == listed.lower() or (marking.lower().startswith(listed.lower()) and len(marking) > len(listed))
+
+
 @pytest.mark.parametrize("marking,module,tier", [
     ("SSD1306", "ssd1306-096-i2c", "exact"),
     ("ESP32-WROOM-32E", "esp32-devkitc-v4", "exact"),
@@ -50,8 +54,10 @@ def test_real_library_match_preserves_the_read_marking_and_relations():
 def test_chip_markings_match_only_a_part_listed_on_the_module(marking, module, tier):
     found = reclaim.match_reclaimed_parts({"parts": [row(marking, kind="connector")]})["parts"][0]
     assert found["marking"] == marking and found["kind"] == "connector"
-    assert found["matched"] and len(found["matches"]) == 1
-    match = found["matches"][0]
+    # Every module that lists this chip is a candidate (two displays carry an SSD1306); none other is.
+    listing = [m["id"] for m in module_library()["modules"] if any(_chip_matches(marking, c["marking"]) for c in m["chips"])]
+    assert found["matched"] and [m["module"] for m in found["matches"]] == listing and module in listing
+    match = next(m for m in found["matches"] if m["module"] == module)
     entry = next(m for m in module_library()["modules"] if m["id"] == module)
     chip = entry["chips"][0]
     assert match["module"] == module and match["tier"] == tier
@@ -198,4 +204,6 @@ def test_a_shorter_marking_is_not_the_listed_part_it_is_the_start_of(marking: st
 @pytest.mark.parametrize(("marking", "tier"), [("SSD1306", "exact"), ("ssd1306", "exact"), ("SSD1306Z", "variant"), ("ESP32-WROOM-32E-N4", "variant")])
 def test_the_listed_part_and_the_same_part_with_a_package_or_grade_code_still_match(marking: str, tier: str) -> None:
     row = reclaim.match_reclaimed_parts({"parts": [{"ref": "U1", "kind": "chip", "marking": marking}]})["parts"][0]
-    assert [(m["relation"], m["tier"]) for m in row["matches"]] == [("chip_on_module", tier)]
+    # The SSD1306 is listed on two display modules, so it matches each of them; the ESP32 module on one board.
+    expected = 2 if marking.lower().startswith("ssd1306") else 1
+    assert [(m["relation"], m["tier"]) for m in row["matches"]] == [("chip_on_module", tier)] * expected

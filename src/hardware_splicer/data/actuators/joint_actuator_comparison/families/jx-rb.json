@@ -1,0 +1,669 @@
+{
+  "family_id": "jx-rb",
+  "family_name": "巨蟹 RB",
+  "shared": {
+    "manufacturer": "巨蟹",
+    "manufacturer_en": "JUXIE",
+    "electrical": {
+      "voltage_v": 48,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "output_encoder_bits": 19,
+      "motor_encoder_bits": 19
+    },
+    "transmission": {
+      "type": "harmonic",
+      "backdrivable": false
+    }
+  },
+  "variants": [
+    {
+      "id": "jx-rb-102-101-48",
+      "model": "CE-RB-R102-101-P1",
+      "base_id": "JX-RB-102-101-48",
+      "electrical": {
+        "peak_current_a": 12,
+        "continuous_current_a": 4.5,
+        "rated_input_power_w": 180
+      },
+      "mechanical": {
+        "rated_torque_nm": 70,
+        "peak_torque_nm": 200,
+        "start_stop_peak_torque_nm": 200,
+        "rated_speed_rpm": 32,
+        "weight_kg": 2,
+        "outer_diameter_mm": 102,
+        "torque_density_nm_per_kg": 100.0
+      },
+      "transmission": {
+        "reduction_ratio": 101,
+        "backlash_arcsec": 15
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 73.5,
+        "length_mm_max": 73.5,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/8_巨蟹智能_人形机器人模组_20250711.pdf"
+    },
+    {
+      "id": "jx-rb-102-161-48",
+      "model": "CE-RB-R102-161-P1",
+      "base_id": "JX-RB-102-161-48",
+      "electrical": {
+        "peak_current_a": 12,
+        "continuous_current_a": 4.5,
+        "rated_input_power_w": 180
+      },
+      "mechanical": {
+        "rated_torque_nm": 96,
+        "peak_torque_nm": 320,
+        "start_stop_peak_torque_nm": 320,
+        "rated_speed_rpm": 18,
+        "weight_kg": 2,
+        "outer_diameter_mm": 102,
+        "torque_density_nm_per_kg": 160.0
+      },
+      "transmission": {
+        "reduction_ratio": 161,
+        "backlash_arcsec": 15
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 73.5,
+        "length_mm_max": 73.5,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/8_巨蟹智能_人形机器人模组_20250711.pdf"
+    },
+    {
+      "id": "jx-rb-102-51-48",
+      "model": "CE-RB-R102-51-P1",
+      "base_id": "JX-RB-102-51-48",
+      "electrical": {
+        "peak_current_a": 12,
+        "continuous_current_a": 4.5,
+        "rated_input_power_w": 180
+      },
+      "mechanical": {
+        "rated_torque_nm": 35,
+        "peak_torque_nm": 100,
+        "start_stop_peak_torque_nm": 100,
+        "rated_speed_rpm": 65,
+        "weight_kg": 2,
+        "outer_diameter_mm": 102,
+        "torque_density_nm_per_kg": 50.0
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 15
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 73.5,
+        "length_mm_max": 73.5,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/8_巨蟹智能_人形机器人模组_20250711.pdf"
+    },
+    {
+      "id": "jx-rb-120-101-48",
+      "model": "CE-RB-R120-101-P1V1",
+      "base_id": "JX-RB-120-101-48",
+      "electrical": {
+        "peak_current_a": 45,
+        "continuous_current_a": 15,
+        "rated_input_power_w": 732
+      },
+      "mechanical": {
+        "rated_torque_nm": 140,
+        "peak_torque_nm": 360,
+        "start_stop_peak_torque_nm": 360,
+        "rated_speed_rpm": 31.5,
+        "weight_kg": 2.5,
+        "outer_diameter_mm": 120,
+        "hollow_shaft_diameter_mm": 15,
+        "torque_density_nm_per_kg": 144.0
+      },
+      "transmission": {
+        "reduction_ratio": 101,
+        "backlash_arcsec": 15
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 78.5,
+        "length_mm_max": 78.5,
+        "inertia_g_cm2": 5000.0,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/8_巨蟹智能_人形机器人模组_20250711.pdf"
+    },
+    {
+      "id": "jx-rb-120-161-48",
+      "model": "CE-RB-R120-161-P1V1",
+      "base_id": "JX-RB-120-161-48",
+      "electrical": {
+        "peak_current_a": 45,
+        "continuous_current_a": 15,
+        "rated_input_power_w": 732
+      },
+      "mechanical": {
+        "rated_torque_nm": 224,
+        "peak_torque_nm": 576,
+        "start_stop_peak_torque_nm": 576,
+        "rated_speed_rpm": 19,
+        "weight_kg": 2.5,
+        "outer_diameter_mm": 120,
+        "hollow_shaft_diameter_mm": 15,
+        "torque_density_nm_per_kg": 230.4
+      },
+      "transmission": {
+        "reduction_ratio": 161,
+        "backlash_arcsec": 15
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 78.5,
+        "length_mm_max": 78.5,
+        "inertia_g_cm2": 5000.0,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/8_巨蟹智能_人形机器人模组_20250711.pdf"
+    },
+    {
+      "id": "jx-rb-120-51-48",
+      "model": "CE-RB-R120-51-P1V1",
+      "base_id": "JX-RB-120-51-48",
+      "electrical": {
+        "peak_current_a": 45,
+        "continuous_current_a": 15,
+        "rated_input_power_w": 732
+      },
+      "mechanical": {
+        "rated_torque_nm": 70,
+        "peak_torque_nm": 180,
+        "start_stop_peak_torque_nm": 180,
+        "rated_speed_rpm": 63,
+        "weight_kg": 2.5,
+        "outer_diameter_mm": 120,
+        "hollow_shaft_diameter_mm": 15,
+        "torque_density_nm_per_kg": 72.0
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 15
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 78.5,
+        "length_mm_max": 78.5,
+        "inertia_g_cm2": 5000.0,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/8_巨蟹智能_人形机器人模组_20250711.pdf"
+    },
+    {
+      "id": "jx-rb-48-101-48",
+      "model": "CE-RB-R48-101",
+      "base_id": "JX-RB-48-101-48",
+      "electrical": {
+        "peak_current_a": 2,
+        "continuous_current_a": 1,
+        "rated_input_power_w": 48
+      },
+      "mechanical": {
+        "rated_torque_nm": 3.7,
+        "peak_torque_nm": 7.5,
+        "start_stop_peak_torque_nm": 7.5,
+        "rated_speed_rpm": 49,
+        "weight_kg": 0.35,
+        "outer_diameter_mm": 48,
+        "hollow_shaft_diameter_mm": 9,
+        "torque_density_nm_per_kg": 21.43
+      },
+      "transmission": {
+        "reduction_ratio": 101,
+        "backlash_arcsec": 15
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 47.5,
+        "length_mm_max": 47.5,
+        "inertia_g_cm2": 150.0,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/8_巨蟹智能_人形机器人模组_20250711.pdf"
+    },
+    {
+      "id": "jx-rb-48-51-48",
+      "model": "CE-RB-R48-51",
+      "base_id": "JX-RB-48-51-48",
+      "electrical": {
+        "peak_current_a": 2,
+        "continuous_current_a": 1,
+        "rated_input_power_w": 48
+      },
+      "mechanical": {
+        "rated_torque_nm": 2,
+        "peak_torque_nm": 3.8,
+        "start_stop_peak_torque_nm": 3.8,
+        "rated_speed_rpm": 98,
+        "weight_kg": 0.35,
+        "outer_diameter_mm": 48,
+        "hollow_shaft_diameter_mm": 9,
+        "torque_density_nm_per_kg": 10.86
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 15
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 47.5,
+        "length_mm_max": 47.5,
+        "inertia_g_cm2": 150.0,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/8_巨蟹智能_人形机器人模组_20250711.pdf"
+    },
+    {
+      "id": "jx-rb-58-101-48",
+      "model": "CE-RB-R58-101-P1",
+      "base_id": "JX-RB-58-101-48",
+      "electrical": {
+        "peak_current_a": 10.8,
+        "continuous_current_a": 3.6,
+        "rated_input_power_w": 120
+      },
+      "mechanical": {
+        "rated_torque_nm": 16,
+        "peak_torque_nm": 45,
+        "start_stop_peak_torque_nm": 45,
+        "rated_speed_rpm": 45,
+        "weight_kg": 0.5,
+        "outer_diameter_mm": 58,
+        "hollow_shaft_diameter_mm": 3.4,
+        "torque_density_nm_per_kg": 90.0
+      },
+      "transmission": {
+        "reduction_ratio": 101,
+        "backlash_arcsec": 15
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 52.1,
+        "length_mm_max": 52.1,
+        "inertia_g_cm2": 150.0,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/8_巨蟹智能_人形机器人模组_20250711.pdf"
+    },
+    {
+      "id": "jx-rb-58-51-48",
+      "model": "CE-RB-R58-51-P1",
+      "base_id": "JX-RB-58-51-48",
+      "electrical": {
+        "peak_current_a": 10.8,
+        "continuous_current_a": 3.6,
+        "rated_input_power_w": 120
+      },
+      "mechanical": {
+        "rated_torque_nm": 8,
+        "peak_torque_nm": 22,
+        "start_stop_peak_torque_nm": 22,
+        "rated_speed_rpm": 90,
+        "weight_kg": 0.5,
+        "outer_diameter_mm": 58,
+        "hollow_shaft_diameter_mm": 3.4,
+        "torque_density_nm_per_kg": 44.0
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 15
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 52.1,
+        "length_mm_max": 52.1,
+        "inertia_g_cm2": 150.0,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/8_巨蟹智能_人形机器人模组_20250711.pdf"
+    },
+    {
+      "id": "jx-rb-68-101-48",
+      "model": "CE-RB-R68-101-P1",
+      "base_id": "JX-RB-68-101-48",
+      "electrical": {
+        "peak_current_a": 12,
+        "continuous_current_a": 3.8,
+        "rated_input_power_w": 134
+      },
+      "mechanical": {
+        "rated_torque_nm": 26,
+        "peak_torque_nm": 75,
+        "start_stop_peak_torque_nm": 75,
+        "rated_speed_rpm": 30,
+        "weight_kg": 0.8,
+        "outer_diameter_mm": 68,
+        "torque_density_nm_per_kg": 93.75
+      },
+      "transmission": {
+        "reduction_ratio": 101,
+        "backlash_arcsec": 15
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 66.3,
+        "length_mm_max": 66.3,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/8_巨蟹智能_人形机器人模组_20250711.pdf"
+    },
+    {
+      "id": "jx-rb-68-51-48",
+      "model": "CE-RB-R68-51-P1",
+      "base_id": "JX-RB-68-51-48",
+      "electrical": {
+        "peak_current_a": 12,
+        "continuous_current_a": 3.8,
+        "rated_input_power_w": 134
+      },
+      "mechanical": {
+        "rated_torque_nm": 13,
+        "peak_torque_nm": 38,
+        "start_stop_peak_torque_nm": 38,
+        "rated_speed_rpm": 60,
+        "weight_kg": 0.8,
+        "outer_diameter_mm": 68,
+        "torque_density_nm_per_kg": 47.5
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 15
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 66.3,
+        "length_mm_max": 66.3,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/8_巨蟹智能_人形机器人模组_20250711.pdf"
+    },
+    {
+      "id": "jx-rb-83-101-48",
+      "model": "CE-RB-R83-101-P1",
+      "base_id": "JX-RB-83-101-48",
+      "electrical": {
+        "peak_current_a": 14.5,
+        "continuous_current_a": 4.5,
+        "rated_input_power_w": 180
+      },
+      "mechanical": {
+        "rated_torque_nm": 35,
+        "peak_torque_nm": 98,
+        "start_stop_peak_torque_nm": 98,
+        "rated_speed_rpm": 30,
+        "weight_kg": 1.1,
+        "outer_diameter_mm": 83,
+        "hollow_shaft_diameter_mm": 13,
+        "torque_density_nm_per_kg": 89.09
+      },
+      "transmission": {
+        "reduction_ratio": 101,
+        "backlash_arcsec": 30
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 59,
+        "length_mm_max": 59,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/8_巨蟹智能_人形机器人模组_20250711.pdf"
+    },
+    {
+      "id": "jx-rb-83-161-48",
+      "model": "CE-RB-R83-161-P1",
+      "base_id": "JX-RB-83-161-48",
+      "electrical": {
+        "peak_current_a": 14.5,
+        "continuous_current_a": 4.5,
+        "rated_input_power_w": 180
+      },
+      "mechanical": {
+        "rated_torque_nm": 57,
+        "peak_torque_nm": 156,
+        "start_stop_peak_torque_nm": 156,
+        "rated_speed_rpm": 18,
+        "weight_kg": 1.1,
+        "outer_diameter_mm": 83,
+        "hollow_shaft_diameter_mm": 13,
+        "torque_density_nm_per_kg": 141.82
+      },
+      "transmission": {
+        "reduction_ratio": 161,
+        "backlash_arcsec": 30
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 59,
+        "length_mm_max": 59,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/8_巨蟹智能_人形机器人模组_20250711.pdf"
+    },
+    {
+      "id": "jx-rb-83-51-48",
+      "model": "CE-RB-R83-51-P1",
+      "base_id": "JX-RB-83-51-48",
+      "electrical": {
+        "peak_current_a": 14.5,
+        "continuous_current_a": 4.5,
+        "rated_input_power_w": 180
+      },
+      "mechanical": {
+        "rated_torque_nm": 18,
+        "peak_torque_nm": 49,
+        "start_stop_peak_torque_nm": 49,
+        "rated_speed_rpm": 60,
+        "weight_kg": 1.1,
+        "outer_diameter_mm": 83,
+        "hollow_shaft_diameter_mm": 13,
+        "torque_density_nm_per_kg": 44.55
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 30
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 59,
+        "length_mm_max": 59,
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/8_巨蟹智能_人形机器人模组_20250711.pdf"
+    }
+  ]
+}

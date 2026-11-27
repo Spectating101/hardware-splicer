@@ -7,7 +7,7 @@ When a rating or threshold is absent, the candidate remains blocked on explicit 
 
 from __future__ import annotations
 
-from typing import Any, Dict, Iterable, List, Mapping, Sequence
+from typing import Any, Dict, List, Mapping, Sequence
 
 from ..electrical_contract_truth import (
     contract_snapshot,
@@ -24,6 +24,7 @@ from ..electrical_contract_truth import (
 )
 from ..pcb.module_registry import find_module
 from .ir import CircuitIntent, Constraint, SynthesisCandidate, TopologyOperator
+from .common import dedupe as _dedupe, float_or_none as _float_or_none
 
 
 CURRENT_MARGIN_MULTIPLIER = 1.25
@@ -614,24 +615,3 @@ def _blocked(
         status="blocked",
         value=value,
     )
-
-
-def _dedupe(rows: Iterable[str]) -> List[str]:
-    out: List[str] = []
-    seen = set()
-    for row in rows:
-        text = str(row or "").strip()
-        if not text or text in seen:
-            continue
-        seen.add(text)
-        out.append(text)
-    return out
-
-
-def _float_or_none(value: Any) -> float | None:
-    if value is None or value == "":
-        return None
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return None

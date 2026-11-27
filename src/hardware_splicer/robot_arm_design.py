@@ -50,7 +50,8 @@ class ArmJointProposal(ArmDesignModel):
     joint_id: str = Field(min_length=1, max_length=96)
     joint_type: str = "revolute"
     axis: list[float] = Field(min_length=3, max_length=3)
-    link_length_mm: float = Field(gt=0.0, le=2_000.0)
+    # 0 is a real geometry: a wrist roll that shares its point with the wrist pitch before it.
+    link_length_mm: float = Field(ge=0.0, le=2_000.0)
     actuator_part_id: str | None = None
     lower_limit_deg: float | None = None
     upper_limit_deg: float | None = None
@@ -110,6 +111,8 @@ class RobotArmDesignProposal(ArmDesignModel):
         ids = [row.joint_id for row in self.joints]
         if len(ids) != len(set(ids)):
             raise ValueError("robot-arm joint IDs must be unique")
+        if sum(row.link_length_mm for row in self.joints) <= 0:
+            raise ValueError("robot-arm chain must have a nonzero total link length")
         return self
 
 

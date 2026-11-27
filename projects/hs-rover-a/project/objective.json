@@ -1,0 +1,25 @@
+{
+ "schema": "hardware_splicer.objective_project.v1",
+ "project_id": "build-an-affordable-useful-cctv-inspecti-232a25",
+ "objective": "Build an affordable, useful CCTV/inspection rover from obtainable parts: drives on indoor floors and gentle ramps, streams live video over Wi-Fi to a phone or laptop, and can be printed and assembled by one person.",
+ "constraints": {
+  "parts_budget_usd": 250,
+  "print_bed_mm": [
+   220,
+   220,
+   250
+  ],
+  "max_slope_deg": 15,
+  "cruise_speed_m_s": 0.4,
+  "market_reference": "consumer patrol robots US$750-1,025 (SwitchBot K20+ Pro kit, Enabot EBO X, Ring Rover Cam); robot cameras US$20-230 that cannot drive ramps"
+ },
+ "acceptance": [
+  "parts total at or under US$250 with every price cited",
+  "drive holds 0.4 m/s on the flat and climbs 15 degrees within the motor maker limits",
+  "chassis prints on a 220 mm bed, clears the ground by 15 mm and does not tip on a 15 degree slope",
+  "camera sees the floor ahead without the chassis in view",
+  "battery runs at least 1 h of patrol",
+  "every remaining risk listed as needing a physical test"
+ ],
+ "opened": "2026-11-26T16:40:17+0800"
+}

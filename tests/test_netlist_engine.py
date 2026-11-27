@@ -139,3 +139,57 @@ def test_fan_mosfet_netlist_compiles_switched_load(tmp_path: Path) -> None:
         tmp_path,
         require={"level-shifter-4ch", "mosfet-irlz44n", "cooling_fan_5v"},
     )
+
+
+def test_netlist_compile_reports_netlist_to_pcb_connectivity_parity(tmp_path):
+    """The generated board's connectivity is compared with the netlist (KiCad's parity cannot judge generated boards)."""
+    import json as _json
+    from hardware_splicer.build_compiler import compile_from_netlist
+    netlist = {"components": [{"ref": "U1", "module_id": "usb-power-5v"}, {"ref": "U2", "module_id": "esp32-devkit"}],
+               "nets": [{"name": "GND", "pins": [{"component_ref": "U1", "pin": "GND"}, {"component_ref": "U2", "pin": "GND"}]}]}
+    result = compile_from_netlist(netlist, tmp_path, export_gerber=False)
+    if not result.kicad_pcb_file:
+        import pytest
+        pytest.skip("no PCB produced in this environment")
+    parity = result.design_quality["netlist_pcb_parity"]
+    assert set(parity) >= {"pass", "missing_on_pcb", "extra_on_pcb"}
+    stored = _json.loads(open(result.design_quality_file, encoding="utf-8").read())
+    assert stored["netlist_pcb_parity"] == parity
+    assert parity["pass"], parity  # a netlist-compiled board names pads by pin id; parity follows that convention
+
+
+def test_a_netlist_pin_with_no_pad_fails_the_build(tmp_path):
+    """A connection the board cannot carry fails a netlist compile. The MAX98357A once had no GAIN pad; it has one now,
+    so a pin that no module footprint has stands in for it."""
+    import json as _json
+    from pathlib import Path as _Path
+    from hardware_splicer.build_compiler import compile_from_netlist
+    fixture = _Path(__file__).resolve().parents[1] / "examples" / "netlist_fixtures" / "json" / "usb_esp_audio_amp.json"
+    data = _json.loads(fixture.read_text(encoding="utf-8"))
+    good = compile_from_netlist(data, tmp_path / "good", export_gerber=False)
+    if not good.kicad_pcb_file:
+        import pytest
+        pytest.skip("no PCB produced in this environment")
+    assert good.ok and good.design_quality["netlist_pcb_parity"]["pass"] is True
+    for net in data["nets"]:
+        for pin in net["pins"]:
+            if pin["component_ref"] == "U3" and pin["pin"] == "GAIN":
+                pin["pin"] = "NOT_A_PIN"
+    bad = compile_from_netlist(data, tmp_path / "bad", export_gerber=False)
+    assert bad.ok is False and "missing:NOT_A_PIN" in (bad.error or "")
+
+
+def test_parts_with_no_hs_module_are_named_and_still_checked(tmp_path):
+    """A KiCad netlist of raw chips maps to no HS module: they are drawn as preview packages, named, and their
+    connections still checked."""
+    from pathlib import Path as _Path
+    from hardware_splicer.build_compiler import compile_from_netlist
+    from hardware_splicer.netlist.ingest import load_netlist_file
+    net = load_netlist_file(_Path(__file__).resolve().parents[1] / "examples" / "netlist_fixtures" / "kicad" / "esp32_servo.net")
+    result = compile_from_netlist(net, tmp_path, build_id="generic_low_voltage_build", export_gerber=False)
+    if not result.kicad_pcb_file:
+        import pytest
+        pytest.skip("no PCB produced in this environment")
+    parity = result.design_quality["netlist_pcb_parity"]
+    assert parity["unmapped_parts"] == sorted(c.ref for c in net.components)
+    assert parity["pass"] is True and result.ok, parity

@@ -1,0 +1,162 @@
+# Hardware-Splicer scale plan: how far it can go, and everything needed to get there (2026-11-26)
+
+Companion to `COMMERCE_CONVERSION_RESEARCH_20261126.md`. That report chose the route (services first, products as
+proof). This one asks how far the route goes and lists every feature and function, engineering and business, needed to
+scale it, with what exists today. Assumptions are marked as such; nothing here has been sold or built.
+
+## 1. The ladder: where each stage tops out
+
+| Stage | What is sold | Evidence and limit | Monthly revenue range (assumption-based) |
+|---|---|---|---|
+| 0. Today | Nothing | No physical proof, PRO360 account unverified, lead system aimed at software only | 0 |
+| 1. First jobs (from Feb 2027) | Small hardware design jobs in Taiwan: PCB layout, enclosures and mechanisms, 3D models and prints, small prototypes | Demand measured: about 19 PCB, 14 mechanism, 14 product-design and 49 3D-printing requests a month on PRO360, about 22 budgeted hardware posts a month on Tasker; posted medians NT$10,000 (3D) to NT$20,000-30,000 (PCB, firmware, prototypes) | 2-4 jobs at NT$10,000-30,000 = **NT$20,000-120,000**. Assumes a 10-20% win rate (not measured) and about 20-30 quotes a month, so NT$5,000-8,000 of PRO360 quote fees |
+| 2. Productized solo studio | Fixed-price packages, repeat clients, international clients via Upwork | Upwork hardware rates about US$40-85/h (Fiverr 2026 guide); limit is one person's hours | **NT$100,000-200,000**: the solo ceiling, since each job still needs client talk and review |
+| 3. Studio with a bench | You sell and review; engineers deliver with HS as the quality gate. Your notes aim at a business in Indonesia: Indonesian PCB designers list about US$12-25/h on Upwork against Taiwan budgets of NT$20,000-30,000 per job | Limit: finding reliable engineers, and HS checks good enough that review stays fast | Margin on rate gap; scales with clients, not your hours |
+| 4. Products from repeated requests | One niche product per repeated request type (a board, a kit, an inspection rover) | Certification only when volume pays for it: NCC about NT$70,000-170,000 per radio product (lab estimate); BSMI for power supplies | Unbounded, but capital and certification come first |
+
+Two later options that research weakened:
+- **A "non-red" drone parts-origin checker.** ITRI already runs Taiwan's verification platform and is authorized for US
+  "Green UAS" evaluation, with 267+ companies in the supply chain. What remains is a service: helping small component
+  makers prepare traceability files before ITRI review. Only worth pursuing after customer interviews.
+- **Selling HS as software.** Flux has US$37M in funding and charges about US$20-142 a month; competing head-on is not
+  realistic. HS's edge is checked deliverables, which is worth more inside a studio than as a subscription.
+
+## 2. Engineering features: what HS has, what each paid job type needs
+
+Rated against what Taiwan clients actually asked for in the scraped requests: board sizes, MCU pin maps, Allegro files,
+enclosures, mechanisms, assembly drawings, wiring harnesses, samples.
+
+| Deliverable a client pays for | HS today | Gap to close | Priority |
+|---|---|---|---|
+| PCB from a block diagram or pin map | Component schematic generator from real KiCad libraries, read-back parity, ERC, routed PCB, DRC with parity, Gerbers, drill, pick-and-place, BOM (`kicad_component_board`, HS-BUS-A) | Intake that turns a client's pin map or block diagram into the design file; a retry-and-keep loop for FreeRouting's run-to-run misses | **P1** |
+| PCB priced and orderable | JLCPCB/LCSC parts, stock and price via `jlcparts_lookup`; keyword matches flagged | Board and assembly quote (JLCPCB setup about US$8 economic tier, per-joint and extended-part fees: confirm live); a "basic parts first" substitution pass | **P1** |
+| PCB in the client's tool | KiCad only | Altium imports KiCad files (its guide lists up to KiCad 6 or 8, versions disagree); no KiCad-to-Allegro route found. Offer KiCad plus Gerbers, and test an Altium import on a copy | P2 |
+| Enclosure for a board | `device_case` (STL/OpenSCAD two-part box from a device plan); CadQuery parts (HS-ARM-A) | Board-to-case fit from the KiCad STEP export (`kicad-cli pcb export step`), screw bosses, port cut-outs from real connector positions | **P1** |
+| Mechanism and structural design | CadQuery CAD, motion sweep, URDF, static torque, FEM screening (`mechanical_cad_fem`, gmsh now installed) | FEM on real parts with cited material data (PLA figures not yet sourced); joint and fastener detail | P2 |
+| 2D dimensioned drawings | **None** | Drawings from the CAD (views, dimensions, title block) as PDF and DXF; clients asked for 組立圖 (assembly drawings) | **P1** |
+| 3D model fixes and prints | STEP/STL export; mesh tools (trimesh) | Mesh repair (watertight check and fix), print-orientation and wall checks; local print-shop pricing | P2 |
+| Firmware starter | `firmware_scaffold`, `device_firmware` (compile-only packages) | Build and flash for ESP32/STM32 through PlatformIO with a minimal on-bench test | P2 |
+| Wiring harness | `wiring_harness` (DC and signal checks) | Harness drawing and cut list (one client needed a 48 V vehicle harness) | P3 |
+| Client hand-off | `engineering_package` (reproducible ZIP), `verification.json` per project | A client-facing report: renders, checks passed, open items, BOM cost, in Chinese and English | **P1** |
+| Physical proof | Bench-evidence modules (`bench_loop`, physical evidence ledger) | Actually building and testing: none of the designs has been made | **P1** |
+
+## 3. Proof pieces: one each, built and tested
+
+| Piece | Remaining work | Why it sells services |
+|---|---|---|
+| HS-BUS-A board | Order a small batch (quote first), test with real servos | Shows a full PCB job: schematic to working board |
+| Arm, cost-down | Redesign on Feetech STS3215 servos to reach the SO-ARM101 class (US$299 assembled), print, assemble | Shows mechanism plus electronics at a market price point |
+| CCTV/inspection rover | Chassis CAD, camera and streaming, controller board, drive test | Matches requests like "AI inspection robot" (Tasker NT$200,000) and the robot posts |
+| FPV drone | Airframe CAD, flight-controller choice and configuration, flight test | Matches drone ground-control and drone posts; also the non-red conversation |
+| Compact FieldDeck (CM5) | Redesign around CM5 with a proper power path | Shows a consumer-electronics enclosure job |
+
+## 4. Business functions: what exists in your other project, what is missing
+
+The lead system lives in `Molina-Optiplex` (scrapers, scoring, apply queue, rate card). Its May 2026 audit already said
+the missing layer was "engagement/conversion", and that is still true.
+
+| Function | Today | Needed |
+|---|---|---|
+| Lead collection | PRO360, Tasker, Kolabtree scrapers every 2 h; 461,575 posts stored | **Tasker stored nothing since 27 Oct 2026** while logging "done" (parser silently broken). Searches only software keywords. Add hardware keywords (PCB, 電路, 韌體, 機構, 3D列印, 樣機, 無人機) |
+| Lead scoring | Rate card and scoring built for software and data work; it explicitly excludes PLC/MCU/firmware | A hardware lane: fit scoring for PCB, enclosure, mechanism, prototype, firmware |
+| Approval and drafts | Apply queue with draft messages; stalled since 20 May (7 pending) | Daily approval habit; hardware reply templates that attach an HS sample package |
+| Platform accounts | PRO360 expert account exists but cannot quote (identity verification); Tasker and Upwork profiles not checked here | Verification, plus a hardware profile pack: renders, a sample package, a price list |
+| Quoting | Software rate card (NT$) | Hardware rate card from the scraped budgets, plus a scope-to-price estimator (hours, risk, parts and fab cost from `jlcparts_lookup`) |
+| Contract, milestones, invoicing | None | Simple milestone template (deposit, design, revisions, delivery), invoice and payment tracking, tax status for freelance income (to check) |
+| Delivery and QA | HS checks per project | The client report (section 2), a revision log, and a rule that nothing ships without passing HS's checks |
+| Spend control | Prepaid-only API rule and harness guard (2026-11-26) | Per-job cost tracking: platform fees, fab, parts, API |
+
+## 5. Owner-only gates
+
+1. Thesis defense on 7 January 2027 comes first; this plan assumes little of your time before then.
+2. Work status: confirm with YZU's international office whether platform freelancing is allowed on a student work permit
+   (20 h/week cap in term, fines NT$30,000-150,000 for unauthorized work). Your notes say the graduate extension after
+   graduation removes the separate permit, so February 2027 is the clean start.
+3. PRO360 identity verification.
+4. A proof budget: each build quoted first, approved by you.
+
+## 6. Order of work
+
+| Window | HS engineering (mine) | Business (mine, your approval) | You |
+|---|---|---|---|
+| Now to 7 Jan | P1 items: drawings, client report, enclosure-from-board, quoting estimator, intake from pin map; arm cost-down design | Fix the Tasker parser and add hardware keywords (in Molina-Optiplex, after checking no other session is editing it); hardware lane in scoring; hardware rate card | Thesis; YZU work-status question |
+| 8-31 Jan | Order and test HS-BUS-A; print the cost-down arm | Profile pack from the proof pieces | Approve proof spend; housing move |
+| From Feb 2027 | Rover and drone proof pieces between jobs | Approval queue daily; 20-30 quotes a month | PRO360 verification; client calls |
+| After 3 paid jobs | P2/P3 items driven by what clients asked | Upwork profile; decide on Stage 3 bench | Decide |
+
+Sources: as in `COMMERCE_CONVERSION_RESEARCH_20261126.md`, plus ITRI's verification platform and Green UAS authority
+([Taiwan News](https://www.taiwannews.com.tw/news/6434577), [TaiwanPlus](https://www.taiwanplus.com/news/taiwan-news/taiwan-us-relations/260129021/taiwans-itri-joins-drone-security-framework),
+[Focus Taiwan](https://focustaiwan.tw/business/202606040018)) and Altium's KiCad import ([Altium migration guide](https://www.altium.com/altium-designer/migrate/kicad-pcb),
+[Altium interfacing docs](https://www.altium.com/documentation/altium-designer/design-tools-interfacing)).
+
+## 7. Correction: core mission first, business layer second (owner, same day)
+
+Sections 2 and 4 list features a paying client needs. They are a wrapper. HS's own purpose (`HARDWARE_SPLICER_MISSION_FREEZE.md`)
+is an engineering problem solver that takes an objective ("build an affordable and useful drone from obtainable parts"),
+researches existing work, chooses build/buy/salvage/repair/adapt, drives mature tools, produces deliverables, verifies and
+iterates on the same project, and keeps software evidence apart from physical proof. Business features are added only
+when a paid job needs them, on top of that core.
+
+## 8. Competitive check and functional state (2026-11-26)
+
+**Who else does this.** Funded generators: Diode Computers (US$11.4M, a16z; sells designed boards as a service to
+customers such as Physical Intelligence), Quilter (reinforcement-learning layout; an AI-laid-out computer booted), Flux
+(US$37M), Leo AI (US$9.7M, mechanical assemblies from text), Zoo (Zookeeper CAD agent), CopperPilot (US$390k), Schematik
+(US$4.6M). One-agent electronics + mechanical + firmware IDEs in beta or preview: Odem (macOS, free beta; demo USB-C desk
+clock with schematic, routed board, enclosure, firmware), iOrchestra, Autonomyware Electronics Forge. DIY: Claude or
+Gemini with KiCad, FreeCAD and Blender MCP servers.
+
+**Where HS has real value.** The documented failure of agent-driven hardware design is self-certification: an
+engineer's test of Gemini driving KiCad met 38 of 50 requirements while the agent graded itself 50 of 50. HS's design
+answers exactly that: KiCad read-back parity against the intent, cited checks (logic-level guarantees, current and
+voltage ratings, static torque, overturning, collision sweeps, propulsion), fail-closed authority. In this session those
+checks found real defects: the ROBOTIS reference buffer's unguaranteed logic level, the arm's yaw-bearing overload and
+tip-over, a terminal facing into the board, a wrong-colour LED from a keyword search. Generation is not where HS wins:
+funded tools and open MCP servers already generate.
+
+Diode's model (AI inside, boards sold as a service) supports the services-first route in this plan.
+
+**Functional state, checked in code.**
+- The engineering tools work: real outputs and tests for the arm, the bus board, sizing, pricing, routing.
+- **An outside agent cannot reach them.** HS's MCP server exposes 30 older compose and splice tools; none of
+  `kicad_component_board`, `jlcparts_lookup`, `route_pcb`, `arm_actuator_sizing`, `drive_sizing`, `prop_static`,
+  `propulsion_check`, `energy_budget`, `kicad_design_review`, `distributor_check`, `motion_sweep` or
+  `mechanical_cad_fem` has an MCP tool or REST route (`device_case` has one route). Today's arm and board were built by an
+  agent with a shell running Python, not through HS's agent interface.
+- **No objective-level loop.** `mission_runner` drives an accepted fabrication mission through device checks;
+  `ai_project_orchestrator` only proposes; `workshop_operator` is a single bounded action. Nothing takes the drone
+  objective and carries it to a build package with the artifacts kept on one project.
+- **No physical proof** of any design.
+
+**Core order of work, replacing the engineering half of section 6:**
+1. An engineering toolbelt on HS's MCP/REST surface for the tools above, each returning its evidence and refusals, so
+   any agent (Claude Code, a reseller model, a person) works through HS rather than around it.
+2. The drone objective run end to end through that surface on one project: prior art (BoardRepo, GitHub, PX4 and
+   Betaflight ecosystems), strategy, airframe CAD, propulsion and energy, flight-controller choice and configuration,
+   parts priced, build package, then a physical build with your approval.
+3. The same loop for the rover, the cost-down arm and the compact FieldDeck.
+4. A head-to-head on the same briefs against open tools that run locally (Formwright, WireStudio, KiCad MCP with a
+   general agent), graded on known traps and on whether the self-reported "done" matches the independent check.
+
+Sources: [VentureBeat on Quilter](https://venturebeat.com/ai/quilters-ai-just-designed-an-843-part-linux-computer-that-booted-on-the),
+[Odem on Product Hunt](https://www.producthunt.com/posts/1263017), [iOrchestra](https://www.producthunt.com/products/vibe-engineer-by-iorchestra/launches),
+[Autonomyware](https://www.producthunt.com/p/autonomyware/sneak-peek-electronics-forge-from-a-written-brief-to-a-routed-pcb),
+[CopperPilot](https://analyticsindiamag.com/ai-startups/this-bengaluru-startup-is-building-ai-agents-for-hardware-design),
+[Gemini + KiCad test](https://mx.linkedin.com/in/javierhzmbrpena), [Diode (YC)](https://ycombinator.com/companies/diode-computers-inc),
+[Diode Series A](https://technews180.com/funding-news/diode-raises-11-4m-to-end-circuit-board-design-frustrations/),
+[Leo AI](https://www.engineering.com/leo-ai-can-now-generate-full-cad-assemblies/), [Zoo Zookeeper](https://www.digitalengineering247.com/article/zoo-introduces-zookeeper-agent-for-cad-design/products),
+[JLCPCB KiCad MCP guide](https://jlcpcb.com/blog/kicad-mcp-how-to-design-a-pcb-with-claude-code), [FreeCAD MCP guide](https://mcp.directory/blog/freecad-mcp-complete-guide-2026).
+
+## 9. Done the same day: toolbelt and the first objective run over MCP
+
+- `engineering_toolbelt` (MCP + `POST /v1/toolbelt/<tool>`): 16 tools with one envelope (problems, sources, claim
+  boundary), each recorded on an `objective_project` whose status keeps software checks, open problems, physical-only
+  items, research and untested deliverables apart. `component_board_pipeline` runs any JSON board design to fab files;
+  `rover_chassis` builds a printable chassis from cited drawings.
+- `projects/hs-rover-a`: the inspection-rover objective worked entirely over MCP in 24 recorded steps. The tools caught
+  and drove four real design changes: wheel-to-plate gap, a 3 mm vs 4 mm shaft mismatch, a US$323.66 vs US$250 budget
+  overrun (to 2WD + caster), and the Pi Zero's different camera cable. Result: US$242.32 with three prices still
+  uncited, all checks passing in software, nothing built.
+- Still not done: an agent inside HS that drives the loop without an outside agent; the drone and arm objectives
+  through the toolbelt (the drone package exists from earlier scripts); the head-to-head against open tools; any
+  physical build.

@@ -1,0 +1,52 @@
+{
+  "family_id": "ut-im6014",
+  "family_name": "宇树 IM6014",
+  "shared": {
+    "manufacturer": "宇树",
+    "manufacturer_en": "Unitree",
+    "electrical": {
+      "voltage_v": 60,
+      "peak_current_a": 40,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "peak_torque_nm": 34.4,
+      "start_stop_peak_torque_nm": 34.4,
+      "max_allow_instant_load_nm": 34.4,
+      "max_speed_rpm": 517.8,
+      "weight_kg": 0.535,
+      "outer_diameter_mm": 65,
+      "output_encoder_bits": 15,
+      "torque_density_nm_per_kg": 64.3
+    },
+    "transmission": {
+      "type": "planetary",
+      "reduction_ratio": 12.66,
+      "backdrivable": false
+    }
+  },
+  "variants": [
+    {
+      "id": "ut-im6014-12.66-48",
+      "model": "N6014B-12.6",
+      "base_id": "UT-IM6014-12.66-48",
+      "options": {
+        "bus_types": [
+          "RS485"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 60,
+        "length_mm_max": 60
+      },
+      "datasheet_url": "datasheets/26_宇树_关节模组.pdf"
+    }
+  ]
+}

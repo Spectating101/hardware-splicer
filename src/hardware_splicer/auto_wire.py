@@ -116,7 +116,10 @@ def auto_wire_picked_modules(modules: List[ModuleSpec]) -> Recipe:
     # copy of the spec, never through the module id, so a repeated module
     # cannot collapse onto a single role. Callers' specs are not mutated.
     roles = [{"role": f"m{i + 1}", "moduleId": m["id"]} for i, m in enumerate(modules)]
-    modules = [{**m, "_role": f"m{i + 1}"} for i, m in enumerate(modules)]
+    # A pin the catalogue marks offBoard (the module's own plug, or one its footprint keeps off copper) has no pad, so
+    # no wire may land on it: the per-call copies leave those pins out.
+    modules = [{**m, "_role": f"m{i + 1}", "pins": [p for p in (m.get("pins") or []) if not p.get("offBoard")]}
+               for i, m in enumerate(modules)]
     wires: List[Dict[str, Any]] = []
     wire_keys: Set[str] = set()
 

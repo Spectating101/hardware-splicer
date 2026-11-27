@@ -1,0 +1,105 @@
+{
+  "family_id": "gq-htpu",
+  "family_name": "高擎 HTPU",
+  "shared": {
+    "manufacturer": "高擎",
+    "manufacturer_en": "HighTorque",
+    "electrical": {
+      "voltage_v": 24,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "absolute_accuracy_deg": 0.25,
+      "repeatability_deg": 0.2,
+      "output_encoder_bits": 14,
+      "motor_encoder_bits": 14
+    },
+    "transmission": {
+      "type": "planetary",
+      "backdrivable": false,
+      "backlash_arcsec": 600
+    }
+  },
+  "variants": [
+    {
+      "id": "gq-htpu-62-35-24",
+      "model": "HTPU-6035-04-CNE",
+      "base_id": "GQ-HTPU-62-35-24",
+      "electrical": {
+        "peak_current_a": 15,
+        "continuous_current_a": 3,
+        "rated_input_power_w": 52
+      },
+      "mechanical": {
+        "rated_torque_nm": 10,
+        "peak_torque_nm": 36,
+        "start_stop_peak_torque_nm": 36,
+        "rated_speed_rpm": 50,
+        "max_speed_rpm": 60,
+        "weight_kg": 0.558,
+        "outer_diameter_mm": 62,
+        "torque_density_nm_per_kg": 64.52
+      },
+      "transmission": {
+        "reduction_ratio": 35
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 37,
+        "length_mm_max": 37
+      },
+      "datasheet_url": "datasheets/6_高擎_关节模组_20241203.pdf"
+    },
+    {
+      "id": "gq-htpu-72-33-24",
+      "model": "HTPU-7033-04-CNE",
+      "base_id": "GQ-HTPU-72-33-24",
+      "electrical": {
+        "peak_current_a": 20,
+        "continuous_current_a": 4.8,
+        "rated_input_power_w": 84
+      },
+      "mechanical": {
+        "rated_torque_nm": 20,
+        "peak_torque_nm": 50,
+        "start_stop_peak_torque_nm": 50,
+        "rated_speed_rpm": 40,
+        "max_speed_rpm": 48,
+        "weight_kg": 0.808,
+        "outer_diameter_mm": 72,
+        "torque_density_nm_per_kg": 61.88
+      },
+      "transmission": {
+        "reduction_ratio": 33
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 36.9,
+        "length_mm_max": 36.9
+      },
+      "datasheet_url": "datasheets/6_高擎_关节模组_20241203.pdf"
+    }
+  ]
+}

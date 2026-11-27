@@ -256,9 +256,10 @@ _MODULE_FOOTPRINTS: dict[str, dict] = {
     },
     "max98357a-i2s-amp": {
         "kicadFootprint": "Driver:MAX98357A-I2S",
-        "bodyMm": {"w": 18, "h": 12},
+        # Every breakout pin has a pad, GAIN included (Adafruit's header: gain set by a resistor to GND or VIN).
+        "bodyMm": {"w": 22, "h": 12},
         "pads": _row(
-            ["VIN", "GND", "BCLK", "LRC", "DIN", "SD", "SPK+", "SPK-"],
+            ["VIN", "GND", "BCLK", "LRC", "DIN", "GAIN", "SD", "SPK+", "SPK-"],
             0, 0, _P,
         ),
     },

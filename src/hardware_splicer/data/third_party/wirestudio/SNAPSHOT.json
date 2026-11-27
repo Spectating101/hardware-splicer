@@ -1,0 +1,11 @@
+{
+ "source": "https://github.com/moellere/WireStudio",
+ "commit": "2d1df156fbdbb93e842809f93399f69119b8dc5a",
+ "license": "MIT (see LICENSE in this folder)",
+ "counts": {
+  "components": 102,
+  "boards": 27,
+  "examples": 76
+ },
+ "note": "WireStudio's own data, unchanged. Imported into HS as data without HS citations; see hardware_splicer.wirestudio_bridge."
+}

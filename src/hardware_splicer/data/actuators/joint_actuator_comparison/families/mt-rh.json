@@ -1,0 +1,556 @@
+{
+  "family_id": "mt-rh",
+  "family_name": "脉塔 RH",
+  "shared": {
+    "manufacturer": "脉塔",
+    "manufacturer_en": "Myactuator",
+    "electrical": {
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "repeatability_deg": 0.01,
+      "output_encoder_bits": 17
+    },
+    "transmission": {
+      "type": "harmonic",
+      "backdrivable": false,
+      "backlash_arcsec": 40
+    }
+  },
+  "variants": [
+    {
+      "id": "mt-rh-105-100-48",
+      "model": "EPS-RH-25",
+      "base_id": "MT-RH-105-100-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 14.1,
+        "continuous_current_a": 10.6,
+        "rated_input_power_w": 282
+      },
+      "mechanical": {
+        "rated_torque_nm": 108,
+        "peak_torque_nm": 157,
+        "start_stop_peak_torque_nm": 157,
+        "max_allow_instant_load_nm": 256,
+        "rated_speed_rpm": 25,
+        "max_speed_rpm": 30,
+        "weight_kg": 2.42,
+        "outer_diameter_mm": 105.2,
+        "hollow_shaft_diameter_mm": 22,
+        "motor_encoder_bits": 17,
+        "radial_load_kn": 21.8,
+        "axial_load_kn": 49.1,
+        "torque_density_nm_per_kg": 64.88
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/12_脉塔_RH谐波模组_250928.pdf"
+    },
+    {
+      "id": "mt-rh-105-50-48",
+      "model": "EPS-RH-25",
+      "base_id": "MT-RH-105-50-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 14.1,
+        "continuous_current_a": 10.6,
+        "rated_input_power_w": 282
+      },
+      "mechanical": {
+        "rated_torque_nm": 54,
+        "peak_torque_nm": 78.5,
+        "start_stop_peak_torque_nm": 78.5,
+        "rated_speed_rpm": 50,
+        "max_speed_rpm": 60,
+        "weight_kg": 2.42,
+        "outer_diameter_mm": 105.2,
+        "hollow_shaft_diameter_mm": 22,
+        "motor_encoder_bits": 17,
+        "radial_load_kn": 21.8,
+        "axial_load_kn": 49.1,
+        "torque_density_nm_per_kg": 32.44
+      },
+      "transmission": {
+        "reduction_ratio": 50
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/12_脉塔_RH谐波模组_250928.pdf"
+    },
+    {
+      "id": "mt-rh-125-100-48",
+      "model": "EPS-RH-32",
+      "base_id": "MT-RH-125-100-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 32.1,
+        "continuous_current_a": 21.8,
+        "rated_input_power_w": 282
+      },
+      "mechanical": {
+        "rated_torque_nm": 150,
+        "peak_torque_nm": 229,
+        "start_stop_peak_torque_nm": 229,
+        "max_allow_instant_load_nm": 270,
+        "rated_speed_rpm": 18,
+        "max_speed_rpm": 20,
+        "weight_kg": 4.32,
+        "outer_diameter_mm": 125.3,
+        "hollow_shaft_diameter_mm": 20,
+        "motor_encoder_bits": 17,
+        "radial_load_kn": 38.2,
+        "axial_load_kn": 81.8,
+        "torque_density_nm_per_kg": 53.01
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/12_脉塔_RH谐波模组_250928.pdf"
+    },
+    {
+      "id": "mt-rh-125-50-48",
+      "model": "EPS-RH-32",
+      "base_id": "MT-RH-125-50-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 32.1,
+        "continuous_current_a": 21.8,
+        "rated_input_power_w": 282
+      },
+      "mechanical": {
+        "rated_torque_nm": 75,
+        "peak_torque_nm": 114.5,
+        "start_stop_peak_torque_nm": 114.5,
+        "rated_speed_rpm": 50,
+        "max_speed_rpm": 60,
+        "weight_kg": 4.32,
+        "outer_diameter_mm": 125.3,
+        "hollow_shaft_diameter_mm": 20,
+        "motor_encoder_bits": 17,
+        "radial_load_kn": 38.2,
+        "axial_load_kn": 81.8,
+        "torque_density_nm_per_kg": 26.5
+      },
+      "transmission": {
+        "reduction_ratio": 50
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/12_脉塔_RH谐波模组_250928.pdf"
+    },
+    {
+      "id": "mt-rh-73-80-24",
+      "model": "EPS-RH-11",
+      "base_id": "MT-RH-73-80-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 5,
+        "continuous_current_a": 1.4,
+        "rated_input_power_w": 13
+      },
+      "mechanical": {
+        "rated_torque_nm": 5,
+        "peak_torque_nm": 21,
+        "start_stop_peak_torque_nm": 21,
+        "max_allow_instant_load_nm": 21,
+        "rated_speed_rpm": 25,
+        "max_speed_rpm": 40,
+        "weight_kg": 0.38,
+        "outer_diameter_mm": 73,
+        "hollow_shaft_diameter_mm": 8,
+        "motor_encoder_bits": 14,
+        "radial_load_kn": 5.29,
+        "axial_load_kn": 1.13,
+        "torque_density_nm_per_kg": 55.26
+      },
+      "transmission": {
+        "reduction_ratio": 80
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/12_脉塔_RH谐波模组_250928.pdf"
+    },
+    {
+      "id": "mt-rh-80-100-48",
+      "model": "EPS-RH-14",
+      "base_id": "MT-RH-80-100-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 5.7,
+        "continuous_current_a": 2.8,
+        "rated_input_power_w": 28
+      },
+      "mechanical": {
+        "rated_torque_nm": 11,
+        "peak_torque_nm": 28,
+        "start_stop_peak_torque_nm": 28,
+        "rated_speed_rpm": 25,
+        "max_speed_rpm": 30,
+        "weight_kg": 0.78,
+        "outer_diameter_mm": 80,
+        "motor_encoder_bits": 17,
+        "radial_load_kn": 5.8,
+        "axial_load_kn": 16.2,
+        "torque_density_nm_per_kg": 35.9
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/12_脉塔_RH谐波模组_250928.pdf"
+    },
+    {
+      "id": "mt-rh-80-50-48",
+      "model": "EPS-RH-14",
+      "base_id": "MT-RH-80-50-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 5.7,
+        "continuous_current_a": 2.8,
+        "rated_input_power_w": 28
+      },
+      "mechanical": {
+        "rated_torque_nm": 5.5,
+        "peak_torque_nm": 14,
+        "start_stop_peak_torque_nm": 14,
+        "rated_speed_rpm": 50,
+        "max_speed_rpm": 60,
+        "weight_kg": 0.78,
+        "outer_diameter_mm": 80,
+        "motor_encoder_bits": 17,
+        "radial_load_kn": 5.8,
+        "axial_load_kn": 16.2,
+        "torque_density_nm_per_kg": 17.95
+      },
+      "transmission": {
+        "reduction_ratio": 50
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/12_脉塔_RH谐波模组_250928.pdf"
+    },
+    {
+      "id": "mt-rh-85-100-24",
+      "model": "EPS-RH-17 Lite",
+      "base_id": "MT-RH-85-100-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 12.6,
+        "continuous_current_a": 5,
+        "rated_input_power_w": 55
+      },
+      "mechanical": {
+        "rated_torque_nm": 26,
+        "peak_torque_nm": 65,
+        "start_stop_peak_torque_nm": 65,
+        "max_allow_instant_load_nm": 65,
+        "rated_speed_rpm": 20,
+        "max_speed_rpm": 25,
+        "weight_kg": 0.8,
+        "outer_diameter_mm": 85,
+        "hollow_shaft_diameter_mm": 14,
+        "motor_encoder_bits": 14,
+        "torque_density_nm_per_kg": 81.25
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ]
+      },
+      "datasheet_url": "datasheets/12_脉塔_RH谐波模组_250928.pdf"
+    },
+    {
+      "id": "mt-rh-90-100-48",
+      "model": "EPS-RH-17",
+      "base_id": "MT-RH-90-100-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 7.4,
+        "continuous_current_a": 4.7,
+        "rated_input_power_w": 91
+      },
+      "mechanical": {
+        "rated_torque_nm": 35,
+        "peak_torque_nm": 54,
+        "start_stop_peak_torque_nm": 54,
+        "max_allow_instant_load_nm": 87.5,
+        "rated_speed_rpm": 25,
+        "max_speed_rpm": 30,
+        "weight_kg": 1.11,
+        "outer_diameter_mm": 90.2,
+        "hollow_shaft_diameter_mm": 12,
+        "motor_encoder_bits": 17,
+        "radial_load_kn": 10.4,
+        "axial_load_kn": 20.8,
+        "torque_density_nm_per_kg": 48.65
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/12_脉塔_RH谐波模组_250928.pdf"
+    },
+    {
+      "id": "mt-rh-90-50-48",
+      "model": "EPS-RH-17",
+      "base_id": "MT-RH-90-50-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 7.4,
+        "continuous_current_a": 4.7,
+        "rated_input_power_w": 91
+      },
+      "mechanical": {
+        "rated_torque_nm": 17.5,
+        "peak_torque_nm": 27,
+        "start_stop_peak_torque_nm": 27,
+        "rated_speed_rpm": 50,
+        "max_speed_rpm": 60,
+        "weight_kg": 1.11,
+        "outer_diameter_mm": 90.2,
+        "hollow_shaft_diameter_mm": 12,
+        "motor_encoder_bits": 17,
+        "radial_load_kn": 10.4,
+        "axial_load_kn": 20.8,
+        "torque_density_nm_per_kg": 24.32
+      },
+      "transmission": {
+        "reduction_ratio": 50
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/12_脉塔_RH谐波模组_250928.pdf"
+    },
+    {
+      "id": "mt-rh-97-100-48",
+      "model": "EPS-RH-20",
+      "base_id": "MT-RH-97-100-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 10.6,
+        "continuous_current_a": 6.8,
+        "rated_input_power_w": 130
+      },
+      "mechanical": {
+        "rated_torque_nm": 50,
+        "peak_torque_nm": 80,
+        "start_stop_peak_torque_nm": 80,
+        "max_allow_instant_load_nm": 125,
+        "rated_speed_rpm": 25,
+        "max_speed_rpm": 30,
+        "weight_kg": 1.45,
+        "outer_diameter_mm": 97.4,
+        "hollow_shaft_diameter_mm": 12,
+        "motor_encoder_bits": 17,
+        "radial_load_kn": 14.6,
+        "axial_load_kn": 34,
+        "torque_density_nm_per_kg": 55.17
+      },
+      "transmission": {
+        "reduction_ratio": 100
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/12_脉塔_RH谐波模组_250928.pdf"
+    },
+    {
+      "id": "mt-rh-97-50-48",
+      "model": "EPS-RH-20",
+      "base_id": "MT-RH-97-50-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 10.6,
+        "continuous_current_a": 6.8,
+        "rated_input_power_w": 130
+      },
+      "mechanical": {
+        "rated_torque_nm": 25,
+        "peak_torque_nm": 40,
+        "start_stop_peak_torque_nm": 40,
+        "rated_speed_rpm": 50,
+        "max_speed_rpm": 60,
+        "weight_kg": 1.45,
+        "outer_diameter_mm": 97.4,
+        "hollow_shaft_diameter_mm": 12,
+        "motor_encoder_bits": 17,
+        "radial_load_kn": 14.6,
+        "axial_load_kn": 34,
+        "torque_density_nm_per_kg": 27.59
+      },
+      "transmission": {
+        "reduction_ratio": 50
+      },
+      "options": {
+        "bus_types": [
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "variant_count": 2
+      },
+      "datasheet_url": "datasheets/12_脉塔_RH谐波模组_250928.pdf"
+    }
+  ]
+}

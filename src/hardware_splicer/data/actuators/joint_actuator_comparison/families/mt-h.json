@@ -1,0 +1,215 @@
+{
+  "family_id": "mt-h",
+  "family_name": "脉塔 H",
+  "shared": {
+    "manufacturer": "脉塔",
+    "manufacturer_en": "Myactuator",
+    "electrical": {
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "repeatability_deg": 0.01,
+      "motor_encoder_bits": 17
+    },
+    "transmission": {
+      "type": "direct-drive",
+      "reduction_ratio": 1,
+      "backdrivable": true
+    }
+  },
+  "variants": [
+    {
+      "id": "mt-h-30-1-24",
+      "model": "RMD-H-30-08-15-C",
+      "base_id": "MT-H-30-1-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 4,
+        "continuous_current_a": 1.2,
+        "rated_input_power_w": 15
+      },
+      "mechanical": {
+        "rated_torque_nm": 0.03,
+        "peak_torque_nm": 0.1,
+        "start_stop_peak_torque_nm": 0.1,
+        "rated_speed_rpm": 5000,
+        "max_speed_rpm": 6000,
+        "outer_diameter_mm": 30,
+        "radial_load_kn": 0.05,
+        "axial_load_kn": 0.18
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "inertia_g_cm2": 0.15
+      },
+      "datasheet_url": "datasheets/12_脉塔_H外转子直驱模组_251028.pdf"
+    },
+    {
+      "id": "mt-h-40-1-24",
+      "model": "RMD-H-40-15-50-C",
+      "base_id": "MT-H-40-1-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 12.8,
+        "continuous_current_a": 5.1,
+        "rated_input_power_w": 47
+      },
+      "mechanical": {
+        "rated_torque_nm": 0.15,
+        "peak_torque_nm": 0.3,
+        "start_stop_peak_torque_nm": 0.3,
+        "rated_speed_rpm": 3000,
+        "max_speed_rpm": 3700,
+        "weight_kg": 0.2,
+        "outer_diameter_mm": 40,
+        "radial_load_kn": 0.08,
+        "axial_load_kn": 0.35,
+        "torque_density_nm_per_kg": 1.5
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "inertia_g_cm2": 0.29
+      },
+      "datasheet_url": "datasheets/12_脉塔_H外转子直驱模组_251028.pdf"
+    },
+    {
+      "id": "mt-h-50-1-24",
+      "model": "RMD-H-50-15-100-C",
+      "base_id": "MT-H-50-1-24",
+      "electrical": {
+        "voltage_v": 24,
+        "peak_current_a": 12.4,
+        "continuous_current_a": 4.9,
+        "rated_input_power_w": 91.6
+      },
+      "mechanical": {
+        "rated_torque_nm": 0.35,
+        "peak_torque_nm": 0.9,
+        "start_stop_peak_torque_nm": 0.9,
+        "rated_speed_rpm": 2500,
+        "max_speed_rpm": 3200,
+        "weight_kg": 0.24,
+        "outer_diameter_mm": 50,
+        "radial_load_kn": 0.1,
+        "axial_load_kn": 0.489,
+        "torque_density_nm_per_kg": 3.75
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "inertia_g_cm2": 0.57
+      },
+      "datasheet_url": "datasheets/12_脉塔_H外转子直驱模组_251028.pdf"
+    },
+    {
+      "id": "mt-h-70-1-48",
+      "model": "RMD-H-70-15-200-C",
+      "base_id": "MT-H-70-1-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 13.2,
+        "continuous_current_a": 4.4,
+        "rated_input_power_w": 200
+      },
+      "mechanical": {
+        "rated_torque_nm": 0.8,
+        "peak_torque_nm": 2,
+        "start_stop_peak_torque_nm": 2,
+        "rated_speed_rpm": 2400,
+        "max_speed_rpm": 2800,
+        "weight_kg": 0.47,
+        "outer_diameter_mm": 70,
+        "radial_load_kn": 0.44,
+        "axial_load_kn": 1.87,
+        "torque_density_nm_per_kg": 4.26
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "inertia_g_cm2": 1.8
+      },
+      "datasheet_url": "datasheets/12_脉塔_H外转子直驱模组_251028.pdf"
+    },
+    {
+      "id": "mt-h-90-1-48",
+      "model": "RMD-H-90-15-400-C",
+      "base_id": "MT-H-90-1-48",
+      "electrical": {
+        "voltage_v": 48,
+        "peak_current_a": 19.8,
+        "continuous_current_a": 6.6,
+        "rated_input_power_w": 252
+      },
+      "mechanical": {
+        "rated_torque_nm": 1.5,
+        "peak_torque_nm": 3.75,
+        "start_stop_peak_torque_nm": 3.75,
+        "rated_speed_rpm": 1600,
+        "max_speed_rpm": 2000,
+        "weight_kg": 0.71,
+        "outer_diameter_mm": 90,
+        "radial_load_kn": 0.77,
+        "axial_load_kn": 2.35,
+        "torque_density_nm_per_kg": 5.28
+      },
+      "options": {
+        "bus_types": [
+          "CAN"
+        ],
+        "brake_options": [
+          false
+        ],
+        "dual_encoder_options": [
+          false
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "inertia_g_cm2": 4.2
+      },
+      "datasheet_url": "datasheets/12_脉塔_H外转子直驱模组_251028.pdf"
+    }
+  ]
+}

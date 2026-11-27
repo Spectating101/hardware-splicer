@@ -227,3 +227,14 @@ def test_robot_arm_experiment_detects_old_hidden_default_and_new_typed_loop() ->
     assert probe["diagnosis"] == "SCRIPT_BRAIN"
     assert probe["joint_count_without_declared_dof"] == 5
     assert probe["motion_authorized"] is False
+
+
+def test_zero_length_wrist_link_is_accepted_but_a_zero_chain_is_not() -> None:
+    candidate = _candidate([None] * 6)
+    candidate["joints"][-1]["link_length_mm"] = 0
+    proposal = parse_robot_arm_design(json.dumps(candidate))
+    assert proposal.joints[-1].link_length_mm == 0
+    for joint in candidate["joints"]:
+        joint["link_length_mm"] = 0
+    with pytest.raises(RobotArmDesignError):
+        parse_robot_arm_design(json.dumps(candidate))

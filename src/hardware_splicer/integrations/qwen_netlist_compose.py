@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import os
-import re
 from typing import Any, Dict, Mapping
 
 from ..netlist import run_erc
@@ -14,6 +13,7 @@ from ..semantic_module_selector import SemanticSelectionError, semantic_module_s
 from .catalog_context import catalog_context_for_goal
 from .qwen_model_policy import qwen_text_model_rotation
 from .qwen_text_client import call_qwen_chat, qwen_configured
+from .qwen_text_client import extract_json_object as _extract_json_object
 
 # Back-compat
 QWEN_TEXT_MODEL_ROTATION = qwen_text_model_rotation()
@@ -25,14 +25,6 @@ def _catalog_hint_for_goal(goal: str) -> str:
 
 # Back-compat alias for imports; prefer _catalog_hint_for_goal(goal).
 _MODULE_CATALOG_HINT = ""
-
-
-def _extract_json_object(text: str) -> Dict[str, Any]:
-    text = text.strip()
-    if text.startswith("```"):
-        text = re.sub(r"^```(?:json)?\s*", "", text)
-        text = re.sub(r"\s*```$", "", text)
-    return json.loads(text)
 
 
 def _normalize_netlist_payload(raw: Mapping[str, Any], *, source: str) -> Dict[str, Any]:

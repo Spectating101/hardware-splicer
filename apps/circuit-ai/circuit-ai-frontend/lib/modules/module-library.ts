@@ -34,6 +34,9 @@ export interface ModulePin {
   currentMaxMa?: number;
   /** Free-form note (pull-ups, strap pins, ADC attenuation, etc.). */
   notes?: string;
+  /** Set when the pin is real but has no pad on the board footprint (the module's own plug, or a pin the footprint
+   *  leaves off copper on purpose); says why. A netlist that wires it cannot be carried by the board. */
+  offBoard?: string;
 }
 
 export interface ModuleSpec {
@@ -49,6 +52,14 @@ export interface ModuleSpec {
   inputVoltageRange?: [number, number];
   /** Typical quiescent current, mA. */
   typicalCurrentMa?: number;
+  /** Cited peak current, mA (whole module), with where it was read. */
+  peakCurrentMa?: number;
+  /** Cited peak current per unit (e.g. per pixel), mA; the unit is named in currentUnit. */
+  peakCurrentMaPerUnit?: number;
+  currentUnit?: string;
+  peakCurrentSource?: { url: string; accessed: string; quote?: string; locator?: string; note?: string };
+  /** Where logicVoltage was read. */
+  logicVoltageSource?: { url: string; accessed: string; quote?: string; locator?: string; note?: string };
   pins: ModulePin[];
   /** Safety notes surfaced in inspectors. */
   warnings?: string[];
@@ -419,6 +430,8 @@ export const MODULE_LIBRARY: ModuleSpec[] = [
     label: "SG90 servo",
     category: "actuator",
     summary: "Small hobby servo, 180° range, 5V PWM.",
+    peakCurrentMa: 500,
+    peakCurrentSource: {"url": "http://www.towerpro.com.tw/product/sg90-7/", "accessed": "2026-11-26", "quote": "The operation current for our SG90 is about 0.5A – 2A.", "note": "A TowerPro staff reply in the product page's Q&A (2021-11-07), not the specification, which gives no current; 500 mA is its lower end."},
     inputVoltageRange: [4.8, 6],
     typicalCurrentMa: 200,
     pins: [
@@ -452,7 +465,7 @@ export const MODULE_LIBRARY: ModuleSpec[] = [
     category: "interface",
     summary: "USB serial adapter, 3.3V or 5V selectable.",
     pins: [
-      { id: "USB", label: "USB", role: "power_in", voltage: "5V", notes: "Powered from USB host" },
+      { id: "USB", label: "USB", role: "power_in", voltage: "5V", notes: "Powered from USB host", offBoard: "the module's own USB plug: it takes power from the host it plugs into, not from the board" },
       { id: "VCC", label: "VCC", role: "power_out", voltage: "5V", currentMaxMa: 300, notes: "3.3V/5V jumper on many boards" },
       { id: "GND", label: "GND", role: "gnd" },
       { id: "TX", label: "TX", role: "uart_tx" },

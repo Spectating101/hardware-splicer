@@ -1,0 +1,132 @@
+{
+ "schema": "hardware_splicer.oomwoo_vacuum_parts.v1",
+ "modules": [
+  {
+   "id": "roborock-drive-wheel-module",
+   "capability": "drive_motors_encoded",
+   "what": "drive wheel assembly: motor + encoder + suspension + tire + cables + wheel-drop sensors",
+   "sold_as": "pair, US$24-33 (OOMWOO BOM, incl. shipping)",
+   "fits": [
+    "Roborock S4 Max, S5 Max, S50/S55 Max, S6 MaxV, S6 Pure, S7 family, E4/E5, G10, T7/T7S, Q5, Q7, Q7 Max, Q Revo",
+    "Roborock S5, S50, S51, S52, S55, S502, C10, E20, E25, E35"
+   ],
+   "source": "https://github.com/makerspet/oomwoo/blob/b7e37f61bfe62e18c69b6ae4a01a5dbd63d55a04/BOM.md",
+   "envelope_mm": [
+    72.71,
+    111.21,
+    60.37
+   ],
+   "wheel_diameter_mm_scan": 71.6,
+   "cad": "https://github.com/makerspet/oomwoo-cad/blob/30a3d12944fb0f0aad92e6870df625b7307e0e54/lib/roborock/OOM-W01-drive-wheel-assembly.stp",
+   "cad_sha256": "101bd1ef763c3b11fe60dd31274b58afc26cd071d1205c8a210f7c74020e2fe2",
+   "unknown": "motor voltage, torque and encoder resolution are not in OOMWOO's BOM; measure before sizing"
+  },
+  {
+   "id": "xiaomi-lds02rr",
+   "capability": "lidar_2d",
+   "what": "Xiaomi LDS02RR / LDS01RR spinning 2D laser distance sensor",
+   "sold_as": "US$14-32 (OOMWOO BOM); NT$390-736 new on Ruten, 2026-11-27",
+   "fits": [
+    "Roborock S5/S50/S51/S55/S6/S7, S502, S550, S5 Max, S6 MaxV/Pure, S45 Max, S7 Max, Xiaomi Mi 1S"
+   ],
+   "source": "https://github.com/makerspet/oomwoo/blob/b7e37f61bfe62e18c69b6ae4a01a5dbd63d55a04/BOM.md",
+   "envelope_mm": [
+    107.65,
+    86.51,
+    54.1
+   ],
+   "turret_diameter_mm": 76.0,
+   "cad": "https://github.com/makerspet/oomwoo-cad/blob/30a3d12944fb0f0aad92e6870df625b7307e0e54/lib/lidars/xiaomi_lds02rr.step",
+   "cad_sha256": "bdf44c7ec739808df85cd02498c80d870dbe7269db93c70b8a6fcb462a184b12",
+   "driver": "https://github.com/kaiaai/LDS (Apache-2.0, Arduino/ESP32) and https://github.com/kaiaai/lds2d (Apache-2.0, Python)"
+  },
+  {
+   "id": "dreame-lds-camsense",
+   "capability": "lidar_2d",
+   "what": "Dreame LDS, PCB marks X-WPFTB-V2.6.2 or X-Wireless board-V1.13.3 (possibly Camsense)",
+   "sold_as": "US$16-27 (OOMWOO BOM)",
+   "fits": [
+    "Dreame L10s/Pro/Ultra/Prime, L10 Ultra, L20, L30 Ultra, W10/W10s/W20, F9, D9 family, Z10 Pro; Xiaomi X10+, X20, X30, X40, S10, S20+"
+   ],
+   "source": "https://github.com/makerspet/oomwoo/blob/b7e37f61bfe62e18c69b6ae4a01a5dbd63d55a04/BOM.md",
+   "driver": "OOMWOO lists Camsense X1 in its CAD library; kaiaai/LDS lists Camsense models"
+  },
+  {
+   "id": "3irobotix-delta-2",
+   "capability": "lidar_2d",
+   "what": "3irobotix Delta-2A/B/G LDS",
+   "sold_as": "US$13-25 (OOMWOO BOM)",
+   "fits": [
+    "Xiaomi Mijia Mop P Pro, Mop 2S, 3C, S10, S12, T12"
+   ],
+   "source": "https://github.com/makerspet/oomwoo/blob/b7e37f61bfe62e18c69b6ae4a01a5dbd63d55a04/BOM.md"
+  },
+  {
+   "id": "roborock-battery-brr-2p4s-5200",
+   "capability": "battery_pack",
+   "what": "BRR-2P4S-5200 (or 4S2P P2150-4S2P-XWDLS): 14.4 V Li-ion, about 5200 mAh / 75 Wh, BMS in the pack",
+   "sold_as": "US$16-30 (OOMWOO BOM)",
+   "fits": [
+    "Xiaomi Mijia 1/1S/1C/1T/G1, Roborock S4/S5/S5 Max/S6/S6 Pure/MaxV/S7/S7 MaxV, Q5/Q7 Max, T4/T6/T7/T60/T65, Xiaowa E20/E25/E35, C10"
+   ],
+   "source": "https://github.com/makerspet/oomwoo/blob/b7e37f61bfe62e18c69b6ae4a01a5dbd63d55a04/BOM.md",
+   "envelope_mm": [
+    44.4,
+    142.84,
+    43.5
+   ],
+   "cad": "https://github.com/makerspet/oomwoo-cad/blob/30a3d12944fb0f0aad92e6870df625b7307e0e54/lib/roborock/OOM-E01-battery.stp",
+   "cad_sha256": "24dc84ece86ed267b838b176ad7f9c7d6edd4fd7bb1462cf658e29907e0a53d1",
+   "safety": "OOMWOO: 4-pin connector B+, B-, NTC, sense (pinout to verify); charge 16.8 V CC/CV with NTC temperature sense"
+  },
+  {
+   "id": "nidec-20n704-low",
+   "capability": "suction_fan",
+   "what": "Nidec 20N704P200 / R500 / R310 / P160 suction fan",
+   "rated_kpa": [
+    2.0,
+    2.5
+   ],
+   "sold_as": "US$12-25 (OOMWOO BOM)",
+   "fits": [
+    "Roborock S5, S50, S51, S55, S60, S61, S65, S5 Max, S6, S6 Pure, E25, E35"
+   ],
+   "source": "https://github.com/makerspet/oomwoo/blob/b7e37f61bfe62e18c69b6ae4a01a5dbd63d55a04/BOM.md"
+  },
+  {
+   "id": "dreame-msd-c-3",
+   "capability": "suction_fan",
+   "what": "Dreame MSD-C-3 / Nidec 20N709U020",
+   "rated_kpa": [
+    5.3,
+    6.0
+   ],
+   "sold_as": "US$10-23 (OOMWOO BOM)",
+   "fits": [
+    "Dreame L10s Prime/Pro, L10s Ultra Gen 1 (5.3 kPa), D10s Plus, X10+ (6 kPa)"
+   ],
+   "source": "https://github.com/makerspet/oomwoo/blob/b7e37f61bfe62e18c69b6ae4a01a5dbd63d55a04/BOM.md"
+  },
+  {
+   "id": "roborock-bl24131616",
+   "capability": "suction_fan",
+   "what": "Roborock BL24131616 / Nidec 22N704V160",
+   "rated_kpa": [
+    10.0,
+    10.0
+   ],
+   "sold_as": "US$12-24 (OOMWOO BOM)",
+   "fits": [
+    "Roborock S8 MaxV Ultra, G20S"
+   ],
+   "source": "https://github.com/makerspet/oomwoo/blob/b7e37f61bfe62e18c69b6ae4a01a5dbd63d55a04/BOM.md",
+   "envelope_mm": [
+    78.7,
+    74.95,
+    33.81
+   ],
+   "cad": "https://github.com/makerspet/oomwoo-cad/blob/30a3d12944fb0f0aad92e6870df625b7307e0e54/lib/fans/22N704V160.stp",
+   "cad_sha256": "b0df8812931860d33dcad5c3194895bc065400c7fea3f88528d4bcd2b9c17dce"
+  }
+ ]
+}

@@ -1,0 +1,13 @@
+{
+ "source": [
+  "https://github.com/makerspet/oomwoo (BOM.md)",
+  "https://github.com/makerspet/oomwoo-cad (lib/)"
+ ],
+ "commit": {
+  "oomwoo": "b7e37f61bfe62e18c69b6ae4a01a5dbd63d55a04",
+  "oomwoo-cad": "30a3d12944fb0f0aad92e6870df625b7307e0e54"
+ },
+ "license": "Apache-2.0 (see LICENSE in this folder); OOM- models scanned by mikbalarikan, sponsored by Maker's Pet",
+ "captured": "2026-11-27",
+ "note": "Robot-vacuum spare-part modules from OOMWOO's BOM, with the vacuum models each fits, and envelopes HS measured from OOMWOO's scanned STEP models (bounding box of the file as published; the STEP files are not copied). OOMWOO marks its fan list a sourcing aid: a 'fits model X' listing is not necessarily X's original fan."
+}

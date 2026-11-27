@@ -1,0 +1,1521 @@
+{
+  "family_id": "ti-pro2",
+  "family_name": "钛虎 PRO2",
+  "shared": {
+    "manufacturer": "钛虎",
+    "manufacturer_en": "TiS",
+    "electrical": {
+      "voltage_v": 48,
+      "motor_topology": "radial flux"
+    },
+    "mechanical": {
+      "output_encoder_bits": 16
+    },
+    "transmission": {
+      "type": "harmonic",
+      "backdrivable": false
+    }
+  },
+  "variants": [
+    {
+      "id": "ti-pro2-110-101-48",
+      "model": "CRA-RI80-110-PRO-2-101",
+      "base_id": "Ti-PRO2-110-101-48",
+      "electrical": {
+        "peak_current_a": 10.4,
+        "continuous_current_a": 9,
+        "rated_input_power_w": 750
+      },
+      "mechanical": {
+        "rated_torque_nm": 84,
+        "peak_torque_nm": 194,
+        "start_stop_peak_torque_nm": 194,
+        "max_allow_avg_load_nm": 133,
+        "rated_speed_rpm": 27,
+        "max_speed_rpm": 36,
+        "weight_kg": 2.05,
+        "outer_diameter_mm": 110,
+        "hollow_shaft_diameter_mm": 27,
+        "weight_kg_max": 2.26,
+        "torque_density_nm_per_kg": 94.63
+      },
+      "transmission": {
+        "reduction_ratio": 101,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 85.5,
+        "length_mm_max": 107,
+        "inertia_g_cm2": 1572.05,
+        "brake_torque_nm": 2,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-110-121-48",
+      "model": "CRA-RI80-110-PRO-2-121",
+      "base_id": "Ti-PRO2-110-121-48",
+      "electrical": {
+        "peak_current_a": 10.4,
+        "continuous_current_a": 9,
+        "rated_input_power_w": 750
+      },
+      "mechanical": {
+        "rated_torque_nm": 84,
+        "peak_torque_nm": 207,
+        "start_stop_peak_torque_nm": 207,
+        "max_allow_avg_load_nm": 133,
+        "rated_speed_rpm": 23,
+        "max_speed_rpm": 30,
+        "weight_kg": 2.05,
+        "outer_diameter_mm": 110,
+        "hollow_shaft_diameter_mm": 27,
+        "weight_kg_max": 2.26,
+        "torque_density_nm_per_kg": 100.98
+      },
+      "transmission": {
+        "reduction_ratio": 121,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 85.5,
+        "length_mm_max": 107,
+        "inertia_g_cm2": 1572.05,
+        "brake_torque_nm": 2,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-110-161-48",
+      "model": "CRA-RI80-110-PRO-2-161",
+      "base_id": "Ti-PRO2-110-161-48",
+      "electrical": {
+        "peak_current_a": 10.4,
+        "continuous_current_a": 9,
+        "rated_input_power_w": 750
+      },
+      "mechanical": {
+        "rated_torque_nm": 84,
+        "peak_torque_nm": 217,
+        "start_stop_peak_torque_nm": 217,
+        "max_allow_avg_load_nm": 133,
+        "rated_speed_rpm": 17,
+        "max_speed_rpm": 22,
+        "weight_kg": 2.05,
+        "outer_diameter_mm": 110,
+        "hollow_shaft_diameter_mm": 27,
+        "weight_kg_max": 2.26,
+        "torque_density_nm_per_kg": 105.85
+      },
+      "transmission": {
+        "reduction_ratio": 161,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 85.5,
+        "length_mm_max": 107,
+        "inertia_g_cm2": 1572.05,
+        "brake_torque_nm": 2,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-110-51-48",
+      "model": "CRA-RI80-110-PRO-2-51",
+      "base_id": "Ti-PRO2-110-51-48",
+      "electrical": {
+        "peak_current_a": 10.4,
+        "continuous_current_a": 9,
+        "rated_input_power_w": 750
+      },
+      "mechanical": {
+        "rated_torque_nm": 48,
+        "peak_torque_nm": 121,
+        "start_stop_peak_torque_nm": 121,
+        "max_allow_avg_load_nm": 68.5,
+        "rated_speed_rpm": 54,
+        "max_speed_rpm": 65,
+        "weight_kg": 2.05,
+        "outer_diameter_mm": 110,
+        "hollow_shaft_diameter_mm": 27,
+        "weight_kg_max": 2.26,
+        "torque_density_nm_per_kg": 59.02
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 85.5,
+        "length_mm_max": 107,
+        "inertia_g_cm2": 1572.05,
+        "brake_torque_nm": 2,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-110-81-48",
+      "model": "CRA-RI80-110-PRO-2-81",
+      "base_id": "Ti-PRO2-110-81-48",
+      "electrical": {
+        "peak_current_a": 10.4,
+        "continuous_current_a": 9,
+        "rated_input_power_w": 750
+      },
+      "mechanical": {
+        "rated_torque_nm": 78,
+        "peak_torque_nm": 169,
+        "start_stop_peak_torque_nm": 169,
+        "max_allow_avg_load_nm": 107,
+        "rated_speed_rpm": 35,
+        "max_speed_rpm": 43,
+        "weight_kg": 2.05,
+        "outer_diameter_mm": 110,
+        "hollow_shaft_diameter_mm": 27,
+        "weight_kg_max": 2.26,
+        "torque_density_nm_per_kg": 82.44
+      },
+      "transmission": {
+        "reduction_ratio": 81,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 85.5,
+        "length_mm_max": 107,
+        "inertia_g_cm2": 1572.05,
+        "brake_torque_nm": 2,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-142-101-48",
+      "model": "CRA-RI100-142-PRO-2-101",
+      "base_id": "Ti-PRO2-142-101-48",
+      "electrical": {
+        "peak_current_a": 16.9,
+        "continuous_current_a": 15.8,
+        "rated_input_power_w": 1000
+      },
+      "mechanical": {
+        "rated_torque_nm": 169,
+        "peak_torque_nm": 411,
+        "start_stop_peak_torque_nm": 411,
+        "max_allow_avg_load_nm": 267,
+        "rated_speed_rpm": 22,
+        "max_speed_rpm": 29,
+        "weight_kg": 3.96,
+        "outer_diameter_mm": 142,
+        "hollow_shaft_diameter_mm": 32,
+        "weight_kg_max": 4.46,
+        "torque_density_nm_per_kg": 103.79
+      },
+      "transmission": {
+        "reduction_ratio": 101,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 100.5,
+        "length_mm_max": 126.5,
+        "inertia_g_cm2": 5340.02,
+        "brake_torque_nm": 4,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-142-121-48",
+      "model": "CRA-RI100-142-PRO-2-121",
+      "base_id": "Ti-PRO2-142-121-48",
+      "electrical": {
+        "peak_current_a": 16.9,
+        "continuous_current_a": 15.8,
+        "rated_input_power_w": 1000
+      },
+      "mechanical": {
+        "rated_torque_nm": 169,
+        "peak_torque_nm": 436,
+        "start_stop_peak_torque_nm": 436,
+        "max_allow_avg_load_nm": 267,
+        "rated_speed_rpm": 18,
+        "max_speed_rpm": 24,
+        "weight_kg": 3.96,
+        "outer_diameter_mm": 142,
+        "hollow_shaft_diameter_mm": 32,
+        "weight_kg_max": 4.46,
+        "torque_density_nm_per_kg": 110.1
+      },
+      "transmission": {
+        "reduction_ratio": 121,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 100.5,
+        "length_mm_max": 126.5,
+        "inertia_g_cm2": 5340.02,
+        "brake_torque_nm": 4,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-142-161-48",
+      "model": "CRA-RI100-142-PRO-2-161",
+      "base_id": "Ti-PRO2-142-161-48",
+      "electrical": {
+        "peak_current_a": 16.9,
+        "continuous_current_a": 15.8,
+        "rated_input_power_w": 1000
+      },
+      "mechanical": {
+        "rated_torque_nm": 169,
+        "peak_torque_nm": 459,
+        "start_stop_peak_torque_nm": 459,
+        "max_allow_avg_load_nm": 267,
+        "rated_speed_rpm": 12,
+        "max_speed_rpm": 18,
+        "weight_kg": 3.96,
+        "outer_diameter_mm": 142,
+        "hollow_shaft_diameter_mm": 32,
+        "weight_kg_max": 4.46,
+        "torque_density_nm_per_kg": 115.91
+      },
+      "transmission": {
+        "reduction_ratio": 161,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 100.5,
+        "length_mm_max": 126.5,
+        "inertia_g_cm2": 5340.02,
+        "brake_torque_nm": 4,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-142-51-48",
+      "model": "CRA-RI100-142-PRO-2-51",
+      "base_id": "Ti-PRO2-142-51-48",
+      "electrical": {
+        "peak_current_a": 16.9,
+        "continuous_current_a": 15.8,
+        "rated_input_power_w": 1000
+      },
+      "mechanical": {
+        "rated_torque_nm": 94,
+        "peak_torque_nm": 267,
+        "start_stop_peak_torque_nm": 267,
+        "max_allow_avg_load_nm": 133,
+        "rated_speed_rpm": 44,
+        "max_speed_rpm": 55,
+        "weight_kg": 3.96,
+        "outer_diameter_mm": 142,
+        "hollow_shaft_diameter_mm": 32,
+        "weight_kg_max": 4.46,
+        "torque_density_nm_per_kg": 67.42
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 100.5,
+        "length_mm_max": 126.5,
+        "inertia_g_cm2": 5340.02,
+        "brake_torque_nm": 4,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-142-81-48",
+      "model": "CRA-RI100-142-PRO-2-81",
+      "base_id": "Ti-PRO2-142-81-48",
+      "electrical": {
+        "peak_current_a": 16.9,
+        "continuous_current_a": 15.8,
+        "rated_input_power_w": 1000
+      },
+      "mechanical": {
+        "rated_torque_nm": 146,
+        "peak_torque_nm": 376,
+        "start_stop_peak_torque_nm": 376,
+        "max_allow_avg_load_nm": 206,
+        "rated_speed_rpm": 29,
+        "max_speed_rpm": 37,
+        "weight_kg": 3.96,
+        "outer_diameter_mm": 142,
+        "hollow_shaft_diameter_mm": 32,
+        "weight_kg_max": 4.46,
+        "torque_density_nm_per_kg": 94.95
+      },
+      "transmission": {
+        "reduction_ratio": 81,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 100.5,
+        "length_mm_max": 126.5,
+        "inertia_g_cm2": 5340.02,
+        "brake_torque_nm": 4,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-170-101-48",
+      "model": "CRA-RI110-170-PRO-2-101",
+      "base_id": "Ti-PRO2-170-101-48",
+      "electrical": {
+        "peak_current_a": 30.2,
+        "continuous_current_a": 14.1,
+        "rated_input_power_w": 1500
+      },
+      "mechanical": {
+        "rated_torque_nm": 328,
+        "peak_torque_nm": 702,
+        "start_stop_peak_torque_nm": 702,
+        "max_allow_avg_load_nm": 460,
+        "rated_speed_rpm": 12,
+        "max_speed_rpm": 16,
+        "weight_kg": 6.84,
+        "outer_diameter_mm": 170,
+        "hollow_shaft_diameter_mm": 40,
+        "weight_kg_max": 7.61,
+        "torque_density_nm_per_kg": 102.63
+      },
+      "transmission": {
+        "reduction_ratio": 101,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 121.7,
+        "length_mm_max": 156.5,
+        "inertia_g_cm2": 10199.51,
+        "brake_torque_nm": 6,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-170-121-48",
+      "model": "CRA-RI110-170-PRO-2-121",
+      "base_id": "Ti-PRO2-170-121-48",
+      "electrical": {
+        "peak_current_a": 30.2,
+        "continuous_current_a": 14.1,
+        "rated_input_power_w": 1500
+      },
+      "mechanical": {
+        "rated_torque_nm": 363,
+        "peak_torque_nm": 762,
+        "start_stop_peak_torque_nm": 762,
+        "max_allow_avg_load_nm": 557,
+        "rated_speed_rpm": 10,
+        "max_speed_rpm": 14,
+        "weight_kg": 6.84,
+        "outer_diameter_mm": 170,
+        "hollow_shaft_diameter_mm": 40,
+        "weight_kg_max": 7.61,
+        "torque_density_nm_per_kg": 111.4
+      },
+      "transmission": {
+        "reduction_ratio": 121,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 121.7,
+        "length_mm_max": 156.5,
+        "inertia_g_cm2": 10199.51,
+        "brake_torque_nm": 6,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-170-161-48",
+      "model": "CRA-RI110-170-PRO-2-161",
+      "base_id": "Ti-PRO2-170-161-48",
+      "electrical": {
+        "peak_current_a": 30.2,
+        "continuous_current_a": 14.1,
+        "rated_input_power_w": 1500
+      },
+      "mechanical": {
+        "rated_torque_nm": 363,
+        "peak_torque_nm": 800,
+        "start_stop_peak_torque_nm": 800,
+        "max_allow_avg_load_nm": 557,
+        "rated_speed_rpm": 7,
+        "max_speed_rpm": 10,
+        "weight_kg": 6.84,
+        "outer_diameter_mm": 170,
+        "hollow_shaft_diameter_mm": 40,
+        "weight_kg_max": 7.61,
+        "torque_density_nm_per_kg": 116.96
+      },
+      "transmission": {
+        "reduction_ratio": 161,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 121.7,
+        "length_mm_max": 156.5,
+        "inertia_g_cm2": 10199.51,
+        "brake_torque_nm": 6,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-170-51-48",
+      "model": "CRA-RI110-170-PRO-2-51",
+      "base_id": "Ti-PRO2-170-51-48",
+      "electrical": {
+        "peak_current_a": 30.2,
+        "continuous_current_a": 14.1,
+        "rated_input_power_w": 1500
+      },
+      "mechanical": {
+        "rated_torque_nm": 169,
+        "peak_torque_nm": 497,
+        "start_stop_peak_torque_nm": 497,
+        "max_allow_avg_load_nm": 242,
+        "rated_speed_rpm": 22,
+        "max_speed_rpm": 33,
+        "weight_kg": 6.84,
+        "outer_diameter_mm": 170,
+        "hollow_shaft_diameter_mm": 40,
+        "weight_kg_max": 7.61,
+        "torque_density_nm_per_kg": 72.66
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 121.7,
+        "length_mm_max": 156.5,
+        "inertia_g_cm2": 10199.51,
+        "brake_torque_nm": 6,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-170-81-48",
+      "model": "CRA-RI110-170-PRO-2-81",
+      "base_id": "Ti-PRO2-170-81-48",
+      "electrical": {
+        "peak_current_a": 30.2,
+        "continuous_current_a": 14.1,
+        "rated_input_power_w": 1500
+      },
+      "mechanical": {
+        "rated_torque_nm": 255,
+        "peak_torque_nm": 641,
+        "start_stop_peak_torque_nm": 641,
+        "max_allow_avg_load_nm": 351,
+        "rated_speed_rpm": 15,
+        "max_speed_rpm": 21,
+        "weight_kg": 6.84,
+        "outer_diameter_mm": 170,
+        "hollow_shaft_diameter_mm": 40,
+        "weight_kg_max": 7.61,
+        "torque_density_nm_per_kg": 93.71
+      },
+      "transmission": {
+        "reduction_ratio": 81,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 121.7,
+        "length_mm_max": 156.5,
+        "inertia_g_cm2": 10199.51,
+        "brake_torque_nm": 6,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-40-101-48",
+      "model": "CRA-RI30-40-PRO-2-101",
+      "base_id": "Ti-PRO2-40-101-48",
+      "electrical": {
+        "peak_current_a": 2,
+        "continuous_current_a": 1,
+        "rated_input_power_w": 36
+      },
+      "mechanical": {
+        "rated_torque_nm": 2.4,
+        "peak_torque_nm": 4.8,
+        "start_stop_peak_torque_nm": 4.8,
+        "max_allow_avg_load_nm": 3.3,
+        "rated_speed_rpm": 45,
+        "max_speed_rpm": 59,
+        "weight_kg": 0.19,
+        "outer_diameter_mm": 40,
+        "hollow_shaft_diameter_mm": 6,
+        "weight_kg_max": 0.27,
+        "torque_density_nm_per_kg": 25.26
+      },
+      "transmission": {
+        "reduction_ratio": 101,
+        "backlash_arcsec": 40
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 60,
+        "length_mm_max": 79,
+        "inertia_g_cm2": 27.77,
+        "brake_torque_nm": 0.06,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-40-51-48",
+      "model": "CRA-RI30-40-PRO-2-51",
+      "base_id": "Ti-PRO2-40-51-48",
+      "electrical": {
+        "peak_current_a": 2,
+        "continuous_current_a": 1,
+        "rated_input_power_w": 36
+      },
+      "mechanical": {
+        "rated_torque_nm": 1.8,
+        "peak_torque_nm": 3.3,
+        "start_stop_peak_torque_nm": 3.3,
+        "max_allow_avg_load_nm": 2.3,
+        "rated_speed_rpm": 90,
+        "max_speed_rpm": 118,
+        "weight_kg": 0.19,
+        "outer_diameter_mm": 40,
+        "hollow_shaft_diameter_mm": 6,
+        "weight_kg_max": 0.27,
+        "torque_density_nm_per_kg": 17.37
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 40
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 60,
+        "length_mm_max": 79,
+        "inertia_g_cm2": 27.77,
+        "brake_torque_nm": 0.06,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-52-101-48",
+      "model": "CRA-RI40-52-PRO-2-101",
+      "base_id": "Ti-PRO2-52-101-48",
+      "electrical": {
+        "peak_current_a": 3,
+        "continuous_current_a": 2,
+        "rated_input_power_w": 90
+      },
+      "mechanical": {
+        "rated_torque_nm": 5,
+        "peak_torque_nm": 11,
+        "start_stop_peak_torque_nm": 11,
+        "max_allow_avg_load_nm": 8.9,
+        "rated_speed_rpm": 40,
+        "max_speed_rpm": 59,
+        "weight_kg": 0.32,
+        "outer_diameter_mm": 52,
+        "hollow_shaft_diameter_mm": 12,
+        "weight_kg_max": 0.46,
+        "torque_density_nm_per_kg": 34.38
+      },
+      "transmission": {
+        "reduction_ratio": 101,
+        "backlash_arcsec": 30
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 62,
+        "length_mm_max": 85.5,
+        "inertia_g_cm2": 89.83,
+        "brake_torque_nm": 0.15,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-52-51-48",
+      "model": "CRA-RI40-52-PRO-2-51",
+      "base_id": "Ti-PRO2-52-51-48",
+      "electrical": {
+        "peak_current_a": 3,
+        "continuous_current_a": 2,
+        "rated_input_power_w": 90
+      },
+      "mechanical": {
+        "rated_torque_nm": 3.5,
+        "peak_torque_nm": 8.3,
+        "start_stop_peak_torque_nm": 8.3,
+        "max_allow_avg_load_nm": 5.5,
+        "rated_speed_rpm": 80,
+        "max_speed_rpm": 118,
+        "weight_kg": 0.32,
+        "outer_diameter_mm": 52,
+        "hollow_shaft_diameter_mm": 12,
+        "weight_kg_max": 0.46,
+        "torque_density_nm_per_kg": 25.94
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 40
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 62,
+        "length_mm_max": 85.5,
+        "inertia_g_cm2": 89.83,
+        "brake_torque_nm": 0.15,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-70-101-48",
+      "model": "CRA-RI50-70-PRO-2-101",
+      "base_id": "Ti-PRO2-70-101-48",
+      "electrical": {
+        "peak_current_a": 5,
+        "continuous_current_a": 3.6,
+        "rated_input_power_w": 150
+      },
+      "mechanical": {
+        "rated_torque_nm": 9.6,
+        "peak_torque_nm": 34,
+        "start_stop_peak_torque_nm": 34,
+        "max_allow_avg_load_nm": 13.5,
+        "rated_speed_rpm": 37,
+        "max_speed_rpm": 49,
+        "weight_kg": 0.66,
+        "outer_diameter_mm": 70,
+        "hollow_shaft_diameter_mm": 12,
+        "weight_kg_max": 0.81,
+        "torque_density_nm_per_kg": 51.52
+      },
+      "transmission": {
+        "reduction_ratio": 101,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 63,
+        "length_mm_max": 85,
+        "inertia_g_cm2": 193.42,
+        "brake_torque_nm": 0.3,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-70-51-48",
+      "model": "CRA-RI50-70-PRO-2-51",
+      "base_id": "Ti-PRO2-70-51-48",
+      "electrical": {
+        "peak_current_a": 5,
+        "continuous_current_a": 3.6,
+        "rated_input_power_w": 150
+      },
+      "mechanical": {
+        "rated_torque_nm": 6.6,
+        "peak_torque_nm": 23,
+        "start_stop_peak_torque_nm": 23,
+        "max_allow_avg_load_nm": 8.6,
+        "rated_speed_rpm": 75,
+        "max_speed_rpm": 97,
+        "weight_kg": 0.66,
+        "outer_diameter_mm": 70,
+        "hollow_shaft_diameter_mm": 12,
+        "weight_kg_max": 0.81,
+        "torque_density_nm_per_kg": 34.85
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 63,
+        "length_mm_max": 85,
+        "inertia_g_cm2": 193.42,
+        "brake_torque_nm": 0.3,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-70-81-48",
+      "model": "CRA-RI50-70-PRO-2-81",
+      "base_id": "Ti-PRO2-70-81-48",
+      "electrical": {
+        "peak_current_a": 5,
+        "continuous_current_a": 3.6,
+        "rated_input_power_w": 150
+      },
+      "mechanical": {
+        "rated_torque_nm": 9.6,
+        "peak_torque_nm": 29,
+        "start_stop_peak_torque_nm": 29,
+        "max_allow_avg_load_nm": 13.5,
+        "rated_speed_rpm": 46,
+        "max_speed_rpm": 61,
+        "weight_kg": 0.66,
+        "outer_diameter_mm": 70,
+        "hollow_shaft_diameter_mm": 12,
+        "weight_kg_max": 0.81,
+        "torque_density_nm_per_kg": 43.94
+      },
+      "transmission": {
+        "reduction_ratio": 81,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 63,
+        "length_mm_max": 85,
+        "inertia_g_cm2": 193.42,
+        "brake_torque_nm": 0.3,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-80-101-48",
+      "model": "CRA-RI60-80-PRO-2-101",
+      "base_id": "Ti-PRO2-80-101-48",
+      "electrical": {
+        "peak_current_a": 6.7,
+        "continuous_current_a": 5,
+        "rated_input_power_w": 300
+      },
+      "mechanical": {
+        "rated_torque_nm": 30,
+        "peak_torque_nm": 66,
+        "start_stop_peak_torque_nm": 66,
+        "max_allow_avg_load_nm": 49,
+        "rated_speed_rpm": 34,
+        "max_speed_rpm": 41,
+        "weight_kg": 1.03,
+        "outer_diameter_mm": 80,
+        "hollow_shaft_diameter_mm": 18,
+        "weight_kg_max": 1.24,
+        "torque_density_nm_per_kg": 64.08
+      },
+      "transmission": {
+        "reduction_ratio": 101,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 72.5,
+        "length_mm_max": 93.8,
+        "inertia_g_cm2": 485.98,
+        "brake_torque_nm": 1,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-80-121-48",
+      "model": "CRA-RI60-80-PRO-2-121",
+      "base_id": "Ti-PRO2-80-121-48",
+      "electrical": {
+        "peak_current_a": 6.7,
+        "continuous_current_a": 5,
+        "rated_input_power_w": 300
+      },
+      "mechanical": {
+        "rated_torque_nm": 30,
+        "peak_torque_nm": 66,
+        "start_stop_peak_torque_nm": 66,
+        "max_allow_avg_load_nm": 49,
+        "rated_speed_rpm": 24,
+        "max_speed_rpm": 32,
+        "weight_kg": 1.03,
+        "outer_diameter_mm": 80,
+        "hollow_shaft_diameter_mm": 18,
+        "weight_kg_max": 1.24,
+        "torque_density_nm_per_kg": 64.08
+      },
+      "transmission": {
+        "reduction_ratio": 121,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 72.5,
+        "length_mm_max": 93.8,
+        "inertia_g_cm2": 485.98,
+        "brake_torque_nm": 1,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-80-51-48",
+      "model": "CRA-RI60-80-PRO-2-51",
+      "base_id": "Ti-PRO2-80-51-48",
+      "electrical": {
+        "peak_current_a": 6.7,
+        "continuous_current_a": 5,
+        "rated_input_power_w": 300
+      },
+      "mechanical": {
+        "rated_torque_nm": 19.8,
+        "peak_torque_nm": 42,
+        "start_stop_peak_torque_nm": 42,
+        "max_allow_avg_load_nm": 32,
+        "rated_speed_rpm": 68,
+        "max_speed_rpm": 82,
+        "weight_kg": 1.03,
+        "outer_diameter_mm": 80,
+        "hollow_shaft_diameter_mm": 18,
+        "weight_kg_max": 1.24,
+        "torque_density_nm_per_kg": 40.78
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 72.5,
+        "length_mm_max": 93.8,
+        "inertia_g_cm2": 485.98,
+        "brake_torque_nm": 1,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-80-81-48",
+      "model": "CRA-RI60-80-PRO-2-81",
+      "base_id": "Ti-PRO2-80-81-48",
+      "electrical": {
+        "peak_current_a": 6.7,
+        "continuous_current_a": 5,
+        "rated_input_power_w": 300
+      },
+      "mechanical": {
+        "rated_torque_nm": 27.5,
+        "peak_torque_nm": 53,
+        "start_stop_peak_torque_nm": 53,
+        "max_allow_avg_load_nm": 33,
+        "rated_speed_rpm": 43,
+        "max_speed_rpm": 51,
+        "weight_kg": 1.03,
+        "outer_diameter_mm": 80,
+        "hollow_shaft_diameter_mm": 18,
+        "weight_kg_max": 1.24,
+        "torque_density_nm_per_kg": 51.46
+      },
+      "transmission": {
+        "reduction_ratio": 81,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 72.5,
+        "length_mm_max": 93.8,
+        "inertia_g_cm2": 485.98,
+        "brake_torque_nm": 1,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-90-101-48",
+      "model": "CRA-RI70-90-PRO-2-101",
+      "base_id": "Ti-PRO2-90-101-48",
+      "electrical": {
+        "peak_current_a": 8.4,
+        "continuous_current_a": 6.1,
+        "rated_input_power_w": 500
+      },
+      "mechanical": {
+        "rated_torque_nm": 50,
+        "peak_torque_nm": 102,
+        "start_stop_peak_torque_nm": 102,
+        "max_allow_avg_load_nm": 61,
+        "rated_speed_rpm": 30,
+        "max_speed_rpm": 40,
+        "weight_kg": 1.27,
+        "outer_diameter_mm": 90,
+        "hollow_shaft_diameter_mm": 18,
+        "weight_kg_max": 1.5,
+        "torque_density_nm_per_kg": 80.31
+      },
+      "transmission": {
+        "reduction_ratio": 101,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 73.5,
+        "length_mm_max": 94,
+        "inertia_g_cm2": 684.75,
+        "brake_torque_nm": 1,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-90-121-48",
+      "model": "CRA-RI70-90-PRO-2-121",
+      "base_id": "Ti-PRO2-90-121-48",
+      "electrical": {
+        "peak_current_a": 8.4,
+        "continuous_current_a": 6.1,
+        "rated_input_power_w": 500
+      },
+      "mechanical": {
+        "rated_torque_nm": 50,
+        "peak_torque_nm": 108,
+        "start_stop_peak_torque_nm": 108,
+        "max_allow_avg_load_nm": 61,
+        "rated_speed_rpm": 25,
+        "max_speed_rpm": 30,
+        "weight_kg": 1.27,
+        "outer_diameter_mm": 90,
+        "hollow_shaft_diameter_mm": 18,
+        "weight_kg_max": 1.5,
+        "torque_density_nm_per_kg": 85.04
+      },
+      "transmission": {
+        "reduction_ratio": 121,
+        "backlash_arcsec": 10
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 73.5,
+        "length_mm_max": 94,
+        "inertia_g_cm2": 684.75,
+        "brake_torque_nm": 1,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-90-51-48",
+      "model": "CRA-RI70-90-PRO-2-51",
+      "base_id": "Ti-PRO2-90-51-48",
+      "electrical": {
+        "peak_current_a": 8.4,
+        "continuous_current_a": 6.1,
+        "rated_input_power_w": 500
+      },
+      "mechanical": {
+        "rated_torque_nm": 32,
+        "peak_torque_nm": 69,
+        "start_stop_peak_torque_nm": 69,
+        "max_allow_avg_load_nm": 42,
+        "rated_speed_rpm": 61,
+        "max_speed_rpm": 77,
+        "weight_kg": 1.27,
+        "outer_diameter_mm": 90,
+        "hollow_shaft_diameter_mm": 18,
+        "weight_kg_max": 1.5,
+        "torque_density_nm_per_kg": 54.33
+      },
+      "transmission": {
+        "reduction_ratio": 51,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 73.5,
+        "length_mm_max": 94,
+        "inertia_g_cm2": 684.75,
+        "brake_torque_nm": 1,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    },
+    {
+      "id": "ti-pro2-90-81-48",
+      "model": "CRA-RI70-90-PRO-2-81",
+      "base_id": "Ti-PRO2-90-81-48",
+      "electrical": {
+        "peak_current_a": 8.4,
+        "continuous_current_a": 6.1,
+        "rated_input_power_w": 500
+      },
+      "mechanical": {
+        "rated_torque_nm": 42,
+        "peak_torque_nm": 91,
+        "start_stop_peak_torque_nm": 91,
+        "max_allow_avg_load_nm": 58,
+        "rated_speed_rpm": 38,
+        "max_speed_rpm": 48,
+        "weight_kg": 1.27,
+        "outer_diameter_mm": 90,
+        "hollow_shaft_diameter_mm": 18,
+        "weight_kg_max": 1.5,
+        "torque_density_nm_per_kg": 71.65
+      },
+      "transmission": {
+        "reduction_ratio": 81,
+        "backlash_arcsec": 20
+      },
+      "options": {
+        "bus_types": [
+          "CAN",
+          "EC"
+        ],
+        "brake_options": [
+          false,
+          true
+        ],
+        "dual_encoder_options": [
+          false,
+          true
+        ],
+        "force_sensor_options": [
+          false
+        ],
+        "length_mm_min": 73.5,
+        "length_mm_max": 94,
+        "inertia_g_cm2": 684.75,
+        "brake_torque_nm": 1,
+        "variant_count": 4
+      },
+      "datasheet_url": "datasheets/2_钛虎_轻量化关节模组详细参数表_20250805.pdf"
+    }
+  ]
+}

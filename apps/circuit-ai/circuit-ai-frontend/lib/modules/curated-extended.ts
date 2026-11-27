@@ -725,7 +725,7 @@ export const CURATED_EXTENDED: ModuleSpec[] = [
       { id: "GND", label: "GND", role: "gnd" },
       { id: "U0T", label: "U0T", role: "uart_tx", voltage: "3.3V", notes: "GPIO1 — programming UART" },
       { id: "U0R", label: "U0R", role: "uart_rx", voltage: "3.3V", notes: "GPIO3" },
-      { id: "GPIO4", label: "GPIO4", role: "digital_io", voltage: "3.3V", notes: "Flash LED / aux" },
+      { id: "GPIO4", label: "GPIO4", role: "digital_io", voltage: "3.3V", notes: "Flash LED / aux", offBoard: "the footprint keeps only power and motor GPIOs on copper; GPIO4 drives the on-module flash LED" },
       { id: "GPIO12", label: "GPIO12", role: "digital_io", voltage: "3.3V" },
       { id: "GPIO13", label: "GPIO13", role: "digital_io", voltage: "3.3V" },
       { id: "GPIO14", label: "GPIO14", role: "digital_io", voltage: "3.3V" },

@@ -1,0 +1,5622 @@
+{
+ "esp01_1m": {
+  "chip_variant": "esp8266",
+  "flash_size_mb": 1,
+  "framework": "arduino",
+  "gpio_capabilities": {
+   "GPIO0": [
+    "gpio",
+    "strap",
+    "button",
+    "boot_high",
+    "pull_up_external"
+   ],
+   "GPIO1": [
+    "gpio",
+    "uart_tx",
+    "serial_tx"
+   ],
+   "GPIO12": [
+    "gpio"
+   ],
+   "GPIO13": [
+    "gpio"
+   ],
+   "GPIO14": [
+    "gpio"
+   ],
+   "GPIO15": [
+    "gpio",
+    "strap",
+    "boot_low",
+    "pull_down_external"
+   ],
+   "GPIO16": [
+    "gpio",
+    "no_pwm",
+    "no_i2c",
+    "no_interrupt",
+    "no_fast_gpio"
+   ],
+   "GPIO2": [
+    "gpio",
+    "strap",
+    "builtin_led",
+    "boot_high",
+    "pull_up_external"
+   ],
+   "GPIO3": [
+    "gpio",
+    "uart_rx",
+    "serial_rx"
+   ]
+  },
+  "id": "esp01_1m",
+  "kicad": {
+   "footprint": "RF_Module:ESP-12E",
+   "pin_map": {
+    "3V3": "VCC",
+    "GND": "GND",
+    "GPIO0": "GPIO0",
+    "GPIO1": "GPIO1/TXD",
+    "GPIO12": "GPIO12",
+    "GPIO13": "GPIO13",
+    "GPIO14": "GPIO14",
+    "GPIO15": "GPIO15",
+    "GPIO16": "GPIO16",
+    "GPIO2": "GPIO2",
+    "GPIO3": "GPIO3/RXD"
+   },
+   "symbol": "ESP-12E",
+   "symbol_lib": "RF_Module"
+  },
+  "mcu": "esp8266",
+  "name": "ESP-01S 1MB module / Sonoff Basic",
+  "platformio_board": "esp01_1m",
+  "rails": [
+   {
+    "name": "5V",
+    "source": "usb",
+    "voltage": 5.0
+   },
+   {
+    "name": "3V3",
+    "source": "onboard_regulator",
+    "voltage": 3.3
+   },
+   {
+    "name": "GND",
+    "voltage": 0.0
+   }
+  ]
+ },
+ "esp32-c3-devkitm-1": {
+  "chip_variant": "esp32c3",
+  "default_buses": {
+   "i2c": {
+    "scl": "GPIO9",
+    "sda": "GPIO8"
+   },
+   "spi": {
+    "clk": "GPIO6",
+    "miso": "GPIO5",
+    "mosi": "GPIO7"
+   }
+  },
+  "enclosure": {
+   "component_height_max_mm": 13.0,
+   "mount_holes": [],
+   "pcb": {
+    "length_mm": 44.31,
+    "thickness_mm": 1.6,
+    "width_mm": 25.4
+   },
+   "ports": [
+    {
+     "edge": "short_a",
+     "height_above_pcb_mm": 1.5,
+     "height_mm": 3.0,
+     "kind": "usb_micro",
+     "offset_mm": 8.95,
+     "width_mm": 7.5
+    }
+   ]
+  },
+  "flash_size_mb": 4,
+  "framework": "arduino",
+  "gpio_capabilities": {
+   "GPIO0": [
+    "gpio",
+    "adc",
+    "adc1"
+   ],
+   "GPIO1": [
+    "gpio",
+    "adc",
+    "adc1"
+   ],
+   "GPIO10": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO18": [
+    "gpio",
+    "usb_jtag"
+   ],
+   "GPIO19": [
+    "gpio",
+    "usb_jtag"
+   ],
+   "GPIO2": [
+    "gpio",
+    "adc",
+    "adc1",
+    "strap",
+    "boot_high"
+   ],
+   "GPIO20": [
+    "gpio",
+    "uart_rx",
+    "serial_rx"
+   ],
+   "GPIO21": [
+    "gpio",
+    "uart_tx",
+    "serial_tx"
+   ],
+   "GPIO3": [
+    "gpio",
+    "adc",
+    "adc1"
+   ],
+   "GPIO4": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO5": [
+    "gpio",
+    "adc",
+    "adc2",
+    "spi_miso",
+    "pwm"
+   ],
+   "GPIO6": [
+    "gpio",
+    "spi_clk",
+    "pwm"
+   ],
+   "GPIO7": [
+    "gpio",
+    "spi_mosi",
+    "pwm"
+   ],
+   "GPIO8": [
+    "gpio",
+    "strap",
+    "boot_high",
+    "builtin_led",
+    "i2c_sda"
+   ],
+   "GPIO9": [
+    "gpio",
+    "strap",
+    "boot_high",
+    "button",
+    "i2c_scl"
+   ]
+  },
+  "id": "esp32-c3-devkitm-1",
+  "kicad": {
+   "footprint": "Connector_PinHeader_2.54mm:PinHeader_2x15_P2.54mm_Vertical",
+   "pin_map": {
+    "3V3": "3",
+    "5V": "25",
+    "GND": "1",
+    "GPIO0": "17",
+    "GPIO1": "19",
+    "GPIO10": "21",
+    "GPIO18": "26",
+    "GPIO19": "28",
+    "GPIO2": "7",
+    "GPIO20": "6",
+    "GPIO21": "4",
+    "GPIO3": "9",
+    "GPIO4": "22",
+    "GPIO5": "20",
+    "GPIO6": "18",
+    "GPIO7": "16",
+    "GPIO8": "12",
+    "GPIO9": "10"
+   },
+   "symbol": "Conn_02x15_Odd_Even",
+   "symbol_lib": "Connector_Generic",
+   "value": "ESP32-C3-DevKitM-1"
+  },
+  "mcu": "esp32",
+  "name": "ESP32-C3-DevKitM-1",
+  "onboard_peripherals": {
+   "boot_button": {
+    "inverted": true,
+    "pin": "GPIO9"
+   },
+   "led_ws2812": {
+    "pin": "GPIO8"
+   }
+  },
+  "platformio_board": "esp32-c3-devkitm-1",
+  "rails": [
+   {
+    "name": "5V",
+    "source": "usb",
+    "voltage": 5.0
+   },
+   {
+    "name": "3V3",
+    "source": "onboard_regulator",
+    "voltage": 3.3
+   },
+   {
+    "name": "GND",
+    "voltage": 0.0
+   }
+  ]
+ },
+ "esp32-c3-supermini": {
+  "chip_variant": "esp32c3",
+  "default_buses": {
+   "i2c": {
+    "scl": "GPIO9",
+    "sda": "GPIO8"
+   },
+   "spi": {
+    "clk": "GPIO6",
+    "miso": "GPIO5",
+    "mosi": "GPIO7"
+   }
+  },
+  "enclosure": {
+   "component_height_max_mm": 3.5,
+   "mount_holes": [],
+   "pcb": {
+    "length_mm": 22.5,
+    "thickness_mm": 1.0,
+    "width_mm": 18.0
+   },
+   "ports": [
+    {
+     "edge": "short_a",
+     "height_above_pcb_mm": 1.6,
+     "height_mm": 3.4,
+     "kind": "usb_c",
+     "offset_mm": 4.5,
+     "width_mm": 9.0
+    }
+   ]
+  },
+  "flash_size_mb": 4,
+  "framework": "arduino",
+  "gpio_capabilities": {
+   "GPIO0": [
+    "gpio",
+    "adc",
+    "adc1"
+   ],
+   "GPIO1": [
+    "gpio",
+    "adc",
+    "adc1"
+   ],
+   "GPIO10": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO2": [
+    "gpio",
+    "adc",
+    "adc1",
+    "strap",
+    "boot_high"
+   ],
+   "GPIO20": [
+    "gpio",
+    "uart_rx",
+    "serial_rx"
+   ],
+   "GPIO21": [
+    "gpio",
+    "uart_tx",
+    "serial_tx"
+   ],
+   "GPIO3": [
+    "gpio",
+    "adc",
+    "adc1"
+   ],
+   "GPIO4": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO5": [
+    "gpio",
+    "adc",
+    "adc2",
+    "spi_miso",
+    "pwm"
+   ],
+   "GPIO6": [
+    "gpio",
+    "spi_clk",
+    "pwm"
+   ],
+   "GPIO7": [
+    "gpio",
+    "spi_mosi",
+    "pwm"
+   ],
+   "GPIO8": [
+    "gpio",
+    "strap",
+    "boot_high",
+    "builtin_led",
+    "i2c_sda"
+   ],
+   "GPIO9": [
+    "gpio",
+    "strap",
+    "boot_high",
+    "button",
+    "i2c_scl"
+   ]
+  },
+  "id": "esp32-c3-supermini",
+  "kicad": {
+   "footprint": "Connector_PinHeader_2.54mm:PinHeader_2x08_P2.54mm_Vertical",
+   "pin_map": {
+    "3V3": "6",
+    "5V": "2",
+    "GND": "4",
+    "GPIO0": "16",
+    "GPIO1": "14",
+    "GPIO10": "11",
+    "GPIO2": "12",
+    "GPIO20": "13",
+    "GPIO21": "15",
+    "GPIO3": "10",
+    "GPIO4": "8",
+    "GPIO5": "1",
+    "GPIO6": "3",
+    "GPIO7": "5",
+    "GPIO8": "7",
+    "GPIO9": "9"
+   },
+   "symbol": "Conn_02x08_Odd_Even",
+   "symbol_lib": "Connector_Generic",
+   "value": "ESP32-C3-SuperMini"
+  },
+  "mcu": "esp32",
+  "name": "ESP32-C3 SuperMini",
+  "onboard_peripherals": {
+   "boot_button": {
+    "inverted": true,
+    "pin": "GPIO9"
+   },
+   "led": {
+    "inverted": true,
+    "pin": "GPIO8"
+   }
+  },
+  "platformio_board": "esp32-c3-devkitm-1",
+  "rails": [
+   {
+    "name": "5V",
+    "source": "usb",
+    "voltage": 5.0
+   },
+   {
+    "name": "3V3",
+    "source": "onboard_regulator",
+    "voltage": 3.3
+   },
+   {
+    "name": "GND",
+    "voltage": 0.0
+   }
+  ]
+ },
+ "esp32-c6-supermini": {
+  "chip_variant": "esp32c6",
+  "default_buses": {
+   "i2c": {
+    "scl": "GPIO9",
+    "sda": "GPIO8"
+   },
+   "spi": {
+    "clk": "GPIO6",
+    "miso": "GPIO5",
+    "mosi": "GPIO7"
+   }
+  },
+  "flash_size_mb": 4,
+  "framework": "esp-idf",
+  "gpio_capabilities": {
+   "GPIO0": [
+    "gpio",
+    "adc",
+    "adc1"
+   ],
+   "GPIO1": [
+    "gpio",
+    "adc",
+    "adc1"
+   ],
+   "GPIO14": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO15": [
+    "gpio",
+    "strap",
+    "boot_high"
+   ],
+   "GPIO18": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO19": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO2": [
+    "gpio",
+    "adc",
+    "adc1"
+   ],
+   "GPIO20": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO21": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO22": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO23": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO3": [
+    "gpio",
+    "adc",
+    "adc1"
+   ],
+   "GPIO4": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO5": [
+    "gpio",
+    "adc",
+    "adc1",
+    "spi_miso",
+    "pwm"
+   ],
+   "GPIO6": [
+    "gpio",
+    "adc",
+    "adc1",
+    "spi_clk",
+    "pwm"
+   ],
+   "GPIO7": [
+    "gpio",
+    "spi_mosi",
+    "pwm"
+   ],
+   "GPIO8": [
+    "gpio",
+    "strap",
+    "boot_high",
+    "builtin_led",
+    "i2c_sda"
+   ],
+   "GPIO9": [
+    "gpio",
+    "strap",
+    "boot_high",
+    "button",
+    "i2c_scl"
+   ]
+  },
+  "id": "esp32-c6-supermini",
+  "kicad": {
+   "footprint": "Connector_PinHeader_2.54mm:PinHeader_2x10_P2.54mm_Vertical",
+   "pin_map": {
+    "3V3": "6",
+    "5V": "2",
+    "GND": "4",
+    "GPIO0": "5",
+    "GPIO1": "7",
+    "GPIO14": "16",
+    "GPIO15": "14",
+    "GPIO16": "1",
+    "GPIO17": "3",
+    "GPIO18": "12",
+    "GPIO19": "10",
+    "GPIO2": "9",
+    "GPIO20": "8",
+    "GPIO3": "11",
+    "GPIO4": "13",
+    "GPIO5": "15",
+    "GPIO6": "17",
+    "GPIO7": "19",
+    "GPIO8": "20",
+    "GPIO9": "18"
+   },
+   "symbol": "Conn_02x10_Odd_Even",
+   "symbol_lib": "Connector_Generic",
+   "value": "ESP32-C6-SuperMini"
+  },
+  "mcu": "esp32",
+  "name": "ESP32-C6 SuperMini",
+  "onboard_peripherals": {
+   "boot_button": {
+    "inverted": true,
+    "pin": "GPIO9"
+   },
+   "led_ws2812": {
+    "pin": "GPIO8"
+   }
+  },
+  "platformio_board": "esp32-c6-devkitc-1",
+  "rails": [
+   {
+    "name": "5V",
+    "source": "usb",
+    "voltage": 5.0
+   },
+   {
+    "name": "3V3",
+    "source": "onboard_regulator",
+    "voltage": 3.3
+   },
+   {
+    "name": "GND",
+    "voltage": 0.0
+   }
+  ]
+ },
+ "esp32-devkitc-v4": {
+  "chip_variant": "esp32",
+  "default_buses": {
+   "i2c": {
+    "scl": "GPIO22",
+    "sda": "GPIO21"
+   },
+   "spi": {
+    "clk": "GPIO18",
+    "miso": "GPIO19",
+    "mosi": "GPIO23"
+   }
+  },
+  "enclosure": {
+   "component_height_max_mm": 13.0,
+   "mount_holes": [
+    {
+     "hole_diameter_mm": 3.2,
+     "x_mm": 3.0,
+     "y_mm": 14.3
+    },
+    {
+     "hole_diameter_mm": 3.2,
+     "x_mm": 51.4,
+     "y_mm": 14.3
+    }
+   ],
+   "pcb": {
+    "length_mm": 54.4,
+    "thickness_mm": 1.6,
+    "width_mm": 28.6
+   },
+   "ports": [
+    {
+     "edge": "short_a",
+     "height_above_pcb_mm": 1.5,
+     "height_mm": 3.0,
+     "kind": "usb_micro",
+     "offset_mm": 10.3,
+     "width_mm": 8.0
+    }
+   ]
+  },
+  "flash_size_mb": 4,
+  "framework": "arduino",
+  "gpio_capabilities": {
+   "GPIO0": [
+    "boot",
+    "strap",
+    "boot_high",
+    "adc",
+    "adc2"
+   ],
+   "GPIO1": [
+    "gpio",
+    "uart_tx",
+    "serial_tx"
+   ],
+   "GPIO12": [
+    "gpio",
+    "adc",
+    "adc2",
+    "strap",
+    "boot_low"
+   ],
+   "GPIO13": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO14": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO15": [
+    "gpio",
+    "adc",
+    "adc2",
+    "strap",
+    "boot_high"
+   ],
+   "GPIO16": [
+    "gpio"
+   ],
+   "GPIO17": [
+    "gpio"
+   ],
+   "GPIO18": [
+    "gpio",
+    "spi_clk"
+   ],
+   "GPIO19": [
+    "gpio",
+    "spi_miso"
+   ],
+   "GPIO2": [
+    "strap",
+    "gpio",
+    "boot_low",
+    "adc",
+    "adc2"
+   ],
+   "GPIO21": [
+    "gpio",
+    "i2c_sda"
+   ],
+   "GPIO22": [
+    "gpio",
+    "i2c_scl"
+   ],
+   "GPIO23": [
+    "gpio",
+    "spi_mosi"
+   ],
+   "GPIO25": [
+    "gpio",
+    "dac",
+    "adc",
+    "adc2"
+   ],
+   "GPIO26": [
+    "gpio",
+    "dac",
+    "adc",
+    "adc2"
+   ],
+   "GPIO27": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO3": [
+    "gpio",
+    "uart_rx",
+    "serial_rx"
+   ],
+   "GPIO32": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO33": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO34": [
+    "gpio",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO35": [
+    "gpio",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO36": [
+    "gpio",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO39": [
+    "gpio",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO4": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO5": [
+    "gpio",
+    "strap",
+    "spi_cs",
+    "boot_high"
+   ]
+  },
+  "id": "esp32-devkitc-v4",
+  "kicad": {
+   "footprint": "RF_Module:ESP32-WROOM-32",
+   "pin_map": {
+    "3V3": "VDD",
+    "GND": "GND",
+    "GPIO0": "IO0",
+    "GPIO1": "TXD0/IO1",
+    "GPIO12": "IO12",
+    "GPIO13": "IO13",
+    "GPIO14": "IO14",
+    "GPIO15": "IO15",
+    "GPIO16": "IO16",
+    "GPIO17": "IO17",
+    "GPIO18": "IO18",
+    "GPIO19": "IO19",
+    "GPIO2": "IO2",
+    "GPIO21": "IO21",
+    "GPIO22": "IO22",
+    "GPIO23": "IO23",
+    "GPIO25": "IO25",
+    "GPIO26": "IO26",
+    "GPIO27": "IO27",
+    "GPIO3": "RXD0/IO3",
+    "GPIO32": "IO32",
+    "GPIO33": "IO33",
+    "GPIO34": "IO34",
+    "GPIO35": "IO35",
+    "GPIO36": "SENSOR_VP",
+    "GPIO39": "SENSOR_VN",
+    "GPIO4": "IO4",
+    "GPIO5": "IO5"
+   },
+   "symbol": "ESP32-WROOM-32",
+   "symbol_lib": "RF_Module"
+  },
+  "mcu": "esp32",
+  "name": "ESP32-DevKitC-V4",
+  "platformio_board": "esp32dev",
+  "rails": [
+   {
+    "name": "5V",
+    "source": "usb",
+    "voltage": 5.0
+   },
+   {
+    "name": "3V3",
+    "source": "onboard_regulator",
+    "voltage": 3.3
+   },
+   {
+    "name": "GND",
+    "voltage": 0.0
+   }
+  ]
+ },
+ "esp32-s3-devkitc-1": {
+  "chip_variant": "esp32s3",
+  "default_buses": {
+   "i2c": {
+    "scl": "GPIO9",
+    "sda": "GPIO8"
+   },
+   "spi": {
+    "clk": "GPIO12",
+    "miso": "GPIO13",
+    "mosi": "GPIO11"
+   }
+  },
+  "enclosure": {
+   "component_height_max_mm": 13.0,
+   "mount_holes": [],
+   "pcb": {
+    "length_mm": 69.19,
+    "thickness_mm": 1.6,
+    "width_mm": 25.4
+   },
+   "ports": [
+    {
+     "edge": "short_a",
+     "height_above_pcb_mm": 1.5,
+     "height_mm": 3.0,
+     "kind": "usb_micro",
+     "offset_mm": 2.3,
+     "width_mm": 7.4
+    },
+    {
+     "edge": "short_a",
+     "height_above_pcb_mm": 1.5,
+     "height_mm": 3.0,
+     "kind": "usb_micro",
+     "offset_mm": 15.7,
+     "width_mm": 7.4
+    }
+   ]
+  },
+  "flash_size_mb": 8,
+  "framework": "arduino",
+  "gpio_capabilities": {
+   "GPIO0": [
+    "gpio",
+    "strap",
+    "boot_high",
+    "button"
+   ],
+   "GPIO1": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO10": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO11": [
+    "gpio",
+    "adc",
+    "adc2",
+    "spi_mosi",
+    "pwm"
+   ],
+   "GPIO12": [
+    "gpio",
+    "adc",
+    "adc2",
+    "spi_clk",
+    "pwm"
+   ],
+   "GPIO13": [
+    "gpio",
+    "adc",
+    "adc2",
+    "spi_miso",
+    "pwm"
+   ],
+   "GPIO14": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO15": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO16": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO17": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO18": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO19": [
+    "gpio",
+    "usb",
+    "pwm"
+   ],
+   "GPIO2": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO20": [
+    "gpio",
+    "usb",
+    "pwm"
+   ],
+   "GPIO21": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO3": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO33": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO34": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO35": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO36": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO37": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO38": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO39": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO4": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO40": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO41": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO42": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO43": [
+    "gpio",
+    "uart_tx",
+    "serial_tx"
+   ],
+   "GPIO44": [
+    "gpio",
+    "uart_rx",
+    "serial_rx"
+   ],
+   "GPIO45": [
+    "gpio",
+    "strap",
+    "boot_low",
+    "pwm"
+   ],
+   "GPIO46": [
+    "gpio",
+    "strap",
+    "boot_low",
+    "pwm"
+   ],
+   "GPIO47": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO48": [
+    "gpio",
+    "builtin_led",
+    "pwm"
+   ],
+   "GPIO5": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO6": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO7": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO8": [
+    "gpio",
+    "adc",
+    "adc1",
+    "i2c_sda",
+    "pwm"
+   ],
+   "GPIO9": [
+    "gpio",
+    "adc",
+    "adc1",
+    "i2c_scl",
+    "pwm"
+   ]
+  },
+  "id": "esp32-s3-devkitc-1",
+  "kicad": {
+   "footprint": "Connector_PinHeader_2.54mm:PinHeader_2x22_P2.54mm_Vertical",
+   "pin_map": {
+    "3V3": "1",
+    "5V": "41",
+    "GND": "2",
+    "GPIO0": "28",
+    "GPIO1": "8",
+    "GPIO10": "31",
+    "GPIO11": "33",
+    "GPIO12": "35",
+    "GPIO13": "37",
+    "GPIO14": "39",
+    "GPIO15": "15",
+    "GPIO16": "17",
+    "GPIO17": "19",
+    "GPIO18": "21",
+    "GPIO19": "40",
+    "GPIO2": "10",
+    "GPIO20": "38",
+    "GPIO21": "36",
+    "GPIO3": "25",
+    "GPIO35": "26",
+    "GPIO36": "24",
+    "GPIO37": "22",
+    "GPIO38": "20",
+    "GPIO39": "18",
+    "GPIO4": "7",
+    "GPIO40": "16",
+    "GPIO41": "14",
+    "GPIO42": "12",
+    "GPIO43": "4",
+    "GPIO44": "6",
+    "GPIO45": "30",
+    "GPIO46": "27",
+    "GPIO47": "34",
+    "GPIO48": "32",
+    "GPIO5": "9",
+    "GPIO6": "11",
+    "GPIO7": "13",
+    "GPIO8": "23",
+    "GPIO9": "29"
+   },
+   "symbol": "Conn_02x22_Odd_Even",
+   "symbol_lib": "Connector_Generic",
+   "value": "ESP32-S3-DevKitC-1"
+  },
+  "mcu": "esp32",
+  "name": "ESP32-S3-DevKitC-1",
+  "onboard_peripherals": {
+   "boot_button": {
+    "inverted": true,
+    "pin": "GPIO0"
+   },
+   "led_ws2812": {
+    "pin": "GPIO48"
+   }
+  },
+  "platformio_board": "esp32-s3-devkitc-1",
+  "rails": [
+   {
+    "name": "5V",
+    "source": "usb",
+    "voltage": 5.0
+   },
+   {
+    "name": "3V3",
+    "source": "onboard_regulator",
+    "voltage": 3.3
+   },
+   {
+    "name": "GND",
+    "voltage": 0.0
+   }
+  ]
+ },
+ "esp32-s3-supermini": {
+  "chip_variant": "esp32s3",
+  "default_buses": {
+   "i2c": {
+    "scl": "GPIO9",
+    "sda": "GPIO8"
+   },
+   "spi": {
+    "clk": "GPIO12",
+    "miso": "GPIO13",
+    "mosi": "GPIO11"
+   }
+  },
+  "flash_size_mb": 4,
+  "framework": "arduino",
+  "gpio_capabilities": {
+   "GPIO0": [
+    "gpio",
+    "strap",
+    "boot_high",
+    "button"
+   ],
+   "GPIO1": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO10": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO11": [
+    "gpio",
+    "adc",
+    "adc2",
+    "spi_mosi",
+    "pwm"
+   ],
+   "GPIO12": [
+    "gpio",
+    "adc",
+    "adc2",
+    "spi_clk",
+    "pwm"
+   ],
+   "GPIO13": [
+    "gpio",
+    "adc",
+    "adc2",
+    "spi_miso",
+    "pwm"
+   ],
+   "GPIO14": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO15": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO16": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO17": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO18": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO2": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO21": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO3": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO33": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO34": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO35": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO36": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO37": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO38": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO39": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO4": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO40": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO41": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO45": [
+    "gpio",
+    "strap",
+    "boot_low",
+    "pwm"
+   ],
+   "GPIO46": [
+    "gpio",
+    "strap",
+    "boot_low",
+    "pwm"
+   ],
+   "GPIO47": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO48": [
+    "gpio",
+    "builtin_led",
+    "pwm"
+   ],
+   "GPIO5": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO6": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO7": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO8": [
+    "gpio",
+    "adc",
+    "adc1",
+    "i2c_sda",
+    "pwm"
+   ],
+   "GPIO9": [
+    "gpio",
+    "adc",
+    "adc1",
+    "i2c_scl",
+    "pwm"
+   ]
+  },
+  "id": "esp32-s3-supermini",
+  "kicad": {
+   "footprint": "Connector_PinHeader_2.54mm:PinHeader_2x09_P2.54mm_Vertical",
+   "pin_map": {
+    "3V3": "6",
+    "5V": "2",
+    "GND": "4",
+    "GPIO1": "5",
+    "GPIO10": "14",
+    "GPIO11": "12",
+    "GPIO12": "10",
+    "GPIO13": "8",
+    "GPIO2": "7",
+    "GPIO3": "9",
+    "GPIO4": "11",
+    "GPIO43": "1",
+    "GPIO44": "3",
+    "GPIO5": "13",
+    "GPIO6": "15",
+    "GPIO7": "17",
+    "GPIO8": "18",
+    "GPIO9": "16"
+   },
+   "symbol": "Conn_02x09_Odd_Even",
+   "symbol_lib": "Connector_Generic",
+   "value": "ESP32-S3-SuperMini"
+  },
+  "mcu": "esp32",
+  "name": "ESP32-S3 SuperMini",
+  "onboard_peripherals": {
+   "boot_button": {
+    "inverted": true,
+    "pin": "GPIO0"
+   },
+   "led_ws2812": {
+    "pin": "GPIO48"
+   }
+  },
+  "platformio_board": "esp32-s3-devkitm-1",
+  "rails": [
+   {
+    "name": "5V",
+    "source": "usb",
+    "voltage": 5.0
+   },
+   {
+    "name": "3V3",
+    "source": "onboard_regulator",
+    "voltage": 3.3
+   },
+   {
+    "name": "GND",
+    "voltage": 0.0
+   }
+  ]
+ },
+ "esp32-wrover-cam": {
+  "chip_variant": "esp32",
+  "flash_size_mb": 4,
+  "framework": "arduino",
+  "gpio_capabilities": {
+   "GPIO0": [
+    "boot",
+    "strap",
+    "boot_high",
+    "adc",
+    "adc2"
+   ],
+   "GPIO1": [
+    "gpio",
+    "uart_tx",
+    "serial_tx"
+   ],
+   "GPIO12": [
+    "gpio",
+    "camera_scl",
+    "strap",
+    "boot_low",
+    "adc",
+    "adc2"
+   ],
+   "GPIO13": [
+    "gpio",
+    "camera_sda",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO14": [
+    "gpio",
+    "camera_data",
+    "adc",
+    "adc2",
+    "pwm",
+    "strap"
+   ],
+   "GPIO15": [
+    "gpio",
+    "camera_data",
+    "adc",
+    "adc2",
+    "strap",
+    "boot_high"
+   ],
+   "GPIO16": [
+    "gpio"
+   ],
+   "GPIO17": [
+    "gpio"
+   ],
+   "GPIO18": [
+    "gpio",
+    "camera_data"
+   ],
+   "GPIO19": [
+    "gpio",
+    "camera_pclk"
+   ],
+   "GPIO2": [
+    "strap",
+    "gpio",
+    "boot_low",
+    "adc",
+    "adc2"
+   ],
+   "GPIO21": [
+    "gpio"
+   ],
+   "GPIO22": [
+    "gpio"
+   ],
+   "GPIO23": [
+    "gpio",
+    "camera_data"
+   ],
+   "GPIO25": [
+    "gpio",
+    "camera_href",
+    "dac",
+    "adc",
+    "adc2"
+   ],
+   "GPIO26": [
+    "gpio",
+    "camera_pwdn",
+    "dac",
+    "adc",
+    "adc2"
+   ],
+   "GPIO27": [
+    "gpio",
+    "camera_vsync",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO3": [
+    "gpio",
+    "uart_rx",
+    "serial_rx"
+   ],
+   "GPIO32": [
+    "gpio",
+    "camera_xclk",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO33": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO34": [
+    "gpio",
+    "camera_data",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO35": [
+    "gpio",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO36": [
+    "gpio",
+    "camera_data",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO39": [
+    "gpio",
+    "camera_data",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO4": [
+    "gpio",
+    "camera_data",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO5": [
+    "gpio",
+    "camera_data",
+    "strap",
+    "boot_high"
+   ]
+  },
+  "id": "esp32-wrover-cam",
+  "kicad": {
+   "footprint": "Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical",
+   "pin_map": {
+    "3V3": "1",
+    "5V": "37",
+    "GND": "2",
+    "GPIO0": "28",
+    "GPIO1": "8",
+    "GPIO12": "25",
+    "GPIO13": "29",
+    "GPIO14": "23",
+    "GPIO15": "32",
+    "GPIO18": "18",
+    "GPIO19": "16",
+    "GPIO2": "30",
+    "GPIO21": "12",
+    "GPIO22": "6",
+    "GPIO23": "4",
+    "GPIO25": "17",
+    "GPIO26": "19",
+    "GPIO27": "21",
+    "GPIO3": "10",
+    "GPIO32": "13",
+    "GPIO33": "15",
+    "GPIO34": "9",
+    "GPIO35": "11",
+    "GPIO36": "5",
+    "GPIO39": "7",
+    "GPIO4": "26",
+    "GPIO5": "20"
+   },
+   "symbol": "Conn_02x20_Odd_Even",
+   "symbol_lib": "Connector_Generic",
+   "value": "ESP32-WROVER-CAM"
+  },
+  "mcu": "esp32",
+  "name": "ESP32-WROVER-CAM (Freenove-style)",
+  "platformio_board": "esp-wrover-kit",
+  "rails": [
+   {
+    "name": "5V",
+    "source": "usb",
+    "voltage": 5.0
+   },
+   {
+    "name": "3V3",
+    "source": "onboard_regulator",
+    "voltage": 3.3
+   },
+   {
+    "name": "GND",
+    "voltage": 0.0
+   }
+  ]
+ },
+ "esp32cam-ai-thinker": {
+  "chip_variant": "esp32",
+  "flash_size_mb": 4,
+  "framework": "arduino",
+  "gpio_capabilities": {
+   "GPIO0": [
+    "boot",
+    "strap",
+    "boot_high",
+    "camera_xclk",
+    "adc",
+    "adc2"
+   ],
+   "GPIO1": [
+    "gpio",
+    "uart_tx",
+    "serial_tx"
+   ],
+   "GPIO12": [
+    "gpio",
+    "sd_data2",
+    "adc",
+    "adc2",
+    "strap",
+    "boot_low"
+   ],
+   "GPIO13": [
+    "gpio",
+    "sd_data3",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO14": [
+    "gpio",
+    "sd_clk",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO15": [
+    "gpio",
+    "sd_cmd",
+    "adc",
+    "adc2",
+    "strap",
+    "boot_high"
+   ],
+   "GPIO16": [
+    "gpio"
+   ],
+   "GPIO18": [
+    "gpio",
+    "camera_data"
+   ],
+   "GPIO19": [
+    "gpio",
+    "camera_data"
+   ],
+   "GPIO2": [
+    "gpio",
+    "sd_data0",
+    "strap",
+    "boot_low",
+    "adc",
+    "adc2"
+   ],
+   "GPIO21": [
+    "gpio",
+    "camera_data"
+   ],
+   "GPIO22": [
+    "gpio",
+    "camera_pclk"
+   ],
+   "GPIO23": [
+    "gpio",
+    "camera_href"
+   ],
+   "GPIO25": [
+    "gpio",
+    "camera_vsync",
+    "dac",
+    "adc",
+    "adc2"
+   ],
+   "GPIO26": [
+    "gpio",
+    "camera_sda",
+    "dac",
+    "adc",
+    "adc2"
+   ],
+   "GPIO27": [
+    "gpio",
+    "camera_scl",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO3": [
+    "gpio",
+    "uart_rx",
+    "serial_rx"
+   ],
+   "GPIO32": [
+    "gpio",
+    "camera_pwdn",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO34": [
+    "gpio",
+    "camera_data",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO35": [
+    "gpio",
+    "camera_data",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO36": [
+    "gpio",
+    "camera_data",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO39": [
+    "gpio",
+    "camera_data",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO4": [
+    "gpio",
+    "sd_data1",
+    "flash_led",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO5": [
+    "gpio",
+    "camera_data",
+    "strap",
+    "boot_high"
+   ]
+  },
+  "id": "esp32cam-ai-thinker",
+  "kicad": {
+   "footprint": "Connector_PinHeader_2.54mm:PinHeader_2x08_P2.54mm_Vertical",
+   "pin_map": {
+    "3V3": "16",
+    "5V": "15",
+    "GND": "2",
+    "GPIO0": "12",
+    "GPIO1": "4",
+    "GPIO12": "11",
+    "GPIO13": "9",
+    "GPIO14": "5",
+    "GPIO15": "7",
+    "GPIO16": "14",
+    "GPIO2": "3",
+    "GPIO3": "6",
+    "GPIO4": "1"
+   },
+   "symbol": "Conn_02x08_Odd_Even",
+   "symbol_lib": "Connector_Generic",
+   "value": "AI-Thinker ESP32-CAM"
+  },
+  "mcu": "esp32",
+  "name": "AI-Thinker ESP32-CAM",
+  "platformio_board": "esp32cam",
+  "rails": [
+   {
+    "name": "5V",
+    "source": "usb",
+    "voltage": 5.0
+   },
+   {
+    "name": "3V3",
+    "source": "onboard_regulator",
+    "voltage": 3.3
+   },
+   {
+    "name": "GND",
+    "voltage": 0.0
+   }
+  ]
+ },
+ "esp8285-1m": {
+  "chip_variant": "esp8266",
+  "flash_size_mb": 1,
+  "framework": "arduino",
+  "gpio_capabilities": {
+   "GPIO0": [
+    "gpio",
+    "strap",
+    "button",
+    "boot_high",
+    "pull_up_external"
+   ],
+   "GPIO1": [
+    "gpio",
+    "uart_tx",
+    "serial_tx"
+   ],
+   "GPIO12": [
+    "gpio"
+   ],
+   "GPIO13": [
+    "gpio"
+   ],
+   "GPIO14": [
+    "gpio"
+   ],
+   "GPIO15": [
+    "gpio",
+    "strap",
+    "boot_low",
+    "pull_down_external"
+   ],
+   "GPIO16": [
+    "gpio",
+    "no_pwm",
+    "no_i2c",
+    "no_interrupt",
+    "no_fast_gpio"
+   ],
+   "GPIO2": [
+    "gpio",
+    "strap",
+    "builtin_led",
+    "boot_high",
+    "pull_up_external"
+   ],
+   "GPIO3": [
+    "gpio",
+    "uart_rx",
+    "serial_rx"
+   ],
+   "GPIO4": [
+    "gpio",
+    "i2c_sda"
+   ],
+   "GPIO5": [
+    "gpio",
+    "i2c_scl"
+   ]
+  },
+  "id": "esp8285-1m",
+  "kicad": {
+   "footprint": "RF_Module:ESP-12E",
+   "pin_map": {
+    "3V3": "VCC",
+    "GND": "GND",
+    "GPIO0": "GPIO0",
+    "GPIO1": "GPIO1/TXD",
+    "GPIO12": "GPIO12",
+    "GPIO13": "GPIO13",
+    "GPIO14": "GPIO14",
+    "GPIO15": "GPIO15",
+    "GPIO16": "GPIO16",
+    "GPIO2": "GPIO2",
+    "GPIO3": "GPIO3/RXD",
+    "GPIO4": "GPIO4",
+    "GPIO5": "GPIO5"
+   },
+   "symbol": "ESP-12E",
+   "symbol_lib": "RF_Module",
+   "value": "ESP8285"
+  },
+  "mcu": "esp8266",
+  "name": "Generic ESP8285 1MB module (Athom / Sonoff Basic R3 / Tuya plug)",
+  "platformio_board": "esp8285",
+  "rails": [
+   {
+    "name": "MAINS",
+    "source": "external",
+    "voltage": 230.0
+   },
+   {
+    "name": "5V",
+    "source": "onboard_psu",
+    "voltage": 5.0
+   },
+   {
+    "name": "3V3",
+    "source": "onboard_regulator",
+    "voltage": 3.3
+   },
+   {
+    "name": "GND",
+    "voltage": 0.0
+   }
+  ]
+ },
+ "heltec-wifi-lora32-v2": {
+  "chip_variant": "esp32",
+  "default_buses": {
+   "i2c": {
+    "scl": "GPIO15",
+    "sda": "GPIO4"
+   },
+   "spi": {
+    "clk": "GPIO5",
+    "miso": "GPIO19",
+    "mosi": "GPIO27"
+   }
+  },
+  "flash_size_mb": 4,
+  "framework": "arduino",
+  "gpio_capabilities": {
+   "GPIO0": [
+    "boot",
+    "strap",
+    "boot_high",
+    "adc",
+    "adc2"
+   ],
+   "GPIO12": [
+    "gpio",
+    "adc",
+    "adc2",
+    "strap",
+    "boot_low"
+   ],
+   "GPIO13": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO14": [
+    "gpio",
+    "lora_rst",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO15": [
+    "gpio",
+    "i2c_scl",
+    "strap",
+    "boot_high"
+   ],
+   "GPIO16": [
+    "gpio",
+    "oled_reset"
+   ],
+   "GPIO17": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO18": [
+    "gpio",
+    "lora_cs"
+   ],
+   "GPIO19": [
+    "gpio",
+    "spi_miso"
+   ],
+   "GPIO2": [
+    "strap",
+    "gpio",
+    "boot_low",
+    "adc",
+    "adc2"
+   ],
+   "GPIO21": [
+    "gpio",
+    "vext_control"
+   ],
+   "GPIO22": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO23": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO25": [
+    "gpio",
+    "led",
+    "dac",
+    "adc",
+    "adc2"
+   ],
+   "GPIO26": [
+    "gpio",
+    "lora_dio0",
+    "adc",
+    "adc2"
+   ],
+   "GPIO27": [
+    "gpio",
+    "spi_mosi",
+    "adc",
+    "adc2"
+   ],
+   "GPIO32": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO33": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO34": [
+    "gpio",
+    "lora_dio2",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO35": [
+    "gpio",
+    "lora_dio1",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO36": [
+    "gpio",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO37": [
+    "gpio",
+    "battery_sense",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO39": [
+    "gpio",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO4": [
+    "gpio",
+    "i2c_sda",
+    "adc",
+    "adc2"
+   ],
+   "GPIO5": [
+    "gpio",
+    "spi_clk",
+    "boot_high"
+   ]
+  },
+  "id": "heltec-wifi-lora32-v2",
+  "kicad": {
+   "footprint": "Connector_PinHeader_2.54mm:PinHeader_2x18_P2.54mm_Vertical",
+   "pin_map": {
+    "3V3": "3",
+    "5V": "4",
+    "GND": "1",
+    "GPIO0": "16",
+    "GPIO1": "12",
+    "GPIO12": "31",
+    "GPIO13": "33",
+    "GPIO14": "29",
+    "GPIO15": "28",
+    "GPIO16": "36",
+    "GPIO17": "34",
+    "GPIO18": "24",
+    "GPIO19": "20",
+    "GPIO2": "30",
+    "GPIO21": "35",
+    "GPIO22": "18",
+    "GPIO23": "22",
+    "GPIO25": "23",
+    "GPIO26": "25",
+    "GPIO27": "27",
+    "GPIO3": "10",
+    "GPIO32": "19",
+    "GPIO33": "21",
+    "GPIO34": "15",
+    "GPIO35": "17",
+    "GPIO36": "7",
+    "GPIO37": "9",
+    "GPIO38": "11",
+    "GPIO39": "13",
+    "GPIO4": "32",
+    "GPIO5": "26"
+   },
+   "symbol": "Conn_02x18_Odd_Even",
+   "symbol_lib": "Connector_Generic",
+   "value": "Heltec WiFi LoRa 32 V2"
+  },
+  "mcu": "esp32",
+  "name": "Heltec WiFi LoRa 32 V2 (SX1276)",
+  "onboard_peripherals": {
+   "battery_adc": {
+    "divider": 3.2,
+    "pin": "GPIO37"
+   },
+   "led": {
+    "pin": "GPIO25"
+   },
+   "lora_sx1276": {
+    "cs": "GPIO18",
+    "dio0": "GPIO26",
+    "dio1": "GPIO35",
+    "rst": "GPIO14"
+   },
+   "oled_ssd1306": {
+    "address": "0x3C",
+    "reset": "GPIO16",
+    "scl": "GPIO15",
+    "sda": "GPIO4",
+    "vext": "GPIO21"
+   }
+  },
+  "platformio_board": "heltec_wifi_lora_32_V2",
+  "radio": {
+   "chip": "sx1276",
+   "pins": {
+    "cs": "GPIO18",
+    "dio0": "GPIO26",
+    "dio1": "GPIO35",
+    "rst": "GPIO14"
+   },
+   "radiolib_class": "SX1276"
+  },
+  "rails": [
+   {
+    "name": "5V",
+    "source": "usb",
+    "voltage": 5.0
+   },
+   {
+    "name": "3V3",
+    "source": "onboard_regulator",
+    "voltage": 3.3
+   },
+   {
+    "name": "GND",
+    "voltage": 0.0
+   }
+  ]
+ },
+ "heltec-wifi-lora32-v3": {
+  "chip_variant": "esp32s3",
+  "default_buses": {
+   "i2c": {
+    "scl": "GPIO18",
+    "sda": "GPIO17"
+   },
+   "spi": {
+    "clk": "GPIO9",
+    "miso": "GPIO11",
+    "mosi": "GPIO10"
+   }
+  },
+  "enclosure": {
+   "component_height_max_mm": 9.2,
+   "mount_holes": [],
+   "pcb": {
+    "length_mm": 50.2,
+    "thickness_mm": 1.0,
+    "width_mm": 25.5
+   },
+   "ports": [
+    {
+     "edge": "short_a",
+     "height_above_pcb_mm": 1.6,
+     "height_mm": 3.4,
+     "kind": "usb_c",
+     "offset_mm": 8.25,
+     "width_mm": 9.0
+    },
+    {
+     "edge": "short_b",
+     "height_above_pcb_mm": 4.0,
+     "height_mm": 7.0,
+     "kind": "sma",
+     "offset_mm": 9.25,
+     "width_mm": 7.0
+    }
+   ]
+  },
+  "flash_size_mb": 8,
+  "framework": "arduino",
+  "gpio_capabilities": {
+   "GPIO0": [
+    "gpio",
+    "strap",
+    "boot_high",
+    "button"
+   ],
+   "GPIO1": [
+    "gpio",
+    "adc",
+    "adc1",
+    "battery_sense"
+   ],
+   "GPIO10": [
+    "gpio",
+    "adc",
+    "adc1",
+    "spi_mosi"
+   ],
+   "GPIO11": [
+    "gpio",
+    "adc",
+    "adc2",
+    "spi_miso"
+   ],
+   "GPIO12": [
+    "gpio",
+    "adc",
+    "adc2",
+    "lora_rst"
+   ],
+   "GPIO13": [
+    "gpio",
+    "adc",
+    "adc2",
+    "lora_busy"
+   ],
+   "GPIO14": [
+    "gpio",
+    "adc",
+    "adc2",
+    "lora_dio1"
+   ],
+   "GPIO15": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO16": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO17": [
+    "gpio",
+    "adc",
+    "adc2",
+    "i2c_sda"
+   ],
+   "GPIO18": [
+    "gpio",
+    "adc",
+    "adc2",
+    "i2c_scl"
+   ],
+   "GPIO19": [
+    "gpio",
+    "usb",
+    "pwm"
+   ],
+   "GPIO2": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO20": [
+    "gpio",
+    "usb",
+    "pwm"
+   ],
+   "GPIO21": [
+    "gpio",
+    "oled_reset"
+   ],
+   "GPIO3": [
+    "gpio",
+    "adc",
+    "adc1",
+    "strap"
+   ],
+   "GPIO33": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO34": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO35": [
+    "gpio",
+    "led",
+    "pwm"
+   ],
+   "GPIO36": [
+    "gpio",
+    "vext_control"
+   ],
+   "GPIO37": [
+    "gpio",
+    "adc_control"
+   ],
+   "GPIO38": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO39": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO4": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO40": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO41": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO42": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO43": [
+    "gpio",
+    "uart_tx",
+    "serial_tx"
+   ],
+   "GPIO44": [
+    "gpio",
+    "uart_rx",
+    "serial_rx"
+   ],
+   "GPIO45": [
+    "gpio",
+    "strap",
+    "boot_low",
+    "pwm"
+   ],
+   "GPIO46": [
+    "gpio",
+    "strap",
+    "boot_low",
+    "pwm"
+   ],
+   "GPIO47": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO48": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO5": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO6": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO7": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO8": [
+    "gpio",
+    "adc",
+    "adc1",
+    "lora_cs"
+   ],
+   "GPIO9": [
+    "gpio",
+    "adc",
+    "adc1",
+    "spi_clk"
+   ]
+  },
+  "id": "heltec-wifi-lora32-v3",
+  "kicad": {
+   "footprint": "Connector_PinHeader_2.54mm:PinHeader_2x18_P2.54mm_Vertical",
+   "pin_map": {
+    "3V3": "3",
+    "5V": "4",
+    "GND": "1",
+    "GPIO0": "16",
+    "GPIO1": "23",
+    "GPIO19": "36",
+    "GPIO2": "25",
+    "GPIO20": "34",
+    "GPIO21": "32",
+    "GPIO26": "30",
+    "GPIO3": "27",
+    "GPIO33": "24",
+    "GPIO34": "22",
+    "GPIO35": "20",
+    "GPIO36": "18",
+    "GPIO37": "7",
+    "GPIO38": "21",
+    "GPIO39": "19",
+    "GPIO4": "29",
+    "GPIO40": "17",
+    "GPIO41": "15",
+    "GPIO42": "13",
+    "GPIO43": "12",
+    "GPIO44": "10",
+    "GPIO45": "11",
+    "GPIO46": "9",
+    "GPIO47": "26",
+    "GPIO48": "28",
+    "GPIO5": "31",
+    "GPIO6": "33",
+    "GPIO7": "35"
+   },
+   "symbol": "Conn_02x18_Odd_Even",
+   "symbol_lib": "Connector_Generic",
+   "value": "Heltec WiFi LoRa 32 V3"
+  },
+  "mcu": "esp32",
+  "name": "Heltec WiFi LoRa 32 V3 (SX1262)",
+  "onboard_peripherals": {
+   "battery_adc": {
+    "control": "GPIO37",
+    "divider": 4.9,
+    "pin": "GPIO1"
+   },
+   "button": {
+    "inverted": true,
+    "pin": "GPIO0"
+   },
+   "led": {
+    "pin": "GPIO35"
+   },
+   "lora_sx1262": {
+    "busy": "GPIO13",
+    "cs": "GPIO8",
+    "dio1": "GPIO14",
+    "rst": "GPIO12"
+   },
+   "oled_ssd1306": {
+    "address": "0x3C",
+    "reset": "GPIO21",
+    "vext": "GPIO36"
+   },
+   "vext": {
+    "inverted": true,
+    "pin": "GPIO36"
+   }
+  },
+  "platformio_board": "heltec_wifi_lora_32_V3",
+  "radio": {
+   "chip": "sx1262",
+   "dio2_as_rf_switch": true,
+   "pins": {
+    "busy": "GPIO13",
+    "cs": "GPIO8",
+    "dio1": "GPIO14",
+    "rst": "GPIO12"
+   },
+   "radiolib_class": "SX1262",
+   "tcxo_voltage": 1.8
+  },
+  "rails": [
+   {
+    "name": "5V",
+    "source": "usb",
+    "voltage": 5.0
+   },
+   {
+    "name": "3V3",
+    "source": "onboard_regulator",
+    "voltage": 3.3
+   },
+   {
+    "name": "GND",
+    "voltage": 0.0
+   }
+  ]
+ },
+ "heltec-wifi-lora32-v4": {
+  "chip_variant": "esp32s3",
+  "default_buses": {
+   "i2c": {
+    "scl": "GPIO18",
+    "sda": "GPIO17"
+   },
+   "spi": {
+    "clk": "GPIO9",
+    "miso": "GPIO11",
+    "mosi": "GPIO10"
+   }
+  },
+  "flash_size_mb": 16,
+  "framework": "arduino",
+  "gpio_capabilities": {
+   "GPIO0": [
+    "gpio",
+    "strap",
+    "boot_high",
+    "button"
+   ],
+   "GPIO1": [
+    "gpio",
+    "adc",
+    "adc1",
+    "battery_sense"
+   ],
+   "GPIO10": [
+    "gpio",
+    "adc",
+    "adc1",
+    "spi_mosi"
+   ],
+   "GPIO11": [
+    "gpio",
+    "adc",
+    "adc2",
+    "spi_miso"
+   ],
+   "GPIO12": [
+    "gpio",
+    "adc",
+    "adc2",
+    "lora_rst"
+   ],
+   "GPIO13": [
+    "gpio",
+    "adc",
+    "adc2",
+    "lora_busy"
+   ],
+   "GPIO14": [
+    "gpio",
+    "adc",
+    "adc2",
+    "lora_dio1"
+   ],
+   "GPIO15": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO16": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO17": [
+    "gpio",
+    "adc",
+    "adc2",
+    "i2c_sda"
+   ],
+   "GPIO18": [
+    "gpio",
+    "adc",
+    "adc2",
+    "i2c_scl"
+   ],
+   "GPIO19": [
+    "gpio",
+    "usb",
+    "pwm"
+   ],
+   "GPIO2": [
+    "gpio",
+    "adc",
+    "adc1",
+    "fem_enable"
+   ],
+   "GPIO20": [
+    "gpio",
+    "usb",
+    "pwm"
+   ],
+   "GPIO21": [
+    "gpio",
+    "oled_reset"
+   ],
+   "GPIO3": [
+    "gpio",
+    "adc",
+    "adc1",
+    "strap",
+    "i2c_scl"
+   ],
+   "GPIO33": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO34": [
+    "gpio",
+    "gnss_en"
+   ],
+   "GPIO35": [
+    "gpio",
+    "led",
+    "pwm"
+   ],
+   "GPIO36": [
+    "gpio",
+    "vext_control"
+   ],
+   "GPIO37": [
+    "gpio",
+    "adc_control"
+   ],
+   "GPIO38": [
+    "gpio",
+    "gnss_uart"
+   ],
+   "GPIO39": [
+    "gpio",
+    "gnss_uart"
+   ],
+   "GPIO4": [
+    "gpio",
+    "adc",
+    "adc1",
+    "i2c_sda"
+   ],
+   "GPIO40": [
+    "gpio",
+    "gnss_standby"
+   ],
+   "GPIO41": [
+    "gpio",
+    "gnss_pps"
+   ],
+   "GPIO42": [
+    "gpio",
+    "gnss_reset"
+   ],
+   "GPIO43": [
+    "gpio",
+    "uart_tx",
+    "serial_tx"
+   ],
+   "GPIO44": [
+    "gpio",
+    "uart_rx",
+    "serial_rx"
+   ],
+   "GPIO45": [
+    "gpio",
+    "strap",
+    "boot_low",
+    "pwm"
+   ],
+   "GPIO46": [
+    "gpio",
+    "strap",
+    "boot_low",
+    "fem_pa_mode"
+   ],
+   "GPIO47": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO48": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO5": [
+    "gpio",
+    "adc",
+    "adc1",
+    "fem_ctx"
+   ],
+   "GPIO6": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO7": [
+    "gpio",
+    "adc",
+    "adc1",
+    "fem_power"
+   ],
+   "GPIO8": [
+    "gpio",
+    "adc",
+    "adc1",
+    "lora_cs"
+   ],
+   "GPIO9": [
+    "gpio",
+    "adc",
+    "adc1",
+    "spi_clk"
+   ]
+  },
+  "id": "heltec-wifi-lora32-v4",
+  "kicad": {
+   "footprint": "Connector_PinHeader_2.54mm:PinHeader_2x18_P2.54mm_Vertical",
+   "pin_map": {
+    "3V3": "3",
+    "5V": "4",
+    "GND": "1",
+    "GPIO0": "16",
+    "GPIO1": "23",
+    "GPIO19": "36",
+    "GPIO2": "25",
+    "GPIO20": "34",
+    "GPIO21": "32",
+    "GPIO26": "30",
+    "GPIO3": "27",
+    "GPIO33": "24",
+    "GPIO34": "22",
+    "GPIO35": "20",
+    "GPIO36": "18",
+    "GPIO37": "7",
+    "GPIO38": "21",
+    "GPIO39": "19",
+    "GPIO4": "29",
+    "GPIO40": "17",
+    "GPIO41": "15",
+    "GPIO42": "13",
+    "GPIO43": "12",
+    "GPIO44": "10",
+    "GPIO45": "11",
+    "GPIO46": "9",
+    "GPIO47": "26",
+    "GPIO48": "28",
+    "GPIO5": "31",
+    "GPIO6": "33",
+    "GPIO7": "35"
+   },
+   "symbol": "Conn_02x18_Odd_Even",
+   "symbol_lib": "Connector_Generic",
+   "value": "Heltec WiFi LoRa 32 V4"
+  },
+  "mcu": "esp32",
+  "name": "Heltec WiFi LoRa 32 V4 (SX1262 + PA)",
+  "onboard_peripherals": {
+   "battery_adc": {
+    "control": "GPIO37",
+    "divider": 5.12,
+    "pin": "GPIO1"
+   },
+   "button": {
+    "inverted": true,
+    "pin": "GPIO0"
+   },
+   "gps_gnss": {
+    "baud": 9600,
+    "enable": "GPIO34",
+    "enable_active_low": true,
+    "reset": "GPIO42",
+    "rx": "GPIO38",
+    "standby": "GPIO40",
+    "tx": "GPIO39"
+   },
+   "led": {
+    "pin": "GPIO35"
+   },
+   "lora_sx1262": {
+    "busy": "GPIO13",
+    "cs": "GPIO8",
+    "dio1": "GPIO14",
+    "rst": "GPIO12"
+   },
+   "oled_ssd1306": {
+    "address": "0x3C",
+    "reset": "GPIO21",
+    "vext": "GPIO36"
+   },
+   "rf_fem": {
+    "ctx": "GPIO5",
+    "enable": "GPIO2",
+    "pa_mode": "GPIO46",
+    "power": "GPIO7"
+   },
+   "vext": {
+    "inverted": true,
+    "pin": "GPIO36"
+   }
+  },
+  "platformio_board": "heltec_wifi_lora_32_V3",
+  "radio": {
+   "chip": "sx1262",
+   "dio2_as_rf_switch": true,
+   "pins": {
+    "busy": "GPIO13",
+    "cs": "GPIO8",
+    "dio1": "GPIO14",
+    "rst": "GPIO12"
+   },
+   "radiolib_class": "SX1262",
+   "setup_high": [
+    "GPIO7",
+    "GPIO2"
+   ],
+   "setup_low": [
+    "GPIO36"
+   ],
+   "tcxo_voltage": 1.8,
+   "txen": "GPIO46"
+  },
+  "rails": [
+   {
+    "name": "5V",
+    "source": "usb",
+    "voltage": 5.0
+   },
+   {
+    "name": "3V3",
+    "source": "onboard_regulator",
+    "voltage": 3.3
+   },
+   {
+    "name": "GND",
+    "voltage": 0.0
+   }
+  ],
+  "revisions": {
+   "4.2": {
+    "radio": {
+     "txen": "GPIO46"
+    }
+   },
+   "4.3": {
+    "radio": {
+     "txen": "GPIO5"
+    }
+   }
+  }
+ },
+ "m5stack-atom": {
+  "chip_variant": "esp32",
+  "default_buses": {
+   "i2c": {
+    "scl": "GPIO32",
+    "sda": "GPIO26"
+   }
+  },
+  "flash_size_mb": 4,
+  "framework": "arduino",
+  "gpio_capabilities": {
+   "GPIO19": [
+    "gpio",
+    "i2s_bclk"
+   ],
+   "GPIO21": [
+    "gpio",
+    "grove_sda",
+    "i2c_sda"
+   ],
+   "GPIO22": [
+    "gpio",
+    "i2s_dout"
+   ],
+   "GPIO23": [
+    "gpio",
+    "i2s_din"
+   ],
+   "GPIO25": [
+    "gpio",
+    "grove_scl",
+    "i2c_scl",
+    "dac",
+    "adc",
+    "adc2"
+   ],
+   "GPIO26": [
+    "gpio",
+    "dac",
+    "adc",
+    "adc2"
+   ],
+   "GPIO27": [
+    "gpio",
+    "builtin_led",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO32": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO33": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm",
+    "i2s_lrclk"
+   ],
+   "GPIO39": [
+    "gpio",
+    "button",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ]
+  },
+  "id": "m5stack-atom",
+  "image": "https://shop.m5stack.com/cdn/shop/products/1_2_c215b5d9-d41a-4ab8-ad54-b2531930f075_1200x1200.jpg",
+  "kicad": {
+   "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x13_P2.54mm_Vertical",
+   "pin_map": {
+    "3V3": "1",
+    "5V": "8",
+    "GND": "9",
+    "GPIO19": "3",
+    "GPIO21": "6",
+    "GPIO22": "2",
+    "GPIO23": "4",
+    "GPIO25": "7",
+    "GPIO26": "12",
+    "GPIO32": "13",
+    "GPIO33": "5"
+   },
+   "symbol": "Conn_01x13",
+   "symbol_lib": "Connector_Generic",
+   "value": "M5Stack Atom"
+  },
+  "mcu": "esp32",
+  "name": "M5Stack Atom Lite / Echo",
+  "onboard_peripherals": {
+   "button": {
+    "inverted": true,
+    "pin": "GPIO39"
+   },
+   "echo_i2s": {
+    "bclk": "GPIO19",
+    "din": "GPIO23",
+    "dout": "GPIO22",
+    "lrclk": "GPIO33"
+   },
+   "led_sk6812": {
+    "pin": "GPIO27"
+   }
+  },
+  "platformio_board": "m5stack-atom",
+  "rails": [
+   {
+    "name": "5V",
+    "source": "usb",
+    "voltage": 5.0
+   },
+   {
+    "name": "3V3",
+    "source": "onboard_regulator",
+    "voltage": 3.3
+   },
+   {
+    "name": "GND",
+    "voltage": 0.0
+   }
+  ]
+ },
+ "m5stack-atom-echo": {
+  "chip_variant": "esp32",
+  "default_buses": {
+   "i2c": {
+    "scl": "GPIO32",
+    "sda": "GPIO26"
+   }
+  },
+  "flash_size_mb": 4,
+  "framework": "arduino",
+  "gpio_capabilities": {
+   "GPIO19": [
+    "gpio",
+    "i2s_bclk"
+   ],
+   "GPIO21": [
+    "gpio",
+    "grove_sda",
+    "i2c_sda"
+   ],
+   "GPIO22": [
+    "gpio",
+    "i2s_dout"
+   ],
+   "GPIO23": [
+    "gpio",
+    "i2s_din"
+   ],
+   "GPIO25": [
+    "gpio",
+    "grove_scl",
+    "i2c_scl",
+    "dac",
+    "adc",
+    "adc2"
+   ],
+   "GPIO26": [
+    "gpio",
+    "dac",
+    "adc",
+    "adc2"
+   ],
+   "GPIO27": [
+    "gpio",
+    "builtin_led",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO32": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO33": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm",
+    "i2s_lrclk"
+   ],
+   "GPIO39": [
+    "gpio",
+    "button",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ]
+  },
+  "id": "m5stack-atom-echo",
+  "image": "https://shop.m5stack.com/cdn/shop/files/1_da8f77ce-1545-4a44-99c5-e82fd385cdc4_1200x1200.webp",
+  "kicad": {
+   "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x13_P2.54mm_Vertical",
+   "pin_map": {
+    "3V3": "1",
+    "5V": "8",
+    "GND": "9",
+    "GPIO19": "3",
+    "GPIO21": "6",
+    "GPIO22": "2",
+    "GPIO23": "4",
+    "GPIO25": "7",
+    "GPIO26": "12",
+    "GPIO32": "13",
+    "GPIO33": "5"
+   },
+   "symbol": "Conn_01x13",
+   "symbol_lib": "Connector_Generic",
+   "value": "M5Stack Atom Echo"
+  },
+  "mcu": "esp32",
+  "name": "M5Stack Atom Echo",
+  "onboard_peripherals": {
+   "button": {
+    "inverted": true,
+    "pin": "GPIO39"
+   },
+   "echo_i2s": {
+    "bclk": "GPIO19",
+    "din": "GPIO23",
+    "dout": "GPIO22",
+    "lrclk": "GPIO33"
+   },
+   "led_sk6812": {
+    "pin": "GPIO27"
+   }
+  },
+  "platformio_board": "m5stack-atom",
+  "rails": [
+   {
+    "name": "5V",
+    "source": "usb",
+    "voltage": 5.0
+   },
+   {
+    "name": "3V3",
+    "source": "onboard_regulator",
+    "voltage": 3.3
+   },
+   {
+    "name": "GND",
+    "voltage": 0.0
+   }
+  ]
+ },
+ "m5stack-atom-matrix": {
+  "chip_variant": "esp32",
+  "default_buses": {
+   "i2c": {
+    "scl": "GPIO32",
+    "sda": "GPIO26"
+   }
+  },
+  "flash_size_mb": 4,
+  "framework": "arduino",
+  "gpio_capabilities": {
+   "GPIO12": [
+    "gpio",
+    "strap",
+    "ir_tx",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO19": [
+    "gpio",
+    "i2s_bclk"
+   ],
+   "GPIO21": [
+    "gpio",
+    "imu_scl",
+    "i2c_scl"
+   ],
+   "GPIO22": [
+    "gpio"
+   ],
+   "GPIO23": [
+    "gpio",
+    "i2s_din"
+   ],
+   "GPIO25": [
+    "gpio",
+    "imu_sda",
+    "i2c_sda",
+    "dac",
+    "adc",
+    "adc2"
+   ],
+   "GPIO26": [
+    "gpio",
+    "grove_sda",
+    "i2c_sda",
+    "dac",
+    "adc",
+    "adc2"
+   ],
+   "GPIO27": [
+    "gpio",
+    "builtin_led",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO32": [
+    "gpio",
+    "grove_scl",
+    "i2c_scl",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO33": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm",
+    "i2s_lrclk"
+   ],
+   "GPIO39": [
+    "gpio",
+    "button",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ]
+  },
+  "id": "m5stack-atom-matrix",
+  "image": "https://static-cdn.m5stack.com/resource/docs/products/core/ATOM%20Matrix/img-bc9c8013-4f56-43ff-9dc5-0f6b8558790c.webp",
+  "kicad": {
+   "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x13_P2.54mm_Vertical",
+   "pin_map": {
+    "3V3": "1",
+    "5V": "8",
+    "GND": "9",
+    "GPIO19": "3",
+    "GPIO21": "6",
+    "GPIO22": "2",
+    "GPIO23": "4",
+    "GPIO25": "7",
+    "GPIO26": "12",
+    "GPIO32": "13",
+    "GPIO33": "5"
+   },
+   "symbol": "Conn_01x13",
+   "symbol_lib": "Connector_Generic",
+   "value": "M5Stack Atom Matrix"
+  },
+  "mcu": "esp32",
+  "name": "M5Stack Atom Matrix",
+  "onboard_peripherals": {
+   "button": {
+    "inverted": true,
+    "pin": "GPIO39"
+   },
+   "imu_mpu6886": {
+    "address": "0x68",
+    "scl": "GPIO21",
+    "sda": "GPIO25"
+   },
+   "ir_tx": {
+    "pin": "GPIO12"
+   },
+   "led_matrix_sk6812": {
+    "count": 25,
+    "pin": "GPIO27"
+   }
+  },
+  "platformio_board": "m5stack-atom",
+  "rails": [
+   {
+    "name": "5V",
+    "source": "usb",
+    "voltage": 5.0
+   },
+   {
+    "name": "3V3",
+    "source": "onboard_regulator",
+    "voltage": 3.3
+   },
+   {
+    "name": "GND",
+    "voltage": 0.0
+   }
+  ]
+ },
+ "m5stack-atoms3": {
+  "chip_variant": "esp32s3",
+  "default_buses": {
+   "i2c": {
+    "scl": "GPIO2",
+    "sda": "GPIO1"
+   },
+   "spi": {
+    "clk": "GPIO17",
+    "miso": "GPIO13",
+    "mosi": "GPIO21"
+   }
+  },
+  "flash_size_mb": 8,
+  "framework": "arduino",
+  "gpio_capabilities": {
+   "GPIO0": [
+    "gpio",
+    "strap",
+    "boot_high"
+   ],
+   "GPIO1": [
+    "gpio",
+    "adc",
+    "adc1",
+    "i2c_sda",
+    "grove_sda",
+    "pwm"
+   ],
+   "GPIO13": [
+    "gpio",
+    "spi_miso",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO15": [
+    "gpio",
+    "display_cs",
+    "adc",
+    "adc2"
+   ],
+   "GPIO16": [
+    "gpio",
+    "display_backlight",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO17": [
+    "gpio",
+    "spi_clk",
+    "adc",
+    "adc2"
+   ],
+   "GPIO19": [
+    "gpio",
+    "usb"
+   ],
+   "GPIO2": [
+    "gpio",
+    "adc",
+    "adc1",
+    "i2c_scl",
+    "grove_scl",
+    "pwm"
+   ],
+   "GPIO20": [
+    "gpio",
+    "usb"
+   ],
+   "GPIO21": [
+    "gpio",
+    "spi_mosi"
+   ],
+   "GPIO33": [
+    "gpio",
+    "display_dc"
+   ],
+   "GPIO34": [
+    "gpio",
+    "display_reset"
+   ],
+   "GPIO38": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO39": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO41": [
+    "gpio",
+    "button"
+   ],
+   "GPIO43": [
+    "gpio",
+    "uart_tx",
+    "serial_tx"
+   ],
+   "GPIO44": [
+    "gpio",
+    "uart_rx",
+    "serial_rx"
+   ],
+   "GPIO5": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO6": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO7": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO8": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ]
+  },
+  "id": "m5stack-atoms3",
+  "image": "https://static-cdn.m5stack.com/resource/docs/products/core/AtomS3/img-abe8d8b0-3d8c-4f42-a84a-093bfed0aa38.png",
+  "kicad": {
+   "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x13_P2.54mm_Vertical",
+   "pin_map": {
+    "3V3": "1",
+    "5V": "8",
+    "GND": "9",
+    "GPIO1": "13",
+    "GPIO2": "12",
+    "GPIO38": "7",
+    "GPIO39": "6",
+    "GPIO5": "2",
+    "GPIO6": "3",
+    "GPIO7": "4",
+    "GPIO8": "5"
+   },
+   "symbol": "Conn_01x13",
+   "symbol_lib": "Connector_Generic",
+   "value": "M5Stack AtomS3"
+  },
+  "mcu": "esp32",
+  "name": "M5Stack AtomS3",
+  "onboard_peripherals": {
+   "button": {
+    "inverted": true,
+    "pin": "GPIO41"
+   },
+   "display_st7789": {
+    "backlight": "GPIO16",
+    "cs": "GPIO15",
+    "dc": "GPIO33",
+    "height": 128,
+    "offset_height": 1,
+    "offset_width": 2,
+    "reset": "GPIO34",
+    "width": 128
+   },
+   "imu_mpu6886": {
+    "address": "0x68"
+   }
+  },
+  "platformio_board": "m5stack-atoms3",
+  "rails": [
+   {
+    "name": "5V",
+    "source": "usb",
+    "voltage": 5.0
+   },
+   {
+    "name": "3V3",
+    "source": "onboard_regulator",
+    "voltage": 3.3
+   },
+   {
+    "name": "GND",
+    "voltage": 0.0
+   }
+  ]
+ },
+ "m5stack-atoms3-lite": {
+  "chip_variant": "esp32s3",
+  "default_buses": {
+   "i2c": {
+    "scl": "GPIO2",
+    "sda": "GPIO1"
+   }
+  },
+  "flash_size_mb": 8,
+  "framework": "arduino",
+  "gpio_capabilities": {
+   "GPIO0": [
+    "gpio",
+    "strap",
+    "boot_high"
+   ],
+   "GPIO1": [
+    "gpio",
+    "adc",
+    "adc1",
+    "i2c_sda",
+    "grove_sda",
+    "pwm"
+   ],
+   "GPIO19": [
+    "gpio",
+    "usb"
+   ],
+   "GPIO2": [
+    "gpio",
+    "adc",
+    "adc1",
+    "i2c_scl",
+    "grove_scl",
+    "pwm"
+   ],
+   "GPIO20": [
+    "gpio",
+    "usb"
+   ],
+   "GPIO35": [
+    "gpio",
+    "builtin_led"
+   ],
+   "GPIO38": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO39": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO4": [
+    "gpio",
+    "ir_tx",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO41": [
+    "gpio",
+    "button"
+   ],
+   "GPIO43": [
+    "gpio",
+    "uart_tx",
+    "serial_tx"
+   ],
+   "GPIO44": [
+    "gpio",
+    "uart_rx",
+    "serial_rx"
+   ],
+   "GPIO5": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO6": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO7": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO8": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ]
+  },
+  "id": "m5stack-atoms3-lite",
+  "image": "https://static-cdn.m5stack.com/resource/docs/products/core/AtomS3%20Lite/img-dc6432b6-fd9b-4066-9a4d-49786503d1a3.webp",
+  "kicad": {
+   "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x13_P2.54mm_Vertical",
+   "pin_map": {
+    "3V3": "1",
+    "5V": "8",
+    "GND": "9",
+    "GPIO1": "13",
+    "GPIO2": "12",
+    "GPIO38": "7",
+    "GPIO39": "6",
+    "GPIO5": "2",
+    "GPIO6": "3",
+    "GPIO7": "4",
+    "GPIO8": "5"
+   },
+   "symbol": "Conn_01x13",
+   "symbol_lib": "Connector_Generic",
+   "value": "M5Stack AtomS3 Lite"
+  },
+  "mcu": "esp32",
+  "name": "M5Stack AtomS3 Lite",
+  "onboard_peripherals": {
+   "button": {
+    "inverted": true,
+    "pin": "GPIO41"
+   },
+   "ir_tx": {
+    "pin": "GPIO4"
+   },
+   "led_ws2812": {
+    "pin": "GPIO35"
+   }
+  },
+  "platformio_board": "esp32-s3-devkitc-1",
+  "rails": [
+   {
+    "name": "5V",
+    "source": "usb",
+    "voltage": 5.0
+   },
+   {
+    "name": "3V3",
+    "source": "onboard_regulator",
+    "voltage": 3.3
+   },
+   {
+    "name": "GND",
+    "voltage": 0.0
+   }
+  ]
+ },
+ "m5stack-atomu": {
+  "chip_variant": "esp32",
+  "default_buses": {
+   "i2c": {
+    "scl": "GPIO32",
+    "sda": "GPIO26"
+   }
+  },
+  "flash_size_mb": 4,
+  "framework": "arduino",
+  "gpio_capabilities": {
+   "GPIO12": [
+    "gpio",
+    "strap",
+    "ir_tx",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO19": [
+    "gpio",
+    "pdm_data"
+   ],
+   "GPIO21": [
+    "gpio"
+   ],
+   "GPIO22": [
+    "gpio"
+   ],
+   "GPIO25": [
+    "gpio",
+    "dac",
+    "adc",
+    "adc2"
+   ],
+   "GPIO26": [
+    "gpio",
+    "grove_sda",
+    "i2c_sda",
+    "dac",
+    "adc",
+    "adc2"
+   ],
+   "GPIO27": [
+    "gpio",
+    "builtin_led",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO32": [
+    "gpio",
+    "grove_scl",
+    "i2c_scl",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO33": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO39": [
+    "gpio",
+    "button",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO5": [
+    "gpio",
+    "pdm_clk",
+    "pwm"
+   ]
+  },
+  "id": "m5stack-atomu",
+  "image": "https://static-cdn.m5stack.com/resource/docs/products/core/ATOM%20U/img-70ca8b36-bd91-4760-af0b-ae247bbb30b7.webp",
+  "kicad": {
+   "footprint": "Connector_PinHeader_2.54mm:PinHeader_1x10_P2.54mm_Vertical",
+   "pin_map": {
+    "5V": "2",
+    "GND": "1",
+    "GPIO21": "6",
+    "GPIO22": "5",
+    "GPIO25": "3",
+    "GPIO26": "9",
+    "GPIO32": "10",
+    "GPIO33": "4"
+   },
+   "symbol": "Conn_01x10",
+   "symbol_lib": "Connector_Generic",
+   "value": "M5Stack AtomU"
+  },
+  "mcu": "esp32",
+  "name": "M5Stack AtomU",
+  "onboard_peripherals": {
+   "button": {
+    "inverted": true,
+    "pin": "GPIO39"
+   },
+   "ir_tx": {
+    "pin": "GPIO12"
+   },
+   "led_sk6812": {
+    "pin": "GPIO27"
+   },
+   "pdm_mic": {
+    "clk": "GPIO5",
+    "data": "GPIO19"
+   }
+  },
+  "platformio_board": "m5stack-atom",
+  "rails": [
+   {
+    "name": "5V",
+    "source": "usb",
+    "voltage": 5.0
+   },
+   {
+    "name": "3V3",
+    "source": "onboard_regulator",
+    "voltage": 3.3
+   },
+   {
+    "name": "GND",
+    "voltage": 0.0
+   }
+  ]
+ },
+ "nodemcu-32s": {
+  "chip_variant": "esp32",
+  "default_buses": {
+   "i2c": {
+    "scl": "GPIO22",
+    "sda": "GPIO21"
+   },
+   "spi": {
+    "clk": "GPIO18",
+    "miso": "GPIO19",
+    "mosi": "GPIO23"
+   }
+  },
+  "enclosure": {
+   "component_height_max_mm": 13.0,
+   "mount_holes": [
+    {
+     "hole_diameter_mm": 3.2,
+     "x_mm": 3.0,
+     "y_mm": 14.15
+    },
+    {
+     "hole_diameter_mm": 3.2,
+     "x_mm": 45.6,
+     "y_mm": 14.15
+    }
+   ],
+   "pcb": {
+    "length_mm": 48.6,
+    "thickness_mm": 1.6,
+    "width_mm": 28.3
+   },
+   "ports": [
+    {
+     "edge": "short_a",
+     "height_above_pcb_mm": 1.5,
+     "height_mm": 3.0,
+     "kind": "usb_micro",
+     "offset_mm": 10.15,
+     "width_mm": 8.0
+    }
+   ]
+  },
+  "flash_size_mb": 4,
+  "framework": "arduino",
+  "gpio_capabilities": {
+   "GPIO0": [
+    "boot",
+    "strap",
+    "boot_high",
+    "adc",
+    "adc2"
+   ],
+   "GPIO1": [
+    "gpio",
+    "uart_tx",
+    "serial_tx"
+   ],
+   "GPIO12": [
+    "gpio",
+    "adc",
+    "adc2",
+    "strap",
+    "boot_low"
+   ],
+   "GPIO13": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO14": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO15": [
+    "gpio",
+    "adc",
+    "adc2",
+    "strap",
+    "boot_high"
+   ],
+   "GPIO16": [
+    "gpio"
+   ],
+   "GPIO17": [
+    "gpio"
+   ],
+   "GPIO18": [
+    "gpio",
+    "spi_clk"
+   ],
+   "GPIO19": [
+    "gpio",
+    "spi_miso"
+   ],
+   "GPIO2": [
+    "strap",
+    "gpio",
+    "boot_low",
+    "adc",
+    "adc2"
+   ],
+   "GPIO21": [
+    "gpio",
+    "i2c_sda"
+   ],
+   "GPIO22": [
+    "gpio",
+    "i2c_scl"
+   ],
+   "GPIO23": [
+    "gpio",
+    "spi_mosi"
+   ],
+   "GPIO25": [
+    "gpio",
+    "dac",
+    "adc",
+    "adc2",
+    "i2s_bclk"
+   ],
+   "GPIO26": [
+    "gpio",
+    "dac",
+    "adc",
+    "adc2"
+   ],
+   "GPIO27": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO3": [
+    "gpio",
+    "uart_rx",
+    "serial_rx"
+   ],
+   "GPIO32": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm",
+    "i2s_dout"
+   ],
+   "GPIO33": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm",
+    "i2s_lrclk"
+   ],
+   "GPIO34": [
+    "gpio",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO35": [
+    "gpio",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO36": [
+    "gpio",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO39": [
+    "gpio",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO4": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO5": [
+    "gpio",
+    "strap",
+    "spi_cs",
+    "boot_high"
+   ]
+  },
+  "id": "nodemcu-32s",
+  "kicad": {
+   "footprint": "RF_Module:ESP32-WROOM-32",
+   "pin_map": {
+    "3V3": "VDD",
+    "GND": "GND",
+    "GPIO0": "IO0",
+    "GPIO1": "TXD0/IO1",
+    "GPIO12": "IO12",
+    "GPIO13": "IO13",
+    "GPIO14": "IO14",
+    "GPIO15": "IO15",
+    "GPIO16": "IO16",
+    "GPIO17": "IO17",
+    "GPIO18": "IO18",
+    "GPIO19": "IO19",
+    "GPIO2": "IO2",
+    "GPIO21": "IO21",
+    "GPIO22": "IO22",
+    "GPIO23": "IO23",
+    "GPIO25": "IO25",
+    "GPIO26": "IO26",
+    "GPIO27": "IO27",
+    "GPIO3": "RXD0/IO3",
+    "GPIO32": "IO32",
+    "GPIO33": "IO33",
+    "GPIO34": "IO34",
+    "GPIO35": "IO35",
+    "GPIO36": "SENSOR_VP",
+    "GPIO39": "SENSOR_VN",
+    "GPIO4": "IO4",
+    "GPIO5": "IO5"
+   },
+   "symbol": "ESP32-WROOM-32",
+   "symbol_lib": "RF_Module"
+  },
+  "mcu": "esp32",
+  "name": "NodeMCU-32S",
+  "platformio_board": "nodemcu-32s",
+  "rails": [
+   {
+    "name": "5V",
+    "source": "usb",
+    "voltage": 5.0
+   },
+   {
+    "name": "3V3",
+    "source": "onboard_regulator",
+    "voltage": 3.3
+   },
+   {
+    "name": "GND",
+    "voltage": 0.0
+   }
+  ]
+ },
+ "nodemcu-v2": {
+  "chip_variant": "esp8266",
+  "default_buses": {
+   "i2c": {
+    "scl": "D1",
+    "sda": "D2"
+   },
+   "spi": {
+    "clk": "D5",
+    "miso": "D6",
+    "mosi": "D7"
+   }
+  },
+  "enclosure": {
+   "component_height_max_mm": 13.0,
+   "mount_holes": [
+    {
+     "hole_diameter_mm": 3.2,
+     "x_mm": 2.5,
+     "y_mm": 13.0
+    },
+    {
+     "hole_diameter_mm": 3.2,
+     "x_mm": 45.5,
+     "y_mm": 13.0
+    }
+   ],
+   "pcb": {
+    "length_mm": 48.0,
+    "thickness_mm": 1.6,
+    "width_mm": 26.0
+   },
+   "ports": [
+    {
+     "edge": "short_a",
+     "height_above_pcb_mm": 1.5,
+     "height_mm": 3.0,
+     "kind": "usb_micro",
+     "offset_mm": 9.0,
+     "width_mm": 8.0
+    }
+   ]
+  },
+  "flash_size_mb": 4,
+  "framework": "arduino",
+  "gpio_capabilities": {
+   "A0": [
+    "adc",
+    "input_only",
+    "adc_max_1v"
+   ],
+   "D0": [
+    "gpio",
+    "no_pwm",
+    "no_i2c",
+    "no_interrupt",
+    "no_fast_gpio"
+   ],
+   "D1": [
+    "gpio",
+    "i2c_scl"
+   ],
+   "D10": [
+    "gpio",
+    "uart_tx",
+    "serial_tx"
+   ],
+   "D2": [
+    "gpio",
+    "i2c_sda"
+   ],
+   "D3": [
+    "gpio",
+    "strap",
+    "boot_high",
+    "pull_up_external"
+   ],
+   "D4": [
+    "gpio",
+    "strap",
+    "builtin_led",
+    "boot_high",
+    "pull_up_external"
+   ],
+   "D5": [
+    "gpio",
+    "spi_clk",
+    "pwm"
+   ],
+   "D6": [
+    "gpio",
+    "spi_miso",
+    "pwm"
+   ],
+   "D7": [
+    "gpio",
+    "spi_mosi",
+    "pwm"
+   ],
+   "D8": [
+    "gpio",
+    "spi_cs",
+    "strap",
+    "boot_low",
+    "pull_down_external"
+   ],
+   "D9": [
+    "gpio",
+    "uart_rx",
+    "serial_rx"
+   ]
+  },
+  "id": "nodemcu-v2",
+  "kicad": {
+   "footprint": "RF_Module:ESP-12E",
+   "pin_map": {
+    "3V3": "VCC",
+    "A0": "ADC",
+    "D0": "GPIO16",
+    "D1": "GPIO5",
+    "D10": "GPIO1/TXD",
+    "D2": "GPIO4",
+    "D3": "GPIO0",
+    "D4": "GPIO2",
+    "D5": "GPIO14",
+    "D6": "GPIO12",
+    "D7": "GPIO13",
+    "D8": "GPIO15",
+    "D9": "GPIO3/RXD",
+    "GND": "GND"
+   },
+   "symbol": "ESP-12E",
+   "symbol_lib": "RF_Module"
+  },
+  "mcu": "esp8266",
+  "name": "NodeMCU v2 (ESP-12E/F)",
+  "platformio_board": "nodemcuv2",
+  "rails": [
+   {
+    "name": "5V",
+    "source": "usb",
+    "voltage": 5.0
+   },
+   {
+    "name": "3V3",
+    "source": "onboard_regulator",
+    "voltage": 3.3
+   },
+   {
+    "name": "GND",
+    "voltage": 0.0
+   }
+  ]
+ },
+ "seeed-xiao-esp32c3": {
+  "chip_variant": "esp32c3",
+  "current_ma_peak": 350,
+  "current_ma_typical": 75,
+  "default_buses": {
+   "i2c": {
+    "scl": "GPIO7",
+    "sda": "GPIO6"
+   },
+   "spi": {
+    "clk": "GPIO8",
+    "miso": "GPIO9",
+    "mosi": "GPIO10"
+   }
+  },
+  "enclosure": {
+   "component_height_max_mm": 4.0,
+   "mount_holes": [],
+   "pcb": {
+    "length_mm": 21.0,
+    "thickness_mm": 1.2,
+    "width_mm": 17.8
+   },
+   "ports": [
+    {
+     "edge": "short_a",
+     "height_above_pcb_mm": 1.3,
+     "height_mm": 3.4,
+     "kind": "usb_c",
+     "offset_mm": 4.4,
+     "width_mm": 9.0
+    }
+   ]
+  },
+  "flash_size_mb": 4,
+  "framework": "arduino",
+  "gpio_capabilities": {
+   "GPIO10": [
+    "gpio",
+    "spi_mosi",
+    "pwm"
+   ],
+   "GPIO2": [
+    "gpio",
+    "adc",
+    "adc1",
+    "strap",
+    "boot_high"
+   ],
+   "GPIO20": [
+    "gpio",
+    "uart_rx",
+    "serial_rx"
+   ],
+   "GPIO21": [
+    "gpio",
+    "uart_tx",
+    "serial_tx"
+   ],
+   "GPIO3": [
+    "gpio",
+    "adc",
+    "adc1"
+   ],
+   "GPIO4": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO5": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO6": [
+    "gpio",
+    "i2c_sda",
+    "pwm"
+   ],
+   "GPIO7": [
+    "gpio",
+    "i2c_scl",
+    "pwm"
+   ],
+   "GPIO8": [
+    "gpio",
+    "strap",
+    "boot_high",
+    "spi_clk"
+   ],
+   "GPIO9": [
+    "gpio",
+    "strap",
+    "boot_high",
+    "button",
+    "spi_miso"
+   ]
+  },
+  "id": "seeed-xiao-esp32c3",
+  "kicad": {
+   "footprint": "Connector_PinHeader_2.54mm:PinHeader_2x07_P2.54mm_Vertical",
+   "pin_map": {
+    "3V3": "6",
+    "5V": "2",
+    "GND": "4",
+    "GPIO10": "8",
+    "GPIO2": "1",
+    "GPIO20": "14",
+    "GPIO21": "13",
+    "GPIO3": "3",
+    "GPIO4": "5",
+    "GPIO5": "7",
+    "GPIO6": "9",
+    "GPIO7": "11",
+    "GPIO8": "12",
+    "GPIO9": "10"
+   },
+   "symbol": "Conn_02x07_Odd_Even",
+   "symbol_lib": "Connector_Generic",
+   "value": "Seeed XIAO ESP32C3"
+  },
+  "mcu": "esp32",
+  "name": "Seeed Studio XIAO ESP32C3",
+  "onboard_peripherals": {
+   "boot_button": {
+    "inverted": true,
+    "pin": "GPIO9"
+   }
+  },
+  "platformio_board": "seeed_xiao_esp32c3",
+  "rails": [
+   {
+    "name": "5V",
+    "source": "usb",
+    "voltage": 5.0
+   },
+   {
+    "name": "3V3",
+    "source": "onboard_regulator",
+    "voltage": 3.3
+   },
+   {
+    "name": "GND",
+    "voltage": 0.0
+   }
+  ]
+ },
+ "ttgo-lora32-v1": {
+  "chip_variant": "esp32",
+  "default_buses": {
+   "i2c": {
+    "scl": "GPIO22",
+    "sda": "GPIO21"
+   },
+   "spi": {
+    "clk": "GPIO5",
+    "miso": "GPIO19",
+    "mosi": "GPIO27"
+   }
+  },
+  "enclosure": {
+   "component_height_max_mm": 9.0,
+   "mount_holes": [
+    {
+     "hole_diameter_mm": 3.2,
+     "x_mm": 2.5,
+     "y_mm": 2.5
+    },
+    {
+     "hole_diameter_mm": 3.2,
+     "x_mm": 2.5,
+     "y_mm": 23.0
+    },
+    {
+     "hole_diameter_mm": 3.2,
+     "x_mm": 48.0,
+     "y_mm": 2.5
+    },
+    {
+     "hole_diameter_mm": 3.2,
+     "x_mm": 48.0,
+     "y_mm": 23.0
+    }
+   ],
+   "pcb": {
+    "length_mm": 50.5,
+    "thickness_mm": 1.6,
+    "width_mm": 25.5
+   },
+   "ports": [
+    {
+     "edge": "short_a",
+     "height_above_pcb_mm": 1.5,
+     "height_mm": 3.0,
+     "kind": "usb_micro",
+     "offset_mm": 8.75,
+     "width_mm": 8.0
+    },
+    {
+     "edge": "short_b",
+     "height_above_pcb_mm": 0.0,
+     "height_mm": 7.0,
+     "kind": "sma",
+     "offset_mm": 12.75,
+     "width_mm": 7.0
+    }
+   ]
+  },
+  "flash_size_mb": 4,
+  "framework": "arduino",
+  "gpio_capabilities": {
+   "GPIO0": [
+    "boot",
+    "strap",
+    "boot_high",
+    "adc",
+    "adc2"
+   ],
+   "GPIO1": [
+    "gpio",
+    "uart_tx",
+    "serial_tx"
+   ],
+   "GPIO12": [
+    "gpio",
+    "adc",
+    "adc2",
+    "strap",
+    "boot_low"
+   ],
+   "GPIO13": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO14": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO15": [
+    "gpio",
+    "adc",
+    "adc2",
+    "strap",
+    "boot_high"
+   ],
+   "GPIO16": [
+    "gpio",
+    "oled_reset"
+   ],
+   "GPIO17": [
+    "gpio"
+   ],
+   "GPIO18": [
+    "gpio",
+    "lora_cs"
+   ],
+   "GPIO19": [
+    "gpio",
+    "spi_miso"
+   ],
+   "GPIO2": [
+    "strap",
+    "gpio",
+    "boot_low",
+    "adc",
+    "adc2"
+   ],
+   "GPIO21": [
+    "gpio",
+    "i2c_sda"
+   ],
+   "GPIO22": [
+    "gpio",
+    "i2c_scl"
+   ],
+   "GPIO23": [
+    "gpio",
+    "lora_rst"
+   ],
+   "GPIO25": [
+    "gpio",
+    "led",
+    "adc",
+    "adc2"
+   ],
+   "GPIO26": [
+    "gpio",
+    "lora_dio0",
+    "adc",
+    "adc2"
+   ],
+   "GPIO27": [
+    "gpio",
+    "spi_mosi",
+    "adc",
+    "adc2"
+   ],
+   "GPIO3": [
+    "gpio",
+    "uart_rx",
+    "serial_rx"
+   ],
+   "GPIO34": [
+    "gpio",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO35": [
+    "gpio",
+    "adc",
+    "adc1",
+    "input_only",
+    "battery_sense",
+    "no_pull_internal"
+   ],
+   "GPIO36": [
+    "gpio",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO39": [
+    "gpio",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO4": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO5": [
+    "gpio",
+    "spi_clk",
+    "boot_high"
+   ]
+  },
+  "id": "ttgo-lora32-v1",
+  "kicad": {
+   "footprint": "Connector_PinHeader_2.54mm:PinHeader_2x18_P2.54mm_Vertical",
+   "pin_map": {
+    "3V3": "31",
+    "5V": "33",
+    "GND": "29",
+    "GPIO0": "21",
+    "GPIO1": "25",
+    "GPIO12": "6",
+    "GPIO13": "4",
+    "GPIO14": "8",
+    "GPIO15": "9",
+    "GPIO16": "1",
+    "GPIO17": "3",
+    "GPIO18": "13",
+    "GPIO19": "17",
+    "GPIO2": "7",
+    "GPIO21": "2",
+    "GPIO22": "19",
+    "GPIO23": "15",
+    "GPIO25": "14",
+    "GPIO26": "12",
+    "GPIO27": "10",
+    "GPIO3": "27",
+    "GPIO32": "18",
+    "GPIO33": "16",
+    "GPIO34": "22",
+    "GPIO35": "20",
+    "GPIO36": "30",
+    "GPIO37": "28",
+    "GPIO38": "26",
+    "GPIO39": "24",
+    "GPIO4": "5",
+    "GPIO5": "11"
+   },
+   "symbol": "Conn_02x18_Odd_Even",
+   "symbol_lib": "Connector_Generic",
+   "value": "TTGO_LoRa32_V1"
+  },
+  "mcu": "esp32",
+  "name": "TTGO LoRa32 V1 (T3)",
+  "onboard_peripherals": {
+   "battery_adc": {
+    "divider": 2.0,
+    "pin": "GPIO35"
+   },
+   "led": {
+    "pin": "GPIO25"
+   },
+   "lora_sx1276": {
+    "cs": "GPIO18",
+    "dio0": "GPIO26",
+    "rst": "GPIO23"
+   },
+   "oled_ssd1306": {
+    "address": "0x3C"
+   }
+  },
+  "platformio_board": "ttgo-lora32-v1",
+  "radio": {
+   "chip": "sx1276",
+   "pins": {
+    "cs": "GPIO18",
+    "dio0": "GPIO26",
+    "rst": "GPIO23"
+   },
+   "radiolib_class": "SX1276"
+  },
+  "rails": [
+   {
+    "name": "5V",
+    "source": "usb",
+    "voltage": 5.0
+   },
+   {
+    "name": "3V3",
+    "source": "onboard_regulator",
+    "voltage": 3.3
+   },
+   {
+    "name": "GND",
+    "voltage": 0.0
+   }
+  ]
+ },
+ "ttgo-lora32-v2": {
+  "chip_variant": "esp32",
+  "default_buses": {
+   "i2c": {
+    "scl": "GPIO22",
+    "sda": "GPIO21"
+   },
+   "spi": {
+    "clk": "GPIO5",
+    "miso": "GPIO19",
+    "mosi": "GPIO27"
+   }
+  },
+  "enclosure": {
+   "component_height_max_mm": 9.0,
+   "mount_holes": [
+    {
+     "hole_diameter_mm": 3.2,
+     "x_mm": 2.5,
+     "y_mm": 2.5
+    },
+    {
+     "hole_diameter_mm": 3.2,
+     "x_mm": 2.5,
+     "y_mm": 23.0
+    },
+    {
+     "hole_diameter_mm": 3.2,
+     "x_mm": 48.0,
+     "y_mm": 2.5
+    },
+    {
+     "hole_diameter_mm": 3.2,
+     "x_mm": 48.0,
+     "y_mm": 23.0
+    }
+   ],
+   "pcb": {
+    "length_mm": 50.5,
+    "thickness_mm": 1.6,
+    "width_mm": 25.5
+   },
+   "ports": [
+    {
+     "edge": "short_a",
+     "height_above_pcb_mm": 1.5,
+     "height_mm": 3.0,
+     "kind": "usb_micro",
+     "offset_mm": 8.75,
+     "width_mm": 8.0
+    },
+    {
+     "edge": "short_b",
+     "height_above_pcb_mm": 0.0,
+     "height_mm": 7.0,
+     "kind": "sma",
+     "offset_mm": 12.75,
+     "width_mm": 7.0
+    }
+   ]
+  },
+  "flash_size_mb": 4,
+  "framework": "arduino",
+  "gpio_capabilities": {
+   "GPIO0": [
+    "boot",
+    "strap",
+    "boot_high",
+    "adc",
+    "adc2"
+   ],
+   "GPIO1": [
+    "gpio",
+    "uart_tx",
+    "serial_tx"
+   ],
+   "GPIO12": [
+    "gpio",
+    "adc",
+    "adc2",
+    "strap",
+    "boot_low"
+   ],
+   "GPIO13": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO14": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO15": [
+    "gpio",
+    "adc",
+    "adc2",
+    "strap",
+    "boot_high"
+   ],
+   "GPIO16": [
+    "gpio",
+    "oled_reset"
+   ],
+   "GPIO17": [
+    "gpio"
+   ],
+   "GPIO18": [
+    "gpio",
+    "lora_cs"
+   ],
+   "GPIO19": [
+    "gpio",
+    "spi_miso"
+   ],
+   "GPIO2": [
+    "strap",
+    "gpio",
+    "boot_low",
+    "adc",
+    "adc2"
+   ],
+   "GPIO21": [
+    "gpio",
+    "i2c_sda"
+   ],
+   "GPIO22": [
+    "gpio",
+    "i2c_scl"
+   ],
+   "GPIO23": [
+    "gpio",
+    "lora_rst"
+   ],
+   "GPIO25": [
+    "gpio",
+    "led",
+    "adc",
+    "adc2"
+   ],
+   "GPIO26": [
+    "gpio",
+    "lora_dio0",
+    "adc",
+    "adc2"
+   ],
+   "GPIO27": [
+    "gpio",
+    "spi_mosi",
+    "adc",
+    "adc2"
+   ],
+   "GPIO3": [
+    "gpio",
+    "uart_rx",
+    "serial_rx"
+   ],
+   "GPIO32": [
+    "gpio",
+    "lora_dio2",
+    "adc",
+    "adc1"
+   ],
+   "GPIO33": [
+    "gpio",
+    "lora_dio1",
+    "adc",
+    "adc1"
+   ],
+   "GPIO34": [
+    "gpio",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO35": [
+    "gpio",
+    "adc",
+    "adc1",
+    "input_only",
+    "battery_sense",
+    "no_pull_internal"
+   ],
+   "GPIO36": [
+    "gpio",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO39": [
+    "gpio",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO4": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO5": [
+    "gpio",
+    "spi_clk",
+    "boot_high"
+   ]
+  },
+  "id": "ttgo-lora32-v2",
+  "kicad": {
+   "footprint": "Connector_PinHeader_2.54mm:PinHeader_2x13_P2.54mm_Vertical",
+   "pin_map": {
+    "3V3": "22",
+    "5V": "26",
+    "GND": "20",
+    "GPIO0": "21",
+    "GPIO1": "4",
+    "GPIO12": "13",
+    "GPIO13": "15",
+    "GPIO14": "11",
+    "GPIO15": "17",
+    "GPIO19": "12",
+    "GPIO2": "19",
+    "GPIO21": "2",
+    "GPIO22": "8",
+    "GPIO23": "10",
+    "GPIO25": "25",
+    "GPIO26": "18",
+    "GPIO3": "6",
+    "GPIO34": "7",
+    "GPIO35": "9",
+    "GPIO36": "1",
+    "GPIO39": "3",
+    "GPIO4": "23"
+   },
+   "symbol": "Conn_02x13_Odd_Even",
+   "symbol_lib": "Connector_Generic",
+   "value": "TTGO_LoRa32_V2"
+  },
+  "mcu": "esp32",
+  "name": "TTGO LoRa32 V2.1 (T3 v1.6.1)",
+  "onboard_peripherals": {
+   "battery_adc": {
+    "divider": 2.0,
+    "pin": "GPIO35"
+   },
+   "led": {
+    "pin": "GPIO25"
+   },
+   "lora_sx1276": {
+    "cs": "GPIO18",
+    "dio0": "GPIO26",
+    "dio1": "GPIO33",
+    "dio2": "GPIO32",
+    "rst": "GPIO23"
+   },
+   "oled_ssd1306": {
+    "address": "0x3C"
+   }
+  },
+  "platformio_board": "ttgo-lora32-v21",
+  "radio": {
+   "chip": "sx1276",
+   "pins": {
+    "cs": "GPIO18",
+    "dio0": "GPIO26",
+    "rst": "GPIO23"
+   },
+   "radiolib_class": "SX1276"
+  },
+  "rails": [
+   {
+    "name": "5V",
+    "source": "usb",
+    "voltage": 5.0
+   },
+   {
+    "name": "3V3",
+    "source": "onboard_regulator",
+    "voltage": 3.3
+   },
+   {
+    "name": "GND",
+    "voltage": 0.0
+   }
+  ]
+ },
+ "ttgo-t-beam": {
+  "chip_variant": "esp32",
+  "default_buses": {
+   "i2c": {
+    "scl": "GPIO22",
+    "sda": "GPIO21"
+   },
+   "spi": {
+    "clk": "GPIO5",
+    "miso": "GPIO19",
+    "mosi": "GPIO27"
+   }
+  },
+  "flash_size_mb": 4,
+  "framework": "arduino",
+  "gpio_capabilities": {
+   "GPIO0": [
+    "boot",
+    "strap",
+    "boot_high",
+    "adc",
+    "adc2"
+   ],
+   "GPIO1": [
+    "gpio",
+    "uart_tx",
+    "serial_tx"
+   ],
+   "GPIO12": [
+    "gpio",
+    "gps_rx",
+    "strap",
+    "boot_low"
+   ],
+   "GPIO13": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO14": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO15": [
+    "gpio",
+    "adc",
+    "adc2",
+    "strap",
+    "boot_high"
+   ],
+   "GPIO18": [
+    "gpio",
+    "lora_cs"
+   ],
+   "GPIO19": [
+    "gpio",
+    "spi_miso"
+   ],
+   "GPIO2": [
+    "strap",
+    "gpio",
+    "boot_low",
+    "adc",
+    "adc2"
+   ],
+   "GPIO21": [
+    "gpio",
+    "i2c_sda"
+   ],
+   "GPIO22": [
+    "gpio",
+    "i2c_scl"
+   ],
+   "GPIO23": [
+    "gpio",
+    "lora_rst"
+   ],
+   "GPIO25": [
+    "gpio",
+    "dac",
+    "adc",
+    "adc2"
+   ],
+   "GPIO26": [
+    "gpio",
+    "lora_dio0",
+    "adc",
+    "adc2"
+   ],
+   "GPIO27": [
+    "gpio",
+    "spi_mosi",
+    "adc",
+    "adc2"
+   ],
+   "GPIO3": [
+    "gpio",
+    "uart_rx",
+    "serial_rx"
+   ],
+   "GPIO32": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO33": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO34": [
+    "gpio",
+    "gps_tx",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO35": [
+    "gpio",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal",
+    "battery_sense"
+   ],
+   "GPIO36": [
+    "gpio",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO38": [
+    "gpio",
+    "button",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO39": [
+    "gpio",
+    "adc",
+    "adc1",
+    "input_only",
+    "no_pull_internal"
+   ],
+   "GPIO4": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO5": [
+    "gpio",
+    "spi_clk",
+    "boot_high"
+   ]
+  },
+  "id": "ttgo-t-beam",
+  "kicad": {
+   "footprint": "Connector_PinHeader_2.54mm:PinHeader_2x13_P2.54mm_Vertical",
+   "pin_map": {
+    "3V3": "14",
+    "5V": "25",
+    "GND": "12",
+    "GPIO0": "10",
+    "GPIO1": "2",
+    "GPIO13": "19",
+    "GPIO14": "17",
+    "GPIO15": "7",
+    "GPIO2": "21",
+    "GPIO21": "20",
+    "GPIO22": "18",
+    "GPIO23": "6",
+    "GPIO25": "15",
+    "GPIO3": "4",
+    "GPIO32": "11",
+    "GPIO33": "13",
+    "GPIO35": "9",
+    "GPIO36": "1",
+    "GPIO39": "3",
+    "GPIO4": "8"
+   },
+   "symbol": "Conn_02x13_Odd_Even",
+   "symbol_lib": "Connector_Generic",
+   "value": "TTGO T-Beam"
+  },
+  "mcu": "esp32",
+  "name": "LilyGO TTGO T-Beam (v1.x)",
+  "onboard_peripherals": {
+   "axp192": {
+    "address": "0x34"
+   },
+   "button": {
+    "inverted": true,
+    "pin": "GPIO38"
+   },
+   "gps_neo6m": {
+    "baud": 9600,
+    "rx": "GPIO12",
+    "tx": "GPIO34"
+   },
+   "lora_sx1276": {
+    "cs": "GPIO18",
+    "dio0": "GPIO26",
+    "rst": "GPIO23"
+   }
+  },
+  "platformio_board": "ttgo-t-beam",
+  "radio": {
+   "chip": "sx1276",
+   "pins": {
+    "cs": "GPIO18",
+    "dio0": "GPIO26",
+    "rst": "GPIO23"
+   },
+   "radiolib_class": "SX1276"
+  },
+  "rails": [
+   {
+    "name": "5V",
+    "source": "usb",
+    "voltage": 5.0
+   },
+   {
+    "name": "3V3",
+    "source": "axp192",
+    "voltage": 3.3
+   },
+   {
+    "name": "GND",
+    "voltage": 0.0
+   }
+  ]
+ },
+ "wemos-d1-mini": {
+  "chip_variant": "esp8266",
+  "default_buses": {
+   "i2c": {
+    "scl": "D1",
+    "sda": "D2"
+   },
+   "spi": {
+    "clk": "D5",
+    "miso": "D6",
+    "mosi": "D7"
+   }
+  },
+  "enclosure": {
+   "component_height_max_mm": 7.0,
+   "mount_holes": [
+    {
+     "hole_diameter_mm": 3.2,
+     "x_mm": 2.0,
+     "y_mm": 2.0
+    },
+    {
+     "hole_diameter_mm": 3.2,
+     "x_mm": 2.0,
+     "y_mm": 23.6
+    },
+    {
+     "hole_diameter_mm": 3.2,
+     "x_mm": 32.2,
+     "y_mm": 2.0
+    },
+    {
+     "hole_diameter_mm": 3.2,
+     "x_mm": 32.2,
+     "y_mm": 23.6
+    }
+   ],
+   "pcb": {
+    "length_mm": 34.2,
+    "thickness_mm": 1.0,
+    "width_mm": 25.6
+   },
+   "ports": [
+    {
+     "edge": "short_a",
+     "height_above_pcb_mm": 1.5,
+     "height_mm": 3.0,
+     "kind": "usb_micro",
+     "offset_mm": 8.8,
+     "width_mm": 8.0
+    }
+   ]
+  },
+  "flash_size_mb": 4,
+  "framework": "arduino",
+  "gpio_capabilities": {
+   "A0": [
+    "adc",
+    "input_only",
+    "adc_max_1v"
+   ],
+   "D0": [
+    "gpio",
+    "no_pwm",
+    "no_i2c",
+    "no_interrupt",
+    "no_fast_gpio"
+   ],
+   "D1": [
+    "gpio",
+    "i2c_scl"
+   ],
+   "D2": [
+    "gpio",
+    "i2c_sda"
+   ],
+   "D3": [
+    "gpio",
+    "strap",
+    "boot_high",
+    "pull_up_external"
+   ],
+   "D4": [
+    "gpio",
+    "strap",
+    "builtin_led",
+    "boot_high",
+    "pull_up_external"
+   ],
+   "D5": [
+    "gpio",
+    "spi_clk",
+    "pwm"
+   ],
+   "D6": [
+    "gpio",
+    "spi_miso",
+    "pwm"
+   ],
+   "D7": [
+    "gpio",
+    "spi_mosi",
+    "pwm"
+   ],
+   "D8": [
+    "gpio",
+    "spi_cs",
+    "strap",
+    "boot_low",
+    "pull_down_external"
+   ],
+   "RX": [
+    "gpio",
+    "uart_rx",
+    "serial_rx"
+   ],
+   "TX": [
+    "gpio",
+    "uart_tx",
+    "serial_tx"
+   ]
+  },
+  "id": "wemos-d1-mini",
+  "kicad": {
+   "footprint": "Module:WEMOS_D1_mini_light",
+   "pin_map": {
+    "3V3": "3V3",
+    "5V": "5V",
+    "A0": "A0",
+    "D0": "D0",
+    "D1": "SCL/D1",
+    "D2": "SDA/D2",
+    "D3": "D3",
+    "D4": "D4",
+    "D5": "SCK/D5",
+    "D6": "MISO/D6",
+    "D7": "MOSI/D7",
+    "D8": "CS/D8",
+    "GND": "GND",
+    "RX": "RX",
+    "TX": "TX"
+   },
+   "symbol": "WeMos_D1_mini",
+   "symbol_lib": "MCU_Module"
+  },
+  "mcu": "esp8266",
+  "name": "WeMos D1 Mini",
+  "platformio_board": "d1_mini",
+  "rails": [
+   {
+    "name": "5V",
+    "source": "usb",
+    "voltage": 5.0
+   },
+   {
+    "name": "3V3",
+    "source": "onboard_regulator",
+    "voltage": 3.3
+   },
+   {
+    "name": "GND",
+    "voltage": 0.0
+   }
+  ]
+ },
+ "yd-esp32-23": {
+  "chip_variant": "esp32s3",
+  "default_buses": {
+   "i2c": {
+    "scl": "GPIO9",
+    "sda": "GPIO8"
+   },
+   "spi": {
+    "clk": "GPIO12",
+    "miso": "GPIO13",
+    "mosi": "GPIO11"
+   }
+  },
+  "enclosure": {
+   "component_height_max_mm": 3.5,
+   "mount_holes": [],
+   "pcb": {
+    "length_mm": 64.0,
+    "thickness_mm": 1.6,
+    "width_mm": 28.0
+   },
+   "ports": [
+    {
+     "edge": "short_a",
+     "height_above_pcb_mm": 1.65,
+     "height_mm": 3.3,
+     "kind": "usb_c",
+     "offset_mm": 3.1,
+     "width_mm": 9.0
+    },
+    {
+     "edge": "short_a",
+     "height_above_pcb_mm": 1.65,
+     "height_mm": 3.3,
+     "kind": "usb_c",
+     "offset_mm": 15.9,
+     "width_mm": 9.0
+    }
+   ],
+   "underside_height_mm": 17.0
+  },
+  "flash_size_mb": 8,
+  "framework": "arduino",
+  "gpio_capabilities": {
+   "GPIO0": [
+    "gpio",
+    "strap",
+    "boot_high",
+    "button"
+   ],
+   "GPIO1": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO10": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO11": [
+    "gpio",
+    "adc",
+    "adc2",
+    "spi_mosi",
+    "pwm"
+   ],
+   "GPIO12": [
+    "gpio",
+    "adc",
+    "adc2",
+    "spi_clk",
+    "pwm"
+   ],
+   "GPIO13": [
+    "gpio",
+    "adc",
+    "adc2",
+    "spi_miso",
+    "pwm"
+   ],
+   "GPIO14": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO15": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO16": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO17": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO18": [
+    "gpio",
+    "adc",
+    "adc2",
+    "pwm"
+   ],
+   "GPIO19": [
+    "gpio",
+    "usb",
+    "pwm"
+   ],
+   "GPIO2": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO20": [
+    "gpio",
+    "usb",
+    "pwm"
+   ],
+   "GPIO21": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO3": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO33": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO34": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO38": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO39": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO4": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO40": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO41": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO42": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO43": [
+    "gpio",
+    "uart_tx",
+    "serial_tx"
+   ],
+   "GPIO44": [
+    "gpio",
+    "uart_rx",
+    "serial_rx"
+   ],
+   "GPIO45": [
+    "gpio",
+    "strap",
+    "boot_low",
+    "pwm"
+   ],
+   "GPIO46": [
+    "gpio",
+    "strap",
+    "boot_low",
+    "pwm"
+   ],
+   "GPIO47": [
+    "gpio",
+    "pwm"
+   ],
+   "GPIO48": [
+    "gpio",
+    "builtin_led",
+    "pwm"
+   ],
+   "GPIO5": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO6": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO7": [
+    "gpio",
+    "adc",
+    "adc1",
+    "pwm"
+   ],
+   "GPIO8": [
+    "gpio",
+    "adc",
+    "adc1",
+    "i2c_sda",
+    "pwm"
+   ],
+   "GPIO9": [
+    "gpio",
+    "adc",
+    "adc1",
+    "i2c_scl",
+    "pwm"
+   ]
+  },
+  "id": "yd-esp32-23",
+  "kicad": {
+   "footprint": "Connector_PinHeader_2.54mm:PinHeader_2x22_P2.54mm_Vertical",
+   "pin_map": {
+    "3V3": "1",
+    "5V": "41",
+    "GND": "2",
+    "GPIO0": "28",
+    "GPIO1": "8",
+    "GPIO10": "31",
+    "GPIO11": "33",
+    "GPIO12": "35",
+    "GPIO13": "37",
+    "GPIO14": "39",
+    "GPIO15": "15",
+    "GPIO16": "17",
+    "GPIO17": "19",
+    "GPIO18": "21",
+    "GPIO19": "40",
+    "GPIO2": "10",
+    "GPIO20": "38",
+    "GPIO21": "36",
+    "GPIO3": "25",
+    "GPIO38": "20",
+    "GPIO39": "18",
+    "GPIO4": "7",
+    "GPIO40": "16",
+    "GPIO41": "14",
+    "GPIO42": "12",
+    "GPIO43": "4",
+    "GPIO44": "6",
+    "GPIO45": "30",
+    "GPIO46": "27",
+    "GPIO47": "34",
+    "GPIO48": "32",
+    "GPIO5": "9",
+    "GPIO6": "11",
+    "GPIO7": "13",
+    "GPIO8": "23",
+    "GPIO9": "29"
+   },
+   "symbol": "Conn_02x22_Odd_Even",
+   "symbol_lib": "Connector_Generic",
+   "value": "YD-ESP32-23"
+  },
+  "mcu": "esp32",
+  "name": "YD-ESP32-23 (VCC-GND YD-ESP32-S3 N8R8)",
+  "onboard_peripherals": {
+   "boot_button": {
+    "inverted": true,
+    "pin": "GPIO0"
+   },
+   "led_ws2812": {
+    "pin": "GPIO48"
+   }
+  },
+  "platformio_board": "esp32-s3-devkitc-1",
+  "rails": [
+   {
+    "name": "5V",
+    "note": "the 5V header pin is an input as shipped: a diode sits between it and USB power, so a part wired to it gets nothing from USB-C alone. Bridge the IN-OUT solder pads on the back to put USB 5V on the pin, and then never feed external 5V into it while USB is connected.",
+    "source": "usb",
+    "voltage": 5.0
+   },
+   {
+    "name": "3V3",
+    "source": "onboard_regulator",
+    "voltage": 3.3
+   },
+   {
+    "name": "GND",
+    "voltage": 0.0
+   }
+  ]
+ }
+}
