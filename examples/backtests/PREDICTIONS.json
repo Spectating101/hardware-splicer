@@ -1,0 +1,53 @@
+{
+ "schema": "hardware_splicer.prediction_ledger.v1",
+ "captured": "2026-11-27",
+ "rule": "Every quantified prediction HS makes about a design that someone could build or measure. When a measurement arrives, add it under measured and set status; never edit predicted.",
+ "predictions": [
+  {
+   "id": "P-2026-11-27-001",
+   "design": "SO-101 (TheRobotStudio, published URDF)",
+   "quantity": "shoulder_lift load as a share of 7.4 V STS3215 stall, arm held level",
+   "predicted": {
+    "0 g": 0.8,
+    "150 g": 1.36
+   },
+   "how_to_measure": "read STS3215 Present_Load while holding the pose",
+   "status": "open",
+   "backtest": "so101_shoulder_load_20261127.json"
+  },
+  {
+   "id": "P-2026-11-27-002",
+   "design": "HS-ARM-A rev B (projects/hs-arm-a/rev-b)",
+   "quantity": "shoulder load as a share of 12 V STS3215 stall with 150 g, safety factor 1.5",
+   "predicted": 0.66,
+   "how_to_measure": "as above, on a built rev B",
+   "status": "open"
+  },
+  {
+   "id": "P-2026-11-27-003",
+   "design": "Crazyflie 2.1 at 40.85 g, 250 mAh",
+   "quantity": "hover time",
+   "predicted": "4.1 min, now marked an upper bound (thrust_limited_endurance)",
+   "measured": "40-88 s (NanoBench C4 battery drain, 2 runs)",
+   "status": "measured: HS over-stated about 3x; rule added",
+   "backtest": "nanobench_crazyflie_hover_20261127.json"
+  },
+  {
+   "id": "P-2026-11-27-004",
+   "design": "Crazyflie 2.0 stock, 27 g, 240 mAh",
+   "quantity": "hover time, whole pack",
+   "predicted": "within 5% of 7 min",
+   "measured": "7 min (Bitcraze datasheet)",
+   "status": "measured: matches"
+  },
+  {
+   "id": "P-2026-11-27-005",
+   "design": "rocker-bogie with equal arms (OSR-like)",
+   "quantity": "friction needed for the front wheel to climb a step taller than its radius",
+   "predicted": "mu >= 0.447",
+   "how_to_measure": "drive into a wall taller than one wheel radius on surfaces of known friction",
+   "status": "open",
+   "backtest": "osr_rocker_bogie_climb_20261127.json"
+  }
+ ]
+}
