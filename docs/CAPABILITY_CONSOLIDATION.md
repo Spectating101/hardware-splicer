@@ -128,5 +128,8 @@ and PyBullet; not scikit-fem). Board layout needs `HARDWARE_SPLICER_FREEROUTING_
    DRC-clean, and 2 of 5 on one fixed placement in a rerun; the board tool retries up to six times. Copper
    (copper-kicad-mcp, MIT) routed that placement 5 of 5 with 0 DRC errors: Freerouting 2.2.3 leaves 6 connections and its
    guided router closes them. HS calls it as a separate program in KiCad 10's container (`copper_route`, tool
-   `hs_route_copper`; record in `examples/routing_trial/`). Still open: its output is KiCad 10 while HS's board pipeline
-   is KiCad 9, so it is not yet the pipeline's default finisher.
+   `hs_route_copper`; record in `examples/routing_trial/`). The board pipeline now hands the same placement to Copper
+   when every FreeRouting attempt fails and Copper is configured: every net routed, ground poured and stitched on both
+   layers, 0 DRC errors and 0 unconnected on HS-BUS-A. Leaving ground to the pour alone (Copper's documented 2-layer flow)
+   left one fragment unconnected there. Still open: Copper's board is KiCad 10, so fabrication export then needs a
+   KiCad 10 kicad-cli.

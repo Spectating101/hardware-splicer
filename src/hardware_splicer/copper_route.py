@@ -36,6 +36,10 @@ t0 = time.time()
 try:
     r = pcb_tools.pcb_route(project=sys.argv[2], render=False, timeout=900, ignore_nets=json.loads(sys.argv[3]) or None)
     out = {"route": r.data if hasattr(r, "data") else r}
+    pour = sys.argv[4] if len(sys.argv) > 4 else ""
+    if pour:   # Copper's 2-layer flow: the ground net is left to a pour on both layers, stitched
+        p = pcb_tools.pcb_pour(project=sys.argv[2], net=pour, layers=["F.Cu", "B.Cu"], stitch=True, render=False)
+        out["pour"] = p.data if hasattr(p, "data") else p
 except Exception as exc:
     out = {"error": f"{type(exc).__name__}: {exc}"[:800]}
 out["seconds"] = round(time.time() - t0, 1)
@@ -60,7 +64,9 @@ def config() -> dict[str, str]:
     return cfg
 
 
-def route_with_copper(pcb: Path, out_dir: Path, *, ignore_nets: list[str] | None = None, timeout_s: int = 1200) -> dict[str, Any]:
+def route_with_copper(pcb: Path, out_dir: Path, *, ignore_nets: list[str] | None = None, pour_net: str | None = None,
+                      timeout_s: int = 1200) -> dict[str, Any]:
+    """Route ``pcb`` (copied, never touched); with ``pour_net`` that net is also poured, stitched, on both layers."""
     pcb = Path(pcb).resolve()
     if not pcb.is_file() or pcb.suffix != ".kicad_pcb":
         raise CopperRouteError(f"not a KiCad board: {pcb}")
@@ -91,8 +97,11 @@ def route_with_copper(pcb: Path, out_dir: Path, *, ignore_nets: list[str] | None
     up = subprocess.run(base + ["kicad-cli", "pcb", "upgrade", str(project / f"{stem}.kicad_pcb")], capture_output=True, text=True, timeout=300)
     if up.returncode != 0:
         raise CopperRouteError(f"KiCad 10 could not upgrade the board: {(up.stderr or up.stdout).strip()[-300:]}")
+    # Every net is routed, the pour net included, and the pour goes on top: on HS-BUS-A, leaving ground to the pour alone
+    # (Copper's documented 2-layer flow) left one ground fragment unconnected, while routing it first came back clean.
+    ignore = list(ignore_nets or [])
     run = subprocess.run(base + ["python3", str(out_dir / "copper_driver.py"), str(Path(cfg["src"]).resolve()),
-                                 str(project / f"{stem}.kicad_pro"), json.dumps(ignore_nets or [])],
+                                 str(project / f"{stem}.kicad_pro"), json.dumps(ignore), pour_net or ""],
                          capture_output=True, text=True, timeout=timeout_s)
     line = next((ln for ln in run.stdout.splitlines() if ln.startswith("COPPER_RESULT ")), None)
     if line is None:
@@ -102,12 +111,16 @@ def route_with_copper(pcb: Path, out_dir: Path, *, ignore_nets: list[str] | None
         raise CopperRouteError(raw["error"])
     r = raw["route"]
     drc = (r.get("verify") or {}).get("drc") or {}
+    if raw.get("pour"):
+        drc = ((raw["pour"].get("verify") or {}).get("drc")) or drc
     routed = project / f"{stem}.kicad_pcb"
     result = {"schema_version": SCHEMA, "claim_boundary": BOUNDARY, "router": r.get("router"), "source_board": str(pcb),
               "routed_board": str(routed), "kicad_format": "KiCad 10", "unrouted_before": r.get("unrouted_before"),
               "unrouted_after": r.get("unrouted_after"), "drc_errors": drc.get("errors"), "drc_unconnected": drc.get("unconnected"),
               "drc_warnings": drc.get("warnings"), "vias_added": r.get("vias_added"), "track_length_mm": r.get("track_length_mm"),
               "seconds": raw.get("seconds"), "rounds": r.get("rounds"), "elegance": r.get("elegance"),
+              "poured": {"net": pour_net, **{k: v for k, v in (raw.get("pour") or {}).items() if k in ("zones", "stitch", "stitched", "changed")}}
+                        if pour_net else None,
               "complete": r.get("unrouted_after") == 0 and drc.get("errors") == 0 and drc.get("unconnected") == 0}
     (out_dir / "copper_route.json").write_text(json.dumps(result, indent=1, default=str))
     return result

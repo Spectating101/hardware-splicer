@@ -40,7 +40,8 @@ def test_unplaced_parts_are_placed_then_routed_with_retries(tmp_path, monkeypatc
     # routing is FreeRouting's and varies (5 of 14 attempts DRC-clean on this board): the stage must retry and report
     # honestly rather than always succeed
     assert 1 <= len(pcb["route_attempts"]) <= 6
-    assert pcb["ok"] == (pcb["route_attempts"][-1] == 0) == (not pcb["problems"])
+    copper_done = bool((pcb.get("copper") or {}).get("complete")) or pcb.get("kicad_format") == "KiCad 10"
+    assert pcb["ok"] == (pcb["route_attempts"][-1] == 0 or copper_done) == (not pcb["problems"])
     assert pcb["drc"]["schematic_parity"]["errors"] == 0
 
 
@@ -49,3 +50,44 @@ def test_a_fully_placed_design_does_not_run_the_placer(monkeypatch, tmp_path):
     monkeypatch.setattr(cbp, "_place_free", lambda *a, **k: calls.append(a))
     design = cbp.design_from_json({"name": "x", "parts": [{"ref": "R1", "lib_id": "Device:R", "pcb_xy": [1, 2]}], "nets": {}})
     assert all(p.pcb_xy for p in design.parts) and not calls
+
+
+
+def _stub_stage(monkeypatch, tmp_path, drc_errors):
+    from types import SimpleNamespace
+    from hardware_splicer import copper_route
+    monkeypatch.setattr(cbp.kb, "pcb_spec", lambda *a, **k: {})
+    monkeypatch.setattr(cbp, "_netname", lambda readback, plain: "/GND")
+
+    def pcbnew(*args):
+        Path(args[-1]).write_text("(kicad_pcb)")
+        Path(args[-1]).with_suffix(".kicad_pro").write_text("{}")
+    monkeypatch.setattr(cbp, "_pcbnew", pcbnew)
+    monkeypatch.setattr(cbp, "route_pcb", lambda *a, **k: SimpleNamespace(text="(kicad_pcb)", stats={"nets_total": 3}))
+    item = {"severity": "error", "type": "unconnected_items", "where": ["U1 pad 3"]}
+    groups = {g: {"errors": drc_errors if g == "unconnected_items" else 0, "warnings": 0,
+                  "items": [item] * drc_errors if g == "unconnected_items" else []}
+              for g in ("violations", "unconnected_items", "schematic_parity")}
+    monkeypatch.setattr(cbp.kb, "run_drc", lambda pcb, out: groups)
+    calls = []
+
+    def fake_copper(placed, out, **kw):
+        calls.append(kw)
+        return {"complete": True, "routed_board": str(out / "copper_project" / "board.kicad_pcb"), "router": "Freerouting 2.2.3 + guided router",
+                "drc_errors": 0, "drc_unconnected": 0, "drc_warnings": 2, "unrouted_before": 9, "unrouted_after": 0}
+    monkeypatch.setattr(copper_route, "route_with_copper", fake_copper)
+    design = cbp.design_from_json({"name": "x", "parts": [{"ref": "R1", "lib_id": "Device:R", "pcb_xy": [1, 2]}], "nets": {}})
+    return design, calls
+
+
+def test_copper_finishes_when_every_freerouting_attempt_fails(monkeypatch, tmp_path):
+    design, calls = _stub_stage(monkeypatch, tmp_path, drc_errors=1)
+    res = cbp.pcb_stage(design, {}, tmp_path, {"outline_mm": [0, 0, 50, 40]}, route_attempts=2)
+    assert res["ok"] and res["kicad_format"] == "KiCad 10" and res["route_attempts"] == [1, 1]
+    assert calls == [{"pour_net": "/GND"}] and res["pcb"].endswith("board.kicad_pcb")
+
+
+def test_copper_is_not_called_when_freerouting_comes_back_clean(monkeypatch, tmp_path):
+    design, calls = _stub_stage(monkeypatch, tmp_path, drc_errors=0)
+    res = cbp.pcb_stage(design, {}, tmp_path, {"outline_mm": [0, 0, 50, 40]}, route_attempts=2)
+    assert res["ok"] and res["route_attempts"] == [0] and calls == [] and res.get("kicad_format") is None

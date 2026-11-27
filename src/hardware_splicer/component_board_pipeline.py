@@ -147,9 +147,26 @@ def pcb_stage(design: kb.Design, readback: dict, out: Path, board: dict[str, Any
         attempts.append(len(problems))
         if not problems:
             break
+    copper = None
+    if problems:
+        # Every FreeRouting attempt left errors: hand the same placement to Copper (copper-kicad-mcp, MIT) when it is
+        # configured. Its result is a KiCad 10 board, judged by KiCad 10's DRC; the KiCad 9 board above is kept.
+        from . import copper_route
+        try:
+            copper = copper_route.route_with_copper(placed, out / "copper", pour_net=gnd)
+        except copper_route.CopperRouteError as exc:
+            copper = {"complete": False, "error": str(exc)}
     for tmp in (placed, routed_path, placed.with_suffix(".kicad_pro"), placed.with_suffix(".kicad_prl"), spec_path):
         tmp.unlink(missing_ok=True)
+    if copper and copper.get("complete"):
+        return {"ok": True, "stage": "pcb", "pcb": copper["routed_board"], "kicad_format": "KiCad 10", "router": copper["router"],
+                "placement": placement, "route_attempts": attempts, "freerouting_board": str(pcb),
+                "drc": {"errors": copper["drc_errors"], "unconnected": copper["drc_unconnected"], "warnings": copper["drc_warnings"]},
+                "problems": [], "copper": {k: v for k, v in copper.items() if k not in ("rounds", "elegance")},
+                "note": (f"FreeRouting left DRC errors in all {len(attempts)} attempts; Copper routed the same placement clean. "
+                         "Its board is KiCad 10: export fabrication files with a KiCad 10 kicad-cli.")}
     return {"ok": not problems, "stage": "pcb", "pcb": str(pcb), "routing": routed.stats, "placement": placement,
+            "copper": copper,
             "route_attempts": attempts,
             "drc": {g: {"errors": drc[g]["errors"], "warnings": drc[g]["warnings"]} for g in ("violations", "unconnected_items", "schematic_parity")},
             "drc_warnings": [f"{i['type']}: {'; '.join(w for w in i['where'] if w)}" for g in ("violations",) for i in drc[g]["items"]

@@ -67,10 +67,10 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `electronics_foundation_benchmark` | 232 | 2 | research | - | Catalog-backed electronics benchmark for HS electrical truth boundaries. The benchmark separates component/pin identity, signal-domain safety, translator topology, and later KiCad geometry. PCB DRC mu... |
 | `circuit_synthesis.level_shift_planner` | 230 | 0 | product | TMRC | Bounded logic-level translation planner. |
 | `netlist.erc` | 230 | 1 | product | TMRC | Electrical rule check on circuit netlist IR. |
+| `component_board_pipeline` | 225 | 1 | product | TMRC | Any component-level board, from a JSON design to checked KiCad files and fab outputs. The pipeline HS-BUS-A proved, for any design an agent writes: schematic symbols from the KiCad libraries, pin cove... |
 | `compose_agent_loop` | 222 | 3 | product | MRC | Agent-facing compose orchestration — manual DRC retry rounds on top of engine fix loop. |
 | `pcb.geometry_compile` | 219 | 3 | product | TMRC | Compile build_graph.json → geometry, DRC, KiCad, design quality (Python engine). |
 | `part_tiers` | 211 | 1 | product | MRC | One catalogue over every part HS knows, saying what HS can do with each. HS keeps parts in two libraries that grew apart: * the device planner's library (``data/device_modules.json``): few parts, each... |
-| `component_board_pipeline` | 208 | 1 | product | TMRC | Any component-level board, from a JSON design to checked KiCad files and fab outputs. The pipeline HS-BUS-A proved, for any design an agent writes: schematic symbols from the KiCad libraries, pin cove... |
 | `circuit_synthesis.common` | 201 | 0 | product | TMRC | Shared helpers for bounded circuit-synthesis planners. Shared helpers may parse declared structured fields, but they do not inject representative USB/barrel currents, preferred MCU identities, or volt... |
 | `semantic_impact_scope` | 201 | 3 | product | TMRC | Bounded semantic scope proposal for cross-domain change impact. Natural-language change descriptions may imply mechanical, electrical, firmware, software, control, safety, sourcing, assembly, and veri... |
 | `distributor_check` | 198 | 2 | product | TMRC | Does every part on a KiCad board resolve, at its distributor, to the part the board assumes? python -m hardware_splicer.distributor_check BOARD.net/BOARD.kicad_sch [--cache FILE] [--offline] For each ... |
@@ -84,13 +84,13 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `netlist.compile` | 157 | 4 | product | TMRC | Netlist-first compile path (general engine entry). |
 | `pcb.kicad_cli_erc` | 157 | 3 | product | TMRC | KiCad CLI ERC on emitted schematics. |
 | `integrations.tscircuit_autorouter_bridge` | 147 | 1 | product | MRC | tscircuit capacity-autorouter glue — opt-in MIT autoroute alternative. |
+| `copper_route` | 145 | 2 | product | TMRC | Route a placed KiCad board with Copper (copper-kicad-mcp, MIT), run as a separate program in KiCad 10's container. On HS-BUS-A's placement (2026-11-27) HS's own FreeRouting step finished 2 of 5 runs (... |
 | `esplabs_bridge` | 143 | 1 | product | MRC | The esp-labs lessons (MIT, agharsallah/esp-labs-web) as HS labs: their wiring checked against Espressif's datasheet. esp-labs is a 32-lesson ESP32-S3 course for the ESP32-S3-DevKitC-1 with an N16R8 mo... |
 | `netlist.import_kicad` | 142 | 3 | product | TMRC | Parse KiCad netlist (sexpr export) into CircuitNetlist. |
 | `github_data_sources` | 138 | 1 | research | - | Find hardware data worth absorbing by GitHub's own signals, instead of a hand-picked list. It runs a fixed set of GitHub repository searches (pinouts, board definitions, component and footprint librar... |
 | `jlcparts_lookup` | 137 | 1 | product | TMRC | JLCPCB/LCSC parts, stock and prices from the jlcparts public tables (https://github.com/yaqwsx/jlcparts, MIT). python -m hardware_splicer.jlcparts_lookup "FT232RL" "SN74AHCT1G125DBVR" [--qty 5] jlcpar... |
 | `netlist.quality_flags` | 137 | 1 | product | TMRC | Honest launch labels for compile quality (copper tier, fab guidance). |
 | `restoration_board_action_gate` | 133 | 4 | research | - | Authority gate: reference schematic pins != verified physical test points. A matching revision CLAIM from a video/article is never equivalent to independently inspecting the actual board marking. We p... |
-| `copper_route` | 132 | 1 | product | TMRC | Route a placed KiCad board with Copper (copper-kicad-mcp, MIT), run as a separate program in KiCad 10's container. On HS-BUS-A's placement (2026-11-27) HS's own FreeRouting step finished 2 of 5 runs (... |
 | `integrations.schematic_symbols` | 132 | 1 | product | TMRC | Embedded + module-aware schematic symbol selection. |
 | `canvas_compose` | 129 | 6 | product | TMRC | Canvas / editor graph → same netlist compile path (lightweight, no FreeRouting). |
 | `integrations.qwen_jarvis_narrative` | 125 | 0 | product | TMRC | Qwen plain-language JARVIS summary over electrical trust artifacts. |
