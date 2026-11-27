@@ -380,6 +380,21 @@ def _pick_propulsion(args, _project):
                      sources=res["sources"], boundary=res["claim_boundary"])
 
 
+def _route_copper(args, project):
+    from . import copper_route
+    pcb = Path(str(args["pcb"])).expanduser()
+    from .state_paths import scratch_dir
+    out = _project_path(project, "pcb/copper_route") if project else Path(scratch_dir()) / "copper_route" / pcb.stem
+    try:
+        res = copper_route.route_with_copper(pcb, out, ignore_nets=args.get("ignore_nets"))
+    except copper_route.CopperRouteError as exc:
+        return _envelope(False, str(exc), {"error": str(exc)}, problems=[str(exc)])
+    problems = [] if res["complete"] else [f"{res['unrouted_after']} connections unrouted, {res['drc_errors']} DRC errors after Copper"]
+    return _envelope(res["complete"], f"Copper routed {res['unrouted_before']} connections, {res['unrouted_after']} left, "
+                     f"{res['drc_errors']} DRC errors, {res['vias_added']} vias ({res['kicad_format']} board)", res, problems=problems,
+                     sources=["https://github.com/claynicholson/copper-kicad-mcp"], boundary=res["claim_boundary"])
+
+
 def _energy(args, _project):
     from . import energy_budget
     res = energy_budget.check_energy(args["spec"])
@@ -951,6 +966,9 @@ TOOLS: dict[str, ToolSpec] = {t.name: t for t in [
              "battery, esc_continuous_a and optionally frame.wheelbase_mm or max_prop_diameter_mm; ranks those that pass. "
              "Then hs_check_propulsion with the chosen table id and prop.",
              _obj({"spec": {"type": "object"}}, ["spec"]), _pick_propulsion),
+    ToolSpec("hs_route_copper", "Route a placed .kicad_pcb with Copper (copper-kicad-mcp, MIT: Freerouting plus its guided finisher) "
+             "in KiCad 10's container; returns unrouted count, DRC and the routed KiCad 10 board. Needs HARDWARE_SPLICER_COPPER_* set.",
+             _obj({"pcb": {"type": "string"}, "ignore_nets": {"type": "array", "items": {"type": "string"}}}, ["pcb"]), _route_copper),
     ToolSpec("hs_energy_budget", "Battery energy budget: loads, runtime, surge, DC current and fuse window.",
              _obj({"spec": {"type": "object"}}, ["spec"]), _energy),
     ToolSpec("hs_price_parts", "JLCPCB/LCSC parts, stock and price breaks (jlcparts), for one query or a whole parts list.",

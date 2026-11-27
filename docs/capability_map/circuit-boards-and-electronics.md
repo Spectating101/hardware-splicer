@@ -90,6 +90,7 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `jlcparts_lookup` | 137 | 1 | product | TMRC | JLCPCB/LCSC parts, stock and prices from the jlcparts public tables (https://github.com/yaqwsx/jlcparts, MIT). python -m hardware_splicer.jlcparts_lookup "FT232RL" "SN74AHCT1G125DBVR" [--qty 5] jlcpar... |
 | `netlist.quality_flags` | 137 | 1 | product | TMRC | Honest launch labels for compile quality (copper tier, fab guidance). |
 | `restoration_board_action_gate` | 133 | 4 | research | - | Authority gate: reference schematic pins != verified physical test points. A matching revision CLAIM from a video/article is never equivalent to independently inspecting the actual board marking. We p... |
+| `copper_route` | 132 | 1 | product | TMRC | Route a placed KiCad board with Copper (copper-kicad-mcp, MIT), run as a separate program in KiCad 10's container. On HS-BUS-A's placement (2026-11-27) HS's own FreeRouting step finished 2 of 5 runs (... |
 | `integrations.schematic_symbols` | 132 | 1 | product | TMRC | Embedded + module-aware schematic symbol selection. |
 | `canvas_compose` | 129 | 6 | product | TMRC | Canvas / editor graph → same netlist compile path (lightweight, no FreeRouting). |
 | `integrations.qwen_jarvis_narrative` | 125 | 0 | product | TMRC | Qwen plain-language JARVIS summary over electrical trust artifacts. |
