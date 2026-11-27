@@ -175,8 +175,9 @@ NT$1,100-2,965 together. A mapping rover built from those, on OOMWOO's open soft
    OSR's 1.6 m/s on its 144 mm wheels HS ranks the OSR's own 26.9:1 first. OSR publishes neither its mass nor fixed
    link positions, so the model is not yet checked against a measured OSR.
 3. Done: drone (above), with a brushless calibration. Still open: a brushless bench table with a flown aircraft
-   (the X500 V2 needs its takeoff mass), the brushed Crazyflie's motor mass, and more cited tables
-   (1S brushless, 2 in, 5 in).
+   (the X500 V2 needs its takeoff mass), the brushed Crazyflie's motor mass, and 1S and 2 in tables. 5 in is in:
+   T-Motor's Velox V2207 V2 and V2207.5 V2 maker tables (1750/1950 KV on 6S, 2550 KV on 4S, four props each), so HS
+   now sizes a 5 in quad as well as the 3 in and 450 classes.
 4. Done: robot vacuum (above); the earlier "uncontested" was wrong, OOMWOO is the open design. The mapping rover it
    opened is designed (`projects/hs-rover-vac-a`): a faulty 1st-gen Xiaomi vacuum plus a cracked phone, US$37.10 with
    Valetudo on a working board or US$46.83 with an ESP32 on a dead one, 7 h, both under the cheapest wheeled camera
