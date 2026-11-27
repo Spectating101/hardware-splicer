@@ -111,9 +111,9 @@
    "name": "Backplane",
    "source": "https://github.com/BackplaneWorks/Backplane",
    "licence": "MIT",
-   "how": "agent workspace on the laptop; its agent reaches HS's toolbelt over MCP (ssh optiplex hs-mcp.sh)",
-   "status": "installing",
-   "measured": "HS MCP connected from the laptop's Claude Code, 68 tools"
+   "how": "agent workspace installed on the laptop (v0.16.4, archive checksum verified); its Claude Code reaches HS's toolbelt over MCP (ssh optiplex hs-mcp.sh); Backplane KiCad still to install from its Settings, CAD",
+   "status": "integrated",
+   "measured": "HS MCP connected from the laptop: 68 tools listed; no board designed through it yet"
   },
   {
    "role": "fab",
