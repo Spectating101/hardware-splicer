@@ -53,6 +53,7 @@ def verification(result: dict) -> dict:
                       "erc_warnings": result["schematic"]["erc"]["warnings"],
                       "erc_warning_types": sorted({v["type"] for v in result["schematic"]["erc"]["violations"]})},
         "routing": result["routing"],
+        "silk_labels_moved": (result.get("silk_labels") or {}).get("moved", {}),
         "drc": {group: {"errors": drc[group]["errors"], "warnings": drc[group]["warnings"],
                         "items": [f"{i['severity']}: {i['type']}: {'; '.join(w for w in i['where'] if w)}" for i in drc[group]["items"]]}
                 for group in ("violations", "unconnected_items", "schematic_parity")},
@@ -139,12 +140,28 @@ def _cli(*args: str) -> None:
         raise SystemExit(f"kicad-cli {' '.join(args[:3])} failed: {run.stderr[-1500:]}")
 
 
+# Labels KiCad's DRC found on copper or on another part's outline after the 2026-11-27 decoupling moves; only their text moves.
+SILK_LABELS = ("C4", "U3")
+
+
+def clear_silk_labels(board: Path) -> dict:
+    from hardware_splicer.component_board_pipeline import clear_silk_labels as move_labels
+
+    result = move_labels(board, SILK_LABELS)
+    if result is None:
+        raise SystemExit("clear_silk_labels failed: is KiCad's pcbnew module installed?")
+    return result
+
+
 def fab(out: Path, board: Path, sch: Path, renders: Path) -> dict:
     """Gerbers and drill files (zipped for a board house), pick-and-place, BOM, schematic PDF and board pictures."""
     fab_dir = out.parent / "fab"
-    if fab_dir.exists():
-        shutil.rmtree(fab_dir)
+    # Only what this step writes is replaced: the quote (quote_*.json) and the JLCPCB order files (jlc/) are kept.
     gerbers = fab_dir / "gerbers"
+    if gerbers.exists():
+        shutil.rmtree(gerbers)
+    for generated in fab_dir.glob(f"{DESIGN.name}_*"):
+        generated.unlink()
     gerbers.mkdir(parents=True)
     layers = "F.Cu,B.Cu,F.Paste,B.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts"
     _cli("pcb", "export", "gerbers", "--layers", layers, "--subtract-soldermask", "-o", str(gerbers) + "/", str(board))
@@ -227,6 +244,7 @@ def main(argv: list[str] | None = None) -> int:
         print(board)
         return 0
     result["routing"] = board["routing"]
+    result["silk_labels"] = clear_silk_labels(board["board"])
     result["drc"] = kb.run_drc(board["board"], out)
     result["board"] = board_stats(board["board"])
     result["electrical"] = checks.run(PORT_TRACK_MM, VIN_TRACK_MM)

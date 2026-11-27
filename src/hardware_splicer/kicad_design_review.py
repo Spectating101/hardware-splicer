@@ -109,8 +109,11 @@ def parse_netlist(text: str) -> dict[str, Any]:
         nodes = []
         for node in net[1:]:
             if isinstance(node, list) and node[:1] == ["node"]:
-                nodes.append({"ref": _scalar(node, "ref") or "", "pin": _scalar(node, "pin") or "",
-                              "function": _scalar(node, "pinfunction") or "", "type": _scalar(node, "pintype") or ""})
+                pin, function = _scalar(node, "pin") or "", _scalar(node, "pinfunction") or ""
+                # KiCad 10 writes a pin's function as name_number ("K_1", "SB_4", "29_29"); KiCad 9 wrote the name alone.
+                if pin and function.endswith("_" + pin) and len(function) > len(pin) + 1:
+                    function = function[: -(len(pin) + 1)]
+                nodes.append({"ref": _scalar(node, "ref") or "", "pin": pin, "function": function, "type": _scalar(node, "pintype") or ""})
         nets[_scalar(net, "name") or f"net{len(nets)}"] = nodes
     return {"components": comps, "nets": nets}
 
@@ -308,12 +311,18 @@ def _token(name: str, token: str) -> bool:
     return bool(re.search(rf"(^|[^A-Z0-9]){token}(\d*)($|[^A-Z])", name.upper()))
 
 
+SIGNAL_SUFFIX = re.compile(r"[_.\-](PG|PGOOD|P?GOOD|OK|EN|ENABLE|DET|DETECT|SENSE|SNS|FB|FAULT|FLT|ALERT|INT|MON|ADC|MEAS|CTRL|ON|OFF|STAT|SIG|IND)\w*$", re.I)
+
+
 def rail_voltage(net: str) -> float | None:
     """0 for a ground net, a signed voltage for a net named after one (+5V, 3V3, A-2V5, -12V), else None."""
     if GROUND.search(net):
         return 0.0
     seg = net.split("/")[-1]
     if not (SUPPLY.search(net) or seg[:1] in "+-"):
+        return None
+    # A signal named after its rail is not the rail: 1.8V_PG is a power-good line, 3V3_EN an enable.
+    if SIGNAL_SUFFIX.search(seg):
         return None
     up = seg.upper()
     m = (re.search(r"([+-])?(\d+)V(\d+)", up) or re.search(r"([+-])?(\d+)\.(\d+)V", up) or re.search(r"([+-])?(\d+)()V(?![A-Z])", up)
@@ -358,7 +367,9 @@ def _physics_findings(comps, nets, pin_net, finding) -> None:
         # A part that repeats A or K (BAV99 names its pins K, A, K; MMBD1503A K, A, A) cannot be paired by name, so it is skipped.
         repeated = any(sum(str(p.get("name", "")).upper() == n for p in comps.get(ref, {}).get("pins", [])) > 1 for n in ("A", "K"))
         if diode and not repeated:
-            led = bool(re.search(r"\bled\b|^LED|:LED", text, re.I)) or ref.upper().startswith("LED")
+            # A clamp drawn with the LED symbol (VESC 6's "TVS 5V" on Device:LED) is a clamp, wired cathode to the rail on purpose.
+            clamp_value = re.search(r"tvs|zener|esd|smaj|smbj|p6ke|clamp", str(comps.get(ref, {}).get("value", "")), re.I)
+            led = not clamp_value and (bool(re.search(r"\bled\b|^LED|:LED", text, re.I)) or ref.upper().startswith("LED"))
             for suffix in ("", "1", "2", "3", "4"):
                 a = roles.get("A" + suffix, [None])[0]
                 k = roles.get("K" + suffix, [None])[0]

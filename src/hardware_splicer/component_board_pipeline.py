@@ -4,7 +4,8 @@ The pipeline HS-BUS-A proved, for any design an agent writes:
 
     schematic   symbols from the KiCad libraries, pin coverage, KiCad's read-back netlist == design, ERC
     pcb         footprints placed where the design says, every net routed by FreeRouting in one pass (net classes set
-                the power widths), router leftovers removed, ground stitching and pours, DRC with schematic parity
+                the power widths), router leftovers removed, ground stitching and pours, reference labels moved off copper
+                and other parts' outlines, DRC with schematic parity
     fab         Gerbers + drill (zipped), pick-and-place, BOM, schematic PDF, 3D renders
 
 Design JSON::
@@ -77,6 +78,16 @@ def decoupling_report(board_path: Path, max_mm: float = 5.0) -> dict[str, Any] |
     python = resolve_kicad_python() or "/usr/bin/python3"
     run = subprocess.run([python, str(HELPER.parent / "decoupling_report.py"), str(board_path), "--max-mm", str(max_mm)],
                          capture_output=True, text=True, timeout=300)
+    if run.returncode != 0:
+        return None
+    return json.loads(run.stdout)
+
+
+def clear_silk_labels(board_path: Path, refs: tuple[str, ...] = ()) -> dict[str, Any] | None:
+    """Move reference labels that sit on copper, another part's outline or the board edge to a clear spot beside their part
+    (pcbnew, in place); only label text moves. ``refs`` limits it to those parts."""
+    python = resolve_kicad_python() or "/usr/bin/python3"
+    run = subprocess.run([python, str(HELPER.parent / "clear_silk_labels.py"), str(board_path), *refs], capture_output=True, text=True, timeout=300)
     if run.returncode != 0:
         return None
     return json.loads(run.stdout)
@@ -176,6 +187,7 @@ def pcb_stage(design: kb.Design, readback: dict, out: Path, board: dict[str, Any
                            project_text=placed.with_suffix(".kicad_pro").read_text())
         routed_path.write_text(routed.text)
         _pcbnew("--finish", str(spec_path), str(routed_path), str(pcb))
+        labels = clear_silk_labels(pcb)
         drc = kb.run_drc(pcb, out)
         problems = [f"DRC {g}: {i['severity']}: {i['type']}: {'; '.join(w for w in i['where'] if w)}"
                     for g in ("violations", "unconnected_items", "schematic_parity") for i in drc[g]["items"] if i["severity"] == "error"]
@@ -205,7 +217,7 @@ def pcb_stage(design: kb.Design, readback: dict, out: Path, board: dict[str, Any
     far = [r for r in (decoupling or {}).get("pads", []) if r["over_limit"]]
     trace_current = _trace_current(pcb, board)
     return {"ok": not problems, "stage": "pcb", "pcb": str(pcb), "routing": routed.stats, "placement": placement,
-            "copper": copper, "decoupling": decoupling, "trace_current": trace_current,
+            "copper": copper, "decoupling": decoupling, "trace_current": trace_current, "silk_labels": labels,
             "trace_current_warnings": [f["message"] for f in (trace_current or {}).get("findings", []) if f["severity"] == "warning"],
             "decoupling_warnings": [f"{r['ic']} pad {r['pad']} ({r['net']}): nearest capacitor {r['nearest_cap']} is {r['distance_mm']} mm away"
                                     for r in far],

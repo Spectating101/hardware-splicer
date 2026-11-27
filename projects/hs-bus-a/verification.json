@@ -20,15 +20,25 @@
   "engine": "freerouting (earlier run of this build)",
   "reused_board": true
  },
+ "silk_labels_moved": {
+  "C4": {
+   "x_mm": 132.5,
+   "y_mm": 130.504,
+   "angle": 0.0
+  },
+  "U3": {
+   "x_mm": 138.5,
+   "y_mm": 135.246,
+   "angle": 0.0
+  }
+ },
  "drc": {
   "violations": {
    "errors": 0,
-   "warnings": 4,
+   "warnings": 2,
    "items": [
     "warning: silk_edge_clearance: Segment on Edge.Cuts; Segment of J1 on F.Silkscreen",
-    "warning: silk_edge_clearance: Segment on Edge.Cuts; Segment of J1 on F.Silkscreen",
-    "warning: silk_over_copper: Reference field of C4",
-    "warning: silk_overlap: Reference field of U3; Segment of C6 on F.Silkscreen"
+    "warning: silk_edge_clearance: Segment on Edge.Cuts; Segment of J1 on F.Silkscreen"
    ]
   },
   "unconnected_items": {
@@ -558,7 +568,7 @@
    "per_board_usd": 9.18,
    "not_found": [],
    "source": "JLCPCB parts list via jlcparts (https://github.com/yaqwsx/jlcparts)",
-   "prices_as_of": "2026-11-27T03:02:21+00:00",
+   "prices_as_of": "2026-11-26T03:01:58+00:00",
    "claim_boundary": "JLCPCB unit prices for the parts only: no PCB, assembly, setup, shipping or tax."
   },
   "10_boards": {
@@ -911,7 +921,7 @@
    "per_board_usd": 8.37,
    "not_found": [],
    "source": "JLCPCB parts list via jlcparts (https://github.com/yaqwsx/jlcparts)",
-   "prices_as_of": "2026-11-27T03:02:21+00:00",
+   "prices_as_of": "2026-11-26T03:01:58+00:00",
    "claim_boundary": "JLCPCB unit prices for the parts only: no PCB, assembly, setup, shipping or tax."
   }
  },
@@ -934,9 +944,13 @@
    "fab/hs_bus_a_bom.csv",
    "fab/hs_bus_a_gerbers.zip",
    "fab/hs_bus_a_pos.csv",
-   "fab/hs_bus_a_schematic.pdf"
+   "fab/hs_bus_a_schematic.pdf",
+   "fab/jlc/ORDER.md",
+   "fab/jlc/hs_bus_a_bom_jlc.csv",
+   "fab/jlc/hs_bus_a_cpl_jlc.csv",
+   "fab/quote_2026-11-26.json"
   ],
-  "zip_sha256": "8141cb87678c085643f332941c73d40dcdec376515a8bdaf101a3aa4579b3dfa"
+  "zip_sha256": "fd07140190c4d804e231fdeb4bfe4a2da18689724360e7f4c344214c223782bc"
  },
  "not_checked": [
   "Signal integrity and USB 2.0 full-speed impedance (12 Mb/s over short tracks; no controlled impedance asked for)",

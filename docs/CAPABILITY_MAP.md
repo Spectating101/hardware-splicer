@@ -6,11 +6,11 @@ their reach and tests; `... show <module>` gives one module's importers, imports
 tables are in `docs/capability_map/`; the job-level map (which module is canonical for which job) is
 `docs/CAPABILITY_CONSOLIDATION.md`.
 
-**621 modules, 178,590 lines; 541 referenced by a test; 38 called by an engine tool.**
+**622 modules, 178,708 lines; 541 referenced by a test; 38 called by an engine tool.**
 
 | Status | Modules | Lines | Meaning |
 |---|---|---|---|
-| product | 472 | 141,713 | reached from a shipped entry point (toolbelt, MCP, REST or a console command) |
+| product | 473 | 141,831 | reached from a shipped entry point (toolbelt, MCP, REST or a console command) |
 | research | 141 | 35,128 | not shipped on purpose: part of a declared research line (RESEARCH_LINES) |
 | script | 5 | 1,475 | reached only from scripts/, projects/, eval/, experiments/, the Makefile or CI |
 | runnable | 0 | 0 | has its own `python -m` main, and nothing shipped imports it |
@@ -21,10 +21,10 @@ tables are in `docs/capability_map/`; the job-level map (which module is canonic
 
 | Surface | Entry modules | Modules reached |
 |---|---|---|
-| toolbelt | `engineering_toolbelt` | 299 |
-| mcp | `backend_mcp_server`, `mcp_server` | 465 |
-| rest | `product_api` | 462 |
-| console | `cli_entry`, `digital_engine_cli`, `materials_cli`, `open_repair_candidates`, `policy_layer_cli`, `wiring_cli` | 472 |
+| toolbelt | `engineering_toolbelt` | 300 |
+| mcp | `backend_mcp_server`, `mcp_server` | 466 |
+| rest | `product_api` | 463 |
+| console | `cli_entry`, `digital_engine_cli`, `materials_cli`, `open_repair_candidates`, `policy_layer_cli`, `wiring_cli` | 473 |
 
 Toolbelt tools (38): `hs_project_open`, `hs_project_record`, `hs_project_write_artifact`, `hs_project_link_design`, `hs_project_status`, `hs_junk_lookup`, `hs_prior_art_search`, `hs_read_board`, `hs_capability_search`, `hs_device_review`, `hs_route_economics`, `hs_what_can_i_build`, `hs_device_lab`, `hs_check_board_parts`, `hs_import_eagle_module`, `hs_record_outcome`, `hs_salvage_resources`, `hs_identify_part`, `hs_battery_runtime`, `hs_prop_hover`, `hs_size_arm_actuators`, `hs_size_rover_drive`, `hs_check_propulsion`, `hs_pick_propulsion`, `hs_route_copper`, `hs_step_fit`, `hs_trace_current`, `hs_rocker_bogie`, `hs_energy_budget`, `hs_price_parts`, `hs_bom_check`, `hs_review_kicad_schematic`, `hs_component_board`, `hs_plan_circuit`, `hs_fem_screen`, `hs_arm_kinematics`, `hs_motion_sweep`, `hs_rover_chassis`.
 Console commands: `hs-doctor`, `hs-serve`, `hs-mcp`, `hs-backend-mcp`, `hs-capability-freeze`, `hs-derive`, `hs-mechanical`, `hs-open-repair`, `hs-digital`, `hs-policy`, `hs-materials`, `hs-wiring`.
@@ -35,7 +35,7 @@ Reach codes in the area pages: **T** toolbelt, **M** MCP server, **R** REST prod
 
 | Area | Modules | Engineering | Lines | Tested | Shipped | Called by a tool | Page |
 |---|---|---|---|---|---|---|---|
-| circuit boards and electronics | 140 | 122 | 39,309 | 112 | 126 | 13 | [circuit-boards-and-electronics](capability_map/circuit-boards-and-electronics.md) |
+| circuit boards and electronics | 141 | 123 | 39,427 | 112 | 127 | 13 | [circuit-boards-and-electronics](capability_map/circuit-boards-and-electronics.md) |
 | salvage, donors, repair | 114 | 103 | 28,740 | 109 | 53 | 3 | [salvage-donors-repair](capability_map/salvage-donors-repair.md) |
 | AI, agents and models | 60 | 42 | 19,361 | 55 | 51 | 0 | [ai-agents-and-models](capability_map/ai-agents-and-models.md) |
 | mechanical, CAD and FEM | 53 | 49 | 18,481 | 46 | 38 | 6 | [mechanical-cad-and-fem](capability_map/mechanical-cad-and-fem.md) |

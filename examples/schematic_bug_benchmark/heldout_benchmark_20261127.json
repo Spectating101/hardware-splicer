@@ -45,7 +45,8 @@
    "longboi BAV99: KiCad names its pins K, A, K; fixed by skipping parts that repeat A or K",
    "meteo-station BME280 breakout compared with the bare chip; fixed by comparing only equal pin counts"
   ],
-  "after_fix": "3 findings, all on the two true defects"
+  "after_fix": "3 findings, all on the two true defects",
+  "kicad10_pin_names_20261128": "KiCad 10 writes netlist pin functions as name_number (K_1, SB_4); HS's name rules missed on KiCad 10 files until parse_netlist stripped the suffix (2026-11-28). Re-run: held-out catches unchanged (5), dev catches unchanged; on the 110 good boards the fix surfaced 2 more false alarms (a power-good net named 1.8V_PG read as a rail; VESC 6's 'TVS 5V' drawn with the LED symbol), both fixed: signal suffixes (_PG, _EN, _SENSE...) no longer read as rails, and parts valued TVS/zener/ESD are not LEDs. Findings on good boards: 3, all on the two true defects."
  },
  "what_this_says": "On projects its rules were not written from, HS caught 4 of 35 bugs (5 with one rule added after reading this set) against 9 for KiCad ERC and 9 for kicad-happy; ERC and kicad-happy together catch 12. HS adds bugs the other two miss (an IC with GND and VCC swapped; with the later rule, an op-amp on inverted rails) but misses the generic connection faults they check: dangling labels, undriven inputs, supply pins with no path to a rail, missing pull resistors on boot pins. All three together cover 14 of 35. 21 of the 35 are missed by every checker: connector pinouts, swapped signals with no pair name, part choice and design intent.",
  "cases": [
