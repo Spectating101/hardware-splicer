@@ -92,6 +92,7 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `netlist.quality_flags` | 137 | 1 | product | TMRC | Honest launch labels for compile quality (copper tier, fab guidance). |
 | `restoration_board_action_gate` | 133 | 4 | research | - | Authority gate: reference schematic pins != verified physical test points. A matching revision CLAIM from a video/article is never equivalent to independently inspecting the actual board marking. We p... |
 | `integrations.schematic_symbols` | 132 | 1 | product | TMRC | Embedded + module-aware schematic symbol selection. |
+| `step_fit` | 132 | 0 | runnable | - | Fit check of any STEP assembly, from any CAD program: interference, clearance, loose parts, size and volumes. SolidWorks, Fusion 360, Onshape, FreeCAD and KiCad all export STEP. HS's own fit engine (`... |
 | `canvas_compose` | 129 | 6 | product | TMRC | Canvas / editor graph → same netlist compile path (lightweight, no FreeRouting). |
 | `integrations.qwen_jarvis_narrative` | 125 | 0 | product | TMRC | Qwen plain-language JARVIS summary over electrical trust artifacts. |
 | `pcb.kicad_cli_views` | 125 | 1 | product | MRC | Human-readable schematic/PCB exports via kicad-cli (on-demand, not compile-critical). |

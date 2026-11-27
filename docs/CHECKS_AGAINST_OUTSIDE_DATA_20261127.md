@@ -36,3 +36,11 @@ Three open 2-layer boards stripped to the designer's placement and re-routed by 
 against the designer's 39 (14% more track), one with 2 connections left, one complete but with 7 shorts. HS now also
 sizes power tracks from stated currents before routing and checks the routed board after (`trace_capacity`, IPC-2221;
 `board.net_currents_a`, `hs_trace_current`).
+
+## CAD from other programs (`examples/step_fit/`)
+
+`step_fit` (toolbelt `hs_step_fit`) checks any STEP assembly, whatever made it: SolidWorks, Fusion 360, Onshape, FreeCAD or
+KiCad. Parts keep their names from the STEP tree; it reports overlapping pairs with their volume, tight gaps, loose parts,
+size, volumes and masses. On SO-100's published follower assembly (19 parts, exported from Fusion 360) it ran in 48 s and
+found 3 overlaps, the largest 170 mm3 between a servo model and a bracket, and 5 gaps under 1 mm. Editing a part in
+SolidWorks and re-exporting STEP now gets HS's fit check back; SolidWorks' own files and feature tree are still out of reach.

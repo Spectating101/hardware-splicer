@@ -5,3 +5,4 @@ line claims them: wire, declare or delete each. Status meanings: [CAPABILITY_MAP
 
 | Module | Status | Area | Lines | Tests | Reached from | What it says it does |
 |---|---|---|---|---|---|---|
+| `step_fit` | runnable | circuit boards and electronics | 132 | 0 | - | Fit check of any STEP assembly, from any CAD program: interference, clearance, loose parts, size and volumes. SolidWorks... |
