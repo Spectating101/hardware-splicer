@@ -1051,11 +1051,16 @@
     },
     {
       "id": "sg90",
-      "peakCurrentMa": 500,
-      "peakCurrentSource": {"url": "http://www.towerpro.com.tw/product/sg90-7/", "accessed": "2026-11-26", "quote": "The operation current for our SG90 is about 0.5A – 2A.", "note": "A TowerPro staff reply in the product page's Q&A (2021-11-07), not the specification, which gives no current; 500 mA is its lower end."},
       "label": "SG90 servo",
       "category": "actuator",
       "summary": "Small hobby servo, 180° range, 5V PWM.",
+      "peakCurrentMa": 500,
+      "peakCurrentSource": {
+        "url": "http://www.towerpro.com.tw/product/sg90-7/",
+        "accessed": "2026-11-26",
+        "quote": "The operation current for our SG90 is about 0.5A – 2A.",
+        "note": "A TowerPro staff reply in the product page's Q&A (2021-11-07), not the specification, which gives no current; 500 mA is its lower end."
+      },
       "inputVoltageRange": [
         4.8,
         6
@@ -4723,6 +4728,14 @@
       "label": "RC522 RFID Reader Module",
       "category": "sensor",
       "summary": "RC522 RFID Reader Module (SPI)",
+      "logicVoltage": 3.3,
+      "logicVoltageSource": {
+        "url": "https://www.nxp.com/docs/en/data-sheet/MFRC522.pdf",
+        "accessed": "2026-11-25",
+        "locator": "Operating conditions table, VDDD digital supply voltage",
+        "quote": "VDDD digital supply voltage VSSA = VSSD = VSS(PVSS) = VSS(TVSS) = 0 V 2.5 3.3 3.6 V",
+        "note": "A 3.3 V part: 5 V logic from an Arduino Uno or Nano exceeds its supply."
+      },
       "inputVoltageRange": [
         3.3,
         3.3
@@ -4779,15 +4792,7 @@
       "source": "ingested-component-db",
       "capabilityTags": [
         "sensor_or_adc"
-      ],
-      "logicVoltage": 3.3,
-      "logicVoltageSource": {
-        "url": "https://www.nxp.com/docs/en/data-sheet/MFRC522.pdf",
-        "accessed": "2026-11-25",
-        "locator": "Operating conditions table, VDDD digital supply voltage",
-        "quote": "VDDD digital supply voltage VSSA = VSSD = VSS(PVSS) = VSS(TVSS) = 0 V 2.5 3.3 3.6 V",
-        "note": "A 3.3 V part: 5 V logic from an Arduino Uno or Nano exceeds its supply."
-      }
+      ]
     },
     {
       "id": "dc_motor_3v_6v",
@@ -6730,6 +6735,14 @@
       "label": "LCD 16x2 with I2C Interface",
       "category": "display",
       "summary": "LCD 16x2 with I2C Interface (I2C)",
+      "logicVoltage": 5,
+      "logicVoltageSource": {
+        "url": "https://www.ti.com/lit/ds/symlink/pcf8574.pdf",
+        "accessed": "2026-11-25",
+        "locator": "Recommended Operating Conditions, VCC and VIH (the I2C backpack's PCF8574)",
+        "quote": "VIH High-level input voltage 0.7 × VCC VCC + 0.5",
+        "note": "The backpack's PCF8574 runs from the module's 5 V, so its I2C logic is 5 V; any pull-ups on the backpack pull SDA and SCL to 5 V."
+      },
       "inputVoltageRange": [
         5,
         5
@@ -6768,15 +6781,7 @@
       "source": "ingested-component-db",
       "capabilityTags": [
         "display_or_ui"
-      ],
-      "logicVoltage": 5,
-      "logicVoltageSource": {
-        "url": "https://www.ti.com/lit/ds/symlink/pcf8574.pdf",
-        "accessed": "2026-11-25",
-        "locator": "Recommended Operating Conditions, VCC and VIH (the I2C backpack's PCF8574)",
-        "quote": "VIH High-level input voltage 0.7 × VCC VCC + 0.5",
-        "note": "The backpack's PCF8574 runs from the module's 5 V, so its I2C logic is 5 V; any pull-ups on the backpack pull SDA and SCL to 5 V."
-      }
+      ]
     },
     {
       "id": "lcd_16x2_parallel",
@@ -7985,12 +7990,25 @@
     },
     {
       "id": "ws2812b_strip",
-      "peakCurrentMaPerUnit": 60,
-      "currentUnit": "pixel",
-      "peakCurrentSource": {"url": "https://learn.adafruit.com/adafruit-neopixel-uberguide/powering-neopixels", "accessed": "2026-11-26", "quote": "Each individual NeoPixel draws up to 60 milliamps at maximum brightness white (red + green + blue).", "note": "Worst case; the same page uses 20 mA per pixel as a rule of thumb for mixed colours."},
       "label": "WS2812B Addressable RGB LED Strip",
       "category": "display",
       "summary": "WS2812B Addressable RGB LED Strip",
+      "logicVoltage": 5,
+      "logicVoltageSource": {
+        "url": "https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf",
+        "accessed": "2026-11-25",
+        "locator": "Electrical Characteristics, DIN input high voltage, at VDD = 4.5 to 5.5 V",
+        "quote": "VIH DIN，SET 0.7VDD",
+        "note": "The strip is powered at 5 V, so its data input needs 0.7 x 5 = 3.5 V for a high; a 3.3 V GPIO is below that."
+      },
+      "peakCurrentMaPerUnit": 60,
+      "currentUnit": "pixel",
+      "peakCurrentSource": {
+        "url": "https://learn.adafruit.com/adafruit-neopixel-uberguide/powering-neopixels",
+        "accessed": "2026-11-26",
+        "quote": "Each individual NeoPixel draws up to 60 milliamps at maximum brightness white (red + green + blue).",
+        "note": "Worst case; the same page uses 20 mA per pixel as a rule of thumb for mixed colours."
+      },
       "inputVoltageRange": [
         5,
         5
@@ -8024,15 +8042,7 @@
       "capabilityTags": [
         "display_or_ui",
         "led_or_light"
-      ],
-      "logicVoltage": 5,
-      "logicVoltageSource": {
-        "url": "https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf",
-        "accessed": "2026-11-25",
-        "locator": "Electrical Characteristics, DIN input high voltage, at VDD = 4.5 to 5.5 V",
-        "quote": "VIH DIN，SET 0.7VDD",
-        "note": "The strip is powered at 5 V, so its data input needs 0.7 x 5 = 3.5 V for a high; a 3.3 V GPIO is below that."
-      }
+      ]
     },
     {
       "id": "neopixel_ring",

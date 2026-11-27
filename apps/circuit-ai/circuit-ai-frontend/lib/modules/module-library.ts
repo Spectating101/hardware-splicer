@@ -49,6 +49,14 @@ export interface ModuleSpec {
   inputVoltageRange?: [number, number];
   /** Typical quiescent current, mA. */
   typicalCurrentMa?: number;
+  /** Cited peak current, mA (whole module), with where it was read. */
+  peakCurrentMa?: number;
+  /** Cited peak current per unit (e.g. per pixel), mA; the unit is named in currentUnit. */
+  peakCurrentMaPerUnit?: number;
+  currentUnit?: string;
+  peakCurrentSource?: { url: string; accessed: string; quote?: string; locator?: string; note?: string };
+  /** Where logicVoltage was read. */
+  logicVoltageSource?: { url: string; accessed: string; quote?: string; locator?: string; note?: string };
   pins: ModulePin[];
   /** Safety notes surfaced in inspectors. */
   warnings?: string[];
@@ -419,6 +427,8 @@ export const MODULE_LIBRARY: ModuleSpec[] = [
     label: "SG90 servo",
     category: "actuator",
     summary: "Small hobby servo, 180° range, 5V PWM.",
+    peakCurrentMa: 500,
+    peakCurrentSource: {"url": "http://www.towerpro.com.tw/product/sg90-7/", "accessed": "2026-11-26", "quote": "The operation current for our SG90 is about 0.5A – 2A.", "note": "A TowerPro staff reply in the product page's Q&A (2021-11-07), not the specification, which gives no current; 500 mA is its lower end."},
     inputVoltageRange: [4.8, 6],
     typicalCurrentMa: 200,
     pins: [
