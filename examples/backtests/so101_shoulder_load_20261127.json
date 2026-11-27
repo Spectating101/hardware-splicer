@@ -1,0 +1,41 @@
+{
+ "schema": "hardware_splicer.backtest.v1",
+ "captured": "2026-11-27",
+ "id": "so101-shoulder-load",
+ "question": "HS's CAD-based joint check puts SO-101's shoulder at 80% of its 7.4 V STS3215's stall torque unloaded and 136% with 150 g. Do SO-100/SO-101 owners report shoulder or servo overloads?",
+ "hs_prediction": {
+  "so101_shoulder_share_of_stall": {
+   "no_payload": 0.8,
+   "payload_150g": 1.36
+  },
+  "hs_arm_a_rev_b_shoulder_share_of_stall_150g": 0.66,
+  "rule": "HS requires under 50% of stall with a 1.5 safety factor",
+  "source": "docs/DEVICE_REFERENCE_BENCHMARK_20261127.md"
+ },
+ "evidence": [
+  {
+   "source": "https://github.com/TheRobotStudio/SO-ARM100/issues/66",
+   "date": "2025-04-23",
+   "arm": "SO-100",
+   "quote": "the shoulder_lift motor (#2) of the SO100 robot experiences intermittent overloads and disconnects. The issue occurs even when other motors are functioning normally.",
+   "reply": "A maintainer suggested a faulty motor and swapping it to another joint; the issue has no resolution posted."
+  },
+  {
+   "source": "https://groups.google.com/g/hbrobotics/c/wMPp7it97i4",
+   "arm": "SO-101 (STS3215, 30 kg cm)",
+   "quote": "I've been seeing the gears strip when there is a stall of over 15% of the max torque limit (which works out to a max of 4.5 kg cm).",
+   "also": "the same builder reports three burned-out servos; joint not named"
+  },
+  {
+   "source": "https://github.com/TheRobotStudio/SO-ARM100/issues/132",
+   "quote": "Under realistic heavy moves (multiple joints accelerating or holding near stall), the bus can brown-out",
+   "note": "a supply concern, not a joint measurement"
+  },
+  {
+   "source": "https://github.com/huggingface/lerobot/blob/main/src/lerobot/robots/so_follower/so_follower.py",
+   "finding": "LeRobot limits torque and current only on the gripper (Max_Torque_Limit 500, Protection_Current 250); the shoulder runs unlimited"
+  }
+ ],
+ "result": "Consistent with HS's warning, not proof of it: one shoulder-specific overload report, and a builder whose STS3215 gears strip at stalls above about 15% of rated torque, which makes HS's 50%-of-stall rule look lenient rather than strict. No report gives a measured shoulder torque or payload.",
+ "what_would_settle_it": "Log STS3215 Present_Load on the SO-101 shoulder while holding the arm out with 0 g and 150 g; HS predicts about 80% and over 100% of stall."
+}

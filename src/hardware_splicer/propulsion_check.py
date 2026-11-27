@@ -50,6 +50,7 @@ G = 9.80665
 # unverified, so the results cannot read as clean.
 # maker_data_reseller_copy: the maker's own test table as a dealer reproduces it, when the maker's page cannot be fetched.
 BENCH_SOURCE_CLASSES = {"maker_page", "maker_datasheet", "maker_data_reseller_copy", "independent_bench", "own_measurement"}
+THRUST_LIMITED_TW = 1.5  # between the two back-tested points: 1.70 matched, 1.13 flew a third of the estimate
 MAX_FIGURE_OF_MERIT = 0.85  # real small props reach roughly 0.5-0.75; a table implying more is suspect
 
 
@@ -306,6 +307,14 @@ def check_propulsion(spec: Any, table: Any = None) -> dict[str, Any]:
     effective_tw = results.get("battery_limited_thrust_to_weight", tw)
     if effective_tw < min_tw:
         finding("error", "thrust_to_weight_low", f"Thrust-to-weight {effective_tw:.2f} is under {min_tw}.")
+    # Back-tested on NanoBench's Crazyflie 2.1 battery-drain hovers (examples/backtests): at a usable thrust-to-weight of 1.13 the
+    # aircraft held height for 30-37% of the hover time worked out here, then sank as the sagging pack ran a motor out of headroom;
+    # at 1.70 (the stock 27 g aircraft) the same arithmetic matched Bitcraze's flight time within 5%.
+    if effective_tw < THRUST_LIMITED_TW and "hover_time_min" in results:
+        results["hover_time_is_upper_bound"] = True
+        finding("warning", "thrust_limited_endurance",
+                f"Usable thrust-to-weight is {effective_tw:.2f}: as the pack sags, full throttle stops holding height before the pack is used up, "
+                f"so the {results['hover_time_min']:.1f} min hover time is an upper bound (a 1.13 Crazyflie flew about a third of it).")
     if esc_a / full["current_a"] < esc_margin_min:
         finding("error", "esc_undersized", f"The ESC's {esc_a:g} A continuous is under {esc_margin_min}x the motor's {full['current_a']:g} A at full throttle.")
     if rating_raised:

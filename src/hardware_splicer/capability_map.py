@@ -175,9 +175,9 @@ class _Graph:
                 found = self.best(target)
                 if found:
                     out.update(self.member(found, a.name) if found == target else found for a in n.names)
-            elif (isinstance(n, ast.Call) and getattr(n.func, "id", "") == "_native_tool" and n.args
+            elif (isinstance(n, ast.Call) and getattr(n.func, "id", "") in ("_native_tool", "_native_function") and n.args
                   and isinstance(n.args[0], ast.Constant) and PREFIX + str(n.args[0].value) in self.names):
-                out.add(PREFIX + str(n.args[0].value))  # the toolbelt runs it with `python -m` in the native interpreter
+                out.add(PREFIX + str(n.args[0].value))  # the toolbelt runs it in the native interpreter (python -m, or native_call)
             elif isinstance(n, ast.Import):
                 out.update(self.best(a.name) for a in n.names if a.name.startswith(PREFIX))
                 if not is_pkg:

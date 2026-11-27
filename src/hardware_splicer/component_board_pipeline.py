@@ -13,7 +13,12 @@ Design JSON::
       "footprint": "Resistor_SMD:R_0603_1608Metric", "sch_xy": [50.8, 50.8], "pcb_xy": [110, 120], "pcb_rot": 0,
       "fields": {"MPN": "...", "LCSC": "C25804"}}],
      "nets": {"VIN": ["J1.1", "R1.1"]}, "unused": ["U1.7"], "power_flag_nets": ["VIN", "GND"],
-     "board": {"outline_mm": [100, 100, 150, 140], "rules": {...}, "netclasses": [...], "gnd_net": "GND"}}
+     "board": {"outline_mm": [100, 100, 150, 140], "rules": {...}, "netclasses": [...], "gnd_net": "GND",
+               "net_currents_a": {"*VIN_12V": 5}}}
+
+``board.net_currents_a`` (amperes by net name or KiCad pattern) adds a net class per current, wide enough by IPC-2221 for a
+10 C rise, before routing; after routing the narrowest track on each of those nets is checked (``trace_capacity``).
+An explicit net class with the same pattern wins over the generated one.
 
 Each stage stops at the first failed check and says so. A part with ``pcb_xy`` stays where the design puts it; a part
 without one is placed by ``_pcbnew_helpers/place_free_footprints.py`` (by connectivity, decoupling capacitors beside
@@ -121,6 +126,25 @@ def schematic_stage(design: kb.Design, out: Path, symbol_uuids: dict[str, str] |
             "erc": {"errors": erc["errors"], "warnings": erc["warnings"]}, "problems": problems}
 
 
+def current_netclasses(board: dict[str, Any], rules: dict[str, Any]) -> list[dict[str, Any]]:
+    """The design's own net classes, plus one per stated current that no explicit class already covers."""
+    from . import trace_capacity
+
+    explicit = list(board.get("netclasses") or [])
+    taken = {p for nc in explicit for p in nc.get("patterns", [])}
+    generated = trace_capacity.netclasses_for_currents(board.get("net_currents_a") or {}, min_track_mm=float(rules.get("track", 0.2)),
+                                                       clearance_mm=max(0.2, float(rules.get("clearance", 0.15))))
+    return explicit + [nc for nc in generated if not set(nc["patterns"]) & taken]
+
+
+def _trace_current(pcb: Path | str, board: dict[str, Any]) -> dict[str, Any] | None:
+    if not board.get("net_currents_a"):
+        return None
+    from . import trace_capacity
+
+    return trace_capacity.check_routed(Path(pcb), board["net_currents_a"])
+
+
 def pcb_stage(design: kb.Design, readback: dict, out: Path, board: dict[str, Any], *, route_timeout_s: int = 600,
               route_attempts: int = 6) -> dict[str, Any]:
     rules = {**DEFAULT_RULES, **(board.get("rules") or {})}
@@ -129,7 +153,7 @@ def pcb_stage(design: kb.Design, readback: dict, out: Path, board: dict[str, Any
     if free:  # built at the board centre first; the placer then moves each one
         centre = ((outline[0] + outline[2]) / 2, (outline[1] + outline[3]) / 2)
         design = replace(design, parts=[replace(p, pcb_xy=centre) if p.pcb_xy is None else p for p in design.parts])
-    spec = kb.pcb_spec(design, readback, outline_mm=outline, rules=rules, netclasses=board.get("netclasses") or [])
+    spec = kb.pcb_spec(design, readback, outline_mm=outline, rules=rules, netclasses=current_netclasses(board, rules))
     gnd = _netname(readback, board.get("gnd_net", "GND")) if board.get("gnd_net", "GND") else None
     if gnd:
         x0, y0, x1, y1 = outline
@@ -174,12 +198,15 @@ def pcb_stage(design: kb.Design, readback: dict, out: Path, board: dict[str, Any
                 "placement": placement, "route_attempts": attempts, "freerouting_board": str(pcb),
                 "drc": {"errors": copper["drc_errors"], "unconnected": copper["drc_unconnected"], "warnings": copper["drc_warnings"]},
                 "problems": [], "copper": {k: v for k, v in copper.items() if k not in ("rounds", "elegance")},
+                "trace_current": _trace_current(copper["routed_board"], board),
                 "note": (f"FreeRouting left DRC errors in all {len(attempts)} attempts; Copper routed the same placement clean. "
                          "Its board is KiCad 10: export fabrication files with a KiCad 10 kicad-cli.")}
     decoupling = decoupling_report(pcb)
     far = [r for r in (decoupling or {}).get("pads", []) if r["over_limit"]]
+    trace_current = _trace_current(pcb, board)
     return {"ok": not problems, "stage": "pcb", "pcb": str(pcb), "routing": routed.stats, "placement": placement,
-            "copper": copper, "decoupling": decoupling,
+            "copper": copper, "decoupling": decoupling, "trace_current": trace_current,
+            "trace_current_warnings": [f["message"] for f in (trace_current or {}).get("findings", []) if f["severity"] == "warning"],
             "decoupling_warnings": [f"{r['ic']} pad {r['pad']} ({r['net']}): nearest capacitor {r['nearest_cap']} is {r['distance_mm']} mm away"
                                     for r in far],
             "route_attempts": attempts,

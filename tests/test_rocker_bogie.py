@@ -45,3 +45,15 @@ def test_osr_speed_on_osr_wheels_ranks_osr_motor_first():
     assert best["speed_at_cruise_m_s"] >= 1.6 and best["step_torque_share_of_stall"] < 0.5
     env = tb.call("hs_rocker_bogie", {"spec": {"geometry": EVEN, "mass_kg": 10.0, "wheel_mm": 144, "drive": {"speed_m_s": 1.6}}})
     assert env["ok"] and "26.9" in env["summary"]
+
+
+def test_above_one_radius_the_front_wheel_climbs_a_wall_if_friction_allows():
+    # OSR's README: the rocker-bogie "can traverse obstacles over 2 times the height of the wheel". With equal arms the front wheel
+    # carries 1/6 of the weight, so wall friction needs mu >= sqrt(1/5) = 0.447; the height is the bogie's lever times sin(rotation).
+    res = analyse({"geometry": EVEN, "mass_kg": 10.0, "wheel_mm": 144, "friction": [0.4, 0.8]})
+    low, high = res["step_climb"]["0.4"], res["step_climb"]["0.8"]
+    assert not low["limited_by_model"] and "wall" not in low and low["max_step_mm"] < 72  # too little grip even below one radius
+    assert high["wall"]["possible"] and high["wall"]["friction_needed"] == pytest.approx(math.sqrt(1 / 5), abs=1e-3)
+    assert high["wall"]["max_step_mm"] is None
+    bounded = analyse({"geometry": EVEN, "mass_kg": 10.0, "wheel_mm": 144, "friction": [0.8], "bogie_max_rotation_deg": 45})
+    assert bounded["step_climb"]["0.8"]["wall"]["max_step_mm"] == pytest.approx(150 * math.sin(math.radians(45)), abs=0.1)

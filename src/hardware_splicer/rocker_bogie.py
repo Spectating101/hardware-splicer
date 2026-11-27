@@ -17,8 +17,9 @@ Step climbing (quasi-static, one driven front wheel meeting a step of height h <
 the wheel at angle theta from the bottom, cos(theta) = (r - h) / r. With the wheel at full traction on the edge
 (friction mu times the edge's normal force N), lifting off the ground needs N (cos(theta) + mu sin(theta)) = N_f, the
 wheel's share of the weight, and a push from the body P = N (sin(theta) - mu cos(theta)). The other five driven wheels
-can supply at most mu (W - N_f). The highest h for which they can is reported. Above one wheel radius the bogie has to
-lift the wheel, which this model does not cover; the result says so.
+can supply at most mu (W - N_f). The highest h for which they can is reported. Above one wheel radius the wheel meets the step
+as a wall: it climbs if mu^2 (W - N_f) >= N_f, and the height is then set by how far the bogie can rotate (given as
+bogie_max_rotation_deg; without it no height is claimed).
 
     PYTHONPATH=src python -m hardware_splicer.rocker_bogie spec.json
 """
@@ -33,7 +34,7 @@ from typing import Any
 SCHEMA = "hardware_splicer.rocker_bogie.v1"
 G = 9.80665
 BOUNDARY = ("Quasi-static rigid-wheel model with an assumed friction coefficient, link masses folded into the body, no wheel "
-            "sinkage or slip dynamics. Climbing above one wheel radius depends on the bogie lifting the wheel and is not modelled. "
+            "sinkage or slip dynamics. Above one wheel radius only the wall-friction condition and the bogie's lever are modelled, not the rocker's rotation. "
             "Test the built rover on a measured step.")
 
 
@@ -75,6 +76,24 @@ def max_step(r_mm: float, n_front: float, weight_n: float, mu: float) -> float:
     return lo
 
 
+def wall_climb(geom: dict[str, float], r_mm: float, n_front: float, weight_n: float, mu: float, rotation_deg: Any = None) -> dict[str, Any]:
+    """Above one wheel radius the front wheel meets the step as a wall. The rest of the rover pushes it into the wall with at most
+    P = mu (W - N_f), and the driven wheel climbs the wall if the wall's friction mu P carries the wheel's load N_f: mu^2 (W - N_f) >= N_f.
+    How high it can go is then the bogie's geometry: rotating about the middle wheel by at most phi lifts the front axle by
+    (front_wheel_x - middle_wheel_x) sin(phi). OSR and most designs do not publish phi, so without bogie_max_rotation_deg no height is given."""
+    possible = mu * mu * (weight_n - n_front) >= n_front
+    out: dict[str, Any] = {"possible": possible, "friction_needed": round(math.sqrt(n_front / (weight_n - n_front)), 3),
+                           "front_wheel_torque_nm": round(n_front * r_mm / 1000, 3)}
+    if rotation_deg is not None and possible:
+        lever = float(geom["front_wheel_x"]) - float(geom["middle_wheel_x"])
+        out["max_step_mm"] = round(lever * math.sin(math.radians(float(rotation_deg))), 1)
+        out["bogie_max_rotation_deg"] = float(rotation_deg)
+    elif possible:
+        out["max_step_mm"] = None
+        out["note"] = "bogie_max_rotation_deg not given, so the height is not bounded here"
+    return out
+
+
 def analyse(spec: dict[str, Any]) -> dict[str, Any]:
     try:
         geom, mass, wheel_d = spec["geometry"], float(spec["mass_kg"]), float(spec["wheel_mm"])
@@ -94,6 +113,8 @@ def analyse(spec: dict[str, Any]) -> dict[str, Any]:
         n_edge = loads["front_n"] / (math.cos(theta) + mu * math.sin(theta))
         climb[str(mu)] = {"max_step_mm": round(h, 1), "limited_by_model": h >= r - 1e-6,
                           "front_wheel_torque_nm": round(mu * n_edge * r / 1000, 3)}
+        if h >= r - 1e-6:
+            climb[str(mu)]["wall"] = wall_climb(geom, r, loads["front_n"], weight, float(mu), spec.get("bogie_max_rotation_deg"))
     shares = {k: round(v / (weight / 2), 3) for k, v in loads.items()}
     result = {"schema_version": SCHEMA, "claim_boundary": BOUNDARY, "inputs": {"geometry_mm": geom, "mass_kg": mass, "wheel_mm": wheel_d,
               "friction_assumed": mus}, "wheel_load_n_per_side": {k: round(v, 2) for k, v in loads.items()},

@@ -20,13 +20,24 @@ that KiCad's ERC and other checkers missed on real fix commits (examples/schemat
 * ``z80_wired_or_no_pullup``: a Z80's INT or BUSREQ with no pull-up and no push-pull driver (Zilog UM0080: each "is normally
   wired-OR and requires an external pull-up");
 * ``mdio_no_pullup``: an Ethernet PHY's MDIO net with no resistor to a supply, following series 0 ohm links (TI DP83848C:
-  "The MDIO pin requires a pullup resistor (1.5 kΩ)").
+  "The MDIO pin requires a pullup resistor (1.5 kΩ)");
+* ``diode_forward_across_rails`` / ``led_reversed``: a diode forward-biased between two rails (anode above cathode, voltages read from
+  the net names), or an LED that can never be forward-biased (anode on ground, or cathode on a supply, in a board with no negative rail);
+* ``bjt_collector_emitter_reversed``: an NPN with its collector on ground, or a PNP with its collector on a supply;
+* ``ground_pin_on_supply`` / ``supply_pin_on_ground``: a pin named GND on a supply rail, or one named VCC/VDD/VIN on ground;
+* ``joined_pins_split``: two pins with one signal name (an ESD array's I/O1, a receptacle's D+) on two different nets;
+* ``net_name_pin_mismatch``: a net named SDA, MOSI or HSYNC that meets an SCL, MISO or VSYNC pin;
+* ``supply_rails_inverted``: a part's V+ (VCC, VDD) on a lower rail than its V- (VEE, VSS, GND);
+* ``pinout_differs_from_kicad_library``: a part whose value or part number is a symbol in KiCad's own library, drawn with another
+  symbol that numbers its pins differently.
 
 Each finding says what it rests on: KiCad's pin data plus a stated convention or standard. A finding is a reason to look,
 never a verdict, and nothing here was measured. Net names are not trusted for direction: a net called RX may be named
-from either end, so names never decide a finding on their own.
+from either end, so names never decide a direction. A name may still say which signal a net is (SDA is not SCL, at either
+end), and a rail's name gives its voltage for the diode and supply-pin checks.
 
     PYTHONPATH=src python -m hardware_splicer.kicad_design_review board.kicad_sch   # or a .net file
+    PYTHONPATH=src python -m hardware_splicer.kicad_design_review board.kicad_sch --also   # with KiCad ERC and kicad-happy
 """
 from __future__ import annotations
 
@@ -272,6 +283,229 @@ def _pull_rule_findings(comps, nets, pin_net, finding, resistor_to, driven_suppl
                     TI_MDIO, [ref], net)
 
 
+# Rules from the parts' physics and pin names, each a reason to look, not a verdict.
+GROUND_PIN = re.compile(r"^(GND|AGND|DGND|PGND|SGND|GNDA|GNDD|GND_?\d+|EP_?GND)$", re.I)
+SUPPLY_PIN = re.compile(r"^(VCC|VDD|VIN|V\+|VS|AVDD|DVDD|VDDA|VDDIO|VCCIO|VCCA|VCCB|PVIN|VREG_IN|IOVDD)\d*$", re.I)
+RAIL_PAIRS = (("V+", "V-"), ("VCC", "VEE"), ("+VS", "-VS"), ("VS+", "VS-"), ("VDD", "VSS"))  # GND pins have their own rules
+NAME_PAIRS = (("SDA", "SCL"), ("MOSI", "MISO"), ("COPI", "CIPO"), ("HSYNC", "VSYNC"))
+NC_NAME = re.compile(r"^(NC|DNC|N\.?C\.?|RSV\w*|RESERVED\w*|SHIELD\w*|SH\d*|MP\d*|MH\d*|EP|PAD\d*|TAB|~)$", re.I)
+JOINED_NAME = re.compile(r"^(D[+-]|DP|DN)$|[A-Z].*\d|\d.*[A-Z]", re.I)
+
+
+MAIN_GROUND = re.compile(r"^(GND|AGND|DGND|PGND|GNDA|GNDD|GNDPWR|0V)$", re.I)
+GENERIC_LIBS = re.compile(r"^(Device|Jumper|Connector\w*|power|Switch|Mechanical|Graphic|Diode|LED|Transistor_BJT|Battery_Management_generic|Simulation\w*)$")
+
+
+def _different_signals(a: str, b: str) -> bool:
+    """Two nets that are plainly not one signal: a rail and a non-rail, or the + and - halves of a pair."""
+    if (rail_voltage(a) is None) != (rail_voltage(b) is None):
+        return True
+    sa, sb = (_diff_polarity(n.split("/")[-1])[1] for n in (a, b))
+    return bool(sa and sb and sa != sb)
+
+
+def _token(name: str, token: str) -> bool:
+    return bool(re.search(rf"(^|[^A-Z0-9]){token}(\d*)($|[^A-Z])", name.upper()))
+
+
+def rail_voltage(net: str) -> float | None:
+    """0 for a ground net, a signed voltage for a net named after one (+5V, 3V3, A-2V5, -12V), else None."""
+    if GROUND.search(net):
+        return 0.0
+    seg = net.split("/")[-1]
+    if not (SUPPLY.search(net) or seg[:1] in "+-"):
+        return None
+    up = seg.upper()
+    m = (re.search(r"([+-])?(\d+)V(\d+)", up) or re.search(r"([+-])?(\d+)\.(\d+)V", up) or re.search(r"([+-])?(\d+)()V(?![A-Z])", up)
+         or re.search(r"([+-])(\d+)(?:\.(\d+))?$", up))
+    if not m:
+        return None
+    value = float(f"{m.group(2)}.{m.group(3) or 0}")
+    return -value if m.group(1) == "-" else value
+
+
+def _pin_name(comp: dict[str, Any], node: dict[str, str]) -> str:
+    if node.get("function"):
+        return node["function"]
+    return next((str(p.get("name", "")) for p in comp.get("pins", []) if p.get("num") == node.get("pin")), "")
+
+
+def _physics_findings(comps, nets, pin_net, finding) -> None:
+    names: dict[tuple[str, str], str] = {}
+    for net, nodes in nets.items():
+        for n in nodes:
+            names[(n["ref"], n["pin"])] = _pin_name(comps.get(n["ref"], {}), n)
+    negative_rails = any((v := rail_voltage(net)) is not None and v < 0 for net in nets)
+
+    def comp_of(ref: str) -> dict[str, Any]:
+        return comps.get(ref, {})
+
+    def describe(ref: str) -> str:
+        c = comps.get(ref, {})
+        return " ".join(str(c.get(k, "")) for k in ("lib", "part", "value", "description"))
+
+    by_ref: dict[str, dict[str, str]] = {}
+    for (ref, pin), net in pin_net.items():
+        by_ref.setdefault(ref, {})[pin] = net
+
+    for ref, pins in by_ref.items():
+        text = describe(ref)
+        roles: dict[str, list[str]] = {}
+        for pin in pins:
+            roles.setdefault(names.get((ref, pin), "").upper(), []).append(pin)
+        # Diodes, from their anode (A) and cathode (K) pins: dual parts pair A1 with K1.
+        diode = re.match(r"(D|LED|CR|DS)\d", ref) or re.search(r"diode|\bled\b", text, re.I)
+        # A part that repeats A or K (BAV99 names its pins K, A, K; MMBD1503A K, A, A) cannot be paired by name, so it is skipped.
+        repeated = any(sum(str(p.get("name", "")).upper() == n for p in comps.get(ref, {}).get("pins", [])) > 1 for n in ("A", "K"))
+        if diode and not repeated:
+            led = bool(re.search(r"\bled\b|^LED|:LED", text, re.I)) or ref.upper().startswith("LED")
+            for suffix in ("", "1", "2", "3", "4"):
+                a = roles.get("A" + suffix, [None])[0]
+                k = roles.get("K" + suffix, [None])[0]
+                if a is None or k is None:
+                    continue
+                na, nk = pins[a], pins[k]
+                va, vk = rail_voltage(na), rail_voltage(nk)
+                # Between two positive rails a diode is often deliberate (a drop to "4.6V", OR-ing), so only a path to ground or below counts.
+                if va is not None and vk is not None and va > 0 >= vk:
+                    finding("error" if not led else "warning", "diode_forward_across_rails",
+                            f"{ref} anode{suffix} is on {na} ({va:g} V) and its cathode on {nk} ({vk:g} V): it is forward-biased between two rails and "
+                            "conducts all the time. Check the part's pinout and its orientation.",
+                            "diode conducts from anode to cathode; rail voltages read from the net names", [ref], na, local=True)
+                elif led and not negative_rails and (va == 0 or (vk is not None and vk > 0 and va is None)):
+                    where = f"anode on ground net {na}" if va == 0 else f"cathode on supply net {nk}"
+                    finding("warning", "led_reversed", f"{ref} has its {where}, so it can never be forward-biased in a board with no negative rail. "
+                            "Check its orientation and pinout.", "LED conducts from anode to cathode; pin names from KiCad's symbol", [ref], na if va == 0 else nk, local=True)
+        # Bipolar transistors: an NPN conducts collector to emitter, so its collector sits above its emitter (a PNP the other way).
+        bjt = "npn" if re.search(r"\bnpn\b|q_npn", text, re.I) else "pnp" if re.search(r"\bpnp\b|q_pnp", text, re.I) else None
+        if bjt and "C" in roles and "E" in roles:
+            nc, ne = pins[roles["C"][0]], pins[roles["E"][0]]
+            vc, ve = rail_voltage(nc), rail_voltage(ne)
+            if bjt == "npn" and vc == 0 and ve != 0 and not (ve is not None and ve < 0):
+                finding("warning", "bjt_collector_emitter_reversed", f"{ref} (NPN) has its collector on ground net {nc} and its emitter on {ne}. "
+                        "An NPN switch normally has its emitter on ground; reversed it works poorly, if at all.",
+                        "NPN conduction from collector to emitter; pin names from KiCad's symbol", [ref], nc, local=True)
+            if bjt == "pnp" and vc is not None and vc > 0 and (ve is None or ve < vc) and not SUPPLY.search(ne):
+                finding("warning", "bjt_collector_emitter_reversed", f"{ref} (PNP) has its collector on supply net {nc} and its emitter on {ne}. "
+                        "A PNP switch normally has its emitter on the supply.", "PNP conduction from emitter to collector; pin names from KiCad's symbol", [ref], nc, local=True)
+        # Power pins on the wrong rail.
+        for pin, net in pins.items():
+            name = names.get((ref, pin), "")
+            v = rail_voltage(net)
+            if GROUND_PIN.match(name) and v not in (None, 0.0) and not GROUND.search(net):
+                finding("error", "ground_pin_on_supply", f"{ref} pin {pin} ({name}) is on supply net {net} ({v:g} V).",
+                        "pin named as a ground; rail voltage read from the net name", [ref], net, local=True)
+            # Only the board's main ground: stacked designs (Bitcoin-miner ASIC chains) feed each chip's VDD from the next one's GND1.
+            if SUPPLY_PIN.match(name) and MAIN_GROUND.match(net.split("/")[-1]) and len(nets.get(net, [])) > 1:
+                finding("error", "supply_pin_on_ground", f"{ref} pin {pin} ({name}) is on ground net {net}, so the part has no supply.",
+                        "pin named as a supply input; ground read from the net name", [ref], net, local=True)
+        # Two pins with one signal name are usually one node inside the part (an ESD array's pass-through I/O1, a receptacle's D+),
+        # so putting them on two nets joins those nets through the part.
+        comp = comp_of(ref)
+        lib_names: dict[str, list[dict[str, str]]] = {}
+        for p in comp.get("pins", []):
+            lib_names.setdefault(str(p.get("name", "")), []).append(p)
+        for pname, group in lib_names.items():
+            if len(group) != 2 or not JOINED_NAME.search(pname) or NC_NAME.match(pname) or any(p.get("type") in ("power_in", "power_out") for p in group):
+                continue
+            a, b = (pins.get(p["num"]) for p in group)
+            # Flow-through layouts (a clamp's pin 1 to the connector, pin 6 to the chip) join two names for one signal on purpose, and
+            # multi-unit symbols repeat names, so only nets that are plainly different signals count: the two halves of a pair, or a rail and a signal.
+            if a and b and a != b and len(nets.get(a, [])) > 1 and len(nets.get(b, [])) > 1 and _different_signals(a, b):
+                finding("warning", "joined_pins_split", f"{ref} pins {group[0]['num']} and {group[1]['num']} are both {pname}, usually one node inside the part, "
+                        f"but they sit on two nets ({a} and {b}), which the part then joins.", "pin names from KiCad's symbol", [ref], a, local=True)
+    # A part's positive and negative supply pins on rails the wrong way round (an op-amp's V+ on -12 V and V- on +12 V).
+    for ref, pins in by_ref.items():
+        named = {names.get((ref, pin), "").upper(): net for pin, net in pins.items()}
+        for pos, neg in RAIL_PAIRS:
+            if pos in named and neg in named:
+                vp, vn = rail_voltage(named[pos]), rail_voltage(named[neg])
+                if vp is not None and vn is not None and vp < vn:
+                    finding("error", "supply_rails_inverted", f"{ref} {pos} is on {named[pos]} ({vp:g} V) but {neg} on {named[neg]} ({vn:g} V): "
+                            f"its supply is reversed.", "pin names from KiCad's symbol; rail voltages read from the net names", [ref], named[pos], local=True)
+    # A net named after one signal of a pair that meets the other signal's pin: SDA on an SCL pin, MOSI on MISO.
+    for net, nodes in nets.items():
+        seg = net.split("/")[-1]
+        for first, second in NAME_PAIRS:
+            for named, other in ((first, second), (second, first)):
+                if not _token(seg, named) or _token(seg, other):
+                    continue
+                # Pins of both signals on one net are a short, which i2c_sda_scl_short already reports.
+                if any(_token(names.get((n["ref"], n["pin"]), ""), named) for n in nodes):
+                    continue
+                for n in nodes:
+                    pname = names.get((n["ref"], n["pin"]), "")
+                    if _token(pname, other) and not _token(pname, named) and not _is_connector(comps.get(n["ref"], {})):
+                        finding("warning", "net_name_pin_mismatch", f"Net {net} is named {named} but meets {n['ref']} pin {n['pin']} ({pname}). "
+                                f"Check {named} and {other} are not swapped.", "net label versus the pin function in KiCad's symbol", [n["ref"]], net)
+
+
+def _library_pinout_findings(comps, finding) -> None:
+    """A part whose value or part number names a symbol in KiCad's own library, drawn with a different symbol that numbers its pins
+    differently: one of the two pinouts is wrong for the real part."""
+    try:
+        from .part_lookup import libraries_available, lookup_part, symbol_pins
+    except ImportError:
+        return
+    if not libraries_available():
+        return
+
+    def role(name: str) -> str | None:
+        n = name.upper().strip()
+        if n in ("G", "GATE"):
+            return "gate"
+        if n in ("S", "SOURCE"):
+            return "source"
+        if n in ("D", "DRAIN"):
+            return "drain"
+        if n in ("B", "BASE"):
+            return "base"
+        if n in ("C", "COLLECTOR"):
+            return "collector"
+        if n in ("E", "EMITTER"):
+            return "emitter"
+        if n in ("A", "ANODE"):
+            return "anode"
+        if n in ("K", "CATHODE"):
+            return "cathode"
+        if GROUND_PIN.match(n) or n == "VSS":
+            return "ground"
+        if SUPPLY_PIN.match(n):
+            return "supply"
+        return None
+
+    for ref, comp in comps.items():
+        if not comp.get("pins") or len(comp["pins"]) > 64:
+            continue
+        fields = comp.get("fields", {})
+        names = [comp.get("value", "")] + [v for k, v in fields.items() if re.search(r"mpn|part ?number|manufacturer_?part", k, re.I)]
+        # A part number has letters and digits (AO3401A, W25Q128JVS); "Jumper_3_Bridged12" or "LED" names a generic symbol instead.
+        for candidate in dict.fromkeys(n.strip() for n in names if n and 5 <= len(n.strip()) <= 40 and re.search(r"[A-Za-z]{2}", n)
+                                       and re.search(r"\d", n) and not re.search(r"[_ ]", n.strip())):
+            hits = [m for m in lookup_part(candidate).get("matches", []) if m.get("tier") == "exact" and not GENERIC_LIBS.match(m.get("library", ""))]
+            if not hits:
+                continue
+            hit = hits[0]
+            if hit["library"] == comp.get("lib") and hit["name"] == comp.get("part"):
+                break
+            try:
+                theirs = {p["number"]: p["name"] for p in symbol_pins(hit["library"], hit["name"], limit=None)["pins"]}
+            except Exception:  # an unreadable library symbol is a reason to skip, not to fail the review
+                break
+            ours = {str(p.get("num")): str(p.get("name", "")) for p in comp["pins"]}
+            if len(ours) != len(theirs):  # a breakout module (BME280's VIN, GND, SCL, SDA) is drawn with fewer pins than its chip
+                break
+            clashes = [(num, ours[num], theirs[num]) for num in sorted(set(ours) & set(theirs))
+                       if role(ours[num]) and role(theirs[num]) and role(ours[num]) != role(theirs[num])]
+            if clashes:
+                listed = "; ".join(f"pin {num}: {a} here, {b} in KiCad" for num, a, b in clashes[:4])
+                finding("warning", "pinout_differs_from_kicad_library",
+                        f"{ref} ({candidate}) is drawn with {comp.get('lib')}:{comp.get('part')}, but KiCad's own symbol {hit['library']}:{hit['name']} "
+                        f"for that part numbers its pins differently ({listed}). Check the datasheet's pinout.",
+                        f"KiCad library symbol {hit['library']}:{hit['name']}, matched by exact part name", [ref])
+            break
+
+
 USB2_PIN = re.compile(r"(^|[/_])(USB\d?_?)?D\d?(?P<sign>[+-]|P|M|N)$", re.I)
 DIFF_PIN = re.compile(r"(^|[/_])[A-Z0-9_]*?(TX|RX|HS[IO]|HSO|HSI|CLK|LANE|REFCLK)\d*_?(?P<sign>P|N|\+|-)$", re.I)
 
@@ -285,7 +519,7 @@ def _diff_polarity(function: str) -> tuple[str | None, str | None]:
     return None, None
 
 
-def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[str, Any]:
+def review(model: dict[str, Any], mates: dict[str, Any] | None = None, library_check: bool = True) -> dict[str, Any]:
     comps, nets = model["components"], model["nets"]
     pin_net: dict[tuple[str, str], str] = {}
     for name, nodes in nets.items():
@@ -297,9 +531,10 @@ def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[s
     unannotated = sorted(r for r in comps if "?" in r and r in wired)  # a drawing-sheet symbol is on no net
     skipped: list[str] = []
 
-    def finding(severity: str, rule: str, message: str, basis: str, refs: list[str], net: str | None = None) -> None:
-        # An unannotated designator ("R?") names several parts at once, so nothing traced through one can be trusted.
-        if any("?" in r for r in refs) or (net and any("?" in n["ref"] for n in nets.get(net, []))):
+    def finding(severity: str, rule: str, message: str, basis: str, refs: list[str], net: str | None = None, local: bool = False) -> None:
+        # An unannotated designator ("R?") names several parts at once, so nothing traced through one can be trusted. A local
+        # finding rests only on the part's own pins and the net's name, so other parts' designators on that net do not matter.
+        if any("?" in r for r in refs) or (net and not local and any("?" in n["ref"] for n in nets.get(net, []))):
             skipped.append(rule)
             return
         findings.append({"severity": severity, "rule": rule, "message": message, "basis": basis, "components": sorted(set(refs)),
@@ -466,6 +701,9 @@ def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[s
                     finding("warning", "usb_c_cc_no_pulldown", f"{ref} {fn} {'is not connected' if net is None else 'has no resistor to ground'}. A USB-C sink needs Rd (5.1 kOhm) on each CC pin or a "
                             "source will not supply 5 V.", "USB Type-C specification, sink termination Rd = 5.1 kOhm (cited by section, not quoted here)", [ref], net)
     _pull_rule_findings(comps, nets, pin_net, finding, resistor_to, driven_supply)
+    _physics_findings(comps, nets, pin_net, finding)
+    if library_check:
+        _library_pinout_findings(comps, finding)
     _mated_findings(comps, nets, pin_net, mates, finding)
     if unannotated:
         findings.append({"severity": "info", "rule": "unannotated", "components": unannotated,
@@ -475,7 +713,68 @@ def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[s
     return {"schema_version": SCHEMA, "claim_boundary": BOUNDARY, "components": len(comps), "nets": len(nets), "findings": findings, "counts": counts}
 
 
-def review_schematic(path: Path, mates: dict[str, Any] | None = None) -> dict[str, Any]:
+# On 35 held-out bugs (examples/schematic_bug_benchmark/heldout_benchmark_20261127.json) KiCad ERC caught 9, kicad-happy 9 and HS 5;
+# together 14. ``also`` runs the other two next to HS's rules so one call gets all three.
+ALSO = ("kicad_erc", "kicad_happy")
+
+
+def _kicad_erc(sch: Path, cli: str, work: Path) -> dict[str, Any]:
+    sch = sch.resolve()
+    report = work / "erc.json"
+    subprocess.run([cli, "sch", "erc", "--format", "json", "--severity-all", "--output", str(report), str(sch)],
+                   capture_output=True, text=True, timeout=600, check=False, cwd=str(sch.parent))
+    if not report.exists():
+        return {"ran": False, "why": "kicad-cli wrote no ERC report"}
+    data = json.loads(report.read_text(encoding="utf-8"))
+    rows = [{"type": v.get("type"), "severity": v.get("severity"), "message": v.get("description"),
+             "where": [i.get("description") for i in v.get("items", [])][:4]} for sheet in data.get("sheets", []) for v in sheet.get("violations", [])]
+    return {"ran": True, "kicad_version": data.get("kicad_version"), "findings": rows,
+            "counts": {s: sum(r["severity"] == s for r in rows) for s in ("error", "warning")}}
+
+
+def _kicad_happy(sch: Path, work: Path) -> dict[str, Any]:
+    import os
+    import shutil
+
+    root = os.environ.get("HARDWARE_SPLICER_KICAD_HAPPY_ROOT")
+    script = Path(root) / "skills/kicad/scripts/analyze_schematic.py" if root else None
+    if script is None or not script.exists():
+        return {"ran": False, "why": "kicad-happy (MIT, aklofas/kicad-happy) is not set up: clone it and set HARDWARE_SPLICER_KICAD_HAPPY_ROOT"}
+    out = work / "kicad_happy.json"
+    cmd = [sys.executable, "-I", str(script), str(sch.resolve()), "--only-deterministic", "--compact", "-o", str(out)]
+    if shutil.which("bwrap"):  # no network for an outside tool reading the user's design
+        cmd = ["bwrap", "--unshare-net", "--ro-bind", "/", "/", "--bind", str(work), str(work), "--dev", "/dev", "--proc", "/proc", *cmd]
+    subprocess.run(cmd, capture_output=True, text=True, timeout=600, check=False)
+    if not out.exists():
+        return {"ran": False, "why": "kicad-happy wrote no report"}
+    data = json.loads(out.read_text(encoding="utf-8"))
+    rows = [{"rule": f.get("rule_id") or f.get("detector"), "severity": f.get("severity"), "message": str(f.get("summary", ""))[:300],
+             "components": f.get("components") or f.get("refs") or []} for f in data.get("findings", [])]
+    return {"ran": True, "findings": rows, "counts": {s: sum(r["severity"] == s for r in rows) for s in ("error", "warning", "info")}}
+
+
+def review_schematic(path: Path, mates: dict[str, Any] | None = None, also: tuple[str, ...] = ()) -> dict[str, Any]:
+    result = _review_schematic(path, mates)
+    if also:
+        if path.suffix == ".net":
+            result["also"] = {name: {"ran": False, "why": "needs the .kicad_sch, not a netlist"} for name in also}
+            return result
+        from .model3d import resolve_kicad_cli
+
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp)
+            result["also"] = {}
+            if "kicad_erc" in also:
+                cli = resolve_kicad_cli()
+                result["also"]["kicad_erc"] = _kicad_erc(path, cli, work) if cli else {"ran": False, "why": "kicad-cli not found"}
+            if "kicad_happy" in also:
+                result["also"]["kicad_happy"] = _kicad_happy(path, work)
+        result["also_note"] = ("KiCad ERC and kicad-happy findings are theirs, reported unchanged beside HS's own; on held-out bugs the three "
+                               "together caught 14 of 35, each alone at most 9.")
+    return result
+
+
+def _review_schematic(path: Path, mates: dict[str, Any] | None = None) -> dict[str, Any]:
     if path.suffix == ".net":
         return review(parse_netlist(path.read_text(encoding="utf-8", errors="replace")), mates)
     with tempfile.TemporaryDirectory() as tmp:
@@ -497,6 +796,10 @@ def review_schematic(path: Path, mates: dict[str, Any] | None = None) -> dict[st
 def main(argv: list[str] | None = None) -> int:
     args = sys.argv[1:] if argv is None else argv
     mates = None
+    also = ()
+    if "--also" in args:
+        also = ALSO
+        args = [a for a in args if a != "--also"]
     if "--mates" in args:
         i = args.index("--mates")
         mates = json.loads(Path(args[i + 1]).read_text(encoding="utf-8"))
@@ -505,7 +808,7 @@ def main(argv: list[str] | None = None) -> int:
         print(__doc__, file=sys.stderr)
         return 2
     try:
-        print(json.dumps(review_schematic(Path(args[0]), mates), indent=2))
+        print(json.dumps(review_schematic(Path(args[0]), mates, also), indent=2))
     except (KicadReviewError, OSError, subprocess.SubprocessError) as exc:
         print(json.dumps({"error": str(exc)}), file=sys.stderr)
         return 2

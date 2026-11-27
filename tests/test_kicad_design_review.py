@@ -16,8 +16,16 @@ def netlist(comps, nets, libparts=()):
     return parse_netlist(f"(export (version \"E\") (components {c}) (libparts {lp}) (nets {n}))")
 
 
+FRAGMENT_RULES: set[str] = set()
+
+
+def fragment_findings(model, mates=None):
+    """Every finding on a fixture; FRAGMENT_RULES would name rules that a board fragment trips only because it is cut off."""
+    return [f for f in review(model, mates)["findings"] if f["rule"] not in FRAGMENT_RULES]
+
+
 def rules(model):
-    return [f["rule"] for f in review(model)["findings"]]
+    return [f["rule"] for f in fragment_findings(model)]
 
 
 MCU = ("U1", "ESP32", "MCU", "ESP32-S3", "microcontroller")
@@ -47,7 +55,7 @@ def test_unconnected_power_pin_except_on_modules():
 def test_i2c_without_a_pullup_and_with_one():
     sensor = ("U5", "BME280", "Sensor", "BME280", "sensor")
     bare = netlist([MCU, sensor], [("/SDA", [("U1", "8", "GPIO8/SDA", "bidirectional"), ("U5", "3", "SDA", "bidirectional")])])
-    assert rules(bare) == ["i2c_no_pullup"] and "UM10204" in review(bare)["findings"][0]["basis"]
+    assert rules(bare) == ["i2c_no_pullup"] and "UM10204" in fragment_findings(bare)[0]["basis"]
     pulled = netlist([MCU, sensor, ("R1", "4.7k", "Device", "R", "Resistor")],
                      [("/SDA", [("U1", "8", "GPIO8/SDA", "bidirectional"), ("U5", "3", "SDA", "bidirectional"), ("R1", "1", "", "passive")]),
                       ("+3V3", [("R1", "2", "", "passive")])])
@@ -111,17 +119,17 @@ def _backpack(tx_function, rx_function):
 
 def test_a_declared_mate_catches_tx_wired_to_tx_across_the_connector():
     swapped = review(_backpack("TXD0", "RXD0"), FLIPPER)
-    found = {f["rule"] for f in swapped["findings"]}
+    found = {f["rule"] for f in swapped["findings"] if f["rule"] not in FRAGMENT_RULES}
     assert found == {"uart_tx_to_tx_across_connector", "uart_rx_to_rx_across_connector"}
-    assert all("pin offset 8, inferred from" in f["basis"] and "Black Wire" in f["basis"] for f in swapped["findings"])
-    assert review(_backpack("RXD0", "TXD0"), FLIPPER)["findings"] == []
+    assert all("pin offset 8, inferred from" in f["basis"] and "Black Wire" in f["basis"] for f in swapped["findings"] if f["rule"] not in FRAGMENT_RULES)
+    assert fragment_findings(_backpack("RXD0", "TXD0"), FLIPPER) == []
 
 
 def test_without_a_declaration_or_an_alignment_nothing_is_guessed():
-    assert review(_backpack("TXD0", "RXD0"))["findings"] == []
+    assert fragment_findings(_backpack("TXD0", "RXD0")) == []
     lone = netlist([ESP, HEADER], [("TX", [("J20", "5", "Pin_5", "passive"), ("U1", "37", "TXD0", "bidirectional")])])
-    assert [f["rule"] for f in review(lone, FLIPPER)["findings"]] == ["mate_unaligned"]
-    assert [f["rule"] for f in review(lone, {"J20": {"board": "no-such-board"}})["findings"]] == ["mate_unknown"]
+    assert [f["rule"] for f in fragment_findings(lone, FLIPPER)] == ["mate_unaligned"]
+    assert [f["rule"] for f in fragment_findings(lone, {"J20": {"board": "no-such-board"}})] == ["mate_unknown"]
 
 
 def test_usb_c_source_ports_and_controller_terminated_cc_are_not_warnings():
@@ -135,12 +143,12 @@ def test_usb_c_source_ports_and_controller_terminated_cc_are_not_warnings():
     cm5 = ("M1", "ComputeModule5-CM5", "CM5IO", "ComputeModule5-CM5", "Raspberry Pi Compute Module 5")
     module = netlist([usb, cm5], [("CC1", [("J1", "A5", "CC1", "bidirectional"), ("M1", "94", "CC1", "passive")]),
                                   ("CC2", [("J1", "B5", "CC2", "bidirectional"), ("M1", "96", "CC2", "passive")])], pins)
-    found = review(module)["findings"]
+    found = fragment_findings(module)
     assert [(f["rule"], f["severity"]) for f in found] == [("usb_c_cc_no_pulldown", "info")] * 2
     esd = ("U2", "USBLC6-2SC6", "Power_Protection", "USBLC6-2SC6", "Very low capacitance ESD protection diode")
     clamped = netlist([usb, esd], [("CC1", [("J1", "A5", "CC1", "bidirectional"), ("U2", "1", "IO1", "passive")]),
                                    ("CC2", [("J1", "B5", "CC2", "bidirectional"), ("U2", "3", "IO2", "passive")])], pins)
-    assert [(f["rule"], f["severity"]) for f in review(clamped)["findings"]] == [("usb_c_cc_no_pulldown", "warning")] * 2
+    assert [(f["rule"], f["severity"]) for f in fragment_findings(clamped)] == [("usb_c_cc_no_pulldown", "warning")] * 2
 
 
 def test_a_repeated_connector_supply_pin_may_stay_open_when_its_twin_is_wired():
@@ -158,7 +166,7 @@ def test_unannotated_parts_give_one_note_instead_of_findings():
     pins = [("Connector", "USB_C_Receptacle", [("A5", "CC1", "bidirectional"), ("B5", "CC2", "bidirectional")])]
     board = netlist([usb, ("R?", "10k", "Device", "R", "Resistor")], [("CC1", [("U?", "A5", "CC1", "bidirectional"), ("R?", "1", "", "passive")]),
                                                                     ("CC2", [("U?", "B5", "CC2", "bidirectional"), ("R?", "1", "", "passive")])], pins)
-    found = review(board)["findings"]
+    found = fragment_findings(board)
     assert [f["rule"] for f in found] == ["unannotated"] and "2 check(s)" in found[0]["message"]
 
 
@@ -301,7 +309,7 @@ def test_an_i2c_bus_known_only_by_its_net_name_needs_a_pull_up_too():
     mcu = ("U1", "ESP32-C3", "MCU_Espressif", "ESP32-C3", "MCU")
     header = ("J13", "Conn_01x04", "Connector_Generic", "Conn_01x04", "Generic connector")
     bare = netlist([mcu, header], [("/MCU/I2C_SDA", [("U1", "20", "IO12", "bidirectional"), ("J13", "3", "Pin_3", "passive")])])
-    assert [(f["rule"], f["severity"]) for f in review(bare)["findings"]] == [("i2c_no_pullup", "info")]  # the far side may hold the pull-ups
+    assert [(f["rule"], f["severity"]) for f in fragment_findings(bare)] == [("i2c_no_pullup", "info")]  # the far side may hold the pull-ups
     sensor = ("U2", "SHT40", "Sensor_Humidity", "SHT40", "Humidity sensor")
     on_board = netlist([mcu, sensor], [("/MCU/I2C_SDA", [("U1", "20", "IO12", "bidirectional"), ("U2", "3", "DATA", "bidirectional")])])
     assert rules(on_board) == ["i2c_no_pullup"]
@@ -344,7 +352,7 @@ PROG_HEADER = ("J5", "Conn_01x05", "Connector", "Conn_01x05", "Generic connector
 def test_esp32_chip_pu_that_only_reaches_a_header_floats():
     # elkel53930/extraice4 1c2461b8: CHIP_PU went to a programming header only; the fix added a 10 k pull-up.
     bare = netlist([MCU, PROG_HEADER], [("/CHIP_PU", [("U1", "4", "CHIP_PU", "input"), ("J5", "3", "Pin_3", "passive")])])
-    found = review(bare)["findings"]
+    found = fragment_findings(bare)
     assert [f["rule"] for f in found] == ["esp32_enable_floating"] and "must not be left floating" in found[0]["basis"]
     pulled = netlist([MCU, PROG_HEADER, RES], [("/CHIP_PU", [("U1", "4", "CHIP_PU", "input"), ("J5", "3", "Pin_3", "passive"), ("R9", "1", "", "passive")]),
                                           ("+3V3", [("R9", "2", "", "passive")])])
@@ -361,7 +369,7 @@ def test_z80_int_and_busreq_need_a_pullup_but_nmi_is_not_claimed():
     z80 = ("U10", "Z84C0020", "CPU", "Z80CPU", "Z80 CPU")
     bare = netlist([z80, PROG_HEADER], [("/INT", [("U10", "16", "~{INT}", "input"), ("J5", "1", "Pin_1", "passive")]),
                                    ("/NMI", [("U10", "17", "~{NMI}", "input"), ("J5", "2", "Pin_2", "passive")])])
-    found = review(bare)["findings"]
+    found = fragment_findings(bare)
     assert [(f["rule"], f["net"]) for f in found] == [("z80_wired_or_no_pullup", "/INT")]  # UM0080 says nothing of the kind for NMI
     pulled = netlist([z80, PROG_HEADER, RES], [("/INT", [("U10", "16", "~{INT}", "input"), ("J5", "1", "Pin_1", "passive"), ("R9", "1", "", "passive")]),
                                           ("+5V", [("R9", "2", "", "passive")])])
@@ -375,10 +383,10 @@ def test_mdio_follows_zero_ohm_links_and_defers_to_a_module_edge():
     link = ("R110", "R_0R_0402", "Device", "R", "Resistor")
     som = ("U1", "OSM-L_Carrier-side", "OSM", "OSM-L", "module connector")
     lone = netlist([phy], [("/MDIO", [("U7", "24", "MDIO", "bidirectional")])])
-    assert [f["severity"] for f in review(lone)["findings"] if f["rule"] == "mdio_no_pullup"] == ["warning"]
+    assert [f["severity"] for f in fragment_findings(lone) if f["rule"] == "mdio_no_pullup"] == ["warning"]
     via_link = netlist([phy, link, som], [("/MDIO", [("U7", "24", "MDIO", "bidirectional"), ("R110", "2", "", "passive")]),
                                           ("/RGMII.MDIO", [("R110", "1", "", "passive"), ("U1", "C7", "ETH_MDIO", "passive")])])
-    found = [f for f in review(via_link)["findings"] if f["rule"] == "mdio_no_pullup"]
+    found = [f for f in fragment_findings(via_link) if f["rule"] == "mdio_no_pullup"]
     assert len(found) == 1 and found[0]["severity"] == "info" and "U1" in found[0]["message"]
     fixed = netlist([phy, link, som, ("R219", "R_1k5_0402", "Device", "R", "Resistor")],
                     [("/MDIO", [("U7", "24", "MDIO", "bidirectional"), ("R110", "2", "", "passive"), ("R219", "1", "", "passive")]),
@@ -393,7 +401,7 @@ def test_usb_d_plus_meeting_d_minus_is_an_error_but_an_esd_channel_is_not():
     soc = ("U1", "H3", "MCU", "H3", "SoC")
     usb = ("J2", "USB_A", "Connector", "USB_A", "USB connector")
     crossed = netlist([soc, usb], [("/USB_D0+", [("U1", "5", "USB_D0+", "bidirectional"), ("J2", "3", "D-", "passive")])])
-    found = review(crossed)["findings"]
+    found = fragment_findings(crossed)
     assert [(f["severity"], f["rule"]) for f in found] == [("error", "diff_pair_polarity_swap")]
     straight = netlist([soc, usb], [("/USB_D0+", [("U1", "5", "USB_D0+", "bidirectional"), ("J2", "3", "D+", "passive")])])
     assert rules(straight) == []
@@ -409,7 +417,7 @@ def test_a_crossed_high_speed_lane_is_a_warning():
     soc = ("U14", "SoC", "MCU", "SoC", "SoC")
     mux = ("U16", "Redriver", "Interface", "PI3EQX", "redriver")
     lane = netlist([soc, mux], [("/PCIE_TX0", [("U14", "1", "PCIe_A_HSO0_P", "output"), ("U16", "2", "TX0_N", "input")])])
-    assert [(f["severity"], f["rule"]) for f in review(lane)["findings"]] == [("warning", "diff_pair_polarity_swap")]
+    assert [(f["severity"], f["rule"]) for f in fragment_findings(lane)] == [("warning", "diff_pair_polarity_swap")]
 
 
 def test_sda_meeting_scl_is_caught_when_the_symbol_types_the_pins_passive():
@@ -418,3 +426,124 @@ def test_sda_meeting_scl_is_caught_when_the_symbol_types_the_pins_passive():
     eeprom = ("U16", "24C02", "Memory_EEPROM", "24C02", "EEPROM")
     swapped = netlist([pmic, eeprom], [("/PMIC_I2C.SCL", [("U13", "10", "SCL", "passive"), ("U16", "5", "SDA", "bidirectional")])])
     assert "i2c_sda_scl_short" in rules(swapped)
+
+
+DIODE = ("D1", "1N4148", "Diode", "1N4148", "Small signal diode")
+DIODE_PINS = ("Diode", "1N4148", [("1", "K", "passive"), ("2", "A", "passive")])
+
+
+def test_a_diode_forward_biased_from_a_rail_to_ground_is_an_error_but_a_drop_between_rails_is_not():
+    short = netlist([DIODE], [("+3V3", [("D1", "2", "A", "passive"), ("U9", "1", "VDD", "power_in")]), ("GND", [("D1", "1", "K", "passive")])], [DIODE_PINS])
+    assert "diode_forward_across_rails" in rules(short)
+    clamp = netlist([DIODE], [("GND", [("D1", "2", "A", "passive")]), ("+3V3", [("D1", "1", "K", "passive")])], [DIODE_PINS])
+    assert rules(clamp) == []
+    drop = netlist([DIODE], [("+5V", [("D1", "2", "A", "passive")]), ("/4.6V", [("D1", "1", "K", "passive")])], [DIODE_PINS])
+    assert rules(drop) == []
+
+
+def test_an_led_with_its_anode_on_ground_can_never_light():
+    led = ("D2", "Red", "Device", "LED", "Light emitting diode")
+    pins = ("Device", "LED", [("1", "K", "passive"), ("2", "A", "passive")])
+    backwards = netlist([led], [("GND", [("D2", "2", "A", "passive")]), ("/LED", [("D2", "1", "K", "passive"), ("R1", "1", "", "passive")])], [pins])
+    assert rules(backwards) == ["led_reversed"]
+    forwards = netlist([led], [("GND", [("D2", "1", "K", "passive")]), ("/LED", [("D2", "2", "A", "passive"), ("R1", "1", "", "passive")])], [pins])
+    assert rules(forwards) == []
+
+
+def test_an_npn_with_its_collector_on_ground_is_flagged():
+    npn = ("Q5", "2N3904", "Transistor_BJT", "2N3904", "Small Signal NPN Transistor")
+    pins = ("Transistor_BJT", "2N3904", [("1", "E", "passive"), ("2", "B", "passive"), ("3", "C", "passive")])
+    flipped = netlist([npn], [("/~{RESET}", [("Q5", "1", "E", "passive")]), ("GND", [("Q5", "3", "C", "passive")])], [pins])
+    assert rules(flipped) == ["bjt_collector_emitter_reversed"]
+    right = netlist([npn], [("/~{RESET}", [("Q5", "3", "C", "passive")]), ("GND", [("Q5", "1", "E", "passive")])], [pins])
+    assert rules(right) == []
+
+
+def test_power_pins_on_the_wrong_rail_but_not_a_stacked_chips_local_ground():
+    ldo = ("U2", "LDO", "Regulator_Linear", "LP5907", "LDO")
+    on_rail = netlist([ldo], [("/A-2V5", [("U2", "2", "GND", "power_in"), ("C2", "2", "", "passive")])])
+    assert rules(on_rail) == ["ground_pin_on_supply"]
+    asic = ("IC4", "BM1397", "Miner", "BM1397", "ASIC")
+    grounded = netlist([asic], [("GND", [("IC4", "33", "VDD", "power_in"), ("C1", "2", "", "passive")])])
+    assert rules(grounded) == ["supply_pin_on_ground"]
+    stacked = netlist([asic], [("/BM1397-1/GND1", [("IC4", "33", "VDD", "power_in"), ("C1", "2", "", "passive")])])
+    assert rules(stacked) == []
+
+
+ESD = ("U6", "USBLC6-2SC6", "Power_Protection", "USBLC6-2SC6", "ESD protection")
+ESD_PINS = ("Power_Protection", "USBLC6-2SC6", [("1", "I/O1", "passive"), ("6", "I/O1", "passive"), ("3", "I/O2", "passive"), ("4", "I/O2", "passive")])
+
+
+def test_a_pass_through_clamp_that_joins_d_plus_to_d_minus_is_flagged_but_flow_through_is_not():
+    crossed = netlist([ESD], [("USB_D-", [("U6", "1", "I/O1", "passive"), ("U4", "13", "USB_D-", "bidirectional")]),
+                              ("USB_D+", [("U6", "6", "I/O1", "passive"), ("U4", "14", "USB_D+", "bidirectional")])], [ESD_PINS])
+    assert rules(crossed) == ["joined_pins_split"]
+    flow = netlist([ESD], [("DU-", [("U6", "1", "I/O1", "passive"), ("J1", "A7", "D-", "bidirectional")]),
+                           ("D-", [("U6", "6", "I/O1", "passive"), ("U4", "13", "USB_D-", "bidirectional")])], [ESD_PINS])
+    assert rules(flow) == []
+
+
+def test_a_net_named_sda_on_an_scl_pin_is_flagged():
+    bridge = ("U3", "SN65DSI84", "Interface", "SN65DSI84", "DSI to LVDS bridge")
+    swapped = netlist([bridge], [("/DSICtrl_1V8.SDA", [("U3", "15", "SCL", "input"), ("R4", "1", "", "passive")]),
+                                 ("/DSICtrl_1V8.SCL", [("U3", "16", "SDA", "bidirectional"), ("R5", "1", "", "passive")])])
+    assert rules(swapped) == ["net_name_pin_mismatch", "net_name_pin_mismatch"]
+    right = netlist([bridge], [("/DSICtrl_1V8.SDA", [("U3", "16", "SDA", "bidirectional"), ("R4", "1", "", "passive")])])
+    assert "net_name_pin_mismatch" not in rules(right)
+
+
+def test_a_part_number_whose_kicad_symbol_numbers_pins_differently_is_flagged():
+    from hardware_splicer.part_lookup import libraries_available, symbol_pins
+
+    if not libraries_available():
+        pytest.skip("KiCad's symbol libraries are not installed")
+    theirs = {p["number"]: p["name"] for p in symbol_pins("Transistor_FET", "AO3401A", limit=None)["pins"]}
+    assert theirs == {"1": "G", "2": "S", "3": "D"}
+    fet = ("Q3", "AO3401A", "Device", "Q_PMOS_GDS", "P-MOSFET")
+    gds = ("Device", "Q_PMOS_GDS", [("1", "G", "input"), ("2", "D", "passive"), ("3", "S", "passive")])
+    wrong = netlist([fet], [("/G", [("Q3", "1", "G", "input")])], [gds])
+    assert "pinout_differs_from_kicad_library" in rules(wrong)
+    gsd = ("Device", "Q_PMOS_GSD", [("1", "G", "input"), ("2", "S", "passive"), ("3", "D", "passive")])
+    right = netlist([("Q3", "AO3401A", "Device", "Q_PMOS_GSD", "P-MOSFET")], [("/G", [("Q3", "1", "G", "input")])], [gsd])
+    assert "pinout_differs_from_kicad_library" not in rules(right)
+
+
+def test_inverted_op_amp_rails_are_an_error():
+    amp = ("U14", "TL074", "Amplifier_Operational", "TL074", "Quad op-amp")
+    inverted = netlist([amp], [("+12V", [("U14", "11", "V-", "power_in"), ("C1", "1", "", "passive")]),
+                               ("-12V", [("U14", "4", "V+", "power_in"), ("C2", "1", "", "passive")])])
+    assert "supply_rails_inverted" in rules(inverted)
+
+
+
+def test_dual_diodes_that_repeat_a_pin_name_are_not_paired():
+    # KiCad's BAV99 names its pins K, A, K; longboi (held out) clamps a signal with it between +3.3V and GND correctly.
+    bav99 = ("D32", "BAV99", "Diode", "BAV99", "High-speed switching diodes")
+    pins = ("Diode", "BAV99", [("1", "K", "passive"), ("2", "A", "passive"), ("3", "K", "passive")])
+    clamp = netlist([bav99], [("+3.3V", [("D32", "2", "A", "passive")]), ("GND", [("D32", "1", "K", "passive")]),
+                              ("/SIG", [("D32", "3", "K", "passive"), ("R1", "1", "", "passive")])], [pins])
+    assert rules(clamp) == []
+
+
+def test_a_breakout_module_is_not_compared_with_its_chips_pinout():
+    from hardware_splicer.part_lookup import libraries_available
+
+    if not libraries_available():
+        pytest.skip("KiCad's symbol libraries are not installed")
+    module = ("U5", "BME280", "meteo", "BME280", "")
+    pins = ("meteo", "BME280", [("1", "VIN", "power_in"), ("2", "GND", "power_in"), ("3", "SCL", "bidirectional"), ("4", "SDA", "bidirectional")])
+    board = netlist([module], [("3V3", [("U5", "1", "VIN", "power_in"), ("C1", "1", "", "passive")]), ("GND", [("U5", "2", "GND", "power_in")])], [pins])
+    assert "pinout_differs_from_kicad_library" not in rules(board)
+
+
+def test_also_runs_kicad_erc_beside_hs_on_a_real_schematic():
+    import shutil
+    from pathlib import Path
+
+    if not shutil.which("kicad-cli"):
+        pytest.skip("kicad-cli is not installed")
+    sch = Path(__file__).resolve().parents[1] / "projects" / "hs-bus-a" / "kicad" / "hs_bus_a.kicad_sch"
+    res = review_schematic(sch, also=("kicad_erc", "kicad_happy"))
+    assert res["also"]["kicad_erc"]["ran"] and "counts" in res["also"]["kicad_erc"]
+    assert res["also"]["kicad_happy"]["ran"] or "HARDWARE_SPLICER_KICAD_HAPPY_ROOT" in res["also"]["kicad_happy"]["why"]
+    assert "findings" in res  # HS's own findings stay where they were

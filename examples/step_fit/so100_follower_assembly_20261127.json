@@ -1,0 +1,84 @@
+{
+ "schema": "hardware_splicer.step_fit_trial.v1",
+ "captured": "2026-11-27",
+ "source": {
+  "repository": "TheRobotStudio/SO-ARM100",
+  "path": "STEP/SO100/Follower_Specific/SO_5DOF_ARM100_Assembly.step",
+  "branch": "main",
+  "licence": "Apache-2.0",
+  "sha256": "6dda8ce9858b2a460082eb192678ba4dcfc062d8bbacc160111bf2019b8c6658",
+  "exported_by": "Autodesk Translation Framework v13.20.0.188 (Fusion 360)"
+ },
+ "run": "step_fit.analyse in the native CAD interpreter, 48 s on this machine",
+ "summary": {
+  "parts": 19,
+  "overlaps": 3,
+  "tight": 5,
+  "loose": 0,
+  "size_mm": [
+   110.93,
+   168.34,
+   211.77
+  ]
+ },
+ "overlaps_and_tight_gaps": [
+  {
+   "a": "SO_5DOF_ARM100_08k v1/SO_ARM100_08k_Mirror:1#2",
+   "b": "SO_5DOF_ARM100_08k v1/STS3215_03a:2",
+   "kind": "overlap",
+   "gap_mm": 0.0,
+   "overlap_mm3": 170.02
+  },
+  {
+   "a": "SO_5DOF_ARM100_08k v1/STS3215_03a:2",
+   "b": "SO_5DOF_ARM100_08k v1/SO_ARM100_08k_Asym_Mirror_Clip:1",
+   "kind": "overlap",
+   "gap_mm": 0.0,
+   "overlap_mm3": 8.39
+  },
+  {
+   "a": "SO_5DOF_ARM100_08k v1/STS3215_03a:4",
+   "b": "SO_5DOF_ARM100_08k v1/SO_ARM100_08k_Mirror:1#2",
+   "kind": "overlap",
+   "gap_mm": 0.0,
+   "overlap_mm3": 8.39
+  },
+  {
+   "a": "SO_5DOF_ARM100_08k v1/Wrist_Roll_Pitch_08i:1",
+   "b": "SO_5DOF_ARM100_08k v1/STS3215_03a:2",
+   "kind": "tight",
+   "gap_mm": 0.38,
+   "overlap_mm3": null
+  },
+  {
+   "a": "SO_5DOF_ARM100_08k v1/Moving_Jaw_08d:1",
+   "b": "SO_5DOF_ARM100_08k v1/Wrist_Roll_08c:1",
+   "kind": "tight",
+   "gap_mm": 0.499,
+   "overlap_mm3": null
+  },
+  {
+   "a": "SO_5DOF_ARM100_08k v1/Rotation_Pitch_08i:1",
+   "b": "SO_5DOF_ARM100_08k v1/Base_08q:1#1",
+   "kind": "tight",
+   "gap_mm": 0.8,
+   "overlap_mm3": null
+  },
+  {
+   "a": "SO_5DOF_ARM100_08k v1/Rotation_Pitch_08i:1",
+   "b": "SO_5DOF_ARM100_08k v1/Base_08q:1#2",
+   "kind": "tight",
+   "gap_mm": 0.8,
+   "overlap_mm3": null
+  },
+  {
+   "a": "SO_5DOF_ARM100_08k v1/SO_ARM100_08k_116_Square:1",
+   "b": "SO_5DOF_ARM100_08k v1/SO_ARM100_08k_Asym_Mirror_Clip:1",
+   "kind": "tight",
+   "gap_mm": 0.893,
+   "overlap_mm3": null
+  }
+ ],
+ "reading": "A 19-part assembly from another CAD program reads with every part named from its STEP tree. The largest overlap is 170 mm3 between an STS3215 servo model and a mirror bracket; whether that is a deliberate press fit, a simplified servo model or a modelling error needs the parts in hand. The check reports it; it does not decide which.",
+ "claim_boundary": "Measures the exported CAD model; overlaps may be deliberate press fits or simplified threads. Nothing was built or measured."
+}

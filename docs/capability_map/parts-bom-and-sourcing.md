@@ -5,7 +5,7 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 
 | Module | Lines | Tests | Status | Reach | What it says it does |
 |---|---|---|---|---|---|
-| `engineering_toolbelt` | 1081 | 4 | product | TMRC | HS's engineering tools for any agent, over MCP or REST, each working on one objective project. Every tool returns the same envelope: {"tool", "ok", "summary", "problems": [...], "result": {...}, "sour... |
+| `engineering_toolbelt` | 1115 | 6 | product | TMRC | HS's engineering tools for any agent, over MCP or REST, each working on one objective project. Every tool returns the same envelope: {"tool", "ok", "summary", "problems": [...], "result": {...}, "sour... |
 | `engineering_assurance` | 724 | 2 | product | MRC | Read-only engineering assurance projections over canonical project state. The assurance layer does not own evidence and cannot promote authority. It projects the existing source graph, project plan, b... |
 | `part_substitution` | 635 | 3 | product | TMRC | Bounded, declaration-based part substitution across an explicit assembly. The evaluator checks supplied facts; it does not identify parts, infer missing ratings, insert adapters, generate wiring, or g... |
 | `capability_runtime` | 611 | 2 | product | MRC | Canonical runtime and project-use capability truth. A catalog entry, an installed executable, a configured adapter, a compatible version, a successful machine run, and use on the current project are d... |
