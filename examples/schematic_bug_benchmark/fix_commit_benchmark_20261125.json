@@ -26,6 +26,11 @@
   "hs_review_current": {
    "caught": 14,
    "partial": 4
+  },
+  "hs_review_20261127": {
+   "caught": 15,
+   "partial": 5,
+   "scope": "re-run on the 10 missing-pull-up cases only; the other 60 keep their hs_review_current verdict"
   }
  },
  "caught_by_any_frozen_checker": 14,
@@ -66,9 +71,11 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
-   "note": "keyboard COL lines; internal pulls were the alternative"
+   "note": "keyboard COL lines; internal pulls were the alternative",
+   "note_20261127": "design intent (internal pulls were the alternative)"
   },
   {
    "repo": "Wren6991/RISCBoy",
@@ -231,9 +238,11 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
-   "note": ""
+   "note": "",
+   "note_20261127": "RP2040 RUN: not a datasheet requirement HS can cite"
   },
   {
    "repo": "LibreSolar/bms-c1",
@@ -606,9 +615,11 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
-   "note": ""
+   "note": "",
+   "note_20261127": "power-up state: design intent"
   },
   {
    "repo": "0xjmux/ESP-PROG-Adapter",
@@ -711,9 +722,11 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "P"
    },
-   "note": ""
+   "note": "",
+   "note_20261127": "mdio_no_pullup note on the PHY's MDIO before (it reaches the OSM module edge through a 0 ohm link), gone after the 1.5 k pull-up"
   },
   {
    "repo": "brenocq/bldc-motor",
@@ -771,9 +784,11 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
-   "note": ""
+   "note": "",
+   "note_20261127": "boot mode: no boot-strap pin visible to a rule in the netlist; its MAC MDIO now gets a note pointing at the carrier"
   },
   {
    "repo": "2sayle/USB_Dongle_KiCad",
@@ -876,9 +891,11 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "C"
    },
-   "note": ""
+   "note": "",
+   "note_20261127": "esp32_enable_floating warning on /CHIP_PU before, gone after the 10 k pull-up"
   },
   {
    "repo": "barbeque/sg1000",
@@ -891,9 +908,11 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
-   "note": ""
+   "note": "",
+   "note_20261127": "/NMI: Zilog UM0080 states no pull-up requirement for NMI (it does for INT and BUSREQ), so no rule claims it"
   },
   {
    "repo": "FyraLabs/suzyqboard",
@@ -921,9 +940,11 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "P"
+    "hs_review_current": "P",
+    "hs_review_20261127": "P"
    },
-   "note": "named bus to a header: current HS gives a note, not a warning"
+   "note": "named bus to a header: current HS gives a note, not a warning",
+   "note_20261127": "already a note from i2c_no_pullup (named bus to a header)"
   },
   {
    "repo": "256foundation/emberone00-pcb",
@@ -936,9 +957,11 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
-   "note": ""
+   "note": "",
+   "note_20261127": "BM1362 RI: vendor documentation not public"
   },
   {
    "repo": "benjamin-wilson/NerdNOS",
@@ -951,9 +974,11 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
-   "note": ""
+   "note": "",
+   "note_20261127": "BM1366 BI: vendor documentation not public"
   },
   {
    "repo": "antmicro/dc-scm-osm-l-carrier-card",
@@ -966,9 +991,11 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "P"
    },
-   "note": ""
+   "note": "",
+   "note_20261127": "mdio_no_pullup note on the PHY's MDIO before (it reaches the OSM module edge through a 0 ohm link), gone after the 1.5 k pull-up"
   },
   {
    "repo": "Miceuz/paper-wifi",
@@ -1340,5 +1367,15 @@
    "root_sheet": "darling.kicad_sch",
    "reason": "not a schematic-visible electrical bug (part numbers, DFM, routing, comments, values, features)"
   }
- ]
+ ],
+ "pull_rules_20261127": {
+  "rules": {
+   "esp32_enable_floating": "Espressif schematic checklist: \"CHIP_PU must not be left floating.\"",
+   "z80_wired_or_no_pullup": "Zilog UM0080: INT and BUSREQ are each \"normally wired-OR and requires an external pull-up\"",
+   "mdio_no_pullup": "TI DP83848C: \"The MDIO pin requires a pullup resistor (1.5 kΩ)\"; DP83867/DP83822 2.2 kΩ; IEEE 802.3 clause 22"
+  },
+  "fix_commits": "10 missing-pull-up cases re-run with scripts/schematic_checker_benchmark.py (KiCad 9.0.2, KiCad 10.0.8 container for four KiCad 10 projects): 1 caught, 1 partial (a note), 8 not claimed (reasons per case)",
+  "false_alarms": "0 findings from the three rules across 25 netlists of the 14 open reference boards and the held-out set (ESP32 boards with EN pulled up included)",
+  "date": "2026-11-27"
+ }
 }
