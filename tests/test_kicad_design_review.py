@@ -418,3 +418,83 @@ def test_sda_meeting_scl_is_caught_when_the_symbol_types_the_pins_passive():
     eeprom = ("U16", "24C02", "Memory_EEPROM", "24C02", "EEPROM")
     swapped = netlist([pmic, eeprom], [("/PMIC_I2C.SCL", [("U13", "10", "SCL", "passive"), ("U16", "5", "SDA", "bidirectional")])])
     assert "i2c_sda_scl_short" in rules(swapped)
+
+
+DIODE = ("D1", "1N4148", "Diode", "1N4148", "Small signal diode")
+DIODE_PINS = ("Diode", "1N4148", [("1", "K", "passive"), ("2", "A", "passive")])
+
+
+def test_a_diode_forward_biased_from_a_rail_to_ground_is_an_error_but_a_drop_between_rails_is_not():
+    short = netlist([DIODE], [("+3V3", [("D1", "2", "A", "passive"), ("U9", "1", "VDD", "power_in")]), ("GND", [("D1", "1", "K", "passive")])], [DIODE_PINS])
+    assert "diode_forward_across_rails" in rules(short)
+    clamp = netlist([DIODE], [("GND", [("D1", "2", "A", "passive")]), ("+3V3", [("D1", "1", "K", "passive")])], [DIODE_PINS])
+    assert rules(clamp) == []
+    drop = netlist([DIODE], [("+5V", [("D1", "2", "A", "passive")]), ("/4.6V", [("D1", "1", "K", "passive")])], [DIODE_PINS])
+    assert rules(drop) == []
+
+
+def test_an_led_with_its_anode_on_ground_can_never_light():
+    led = ("D2", "Red", "Device", "LED", "Light emitting diode")
+    pins = ("Device", "LED", [("1", "K", "passive"), ("2", "A", "passive")])
+    backwards = netlist([led], [("GND", [("D2", "2", "A", "passive")]), ("/LED", [("D2", "1", "K", "passive"), ("R1", "1", "", "passive")])], [pins])
+    assert rules(backwards) == ["led_reversed"]
+    forwards = netlist([led], [("GND", [("D2", "1", "K", "passive")]), ("/LED", [("D2", "2", "A", "passive"), ("R1", "1", "", "passive")])], [pins])
+    assert rules(forwards) == []
+
+
+def test_an_npn_with_its_collector_on_ground_is_flagged():
+    npn = ("Q5", "2N3904", "Transistor_BJT", "2N3904", "Small Signal NPN Transistor")
+    pins = ("Transistor_BJT", "2N3904", [("1", "E", "passive"), ("2", "B", "passive"), ("3", "C", "passive")])
+    flipped = netlist([npn], [("/~{RESET}", [("Q5", "1", "E", "passive")]), ("GND", [("Q5", "3", "C", "passive")])], [pins])
+    assert rules(flipped) == ["bjt_collector_emitter_reversed"]
+    right = netlist([npn], [("/~{RESET}", [("Q5", "3", "C", "passive")]), ("GND", [("Q5", "1", "E", "passive")])], [pins])
+    assert rules(right) == []
+
+
+def test_power_pins_on_the_wrong_rail_but_not_a_stacked_chips_local_ground():
+    ldo = ("U2", "LDO", "Regulator_Linear", "LP5907", "LDO")
+    on_rail = netlist([ldo], [("/A-2V5", [("U2", "2", "GND", "power_in"), ("C2", "2", "", "passive")])])
+    assert rules(on_rail) == ["ground_pin_on_supply"]
+    asic = ("IC4", "BM1397", "Miner", "BM1397", "ASIC")
+    grounded = netlist([asic], [("GND", [("IC4", "33", "VDD", "power_in"), ("C1", "2", "", "passive")])])
+    assert rules(grounded) == ["supply_pin_on_ground"]
+    stacked = netlist([asic], [("/BM1397-1/GND1", [("IC4", "33", "VDD", "power_in"), ("C1", "2", "", "passive")])])
+    assert rules(stacked) == []
+
+
+ESD = ("U6", "USBLC6-2SC6", "Power_Protection", "USBLC6-2SC6", "ESD protection")
+ESD_PINS = ("Power_Protection", "USBLC6-2SC6", [("1", "I/O1", "passive"), ("6", "I/O1", "passive"), ("3", "I/O2", "passive"), ("4", "I/O2", "passive")])
+
+
+def test_a_pass_through_clamp_that_joins_d_plus_to_d_minus_is_flagged_but_flow_through_is_not():
+    crossed = netlist([ESD], [("USB_D-", [("U6", "1", "I/O1", "passive"), ("U4", "13", "USB_D-", "bidirectional")]),
+                              ("USB_D+", [("U6", "6", "I/O1", "passive"), ("U4", "14", "USB_D+", "bidirectional")])], [ESD_PINS])
+    assert rules(crossed) == ["joined_pins_split"]
+    flow = netlist([ESD], [("DU-", [("U6", "1", "I/O1", "passive"), ("J1", "A7", "D-", "bidirectional")]),
+                           ("D-", [("U6", "6", "I/O1", "passive"), ("U4", "13", "USB_D-", "bidirectional")])], [ESD_PINS])
+    assert rules(flow) == []
+
+
+def test_a_net_named_sda_on_an_scl_pin_is_flagged():
+    bridge = ("U3", "SN65DSI84", "Interface", "SN65DSI84", "DSI to LVDS bridge")
+    swapped = netlist([bridge], [("/DSICtrl_1V8.SDA", [("U3", "15", "SCL", "input"), ("R4", "1", "", "passive")]),
+                                 ("/DSICtrl_1V8.SCL", [("U3", "16", "SDA", "bidirectional"), ("R5", "1", "", "passive")])])
+    assert rules(swapped) == ["net_name_pin_mismatch", "net_name_pin_mismatch"]
+    right = netlist([bridge], [("/DSICtrl_1V8.SDA", [("U3", "16", "SDA", "bidirectional"), ("R4", "1", "", "passive")])])
+    assert "net_name_pin_mismatch" not in rules(right)
+
+
+def test_a_part_number_whose_kicad_symbol_numbers_pins_differently_is_flagged():
+    from hardware_splicer.part_lookup import libraries_available, symbol_pins
+
+    if not libraries_available():
+        pytest.skip("KiCad's symbol libraries are not installed")
+    theirs = {p["number"]: p["name"] for p in symbol_pins("Transistor_FET", "AO3401A", limit=None)["pins"]}
+    assert theirs == {"1": "G", "2": "S", "3": "D"}
+    fet = ("Q3", "AO3401A", "Device", "Q_PMOS_GDS", "P-MOSFET")
+    gds = ("Device", "Q_PMOS_GDS", [("1", "G", "input"), ("2", "D", "passive"), ("3", "S", "passive")])
+    wrong = netlist([fet], [("/G", [("Q3", "1", "G", "input")])], [gds])
+    assert "pinout_differs_from_kicad_library" in rules(wrong)
+    gsd = ("Device", "Q_PMOS_GSD", [("1", "G", "input"), ("2", "S", "passive"), ("3", "D", "passive")])
+    right = netlist([("Q3", "AO3401A", "Device", "Q_PMOS_GSD", "P-MOSFET")], [("/G", [("Q3", "1", "G", "input")])], [gsd])
+    assert "pinout_differs_from_kicad_library" not in rules(right)
