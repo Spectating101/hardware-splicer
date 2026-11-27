@@ -1,0 +1,35 @@
+{
+ "schema": "hardware_splicer.drive_gearmotors.v1",
+ "source_note": "Drive units salvaged from consumer robots, characterised by open measurement (OOMWOO's part-specs, Apache-2.0). Not rated by any maker; torque limits unknown.",
+ "families": [
+  {
+   "id": "salvaged-roborock-s5-wheel-module-14v4",
+   "url": "https://github.com/makerspet/oomwoo/blob/b7e37f61bfe62e18c69b6ae4a01a5dbd63d55a04/contributions/part-specs/IKsares/drive-wheel/README.md",
+   "accessed": "2026-11-27",
+   "quote": "Measured by @IKsares on one aftermarket Roborock S5 Max-family module (motor CDM GM-RS360-16248, DC 12.0V): R 5.08 ohm, brush drop 1.91 V, no-load 0.13 A at 12 V, 6150-6180 rpm no-load at 12 V, gearbox 65.36:1 by tooth count, wheel 71.5 mm, stall 2.46 A at 14.4 V by (V - V0)/R",
+   "voltage_v": 14.4,
+   "no_load_current_a": 0.13,
+   "stall_current_a": 2.46,
+   "mass_g": null,
+   "limits": {},
+   "wheel_mm": 71.5,
+   "encoder": {
+    "cycles_per_motor_rev": 4,
+    "mm_per_rising_edge": 0.859,
+    "channels": 1
+   },
+   "derivation": {
+    "ke_v_s_per_rad": 0.01461,
+    "gear_efficiency_assumed": 0.6,
+    "basis": "No-load speed and stall torque at 14.4 V are derived from the measured constants: back-EMF (V - V0 - I0 R) over the measured 12 V speed gives Ke = Kt; stall torque is Kt (I_stall - I0) through the gearbox at an ASSUMED 60% efficiency (four stages, not measured). No-load current at 14.4 V is taken as the 12 V figure. One unit, measured cold."
+   },
+   "ratios": [
+    {
+     "ratio": 65.36,
+     "no_load_rpm": 118.3,
+     "stall_torque_kg_cm": 13.6
+    }
+   ]
+  }
+ ]
+}

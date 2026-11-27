@@ -51,3 +51,19 @@ def test_hobby_tt_motor_uses_the_sellers_measured_stall_and_leaves_limits_unknow
     data["families"] = [dict(f, stall_current_a=None) if f["id"].startswith("adafruit-tt") else f for f in data["families"]]
     res = ds.size(0.9, 65, 4, 0.3, 10, data=data)
     assert res["passing"][-1]["current_a"]["cruise_per_motor"] is None
+
+
+def test_salvaged_vacuum_wheel_module_reproduces_its_measurements():
+    """The Roborock-type wheel module's figures at 14.4 V are derived from @IKsares's bench constants; the same
+    constants must give back what was measured at 12 V (6150-6180 rpm no-load, 1.99 A stall) and 94 wheel rpm."""
+    import math
+    from hardware_splicer import drive_sizing as ds
+    fam = next(f for f in ds.families()["families"] if f["id"].startswith("salvaged-roborock"))
+    ke, r, v0, i0 = fam["derivation"]["ke_v_s_per_rad"], 5.08, 1.91, fam["no_load_current_a"]
+    motor_rpm_12 = (12 - v0 - i0 * r) / ke * 60 / (2 * math.pi)
+    assert 6150 <= motor_rpm_12 <= 6180
+    assert round((12 - v0) / r, 2) == 1.99
+    assert abs(motor_rpm_12 / fam["ratios"][0]["ratio"] - 94) < 1
+    assert fam["derivation"]["gear_efficiency_assumed"] == 0.6 and fam["limits"] == {}
+    res = ds.size(1.4, fam["wheel_mm"], 2, 0.25, 10)
+    assert any(o["family"] == fam["id"] for o in res["passing"])
