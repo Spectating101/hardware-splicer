@@ -96,6 +96,7 @@ a project with no licence is read and cited, never copied. Routing now tries Fre
 the board's net-class widths (`krt_route`), then Copper (`copper_route`); each result is judged by HS's own finish, DRC
 and track-current check, never by the router's report.
 
-Agents on other machines reach the toolbelt over MCP through SSH: `ssh optiplex
-/home/phyrexian/.local/share/hardware-splicer/hs-mcp.sh` runs the MCP server from a clean copy of `main` with the
-routers configured (set up 28 Nov 2026 for Backplane on the laptop).
+Agents on other machines reach the toolbelt over MCP through SSH: register `ssh <HS machine>
+~/.local/share/hardware-splicer/hs-mcp.sh` as a stdio MCP server, where that script runs `python -m
+hardware_splicer.mcp_server` from a clean copy of `main` with the routers' settings exported (set up 28 Nov 2026 for an
+agent workspace on a second machine).
