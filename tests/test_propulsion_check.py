@@ -245,3 +245,35 @@ def test_a_table_from_a_smaller_pack_still_does_not_apply():
     spec = {"rotors": 4, "prop": "APC9047 3S", "all_up_mass_g": 900, "battery": {"cells": 4, "capacity_mah": 3000, "c_continuous": 25},
             "esc_continuous_a": 30}
     assert "bench_voltage_mismatch" in rules(check_propulsion(spec, SUNNYSKY))
+
+
+CALIBRATION = json.loads((ROOT / "src/hardware_splicer/data/propulsion/calibration_aircraft_20261127.json").read_text())
+
+
+def test_brushless_crazyflie_calibrates_the_same_way():
+    # Crazyflie 2.1 Brushless: 34 g, 350 mAh, "10 minutes"; Bitcraze states at least 5 g/W at hover. Fed through the check
+    # as a two-point table (hover point from that efficiency, peak point from the motor post), the whole pack gives 10 min
+    # and HS's 80% default about 8, the same 20% as the brushed aircraft.
+    cf = next(a for a in CALIBRATION["aircraft"] if a["id"] == "crazyflie-2.1-brushless")
+    hover_g = cf["takeoff_g"] / cf["rotors"]
+    hover_w = hover_g / cf["power"]["hover_efficiency_g_per_w"]
+    peak = cf["power"]["peak"]
+    table = {"schema": "hs.drone_proving_ground.thrust_table.v1", "motor": "Bitcraze 08028-10000KV", "source": cf["sources"][1].split()[0],
+             "source_class": "maker_page", "accessed": "2026-11-27", "columns": ["thrust_g", "voltage_v", "current_a"],
+             "props": {"55-35": [[hover_g, 3.7, hover_w / 3.7], [peak["thrust_g"], peak["voltage_v"], peak["current_a"]]]}}
+    spec = {"rotors": 4, "prop": "55-35", "all_up_mass_g": cf["takeoff_g"], "esc_continuous_a": 5,
+            "battery": {"cells": 1, "capacity_mah": cf["capacity_mah"], "c_continuous": 15},
+            "assumptions": {"avionics_power_w": cf["avionics_power_w"], "min_tw_ratio": 1.0}}
+    full = check_propulsion(dict(spec, assumptions=dict(spec["assumptions"], usable_capacity_fraction=1.0)), table)["results"]
+    assert abs(full["hover_time_min"] - cf["published_flight_time_min"]) / cf["published_flight_time_min"] < 0.05
+    default = check_propulsion(spec, table)["results"]["hover_time_min"]
+    assert 0.75 < default / cf["published_flight_time_min"] < 0.85
+
+
+def test_momentum_law_from_the_peak_alone_would_flatter_a_small_motor():
+    # Why the check takes the more pessimistic of two extrapolations: the ideal 1.5-power law from the 08028's peak point
+    # (30 g at 7.2 W) predicts far better hover efficiency than Bitcraze measured (5 g/W).
+    cf = next(a for a in CALIBRATION["aircraft"] if a["id"] == "crazyflie-2.1-brushless")
+    peak, hover_g = cf["power"]["peak"], cf["takeoff_g"] / cf["rotors"]
+    law_w = peak["power_w"] * (hover_g / peak["thrust_g"]) ** 1.5
+    assert hover_g / law_w > 1.5 * cf["power"]["hover_efficiency_g_per_w"]

@@ -1,0 +1,48 @@
+{
+ "schema": "hardware_splicer.propulsion_calibration.v1",
+ "captured": "2026-11-27",
+ "note": "Flown aircraft whose maker publishes enough to test HS's hover-time arithmetic. Each gives mass, pack and stated flight time; the power data is a bench table or the maker's stated hover efficiency.",
+ "aircraft": [
+  {
+   "id": "crazyflie-2.0",
+   "rotors": 4,
+   "takeoff_g": 27,
+   "cells": 1,
+   "capacity_mah": 240,
+   "published_flight_time_min": 7,
+   "power": {
+    "thrust_table": "crazyflie-2.0-coreless-1s",
+    "prop": "CF2 45mm"
+   },
+   "avionics_power_w": 0.96,
+   "sources": [
+    "https://www.bitcraze.io/documentation/hardware/crazyflie_2_0/crazyflie_2_0-datasheet.pdf",
+    "https://github.com/bitcraze/crazyflie-firmware/blob/master/docs/functional-areas/pwm-to-thrust.md"
+   ]
+  },
+  {
+   "id": "crazyflie-2.1-brushless",
+   "rotors": 4,
+   "takeoff_g": 34,
+   "cells": 1,
+   "capacity_mah": 350,
+   "published_flight_time_min": 10,
+   "power": {
+    "hover_efficiency_g_per_w": 5.0,
+    "quote": "Together with the bitcraze 55-35 mm propeller we manage to achieve a system efficiency of over 5 W/g during hover ... hover time ... a bit over 10 minutes (the unit is g/W: 5 W per gram would be 170 W for a 34 g aircraft)",
+    "peak": {
+     "thrust_g": 30,
+     "power_w": 7.2,
+     "current_a": 1.8,
+     "voltage_v": 4.0
+    }
+   },
+   "avionics_power_w": 0.96,
+   "avionics_basis": "Crazyflie 2.0 bench: 0.24 A at 4.01 V with motors off (assumed the same board load)",
+   "sources": [
+    "https://www.bitcraze.io/documentation/hardware/crazyflie_2_1_brushless/crazyflie_2_1_brushless-datasheet.pdf",
+    "https://www.bitcraze.io/2024/08/the-optimized-crazyflie-2-1-brushless-motors/ (post ?p=13220, 2024-08-12)"
+   ]
+  }
+ ]
+}
