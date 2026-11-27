@@ -11,7 +11,7 @@ checkout: prices and stock move.
 4. **Check the placement preview before paying.** JLCPCB does not correct rotations. Look at:
    - polarity: D1 (SMBJ15CA), D2-D4 (LEDs), D5 (zener), C7 (electrolytic);
    - pin 1: U1 (FT232RL), U2, U3 (SOT-23-5), U4 (SC-70);
-   - the through-hole parts (C7, J1-J5), placed at their footprint origin from the board file, not their centre.
+   - the through-hole parts and J1 (C7, J1-J5), placed at the centre of their pads, which KiCad's position file leaves out.
 5. **Through-hole parts** (C7, J2-J5, J1's shell) are hand-soldered on the Economic service; the quote includes that.
 
 Nothing in this folder has been built or tested. The board passed KiCad DRC with no errors (two silkscreen warnings) and
