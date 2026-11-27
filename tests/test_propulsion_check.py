@@ -300,3 +300,10 @@ def test_a_two_inch_build_picks_the_m1104_on_its_three_cell_table():
     undersized = pick({"rotors": 4, "mass_without_motors_g": 95, "battery": {"cells": 3, "capacity_mah": 450, "c_continuous": 75},
                        "esc_continuous_a": 13, "frame": {"wheelbase_mm": 100}})
     assert "esc_undersized" in {(r["table"]): r for r in undersized["failing"]}["tmotor-m1104-7500kv-3s"]["reasons"]
+
+
+def test_a_one_cell_whoop_picks_a_one_cell_motor():
+    whoop = pick({"rotors": 4, "mass_without_motors_g": 22, "battery": {"cells": 1, "capacity_mah": 300, "c_continuous": 30},
+                  "esc_continuous_a": 5, "frame": {"wheelbase_mm": 75}, "assumptions": {"avionics_power_w": 0.8}})
+    assert whoop["passing"] and all(r["table"].endswith("-1s") for r in whoop["passing"])
+    assert whoop["passing"][0]["hover_power_method"] == "interpolated" and 3 < whoop["passing"][0]["hover_time_min"] < 10
