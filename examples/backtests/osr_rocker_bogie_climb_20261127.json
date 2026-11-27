@@ -1,0 +1,15 @@
+{
+ "schema": "hardware_splicer.backtest.v1",
+ "captured": "2026-11-27",
+ "id": "osr-rocker-bogie-climb",
+ "question": "HS's rocker-bogie step model stopped at one wheel radius. NASA-JPL's Open Source Rover says a rocker-bogie climbs much higher. Who is right, and what does HS need?",
+ "data": {
+  "source": "nasa-jpl/open-source-rover, mechanical/rocker_bogie/README.md (Apache-2.0)",
+  "quote": "The suspension system on a typical consumer vehicle can traverse obstacles about half the height of one wheel; the Rocker-Bogie suspension system can traverse obstacles over 2 times the height of the wheel.",
+  "kind": "a design claim in the README, not a measurement on the OSR; no test, step height or friction is given"
+ },
+ "hs_before": "max step = wheel radius at any friction (72 mm on OSR's 144 mm wheels), reported as limited_by_model",
+ "result": "The claim and HS's cap are not in conflict: HS's cap was the edge model's limit, not the rover's. Above one radius the front wheel meets the step as a wall and climbs it if mu^2 (W - N_f) >= N_f; with equal arms (N_f = W/6) that needs mu >= 0.447, which rubber on concrete or wood normally exceeds. How high it climbs is the bogie's lever times the sine of its rotation, which OSR does not publish.",
+ "change": "rocker_bogie now reports a wall phase above one radius: whether friction allows it, the wheel torque (N_f r), and a height only when bogie_max_rotation_deg is given.",
+ "still_open": "The 2x figure itself is unchecked: it needs OSR's bogie rotation limit and link lengths (from its CAD) and a measured climb. The rocker's own rotation, which adds lift, is not modelled."
+}
