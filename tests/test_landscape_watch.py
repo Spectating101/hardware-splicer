@@ -23,6 +23,7 @@ def test_the_atlas_source_reads_mapped_products_and_keeps_the_hardware_ones(tmp_
 
     run_dir = tmp_path / "atlas" / "signals-delta-20261128" / "newly-possible"
     run_dir.mkdir(parents=True)
+    (run_dir / "build.done").write_text("")  # a finished delta build
     (run_dir / "products.json").write_text(json.dumps([
         {"catalog_id": "github:schlae/cm5-reveng", "purpose": "A reverse-engineered schematic and KiCad layout for the Raspberry Pi CM5",
          "inputs": "[]", "outputs": "['KiCad project']", "stars": "838", "post": "15000"},
