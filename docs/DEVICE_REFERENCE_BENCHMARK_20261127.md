@@ -114,19 +114,24 @@ controller; HS-3G-B buys one.
 - *Motor choice.* HS's four cited thrust tables sat in the proving-ground folders and the check needed one passed in.
   They are now one library (`data/propulsion/thrust_tables_20261127.json`, with Bitcraze's added), each with its motor
   mass and prop diameters, and `propulsion_check.pick` (tool `hs_pick_propulsion`) tries every motor and prop, adding each
-  option's own motor mass and checking its props fit the frame. On HS-3G-B's frame only the F1404 3800KV options pass;
+  option's own motor mass and checking its props fit the frame. On HS-3G-B's frame only the two F1404 motors pass;
   without a frame the 58.5 g SunnySky on 9 in props would pass at 431 g, which is why the frame check matters.
-- *A disagreement it exposed.* The general check refuses HS-3G-B's own F1404 2900KV table: the maker measured it on a
-  full 16.8 V pack, 13% above the 4S nominal voltage, past the check's 10% limit. HS-3G-B's own design script used the
-  table with a voltage correction. The check is not loosened; HS-3G-B's 11.4 min stands on its design script until the
-  two agree (a table at nominal voltage, or a stated rule for full-pack tables).
+- *A disagreement it exposed, and settled.* The general check refused HS-3G-B's own F1404 2900KV table: the maker
+  measured it on a charged 16.8 V pack, 13% above the 4S nominal voltage, past the check's 10% limit, while HS-3G-B's
+  design script used it. At a given thrust a prop needs the same speed and torque whatever the supply, so hover power
+  carries over (if anything the higher-voltage figure is the larger); full-throttle thrust falls roughly with the square
+  of the voltage. The check now accepts a table measured on a charged pack of the same cell count, with a warning: hover
+  power from the table, full-throttle thrust scaled to nominal, full-throttle current kept at the higher bench figure. It
+  then reproduces HS-3G-B's 11.4 min, 3.58 A hover and 25.8 A full throttle exactly, and corrects one claim: HS-3G-B's
+  thrust-to-weight is 5.0 on a full pack and about 3.9 at nominal voltage. A table from a smaller pack (3S on 4S) is still
+  refused.
 
 ## Next
 
 1. Done: HS-ARM-A rev B (above). Still open: horn bolt circle and servo screw holes, the leader arm SO-101 pairs with.
 2. Done: rover (above). Still open: a TT-motor variant of HS-ROVER-A priced and re-checked end to end; the OSR's
    rocker-bogie (Apache-2.0) as HS's rough-terrain option.
-3. Done: drone (above). Still open: the full-pack voltage rule for HS-3G-B's table, a brushless calibration aircraft,
-   Crazyflie's motor mass, and more cited tables (1S brushless, 2 in, 5 in).
+3. Done: drone (above). Still open: a brushless calibration aircraft, Crazyflie's motor mass, and more cited tables
+   (1S brushless, 2 in, 5 in).
 4. Robot vacuum and mopping: no complete open design was found; Valetudo (Apache-2.0) is firmware for commercial
    robots. HS's junk catalogue already treats robot vacuums as donors: an open, salvage-built vacuum is uncontested.
