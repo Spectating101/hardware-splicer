@@ -1,0 +1,48 @@
+{
+ "schema": "hardware_splicer.backtest.v1",
+ "captured": "2026-11-27",
+ "id": "nanobench-crazyflie-2.1-battery-drain",
+ "question": "Does HS's hover-time arithmetic, calibrated on the stock 27 g Crazyflie, hold for the same aircraft at 40.85 g?",
+ "data": {
+  "source": "NanoBench (syediu/nanobench-iros2026, BSD-3-Clause), datasets/dataset/C4_battery_drain_rep1.csv and _rep2.csv; paper arXiv 2603.09908",
+  "aircraft": "Crazyflie 2.1, four 7x16 mm coreless motors, 250 mAh 1S pack, with retroreflective markers and the wireless-charging deck",
+  "flying_mass_g": 40.85,
+  "mass_quote": "raising the flying mass from 27 g to a measured 40.85 g (README)",
+  "measured": [
+   {
+    "run": "rep1",
+    "held_1m_s": 40,
+    "then": "sank to about 0.1 m at t=48-56 s with motor 4 at full PWM (65535) and the others at 79-94%",
+    "battery_v_loaded": "3.35 to 3.15",
+    "hover_pwm_pct": "79-97 per motor"
+   },
+   {
+    "run": "rep2",
+    "held_1m_s": 88,
+    "then": "landed at about t=96 s",
+    "battery_v_loaded": "3.62 to 3.26",
+    "hover_pwm_pct": "mean 82 rising to 90"
+   }
+  ],
+  "method": "Height from Vicon pz; held means within 0.15 m of the 1 m setpoint. Times read at 8 s steps from the CSVs."
+ },
+ "hs": {
+  "call": "check_propulsion(rotors 4, prop CF2 45mm, all_up_mass_g 40.85, 1S 250 mAh 15C, avionics 0.96 W) on crazyflie-2.0-coreless-1s",
+  "throttle_pct": 73.8,
+  "hover_current_a": 2.92,
+  "hover_time_min_default_80pct": 4.1,
+  "hover_time_min_full_pack": 5.1,
+  "thrust_to_weight": 1.42,
+  "battery_limited_thrust_to_weight": 1.13,
+  "default_min_tw_ratio": 2.0,
+  "verdict_with_defaults": "error thrust_to_weight_low (1.13 under 2.0)"
+ },
+ "result": {
+  "hover_time": "measured 0.7-1.5 min against HS's 4.1-5.1 min: HS's energy arithmetic over-states endurance about 3x at this load",
+  "throttle": "measured about 82-90% PWM at hover against HS's 73.8% from Bitcraze's 2015 bench table: the table gives about 10-14% more thrust per PWM step than this aircraft had",
+  "default_rule": "HS's default thrust-to-weight floor (2.0) already refuses this aircraft; the energy estimate is the part that failed",
+  "stock_point": "the same arithmetic matches Bitcraze's 7 min for the 27 g aircraft within 5% (usable thrust-to-weight 1.70)"
+ },
+ "change": "propulsion_check now warns thrust_limited_endurance and marks hover_time_is_upper_bound when usable thrust-to-weight is under 1.5, the point between the two back-tested cases.",
+ "limits": "Two runs, one aircraft, pack age and charge unknown (rep1 started weaker). It says where HS's arithmetic stops holding, not by how much for other aircraft."
+}

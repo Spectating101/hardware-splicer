@@ -307,3 +307,13 @@ def test_a_one_cell_whoop_picks_a_one_cell_motor():
                   "esc_continuous_a": 5, "frame": {"wheelbase_mm": 75}, "assumptions": {"avionics_power_w": 0.8}})
     assert whoop["passing"] and all(r["table"].endswith("-1s") for r in whoop["passing"])
     assert whoop["passing"][0]["hover_power_method"] == "interpolated" and 3 < whoop["passing"][0]["hover_time_min"] < 10
+
+
+def test_a_heavily_loaded_crazyflie_gets_an_upper_bound_not_a_hover_time():
+    # NanoBench's 40.85 g Crazyflie 2.1 held height for 40-88 s; the energy arithmetic gives about 4 min. See examples/backtests.
+    loaded = dict(CF2, all_up_mass_g=40.85, battery=dict(CF2["battery"], capacity_mah=250))
+    got = check_propulsion(loaded, "crazyflie-2.0-coreless-1s")
+    assert "thrust_limited_endurance" in {f["rule"] for f in got["findings"]}
+    assert got["results"]["hover_time_is_upper_bound"] and got["results"]["battery_limited_thrust_to_weight"] < 1.5
+    stock = check_propulsion(CF2, "crazyflie-2.0-coreless-1s")
+    assert "thrust_limited_endurance" not in {f["rule"] for f in stock["findings"]}
