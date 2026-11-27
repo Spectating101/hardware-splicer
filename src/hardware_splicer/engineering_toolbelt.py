@@ -406,6 +406,17 @@ def _rocker_bogie(args, _project):
                      boundary=res["claim_boundary"])
 
 
+def _step_fit(args, project):
+    path = _readable(str(args["step"]), project)
+    res = _native_function("step_fit", "analyse", {"step": str(path), "near": float(args.get("near_mm", 2.0)),
+                                                   "density": args.get("density_g_cm3") or {}})
+    s = res["summary"]
+    overlaps = [p for p in (res.get("fit") or {}).get("pairs", []) if p.get("kind") == "overlap"]
+    problems = [f"{p['a']} overlaps {p['b']} by {p.get('overlap_mm3')} mm3" for p in overlaps]
+    return _envelope(True, f"{s['parts']} parts, {s['overlaps']} overlaps, {s['tight']} tight gaps, {s['loose']} loose parts, size {s.get('size_mm')} mm",
+                     res, problems=problems, boundary=res["claim_boundary"])
+
+
 def _trace_current(args, project):
     from . import trace_capacity
     res = trace_capacity.check_routed(_readable(str(args["pcb"]), project), args["net_currents_a"],
@@ -991,6 +1002,10 @@ TOOLS: dict[str, ToolSpec] = {t.name: t for t in [
     ToolSpec("hs_route_copper", "Route a placed .kicad_pcb with Copper (copper-kicad-mcp, MIT: Freerouting plus its guided finisher) "
              "in KiCad 10's container; returns unrouted count, DRC and the routed KiCad 10 board. Needs HARDWARE_SPLICER_COPPER_* set.",
              _obj({"pcb": {"type": "string"}, "ignore_nets": {"type": "array", "items": {"type": "string"}}}, ["pcb"]), _route_copper),
+    ToolSpec("hs_step_fit", "Fit check of any STEP assembly (SolidWorks, Fusion 360, Onshape, FreeCAD, KiCad export): part names from "
+             "the STEP tree, overlapping pairs with their volume, tight gaps, loose parts, size, volumes, and masses from density_g_cm3 "
+             "({part or '*': g/cm3}). Runs in the native CAD interpreter.",
+             _obj({"step": {"type": "string"}, "near_mm": {"type": "number"}, "density_g_cm3": {"type": "object"}}, ["step"]), _step_fit),
     ToolSpec("hs_trace_current", "Check a routed .kicad_pcb's narrowest track on each net against a stated current (IPC-2221 "
              "chart fit): temperature rise per net, and the width that keeps it under max_rise_c (default 20 C).",
              _obj({"pcb": {"type": "string"}, "net_currents_a": {"type": "object"}, "max_rise_c": {"type": "number"},
