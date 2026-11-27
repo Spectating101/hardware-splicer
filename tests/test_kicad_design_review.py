@@ -547,3 +547,23 @@ def test_also_runs_kicad_erc_beside_hs_on_a_real_schematic():
     assert res["also"]["kicad_erc"]["ran"] and "counts" in res["also"]["kicad_erc"]
     assert res["also"]["kicad_happy"]["ran"] or "HARDWARE_SPLICER_KICAD_HAPPY_ROOT" in res["also"]["kicad_happy"]["why"]
     assert "findings" in res  # HS's own findings stay where they were
+
+
+def test_kicad_10_pin_functions_lose_their_pin_number_suffix():
+    # KiCad 10's netlist writes pinfunction "K_1" where KiCad 9 wrote "K"; the name rules must see "K".
+    led = ("D5", "LED", "Device", "LED", "Light emitting diode")
+    pins = ("Device", "LED", [("1", "K", "passive"), ("2", "A", "passive")])
+    kicad10 = netlist([led], [("GND", [("D5", "2", "A_2", "passive")]), ("Net-(D5-K)", [("D5", "1", "K_1", "passive"), ("R76", "1", "", "passive")])], [pins])
+    assert rules(kicad10) == ["led_reversed"]
+    assert parse_netlist('(export (version "E") (components) (libparts) (nets (net (code "1") (name "X") '
+                         '(node (ref "U1") (pin "29") (pinfunction "29_29") (pintype "passive")))))')["nets"]["X"][0]["function"] == "29"
+
+
+def test_signal_nets_named_after_a_rail_and_clamps_drawn_as_leds_are_not_flagged():
+    from hardware_splicer.kicad_design_review import rail_voltage
+
+    assert rail_voltage("/Power/1.8V_PG") is None and rail_voltage("3V3_EN") is None and rail_voltage("+3V3_SW") == 3.3
+    tvs = ("D5", "TVS 5V", "Device", "LED", "Light emitting diode")  # VESC 6 (held-out reference board)
+    pins = ("Device", "LED", [("1", "K", "passive"), ("2", "A", "passive")])
+    clamp = netlist([tvs], [("+5V", [("D5", "1", "K", "passive"), ("C13", "1", "", "passive")]), ("GND", [("D5", "2", "A", "passive")])], [pins])
+    assert rules(clamp) == []
