@@ -67,3 +67,10 @@ PYTHONPATH=src .venv/bin/python projects/hs-bus-a/build_board.py --reuse-pcb pro
 
 Parts data: JLCPCB's list via [jlcparts](https://github.com/yaqwsx/jlcparts) (`src/hardware_splicer/jlcparts_lookup.py`).
 KiCad symbols, footprints and 3D models are read from the KiCad 9 libraries at build time, not stored here.
+
+**Decoupling moved closer (2026-11-27).** Copper's layout critique flagged the decoupling capacitors as far from their
+pins; HS's own check (`component_board_pipeline.decoupling_report`) measured the FT232RL's VCC capacitor at 11.3 mm,
+VCCIO at 7.6 mm, 3V3OUT at 5.5 mm and U3's at 6.2 mm. C2, C3, C4 and C6 now sit 2.9 to 3.2 mm from their pins (U2's C5
+stays at 4.5 mm). The board was re-routed (DRC 0 errors, 0 unconnected, schematic parity clean) and the fabrication
+files regenerated; two new silkscreen warnings (C4's reference over copper, U3's reference against C6's outline) are
+cosmetic. `quote_2026-11-26.json` priced the earlier copper; the board size and layer count are unchanged.

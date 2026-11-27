@@ -69,3 +69,19 @@ def test_verification_record_matches_the_fab_files() -> None:
     assert record["schematic"]["erc_errors"] == 0 and record["schematic"]["kicad_readback_matches_design"]
     zip_path = PROJECT / "fab" / "hs_bus_a_gerbers.zip"
     assert hashlib.sha256(zip_path.read_bytes()).hexdigest() == record["fab"]["zip_sha256"]
+
+
+def test_every_supply_pad_has_a_capacitor_within_five_mm():
+    """Copper's layout critique (2026-11-27) found the FT232RL's VCC capacitor 11.3 mm from its pin; the caps now sit beside
+    the pins they serve."""
+    from hardware_splicer.component_board_pipeline import decoupling_report
+    from hardware_splicer.routing_engine import resolve_kicad_python
+    import subprocess as _sp
+    py = resolve_kicad_python() or "/usr/bin/python3"
+    if _sp.run([py, "-c", "import pcbnew"], capture_output=True).returncode:
+        import pytest
+        pytest.skip("pcbnew not available")
+    report = decoupling_report(Path(__file__).resolve().parents[1] / "projects" / "hs-bus-a" / "kicad" / "hs_bus_a.kicad_pcb")
+    assert report and report["pads"]
+    assert max(r["distance_mm"] for r in report["pads"]) <= 5.0
+    assert {(r["ic"], r["pad"]) for r in report["pads"]} >= {("U1", "20"), ("U1", "4"), ("U1", "17"), ("U2", "5"), ("U3", "5")}

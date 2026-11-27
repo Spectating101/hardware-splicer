@@ -23,10 +23,12 @@
  "drc": {
   "violations": {
    "errors": 0,
-   "warnings": 2,
+   "warnings": 4,
    "items": [
     "warning: silk_edge_clearance: Segment on Edge.Cuts; Segment of J1 on F.Silkscreen",
-    "warning: silk_edge_clearance: Segment on Edge.Cuts; Segment of J1 on F.Silkscreen"
+    "warning: silk_edge_clearance: Segment on Edge.Cuts; Segment of J1 on F.Silkscreen",
+    "warning: silk_over_copper: Reference field of C4",
+    "warning: silk_overlap: Reference field of U3; Segment of C6 on F.Silkscreen"
    ]
   },
   "unconnected_items": {
@@ -48,13 +50,13 @@
   ],
   "copper_layers": 2,
   "footprints": 39,
-  "track_segments": 310,
+  "track_segments": 296,
   "track_widths_mm": [
    0.2,
    1.2,
    2.5
   ],
-  "vias": 141,
+  "vias": 154,
   "rules": {
    "clearance": 0.15,
    "track": 0.2,
@@ -556,7 +558,7 @@
    "per_board_usd": 9.18,
    "not_found": [],
    "source": "JLCPCB parts list via jlcparts (https://github.com/yaqwsx/jlcparts)",
-   "prices_as_of": "2026-11-26T03:01:58+00:00",
+   "prices_as_of": "2026-11-27T03:02:21+00:00",
    "claim_boundary": "JLCPCB unit prices for the parts only: no PCB, assembly, setup, shipping or tax."
   },
   "10_boards": {
@@ -909,7 +911,7 @@
    "per_board_usd": 8.37,
    "not_found": [],
    "source": "JLCPCB parts list via jlcparts (https://github.com/yaqwsx/jlcparts)",
-   "prices_as_of": "2026-11-26T03:01:58+00:00",
+   "prices_as_of": "2026-11-27T03:02:21+00:00",
    "claim_boundary": "JLCPCB unit prices for the parts only: no PCB, assembly, setup, shipping or tax."
   }
  },
@@ -934,7 +936,7 @@
    "fab/hs_bus_a_pos.csv",
    "fab/hs_bus_a_schematic.pdf"
   ],
-  "zip_sha256": "902b8bfc487a83cc33cacdbf0b2284cd046c63a136716d9cba3fd0eec0c4588c"
+  "zip_sha256": "8141cb87678c085643f332941c73d40dcdec376515a8bdaf101a3aa4579b3dfa"
  },
  "not_checked": [
   "Signal integrity and USB 2.0 full-speed impedance (12 Mb/s over short tracks; no controlled impedance asked for)",
