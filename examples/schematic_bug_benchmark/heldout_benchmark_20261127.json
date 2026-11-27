@@ -1,0 +1,1023 @@
+{
+ "schema": "hardware_splicer.fix_commit_benchmark.v2",
+ "captured": "2026-11-27",
+ "role": "held_out",
+ "method": "Fix commits found by the same search (scripts in the 2026-11-25 record) in 117 repositories outside every dev-set repository; commits shared with the dev set dropped; picked by commit message alone, before any checker ran; all four checkers run by scripts/schematic_checker_benchmark.py on root sheets; each case judged by hand from the netlist change. A case counts when the fix changes the netlist and the bug is electrical; the rest are excluded with a reason.",
+ "tools": {
+  "kicad_cli": "9.0.2, and 10.0.8 for KiCad 10 files",
+  "kicad_happy_commit": "6b9767e19979cdef91631573753b1547efdbeab9",
+  "hs_review_frozen": "1a42cf51 (main before 2026-11-27 rules)",
+  "hs_review_dev_rules": "a52834db (rules written from the 70 dev cases, run before this set was read)",
+  "hs_review_current": "8d3315a7 (adds supply_rails_inverted, written after reading this set's Quango miss)"
+ },
+ "honesty": "hs_review_dev_rules is the independent number: its rules were committed before this set was selected or read. hs_review_current adds one rule prompted by a miss here, so its extra catch is not independent. Three rules tried after reading this set (unfed VDD pins, undriven inputs, one-pin named nets) were dropped because they were wrong more often than right on the 110 known-good boards.",
+ "cases_judged": 35,
+ "excluded_count": 51,
+ "tally": {
+  "kicad_erc": {
+   "caught": 9
+  },
+  "kicad_happy": {
+   "caught": 9
+  },
+  "hs_review_frozen": {
+   "caught": 3
+  },
+  "hs_review_dev_rules": {
+   "caught": 4
+  },
+  "hs_review_current": {
+   "caught": 5
+  }
+ },
+ "caught_by_erc_or_kicad_happy": 12,
+ "caught_by_any": 14,
+ "false_alarms": {
+  "boards": "25 open reference boards and 85 held-out fixed boards",
+  "dev_rules_findings": 4,
+  "true": 2,
+  "false": 2,
+  "true_detail": [
+   "NeoGeoAES-3.5 D5: LED anode on GND, cathode through R76 to VCC",
+   "Projet1AB LM393 U4: V+ on GND, V- on +3.3V_PI"
+  ],
+  "false_detail": [
+   "longboi BAV99: KiCad names its pins K, A, K; fixed by skipping parts that repeat A or K",
+   "meteo-station BME280 breakout compared with the bare chip; fixed by comparing only equal pin counts"
+  ],
+  "after_fix": "3 findings, all on the two true defects"
+ },
+ "what_this_says": "On projects its rules were not written from, HS caught 4 of 35 bugs (5 with one rule added after reading this set) against 9 for KiCad ERC and 9 for kicad-happy; ERC and kicad-happy together catch 12. HS adds bugs the other two miss (an IC with GND and VCC swapped; with the later rule, an op-amp on inverted rails) but misses the generic connection faults they check: dangling labels, undriven inputs, supply pins with no path to a rail, missing pull resistors on boot pins. All three together cover 14 of 35. 21 of the 35 are missed by every checker: connector pinouts, swapped signals with no pair name, part choice and design intent.",
+ "cases": [
+  {
+   "repo": "DADDesign-Projects/OSCAR_AUDIO_01",
+   "fix_commit": "340c5d52c71a424ff339aef25eea2c6fa5bb003d",
+   "parent": "f52fde863dde4837c54f2c16af55263c4fbd544f",
+   "message": "Fix typo OPA1612 -> OPA1642. Note: an OPA with FET inputs is necessary here.",
+   "licence": "MIT",
+   "bug_class": "wrong part (needs FET-input op-amp)",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "value only"
+  },
+  {
+   "repo": "ararobo/GN10Mainboard",
+   "fix_commit": "18513884d848b6bba3aceb42cb1aaf04811e3848",
+   "parent": "9c9be6880faac7fbc786c6c19368d53063c3ffdb",
+   "message": "fix:RJ45-LED,gyro",
+   "licence": "NONE",
+   "bug_class": "interrupt line left unconnected (label typo) and RJ45 LED polarity",
+   "verdict": {
+    "kicad_erc": "C",
+    "kicad_happy": "C",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "ERC dangling GYRO_INT label; kicad-happy single-pin net GYRO_INT; HS has no rule for an unconnected output"
+  },
+  {
+   "repo": "FluYVy/Modular-Electronics-Toolkit",
+   "fix_commit": "4c8487fbcbfa5d21454f9da93fc0e9a1d4b0e5de",
+   "parent": "1a0415fc6673fd68bcf50adc929f99b29e388576",
+   "message": "fixed GND/VCC issue and added filling zone",
+   "licence": "NONE",
+   "bug_class": "connector pinout (VCC/GND on generic header pins)",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "ERC's pin_to_pin entries move with the pin numbers; not about the swap"
+  },
+  {
+   "repo": "JopjeKnopje/VoltageProcessor",
+   "fix_commit": "74ca521da6842971e28bfc3cb7a80ba4638b0e6b",
+   "parent": "eb56bdd6fb3f017218e94df1427561714cab3f04",
+   "message": "Swapped `U1B` inputs to match that of `U1A`, so that it does work",
+   "licence": "NONE",
+   "bug_class": "op-amp input left floating",
+   "verdict": {
+    "kicad_erc": "C",
+    "kicad_happy": "C",
+    "hs_review_frozen": "C",
+    "hs_review_dev_rules": "C",
+    "hs_review_current": "C"
+   },
+   "note": "all three flag U1 pin 6 unconnected"
+  },
+  {
+   "repo": "GenerateNU/Concrete",
+   "fix_commit": "cfb15a444fc180a7aa8c4e9051e80a8290659c4e",
+   "parent": "14e047ab9673c8bd482d7d9ac4ee47caa9e1ebbc",
+   "message": "\"Fixed Net Names\"",
+   "licence": "NONE",
+   "bug_class": "motor-driver inputs on dangling labels (floating)",
+   "verdict": {
+    "kicad_erc": "C",
+    "kicad_happy": "C",
+    "hs_review_frozen": "C",
+    "hs_review_dev_rules": "C",
+    "hs_review_current": "C"
+   },
+   "note": ""
+  },
+  {
+   "repo": "cryptoAlgorithm/HapticDriver",
+   "fix_commit": "bc3211405941afdc35abe2da5655d4273b621f36",
+   "parent": "2064410064aa9a0954354bd8ec71aa4d62227da8",
+   "message": "fix: avoid SDA on strapping pin GPIO45",
+   "licence": "NONE",
+   "bug_class": "I2C SDA on an ESP32-S3 strapping pin (GPIO45)",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "no checker knows strapping pins in review (HS's esplabs bridge does)"
+  },
+  {
+   "repo": "a-tk/parts-files",
+   "fix_commit": "da5eca98a68c2b1537a467c3167aac2769286808",
+   "parent": "24b275f49a2fa8e93ac40fe5fe6ffe618691c316",
+   "message": "fixing decimal point short with jumper",
+   "licence": "NONE",
+   "bug_class": "display decimal-point pin shorted to segment E",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "design intent"
+  },
+  {
+   "repo": "DLehenbauer/commodore-pet-clone",
+   "fix_commit": "bbd5f8fdd04bce8a0508c21a4db566d1459826f8",
+   "parent": "40bb893d7276b5518b3aed0d3045752a7fae6200",
+   "message": "hw: RDY should be series resistor instead of pullup",
+   "licence": "CC0-1.0",
+   "bug_class": "RDY pull-up should be a series resistor",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "design intent"
+  },
+  {
+   "repo": "atoomnetmarc/FT2232HL-development-board-adapters",
+   "fix_commit": "2bcec45eb1c64d990ec2b5f569f6d391c20f535c",
+   "parent": "119a6fa7a285b867d5f2b3a5ff2cb09a99695ac1",
+   "message": "Swapped MOSI/MISO.",
+   "licence": "Apache-2.0",
+   "bug_class": "MOSI/MISO swapped on a header",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "connector-only nets; HS's name rule skips connectors"
+  },
+  {
+   "repo": "cnorthway/pro-micro-adb-shield",
+   "fix_commit": "3ee718980c565fa3dbc83e1abd7352009f81dd4b",
+   "parent": "97cd1e59705e48953059d7190d22b2a968a3dae6",
+   "message": "Fix shorted RST/GND through button",
+   "licence": "BSD-2-Clause",
+   "bug_class": "switch symbol pinout shorts RST to GND",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "internal switch contacts are not in the netlist"
+  },
+  {
+   "repo": "Wet-Lettuce-Robocup/robot_pcb",
+   "fix_commit": "a57526bd97b4f4fa81a83033e2d268f14ab410d7",
+   "parent": "af14ba0a274b30d9bafc7546bbf7ceeead22e9ef",
+   "message": "fixed whatever was going on with i2c",
+   "licence": "NONE",
+   "bug_class": "I2C connector pin order",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "connector pinout convention"
+  },
+  {
+   "repo": "Dragon863/CFWatch",
+   "fix_commit": "79c33bb691b387e10fb061a003f50759f6674614",
+   "parent": "303e9721214a23004fa8a8825bc820631b05d54d",
+   "message": "Fix regulator and voltage issue, replace inductor with LED",
+   "licence": "NONE",
+   "bug_class": "MCU supply pins not connected to the 3.3 V rail",
+   "verdict": {
+    "kicad_erc": "C",
+    "kicad_happy": "C",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "ERC power_pin_not_driven; kicad-happy PP-001; HS misses: each pin has a capacitor, so it is not alone on its net"
+  },
+  {
+   "repo": "Quantx/DG-Nova-1200-CPU",
+   "fix_commit": "3bc7c2b53aa0422c0220410ea75c92171772c68c",
+   "parent": "8f208ab9ebb871d0f004375d80caa36e3e9f7d1f",
+   "message": "Fixed an issue where I swapped 2 gates",
+   "licence": "NONE",
+   "bug_class": "two logic gates swapped (an input left undriven)",
+   "verdict": {
+    "kicad_erc": "C",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "ERC pin_not_driven U41 pin 13"
+  },
+  {
+   "repo": "PockyBum522/cad-pcb-projects",
+   "fix_commit": "c8aed46df878fc4bb312cd3d2c98b776286a8887",
+   "parent": "c5de3cb0244dad9552ea178f1f6e0ced8e9042a1",
+   "message": "Fixed PCB and schematic where GND pin on NFC reader ethernet port went to pin 7 instead of pin 8 like it should have",
+   "licence": "MIT",
+   "bug_class": "RJ45 ground on pin 7 instead of 8",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "connector pinout"
+  },
+  {
+   "repo": "earth75/atat-1800",
+   "fix_commit": "f6696bc985d06c46505fafd113601824885f7bb5",
+   "parent": "eec685742d5cb51f4dc028e72a0e61dd462e3aea",
+   "message": "fix input diode",
+   "licence": "NONE",
+   "bug_class": "IC GND and VCC pins swapped",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "C",
+    "hs_review_current": "C"
+   },
+   "note": "new ground_pin_on_supply and supply_pin_on_ground"
+  },
+  {
+   "repo": "46nori/Z80Atmega128",
+   "fix_commit": "19d94815da013a09031a06a4981fdff8b56b4bc0",
+   "parent": "c0916ef83a41e67f39daa8773f082a1de9936b30",
+   "message": "Swap R4 and R5, Change min_resolved_spokes 2 to 1.",
+   "licence": "GPL-3.0",
+   "bug_class": "pull resistors swapped between /XINT and /NMI",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "values and intent"
+  },
+  {
+   "repo": "dj505/PicoFX",
+   "fix_commit": "3dbf402288797497c0ed55bb6c65c83ae9b98d79",
+   "parent": "f0a0f9eeb12eba0d75ce217cfda68ccbed877bbd",
+   "message": "Fix P1 UL/DL being swapped",
+   "licence": "GPL-3.0",
+   "bug_class": "LED GPIO assignment swapped",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "firmware convention"
+  },
+  {
+   "repo": "AlfredoSystems/NoU3-Hardware",
+   "fix_commit": "02ebb62950255649bbf4fd6ca8417b8568795055",
+   "parent": "90839d1a7edc7fdc31c8ce54a08b1d7d85c29a6a",
+   "message": "Swap positions of MD2_A1 and MD2_A2 labels",
+   "licence": "NONE",
+   "bug_class": "motor output labels swapped on a header",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "connector convention"
+  },
+  {
+   "repo": "ArthorH/ModuCard-backplane",
+   "fix_commit": "ebedfc040c399bea1adc383d8b3073e086ec8016",
+   "parent": "8fcf6f7b8e790c59846ef1024ecbd02876be0d2d",
+   "message": "change USB upstream pinout",
+   "licence": "NONE",
+   "bug_class": "USB upstream pins on the backplane connector not connected to the hub",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "C",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "kicad-happy single-pin nets USB.+ and USB.-"
+  },
+  {
+   "repo": "RICCIARDI-Adrien/Logic_Signal_Generator",
+   "fix_commit": "5f4292d0a0e97b9d6282722c39b952603d40b21d",
+   "parent": "ac0bfdfcebad2aec8fb7204abaead69ed5505b24",
+   "message": "[Hardware] Added the missing pin number 3 to the OS103011MA7QP1 switch.",
+   "licence": "NONE",
+   "bug_class": "switch symbol missing pin 3",
+   "verdict": {
+    "kicad_erc": "C",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "ERC duplicate_pins on SW1"
+  },
+  {
+   "repo": "ararobo/GN10Mainboard",
+   "fix_commit": "58569afee404937334cb13a813fb166d57ba2104",
+   "parent": "159623b79ce718b491a3ef5846cd6a56c3c936d7",
+   "message": "fix: connection between the MCU to connectors.",
+   "licence": "NONE",
+   "bug_class": "MCU nets not reaching connectors (dangling labels)",
+   "verdict": {
+    "kicad_erc": "C",
+    "kicad_happy": "C",
+    "hs_review_frozen": "C",
+    "hs_review_dev_rules": "C",
+    "hs_review_current": "C"
+   },
+   "note": "ERC dangling global labels; kicad-happy single-pin nets on J5/J6/J7; HS input_pin_floating BLE_RESET"
+  },
+  {
+   "repo": "DeflateAwning/STM32F411_USB_AUDIO_DAC_PCB",
+   "fix_commit": "ee368259d4d2f690da2ced963aee7d80675e15f4",
+   "parent": "3e81422053f872e4cc26fab1e85b9d6cd97f25b0",
+   "message": "Schematic: Add 100u cap, fix BOOT0",
+   "licence": "CERN-OHL-P-2.0",
+   "bug_class": "STM32 BOOT0 with no pull-down",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "C",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "kicad-happy PU-001 BOOT0"
+  },
+  {
+   "repo": "car-hacking-village/DC32_CHV_Badge_Board",
+   "fix_commit": "bcbb7ee17989e362d4f885cfec3a84b247e7f0b7",
+   "parent": "402e14a9a2ad86ee2fae319e73e237398a4117f9",
+   "message": "fixed major issue where pins were left floating",
+   "licence": "NONE",
+   "bug_class": "regulator EN, PS/SYNC and VINA floating on a capacitor",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "C",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "kicad-happy PU-001 EN; HS only sees inputs alone on a net"
+  },
+  {
+   "repo": "GenerateNU/Concrete",
+   "fix_commit": "61c47348771c63b04a8675a9c7592b787f4f4572",
+   "parent": "3526b5e46b8d3492971f8bf8dddefb324e113e21",
+   "message": "\"Misspelled Global Net Fix\"",
+   "licence": "NONE",
+   "bug_class": "misspelled global label leaves an MCU pin unconnected",
+   "verdict": {
+    "kicad_erc": "C",
+    "kicad_happy": "C",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": ""
+  },
+  {
+   "repo": "arxwtf/2023_PiezoPreamp2",
+   "fix_commit": "4cf047c486aab8cdf20bc76833ee7c8040e6ceba",
+   "parent": "eec81de85be0b99e1e13ba96d602e1f95e71a154",
+   "message": "v2.2: correcting pins of audio jacks - T and R were swapped. Fixing in schematic and PCB",
+   "licence": "MIT",
+   "bug_class": "audio jack tip and ring swapped",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "connector pinout"
+  },
+  {
+   "repo": "dchwebb/Quango",
+   "fix_commit": "fa0714ba8e9a44f1a5cddce101c350d643946435",
+   "parent": "ae01bd7f3a0d076ce7e77fb3e430d583ccfb0764",
+   "message": "Multiplexer tested working; PCB bug - U14 power rails inverted",
+   "licence": "NONE",
+   "bug_class": "op-amp V+ and V- rails inverted (+12 V / -12 V)",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "C"
+   },
+   "note": "no rule compares a part's V+ and V- rails"
+  },
+  {
+   "repo": "aliahumanoid/alia-humanoid-core",
+   "fix_commit": "ed019803fa154d98bd1fe1e0cec35f906234f613",
+   "parent": "cef60ceaf9905e594d4096ddfd74c8c30e8b1c3a",
+   "message": "fix(rev_d_power): correct XT60 polarity pin assignment on J2/J4",
+   "licence": "GPL-3.0",
+   "bug_class": "XT60 polarity on generic connector pins",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "connector pinout"
+  },
+  {
+   "repo": "draklowell/Cpu8",
+   "fix_commit": "08b51cd4c0388fa5dc88f48ec5ac21b9a0a24ef7",
+   "parent": "953a56b6ae09ba03ac362771cb2ff6741a2a5de0",
+   "message": "fix(backplane): changed vcc and gnd connector",
+   "licence": "NOASSERTION",
+   "bug_class": "VCC and GND swapped on the power connector",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "connector pinout"
+  },
+  {
+   "repo": "CarletonURocketry/hybrid-valve-board",
+   "fix_commit": "629f61db8996d465b9fbbe657149b2f1d9f1e154",
+   "parent": "c2f7dc18e025699ea02d9b3b891b75d55213d328",
+   "message": "Add pull-down resistor on NMOS gate",
+   "licence": "NONE",
+   "bug_class": "MOSFET gates with no pull-down",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "design guideline"
+  },
+  {
+   "repo": "Queens-Rocket-Engineering-Team/Avionics-23-26",
+   "fix_commit": "42c3cd289c6e754297831b9c42806059c0162ec8",
+   "parent": "195bc1a30738f628863dad17a64a4ecd7b2c0e41",
+   "message": "Fixed SATA pinout + Dimmed power LED",
+   "licence": "NONE",
+   "bug_class": "GPS connector pinout",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "connector pinout"
+  },
+  {
+   "repo": "agkaminski/emuprom",
+   "fix_commit": "23f4ff82ac4b99c13d4f1552f199e8904cb4bec4",
+   "parent": "b8499058e8afd9261c0bab1f6468bb292f544d71",
+   "message": "rev D: Fix U4 output being swapped with input",
+   "licence": "CC0-1.0",
+   "bug_class": "bus buffer inputs and outputs swapped",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "no checker caught output-on-output"
+  },
+  {
+   "repo": "cryptoAlgorithm/HapticDriver",
+   "fix_commit": "470fd9042826f5483077b545620ce922f0929619",
+   "parent": "0ac0041c1850504efd773204d876bb9562a2c466",
+   "message": "fix: delay rising of EN with cap, as per devkit design",
+   "licence": "NONE",
+   "bug_class": "ESP32 EN with no RC delay capacitor",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "Espressif guideline"
+  },
+  {
+   "repo": "BasicCode/STM32MP151_Dev_Board_PCB",
+   "fix_commit": "64b4e898a97d28afadcac13b35c076e094cf3fd9",
+   "parent": "1605a6810726a10b45a69b8e5276ede4eab14fa6",
+   "message": "fix swapped SAI clock signals",
+   "licence": "NONE",
+   "bug_class": "I2S codec BCK and SCKI clocks swapped",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "signal names outside the name pairs"
+  },
+  {
+   "repo": "buildbotics/bbctrl-pcb-new",
+   "fix_commit": "9cbbe99c7165795641a0bcc0dece8ee5175f27b0",
+   "parent": "0b1f9d864b2fd6b6c4d87c99771ac320c976d4bd",
+   "message": "added pull-up to buffer_enable",
+   "licence": "CERN-OHL-S-2.0",
+   "bug_class": "buffer enable with no pull-up",
+   "verdict": {
+    "kicad_erc": "-",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "design intent"
+  },
+  {
+   "repo": "Board-Folk/NeoGeoAES-3.5",
+   "fix_commit": "dda9c7ced978eb13323700a2a15ab4f13f785282",
+   "parent": "55e363be6ac09f629fba9018aba28f0ccbb1fbd8",
+   "message": "Fix U8 Unused pins to GND and NC",
+   "licence": "NONE",
+   "bug_class": "unused 74HC04 inputs floating",
+   "verdict": {
+    "kicad_erc": "C",
+    "kicad_happy": "-",
+    "hs_review_frozen": "-",
+    "hs_review_dev_rules": "-",
+    "hs_review_current": "-"
+   },
+   "note": "ERC missing_unit: unplaced gates; HS sees no pins for them"
+  }
+ ],
+ "excluded": [
+  {
+   "repo": "Aylo6061/PCBHotplate",
+   "fix_commit": "441c8ccec967f13fbc0c3f340789a2bae25db76c",
+   "parent": "c480cd4154300e2f511cc3fa2aabcbf934a323f7",
+   "message": "released rev c - op amp swap not fixed!",
+   "licence": "NONE",
+   "reason": "release commit with many changes; the bug is not identifiable"
+  },
+  {
+   "repo": "Creative-Difficulty/mSCKee",
+   "fix_commit": "08780dc4f87e9d6bd1ba0a4f0d99f3b095d155c6",
+   "parent": "85856dcfbf75618cb2610bb693883c5c03da16e0",
+   "message": "fix: Proper USB-C receptacle symbol",
+   "licence": "NONE",
+   "reason": "symbol replacement with capacitor reshuffle; bug not identifiable"
+  },
+  {
+   "repo": "DBXYD/2526_Projet1AB_Khess",
+   "fix_commit": "e7f72a3fde97181d0c7ecfb1c6357c2c3eaa4257",
+   "parent": "e757233268879c85cee96e2132f208048dd76156",
+   "message": "fix: update two pcb and add gnd via",
+   "licence": "MIT",
+   "reason": "footprint and PCB changes"
+  },
+  {
+   "repo": "Pips801/Minibadge-Display-Devboard",
+   "fix_commit": "117d8b1553d6ac8f5b04491a3ed26d742d11af10",
+   "parent": "f9d33916d01a90f65f5a4a7d177a7934174628e2",
+   "message": "Swap to TPS2121 for ORing powerpath",
+   "licence": "NONE",
+   "reason": "design change (diode OR-ing to TPS2121)"
+  },
+  {
+   "repo": "RICCIARDI-Adrien/Logic_Signal_Generator",
+   "fix_commit": "62ab98a8643dfaed6bca9f19c0eb8e9a1ed4b7c7",
+   "parent": "c14465cba90ec84748b057d8f71c56cf03c26f26",
+   "message": "[Hardware] Added the missing value for the switch into the schematic.",
+   "licence": "NONE",
+   "reason": "missing value field only"
+  },
+  {
+   "repo": "a-little-wifi/Cintiq-Companion-3",
+   "fix_commit": "c18fd6c7e181bbb30593dde6a12cc9412186dd1c",
+   "parent": "aff617ef0b5580eba537f24d2372634ac6c76f25",
+   "message": "unflipped m-key polarity for sata",
+   "licence": "NONE",
+   "reason": "SATA polarity flipped and unflipped in consecutive commits; correct polarity not established"
+  },
+  {
+   "repo": "a-little-wifi/Cintiq-Companion-3",
+   "fix_commit": "13907528df3d1379674084bfe1b3a804ebef4098",
+   "parent": "3760ce008a434ee329d0f1f2057f80cd32dd0362",
+   "message": "Swapped sata pair polarity on m-key slot to make sata actually work probably",
+   "licence": "NONE",
+   "reason": "SATA polarity flipped and unflipped in consecutive commits; correct polarity not established"
+  },
+  {
+   "repo": "CarletonURocketry/hybrid-valve-board",
+   "fix_commit": "33477a5363307f88d9ae9dcfeb84cd40264106cc",
+   "parent": "7c3fa943be087fd2b37b5f508b881cbf65a7b114",
+   "message": "Added: reverse polarity protection for MCU, arming LED and PMOS switching",
+   "licence": "NONE",
+   "reason": "feature added (reverse-polarity protection, PMOS switching)"
+  },
+  {
+   "repo": "ApophisXIV/PCB-Desing",
+   "fix_commit": "dffd1dddd3d6606e80dbdb58e681d1d0f61c1835",
+   "parent": "174ff76f859e3f5c1528ec27443fd7fdf8e32844",
+   "message": "[ADD] 4x4 Keypad with selectable 4 pull-up/down buttons",
+   "licence": "NONE",
+   "reason": "files could not be fetched"
+  },
+  {
+   "repo": "antmicro/lpddr4-testbed",
+   "fix_commit": "496381531f70d17fff0751715e7b4be4214d8671",
+   "parent": "c68d482e91e91cf44d9bb52218e372f8b5aba40f",
+   "message": "Fix missing global links",
+   "licence": "Apache-2.0",
+   "reason": "library links only"
+  },
+  {
+   "repo": "TU-Darmstadt-APQ/DIN_41612_Backplane",
+   "fix_commit": "afab5067860fd0354ea3498ad5f60c31eb18fad1",
+   "parent": "9297e7107da1f3f5258090e852de4db35f447583",
+   "message": "Add OVP and Reverse polarity protection.",
+   "licence": "CERN-OHL-W-2.0",
+   "reason": "files could not be fetched"
+  },
+  {
+   "repo": "AutopilotPi/AutoPilotPi-Hardware",
+   "fix_commit": "04124a579a16036b34dde302476d9c8a2ffd64f8",
+   "parent": "896bc494cf7b1a3beec68437feb99fb91b0f58de",
+   "message": "use LDO to produce 1.2V, to fix fpga voltage issue. fix wrong fpga sch issue, change the pins of fpga. connect fpga SSPI to V3s-spi, so that we can configuare f",
+   "licence": "GPL-3.0",
+   "reason": "large rework, several changes"
+  },
+  {
+   "repo": "bad-alloc-heavy-industries/SPIFlashProgrammer",
+   "fix_commit": "c0f1749dc8355753aba5b00c32908ffa1cb01584",
+   "parent": "d8db19bba033e71a45e025a7e07c38f5c841fd96",
+   "message": "Added control for the level shifter output enable to the CPU to fix problems caused by us accidentally still driving the external bus after reset is released",
+   "licence": "NOASSERTION",
+   "reason": "feature: level-shifter enable made controllable"
+  },
+  {
+   "repo": "Phantom-243/handheld-gaming-console",
+   "fix_commit": "abf566d8029a9ecd39b0970b979e2d65d86430da",
+   "parent": "248585016d4bf14ce509396d8d1ffab102ea132d",
+   "message": "fix: wired y1 to gnd and fixed sw1",
+   "licence": "NONE",
+   "reason": "several changes in one commit"
+  },
+  {
+   "repo": "adam-kabbara/RSX-CANSAT-2026",
+   "fix_commit": "1a58f170f5f08a17c127e3e3457c78d0983a7177",
+   "parent": "c67ef4b305d990834d904cf2b595b49870098641",
+   "message": "fixes to gnd station post production",
+   "licence": "NONE",
+   "reason": "no schematic change"
+  },
+  {
+   "repo": "DBXYD/2526_Projet1AB_Khess",
+   "fix_commit": "0185d32e3a66e916b5dad4833ac1dd4298fe5bef",
+   "parent": "1b62ac4eae292af8ecd72e306c2751bb512e5a4a",
+   "message": "fix: usb c to 12v dc barel jack connector",
+   "licence": "MIT",
+   "reason": "design change (USB-C input replaced by barrel jack)"
+  },
+  {
+   "repo": "Alex-C-EE/DCPower",
+   "fix_commit": "3d1f18fb690e260b29d19dbe3b27293e7c11f7a9",
+   "parent": "dbb015de3ec3f2ecfcbca80d4f01e88f33b075de",
+   "message": "More Power Path, fixed filter",
+   "licence": "NONE",
+   "reason": "several power-path changes"
+  },
+  {
+   "repo": "RICCIARDI-Adrien/Logic_Signal_Generator",
+   "fix_commit": "dd1d76d204e6283777f9097ea379c82c48caa80e",
+   "parent": "a0f512374dbe3c17a348ea9dcfa7c46597d68534",
+   "message": "[Hardware] Added the missing pin no connect indicators to the schematic.",
+   "licence": "NONE",
+   "reason": "no-connect markers only"
+  },
+  {
+   "repo": "ararobo/GN10Mainboard",
+   "fix_commit": "97297ca6a2c9d965144c865953fb46d0b36ab09a",
+   "parent": "7e6b22db5943bbf57c6e264c0d1b5e88af6ba6aa",
+   "message": "Added a reverse voltage protection diode to the linear regulator and fixed the 7seg LED because its resistance was too high.",
+   "licence": "NONE",
+   "reason": "design change and LED resistor values"
+  },
+  {
+   "repo": "alufers/Zamkonator",
+   "fix_commit": "0ea241297eaacd89f6206a8d5c238ed7c43bf539",
+   "parent": "5a9c89daf88b22e2a0632f15a60e5871b4078e99",
+   "message": "Kicad updates, added missing resistances",
+   "licence": "NONE",
+   "reason": "missing values only"
+  },
+  {
+   "repo": "Anthilla/AnthC",
+   "fix_commit": "036323e59eed5b50f2fae9963ea73c32f020d962",
+   "parent": "5d545445b2cce38a2ec67fa74b7bca42335d53ef",
+   "message": "Updated PCB with the last version of schematic (Added the pulldown to the mosfet resistor)",
+   "licence": "NONE",
+   "reason": "no schematic change"
+  },
+  {
+   "repo": "Atomicbeast101/esp-breadboard-expander",
+   "fix_commit": "c94ff75794b905cabf2be7c525b200ab6d48f698",
+   "parent": "ecc4304c21223080203af4a79a9568d8aa00b6df",
+   "message": "Fixed LED circuit & position of them",
+   "licence": "MIT",
+   "reason": "LED and resistor-array rework; the bug is not identifiable from the netlist"
+  },
+  {
+   "repo": "a-tk/parts-files",
+   "fix_commit": "8fc22cfd246567d7d50b53a79c088e3871d01a83",
+   "parent": "a9962a0012e43762b41d844ce0ca2ea43c20f5f7",
+   "message": "added cap to fix repeated triggers",
+   "licence": "NONE",
+   "reason": "debounce capacitor added (improvement)"
+  },
+  {
+   "repo": "Board-Folk/NeoGeoAES-3.5",
+   "fix_commit": "ebf7e52ae2c1f9e33ceaa187944568cc0c9558f1",
+   "parent": "e99684e059249013b9e92b5472aadae63a390860",
+   "message": "Swap Barrel Jack Symbol",
+   "licence": "NONE",
+   "reason": "symbol swap, no wiring change"
+  },
+  {
+   "repo": "Celnardur/rfc_tackle_sensor",
+   "fix_commit": "6098bd29c31b238aae453f14fd496e2846d26b6b",
+   "parent": "916c0d8ea757a40a780d36f3e0e5f0dc5dde981c",
+   "message": "added pinout to MCU",
+   "licence": "MIT",
+   "reason": "work in progress, many changes"
+  },
+  {
+   "repo": "butchwarns/Eurorack_PSU",
+   "fix_commit": "eafecb86112579ec7bdbe399b2468e6bbb0c35f0",
+   "parent": "4d38c70b064b63dc027d2514a814315bb3ee8ba2",
+   "message": "Swap rectifier diodes for larger ones. Change input terminal text to be more legible.",
+   "licence": "NONE",
+   "reason": "part upgrade"
+  },
+  {
+   "repo": "AcheronProject/Jiu",
+   "fix_commit": "593624a88f6f06dde661efcd711a18d909a88e1e",
+   "parent": "b7ddde6fe7d73832cdcf149200cf0f7a9131f19a",
+   "message": "Fix missing 6.25U bottom row key",
+   "licence": "NOASSERTION",
+   "reason": "missing key switch (completeness)"
+  },
+  {
+   "repo": "Phantom-243/handheld-gaming-console",
+   "fix_commit": "382947c24f9b99bbce70ea7ec7d54078f9d00170",
+   "parent": "a5a49e3ca154c38f3857a41c56dbf52f95517bb0",
+   "message": "fix(usb): correct USB2514B reset timing, complete VDDA33 decoupling network, and add TPS2051B VBUS load switch for internal RP2040 port",
+   "licence": "NONE",
+   "reason": "several changes in one commit"
+  },
+  {
+   "repo": "adam-kabbara/RSX-CANSAT-2026",
+   "fix_commit": "c06f74a6a8d96f657b46dc22d80f0b3c65e54fc0",
+   "parent": "d3482c4581a366d56d99678c096b36efbdfa0f90",
+   "message": "Add ERCs fixed for ground station",
+   "licence": "NONE",
+   "reason": "pin types changed for ERC"
+  },
+  {
+   "repo": "Just4Stan/SatNOGS-Basestation",
+   "fix_commit": "92bc183ebcf6916e88bfcac5061d92ab430eb76e",
+   "parent": "056188a4a6180e923f2df81ca78a3df717ebc89d",
+   "message": "MOTOR_RF_HAT: fix cap packages — 10uF/50V, 22uF, 4.7uF/50V back to 0805",
+   "licence": "NONE",
+   "reason": "footprints only"
+  },
+  {
+   "repo": "Anothyre/drone",
+   "fix_commit": "6c3f17a62aad571ad7f251acc5e1afd4e1a8f397",
+   "parent": "fdb0faf2eb75105604b048079148b7f19e99a25c",
+   "message": "Fix Bypass Capacitor error",
+   "licence": "NONE",
+   "reason": "bypass and connector rework; bug not identifiable"
+  },
+  {
+   "repo": "Dragon863/CFWatch",
+   "fix_commit": "0ebc9a19e4176a913bc5447558ec795a7e3a9806",
+   "parent": "db597dbb05886fc5f6bf3d509bb5a25c404ba7bc",
+   "message": "Fix charge LED, display resistors",
+   "licence": "NONE",
+   "reason": "display driver redesign"
+  },
+  {
+   "repo": "Queens-Rocket-Engineering-Team/Avionics-23-26",
+   "fix_commit": "c64a371e3caee9f8f6e79b55c071697970eb42c7",
+   "parent": "92285d3b69d54b465054f2f6ea341aae39ed7efd",
+   "message": "Swapped SWD connector to SMD version",
+   "licence": "NONE",
+   "reason": "footprint only"
+  },
+  {
+   "repo": "bitaxeorg/bitaxeUltra",
+   "fix_commit": "e2cd452bce0641926e4ed87f03f65cabca338c51",
+   "parent": "ffb6ea4a9a2abfb1da94986fd8c5cf51d964c6a0",
+   "message": "fixed polarity symbol",
+   "licence": "CERN-OHL-S-2.0",
+   "reason": "graphic symbol only"
+  },
+  {
+   "repo": "46nori/Z80Atmega128",
+   "fix_commit": "44d1fc7a0657c9c20e7c50e5787da6bd6551ba1f",
+   "parent": "0d88da5b431c77e8a3ff50f50055efa06022b6b4",
+   "message": "Bug fix of /BUSACK handling during Z80 /RESET is low at power on/manual reset.",
+   "licence": "GPL-3.0",
+   "reason": "logic redesign"
+  },
+  {
+   "repo": "Board-Folk/NeoGeoAES-3.5",
+   "fix_commit": "f3ba2b1adbac8ae08a1f64cac2466aed59a51017",
+   "parent": "c6409bc80df8f3fa53cccdc862be0c7c2f76dd0d",
+   "message": "Swap X2 around",
+   "licence": "NONE",
+   "reason": "no schematic change"
+  },
+  {
+   "repo": "balthazar-space/Unifying-PCB",
+   "fix_commit": "d8d24f3e5d59402135d5b4b729b7d244f5f2be89",
+   "parent": "d38ef33d710d88965fe8524570e5b78a068e639d",
+   "message": "Mirroring CAM, DSI, new GPDI pinout fix #2 #3 #5 #12",
+   "licence": "NOASSERTION",
+   "reason": "HDMI connector symbol replaced; several fixes"
+  },
+  {
+   "repo": "blurpy/esp32-pcb-bitraf",
+   "fix_commit": "9d8d126c9134359f94e600a66c3882d50117dad9",
+   "parent": "4bb90941e09255d7fef9d8491fa254f10538cdf9",
+   "message": "Seems some labels were missing from original saves",
+   "licence": "MIT",
+   "reason": "no schematic change"
+  },
+  {
+   "repo": "alicjamusial/meteo-station-pcb",
+   "fix_commit": "3494ac8039aead6a1e8120bb90eec6af91ed22f7",
+   "parent": "dbd0a70dcc3f59259e88f3405d3739d8c9906dbb",
+   "message": "Net fixes",
+   "licence": "NOASSERTION",
+   "reason": "pin types changed"
+  },
+  {
+   "repo": "Phantom-243/handheld-gaming-console",
+   "fix_commit": "a5a49e3ca154c38f3857a41c56dbf52f95517bb0",
+   "parent": "bf2cf20ef2ae19f0abeeec0f28855e6891d43f3c",
+   "message": "fix(core): correct J3 ground matrix, fix UART pins, add OTG_ID pull-up, and reduce BQ24075 input capacitance per design audit",
+   "licence": "NONE",
+   "reason": "several changes in one commit"
+  },
+  {
+   "repo": "FOME-Tech/Polygonus-Universal-112",
+   "fix_commit": "d2cef5b97481fe222f4d6b7caf52bf407173c155",
+   "parent": "4b893a70686b1154a86214e8b2ca7c2db4a17857",
+   "message": "fix busted symbol connection to Simon.kicad_sym",
+   "licence": "NONE",
+   "reason": "footprint only"
+  },
+  {
+   "repo": "Gherkin/stm32mp2-core",
+   "fix_commit": "871b1eaaa979208072492cc9bf718e9c320ae234",
+   "parent": "ce3ae9a5ad91d55a97baab2911d9daaeef3e7315",
+   "message": "added the missing pins from the stupid pmic ultralibrarian symbol",
+   "licence": "NONE",
+   "reason": "symbol pin types"
+  },
+  {
+   "repo": "antmicro/m2-oculink-adapter",
+   "fix_commit": "bb69f7bd709e4a06285fd407ec216b60efa48df2",
+   "parent": "6e590c0f37d4c780e3126e5890cb7160a8b2c028",
+   "message": "[#81131] Fix schematic 3V3",
+   "licence": "Apache-2.0",
+   "reason": "no schematic change"
+  },
+  {
+   "repo": "KungfuPancake/longboi",
+   "fix_commit": "9d2ca4ad2b7232d7222e42e3f5399a0141c590b1",
+   "parent": "b1750b94038df5e5ec2e5959e447827e630d05fe",
+   "message": "fixes #8: changed led series resistor values",
+   "licence": "Apache-2.0",
+   "reason": "LED resistor values (brightness)"
+  },
+  {
+   "repo": "feastorg/Slice_DCMT",
+   "fix_commit": "19f7c2820f5f83c0a67a2ba4a4e183319d863d19",
+   "parent": "808c2c6d4adcebb8e569637241031ac1b3d6ffe0",
+   "message": "fixed to use elec cap, fill zones instead of traces, tab down for thermal",
+   "licence": "GPL-3.0",
+   "reason": "files could not be fetched"
+  },
+  {
+   "repo": "buckles3636/EasyBLDC",
+   "fix_commit": "bf3aae058dd0c06e25bc0dcfcadff9fa2393e0b2",
+   "parent": "e6c9deb22660d3740804cd6a49e2175ba02dac92",
+   "message": "Changed main connector pinout to improve signal integrity",
+   "licence": "MIT",
+   "reason": "connector pinout changed for signal integrity, not a bug"
+  },
+  {
+   "repo": "GenerateNU/Concrete",
+   "fix_commit": "1532d7b829dba3312e7bcba3ae27bfb774bfcd41",
+   "parent": "210005588a93048b81f5dad45b90e928ab5ed344",
+   "message": "added cap and fixed pmos symbol",
+   "licence": "NONE",
+   "reason": "capacitor and symbol rework; bug not identifiable"
+  },
+  {
+   "repo": "Churrosoft/OpenEFI-PCB",
+   "fix_commit": "745c9e6c54c246717d529a0f886f81a0d592f209",
+   "parent": "b18011557615067f3013e7eed0bdd71769bbfa46",
+   "message": "update sensors/connector pinout, added rtc vbatt backup",
+   "licence": "CERN-OHL-S-2.0",
+   "reason": "several updates"
+  },
+  {
+   "repo": "aeberbach/A600KB",
+   "fix_commit": "462b1f950a7a6f0ec7972bfbd01c2e75af459d10",
+   "parent": "e086f5c99b311ec594e2e7d07598563e0aa770bf",
+   "message": "Revise PCB to fix swapped keys",
+   "licence": "NOASSERTION",
+   "reason": "LED section removed (design change)"
+  },
+  {
+   "repo": "ManoShu/BareDev",
+   "fix_commit": "11cfabe5ae43ebf13b67c1c59c331e1dee299815",
+   "parent": "5b9a4fdd67613695381083537b90ff1a0190cf63",
+   "message": "Fixed missing 'Don't connect's in schematic",
+   "licence": "MIT",
+   "reason": "no-connect markers only"
+  },
+  {
+   "repo": "Bastardkb/adapter-blackpill",
+   "fix_commit": "5a6e4a24683ec4a58b5ed30cd719f0c3c255b27c",
+   "parent": "92f50f6bb8cb9c3bbcb41ac6bef404542958d016",
+   "message": "pinout",
+   "licence": "NOASSERTION",
+   "reason": "rework with unannotated parts"
+  }
+ ]
+}

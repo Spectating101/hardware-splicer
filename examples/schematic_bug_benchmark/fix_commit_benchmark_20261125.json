@@ -6,9 +6,10 @@
   "kicad_cli": "9.0.2, and 10.0.8 (kicad/kicad:10.0.8 container) for KiCad 10 files",
   "kicad_happy_commit": "6b9767e19979cdef91631573753b1547efdbeab9",
   "hs_review_frozen": "2fc56f24",
-  "hs_review_current": "hardware_splicer.kicad_design_review at this commit"
+  "hs_review_current": "hardware_splicer.kicad_design_review at this commit",
+  "hs_review_rules2_20261127": "hardware_splicer.kicad_design_review at 8d3315a7"
  },
- "honesty": "hs_review_frozen is HS as it stood before these cases were examined (commit 2fc56f24). hs_review_current includes rules and fixes these same cases prompted, so its extra catches are not independent evidence. Earlier versions of this file exported sub-sheets instead of root sheets for 40 of 73 cases; every verdict here comes from root-sheet runs.",
+ "honesty": "hs_review_frozen is HS as it stood before these cases were examined (commit 2fc56f24). hs_review_current includes rules and fixes these same cases prompted, so its extra catches are not independent evidence. Earlier versions of this file exported sub-sheets instead of root sheets for 40 of 73 cases; every verdict here comes from root-sheet runs. hs_review_rules2_20261127 adds rules written while reading these same 70 cases; examples/schematic_bug_benchmark/heldout_benchmark_20261127.json measures them on 35 bugs from projects none of the rules were written from.",
  "cases_judged": 70,
  "tally": {
   "kicad_erc": {
@@ -31,6 +32,11 @@
    "caught": 17,
    "partial": 5,
    "scope": "re-run on the 10 missing-pull-up cases and the 9 swap cases; the others keep their hs_review_current verdict"
+  },
+  "hs_review_rules2_20261127": {
+   "caught": 21,
+   "partial": 6,
+   "scope": "every case re-run with the physics, pin-name and library rules of 2026-11-27 (commit a52834db and later)"
   }
  },
  "caught_by_any_frozen_checker": 14,
@@ -57,7 +63,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": "1 uF vs 0.1 uF: values are not checked"
   },
@@ -73,7 +80,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": "keyboard COL lines; internal pulls were the alternative",
    "note_20261127": "design intent (internal pulls were the alternative)"
@@ -90,7 +98,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": ""
   },
@@ -106,7 +115,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "C",
     "hs_review_current": "C",
-    "hs_review_20261127": "C"
+    "hs_review_20261127": "C",
+    "hs_review_rules2_20261127": "C"
    },
    "note": "P-channel drain on +VSW"
   },
@@ -122,7 +132,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "C*",
     "hs_review_current": "C*",
-    "hs_review_20261127": "C*"
+    "hs_review_20261127": "C*",
+    "hs_review_rules2_20261127": "C*"
    },
    "note": "*with one declared mate: J20 is the Flipper Zero GPIO header (Black Wire pinout)"
   },
@@ -138,9 +149,10 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "C"
    },
-   "note": "flipped Q5"
+   "note": "flipped Q5; 2026-11-27 rules: bjt_collector_emitter_reversed on Q5"
   },
   {
    "repo": "bitaxeorg/bitaxeGamma",
@@ -154,7 +166,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": ""
   },
@@ -170,7 +183,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": ""
   },
@@ -186,7 +200,8 @@
     "kicad_happy": "C",
     "hs_review_frozen": "C",
     "hs_review_current": "C",
-    "hs_review_20261127": "C"
+    "hs_review_20261127": "C",
+    "hs_review_rules2_20261127": "C"
    },
    "note": "5.1k Rd added; current rules also see D+/D- joined on both rows"
   },
@@ -202,7 +217,8 @@
     "kicad_happy": "C",
     "hs_review_frozen": "-",
     "hs_review_current": "P",
-    "hs_review_20261127": "P"
+    "hs_review_20261127": "P",
+    "hs_review_rules2_20261127": "P"
    },
    "note": "ERC/kicad-happy: unconnected J8 pins; HS current: only the one-sided D- (CC still lacks Rd after this fix)"
   },
@@ -218,7 +234,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "C",
-    "hs_review_20261127": "C"
+    "hs_review_20261127": "C",
+    "hs_review_rules2_20261127": "C"
    },
    "note": "ERC: two labels on one net; HS current: SDA and SCL pins on one net"
   },
@@ -234,7 +251,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": "no TX/RX-named pins on both ends"
   },
@@ -250,7 +268,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": "",
    "note_20261127": "RP2040 RUN: not a datasheet requirement HS can cite"
@@ -267,7 +286,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": "Q_PMOS_GSD to GDS: connectivity identical, needs the package pinout"
   },
@@ -283,7 +303,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": "3.5 mm jack"
   },
@@ -299,7 +320,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": ""
   },
@@ -315,7 +337,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": ""
   },
@@ -331,7 +354,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": "op-amp on the wrong rails; rails exist, intent decides"
   },
@@ -347,9 +371,10 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "C"
    },
-   "note": ""
+   "note": "2026-11-27 rules: supply_pin_on_ground: IC3-IC6 VDD on the main GND before the stack nets were split"
   },
   {
    "repo": "anyshake/explorer",
@@ -363,7 +388,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": "MMBD1503A"
   },
@@ -379,7 +405,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "C",
-    "hs_review_20261127": "C"
+    "hs_review_20261127": "C",
+    "hs_review_rules2_20261127": "C"
    },
    "note": "CUI UJ20-C named only by part number; frozen HS did not know it as USB-C"
   },
@@ -395,7 +422,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": "",
    "note_20261127": "data bus bit order: the pin names agree on both sides"
@@ -412,7 +440,8 @@
     "kicad_happy": "C",
     "hs_review_frozen": "-",
     "hs_review_current": "C",
-    "hs_review_20261127": "C"
+    "hs_review_20261127": "C",
+    "hs_review_rules2_20261127": "C"
    },
    "note": "74HCT166 CE left open"
   },
@@ -428,7 +457,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": "R4/R5 values swapped"
   },
@@ -444,7 +474,8 @@
     "kicad_happy": "C",
     "hs_review_frozen": "P",
     "hs_review_current": "P",
-    "hs_review_20261127": "P"
+    "hs_review_20261127": "P",
+    "hs_review_rules2_20261127": "P"
    },
    "note": "ERC: USB POW label dangling; kicad-happy and HS: unwired LED D3 (removed by the fix)"
   },
@@ -460,7 +491,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": ""
   },
@@ -476,7 +508,8 @@
     "kicad_happy": "P",
     "hs_review_frozen": "P",
     "hs_review_current": "P",
-    "hs_review_20261127": "P"
+    "hs_review_20261127": "P",
+    "hs_review_rules2_20261127": "P"
    },
    "note": "symbol replaced under a new reference, so findings vanish with the part; unclear"
   },
@@ -492,7 +525,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "C"
+    "hs_review_20261127": "C",
+    "hs_review_rules2_20261127": "C"
    },
    "note": "",
    "note_20261127": "diff_pair_polarity_swap errors on the USB_D0/D1 nets before, gone after"
@@ -509,7 +543,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": "",
    "note_20261127": "no connectivity change between parent and fix"
@@ -526,9 +561,10 @@
     "kicad_happy": "C",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "C"
    },
-   "note": "kicad-happy PP-001: LDO GND pin on A-2V5"
+   "note": "kicad-happy PP-001: LDO GND pin on A-2V5; 2026-11-27 rules: ground_pin_on_supply: U2 GND on A-2V5"
   },
   {
    "repo": "anyshake/explorer",
@@ -542,7 +578,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": ""
   },
@@ -558,7 +595,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": "C68 to AVSS"
   },
@@ -574,7 +612,8 @@
     "kicad_happy": "C",
     "hs_review_frozen": "C",
     "hs_review_current": "C",
-    "hs_review_20261127": "C"
+    "hs_review_20261127": "C",
+    "hs_review_rules2_20261127": "C"
    },
    "note": "XT30 +V on VIN, everything else on 12V"
   },
@@ -590,7 +629,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": ""
   },
@@ -606,7 +646,8 @@
     "kicad_happy": "C",
     "hs_review_frozen": "C",
     "hs_review_current": "C",
-    "hs_review_20261127": "C"
+    "hs_review_20261127": "C",
+    "hs_review_rules2_20261127": "C"
    },
    "note": ""
   },
@@ -622,7 +663,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": ""
   },
@@ -638,7 +680,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": ""
   },
@@ -654,7 +697,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": "",
    "note_20261127": "power-up state: design intent"
@@ -671,7 +715,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": "TC2050"
   },
@@ -687,9 +732,10 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "P"
    },
-   "note": "ERC pin_to_pin warnings on Q2 vanish"
+   "note": "ERC pin_to_pin warnings on Q2 vanish; 2026-11-27 rules: joined_pins_split: U6 I/O1 joins USB_D- and USB_D+ (the fix's USB half; the speaker driver half is still missed)"
   },
   {
    "repo": "beagleboard/capes",
@@ -703,7 +749,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": "frozen HS raised a false missing-pull-up warning here (since fixed)"
   },
@@ -719,7 +766,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": ""
   },
@@ -735,7 +783,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": ""
   },
@@ -751,7 +800,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": ""
   },
@@ -767,7 +817,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": "",
    "note_20261127": "TX/RX direction through a mux whose pins carry no direction"
@@ -784,7 +835,8 @@
     "kicad_happy": "C",
     "hs_review_frozen": "-",
     "hs_review_current": "C",
-    "hs_review_20261127": "C"
+    "hs_review_20261127": "C",
+    "hs_review_rules2_20261127": "C"
    },
    "note": "receptacle named by part number; CC2 still open after the fix"
   },
@@ -800,7 +852,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "C"
+    "hs_review_20261127": "C",
+    "hs_review_rules2_20261127": "C"
    },
    "note": "swap at a connector",
    "note_20261127": "i2c_sda_scl_short now counts I2C pins a symbol types passive: four errors before, none after"
@@ -817,7 +870,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": "DQS P/N",
    "note_20261127": "DQS: the fix renamed nets; pins pair the same way before and after"
@@ -834,7 +888,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": "",
    "note_20261127": "boot mode: no boot-strap pin visible to a rule in the netlist; its MAC MDIO now gets a note pointing at the carrier"
@@ -851,7 +906,8 @@
     "kicad_happy": "C",
     "hs_review_frozen": "C",
     "hs_review_current": "C",
-    "hs_review_20261127": "C"
+    "hs_review_20261127": "C",
+    "hs_review_rules2_20261127": "C"
    },
    "note": ""
   },
@@ -867,9 +923,10 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "C"
    },
-   "note": ""
+   "note": "2026-11-27 rules: net_name_pin_mismatch: SDA-named net on U3 SCL and back"
   },
   {
    "repo": "FPGA-Research/FABulous_board",
@@ -883,7 +940,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "C",
-    "hs_review_20261127": "C"
+    "hs_review_20261127": "C",
+    "hs_review_rules2_20261127": "C"
    },
    "note": ""
   },
@@ -899,7 +957,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "C",
-    "hs_review_20261127": "C"
+    "hs_review_20261127": "C",
+    "hs_review_rules2_20261127": "C"
    },
    "note": "IMU SDA to the other part's SCL"
   },
@@ -915,7 +974,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "C",
     "hs_review_current": "C",
-    "hs_review_20261127": "C"
+    "hs_review_20261127": "C",
+    "hs_review_rules2_20261127": "C"
    },
    "note": "RXD to RXD and TXD to TXD"
   },
@@ -931,7 +991,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": ""
   },
@@ -947,7 +1008,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "C"
+    "hs_review_20261127": "C",
+    "hs_review_rules2_20261127": "C"
    },
    "note": "",
    "note_20261127": "esp32_enable_floating warning on /CHIP_PU before, gone after the 10 k pull-up"
@@ -964,7 +1026,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": "",
    "note_20261127": "/NMI: Zilog UM0080 states no pull-up requirement for NMI (it does for INT and BUSREQ), so no rule claims it"
@@ -981,7 +1044,8 @@
     "kicad_happy": "C",
     "hs_review_frozen": "C",
     "hs_review_current": "C",
-    "hs_review_20261127": "C"
+    "hs_review_20261127": "C",
+    "hs_review_rules2_20261127": "C"
    },
    "note": ""
   },
@@ -997,7 +1061,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "P",
-    "hs_review_20261127": "P"
+    "hs_review_20261127": "P",
+    "hs_review_rules2_20261127": "P"
    },
    "note": "named bus to a header: current HS gives a note, not a warning",
    "note_20261127": "already a note from i2c_no_pullup (named bus to a header)"
@@ -1014,7 +1079,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": "",
    "note_20261127": "BM1362 RI: vendor documentation not public"
@@ -1031,7 +1097,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": "",
    "note_20261127": "BM1366 BI: vendor documentation not public"
@@ -1048,7 +1115,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "P"
+    "hs_review_20261127": "P",
+    "hs_review_rules2_20261127": "P"
    },
    "note": "",
    "note_20261127": "mdio_no_pullup note on the PHY's MDIO before (it reaches the OSM module edge through a 0 ohm link), gone after the 1.5 k pull-up"
@@ -1065,7 +1133,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": ""
   },
@@ -1081,7 +1150,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": "",
    "note_20261127": "generic port pins (P24/P25)"
@@ -1098,7 +1168,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": ""
   },
@@ -1114,7 +1185,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": "",
    "note_20261127": "no connectivity change between parent and fix"
@@ -1131,7 +1203,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": ""
   },
@@ -1147,7 +1220,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": ""
   },
@@ -1163,7 +1237,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": ""
   },
@@ -1179,7 +1254,8 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "-"
+    "hs_review_20261127": "-",
+    "hs_review_rules2_20261127": "-"
    },
    "note": "",
    "note_20261127": "no connectivity change between parent and fix"
