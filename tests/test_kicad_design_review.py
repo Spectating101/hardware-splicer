@@ -384,3 +384,37 @@ def test_mdio_follows_zero_ohm_links_and_defers_to_a_module_edge():
                     [("/MDIO", [("U7", "24", "MDIO", "bidirectional"), ("R110", "2", "", "passive"), ("R219", "1", "", "passive")]),
                      ("/RGMII.MDIO", [("R110", "1", "", "passive"), ("U1", "C7", "ETH_MDIO", "passive")]), ("+3V3", [("R219", "2", "", "passive")])])
     assert "mdio_no_pullup" not in rules(fixed)
+
+
+# ---- swaps visible from pin functions (2026-11-27) ------------------------------------------------------------------
+
+def test_usb_d_plus_meeting_d_minus_is_an_error_but_an_esd_channel_is_not():
+    # cheyao/icepi-sbc 2f939f5f: the SoC's USB_D0+ met the connector's D- and the hub's D+.
+    soc = ("U1", "H3", "MCU", "H3", "SoC")
+    usb = ("J2", "USB_A", "Connector", "USB_A", "USB connector")
+    crossed = netlist([soc, usb], [("/USB_D0+", [("U1", "5", "USB_D0+", "bidirectional"), ("J2", "3", "D-", "passive")])])
+    found = review(crossed)["findings"]
+    assert [(f["severity"], f["rule"]) for f in found] == [("error", "diff_pair_polarity_swap")]
+    straight = netlist([soc, usb], [("/USB_D0+", [("U1", "5", "USB_D0+", "bidirectional"), ("J2", "3", "D+", "passive")])])
+    assert rules(straight) == []
+    # CM4 IO board: a TPD4EUSB30 clamp channel named D2+ sits on D-; its channels carry no polarity.
+    esd = ("U4", "TPD4EUSB30", "CM4IO", "TPD4EUSB30", "4-Channel ESD Protection for Super-Speed USB 3.0 Interface")
+    hub = ("U13", "VL805", "Interface_USB", "VL805", "USB hub")
+    clamp = netlist([esd, hub, usb], [("/USBD_N", [("J2", "2", "D-", "passive"), ("U13", "9", "HSD1_M", "bidirectional"),
+                                                   ("U4", "2", "D2+", "passive")])])
+    assert rules(clamp) == []
+
+
+def test_a_crossed_high_speed_lane_is_a_warning():
+    soc = ("U14", "SoC", "MCU", "SoC", "SoC")
+    mux = ("U16", "Redriver", "Interface", "PI3EQX", "redriver")
+    lane = netlist([soc, mux], [("/PCIE_TX0", [("U14", "1", "PCIe_A_HSO0_P", "output"), ("U16", "2", "TX0_N", "input")])])
+    assert [(f["severity"], f["rule"]) for f in review(lane)["findings"]] == [("warning", "diff_pair_polarity_swap")]
+
+
+def test_sda_meeting_scl_is_caught_when_the_symbol_types_the_pins_passive():
+    # antmicro/osm-l-bmc-som d755ff2e: the PMIC's SCL (typed passive) met the EEPROM's SDA.
+    pmic = ("U13", "PCA9450", "Power_Management", "PCA9450", "PMIC")
+    eeprom = ("U16", "24C02", "Memory_EEPROM", "24C02", "EEPROM")
+    swapped = netlist([pmic, eeprom], [("/PMIC_I2C.SCL", [("U13", "10", "SCL", "passive"), ("U16", "5", "SDA", "bidirectional")])])
+    assert "i2c_sda_scl_short" in rules(swapped)

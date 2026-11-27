@@ -272,6 +272,19 @@ def _pull_rule_findings(comps, nets, pin_net, finding, resistor_to, driven_suppl
                     TI_MDIO, [ref], net)
 
 
+USB2_PIN = re.compile(r"(^|[/_])(USB\d?_?)?D\d?(?P<sign>[+-]|P|M|N)$", re.I)
+DIFF_PIN = re.compile(r"(^|[/_])[A-Z0-9_]*?(TX|RX|HS[IO]|HSO|HSI|CLK|LANE|REFCLK)\d*_?(?P<sign>P|N|\+|-)$", re.I)
+
+
+def _diff_polarity(function: str) -> tuple[str | None, str | None]:
+    """('usb2' or 'pair', '+' or '-') for a differential pin function, else (None, None)."""
+    for kind, pat in (("usb2", USB2_PIN), ("pair", DIFF_PIN)):
+        m = pat.search(function or "")
+        if m:
+            return kind, "+" if m.group("sign").upper() in ("+", "P") else "-"
+    return None, None
+
+
 def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[str, Any]:
     comps, nets = model["components"], model["nets"]
     pin_net: dict[tuple[str, str], str] = {}
@@ -354,8 +367,29 @@ def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[s
                     f"{n['ref']} pin {n['pin']} ({n['function'] or 'input'}) is an input with nothing on it. "
                     + ("Standard logic has no internal pull: tie it high or low." if logic else "Check the datasheet for an internal pull resistor; otherwise tie it high or low."),
                     "KiCad pin type input; CMOS inputs must not float", [n["ref"]], name)
-        sda = sorted({n["ref"] + "." + n["function"] for n in parts if re.search(r"(^|[/_])SDA", n["function"], re.I) and not re.search(r"SCL", n["function"], re.I)})
-        scl = sorted({n["ref"] + "." + n["function"] for n in parts if re.search(r"(^|[/_])SCL", n["function"], re.I) and not re.search(r"SDA", n["function"], re.I)})
+        # Some symbols type an IC's I2C pins passive (osm-l-bmc-som's PMIC and EEPROM): an IC's pin counts whatever its type.
+        ic_pins = parts + [n for n in nodes if n["type"] == "passive" and n not in parts and n["function"]
+                           and _kind(comps.get(n["ref"], {"lib": "", "part": "", "description": ""}), n["ref"]) not in ("resistor", "capacitor")
+                           and not _is_connector(comps.get(n["ref"], {})) and re.match(r"(U|IC)\d", n["ref"])]
+        sda = sorted({n["ref"] + "." + n["function"] for n in ic_pins if re.search(r"(^|[/_])SDA", n["function"], re.I) and not re.search(r"SCL", n["function"], re.I)})
+        scl = sorted({n["ref"] + "." + n["function"] for n in ic_pins if re.search(r"(^|[/_])SCL", n["function"], re.I) and not re.search(r"SDA", n["function"], re.I)})
+        # A differential pair crossed: one net joins a pair's positive and negative pins of two different parts.
+        polar = [(n, *_diff_polarity(n["function"])) for n in ic_pins + [x for x in nodes if _is_connector(comps.get(x["ref"], {})) and x not in ic_pins]]
+        # An ESD or TVS array's channels (TPD4EUSB30 "D2+") carry no polarity: any channel may take either line.
+        clamp = lambda ref: re.search(r"esd|tvs|usblc|prtr|clamp|protect|TPD\d", " ".join(str(v) for k, v in comps.get(ref, {}).items()
+                                                                                  if k not in ("pins", "fields", "footprint")), re.I)
+        polar = [(n, kind, sign) for n, kind, sign in polar if kind and not clamp(n["ref"])]
+        signs = {sign for _, _, sign in polar}
+        if len(signs) == 2 and len({n["ref"] for n, _, _ in polar}) >= 2:
+            usb = any(kind == "usb2" for _, kind, _ in polar)
+            listed = ", ".join(sorted(f"{n['ref']}.{n['function']}" for n, _, _ in polar))
+            finding("error" if usb else "warning", "diff_pair_polarity_swap",
+                    f"Net {name} joins positive and negative pins of a differential pair ({listed})."
+                    + (" USB 2.0 has no polarity inversion: D+ must meet D+." if usb else
+                       " Check it is deliberate: PCIe, SATA and USB 3 lanes may be inverted, other pairs may not."),
+                    "pin functions from KiCad's symbols; USB 2.0 data pair (D+ to D+, D- to D-)" if usb else
+                    "pin functions from KiCad's symbols; lane polarity inversion is allowed by PCIe and USB 3 only",
+                    [n["ref"] for n, _, _ in polar], name)
         if sda and scl:
             finding("error", "i2c_sda_scl_short", f"Net {name} joins I2C data ({', '.join(sda)}) and clock ({', '.join(scl)}). SDA and SCL must be separate nets.",
                     UM10204, [x.split(".")[0] for x in sda + scl], name)
