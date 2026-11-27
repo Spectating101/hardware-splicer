@@ -57,7 +57,7 @@ and from 82 g to 55 g each. The 7.4 V version is kept off 12 V supplies.
 
 **Rev B built (same day).** `projects/hs-arm-a/rev-b`: the arm rebuilt around the STS3215, its geometry measured from
 SO-ARM100's own servo model. Printed cheek bosses keep every joint clash-free over rev A's ranges. Parts US$206.49
-against US$1,089.50; moving mass 0.459 kg against 0.516; reach 370.5 mm against 375.9.
+against US$1,089.50; moving mass 0.456 kg against 0.516 (0.459 before its screw holes were cut); reach 370.5 mm against 375.9.
 
 The full CAD check (link and bracket masses included, which the quick sizing tool leaves out) puts rev B's shoulder at
 66% of stall with 150 g and safety factor 1.5: over HS's own 50% rule (about 63 g at the rule). The same method on
@@ -162,7 +162,7 @@ NT$1,100-2,965 together. A mapping rover built from those, on OOMWOO's open soft
 
 ## Next
 
-1. Done: HS-ARM-A rev B (above). Still open: horn bolt circle and servo screw holes, the leader arm SO-101 pairs with.
+1. Done: HS-ARM-A rev B (above), screw holes included. Still open: the leader arm SO-101 pairs with.
 2. Done: rover (above). Still open: a TT-motor variant of HS-ROVER-A priced and re-checked end to end; the OSR's
    rocker-bogie (Apache-2.0) as HS's rough-terrain option.
 3. Done: drone (above). Still open: a brushless calibration aircraft, Crazyflie's motor mass, and more cited tables
