@@ -417,6 +417,14 @@ def _step_fit(args, project):
                      res, problems=problems, boundary=res["claim_boundary"])
 
 
+def _external_tools(args, _project):
+    from . import external_tools
+    rows = external_tools.tools(args.get("role"), args.get("status"))
+    s = external_tools.summary()
+    return _envelope(True, f"{len(rows)} of {s['tools']} outside tools" + (f" ({args['role']})" if args.get("role") else ""),
+                     {"summary": s, "tools": rows}, boundary="A registry of outside tools and their measured results; it authorises nothing.")
+
+
 def _trace_current(args, project):
     from . import trace_capacity
     res = trace_capacity.check_routed(_readable(str(args["pcb"]), project), args["net_currents_a"],
@@ -1006,6 +1014,9 @@ TOOLS: dict[str, ToolSpec] = {t.name: t for t in [
              "the STEP tree, overlapping pairs with their volume, tight gaps, loose parts, size, volumes, and masses from density_g_cm3 "
              "({part or '*': g/cm3}). Runs in the native CAD interpreter.",
              _obj({"step": {"type": "string"}, "near_mm": {"type": "number"}, "density_g_cm3": {"type": "object"}}, ["step"]), _step_fit),
+    ToolSpec("hs_external_tools", "The outside tools HS plugs in (routers, checkers, CAD, interface, fab, data): licence, how HS "
+             "uses each, status and what it measured. Filter by role or status.",
+             _obj({"role": {"type": "string"}, "status": {"type": "string"}}), _external_tools),
     ToolSpec("hs_trace_current", "Check a routed .kicad_pcb's narrowest track on each net against a stated current (IPC-2221 "
              "chart fit): temperature rise per net, and the width that keeps it under max_rise_c (default 20 C).",
              _obj({"pcb": {"type": "string"}, "net_currents_a": {"type": "object"}, "max_rise_c": {"type": "number"},

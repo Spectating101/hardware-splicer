@@ -1,0 +1,218 @@
+{
+ "schema": "hardware_splicer.external_tools.v1",
+ "captured": "2026-11-28",
+ "rule": "HS is the spine; these are its limbs. An outside tool's output is evidence, never authority (docs/INTEGRATION_STACK.md). Each tool is measured before HS relies on it; licences decide whether it is copied in, run separately or only read.",
+ "statuses": {
+  "integrated": "HS calls it today",
+  "measuring": "installed and under test",
+  "installing": "being set up",
+  "candidate": "found, not yet tried",
+  "reference": "read and cited only"
+ },
+ "tools": [
+  {
+   "role": "routing",
+   "name": "FreeRouting",
+   "source": "https://github.com/freerouting/freerouting",
+   "licence": "GPL-3.0",
+   "how": "run as a separate program (jar)",
+   "status": "integrated",
+   "measured": "HS's first router; HS-BUS-A 2 of 5 runs DRC-clean",
+   "record": "examples/routing_trial/copper_vs_hs_bus_a_20261127.json"
+  },
+  {
+   "role": "routing",
+   "name": "Copper (copper-kicad-mcp)",
+   "source": "https://github.com/claynicholson/copper-kicad-mcp",
+   "licence": "MIT",
+   "how": "run in KiCad 10's container; pipeline fallback and hs_route_copper",
+   "status": "integrated",
+   "measured": "HS-BUS-A 5 of 5 clean; designers' boards 1 of 3 clean",
+   "record": "examples/routing_trial/copper_vs_designer_reference_boards_20261127.json"
+  },
+  {
+   "role": "routing",
+   "name": "KiCadRoutingTools",
+   "source": "https://github.com/drandyhaas/KiCadRoutingTools",
+   "licence": "MIT",
+   "how": "run as a separate program in its own environment; route.py with the board's net-class widths (its autorouter caps power nets at 0.3 mm); pipeline fallback after FreeRouting, before Copper",
+   "status": "integrated",
+   "measured": "3 of 3 designer boards fully connected (Copper 2 of 3), fewer added errors; HS-BUS-A clean in 49 s with 2.5/1.2 mm power tracks",
+   "record": "examples/routing_trial/krt_vs_copper_20261128.json"
+  },
+  {
+   "role": "checking",
+   "name": "KiCad ERC and DRC (kicad-cli)",
+   "source": "https://gitlab.com/kicad/code/kicad",
+   "licence": "GPL-3.0-or-later",
+   "how": "run as a separate program; KiCad 10 through scripts/kicad10-cli",
+   "status": "integrated",
+   "measured": "ERC caught 9 of 35 held-out bugs",
+   "record": "examples/schematic_bug_benchmark/heldout_benchmark_20261127.json"
+  },
+  {
+   "role": "checking",
+   "name": "kicad-happy",
+   "source": "https://github.com/aklofas/kicad-happy",
+   "licence": "MIT",
+   "how": "sidecar, network-isolated; review_schematic(also=...)",
+   "status": "integrated",
+   "measured": "9 of 35 held-out bugs",
+   "record": "examples/schematic_bug_benchmark/heldout_benchmark_20261127.json"
+  },
+  {
+   "role": "cad",
+   "name": "CadQuery",
+   "source": "https://github.com/CadQuery/cadquery",
+   "licence": "Apache-2.0",
+   "how": "HS's CAD engine, in the native interpreter",
+   "status": "integrated",
+   "measured": "every HS part; STEP fit check reads any CAD's STEP",
+   "record": "examples/step_fit/so100_follower_assembly_20261127.json"
+  },
+  {
+   "role": "cad",
+   "name": "text-to-cad",
+   "source": "https://github.com/earthtojake/text-to-cad",
+   "licence": "MIT",
+   "how": "candidate; its installer edits every agent app and turns on auto-updates, so not installed",
+   "status": "candidate",
+   "measured": "not compared yet"
+  },
+  {
+   "role": "cad",
+   "name": "sand3d",
+   "source": "https://github.com/Sandflow-ai/sand3d",
+   "licence": "Apache-2.0",
+   "how": "candidate (needs Blender's bpy)",
+   "status": "candidate",
+   "measured": "not compared yet"
+  },
+  {
+   "role": "cad",
+   "name": "ForgeCAD public kit",
+   "source": "https://github.com/ForgeCAD/forgecad-public-kit",
+   "licence": "MIT",
+   "how": "candidate; talks to the hosted forgecad.io service, so a design leaves the machine",
+   "status": "candidate",
+   "measured": "not compared yet"
+  },
+  {
+   "role": "cad",
+   "name": "CADAM",
+   "source": "https://github.com/Adam-CAD/CADAM",
+   "licence": "GPL-3.0",
+   "how": "candidate; may run as a separate program, code not copied",
+   "status": "candidate",
+   "measured": "not compared yet"
+  },
+  {
+   "role": "interface",
+   "name": "Backplane",
+   "source": "https://github.com/BackplaneWorks/Backplane",
+   "licence": "MIT",
+   "how": "agent workspace installed on a second machine (v0.16.4, archive checksum verified); its Claude Code reaches HS's toolbelt over MCP through SSH (docs/INTEGRATION_STACK.md); Backplane KiCad still to install from its Settings, CAD",
+   "status": "integrated",
+   "measured": "HS MCP connected from the second machine: 68 tools listed; no board designed through it yet"
+  },
+  {
+   "role": "fab",
+   "name": "jlcparts",
+   "source": "https://github.com/yaqwsx/jlcparts",
+   "licence": "MIT",
+   "how": "LCSC stock and prices for BOMs",
+   "status": "integrated",
+   "measured": "HS-BUS-A BOM, every line with an LCSC number",
+   "record": "projects/hs-bus-a/fab/jlc/ORDER.md"
+  },
+  {
+   "role": "data",
+   "name": "Black Wire pinouts",
+   "source": "https://github.com/valleytechsolutions/black-wire-pinouts",
+   "licence": "CC-BY-4.0",
+   "how": "snapshot with attribution",
+   "status": "integrated",
+   "measured": "mating-connector UART checks",
+   "record": "src/hardware_splicer/data/third_party/black_wire/SNAPSHOT.json"
+  },
+  {
+   "role": "data",
+   "name": "OOMWOO parts",
+   "source": "https://github.com/makerspet/oomwoo",
+   "licence": "Apache-2.0",
+   "how": "snapshot",
+   "status": "integrated",
+   "measured": "robot-vacuum salvage modules",
+   "record": "src/hardware_splicer/data/third_party/oomwoo/SNAPSHOT.json"
+  },
+  {
+   "role": "data",
+   "name": "WireStudio components",
+   "source": "https://github.com/moellere/WireStudio",
+   "licence": "MIT",
+   "how": "snapshot",
+   "status": "integrated",
+   "measured": "board and module data",
+   "record": "src/hardware_splicer/data/third_party/wirestudio/SNAPSHOT.json"
+  },
+  {
+   "role": "data",
+   "name": "esp-labs lessons",
+   "source": "https://github.com/agharsallah/esp-labs-web",
+   "licence": "MIT",
+   "how": "snapshot",
+   "status": "integrated",
+   "measured": "32 ESP32-S3 lessons, wiring checked",
+   "record": "src/hardware_splicer/data/third_party/esp_labs/SNAPSHOT.json"
+  },
+  {
+   "role": "data",
+   "name": "T-Motor, SunnySky, goBILDA, Bitcraze tables",
+   "source": "https://www.ligpower.com/",
+   "licence": "maker pages, cited per table",
+   "how": "cited data, never edited",
+   "status": "integrated",
+   "measured": "thrust and gearmotor libraries",
+   "record": "src/hardware_splicer/data/propulsion/thrust_tables_20261127.json"
+  },
+  {
+   "role": "data",
+   "name": "NanoBench",
+   "source": "https://github.com/syediu/nanobench-iros2026",
+   "licence": "BSD-3-Clause",
+   "how": "back-test data",
+   "status": "integrated",
+   "measured": "Crazyflie hover back-test",
+   "record": "examples/backtests/nanobench_crazyflie_hover_20261127.json"
+  },
+  {
+   "role": "data",
+   "name": "CM5 reverse engineering",
+   "source": "https://github.com/schlae/cm5-reveng",
+   "licence": "none",
+   "how": "read and cite only; files not copied",
+   "status": "reference",
+   "measured": "CM5 carrier and salvage reference",
+   "record": "docs/ATLAS_LEADS_20261128.md"
+  },
+  {
+   "role": "data",
+   "name": "open-dronelog",
+   "source": "https://github.com/arpanghosh8453/open-dronelog",
+   "licence": "AGPL-3.0",
+   "how": "candidate; run separately on flight logs, code not copied",
+   "status": "candidate",
+   "measured": "needs flown logs to be useful"
+  },
+  {
+   "role": "direction",
+   "name": "Cite-Refinery atlas",
+   "source": "(owner's own project)",
+   "licence": "owner's",
+   "how": "read locally by the weekly landscape watch",
+   "status": "integrated",
+   "measured": "4,914 products read; 172 hardware",
+   "record": "docs/ATLAS_LEADS_20261128.md"
+  }
+ ]
+}

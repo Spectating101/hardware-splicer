@@ -48,12 +48,12 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `integrations.circuit_json_import` | 337 | 3 | product | MRC | Import upstream tscircuit Circuit JSON into Hardware Splicer netlist IR. The importer accepts the real source graph used by Circuit JSON: - ``source_component`` defines component identity and source p... |
 | `circuit_synthesis.sensor_interface_planner` | 333 | 0 | product | TMRC | Bounded sensor/interface hookup planner. |
 | `electrical_interchange` | 327 | 1 | product | MRC | Deterministic identity projection from interchange netlists to electrical truth. Circuit JSON import produces source-graph/netlist truth. This module projects that truth into the canonical :mod:`elect... |
+| `component_board_pipeline` | 304 | 3 | product | TMRC | Any component-level board, from a JSON design to checked KiCad files and fab outputs. The pipeline HS-BUS-A proved, for any design an agent writes: schematic symbols from the KiCad libraries, pin cove... |
 | `source_project_editing` | 301 | 1 | product | TMRC | Promote retained upload bytes into an editable native KiCad workspace. |
 | `_pcbnew_helpers.place_free_footprints` | 300 | 1 | product | TMRC | Constructive placement of a board's free footprints (pcbnew, KiCad 9/10), for HS's component-board pipeline. python3 place.py BOARD_IN BOARD_OUT --locked REF,REF,... [--hints hints.json] [--gap 0.5] [... |
 | `circuit_synthesis.relay_switch_planner` | 294 | 0 | product | TMRC | Bounded relay/load-switch topology planner. |
 | `electrical_contract_truth` | 291 | 2 | product | TMRC | Structured electrical truth accessors for catalog modules. Only explicit machine-readable catalog/component-contract fields count as electrical authority here. Human summaries, warnings, labels and mo... |
 | `pcb.drc` | 291 | 1 | product | TMRC | Design Rule Check for generated PcbGeometry (Python engine port). |
-| `component_board_pipeline` | 279 | 3 | product | TMRC | Any component-level board, from a JSON design to checked KiCad files and fab outputs. The pipeline HS-BUS-A proved, for any design an agent writes: schematic symbols from the KiCad libraries, pin cove... |
 | `circuit_synthesis.semantic_planner_selector` | 270 | 4 | product | TMRC | Typed semantic selection for bounded circuit-synthesis planners. The bounded planners are deterministic engineering machinery. This module replaces raw prose keyword dispatch with a model-visible plan... |
 | `circuit_synthesis.analog_conditioning_planner` | 269 | 0 | product | TMRC | Bounded analog sensor-to-ADC conditioning planner. |
 | `restoration_safety_semantics` | 266 | 3 | research | - | Bounded semantic guard for hazards quoted as prohibitions vs instructions. This is an auxiliary text filter, not a safety certification, machine authorization system or comprehensive electrical standa... |
@@ -102,7 +102,7 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `commercial_materials` | 111 | 1 | product | TMRC | Material and outsourcing cost reconciliation for HS commercial build routes. An itemized material plan is not a verified engineering BOM or proof of safe electrical compatibility. All planning costs s... |
 | `pcb.geometry_hygiene` | 111 | 1 | product | TMRC | Post-process cosmetic PCB preview geometry before KiCad serialization. This does not perform routing. It only removes a specific impossible artifact class from the preview router: duplicate vias at a ... |
 | `integrations.jlcsearch_client` | 110 | 1 | product | TMRC | JLC/LCSC parts search via jlcsearch.tscircuit.com JSON API. |
-| `trace_capacity` | 109 | 1 | product | TMRC | Copper track width for a current, before routing, and the routed board's narrowest track checked against it after. The formula is IPC-2221's chart fit, I = k dT^0.44 A^0.725, with I in amperes, dT the... |
+| `trace_capacity` | 109 | 2 | product | TMRC | Copper track width for a current, before routing, and the routed board's narrowest track checked against it after. The formula is IPC-2221's chart fit, I = k dT^0.44 A^0.725, with I in amperes, dT the... |
 | `integrations.qwen_compose_retry` | 100 | 0 | product | TMRC | One-shot Qwen compose retry when compile/DRC fails on first netlist. |
 | `pcb.netlist_pcb_parity` | 99 | 1 | product | TMRC | Netlist-to-PCB connectivity parity. KiCad's own ``--schematic-parity`` cannot judge generated boards (reference designators and footprint ids are assigned independently of the schematic symbols), so t... |
 | `integrations.ibom_bridge` | 97 | 2 | product | TMRC | InteractiveHtmlBom glue — best-effort HTML BOM from .kicad_pcb. |
@@ -113,6 +113,7 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `integrations.circuit_json_adapter` | 87 | 2 | product | TMRC | Adapter: CircuitNetlist / build graph → tscircuit circuit-json subset. |
 | `ai_project_action_inputs` | 85 | 1 | product | TMRC | Typed data inputs for deterministic AI project tools. Executable inputs must be preserved exactly or rejected. The prose/context sanitizer may truncate collections, which is inappropriate for circuit ... |
 | `blackwire_bridge` | 84 | 1 | product | TMRC | The Black Wire pinout collection (CC-BY-4.0, (c) Valleytech Solutions) in HS: boards, parts, and a second opinion on pins. Black Wire transcribes board connectors from cited pinout images and lists ma... |
+| `krt_route` | 83 | 1 | product | TMRC | Route a placed KiCad board with KiCadRoutingTools (drandyhaas/KiCadRoutingTools, MIT), run as a separate program. On three open 2-layer boards stripped to their designers' placements (2026-11-28, KiCa... |
 | `netlist.passives` | 79 | 1 | product | TMRC | Suggest missing passives on netlist IR (rule-based, GNN-ready hook). |
 | `capability_policy` | 77 | 3 | product | MRC | Product policy over raw runtime capability discovery. Runtime discovery answers what is present. Product policy answers what is required for the supported Hardware Splicer workflow. Optional specialis... |
 | `integrations.pcbdraw_bridge` | 76 | 2 | product | TMRC | PcbDraw glue — best-effort 2D board SVG for bring-up docs. |
