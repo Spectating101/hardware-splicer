@@ -163,10 +163,14 @@ def compile_from_netlist(
     quality = artifact["quality"]
     pcb_path = graph_stage.paths.kicad_pcb
     if pcb_path and Path(pcb_path).is_file():
-        # KiCad's --schematic-parity cannot judge generated boards; compare the connectivity itself. Reported, not gating
-        # yet: netlists imported from KiCad name pins by number, which the module tables cannot map (2026-11-27).
+        # KiCad's --schematic-parity cannot judge generated boards; compare the connectivity itself, and fail the build
+        # when the board drops or adds a connection. Parts that map to no HS module (raw chips from an imported KiCad
+        # netlist) are drawn as preview packages: their connections are still checked, and they are named.
         from .pcb.netlist_pcb_parity import netlist_pcb_parity
         parity = netlist_pcb_parity(circuit, Path(pcb_path).read_text(encoding="utf-8"), pad_names="pin_id")
+        # Named in the parity record, not as a warning: support parts (resistors, capacitors) carry no module either.
+        from .pcb.module_registry import find_module as _find_module
+        parity["unmapped_parts"] = sorted(c.ref for c in circuit.components if not c.module_id or _find_module(c.module_id) is None)
         quality["netlist_pcb_parity"] = json.loads(json.dumps(parity))
     fab_zip = _write_fab_package(build_dir, quality, artifact["bom_paths"], artifact["gerber_dir"])
     if fab_zip:
@@ -180,7 +184,7 @@ def compile_from_netlist(
         dropped = sorted({pin for sig in parity.get("missing_on_pcb", []) for fp, pin in sig if str(pin).startswith("missing:")})
         parity_error = ("netlist-to-PCB parity failed: the board does not carry every netlist connection"
                         + (f" (no pad for {', '.join(dropped)})" if dropped else ""))
-    ok = graph_stage.ok
+    ok = graph_stage.ok and parity_error is None
     if parity_error:
         quality.setdefault("warnings", []).append(parity_error)
     result = BuildCompileResult(
@@ -194,7 +198,7 @@ def compile_from_netlist(
         or graph_stage.paths.design_quality
         or str(build_dir / "DESIGN_QUALITY.json"),
         gerber_package_dir=artifact["gerber_dir"],
-        error=None if ok else (graph_stage.error or _summarize_blockers(quality)),
+        error=None if ok else (graph_stage.error or parity_error or _summarize_blockers(quality)),
     )
     write_fabrication_artifacts(target, result.to_dict())
     return result

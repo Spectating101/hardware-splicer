@@ -40,6 +40,12 @@ def _netlist_signatures(netlist: CircuitNetlist, pad_names: str = "index") -> Co
             comp = comps.get(pin.component_ref)
             module_id = str(comp.module_id or "") if comp else ""
             spec = find_module(module_id) if module_id else None
+            if comp is not None and spec is None and pad_names == "pin_id":
+                # A part with no catalogue module (a raw chip from an imported KiCad netlist, or a synthesized support
+                # part such as a pull-up resistor) is drawn as a logical preview whose pads keep the netlist's own pin
+                # names; if the board has no such pad, the pair goes missing.
+                members.append((_PREVIEW, str(pin.pin)))
+                continue
             if spec is not None and resolve_module_body_mm(module_id) is None:
                 footprint = _PREVIEW
                 order = [str(p.get("id")) for p in spec.get("pins") or []]
