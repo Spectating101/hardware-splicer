@@ -1,0 +1,270 @@
+{
+ "schema": "hardware_splicer.arm_build_verification.v1",
+ "role": "leader",
+ "parameters": {
+  "upper_arm_mm": 110.0,
+  "forearm_mm": 100.0,
+  "wrist_mm": 72.0,
+  "wall": 3.0,
+  "plate": 4.0,
+  "clear": 0.3,
+  "hub_r": 20.0,
+  "ring_r": 44.0,
+  "payload_kg": 0.15,
+  "safety_factor": 1.5,
+  "max_stall_share": 0.5,
+  "pla_g_cm3": 1.24,
+  "fill": 0.6,
+  "bed_mm": [
+   220.0,
+   220.0,
+   250.0
+  ]
+ },
+ "servos": {
+  "base_yaw": "STS3215-C044",
+  "shoulder": "STS3215-C001",
+  "elbow": "STS3215-C044",
+  "wrist_pitch": "STS3215-C046",
+  "wrist_roll": "STS3215-C046",
+  "gripper": "STS3215-C046"
+ },
+ "servo_geometry": {
+  "body_mm": [
+   45.4,
+   24.8,
+   35.4
+  ],
+  "horn_offset_mm": 12.5,
+  "horn_r_mm": 10.0,
+  "horn_proud_mm": 1.0,
+  "idler_mm": 0.0,
+  "cheek_boss_mm": {
+   "horn_side": 3.0,
+   "idler_side": 4.0
+  }
+ },
+ "parts": {
+  "base_housing": {
+   "volume_cm3": 186.05,
+   "mass_g": 138.4,
+   "bbox_mm": [
+    150.0,
+    150.0,
+    41.5
+   ],
+   "fits_bed": true,
+   "valid_solid": true,
+   "single_body": true
+  },
+  "turntable": {
+   "volume_cm3": 43.11,
+   "mass_g": 32.1,
+   "bbox_mm": [
+    88.2,
+    88.0,
+    31.1
+   ],
+   "fits_bed": true,
+   "valid_solid": true,
+   "single_body": true
+  },
+  "upper_arm": {
+   "volume_cm3": 53.82,
+   "mass_g": 40.0,
+   "bbox_mm": [
+    117.5,
+    51.5,
+    40.1
+   ],
+   "fits_bed": true,
+   "valid_solid": true,
+   "single_body": true
+  },
+  "forearm": {
+   "volume_cm3": 49.18,
+   "mass_g": 36.6,
+   "bbox_mm": [
+    107.5,
+    51.5,
+    40.1
+   ],
+   "fits_bed": true,
+   "valid_solid": true,
+   "single_body": true
+  },
+  "wrist": {
+   "volume_cm3": 39.0,
+   "mass_g": 29.0,
+   "bbox_mm": [
+    78.0,
+    51.5,
+    58.6
+   ],
+   "fits_bed": true,
+   "valid_solid": true,
+   "single_body": true
+  },
+  "gripper_base": {
+   "volume_cm3": 64.56,
+   "mass_g": 48.0,
+   "bbox_mm": [
+    31.1,
+    42.0,
+    132.7
+   ],
+   "fits_bed": true,
+   "valid_solid": true,
+   "single_body": true
+  },
+  "gripper_jaw": {
+   "volume_cm3": 19.67,
+   "mass_g": 14.6,
+   "bbox_mm": [
+    54.0,
+    51.5,
+    50.1
+   ],
+   "fits_bed": true,
+   "valid_solid": true,
+   "single_body": true
+  }
+ },
+ "mass_kg": {
+  "base_link": 0.1934,
+  "turntable_link": 0.0871,
+  "upper_arm_link": 0.095,
+  "forearm_link": 0.0916,
+  "wrist_link": 0.084,
+  "gripper_link": 0.103,
+  "jaw_link": 0.0146
+ },
+ "moving_mass_kg": 0.4753,
+ "reach_mm": {
+  "tool_from_yaw_axis": 301.0,
+  "tool_height_mm": 28.9
+ },
+ "static_torque": {
+  "shoulder": {
+   "static_nm": 1.2395,
+   "with_safety_factor_nm": 1.8592,
+   "servo": "STS3215-C001",
+   "stall_nm": 1.61809725,
+   "stall_share": 1.149,
+   "pass": null
+  },
+  "elbow": {
+   "static_nm": 0.6916,
+   "with_safety_factor_nm": 1.0374,
+   "servo": "STS3215-C044",
+   "stall_nm": null,
+   "stall_share": null,
+   "pass": null
+  },
+  "wrist_pitch": {
+   "static_nm": 0.2856,
+   "with_safety_factor_nm": 0.4284,
+   "servo": "STS3215-C046",
+   "stall_nm": null,
+   "stall_share": null,
+   "pass": null
+  }
+ },
+ "base_yaw_overturning": {
+  "moment_nm": 1.239,
+  "servo_side_load_rating_nm": null,
+  "ratio_if_horn_carried_it": null,
+  "design_response": "support ring r=44.0 mm under the turntable with a 1 mm PTFE washer carries it",
+  "basis": "STS3215-C044: no published side-load rating; the support ring carries it"
+ },
+ "tip_over": {
+  "arm_moment_nm": 1.239,
+  "base_kg": 0.193,
+  "base_restoring_nm": 0.142,
+  "free_standing_stable": false,
+  "basis": "worst case: arm stretched over a base edge 75 mm from the yaw axis; the restoring moment is the base's own weight"
+ },
+ "power": {
+  "holding_a_stretched": 0,
+  "all_stalled_a": 0,
+  "basis": "current proportional to torque up to the cited stall current at 12 V (approximation)"
+ },
+ "fasteners": {
+  "cut_mm3": {
+   "base_yaw:body": {
+    "base_housing": 88.7
+   },
+   "base_yaw:horn": {
+    "turntable": 524.0
+   },
+   "elbow:body": {
+    "upper_arm": 37.7
+   },
+   "elbow:horn": {
+    "forearm": 406.9
+   },
+   "elbow:idler": {
+    "forearm": 378.9
+   },
+   "gripper:body": {
+    "gripper_base": 37.7
+   },
+   "gripper:horn": {
+    "gripper_jaw": 406.9
+   },
+   "gripper:idler": {
+    "gripper_jaw": 378.9
+   },
+   "shoulder:body": {
+    "turntable": 37.7
+   },
+   "shoulder:horn": {
+    "upper_arm": 406.9
+   },
+   "shoulder:idler": {
+    "upper_arm": 378.9
+   },
+   "wrist_pitch:body": {
+    "forearm": 37.7
+   },
+   "wrist_pitch:horn": {
+    "wrist": 406.9
+   },
+   "wrist_pitch:idler": {
+    "wrist": 378.9
+   },
+   "wrist_roll:body": {
+    "wrist": 18.8
+   },
+   "wrist_roll:horn": {
+    "gripper_base": 685.3
+   }
+  },
+  "holes": {
+   "horn_half": 4.9,
+   "horn_d": 3.0,
+   "centre_d": 3.2,
+   "horn_head_d": 6.0,
+   "body_d": 2.0,
+   "body_head_d": 4.5,
+   "pilot_y": 10.2,
+   "pilot_x": {
+    "horn_face": [
+     -29.0,
+     -8.3
+    ],
+    "back_face": [
+     -32.8,
+     -8.3
+    ]
+   }
+  },
+  "basis": "STS3215_03a.step hole positions; SO-101 Upper_arm_SO101.step clearances"
+ },
+ "unmodelled": [
+  "screw heads in the motion sweep",
+  "rear disc thread size (2.5 mm holes in the model)",
+  "cables, screws, horns' own mass",
+  "print strength (no FEM on the links yet)"
+ ]
+}

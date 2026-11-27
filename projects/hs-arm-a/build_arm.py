@@ -54,6 +54,12 @@ FAMILIES = {
                 "holes": {"horn_half": 4.9, "horn_d": 3.0, "centre_d": 3.2, "horn_head_d": 6.0, "body_d": 2.0, "body_head_d": 4.5,
                           "pilot_y": 10.2, "pilot_x": {"horn_face": (-29.0, -8.3), "back_face": (-32.8, -8.3)}}},
 }
+# The leader (teleoperation input) is rev B's arm moved by hand: same geometry, so joint angles map one to one, with
+# low-ratio STS3215s a hand can backdrive (LeRobot's SO-101 leader table, Apache-2.0) and a handle and trigger in place of
+# the gripper jaw. It runs with torque off, so the powered torque rule does not apply to it.
+FAMILIES["sts3215_leader"] = {**FAMILIES["sts3215"], "name": "hs_arm_a_rev_b_leader", "yaw_servo": "STS3215-C044", "leader": True,
+                              "joints": {"base_yaw": "STS3215-C044", "shoulder": "STS3215-C001", "elbow": "STS3215-C044",
+                                         "wrist_pitch": "STS3215-C046", "wrist_roll": "STS3215-C046", "gripper": "STS3215-C046"}}
 BODY_L, BODY_W, BODY_D = FAMILIES["x430"]["body"]
 HORN_OFF = 12.0          # horn axis from body centre, along the length
 HORN_R, HORN_H = 9.75, 6.4
@@ -61,7 +67,12 @@ IDLER_H = 4.0            # assumed
 SERVOS = {"XM430-W350-T": {"mass_kg": 0.082, "stall_nm_12v": 4.1, "stall_a_12v": 2.3, "radial_load_n_at_10mm": 40.0},
           "XL430-W250-T": {"mass_kg": 0.0572, "stall_nm_12v": 1.5, "stall_a_12v": 1.4, "radial_load_n_at_10mm": None},
           # Feetech listing ST-3215-C018 (55 g, 30 kg.cm at 12 V) and Waveshare's wiki (2.7 A locked-rotor); no side-load rating
-          "STS3215-12V": {"mass_kg": 0.055, "stall_nm_12v": 2.942, "stall_a_12v": 2.7, "radial_load_n_at_10mm": None}}
+          "STS3215-12V": {"mass_kg": 0.055, "stall_nm_12v": 2.942, "stall_a_12v": 2.7, "radial_load_n_at_10mm": None},
+          # Leader variants (7.4 V body, same 55 g): SO-ARM100 README gives 16.5 kg.cm at 6 V for the 1/345 (C001); the
+          # 1/191 (C044) and 1/147 (C046) publish no torque here. Stall currents unknown.
+          "STS3215-C001": {"mass_kg": 0.055, "stall_nm_12v": 16.5 * 0.0980665, "stall_a_12v": None, "radial_load_n_at_10mm": None},
+          "STS3215-C044": {"mass_kg": 0.055, "stall_nm_12v": None, "stall_a_12v": None, "radial_load_n_at_10mm": None},
+          "STS3215-C046": {"mass_kg": 0.055, "stall_nm_12v": None, "stall_a_12v": None, "radial_load_n_at_10mm": None}}
 NAME = "hs_arm_a"
 YAW_SERVO = "XM430-W350-T"
 
@@ -82,8 +93,9 @@ C = P["clear"]
 def use_servo(family: str) -> None:
     """Set the servo geometry every part is built around (module globals, so the part functions read one source)."""
     global BODY_L, BODY_W, BODY_D, HORN_OFF, HORN_R, HORN_H, IDLER_H, JOINT_SERVO, NAME, YAW_SERVO
-    global HALF_IN, HALF_OUT, CHEEK_POS, CHEEK_NEG, HORN_GAP, IDLER_GAP, HOLES
+    global HALF_IN, HALF_OUT, CHEEK_POS, CHEEK_NEG, HORN_GAP, IDLER_GAP, HOLES, LEADER
     f = FAMILIES[family]
+    LEADER = bool(f.get("leader"))
     HOLES = f.get("holes")
     BODY_L, BODY_W, BODY_D = f["body"]
     HORN_OFF, HORN_R, HORN_H, IDLER_H = f["horn_off"], f["horn_r"], f["horn_h"], f["idler_h"]
@@ -99,6 +111,7 @@ def use_servo(family: str) -> None:
 
 
 HOLES = None
+LEADER = False
 FASTENER_CUTS = None
 use_servo("x430")
 
@@ -273,6 +286,15 @@ def gripper_parts(p4):
         box(back, gx - HORN_OFF + 1, -HALF_IN, HALF_IN, gz - hz, gz + hz))
     web = box(face, back, -HALF_OUT, HALF_OUT, p4[2] - 20, gz - hz)        # ties the plate to the bracket underside
     tool = (gx + 45.0, 0.0, p4[2])
+    if LEADER:
+        # A handle hangs below the bracket where the fixed jaw was, and the gripper servo turns a short trigger under the
+        # index finger instead of a jaw (SO-101's leader does the same with Handle_SO101 and Trigger_SO101).
+        hx = face + P["plate"] + 14.0
+        handle = union(cyl(13.0, "z", p4[2] - 95.0, p4[2] - 19.0, (hx, 0.0, 0.0)), box(face, hx + 13.0, -8, 8, p4[2] - 24.0, p4[2] - 14.0))
+        trigger = union(*cheeks_y(gx, gz, gx + P["hub_r"]),
+                        box(gx + math.hypot(BODY_L / 2 - HORN_OFF, BODY_W / 2) + 1.5, gx + 34.0, CHEEK_NEG[0], CHEEK_POS[1], gz - 4, gz + 2),
+                        box(gx + 28.0, gx + 34.0, -6, 6, gz - 30.0, gz + 2))
+        return union(plate, bracket, web, handle), g, (hx, 0.0, p4[2] - 57.0), trigger
     fixed_jaw = union(box(face, tool[0] + 8, -8, 8, p4[2] - 20, p4[2] - 14),   # runs under the web to the horn plate
                       box(tool[0], tool[0] + 8, -8, 8, p4[2] - 20, p4[2] - 2))
     jaw = union(*cheeks_y(gx, gz, gx + P["hub_r"]),
@@ -440,7 +462,7 @@ def main(argv=None):
         servo_spec = SERVOS[JOINT_SERVO[jname]]
         lines += [f'  <joint name="{jname}" type="revolute"><parent link="{parent}"/><child link="{child}"/>',
                   f'    <origin xyz="{rel[0]:.5f} {rel[1]:.5f} {rel[2]:.5f}" rpy="0 0 0"/><axis xyz="{axis[0]} {axis[1]} {axis[2]}"/>',
-                  f'    <limit lower="{math.radians(lo):.5f}" upper="{math.radians(hi):.5f}" effort="{servo_spec["stall_nm_12v"]}" velocity="1.0"/></joint>']
+                  f'    <limit lower="{math.radians(lo):.5f}" upper="{math.radians(hi):.5f}" effort="{servo_spec["stall_nm_12v"] or 0}" velocity="1.0"/></joint>']
     lines.append("</robot>")
     (out / "urdf" / f"{NAME}.urdf").write_text("\n".join(lines) + "\n")
 
@@ -456,7 +478,8 @@ def main(argv=None):
         need = t * P["safety_factor"]
         stall = SERVOS[JOINT_SERVO[jname]]["stall_nm_12v"]
         torque[jname] = {"static_nm": round(t, 4), "with_safety_factor_nm": round(need, 4), "servo": JOINT_SERVO[jname],
-                         "stall_nm": stall, "stall_share": round(need / stall, 3), "pass": need <= P["max_stall_share"] * stall}
+                         "stall_nm": stall, "stall_share": round(need / stall, 3) if stall else None,
+                         "pass": (need <= P["max_stall_share"] * stall) if stall and not LEADER else None}
     # base yaw: overturning moment of everything above the yaw horn, against the horn's rated side load
     above = chain
     moment = sum(mass[l] * g * (com_world[l][0]) / 1000 for l in above) + P["payload_kg"] * g * tool[0] / 1000
@@ -468,11 +491,12 @@ def main(argv=None):
            "free_standing_stable": base_kg * g * 0.075 >= moment,
            "basis": "worst case: arm stretched over a base edge 75 mm from the yaw axis; the restoring moment is the base's own weight"}
     # holding current at the stretched pose: current scales with torque between no load and stall (approximation)
-    holding_a = sum(SERVOS[JOINT_SERVO[j]]["stall_a_12v"] * torque[j]["static_nm"] / SERVOS[JOINT_SERVO[j]]["stall_nm_12v"] for j in torque)
-    stall_all_a = sum(SERVOS[JOINT_SERVO[j]]["stall_a_12v"] for j in JOINT_SERVO)
+    known = [j for j in torque if SERVOS[JOINT_SERVO[j]]["stall_a_12v"] and SERVOS[JOINT_SERVO[j]]["stall_nm_12v"]]
+    holding_a = sum(SERVOS[JOINT_SERVO[j]]["stall_a_12v"] * torque[j]["static_nm"] / SERVOS[JOINT_SERVO[j]]["stall_nm_12v"] for j in known)
+    stall_all_a = sum(SERVOS[JOINT_SERVO[j]]["stall_a_12v"] or 0 for j in JOINT_SERVO)
     reach = math.hypot(tool[0], tool[1])
     verification = {
-        "schema": "hardware_splicer.arm_build_verification.v1",
+        "schema": "hardware_splicer.arm_build_verification.v1", "role": "leader" if LEADER else "follower",
         "parameters": P | {"bed_mm": list(P["bed_mm"])}, "servos": JOINT_SERVO,
         "servo_geometry": {"body_mm": [BODY_L, BODY_W, BODY_D], "horn_offset_mm": HORN_OFF, "horn_r_mm": HORN_R,
                            "horn_proud_mm": HORN_H, "idler_mm": IDLER_H,

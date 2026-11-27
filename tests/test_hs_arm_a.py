@@ -104,3 +104,24 @@ def test_committed_rev_b_sweep_is_clash_free_over_rev_a_ranges_and_cheaper() -> 
     bom_a = json.loads((PROJECT / "BOM.json").read_text())
     bom_b = json.loads((PROJECT / "rev-b" / "BOM.json").read_text())
     assert bom_b["total"] < bom_a["total"] / 5
+
+
+def test_committed_leader_matches_rev_b_kinematics_and_claims_no_torque() -> None:
+    leader = json.loads((PROJECT / "leader" / "verification.json").read_text())
+    follower = json.loads((PROJECT / "rev-b" / "verification.json").read_text())
+    assert leader["role"] == "leader"
+    assert leader["servo_geometry"]["body_mm"] == follower["servo_geometry"]["body_mm"]
+    assert leader["reach_mm"]["tool_height_mm"] != follower["reach_mm"]["tool_height_mm"]  # the tool point is the handle
+    assert leader["servos"] == {"base_yaw": "STS3215-C044", "shoulder": "STS3215-C001", "elbow": "STS3215-C044",
+                                "wrist_pitch": "STS3215-C046", "wrist_roll": "STS3215-C046", "gripper": "STS3215-C046"}
+    assert all(t["pass"] is None for t in leader["static_torque"].values())  # moved by hand with torque off
+    assert all(p["single_body"] and p["valid_solid"] and p["fits_bed"] for p in leader["parts"].values())
+    assert leader["parts"]["gripper_base"]["bbox_mm"][2] > follower["parts"]["gripper_base"]["bbox_mm"][2]  # the handle
+    sweep = json.loads((PROJECT / "leader" / "motion_sweep.json").read_text())
+    assert len(sweep["sweeps"]) == 6 and all(s["clash_steps"] == 0 for s in sweep["sweeps"])
+    urdf = ET.parse(PROJECT / "leader" / "urdf" / "hs_arm_a_rev_b_leader.urdf").getroot()
+    follower_urdf = ET.parse(PROJECT / "rev-b" / "urdf" / "hs_arm_a_rev_b.urdf").getroot()
+    origins = lambda root: {j.get("name"): j.find("origin").get("xyz") for j in root.findall("joint") if j.get("name") != "gripper"}
+    assert origins(urdf) == origins(follower_urdf)  # same joint frames: leader angles drive the follower one to one
+    bom = json.loads((PROJECT / "leader" / "BOM.json").read_text())
+    assert sum(l["qty"] for l in bom["lines"] if "STS3215" in l["item"]) == 6

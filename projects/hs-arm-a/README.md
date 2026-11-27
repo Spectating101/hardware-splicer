@@ -94,3 +94,23 @@ holes. Each horn hole has a 6 mm head recess open towards the servo pocket, so t
 go in before the next servo and their heads sit clear of it; the base plate's body screws are counterbored underneath.
 `verification.json` (`fasteners`) records which part each servo's holes cut, and a test holds every set to the part that
 holds or is driven by that servo. The horn thread size is not in the model; screw heads are not in the collision sweep.
+
+## Leader arm (2026-11-27, `leader/`)
+
+The teleoperation input for rev B: the same arm moved by hand, so its joint angles drive rev B one to one (the URDF's
+joint frames match rev B's apart from the gripper). It takes the low-ratio STS3215s SO-101's leader uses, per LeRobot's
+table (Apache-2.0): 1/191 at the base and elbow, 1/345 at the shoulder so the arm holds its own weight unpowered, 1/147
+at the wrist and the trigger so a hand can backdrive them. A handle hangs below the gripper bracket where the fixed jaw
+was, and the gripper servo turns a short trigger, as SO-101's Handle and Trigger parts do.
+
+| | Rev B follower | Leader |
+|---|---|---|
+| Servos | 6 x STS3215 12 V | 2 x C044, 1 x C001, 3 x C046 (7.4 V) |
+| Collision sweep over rev A's ranges | clash-free | clash-free |
+| Torque check | shoulder 66% of stall (over HS's 50% rule) | not applied: moved by hand with torque off |
+| Parts | US$206.49 | US$125.71 (`leader/BOM.json`) |
+
+Follower plus leader: US$332.20, against US$229.88 for SO-101's two-arm kit; most of the gap is rev B's 12 V servos and
+supply. Nothing has been printed.
+
+    .cache/hardware-splicer/digital-native-venv/bin/python projects/hs-arm-a/build_arm.py --servo sts3215_leader --out projects/hs-arm-a/leader

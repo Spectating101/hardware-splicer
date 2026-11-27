@@ -1,0 +1,72 @@
+{
+ "schema": "hardware_splicer.bom.v1",
+ "project": "hs-arm-a rev B leader",
+ "currency": "USD",
+ "priced": "2026-11-27",
+ "lines": [
+  {
+   "item": "Feetech STS3215 7.4 V, 1/191 gear (C044): base yaw and elbow",
+   "qty": 2,
+   "unit_price": 13.89,
+   "source": "https://github.com/TheRobotStudio/SO-ARM100",
+   "basis": "cited (SO-ARM100 README, two-arm BOM, US column)",
+   "line_total": 27.78
+  },
+  {
+   "item": "Feetech STS3215 7.4 V, 1/345 gear (C001): shoulder, holds the arm's weight unpowered",
+   "qty": 1,
+   "unit_price": 13.89,
+   "source": "https://github.com/TheRobotStudio/SO-ARM100",
+   "basis": "cited (SO-ARM100 README)",
+   "line_total": 13.89
+  },
+  {
+   "item": "Feetech STS3215 7.4 V, 1/147 gear (C046): wrist pitch, wrist roll, trigger",
+   "qty": 3,
+   "unit_price": 13.89,
+   "source": "https://github.com/TheRobotStudio/SO-ARM100",
+   "basis": "cited (SO-ARM100 README)",
+   "line_total": 41.67
+  },
+  {
+   "item": "Waveshare bus servo adapter board (USB to STS serial bus)",
+   "qty": 1,
+   "unit_price": 10.6,
+   "source": "https://github.com/TheRobotStudio/SO-ARM100",
+   "basis": "cited (SO-ARM100 README)",
+   "line_total": 10.6
+  },
+  {
+   "item": "5 V power supply for the leader's servos",
+   "qty": 1,
+   "unit_price": 10.0,
+   "source": "https://github.com/TheRobotStudio/SO-ARM100",
+   "basis": "cited (SO-ARM100 README, Power Supply line)",
+   "line_total": 10.0
+  },
+  {
+   "item": "PLA, part of a 1 kg spool (leader parts use 339 g at 60% fill)",
+   "qty": 1,
+   "unit_price": 6.77,
+   "source": null,
+   "basis": "assumed US$20/kg",
+   "line_total": 6.77
+  },
+  {
+   "item": "Screws (40 horn/rear-disc, 20 M2 x 8 body) and 1 mm PTFE washer",
+   "qty": 1,
+   "unit_price": 15.0,
+   "source": null,
+   "basis": "assumed, as rev B",
+   "line_total": 15.0
+  }
+ ],
+ "total": 125.71,
+ "cited_share": 103.94,
+ "assumed_share": 21.77,
+ "notes": [
+  "Follower (rev B) plus leader: US$332.2. SO-101's two-arm kit lists US$229.88; rev B's follower uses the 12 V STS3215 at US$21.99 and a 12 V 5 A supply.",
+  "Gear ratios per joint follow LeRobot's SO-101 leader table (Apache-2.0); the C044/C046 publish no torque, so the leader has no torque check. It is moved by hand with torque off.",
+  "Shipping, tax and lead times not included."
+ ]
+}
