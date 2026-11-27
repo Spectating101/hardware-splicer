@@ -206,7 +206,9 @@ def test_pick_counts_each_motors_own_mass_and_prop_fit():
     sunny = [r for r in loose["passing"] if r["table"] == "sunnysky-x2212-980kv"]
     assert sunny and all(r["all_up_mass_g"] == round(197.5 + 4 * 58.5, 1) for r in sunny)
     framed = pick(dict(spec, frame={"wheelbase_mm": 137}))
-    assert {r["table"] for r in framed["passing"]} == {"tmotor-f1404-3800kv-4s", "tmotor-f1404-2900kv-4s"}
+    passing = {r["table"] for r in framed["passing"]}
+    assert {"tmotor-f1404-3800kv-4s", "tmotor-f1404-2900kv-4s"} <= passing  # HS-3G-B's own motors pass on its frame
+    assert all(r["prop_diameter_mm"] <= 80 for r in framed["passing"])  # nothing bigger than a 3 in prop fits it
     reasons = {(r["table"], r["prop"]): r["reasons"] for r in framed["failing"]}
     assert "props_overlap" in reasons[("sunnysky-x2212-980kv", "APC9047 4S")]
     assert reasons[("crazyflie-2.0-coreless-1s", "CF2 45mm")] == ["motor_mass_unknown"]
@@ -288,4 +290,13 @@ def test_a_five_inch_frame_picks_a_five_inch_motor_and_a_three_inch_frame_does_n
                   "esc_continuous_a": 35, "frame": {"wheelbase_mm": 137}})
     reasons = {(r["table"], r["prop"]): r["reasons"] for r in three["failing"]}
     assert all("props_overlap" in v or "prop_gap_small" in v for (t, _), v in reasons.items() if t.startswith("tmotor-v2207") and "-4s" in t)
-    assert {r["table"] for r in three["passing"]} <= {"tmotor-f1404-2900kv-4s", "tmotor-f1404-3800kv-4s"}
+    assert all(r["prop_diameter_mm"] <= 80 for r in three["passing"]) and not any("v2207" in r["table"] for r in three["passing"])
+
+
+def test_a_two_inch_build_picks_the_m1104_on_its_three_cell_table():
+    two = pick({"rotors": 4, "mass_without_motors_g": 95, "battery": {"cells": 3, "capacity_mah": 450, "c_continuous": 75},
+                "esc_continuous_a": 20, "frame": {"wheelbase_mm": 100}})
+    assert [(r["table"], r["prop"]) for r in two["passing"]] == [("tmotor-m1104-7500kv-3s", "GF2020-4")]
+    undersized = pick({"rotors": 4, "mass_without_motors_g": 95, "battery": {"cells": 3, "capacity_mah": 450, "c_continuous": 75},
+                       "esc_continuous_a": 13, "frame": {"wheelbase_mm": 100}})
+    assert "esc_undersized" in {(r["table"]): r for r in undersized["failing"]}["tmotor-m1104-7500kv-3s"]["reasons"]

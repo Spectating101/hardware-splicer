@@ -3458,6 +3458,207 @@
     "T5147": 129.5
    },
    "prop_diameter_source": "nominal, from the prop designation (T51xx 5.1 in, T49xx 4.9 in)"
+  },
+  "tmotor-m1104-7500kv-4s": {
+   "schema": "hs.drone_proving_ground.thrust_table.v1",
+   "motor": "T-Motor M1104 KV7500",
+   "source": "https://www.ligpower.com/product/m1104-fpv-motor.html",
+   "source_class": "maker_page",
+   "accessed": "2026-11-27",
+   "note": "Maker test table parsed from the product page's HTML: GF1636-4 on a charged 4S pack, 20-100% throttle in 5 rows. Weight 5.6 g incl. cable and 'Peak Current (10s)' 13.1 A from the page's spec table.",
+   "columns": [
+    "throttle_pct",
+    "thrust_g",
+    "voltage_v",
+    "current_a",
+    "rpm",
+    "power_w"
+   ],
+   "props": {
+    "GF1636-4": [
+     [
+      20.0,
+      34.3,
+      16.8,
+      1.2,
+      33572.0,
+      19.4
+     ],
+     [
+      40.0,
+      79.6,
+      16.8,
+      2.8,
+      50831.0,
+      47.0
+     ],
+     [
+      60.0,
+      118.9,
+      16.8,
+      4.4,
+      62932.0,
+      73.5
+     ],
+     [
+      80.0,
+      170.6,
+      16.8,
+      6.7,
+      74857.0,
+      111.9
+     ],
+     [
+      100.0,
+      251.4,
+      16.7,
+      11.8,
+      84940.0,
+      197.7
+     ]
+    ]
+   },
+   "motor_max_current_a": 13.1,
+   "motor_mass_g": 5.6,
+   "motor_mass_source": "maker page spec table, Weight (incl. cable)",
+   "prop_diameter_mm": {
+    "GF1636-4": 40.6
+   },
+   "prop_diameter_source": "nominal, from the prop designation (1.6 in)"
+  },
+  "tmotor-m1104-7500kv-3s": {
+   "schema": "hs.drone_proving_ground.thrust_table.v1",
+   "motor": "T-Motor M1104 KV7500",
+   "source": "https://www.ligpower.com/product/m1104-fpv-motor.html",
+   "source_class": "maker_page",
+   "accessed": "2026-11-27",
+   "note": "Maker test table parsed from the product page's HTML: GF2020-4 on a charged 3S pack, 20-100% throttle in 5 rows. Weight 5.6 g incl. cable and 'Peak Current (10s)' 13.1 A from the page's spec table.",
+   "columns": [
+    "throttle_pct",
+    "thrust_g",
+    "voltage_v",
+    "current_a",
+    "rpm",
+    "power_w"
+   ],
+   "props": {
+    "GF2020-4": [
+     [
+      20.0,
+      27.3,
+      12.6,
+      0.9,
+      18129.0,
+      11.8
+     ],
+     [
+      40.0,
+      62.5,
+      12.6,
+      2.5,
+      27280.0,
+      30.9
+     ],
+     [
+      60.0,
+      101.4,
+      12.6,
+      4.3,
+      34670.0,
+      54.6
+     ],
+     [
+      80.0,
+      171.7,
+      12.5,
+      8.1,
+      45317.0,
+      101.2
+     ],
+     [
+      100.0,
+      240.0,
+      12.5,
+      13.1,
+      54613.0,
+      163.0
+     ]
+    ]
+   },
+   "motor_max_current_a": 13.1,
+   "motor_mass_g": 5.6,
+   "motor_mass_source": "maker page spec table, Weight (incl. cable)",
+   "prop_diameter_mm": {
+    "GF2020-4": 50.8
+   },
+   "prop_diameter_source": "nominal, from the prop designation (2.0 in)"
+  },
+  "tmotor-m1104-7500kv-2s": {
+   "schema": "hs.drone_proving_ground.thrust_table.v1",
+   "motor": "T-Motor M1104 KV7500",
+   "source": "https://www.ligpower.com/product/m1104-fpv-motor.html",
+   "source_class": "maker_page",
+   "accessed": "2026-11-27",
+   "note": "Maker test table parsed from the product page's HTML: GF3028-3 on a charged 2S pack, 20-100% throttle in 5 rows. Weight 5.6 g incl. cable and 'Peak Current (10s)' 13.1 A from the page's spec table.",
+   "columns": [
+    "throttle_pct",
+    "thrust_g",
+    "voltage_v",
+    "current_a",
+    "rpm",
+    "power_w"
+   ],
+   "props": {
+    "GF3028-3": [
+     [
+      20.0,
+      24.4,
+      8.4,
+      0.7,
+      9070.0,
+      5.7
+     ],
+     [
+      40.0,
+      63.5,
+      8.4,
+      2.2,
+      14346.0,
+      18.4
+     ],
+     [
+      60.0,
+      111.4,
+      8.4,
+      4.6,
+      18862.0,
+      38.3
+     ],
+     [
+      80.0,
+      175.5,
+      8.3,
+      8.2,
+      23402.0,
+      68.1
+     ],
+     [
+      100.0,
+      231.4,
+      8.4,
+      12.7,
+      26811.0,
+      106.3
+     ]
+    ]
+   },
+   "motor_max_current_a": 13.1,
+   "motor_mass_g": 5.6,
+   "motor_mass_source": "maker page spec table, Weight (incl. cable)",
+   "prop_diameter_mm": {
+    "GF3028-3": 76.2
+   },
+   "prop_diameter_source": "nominal, from the prop designation (3.0 in)"
   }
  }
 }
