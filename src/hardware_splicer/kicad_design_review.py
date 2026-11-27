@@ -27,6 +27,7 @@ that KiCad's ERC and other checkers missed on real fix commits (examples/schemat
 * ``ground_pin_on_supply`` / ``supply_pin_on_ground``: a pin named GND on a supply rail, or one named VCC/VDD/VIN on ground;
 * ``joined_pins_split``: two pins with one signal name (an ESD array's I/O1, a receptacle's D+) on two different nets;
 * ``net_name_pin_mismatch``: a net named SDA, MOSI or HSYNC that meets an SCL, MISO or VSYNC pin;
+* ``supply_rails_inverted``: a part's V+ (VCC, VDD) on a lower rail than its V- (VEE, VSS, GND);
 * ``pinout_differs_from_kicad_library``: a part whose value or part number is a symbol in KiCad's own library, drawn with another
   symbol that numbers its pins differently.
 
@@ -284,6 +285,7 @@ def _pull_rule_findings(comps, nets, pin_net, finding, resistor_to, driven_suppl
 # Rules from the parts' physics and pin names, each a reason to look, not a verdict.
 GROUND_PIN = re.compile(r"^(GND|AGND|DGND|PGND|SGND|GNDA|GNDD|GND_?\d+|EP_?GND)$", re.I)
 SUPPLY_PIN = re.compile(r"^(VCC|VDD|VIN|V\+|VS|AVDD|DVDD|VDDA|VDDIO|VCCIO|VCCA|VCCB|PVIN|VREG_IN|IOVDD)\d*$", re.I)
+RAIL_PAIRS = (("V+", "V-"), ("VCC", "VEE"), ("+VS", "-VS"), ("VS+", "VS-"), ("VDD", "VSS"))  # GND pins have their own rules
 NAME_PAIRS = (("SDA", "SCL"), ("MOSI", "MISO"), ("COPI", "CIPO"), ("HSYNC", "VSYNC"))
 NC_NAME = re.compile(r"^(NC|DNC|N\.?C\.?|RSV\w*|RESERVED\w*|SHIELD\w*|SH\d*|MP\d*|MH\d*|EP|PAD\d*|TAB|~)$", re.I)
 JOINED_NAME = re.compile(r"^(D[+-]|DP|DN)$|[A-Z].*\d|\d.*[A-Z]", re.I)
@@ -352,7 +354,9 @@ def _physics_findings(comps, nets, pin_net, finding) -> None:
             roles.setdefault(names.get((ref, pin), "").upper(), []).append(pin)
         # Diodes, from their anode (A) and cathode (K) pins: dual parts pair A1 with K1.
         diode = re.match(r"(D|LED|CR|DS)\d", ref) or re.search(r"diode|\bled\b", text, re.I)
-        if diode:
+        # A part that repeats A or K (BAV99 names its pins K, A, K; MMBD1503A K, A, A) cannot be paired by name, so it is skipped.
+        repeated = any(sum(str(p.get("name", "")).upper() == n for p in comps.get(ref, {}).get("pins", [])) > 1 for n in ("A", "K"))
+        if diode and not repeated:
             led = bool(re.search(r"\bled\b|^LED|:LED", text, re.I)) or ref.upper().startswith("LED")
             for suffix in ("", "1", "2", "3", "4"):
                 a = roles.get("A" + suffix, [None])[0]
@@ -409,6 +413,15 @@ def _physics_findings(comps, nets, pin_net, finding) -> None:
             if a and b and a != b and len(nets.get(a, [])) > 1 and len(nets.get(b, [])) > 1 and _different_signals(a, b):
                 finding("warning", "joined_pins_split", f"{ref} pins {group[0]['num']} and {group[1]['num']} are both {pname}, usually one node inside the part, "
                         f"but they sit on two nets ({a} and {b}), which the part then joins.", "pin names from KiCad's symbol", [ref], a, local=True)
+    # A part's positive and negative supply pins on rails the wrong way round (an op-amp's V+ on -12 V and V- on +12 V).
+    for ref, pins in by_ref.items():
+        named = {names.get((ref, pin), "").upper(): net for pin, net in pins.items()}
+        for pos, neg in RAIL_PAIRS:
+            if pos in named and neg in named:
+                vp, vn = rail_voltage(named[pos]), rail_voltage(named[neg])
+                if vp is not None and vn is not None and vp < vn:
+                    finding("error", "supply_rails_inverted", f"{ref} {pos} is on {named[pos]} ({vp:g} V) but {neg} on {named[neg]} ({vn:g} V): "
+                            f"its supply is reversed.", "pin names from KiCad's symbol; rail voltages read from the net names", [ref], named[pos], local=True)
     # A net named after one signal of a pair that meets the other signal's pin: SDA on an SCL pin, MOSI on MISO.
     for net, nodes in nets.items():
         seg = net.split("/")[-1]
@@ -479,6 +492,8 @@ def _library_pinout_findings(comps, finding) -> None:
             except Exception:  # an unreadable library symbol is a reason to skip, not to fail the review
                 break
             ours = {str(p.get("num")): str(p.get("name", "")) for p in comp["pins"]}
+            if len(ours) != len(theirs):  # a breakout module (BME280's VIN, GND, SCL, SDA) is drawn with fewer pins than its chip
+                break
             clashes = [(num, ours[num], theirs[num]) for num in sorted(set(ours) & set(theirs))
                        if role(ours[num]) and role(theirs[num]) and role(ours[num]) != role(theirs[num])]
             if clashes:
