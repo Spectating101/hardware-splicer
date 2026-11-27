@@ -181,4 +181,7 @@ NT$1,100-2,965 together. A mapping rover built from those, on OOMWOO's open soft
    opened is designed (`projects/hs-rover-vac-a`): a faulty 1st-gen Xiaomi vacuum plus a cracked phone, US$37.10 with
    Valetudo on a working board or US$46.83 with an ESP32 on a dead one, 7 h, both under the cheapest wheeled camera
    robot sold. The wheel module is in HS's drive table from OOMWOO contributor @IKsares's bench measurements. Still
-   open: confirming the 1st-gen's wheel modules match the measured S5-family one; mopping (OOMWOO's RFC board).
+   open: confirming the 1st-gen's wheel modules match the measured S5-family one. Mopping: the Xiaomi Vacuum-Mop P
+   (STYJ02YM, a 3irobotix CRL-200S) is now a donor (NT$1,400 faulty): its tank, scanner, wheels and pack, rootable for
+   Valetudo over micro USB, with an open driver and ROS2 bridge already written for the CRL-200S. Valetudo's page also
+   shows the 1st-gen Xiaomi never got persistent maps, so the Mop P is the better donor for route A.
