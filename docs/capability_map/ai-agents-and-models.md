@@ -6,7 +6,7 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | Module | Lines | Tests | Status | Reach | What it says it does |
 |---|---|---|---|---|---|
 | `vision_evidence_assistant` | 731 | 4 | product | TMRC | (no description) |
-| `auto_wire` | 709 | 23 | product | TMRC | Heuristic auto-wiring for inventory-composed module sets (Python engine port). |
+| `auto_wire` | 712 | 23 | product | TMRC | Heuristic auto-wiring for inventory-composed module sets (Python engine port). |
 | `ai_project_orchestrator` | 618 | 8 | product | TMRC | Bounded, project-revision-pinned AI engineering proposal orchestration. The orchestrator is intentionally proposal-only. It assembles a sanitized project context, asks the configured text model for sc... |
 | `integrations.qwen_model_policy` | 593 | 1 | product | TMRC | Qwen Model Studio policy — per-stage models, per-model 1M free pools, rotation. Each enabled Singapore model has its own free-token pool (typically 1M). Pools are shared across workspaces and API keys... |
 | `codex_mission_progress` | 556 | 1 | research | - | Deterministic mission-progress audit for Codex/Astra Hardware-Splicer runs. This does not grade engineering correctness. It prevents a transport-valid no-op from being mistaken for a meaningful experi... |

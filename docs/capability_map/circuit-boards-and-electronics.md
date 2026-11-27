@@ -23,7 +23,7 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `circuit_synthesis.battery_power_planner` | 610 | 0 | product | TMRC | Bounded single-cell battery/charger power-path planner. |
 | `device_engineering` | 607 | 3 | product | TMRC | A quantified engineering review of a device plan: electrical, power, thermal, RF, mechanical and printing. The plan says what goes where. This asks what that layout implies and puts numbers on it, wit... |
 | `circuit_synthesis.topology_library` | 523 | 1 | product | TMRC | Trusted bounded topology primitive library. This is the ceiling contract for Hardware-Splicer's backend synthesis layer. It deliberately describes low-voltage mechatronics primitives, not universal el... |
-| `pcb.module_registry` | 520 | 8 | product | TMRC | Module registry: loads engine_pcb_data.json and exposes lookup helpers that mirror the TypeScript module-library + module-footprints functions. |
+| `pcb.module_registry` | 521 | 8 | product | TMRC | Module registry: loads engine_pcb_data.json and exposes lookup helpers that mirror the TypeScript module-library + module-footprints functions. |
 | `manufacturing_closure` | 513 | 5 | product | TMRC | Cross-domain manufacturing closure for guided hardware and robotics projects. The closure graph reconciles design identities across electrical, firmware, harness, BOM, physical assembly, CAD, and fabr... |
 | `electrical_design` | 495 | 4 | product | TMRC | Canonical pin/net/power-domain electrical design model and ERC. The electrical model is intentionally separate from the visual graph. A canvas edge is not an electrical connection until component pins... |
 | `model3d` | 495 | 6 | product | TMRC | Server-side GLB views of retained PCB bytes. A rendered model is a view of retained bytes. It carries no engineering authority and never rewrites a snapshot, revision, pin, review, or thread. |
@@ -101,10 +101,10 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `pcb.geometry_hygiene` | 111 | 1 | product | TMRC | Post-process cosmetic PCB preview geometry before KiCad serialization. This does not perform routing. It only removes a specific impossible artifact class from the preview router: duplicate vias at a ... |
 | `integrations.jlcsearch_client` | 110 | 1 | product | TMRC | JLC/LCSC parts search via jlcsearch.tscircuit.com JSON API. |
 | `integrations.qwen_compose_retry` | 100 | 0 | product | TMRC | One-shot Qwen compose retry when compile/DRC fails on first netlist. |
+| `pcb.netlist_pcb_parity` | 99 | 1 | product | TMRC | Netlist-to-PCB connectivity parity. KiCad's own ``--schematic-parity`` cannot judge generated boards (reference designators and footprint ids are assigned independently of the schematic symbols), so t... |
 | `integrations.ibom_bridge` | 97 | 2 | product | TMRC | InteractiveHtmlBom glue — best-effort HTML BOM from .kicad_pcb. |
 | `netlist.ir` | 97 | 8 | product | TMRC | Circuit netlist intermediate representation. |
 | `backends.tscircuit` | 93 | 0 | product | TMRC | (no description) |
-| `pcb.netlist_pcb_parity` | 93 | 1 | product | TMRC | Netlist-to-PCB connectivity parity. KiCad's own ``--schematic-parity`` cannot judge generated boards (reference designators and footprint ids are assigned independently of the schematic symbols), so t... |
 | `board_catalog` | 87 | 1 | product | MRC | Microcontroller boards from PlatformIO's board definitions (Apache-2.0, pinned snapshot), and checks that use them. PlatformIO describes several hundred ESP32, ESP8266, AVR and RP2040 boards: chip, cl... |
 | `integrations.circuit_json_adapter` | 87 | 2 | product | TMRC | Adapter: CircuitNetlist / build graph → tscircuit circuit-json subset. |
 | `ai_project_action_inputs` | 85 | 1 | product | TMRC | Typed data inputs for deterministic AI project tools. Executable inputs must be preserved exactly or rejected. The prose/context sanitizer may truncate collections, which is inappropriate for circuit ... |
@@ -113,7 +113,7 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `capability_policy` | 77 | 3 | product | MRC | Product policy over raw runtime capability discovery. Runtime discovery answers what is present. Product policy answers what is required for the supported Hardware Splicer workflow. Optional specialis... |
 | `integrations.pcbdraw_bridge` | 76 | 2 | product | TMRC | PcbDraw glue — best-effort 2D board SVG for bring-up docs. |
 | `integrations.easyeda2kicad_bridge` | 67 | 1 | product | MRC | easyeda2kicad glue — opt-in LCSC part → KiCad library export. |
-| `netlist.ingest` | 65 | 1 | product | MRC | Load netlist files — shared by CLI and API (netlist-compile parity). |
+| `netlist.ingest` | 65 | 2 | product | MRC | Load netlist files — shared by CLI and API (netlist-compile parity). |
 | `spice_runner` | 64 | 0 | product | TMRC | Batch ngspice runner for electrical simulation gates. |
 | `engineering_cad_carrier` | 63 | 1 | product | TMRC | Design a bounded editable board-envelope carrier from registered PCB geometry. |
 | `tool_workers.pcb_carrier_worker` | 59 | 0 | product | TMRC | Parametric board-only carrier: a fabricated-design CANDIDATE, not approved fit. |

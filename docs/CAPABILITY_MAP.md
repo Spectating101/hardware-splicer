@@ -6,11 +6,11 @@ their reach and tests; `... show <module>` gives one module's importers, imports
 tables are in `docs/capability_map/`; the job-level map (which module is canonical for which job) is
 `docs/CAPABILITY_CONSOLIDATION.md`.
 
-**616 modules, 177,435 lines; 538 referenced by a test; 32 called by an engine tool.**
+**616 modules, 177,449 lines; 538 referenced by a test; 32 called by an engine tool.**
 
 | Status | Modules | Lines | Meaning |
 |---|---|---|---|
-| product | 467 | 140,558 | reached from a shipped entry point (toolbelt, MCP, REST or a console command) |
+| product | 467 | 140,572 | reached from a shipped entry point (toolbelt, MCP, REST or a console command) |
 | research | 141 | 35,128 | not shipped on purpose: part of a declared research line (RESEARCH_LINES) |
 | script | 5 | 1,475 | reached only from scripts/, projects/, eval/, experiments/, the Makefile or CI |
 | runnable | 0 | 0 | has its own `python -m` main, and nothing shipped imports it |
@@ -35,12 +35,12 @@ Reach codes in the area pages: **T** toolbelt, **M** MCP server, **R** REST prod
 
 | Area | Modules | Engineering | Lines | Tested | Shipped | Called by a tool | Page |
 |---|---|---|---|---|---|---|---|
-| circuit boards and electronics | 136 | 118 | 38,391 | 110 | 122 | 10 | [circuit-boards-and-electronics](capability_map/circuit-boards-and-electronics.md) |
+| circuit boards and electronics | 136 | 118 | 38,398 | 110 | 122 | 10 | [circuit-boards-and-electronics](capability_map/circuit-boards-and-electronics.md) |
 | salvage, donors, repair | 114 | 103 | 28,740 | 109 | 53 | 3 | [salvage-donors-repair](capability_map/salvage-donors-repair.md) |
-| AI, agents and models | 60 | 42 | 19,358 | 55 | 51 | 0 | [ai-agents-and-models](capability_map/ai-agents-and-models.md) |
+| AI, agents and models | 60 | 42 | 19,361 | 55 | 51 | 0 | [ai-agents-and-models](capability_map/ai-agents-and-models.md) |
 | mechanical, CAD and FEM | 53 | 49 | 18,481 | 46 | 38 | 4 | [mechanical-cad-and-fem](capability_map/mechanical-cad-and-fem.md) |
 | projects, reviews and evidence | 70 | 42 | 17,633 | 59 | 62 | 3 | [projects-reviews-and-evidence](capability_map/projects-reviews-and-evidence.md) |
-| other | 65 | 53 | 16,805 | 49 | 49 | 0 | [other](capability_map/other.md) |
+| other | 65 | 53 | 16,809 | 49 | 49 | 0 | [other](capability_map/other.md) |
 | parts, BOM and sourcing | 53 | 39 | 15,775 | 48 | 44 | 1 | [parts-bom-and-sourcing](capability_map/parts-bom-and-sourcing.md) |
 | robots, arms and motion | 30 | 28 | 12,077 | 29 | 22 | 4 | [robots-arms-and-motion](capability_map/robots-arms-and-motion.md) |
 | firmware and devices | 11 | 10 | 4,063 | 10 | 11 | 2 | [firmware-and-devices](capability_map/firmware-and-devices.md) |

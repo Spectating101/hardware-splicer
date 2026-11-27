@@ -109,11 +109,17 @@ and PyBullet; not scikit-fem). Board layout needs `HARDWARE_SPLICER_FREEROUTING_
 
 ## 6. Open issues found by connecting things
 
-1. **Netlist-to-PCB parity (corrected 2026-11-27).** The first "pad mismatch" was the checker's: a board compiled from a
-   netlist names pads by pin id on purpose (`build_to_geometry`), and the check now follows that. Across the 17 example
-   netlists, 15 match exactly; two drop a connection and still compile "ok": `usb_esp_audio_amp` (the MAX98357A module
-   has no `GAIN` pad) and `usb_esp_ch340` (the CH340 module has no `USB` pin). Parity is a warning, not a blocker,
-   because netlists imported from KiCad name pins by number (`esp32_servo_netlist`) and the check cannot map those yet.
+1. **Netlist-to-PCB parity: now a gate (2026-11-27, closed).** A board compiled from a netlist must carry every netlist
+   connection, or the compile fails. Getting there fixed three real defects: the MAX98357A footprint lacked its `GAIN`
+   pad; the `usb_esp_ch340` example wired the adapter's own USB plug to the board's 5 V rail (it now takes power from its
+   plug and crosses TX/RX with the ESP32); and the auto-wirer could land a wire on the ESP32-CAM's GPIO4, which its
+   footprint keeps off copper. Pins with no pad now say why in the catalogue (`offBoard`), the auto-wirer skips them,
+   and a test holds every catalogue pin to "has a pad or says why not". Parts with no catalogue module (raw chips from
+   an imported KiCad netlist, synthesized pull-ups) are drawn as preview packages, still checked pin by pin, and named
+   in `netlist_pcb_parity.unmapped_parts`. All 18 example netlists pass. Found on the way: `engine_pcb_data.json` had
+   been hand-edited (cited currents and logic voltages) without its TypeScript source; those edits now live in the
+   source and the export reproduces the file. The topology-lowering tests reach a live model call (`agy`) whenever the
+   deterministic path's compile fails, so a compile regression there shows up as "planner selection unresolved".
 2. **FEM size.** The bounded solver takes up to 5,000 elements and 2,000 nodes; the rover chassis is too large even at
    a 40 mm mesh. Screen a bracket or boss cut from a part, or add a sparse solver.
 3. **FEM stays open.** Linear tetrahedra are not conservative in bending, so every `hs_fem_screen` result keeps an open
