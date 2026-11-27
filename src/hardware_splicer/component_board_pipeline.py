@@ -66,6 +66,17 @@ def _pcbnew(*args: str) -> str:
     return run.stdout
 
 
+def decoupling_report(board_path: Path, max_mm: float = 5.0) -> dict[str, Any] | None:
+    """Nearest 1 uF-or-smaller capacitor to every IC supply pad (pcbnew). Over ``max_mm`` is HS's rule of thumb, not a
+    datasheet figure: makers ask for the capacitor 'as close as possible' to the pin."""
+    python = resolve_kicad_python() or "/usr/bin/python3"
+    run = subprocess.run([python, str(HELPER.parent / "decoupling_report.py"), str(board_path), "--max-mm", str(max_mm)],
+                         capture_output=True, text=True, timeout=300)
+    if run.returncode != 0:
+        return None
+    return json.loads(run.stdout)
+
+
 def _place_free(board_path: Path, locked: list[str], hints: dict[str, Any] | None) -> dict[str, Any]:
     """Run the placer on the built board in place; the design's own positions are locked."""
     python = resolve_kicad_python() or "/usr/bin/python3"
@@ -165,8 +176,12 @@ def pcb_stage(design: kb.Design, readback: dict, out: Path, board: dict[str, Any
                 "problems": [], "copper": {k: v for k, v in copper.items() if k not in ("rounds", "elegance")},
                 "note": (f"FreeRouting left DRC errors in all {len(attempts)} attempts; Copper routed the same placement clean. "
                          "Its board is KiCad 10: export fabrication files with a KiCad 10 kicad-cli.")}
+    decoupling = decoupling_report(pcb)
+    far = [r for r in (decoupling or {}).get("pads", []) if r["over_limit"]]
     return {"ok": not problems, "stage": "pcb", "pcb": str(pcb), "routing": routed.stats, "placement": placement,
-            "copper": copper,
+            "copper": copper, "decoupling": decoupling,
+            "decoupling_warnings": [f"{r['ic']} pad {r['pad']} ({r['net']}): nearest capacitor {r['nearest_cap']} is {r['distance_mm']} mm away"
+                                    for r in far],
             "route_attempts": attempts,
             "drc": {g: {"errors": drc[g]["errors"], "warnings": drc[g]["warnings"]} for g in ("violations", "unconnected_items", "schematic_parity")},
             "drc_warnings": [f"{i['type']}: {'; '.join(w for w in i['where'] if w)}" for g in ("violations",) for i in drc[g]["items"]
