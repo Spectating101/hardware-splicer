@@ -1,0 +1,96 @@
+{
+ "schema": "hardware_splicer.routing_trial.v1",
+ "date": "2026-11-27",
+ "board": "HS-BUS-A (projects/hs-bus-a), placed by build_board.py --stage place: 36 nets, 83 connections, 2 layers, 70 x 56 mm",
+ "same_placement": true,
+ "hs": {
+  "router": "routing_engine.route_pcb, FreeRouting 2.1.0, one pass of up to 20 router passes",
+  "runs": [
+   {
+    "unconnected_after_drc": 1,
+    "drc_errors": 0,
+    "vias": 10,
+    "seconds": 14.6
+   },
+   {
+    "unconnected_after_drc": 1,
+    "drc_errors": 0,
+    "vias": 7,
+    "seconds": 15.2
+   },
+   {
+    "unconnected_after_drc": 1,
+    "drc_errors": 0,
+    "vias": 7,
+    "seconds": 12.5
+   },
+   {
+    "unconnected_after_drc": 0,
+    "drc_errors": 0,
+    "vias": 12,
+    "seconds": 11.9
+   },
+   {
+    "unconnected_after_drc": 0,
+    "drc_errors": 0,
+    "vias": 13,
+    "seconds": 12.0
+   }
+  ],
+  "complete": "2 of 5",
+  "drc": "KiCad 9.0.2"
+ },
+ "copper": {
+  "router": "copper-kicad-mcp (MIT, commit 3d3a7628) pcb_route: Freerouting 2.2.3 then its guided router",
+  "runs": [
+   {
+    "freerouting_left": 6,
+    "unrouted_after": 0,
+    "drc_errors": 0,
+    "vias": 12,
+    "track_mm": 874.7,
+    "seconds": 26.3
+   },
+   {
+    "freerouting_left": 6,
+    "unrouted_after": 0,
+    "drc_errors": 0,
+    "vias": 12,
+    "track_mm": 874.7,
+    "seconds": 26.3
+   },
+   {
+    "freerouting_left": 6,
+    "unrouted_after": 0,
+    "drc_errors": 0,
+    "vias": 12,
+    "track_mm": 874.7,
+    "seconds": 27.9
+   },
+   {
+    "freerouting_left": 6,
+    "unrouted_after": 0,
+    "drc_errors": 0,
+    "vias": 12,
+    "track_mm": 874.7,
+    "seconds": 32.2
+   },
+   {
+    "freerouting_left": 6,
+    "unrouted_after": 0,
+    "drc_errors": 0,
+    "vias": 12,
+    "track_mm": 874.7,
+    "seconds": 30.5
+   }
+  ],
+  "complete": "5 of 5",
+  "drc": "KiCad 10.0.8 (kicad/kicad:10.0.8 container, no network)",
+  "placement_critique": "Copper's layout score 67/100: decoupling capacitors C4 20.6 mm from U2.5, C5 18.2 mm from U3.5, C6 11.9 mm from U1.4, C1 11.6 mm from U1.20; connectors J2-J5 1.85 mm short of the board edge"
+ },
+ "reading": "Freerouting 2.2.3 alone left 6 connections every run, more than HS's 2.1.0 (0-1); Copper's guided finisher closes them. HS now calls Copper as a separate program (hardware_splicer.copper_route, tool hs_route_copper). The routed board is KiCad 10 format; HS's own pipeline is KiCad 9.",
+ "sources": [
+  "https://github.com/claynicholson/copper-kicad-mcp",
+  "https://github.com/freerouting/freerouting/releases/tag/v2.2.3"
+ ]
+}
