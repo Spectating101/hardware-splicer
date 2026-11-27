@@ -75,13 +75,22 @@ collision sweep found clashes at the elbow, wrist and gripper.
 | | Rev A (X430) | Rev B (STS3215) |
 |---|---|---|
 | Reach | 375.9 mm | 370.5 mm |
-| Moving mass | 0.516 kg | 0.459 kg |
+| Moving mass | 0.516 kg | 0.456 kg |
 | Shoulder, 150 g payload, safety factor 1.5 | 49% of stall | 66% of stall (over the 50% rule; about 63 g at the rule) |
 | Elbow / wrist pitch | 29% / 39% | 39% / 19% |
 | Joint ranges, collision sweep | clash-free | clash-free over the same ranges |
+| Screw holes | none (drill from the real horn) | cut: horn and rear-disc screws, body screws |
 | Parts | US$1,089.50 | US$206.49 (`rev-b/BOM.json`) |
 
 The 50% rule is HS's own design assumption, not a published rating. The SO-101 follower, built in large numbers, needs
 80% of its 7.4 V STS3215's stall at the shoulder with no payload by the same method (worst pose over its joint ranges,
 safety factor 1.5, masses from its URDF), so rev B keeps more margin than the reference design does. Nothing has been
 printed or built.
+
+Rev B's printed parts carry their screw holes. Positions are measured from the STS3215 model: four 2.5 mm holes on a
+9.8 mm square about the axis on both the horn and the rear disc, and 1.5 mm pilots (M2 self-tapping) on each body face.
+Clearances copy SO-101's printed upper arm for the same servo: 3.0 mm horn holes, a 3.2 mm centre bore, 2.0 mm body
+holes. Each horn hole has a 6 mm head recess open towards the servo pocket, so the turntable's and gripper base's screws
+go in before the next servo and their heads sit clear of it; the base plate's body screws are counterbored underneath.
+`verification.json` (`fasteners`) records which part each servo's holes cut, and a test holds every set to the part that
+holds or is driven by that servo. The horn thread size is not in the model; screw heads are not in the collision sweep.

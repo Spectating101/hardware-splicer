@@ -17,8 +17,9 @@ Geometry basis
   off the body centre.
 * Idler horn on the back face: 4 mm thick, same diameter (assumed; ROBOTIS's hinge frames need an idler horn per its
   e-manual, but its drawing could not be downloaded).
-* Horn bolt circle and servo side-screw positions are NOT modelled: printed parts carry no holes for them. Drill or
-  add them from the real horn before printing.
+* Rev A: horn bolt circle and servo side-screw positions are NOT modelled; drill them from the real horn. Rev B cuts
+  them: horn screws on the STS3215's measured 9.8 mm square (with a head recess reachable from the servo pocket) and body
+  screws into its 1.5 mm pilots, with SO-101's clearances (see FAMILIES["sts3215"]["holes"]).
 
 Everything printed is PLA. Its mass uses a density of 1.24 g/cm3 and a 60 % effective fill (both assumed). Servo masses
 are the cited ones.
@@ -45,7 +46,13 @@ FAMILIES = {
              "name": "hs_arm_a", "yaw_servo": "XM430-W350-T"},
     "sts3215": {"body": (45.4, 24.8, 35.4), "horn_off": 12.5, "horn_r": 10.0, "horn_h": 1.0, "idler_h": 0.0,
                 "joints": {j: "STS3215-12V" for j in ("base_yaw", "shoulder", "elbow", "wrist_pitch", "wrist_roll", "gripper")},
-                "name": "hs_arm_a_rev_b", "yaw_servo": "STS3215-12V"},
+                "name": "hs_arm_a_rev_b", "yaw_servo": "STS3215-12V",
+                # Measured from STS3215_03a.step (servo frame: horn axis at the origin, body toward -x). The horn and the rear
+                # disc each carry four 2.5 mm holes on a 9.8 mm square about the axis; each body face has 1.5 mm pilot holes
+                # (M2 self-tapping) at the x given, y +-10.2. Clearances are the ones SO-101's printed Upper_arm_SO101.step
+                # cuts for the same servo: 3.0 mm horn holes on the same square, a 3.2 mm centre bore, 2.0 mm body holes.
+                "holes": {"horn_half": 4.9, "horn_d": 3.0, "centre_d": 3.2, "horn_head_d": 6.0, "body_d": 2.0, "body_head_d": 4.5,
+                          "pilot_y": 10.2, "pilot_x": {"horn_face": (-29.0, -8.3), "back_face": (-32.8, -8.3)}}},
 }
 BODY_L, BODY_W, BODY_D = FAMILIES["x430"]["body"]
 HORN_OFF = 12.0          # horn axis from body centre, along the length
@@ -75,8 +82,9 @@ C = P["clear"]
 def use_servo(family: str) -> None:
     """Set the servo geometry every part is built around (module globals, so the part functions read one source)."""
     global BODY_L, BODY_W, BODY_D, HORN_OFF, HORN_R, HORN_H, IDLER_H, JOINT_SERVO, NAME, YAW_SERVO
-    global HALF_IN, HALF_OUT, CHEEK_POS, CHEEK_NEG, HORN_GAP, IDLER_GAP
+    global HALF_IN, HALF_OUT, CHEEK_POS, CHEEK_NEG, HORN_GAP, IDLER_GAP, HOLES
     f = FAMILIES[family]
+    HOLES = f.get("holes")
     BODY_L, BODY_W, BODY_D = f["body"]
     HORN_OFF, HORN_R, HORN_H, IDLER_H = f["horn_off"], f["horn_r"], f["horn_h"], f["idler_h"]
     JOINT_SERVO, NAME, YAW_SERVO = dict(f["joints"]), f["name"], f["yaw_servo"]
@@ -90,6 +98,8 @@ def use_servo(family: str) -> None:
     CHEEK_NEG = (-(BODY_D / 2 + IDLER_GAP + P["plate"]), -(BODY_D / 2 + IDLER_GAP))  # idler-side cheek
 
 
+HOLES = None
+FASTENER_CUTS = None
 use_servo("x430")
 
 
@@ -130,6 +140,56 @@ def servo(point, axis, body_dir):
         extras.append(cyl(HORN_R, "z", -BODY_D / 2 - IDLER_H, -BODY_D / 2, (0, 0, 0)))
     solid = body.fuse(*extras).clean()
     return place(solid, frame(axis, body_dir), point)
+
+
+def fastener_tools(placement, idler_cheek, body_faces=("horn_face", "back_face")):
+    """Hole solids for one servo, in world space: horn screws through the driven part's plate (head recess beyond it),
+    the rear-disc screws when the driven part has an idler-side cheek, and body screws through the holder's walls
+    (rear half of the body only: the front half is left free for the next link's cheeks)."""
+    point, axis, body_dir = placement
+    h = HOLES
+    horn_face = BODY_D / 2 + HORN_H
+    plate_out = BODY_D / 2 + HORN_GAP + P["plate"]           # outer face of a horn-side cheek
+    recess = plate_out - 1.8                                  # head recess 1.8 mm deep, open beyond the plate
+    tools = []
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            c = (sx * h["horn_half"], sy * h["horn_half"], 0)
+            tools.append(("horn", cyl(h["horn_d"] / 2, "z", horn_face - 0.01, plate_out + 0.5, c)))
+            tools.append(("horn", cyl(h["horn_head_d"] / 2, "z", recess, recess + 40.0, c)))
+            if idler_cheek:
+                tools.append(("idler", cyl(h["horn_d"] / 2, "z", CHEEK_NEG[0] - 0.5, -BODY_D / 2 + 0.01, c)))
+                tools.append(("idler", cyl(h["horn_head_d"] / 2, "z", CHEEK_NEG[0] - 0.5, CHEEK_NEG[0] + 1.8, c)))
+    tools.append(("horn", cyl(h["centre_d"] / 2, "z", horn_face - 0.01, plate_out + 0.5, (0, 0, 0))))
+    for face, sign in (("horn_face", 1), ("back_face", -1)):
+        if face not in body_faces:
+            continue
+        for x in h["pilot_x"][face]:
+            if x > -HORN_OFF:
+                continue
+            for y in (-h["pilot_y"], h["pilot_y"]):
+                a0, a1 = BODY_D / 2 - 0.01, BODY_D / 2 + 8.0
+                tools.append(("body", cyl(h["body_d"] / 2, "z", *sorted((sign * a0, sign * a1)), (x, y, 0))))
+                b0, b1 = BODY_D / 2 + 4.0, BODY_D / 2 + 9.0   # counterbore where the holder is thicker than a cradle wall
+                tools.append(("body", cyl(h["body_head_d"] / 2, "z", *sorted((sign * b0, sign * b1)), (x, y, 0))))
+    rot = frame(axis, body_dir)
+    return [(kind, place(t, rot, point)) for kind, t in tools]
+
+
+def cut_fasteners(printed, placements, idler_cheeks, body_faces):
+    """Cut every servo's fastener holes from the printed parts; report which part each set of holes went into."""
+    cuts = {}
+    for name, placement in placements.items():
+        for kind, tool in fastener_tools(placement, name in idler_cheeks, body_faces[name]):
+            for part, shape in printed.items():
+                after = shape.cut(tool)
+                removed = shape.Volume() - after.Volume()
+                if removed > 1e-3:
+                    printed[part] = after
+                    key = f"{name}:{kind}"
+                    cuts.setdefault(key, {}).setdefault(part, 0.0)
+                    cuts[key][part] += removed
+    return {k: {p: round(v, 1) for p, v in d.items()} for k, d in sorted(cuts.items())}
 
 
 def union(*shapes):
@@ -256,17 +316,26 @@ def build():
     p3 = (p2[0] + P["forearm_mm"], 0.0, p1[2])
     p4 = (p3[0] + P["wrist_mm"], 0.0, p1[2])
     grip_base, g, tool, jaw = gripper_parts(p4)
-    s = {
-        "base_yaw": servo(yaw_pt, (0, 0, 1), (-1, 0, 0)),
-        "shoulder": servo(p1, (0, 1, 0), (0, 0, -1)),
-        "elbow": servo(p2, (0, 1, 0), (-1, 0, 0)),
-        "wrist_pitch": servo(p3, (0, 1, 0), (-1, 0, 0)),
-        "wrist_roll": servo((p4[0] - BODY_D / 2, 0.0, p4[2]), (1, 0, 0), (0, 0, -1)),
-        "gripper": servo(g, (0, 1, 0), (-1, 0, 0)),
+    placements = {
+        "base_yaw": (yaw_pt, (0, 0, 1), (-1, 0, 0)),
+        "shoulder": (p1, (0, 1, 0), (0, 0, -1)),
+        "elbow": (p2, (0, 1, 0), (-1, 0, 0)),
+        "wrist_pitch": (p3, (0, 1, 0), (-1, 0, 0)),
+        "wrist_roll": ((p4[0] - BODY_D / 2, 0.0, p4[2]), (1, 0, 0), (0, 0, -1)),
+        "gripper": (g, (0, 1, 0), (-1, 0, 0)),
     }
+    s = {name: servo(*pl) for name, pl in placements.items()}
     printed = {"base_housing": housing, "turntable": turntable, "upper_arm": pitch_link(p1, P["upper_arm_mm"]),
                "forearm": pitch_link(p2, P["forearm_mm"]), "wrist": wrist_link(p3, p4), "gripper_base": grip_base,
                "gripper_jaw": jaw}
+    global FASTENER_CUTS
+    # The pitch joints drive two-cheek links, which also screw to the servo's rear disc. Body screws go only where a wall
+    # holds that face: the yaw servo stands on the base plate (its top face is free under the turntable) and the roll
+    # servo's cradle closes only behind it.
+    both = ("horn_face", "back_face")
+    body_faces = {"base_yaw": ("back_face",), "wrist_roll": ("back_face",), "shoulder": both, "elbow": both,
+                  "wrist_pitch": both, "gripper": both}
+    FASTENER_CUTS = cut_fasteners(printed, placements, {"shoulder", "elbow", "wrist_pitch", "gripper"}, body_faces) if HOLES else None
     # URDF links: (printed parts, servos carried), joint (name, type, point, axis, child)
     links = {"base_link": (["base_housing"], ["base_yaw"]), "turntable_link": (["turntable"], ["shoulder"]),
              "upper_arm_link": (["upper_arm"], ["elbow"]), "forearm_link": (["forearm"], ["wrist_pitch"]),
@@ -420,7 +489,10 @@ def main(argv=None):
         "tip_over": tip,
         "power": {"holding_a_stretched": round(holding_a, 2), "all_stalled_a": round(stall_all_a, 2),
                   "basis": "current proportional to torque up to the cited stall current at 12 V (approximation)"},
-        "unmodelled": ["horn bolt circle and servo side screws", "idler horn thickness (4 mm assumed)",
+        "fasteners": ({"cut_mm3": FASTENER_CUTS, "holes": HOLES,
+                       "basis": "STS3215_03a.step hole positions; SO-101 Upper_arm_SO101.step clearances"} if HOLES else None),
+        "unmodelled": (["horn bolt circle and servo side screws"] if not HOLES else ["screw heads in the motion sweep"]) +
+                      ["idler horn thickness (4 mm assumed)" if IDLER_H else "rear disc thread size (2.5 mm holes in the model)",
                        "cables, screws, horns' own mass", "print strength (no FEM on the links yet)"],
     }
     (out / "verification.json").write_text(json.dumps(verification, indent=1, default=lambda o: o.item() if hasattr(o, "item") else str(o)) + "\n")

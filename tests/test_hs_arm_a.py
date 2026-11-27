@@ -84,6 +84,20 @@ def test_rev_b_is_built_around_the_measured_sts3215_and_reports_its_shoulder_hon
     assert v["reach_mm"]["tool_from_yaw_axis"] >= 300
 
 
+def test_rev_b_cuts_every_servo_screw_into_the_part_that_holds_or_is_driven_by_it(built_rev_b) -> None:
+    cuts = json.loads((built_rev_b / "verification.json").read_text())["fasteners"]["cut_mm3"]
+    driven = {"base_yaw": "turntable", "shoulder": "upper_arm", "elbow": "forearm", "wrist_pitch": "wrist",
+              "wrist_roll": "gripper_base", "gripper": "gripper_jaw"}
+    holder = {"base_yaw": "base_housing", "shoulder": "turntable", "elbow": "upper_arm", "wrist_pitch": "forearm",
+              "wrist_roll": "wrist", "gripper": "gripper_base"}
+    for joint in driven:
+        assert set(cuts[f"{joint}:horn"]) == {driven[joint]}, joint
+        assert set(cuts[f"{joint}:body"]) == {holder[joint]}, joint
+    for joint in ("shoulder", "elbow", "wrist_pitch", "gripper"):
+        assert set(cuts[f"{joint}:idler"]) == {driven[joint]}
+    assert "base_yaw:idler" not in cuts and "wrist_roll:idler" not in cuts
+
+
 def test_committed_rev_b_sweep_is_clash_free_over_rev_a_ranges_and_cheaper() -> None:
     sweep = json.loads((PROJECT / "rev-b" / "motion_sweep.json").read_text())
     assert len(sweep["sweeps"]) == 6 and all(s["clash_steps"] == 0 for s in sweep["sweeps"])

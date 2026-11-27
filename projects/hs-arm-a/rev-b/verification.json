@@ -45,8 +45,8 @@
  },
  "parts": {
   "base_housing": {
-   "volume_cm3": 186.14,
-   "mass_g": 138.5,
+   "volume_cm3": 186.05,
+   "mass_g": 138.4,
    "bbox_mm": [
     150.0,
     150.0,
@@ -57,8 +57,8 @@
    "single_body": true
   },
   "turntable": {
-   "volume_cm3": 43.67,
-   "mass_g": 32.5,
+   "volume_cm3": 43.11,
+   "mass_g": 32.1,
    "bbox_mm": [
     88.2,
     88.0,
@@ -69,8 +69,8 @@
    "single_body": true
   },
   "upper_arm": {
-   "volume_cm3": 54.64,
-   "mass_g": 40.7,
+   "volume_cm3": 53.82,
+   "mass_g": 40.0,
    "bbox_mm": [
     117.5,
     51.5,
@@ -81,8 +81,8 @@
    "single_body": true
   },
   "forearm": {
-   "volume_cm3": 50.0,
-   "mass_g": 37.2,
+   "volume_cm3": 49.18,
+   "mass_g": 36.6,
    "bbox_mm": [
     107.5,
     51.5,
@@ -93,8 +93,8 @@
    "single_body": true
   },
   "wrist": {
-   "volume_cm3": 39.8,
-   "mass_g": 29.6,
+   "volume_cm3": 39.0,
+   "mass_g": 29.0,
    "bbox_mm": [
     78.0,
     51.5,
@@ -105,8 +105,8 @@
    "single_body": true
   },
   "gripper_base": {
-   "volume_cm3": 32.62,
-   "mass_g": 24.3,
+   "volume_cm3": 31.89,
+   "mass_g": 23.7,
    "bbox_mm": [
     95.6,
     42.0,
@@ -117,8 +117,8 @@
    "single_body": true
   },
   "gripper_jaw": {
-   "volume_cm3": 26.49,
-   "mass_g": 19.7,
+   "volume_cm3": 25.7,
+   "mass_g": 19.1,
    "bbox_mm": [
     73.0,
     51.5,
@@ -130,39 +130,39 @@
   }
  },
  "mass_kg": {
-  "base_link": 0.1935,
-  "turntable_link": 0.0875,
-  "upper_arm_link": 0.0957,
-  "forearm_link": 0.0922,
-  "wrist_link": 0.0846,
-  "gripper_link": 0.0793,
-  "jaw_link": 0.0197
+  "base_link": 0.1934,
+  "turntable_link": 0.0871,
+  "upper_arm_link": 0.095,
+  "forearm_link": 0.0916,
+  "wrist_link": 0.084,
+  "gripper_link": 0.0787,
+  "jaw_link": 0.0191
  },
- "moving_mass_kg": 0.459,
+ "moving_mass_kg": 0.4555,
  "reach_mm": {
   "tool_from_yaw_axis": 370.5,
   "tool_height_mm": 85.9
  },
  "static_torque": {
   "shoulder": {
-   "static_nm": 1.2951,
-   "with_safety_factor_nm": 1.9426,
+   "static_nm": 1.2894,
+   "with_safety_factor_nm": 1.9342,
    "servo": "STS3215-12V",
    "stall_nm": 2.942,
-   "stall_share": 0.66,
+   "stall_share": 0.657,
    "pass": false
   },
   "elbow": {
-   "static_nm": 0.7659,
-   "with_safety_factor_nm": 1.1488,
+   "static_nm": 0.7629,
+   "with_safety_factor_nm": 1.1443,
    "servo": "STS3215-12V",
    "stall_nm": 2.942,
-   "stall_share": 0.39,
+   "stall_share": 0.389,
    "pass": true
   },
   "wrist_pitch": {
-   "static_nm": 0.3775,
-   "with_safety_factor_nm": 0.5663,
+   "static_nm": 0.3763,
+   "with_safety_factor_nm": 0.5645,
    "servo": "STS3215-12V",
    "stall_nm": 2.942,
    "stall_share": 0.192,
@@ -170,27 +170,99 @@
   }
  },
  "base_yaw_overturning": {
-  "moment_nm": 1.295,
+  "moment_nm": 1.289,
   "servo_side_load_rating_nm": null,
   "ratio_if_horn_carried_it": null,
   "design_response": "support ring r=44.0 mm under the turntable with a 1 mm PTFE washer carries it",
   "basis": "STS3215-12V: no published side-load rating; the support ring carries it"
  },
  "tip_over": {
-  "arm_moment_nm": 1.295,
-  "base_kg": 0.194,
+  "arm_moment_nm": 1.289,
+  "base_kg": 0.193,
   "base_restoring_nm": 0.142,
   "free_standing_stable": false,
   "basis": "worst case: arm stretched over a base edge 75 mm from the yaw axis; the restoring moment is the base's own weight"
  },
  "power": {
-  "holding_a_stretched": 2.24,
+  "holding_a_stretched": 2.23,
   "all_stalled_a": 16.2,
   "basis": "current proportional to torque up to the cited stall current at 12 V (approximation)"
  },
+ "fasteners": {
+  "cut_mm3": {
+   "base_yaw:body": {
+    "base_housing": 88.7
+   },
+   "base_yaw:horn": {
+    "turntable": 524.0
+   },
+   "elbow:body": {
+    "upper_arm": 37.7
+   },
+   "elbow:horn": {
+    "forearm": 406.9
+   },
+   "elbow:idler": {
+    "forearm": 378.9
+   },
+   "gripper:body": {
+    "gripper_base": 37.7
+   },
+   "gripper:horn": {
+    "gripper_jaw": 406.9
+   },
+   "gripper:idler": {
+    "gripper_jaw": 378.9
+   },
+   "shoulder:body": {
+    "turntable": 37.7
+   },
+   "shoulder:horn": {
+    "upper_arm": 406.9
+   },
+   "shoulder:idler": {
+    "upper_arm": 378.9
+   },
+   "wrist_pitch:body": {
+    "forearm": 37.7
+   },
+   "wrist_pitch:horn": {
+    "wrist": 406.9
+   },
+   "wrist_pitch:idler": {
+    "wrist": 378.9
+   },
+   "wrist_roll:body": {
+    "wrist": 18.8
+   },
+   "wrist_roll:horn": {
+    "gripper_base": 685.3
+   }
+  },
+  "holes": {
+   "horn_half": 4.9,
+   "horn_d": 3.0,
+   "centre_d": 3.2,
+   "horn_head_d": 6.0,
+   "body_d": 2.0,
+   "body_head_d": 4.5,
+   "pilot_y": 10.2,
+   "pilot_x": {
+    "horn_face": [
+     -29.0,
+     -8.3
+    ],
+    "back_face": [
+     -32.8,
+     -8.3
+    ]
+   }
+  },
+  "basis": "STS3215_03a.step hole positions; SO-101 Upper_arm_SO101.step clearances"
+ },
  "unmodelled": [
-  "horn bolt circle and servo side screws",
-  "idler horn thickness (4 mm assumed)",
+  "screw heads in the motion sweep",
+  "rear disc thread size (2.5 mm holes in the model)",
   "cables, screws, horns' own mass",
   "print strength (no FEM on the links yet)"
  ]
