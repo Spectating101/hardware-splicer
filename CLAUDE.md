@@ -2,6 +2,12 @@
 
 **Read first for project direction:** [`docs/HARDWARE_SPLICER_MISSION_FREEZE.md`](docs/HARDWARE_SPLICER_MISSION_FREEZE.md). This is the canonical strategic scope and work-selection contract; do not replace user engineering outcomes with synthetic benchmarks, reference-kit duplication or demo builds. Existing engineering authority/safety contracts still apply.
 
+**Compass (owner, 28 Nov 2026):** Cite-Refinery's atlas decides what is worth building. Before choosing new work, read
+its newest reports (`cite-refinery/research_materials/signals_reports/`, `value-extraction-*.md` first) and HS's landscape
+digest, which now includes the atlas's hardware products (`~/.local/share/hs-landscape/digests/`); see
+[`docs/ATLAS_LEADS_20261128.md`](docs/ATLAS_LEADS_20261128.md). Test results go back to the atlas as records under
+`examples/atlas_feedback/`.
+
 Orientation: [`docs/GITHUB_START_HERE.md`](docs/GITHUB_START_HERE.md).
 Setup: [`docs/SETUP.md`](docs/SETUP.md) · Tests: [`docs/TESTING.md`](docs/TESTING.md) ·
 API/MCP: [`docs/AGENT_QUICKSTART.md`](docs/AGENT_QUICKSTART.md).
