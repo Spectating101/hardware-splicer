@@ -34,3 +34,16 @@ def test_oomwoo_modules_are_attributed_and_match_the_catalogue():
             assert len(m["cad_sha256"]) == 64 and len(m["envelope_mm"]) == 3
     fans = [m for m in modules if m["capability"] == "suction_fan"]
     assert all(lo <= hi for m in fans for lo, hi in [m["rated_kpa"]])
+
+
+def test_vacuum_rover_package_prices_both_routes_from_cited_listings():
+    root = Path(__file__).resolve().parents[1] / "projects" / "hs-rover-vac-a"
+    bom = json.loads((root / "bom.json").read_text())
+    for route in ("route_a", "route_b"):
+        lines = bom[route]
+        assert all(l["source"].startswith("https://") for l in lines)
+        assert sum(l["qty"] * l["unit_usd"] for l in lines) < 50
+        donors = {l["donor"] for l in lines if l.get("origin") == "salvaged"}
+        assert donors == {"robot-vacuum-lidar-xiaomi-roborock", "phone-android-cracked"}
+        assert all(d in {x["id"] for x in catalogue()["devices"]} for d in donors)
+    assert len(bom["route_b"]) > len(bom["route_a"])

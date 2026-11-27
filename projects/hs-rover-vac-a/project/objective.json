@@ -1,0 +1,8 @@
+{
+ "schema": "hardware_splicer.objective_project.v1",
+ "project_id": "a-mapping-and-live-camera-rover-built-fr-1c0f8f",
+ "objective": "A mapping and live-camera rover built from a faulty Xiaomi Mi robot vacuum (1st gen) and a cracked Android phone: maps a room with the vacuum's laser scanner, drives on its own wheels and battery, streams video on the local network; cheaper than a new pet camera robot.",
+ "constraints": {},
+ "acceptance": [],
+ "opened": "2026-11-27T14:48:14+0800"
+}
