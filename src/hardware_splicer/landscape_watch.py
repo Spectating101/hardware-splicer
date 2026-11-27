@@ -137,6 +137,9 @@ def atlas(_since: datetime, root: Path | None = None) -> list[dict[str, Any]]:
     filter in ``run`` keeps the hardware ones."""
     root = root or ATLAS_DIR
     files = sorted(root.glob("signals-*/newly-possible*/products.json"), key=lambda p: p.stat().st_mtime) if root.is_dir() else []
+    # A delta refresh rebuilds its products.json while new listings are still being mapped and writes build.done when the
+    # build is final; until then its file is partial and an older complete run is read instead.
+    files = [f for f in files if "delta" not in f.parent.parent.name or (f.parent / "build.done").exists()]
     seen: dict[str, dict[str, Any]] = {}
     for path in files:
         try:

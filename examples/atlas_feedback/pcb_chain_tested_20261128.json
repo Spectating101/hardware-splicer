@@ -2,7 +2,7 @@
  "schema": "hardware_splicer.atlas_feedback.v1",
  "captured": "2026-11-28",
  "atlas_entry": {
-  "report": "cite-refinery research_materials/signals_reports/multi-product-chains-20261126.md, chain 1",
+  "report": "Cite-Refinery's private repository (cite-refinery-private), research_materials/signals_reports/multi-product-chains-20261126.md, chain 1; not publicly readable",
   "title": "AI-drafted PCB with independent KiCad check, engineering review and supplier order files",
   "chain": [
    "claynicholson/copper-kicad-mcp",
@@ -44,5 +44,7 @@
   }
  ],
  "verdict": "The chain runs end to end. Its weak link is routing (1 of 3 designer boards clean), and its checking catches 14 of 35 real bugs together; nothing has been fabricated yet.",
- "not_shown": "A fabricated board; a buyer; the seeed kicad-mcp-server itself (HS used kicad-cli directly)."
+ "not_shown": "A fabricated board; a buyer; the seeed kicad-mcp-server itself (HS used kicad-cli directly).",
+ "caveat": "The Seeed kicad-mcp-server in the atlas's chain was not used; HS ran kicad-cli directly. This tests the chain's function, not those exact three products.",
+ "received_by_atlas": "Stored by Cite-Refinery on 28 Nov 2026 under research_materials/signals_reports/feedback/ and summarised in value-extraction-20261128.md"
 }

@@ -38,3 +38,16 @@ def test_the_atlas_source_reads_mapped_products_and_keeps_the_hardware_ones(tmp_
     result = lw.run(8, tmp_path / "state")
     assert result["new"] == 2  # the photo manager matches no hardware topic
     assert lw.atlas(None, tmp_path / "missing") == []
+
+
+def test_a_delta_run_is_read_only_once_its_build_is_final(tmp_path):
+    import json
+
+    for run, slug in (("signals-final60pct-20261119/newly-possible-20261127", "a/full-run-kicad-tool"),
+                      ("signals-delta-20261128/newly-possible", "b/partial-delta-kicad-tool")):
+        d = tmp_path / run
+        d.mkdir(parents=True)
+        (d / "products.json").write_text(json.dumps([{"catalog_id": f"github:{slug}", "purpose": "KiCad tool", "stars": "1"}]))
+    assert {i["url"] for i in lw.atlas(None, tmp_path)} == {"https://github.com/a/full-run-kicad-tool"}
+    (tmp_path / "signals-delta-20261128/newly-possible/build.done").write_text("")
+    assert "https://github.com/b/partial-delta-kicad-tool" in {i["url"] for i in lw.atlas(None, tmp_path)}
