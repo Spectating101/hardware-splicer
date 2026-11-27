@@ -14,7 +14,13 @@ that KiCad's ERC and other checkers missed on real fix commits (examples/schemat
 * ``i2c_sda_scl_short``: SDA and SCL pins on one net;
 * ``usb_c_data_one_side``: a USB-C receptacle's D+ or D- wired on one row only;
 * ``usb_c_cc_no_pulldown``: a USB-C receptacle's CC pin with no resistor to ground, unless it has Rp to a supply (a source port);
-  a CC pin that reaches a controller or module is reported as a note.
+  a CC pin that reaches a controller or module is reported as a note;
+* ``esp32_enable_floating``: an ESP32 chip or module whose CHIP_PU/EN pin has no pull-up, no supply and no push-pull driver
+  (Espressif: "CHIP_PU must not be left floating");
+* ``z80_wired_or_no_pullup``: a Z80's INT or BUSREQ with no pull-up and no push-pull driver (Zilog UM0080: each "is normally
+  wired-OR and requires an external pull-up");
+* ``mdio_no_pullup``: an Ethernet PHY's MDIO net with no resistor to a supply, following series 0 ohm links (TI DP83848C:
+  "The MDIO pin requires a pullup resistor (1.5 kΩ)").
 
 Each finding says what it rests on: KiCad's pin data plus a stated convention or standard. A finding is a reason to look,
 never a verdict, and nothing here was measured. Net names are not trusted for direction: a net called RX may be named
@@ -201,6 +207,71 @@ def _mated_findings(comps, nets, pin_net, mates, finding) -> None:
                 finding("error", "mate_supply_on_ground", f"{ref} pin {k} meets {mate['board']}'s {pin['label']} but is on ground net {net}.", f"{source}; {how}", [ref], net)
 
 
+# Pins that a datasheet or standard says must be pulled, each with its source quoted.
+ESP32_PART = re.compile(r"ESP32", re.I)
+DEV_BOARD = re.compile(r"devkit|dev ?board|\bboard\b|breakout|feather|xiao|nodemcu", re.I)
+ESP32_EN = re.compile(r"^(CHIP_PU|CHIP_EN|EN)$", re.I)
+ESPRESSIF_EN = ("Espressif hardware design guidelines, schematic checklist, Chip Power-up and Reset Timing: \"CHIP_PU must not be "
+                "left floating.\" (ESP32 and ESP32-S3 pages)")
+Z80_PART = re.compile(r"\bZ80|Z84C|Z8400", re.I)
+Z80_WIRED_OR = re.compile(r"^[~/]?\{?(INT|BUSREQ|BUSRQ)\}?$", re.I)
+ZILOG_UM0080 = ("Zilog Z80 CPU User Manual UM0080, pin descriptions: INT and BUSREQ are each \"normally wired-OR and requires an "
+                "external pull-up\"")
+MDIO_PIN = re.compile(r"(^|[/_])MDIO\d?($|[/_])", re.I)
+CARRIER = re.compile(r"module|\bsom\b|carrier|osm|\bcm[345]\b", re.I)
+TI_MDIO = ("TI DP83848C datasheet, MII serial management: \"The MDIO pin requires a pullup resistor (1.5 kΩ) which, during IDLE "
+           "and turnaround, will pull MDIO high.\" (DP83867 and DP83822 state 2.2 kΩ); IEEE 802.3 clause 22")
+ZERO_OHM = re.compile(r"^(0|0R|0R0|R_0R\w*|0 ?(Ω|ohm))$", re.I)
+
+
+def _pull_rule_findings(comps, nets, pin_net, finding, resistor_to, driven_supply) -> None:
+    def text(ref: str) -> str:
+        c = comps.get(ref, {})
+        return f"{c.get('value', '')} {c.get('part', '')} {c.get('lib', '')}"
+
+    def node(ref: str, pin: str, net: str) -> dict[str, str]:
+        return next((n for n in nets.get(net, []) if n["ref"] == ref and n["pin"] == pin), {"function": "", "type": ""})
+
+    def held(net: str, ref: str) -> bool:
+        """Pulled or driven: the net is a supply, reaches one through a resistor, or another part drives it push-pull."""
+        if SUPPLY.search(net) or driven_supply(net) or resistor_to(net, SUPPLY):
+            return True
+        return any(n["ref"] != ref and n["type"] in ("output", "power_out") for n in nets.get(net, []))
+
+    for (ref, pin), net in pin_net.items():
+        fn = node(ref, pin, net)["function"]
+        if not fn:
+            continue
+        if ESP32_EN.match(fn) and ESP32_PART.search(text(ref)) and not DEV_BOARD.search(text(ref)) and not held(net, ref):
+            finding("warning", "esp32_enable_floating", f"{ref} {fn} (net {net}) has no pull-up, no supply and no push-pull driver, so the "
+                    "chip enable floats when nothing is plugged in. Fit a pull-up to 3.3 V (Espressif suggests an RC delay, 10 kOhm and 1 uF).",
+                    ESPRESSIF_EN, [ref], net)
+        if Z80_WIRED_OR.match(fn) and Z80_PART.search(text(ref)) and not held(net, ref):
+            finding("warning", "z80_wired_or_no_pullup", f"{ref} {fn} (net {net}) has no pull-up and no push-pull driver. The Z80 has no "
+                    "internal pull-up on it, so open-collector sources leave it floating.", ZILOG_UM0080, [ref], net)
+        trigger = MDIO_PIN.search(fn) and "no_connect" not in node(ref, pin, net)["type"] and node(ref, pin, net)["type"] != "passive"
+        # A connector or a module's edge pin is where the bus leaves, not a PHY or MAC that needs the pull-up here.
+        if trigger and not _is_connector(comps.get(ref, {})) and not CARRIER.search(text(ref)):
+            # Follow series 0 ohm links (option resistors) to the nets they join.
+            group, todo = {net}, [net]
+            while todo:
+                current = todo.pop()
+                for n in nets.get(current, []):
+                    if ZERO_OHM.match(str(comps.get(n["ref"], {}).get("value", ""))):
+                        for (r, q), far in pin_net.items():
+                            if r == n["ref"] and far not in group:
+                                group.add(far)
+                                todo.append(far)
+            if any(resistor_to(g, SUPPLY) for g in group):
+                continue
+            members = {n["ref"] for g in group for n in nets.get(g, [])}
+            off_board = [r for r in members if r != ref and (_is_connector(comps.get(r, {})) or CARRIER.search(text(r)))]
+            finding("info" if off_board else "warning", "mdio_no_pullup",
+                    f"{ref} {fn} (net {net}) has no resistor to a supply" + (f"; it reaches {', '.join(sorted(off_board))}, which may carry the pull-up"
+                    if off_board else "") + ". MDIO is open-drain and needs a pull-up (1.5 kOhm to 2.2 kOhm) to idle high.",
+                    TI_MDIO, [ref], net)
+
+
 def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[str, Any]:
     comps, nets = model["components"], model["nets"]
     pin_net: dict[tuple[str, str], str] = {}
@@ -360,6 +431,7 @@ def review(model: dict[str, Any], mates: dict[str, Any] | None = None) -> dict[s
                 if net is None or not resistor_to(net, GROUND):
                     finding("warning", "usb_c_cc_no_pulldown", f"{ref} {fn} {'is not connected' if net is None else 'has no resistor to ground'}. A USB-C sink needs Rd (5.1 kOhm) on each CC pin or a "
                             "source will not supply 5 V.", "USB Type-C specification, sink termination Rd = 5.1 kOhm (cited by section, not quoted here)", [ref], net)
+    _pull_rule_findings(comps, nets, pin_net, finding, resistor_to, driven_supply)
     _mated_findings(comps, nets, pin_net, mates, finding)
     if unannotated:
         findings.append({"severity": "info", "rule": "unannotated", "components": unannotated,

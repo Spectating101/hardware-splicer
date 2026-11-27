@@ -333,3 +333,54 @@ def test_component_footprints_and_part_number_fields_are_read():
     comp = parse_netlist(text)["components"]["R14"]
     assert comp["footprint"] == "Resistor_SMD:R_0402_1005Metric"
     assert comp["fields"]["LCSC Part"] == "C25905" and comp["fields"]["PARTNO"] == "RMCF0402JT5K10"
+
+
+# ---- datasheet pull rules (2026-11-27), each modelled on a real fix commit --------------------------------------------
+
+RES = ("R9", "10k", "Device", "R", "Resistor")
+PROG_HEADER = ("J5", "Conn_01x05", "Connector", "Conn_01x05", "Generic connector")
+
+
+def test_esp32_chip_pu_that_only_reaches_a_header_floats():
+    # elkel53930/extraice4 1c2461b8: CHIP_PU went to a programming header only; the fix added a 10 k pull-up.
+    bare = netlist([MCU, PROG_HEADER], [("/CHIP_PU", [("U1", "4", "CHIP_PU", "input"), ("J5", "3", "Pin_3", "passive")])])
+    found = review(bare)["findings"]
+    assert [f["rule"] for f in found] == ["esp32_enable_floating"] and "must not be left floating" in found[0]["basis"]
+    pulled = netlist([MCU, PROG_HEADER, RES], [("/CHIP_PU", [("U1", "4", "CHIP_PU", "input"), ("J5", "3", "Pin_3", "passive"), ("R9", "1", "", "passive")]),
+                                          ("+3V3", [("R9", "2", "", "passive")])])
+    assert rules(pulled) == []
+    supervisor = netlist([MCU, ("U8", "TPS3839", "Power_Supervisor", "TPS3839", "supervisor")],
+                         [("/EN", [("U1", "4", "EN", "input"), ("U8", "3", "~{RESET}", "output")])])
+    assert rules(supervisor) == []
+    devkit = netlist([("U1", "ESP32-DevKitC", "MCU_Module", "ESP32-DevKitC", "dev board"), PROG_HEADER],
+                     [("/EN", [("U1", "2", "EN", "input"), ("J5", "3", "Pin_3", "passive")])])
+    assert rules(devkit) == []
+
+
+def test_z80_int_and_busreq_need_a_pullup_but_nmi_is_not_claimed():
+    z80 = ("U10", "Z84C0020", "CPU", "Z80CPU", "Z80 CPU")
+    bare = netlist([z80, PROG_HEADER], [("/INT", [("U10", "16", "~{INT}", "input"), ("J5", "1", "Pin_1", "passive")]),
+                                   ("/NMI", [("U10", "17", "~{NMI}", "input"), ("J5", "2", "Pin_2", "passive")])])
+    found = review(bare)["findings"]
+    assert [(f["rule"], f["net"]) for f in found] == [("z80_wired_or_no_pullup", "/INT")]  # UM0080 says nothing of the kind for NMI
+    pulled = netlist([z80, PROG_HEADER, RES], [("/INT", [("U10", "16", "~{INT}", "input"), ("J5", "1", "Pin_1", "passive"), ("R9", "1", "", "passive")]),
+                                          ("+5V", [("R9", "2", "", "passive")])])
+    assert rules(pulled) == []
+
+
+def test_mdio_follows_zero_ohm_links_and_defers_to_a_module_edge():
+    # antmicro/dc-scm-osm-l-carrier-card 5f320f74: the PHY's MDIO reached the module only through a 0 ohm link; the fix
+    # added 1.5 k to 3.3 V.
+    phy = ("U7", "RTL8211FDI-CG", "Interface_Ethernet", "RTL8211F", "Gigabit PHY")
+    link = ("R110", "R_0R_0402", "Device", "R", "Resistor")
+    som = ("U1", "OSM-L_Carrier-side", "OSM", "OSM-L", "module connector")
+    lone = netlist([phy], [("/MDIO", [("U7", "24", "MDIO", "bidirectional")])])
+    assert [f["severity"] for f in review(lone)["findings"] if f["rule"] == "mdio_no_pullup"] == ["warning"]
+    via_link = netlist([phy, link, som], [("/MDIO", [("U7", "24", "MDIO", "bidirectional"), ("R110", "2", "", "passive")]),
+                                          ("/RGMII.MDIO", [("R110", "1", "", "passive"), ("U1", "C7", "ETH_MDIO", "passive")])])
+    found = [f for f in review(via_link)["findings"] if f["rule"] == "mdio_no_pullup"]
+    assert len(found) == 1 and found[0]["severity"] == "info" and "U1" in found[0]["message"]
+    fixed = netlist([phy, link, som, ("R219", "R_1k5_0402", "Device", "R", "Resistor")],
+                    [("/MDIO", [("U7", "24", "MDIO", "bidirectional"), ("R110", "2", "", "passive"), ("R219", "1", "", "passive")]),
+                     ("/RGMII.MDIO", [("R110", "1", "", "passive"), ("U1", "C7", "ETH_MDIO", "passive")]), ("+3V3", [("R219", "2", "", "passive")])])
+    assert "mdio_no_pullup" not in rules(fixed)

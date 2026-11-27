@@ -27,6 +27,7 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `manufacturing_closure` | 513 | 5 | product | TMRC | Cross-domain manufacturing closure for guided hardware and robotics projects. The closure graph reconciles design identities across electrical, firmware, harness, BOM, physical assembly, CAD, and fabr... |
 | `electrical_design` | 495 | 4 | product | TMRC | Canonical pin/net/power-domain electrical design model and ERC. The electrical model is intentionally separate from the visual graph. A canvas edge is not an electrical connection until component pins... |
 | `model3d` | 495 | 6 | product | TMRC | Server-side GLB views of retained PCB bytes. A rendered model is a view of retained bytes. It carries no engineering authority and never rewrites a snapshot, revision, pin, review, or thread. |
+| `kicad_design_review` | 482 | 1 | product | TMRC | Review any KiCad schematic from KiCad's own netlist, not only boards HS laid out itself. KiCad's netlist export (``kicad-cli sch export netlist --format kicadsexpr``) gives every node its pin function... |
 | `circuit_synthesis.power_rail_planner` | 478 | 0 | product | TMRC | Bounded power-rail conversion planner using structured electrical contracts. |
 | `circuit_synthesis.h_bridge_planner` | 471 | 0 | product | TMRC | Bounded bidirectional DC motor H-bridge topology planner. |
 | `kicad_component_board` | 456 | 2 | product | TMRC | Component-level KiCad boards: real library symbols and footprints, and the checks that close the loop. A design is a list of parts (each a KiCad library symbol and footprint) and named nets of ``REF.P... |
@@ -35,7 +36,6 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `circuit_synthesis.ir` | 438 | 0 | product | TMRC | Circuit synthesis intermediate representation. This is not a full schematic engine. It is the first bounded language for representing user intent, parts, ports, topology operators, constraints, and ca... |
 | `discrete_electronics_truth` | 431 | 1 | research | - | Datasheet-backed truth contracts for discrete electronic designs. This is intentionally separate from the historical module catalog. A model may select exact parts and propose a circuit only from pers... |
 | `pcb.safety_rules` | 419 | 15 | product | TMRC | Electrical safety/correctness checks for build graphs (Python engine port). |
-| `kicad_design_review` | 410 | 1 | product | TMRC | Review any KiCad schematic from KiCad's own netlist, not only boards HS laid out itself. KiCad's netlist export (``kicad-cli sch export netlist --format kicadsexpr``) gives every node its pin function... |
 | `build_files` | 391 | 1 | product | TMRC | Safe read/list of KiCad artifacts under a build directory (for UI preview). |
 | `jarvis_build` | 389 | 3 | product | TMRC | Unified LLM-aware electrical build: goal (+ optional parts) → compile → trust → JARVIS narrative. |
 | `mechanical_fixture_handoff` | 367 | 1 | research | - | Source-bound mechanical fixture strategy and digital CAD evidence. An independent, reusable HS mechanical-design adapter. This is deliberately NOT the registered four-hole PCB nest and cannot confer p... |

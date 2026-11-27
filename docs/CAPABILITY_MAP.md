@@ -6,11 +6,11 @@ their reach and tests; `... show <module>` gives one module's importers, imports
 tables are in `docs/capability_map/`; the job-level map (which module is canonical for which job) is
 `docs/CAPABILITY_CONSOLIDATION.md`.
 
-**616 modules, 177,449 lines; 538 referenced by a test; 32 called by an engine tool.**
+**616 modules, 177,521 lines; 538 referenced by a test; 32 called by an engine tool.**
 
 | Status | Modules | Lines | Meaning |
 |---|---|---|---|
-| product | 467 | 140,572 | reached from a shipped entry point (toolbelt, MCP, REST or a console command) |
+| product | 467 | 140,644 | reached from a shipped entry point (toolbelt, MCP, REST or a console command) |
 | research | 141 | 35,128 | not shipped on purpose: part of a declared research line (RESEARCH_LINES) |
 | script | 5 | 1,475 | reached only from scripts/, projects/, eval/, experiments/, the Makefile or CI |
 | runnable | 0 | 0 | has its own `python -m` main, and nothing shipped imports it |
@@ -35,7 +35,7 @@ Reach codes in the area pages: **T** toolbelt, **M** MCP server, **R** REST prod
 
 | Area | Modules | Engineering | Lines | Tested | Shipped | Called by a tool | Page |
 |---|---|---|---|---|---|---|---|
-| circuit boards and electronics | 136 | 118 | 38,398 | 110 | 122 | 10 | [circuit-boards-and-electronics](capability_map/circuit-boards-and-electronics.md) |
+| circuit boards and electronics | 136 | 118 | 38,470 | 110 | 122 | 10 | [circuit-boards-and-electronics](capability_map/circuit-boards-and-electronics.md) |
 | salvage, donors, repair | 114 | 103 | 28,740 | 109 | 53 | 3 | [salvage-donors-repair](capability_map/salvage-donors-repair.md) |
 | AI, agents and models | 60 | 42 | 19,361 | 55 | 51 | 0 | [ai-agents-and-models](capability_map/ai-agents-and-models.md) |
 | mechanical, CAD and FEM | 53 | 49 | 18,481 | 46 | 38 | 4 | [mechanical-cad-and-fem](capability_map/mechanical-cad-and-fem.md) |
