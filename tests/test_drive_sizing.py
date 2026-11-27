@@ -23,8 +23,11 @@ def test_every_passing_option_meets_the_maker_limits() -> None:
         fam = limits[option["family"]]
         assert option["speed_at_cruise_m_s"] >= 0.6 - 1e-3
         assert option["current_a"]["cruise_per_motor"] <= 0.25 * fam["stall_current_a"] + 1e-9
-        peak = fam["limits"].get("intermittent_torque_kg_cm") or fam["limits"]["instantaneous_torque_kg_cm"]
-        assert r["required"]["torque_per_motor_nm"]["slope"] <= peak * KGCM_TO_NM
+        peak = fam["limits"].get("intermittent_torque_kg_cm") or fam["limits"].get("instantaneous_torque_kg_cm")
+        if peak is None:  # unpublished (TT, goBILDA): the check reads unknown, never passed
+            assert option["checks"]["slope_torque_within_peak_limit"] is None
+        else:
+            assert r["required"]["torque_per_motor_nm"]["slope"] <= peak * KGCM_TO_NM
 
 
 def test_a_steep_heavy_case_rules_out_the_micro_motors() -> None:

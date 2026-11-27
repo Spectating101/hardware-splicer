@@ -1,0 +1,92 @@
+{
+ "schema": "hardware_splicer.drive_gearmotors.v1",
+ "source_note": "goBILDA Yellow Jacket 5203 planetary gearmotors, the Open Source Rover's drive, read from each product page on 2026-11-27.",
+ "families": [
+  {
+   "id": "gobilda-5203-12v",
+   "url": "https://www.gobilda.com/yellow-jacket-planetary-gear-motors/",
+   "accessed": "2026-11-27",
+   "quote": "Nominal Voltage 12VDC; No-Load Current @12VDC 0.25A; Stall Current @12VDC 9.2A (every 5203 ratio, 24 mm length, 8 mm REX shaft, 3.3-5V encoder)",
+   "voltage_v": 12,
+   "no_load_current_a": 0.25,
+   "stall_current_a": 9.2,
+   "mass_g": null,
+   "limits": {},
+   "note": "goBILDA publishes no continuous torque limit; the Open Source Rover drives on the 26.9:1 (its README).",
+   "ratios": [
+    {
+     "ratio": 5.2,
+     "no_load_rpm": 1150.0,
+     "stall_torque_kg_cm": 7.9,
+     "mass_g": 399.0,
+     "price_usd": 54.99,
+     "url": "https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-5-2-1-ratio-24mm-length-8mm-rex-shaft-1150-rpm-3-3-5v-encoder/"
+    },
+    {
+     "ratio": 13.7,
+     "no_load_rpm": 435.0,
+     "stall_torque_kg_cm": 18.7,
+     "mass_g": 438.0,
+     "price_usd": 54.99,
+     "url": "https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-13-7-1-ratio-24mm-length-8mm-rex-shaft-435-rpm-3-3-5v-encoder/"
+    },
+    {
+     "ratio": 19.2,
+     "no_load_rpm": 312.0,
+     "stall_torque_kg_cm": 24.3,
+     "mass_g": 437.0,
+     "price_usd": 54.99,
+     "url": "https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-19-2-1-ratio-24mm-length-8mm-rex-shaft-312-rpm-3-3-5v-encoder/"
+    },
+    {
+     "ratio": 26.9,
+     "no_load_rpm": 223.0,
+     "stall_torque_kg_cm": 38.0,
+     "mass_g": 437.0,
+     "price_usd": 54.99,
+     "url": "https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-26-9-1-ratio-24mm-length-8mm-rex-shaft-223-rpm-3-3-5v-encoder/"
+    },
+    {
+     "ratio": 50.9,
+     "no_load_rpm": 117.0,
+     "stall_torque_kg_cm": 68.4,
+     "mass_g": 481.0,
+     "price_usd": 54.99,
+     "url": "https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-50-9-1-ratio-24mm-length-8mm-rex-shaft-117-rpm-3-3-5v-encoder/"
+    },
+    {
+     "ratio": 71.2,
+     "no_load_rpm": 84.0,
+     "stall_torque_kg_cm": 93.6,
+     "mass_g": 486.0,
+     "price_usd": 54.99,
+     "url": "https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-71-2-1-ratio-24mm-length-8mm-rex-shaft-84-rpm-3-3-5v-encoder/"
+    },
+    {
+     "ratio": 99.5,
+     "no_load_rpm": 60.0,
+     "stall_torque_kg_cm": 133.2,
+     "mass_g": 486.0,
+     "price_usd": 54.99,
+     "url": "https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-99-5-1-ratio-24mm-length-8mm-rex-shaft-60-rpm-3-3-5v-encoder/"
+    },
+    {
+     "ratio": 139.0,
+     "no_load_rpm": 43.0,
+     "stall_torque_kg_cm": 185.0,
+     "mass_g": 485.0,
+     "price_usd": 54.99,
+     "url": "https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-139-1-ratio-24mm-length-8mm-rex-shaft-43-rpm-3-3-5v-encoder/"
+    },
+    {
+     "ratio": 188.0,
+     "no_load_rpm": 30.0,
+     "stall_torque_kg_cm": 250.0,
+     "mass_g": 524.0,
+     "price_usd": 54.99,
+     "url": "https://www.gobilda.com/5203-series-yellow-jacket-planetary-gear-motor-188-1-ratio-24mm-length-8mm-rex-shaft-30-rpm-3-3-5v-encoder/"
+    }
+   ]
+  }
+ ]
+}
