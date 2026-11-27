@@ -82,12 +82,51 @@ is now in it, and passes HS-ROVER-A's speed and torque requirements. The seller 
 limits, so those checks read unknown rather than passed, and a TT option is listed after every option with a known
 current.
 
+## Third comparison: HS-3G-B against the open multirotors
+
+The sweep's drone category is mostly flight software (Betaflight, INAV, ExpressLRS, PX4 tooling). Read file by file, the
+open whole aircraft are:
+
+| | HS-3G-B (HS, 16 Nov) | Crazyflie 2.0/2.1 (Bitcraze) | ESP-Drone (Espressif) | Flix (okalachev, 2.6k stars) | SRD-1 (MilosRasic98) |
+|---|---|---|---|---|---|
+| Class | 3 in brushless, GPS, analog FPV, 137 mm | 92 mm nano, brushed coreless, 1S | ESP32-S2 nano, brushed | ESP32, 8520 brushed, printed frame | 450-class, 2212 motors, Arduino Nano FC |
+| Mass | 234.9 g (model) | 27 g / 29 g; 42 g maximum takeoff | not read | not read | aim below 1.75 kg (README) |
+| Flight time | 11.4 min hover (model, extrapolated below the maker's table) | 7 min with stock battery (datasheet) | not read | not read | not stated |
+| Published | frame STEP/STL/DXF, BOM, wiring, partial INAV config | firmware (GPL-3.0), KiCad electronics (CC BY-NC-SA 3.0: non-commercial, not absorbed) | firmware (GPL-3.0), schematic PDF, BOM | frame STL/STEP, firmware, Gazebo simulation, assembly guide; no licence file | CAD, firmware (MIT) |
+| Flight controller | bought stack (SpeedyBee F405 Mini) | own board | own board | ESP32 module + IMU breakout | Arduino Nano + MPU6050 |
+| Flown | no | yes | yes | yes (videos, user builds) | yes (videos) |
+
+No open, complete design was found in HS-3G-B's class (sub-250 g, GPS, 3 in). The open aircraft are either nano
+educational quads or 450-class frames, and the open FPV designs are frames only (TBS Source One V6, DXF and STL, has no licence
+file; source_micro is GPL-3.0). Against them HS-3G-B is the only package that sizes its power system against the makers' limits and
+ships cut files, and the only one never flown. Three of the four reference projects design their own flight
+controller; HS-3G-B buys one.
+
+**What the comparison changed in HS.**
+
+- *Calibration.* Bitcraze publishes its whole-aircraft bench table (thrust, current and voltage at 16 PWM steps). HS's
+  propulsion check on that table predicts 7.1 min for the 27 g, 240 mAh Crazyflie 2.0 when the whole pack is used, against
+  Bitcraze's 7 min, and 5.7 min with HS's default of landing at 80% of capacity. Cutting the table's low rows to force
+  the extrapolation HS-3G-B relies on (up to 1.7 times below the lowest row) moves the hover power by under 12%. Both are
+  now tests. One aircraft, brushed motors: a brushless calibration is still to find.
+- *Rules against practice.* Bitcraze's 42 g maximum takeoff is a thrust-to-weight of 1.4; HS's default floor is 2.0, so
+  HS is again stricter than the maker. HS-3G-B (5.0) is unaffected; the floor is left as it is.
+- *Motor choice.* HS's four cited thrust tables sat in the proving-ground folders and the check needed one passed in.
+  They are now one library (`data/propulsion/thrust_tables_20261127.json`, with Bitcraze's added), each with its motor
+  mass and prop diameters, and `propulsion_check.pick` (tool `hs_pick_propulsion`) tries every motor and prop, adding each
+  option's own motor mass and checking its props fit the frame. On HS-3G-B's frame only the F1404 3800KV options pass;
+  without a frame the 58.5 g SunnySky on 9 in props would pass at 431 g, which is why the frame check matters.
+- *A disagreement it exposed.* The general check refuses HS-3G-B's own F1404 2900KV table: the maker measured it on a
+  full 16.8 V pack, 13% above the 4S nominal voltage, past the check's 10% limit. HS-3G-B's own design script used the
+  table with a voltage correction. The check is not loosened; HS-3G-B's 11.4 min stands on its design script until the
+  two agree (a table at nominal voltage, or a stated rule for full-pack tables).
+
 ## Next
 
 1. Done: HS-ARM-A rev B (above). Still open: horn bolt circle and servo screw holes, the leader arm SO-101 pairs with.
 2. Done: rover (above). Still open: a TT-motor variant of HS-ROVER-A priced and re-checked end to end; the OSR's
    rocker-bogie (Apache-2.0) as HS's rough-terrain option.
-3. Drone: HS-3G against the open multirotor designs once the sweep's drone results are read file by file (none passed
-   the completeness floor; Crazyflie splits firmware and electronics across repositories).
+3. Done: drone (above). Still open: the full-pack voltage rule for HS-3G-B's table, a brushless calibration aircraft,
+   Crazyflie's motor mass, and more cited tables (1S brushless, 2 in, 5 in).
 4. Robot vacuum and mopping: no complete open design was found; Valetudo (Apache-2.0) is firmware for commercial
    robots. HS's junk catalogue already treats robot vacuums as donors: an open, salvage-built vacuum is uncontested.
