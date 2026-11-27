@@ -406,6 +406,16 @@ def _rocker_bogie(args, _project):
                      boundary=res["claim_boundary"])
 
 
+def _trace_current(args, project):
+    from . import trace_capacity
+    res = trace_capacity.check_routed(_readable(str(args["pcb"]), project), args["net_currents_a"],
+                                      max_rise_c=float(args.get("max_rise_c", 20)), copper_um=float(args.get("copper_um", 35)))
+    worst = max(res["nets"], key=lambda r: r["worst_rise_c"], default=None)
+    summary = f"{len(res['nets'])} nets checked" + (f"; hottest {worst['net']} +{worst['worst_rise_c']} C at {worst['current_a']:g} A" if worst else "")
+    problems = [f["message"] for f in res["findings"] if f["severity"] == "warning"]
+    return _envelope(not problems, summary, res, problems=problems, boundary=res["claim_boundary"])
+
+
 def _energy(args, _project):
     from . import energy_budget
     res = energy_budget.check_energy(args["spec"])
@@ -980,8 +990,13 @@ TOOLS: dict[str, ToolSpec] = {t.name: t for t in [
     ToolSpec("hs_route_copper", "Route a placed .kicad_pcb with Copper (copper-kicad-mcp, MIT: Freerouting plus its guided finisher) "
              "in KiCad 10's container; returns unrouted count, DRC and the routed KiCad 10 board. Needs HARDWARE_SPLICER_COPPER_* set.",
              _obj({"pcb": {"type": "string"}, "ignore_nets": {"type": "array", "items": {"type": "string"}}}, ["pcb"]), _route_copper),
+    ToolSpec("hs_trace_current", "Check a routed .kicad_pcb's narrowest track on each net against a stated current (IPC-2221 "
+             "chart fit): temperature rise per net, and the width that keeps it under max_rise_c (default 20 C).",
+             _obj({"pcb": {"type": "string"}, "net_currents_a": {"type": "object"}, "max_rise_c": {"type": "number"},
+                   "copper_um": {"type": "number"}}, ["pcb", "net_currents_a"]), _trace_current),
     ToolSpec("hs_rocker_bogie", "Six-wheel rocker-bogie: wheel load split from the link geometry, highest step the front wheels "
-             "climb (quasi-static, up to one wheel radius), and with spec.drive the cited gearmotors ranked by step-torque margin.",
+             "climb (quasi-static edge model up to one wheel radius, then a wall-friction phase), and with spec.drive the cited "
+             "gearmotors ranked by step-torque margin.",
              _obj({"spec": {"type": "object"}}, ["spec"]), _rocker_bogie),
     ToolSpec("hs_energy_budget", "Battery energy budget: loads, runtime, surge, DC current and fuse window.",
              _obj({"spec": {"type": "object"}}, ["spec"]), _energy),
@@ -994,8 +1009,9 @@ TOOLS: dict[str, ToolSpec] = {t.name: t for t in [
              _obj({"lines": {"type": "array"}, "budget_usd": {"type": "number"}, "salvage_rejected_because": {"type": "string"}},
                   ["lines"]), _bom_check,
              check_key=lambda a: "bom_check"),
-    ToolSpec("hs_review_kicad_schematic", "Review any KiCad schematic from KiCad's own netlist (UART crossings, power pins, I2C "
-             "pull-ups, MOSFET orientation, USB-C CC).", _obj({"schematic": {"type": "string"}, "mates": {"type": "object"}}, ["schematic"]),
+    ToolSpec("hs_review_kicad_schematic", "Review any KiCad schematic from KiCad's own netlist (UART crossings, power pins on the "
+             "wrong rail, I2C pull-ups and SDA/SCL names, MOSFET and BJT orientation, diodes across rails, USB-C CC, datasheet "
+             "pull-ups, pinouts against KiCad's library).", _obj({"schematic": {"type": "string"}, "mates": {"type": "object"}}, ["schematic"]),
              _review_schematic),
     ToolSpec("hs_component_board", "Build a board from a component-level JSON design: schematic from the KiCad libraries with "
              "read-back parity and ERC; optionally the PCB (parts without pcb_xy are placed by HS by connectivity, steered by "
