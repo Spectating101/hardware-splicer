@@ -28,9 +28,9 @@
    "partial": 4
   },
   "hs_review_20261127": {
-   "caught": 15,
+   "caught": 17,
    "partial": 5,
-   "scope": "re-run on the 10 missing-pull-up cases only; the other 60 keep their hs_review_current verdict"
+   "scope": "re-run on the 10 missing-pull-up cases and the 9 swap cases; the others keep their hs_review_current verdict"
   }
  },
  "caught_by_any_frozen_checker": 14,
@@ -375,9 +375,11 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
-   "note": ""
+   "note": "",
+   "note_20261127": "data bus bit order: the pin names agree on both sides"
   },
   {
    "repo": "DuPAL-PAL-DUmper/DuPAL_Board",
@@ -465,9 +467,11 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "C"
    },
-   "note": ""
+   "note": "",
+   "note_20261127": "diff_pair_polarity_swap errors on the USB_D0/D1 nets before, gone after"
   },
   {
    "repo": "butterstick-fpga/butterstick-hardware",
@@ -480,9 +484,11 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
-   "note": ""
+   "note": "",
+   "note_20261127": "no connectivity change between parent and fix"
   },
   {
    "repo": "anyshake/explorer",
@@ -723,10 +729,10 @@
     "kicad_happy": "-",
     "hs_review_frozen": "-",
     "hs_review_current": "-",
-    "hs_review_20261127": "P"
+    "hs_review_20261127": "-"
    },
    "note": "",
-   "note_20261127": "mdio_no_pullup note on the PHY's MDIO before (it reaches the OSM module edge through a 0 ohm link), gone after the 1.5 k pull-up"
+   "note_20261127": "TX/RX direction through a mux whose pins carry no direction"
   },
   {
    "repo": "brenocq/bldc-motor",
@@ -754,9 +760,11 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "C"
    },
-   "note": "swap at a connector"
+   "note": "swap at a connector",
+   "note_20261127": "i2c_sda_scl_short now counts I2C pins a symbol types passive: four errors before, none after"
   },
   {
    "repo": "antmicro/osm-l-bmc-som",
@@ -769,9 +777,11 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
-   "note": "DQS P/N"
+   "note": "DQS P/N",
+   "note_20261127": "DQS: the fix renamed nets; pins pair the same way before and after"
   },
   {
    "repo": "antmicro/osm-l-bmc-som",
@@ -1023,9 +1033,11 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
-   "note": ""
+   "note": "",
+   "note_20261127": "generic port pins (P24/P25)"
   },
   {
    "repo": "0xCB-dev/SL-060-PCB",
@@ -1053,9 +1065,11 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
-   "note": ""
+   "note": "",
+   "note_20261127": "no connectivity change between parent and fix"
   },
   {
    "repo": "blazjerman/ESP32-Based-Sensor-PCB",
@@ -1113,9 +1127,11 @@
     "kicad_erc": "-",
     "kicad_happy": "-",
     "hs_review_frozen": "-",
-    "hs_review_current": "-"
+    "hs_review_current": "-",
+    "hs_review_20261127": "-"
    },
-   "note": ""
+   "note": "",
+   "note_20261127": "no connectivity change between parent and fix"
   }
  ],
  "excluded": [
@@ -1377,5 +1393,13 @@
   "fix_commits": "10 missing-pull-up cases re-run with scripts/schematic_checker_benchmark.py (KiCad 9.0.2, KiCad 10.0.8 container for four KiCad 10 projects): 1 caught, 1 partial (a note), 8 not claimed (reasons per case)",
   "false_alarms": "0 findings from the three rules across 25 netlists of the 14 open reference boards and the held-out set (ESP32 boards with EN pulled up included)",
   "date": "2026-11-27"
+ },
+ "swap_rules_20261127": {
+  "rules": {
+   "diff_pair_polarity_swap": "a net joining a differential pair's + and - pins of two parts (error for USB 2.0, warning for other lanes; ESD/TVS channels excluded)",
+   "i2c_sda_scl_short": "now also counts IC pins a symbol types passive"
+  },
+  "fix_commits": "9 swap cases: 2 caught, 7 not visible from pin functions (reasons per case)",
+  "false_alarms": "0 across 63 netlists (14 reference boards, held-out set, pull-up and swap case parents/fixes) after excluding ESD clamp channels (one false alarm on the Raspberry Pi CM4 IO board's TPD4EUSB30 before)"
  }
 }
