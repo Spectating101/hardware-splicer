@@ -1,0 +1,48 @@
+{
+ "schema": "hardware_splicer.atlas_feedback.v1",
+ "captured": "2026-11-28",
+ "atlas_entry": {
+  "report": "cite-refinery research_materials/signals_reports/multi-product-chains-20261126.md, chain 1",
+  "title": "AI-drafted PCB with independent KiCad check, engineering review and supplier order files",
+  "chain": [
+   "claynicholson/copper-kicad-mcp",
+   "seeed-studio/kicad-mcp-server",
+   "aklofas/kicad-happy"
+  ],
+  "atlas_status": "proposed; 'No test shows that Copper-generated projects load and check cleanly in the seeed server or kicad-happy'"
+ },
+ "tested_by": "Hardware Splicer (public repository Spectating101/hardware-splicer)",
+ "results": [
+  {
+   "step": "Copper routing",
+   "what": "designers' 2-layer boards stripped to placement and re-routed",
+   "result": "1 of 3 DRC-clean (SNAP Power Controller, 12 vias against 39); IP5328P left 2 connections; PiUPS complete but 7 shorts",
+   "record": "examples/routing_trial/copper_vs_designer_reference_boards_20261127.json"
+  },
+  {
+   "step": "Copper on an HS board",
+   "what": "HS-BUS-A placement, 5 runs each",
+   "result": "Copper 5 of 5 DRC-clean; HS's own FreeRouting step 2 of 5",
+   "record": "examples/routing_trial/copper_vs_hs_bus_a_20261127.json"
+  },
+  {
+   "step": "Independent checks",
+   "what": "KiCad ERC, kicad-happy and HS's review on 35 held-out real bugs from public projects",
+   "result": "ERC 9, kicad-happy 9, HS 5, all three 14; 21 missed by all",
+   "record": "examples/schematic_bug_benchmark/heldout_benchmark_20261127.json"
+  },
+  {
+   "step": "Copper output into the checkers",
+   "what": "Copper writes KiCad 10 files",
+   "result": "KiCad 10 boards check cleanly with KiCad 10's kicad-cli (container); KiCad 10 netlists needed a pin-name fix in HS's review (name_number), fixed 28 Nov"
+  },
+  {
+   "step": "Supplier order files",
+   "what": "HS-BUS-A",
+   "result": "JLCPCB BOM with an LCSC number on every line and a placement file including through-hole parts; quoted US$106.44 for 5 assembled boards (26 Nov); not ordered",
+   "record": "projects/hs-bus-a/fab/jlc/ORDER.md"
+  }
+ ],
+ "verdict": "The chain runs end to end. Its weak link is routing (1 of 3 designer boards clean), and its checking catches 14 of 35 real bugs together; nothing has been fabricated yet.",
+ "not_shown": "A fabricated board; a buyer; the seeed kicad-mcp-server itself (HS used kicad-cli directly)."
+}
