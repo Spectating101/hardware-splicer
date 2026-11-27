@@ -19,7 +19,9 @@
   "servo_actuators": "position-controlled servos (PWM or bus) for joints and steering",
   "keyboard": "a working keyboard",
   "submersible_motor": "a sealed motor that runs under water (a thruster's starting point)",
-  "pump": "a pump that moves water"
+  "pump": "a pump that moves water",
+  "lidar_2d": "a spinning 2D laser distance scanner (LDS) for mapping and obstacle range",
+  "suction_fan": "a vacuum suction fan with its rated pressure"
  },
  "devices": [
   {
@@ -67,7 +69,7 @@
   },
   {
    "id": "robot-vacuum",
-   "name": "Robot vacuum that powers up but will not run, or has a dead battery",
+   "name": "Robot vacuum without a laser scanner (bump-and-go: Roomba 500-800, Deebot, Thomson, Heran and similar) that powers up but will not run",
    "search_tw": [
     "掃地機器人 二手",
     "掃地機器人 零件機",
@@ -107,6 +109,99 @@
     "where": "Ruten",
     "date": "2026-11-26",
     "note": "Roomba 571 sold as powers up, will not run: NT$800"
+   }
+  },
+  {
+   "id": "robot-vacuum-lidar-xiaomi-roborock",
+   "name": "Xiaomi Mi Robot Vacuum (1st gen SDJQR01RR/02RR, 1S) or Roborock S5/S50/S55/S6 with a fault or dead battery",
+   "search_tw": [
+    "小米掃地機器人 零件機",
+    "米家掃地機器人 故障",
+    "石頭掃地機器人 零件機",
+    "掃地機器人 雷射頭損壞"
+   ],
+   "gives": {
+    "lidar_2d": "its LDS laser scanner (Xiaomi LDS02RR/LDS01RR family on Mi 1S and Roborock S5/S6); kaiaai/LDS reads the LDS02RR from an ESP32",
+    "drive_motors_encoded": "two Roborock-type drive wheel modules: motor, encoder, suspension, about 72 mm tire, wheel-drop switch",
+    "suction_fan": "a 2-2.5 kPa Nidec 20N704-series suction fan (Roborock S5/S6 family)",
+    "battery_pack": "BRR-2P4S-5200: 14.4 V Li-ion 4S2P, about 5.2 Ah / 75 Wh, BMS inside the pack, if not worn out",
+    "bump_cliff_sensors": "front bumper switches and downward cliff sensors"
+   },
+   "interfaces": [
+    "Valetudo (Apache-2.0) replaces the cloud firmware on supported Xiaomi/Roborock models: the robot keeps working as a whole, locally controlled",
+    "the LDS02RR streams scans over a serial line; kaiaai/LDS (Apache-2.0, Arduino/ESP32) and kaiaai/lds2d (Apache-2.0, Python) decode it",
+    "OOMWOO's scanned STEP models give the wheel module (72.7 x 111.2 x 60.4 mm), the LDS02RR (107.7 x 86.5 x 54.1 mm, 76 mm turret) and the pack (44.4 x 142.8 x 43.5 mm); see data/third_party/oomwoo"
+   ],
+   "reuse": [
+    "https://github.com/makerspet/oomwoo",
+    "https://github.com/makerspet/oomwoo-cad",
+    "https://github.com/Hypfer/Valetudo",
+    "https://github.com/kaiaai/LDS",
+    "https://github.com/kaiaai/lds2d",
+    "https://github.com/remakeai/vacuum_ros2_bridge"
+   ],
+   "hazards": [
+    "Li-ion pack: check for swelling; charge only at 16.8 V CC/CV with the pack's NTC connected (OOMWOO's safety note); the 4-pin connector pinout is unverified",
+    "the laser scanner is a Class 1 laser product in its housing; do not open the turret while it runs",
+    "suction fan and brush motors draw high current; leave them disconnected while testing the drive"
+   ],
+   "first_tests": [
+    "on a Xiaomi, 'error 1' means the laser scanner: check its turret spins (its belt and motor are sold separately for about NT$150)",
+    "the LDS streams scans to an ESP32 running kaiaai/LDS",
+    "each wheel turns and its encoder counts",
+    "pack voltage under load"
+   ],
+   "skip_if": [
+    "main board burnt (smell, scorched area) and the LDS also dead",
+    "pack swollen"
+   ],
+   "price_seen": {
+    "ntd": [
+     1000,
+     2625
+    ],
+    "where": "Ruten",
+    "date": "2026-11-27",
+    "note": "1st-gen Mi Robot (SDJQR01RR/02RR) sold as untested or faulty: NT$1,000, NT$1,900 (unit plus dock), NT$1,999 (error 1), NT$2,625 (laser head broken). A new replacement LDS for Mi 1S/S50/S55 lists at NT$390-736."
+   },
+   "sources": [
+    "https://github.com/makerspet/oomwoo/blob/b7e37f61bfe62e18c69b6ae4a01a5dbd63d55a04/BOM.md"
+   ]
+  },
+  {
+   "id": "robot-vacuum-lidar-neato",
+   "name": "Neato XV-11/XV-21 or Botvac D-series robot vacuum, faulty or with a dead battery",
+   "search_tw": [
+    "Neato 零件機",
+    "Neato 掃地機器人 故障"
+   ],
+   "gives": {
+    "lidar_2d": "its Neato laser scanner (the XV-11 unit is read by kaiaai/LDS)",
+    "bump_cliff_sensors": "front bumper switches and cliff sensors"
+   },
+   "interfaces": [
+    "kaiaai/LDS (Apache-2.0) lists the Neato XV11 scanner"
+   ],
+   "reuse": [
+    "https://github.com/kaiaai/LDS"
+   ],
+   "hazards": [
+    "older XV packs are NiMH: check for leaks before charging"
+   ],
+   "first_tests": [
+    "the turret spins and the scanner streams to kaiaai/LDS"
+   ],
+   "skip_if": [
+    "turret seized and its motor missing"
+   ],
+   "price_seen": {
+    "ntd": [
+     1600,
+     3500
+    ],
+    "where": "Ruten",
+    "date": "2026-11-27",
+    "note": "XV-11 (will not hold charge) NT$1,600; XV-21 NT$2,500; Botvac D-series NT$1,999-3,500"
    }
   },
   {
