@@ -226,8 +226,9 @@ export const MODULE_FOOTPRINTS: Record<string, ModuleFootprintMeta> = {
   },
   "max98357a-i2s-amp": {
     kicadFootprint: "Driver:MAX98357A-I2S",
-    bodyMm: { w: 18, h: 12 },
-    pads: row(["VIN", "GND", "BCLK", "LRC", "DIN", "SD", "SPK+", "SPK-"], 0, 0, P),
+    // Every breakout pin has a pad: Adafruit's header carries GAIN (gain set by a resistor to GND or VIN).
+    bodyMm: { w: 22, h: 12 },
+    pads: row(["VIN", "GND", "BCLK", "LRC", "DIN", "GAIN", "SD", "SPK+", "SPK-"], 0, 0, P),
   },
   "limit-switch-3pin": {
     kicadFootprint: "Sensor:LIMIT-SWITCH-3PIN",

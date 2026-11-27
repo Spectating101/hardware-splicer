@@ -34,6 +34,9 @@ export interface ModulePin {
   currentMaxMa?: number;
   /** Free-form note (pull-ups, strap pins, ADC attenuation, etc.). */
   notes?: string;
+  /** Set when the pin is real but has no pad on the board footprint (the module's own plug, or a pin the footprint
+   *  leaves off copper on purpose); says why. A netlist that wires it cannot be carried by the board. */
+  offBoard?: string;
 }
 
 export interface ModuleSpec {
@@ -462,7 +465,7 @@ export const MODULE_LIBRARY: ModuleSpec[] = [
     category: "interface",
     summary: "USB serial adapter, 3.3V or 5V selectable.",
     pins: [
-      { id: "USB", label: "USB", role: "power_in", voltage: "5V", notes: "Powered from USB host" },
+      { id: "USB", label: "USB", role: "power_in", voltage: "5V", notes: "Powered from USB host", offBoard: "the module's own USB plug: it takes power from the host it plugs into, not from the board" },
       { id: "VCC", label: "VCC", role: "power_out", voltage: "5V", currentMaxMa: 300, notes: "3.3V/5V jumper on many boards" },
       { id: "GND", label: "GND", role: "gnd" },
       { id: "TX", label: "TX", role: "uart_tx" },

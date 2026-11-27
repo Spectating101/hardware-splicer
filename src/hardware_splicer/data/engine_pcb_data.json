@@ -1166,7 +1166,8 @@
           "label": "USB",
           "role": "power_in",
           "voltage": "5V",
-          "notes": "Powered from USB host"
+          "notes": "Powered from USB host",
+          "offBoard": "the module's own USB plug: it takes power from the host it plugs into, not from the board"
         },
         {
           "id": "VCC",
@@ -3489,7 +3490,8 @@
           "label": "GPIO4",
           "role": "digital_io",
           "voltage": "3.3V",
-          "notes": "Flash LED / aux"
+          "notes": "Flash LED / aux",
+          "offBoard": "the footprint keeps only power and motor GPIOs on copper; GPIO4 drives the on-module flash LED"
         },
         {
           "id": "GPIO12",
@@ -10319,48 +10321,53 @@
     "max98357a-i2s-amp": {
       "kicadFootprint": "Driver:MAX98357A-I2S",
       "bodyMm": {
-        "w": 18,
+        "w": 22,
         "h": 12
       },
       "pads": [
         {
           "pinId": "VIN",
-          "x": -8.89,
+          "x": -10.16,
           "y": 0
         },
         {
           "pinId": "GND",
-          "x": -6.3500000000000005,
+          "x": -7.62,
           "y": 0
         },
         {
           "pinId": "BCLK",
-          "x": -3.8100000000000005,
+          "x": -5.08,
           "y": 0
         },
         {
           "pinId": "LRC",
-          "x": -1.2700000000000005,
+          "x": -2.54,
           "y": 0
         },
         {
           "pinId": "DIN",
-          "x": 1.2699999999999996,
+          "x": 0,
+          "y": 0
+        },
+        {
+          "pinId": "GAIN",
+          "x": 2.539999999999999,
           "y": 0
         },
         {
           "pinId": "SD",
-          "x": 3.8099999999999987,
+          "x": 5.08,
           "y": 0
         },
         {
           "pinId": "SPK+",
-          "x": 6.35,
+          "x": 7.620000000000001,
           "y": 0
         },
         {
           "pinId": "SPK-",
-          "x": 8.89,
+          "x": 10.16,
           "y": 0
         }
       ]
