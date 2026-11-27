@@ -1,0 +1,89 @@
+{
+ "schema": "hardware_splicer.routing_reference_benchmark.v1",
+ "captured": "2026-11-27",
+ "question": "On open boards a designer routed by hand, does Copper (the router HS hands boards to) match the designer when given the same placement?",
+ "method": "scripts/routing_reference_benchmark.py: strip tracks, vias and copper zones from the designer's 2-layer board, route with Copper (Freerouting 2.2.3 plus its finisher, GND poured), and run KiCad 10.0.8's DRC on both boards. Vias on the designer's boards include stitching vias.",
+ "boards": [
+  {
+   "board": "diminDDL/PiUPS",
+   "commit": "423f9aa160",
+   "licence": "CERN-OHL-W-2.0",
+   "connections_to_route": 282,
+   "designer": {
+    "vias": 384,
+    "track_length_mm": 1546.7,
+    "drc_errors": 121
+   },
+   "copper": {
+    "unrouted": 0,
+    "vias": 78,
+    "track_length_mm": 2197.1,
+    "drc_errors": 134,
+    "seconds": 180.5
+   },
+   "errors_copper_added": {
+    "shorting_items": 7,
+    "solder_mask_bridge": 30
+   },
+   "errors_on_both_from_placement": {
+    "annular_width": 8,
+    "shorting_items": 11,
+    "hole_clearance": 8,
+    "courtyards_overlap": 20,
+    "npth_inside_courtyard": 6,
+    "pth_inside_courtyard": 9,
+    "copper_edge_clearance": 7,
+    "drill_out_of_range": 17,
+    "starved_thermal": 2,
+    "solder_mask_bridge": 9
+   }
+  },
+  {
+   "board": "YC-Lam/IP5328P-powerbank_design",
+   "commit": "5ee7f8beab",
+   "licence": "GPL-3.0",
+   "connections_to_route": 128,
+   "designer": {
+    "vias": 77,
+    "track_length_mm": 1214.0,
+    "drc_errors": 70
+   },
+   "copper": {
+    "unrouted": 2,
+    "vias": 48,
+    "track_length_mm": 1075.7,
+    "drc_errors": 30,
+    "seconds": 158.7
+   },
+   "errors_copper_added": {},
+   "errors_on_both_from_placement": {
+    "hole_clearance": 8,
+    "courtyards_overlap": 11,
+    "copper_edge_clearance": 10,
+    "starved_thermal": 1
+   }
+  },
+  {
+   "board": "jaisor/SNAP_Power_Controller",
+   "commit": "0492c3fc19",
+   "licence": "CERN-OHL-P-2.0",
+   "connections_to_route": 74,
+   "designer": {
+    "vias": 39,
+    "track_length_mm": 395.0,
+    "drc_errors": 0
+   },
+   "copper": {
+    "unrouted": 0,
+    "vias": 12,
+    "track_length_mm": 450.3,
+    "drc_errors": 0,
+    "seconds": 16.6
+   },
+   "errors_copper_added": {},
+   "errors_on_both_from_placement": {}
+  }
+ ],
+ "result": "1 of 3 matches the designer: SNAP Power Controller is DRC-clean with 12 vias against 39 and 14% more track. IP5328P leaves 2 connections unrouted. PiUPS routes every connection but adds 7 shorts and 30 solder-mask bridges, with 42% more track. Automatic routing is not at a designer's level on 2 of these 3 boards.",
+ "limits": "Three 2-layer boards; Copper's settings as shipped; no 4-layer board was tried (Copper's pour step is 2-layer)."
+}
