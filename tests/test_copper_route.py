@@ -43,3 +43,15 @@ def test_copper_routes_hs_bus_a_placement(tmp_path):
         pytest.skip("set HS_TEST_PLACED_BOARD to a placed board (projects/hs-bus-a/build_board.py --stage place)")
     res = copper_route.route_with_copper(Path(placed), tmp_path)
     assert res["complete"] and res["kicad_format"] == "KiCad 10"
+
+
+def test_board_tools_honour_the_kicad_cli_override(tmp_path, monkeypatch):
+    from hardware_splicer import kicad_component_board as kb
+    fake = tmp_path / "kicad-cli"
+    fake.write_text("#!/bin/sh\n")
+    fake.chmod(0o755)
+    monkeypatch.setenv("HARDWARE_SPLICER_KICAD_CLI", str(fake))
+    assert kb.kicad_cli() == str(fake)
+    monkeypatch.setenv("HARDWARE_SPLICER_KICAD_CLI", str(tmp_path / "missing"))
+    with pytest.raises(RuntimeError, match="does not exist"):
+        kb.kicad_cli()

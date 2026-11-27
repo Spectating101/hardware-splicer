@@ -131,5 +131,5 @@ and PyBullet; not scikit-fem). Board layout needs `HARDWARE_SPLICER_FREEROUTING_
    `hs_route_copper`; record in `examples/routing_trial/`). The board pipeline now hands the same placement to Copper
    when every FreeRouting attempt fails and Copper is configured: every net routed, ground poured and stitched on both
    layers, 0 DRC errors and 0 unconnected on HS-BUS-A. Leaving ground to the pour alone (Copper's documented 2-layer flow)
-   left one fragment unconnected there. Still open: Copper's board is KiCad 10, so fabrication export then needs a
-   KiCad 10 kicad-cli.
+   left one fragment unconnected there. Copper's board is KiCad 10: point HARDWARE_SPLICER_KICAD_CLI at
+   `scripts/kicad10-cli` (KiCad 10's container, no network) and HS's DRC and fabrication export read it.

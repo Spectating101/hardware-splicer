@@ -1,0 +1,12 @@
+#!/bin/sh
+# KiCad 10's kicad-cli from the official container, with no network, as the calling user. Point
+# HARDWARE_SPLICER_KICAD_CLI here to read KiCad 10 files (Copper's routed boards, KiCad 10 schematics).
+# Mounts the working directory and the folder of every absolute path among the arguments.
+IMAGE="${HARDWARE_SPLICER_KICAD10_IMAGE:-kicad/kicad:10.0.8}"
+MOUNTS="-v $PWD:$PWD"
+for arg in "$@"; do
+  case "$arg" in
+    /*) dir=$(dirname "$arg"); [ -d "$arg" ] && dir="$arg"; [ -d "$dir" ] && MOUNTS="$MOUNTS -v $dir:$dir" ;;
+  esac
+done
+exec docker run --rm -i --network none --user "$(id -u):$(id -g)" -e HOME=/tmp $MOUNTS -w "$PWD" "$IMAGE" kicad-cli "$@"

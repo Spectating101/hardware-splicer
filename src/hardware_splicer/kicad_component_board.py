@@ -345,6 +345,13 @@ def _name_fields(ref: str, value: str, x: float, y: float, pins: Sequence[Pin], 
 
 
 def kicad_cli() -> str:
+    """HARDWARE_SPLICER_KICAD_CLI when set (a KiCad 10 wrapper reads the KiCad 10 boards Copper writes), else PATH's."""
+    import os
+    override = os.environ.get("HARDWARE_SPLICER_KICAD_CLI", "").strip()
+    if override:
+        if not (Path(override).is_file() or shutil.which(override)):
+            raise RuntimeError(f"HARDWARE_SPLICER_KICAD_CLI points at {override}, which does not exist")
+        return shutil.which(override) or override
     path = shutil.which("kicad-cli")
     if not path:
         raise RuntimeError("kicad-cli is not on PATH")
