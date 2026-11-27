@@ -353,3 +353,16 @@ def test_salvage_resources_need_a_linked_design_and_never_mark_unevidenced_donor
                                                           "capabilities": ["fdm.print"], "limits": {}, "available": True,
                                                           "simulated_only": False}]})
     assert any("donor:radio:buttons" in p for p in env["problems"])
+
+
+def test_propulsion_pick_then_check_by_table_id():
+    spec = {"rotors": 4, "mass_without_motors_g": 197.5, "battery": {"cells": 4, "capacity_mah": 850, "c_continuous": 70},
+            "esc_continuous_a": 35, "frame": {"wheelbase_mm": 137}}
+    picked = tb.call("hs_pick_propulsion", {"spec": spec})
+    assert picked["ok"], picked["problems"]
+    best = picked["result"]["passing"][0]
+    checked = tb.call("hs_check_propulsion", {"spec": {"rotors": 4, "prop": best["prop"], "all_up_mass_g": best["all_up_mass_g"],
+                                                       "battery": spec["battery"], "esc_continuous_a": 35}, "table": best["table"]})
+    assert checked["result"]["results"]["hover_time_min"] == best["hover_time_min"]
+    none = tb.call("hs_pick_propulsion", {"spec": dict(spec, mass_without_motors_g=5000)})
+    assert not none["ok"] and none["problems"]

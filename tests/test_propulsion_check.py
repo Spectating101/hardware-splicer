@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from hardware_splicer.propulsion_check import PropulsionCheckError, check_propulsion, main
+from hardware_splicer.propulsion_check import PropulsionCheckError, check_propulsion, main, pick, tables
 
 ROOT = Path(__file__).resolve().parents[1]
 TABLE = json.loads((ROOT / "examples/drone_proving_ground/inputs/motor_f1404_3800kv_thrust.json").read_text())
@@ -144,3 +144,78 @@ def test_cli_exit_codes(tmp_path, capsys):
     spec.write_text(json.dumps(dict(HS3G, rotors=2)))
     assert main([str(spec), "--table", str(table)]) == 2
     capsys.readouterr()
+
+
+LIBRARY = tables()
+CF2 = {"rotors": 4, "prop": "CF2 45mm", "all_up_mass_g": 27, "battery": {"cells": 1, "capacity_mah": 240, "c_continuous": 15},
+       "esc_continuous_a": 2.0, "assumptions": {"avionics_power_w": 0.96, "min_tw_ratio": 1.0}}
+
+
+def test_library_copies_are_the_proving_ground_tables():
+    strip = lambda t: {k: v for k, v in t.items() if k not in {"motor_mass_g", "motor_mass_source", "prop_diameter_mm", "prop_diameter_source"}}
+    assert strip(LIBRARY["tmotor-f1404-3800kv-4s"]) == TABLE
+    assert strip(LIBRARY["sunnysky-x2212-980kv"]) == SUNNYSKY
+    rev_b = json.loads((ROOT / "examples/drone_proving_ground/revision_b/inputs/thrust_table.json").read_text())
+    assert strip(LIBRARY["tmotor-f1404-2900kv-4s"]) == rev_b
+    for table in LIBRARY.values():
+        assert set(table["prop_diameter_mm"]) == set(table["props"])
+
+
+def test_a_table_can_be_named():
+    assert check_propulsion(HS3G, "tmotor-f1404-3800kv-4s")["results"] == check_propulsion(HS3G, TABLE)["results"]
+    with pytest.raises(PropulsionCheckError, match="no cited thrust table"):
+        check_propulsion(HS3G, "made-up-motor")
+
+
+def test_crazyflie_rows_come_from_bitcraze_whole_aircraft_table():
+    cf = LIBRARY["crazyflie-2.0-coreless-1s"]
+    raw = cf["raw_whole_aircraft"]["rows"]
+    idle = raw[0][0]
+    for (amps, thrust, volts, pwm, rpm), row in zip(raw[1:], cf["props"]["CF2 45mm"]):
+        assert row == [pwm, round(thrust / 4, 3), volts, round((amps - idle) / 4, 4), rpm]
+
+
+def test_hover_time_calibrates_against_crazyflies_published_flight_time():
+    # Bitcraze: 27 g, 240 mAh, "flight time with stock battery: 7 minutes". HS's interpolation, with the whole pack used
+    # as Crazyflie's firmware does, lands within 5%; HS's default 80% usable capacity reads about 20% short.
+    published = LIBRARY["crazyflie-2.0-coreless-1s"]["reference_aircraft"]["published_flight_time_min"]
+    full = check_propulsion(dict(CF2, assumptions=dict(CF2["assumptions"], usable_capacity_fraction=1.0)), "crazyflie-2.0-coreless-1s")
+    assert full["results"]["hover_power_method"] == "interpolated"
+    assert abs(full["results"]["hover_time_min"] - published) / published < 0.05
+    default = check_propulsion(CF2, "crazyflie-2.0-coreless-1s")["results"]["hover_time_min"]
+    assert 0.75 < default / published < 0.85
+
+
+def test_extrapolation_holds_on_crazyflie_rows_cut_from_below():
+    # The same table with its low rows removed forces HS-3G-style extrapolation (up to 1.7x below the lowest row); the
+    # headline (pessimistic) hover power stays within 12% of the interpolated value from the full table.
+    spec = dict(CF2, assumptions=dict(CF2["assumptions"], usable_capacity_fraction=1.0))
+    truth = check_propulsion(spec, "crazyflie-2.0-coreless-1s")["results"]["hover_power_per_rotor_w"]
+    for lowest in (8.0, 9.0, 10.0, 11.5):
+        cut = copy.deepcopy(LIBRARY["crazyflie-2.0-coreless-1s"])
+        cut["props"]["CF2 45mm"] = [r for r in cut["props"]["CF2 45mm"] if r[1] >= lowest]
+        got = check_propulsion(spec, cut)["results"]
+        assert got["hover_power_method"] == "extrapolated"
+        assert abs(got["hover_power_per_rotor_w"] - truth) / truth < 0.12, lowest
+
+
+def test_pick_counts_each_motors_own_mass_and_prop_fit():
+    spec = {"rotors": 4, "mass_without_motors_g": 197.5, "battery": {"cells": 4, "capacity_mah": 850, "c_continuous": 70},
+            "esc_continuous_a": 35}
+    loose = pick(spec)
+    sunny = [r for r in loose["passing"] if r["table"] == "sunnysky-x2212-980kv"]
+    assert sunny and all(r["all_up_mass_g"] == round(197.5 + 4 * 58.5, 1) for r in sunny)
+    framed = pick(dict(spec, frame={"wheelbase_mm": 137}))
+    assert framed["passing"] and {r["table"] for r in framed["passing"]} == {"tmotor-f1404-3800kv-4s"}
+    reasons = {(r["table"], r["prop"]): r["reasons"] for r in framed["failing"]}
+    assert "props_overlap" in reasons[("sunnysky-x2212-980kv", "APC9047 4S")]
+    assert reasons[("crazyflie-2.0-coreless-1s", "CF2 45mm")] == ["motor_mass_unknown"]
+    # HS-3G-B's own table was measured on a full 16.8 V pack; the general check holds it to the 4S nominal voltage
+    assert "bench_voltage_mismatch" in reasons[("tmotor-f1404-2900kv-4s", "GF3028-3")]
+    capped = pick(dict(spec, max_prop_diameter_mm=100))
+    assert all(r["prop_diameter_mm"] <= 100 for r in capped["passing"])
+
+
+def test_pick_needs_the_mass_without_motors():
+    with pytest.raises(PropulsionCheckError, match="mass_without_motors_g"):
+        pick({"rotors": 4, "battery": {"cells": 4, "capacity_mah": 850, "c_continuous": 70}, "esc_continuous_a": 35})

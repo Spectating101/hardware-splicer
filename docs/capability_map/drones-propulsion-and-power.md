@@ -6,8 +6,8 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | Module | Lines | Tests | Status | Reach | What it says it does |
 |---|---|---|---|---|---|
 | `review_packet` | 708 | 1 | product | MRC | A review packet: what a reviewer was shown for one revision, in one hash-bound document. The packet reports. It is built only from what the project already holds (the revision, its findings and how ea... |
+| `propulsion_check` | 389 | 1 | product | TMRC | Multirotor propulsion check from a cited motor bench table. Given the all-up mass, a rotor count, a motor and propeller bench table and the battery and ESC ratings, this works out hover power and curr... |
 | `device_application` | 352 | 11 | product | TMRC | Stateless host-testable application packages derived from catalog device plans. A generated package reports and proposes. It never approves flashing, powering or physical use. Callers' findings and au... |
-| `propulsion_check` | 312 | 1 | product | TMRC | Multirotor propulsion check from a cited motor bench table. Given the all-up mass, a rotor count, a motor and propeller bench table and the battery and ESC ratings, this works out hover power and curr... |
 | `device_draft` | 290 | 11 | product | TMRC | A device spec drafted from a controller and a list of parts. A draft is a starting point for a person or an agent. It wires every part the plain way (power, ground and the controller's default I2C bus... |
 | `system_example_microdrone` | 258 | 1 | research | - | Offline cross-discipline assessment of HS microdrone system example 001. All outputs are engineering *proposals*. No telemetry, firmware, simulation or physical device is invoked. Calculations on illu... |
 | `energy_budget` | 205 | 1 | product | TMRC | Energy budget for a battery and inverter system: loads, runtime, surge, DC current and the fuse window. It adds up what the loads draw over a session, converts AC loads back through the inverter's eff... |

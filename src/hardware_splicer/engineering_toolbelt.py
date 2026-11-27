@@ -370,6 +370,16 @@ def _propulsion(args, _project):
                      problems=_findings_problems(res), sources=[str(res.get("table", {}).get("source") or "")], boundary=res["claim_boundary"])
 
 
+def _pick_propulsion(args, _project):
+    from . import propulsion_check
+    res = propulsion_check.pick(args["spec"])
+    best = res["passing"][0] if res["passing"] else None
+    summary = (f"{len(res['passing'])} of {res['options_checked']} cited motor and prop options pass; best {best['motor']} with "
+               f"{best['prop']}, {best['hover_time_min']} min hover ({best['hover_power_method']})" if best else "no cited motor and prop passes")
+    return _envelope(bool(best), summary, res, problems=[] if best else ["no cited motor and prop meets the mass, fit, voltage and limits"],
+                     sources=res["sources"], boundary=res["claim_boundary"])
+
+
 def _energy(args, _project):
     from . import energy_budget
     res = energy_budget.check_energy(args["spec"])
@@ -934,8 +944,13 @@ TOOLS: dict[str, ToolSpec] = {t.name: t for t in [
              _obj({"mass_kg": {"type": "number"}, "wheel_mm": {"type": "number"}, "driven": {"type": "integer"},
                    "speed_m_s": {"type": "number"}, "slope_deg": {"type": "number"}, "crr": {"type": "number"},
                    "accel_m_s2": {"type": "number"}}, ["mass_kg", "wheel_mm", "speed_m_s"]), _drive),
-    ToolSpec("hs_check_propulsion", "Multirotor hover power, time, thrust-to-weight and margins from a cited motor bench table.",
-             _obj({"spec": {"type": "object"}, "table": {"type": "object"}}, ["spec"]), _propulsion),
+    ToolSpec("hs_check_propulsion", "Multirotor hover power, time, thrust-to-weight and margins from a cited motor bench table "
+             "(a table object, or the id of one in HS's library such as tmotor-f1404-3800kv-4s).",
+             _obj({"spec": {"type": "object"}, "table": {"type": ["object", "string"]}}, ["spec"]), _propulsion),
+    ToolSpec("hs_pick_propulsion", "Try every cited motor and prop for a multirotor: spec gives rotors, mass_without_motors_g, "
+             "battery, esc_continuous_a and optionally frame.wheelbase_mm or max_prop_diameter_mm; ranks those that pass. "
+             "Then hs_check_propulsion with the chosen table id and prop.",
+             _obj({"spec": {"type": "object"}}, ["spec"]), _pick_propulsion),
     ToolSpec("hs_energy_budget", "Battery energy budget: loads, runtime, surge, DC current and fuse window.",
              _obj({"spec": {"type": "object"}}, ["spec"]), _energy),
     ToolSpec("hs_price_parts", "JLCPCB/LCSC parts, stock and price breaks (jlcparts), for one query or a whole parts list.",

@@ -11,7 +11,10 @@ interpolates; below it, it extrapolates with the more pessimistic of a log-log f
 says so; above it, the rotor cannot hover. Every number is a calculation from the table and the stated assumptions. Nothing
 here was flown or bench tested, and nothing changes any authority flag.
 
-    PYTHONPATH=src python -m hardware_splicer.propulsion_check spec.json [--table thrust.json]
+A table can be named from HS's cited library (``data/propulsion/thrust_tables_*.json``, see ``tables()``), and ``pick``
+runs the check over every library table and prop and ranks the ones that pass.
+
+    PYTHONPATH=src python -m hardware_splicer.propulsion_check spec.json [--table thrust.json | --table-id ID | --pick]
 """
 from __future__ import annotations
 
@@ -24,6 +27,8 @@ from pathlib import Path
 from typing import Any
 
 SCHEMA = "hardware_splicer.propulsion_check.v1"
+PICK_SCHEMA = "hardware_splicer.propulsion_pick.v1"
+DATA = Path(__file__).resolve().parent / "data" / "propulsion"
 TABLE_SCHEMA = "hs.drone_proving_ground.thrust_table.v1"
 BOUNDARY = ("Calculation from a bench table and stated assumptions. Nothing was flown or bench tested here; hover time, "
             "thrust and current must be measured on the built aircraft, and flight needs the local rules and a safe test site.")
@@ -57,6 +62,23 @@ def _num(value: Any, label: str, *, positive: bool = True) -> float:
     if positive and value <= 0:
         raise PropulsionCheckError(f"{label} must be greater than zero")
     return float(value)
+
+
+def tables(path: Path | None = None) -> dict[str, dict[str, Any]]:
+    """HS's cited bench tables by id: the newest library file wins for an id."""
+    merged: dict[str, dict[str, Any]] = {}
+    for f in ([path] if path else sorted(DATA.glob("thrust_tables_*.json"))):
+        merged.update(json.loads(f.read_text(encoding="utf-8"))["tables"])
+    return merged
+
+
+def _resolve(table: Any) -> Any:
+    if isinstance(table, str):
+        library = tables()
+        if table not in library:
+            raise PropulsionCheckError(f"no cited thrust table {table!r}; HS has {sorted(library)}")
+        return library[table]
+    return table
 
 
 def _rows(table: Any, prop: str) -> tuple[list[dict[str, float]], dict[str, Any]]:
@@ -155,7 +177,7 @@ def _mass(spec: dict[str, Any]) -> tuple[float, list[dict[str, Any]]]:
 def check_propulsion(spec: Any, table: Any = None) -> dict[str, Any]:
     if not isinstance(spec, dict):
         raise PropulsionCheckError("the spec must be an object")
-    table = table if table is not None else spec.get("thrust_table")
+    table = _resolve(table if table is not None else spec.get("thrust_table"))
     rotors = spec.get("rotors", 4)
     if isinstance(rotors, bool) or not isinstance(rotors, int) or not 3 <= rotors <= 12:
         raise PropulsionCheckError("rotors must be a whole number from 3 to 12")
@@ -292,14 +314,69 @@ def check_propulsion(spec: Any, table: Any = None) -> dict[str, Any]:
             "summary": {"errors": errors, "warnings": sum(f["severity"] == "warning" for f in findings)}}
 
 
+def pick(spec: Any, library: dict[str, dict[str, Any]] | None = None) -> dict[str, Any]:
+    """Run the check over every cited table and prop; rank those with no errors by hover time.
+
+    The spec gives ``mass_without_motors_g`` (everything but the motors) and each option adds its own motors' mass, so a big
+    motor is not credited with a small one's weight. With ``frame.wheelbase_mm`` (or ``max_prop_diameter_mm``) each option's
+    prop must fit. The spec's own prop and table are ignored. Options that fail keep the check's own reasons."""
+    if not isinstance(spec, dict):
+        raise PropulsionCheckError("the spec must be an object")
+    base_g = _num(spec.get("mass_without_motors_g"), "mass_without_motors_g")
+    rotors = spec.get("rotors", 4)
+    max_prop = _num(spec["max_prop_diameter_mm"], "max_prop_diameter_mm") if spec.get("max_prop_diameter_mm") is not None else None
+    library = tables() if library is None else library
+    passing, failing = [], []
+    for table_id, table in sorted(library.items()):
+        motor_g = table.get("motor_mass_g")
+        for prop in sorted(table.get("props", {})):
+            head = {"table": table_id, "motor": table.get("motor"), "prop": prop, "source": table.get("source")}
+            diameter = (table.get("prop_diameter_mm") or {}).get(prop)
+            if not isinstance(motor_g, (int, float)) or isinstance(motor_g, bool) or motor_g <= 0:
+                failing.append({**head, "reasons": ["motor_mass_unknown"]})
+                continue
+            if max_prop is not None and (diameter is None or diameter > max_prop):
+                failing.append({**head, "prop_diameter_mm": diameter, "reasons": ["prop_too_large" if diameter else "prop_diameter_unknown"]})
+                continue
+            trial = {k: v for k, v in spec.items() if k not in {"thrust_table", "prop", "mass_without_motors_g", "parts",
+                                                              "all_up_mass_g", "max_prop_diameter_mm", "prop_diameter_mm"}}
+            trial.update(prop=prop, all_up_mass_g=base_g + rotors * motor_g)
+            if diameter is not None:
+                trial["prop_diameter_mm"] = diameter
+            try:
+                report = check_propulsion(trial, table)
+            except PropulsionCheckError as exc:
+                failing.append({**head, "reasons": [str(exc)]})
+                continue
+            row = {**head, "prop_diameter_mm": diameter, "motor_mass_g": motor_g, "all_up_mass_g": round(trial["all_up_mass_g"], 1),
+                   **{k: report["results"].get(k) for k in ("hover_time_min", "hover_power_method", "thrust_to_weight",
+                                                           "hover_current_a", "full_throttle_current_a", "esc_margin", "prop_tip_gap_mm")},
+                   "warnings": [f["rule"] for f in report["findings"] if f["severity"] == "warning"]}
+            if report["summary"]["errors"]:
+                failing.append({**row, "reasons": [f["rule"] for f in report["findings"] if f["severity"] == "error"]})
+            else:
+                passing.append(row)
+    # interpolated hover power before extrapolated, then the longest hover
+    passing.sort(key=lambda r: (r["hover_power_method"] != "interpolated", -(r["hover_time_min"] or 0)))
+    return {"schema_version": PICK_SCHEMA, "claim_boundary": BOUNDARY, "status": "CALCULATION_ONLY", "flight_tested": False,
+            "flight_authorized": False, "options_checked": len(passing) + len(failing), "passing": passing, "failing": failing,
+            "sources": sorted({t.get("source") for t in library.values() if t.get("source")})}
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("spec", type=Path, help="JSON spec: rotors, prop, all_up_mass_g or parts, battery, esc_continuous_a, ...")
     ap.add_argument("--table", type=Path, help=f"bench table JSON in the {TABLE_SCHEMA} shape, if the spec does not embed one")
+    ap.add_argument("--table-id", help="a table from HS's cited library, by id")
+    ap.add_argument("--pick", action="store_true", help="try every library table and prop and rank those that pass")
     args = ap.parse_args(argv)
     spec = json.loads(args.spec.read_text(encoding="utf-8"))
-    table = json.loads(args.table.read_text(encoding="utf-8")) if args.table else None
+    table = json.loads(args.table.read_text(encoding="utf-8")) if args.table else args.table_id
     try:
+        if args.pick:
+            ranked = pick(spec)
+            print(json.dumps(ranked, indent=2))
+            return 0 if ranked["passing"] else 1
         report = check_propulsion(spec, table)
     except PropulsionCheckError as exc:
         print(json.dumps({"error": str(exc)}), file=sys.stderr)
