@@ -6,11 +6,11 @@ their reach and tests; `... show <module>` gives one module's importers, imports
 tables are in `docs/capability_map/`; the job-level map (which module is canonical for which job) is
 `docs/CAPABILITY_CONSOLIDATION.md`.
 
-**617 modules, 177,671 lines; 539 referenced by a test; 33 called by an engine tool.**
+**618 modules, 177,819 lines; 540 referenced by a test; 34 called by an engine tool.**
 
 | Status | Modules | Lines | Meaning |
 |---|---|---|---|
-| product | 468 | 140,794 | reached from a shipped entry point (toolbelt, MCP, REST or a console command) |
+| product | 469 | 140,942 | reached from a shipped entry point (toolbelt, MCP, REST or a console command) |
 | research | 141 | 35,128 | not shipped on purpose: part of a declared research line (RESEARCH_LINES) |
 | script | 5 | 1,475 | reached only from scripts/, projects/, eval/, experiments/, the Makefile or CI |
 | runnable | 0 | 0 | has its own `python -m` main, and nothing shipped imports it |
@@ -21,12 +21,12 @@ tables are in `docs/capability_map/`; the job-level map (which module is canonic
 
 | Surface | Entry modules | Modules reached |
 |---|---|---|
-| toolbelt | `engineering_toolbelt` | 292 |
-| mcp | `backend_mcp_server`, `mcp_server` | 461 |
-| rest | `product_api` | 458 |
-| console | `cli_entry`, `digital_engine_cli`, `materials_cli`, `open_repair_candidates`, `policy_layer_cli`, `wiring_cli` | 468 |
+| toolbelt | `engineering_toolbelt` | 293 |
+| mcp | `backend_mcp_server`, `mcp_server` | 462 |
+| rest | `product_api` | 459 |
+| console | `cli_entry`, `digital_engine_cli`, `materials_cli`, `open_repair_candidates`, `policy_layer_cli`, `wiring_cli` | 469 |
 
-Toolbelt tools (35): `hs_project_open`, `hs_project_record`, `hs_project_write_artifact`, `hs_project_link_design`, `hs_project_status`, `hs_junk_lookup`, `hs_prior_art_search`, `hs_read_board`, `hs_capability_search`, `hs_device_review`, `hs_route_economics`, `hs_what_can_i_build`, `hs_device_lab`, `hs_check_board_parts`, `hs_import_eagle_module`, `hs_record_outcome`, `hs_salvage_resources`, `hs_identify_part`, `hs_battery_runtime`, `hs_prop_hover`, `hs_size_arm_actuators`, `hs_size_rover_drive`, `hs_check_propulsion`, `hs_pick_propulsion`, `hs_route_copper`, `hs_energy_budget`, `hs_price_parts`, `hs_bom_check`, `hs_review_kicad_schematic`, `hs_component_board`, `hs_plan_circuit`, `hs_fem_screen`, `hs_arm_kinematics`, `hs_motion_sweep`, `hs_rover_chassis`.
+Toolbelt tools (36): `hs_project_open`, `hs_project_record`, `hs_project_write_artifact`, `hs_project_link_design`, `hs_project_status`, `hs_junk_lookup`, `hs_prior_art_search`, `hs_read_board`, `hs_capability_search`, `hs_device_review`, `hs_route_economics`, `hs_what_can_i_build`, `hs_device_lab`, `hs_check_board_parts`, `hs_import_eagle_module`, `hs_record_outcome`, `hs_salvage_resources`, `hs_identify_part`, `hs_battery_runtime`, `hs_prop_hover`, `hs_size_arm_actuators`, `hs_size_rover_drive`, `hs_check_propulsion`, `hs_pick_propulsion`, `hs_route_copper`, `hs_rocker_bogie`, `hs_energy_budget`, `hs_price_parts`, `hs_bom_check`, `hs_review_kicad_schematic`, `hs_component_board`, `hs_plan_circuit`, `hs_fem_screen`, `hs_arm_kinematics`, `hs_motion_sweep`, `hs_rover_chassis`.
 Console commands: `hs-doctor`, `hs-serve`, `hs-mcp`, `hs-backend-mcp`, `hs-capability-freeze`, `hs-derive`, `hs-mechanical`, `hs-open-repair`, `hs-digital`, `hs-policy`, `hs-materials`, `hs-wiring`.
 
 Reach codes in the area pages: **T** toolbelt, **M** MCP server, **R** REST product API, **C** console command.
@@ -41,8 +41,8 @@ Reach codes in the area pages: **T** toolbelt, **M** MCP server, **R** REST prod
 | mechanical, CAD and FEM | 53 | 49 | 18,481 | 46 | 38 | 4 | [mechanical-cad-and-fem](capability_map/mechanical-cad-and-fem.md) |
 | projects, reviews and evidence | 70 | 42 | 17,633 | 59 | 62 | 3 | [projects-reviews-and-evidence](capability_map/projects-reviews-and-evidence.md) |
 | other | 65 | 53 | 16,809 | 49 | 49 | 0 | [other](capability_map/other.md) |
-| parts, BOM and sourcing | 53 | 39 | 15,793 | 48 | 44 | 1 | [parts-bom-and-sourcing](capability_map/parts-bom-and-sourcing.md) |
-| robots, arms and motion | 30 | 28 | 12,077 | 29 | 22 | 4 | [robots-arms-and-motion](capability_map/robots-arms-and-motion.md) |
+| parts, BOM and sourcing | 53 | 39 | 15,807 | 48 | 44 | 1 | [parts-bom-and-sourcing](capability_map/parts-bom-and-sourcing.md) |
+| robots, arms and motion | 31 | 29 | 12,211 | 30 | 23 | 5 | [robots-arms-and-motion](capability_map/robots-arms-and-motion.md) |
 | firmware and devices | 11 | 10 | 4,063 | 10 | 11 | 2 | [firmware-and-devices](capability_map/firmware-and-devices.md) |
 | drones, propulsion and power | 13 | 12 | 2,935 | 13 | 10 | 5 | [drones-propulsion-and-power](capability_map/drones-propulsion-and-power.md) |
 | simulation | 8 | 6 | 2,366 | 7 | 5 | 0 | [simulation](capability_map/simulation.md) |

@@ -395,6 +395,17 @@ def _route_copper(args, project):
                      sources=["https://github.com/claynicholson/copper-kicad-mcp"], boundary=res["claim_boundary"])
 
 
+def _rocker_bogie(args, _project):
+    from . import rocker_bogie
+    res = rocker_bogie.analyse(args["spec"])
+    climb = ", ".join(f"mu {mu}: {c['max_step_mm']} mm" for mu, c in res["step_climb"].items())
+    best = ((res.get("drive") or {}).get("options") or [None])[0]
+    summary = f"wheel shares {res['share_of_side_weight']}; step climb {climb}" + (
+        f"; best drive {best['family']} {best['ratio']}:1 at {best['step_torque_share_of_stall']} of stall on the step" if best else "")
+    return _envelope(True, summary, res, problems=res["problems"], sources=(res.get("drive") or {}).get("sources", []),
+                     boundary=res["claim_boundary"])
+
+
 def _energy(args, _project):
     from . import energy_budget
     res = energy_budget.check_energy(args["spec"])
@@ -969,6 +980,9 @@ TOOLS: dict[str, ToolSpec] = {t.name: t for t in [
     ToolSpec("hs_route_copper", "Route a placed .kicad_pcb with Copper (copper-kicad-mcp, MIT: Freerouting plus its guided finisher) "
              "in KiCad 10's container; returns unrouted count, DRC and the routed KiCad 10 board. Needs HARDWARE_SPLICER_COPPER_* set.",
              _obj({"pcb": {"type": "string"}, "ignore_nets": {"type": "array", "items": {"type": "string"}}}, ["pcb"]), _route_copper),
+    ToolSpec("hs_rocker_bogie", "Six-wheel rocker-bogie: wheel load split from the link geometry, highest step the front wheels "
+             "climb (quasi-static, up to one wheel radius), and with spec.drive the cited gearmotors ranked by step-torque margin.",
+             _obj({"spec": {"type": "object"}}, ["spec"]), _rocker_bogie),
     ToolSpec("hs_energy_budget", "Battery energy budget: loads, runtime, surge, DC current and fuse window.",
              _obj({"spec": {"type": "object"}}, ["spec"]), _energy),
     ToolSpec("hs_price_parts", "JLCPCB/LCSC parts, stock and price breaks (jlcparts), for one query or a whole parts list.",
