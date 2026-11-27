@@ -277,3 +277,15 @@ def test_momentum_law_from_the_peak_alone_would_flatter_a_small_motor():
     peak, hover_g = cf["power"]["peak"], cf["takeoff_g"] / cf["rotors"]
     law_w = peak["power_w"] * (hover_g / peak["thrust_g"]) ** 1.5
     assert hover_g / law_w > 1.5 * cf["power"]["hover_efficiency_g_per_w"]
+
+
+def test_a_five_inch_frame_picks_a_five_inch_motor_and_a_three_inch_frame_does_not():
+    five = pick({"rotors": 4, "mass_without_motors_g": 520, "battery": {"cells": 6, "capacity_mah": 1300, "c_continuous": 100},
+                 "esc_continuous_a": 55, "frame": {"wheelbase_mm": 225}})
+    assert five["passing"] and five["passing"][0]["table"].startswith("tmotor-v2207")
+    assert all(r["full_throttle_current_a"] is not None for r in five["passing"])
+    three = pick({"rotors": 4, "mass_without_motors_g": 197.5, "battery": {"cells": 4, "capacity_mah": 850, "c_continuous": 70},
+                  "esc_continuous_a": 35, "frame": {"wheelbase_mm": 137}})
+    reasons = {(r["table"], r["prop"]): r["reasons"] for r in three["failing"]}
+    assert all("props_overlap" in v or "prop_gap_small" in v for (t, _), v in reasons.items() if t.startswith("tmotor-v2207") and "-4s" in t)
+    assert {r["table"] for r in three["passing"]} <= {"tmotor-f1404-2900kv-4s", "tmotor-f1404-3800kv-4s"}
