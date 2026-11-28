@@ -1,10 +1,28 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Icon, Outcome } from "./icons.jsx";
 import { OUTCOME_LABEL, toolTitle } from "./catalog.js";
 import { renderUrl } from "./benchApi.js";
+import SpineFlow3D, { canUseWebGL } from "./SpineFlow3D.jsx";
+
+const WEBGL = canUseWebGL();
+
+/** The 3D view on desktop widths; phones (status checks only) keep the plain station list. */
+function useWide(query = "(min-width: 861px)") {
+  const get = () => typeof window !== "undefined" && typeof window.matchMedia === "function" && window.matchMedia(query).matches;
+  const [wide, setWide] = useState(get);
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return undefined;
+    const mql = window.matchMedia(query);
+    const on = () => setWide(mql.matches);
+    mql.addEventListener("change", on);
+    return () => mql.removeEventListener("change", on);
+  }, [query]);
+  return wide;
+}
 
 /** The pipeline every HS board goes through, with one recorded run laid over it. */
 export function SpineView({ spine, selectedKey, onSelectStep, onShowRun }) {
+  const wide = useWide();
   if (!spine) return <ViewEmpty text="Loading the spine…" />;
   const { steps, run } = spine;
   const present = new Set(steps.map((s) => s.run.outcome));
@@ -14,26 +32,24 @@ export function SpineView({ spine, selectedKey, onSelectStep, onShowRun }) {
         <h2>{run ? <button type="button" className="wb-title-link" onClick={onShowRun} title="Run details">{run.name}</button> : "No recorded run"}</h2>
         <Legend outcomes={OUTCOME_ORDER.filter((o) => present.has(o))} />
       </header>
-      <ol className="wb-steps" aria-label="Board pipeline steps">
-        {steps.map((s) => (
-          <li key={s.key} className={`wb-station${s.gate ? " is-gate" : ""}${selectedKey === s.key ? " is-selected" : ""} out-${s.run.outcome}`}>
-            <button type="button" className="wb-step" onClick={() => onSelectStep(s.key)} aria-pressed={selectedKey === s.key}
-              aria-label={`${s.n} ${s.title}${s.gate ? ", gate" : ""}: ${OUTCOME_LABEL[s.run.outcome]}, ${s.run.line}`}>
-              <span className="wb-step-head" aria-hidden="true">
-                <span className="wb-step-n mono">{String(s.n).padStart(2, "0")}</span>
-                <Outcome outcome={s.run.outcome} />
-              </span>
-              <span className="wb-step-title" aria-hidden="true">{s.title}</span>
-              <span className="wb-step-line" aria-hidden="true">{s.run.line}</span>
-            </button>
-          </li>
-        ))}
-      </ol>
-      {run?.not_checked?.length > 0 && (
-        <section className="wb-spine-notes">
-          <h3>Not checked on this run</h3>
-          <ul className="wb-notchecked">{run.not_checked.map((t) => <li key={t}>{t}</li>)}</ul>
-        </section>
+      {WEBGL && wide ? (
+        <SpineFlow3D steps={steps} selectedKey={selectedKey} onSelect={onSelectStep} renders={run?.renders ?? []} renderUrl={renderUrl} />
+      ) : (
+        <ol className="wb-steps" aria-label="Board pipeline steps">
+          {steps.map((s) => (
+            <li key={s.key} className={`wb-station${s.gate ? " is-gate" : ""}${selectedKey === s.key ? " is-selected" : ""} out-${s.run.outcome}`}>
+              <button type="button" className="wb-step" onClick={() => onSelectStep(s.key)} aria-pressed={selectedKey === s.key}
+                aria-label={`${s.n} ${s.title}${s.gate ? ", gate" : ""}: ${OUTCOME_LABEL[s.run.outcome]}, ${s.run.line}`}>
+                <span className="wb-step-head" aria-hidden="true">
+                  <span className="wb-step-n mono">{String(s.n).padStart(2, "0")}</span>
+                  <Outcome outcome={s.run.outcome} />
+                </span>
+                <span className="wb-step-title" aria-hidden="true">{s.title}</span>
+                <span className="wb-step-line" aria-hidden="true">{s.run.line}</span>
+              </button>
+            </li>
+          ))}
+        </ol>
       )}
     </div>
   );

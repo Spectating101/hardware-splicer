@@ -301,6 +301,8 @@ body.wb-dragging { cursor: grabbing; user-select: none; }
 
 /* spine */
 .wb-spine { padding-bottom: 12px; }
+.wb-spine:has(> .wb-flow-root) { display: flex; flex-direction: column; height: 100%; padding-bottom: 0; }
+.wb-spine > .wb-flow-root { flex: 1; }
 .wb-steps {
   list-style: none;
   margin: 0;
@@ -672,4 +674,189 @@ button.wb-logrow:hover { background: var(--b-hover); }
   .wb-legend { gap: 6px 12px; font-size: 11.5px; }
   .wb-tabs { overflow-x: auto; }
   .wb-tabs button { padding: 0 10px; }
+}
+
+/* ------------------------------------------------------------------ 3D spine flow */
+.wb-flow-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
+  background: var(--b-ground);
+  border: 0;
+  border-radius: 0 0 var(--b-radius) var(--b-radius);
+  overflow: hidden;
+  user-select: none;
+  outline: none;
+}
+
+.wb-flow-root:focus-visible {
+  outline: 1px solid var(--b-text);
+  outline-offset: -1px;
+}
+
+.wb-flow-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+}
+
+.wb-flow-canvas canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.wb-flow-canvas.is-hover {
+  cursor: pointer;
+}
+
+.wb-flow-canvas.is-drag {
+  cursor: grabbing;
+}
+
+.wb-flow-labels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.wb-flow-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  will-change: transform;
+  font-family: var(--b-font);
+}
+
+.wb-flow-head {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  padding: 2px 6px;
+  background: var(--b-panel);
+  border: 1px solid var(--b-line);
+  border-radius: var(--b-radius);
+  white-space: nowrap;
+}
+
+.wb-flow-num {
+  font-family: var(--b-mono);
+  font-size: 11px;
+  color: var(--b-text-3);
+}
+
+.wb-flow-title {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--b-text);
+}
+
+.wb-flow-line {
+  font-family: var(--b-mono);
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--b-text-2);
+  background: var(--b-ground);
+  border: 1px solid var(--b-line);
+  border-radius: var(--b-radius);
+  padding: 1px 6px;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wb-flow-label.is-selected .wb-flow-head {
+  background: var(--b-raised);
+  border-color: var(--b-text);
+}
+
+.wb-flow-label.is-hover .wb-flow-head {
+  border-color: var(--b-text-2);
+}
+
+.wb-flow-label.is-failed .wb-flow-head {
+  border-color: var(--b-failed);
+}
+
+.wb-flow-label.is-failed .wb-flow-line {
+  border-color: var(--b-failed);
+  color: var(--b-failed);
+}
+
+.wb-flow-label.is-unknown .wb-flow-head {
+  border-style: dashed;
+  border-color: var(--b-unknown);
+}
+
+.wb-flow-label.is-unknown .wb-flow-line {
+  border-color: var(--b-unknown);
+  color: var(--b-unknown);
+}
+
+.wb-flow-label.is-not_run {
+  opacity: 0.55;
+}
+
+.wb-flow-label.is-not_run .wb-flow-head {
+  border-style: dashed;
+  border-color: var(--b-notrun);
+}
+
+.wb-flow-hud {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 6px;
+  z-index: 2;
+}
+
+.wb-flow-btn {
+  padding: 4px 8px;
+  font-family: var(--b-font);
+  font-size: 11px;
+  color: var(--b-text-2);
+  background: var(--b-panel);
+  border: 1px solid var(--b-line);
+  border-radius: var(--b-radius);
+  cursor: pointer;
+}
+
+.wb-flow-btn:hover:not(:disabled) {
+  color: var(--b-text);
+  background: var(--b-hover);
+  border-color: var(--b-line-strong);
+}
+
+.wb-flow-btn[aria-pressed="true"] {
+  color: var(--b-text);
+  background: var(--b-raised);
+  border-color: var(--b-line-strong);
+}
+
+.wb-flow-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.wb-flow-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
