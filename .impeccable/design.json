@@ -1,0 +1,523 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-28T06:23:15+00:00",
+  "title": "Design System: Hardware Splicer Workbench",
+  "extensions": {
+    "colorMeta": {
+      "ground": {
+        "role": "neutral",
+        "displayName": "Bench Ground",
+        "canonical": "oklch(17.7% 0.007 258)",
+        "tonalRamp": [
+          "oklch(15% 0.003 258)",
+          "oklch(26% 0.004 258)",
+          "oklch(38% 0.005 258)",
+          "oklch(49% 0.006 258)",
+          "oklch(61% 0.007 258)",
+          "oklch(72% 0.006 258)",
+          "oklch(84% 0.005 258)",
+          "oklch(95% 0.004 258)"
+        ]
+      },
+      "panel": {
+        "role": "neutral",
+        "displayName": "Panel Island",
+        "canonical": "oklch(22.1% 0.009 256)",
+        "tonalRamp": [
+          "oklch(15% 0.004 256)",
+          "oklch(26% 0.006 256)",
+          "oklch(38% 0.007 256)",
+          "oklch(49% 0.008 256)",
+          "oklch(61% 0.009 256)",
+          "oklch(72% 0.008 256)",
+          "oklch(84% 0.007 256)",
+          "oklch(95% 0.005 256)"
+        ]
+      },
+      "raised": {
+        "role": "neutral",
+        "displayName": "Raised Slate",
+        "canonical": "oklch(25.9% 0.013 258)",
+        "tonalRamp": [
+          "oklch(15% 0.006 258)",
+          "oklch(26% 0.008 258)",
+          "oklch(38% 0.009 258)",
+          "oklch(49% 0.011 258)",
+          "oklch(61% 0.013 258)",
+          "oklch(72% 0.011 258)",
+          "oklch(84% 0.009 258)",
+          "oklch(95% 0.008 258)"
+        ]
+      },
+      "hover": {
+        "role": "neutral",
+        "displayName": "Hover Slate",
+        "canonical": "oklch(28.7% 0.015 257)",
+        "tonalRamp": [
+          "oklch(15% 0.007 257)",
+          "oklch(26% 0.009 257)",
+          "oklch(38% 0.011 257)",
+          "oklch(49% 0.013 257)",
+          "oklch(61% 0.015 257)",
+          "oklch(72% 0.013 257)",
+          "oklch(84% 0.011 257)",
+          "oklch(95% 0.009 257)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "canonical": "oklch(30.3% 0.014 257)",
+        "tonalRamp": [
+          "oklch(15% 0.007 257)",
+          "oklch(26% 0.009 257)",
+          "oklch(38% 0.011 257)",
+          "oklch(49% 0.013 257)",
+          "oklch(61% 0.014 257)",
+          "oklch(72% 0.012 257)",
+          "oklch(84% 0.010 257)",
+          "oklch(95% 0.009 257)"
+        ]
+      },
+      "line-strong": {
+        "role": "neutral",
+        "displayName": "Strong Hairline",
+        "canonical": "oklch(35.4% 0.018 258)",
+        "tonalRamp": [
+          "oklch(15% 0.008 258)",
+          "oklch(26% 0.011 258)",
+          "oklch(38% 0.013 258)",
+          "oklch(49% 0.015 258)",
+          "oklch(61% 0.017 258)",
+          "oklch(72% 0.015 258)",
+          "oklch(84% 0.013 258)",
+          "oklch(95% 0.010 258)"
+        ]
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "Bench White",
+        "canonical": "oklch(92.7% 0.006 255)",
+        "tonalRamp": [
+          "oklch(15% 0.003 255)",
+          "oklch(26% 0.004 255)",
+          "oklch(38% 0.005 255)",
+          "oklch(49% 0.006 255)",
+          "oklch(61% 0.006 255)",
+          "oklch(72% 0.005 255)",
+          "oklch(84% 0.005 255)",
+          "oklch(95% 0.004 255)"
+        ]
+      },
+      "text-2": {
+        "role": "neutral",
+        "displayName": "Steel",
+        "canonical": "oklch(76.0% 0.017 254)",
+        "tonalRamp": [
+          "oklch(15% 0.008 254)",
+          "oklch(26% 0.010 254)",
+          "oklch(38% 0.013 254)",
+          "oklch(49% 0.015 254)",
+          "oklch(61% 0.017 254)",
+          "oklch(72% 0.015 254)",
+          "oklch(84% 0.012 254)",
+          "oklch(95% 0.010 254)"
+        ]
+      },
+      "text-3": {
+        "role": "neutral",
+        "displayName": "Pewter",
+        "canonical": "oklch(70.5% 0.019 253)",
+        "tonalRamp": [
+          "oklch(15% 0.009 253)",
+          "oklch(26% 0.012 253)",
+          "oklch(38% 0.014 253)",
+          "oklch(49% 0.017 253)",
+          "oklch(61% 0.019 253)",
+          "oklch(72% 0.016 253)",
+          "oklch(84% 0.014 253)",
+          "oklch(95% 0.011 253)"
+        ]
+      },
+      "accent": {
+        "role": "primary",
+        "displayName": "HS Green",
+        "canonical": "oklch(71.5% 0.138 161)",
+        "tonalRamp": [
+          "oklch(15% 0.065 161)",
+          "oklch(26% 0.084 161)",
+          "oklch(38% 0.102 161)",
+          "oklch(49% 0.121 161)",
+          "oklch(61% 0.137 161)",
+          "oklch(72% 0.118 161)",
+          "oklch(84% 0.100 161)",
+          "oklch(95% 0.082 161)"
+        ]
+      },
+      "accent-bright": {
+        "role": "primary",
+        "displayName": "Lit Green",
+        "canonical": "oklch(76.2% 0.134 162)",
+        "tonalRamp": [
+          "oklch(15% 0.064 162)",
+          "oklch(26% 0.082 162)",
+          "oklch(38% 0.100 162)",
+          "oklch(49% 0.118 162)",
+          "oklch(61% 0.133 162)",
+          "oklch(72% 0.115 162)",
+          "oklch(84% 0.097 162)",
+          "oklch(95% 0.079 162)"
+        ]
+      },
+      "accent-ink": {
+        "role": "primary",
+        "displayName": "Green Ink",
+        "canonical": "oklch(21.9% 0.040 161)",
+        "tonalRamp": [
+          "oklch(15% 0.019 161)",
+          "oklch(26% 0.024 161)",
+          "oklch(38% 0.030 161)",
+          "oklch(49% 0.035 161)",
+          "oklch(61% 0.040 161)",
+          "oklch(72% 0.034 161)",
+          "oklch(84% 0.029 161)",
+          "oklch(95% 0.024 161)"
+        ]
+      },
+      "clean": {
+        "role": "status",
+        "displayName": "Clean",
+        "canonical": "oklch(71.5% 0.138 161)",
+        "tonalRamp": [
+          "oklch(15% 0.065 161)",
+          "oklch(26% 0.084 161)",
+          "oklch(38% 0.102 161)",
+          "oklch(49% 0.121 161)",
+          "oklch(61% 0.137 161)",
+          "oklch(72% 0.118 161)",
+          "oklch(84% 0.100 161)",
+          "oklch(95% 0.082 161)"
+        ]
+      },
+      "failed": {
+        "role": "status",
+        "displayName": "Failed Coral",
+        "canonical": "oklch(67.8% 0.174 26)",
+        "tonalRamp": [
+          "oklch(15% 0.083 26)",
+          "oklch(26% 0.106 26)",
+          "oklch(38% 0.129 26)",
+          "oklch(49% 0.153 26)",
+          "oklch(61% 0.173 26)",
+          "oklch(72% 0.150 26)",
+          "oklch(84% 0.127 26)",
+          "oklch(95% 0.103 26)"
+        ]
+      },
+      "recorded": {
+        "role": "status",
+        "displayName": "Recorded Silver",
+        "canonical": "oklch(83.6% 0.015 255)",
+        "tonalRamp": [
+          "oklch(15% 0.007 255)",
+          "oklch(26% 0.009 255)",
+          "oklch(38% 0.011 255)",
+          "oklch(49% 0.013 255)",
+          "oklch(61% 0.015 255)",
+          "oklch(72% 0.013 255)",
+          "oklch(84% 0.011 255)",
+          "oklch(95% 0.009 255)"
+        ]
+      },
+      "not-run": {
+        "role": "status",
+        "displayName": "Not-run Grey",
+        "canonical": "oklch(66.0% 0.019 253)",
+        "tonalRamp": [
+          "oklch(15% 0.009 253)",
+          "oklch(26% 0.012 253)",
+          "oklch(38% 0.014 253)",
+          "oklch(49% 0.017 253)",
+          "oklch(61% 0.019 253)",
+          "oklch(72% 0.017 253)",
+          "oklch(84% 0.014 253)",
+          "oklch(95% 0.011 253)"
+        ]
+      },
+      "unknown": {
+        "role": "status",
+        "displayName": "Amber Unknown",
+        "canonical": "oklch(75.8% 0.135 77)",
+        "tonalRamp": [
+          "oklch(15% 0.064 77)",
+          "oklch(26% 0.082 77)",
+          "oklch(38% 0.100 77)",
+          "oklch(49% 0.118 77)",
+          "oklch(61% 0.134 77)",
+          "oklch(72% 0.116 77)",
+          "oklch(84% 0.098 77)",
+          "oklch(95% 0.080 77)"
+        ]
+      },
+      "accent-soft": {
+        "role": "primary",
+        "displayName": "Green Wash",
+        "canonical": "rgba(62, 189, 134, 0.14)",
+        "tonalRamp": [
+          "oklch(15% 0.065 161)",
+          "oklch(26% 0.084 161)",
+          "oklch(38% 0.102 161)",
+          "oklch(49% 0.121 161)",
+          "oklch(61% 0.137 161)",
+          "oklch(72% 0.118 161)",
+          "oklch(84% 0.100 161)",
+          "oklch(95% 0.082 161)"
+        ]
+      },
+      "accent-line": {
+        "role": "primary",
+        "displayName": "Green Rule",
+        "canonical": "rgba(62, 189, 134, 0.55)",
+        "tonalRamp": [
+          "oklch(15% 0.065 161)",
+          "oklch(26% 0.084 161)",
+          "oklch(38% 0.102 161)",
+          "oklch(49% 0.121 161)",
+          "oklch(61% 0.137 161)",
+          "oklch(72% 0.118 161)",
+          "oklch(84% 0.100 161)",
+          "oklch(95% 0.082 161)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "title": {
+        "displayName": "Title",
+        "purpose": "Inspector heading naming the selection."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Run bar heading and measured-record headings."
+      },
+      "station-title": {
+        "displayName": "Station Title",
+        "purpose": "Step names on the spine."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "All interface text; prose capped at 60ch."
+      },
+      "section-head": {
+        "displayName": "Section Head",
+        "purpose": "Sub-heads in the view and panel headings, in Steel."
+      },
+      "meta": {
+        "displayName": "Meta",
+        "purpose": "Runs lines, legends, chips, last run, engine state."
+      },
+      "prop-label": {
+        "displayName": "Prop Label",
+        "purpose": "Inspector dt labels, field help, palette kinds."
+      },
+      "mono": {
+        "displayName": "Mono",
+        "purpose": "Ids, paths, revision tags and values."
+      },
+      "mono-tag": {
+        "displayName": "Mono Tag",
+        "purpose": "Row tags, counts, field names, kbd; the GATE tag is the only uppercase use (0.04em)."
+      }
+    },
+    "shadows": [
+      {
+        "name": "palette-float",
+        "value": "0 18px 44px rgba(0, 0, 0, 0.3)",
+        "purpose": "Command palette only; the one floating surface."
+      },
+      {
+        "name": "selection-ring",
+        "value": "inset 0 0 0 1px rgba(62, 189, 134, 0.55)",
+        "purpose": "Selected explorer rows; a ring, not elevation."
+      },
+      {
+        "name": "field-focus-halo",
+        "value": "0 0 0 2px rgba(62, 189, 134, 0.14)",
+        "purpose": "Focused text inputs, with a Green Rule border."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-quick",
+        "value": "120ms ease-out",
+        "purpose": "Scrim fade and resize-handle highlight."
+      },
+      {
+        "name": "chevron-turn",
+        "value": "140ms ease-out",
+        "purpose": "Tree chevron rotating 90 degrees."
+      },
+      {
+        "name": "ease-out-expo",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Palette rise (160ms, 6px) and console row arrival wash (900ms)."
+      },
+      {
+        "name": "pulse",
+        "value": "1s ease-in-out infinite alternate, opacity 0.35 to 1",
+        "purpose": "Busy tab dot and running log dot (0.8s)."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "all animation and transition off",
+        "purpose": "Under prefers-reduced-motion: reduce."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "phone",
+        "value": "860px"
+      },
+      {
+        "name": "narrow-desktop",
+        "value": "1360px"
+      },
+      {
+        "name": "spine-5-col (container)",
+        "value": "740px"
+      },
+      {
+        "name": "spine-2-col (container)",
+        "value": "620px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Run Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one primary action per inspector, at the bottom right of the footer.",
+      "html": "<button class=\"ds-btn-primary\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\"><path d=\"M5 3.5v9l7-4.5z\" fill=\"currentColor\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linejoin=\"round\"/></svg>Run</button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border:1px solid #3ebd86;border-radius:6px;background:#3ebd86;color:#062014;font:600 13px/1.45 'IBM Plex Sans',system-ui,sans-serif;cursor:pointer}.ds-btn-primary:hover{background:#52cc97;border-color:#52cc97}.ds-btn-primary:focus-visible{outline:2px solid #3ebd86;outline-offset:1px}.ds-btn-primary:disabled{opacity:.55;cursor:default}"
+    },
+    {
+      "name": "Default Button",
+      "kind": "button",
+      "refersTo": "button",
+      "description": "Secondary actions such as opening a tool's board.",
+      "html": "<button class=\"ds-btn\">Open Component board</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border:1px solid #363c45;border-radius:6px;background:#20242a;color:#e4e7eb;font:500 13px/1.45 'IBM Plex Sans',system-ui,sans-serif;cursor:pointer}.ds-btn:hover{background:#262b32;border-color:#48505a}.ds-btn:focus-visible{outline:2px solid #3ebd86;outline-offset:1px}"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Panel-header actions such as Clear in the console.",
+      "html": "<button class=\"ds-btn-ghost\">Clear</button>",
+      "css": ".ds-btn-ghost{border:0;background:none;color:#aab2bc;padding:2px 8px;border-radius:5px;font:400 12px 'IBM Plex Sans',system-ui,sans-serif;cursor:pointer}.ds-btn-ghost:hover{background:#262b32;color:#e4e7eb}.ds-btn-ghost:focus-visible{outline:2px solid #3ebd86;outline-offset:1px}"
+    },
+    {
+      "name": "Schema Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "A tool argument generated from its schema: mono name, required mark, type, recessed input.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\"><span class=\"ds-field-name\">board_path</span><span class=\"ds-req\">required</span><span class=\"ds-field-type\">string</span></span><input class=\"ds-input\" type=\"text\" value=\"projects/hs-bus-a/hs_bus_a.kicad_pcb\"></label>",
+      "css": ".ds-field{display:grid;gap:4px;width:300px;font:400 13px/1.45 'IBM Plex Sans',system-ui,sans-serif;color:#e4e7eb}.ds-field-label{display:flex;align-items:baseline;gap:8px}.ds-field-name{font:500 12px 'IBM Plex Mono',ui-monospace,monospace}.ds-req{font-size:11px;color:#3ebd86}.ds-field-type{margin-left:auto;font:400 11px 'IBM Plex Mono',ui-monospace,monospace;color:#98a1ac}.ds-input{width:100%;box-sizing:border-box;border:1px solid #2a2f36;border-radius:6px;background:#0f1114;color:#e4e7eb;padding:6px 8px;font:400 12px 'IBM Plex Mono',ui-monospace,monospace}.ds-input:focus{outline:0;border-color:rgba(62,189,134,.55);box-shadow:0 0 0 2px rgba(62,189,134,.14)}"
+    },
+    {
+      "name": "Explorer Tree Row",
+      "kind": "nav",
+      "refersTo": "tree-row",
+      "description": "Spine steps and tools in the explorer; selected rows get the green wash and inset ring.",
+      "html": "<div class=\"ds-tree\"><button class=\"ds-row\"><span class=\"ds-n\">10</span><span class=\"ds-label\">Finish + labels</span><svg width=\"10\" height=\"10\"><circle cx=\"5\" cy=\"5\" r=\"4\" fill=\"#c3cad3\" stroke=\"#c3cad3\" stroke-width=\"1.5\"/></svg></button><button class=\"ds-row is-selected\"><span class=\"ds-n\">11</span><span class=\"ds-label\">DRC + parity</span><span class=\"ds-sub\">gate</span><svg width=\"10\" height=\"10\"><circle cx=\"5\" cy=\"5\" r=\"4\" fill=\"#3ebd86\" stroke=\"#3ebd86\" stroke-width=\"1.5\"/></svg></button><button class=\"ds-row\"><span class=\"ds-n\">13</span><span class=\"ds-label\">Decoupling</span><svg width=\"10\" height=\"10\"><circle cx=\"5\" cy=\"5\" r=\"4\" fill=\"none\" stroke=\"#e0a43e\" stroke-width=\"1.5\" stroke-dasharray=\"2 1.6\"/></svg></button></div>",
+      "css": ".ds-tree{width:240px;padding:6px;background:#181b1f;border-radius:8px;display:flex;flex-direction:column}.ds-row{display:flex;align-items:center;gap:8px;min-height:26px;padding:3px 8px 3px 26px;border:0;border-radius:5px;background:none;color:#e4e7eb;font:400 13px/1.45 'IBM Plex Sans',system-ui,sans-serif;text-align:left;cursor:pointer}.ds-row:hover{background:#262b32}.ds-row:focus-visible{outline:2px solid #3ebd86;outline-offset:1px}.ds-row.is-selected{background:rgba(62,189,134,.14);box-shadow:inset 0 0 0 1px rgba(62,189,134,.55)}.ds-n{color:#98a1ac;font-size:11px;width:16px}.ds-label{flex:1}.ds-sub{color:#3ebd86;font-size:11px}"
+    },
+    {
+      "name": "View Tabs",
+      "kind": "nav",
+      "refersTo": "tab-active",
+      "description": "Centre view tabs: Spine, Board, Measured, Result.",
+      "html": "<div class=\"ds-tabs\"><button class=\"ds-tab is-active\">Spine</button><button class=\"ds-tab\">Board</button><button class=\"ds-tab\">Measured</button><button class=\"ds-tab\">Result</button></div>",
+      "css": ".ds-tabs{display:flex;gap:2px;padding:6px 6px 0;border-bottom:1px solid #2a2f36;background:#181b1f}.ds-tab{position:relative;height:30px;padding:0 12px;border:0;border-radius:6px 6px 0 0;background:none;color:#aab2bc;font:400 13px 'IBM Plex Sans',system-ui,sans-serif;cursor:pointer}.ds-tab:hover{color:#e4e7eb;background:#262b32}.ds-tab:focus-visible{outline:2px solid #3ebd86;outline-offset:1px}.ds-tab.is-active{color:#e4e7eb;background:#20242a}.ds-tab.is-active::after{content:'';position:absolute;left:8px;right:8px;bottom:-1px;height:2px;background:#3ebd86;border-radius:2px}"
+    },
+    {
+      "name": "Chips and Tags",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Linked outside-tool chip, row tags and status pills.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\">KiCad ERC and DRC (kicad-cli)</button><span class=\"ds-tag\">example</span><span class=\"ds-tag is-int\">integrated</span><span class=\"ds-tag is-cand\">candidate</span><span class=\"ds-pill is-ok\">ok</span><span class=\"ds-pill is-err\">error</span></div>",
+      "css": ".ds-chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:12px;background:#181b1f;font-family:'IBM Plex Sans',system-ui,sans-serif}.ds-chip{padding:2px 8px;border-radius:5px;background:#20242a;border:1px solid transparent;color:#e4e7eb;font-size:12px;cursor:pointer}.ds-chip:hover{border-color:rgba(62,189,134,.55)}.ds-chip:focus-visible{outline:2px solid #3ebd86;outline-offset:1px}.ds-tag{font:500 11px/16px 'IBM Plex Mono',ui-monospace,monospace;color:#98a1ac;padding:0 5px;border-radius:4px;border:1px solid #363c45}.ds-tag.is-int{color:#3ebd86;border-color:rgba(62,189,134,.4)}.ds-tag.is-cand{color:#e0a43e;border-color:rgba(224,164,62,.4)}.ds-pill{font-size:12px;font-weight:500;padding:1px 8px;border-radius:10px;border:1px solid #363c45}.ds-pill.is-ok{color:#3ebd86;border-color:rgba(62,189,134,.45)}.ds-pill.is-err{color:#f0645c;border-color:rgba(240,100,92,.45)}"
+    },
+    {
+      "name": "Spine Station",
+      "kind": "custom",
+      "refersTo": "station-number",
+      "description": "A pipeline step on the rail: numbered pill, gate tag, outcome mark, title, runs line, measured foot line.",
+      "html": "<ol class=\"ds-steps\"><li class=\"ds-station is-gate\"><div class=\"ds-step\"><span class=\"ds-head\"><span class=\"ds-num\">05</span><span class=\"ds-gate\">gate</span><svg class=\"ds-mark\" width=\"10\" height=\"10\"><circle cx=\"5\" cy=\"5\" r=\"4\" fill=\"#3ebd86\" stroke=\"#3ebd86\" stroke-width=\"1.5\"/></svg></span><span class=\"ds-title\">ERC</span><span class=\"ds-runs\">KiCad ERC and DRC (kicad-cli)</span><span class=\"ds-line\">0 errors · 0 warnings</span></div></li><li class=\"ds-station is-selected\"><div class=\"ds-step\"><span class=\"ds-head\"><span class=\"ds-num\">11</span><span class=\"ds-gate\">gate</span><svg class=\"ds-mark\" width=\"10\" height=\"10\"><circle cx=\"5\" cy=\"5\" r=\"4\" fill=\"#3ebd86\" stroke=\"#3ebd86\" stroke-width=\"1.5\"/></svg></span><span class=\"ds-title\">DRC + parity</span><span class=\"ds-runs\">KiCad ERC and DRC (kicad-cli)</span><span class=\"ds-line\">0 errors · 2 warnings</span></div></li><li class=\"ds-station is-unknown\"><div class=\"ds-step\"><span class=\"ds-head\"><span class=\"ds-num\">13</span><svg class=\"ds-mark\" width=\"10\" height=\"10\"><circle cx=\"5\" cy=\"5\" r=\"4\" fill=\"none\" stroke=\"#e0a43e\" stroke-width=\"1.5\" stroke-dasharray=\"2 1.6\"/></svg></span><span class=\"ds-title\">Decoupling</span><span class=\"ds-runs\">HS</span><span class=\"ds-line\">not recorded for this build</span></div></li></ol>",
+      "css": ".ds-steps{list-style:none;margin:0;padding:10px 6px;display:grid;grid-template-columns:repeat(3,150px);background:#181b1f;font:400 13px/1.45 'IBM Plex Sans',system-ui,sans-serif;color:#e4e7eb}.ds-station{position:relative;display:flex}.ds-station::before{content:'';position:absolute;left:0;right:0;top:20px;height:1px;background:#363c45}.ds-station.is-selected::before{background:#3ebd86;height:2px;top:19px}.ds-step{position:relative;display:flex;flex-direction:column;gap:6px;width:100%;min-height:112px;padding:10px}.ds-head{display:flex;align-items:center;gap:6px}.ds-num{font-size:13px;font-weight:500;background:#181b1f;border:1px solid #363c45;border-radius:10px;padding:0 7px;line-height:20px}.is-gate .ds-num{border-color:#3ebd86;color:#3ebd86}.is-selected .ds-num{background:#3ebd86;border-color:#3ebd86;color:#062014}.ds-gate{font:500 11px/15px 'IBM Plex Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:.04em;color:#3ebd86;background:#181b1f;padding:0 4px}.ds-mark{margin-left:auto;background:#181b1f;border-radius:50%}.ds-title{font-weight:600;font-size:13.5px;line-height:1.25}.is-selected .ds-title{color:#3ebd86}.ds-runs{color:#aab2bc;font-size:12px;line-height:1.35}.ds-line{margin-top:auto;padding-top:8px;border-top:1px solid #2a2f36;font-size:12px;line-height:1.4}.is-unknown .ds-line{color:#e0a43e}"
+    },
+    {
+      "name": "Console",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Run log under the centre view: header with segmented filter, rows with time, status dot, tool, text, duration.",
+      "html": "<section class=\"ds-console\"><header class=\"ds-chead\"><h2>Console</h2><div class=\"ds-seg\"><button aria-pressed=\"true\">All</button><button aria-pressed=\"false\">Problems</button></div><button class=\"ds-clear\">Clear</button></header><ul class=\"ds-log\"><li class=\"ds-logrow\"><span class=\"ds-time\">14:19:08</span><span class=\"ds-dot is-ok\"></span><span class=\"ds-tool\">kicad-cli</span><span class=\"ds-text\">0 errors · 2 warnings</span><span class=\"ds-ms\">812 ms</span></li><li class=\"ds-logrow\"><span class=\"ds-time\">14:19:31</span><span class=\"ds-dot is-err\"></span><span class=\"ds-tool\">route_copper</span><span class=\"ds-text is-err\">board path not found</span><span class=\"ds-ms\">41 ms</span></li></ul></section>",
+      "css": ".ds-console{width:560px;background:#181b1f;border-radius:8px;overflow:hidden;font:400 13px/1.45 'IBM Plex Sans',system-ui,sans-serif;color:#aab2bc}.ds-chead{display:flex;align-items:center;gap:8px;height:34px;padding:0 8px 0 12px;border-bottom:1px solid #2a2f36}.ds-chead h2{margin:0 8px 0 0;font-size:12.5px;font-weight:600;color:#e4e7eb}.ds-seg{display:flex;border:1px solid #2a2f36;border-radius:5px;overflow:hidden}.ds-seg button{border:0;background:none;padding:1px 8px;color:#aab2bc;font-size:12px;cursor:pointer}.ds-seg button[aria-pressed=true]{background:#20242a;color:#e4e7eb}.ds-clear{margin-left:auto;border:0;background:none;color:#aab2bc;padding:2px 8px;border-radius:5px;font-size:12px;cursor:pointer}.ds-clear:hover{background:#262b32;color:#e4e7eb}.ds-log{list-style:none;margin:0;padding:4px 0;font-size:12.5px}.ds-logrow{display:flex;align-items:baseline;gap:10px;padding:3px 12px;color:#e4e7eb}.ds-logrow:hover{background:#262b32}.ds-time,.ds-ms{color:#98a1ac;font:400 12px 'IBM Plex Mono',ui-monospace,monospace}.ds-dot{width:7px;height:7px;border-radius:50%;align-self:center;background:#8a939e}.ds-dot.is-ok{background:#3ebd86}.ds-dot.is-err{background:#f0645c}.ds-tool{color:#aab2bc}.ds-text{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ds-text.is-err{color:#f0645c}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Docked Bench",
+    "overview": "**Creative North Star: \"The Docked Bench\"**\n\nHardware Splicer opens straight into the tool, as Unity, Premiere or a JetBrains IDE do. It has no front door and no dashboard of cards. The screen is one docked editor: rounded panel islands sit on a darker ground, and the gaps between the islands are the resize handles. The explorer is on the left, the pipeline view in the middle, the inspector on the right and the console under the middle. The pipeline, HS's fourteen-step board spine, is drawn as stations on two lines with the gates marked. A user should feel they are at a working instrument, not being shown a presentation.\n\nDensity is set for a large desk screen: 13px body text, 26px tree rows and 6px gutters. There is a single accent. Colour on the screen mostly means state. The engine decides every state: the UI shows outcomes as the backend records them, and \"not run\" and \"not recorded\" are drawn as clearly as \"clean\" or \"failed\". Phones get one panel at a time, for status checks.\n\n**Scope.** This world currently covers the Workbench (`apps/splice-ui/src/bench/`, the `/` route) and is the app's direction from here on. The older screens (Projects, Library, Advanced and the project bench) still use the earlier light theme in `apps/splice-ui/src/styles.css`. They have not been migrated and are not part of this system. Do not borrow tokens from them, and do not treat their look as precedent.",
+    "keyCharacteristics": [
+      "Near-black ground, slightly lighter panel islands and hairline rules. Depth comes from tone, not from shadows.",
+      "One green accent, used for selection, gates and Run.",
+      "Outcome marks: a filled, hollow or dashed circle, so a state reads without relying on colour.",
+      "IBM Plex Sans for the interface. Plex Mono only for ids, paths, numbers, field names and keys.",
+      "One drawn icon set: 16px grid, 1.5px stroke, round caps, inline SVG."
+    ],
+    "rules": [
+      {
+        "name": "The One Green Rule",
+        "body": "Green means selected, gate or the primary action. A second accent is never added, and green is never used for decoration. If something is green, the user should be able to say which of the three it is.",
+        "section": "colors"
+      },
+      {
+        "name": "The Verbatim State Rule",
+        "body": "Outcome colours appear only where the engine supplied an outcome. The UI never computes a state colour, and it never shows a \"ready\" or \"build-ready\" badge.",
+        "section": "colors"
+      },
+      {
+        "name": "The Mono-for-Machine Rule",
+        "body": "Plex Mono marks things a machine wrote or reads: ids, paths, numbers, schema field names and shortcut keys. Prose, labels and headings are in Plex Sans.",
+        "section": "typography"
+      },
+      {
+        "name": "The No Display Rule",
+        "body": "The bench has no hero text. Hierarchy comes from weight (400/500/600) and the steps between 11px and 16px, not from size jumps.",
+        "section": "typography"
+      },
+      {
+        "name": "The Islands Rule",
+        "body": "Panels have no border and no shadow. They separate from the ground by tone alone, and the 6px gap between them is the handle. Only the command palette may float above them.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do put every new panel on Panel Island (#181b1f) with 8px corners and a 6px ground gap. The gap is the separator.",
+      "Do keep HS Green for selection, gates and the one primary action per panel.",
+      "Do pair every outcome colour with its filled, hollow or dashed mark or its text label, and show \"not run\" and \"not recorded\" as clearly as \"clean\" and \"failed\".",
+      "Do set ids, paths, numbers and schema field names in IBM Plex Mono 12px or 11px, and everything else in IBM Plex Sans.",
+      "Do draw new icons on the 16px grid with a 1.5px stroke and round caps, inline as SVG in currentColor.",
+      "Do cap prose at 60ch inside wide panels.",
+      "Do respect reduced motion: every animation and transition in the bench is switched off under `prefers-reduced-motion`."
+    ],
+    "donts": [
+      "Don't build a marketing front door, a hero or a dashboard of cards. The first thing on screen is the docked editor.",
+      "Don't compute, upgrade or decorate a state in the UI. Never show a \"ready\" or \"build-ready\" badge; states and labels come from the engine verbatim.",
+      "Don't add a second accent colour, or use the outcome colours for decoration.",
+      "Don't put borders or drop shadows on docked panels. Only the command palette floats.",
+      "Don't add small uppercase eyebrow or kicker labels above headings. The GATE tag on a station is a state marker, not a section label.",
+      "Don't take tokens or patterns from the older light screens in `styles.css`. They have not been migrated and are not part of this system."
+    ]
+  }
+}
