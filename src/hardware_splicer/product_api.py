@@ -84,6 +84,7 @@ from .project_thread_store import ProjectThreadStore
 from .semantic_circuit_api import create_semantic_circuit_router
 from .source_conflict_api import create_source_conflict_router
 from .engineering_toolbelt_api import create_engineering_toolbelt_router
+from .bench_api import create_bench_router
 from .source_storage_operations_api import create_source_storage_operations_router
 from .source_upload_session_api import create_source_upload_session_router
 from .stored_source_parser_api import create_stored_source_parser_router
@@ -138,6 +139,7 @@ def create_product_app(
     app.include_router(create_device_router())
     app.include_router(create_donor_router())
     app.include_router(create_engineering_toolbelt_router())
+    app.include_router(create_bench_router())
     app.include_router(create_parts_lookup_router())
     app.include_router(create_project_parts_router(resolved_store))
     from .project_part_substitutions_api import create_project_part_substitutions_router
