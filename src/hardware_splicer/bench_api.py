@@ -7,21 +7,15 @@ so ("not recorded"), and the run's own ``not_checked`` list travels with it.
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
 
-PACKAGE_ROOT = Path(__file__).resolve().parents[2]
+from .state_paths import repo_root
+
 RENDER_FILES = {"top": "HS_BUS_A_TOP.png", "iso": "HS_BUS_A_ISO.png"}
-
-
-def repo_root() -> Path:
-    """The checkout whose records are read: HARDWARE_SPLICER_REPO_ROOT (hs-serve --repo-root) or this source tree."""
-    explicit = os.environ.get("HARDWARE_SPLICER_REPO_ROOT", "").strip()
-    return Path(explicit).expanduser().resolve() if explicit else PACKAGE_ROOT
 
 
 def _paths() -> dict[str, Path]:
