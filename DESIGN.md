@@ -79,9 +79,9 @@ spacing:
   md: "12px"
   lg: "16px"
   topbar: "44px"
-  explorer: "256px"
+  explorer: "248px"
   inspector: "340px"
-  console: "112px"
+  console: "34px collapsed, 180px open"
 components:
   panel:
     backgroundColor: "{colors.panel}"
@@ -188,7 +188,7 @@ Density is set for a large desk screen: 13px body text, 26px tree rows and 6px g
 A cool graphite neutral ramp with one HS green and a small set of outcome colours. Most of the screen is grey. When colour appears, it reports something.
 
 ### Primary
-- **HS Green** (accent): the selection, the gates and the primary action, and nothing else. It is used for the selected tree row's tint and ring, the selected station's number and title, a gate station's number outline, the GATE tag, the active-tab underline, the Run button, links, the required-field mark, focus outlines and the resize-handle highlight.
+- **HS Green** (accent): the selection, the gates and the primary action, and nothing else. It is used for the selected tree row's tint and ring, the selected station's number and title, a gate station's number outline, the gate ring in the legend, the active-tab underline, the Run button, links, the required-field mark, focus outlines and the resize-handle highlight.
 - **Lit Green** (accent-bright): the primary button's hover fill only.
 - **Green Ink** (accent-ink): text and glyphs placed on a solid green fill (the Run button, the brand mark, the selected station number).
 - **Green Wash** (accent-soft) and **Green Rule** (accent-line): the translucent pair for selected rows, active segments, the active console row and the focus border on inputs.
@@ -228,11 +228,11 @@ These colours are reserved for run outcomes and status, always paired with an ou
 - **Headline** (600, 15px): the run bar heading over the spine, and the heading of each measured record.
 - **Station Title** (600, 13.5px, 1.25): step names on the spine.
 - **Body** (400, 13px, 1.45): all interface text. Prose blocks are capped at 60ch; empty-state copy at 44ch.
-- **Section Head** (600, 12.5px, Steel): sub-heads in the view, such as "How the run stops" and "Not checked on this run", and the console heading.
-- **Meta** (400, 12px): runs lines, legends, chips, the last run, the engine state.
+- **Section Head** (600, 12.5px, Steel): sub-heads in the view, such as "Not checked on this run", and the console heading.
+- **Meta** (400, 12px): station result lines, legends, chips, the last run, the engine state.
 - **Prop Label** (400, 11.5px, Pewter): `dt` labels in the inspector, field help, palette kinds.
 - **Mono** (400, 12px): ids, paths, revision tags and values.
-- **Mono Tag** (500, 11px): row tags (example, integrated, candidate), counts, field names, `kbd`. The GATE tag is the one uppercase mono label, tracked at 0.04em.
+- **Mono Tag** (500, 11px): counts, field names, `kbd`. The workbench carries no row tags and no uppercase labels.
 
 ### Named Rules
 **The Mono-for-Machine Rule.** Plex Mono marks things a machine wrote or reads: ids, paths, numbers, schema field names and shortcut keys. Prose, labels and headings are in Plex Sans.
@@ -241,13 +241,13 @@ These colours are reserved for run outcomes and status, always paired with an ou
 
 ## Layout
 
-The layout is a five-track grid under a 44px top bar: explorer (256px by default), a 6px gutter, the centre (minimum 360px), a 6px gutter and the inspector (340px by default). The centre column is split again into the viewport and a console (112px by default). Every gutter is a drag handle. When hovered or focused, it shows a 2px green line along its middle stretch. The window has a 6px margin on the sides and bottom. Pane sizes persist per browser.
+The layout is a five-track grid under a 44px top bar: explorer (256px by default), a 6px gutter, the centre (minimum 360px), a 6px gutter and the inspector (340px by default). The centre column is split again into the viewport and a console that sits as a 34px status strip showing the latest line until it is opened (180px, resizable). Every gutter is a drag handle. When hovered or focused, it shows a 2px green line along its middle stretch. The window has a 6px margin on the sides and bottom. Pane sizes persist per browser.
 
-The spine is a seven-column station grid, giving two lines of seven. It is container-queried on the viewport: five columns below 740px and two below 620px. Each station is at least 112px tall. A 1px rail runs through the station heads, and the rail turns into a 2px green line on the selected station.
+The spine is a seven-column station grid, giving two lines of seven. It is container-queried on the viewport: five columns below 740px and two below 620px. A 1px rail runs through the station heads, and the rail turns into a 2px green line on the selected station.
 
 The spacing rhythm is 4/6/8/12/16. Panel headers are padded at 14px 16px. Tree rows are indented at 26px, and nested rows at 38px.
 
-Below 1360px the top-bar links are hidden and the spine notes stack into one column. Below 860px (phone) the top bar grows to 48px, the jump box shrinks to an icon, and a pane switcher (Explorer, View, Inspector, Console) shows one panel at a time.
+Below 1360px the top-bar links are hidden. Below 860px (phone) the top bar grows to 48px, the jump box shrinks to an icon, and a pane switcher (Explorer, View, Inspector, Console) shows one panel at a time.
 
 ## Elevation & Depth
 
@@ -296,18 +296,18 @@ The buttons are quiet and compact; the only loud one is Run.
 
 ### Navigation
 - **Top bar:** the HS monogram (a 24px green square with ink letters), the product name, a slash breadcrumb and the jump box (up to 420px wide, with a `kbd` hint). It also holds plain text links to the older screens and the engine state dot.
-- **Explorer tree:** 26px rows with a chevron that rotates 90° over 140ms. Each section head is 600 weight with a mono count. Rows carry a step number, a label, a trailing outcome mark or tag, and a green "gate" sub-label. On hover a row gets a Hover Slate fill; when selected it gets the Green Wash with an inset ring.
+- **Explorer tree:** two sections, HS tools and Outside tools, each split into groups that start closed (a filter opens them all; the selection's group opens itself). 26px rows carry only a name; outside tools that are only candidates or references are set in Steel. A chevron rotates 90° over 140ms. On hover a row gets a Hover Slate fill; when selected it gets the Green Wash with an inset ring. The spine steps are not repeated here: the centre view owns them.
 - **View tabs:** 30px. Inactive tabs are Steel; the active tab gets a Raised Slate fill and a 2px green underline inset 8px. A pulsing 6px green dot marks a tab that is busy.
 - **Command palette:** 640px wide, rows in three columns (kind, label, hint), the active row in Green Wash.
 
 ### Spine Station (signature)
-Each pipeline step is a station on a rail. The head holds a numbered pill (two-digit mono-width number, with a green outline when the step is a gate and a solid green fill when it is selected), a GATE tag when it is a gate, and the outcome mark on the right. Below come the title, a line naming the tool that ran the step and its owner, and a foot line above a hairline giving what the record measured. A failed foot line is coral, an unrecorded one amber, and one not run on this build is Steel.
+Each pipeline step is a station on a rail, and carries four things only: a numbered pill (two-digit mono-width number, with a green outline when the step is a gate and a solid green fill with Green Ink when it is selected), the outcome mark on the right, the title, and one Steel line giving what the record measured. A failed line is coral, an unrecorded one amber, and one not run on this build is dimmer Steel. Which tool runs the step, what stops it and the record path live in the Inspector.
 
 ### Outcome Mark (signature)
 A 10px circle with a 1.5px stroke. It is filled for a recorded result (clean, failed or recorded), hollow for not run, and dashed (2/1.6) for not recorded. A legend over the spine names all five states. Labels come verbatim from the engine.
 
 ### Console
-The console has a 34px header with an All/Problems segmented control and a ghost Clear button. Below it are 12.5px log rows: a mono timestamp, a 7px status dot, the tool and the text, truncated with an ellipsis, and the duration. A new row arrives with a green wash that fades over 900ms. A running row's dot pulses.
+The console is a 34px strip by default: a chevron, the heading, a run count and the latest line with its status dot. Opened, the strip gains an All/Problems segmented control and a ghost Clear button, and below it 12.5px log rows: a mono timestamp, a 7px status dot, the tool and the text, truncated with an ellipsis, and the duration. A new row arrives with a green wash that fades over 900ms. A running row's dot pulses.
 
 ### Result Tree
 The engine's JSON is shown as a collapsible tree on Bench Ground, with a hairline guide on each child level. The tree has its own syntax palette: keys soft blue (#9cc3ff), strings pale olive (#d7e0a3), numbers apricot (#f2b37a), booleans and null aqua (#7fd6d1). These four hues appear only in the result tree.
@@ -328,5 +328,6 @@ The engine's JSON is shown as a collapsible tree on Bench Ground, with a hairlin
 - **Don't** compute, upgrade or decorate a state in the UI. Never show a "ready" or "build-ready" badge; states and labels come from the engine verbatim.
 - **Don't** add a second accent colour, or use the outcome colours for decoration.
 - **Don't** put borders or drop shadows on docked panels. Only the command palette floats.
-- **Don't** add small uppercase eyebrow or kicker labels above headings. The GATE tag on a station is a state marker, not a section label.
+- **Don't** add small uppercase eyebrow or kicker labels above headings, or tags on tree rows.
+- **Don't** show a fact in two places. The spine lives in the centre view; the run's revision, record, gates, routing order and limits live in the Inspector's run view (shown when nothing is selected); a tool's runner and stop condition live in the step Inspector.
 - **Don't** take tokens or patterns from the older light screens in `styles.css`. They have not been migrated and are not part of this system.
