@@ -26,6 +26,7 @@ import { canGoBackInApp, useRoute } from "./router";
 import ProjectWorkspace from "./projectSession/ProjectWorkspace.jsx";
 import { createDigitalProject } from "./projectSession/digitalStudyApi";
 import { useProjectPersistence } from "./projectSession/projectPersistence";
+import Bench from "./bench/Bench.jsx";
 import {
   ACTIONS,
   STAGES,
@@ -652,6 +653,10 @@ export default function App() {
     || (routeLoad.key === routeKey && routeLoad.state !== "ready"));
   const advancedActive = isAdvancedView(view);
 
+  if (view === VIEWS.bench) {
+    return <Bench onNavigate={(next) => (next === "library" ? openLibrary() : setView(next))} />;
+  }
+
   return (
     <div className={`app-shell${view === VIEWS.fielddeck || view === VIEWS.device ? " fielddeck-shell" : ""}${sidebarCollapsed ? " sidebar-collapsed" : ""}`} data-testid="app-shell">
       <BuildOverlay
@@ -686,6 +691,7 @@ export default function App() {
         <div id="workbench-navigation" className={menuOpen ? "sidebar-body open" : "sidebar-body"}
           onClick={(event) => { if (event.target.closest(".nav-button, .project-button")) setMenuOpen(false); }}>
         <nav className="sidebar-nav" aria-label="Main">
+          <button type="button" className="nav-button" data-testid="nav-bench" onClick={() => setView(VIEWS.bench)}>Workbench</button>
           <button
             type="button"
             className={`nav-button ${view === VIEWS.home ? "active" : ""}`}

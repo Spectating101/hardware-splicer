@@ -73,7 +73,7 @@ import { isAdvancedView, VIEWS } from "./nav.js";
 describe("App navigation integration", () => {
   beforeEach(() => {
     cleanup();
-    window.history.replaceState(null, "", "/");
+    window.history.replaceState(null, "", "/projects");
     vi.stubGlobal("fetch", vi.fn(async (url, options = {}) => {
       let body = { projects: [], cases: [], assessments: [], reviews: [], revisions: [] };
       if (String(url).endsWith("/health")) body = { ok: true };

@@ -109,7 +109,7 @@ describe("App URL routing", () => {
   afterEach(() => {
     cleanup();
     vi.unstubAllGlobals();
-    window.history.replaceState(null, "", "/");
+    window.history.replaceState(null, "", "/projects");
   });
 
   it("reopens the project named in the URL on a fresh load", async () => {
@@ -142,7 +142,7 @@ describe("App URL routing", () => {
     expect(screen.queryByTestId("project-bench")).toBeNull();
     await userEvent.click(screen.getByRole("button", { name: "Back to projects" }));
     expect(await screen.findByRole("heading", { name: "Saved projects" })).toBeInTheDocument();
-    expect(window.location.pathname).toBe("/");
+    expect(window.location.pathname).toBe("/projects");
     cleanup();
 
     window.history.replaceState(null, "", "/projects/plotter?rev=9");
@@ -209,7 +209,7 @@ describe("App URL routing", () => {
     const saved = screen.getByText("Saved projects", { selector: ".sidebar-label" }).parentElement;
     expect(within(saved).getAllByRole("button").filter((b) => b.classList.contains("project-button"))).toHaveLength(5);
     await userEvent.click(all);
-    expect(window.location.pathname).toBe("/");
+    expect(window.location.pathname).toBe("/projects");
     // Repeated names read the same way and carry the id tail and objective that tell them apart.
     const row = await screen.findByRole("button", { name: /^Pen plotter · p1 Plot sheet 1/ });
     expect(row).toHaveTextContent("created");
