@@ -9,7 +9,8 @@ const at = (url) => {
 
 describe("router", () => {
   it.each([
-    ["/", VIEWS.home],
+    ["/", VIEWS.bench],
+    ["/projects", VIEWS.home],
     ["/projects/new", VIEWS.newProject],
     ["/library", VIEWS.library],
     ["/library/", VIEWS.library],

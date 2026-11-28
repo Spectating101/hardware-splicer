@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { VIEWS } from "./nav.js";
 
 export type StaticView =
+  | "bench"
   | "home"
   | "new-project"
   | "library"
@@ -57,7 +58,8 @@ export type NavigateFn = (next: Route, options?: NavigateOptions) => void;
  * History-based routes for the served SPA. The backend answers every non-API path with
  * index.html, so each of these URLs can be reloaded, linked and reached with Back/Forward.
  *
- *   /                          Projects
+ *   /                          Workbench: the spine, HS tools and outside tools
+ *   /projects                  Projects
  *   /projects/new              intake
  *   /projects/<id>[?rev=N]     project bench (optionally a saved revision)
  *   /library[/<reference>]     design library and its reference projects
@@ -66,7 +68,8 @@ export type NavigateFn = (next: Route, options?: NavigateOptions) => void;
  *   /devices/<id>              the device workspace for a scene: questions compose the model
  */
 const STATIC: ReadonlyArray<readonly [string, StaticView]> = [
-  ["/", VIEWS.home],
+  ["/", VIEWS.bench],
+  ["/projects", VIEWS.home],
   ["/projects/new", VIEWS.newProject],
   ["/library", VIEWS.library],
   ["/library/sorting-workcell", VIEWS.sortcell],

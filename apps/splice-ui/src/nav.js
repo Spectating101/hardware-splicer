@@ -1,6 +1,7 @@
 /** Top-level UI views — single source for App + tests. */
 
 export const VIEWS = Object.freeze({
+  bench: "bench",
   home: "home",
   newProject: "new-project",
   library: "library",
