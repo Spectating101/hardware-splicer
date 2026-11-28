@@ -60,7 +60,7 @@ Status and the other areas: [CAPABILITY_MAP.md](../CAPABILITY_MAP.md).
 | `project_candidates_api` (plumbing) | 273 | 3 | product | MRC | HTTP surface for candidate proposals. An edit is never a write to a revision. The only durable writes are the candidate directory, the candidate record, and a staged review opened through the existing... |
 | `ai_project_conversation_api` (plumbing) | 246 | 2 | product | MRC | Revisioned API for project-grounded AI session continuation. |
 | `engineering_package_api` (plumbing) | 208 | 1 | product | MRC | Revisioned API for deterministic Engineering Package creation and listing. |
-| `product_api` (plumbing) | 203 | 88 | product | MRC | Canonical product API composition: the one app ``hs-serve`` runs. ``create_product_app`` builds on the engine app from :mod:`hardware_splicer.api` (health, jobs, examples, vision, splice and the proje... |
+| `product_api` (plumbing) | 205 | 88 | product | MRC | Canonical product API composition: the one app ``hs-serve`` runs. ``create_product_app`` builds on the engine app from :mod:`hardware_splicer.api` (health, jobs, examples, vision, splice and the proje... |
 | `engineering_execution_anchored_api` (plumbing) | 171 | 1 | product | MRC | Canonical execution router with revision-anchored evidence persistence. The existing execution router owns preview, run, capabilities, and in-memory evidence attachment. This wrapper preserves those r... |
 | `engineering_revision_api` (plumbing) | 116 | 0 | product | MRC | Product API for canonical engineering revision comparison. |
 | `engineering_revision_diff_compat` (plumbing) | 71 | 0 | product | MRC | Compatibility corrections for canonical engineering revision diffs. |
