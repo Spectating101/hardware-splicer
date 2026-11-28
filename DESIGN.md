@@ -306,6 +306,22 @@ Each pipeline step is a station on a rail, and carries four things only: a numbe
 ### Outcome Mark (signature)
 A 10px circle with a 1.5px stroke. It is filled for a recorded result (clean, failed or recorded), hollow for not run, and dashed (2/1.6) for not recorded. A legend over the spine names all five states. Labels come verbatim from the engine.
 
+### 3D spine flow (desktop)
+On widths above 860px with WebGL, the Spine tab shows the pipeline as a 3D scene instead of the station grid (`bench/SpineFlow3D.jsx`, plain three.js).
+- **Camera and layout:** an orthographic camera at about 55° looks down on a U-shaped rail.
+  - The back rail runs from design to placement.
+  - A routing switchyard on the right holds FreeRouting on the inner arc, with KRT and Copper as outer sidings.
+  - The front rail runs from finish to fab.
+  - The routed board's top render lies flat in the middle and never moves.
+- **Stations:** Raised Slate pads. Status colour appears only on each pad's beacon bar.
+  - A not-run step is a wireframe in dimmer Steel, and its siding is dashed.
+  - A not-recorded step has an amber hatch and dashed amber edges.
+  - A gate is a neutral arch, never green or red.
+- **Motion:** one carrier, a small capsule, travels the stations that ran on a 7 s loop and pauses briefly at each gate. Under reduced motion it is replaced by still chevrons, and the scene renders only on demand.
+- **Labels:** DOM labels projected from the scene show the number and title. A step's line, as the engine gave it, appears on hover, on selection, and always for failed or unrecorded steps.
+- **Interaction:** click, or the arrow keys on the focused scene, select a station, and the selection drives the Inspector. Dragging tilts the view within limits, the wheel zooms, and Pause and Reset view sit top right.
+- **Fallback:** phones, jsdom and machines without WebGL keep the station grid.
+
 ### Console
 The console is a 34px strip by default: a chevron, the heading, a run count and the latest line with its status dot. Opened, the strip gains an All/Problems segmented control and a ghost Clear button, and below it 12.5px log rows: a mono timestamp, a 7px status dot, the tool and the text, truncated with an ellipsis, and the duration. A new row arrives with a green wash that fades over 900ms. A running row's dot pulses.
 
