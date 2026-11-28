@@ -180,6 +180,11 @@ function RunInspector({ spine, plugins, onSelect }) {
         <Prop label="Gates">Steps {listWords(spine.gates)} stop the run on an error, before anything is routed or written.</Prop>
         <Prop label="Routing">{router("FreeRouting", "FreeRouting")} first; then {router("KiCadRoutingTools", "KiCadRoutingTools")}, then {router("Copper (copper-kicad-mcp)", "Copper")}, while DRC still reports errors.</Prop>
         <Prop label="Limits">{run.claim_boundary}</Prop>
+        {run.not_checked?.length > 0 && (
+          <Prop label="Not checked on this run">
+            <ul className="wb-notchecked">{run.not_checked.map((t) => <li key={t}>{t}</li>)}</ul>
+          </Prop>
+        )}
         <Prop label="Record" mono>{run.record}</Prop>
       </dl>
       <p className="wb-muted">Select a step for its detail, or a tool on the left to run it.</p>
