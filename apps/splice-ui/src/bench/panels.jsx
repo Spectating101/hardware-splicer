@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Icon, Outcome } from "./icons.jsx";
 import { EXAMPLES, OUTCOME_LABEL, ROLE_LABELS, TOOL_GROUPS, groupOf, toolTitle } from "./catalog.js";
 import { SchemaForm } from "./SchemaForm.jsx";
-import { fmtMs } from "./views.jsx";
+import { fmtMs, listWords } from "./views.jsx";
 
 /**
  * Palette ranking: the name before its hint; a whole substring first, then the name's initials
@@ -31,14 +31,12 @@ const matches = (q, ...texts) => !q || texts.some((t) => t && String(t).toLowerC
 
 /* ---------------------------------------------------------------- Explorer */
 
-export function Explorer({ spine, tools, plugins, selection, onSelect, engine }) {
+export function Explorer({ tools, plugins, selection, onSelect, engine }) {
   const [q, setQ] = useState("");
-  const [closed, setClosed] = useState(() => new Set());
+  const [toggled, setToggled] = useState(() => new Set());
   const query = q.trim().toLowerCase();
-  const toggle = (key) => setClosed((s) => { const n = new Set(s); if (n.has(key)) n.delete(key); else n.add(key); return n; });
-  const isOpen = (key) => query !== "" || !closed.has(key);
+  const toggle = (key) => setToggled((s) => { const n = new Set(s); if (n.has(key)) n.delete(key); else n.add(key); return n; });
 
-  const steps = (spine?.steps ?? []).filter((s) => matches(query, s.title, s.runs.join(" "), s.run.line));
   const toolGroups = useMemo(() => {
     const by = new Map(TOOL_GROUPS.map(([g]) => [g, []]));
     for (const t of tools ?? []) {
@@ -59,44 +57,42 @@ export function Explorer({ spine, tools, plugins, selection, onSelect, engine })
     return [...by.entries()];
   }, [plugins, query]);
 
+  // Sections start open and groups start closed; a filter opens everything, and the selection's group opens itself.
+  const selectedGroup = selection?.kind === "tool" ? `tg-${groupOf(selection.id)}`
+    : selection?.kind === "plugin" ? `pg-${(plugins ?? []).find((p) => p.name === selection.id)?.role}` : null;
+  const sectionOpen = (key) => query !== "" || !toggled.has(key);
+  const groupOpen = (key) => query !== "" || toggled.has(key) !== (key === selectedGroup);
+
   const sel = (kind, id) => selection?.kind === kind && selection?.id === id;
-  const nothing = query && !steps.length && !toolGroups.length && !pluginGroups.length;
+  const nothing = query && !toolGroups.length && !pluginGroups.length;
 
   return (
     <nav className="wb-explorer" aria-label="Explorer">
       <div className="wb-search">
         <Icon name="search" size={14} />
-        <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filter"
-          aria-label="Filter the explorer" spellCheck={false} />
+        <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filter tools"
+          aria-label="Filter tools" spellCheck={false} />
       </div>
       <div className="wb-tree-scroll">
         {engine === "offline" && (
           <p className="wb-explorer-note">The HS engine is not answering. Start it with <code>hs-serve</code>, then reload.</p>
         )}
-        <TreeSection id="spine" icon="spine" label="Spine" meta={spine?.run ? "HS-BUS-A run" : null} open={isOpen("spine")} onToggle={toggle}>
-          {steps.map((s) => (
-            <TreeRow key={s.key} selected={sel("step", s.key)} onClick={() => onSelect({ kind: "step", id: s.key })}
-              lead={<span className="mono wb-row-n">{String(s.n).padStart(2, "0")}</span>}
-              label={s.title} sub={s.gate ? "gate" : null}
-              trail={<Outcome outcome={s.run.outcome} />} title={`${s.title}: ${OUTCOME_LABEL[s.run.outcome]}`} />
-          ))}
-        </TreeSection>
-        <TreeSection id="tools" icon="tool" label="HS tools" meta={tools ? String(tools.length) : null} open={isOpen("tools")} onToggle={toggle}>
+        <TreeSection id="tools" label="HS tools" meta={tools ? String(tools.length) : null} open={sectionOpen("tools")} onToggle={toggle}>
           {toolGroups.map(([group, list]) => (
-            <TreeSection key={group} id={`tg-${group}`} label={group} meta={String(list.length)} nested open={isOpen(`tg-${group}`)} onToggle={toggle}>
+            <TreeSection key={group} id={`tg-${group}`} label={group} meta={String(list.length)} nested open={groupOpen(`tg-${group}`)} onToggle={toggle}>
               {list.map((t) => (
                 <TreeRow key={t.name} selected={sel("tool", t.name)} onClick={() => onSelect({ kind: "tool", id: t.name })}
-                  label={toolTitle(t.name)} trail={EXAMPLES[t.name] ? <span className="wb-row-tag">example</span> : null} title={t.name} />
+                  label={toolTitle(t.name)} title={t.name} />
               ))}
             </TreeSection>
           ))}
         </TreeSection>
-        <TreeSection id="plugins" icon="plug" label="Outside tools" meta={plugins ? String(plugins.length) : null} open={isOpen("plugins")} onToggle={toggle}>
+        <TreeSection id="plugins" label="Outside tools" meta={plugins ? String(plugins.length) : null} open={sectionOpen("plugins")} onToggle={toggle}>
           {pluginGroups.map(([role, list]) => (
-            <TreeSection key={role} id={`pg-${role}`} label={ROLE_LABELS[role] ?? role} meta={String(list.length)} nested open={isOpen(`pg-${role}`)} onToggle={toggle}>
+            <TreeSection key={role} id={`pg-${role}`} label={ROLE_LABELS[role] ?? role} meta={String(list.length)} nested open={groupOpen(`pg-${role}`)} onToggle={toggle}>
               {list.map((p) => (
                 <TreeRow key={p.name} selected={sel("plugin", p.name)} onClick={() => onSelect({ kind: "plugin", id: p.name })}
-                  label={p.name} trail={<span className={`wb-row-tag st-${p.status}`}>{p.status}</span>} title={`${p.name} · ${p.licence}`} />
+                  label={p.name} title={`${p.name} · ${p.status} · ${p.licence}`} dim={p.status !== "integrated"} />
               ))}
             </TreeSection>
           ))}
@@ -121,9 +117,9 @@ function TreeSection({ id, icon, label, meta, open, onToggle, nested, children }
   );
 }
 
-function TreeRow({ selected, onClick, lead, label, sub, trail, title }) {
+function TreeRow({ selected, onClick, lead, label, sub, trail, title, dim }) {
   return (
-    <button type="button" role="listitem" className={`wb-row${selected ? " is-selected" : ""}`} onClick={onClick} title={title}
+    <button type="button" role="listitem" className={`wb-row${selected ? " is-selected" : ""}${dim ? " is-dim" : ""}`} onClick={onClick} title={title}
       aria-current={selected ? "true" : undefined}>
       {lead}
       <span className="wb-row-label">{label}</span>
@@ -137,9 +133,7 @@ function TreeRow({ selected, onClick, lead, label, sub, trail, title }) {
 
 export function Inspector(props) {
   const { selection } = props;
-  if (!selection) {
-    return <InspectorShell title="Inspector"><p className="wb-muted">Select a step, a tool or an outside tool.</p></InspectorShell>;
-  }
+  if (!selection) return <RunInspector {...props} />;
   if (selection.kind === "step") return <StepInspector {...props} />;
   if (selection.kind === "tool") return <ToolInspector {...props} />;
   return <PluginInspector {...props} />;
@@ -170,6 +164,26 @@ function Prop({ label, children, mono }) {
       <dt>{label}</dt>
       <dd className={mono ? "mono" : ""}>{children}</dd>
     </div>
+  );
+}
+
+function RunInspector({ spine, plugins, onSelect }) {
+  const run = spine?.run;
+  if (!spine) return <InspectorShell title="Run"><p className="wb-muted">Loading…</p></InspectorShell>;
+  if (!run) return <InspectorShell title="No recorded run"><p className="wb-muted">Pick a tool on the left to run it.</p></InspectorShell>;
+  const names = new Set((plugins ?? []).map((p) => p.name));
+  const router = (name, label) => (names.has(name)
+    ? <button type="button" className="wb-inline-link" onClick={() => onSelect({ kind: "plugin", id: name })}>{label}</button> : label);
+  return (
+    <InspectorShell title={run.name} sub={`rev ${run.revision} · KiCad ${run.kicad}`}>
+      <dl className="wb-props">
+        <Prop label="Gates">Steps {listWords(spine.gates)} stop the run on an error, before anything is routed or written.</Prop>
+        <Prop label="Routing">{router("FreeRouting", "FreeRouting")} first; then {router("KiCadRoutingTools", "KiCadRoutingTools")}, then {router("Copper (copper-kicad-mcp)", "Copper")}, while DRC still reports errors.</Prop>
+        <Prop label="Limits">{run.claim_boundary}</Prop>
+        <Prop label="Record" mono>{run.record}</Prop>
+      </dl>
+      <p className="wb-muted">Select a step for its detail, or a tool on the left to run it.</p>
+    </InspectorShell>
   );
 }
 
@@ -265,44 +279,66 @@ function ToolInspector({ selection, tools, formValues, formErrors, onFieldChange
 
 /* ---------------------------------------------------------------- Console */
 
-export function ConsolePanel({ runs, system, activeRunId, onOpenRun, onClear }) {
+export function ConsolePanel({ runs, system, activeRunId, onOpenRun, onClear, open, onToggle }) {
   const [only, setOnly] = useState("all");
   const listRef = useRef(null);
   const shown = runs.filter((r) => only === "all" || r.status === "problems" || r.status === "error");
   useEffect(() => { if (listRef.current) listRef.current.scrollTop = 0; }, [runs.length]);
+  const latest = runs[0]
+    ? { time: runs[0].time, level: runs[0].status, text: `${runs[0].tool} · ${lineOf(runs[0])}` }
+    : system[0];
   return (
-    <section className="wb-console" aria-label="Console">
+    <section className={`wb-console${open ? " is-open" : ""}`} aria-label="Console">
       <header className="wb-panel-head">
-        <Icon name="console" size={14} />
-        <h2>Console</h2>
-        <div className="wb-seg" role="group" aria-label="Show">
-          <button type="button" aria-pressed={only === "all"} onClick={() => setOnly("all")}>All</button>
-          <button type="button" aria-pressed={only === "problems"} onClick={() => setOnly("problems")}>Problems</button>
-        </div>
-        <button type="button" className="wb-ghost" onClick={onClear} disabled={!runs.length}>Clear</button>
+        <button type="button" className="wb-console-toggle" aria-expanded={open} onClick={onToggle}>
+          <Icon name="chevron" size={12} className={open ? "is-open is-up" : ""} />
+          <h2>Console</h2>
+          {runs.length > 0 && <span className="wb-section-meta">{runs.length}</span>}
+        </button>
+        {!open && latest && (
+          <span className="wb-console-latest">
+            <span className={`wb-log-dot is-${latest.level}`} aria-hidden="true" />
+            <span className="wb-log-text">{latest.text}</span>
+          </span>
+        )}
+        {open && (
+          <>
+            <div className="wb-seg" role="group" aria-label="Show">
+              <button type="button" aria-pressed={only === "all"} onClick={() => setOnly("all")}>All</button>
+              <button type="button" aria-pressed={only === "problems"} onClick={() => setOnly("problems")}>Problems</button>
+            </div>
+            <button type="button" className="wb-ghost" onClick={onClear} disabled={!runs.length}>Clear</button>
+          </>
+        )}
       </header>
-      <ol className="wb-log" ref={listRef}>
-        {shown.map((r) => (
-          <li key={r.id}>
-            <button type="button" className={`wb-logrow is-${r.status}${r.id === activeRunId ? " is-active" : ""}`} onClick={() => onOpenRun(r.id)}>
-              <span className="mono wb-log-time">{r.time}</span>
-              <span className={`wb-log-dot is-${r.status}`} aria-hidden="true" />
-              <span className="mono wb-log-tool">{r.tool}</span>
-              <span className="wb-log-text">{r.status === "running" ? "running…" : r.status === "error" ? r.error : summaryText(r.env)}</span>
-              {r.ms !== null && <span className="mono wb-log-ms">{fmtMs(r.ms)}</span>}
-            </button>
-          </li>
-        ))}
-        {system.map((s, i) => (
-          <li key={`s${i}`} className="wb-logrow is-system">
-            <span className="mono wb-log-time">{s.time}</span>
-            <span className={`wb-log-dot is-${s.level}`} aria-hidden="true" />
-            <span className="wb-log-text">{s.text}</span>
-          </li>
-        ))}
-      </ol>
+      {open && (
+        <ol className="wb-log" ref={listRef}>
+          {shown.map((r) => (
+            <li key={r.id}>
+              <button type="button" className={`wb-logrow is-${r.status}${r.id === activeRunId ? " is-active" : ""}`} onClick={() => onOpenRun(r.id)}>
+                <span className="mono wb-log-time">{r.time}</span>
+                <span className={`wb-log-dot is-${r.status}`} aria-hidden="true" />
+                <span className="mono wb-log-tool">{r.tool}</span>
+                <span className="wb-log-text">{lineOf(r)}</span>
+                {r.ms !== null && <span className="mono wb-log-ms">{fmtMs(r.ms)}</span>}
+              </button>
+            </li>
+          ))}
+          {system.map((s, i) => (
+            <li key={`s${i}`} className="wb-logrow is-system">
+              <span className="mono wb-log-time">{s.time}</span>
+              <span className={`wb-log-dot is-${s.level}`} aria-hidden="true" />
+              <span className="wb-log-text">{s.text}</span>
+            </li>
+          ))}
+        </ol>
+      )}
     </section>
   );
+}
+
+function lineOf(r) {
+  return r.status === "running" ? "running…" : r.status === "error" ? r.error : summaryText(r.env);
 }
 
 function summaryText(env) {

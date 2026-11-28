@@ -4,47 +4,37 @@ import { OUTCOME_LABEL, toolTitle } from "./catalog.js";
 import { renderUrl } from "./benchApi.js";
 
 /** The pipeline every HS board goes through, with one recorded run laid over it. */
-export function SpineView({ spine, selectedKey, onSelectStep, onSelectPlugin, pluginNames }) {
+export function SpineView({ spine, selectedKey, onSelectStep, onShowRun }) {
   if (!spine) return <ViewEmpty text="Loading the spine…" />;
-  const { steps, gates, run } = spine;
+  const { steps, run } = spine;
+  const present = new Set(steps.map((s) => s.run.outcome));
   return (
     <div className="wb-spine">
       <header className="wb-runbar">
-        <div className="wb-runbar-main">
-          <h2>{run?.name ?? "No recorded run"}</h2>
-          {run && <span className="wb-runbar-meta mono">rev {run.revision} · KiCad {run.kicad} · {run.record}</span>}
-        </div>
-        <Legend />
+        <h2>{run ? <button type="button" className="wb-title-link" onClick={onShowRun} title="Run details">{run.name}</button> : "No recorded run"}</h2>
+        <Legend outcomes={OUTCOME_ORDER.filter((o) => present.has(o))} />
       </header>
       <ol className="wb-steps" aria-label="Board pipeline steps">
         {steps.map((s) => (
           <li key={s.key} className={`wb-station${s.gate ? " is-gate" : ""}${selectedKey === s.key ? " is-selected" : ""} out-${s.run.outcome}`}>
-            <button type="button" className="wb-step" onClick={() => onSelectStep(s.key)} aria-pressed={selectedKey === s.key}>
-              <span className="wb-step-head">
+            <button type="button" className="wb-step" onClick={() => onSelectStep(s.key)} aria-pressed={selectedKey === s.key}
+              aria-label={`${s.n} ${s.title}${s.gate ? ", gate" : ""}: ${OUTCOME_LABEL[s.run.outcome]}, ${s.run.line}`}>
+              <span className="wb-step-head" aria-hidden="true">
                 <span className="wb-step-n mono">{String(s.n).padStart(2, "0")}</span>
-                {s.gate && <span className="wb-gate-tag">gate</span>}
                 <Outcome outcome={s.run.outcome} />
               </span>
-              <span className="wb-step-title">{s.title}</span>
-              <span className="wb-step-runs">{s.runs.join(" · ")}</span>
-              <span className="wb-step-line">{s.run.line}</span>
+              <span className="wb-step-title" aria-hidden="true">{s.title}</span>
+              <span className="wb-step-line" aria-hidden="true">{s.run.line}</span>
             </button>
           </li>
         ))}
       </ol>
-      <div className="wb-spine-notes">
-        <section>
-          <h3>How the run stops</h3>
-          <p>Steps {listWords(gates)} are gates: an error there stops the pipeline before anything is routed or written. Routing tries FreeRouting first, then hands the same placement to {pluginLink("KiCadRoutingTools", pluginNames, onSelectPlugin)} and then to {pluginLink("Copper (copper-kicad-mcp)", pluginNames, onSelectPlugin, "Copper")} while DRC still reports errors.</p>
-          {run && <p className="wb-boundary">{run.claim_boundary}</p>}
+      {run?.not_checked?.length > 0 && (
+        <section className="wb-spine-notes">
+          <h3>Not checked on this run</h3>
+          <ul className="wb-notchecked">{run.not_checked.map((t) => <li key={t}>{t}</li>)}</ul>
         </section>
-        {run?.not_checked?.length > 0 && (
-          <section>
-            <h3>Not checked on this run</h3>
-            <ul className="wb-notchecked">{run.not_checked.map((t) => <li key={t}>{t}</li>)}</ul>
-          </section>
-        )}
-      </div>
+      )}
     </div>
   );
 }
@@ -54,15 +44,18 @@ function pluginLink(name, names, onSelect, label) {
   return <button type="button" className="wb-inline-link" onClick={() => onSelect(name)}>{label ?? name}</button>;
 }
 
-function listWords(ns = []) {
+const OUTCOME_ORDER = ["clean", "failed", "recorded", "not_run", "unknown"];
+
+export function listWords(ns = []) {
   if (ns.length < 2) return ns.join("");
   return `${ns.slice(0, -1).join(", ")} and ${ns[ns.length - 1]}`;
 }
 
-function Legend() {
+function Legend({ outcomes }) {
   return (
     <ul className="wb-legend" aria-label="Legend">
-      {["clean", "failed", "recorded", "not_run", "unknown"].map((o) => (
+      <li><span className="wb-legend-gate" aria-hidden="true" /> gate</li>
+      {outcomes.map((o) => (
         <li key={o}><Outcome outcome={o} /> {OUTCOME_LABEL[o]}</li>
       ))}
     </ul>
@@ -231,19 +224,16 @@ export function ResultView({ run, tools }) {
                   </tbody>
                 </table>
               </div>
-              {rows.length > 60 && <p className="wb-muted">First 60 of {rows.length}; all of them are in the tree below.</p>}
+              {rows.length > 60 && <p className="wb-muted">First 60 of {rows.length}; all of them are in the raw result below.</p>}
             </section>
           ))}
-          <section className="wb-block">
-            <h3>Result</h3>
+          <details className="wb-raw">
+            <summary>Raw result and arguments</summary>
             <div className="wb-tree mono"><JsonTree value={env.result} open depth={0} /></div>
-          </section>
+            <pre className="wb-args mono">{JSON.stringify(run.args, null, 2)}</pre>
+          </details>
         </>
       )}
-      <section className="wb-block">
-        <h3>Arguments</h3>
-        <pre className="wb-args mono">{JSON.stringify(run.args, null, 2)}</pre>
-      </section>
     </div>
   );
 }

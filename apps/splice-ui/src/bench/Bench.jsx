@@ -14,8 +14,8 @@ const TABS = [
   ["result", "Result", "result"],
 ];
 
-const SIZES_KEY = "hs.bench.sizes.v3";
-const DEFAULT_SIZES = { left: 256, right: 340, bottom: 112 };
+const SIZES_KEY = "hs.bench.sizes.v4";
+const DEFAULT_SIZES = { left: 248, right: 340, bottom: 180 };
 
 const clock = () => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
 
@@ -34,7 +34,7 @@ export default function Bench({ onNavigate }) {
   const [measures, setMeasures] = useState(null);
   const [engine, setEngine] = useState("connecting");
   const [system, setSystem] = useState([]);
-  const [selection, setSelection] = useState({ kind: "step", id: "drc" });
+  const [selection, setSelection] = useState(null);
   const [tab, setTab] = useState("spine");
   const [runs, setRuns] = useState([]);
   const [activeRunId, setActiveRunId] = useState(null);
@@ -43,6 +43,7 @@ export default function Bench({ onNavigate }) {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [sizes, setSizes] = useState(loadSizes);
   const [pane, setPane] = useState("view");
+  const [consoleOpen, setConsoleOpen] = useState(false);
   const seq = useRef(0);
 
   const log = useCallback((level, text) => setSystem((s) => [{ level, text, time: clock() }, ...s].slice(0, 50)), []);
@@ -144,7 +145,8 @@ export default function Bench({ onNavigate }) {
       : which === "right" ? { ...s, right: clamp(s.right - d, 280, 560) } : { ...s, bottom: clamp(s.bottom - d, 96, 480) });
   };
 
-  const style = { "--wb-left": `${sizes.left}px`, "--wb-right": `${sizes.right}px`, "--wb-bottom": `${sizes.bottom}px` };
+  const style = { "--wb-left": `${sizes.left}px`, "--wb-right": `${sizes.right}px`,
+    "--wb-bottom": consoleOpen || pane === "console" ? `${sizes.bottom}px` : "34px" };
 
   return (
     <div className="hs-bench" style={style} data-testid="bench" data-pane={pane}>
@@ -178,7 +180,7 @@ export default function Bench({ onNavigate }) {
 
       <div className="wb-body">
         <div className="wb-col wb-col-left">
-          <Explorer spine={spine} tools={tools} plugins={plugins} selection={selection} onSelect={select} engine={engine} />
+          <Explorer tools={tools} plugins={plugins} selection={selection} onSelect={select} engine={engine} />
         </div>
         <div className="wb-split is-v" role="separator" aria-orientation="vertical" aria-label="Resize explorer" tabIndex={0}
           onPointerDown={startDrag("left")} onKeyDown={keyResize("left")} />
@@ -194,17 +196,18 @@ export default function Bench({ onNavigate }) {
               ))}
             </div>
             <div className="wb-view" role="tabpanel">
-              {tab === "spine" && <SpineView spine={spine} selectedKey={selection.kind === "step" ? selection.id : null}
-                onSelectStep={(key) => select({ kind: "step", id: key })} onSelectPlugin={selectPlugin} pluginNames={pluginNames} />}
+              {tab === "spine" && <SpineView spine={spine} selectedKey={selection?.kind === "step" ? selection.id : null}
+                onSelectStep={(key) => select({ kind: "step", id: key })} onShowRun={() => { setSelection(null); setPane("inspector"); }} />}
               {tab === "board" && <BoardView spine={spine} />}
               {tab === "measures" && <MeasuresView measures={measures} onSelectPlugin={selectPlugin} pluginNames={pluginNames} />}
               {tab === "result" && <ResultView run={activeRun} tools={tools} />}
             </div>
           </main>
-          <div className="wb-split is-h" role="separator" aria-orientation="horizontal" aria-label="Resize console" tabIndex={0}
-            onPointerDown={startDrag("bottom")} onKeyDown={keyResize("bottom")} />
+          {consoleOpen ? <div className="wb-split is-h" role="separator" aria-orientation="horizontal" aria-label="Resize console" tabIndex={0}
+            onPointerDown={startDrag("bottom")} onKeyDown={keyResize("bottom")} /> : <div className="wb-split is-h is-idle" aria-hidden="true" />}
           <div className="wb-col-console">
-            <ConsolePanel runs={runs} system={system} activeRunId={activeRunId}
+            <ConsolePanel runs={runs} system={system} activeRunId={activeRunId} open={consoleOpen || pane === "console"}
+              onToggle={() => setConsoleOpen((v) => !v)}
               onOpenRun={(id) => { setActiveRunId(id); setTab("result"); setPane("view"); }} onClear={() => setRuns([])} />
           </div>
         </div>
