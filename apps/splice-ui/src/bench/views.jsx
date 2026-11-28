@@ -166,7 +166,7 @@ function Cells({ v, keys }) {
   return keys.map((k) => {
     const names = Array.isArray(k) ? k : [k];
     const val = v ? names.map((n) => v[n]).find((x) => x !== undefined) : undefined;
-    const shown = val === undefined || val === null ? "—" : typeof val === "number" ? Math.round(val * 10) / 10 : String(val);
+    const shown = val === undefined || val === null ? "—" : String(val);
     const bad = names[0] === "drc_errors" || names[0] === "unconnected" ? Number(val) > 0 : false;
     return <td key={names[0]} className={`num mono${bad ? " is-bad" : ""}`}>{shown}</td>;
   });
@@ -251,7 +251,6 @@ export function tablesOf(result) {
 
 function cell(v) {
   if (v === undefined || v === null) return "—";
-  if (typeof v === "number") return Math.round(v * 100) / 100;
   return String(v);
 }
 
